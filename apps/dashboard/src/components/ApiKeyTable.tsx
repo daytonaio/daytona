@@ -6,7 +6,7 @@
 import { CREATE_API_KEY_PERMISSIONS_GROUPS } from '@/constants/CreateApiKeyPermissionsGroups'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { getRelativeTimeString } from '@/lib/utils'
-import { ApiKeyList, ApiKeyListPermissionsEnum, CreateApiKeyPermissionsEnum } from '@daytonaio/api-client'
+import { ApiKeyList, ApiKeyListPermissionsEnum, CreateApiKeyPermissionsEnum } from '@daytona/api-client'
 
 import {
   ColumnDef,

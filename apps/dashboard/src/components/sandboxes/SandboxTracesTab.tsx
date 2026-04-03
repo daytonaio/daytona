@@ -17,7 +17,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { ChevronLeft, ChevronRight, RefreshCw, Activity, ChevronDown } from 'lucide-react'
 import { format, subHours } from 'date-fns'
-import { TraceSummary, TraceSpan } from '@daytonaio/api-client'
+import { TraceSummary, TraceSpan } from '@daytona/api-client'
 import { cn } from '@/lib/utils'
 import { tracesSearchParams, timeRangeSearchParams } from './SearchParams'
 

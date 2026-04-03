@@ -11,7 +11,7 @@ import {
   ListSandboxesPaginatedSortEnum,
   ListSandboxesPaginatedStatesEnum,
   PaginatedSandboxes,
-} from '@daytonaio/api-client'
+} from '@daytona/api-client'
 import { isValidUUID } from '@/lib/utils'
 
 export interface SandboxFilters {

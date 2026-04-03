@@ -14,7 +14,7 @@ import {
   filterStoppable,
   getBulkActionCounts,
 } from '@/lib/utils/sandbox'
-import { OrganizationRolePermissionsEnum, Sandbox, SandboxState } from '@daytonaio/api-client'
+import { OrganizationRolePermissionsEnum, Sandbox, SandboxState } from '@daytona/api-client'
 import { flexRender } from '@tanstack/react-table'
 import { Container } from 'lucide-react'
 import { AnimatePresence } from 'motion/react'

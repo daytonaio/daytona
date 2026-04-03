@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Runner, RunnerState, Region } from '@daytonaio/api-client'
+import { Runner, RunnerState, Region } from '@daytona/api-client'
 import {
   ColumnDef,
   flexRender,

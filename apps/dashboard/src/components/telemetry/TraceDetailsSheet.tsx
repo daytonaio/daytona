@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Spinner } from '@/components/ui/spinner'
 import { CopyButton } from '@/components/CopyButton'
-import { TraceSpan } from '@daytonaio/api-client'
+import { TraceSpan } from '@daytona/api-client'
 
 interface TraceDetailsSheetProps {
   sandboxId: string

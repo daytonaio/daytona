@@ -7,7 +7,7 @@ import { z } from 'zod'
 import type { PluginInput } from '@opencode-ai/plugin'
 import type { ToolContext } from '@opencode-ai/plugin/tool'
 import type { DaytonaSessionManager } from '../core/session-manager'
-import type { FileInfo } from '@daytonaio/sdk'
+import type { FileInfo } from '@daytona/sdk'
 
 export const lsTool = (
   sessionManager: DaytonaSessionManager,

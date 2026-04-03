@@ -1,5 +1,5 @@
 {
-  "name": "@daytonaio/sdk",
+  "name": "@daytona/sdk",
   "version": "0.0.0-dev",
   "description": "Daytona TypeScript SDK for sandbox management and code execution",
   "main": "./src/index.js",

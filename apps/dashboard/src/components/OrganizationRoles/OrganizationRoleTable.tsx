@@ -11,7 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
-import { OrganizationRole, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
+import { OrganizationRole, OrganizationRolePermissionsEnum } from '@daytona/api-client'
 import {
   ColumnDef,
   flexRender,

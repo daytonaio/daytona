@@ -4,7 +4,7 @@
  */
 
 import React, { Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
-import { Region, CreateRunner, CreateRunnerResponse } from '@daytonaio/api-client'
+import { Region, CreateRunner, CreateRunnerResponse } from '@daytona/api-client'
 import { useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { z } from 'zod'

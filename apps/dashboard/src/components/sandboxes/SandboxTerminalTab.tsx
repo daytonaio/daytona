@@ -10,7 +10,7 @@ import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { useTerminalSessionQuery } from '@/hooks/queries/useTerminalSessionQuery'
 import { useSandboxSessionContext } from '@/hooks/useSandboxSessionContext'
 import { isStoppable } from '@/lib/utils/sandbox'
-import { Sandbox } from '@daytonaio/api-client'
+import { Sandbox } from '@daytona/api-client'
 import { Spinner } from '@/components/ui/spinner'
 import { Play, RefreshCw, TerminalSquare } from 'lucide-react'
 

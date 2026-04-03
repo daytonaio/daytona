@@ -7,7 +7,7 @@ import { IOrganizationsContext, OrganizationsContext } from '@/contexts/Organiza
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { useApi } from '@/hooks/useApi'
 import { handleApiError } from '@/lib/error-handling'
-import { Organization } from '@daytonaio/api-client'
+import { Organization } from '@daytona/api-client'
 import { ReactNode, useCallback, useMemo, useState } from 'react'
 import { suspend } from 'suspend-react'
 

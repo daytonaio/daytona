@@ -1,5 +1,5 @@
 {
-  "name": "@daytonaio/opencode",
+  "name": "@daytona/opencode",
   "version": "0.0.0-dev",
   "description": "OpenCode plugin that automatically runs all sessions in Daytona sandboxes for isolated, reproducible development environments",
   "main": "./.opencode/plugin/index.js",

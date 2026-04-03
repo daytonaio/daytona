@@ -9,7 +9,7 @@ import {
   PieChart,
   ScatterChart,
   Image,
-} from '@daytonaio/sdk'
+} from '@daytona/sdk'
 import * as fs from 'fs'
 import * as path from 'path'
 

@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { LogsQueryParams, useSandboxLogs } from '@/hooks/useSandboxLogs'
 import { cn } from '@/lib/utils'
-import { LogEntry } from '@daytonaio/api-client'
+import { LogEntry } from '@daytona/api-client'
 import { format, subHours } from 'date-fns'
 import { ChevronDown, ChevronLeft, ChevronRight, FileText, RefreshCw, Search } from 'lucide-react'
 import { useQueryStates } from 'nuqs'

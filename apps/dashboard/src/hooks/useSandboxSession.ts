@@ -12,7 +12,7 @@ import {
   CreateSandboxFromSnapshotParams,
   Daytona,
   Sandbox,
-} from '@daytonaio/sdk'
+} from '@daytona/sdk'
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useAuth } from 'react-oidc-context'

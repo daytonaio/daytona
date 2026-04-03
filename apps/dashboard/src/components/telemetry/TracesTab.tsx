@@ -16,7 +16,7 @@ import { CopyButton } from '@/components/CopyButton'
 import { Spinner } from '@/components/ui/spinner'
 import { format } from 'date-fns'
 import { subHours } from 'date-fns'
-import { TraceSummary } from '@daytonaio/api-client'
+import { TraceSummary } from '@daytona/api-client'
 
 interface TracesTabProps {
   sandboxId: string

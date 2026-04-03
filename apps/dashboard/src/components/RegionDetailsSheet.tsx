@@ -6,7 +6,7 @@
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { formatTimestamp } from '@/lib/utils'
-import { Region, RegionType } from '@daytonaio/api-client'
+import { Region, RegionType } from '@daytona/api-client'
 import { Copy, Info, Pencil, Trash, X } from 'lucide-react'
 import React from 'react'
 import { toast } from 'sonner'

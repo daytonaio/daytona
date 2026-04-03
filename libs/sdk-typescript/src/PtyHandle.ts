@@ -6,7 +6,7 @@
 import WebSocket from 'isomorphic-ws'
 import { PtyResult } from './types/Pty'
 import { DaytonaError } from './errors/DaytonaError'
-import { PtySessionInfo } from '@daytonaio/toolbox-api-client'
+import { PtySessionInfo } from '@daytona/toolbox-api-client'
 import { WithInstrumentation } from './utils/otel.decorator'
 
 /**

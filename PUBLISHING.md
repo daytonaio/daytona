@@ -149,9 +149,9 @@ curl -s https://pypi.org/pypi/daytona/json | jq -r .info.version
 #### npm
 
 ```bash
-npm view @daytonaio/sdk version
+npm view @daytona/sdk version
 # or
-npm info @daytonaio/sdk
+npm info @daytona/sdk
 ```
 
 #### RubyGems
