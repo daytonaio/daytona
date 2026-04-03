@@ -10,20 +10,15 @@ on:
 
 env:
   VERSION: ${{ inputs.version }}
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
-  DAYTONA_API_URL: ${{ secrets.DAYTONA_API_URL }}
-  DAYTONA_AUTH0_DOMAIN: ${{ secrets.DAYTONA_AUTH0_DOMAIN }}
-  DAYTONA_AUTH0_CLIENT_ID: ${{ secrets.DAYTONA_AUTH0_CLIENT_ID }}
-  DAYTONA_AUTH0_CALLBACK_PORT: ${{ secrets.DAYTONA_AUTH0_CALLBACK_PORT }}
-  DAYTONA_AUTH0_CLIENT_SECRET: ${{ secrets.DAYTONA_AUTH0_CLIENT_SECRET }}
-  DAYTONA_AUTH0_AUDIENCE: ${{ secrets.DAYTONA_AUTH0_AUDIENCE }}
   POETRY_VIRTUALENVS_IN_PROJECT: true
   GONOSUMDB: github.com/daytonaio/daytona
 
 jobs:
   publish:
     runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Validate version format
@@ -94,6 +89,14 @@ jobs:
   build_projects:
     needs: publish
     runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      DAYTONA_API_URL: ${{ secrets.DAYTONA_API_URL }}
+      DAYTONA_AUTH0_DOMAIN: ${{ secrets.DAYTONA_AUTH0_DOMAIN }}
+      DAYTONA_AUTH0_CLIENT_ID: ${{ secrets.DAYTONA_AUTH0_CLIENT_ID }}
+      DAYTONA_AUTH0_CALLBACK_PORT: ${{ secrets.DAYTONA_AUTH0_CALLBACK_PORT }}
+      DAYTONA_AUTH0_CLIENT_SECRET: ${{ secrets.DAYTONA_AUTH0_CLIENT_SECRET }}
+      DAYTONA_AUTH0_AUDIENCE: ${{ secrets.DAYTONA_AUTH0_AUDIENCE }}
 
     steps:
       - name: Checkout code

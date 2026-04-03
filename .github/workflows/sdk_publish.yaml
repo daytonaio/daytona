@@ -27,14 +27,15 @@ env:
   NPM_PKG_VERSION: ${{ inputs.npm_pkg_version || inputs.version}}
   RUBYGEMS_PKG_VERSION: ${{ inputs.rubygems_pkg_version || inputs.version}}
   NPM_TAG: ${{ inputs.npm_tag }}
-  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-  PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-  RUBYGEMS_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
   POETRY_VIRTUALENVS_IN_PROJECT: true
 
 jobs:
   publish:
     runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+      RUBYGEMS_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
 
     steps:
       - name: Validate version format
