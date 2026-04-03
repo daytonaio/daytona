@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { BadRequestException, ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, FindOptionsWhere, IsNull, Repository } from 'typeorm'
 import { DockerRegistry } from '../entities/docker-registry.entity'
@@ -14,6 +14,8 @@ import { RegistryPushAccessDto } from '../../sandbox/dto/registry-push-access-dt
 import {
   DOCKER_REGISTRY_PROVIDER,
   IDockerRegistryProvider,
+  RegistryCredentialsValidationError,
+  RegistryCredentialsValidationErrorCode,
 } from './../../docker-registry/providers/docker-registry.provider.interface'
 import { RegistryType } from './../../docker-registry/enums/registry-type.enum'
 import { parseDockerImage, checkDockerfileHasRegistryPrefix } from '../../common/utils/docker-image.util'
@@ -85,9 +87,18 @@ export class DockerRegistryService {
       }
     }
 
+    const normalizedUrl = normalizeRegistryUrl(createDto.url)
+
+    if (createDto.registryType === RegistryType.ORGANIZATION) {
+      await this.validateRegistryCredentials(normalizedUrl, {
+        username: createDto.username,
+        password: createDto.password,
+      })
+    }
+
     const registry = repository.create({
       ...createDto,
-      url: normalizeRegistryUrl(createDto.url),
+      url: normalizedUrl,
       region: createDto.regionId,
       organizationId,
       isFallback,
@@ -125,12 +136,24 @@ export class DockerRegistryService {
       throw new NotFoundException(`Docker registry with ID ${registryId} not found`)
     }
 
-    registry.name = updateDto.name
-    registry.url = normalizeRegistryUrl(updateDto.url)
-    registry.username = updateDto.username
-    if (updateDto.password) {
-      registry.password = updateDto.password
+    const normalizedUrl = normalizeRegistryUrl(updateDto.url)
+    const effectivePassword = updateDto.password || registry.password
+    const credentialsChanged =
+      registry.url !== normalizedUrl ||
+      registry.username !== updateDto.username ||
+      registry.password !== effectivePassword
+
+    if (credentialsChanged && registry.registryType === RegistryType.ORGANIZATION) {
+      await this.validateRegistryCredentials(normalizedUrl, {
+        username: updateDto.username,
+        password: effectivePassword,
+      })
     }
+
+    registry.name = updateDto.name
+    registry.url = normalizedUrl
+    registry.username = updateDto.username
+    registry.password = effectivePassword
     registry.project = updateDto.project
 
     return this.dockerRegistryRepository.save(registry)
@@ -521,6 +544,53 @@ export class DockerRegistryService {
     }
 
     return registry.url.startsWith('http') ? registry.url : `https://${registry.url}`
+  }
+
+  /**
+   * Validates registry credentials before persisting them.
+   */
+  private async validateRegistryCredentials(url: string, auth: { username: string; password: string }): Promise<void> {
+    const probeUrl = this.getRegistryValidationUrl(url)
+
+    try {
+      await this.dockerRegistryProvider.validateCredentials(probeUrl, auth)
+    } catch (error) {
+      if (!(error instanceof RegistryCredentialsValidationError)) {
+        throw error
+      }
+
+      switch (error.code) {
+        case RegistryCredentialsValidationErrorCode.INVALID_CREDENTIALS:
+          throw new BadRequestException('Invalid registry credentials')
+        case RegistryCredentialsValidationErrorCode.UNREACHABLE:
+          throw new BadRequestException('Registry could not be reached')
+        case RegistryCredentialsValidationErrorCode.UNSUPPORTED_CHALLENGE:
+          throw new BadRequestException('Registry authentication challenge is unsupported or malformed')
+        case RegistryCredentialsValidationErrorCode.UNVERIFIED_CREDENTIALS:
+          throw new BadRequestException('Registry is reachable but submitted credentials could not be verified')
+      }
+
+      throw error
+    }
+  }
+
+  /**
+   * Builds the base URL used to probe the registry auth challenge.
+   */
+  private getRegistryValidationUrl(url: string): string {
+    if (url === DOCKER_HUB_URL) {
+      return `https://${DOCKER_HUB_REGISTRY}`
+    }
+
+    if (url.startsWith('localhost:') || url.startsWith('registry:')) {
+      return `http://${url}`
+    }
+
+    if (url.startsWith('localhost') || url.startsWith('127.0.0.1')) {
+      return `http://${url}`
+    }
+
+    return url.startsWith('http') ? url : `https://${url}`
   }
 
   public async findRegistryByImageName(
