@@ -136,7 +136,7 @@ func (u *ComputerUse) Drag(req *computeruse.MouseDragRequest) (*computeruse.Mous
 
 func (u *ComputerUse) Scroll(req *computeruse.MouseScrollRequest) (*computeruse.ScrollResponse, error) {
 	// Default amount if not specified
-	if req.Amount == 0 {
+	if req.Amount <= 0 {
 		req.Amount = 3
 	}
 
