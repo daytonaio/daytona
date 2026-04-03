@@ -3,47 +3,14 @@
 
 package io.daytona.sdk.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+public class Session extends io.daytona.toolbox.client.model.Session {
+    public Session() {}
 
-import java.util.ArrayList;
-import java.util.List;
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-/**
- * Background process session metadata.
- */
-public class Session {
-    @JsonProperty("sessionId")
-    private String sessionId;
-    @JsonProperty("commands")
-    private List<Command> commands;
-
-    /**
-     * Returns session identifier.
-     *
-     * @return session ID
-     */
-    public String getSessionId() { return sessionId; }
-
-    /**
-     * Sets session identifier.
-     *
-     * @param sessionId session ID
-     */
-    public void setSessionId(String sessionId) { this.sessionId = sessionId; }
-
-    /**
-     * Returns commands executed in this session.
-     *
-     * @return command list
-     */
-    public List<Command> getCommands() { return commands == null ? new ArrayList<Command>() : commands; }
-
-    /**
-     * Sets commands executed in this session.
-     *
-     * @param commands command list
-     */
-    public void setCommands(List<Command> commands) { this.commands = commands; }
+    public Session(io.daytona.toolbox.client.model.Session source) {
+        super();
+        if (source != null) {
+            setSessionId(source.getSessionId());
+            setCommands(source.getCommands());
+        }
+    }
 }

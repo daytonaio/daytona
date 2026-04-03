@@ -100,7 +100,7 @@ public class FileSystem {
         List<FileInfo> result = new ArrayList<FileInfo>();
         if (files != null) {
             for (io.daytona.toolbox.client.model.FileInfo file : files) {
-                result.add(toFileInfo(file));
+                result.add(new FileInfo(file));
             }
         }
         return result;
@@ -115,7 +115,7 @@ public class FileSystem {
      */
     public FileInfo getFileDetails(String path) {
         io.daytona.toolbox.client.model.FileInfo fileInfo = ExceptionMapper.callToolbox(() -> fileSystemApi.getFileInfo(path));
-        return toFileInfo(fileInfo);
+        return new FileInfo(fileInfo);
     }
 
     /**
@@ -180,15 +180,4 @@ public class FileSystem {
         ExceptionMapper.runToolbox(() -> fileSystemApi.moveFile(source, destination));
     }
 
-    private FileInfo toFileInfo(io.daytona.toolbox.client.model.FileInfo source) {
-        FileInfo fileInfo = new FileInfo();
-        if (source != null) {
-            fileInfo.setName(source.getName());
-            fileInfo.setSize(source.getSize() == null ? null : source.getSize().longValue());
-            fileInfo.setMode(source.getMode());
-            fileInfo.setModTime(source.getModTime());
-            fileInfo.setDir(source.getIsDir());
-        }
-        return fileInfo;
-    }
 }

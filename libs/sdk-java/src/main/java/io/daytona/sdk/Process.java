@@ -195,7 +195,7 @@ public class Process {
      */
     public Command getSessionCommand(String sessionId, String commandId) {
         io.daytona.toolbox.client.model.Command command = ExceptionMapper.callToolbox(() -> processApi.getSessionCommand(sessionId, commandId));
-        return toCommand(command);
+        return new Command(command);
     }
 
     /**
@@ -539,47 +539,14 @@ public class Process {
     }
 
     private ExecuteResponse toExecuteResponse(io.daytona.toolbox.client.model.ExecuteResponse source) {
-        ExecuteResponse response = new ExecuteResponse();
-        if (source != null) {
-            response.setExitCode(source.getExitCode());
-            response.setResult(source.getResult());
-        }
-        return response;
+        return new ExecuteResponse(source);
     }
 
     private Session toSession(io.daytona.toolbox.client.model.Session source) {
-        Session session = new Session();
-        if (source == null) {
-            return session;
-        }
-        session.setSessionId(source.getSessionId());
-        List<Command> commands = new ArrayList<Command>();
-        if (source.getCommands() != null) {
-            for (io.daytona.toolbox.client.model.Command command : source.getCommands()) {
-                commands.add(toCommand(command));
-            }
-        }
-        session.setCommands(commands);
-        return session;
-    }
-
-    private Command toCommand(io.daytona.toolbox.client.model.Command source) {
-        Command command = new Command();
-        if (source != null) {
-            command.setId(source.getId());
-            command.setCommand(source.getCommand());
-            command.setExitCode(source.getExitCode());
-        }
-        return command;
+        return new Session(source);
     }
 
     private SessionExecuteResponse toSessionExecuteResponse(io.daytona.toolbox.client.model.SessionExecuteResponse source) {
-        SessionExecuteResponse response = new SessionExecuteResponse();
-        if (source != null) {
-            response.setCmdId(source.getCmdId());
-            response.setOutput(source.getOutput());
-            response.setExitCode(source.getExitCode());
-        }
-        return response;
+        return new SessionExecuteResponse(source);
     }
 }
