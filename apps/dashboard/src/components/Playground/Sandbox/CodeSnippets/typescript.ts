@@ -4,7 +4,7 @@
  */
 
 import { CodeSnippetGenerator } from './types'
-import { joinGroupedSections } from './utils'
+import { escapeSnippetTsSingleQuotedString, joinGroupedSections } from './utils'
 
 export const TypeScriptSnippetGenerator: CodeSnippetGenerator = {
   getImports(p) {
@@ -25,6 +25,12 @@ export const TypeScriptSnippetGenerator: CodeSnippetGenerator = {
   },
 
   getClientInit(p) {
+    if (p.config.useCustomSandboxTarget && p.config.customSandboxTargetId) {
+      return [
+        '\t// Initialize the Daytona client',
+        `\tconst daytona = new Daytona({ target: '${escapeSnippetTsSingleQuotedString(p.config.customSandboxTargetId)}' })`,
+      ].join('\n')
+    }
     return [
       '\t// Initialize the Daytona client',
       `\tconst daytona = new Daytona(${p.actions.useConfigObject ? 'config' : ''})`,

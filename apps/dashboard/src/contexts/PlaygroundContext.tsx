@@ -186,6 +186,7 @@ export type ProcessCodeExecutionOperationsActionFormData<T extends CodeRunParams
 export interface SandboxParams {
   language?: CodeLanguage
   snapshotName?: string
+  sandboxTarget?: string
   resources: Resources
   createSandboxBaseParams: CreateSandboxBaseParams
   // File system operations params
@@ -280,6 +281,8 @@ export type SandboxParametersInfo = {
   useAutoDeleteInterval: boolean
   useSandboxCreateParams: boolean
   useCustomSandboxSnapshotName: boolean
+  useCustomSandboxTarget: boolean
+  customSandboxTargetId: string | undefined
   createSandboxFromImage: boolean
   createSandboxFromSnapshot: boolean
   createSandboxParams: CreateSandboxBaseParams | CreateSandboxFromImageParams | CreateSandboxFromSnapshotParams

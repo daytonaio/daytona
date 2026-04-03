@@ -8,6 +8,7 @@ import {
   DEFAULT_DISK_RESOURCES,
   DEFAULT_MEMORY_RESOURCES,
   SANDBOX_SNAPSHOT_DEFAULT_VALUE,
+  SANDBOX_TARGET_DEFAULT_VALUE,
 } from '@/constants/Playground'
 import {
   ActionRuntimeError,
@@ -75,6 +76,7 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const [sandboxParametersState, setSandboxParametersState] = useState<SandboxParams>({
     snapshotName: SANDBOX_SNAPSHOT_DEFAULT_VALUE,
+    sandboxTarget: SANDBOX_TARGET_DEFAULT_VALUE,
     resources: {
       cpu: DEFAULT_CPU_RESOURCES,
       memory: DEFAULT_MEMORY_RESOURCES,
@@ -317,6 +319,12 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const createSandboxFromImageParams: CreateSandboxFromImageParams = { image: Image.debianSlim('3.13') } // Default and fixed image if CreateSandboxFromImageParams are used
     const snapshotName = sandboxParametersState['snapshotName']
     const useCustomSandboxSnapshotName = snapshotName !== undefined && snapshotName !== SANDBOX_SNAPSHOT_DEFAULT_VALUE
+    const sandboxTarget = sandboxParametersState['sandboxTarget']
+    const useCustomSandboxTarget =
+      typeof sandboxTarget === 'string' &&
+      sandboxTarget !== SANDBOX_TARGET_DEFAULT_VALUE &&
+      sandboxTarget.length > 0
+    const customSandboxTargetId = useCustomSandboxTarget ? sandboxTarget : undefined
     const createSandboxFromSnapshotParams: CreateSandboxFromSnapshotParams = {
       snapshot: useCustomSandboxSnapshotName ? snapshotName : undefined,
     }
@@ -372,6 +380,8 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       useAutoDeleteInterval,
       useSandboxCreateParams,
       useCustomSandboxSnapshotName,
+      useCustomSandboxTarget,
+      customSandboxTargetId,
       createSandboxFromImage,
       createSandboxFromSnapshot,
       createSandboxParams,

@@ -4,14 +4,14 @@
  */
 
 import { CodeSnippetGenerator } from './types'
-import { joinGroupedSections } from './utils'
+import { escapeSnippetPyDoubleQuotedString, joinGroupedSections } from './utils'
 
 export const PythonSnippetGenerator: CodeSnippetGenerator = {
   getImports(p) {
     return (
       [
         'from daytona import Daytona',
-        p.actions.useConfigObject ? 'DaytonaConfig' : '',
+        p.actions.useConfigObject || p.config.useCustomSandboxTarget ? 'DaytonaConfig' : '',
         p.config.useSandboxCreateParams
           ? p.config.createSandboxFromSnapshot
             ? 'CreateSandboxFromSnapshotParams'
@@ -31,6 +31,12 @@ export const PythonSnippetGenerator: CodeSnippetGenerator = {
   },
 
   getClientInit(p) {
+    if (p.config.useCustomSandboxTarget && p.config.customSandboxTargetId) {
+      return [
+        '# Initialize the Daytona client',
+        `daytona = Daytona(DaytonaConfig(target="${escapeSnippetPyDoubleQuotedString(p.config.customSandboxTargetId)}"))`,
+      ].join('\n')
+    }
     return ['# Initialize the Daytona client', `daytona = Daytona(${p.actions.useConfigObject ? 'config' : ''})`]
       .filter(Boolean)
       .join('\n')
