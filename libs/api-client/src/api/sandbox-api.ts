@@ -854,7 +854,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
          * @param {string} sandboxIdOrName ID or name of the sandbox
          * @param {number} port Port number to get signed preview URL for
          * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {number} [expiresInSeconds] Expiration time in seconds (default: 60 seconds)
+         * @param {number} [expiresInSeconds] Expiration time in seconds (default: 300 seconds)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2006,7 +2006,7 @@ export const SandboxApiFp = function(configuration?: Configuration) {
          * @param {string} sandboxIdOrName ID or name of the sandbox
          * @param {number} port Port number to get signed preview URL for
          * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {number} [expiresInSeconds] Expiration time in seconds (default: 60 seconds)
+         * @param {number} [expiresInSeconds] Expiration time in seconds (default: 300 seconds)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2472,7 +2472,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
          * @param {string} sandboxIdOrName ID or name of the sandbox
          * @param {number} port Port number to get signed preview URL for
          * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {number} [expiresInSeconds] Expiration time in seconds (default: 60 seconds)
+         * @param {number} [expiresInSeconds] Expiration time in seconds (default: 300 seconds)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2917,7 +2917,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {number} port Port number to get signed preview URL for
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {number} [expiresInSeconds] Expiration time in seconds (default: 60 seconds)
+    * @param {number} [expiresInSeconds] Expiration time in seconds (default: 300 seconds)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SandboxApi

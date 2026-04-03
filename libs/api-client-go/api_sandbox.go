@@ -2362,7 +2362,7 @@ func (r SandboxAPIGetSignedPortPreviewUrlRequest) XDaytonaOrganizationID(xDayton
 	return r
 }
 
-// Expiration time in seconds (default: 60 seconds)
+// Expiration time in seconds (default: 300 seconds)
 func (r SandboxAPIGetSignedPortPreviewUrlRequest) ExpiresInSeconds(expiresInSeconds int32) SandboxAPIGetSignedPortPreviewUrlRequest {
 	r.expiresInSeconds = &expiresInSeconds
 	return r
