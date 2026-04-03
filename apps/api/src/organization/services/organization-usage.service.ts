@@ -291,12 +291,12 @@ export class OrganizationUsageService {
     let memToSubtract = 0
     let diskToSubtract = 0
 
-    if (SANDBOX_STATES_CONSUMING_COMPUTE.includes(excludedSandbox.state)) {
+    if (SANDBOX_STATES_CONSUMING_COMPUTE.includes(excludedSandbox.sandboxState.state)) {
       cpuToSubtract = excludedSandbox.cpu
       memToSubtract = excludedSandbox.mem
     }
 
-    if (SANDBOX_STATES_CONSUMING_DISK.includes(excludedSandbox.state)) {
+    if (SANDBOX_STATES_CONSUMING_DISK.includes(excludedSandbox.sandboxState.state)) {
       diskToSubtract = excludedSandbox.disk
     }
 
@@ -612,13 +612,13 @@ export class OrganizationUsageService {
       used_mem: number
       used_disk: number
     } = await this.sandboxRepository
-      .createQueryBuilder('sandbox')
+      .createAggregateQueryBuilder('sandbox')
       .select([
-        `SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) OR (sandbox.state = :resizingState AND sandbox."desiredState" = :startedDesiredState) THEN sandbox.cpu ELSE 0 END) as used_cpu`,
-        `SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) OR (sandbox.state = :resizingState AND sandbox."desiredState" = :startedDesiredState) THEN sandbox.mem ELSE 0 END) as used_mem`,
-        'SUM(CASE WHEN sandbox.state IN (:...statesConsumingDisk) THEN sandbox.disk ELSE 0 END) as used_disk',
+        `SUM(CASE WHEN ss."state" IN (:...statesConsumingCompute) OR (ss."state" = :resizingState AND ss."desiredState" = :startedDesiredState) THEN sandbox.cpu ELSE 0 END) as used_cpu`,
+        `SUM(CASE WHEN ss."state" IN (:...statesConsumingCompute) OR (ss."state" = :resizingState AND ss."desiredState" = :startedDesiredState) THEN sandbox.mem ELSE 0 END) as used_mem`,
+        'SUM(CASE WHEN ss."state" IN (:...statesConsumingDisk) THEN sandbox.disk ELSE 0 END) as used_disk',
       ])
-      .where('sandbox.organizationId = :organizationId', { organizationId })
+      .where('sandbox."organizationId" = :organizationId', { organizationId })
       .andWhere('sandbox.region = :regionId', { regionId })
       .setParameter('statesConsumingCompute', SANDBOX_STATES_CONSUMING_COMPUTE)
       .setParameter('statesConsumingDisk', SANDBOX_STATES_CONSUMING_DISK)
@@ -843,12 +843,12 @@ export class OrganizationUsageService {
       })
 
       if (excludedSandbox) {
-        if (SANDBOX_STATES_CONSUMING_COMPUTE.includes(excludedSandbox.state)) {
+        if (SANDBOX_STATES_CONSUMING_COMPUTE.includes(excludedSandbox.sandboxState.state)) {
           shouldIncrementCpu = false
           shouldIncrementMemory = false
         }
 
-        if (SANDBOX_STATES_CONSUMING_DISK.includes(excludedSandbox.state)) {
+        if (SANDBOX_STATES_CONSUMING_DISK.includes(excludedSandbox.sandboxState.state)) {
           shouldIncrementDisk = false
         }
       }

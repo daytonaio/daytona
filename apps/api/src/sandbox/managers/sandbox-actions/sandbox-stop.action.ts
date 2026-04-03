@@ -28,14 +28,14 @@ export class SandboxStopAction extends SandboxAction {
 
   @WithSpan()
   async run(sandbox: Sandbox, lockCode: LockCode, force?: boolean): Promise<SyncState> {
-    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
+    const runner = await this.runnerService.findOneOrFail(sandbox.sandboxState.runnerId)
     if (runner.state !== RunnerState.READY) {
       return DONT_SYNC_AGAIN
     }
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-    if (sandbox.state === SandboxState.STARTED) {
+    if (sandbox.sandboxState.state === SandboxState.STARTED) {
       // stop sandbox
       await runnerAdapter.stopSandbox(sandbox.id, force)
       await this.updateSandboxState(sandbox, SandboxState.STOPPING, lockCode)
@@ -44,7 +44,7 @@ export class SandboxStopAction extends SandboxAction {
       return SYNC_AGAIN
     }
 
-    if (sandbox.state !== SandboxState.STOPPING && sandbox.state !== SandboxState.ERROR) {
+    if (sandbox.sandboxState.state !== SandboxState.STOPPING && sandbox.sandboxState.state !== SandboxState.ERROR) {
       return DONT_SYNC_AGAIN
     }
 

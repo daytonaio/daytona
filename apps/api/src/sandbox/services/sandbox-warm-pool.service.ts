@@ -125,7 +125,7 @@ export class SandboxWarmPoolService {
         .andWhere('(runner.unschedulable = true OR runner.availabilityScore < :scoreThreshold)')
 
       const queryBuilder = this.sandboxRepository
-        .createQueryBuilder('sandbox')
+        .createAggregateQueryBuilder('sandbox')
         .where('sandbox.class = :class', { class: warmPoolItem.class })
         .andWhere('sandbox.cpu = :cpu', { cpu: warmPoolItem.cpu })
         .andWhere('sandbox.mem = :mem', { mem: warmPoolItem.mem })
@@ -137,8 +137,8 @@ export class SandboxWarmPoolService {
           organizationId: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
         })
         .andWhere('sandbox.region = :region', { region: warmPoolItem.target })
-        .andWhere('sandbox.state = :state', { state: SandboxState.STARTED })
-        .andWhere(`sandbox.runnerId NOT IN (${excludedRunnersSubquery.getQuery()})`)
+        .andWhere('ss."state" = :state', { state: SandboxState.STARTED })
+        .andWhere(`ss."runnerId" NOT IN (${excludedRunnersSubquery.getQuery()})`)
         .setParameters({
           region: warmPoolItem.target,
           scoreThreshold: availabilityScoreThreshold,
@@ -194,8 +194,10 @@ export class SandboxWarmPoolService {
             gpu: warmPoolItem.gpu,
             mem: warmPoolItem.mem,
             disk: warmPoolItem.disk,
-            desiredState: SandboxDesiredState.STARTED,
-            state: Not(In([SandboxState.ERROR, SandboxState.BUILD_FAILED])),
+            sandboxState: {
+              desiredState: SandboxDesiredState.STARTED,
+              state: Not(In([SandboxState.ERROR, SandboxState.BUILD_FAILED])),
+            },
           },
         })
 
@@ -254,8 +256,10 @@ export class SandboxWarmPoolService {
         gpu: warmPoolItem.gpu,
         mem: warmPoolItem.mem,
         disk: warmPoolItem.disk,
-        desiredState: SandboxDesiredState.STARTED,
-        state: Not(In([SandboxState.ERROR, SandboxState.BUILD_FAILED])),
+        sandboxState: {
+          desiredState: SandboxDesiredState.STARTED,
+          state: Not(In([SandboxState.ERROR, SandboxState.BUILD_FAILED])),
+        },
       },
     })
 

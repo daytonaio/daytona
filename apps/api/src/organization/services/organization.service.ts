@@ -616,13 +616,15 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       return
     }
 
-    const sandboxes = await this.sandboxRepository.find({
-      where: {
-        organizationId: In(suspendedOrganizationIds),
-        desiredState: SandboxDesiredState.STARTED,
-        state: Not(In([SandboxState.ERROR, SandboxState.BUILD_FAILED])),
-      },
-    })
+    const sandboxes = await this.sandboxRepository
+      .createAggregateQueryBuilder('sandbox')
+      .where('sandbox."organizationId" IN (:...ids)', { ids: suspendedOrganizationIds })
+      .andWhere('ss."desiredState" = :desiredState', { desiredState: SandboxDesiredState.STARTED })
+      .andWhere('ss."state" NOT IN (:...badStates)', {
+        badStates: [SandboxState.ERROR, SandboxState.BUILD_FAILED],
+      })
+      .take(100)
+      .getMany()
 
     sandboxes.map((sandbox) =>
       this.eventEmitter.emitAsync(

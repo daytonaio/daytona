@@ -19,7 +19,8 @@ import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { sanitizeSandboxError } from '../utils/sanitize-error.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { SandboxRepository } from '../repositories/sandbox.repository'
-import { Sandbox } from '../entities/sandbox.entity'
+import { SandboxAggregate } from '../types/sandbox-aggregate.type'
+import { SandboxBackupEntity } from '../entities/sandbox-backup.entity'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { ResourceType } from '../enums/resource-type.enum'
 import { getStateChangeLockKey } from '../utils/lock-key.util'
@@ -114,34 +115,37 @@ export class JobStateHandlerService {
         return
       }
 
-      if (sandbox.desiredState !== SandboxDesiredState.STARTED) {
+      if (sandbox.sandboxState.desiredState !== SandboxDesiredState.STARTED) {
         this.logger.error(
-          `Sandbox ${sandboxId} is not in desired state STARTED for CREATE_SANDBOX job ${job.id}. Desired state: ${sandbox.desiredState}`,
+          `Sandbox ${sandboxId} is not in desired state STARTED for CREATE_SANDBOX job ${job.id}. Desired state: ${sandbox.sandboxState.desiredState}`,
         )
         return
       }
 
-      const updateData: Partial<Sandbox> = {}
+      const updateData: Partial<SandboxAggregate> = {}
 
       if (job.status === JobStatus.COMPLETED) {
         this.logger.debug(
           `CREATE_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STARTED`,
         )
-        updateData.state = SandboxState.STARTED
-        updateData.errorReason = null
-        if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
-          Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.NONE))
+        updateData.sandboxState.state = SandboxState.STARTED
+        updateData.sandboxState.errorReason = null
+        if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.sandboxBackup.backupState)) {
+          Object.assign(
+            updateData.sandboxState,
+            SandboxBackupEntity.getBackupStateUpdate(sandbox.sandboxBackup, BackupState.NONE),
+          )
         }
         const metadata = job.getResultMetadata()
         if (metadata?.daemonVersion && typeof metadata.daemonVersion === 'string') {
-          updateData.daemonVersion = metadata.daemonVersion
+          updateData.sandboxState.daemonVersion = metadata.sandboxState.daemonVersion
         }
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`CREATE_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-        updateData.state = SandboxState.ERROR
+        updateData.sandboxState.state = SandboxState.ERROR
         const { recoverable, errorReason } = sanitizeSandboxError(job.errorMessage)
-        updateData.errorReason = errorReason || 'Failed to create sandbox'
-        updateData.recoverable = recoverable
+        updateData.sandboxState.errorReason = errorReason || 'Failed to create sandbox'
+        updateData.sandboxState.recoverable = recoverable
       }
 
       await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
@@ -161,32 +165,35 @@ export class JobStateHandlerService {
         return
       }
 
-      if (sandbox.desiredState !== SandboxDesiredState.STARTED) {
+      if (sandbox.sandboxState.desiredState !== SandboxDesiredState.STARTED) {
         this.logger.error(
-          `Sandbox ${sandboxId} is not in desired state STARTED for START_SANDBOX job ${job.id}. Desired state: ${sandbox.desiredState}`,
+          `Sandbox ${sandboxId} is not in desired state STARTED for START_SANDBOX job ${job.id}. Desired state: ${sandbox.sandboxState.desiredState}`,
         )
         return
       }
 
-      const updateData: Partial<Sandbox> = {}
+      const updateData: Partial<SandboxAggregate> = {}
 
       if (job.status === JobStatus.COMPLETED) {
         this.logger.debug(`START_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STARTED`)
-        updateData.state = SandboxState.STARTED
-        updateData.errorReason = null
-        if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
-          Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.NONE))
+        updateData.sandboxState.state = SandboxState.STARTED
+        updateData.sandboxState.errorReason = null
+        if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.sandboxBackup.backupState)) {
+          Object.assign(
+            updateData.sandboxState,
+            SandboxBackupEntity.getBackupStateUpdate(sandbox.sandboxBackup, BackupState.NONE),
+          )
         }
         const metadata = job.getResultMetadata()
         if (metadata?.daemonVersion && typeof metadata.daemonVersion === 'string') {
-          updateData.daemonVersion = metadata.daemonVersion
+          updateData.sandboxState.daemonVersion = metadata.sandboxState.daemonVersion
         }
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`START_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-        updateData.state = SandboxState.ERROR
+        updateData.sandboxState.state = SandboxState.ERROR
         const { recoverable, errorReason } = sanitizeSandboxError(job.errorMessage)
-        updateData.errorReason = errorReason || 'Failed to start sandbox'
-        updateData.recoverable = recoverable
+        updateData.sandboxState.errorReason = errorReason || 'Failed to start sandbox'
+        updateData.sandboxState.recoverable = recoverable
       }
 
       await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
@@ -206,26 +213,26 @@ export class JobStateHandlerService {
         return
       }
 
-      if (sandbox.desiredState !== SandboxDesiredState.STOPPED) {
+      if (sandbox.sandboxState.desiredState !== SandboxDesiredState.STOPPED) {
         this.logger.error(
-          `Sandbox ${sandboxId} is not in desired state STOPPED for STOP_SANDBOX job ${job.id}. Desired state: ${sandbox.desiredState}`,
+          `Sandbox ${sandboxId} is not in desired state STOPPED for STOP_SANDBOX job ${job.id}. Desired state: ${sandbox.sandboxState.desiredState}`,
         )
         return
       }
 
-      const updateData: Partial<Sandbox> = {}
+      const updateData: Partial<SandboxAggregate> = {}
 
       if (job.status === JobStatus.COMPLETED) {
         this.logger.debug(`STOP_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STOPPED`)
-        updateData.state = SandboxState.STOPPED
-        updateData.errorReason = null
-        Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.NONE))
+        updateData.sandboxState.state = SandboxState.STOPPED
+        updateData.sandboxState.errorReason = null
+        Object.assign(updateData, SandboxBackupEntity.getBackupStateUpdate(sandbox.sandboxBackup, BackupState.NONE))
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`STOP_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-        updateData.state = SandboxState.ERROR
+        updateData.sandboxState.state = SandboxState.ERROR
         const { recoverable, errorReason } = sanitizeSandboxError(job.errorMessage)
-        updateData.errorReason = errorReason || 'Failed to stop sandbox'
-        updateData.recoverable = recoverable
+        updateData.sandboxState.errorReason = errorReason || 'Failed to stop sandbox'
+        updateData.sandboxState.recoverable = recoverable
       }
 
       await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
@@ -244,25 +251,25 @@ export class JobStateHandlerService {
         this.logger.warn(`Sandbox ${sandboxId} not found for DESTROY_SANDBOX job ${job.id}`)
         return
       }
-      const updateData: Partial<Sandbox> = {}
+      const updateData: Partial<SandboxAggregate> = {}
 
-      if (sandbox.desiredState === SandboxDesiredState.DESTROYED) {
+      if (sandbox.sandboxState.desiredState === SandboxDesiredState.DESTROYED) {
         if (job.status === JobStatus.COMPLETED) {
           this.logger.debug(
             `DESTROY_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as DESTROYED`,
           )
-          updateData.state = SandboxState.DESTROYED
-          updateData.errorReason = null
+          updateData.sandboxState.state = SandboxState.DESTROYED
+          updateData.sandboxState.errorReason = null
         } else if (job.status === JobStatus.FAILED) {
           this.logger.error(`DESTROY_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-          updateData.state = SandboxState.ERROR
+          updateData.sandboxState.state = SandboxState.ERROR
           const { recoverable, errorReason } = sanitizeSandboxError(job.errorMessage)
-          updateData.errorReason = errorReason || 'Failed to destroy sandbox'
-          updateData.recoverable = recoverable
+          updateData.sandboxState.errorReason = errorReason || 'Failed to destroy sandbox'
+          updateData.sandboxState.recoverable = recoverable
         }
       } else if (
-        sandbox.desiredState === SandboxDesiredState.ARCHIVED &&
-        sandbox.backupState === BackupState.COMPLETED
+        sandbox.sandboxState.desiredState === SandboxDesiredState.ARCHIVED &&
+        sandbox.sandboxBackup.backupState === BackupState.COMPLETED
       ) {
         if (job.status === JobStatus.COMPLETED) {
           this.logger.debug(
@@ -273,8 +280,8 @@ export class JobStateHandlerService {
             `DESTROY_SANDBOX job ${job.id} failed during archiving for sandbox ${sandboxId}: ${job.errorMessage}. Marking as ARCHIVED since backup is complete.`,
           )
         }
-        updateData.state = SandboxState.ARCHIVED
-        updateData.errorReason = null
+        updateData.sandboxState.state = SandboxState.ARCHIVED
+        updateData.sandboxState.errorReason = null
       } else {
         return
       }
@@ -440,25 +447,34 @@ export class JobStateHandlerService {
 
       // Ignore stale backup results if the job's snapshot doesn't match the current DB snapshot.
       // Old v2 runners may not include snapshot in the payload — skip this check for them.
-      if (jobSnapshot && jobSnapshot !== sandbox.backupSnapshot) {
+      if (jobSnapshot && jobSnapshot !== sandbox.sandboxBackup.backupSnapshot) {
         this.logger.warn(
-          `Ignoring stale backup ${job.status} for sandbox ${sandboxId}: job snapshot ${jobSnapshot} does not match DB snapshot ${sandbox.backupSnapshot}`,
+          `Ignoring stale backup ${job.status} for sandbox ${sandboxId}: job snapshot ${jobSnapshot} does not match DB snapshot ${sandbox.sandboxBackup.backupSnapshot}`,
         )
         return
       }
 
-      const updateData: Partial<Sandbox> = {}
+      const updateData: Partial<SandboxAggregate> = {}
 
       if (job.status === JobStatus.COMPLETED) {
         this.logger.debug(
           `CREATE_BACKUP job ${job.id} completed successfully, marking sandbox ${sandboxId} as BACKUP_COMPLETED`,
         )
-        Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.COMPLETED))
+        Object.assign(
+          updateData,
+          SandboxBackupEntity.getBackupStateUpdate(sandbox.sandboxBackup, BackupState.COMPLETED),
+        )
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`CREATE_BACKUP job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
         Object.assign(
           updateData,
-          Sandbox.getBackupStateUpdate(sandbox, BackupState.ERROR, undefined, undefined, job.errorMessage),
+          SandboxBackupEntity.getBackupStateUpdate(
+            sandbox.sandboxBackup,
+            BackupState.ERROR,
+            undefined,
+            undefined,
+            job.errorMessage,
+          ),
         )
       }
 
@@ -479,28 +495,31 @@ export class JobStateHandlerService {
         return
       }
 
-      if (sandbox.desiredState !== SandboxDesiredState.STARTED) {
+      if (sandbox.sandboxState.desiredState !== SandboxDesiredState.STARTED) {
         this.logger.error(
-          `Sandbox ${sandboxId} is not in desired state STARTED for RECOVER_SANDBOX job ${job.id}. Desired state: ${sandbox.desiredState}`,
+          `Sandbox ${sandboxId} is not in desired state STARTED for RECOVER_SANDBOX job ${job.id}. Desired state: ${sandbox.sandboxState.desiredState}`,
         )
         return
       }
 
-      const updateData: Partial<Sandbox> = {}
+      const updateData: Partial<SandboxAggregate> = {}
 
       if (job.status === JobStatus.COMPLETED) {
         this.logger.debug(
           `RECOVER_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STARTED`,
         )
-        updateData.state = SandboxState.STARTED
-        updateData.errorReason = null
-        if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
-          Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.NONE))
+        updateData.sandboxState.state = SandboxState.STARTED
+        updateData.sandboxState.errorReason = null
+        if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.sandboxBackup.backupState)) {
+          Object.assign(
+            updateData.sandboxState,
+            SandboxBackupEntity.getBackupStateUpdate(sandbox.sandboxBackup, BackupState.NONE),
+          )
         }
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`RECOVER_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-        updateData.state = SandboxState.ERROR
-        updateData.errorReason = job.errorMessage || 'Failed to recover sandbox'
+        updateData.sandboxState.state = SandboxState.ERROR
+        updateData.sandboxState.errorReason = job.errorMessage || 'Failed to recover sandbox'
       }
 
       await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
@@ -520,24 +539,24 @@ export class JobStateHandlerService {
         return
       }
 
-      if (sandbox.state !== SandboxState.RESIZING) {
+      if (sandbox.sandboxState.state !== SandboxState.RESIZING) {
         this.logger.warn(
-          `Sandbox ${sandboxId} is not in RESIZING state for RESIZE_SANDBOX job ${job.id}. State: ${sandbox.state}`,
+          `Sandbox ${sandboxId} is not in RESIZING state for RESIZE_SANDBOX job ${job.id}. State: ${sandbox.sandboxState.state}`,
         )
         return
       }
 
       // Determine the previous state (STARTED or STOPPED based on desiredState)
       const previousState =
-        sandbox.desiredState === SandboxDesiredState.STARTED
+        sandbox.sandboxState.desiredState === SandboxDesiredState.STARTED
           ? SandboxState.STARTED
-          : sandbox.desiredState === SandboxDesiredState.STOPPED
+          : sandbox.sandboxState.desiredState === SandboxDesiredState.STOPPED
             ? SandboxState.STOPPED
             : null
 
       if (!previousState) {
         this.logger.error(
-          `Sandbox ${sandboxId} has unexpected desiredState ${sandbox.desiredState} for RESIZE_SANDBOX job ${job.id}`,
+          `Sandbox ${sandboxId} has unexpected desiredState ${sandbox.sandboxState.desiredState} for RESIZE_SANDBOX job ${job.id}`,
         )
         return
       }
@@ -551,7 +570,7 @@ export class JobStateHandlerService {
       const memDeltaForQuota = isHotResize ? (payload.memory ?? sandbox.mem) - sandbox.mem : 0
       const diskDeltaForQuota = (payload.disk ?? sandbox.disk) - sandbox.disk // Disk only increases
 
-      const updateData: Partial<Sandbox> = {}
+      const updateData: Partial<SandboxAggregate> = {}
 
       if (job.status === JobStatus.COMPLETED) {
         this.logger.debug(`RESIZE_SANDBOX job ${job.id} completed successfully for sandbox ${sandboxId}`)
@@ -560,7 +579,7 @@ export class JobStateHandlerService {
         updateData.cpu = payload.cpu ?? sandbox.cpu
         updateData.mem = payload.memory ?? sandbox.mem
         updateData.disk = payload.disk ?? sandbox.disk
-        updateData.state = previousState
+        updateData.sandboxState.state = previousState
 
         // Apply usage change (handles both positive and negative deltas)
         await this.organizationUsageService.applyResizeUsageChange(
@@ -583,7 +602,7 @@ export class JobStateHandlerService {
           diskDeltaForQuota !== 0 ? diskDeltaForQuota : undefined,
         )
 
-        updateData.state = previousState
+        updateData.sandboxState.state = previousState
       }
 
       await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })

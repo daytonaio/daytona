@@ -3,8 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { DataSource, EntityManager, FindOptionsWhere } from 'typeorm'
+import { DataSource, EntityManager, FindOptionsWhere, SelectQueryBuilder } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
+import { SandboxStateEntity } from '../entities/sandbox-state.entity'
+import { SandboxBackupEntity } from '../entities/sandbox-backup.entity'
+import { SandboxAggregate } from '../types/sandbox-aggregate.type'
+import { BackupState } from '../enums/backup-state.enum'
+import { SandboxState } from '../enums/sandbox-state.enum'
+import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { SandboxLastActivity } from '../entities/sandbox-last-activity.entity'
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { SandboxConflictError } from '../errors/sandbox-conflict.error'
@@ -18,6 +24,57 @@ import { SandboxPublicStatusUpdatedEvent } from '../events/sandbox-public-status
 import { SandboxOrganizationUpdatedEvent } from '../events/sandbox-organization-updated.event'
 import { SandboxLookupCacheInvalidationService } from '../services/sandbox-lookup-cache-invalidation.service'
 
+const STATE_KEYS = new Set([
+  'state',
+  'desiredState',
+  'pending',
+  'errorReason',
+  'recoverable',
+  'runnerId',
+  'prevRunnerId',
+  'daemonVersion',
+])
+
+const BACKUP_KEYS = new Set([
+  'backupState',
+  'backupSnapshot',
+  'backupRegistryId',
+  'lastBackupAt',
+  'backupErrorReason',
+  'existingBackupSnapshots',
+])
+
+function partitionUpdate(data: Partial<SandboxAggregate>): {
+  stateFields: Partial<SandboxStateEntity>
+  backupFields: Partial<SandboxBackupEntity>
+  configFields: Partial<Sandbox>
+} {
+  const stateFields: Record<string, unknown> = {}
+  const backupFields: Record<string, unknown> = {}
+  const configFields: Record<string, unknown> = {}
+
+  for (const [key, value] of Object.entries(data)) {
+    if (value === undefined) continue
+    if (STATE_KEYS.has(key)) {
+      stateFields[key] = value
+    } else if (BACKUP_KEYS.has(key)) {
+      backupFields[key] = value
+    } else {
+      configFields[key] = value
+    }
+  }
+
+  return {
+    stateFields: stateFields as Partial<SandboxStateEntity>,
+    backupFields: backupFields as Partial<SandboxBackupEntity>,
+    configFields: configFields as Partial<Sandbox>,
+  }
+}
+
+function hasFields(obj: Record<string, unknown>): boolean {
+  return Object.keys(obj).length > 0
+}
+
 @Injectable()
 export class SandboxRepository extends BaseRepository<Sandbox> {
   private readonly logger = new Logger(SandboxRepository.name)
@@ -30,7 +87,11 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     super(dataSource, eventEmitter, Sandbox)
   }
 
-  async insert(sandbox: Sandbox): Promise<Sandbox> {
+  async insert(
+    sandbox: Sandbox,
+    stateData?: Partial<SandboxStateEntity>,
+    backupData?: Partial<SandboxBackupEntity>,
+  ): Promise<Sandbox> {
     const now = new Date()
     if (!sandbox.createdAt) {
       sandbox.createdAt = now
@@ -39,145 +100,364 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
       sandbox.updatedAt = now
     }
 
-    sandbox.assertValid()
-    sandbox.enforceInvariants()
+    const stateEntity = new SandboxStateEntity()
+    Object.assign(stateEntity, {
+      sandboxId: sandbox.id,
+      state: SandboxState.UNKNOWN,
+      desiredState: SandboxDesiredState.STARTED,
+      pending: false,
+      recoverable: false,
+      ...stateData,
+    })
+    stateEntity.assertValid(sandbox.id)
+    const stateInvariants = stateEntity.enforceInvariants()
+    Object.assign(stateEntity, stateInvariants)
+
+    const backupEntity = new SandboxBackupEntity()
+    Object.assign(backupEntity, {
+      sandboxId: sandbox.id,
+      backupState: BackupState.NONE,
+      backupSnapshot: null,
+      backupRegistryId: null,
+      lastBackupAt: null,
+      backupErrorReason: null,
+      existingBackupSnapshots: [],
+      ...backupData,
+    })
 
     await this.dataSource.transaction(async (entityManager) => {
       await entityManager.insert(Sandbox, sandbox)
+      await entityManager.insert(SandboxStateEntity, stateEntity)
+      await entityManager.insert(SandboxBackupEntity, backupEntity)
       await this.upsertLastActivity(entityManager, sandbox.id, sandbox.createdAt)
     })
+
+    sandbox.sandboxState = stateEntity
+    sandbox.sandboxBackup = backupEntity
 
     this.invalidateLookupCacheOnInsert(sandbox)
 
     return sandbox
   }
 
-  /**
-   * @param id - The ID of the sandbox to update.
-   * @param params.updateData - The partial data to update.
-   *
-   * @returns `void` because a raw update is performed.
-   */
-  async update(id: string, params: { updateData: Partial<Sandbox> }, raw: true): Promise<void>
-  /**
-   * @param id - The ID of the sandbox to update.
-   * @param params.updateData - The partial data to update.
-   * @param params.entity - Optional pre-fetched sandbox to use instead of fetching from the database.
-   *
-   * @returns The updated sandbox.
-   */
-  async update(id: string, params: { updateData: Partial<Sandbox>; entity?: Sandbox }, raw?: false): Promise<Sandbox>
+  async update(id: string, params: { updateData: Partial<SandboxAggregate> }, raw: true): Promise<void>
   async update(
     id: string,
-    params: { updateData: Partial<Sandbox>; entity?: Sandbox },
+    params: { updateData: Partial<SandboxAggregate>; entity?: Sandbox },
+    raw?: false,
+  ): Promise<Sandbox>
+  async update(
+    id: string,
+    params: { updateData: Partial<SandboxAggregate>; entity?: Sandbox },
     raw = false,
   ): Promise<Sandbox | void> {
     const { updateData, entity } = params
 
     if (raw) {
-      await this.repository.update(id, updateData)
+      const { stateFields, backupFields, configFields } = partitionUpdate(updateData)
+      const stateRepo = this.dataSource.getRepository(SandboxStateEntity)
+      const backupRepo = this.dataSource.getRepository(SandboxBackupEntity)
+
+      if (hasFields(stateFields as Record<string, unknown>)) {
+        await stateRepo.update({ sandboxId: id }, stateFields)
+      }
+      if (hasFields(backupFields as Record<string, unknown>)) {
+        await backupRepo.update({ sandboxId: id }, backupFields)
+      }
+      if (hasFields(configFields as Record<string, unknown>)) {
+        await this.repository.update(id, configFields)
+      }
       return
     }
 
-    const sandbox = entity ?? (await this.findOneBy({ id }))
+    const sandbox =
+      entity ??
+      (await this.findOne({
+        where: { id },
+        relations: ['sandboxState', 'sandboxBackup'],
+      }))
     if (!sandbox) {
       throw new NotFoundException('Sandbox not found')
     }
 
-    const previousSandbox = { ...sandbox }
+    if (!sandbox.sandboxState) {
+      const stateRepo = this.dataSource.getRepository(SandboxStateEntity)
+      const row = await stateRepo.findOneBy({ sandboxId: id })
+      if (row) sandbox.sandboxState = row
+    }
+    if (!sandbox.sandboxBackup) {
+      const backupRepo = this.dataSource.getRepository(SandboxBackupEntity)
+      const row = await backupRepo.findOneBy({ sandboxId: id })
+      if (row) sandbox.sandboxBackup = row
+    }
 
-    Object.assign(sandbox, updateData)
-    sandbox.assertValid()
-    const invariantChanges = sandbox.enforceInvariants()
+    const prevState = sandbox.sandboxState.state
+    const prevDesiredState = sandbox.sandboxState.desiredState
+    const prevPending = sandbox.sandboxState.pending
+    const prevPublic = sandbox.public
+    const prevOrganizationId = sandbox.organizationId
+    const prevName = sandbox.name
+    const prevAuthToken = sandbox.authToken
+
+    const { stateFields, backupFields, configFields } = partitionUpdate(updateData)
+
+    if (hasFields(configFields as Record<string, unknown>)) {
+      Object.assign(sandbox, configFields)
+    }
+    if (hasFields(stateFields as Record<string, unknown>)) {
+      Object.assign(sandbox.sandboxState, stateFields)
+    }
+    if (hasFields(backupFields as Record<string, unknown>)) {
+      Object.assign(sandbox.sandboxBackup, backupFields)
+    }
+
+    sandbox.sandboxState.assertValid(id)
+    const invariantChanges = sandbox.sandboxState.enforceInvariants()
+    Object.assign(sandbox.sandboxState, invariantChanges)
+
+    let crossTableBackup: Partial<SandboxBackupEntity> = {}
+    if (sandbox.sandboxState.state === SandboxState.DESTROYED) {
+      sandbox.sandboxBackup.backupState = BackupState.NONE
+      crossTableBackup = { backupState: BackupState.NONE }
+    }
+
+    const allStateFields = { ...stateFields, ...invariantChanges } as Partial<SandboxStateEntity>
+    const allBackupFields = { ...backupFields, ...crossTableBackup } as Partial<SandboxBackupEntity>
 
     await this.dataSource.transaction(async (entityManager) => {
-      const result = await entityManager.update(
-        Sandbox,
-        {
-          id: previousSandbox.id,
-          state: previousSandbox.state,
-          desiredState: previousSandbox.desiredState,
-          pending: previousSandbox.pending,
-          organizationId: previousSandbox.organizationId,
-        },
-        { ...updateData, ...invariantChanges },
-      )
-      if (!result.affected) {
-        throw new SandboxConflictError()
+      if (hasFields(allStateFields as Record<string, unknown>)) {
+        const result = await entityManager.update(
+          SandboxStateEntity,
+          {
+            sandboxId: id,
+            state: prevState,
+            desiredState: prevDesiredState,
+            pending: prevPending,
+          },
+          allStateFields,
+        )
+        if (!result.affected) {
+          throw new SandboxConflictError()
+        }
       }
+
+      if (hasFields(configFields as Record<string, unknown>)) {
+        const result = await entityManager.update(Sandbox, { id, organizationId: prevOrganizationId }, configFields)
+        if (!result.affected) {
+          throw new SandboxConflictError()
+        }
+      }
+
+      if (hasFields(allBackupFields as Record<string, unknown>)) {
+        await entityManager.update(SandboxBackupEntity, { sandboxId: id }, allBackupFields)
+      }
+
       sandbox.updatedAt = new Date()
 
-      if (previousSandbox.state !== sandbox.state || previousSandbox.organizationId !== sandbox.organizationId) {
+      if (prevState !== sandbox.sandboxState.state || prevOrganizationId !== sandbox.organizationId) {
         await this.upsertLastActivity(entityManager, id, sandbox.updatedAt)
       }
     })
 
-    this.emitUpdateEvents(sandbox, previousSandbox)
-    this.invalidateLookupCacheOnUpdate(sandbox, previousSandbox)
+    this.emitUpdateEvents(sandbox, {
+      state: prevState,
+      desiredState: prevDesiredState,
+      public: prevPublic,
+      organizationId: prevOrganizationId,
+    })
+    this.invalidateLookupCacheOnUpdate(sandbox, {
+      organizationId: prevOrganizationId,
+      name: prevName,
+      authToken: prevAuthToken,
+    })
 
     return sandbox
   }
 
-  /**
-   * Partially updates a sandbox in the database and optionally emits a corresponding event based on the changes.
-   *
-   * Performs the update in a transaction with a pessimistic write lock to ensure consistency.
-   *
-   * @param id - The ID of the sandbox to update.
-   * @param params.updateData - The partial data to update.
-   * @param params.whereCondition - The where condition to use for the update.
-   *
-   * @throws {SandboxConflictError} if the sandbox was modified by another operation
-   */
   async updateWhere(
     id: string,
     params: {
-      updateData: Partial<Sandbox>
-      whereCondition: FindOptionsWhere<Sandbox>
+      updateData: Partial<SandboxAggregate>
+      whereCondition: Partial<SandboxAggregate>
     },
   ): Promise<Sandbox> {
     const { updateData, whereCondition } = params
 
-    return this.manager.transaction(async (entityManager) => {
-      const whereClause = {
-        ...whereCondition,
-        id,
-      }
+    const { stateFields: stateWhere, configFields: configWhere } = partitionUpdate(whereCondition)
 
-      const sandbox = await entityManager.findOne(Sandbox, {
-        where: whereClause,
+    const result = await this.dataSource.transaction(async (entityManager) => {
+      const stateRow = await entityManager.findOne(SandboxStateEntity, {
+        where: { sandboxId: id, ...(stateWhere as FindOptionsWhere<SandboxStateEntity>) },
         lock: { mode: 'pessimistic_write' },
-        relations: [],
-        loadEagerRelations: false,
       })
-
-      if (!sandbox) {
+      if (!stateRow) {
         throw new SandboxConflictError()
       }
 
-      const previousSandbox = { ...sandbox }
+      let sandbox: Sandbox
+      if (hasFields(configWhere as Record<string, unknown>)) {
+        const found = await entityManager.findOne(Sandbox, {
+          where: { id, ...(configWhere as FindOptionsWhere<Sandbox>) },
+          loadEagerRelations: false,
+        })
+        if (!found) {
+          throw new SandboxConflictError()
+        }
+        sandbox = found
+      } else {
+        const found = await entityManager.findOne(Sandbox, {
+          where: { id },
+          loadEagerRelations: false,
+        })
+        if (!found) {
+          throw new NotFoundException('Sandbox not found')
+        }
+        sandbox = found
+      }
 
-      Object.assign(sandbox, updateData)
-      sandbox.assertValid()
-      const invariantChanges = sandbox.enforceInvariants()
+      sandbox.sandboxState = stateRow
+      const backupRow = await entityManager.findOne(SandboxBackupEntity, { where: { sandboxId: id } })
+      if (backupRow) {
+        sandbox.sandboxBackup = backupRow
+      }
 
-      await entityManager.update(Sandbox, id, { ...updateData, ...invariantChanges })
+      const prevState = sandbox.sandboxState.state
+      const prevDesiredState = sandbox.sandboxState.desiredState
+      const prevPublic = sandbox.public
+      const prevOrganizationId = sandbox.organizationId
+      const prevName = sandbox.name
+      const prevAuthToken = sandbox.authToken
+
+      const { stateFields, backupFields, configFields } = partitionUpdate(updateData)
+
+      if (hasFields(configFields as Record<string, unknown>)) Object.assign(sandbox, configFields)
+      if (hasFields(stateFields as Record<string, unknown>)) Object.assign(sandbox.sandboxState, stateFields)
+      if (hasFields(backupFields as Record<string, unknown>)) Object.assign(sandbox.sandboxBackup, backupFields)
+
+      sandbox.sandboxState.assertValid(id)
+      const invariantChanges = sandbox.sandboxState.enforceInvariants()
+      Object.assign(sandbox.sandboxState, invariantChanges)
+
+      if (sandbox.sandboxState.state === SandboxState.DESTROYED) {
+        sandbox.sandboxBackup.backupState = BackupState.NONE
+      }
+
+      const allStateFields = { ...stateFields, ...invariantChanges } as Partial<SandboxStateEntity>
+      const allBackupFields =
+        sandbox.sandboxState.state === SandboxState.DESTROYED
+          ? ({ ...backupFields, backupState: BackupState.NONE } as Partial<SandboxBackupEntity>)
+          : backupFields
+
+      if (hasFields(allStateFields as Record<string, unknown>)) {
+        await entityManager.update(SandboxStateEntity, { sandboxId: id }, allStateFields)
+      }
+      if (hasFields(configFields as Record<string, unknown>)) {
+        await entityManager.update(Sandbox, id, configFields)
+      }
+      if (hasFields(allBackupFields as Record<string, unknown>)) {
+        await entityManager.update(SandboxBackupEntity, { sandboxId: id }, allBackupFields)
+      }
+
       sandbox.updatedAt = new Date()
 
-      if (previousSandbox.state !== sandbox.state || previousSandbox.organizationId !== sandbox.organizationId) {
+      if (prevState !== sandbox.sandboxState.state || prevOrganizationId !== sandbox.organizationId) {
         await this.upsertLastActivity(entityManager, id, sandbox.updatedAt)
       }
 
-      this.emitUpdateEvents(sandbox, previousSandbox)
-      this.invalidateLookupCacheOnUpdate(sandbox, previousSandbox)
-
-      return sandbox
+      return {
+        sandbox,
+        prev: {
+          state: prevState,
+          desiredState: prevDesiredState,
+          public: prevPublic,
+          organizationId: prevOrganizationId,
+          name: prevName,
+          authToken: prevAuthToken,
+        },
+      }
     })
+
+    this.emitUpdateEvents(result.sandbox, result.prev)
+    this.invalidateLookupCacheOnUpdate(result.sandbox, result.prev)
+
+    return result.sandbox
   }
 
-  /**
-   * Upserts the last activity for a sandbox.
-   */
+  async updateState(
+    id: string,
+    updateData: Partial<SandboxStateEntity>,
+    whereCondition: FindOptionsWhere<SandboxStateEntity>,
+  ): Promise<Sandbox> {
+    const result = await this.dataSource.transaction(async (entityManager) => {
+      const stateRow = await entityManager.findOne(SandboxStateEntity, {
+        where: { sandboxId: id, ...whereCondition },
+        lock: { mode: 'pessimistic_write' },
+      })
+      if (!stateRow) {
+        throw new SandboxConflictError()
+      }
+
+      const previousState = stateRow.state
+      const previousDesiredState = stateRow.desiredState
+
+      Object.assign(stateRow, updateData)
+      const invariants = stateRow.enforceInvariants()
+      const allStateChanges = { ...updateData, ...invariants }
+
+      await entityManager.update(SandboxStateEntity, { sandboxId: id }, allStateChanges)
+
+      if (stateRow.state === SandboxState.DESTROYED) {
+        await entityManager.update(SandboxBackupEntity, { sandboxId: id }, { backupState: BackupState.NONE })
+      }
+
+      const now = new Date()
+      if (previousState !== stateRow.state) {
+        await this.upsertLastActivity(entityManager, id, now)
+      }
+
+      const sandbox = await entityManager.findOne(Sandbox, {
+        where: { id },
+        loadEagerRelations: false,
+      })
+      if (!sandbox) {
+        throw new NotFoundException('Sandbox not found')
+      }
+      sandbox.sandboxState = stateRow
+
+      return { sandbox, previousState, previousDesiredState }
+    })
+
+    if (result.previousState !== result.sandbox.sandboxState.state) {
+      this.eventEmitter.emit(
+        SandboxEvents.STATE_UPDATED,
+        new SandboxStateUpdatedEvent(result.sandbox, result.previousState, result.sandbox.sandboxState.state),
+      )
+    }
+    if (result.previousDesiredState !== result.sandbox.sandboxState.desiredState) {
+      this.eventEmitter.emit(
+        SandboxEvents.DESIRED_STATE_UPDATED,
+        new SandboxDesiredStateUpdatedEvent(
+          result.sandbox,
+          result.previousDesiredState,
+          result.sandbox.sandboxState.desiredState,
+        ),
+      )
+    }
+
+    return result.sandbox
+  }
+
+  async updateBackup(id: string, updateData: Partial<SandboxBackupEntity>): Promise<void> {
+    await this.dataSource.getRepository(SandboxBackupEntity).update({ sandboxId: id }, updateData)
+  }
+
+  createAggregateQueryBuilder(alias = 'sandbox'): SelectQueryBuilder<Sandbox> {
+    return this.repository
+      .createQueryBuilder(alias)
+      .innerJoin('sandbox_state', 'ss', `ss."sandboxId" = ${alias}."id"`)
+      .innerJoin('sandbox_backup', 'sb', `sb."sandboxId" = ${alias}."id"`)
+  }
+
   private async upsertLastActivity(
     entityManager: EntityManager,
     sandboxId: string,
@@ -186,9 +466,6 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     await entityManager.upsert(SandboxLastActivity, { sandboxId, lastActivityAt }, ['sandboxId'])
   }
 
-  /**
-   * Invalidates the sandbox lookup cache for the inserted sandbox.
-   */
   private invalidateLookupCacheOnInsert(sandbox: Sandbox): void {
     try {
       this.sandboxLookupCacheInvalidationService.invalidateOrgId({
@@ -203,12 +480,9 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     }
   }
 
-  /**
-   * Invalidates the sandbox lookup cache for the updated sandbox.
-   */
   private invalidateLookupCacheOnUpdate(
     updatedSandbox: Sandbox,
-    previousSandbox: Pick<Sandbox, 'organizationId' | 'name' | 'authToken'>,
+    previousSandbox: { organizationId: string; name: string; authToken: string },
   ): void {
     try {
       this.sandboxLookupCacheInvalidationService.invalidate({
@@ -237,42 +511,39 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     }
   }
 
-  /**
-   * Emits events based on the changes made to a sandbox.
-   */
   private emitUpdateEvents(
     updatedSandbox: Sandbox,
-    previousSandbox: Pick<Sandbox, 'state' | 'desiredState' | 'public' | 'organizationId'>,
+    previous: { state: SandboxState; desiredState: SandboxDesiredState; public: boolean; organizationId: string },
   ): void {
-    if (previousSandbox.state !== updatedSandbox.state) {
+    if (previous.state !== updatedSandbox.sandboxState.state) {
       this.eventEmitter.emit(
         SandboxEvents.STATE_UPDATED,
-        new SandboxStateUpdatedEvent(updatedSandbox, previousSandbox.state, updatedSandbox.state),
+        new SandboxStateUpdatedEvent(updatedSandbox, previous.state, updatedSandbox.sandboxState.state),
       )
     }
 
-    if (previousSandbox.desiredState !== updatedSandbox.desiredState) {
+    if (previous.desiredState !== updatedSandbox.sandboxState.desiredState) {
       this.eventEmitter.emit(
         SandboxEvents.DESIRED_STATE_UPDATED,
-        new SandboxDesiredStateUpdatedEvent(updatedSandbox, previousSandbox.desiredState, updatedSandbox.desiredState),
+        new SandboxDesiredStateUpdatedEvent(
+          updatedSandbox,
+          previous.desiredState,
+          updatedSandbox.sandboxState.desiredState,
+        ),
       )
     }
 
-    if (previousSandbox.public !== updatedSandbox.public) {
+    if (previous.public !== updatedSandbox.public) {
       this.eventEmitter.emit(
         SandboxEvents.PUBLIC_STATUS_UPDATED,
-        new SandboxPublicStatusUpdatedEvent(updatedSandbox, previousSandbox.public, updatedSandbox.public),
+        new SandboxPublicStatusUpdatedEvent(updatedSandbox, previous.public, updatedSandbox.public),
       )
     }
 
-    if (previousSandbox.organizationId !== updatedSandbox.organizationId) {
+    if (previous.organizationId !== updatedSandbox.organizationId) {
       this.eventEmitter.emit(
         SandboxEvents.ORGANIZATION_UPDATED,
-        new SandboxOrganizationUpdatedEvent(
-          updatedSandbox,
-          previousSandbox.organizationId,
-          updatedSandbox.organizationId,
-        ),
+        new SandboxOrganizationUpdatedEvent(updatedSandbox, previous.organizationId, updatedSandbox.organizationId),
       )
     }
   }

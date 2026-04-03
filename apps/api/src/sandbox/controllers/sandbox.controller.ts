@@ -1087,7 +1087,7 @@ export class SandboxController {
     @Query('follow', new ParseBoolPipe({ optional: true })) follow?: boolean,
   ): Promise<void> {
     const sandbox = await this.sandboxService.findOneByIdOrName(sandboxIdOrName, authContext.organizationId)
-    if (!sandbox.runnerId) {
+    if (!sandbox.sandboxState.runnerId) {
       throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} has no runner assigned`)
     }
 
@@ -1095,7 +1095,7 @@ export class SandboxController {
       throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} has no build info`)
     }
 
-    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
+    const runner = await this.runnerService.findOneOrFail(sandbox.sandboxState.runnerId)
 
     if (!runner.apiUrl) {
       throw new NotFoundException(`Runner for sandbox ${sandboxIdOrName} has no API URL`)
@@ -1278,15 +1278,18 @@ export class SandboxController {
           return
         }
         latestSandbox = event.sandbox
-        if (event.sandbox.state === SandboxState.STARTED) {
+        if (event.sandbox.sandboxState.state === SandboxState.STARTED) {
           this.sandboxCallbacks.delete(sandbox.id)
           clearTimeout(timeout)
           resolve(this.sandboxService.toSandboxDto(event.sandbox))
         }
-        if (event.sandbox.state === SandboxState.ERROR || event.sandbox.state === SandboxState.BUILD_FAILED) {
+        if (
+          event.sandbox.sandboxState.state === SandboxState.ERROR ||
+          event.sandbox.sandboxState.state === SandboxState.BUILD_FAILED
+        ) {
           this.sandboxCallbacks.delete(sandbox.id)
           clearTimeout(timeout)
-          reject(new BadRequestError(`Sandbox failed to start: ${event.sandbox.errorReason}`))
+          reject(new BadRequestError(`Sandbox failed to start: ${event.sandbox.sandboxState.errorReason}`))
         }
       }
 

@@ -75,7 +75,7 @@ export class SandboxCreatedWebhookDto extends BaseWebhookEventDto {
       timestamp: new Date().toISOString(),
       id: event.sandbox.id,
       organizationId: event.sandbox.organizationId,
-      state: event.sandbox.state,
+      state: event.sandbox.sandboxState.state,
       class: event.sandbox.class,
       createdAt: event.sandbox.createdAt.toISOString(),
     }

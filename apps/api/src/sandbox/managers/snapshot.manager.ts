@@ -438,11 +438,15 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
           try {
             const sandboxes = await this.sandboxRepository.find({
               where: {
-                runnerId: runner.id,
-                state: SandboxState.STOPPED,
-                desiredState: SandboxDesiredState.STOPPED,
-                backupState: BackupState.COMPLETED,
-                backupSnapshot: Not(IsNull()),
+                sandboxState: {
+                  runnerId: runner.id,
+                  state: SandboxState.STOPPED,
+                  desiredState: SandboxDesiredState.STOPPED,
+                },
+                sandboxBackup: {
+                  backupState: BackupState.COMPLETED,
+                  backupSnapshot: Not(IsNull()),
+                },
               },
               take: 100,
             })
@@ -470,18 +474,18 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
                   // Check if snapshot runner entry already exists
                   const existingEntry = await this.runnerService.getSnapshotRunner(
                     targetRunner.id,
-                    sandbox.backupSnapshot,
+                    sandbox.sandboxBackup.backupSnapshot,
                   )
                   if (existingEntry) {
                     if (existingEntry.state === SnapshotRunnerState.ERROR) {
                       // Clean up the failed entry so we can retry
                       this.logger.warn(
-                        `Removing ERROR snapshot runner entry ${existingEntry.id} for runner ${targetRunner.id} and snapshot ${sandbox.backupSnapshot} to allow retry`,
+                        `Removing ERROR snapshot runner entry ${existingEntry.id} for runner ${targetRunner.id} and snapshot ${sandbox.sandboxBackup.backupSnapshot} to allow retry`,
                       )
                       await this.snapshotRunnerRepository.delete(existingEntry.id)
                     } else {
                       this.logger.debug(
-                        `Snapshot runner entry already exists for runner ${targetRunner.id} and snapshot ${sandbox.backupSnapshot} (state: ${existingEntry.state})`,
+                        `Snapshot runner entry already exists for runner ${targetRunner.id} and snapshot ${sandbox.sandboxBackup.backupSnapshot} (state: ${existingEntry.state})`,
                       )
                       // Do not unlock to avoid duplicates
                       return
@@ -489,16 +493,16 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
                   }
 
                   // Find the backup registry to use as source for the pull
-                  const registry = sandbox.backupRegistryId
-                    ? await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
+                  const registry = sandbox.sandboxBackup.backupRegistryId
+                    ? await this.dockerRegistryService.findOne(sandbox.sandboxBackup.backupRegistryId)
                     : await this.dockerRegistryService.findInternalRegistryBySnapshotRef(
-                        sandbox.backupSnapshot,
+                        sandbox.sandboxBackup.backupSnapshot,
                         targetRunner.region,
                       )
 
                   if (!registry) {
                     this.logger.warn(
-                      `No registry found for backup snapshot ${sandbox.backupSnapshot} of sandbox ${sandbox.id}`,
+                      `No registry found for backup snapshot ${sandbox.sandboxBackup.backupSnapshot} of sandbox ${sandbox.id}`,
                     )
                     await this.redisLockProvider.unlock(sandboxLockKey)
                     return
@@ -507,13 +511,13 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
                   // Create snapshot runner entry on the target runner
                   await this.runnerService.createSnapshotRunnerEntry(
                     targetRunner.id,
-                    sandbox.backupSnapshot,
+                    sandbox.sandboxBackup.backupSnapshot,
                     SnapshotRunnerState.PULLING_SNAPSHOT,
                   )
-                  await this.pullSnapshotRunner(targetRunner, sandbox.backupSnapshot, registry)
+                  await this.pullSnapshotRunner(targetRunner, sandbox.sandboxBackup.backupSnapshot, registry)
 
                   this.logger.log(
-                    `Created snapshot runner entry for sandbox ${sandbox.id} backup ${sandbox.backupSnapshot} on runner ${targetRunner.id} (migrating from draining runner ${runner.id})`,
+                    `Created snapshot runner entry for sandbox ${sandbox.id} backup ${sandbox.sandboxBackup.backupSnapshot} on runner ${targetRunner.id} (migrating from draining runner ${runner.id})`,
                   )
                   await this.redisLockProvider.unlock(sandboxLockKey)
                 } catch (e) {

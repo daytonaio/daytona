@@ -580,7 +580,7 @@ export class WorkspaceController {
     @Query('follow', new ParseBoolPipe({ optional: true })) follow?: boolean,
   ): Promise<void> {
     const workspace = await this.workspaceService.findOne(workspaceId)
-    if (!workspace || !workspace.runnerId) {
+    if (!workspace || !workspace.sandboxState.runnerId) {
       throw new NotFoundException(`Workspace with ID ${workspaceId} not found or has no runner assigned`)
     }
 
@@ -588,7 +588,7 @@ export class WorkspaceController {
       throw new NotFoundException(`Workspace with ID ${workspaceId} has no build info`)
     }
 
-    const runner = await this.runnerService.findOneOrFail(workspace.runnerId)
+    const runner = await this.runnerService.findOneOrFail(workspace.sandboxState.runnerId)
 
     if (!runner.apiUrl) {
       throw new NotFoundException(`Runner for workspace ${workspaceId} has no API URL`)
@@ -616,7 +616,7 @@ export class WorkspaceController {
     let workspaceState: WorkspaceState
     while (Date.now() - startTime < timeout) {
       const workspace = await this.workspaceService.findOne(workspaceId)
-      workspaceState = workspace.state
+      workspaceState = workspace.sandboxState.state
       if (
         workspaceState === desiredState ||
         workspaceState === WorkspaceState.ERROR ||

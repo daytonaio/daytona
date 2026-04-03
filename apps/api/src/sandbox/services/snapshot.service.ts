@@ -647,18 +647,22 @@ export class SnapshotService {
     const sandbox = await this.sandboxRepository.findOne({
       where: [
         {
-          existingBackupSnapshots: Raw((alias) => `${alias} @> '[{"snapshotName":"${imageName}"}]'::jsonb`),
+          sandboxBackup: {
+            existingBackupSnapshots: Raw((alias) => `${alias} @> '[{"snapshotName":"${imageName}"}]'::jsonb`),
+          },
         },
         {
-          existingBackupSnapshots: Raw((alias) => `${alias} @> '[{"imageName":"${imageName}"}]'::jsonb`),
+          sandboxBackup: {
+            existingBackupSnapshots: Raw((alias) => `${alias} @> '[{"imageName":"${imageName}"}]'::jsonb`),
+          },
         },
         {
-          backupSnapshot: imageName,
+          sandboxBackup: { backupSnapshot: imageName },
         },
       ],
     })
 
-    if (sandbox && sandbox.state !== SandboxState.DESTROYED) {
+    if (sandbox && sandbox.sandboxState.state !== SandboxState.DESTROYED) {
       return false
     }
 

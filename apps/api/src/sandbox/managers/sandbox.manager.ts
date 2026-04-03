@@ -43,6 +43,7 @@ import { BackupState } from '../enums/backup-state.enum'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { sanitizeSandboxError } from '../utils/sanitize-error.util'
 import { Sandbox } from '../entities/sandbox.entity'
+import { SandboxAggregate } from '../types/sandbox-aggregate.type'
 import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { OrganizationService } from '../../organization/services/organization.service'
@@ -103,20 +104,20 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       await Promise.all(
         readyRunners.map(async (runner) => {
           const sandboxes = await this.sandboxRepository
-            .createQueryBuilder('sandbox')
+            .createAggregateQueryBuilder('sandbox')
             .innerJoin('sandbox_last_activity', 'activity', 'activity."sandboxId" = sandbox.id')
-            .where('sandbox."runnerId" = :runnerId', { runnerId: runner.id })
+            .where('ss."runnerId" = :runnerId', { runnerId: runner.id })
             .andWhere('sandbox."organizationId" != :warmPoolOrg', {
               warmPoolOrg: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
             })
-            .andWhere('sandbox.state = :state', { state: SandboxState.STARTED })
-            .andWhere('sandbox."desiredState" = :desiredState', {
+            .andWhere('ss."state" = :state', { state: SandboxState.STARTED })
+            .andWhere('ss."desiredState" = :desiredState', {
               desiredState: SandboxDesiredState.STARTED,
             })
-            .andWhere('sandbox.pending != true')
+            .andWhere('ss."pending" != true')
             .andWhere('sandbox."autoStopInterval" != 0')
             .andWhere('activity."lastActivityAt" < NOW() - INTERVAL \'1 minute\' * sandbox."autoStopInterval"')
-            .orderBy('sandbox."lastBackupAt"', 'ASC')
+            .orderBy('sb."lastBackupAt"', 'ASC')
             .limit(100)
             .getMany()
 
@@ -128,20 +129,25 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                 return
               }
 
-              let updateData: Partial<Sandbox> = {}
+              let updateData: Partial<SandboxAggregate> = {}
 
               //  if auto-delete interval is 0, delete the sandbox immediately
               if (sandbox.autoDeleteInterval === 0) {
-                updateData = Sandbox.getSoftDeleteUpdate(sandbox)
+                updateData = {
+                  pending: true,
+                  desiredState: SandboxDesiredState.DESTROYED,
+                  backupState: BackupState.NONE,
+                  name: 'DESTROYED_' + sandbox.name + '_' + Date.now(),
+                }
               } else {
-                updateData.pending = true
-                updateData.desiredState = SandboxDesiredState.STOPPED
+                updateData.sandboxState.pending = true
+                updateData.sandboxState.desiredState = SandboxDesiredState.STOPPED
               }
 
               try {
                 await this.sandboxRepository.updateWhere(sandbox.id, {
                   updateData,
-                  whereCondition: { pending: false, state: sandbox.state },
+                  whereCondition: { pending: false, state: sandbox.sandboxState.state },
                 })
 
                 this.syncInstanceState(sandbox.id).catch(this.logger.error)
@@ -172,18 +178,18 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
     try {
       const sandboxes = await this.sandboxRepository
-        .createQueryBuilder('sandbox')
+        .createAggregateQueryBuilder('sandbox')
         .innerJoin('sandbox_last_activity', 'activity', 'activity."sandboxId" = sandbox.id')
         .where('sandbox."organizationId" != :warmPoolOrg', {
           warmPoolOrg: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
         })
-        .andWhere('sandbox.state = :state', { state: SandboxState.STOPPED })
-        .andWhere('sandbox."desiredState" = :desiredState', {
+        .andWhere('ss."state" = :state', { state: SandboxState.STOPPED })
+        .andWhere('ss."desiredState" = :desiredState', {
           desiredState: SandboxDesiredState.STOPPED,
         })
-        .andWhere('sandbox.pending != true')
+        .andWhere('ss."pending" != true')
         .andWhere('activity."lastActivityAt" < NOW() - INTERVAL \'1 minute\' * sandbox."autoArchiveInterval"')
-        .orderBy('sandbox."lastBackupAt"', 'ASC')
+        .orderBy('sb."lastBackupAt"', 'ASC')
         .limit(100)
         .getMany()
 
@@ -196,12 +202,12 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           }
 
           try {
-            const updateData: Partial<Sandbox> = {
+            const updateData: Partial<SandboxAggregate> = {
               desiredState: SandboxDesiredState.ARCHIVED,
             }
             await this.sandboxRepository.updateWhere(sandbox.id, {
               updateData,
-              whereCondition: { pending: false, state: sandbox.state },
+              whereCondition: { pending: false, state: sandbox.sandboxState.state },
             })
 
             this.syncInstanceState(sandbox.id).catch(this.logger.error)
@@ -235,17 +241,17 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       await Promise.all(
         readyRunners.map(async (runner) => {
           const sandboxes = await this.sandboxRepository
-            .createQueryBuilder('sandbox')
+            .createAggregateQueryBuilder('sandbox')
             .innerJoin('sandbox_last_activity', 'activity', 'activity."sandboxId" = sandbox.id')
-            .where('sandbox."runnerId" = :runnerId', { runnerId: runner.id })
+            .where('ss."runnerId" = :runnerId', { runnerId: runner.id })
             .andWhere('sandbox."organizationId" != :warmPoolOrg', {
               warmPoolOrg: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
             })
-            .andWhere('sandbox.state = :state', { state: SandboxState.STOPPED })
-            .andWhere('sandbox."desiredState" = :desiredState', {
+            .andWhere('ss."state" = :state', { state: SandboxState.STOPPED })
+            .andWhere('ss."desiredState" = :desiredState', {
               desiredState: SandboxDesiredState.STOPPED,
             })
-            .andWhere('sandbox.pending != true')
+            .andWhere('ss."pending" != true')
             .andWhere('sandbox."autoDeleteInterval" >= 0')
             .andWhere('activity."lastActivityAt" < NOW() - INTERVAL \'1 minute\' * sandbox."autoDeleteInterval"')
             .orderBy('activity."lastActivityAt"', 'ASC')
@@ -261,10 +267,15 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               }
 
               try {
-                const updateData = Sandbox.getSoftDeleteUpdate(sandbox)
+                const updateData: Partial<SandboxAggregate> = {
+                  pending: true,
+                  desiredState: SandboxDesiredState.DESTROYED,
+                  backupState: BackupState.NONE,
+                  name: 'DESTROYED_' + sandbox.name + '_' + Date.now(),
+                }
                 await this.sandboxRepository.updateWhere(sandbox.id, {
                   updateData,
-                  whereCondition: { pending: false, state: sandbox.state },
+                  whereCondition: { pending: false, state: sandbox.sandboxState.state },
                 })
 
                 this.syncInstanceState(sandbox.id).catch(this.logger.error)
@@ -312,11 +323,15 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           try {
             const sandboxes = await this.sandboxRepository.find({
               where: {
-                runnerId: runner.id,
-                state: SandboxState.STOPPED,
-                desiredState: SandboxDesiredState.STOPPED,
-                backupState: BackupState.COMPLETED,
-                backupSnapshot: Not(IsNull()),
+                sandboxState: {
+                  runnerId: runner.id,
+                  state: SandboxState.STOPPED,
+                  desiredState: SandboxDesiredState.STOPPED,
+                },
+                sandboxBackup: {
+                  backupState: BackupState.COMPLETED,
+                  backupSnapshot: Not(IsNull()),
+                },
               },
               take: 100,
             })
@@ -336,7 +351,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                 try {
                   const startScoreThreshold = this.configService.get('runnerScore.thresholds.start') || 0
                   const targetRunner = await this.runnerService.getRandomAvailableRunner({
-                    snapshotRef: sandbox.backupSnapshot,
+                    snapshotRef: sandbox.sandboxBackup.backupSnapshot,
                     excludedRunnerIds: [runner.id],
                     availabilityScoreThreshold: startScoreThreshold,
                   })
@@ -371,12 +386,16 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
   private async archiveErroredSandboxesOnDrainingRunner(runnerId: string): Promise<void> {
     const erroredSandboxes = await this.sandboxRepository.find({
       where: {
-        runnerId,
-        state: SandboxState.ERROR,
-        recoverable: false,
-        desiredState: Not(In([SandboxDesiredState.DESTROYED, SandboxDesiredState.ARCHIVED])),
-        backupState: BackupState.COMPLETED,
-        backupSnapshot: Not(IsNull()),
+        sandboxState: {
+          runnerId,
+          state: SandboxState.ERROR,
+          recoverable: false,
+          desiredState: Not(In([SandboxDesiredState.DESTROYED, SandboxDesiredState.ARCHIVED])),
+        },
+        sandboxBackup: {
+          backupState: BackupState.COMPLETED,
+          backupSnapshot: Not(IsNull()),
+        },
       },
       take: 100,
     })
@@ -399,9 +418,9 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
         try {
           this.logger.warn(
-            `Setting desired state to ARCHIVED for errored sandbox ${sandbox.id} on draining runner ${runnerId} (previous desired state: ${sandbox.desiredState})`,
+            `Setting desired state to ARCHIVED for errored sandbox ${sandbox.id} on draining runner ${runnerId} (previous desired state: ${sandbox.sandboxState.desiredState})`,
           )
-          const updateData: Partial<Sandbox> = {
+          const updateData: Partial<SandboxAggregate> = {
             desiredState: SandboxDesiredState.ARCHIVED,
           }
           await this.sandboxRepository.updateWhere(sandbox.id, {
@@ -427,18 +446,22 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     const erroredSandboxes = await this.sandboxRepository.find({
       where: [
         {
-          runnerId,
-          state: SandboxState.STOPPED,
-          recoverable: false,
-          desiredState: SandboxDesiredState.STOPPED,
-          backupState: BackupState.ERROR,
+          sandboxState: {
+            runnerId,
+            state: SandboxState.STOPPED,
+            recoverable: false,
+            desiredState: SandboxDesiredState.STOPPED,
+          },
+          sandboxBackup: { backupState: BackupState.ERROR },
         },
         {
-          runnerId,
-          state: SandboxState.ERROR,
-          recoverable: false,
-          backupState: In([BackupState.ERROR, BackupState.NONE]),
-          desiredState: Not(SandboxDesiredState.DESTROYED),
+          sandboxState: {
+            runnerId,
+            state: SandboxState.ERROR,
+            recoverable: false,
+            desiredState: Not(SandboxDesiredState.DESTROYED),
+          },
+          sandboxBackup: { backupState: In([BackupState.ERROR, BackupState.NONE]) },
         },
       ],
       take: 100,
@@ -454,7 +477,6 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       erroredSandboxes.map(async (sandbox) => {
         const redisKey = `draining:backup-retry:${sandbox.id}`
 
-        // Check if we've already retried within the last 12 hours
         const alreadyRetried = await this.redis.exists(redisKey)
         if (alreadyRetried) {
           this.logger.debug(
@@ -477,10 +499,12 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
   private async recoverRecoverableSandboxesOnDrainingRunner(runnerId: string): Promise<void> {
     const recoverableSandboxes = await this.sandboxRepository.find({
       where: {
-        runnerId,
-        recoverable: true,
-        desiredState: Not(In([SandboxDesiredState.DESTROYED])),
-        backupSnapshot: Not(IsNull()),
+        sandboxState: {
+          runnerId,
+          recoverable: true,
+          desiredState: Not(In([SandboxDesiredState.DESTROYED])),
+        },
+        sandboxBackup: { backupSnapshot: Not(IsNull()) },
       },
       take: 100,
     })
@@ -524,7 +548,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         try {
           await runnerAdapter.recoverSandbox(sandbox)
 
-          const updateData: Partial<Sandbox> = {
+          const updateData: Partial<SandboxAggregate> = {
             state: SandboxState.STOPPED,
             desiredState: SandboxDesiredState.STOPPED,
             errorReason: null,
@@ -534,7 +558,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
           await this.sandboxRepository.updateWhere(sandbox.id, {
             updateData,
-            whereCondition: { pending: false, state: sandbox.state },
+            whereCondition: { pending: false, state: sandbox.sandboxState.state },
           })
 
           this.logger.log(`Recovered sandbox ${sandbox.id} on draining runner ${runnerId}`)
@@ -554,20 +578,20 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     )
 
     // Safety check: ensure sandbox is not pending
-    if (sandbox.pending) {
+    if (sandbox.sandboxState.pending) {
       this.logger.warn(
         `Sandbox ${sandbox.id} is pending, skipping reassignment from runner ${oldRunnerId} to runner ${newRunnerId}`,
       )
       return
     }
 
-    if (!sandbox.backupRegistryId) {
+    if (!sandbox.sandboxBackup.backupRegistryId) {
       throw new Error(`Sandbox ${sandbox.id} has no backup registry`)
     }
 
-    const registry = await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
+    const registry = await this.dockerRegistryService.findOne(sandbox.sandboxBackup.backupRegistryId)
     if (!registry) {
-      throw new Error(`Registry ${sandbox.backupRegistryId} not found for sandbox ${sandbox.id}`)
+      throw new Error(`Registry ${sandbox.sandboxBackup.backupRegistryId} not found for sandbox ${sandbox.id}`)
     }
 
     const organization = await this.organizationService.findOne(sandbox.organizationId)
@@ -584,7 +608,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       // Pass undefined for entrypoint as the backup snapshot already has it baked in and use skipStart
       await newRunnerAdapter.createSandbox(
         sandbox,
-        sandbox.backupSnapshot,
+        sandbox.sandboxBackup.backupSnapshot,
         registry,
         undefined,
         metadata,
@@ -599,7 +623,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
     // Re-fetch sandbox from DB to get fresh state (the in-memory entity may be stale)
     const freshSandbox = await this.sandboxRepository.findOne({ where: { id: sandbox.id } })
-    if (!freshSandbox || freshSandbox.pending) {
+    if (!freshSandbox || freshSandbox.sandboxState.pending) {
       this.logger.warn(
         `Sandbox ${sandbox.id} is pending or missing, aborting reassignment from runner ${oldRunnerId} to runner ${newRunnerId}`,
       )
@@ -619,8 +643,8 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
     // Update the sandbox to use the new runner; roll back on failure
     try {
-      const updateData: Partial<Sandbox> = {
-        prevRunnerId: sandbox.runnerId,
+      const updateData: Partial<SandboxAggregate> = {
+        prevRunnerId: sandbox.sandboxState.runnerId,
         runnerId: newRunnerId,
       }
       await this.sandboxRepository.update(
@@ -674,10 +698,10 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
     try {
       const queryBuilder = this.sandboxRepository
-        .createQueryBuilder('sandbox')
+        .createAggregateQueryBuilder('sandbox')
         .select(['sandbox.id'])
         .leftJoin('sandbox_last_activity', 'activity', 'activity."sandboxId" = sandbox.id')
-        .where('sandbox.state NOT IN (:...excludedStates)', {
+        .where('ss."state" NOT IN (:...excludedStates)', {
           excludedStates: [
             SandboxState.DESTROYED,
             SandboxState.ERROR,
@@ -685,8 +709,8 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             SandboxState.RESIZING,
           ],
         })
-        .andWhere('sandbox."desiredState"::text != sandbox.state::text')
-        .andWhere('sandbox."desiredState"::text != :archived', { archived: SandboxDesiredState.ARCHIVED })
+        .andWhere('ss."desiredState"::text != ss."state"::text')
+        .andWhere('ss."desiredState"::text != :archived', { archived: SandboxDesiredState.ARCHIVED })
         .orderBy('activity."lastActivityAt"', 'DESC', 'NULLS LAST')
 
       const stream = await queryBuilder.stream()
@@ -756,8 +780,10 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
     const sandboxes = await this.sandboxRepository.find({
       where: {
-        state: In([SandboxState.ARCHIVING, SandboxState.STOPPED, SandboxState.ERROR]),
-        desiredState: SandboxDesiredState.ARCHIVED,
+        sandboxState: {
+          state: In([SandboxState.ARCHIVING, SandboxState.STOPPED, SandboxState.ERROR]),
+          desiredState: SandboxDesiredState.ARCHIVED,
+        },
       },
       take: 100,
       order: {
@@ -784,9 +810,11 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
     const sandboxes = await this.sandboxRepository.find({
       where: {
-        state: In([SandboxState.ARCHIVING, SandboxState.STOPPED, SandboxState.ERROR]),
-        desiredState: SandboxDesiredState.ARCHIVED,
-        backupState: BackupState.COMPLETED,
+        sandboxState: {
+          state: In([SandboxState.ARCHIVING, SandboxState.STOPPED, SandboxState.ERROR]),
+          desiredState: SandboxDesiredState.ARCHIVED,
+        },
+        sandboxBackup: { backupState: BackupState.COMPLETED },
       },
       take: 100,
       order: {
@@ -830,17 +858,20 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
       while (new Date().getTime() - startedAt.getTime() <= 10000) {
         if (
-          [SandboxState.DESTROYED, SandboxState.BUILD_FAILED, SandboxState.RESIZING].includes(sandbox.state) ||
-          (sandbox.state === SandboxState.ERROR && sandbox.desiredState !== SandboxDesiredState.ARCHIVED)
+          [SandboxState.DESTROYED, SandboxState.BUILD_FAILED, SandboxState.RESIZING].includes(
+            sandbox.sandboxState.state,
+          ) ||
+          (sandbox.sandboxState.state === SandboxState.ERROR &&
+            sandbox.sandboxState.desiredState !== SandboxDesiredState.ARCHIVED)
         ) {
           // Break sync loop if sandbox reaches a terminal state.
           // However, should allow ERROR → ARCHIVED transition (e.g., during runner draining).
           break
         }
 
-        if (String(sandbox.state) === String(sandbox.desiredState)) {
+        if (String(sandbox.sandboxState.state) === String(sandbox.sandboxState.desiredState)) {
           this.logger.warn(
-            `Sandbox ${sandboxId} is already in the desired state ${sandbox.desiredState}, skipping sync`,
+            `Sandbox ${sandboxId} is already in the desired state ${sandbox.sandboxState.desiredState}, skipping sync`,
           )
           // Break sync loop if sandbox is already in the desired state.
           break
@@ -850,7 +881,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         let syncState = DONT_SYNC_AGAIN
 
         try {
-          switch (sandbox.desiredState) {
+          switch (sandbox.sandboxState.desiredState) {
             case SandboxDesiredState.STARTED: {
               syncState = await this.sandboxStartAction.run(sandbox, lockCode)
               break
@@ -885,7 +916,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
           const { recoverable, errorReason } = sanitizeSandboxError(error)
 
-          const updateData: Partial<Sandbox> = {
+          const updateData: Partial<SandboxAggregate> = {
             state: SandboxState.ERROR,
             errorReason,
             recoverable,
@@ -900,7 +931,10 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
         // Do not sync again for v2 runners
         // Job completion will update the sandbox state
-        if (sandbox.runnerId && (await this.runnerService.getRunnerApiVersion(sandbox.runnerId)) === '2') {
+        if (
+          sandbox.sandboxState.runnerId &&
+          (await this.runnerService.getRunnerApiVersion(sandbox.sandboxState.runnerId)) === '2'
+        ) {
           break
         }
 

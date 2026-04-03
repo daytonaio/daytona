@@ -7,9 +7,11 @@ import { Injectable, Logger } from '@nestjs/common'
 import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { Sandbox } from '../../entities/sandbox.entity'
+import { SandboxBackupEntity } from '../../entities/sandbox-backup.entity'
 import { SandboxRepository } from '../../repositories/sandbox.repository'
 import { SandboxState } from '../../enums/sandbox-state.enum'
 import { BackupState } from '../../enums/backup-state.enum'
+import { SandboxAggregate } from '../../types/sandbox-aggregate.type'
 import { getStateChangeLockKey } from '../../utils/lock-key.util'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
 
@@ -40,7 +42,6 @@ export abstract class SandboxAction {
     backupState?: BackupState,
     recoverable?: boolean,
   ) {
-    //  check if the lock code is still valid
     const lockKey = getStateChangeLockKey(sandbox.id)
     const currentLockCode = await this.redisLockProvider.getCode(lockKey)
 
@@ -58,13 +59,13 @@ export abstract class SandboxAction {
       return
     }
 
-    if (state !== SandboxState.ARCHIVED && !sandbox.pending) {
+    if (state !== SandboxState.ARCHIVED && !sandbox.sandboxState.pending) {
       const err = new Error(`sandbox ${sandbox.id} is not in a pending state`)
       this.logger.error(err)
       return
     }
 
-    const updateData: Partial<Sandbox> = {
+    const updateData: Partial<SandboxAggregate> = {
       state,
     }
 
@@ -79,7 +80,7 @@ export abstract class SandboxAction {
       }
     }
 
-    if (sandbox.state === SandboxState.ERROR && !sandbox.errorReason) {
+    if (sandbox.sandboxState.state === SandboxState.ERROR && !sandbox.sandboxState.errorReason) {
       updateData.errorReason = 'Sandbox is in error state during update'
       updateData.recoverable = false
     }
@@ -93,7 +94,7 @@ export abstract class SandboxAction {
     }
 
     if (backupState !== undefined) {
-      Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, backupState))
+      Object.assign(updateData, SandboxBackupEntity.getBackupStateUpdate(sandbox.sandboxBackup, backupState))
     }
 
     if (recoverable !== undefined) {

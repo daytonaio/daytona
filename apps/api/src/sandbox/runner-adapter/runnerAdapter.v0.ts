@@ -433,8 +433,8 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       })),
       networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
-      errorReason: sandbox.errorReason,
-      backupErrorReason: sandbox.backupErrorReason,
+      errorReason: sandbox.sandboxState.errorReason,
+      backupErrorReason: sandbox.sandboxBackup.backupErrorReason,
     }
     await this.sandboxApiClient.recover(sandbox.id, recoverSandboxDTO)
   }

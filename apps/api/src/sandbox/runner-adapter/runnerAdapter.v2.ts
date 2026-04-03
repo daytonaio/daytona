@@ -85,7 +85,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       order: { createdAt: 'DESC' },
     })
 
-    let state = sandbox.state
+    let state = sandbox.sandboxState.state
 
     let daemonVersion: string | undefined = undefined
 
@@ -110,8 +110,8 @@ export class RunnerAdapterV2 implements RunnerAdapter {
 
     return {
       state,
-      backupState: sandbox.backupState,
-      backupErrorReason: sandbox.backupErrorReason,
+      backupState: sandbox.sandboxBackup.backupState,
+      backupErrorReason: sandbox.sandboxBackup.backupErrorReason,
       daemonVersion,
     }
   }
@@ -129,7 +129,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
         return job.status === JobStatus.COMPLETED ? SandboxState.DESTROYED : SandboxState.DESTROYING
       default:
         // For other job types (backup, etc.), return current sandbox state
-        return sandbox.state
+        return sandbox.sandboxState.state
     }
   }
 
@@ -238,8 +238,8 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       })),
       networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
-      errorReason: sandbox.errorReason,
-      backupErrorReason: sandbox.backupErrorReason,
+      errorReason: sandbox.sandboxState.errorReason,
+      backupErrorReason: sandbox.sandboxBackup.backupErrorReason,
     }
     await this.jobService.createJob(
       null,

@@ -62,6 +62,8 @@ import { ProxyGuard } from './guards/proxy.guard'
 import { SshGatewayGuard } from './guards/ssh-gateway.guard'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { SandboxLastActivity } from './entities/sandbox-last-activity.entity'
+import { SandboxStateEntity } from './entities/sandbox-state.entity'
+import { SandboxBackupEntity } from './entities/sandbox-backup.entity'
 import { SandboxActivityService } from './services/sandbox-activity.service'
 
 @Module({
@@ -84,6 +86,8 @@ import { SandboxActivityService } from './services/sandbox-activity.service'
       Region,
       Job,
       SandboxLastActivity,
+      SandboxStateEntity,
+      SandboxBackupEntity,
     ]),
   ],
   controllers: [

@@ -27,16 +27,19 @@ export class SandboxDestroyAction extends SandboxAction {
 
   @WithSpan()
   async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
-    if (sandbox.state === SandboxState.DESTROYED) {
+    if (sandbox.sandboxState.state === SandboxState.DESTROYED) {
       return DONT_SYNC_AGAIN
     }
 
-    if (sandbox.state === SandboxState.ARCHIVED || sandbox.state === SandboxState.PENDING_BUILD) {
+    if (
+      sandbox.sandboxState.state === SandboxState.ARCHIVED ||
+      sandbox.sandboxState.state === SandboxState.PENDING_BUILD
+    ) {
       await this.updateSandboxState(sandbox, SandboxState.DESTROYED, lockCode)
       return DONT_SYNC_AGAIN
     }
 
-    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
+    const runner = await this.runnerService.findOneOrFail(sandbox.sandboxState.runnerId)
     if (runner.state !== RunnerState.READY) {
       return DONT_SYNC_AGAIN
     }
@@ -51,7 +54,7 @@ export class SandboxDestroyAction extends SandboxAction {
         return DONT_SYNC_AGAIN
       }
 
-      if (sandbox.state !== SandboxState.DESTROYING) {
+      if (sandbox.sandboxState.state !== SandboxState.DESTROYING) {
         await runnerAdapter.destroySandbox(sandbox.id)
         await this.updateSandboxState(sandbox, SandboxState.DESTROYING, lockCode)
       }

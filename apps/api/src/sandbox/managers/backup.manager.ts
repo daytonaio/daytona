@@ -84,21 +84,23 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
       // Process all runners in parallel
       await Promise.all(
         readyRunners.map(async (runner) => {
-          const sandboxes = await this.sandboxRepository.find({
-            where: {
-              runnerId: runner.id,
-              organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
-              state: SandboxState.STARTED,
-              backupState: In([BackupState.NONE, BackupState.COMPLETED]),
-              lastBackupAt: Or(IsNull(), LessThan(new Date(Date.now() - 1 * 60 * 60 * 1000))),
-              autoDeleteInterval: Not(0),
-            },
-            order: {
-              lastBackupAt: 'ASC',
-            },
-            //  todo: increase this number when backup is stable
-            take: 10,
-          })
+          const sandboxes = await this.sandboxRepository
+            .createAggregateQueryBuilder('sandbox')
+            .where('ss."runnerId" = :runnerId', { runnerId: runner.id })
+            .andWhere('sandbox."organizationId" != :org', { org: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION })
+            .andWhere('ss."state" = :state', { state: SandboxState.STARTED })
+            .andWhere('sb."backupState" IN (:...backupStates)', {
+              backupStates: [BackupState.NONE, BackupState.COMPLETED],
+            })
+            .andWhere('(sb."backupSnapshot" IS NULL OR sb."backupSnapshot" <= NULL)')
+            .andWhere('sb."lastBackupAt" IS NULL OR sb."lastBackupAt" < :cutoff', {
+              cutoff: new Date(Date.now() - 1 * 60 * 60 * 1000),
+            })
+            .andWhere('sandbox."autoDeleteInterval" != 0')
+            // order by lastBackupAt ascending
+            .orderBy('sb."lastBackupAt"', 'ASC')
+            .take(10)
+            .getMany()
 
           await Promise.all(
             sandboxes.map(async (sandbox) => {
@@ -146,19 +148,19 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
 
     try {
       const sandboxes = await this.sandboxRepository
-        .createQueryBuilder('sandbox')
-        .innerJoin('runner', 'r', 'r.id = sandbox.runnerId')
-        .where('sandbox.state IN (:...states)', {
+        .createAggregateQueryBuilder('sandbox')
+        .innerJoin('runner', 'r', 'r.id = ss."runnerId"')
+        .where('ss."state" IN (:...states)', {
           states: [SandboxState.ARCHIVING, SandboxState.STARTED, SandboxState.STOPPED],
         })
-        .andWhere('sandbox.backupState IN (:...backupStates)', {
+        .andWhere('sb."backupState" IN (:...backupStates)', {
           backupStates: [BackupState.PENDING, BackupState.IN_PROGRESS],
         })
         .andWhere('r.state = :ready', { ready: RunnerState.READY })
         // Prioritize manual archival action, then auto-archive poller, then ad-hoc backup poller
         .addSelect(
           `
-          CASE sandbox.state
+          CASE ss."state"
             WHEN :archiving THEN 1
             WHEN :stopped   THEN 2
             WHEN :started   THEN 3
@@ -173,7 +175,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
           started: SandboxState.STARTED,
         })
         .orderBy('state_priority', 'ASC')
-        .addOrderBy('sandbox.lastBackupAt', 'ASC', 'NULLS FIRST') // Process sandboxes with no backups first
+        .addOrderBy('sb."lastBackupAt"', 'ASC', 'NULLS FIRST') // Process sandboxes with no backups first
         .addOrderBy('sandbox.createdAt', 'ASC') // For equal lastBackupAt, process older sandboxes first
         .take(100)
         .getMany()
@@ -193,7 +195,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
             })
 
             try {
-              switch (sandbox.backupState) {
+              switch (sandbox.sandboxBackup.backupState) {
                 case BackupState.PENDING: {
                   await this.handlePendingBackup(sandbox)
                   break
@@ -249,15 +251,15 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
 
     try {
       const sandboxes = await this.sandboxRepository
-        .createQueryBuilder('sandbox')
-        .innerJoin('runner', 'r', 'r.id = sandbox.runnerId')
-        .where('sandbox.state = :error', { error: SandboxState.ERROR })
-        .andWhere('sandbox.backupState IN (:...backupStates)', {
+        .createAggregateQueryBuilder('sandbox')
+        .innerJoin('runner', 'r', 'r.id = ss."runnerId"')
+        .where('ss."state" = :error', { error: SandboxState.ERROR })
+        .andWhere('sb."backupState" IN (:...backupStates)', {
           backupStates: [BackupState.PENDING, BackupState.IN_PROGRESS],
         })
         .andWhere('r.state = :ready', { ready: RunnerState.READY })
         .andWhere('r."draining" = true')
-        .addOrderBy('sandbox.lastBackupAt', 'ASC', 'NULLS FIRST')
+        .addOrderBy('sb."lastBackupAt"', 'ASC', 'NULLS FIRST')
         .addOrderBy('sandbox.createdAt', 'ASC')
         .take(100)
         .getMany()
@@ -276,7 +278,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
             })
 
             try {
-              switch (sandbox.backupState) {
+              switch (sandbox.sandboxBackup.backupState) {
                 case BackupState.PENDING: {
                   await this.handlePendingBackup(sandbox)
                   break
@@ -334,17 +336,17 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
 
     try {
       const sandboxes = await this.sandboxRepository
-        .createQueryBuilder('sandbox')
-        .innerJoin('runner', 'r', 'r.id = sandbox.runnerId')
-        .where('sandbox.state IN (:...states)', { states: [SandboxState.ARCHIVING, SandboxState.STOPPED] })
-        .andWhere('sandbox.backupState = :none', { none: BackupState.NONE })
+        .createAggregateQueryBuilder('sandbox')
+        .innerJoin('runner', 'r', 'r.id = ss."runnerId"')
+        .where('ss."state" IN (:...states)', { states: [SandboxState.ARCHIVING, SandboxState.STOPPED] })
+        .andWhere('sb."backupState" = :none', { none: BackupState.NONE })
         .andWhere('r.state = :ready', { ready: RunnerState.READY })
         .take(100)
         .getMany()
 
       await Promise.allSettled(
         sandboxes
-          .filter((sandbox) => sandbox.runnerId !== null)
+          .filter((sandbox) => sandbox.sandboxState.runnerId !== null)
           .map(async (sandbox) => {
             const lockKey = `sandbox-backup-${sandbox.id}`
             const hasLock = await this.redisLockProvider.lock(lockKey, 30)
@@ -369,30 +371,33 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   }
 
   async setBackupPending(sandbox: Sandbox): Promise<void> {
-    if (sandbox.backupState === BackupState.COMPLETED) {
+    if (sandbox.sandboxBackup.backupState === BackupState.COMPLETED) {
       return
     }
 
     // Allow backups for STARTED sandboxes, STOPPED/ERROR sandboxes with runnerId, or ARCHIVING sandboxes
     if (
       !(
-        sandbox.state === SandboxState.STARTED ||
-        sandbox.state === SandboxState.ARCHIVING ||
-        (sandbox.state === SandboxState.STOPPED && sandbox.runnerId) ||
-        (sandbox.state === SandboxState.ERROR && sandbox.runnerId)
+        sandbox.sandboxState.state === SandboxState.STARTED ||
+        sandbox.sandboxState.state === SandboxState.ARCHIVING ||
+        (sandbox.sandboxState.state === SandboxState.STOPPED && sandbox.sandboxState.runnerId) ||
+        (sandbox.sandboxState.state === SandboxState.ERROR && sandbox.sandboxState.runnerId)
       )
     ) {
       throw new BadRequestError('Sandbox must be started, stopped, or errored with assigned runner to create a backup')
     }
 
-    if (sandbox.backupState === BackupState.IN_PROGRESS || sandbox.backupState === BackupState.PENDING) {
+    if (
+      sandbox.sandboxBackup.backupState === BackupState.IN_PROGRESS ||
+      sandbox.sandboxBackup.backupState === BackupState.PENDING
+    ) {
       return
     }
 
     let registry: DockerRegistry | null = null
 
-    if (sandbox.backupRegistryId) {
-      registry = await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
+    if (sandbox.sandboxBackup.backupRegistryId) {
+      registry = await this.dockerRegistryService.findOne(sandbox.sandboxBackup.backupRegistryId)
     } else {
       registry = await this.dockerRegistryService.getAvailableBackupRegistry(sandbox.region)
     }
@@ -409,7 +414,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
 
   private async checkBackupProgress(sandbox: Sandbox): Promise<void> {
     try {
-      const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
+      const runner = await this.runnerService.findOneOrFail(sandbox.sandboxState.runnerId)
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
       // Get sandbox info from runner
@@ -418,9 +423,9 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
       switch (sandboxInfo.backupState) {
         case BackupState.COMPLETED: {
           // Only accept completion if the runner-reported snapshot matches the DB snapshot
-          if (sandboxInfo.backupSnapshot && sandboxInfo.backupSnapshot !== sandbox.backupSnapshot) {
+          if (sandboxInfo.backupSnapshot && sandboxInfo.backupSnapshot !== sandbox.sandboxBackup.backupSnapshot) {
             this.logger.warn(
-              `Ignoring stale backup completion for sandbox ${sandbox.id}: runner snapshot ${sandboxInfo.backupSnapshot} does not match DB snapshot ${sandbox.backupSnapshot}`,
+              `Ignoring stale backup completion for sandbox ${sandbox.id}: runner snapshot ${sandboxInfo.backupSnapshot} does not match DB snapshot ${sandbox.sandboxBackup.backupSnapshot}`,
             )
             break
           }
@@ -429,9 +434,9 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
         }
         case BackupState.ERROR: {
           // Only accept failure if the runner-reported snapshot matches the DB snapshot
-          if (sandboxInfo.backupSnapshot && sandboxInfo.backupSnapshot !== sandbox.backupSnapshot) {
+          if (sandboxInfo.backupSnapshot && sandboxInfo.backupSnapshot !== sandbox.sandboxBackup.backupSnapshot) {
             this.logger.warn(
-              `Ignoring stale backup failure for sandbox ${sandbox.id}: runner snapshot ${sandboxInfo.backupSnapshot} does not match DB snapshot ${sandbox.backupSnapshot}`,
+              `Ignoring stale backup failure for sandbox ${sandbox.id}: runner snapshot ${sandboxInfo.backupSnapshot} does not match DB snapshot ${sandbox.sandboxBackup.backupSnapshot}`,
             )
             break
           }
@@ -465,7 +470,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   }
 
   private async deleteSandboxBackupRepositoryFromRegistry(sandbox: Sandbox): Promise<void> {
-    const registry = await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
+    const registry = await this.dockerRegistryService.findOne(sandbox.sandboxBackup.backupRegistryId)
 
     try {
       await this.dockerRegistryService.deleteSandboxRepository(sandbox.id, registry)
@@ -478,26 +483,26 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   }
 
   private async handlePendingBackup(sandbox: Sandbox): Promise<void> {
-    const lockKey = `runner-${sandbox.runnerId}-backup-lock`
+    const lockKey = `runner-${sandbox.sandboxState.runnerId}-backup-lock`
     try {
       await this.redisLockProvider.waitForLock(lockKey, 10)
 
       const backupsInProgress = await this.sandboxRepository.count({
         where: {
-          runnerId: sandbox.runnerId,
-          backupState: BackupState.IN_PROGRESS,
+          sandboxState: { runnerId: sandbox.sandboxState.runnerId },
+          sandboxBackup: { backupState: BackupState.IN_PROGRESS },
         },
       })
       if (backupsInProgress >= this.configService.getOrThrow('maxConcurrentBackupsPerRunner')) {
         return
       }
 
-      const registry = await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
+      const registry = await this.dockerRegistryService.findOne(sandbox.sandboxBackup.backupRegistryId)
       if (!registry) {
         throw new Error('Registry not found')
       }
 
-      const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
+      const runner = await this.runnerService.findOneOrFail(sandbox.sandboxState.runnerId)
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
       //  check if backup is already in progress on the runner
@@ -508,7 +513,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
       }
 
       // Initiate backup on runner
-      await runnerAdapter.createBackup(sandbox, sandbox.backupSnapshot, registry)
+      await runnerAdapter.createBackup(sandbox, sandbox.sandboxBackup.backupSnapshot, registry)
 
       await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
     } catch (error) {

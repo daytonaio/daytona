@@ -37,24 +37,24 @@ export class SandboxArchiveAction extends SandboxAction {
     // Only proceed with archiving if the sandbox is in STOPPED, ARCHIVING or ERROR (runner draining) state.
     // For all other states, do not proceed with archiving.
     if (
-      sandbox.state !== SandboxState.STOPPED &&
-      sandbox.state !== SandboxState.ARCHIVING &&
-      sandbox.state !== SandboxState.ERROR
+      sandbox.sandboxState.state !== SandboxState.STOPPED &&
+      sandbox.sandboxState.state !== SandboxState.ARCHIVING &&
+      sandbox.sandboxState.state !== SandboxState.ERROR
     ) {
       return DONT_SYNC_AGAIN
     }
 
-    const lockKey = 'archive-lock-' + sandbox.runnerId
+    const lockKey = 'archive-lock-' + sandbox.sandboxState.runnerId
     if (!(await this.redisLockProvider.lock(lockKey, 10))) {
       return DONT_SYNC_AGAIN
     }
 
-    const isFromErrorState = sandbox.state === SandboxState.ERROR
+    const isFromErrorState = sandbox.sandboxState.state === SandboxState.ERROR
 
     await this.redisLockProvider.unlock(lockKey)
 
     //  if the backup state is error, we need to retry the backup
-    if (sandbox.backupState === BackupState.ERROR) {
+    if (sandbox.sandboxBackup.backupState === BackupState.ERROR) {
       const archiveErrorRetryKey = 'archive-error-retry-' + sandbox.id
       const archiveErrorRetryCountRaw = await this.redis.get(archiveErrorRetryKey)
       const archiveErrorRetryCount = archiveErrorRetryCountRaw ? parseInt(archiveErrorRetryCountRaw) : 0
@@ -81,13 +81,13 @@ export class SandboxArchiveAction extends SandboxAction {
       return DONT_SYNC_AGAIN
     }
 
-    if (sandbox.backupState !== BackupState.COMPLETED) {
+    if (sandbox.sandboxBackup.backupState !== BackupState.COMPLETED) {
       return DONT_SYNC_AGAIN
     }
 
     //  when the backup is completed, destroy the sandbox on the runner
     //  and deassociate the sandbox from the runner
-    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
+    const runner = await this.runnerService.findOneOrFail(sandbox.sandboxState.runnerId)
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
     try {

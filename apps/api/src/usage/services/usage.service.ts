@@ -151,9 +151,9 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
 
           if (
             sandbox &&
-            (sandbox.state === SandboxState.STARTED ||
-              sandbox.state === SandboxState.STOPPED ||
-              sandbox.state === SandboxState.STOPPING)
+            (sandbox.sandboxState.state === SandboxState.STARTED ||
+              sandbox.sandboxState.state === SandboxState.STOPPED ||
+              sandbox.sandboxState.state === SandboxState.STOPPING)
           ) {
             // Create new usage period
             const newUsagePeriod = SandboxUsagePeriod.fromUsagePeriod(usagePeriod)

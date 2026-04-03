@@ -295,11 +295,13 @@ export class SandboxDto {
       labels: sandbox.labels,
       volumes: sandbox.volumes,
       state: this.getSandboxState(sandbox),
-      desiredState: sandbox.desiredState,
-      errorReason: sandbox.errorReason,
-      recoverable: sandbox.recoverable,
-      backupState: sandbox.backupState,
-      backupCreatedAt: sandbox.lastBackupAt ? new Date(sandbox.lastBackupAt).toISOString() : undefined,
+      desiredState: sandbox.sandboxState?.desiredState,
+      errorReason: sandbox.sandboxState?.errorReason,
+      recoverable: sandbox.sandboxState?.recoverable,
+      backupState: sandbox.sandboxBackup?.backupState,
+      backupCreatedAt: sandbox.sandboxBackup?.lastBackupAt
+        ? new Date(sandbox.sandboxBackup.lastBackupAt).toISOString()
+        : undefined,
       autoStopInterval: sandbox.autoStopInterval,
       autoArchiveInterval: sandbox.autoArchiveInterval,
       autoDeleteInterval: sandbox.autoDeleteInterval,
@@ -315,40 +317,42 @@ export class SandboxDto {
             snapshotRef: sandbox.buildInfo.snapshotRef,
           }
         : undefined,
-      daemonVersion: sandbox.daemonVersion,
-      runnerId: sandbox.runnerId,
+      daemonVersion: sandbox.sandboxState?.daemonVersion,
+      runnerId: sandbox.sandboxState?.runnerId,
       toolboxProxyUrl,
     }
   }
 
   private static getSandboxState(sandbox: Sandbox): SandboxState {
-    switch (sandbox.state) {
+    const current = sandbox.sandboxState?.state
+    const desired = sandbox.sandboxState?.desiredState
+    switch (current) {
       case SandboxState.STARTED:
-        if (sandbox.desiredState === SandboxDesiredState.STOPPED) {
+        if (desired === SandboxDesiredState.STOPPED) {
           return SandboxState.STOPPING
         }
-        if (sandbox.desiredState === SandboxDesiredState.DESTROYED) {
+        if (desired === SandboxDesiredState.DESTROYED) {
           return SandboxState.DESTROYING
         }
         break
       case SandboxState.STOPPED:
-        if (sandbox.desiredState === SandboxDesiredState.STARTED) {
+        if (desired === SandboxDesiredState.STARTED) {
           return SandboxState.STARTING
         }
-        if (sandbox.desiredState === SandboxDesiredState.DESTROYED) {
+        if (desired === SandboxDesiredState.DESTROYED) {
           return SandboxState.DESTROYING
         }
-        if (sandbox.desiredState === SandboxDesiredState.ARCHIVED) {
+        if (desired === SandboxDesiredState.ARCHIVED) {
           return SandboxState.ARCHIVING
         }
         break
       case SandboxState.UNKNOWN:
-        if (sandbox.desiredState === SandboxDesiredState.STARTED) {
+        if (desired === SandboxDesiredState.STARTED) {
           return SandboxState.CREATING
         }
         break
     }
-    return sandbox.state
+    return current ?? SandboxState.UNKNOWN
   }
 }
 

@@ -258,17 +258,17 @@ export class RunnerService {
 
   async findBySandboxId(sandboxId: string): Promise<Runner | null> {
     const sandbox = await this.sandboxRepository.findOne({
-      where: { id: sandboxId, state: Not(SandboxState.DESTROYED) },
-      select: ['runnerId'],
+      where: { id: sandboxId, sandboxState: { state: Not(SandboxState.DESTROYED) } },
+      select: ['id'],
     })
     if (!sandbox) {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
-    if (!sandbox.runnerId) {
+    if (!sandbox.sandboxState.runnerId) {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} does not have a runner`)
     }
 
-    return this.findOne(sandbox.runnerId)
+    return this.findOne(sandbox.sandboxState.runnerId)
   }
 
   async getRegionId(runnerId: string): Promise<string> {
@@ -358,7 +358,7 @@ export class RunnerService {
     }
 
     const sandboxCount = await this.sandboxRepository.count({
-      where: { runnerId: id, state: Not(In([SandboxState.ARCHIVED, SandboxState.DESTROYED])) },
+      where: { sandboxState: { runnerId: id, state: Not(In([SandboxState.ARCHIVED, SandboxState.DESTROYED])) } },
     })
     if (sandboxCount > 0) {
       throw new HttpException(
@@ -689,8 +689,10 @@ export class RunnerService {
             // Check if runner has any sandboxes with desiredState != DESTROYED
             const nonDestroyedSandboxCount = await this.sandboxRepository.count({
               where: {
-                runnerId: runner.id,
-                desiredState: Not(SandboxDesiredState.DESTROYED),
+                sandboxState: {
+                  runnerId: runner.id,
+                  desiredState: Not(SandboxDesiredState.DESTROYED),
+                },
               },
             })
 
@@ -812,12 +814,12 @@ export class RunnerService {
 
   async getRunnersWithMultipleSnapshotsBuilding(maxSnapshotCount = 6): Promise<string[]> {
     const runners = await this.sandboxRepository
-      .createQueryBuilder('sandbox')
-      .select('sandbox.runnerId', 'runnerId')
-      .where('sandbox.state = :state', { state: SandboxState.BUILDING_SNAPSHOT })
-      .andWhere('sandbox.buildInfoSnapshotRef IS NOT NULL')
-      .groupBy('sandbox.runnerId')
-      .having('COUNT(DISTINCT sandbox.buildInfoSnapshotRef) > :maxSnapshotCount', { maxSnapshotCount })
+      .createAggregateQueryBuilder('sandbox')
+      .select('ss."runnerId"', 'runnerId')
+      .where('ss."state" = :state', { state: SandboxState.BUILDING_SNAPSHOT })
+      .andWhere('sandbox."buildInfoSnapshotRef" IS NOT NULL')
+      .groupBy('ss."runnerId"')
+      .having('COUNT(DISTINCT sandbox."buildInfoSnapshotRef") > :maxSnapshotCount', { maxSnapshotCount })
       .getRawMany()
 
     return runners.map((item) => item.runnerId)
