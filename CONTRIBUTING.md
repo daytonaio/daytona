@@ -61,8 +61,8 @@ Follow the following steps to ensure your contribution goes smoothly.
 1. Configure your development environment by either following the guide below.
 1. [Fork](https://help.github.com/articles/working-with-forks/) the GitHub Repository allowing you to make the changes in your own copy of the repository.
 1. Create a [GitHub issue](https://github.com/daytonaio/daytona/issues) if one doesn't exist already.
-1. [Prepare your changes](/PREPARING_YOUR_CHANGES.md) and ensure your commits are descriptive. The document contains an optional commit template, if desired.
-1. Ensure that you sign off on all your commits to comply with the DCO v1.1. We have more details in [Prepare your changes](/PREPARING_YOUR_CHANGES.md).
+1. [Prepare your changes](./PREPARING_YOUR_CHANGES.md) and ensure your commits are descriptive. The document contains an optional commit template, if desired.
+1. Ensure that you sign off on all your commits to comply with the DCO v1.1. We have more details in [Prepare your changes](./PREPARING_YOUR_CHANGES.md).
 1. Ensure to generate new docs after making command related changes, by running `./hack/generate-cli-docs.sh` in the daytona root directory.
 1. Ensure to generate a new API client after making changes related to the API spec, by running `./hack/swagger.sh` in the daytona root directory.
 1. Ensure that you are using `yarn` as the package manager for any Node.js dependencies.
