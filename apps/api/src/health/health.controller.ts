@@ -10,6 +10,7 @@ import { AnonymousRateLimitGuard } from '../common/guards/anonymous-rate-limit.g
 import { AuthenticatedRateLimitGuard } from '../common/guards/authenticated-rate-limit.guard'
 import { CombinedAuthGuard } from '../auth/combined-auth.guard'
 import { HealthCheckGuard } from '../auth/health-check.guard'
+import { Public } from '../auth/decorators/public.decorator'
 
 @Controller('health')
 export class HealthController {
@@ -22,6 +23,7 @@ export class HealthController {
   ) {}
 
   @Get()
+  @Public()
   @UseGuards(AnonymousRateLimitGuard)
   live() {
     return { status: 'ok' }
