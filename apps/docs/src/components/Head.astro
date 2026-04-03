@@ -2,12 +2,33 @@
 import type { Props } from '@astrojs/starlight/props'
 import Default from '@astrojs/starlight/components/Head.astro'
 import PostHog from '@components/PostHog.astro'
-const image = '/docs/daytona.png'
+
+const props = Astro.props as Props
+
+const imagePath = '/docs/daytona.png'
+const imageUrl = Astro.site
+  ? new URL(imagePath, Astro.site).toString()
+  : imagePath
+const pageUrl =
+  Astro.site && Astro.url?.pathname
+    ? new URL(Astro.url.pathname, Astro.site).toString()
+    : undefined
+
+const title = String(props.title ?? 'Daytona')
+const description = String(props.description ?? 'Daytona documentation.')
 ---
 
-<Default {...Astro.props}><slot /></Default>
-<meta name="image" property="og:image" content={image} />
-<meta property="og:image:secure_url" content={image} />
+<Default {...props}><slot /></Default>
+<meta property="og:type" content="website" />
+{pageUrl && <meta property="og:url" content={pageUrl} />}
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content={imageUrl} />
+<meta name="image" property="og:image" content={imageUrl} />
+<meta property="og:image:secure_url" content={imageUrl} />
 <meta property="og:image:type" content="image/png" />
 <meta property="og:image:width" content="1248" />
 <meta property="og:image:height" content="628" />
