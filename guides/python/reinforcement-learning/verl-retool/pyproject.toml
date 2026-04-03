@@ -1,0 +1,13 @@
+[project]
+name = "daytona-verl-retool"
+version = "0.1.0"
+description = "Companion files for benchmarking veRL ReTool backends with Daytona"
+authors = [{name = "Daytona Team", email = "support@daytona.io"}]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "daytona>=0.128.1,<1.0.0",
+]
+
+[tool.setuptools]
+py-modules = []

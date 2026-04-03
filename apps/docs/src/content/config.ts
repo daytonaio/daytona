@@ -651,6 +651,18 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath(
+            '/docs/guides/reinforcement-learning/verl-retool-daytona',
+            locale
+          ),
+          label: t('sidebarconfig.verl'),
+          disablePagination: true,
+          attrs: {
+            icon: 'tools.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/guides/rlm', locale),
           label: t('sidebarconfig.rlm'),
           disablePagination: true,
