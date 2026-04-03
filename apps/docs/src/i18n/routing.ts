@@ -50,6 +50,70 @@ export function isLocalizedPath(slug: string | undefined): boolean {
 }
 
 /**
+ * Origin for server-side self-fetch. Incoming request.url often reflects the
+ * internal listener; using that origin causes ECONNREFUSED when nothing listens on localhost:443.
+ *
+ * In dev, always use the incoming request origin. If PUBLIC_WEB_URL points at
+ * production, preferring it would fetch prod HTML while the browser URL stays
+ * on localhost; root-relative asset paths would then hit the dev server wrong
+ */
+function originFromSiteConfig(site: string): string | null {
+  const trimmed = site.trim()
+  if (!trimmed) return null
+  try {
+    return new URL(trimmed).origin
+  } catch {
+    return null
+  }
+}
+
+function getProxyOrigin(request: Request): string {
+  const reqUrl = new URL(request.url)
+  const host = reqUrl.hostname
+  const isLoopback =
+    host === 'localhost' || host === '127.0.0.1' || host === '::1'
+
+  if (import.meta.env.DEV) {
+    return reqUrl.origin
+  }
+
+  const site =
+    import.meta.env.PUBLIC_WEB_URL ||
+    import.meta.env.SITE ||
+    (typeof process !== 'undefined' && process.env.PUBLIC_WEB_URL) ||
+    ''
+
+  if (isLoopback && typeof site === 'string') {
+    const fromSite = originFromSiteConfig(site)
+    if (fromSite) return fromSite
+  }
+
+  return reqUrl.origin
+}
+
+/**
+ * Headers safe to forward when fetching another path on the public site.
+ * Drops Host and hop-by-hop headers so the URL's host is used (SNI / routing).
+ */
+function headersForProxyFetch(originalRequest: Request): Headers {
+  const out = new Headers()
+  const skip = new Set([
+    'host',
+    'connection',
+    'keep-alive',
+    'proxy-connection',
+    'transfer-encoding',
+    'upgrade',
+  ])
+  originalRequest.headers.forEach((value, key) => {
+    if (!skip.has(key.toLowerCase())) {
+      out.set(key, value)
+    }
+  })
+  return out
+}
+
+/**
  * Creates a transparent proxy request to serve localized content
  * This bypasses Astro.rewrite() limitations with static routes
  */
@@ -58,12 +122,15 @@ export async function proxyLocalizedContent(
   originalRequest: Request
 ): Promise<Response> {
   try {
-    const targetUrl = new URL(targetPath, new URL(originalRequest.url).origin)
+    const targetUrl = new URL(targetPath, getProxyOrigin(originalRequest))
 
     const response = await fetch(targetUrl.toString(), {
       method: originalRequest.method,
-      headers: originalRequest.headers,
-      body: originalRequest.body,
+      headers: headersForProxyFetch(originalRequest),
+      body:
+        originalRequest.method === 'GET' || originalRequest.method === 'HEAD'
+          ? undefined
+          : originalRequest.body,
     })
 
     // Filter out headers that cause compression issues
