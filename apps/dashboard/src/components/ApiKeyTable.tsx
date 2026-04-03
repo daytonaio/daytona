@@ -15,9 +15,11 @@ import {
 import { ApiKeyList, ApiKeyListPermissionsEnum, CreateApiKeyPermissionsEnum } from '@daytonaio/api-client'
 
 import {
+  ColumnFiltersState,
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   SortingState,
@@ -25,6 +27,7 @@ import {
 } from '@tanstack/react-table'
 import { KeyRound, Loader2, MoreHorizontal } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { DebouncedInput } from './DebouncedInput'
 import { PageFooterPortal } from './PageLayout'
 import { Pagination } from './Pagination'
 import { TableEmptyState } from './TableEmptyState'
@@ -57,6 +60,7 @@ const FIXED_COLUMN_IDS = ['actions']
 
 export function ApiKeyTable({ data, loading, isLoadingKey, onRevoke }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [apiKeyToRevoke, setApiKeyToRevoke] = useState<ApiKeyList | null>(null)
   const columns = getColumns({ isLoadingKey, onRevokeRequest: setApiKeyToRevoke })
   const table = useReactTable({
@@ -65,12 +69,15 @@ export function ApiKeyTable({ data, loading, isLoadingKey, onRevoke }: DataTable
     defaultColumn: {
       minSize: 0,
     },
+    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,
+      columnFilters,
     },
     initialState: {
       columnPinning: {
@@ -84,6 +91,7 @@ export function ApiKeyTable({ data, loading, isLoadingKey, onRevoke }: DataTable
   })
 
   const isEmpty = !loading && table.getRowModel().rows.length === 0
+  const hasFilters = table.getState().columnFilters.length > 0
   const leftPinnedCount = table.getLeftLeafColumns().length
   const revokeLoading = apiKeyToRevoke ? isLoadingKey(apiKeyToRevoke) : false
 
@@ -98,7 +106,15 @@ export function ApiKeyTable({ data, loading, isLoadingKey, onRevoke }: DataTable
 
   return (
     <>
-      <div className="flex min-h-0 flex-1 flex-col pt-2">
+      <div className="flex min-h-0 flex-1 flex-col gap-3">
+        <div className="flex items-center gap-4">
+          <DebouncedInput
+            value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+            onChange={(value) => table.getColumn('name')?.setFilterValue(value)}
+            placeholder="Search..."
+            className="max-w-sm"
+          />
+        </div>
         <TableContainer
           className={isEmpty ? 'min-h-[26rem]' : undefined}
           empty={
@@ -106,19 +122,28 @@ export function ApiKeyTable({ data, loading, isLoadingKey, onRevoke }: DataTable
               <TableEmptyState
                 overlay
                 colSpan={columns.length}
-                message="No API Keys yet."
+                message={hasFilters ? 'No matching API keys found.' : 'No API Keys yet.'}
                 icon={<KeyRound className="h-4 w-4" />}
                 description={
-                  <div className="space-y-2">
-                    <p>API Keys authenticate requests made through the Daytona SDK or CLI.</p>
-                    <p>
-                      Generate one and{' '}
-                      <a href="https://www.daytona.io/docs/api-keys" target="_blank" rel="noopener noreferrer">
-                        check out the API Key setup guide
-                      </a>
-                      .
-                    </p>
-                  </div>
+                  hasFilters ? undefined : (
+                    <div className="space-y-2">
+                      <p>API Keys authenticate requests made through the Daytona SDK or CLI.</p>
+                      <p>
+                        Generate one and{' '}
+                        <a href="https://www.daytona.io/docs/api-keys" target="_blank" rel="noopener noreferrer">
+                          check out the API Key setup guide
+                        </a>
+                        .
+                      </p>
+                    </div>
+                  )
+                }
+                action={
+                  hasFilters ? (
+                    <Button variant="outline" onClick={() => table.resetColumnFilters()}>
+                      Clear filters
+                    </Button>
+                  ) : undefined
                 }
               />
             ) : undefined
@@ -269,6 +294,12 @@ const getColumns = ({
       accessorKey: 'name',
       header: 'Name',
       size: 220,
+      filterFn: (row, _id, filterValue) => {
+        const searchValue = String(filterValue).toLowerCase()
+        const apiKey = row.original
+
+        return apiKey.name.toLowerCase().includes(searchValue) || apiKey.value.toLowerCase().includes(searchValue)
+      },
     },
     {
       accessorKey: 'value',

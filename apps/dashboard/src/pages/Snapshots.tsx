@@ -23,6 +23,7 @@ import { useDeleteSnapshotMutation } from '@/hooks/mutations/useDeleteSnapshotMu
 import { queryKeys } from '@/hooks/queries/queryKeys'
 import {
   DEFAULT_SNAPSHOT_SORTING,
+  SnapshotFilters,
   SnapshotQueryParams,
   SnapshotSorting,
   useSnapshotsQuery,
@@ -58,15 +59,17 @@ const Snapshots: React.FC = () => {
   })
 
   const [sorting, setSorting] = useState<SnapshotSorting>(DEFAULT_SNAPSHOT_SORTING)
+  const [filters, setFilters] = useState<SnapshotFilters>({})
   const [stateFilter, setStateFilter] = useState<Set<string>>(new Set())
 
   const queryParams = useMemo<SnapshotQueryParams>(
     () => ({
       page: paginationParams.pageIndex + 1,
       pageSize: paginationParams.pageSize,
+      filters,
       sorting,
     }),
-    [paginationParams, sorting],
+    [paginationParams, filters, sorting],
   )
 
   const snapshotListQueryKey = useMemo(
@@ -126,6 +129,11 @@ const Snapshots: React.FC = () => {
 
   const handleSortingChange = useCallback((newSorting: SnapshotSorting) => {
     setSorting(newSorting)
+    setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
+  }, [])
+
+  const handleFiltersChange = useCallback((newFilters: SnapshotFilters) => {
+    setFilters(newFilters)
     setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
   }, [])
 
@@ -365,6 +373,8 @@ const Snapshots: React.FC = () => {
           }}
           sorting={sorting}
           onSortingChange={handleSortingChange}
+          searchValue={filters.name ?? ''}
+          onSearchChange={(value) => handleFiltersChange({ name: value || undefined })}
           stateFilter={stateFilter}
           onStateFilterChange={setStateFilter}
         />

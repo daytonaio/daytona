@@ -3,23 +3,23 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useState, useCallback, useMemo } from 'react'
-import { useQueryStates } from 'nuqs'
-import { useSandboxTraces, TracesQueryParams } from '@/hooks/useSandboxTraces'
-import { useSandboxTraceSpans } from '@/hooks/useSandboxTraceSpans'
+import { CopyButton } from '@/components/CopyButton'
 import { TimeRangeSelector } from '@/components/telemetry/TimeRangeSelector'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
-import { CopyButton } from '@/components/CopyButton'
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
-import { ChevronLeft, ChevronRight, RefreshCw, Activity, ChevronDown } from 'lucide-react'
-import { format, subHours } from 'date-fns'
-import { TraceSummary, TraceSpan } from '@daytonaio/api-client'
+import { TracesQueryParams, useSandboxTraces } from '@/hooks/useSandboxTraces'
+import { useSandboxTraceSpans } from '@/hooks/useSandboxTraceSpans'
 import { cn } from '@/lib/utils'
-import { tracesSearchParams, timeRangeSearchParams } from './SearchParams'
+import { TraceSpan, TraceSummary } from '@daytonaio/api-client'
+import { format, subHours } from 'date-fns'
+import { Activity, ChevronDown, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react'
+import { useQueryStates } from 'nuqs'
+import React, { useCallback, useMemo, useState } from 'react'
+import { timeRangeSearchParams, tracesSearchParams } from './SearchParams'
 
 interface SpanNode extends TraceSpan {
   depth: number
@@ -434,11 +434,7 @@ export function SandboxTracesTab({ sandboxId }: { sandboxId: string }) {
           <TracesEmptyState />
         </div>
       ) : (
-        <ScrollArea
-          fade="mask"
-          horizontal
-          className="flex-1 min-h-0 border rounded-md [&_[data-slot=scroll-area-viewport]>div]:!overflow-visible [&_[data-slot=scroll-area-viewport]>div>div]:!overflow-visible"
-        >
+        <TableContainer>
           <Table>
             <TableHeader className="sticky top-0 z-10 bg-background after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-border">
               <TableRow>
@@ -496,7 +492,7 @@ export function SandboxTracesTab({ sandboxId }: { sandboxId: string }) {
               })}
             </TableBody>
           </Table>
-        </ScrollArea>
+        </TableContainer>
       )}
 
       {data && data.totalPages > 1 && (

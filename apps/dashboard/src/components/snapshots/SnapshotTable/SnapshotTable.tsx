@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { DebouncedInput } from '@/components/DebouncedInput'
 import { useCommandPaletteActions } from '@/components/CommandPalette'
 import { PageFooterPortal } from '@/components/PageLayout'
 import { SelectionToast } from '@/components/SelectionToast'
@@ -59,6 +60,8 @@ interface DataTableProps {
   onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
   sorting: SnapshotSorting
   onSortingChange: (sorting: SnapshotSorting) => void
+  searchValue: string
+  onSearchChange: (value: string) => void
   stateFilter: Set<string>
   onStateFilterChange: (values: Set<string>) => void
 }
@@ -93,6 +96,8 @@ export function SnapshotTable({
   onPaginationChange,
   sorting,
   onSortingChange,
+  searchValue,
+  onSearchChange,
   stateFilter,
   onStateFilterChange,
 }: DataTableProps) {
@@ -125,7 +130,7 @@ export function SnapshotTable({
     getCoreRowModel: getCoreRowModel(),
     initialState: {
       columnPinning: {
-        left: ['select'],
+        left: ['select', 'name'],
         right: ['actions'],
       },
     },
@@ -172,7 +177,7 @@ export function SnapshotTable({
   const selectedRows = table.getSelectedRowModel().rows
   const hasSelection = selectedRows.length > 0
   const isEmpty = !loading && table.getRowModel().rows.length === 0
-  const hasFilters = stateFilter.size > 0
+  const hasFilters = stateFilter.size > 0 || searchValue.length > 0
 
   const [pendingBulkAction, setPendingBulkAction] = useState<SnapshotBulkAction | null>(null)
   const selectedSnapshots = selectedRows.map((row) => row.original)
@@ -242,6 +247,12 @@ export function SnapshotTable({
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
       <div className="flex items-center gap-2">
+        <DebouncedInput
+          value={searchValue}
+          onChange={(value) => onSearchChange(String(value))}
+          placeholder="Search..."
+          className="max-w-sm"
+        />
         <FacetFilter
           title="State"
           className="h-8"
@@ -283,7 +294,13 @@ export function SnapshotTable({
               }
               action={
                 hasFilters ? (
-                  <Button variant="outline" onClick={() => onStateFilterChange(new Set())}>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      onSearchChange('')
+                      onStateFilterChange(new Set())
+                    }}
+                  >
                     Clear filters
                   </Button>
                 ) : undefined

@@ -6,9 +6,8 @@
 import { TimeRangeSelector } from '@/components/telemetry/TimeRangeSelector'
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { AnalyticsUsageParams, useSandboxUsagePeriods } from '@/hooks/queries/useAnalyticsUsage'
 import { formatMoney } from '@/lib/utils'
 import { format, subHours } from 'date-fns'
@@ -138,11 +137,7 @@ export function SandboxSpendingTab({ sandboxId }: { sandboxId: string }) {
           <SpendingEmptyState />
         </div>
       ) : (
-        <ScrollArea
-          fade="mask"
-          horizontal
-          className="flex-1 min-h-0 border rounded-md [&_[data-slot=scroll-area-viewport]>div]:!overflow-visible [&_[data-slot=scroll-area-viewport]>div>div]:!overflow-visible"
-        >
+        <TableContainer>
           <Table>
             <TableHeader className="sticky top-0 z-10 bg-background after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-border">
               <TableRow>
@@ -178,7 +173,7 @@ export function SandboxSpendingTab({ sandboxId }: { sandboxId: string }) {
               })}
             </TableBody>
           </Table>
-        </ScrollArea>
+        </TableContainer>
       )}
     </div>
   )

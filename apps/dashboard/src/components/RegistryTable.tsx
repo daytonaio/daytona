@@ -87,6 +87,7 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
         pageSize: DEFAULT_PAGE_SIZE,
       },
       columnPinning: {
+        left: ['name'],
         right: ['actions'],
       },
     },
@@ -284,7 +285,8 @@ const getColumns = ({
                 <>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    className="cursor-pointer text-red-600 dark:text-red-400"
+                    variant="destructive"
+                    className="cursor-pointer"
                     disabled={loading}
                     onClick={() => onDelete(row.original.id)}
                   >

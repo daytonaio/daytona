@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { useCommandPaletteActions } from '@/components/CommandPalette'
 import { DebouncedInput } from '@/components/DebouncedInput'
 import { PageFooterPortal } from '@/components/PageLayout'
 import { Pagination } from '@/components/Pagination'
@@ -16,16 +17,15 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useCommandPaletteActions } from '@/components/CommandPalette'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { cn, getRelativeTimeString } from '@/lib/utils'
 import {
   getColumnPinningBorderClasses,
   getColumnPinningClasses,
   getColumnPinningStyles,
   getExplicitColumnSize,
 } from '@/lib/utils/table'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { cn, getRelativeTimeString } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytonaio/api-client'
 import {
   ColumnDef,
@@ -110,7 +110,7 @@ export function VolumeTable({
         pageSize: DEFAULT_PAGE_SIZE,
       },
       columnPinning: {
-        left: ['select'],
+        left: ['select', 'name'],
         right: ['actions'],
       },
     },
@@ -174,12 +174,12 @@ export function VolumeTable({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
         <DebouncedInput
           value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
           onChange={(value) => table.getColumn('name')?.setFilterValue(value)}
           placeholder="Search..."
-          className="max-w-sm mr-4"
+          className="max-w-sm"
         />
         {table.getColumn('state') && (
           <DataTableFacetedFilter column={table.getColumn('state')} title="State" options={statuses} />
@@ -485,9 +485,10 @@ const getColumns = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                className={`cursor-pointer text-red-600 dark:text-red-400 ${
-                  processingVolumeAction[row.original.id] ? 'opacity-50 pointer-events-none' : ''
-                }`}
+                variant="destructive"
+                className={cn('cursor-pointer', {
+                  'opacity-50 pointer-events-none': processingVolumeAction[row.original.id],
+                })}
                 disabled={processingVolumeAction[row.original.id]}
                 onClick={() => onDelete(row.original)}
               >

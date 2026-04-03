@@ -43,13 +43,10 @@ export function getColumnPinningBorderClasses<T>(
   const isPinned = column.getIsPinned()
 
   if (isPinned === 'left') {
-    return cn(columnIndex > 0 && 'md:!border-l-0', 'md:border-r')
+    return cn(column.getIsLastColumn('left') && 'md:border-r')
   }
   if (isPinned === 'right') {
-    return 'md:!border-r-0'
-  }
-  if (columnIndex === leftPinnedCount) {
-    return 'md:!border-l-0'
+    return cn(column.getIsFirstColumn('right') && 'md:border-l')
   }
   return ''
 }

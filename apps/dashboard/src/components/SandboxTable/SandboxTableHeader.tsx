@@ -287,7 +287,7 @@ export function SandboxTableHeader({
         </div>
       </div>
 
-      <div className="flex h-8 flex-1 items-center gap-1 overflow-x-auto scrollbar-hide">
+      <div className="flex h-8 flex-1 items-center gap-1 overflow-x-auto scrollbar-hide empty:hidden">
         {(table.getColumn('state')?.getFilterValue() as string[])?.length > 0 && (
           <StateFilterIndicator
             value={(table.getColumn('state')?.getFilterValue() as string[]) || []}

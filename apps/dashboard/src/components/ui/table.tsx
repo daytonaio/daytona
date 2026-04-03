@@ -146,7 +146,7 @@ function TableHead({ className, style, sticky, ...props }: React.ComponentProps<
       data-slot="table-head"
       data-sticky-state={stickyState}
       className={cn(
-        'text-muted-foreground [&:not(:first-child)]:border-l border-border/70 border-b h-8 px-3 text-left align-middle font-medium whitespace-nowrap text-sm [&_*]:text-sm bg-table-header [&:has([data-sort])]:text-foreground',
+        'text-muted-foreground border-b h-8 px-3 text-left align-middle font-medium whitespace-nowrap text-sm [&_*]:text-sm bg-table-header [&:has([data-sort])]:text-foreground',
         className,
       )}
       style={style}
@@ -163,7 +163,7 @@ function TableCell({ className, style, sticky, ...props }: React.ComponentProps<
       data-slot="table-cell"
       data-sticky-state={stickyState}
       className={cn(
-        'px-3 py-2 align-middle whitespace-nowrap [&:not(:first-child)]:border-l border-border/50 border-b bg-table-cell group-hover/row:bg-table-cell-hover group-data-[state=selected]/row:bg-table-cell-active has-[[data-slot=empty]]:group-hover/row:bg-table-cell',
+        'px-3 py-2 align-middle whitespace-nowrap border-b bg-table-cell group-hover/row:bg-table-cell-hover group-data-[state=selected]/row:bg-table-cell-active has-[[data-slot=empty]]:group-hover/row:bg-table-cell',
         className,
       )}
       style={style}
