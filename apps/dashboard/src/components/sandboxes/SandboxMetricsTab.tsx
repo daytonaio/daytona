@@ -33,7 +33,7 @@ const BYTES_TO_GIB = 1024 * 1024 * 1024
 type ViewMode = '%' | 'GiB'
 
 const METRIC_GROUPS = [
-  { key: 'cpu', title: 'CPU', prefix: '.cpu.', hasToggle: false },
+  { key: 'cpu', title: 'CPU (cores)', prefix: '.cpu.', hasToggle: false },
   { key: 'memory', title: 'Memory', prefix: '.memory.', hasToggle: true },
   { key: 'filesystem', title: 'Filesystem', prefix: '.filesystem.', hasToggle: true },
 ]
@@ -266,6 +266,45 @@ export function SandboxMetricsTab({ sandboxId }: { sandboxId: string }) {
         filteredSeries = filteredSeries.filter((s) => s.metricName.endsWith('.utilization'))
       } else if (mode === 'GiB') {
         filteredSeries = filteredSeries.filter((s) => !s.metricName.endsWith('.utilization'))
+      }
+
+      // Convert CPU utilization from percentage to cores using the limit value
+      if (group.key === 'cpu') {
+        const limitSeries = allSeries.find((s) => s.metricName.endsWith('.cpu.limit'))
+        const utilizationSeries = filteredSeries.find((s) => s.metricName.endsWith('.cpu.utilization'))
+        if (limitSeries && utilizationSeries) {
+          const limitByTimestamp = new Map<string, number>()
+          const sortedLimits = [...limitSeries.dataPoints]
+            .filter((dp) => dp.value != null)
+            .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+          for (const dp of sortedLimits) {
+            limitByTimestamp.set(dp.timestamp, dp.value!)
+          }
+
+          const convertedUtilization: MetricSeries = {
+            ...utilizationSeries,
+            dataPoints: utilizationSeries.dataPoints.flatMap((dp) => {
+              if (dp.value == null) return [dp]
+              let limitValue = limitByTimestamp.get(dp.timestamp)
+              if (limitValue == null) {
+                for (const lp of sortedLimits) {
+                  if (lp.timestamp > dp.timestamp) break
+                  limitValue = lp.value!
+                }
+              }
+              if (limitValue == null) return []
+              return [
+                {
+                  ...dp,
+                  value: Math.round((dp.value / 100) * limitValue * 100) / 100,
+                },
+              ]
+            }),
+          }
+          filteredSeries = filteredSeries.map((s) =>
+            s.metricName === utilizationSeries.metricName ? convertedUtilization : s,
+          )
+        }
       }
 
       return {
