@@ -184,6 +184,10 @@ class DockerContainerTool:
         self._instances[iid] = True
         return iid, None
 
+    class _Response:
+        def __init__(self, text):
+            self.text = text
+
     async def execute(self, instance_id: str, parameters: dict[str, Any], **kwargs) -> tuple[Any, float, dict]:
         code = parameters.get("code", "")
         timeout = parameters.get("timeout", self._timeout)
@@ -201,21 +205,11 @@ class DockerContainerTool:
         except asyncio.TimeoutError:
             proc.kill()
             await proc.wait()
-
-            class _Response:
-                def __init__(self, text):
-                    self.text = text
-
-            return _Response("TimeoutError: execution exceeded timeout"), 0.0, {"had_error": True}
+            return self._Response("TimeoutError: execution exceeded timeout"), 0.0, {"had_error": True}
 
         output = stdout.decode() + stderr.decode()
         had_error = proc.returncode != 0
-
-        class _Response:
-            def __init__(self, text):
-                self.text = text
-
-        return _Response(output), 0.0, {"had_error": had_error}
+        return self._Response(output), 0.0, {"had_error": had_error}
 
     async def release(self, instance_id: str, **kwargs) -> None:
         self._instances.pop(instance_id, None)
@@ -561,16 +555,17 @@ async def run_benchmarks(args: argparse.Namespace) -> tuple[list[dict[str, Any]]
                     f"{ok_count}/{ok_count + fail_count} ok"
                 )
     finally:
-        if instance_ids:
-            print(f"\n{'=' * 60}")
-            print(f"  TEARDOWN - Releasing {len(instance_ids)} sandboxes")
-            print(f"{'=' * 60}")
+        try:
+            if instance_ids:
+                print(f"\n{'=' * 60}")
+                print(f"  TEARDOWN - Releasing {len(instance_ids)} sandboxes")
+                print(f"{'=' * 60}")
 
-            teardown = await measure_teardown(tool, instance_ids)
-            print(f"  {len(instance_ids)} sandboxes released in {teardown['total_wall_s']:.2f}s")
-            setup_result = {"setup": setup, "teardown": teardown}
-
-        await maybe_close_tool(tool)
+                teardown = await measure_teardown(tool, instance_ids)
+                print(f"  {len(instance_ids)} sandboxes released in {teardown['total_wall_s']:.2f}s")
+                setup_result = {"setup": setup, "teardown": teardown}
+        finally:
+            await maybe_close_tool(tool)
 
     return result_rows, setup_result
 

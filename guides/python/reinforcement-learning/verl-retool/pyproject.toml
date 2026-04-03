@@ -9,5 +9,9 @@ dependencies = [
     "daytona>=0.128.1,<1.0.0",
 ]
 
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
 [tool.setuptools]
 py-modules = []

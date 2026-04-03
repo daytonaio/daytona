@@ -27,7 +27,7 @@ Multiple trajectories run concurrently, each with its own isolated sandbox. The 
 
 ### 2. The Problem: Tool Execution Bottlenecks Rollout Speed
 
-Tool execution typically dominates multi-turn RL rollout time. [VerlTool](https://arxiv.org/pdf/2509.01055) shows the effect directly: trajectory-level asynchronous execution speeds up rollout time by **1.32x** on Math-TIR, **1.22x** on SQL, and **1.97x** on DeepSearch.
+Tool execution typically dominates multi-turn RL rollout time. [VerlTool](https://arxiv.org/abs/2509.01055) shows the effect directly: trajectory-level asynchronous execution speeds up rollout time by **1.32x** on Math-TIR, **1.22x** on SQL, and **1.97x** on DeepSearch.
 
 <Image
   src={verlToolFigure}
@@ -150,8 +150,8 @@ Results are written to `outputs/<backend>/<timestamp>/` as `summary.json` and `r
 
 Benchmarked on macOS (Docker Desktop) and Daytona cloud (includes network round-trip). Absolute numbers may vary by environment.
 
-## References
+### References
 
 - [ReTool: Reinforcement Learning for Strategic Tool Use in LLMs](https://arxiv.org/abs/2504.11536)
-- [VerlTool: Towards Holistic Agentic Reinforcement Learning with Tool Use](https://arxiv.org/pdf/2509.01055)
+- [VerlTool: Towards Holistic Agentic Reinforcement Learning with Tool Use](https://arxiv.org/abs/2509.01055)
 - [veRL](https://github.com/verl-project/verl)
