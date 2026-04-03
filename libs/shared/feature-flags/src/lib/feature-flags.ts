@@ -1,6 +1,6 @@
 /*
  * Copyright Daytona Platforms Inc.
- * SPDX-License-Identifier: AGPL-3.0
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 export enum FeatureFlags {
@@ -15,7 +15,7 @@ export enum FeatureFlags {
 
 // Per-flag config for @RequireFlagsEnabled decorators.
 // defaultValue = fallback when the provider fails (false = block, true = allow).
-export const FeatureFlagConfig: Record<string, { flagKey: FeatureFlags; defaultValue: boolean }> = {
+export const FeatureFlagConfig: Record<keyof typeof FeatureFlags, { flagKey: FeatureFlags; defaultValue: boolean }> = {
   ORGANIZATION_INFRASTRUCTURE: { flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false },
   SANDBOX_RESIZE: { flagKey: FeatureFlags.SANDBOX_RESIZE, defaultValue: false },
   ORGANIZATION_EXPERIMENTS: { flagKey: FeatureFlags.ORGANIZATION_EXPERIMENTS, defaultValue: true },

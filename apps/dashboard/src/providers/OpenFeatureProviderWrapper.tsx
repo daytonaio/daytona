@@ -7,22 +7,22 @@ import { useConfig } from '@/hooks/useConfig'
 import { buildInMemoryFlagConfig } from '@daytonaio/feature-flags'
 import { OpenFeature, OpenFeatureProvider, InMemoryProvider } from '@openfeature/react-sdk'
 import { usePostHog } from 'posthog-js/react'
-import { FC, ReactNode, useRef } from 'react'
+import { FC, ReactNode, useEffect } from 'react'
 import { PostHogWebProvider } from './openfeature-posthog-web.provider'
 
 export const OpenFeatureProviderWrapper: FC<{ children: ReactNode }> = ({ children }) => {
   const config = useConfig()
   const posthog = usePostHog()
-  const initialized = useRef(false)
 
-  if (!initialized.current) {
+  useEffect(() => {
     if (config.posthog?.apiKey && posthog) {
       OpenFeature.setProvider(new PostHogWebProvider(posthog))
-    } else {
+    } else if (import.meta.env.DEV) {
       OpenFeature.setProvider(new InMemoryProvider(buildInMemoryFlagConfig()))
+    } else {
+      OpenFeature.setProvider(new InMemoryProvider({}))
     }
-    initialized.current = true
-  }
+  }, [config.posthog?.apiKey, posthog])
 
   return <OpenFeatureProvider>{children}</OpenFeatureProvider>
 }

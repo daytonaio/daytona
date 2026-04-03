@@ -330,7 +330,7 @@ function RequiredPermissionsOrganizationPageWrapper({
   return children
 }
 
-function RequiredFeatureFlagWrapper({ children, flagKey }: { children: React.ReactNode; flagKey: string }) {
+function RequiredFeatureFlagWrapper({ children, flagKey }: { children: React.ReactNode; flagKey: FeatureFlags }) {
   const flagEnabled = useBooleanFlagValue(flagKey, false)
 
   if (!flagEnabled) {

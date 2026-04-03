@@ -1,3 +1,8 @@
+/*
+ * Copyright Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export default {
   displayName: 'feature-flags',
   preset: '../../../jest.preset.js',

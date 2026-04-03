@@ -213,7 +213,9 @@ import { SandboxTelemetryModule } from './sandbox-telemetry/sandbox-telemetry.mo
             },
             apiKey: process.env.POSTHOG_API_KEY,
           })
-        : new InMemoryProvider(buildInMemoryFlagConfig()),
+        : process.env.NODE_ENV !== 'production'
+          ? new InMemoryProvider(buildInMemoryFlagConfig())
+          : new InMemoryProvider({}),
     }),
   ],
   controllers: [],

@@ -66,11 +66,11 @@ export class PostHogWebProvider implements Provider {
     _context: EvaluationContext,
     _logger: Logger,
   ): ResolutionDetails<number> {
-    const variant = this.posthog.getFeatureFlag(flagKey)
-    if (typeof variant !== 'number') {
+    const payload = this.posthog.getFeatureFlagPayload(flagKey)
+    if (typeof payload !== 'number') {
       return { value: defaultValue, reason: StandardResolutionReasons.DEFAULT }
     }
-    return { value: variant, reason: StandardResolutionReasons.TARGETING_MATCH }
+    return { value: payload, reason: StandardResolutionReasons.TARGETING_MATCH }
   }
 
   resolveObjectEvaluation<T extends JsonValue>(
