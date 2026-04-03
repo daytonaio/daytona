@@ -1,11 +1,10 @@
 ---
 import { PAGE_TITLE_ID } from './TableOfContent/constants'
-const { data, slug } = Astro.props.entry
+const { data } = Astro.props.entry
 const { title = data.title, tagline, image, actions = [] } = data.hero || {}
-const is404Page = slug === '404' || slug.endsWith('/404')
 ---
 
-<div class:list={['hero', { 'hero--404': is404Page }]}>
+<div class="hero">
   <h1 id={PAGE_TITLE_ID} data-page-title set:html={title} />
   {tagline && <div class="tagline" set:html={tagline} />}
 </div>
@@ -18,13 +17,6 @@ const is404Page = slug === '404' || slug.endsWith('/404')
     margin-bottom: 60px;
     @include for-mobile-screen-sizes {
       margin-bottom: 40px;
-    }
-
-    &.hero--404 {
-      margin-bottom: 1rem;
-      @include for-mobile-screen-sizes {
-        margin-bottom: 0.85rem;
-      }
     }
 
     .hero-highlight {
