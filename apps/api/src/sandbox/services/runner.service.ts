@@ -808,6 +808,13 @@ export class RunnerService {
     }
   }
 
+  async updateSnapshotRunnerLastUsedAt(runnerId: string, snapshotRef: string): Promise<void> {
+    if (!(await this.redisLockProvider.lock(`snapshot-runner:${runnerId}:${snapshotRef}:update-last-used`, 60))) {
+      return
+    }
+    await this.snapshotRunnerRepository.update({ runnerId, snapshotRef }, { lastUsedAt: new Date() })
+  }
+
   // TODO: combine getRunnersWithMultipleSnapshotsBuilding and getRunnersWithMultipleSnapshotsPulling?
 
   async getRunnersWithMultipleSnapshotsBuilding(maxSnapshotCount = 6): Promise<string[]> {
