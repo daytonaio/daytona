@@ -57,6 +57,16 @@ export function isLocalizedPath(slug: string | undefined): boolean {
  * production, preferring it would fetch prod HTML while the browser URL stays
  * on localhost; root-relative asset paths would then hit the dev server wrong
  */
+function originFromSiteConfig(site: string): string | null {
+  const trimmed = site.trim()
+  if (!trimmed) return null
+  try {
+    return new URL(trimmed).origin
+  } catch {
+    return null
+  }
+}
+
 function getProxyOrigin(request: Request): string {
   const reqUrl = new URL(request.url)
   const host = reqUrl.hostname
@@ -73,8 +83,9 @@ function getProxyOrigin(request: Request): string {
     (typeof process !== 'undefined' && process.env.PUBLIC_WEB_URL) ||
     ''
 
-  if (isLoopback && typeof site === 'string' && site.length > 0) {
-    return new URL(site).origin
+  if (isLoopback && typeof site === 'string') {
+    const fromSite = originFromSiteConfig(site)
+    if (fromSite) return fromSite
   }
 
   return reqUrl.origin
