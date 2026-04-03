@@ -184,6 +184,9 @@ class Daytona:
 
         # Create API configuration without api_key
         configuration = Configuration(host=self._api_url)
+        pool_size = config.connection_pool_maxsize if config else 100
+        if pool_size is not None:
+            configuration.connection_pool_maxsize = pool_size
         self._api_client: ApiClient = ApiClient(configuration)
         self._api_client.default_headers["Authorization"] = f"Bearer {self._api_key or self._jwt_token}"
         self._api_client.default_headers["X-Daytona-Source"] = "sdk-python"
