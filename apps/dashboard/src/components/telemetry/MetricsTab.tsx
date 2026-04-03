@@ -16,6 +16,7 @@ import { format } from 'date-fns'
 import { subHours } from 'date-fns'
 import { MetricSeries } from '@daytonaio/api-client'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { getMetricDisplayName } from '@/constants/metrics'
 
 interface MetricsTabProps {
   sandboxId: string
@@ -72,12 +73,8 @@ function buildChartData(series: MetricSeries[], convertToGiB: boolean): Record<s
 function buildChartConfig(series: MetricSeries[]): ChartConfig {
   const config: ChartConfig = {}
   series.forEach((s, index) => {
-    let label = s.metricName.replace(/^daytona\.sandbox\./, '')
-    if (s.metricName.endsWith('.cpu.utilization')) {
-      label = 'cpu.usage (cores)'
-    }
     config[s.metricName] = {
-      label,
+      label: getMetricDisplayName(s.metricName),
       color: CHART_COLORS[index % CHART_COLORS.length],
     }
   })
@@ -228,15 +225,35 @@ export const MetricsTab: React.FC<MetricsTabProps> = ({ sandboxId }) => {
         const limitSeries = allSeries.find((s) => s.metricName.endsWith('.cpu.limit'))
         const utilizationSeries = filteredSeries.find((s) => s.metricName.endsWith('.cpu.utilization'))
         if (limitSeries && utilizationSeries) {
+          // Build a sorted list of limit values and a Map for O(1) exact-match lookups
+          const limitByTimestamp = new Map<string, number>()
+          const sortedLimits = [...limitSeries.dataPoints]
+            .filter((dp) => dp.value != null)
+            .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+          for (const dp of sortedLimits) {
+            limitByTimestamp.set(dp.timestamp, dp.value!)
+          }
+
           const convertedUtilization: MetricSeries = {
             ...utilizationSeries,
-            dataPoints: utilizationSeries.dataPoints.map((dp) => {
-              const limitAtTime = limitSeries.dataPoints.find((lp) => lp.timestamp === dp.timestamp)
-              const limitValue = limitAtTime?.value ?? 0
-              return {
-                ...dp,
-                value: dp.value != null ? Math.round((dp.value / 100) * limitValue * 100) / 100 : dp.value,
+            dataPoints: utilizationSeries.dataPoints.flatMap((dp) => {
+              if (dp.value == null) return [dp]
+              // Exact match first, then carry forward the most recent limit before this timestamp
+              let limitValue = limitByTimestamp.get(dp.timestamp)
+              if (limitValue == null) {
+                for (const lp of sortedLimits) {
+                  if (lp.timestamp > dp.timestamp) break
+                  limitValue = lp.value!
+                }
               }
+              // Drop the data point if no limit is available, creating a gap in the chart
+              if (limitValue == null) return []
+              return [
+                {
+                  ...dp,
+                  value: Math.round((dp.value / 100) * limitValue * 100) / 100,
+                },
+              ]
             }),
           }
           filteredSeries = filteredSeries.map((s) =>
