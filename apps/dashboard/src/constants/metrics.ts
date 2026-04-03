@@ -4,7 +4,7 @@
  */
 
 export const METRIC_DISPLAY_NAMES: Record<string, string> = {
-  'daytona.sandbox.cpu.utilization': 'CPU Utilization',
+  'daytona.sandbox.cpu.utilization': 'CPU Usage (cores)',
   'daytona.sandbox.cpu.limit': 'CPU Limit',
   'daytona.sandbox.memory.utilization': 'Memory Utilization',
   'daytona.sandbox.memory.usage': 'Memory Usage',
