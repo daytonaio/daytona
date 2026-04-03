@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import pythonIcon from '@/assets/python.svg'
-import typescriptIcon from '@/assets/typescript.svg'
 import CodeBlock from '@/components/CodeBlock'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -127,17 +125,15 @@ const Onboarding: React.FC = () => {
                 <TabsList className="bg-foreground/10 p-0 rounded-none">
                   <TabsTrigger
                     value="python"
-                    className="data-[state=active]:bg-transparent data-[state=active]:text-foreground border-b-2 data-[state=active]:border-primary rounded-none h-full gap-2"
+                    className="data-[state=active]:bg-transparent data-[state=active]:text-foreground border-b-2 data-[state=active]:border-primary rounded-none h-full"
                   >
-                    <img src={pythonIcon} alt="Python" className="w-4 h-4" />
-                    <span>Python</span>
+                    Python
                   </TabsTrigger>
                   <TabsTrigger
                     value="typescript"
-                    className="data-[state=active]:bg-transparent data-[state=active]:text-foreground border-b-2 data-[state=active]:border-primary rounded-none h-full gap-2"
+                    className="data-[state=active]:bg-transparent data-[state=active]:text-foreground border-b-2 data-[state=active]:border-primary rounded-none h-full"
                   >
-                    <img src={typescriptIcon} alt="TypeScript" className="w-4 h-4" />
-                    <span>TypeScript</span>
+                    TypeScript
                   </TabsTrigger>
                   <TabsTrigger
                     value="ruby"
