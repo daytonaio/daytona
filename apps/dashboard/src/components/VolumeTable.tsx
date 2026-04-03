@@ -16,7 +16,7 @@ import { useCommandPaletteActions } from '@/components/CommandPalette'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { getRelativeTimeString } from '@/lib/utils'
-import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytonaio/api-client'
+import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytona/api-client'
 import {
   ColumnDef,
   ColumnFiltersState,

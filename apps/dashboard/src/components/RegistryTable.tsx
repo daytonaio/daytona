@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { DockerRegistry, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
+import { DockerRegistry, OrganizationRolePermissionsEnum } from '@daytona/api-client'
 import {
   ColumnDef,
   flexRender,

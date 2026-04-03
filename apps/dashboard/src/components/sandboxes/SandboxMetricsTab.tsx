@@ -17,7 +17,7 @@ import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { RefreshCw, BarChart3 } from 'lucide-react'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { format, subHours } from 'date-fns'
-import { MetricSeries } from '@daytonaio/api-client'
+import { MetricSeries } from '@daytona/api-client'
 import { getMetricDisplayName } from '@/constants/metrics'
 import { timeRangeSearchParams } from './SearchParams'
 

@@ -31,7 +31,7 @@ import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvit
 import { useWebhooks } from '@/hooks/useWebhooks'
 import { cn, getMetaKey } from '@/lib/utils'
 import { usePylon, usePylonCommands } from '@/vendor/pylon'
-import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
+import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytona/api-client'
 import {
   ArrowRightIcon,
   BookOpen,

@@ -31,7 +31,7 @@ export default defineConfig((mode) => ({
   },
   plugins: [
     react(),
-    // Required for @daytonaio/sdk
+    // Required for @daytona/sdk
     nodePolyfills({
       globals: { global: true, process: true, Buffer: true },
       overrides: {
@@ -71,14 +71,14 @@ export default defineConfig((mode) => ({
   ],
   resolve: {
     alias: [
-      // Resolve @daytonaio/sdk to the local source
+      // Resolve @daytona/sdk to the local source
       {
-        find: '@daytonaio/sdk',
+        find: '@daytona/sdk',
         replacement: path.resolve(__dirname, '../../libs/sdk-typescript/src'),
       },
-      // Target @ but not @daytonaio,
+      // Target @ but not @daytona,
       {
-        // find: /^@(?!daytonaio)/,
+        // find: /^@(?!daytona)/,
         find: '@',
         replacement: path.resolve(__dirname, './src'), // Make sure this points to dashboard's src
       },

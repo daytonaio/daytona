@@ -7,7 +7,7 @@
  * @module code-interpreter
  */
 
-import { InterpreterContext } from '@daytonaio/toolbox-api-client'
+import { InterpreterContext } from '@daytona/toolbox-api-client'
 
 /**
  * Represents stdout or stderr output from code execution.

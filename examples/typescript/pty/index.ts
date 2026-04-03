@@ -1,4 +1,4 @@
-import { Daytona, Sandbox } from '@daytonaio/sdk'
+import { Daytona, Sandbox } from '@daytona/sdk'
 
 async function interactivePtySession(sandbox: Sandbox) {
   console.log('=== First PTY Session: Interactive Command with Exit ===')

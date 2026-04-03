@@ -12,7 +12,7 @@ import {
   CreateRegionResponse,
   SnapshotManagerCredentials,
   UpdateRegion,
-} from '@daytonaio/api-client'
+} from '@daytona/api-client'
 import { RegionTable } from '@/components/RegionTable'
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { CreateRegionSheet } from '@/components/CreateRegionSheet'

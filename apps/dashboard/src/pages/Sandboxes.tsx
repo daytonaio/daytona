@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
+import { OrganizationRolePermissionsEnum } from '@daytona/api-client'
 import { OrganizationSuspendedError } from '@/api/errors'
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
@@ -45,7 +45,7 @@ import { createBulkActionToast } from '@/lib/bulk-action-toast'
 import { handleApiError } from '@/lib/error-handling'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
 import { formatDuration, pluralize } from '@/lib/utils'
-import { OrganizationUserRoleEnum, Sandbox, SandboxDesiredState, SandboxState } from '@daytonaio/api-client'
+import { OrganizationUserRoleEnum, Sandbox, SandboxDesiredState, SandboxState } from '@daytona/api-client'
 import { QueryKey, useQueryClient } from '@tanstack/react-query'
 import { PlusIcon } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'

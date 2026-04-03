@@ -4,7 +4,7 @@
  */
 
 import { ReactNode } from 'react'
-import { CodeLanguage } from '@daytonaio/sdk'
+import { CodeLanguage } from '@daytona/sdk'
 
 export const createErrorMessageOutput = (error: unknown): ReactNode => {
   return (

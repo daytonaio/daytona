@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react'
-import { Region } from '@daytonaio/api-client'
+import { Region } from '@daytona/api-client'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

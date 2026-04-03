@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CompletionList, LspSymbol, LspApi } from '@daytonaio/toolbox-api-client'
+import { CompletionList, LspSymbol, LspApi } from '@daytona/toolbox-api-client'
 import { WithInstrumentation } from './utils/otel.decorator'
 
 /**

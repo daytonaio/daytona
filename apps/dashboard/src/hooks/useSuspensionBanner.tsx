@@ -5,7 +5,7 @@
 
 import { useBanner } from '@/components/Banner'
 import { RoutePath } from '@/enums/RoutePath'
-import { Organization } from '@daytonaio/api-client'
+import { Organization } from '@daytona/api-client'
 import { addHours, formatDistanceToNow } from 'date-fns'
 import { CreditCardIcon, MailIcon } from 'lucide-react'
 import { useEffect, useRef } from 'react'

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import type { OrganizationUsageOverview } from '@daytonaio/api-client'
+import type { OrganizationUsageOverview } from '@daytona/api-client'
 import { useQuery } from '@tanstack/react-query'
 import { useApi } from '../useApi'
 import { queryKeys } from './queryKeys'

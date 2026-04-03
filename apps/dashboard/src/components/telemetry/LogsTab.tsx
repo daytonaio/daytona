@@ -16,7 +16,7 @@ import { ChevronLeft, ChevronRight, Search, FileText, RefreshCw, ChevronDown, Ch
 import { Spinner } from '@/components/ui/spinner'
 import { format } from 'date-fns'
 import { subHours } from 'date-fns'
-import { LogEntry } from '@daytonaio/api-client'
+import { LogEntry } from '@daytona/api-client'
 
 interface LogsTabProps {
   sandboxId: string

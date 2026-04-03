@@ -22,7 +22,7 @@ const config: StorybookConfig = {
       resolve: {
         alias: [
           {
-            find: '@daytonaio/sdk',
+            find: '@daytona/sdk',
             replacement: path.resolve(__dirname, '../../../libs/sdk-typescript/src'),
           },
           {

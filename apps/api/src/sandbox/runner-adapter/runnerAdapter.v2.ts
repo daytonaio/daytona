@@ -33,7 +33,7 @@ import {
   UpdateNetworkSettingsDTO,
   InspectSnapshotInRegistryRequest,
   RecoverSandboxDTO,
-} from '@daytonaio/runner-api-client'
+} from '@daytona/runner-api-client'
 import { SnapshotStateError } from '../errors/snapshot-state-error'
 
 /**

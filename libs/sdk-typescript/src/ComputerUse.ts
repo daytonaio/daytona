@@ -28,7 +28,7 @@ import {
   ProcessErrorsResponse,
   Recording,
   ListRecordingsResponse,
-} from '@daytonaio/toolbox-api-client'
+} from '@daytona/toolbox-api-client'
 import { dynamicImport } from './utils/Import'
 import { WithInstrumentation } from './utils/otel.decorator'
 
