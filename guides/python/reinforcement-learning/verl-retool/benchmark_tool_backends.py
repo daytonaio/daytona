@@ -13,7 +13,7 @@ import platform
 import statistics
 import sys
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from time import perf_counter
 from typing import Any
@@ -260,7 +260,7 @@ def make_tool(args: argparse.Namespace):
 
 def ensure_output_dir(output_root: Path, backend: str) -> Path:
     """Create a timestamped output directory for one backend run."""
-    timestamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     output_dir = output_root / backend / timestamp
     output_dir.mkdir(parents=True, exist_ok=True)
     return output_dir
@@ -641,7 +641,7 @@ def main() -> int:
 
     summary = {
         "backend": args.backend,
-        "created_at": datetime.now(UTC).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
         "host": platform.platform(),
         "python_version": platform.python_version(),
         "results": result_rows,

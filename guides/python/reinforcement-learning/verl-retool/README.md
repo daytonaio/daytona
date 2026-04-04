@@ -1,16 +1,17 @@
-# veRL ReTool + Daytona Benchmark
+# veRL ReTool Backend Benchmark
 
 ## Overview
 
 This directory contains the benchmark script used by Daytona's veRL guide.
-`benchmark_tool_backends.py` runs the ReTool Daytona backend from a local
-veRL checkout with the `recipe` submodule initialized.
+`benchmark_tool_backends.py` compares Daytona, Docker, and SandboxFusion
+backends from a local veRL checkout with the `recipe` submodule initialized.
+The Docker backend can also run standalone without a veRL checkout.
 
 ## Requirements
 
 - A local veRL checkout with the `recipe` submodule initialized
 - A Python environment where veRL is already installed
-- `DAYTONA_API_KEY` exported in your shell
+- Either `DAYTONA_API_KEY` or `DAYTONA_JWT_TOKEN` exported in your shell (for the Daytona backend)
 
 ## Quick Start
 
