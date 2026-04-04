@@ -1,0 +1,157 @@
+---
+title: Scaling Tool Execution in RL Training with veRL and Daytona
+description: Run veRL's ReTool recipe on Daytona sandboxes, configure the Daytona backend, and benchmark tool-calling throughput.
+---
+
+import { Image } from 'astro:assets'
+
+import daytonaThroughputPlot from '../../../../../assets/docs/images/verl-retool-daytona-throughput.svg'
+import verlToolFigure from '../../../../../assets/docs/images/verltool-figure-2-table-2.png'
+
+This guide demonstrates how to run [veRL's](https://github.com/verl-project/verl) ReTool recipe with Daytona sandboxes as the tool execution backend, scaling up to hundreds of tool calls per training step without hitting a concurrency ceiling.
+
+---
+
+### 1. Overview
+
+[veRL](https://github.com/verl-project/verl) is a distributed RL post-training framework for LLMs. The [ReTool](https://arxiv.org/abs/2504.11536v1) recipe trains models to solve math problems by writing and executing Python code across multi-turn interactions.
+
+During each training step, the model generates responses and writes Python code to verify intermediate computations. veRL's agent loop manages the sandbox lifecycle per trajectory:
+
+1. **`create()`** — A sandbox is created for the trajectory (one per trajectory, reused across turns)
+2. **`execute()`** — The model's code runs inside the sandbox and the result is returned
+3. The model reads the result and continues generating, possibly calling the tool again
+4. **`release()`** — The sandbox is deleted when the trajectory ends
+
+Multiple trajectories run concurrently, each with its own isolated sandbox. The reward signal comes from final answer correctness, and the RL trainer reinforces trajectories where the model used the code interpreter effectively.
+
+### 2. The Problem: Tool Execution Bottlenecks Rollout Speed
+
+Tool execution typically dominates multi-turn RL rollout time. [VerlTool](https://arxiv.org/abs/2509.01055) shows the effect directly: trajectory-level asynchronous execution speeds up rollout time by **1.32x** on Math-TIR, **1.22x** on SQL, and **1.97x** on DeepSearch.
+
+<Image
+  src={verlToolFigure}
+  alt="Figure 2 and Table 2 from the VerlTool paper showing the async rollout pipeline and synchronous versus asynchronous rollout times."
+  width={1200}
+  style="max-width: 100%; height: auto; margin: 1rem 0;"
+/>
+
+These speedups depend on the tool backend keeping pace with parallel requests. The GPU will sit idle if tool execution stalls.
+
+### 3. Daytona as the ReTool Backend
+
+By executing tool calls on Daytona sandboxes, the async rollout pipeline can scale to hundreds of concurrent executions without saturating the backend.
+
+- **No per-instance concurrency ceiling.** A single API endpoint handles hundreds of concurrent sandbox operations, removing the need to deploy multiple instances to scale.
+- **Fast parallel creation.** Hundreds of sandboxes are created in sub-second time at rollout start and reused for all tool calls in a trajectory.
+- **Async SDK.** The `AsyncDaytona` client integrates directly with veRL's async rollout workers. Workers fire requests in parallel and process results as they arrive.
+- **Automatic cleanup.** Sandboxes that fail or time out are automatically stopped and deleted, so leaked resources don't accumulate during long training runs.
+
+The chart below compares code execution throughput between Docker containers and Daytona sandboxes.
+
+<Image
+  src={daytonaThroughputPlot}
+  alt="Line chart comparing throughput between Docker containers and Daytona as concurrency increases from 1 to 128."
+  width={900}
+  style="max-width: 100%; height: auto; margin: 1rem 0;"
+/>
+
+With Docker containers, throughput plateaus as concurrency increases. Container startup overhead dominates, and adding more parallelism doesn't help. Daytona sandboxes scale linearly and reach **98 calls/sec** at 128 concurrent — a **5.5x throughput improvement** at peak concurrency.
+
+[Reproduce these results →](#benchmark-script)
+
+### 4. Setup
+
+#### Clone veRL and initialize the recipe submodule
+
+```bash
+git clone https://github.com/verl-project/verl.git
+cd verl
+git submodule update --init --recursive recipe
+cd recipe && git pull origin main && cd ..
+```
+
+#### Download the model checkpoint
+
+The ReTool recipe expects a fine-tuned SFT checkpoint. Download the pre-trained 32B checkpoint from HuggingFace:
+
+```bash
+pip install huggingface_hub
+huggingface-cli download JoeYing/ReTool-Qwen-32B-SFT --local-dir checkpoint/ReTool-Qwen-32B-SFT
+```
+
+See the [ReTool recipe README](https://github.com/verl-project/verl-recipe/tree/main/retool) for SFT data preparation if you want to train your own checkpoint on a different model size.
+
+#### Download the datasets
+
+```bash
+huggingface-cli download BytedTsinghua-SIA/DAPO-Math-17k --repo-type dataset --local-dir dataset/BytedTsinghua-SIA/DAPO-Math-17k
+huggingface-cli download yentinglin/aime_2025 --repo-type dataset --local-dir dataset/yentinglin/aime_2025
+huggingface-cli download Maxwell-Jia/AIME_2024 --repo-type dataset --local-dir dataset/Maxwell-Jia/AIME_2024
+```
+
+#### Create an environment and install dependencies
+
+:::note[Python]
+veRL documents Python 3.10+ for installation.
+:::
+
+```bash
+python3.10 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+pip install daytona
+```
+
+#### Export the Daytona API key
+
+Get your API key from the [Daytona Dashboard](https://app.daytona.io/dashboard/keys) and export it before running the recipe or the benchmark:
+
+```bash
+export DAYTONA_API_KEY="your_daytona_api_key"
+```
+
+### 5. Start Training
+
+Use the existing ReTool launch script and point it at the Daytona tool config and the downloaded checkpoint:
+
+```bash
+TOOL_CFG=recipe/retool/daytona_tool_config.yaml
+MODEL=$PWD/checkpoint/ReTool-Qwen-32B-SFT
+
+bash recipe/retool/run_qwen2-32b_dapo.sh \
+  actor_rollout_ref.model.path=$MODEL \
+  actor_rollout_ref.rollout.multi_turn.tool_config_path=$TOOL_CFG \
+  trainer.project_name=retool_daytona \
+  trainer.experiment_name=qwen2.5-32b_dapo_daytona
+```
+
+The dataset, reward function, async rollout mode, and trainer setup stay the same. The only changes are the model path and tool config path.
+
+### Benchmark Script
+
+```bash
+git clone https://github.com/daytonaio/daytona.git
+cd daytona/guides/python/reinforcement-learning/verl-retool
+
+# Docker containers (baseline — no additional dependencies)
+python benchmark_tool_backends.py \
+  --backend docker \
+  --concurrency 1 4 8 16 32 64 128
+
+# Daytona sandboxes (requires DAYTONA_API_KEY and veRL)
+python benchmark_tool_backends.py \
+  --backend daytona \
+  --verl-root /path/to/verl \
+  --concurrency 1 4 8 16 32 64 128
+```
+
+Results are written to `outputs/<backend>/<timestamp>/` as `summary.json` and `results.csv`.
+
+Benchmarked on macOS (Docker Desktop) and Daytona cloud (includes network round-trip). Absolute numbers may vary by environment.
+
+### References
+
+- [ReTool: Reinforcement Learning for Strategic Tool Use in LLMs](https://arxiv.org/abs/2504.11536)
+- [VerlTool: Towards Holistic Agentic Reinforcement Learning with Tool Use](https://arxiv.org/abs/2509.01055)
+- [veRL](https://github.com/verl-project/verl)
