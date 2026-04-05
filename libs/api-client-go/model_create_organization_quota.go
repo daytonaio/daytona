@@ -27,6 +27,7 @@ type CreateOrganizationQuota struct {
 	MaxMemoryPerSandbox *float32 `json:"maxMemoryPerSandbox,omitempty"`
 	MaxDiskPerSandbox *float32 `json:"maxDiskPerSandbox,omitempty"`
 	SnapshotQuota *float32 `json:"snapshotQuota,omitempty"`
+	TotalSnapshotQuota *float32 `json:"totalSnapshotQuota,omitempty"`
 	MaxSnapshotSize *float32 `json:"maxSnapshotSize,omitempty"`
 	VolumeQuota *float32 `json:"volumeQuota,omitempty"`
 	AdditionalProperties map[string]interface{}
@@ -275,6 +276,38 @@ func (o *CreateOrganizationQuota) SetSnapshotQuota(v float32) {
 	o.SnapshotQuota = &v
 }
 
+// GetTotalSnapshotQuota returns the TotalSnapshotQuota field value if set, zero value otherwise.
+func (o *CreateOrganizationQuota) GetTotalSnapshotQuota() float32 {
+	if o == nil || IsNil(o.TotalSnapshotQuota) {
+		var ret float32
+		return ret
+	}
+	return *o.TotalSnapshotQuota
+}
+
+// GetTotalSnapshotQuotaOk returns a tuple with the TotalSnapshotQuota field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateOrganizationQuota) GetTotalSnapshotQuotaOk() (*float32, bool) {
+	if o == nil || IsNil(o.TotalSnapshotQuota) {
+		return nil, false
+	}
+	return o.TotalSnapshotQuota, true
+}
+
+// HasTotalSnapshotQuota returns a boolean if a field has been set.
+func (o *CreateOrganizationQuota) HasTotalSnapshotQuota() bool {
+	if o != nil && !IsNil(o.TotalSnapshotQuota) {
+		return true
+	}
+
+	return false
+}
+
+// SetTotalSnapshotQuota gets a reference to the given float32 and assigns it to the TotalSnapshotQuota field.
+func (o *CreateOrganizationQuota) SetTotalSnapshotQuota(v float32) {
+	o.TotalSnapshotQuota = &v
+}
+
 // GetMaxSnapshotSize returns the MaxSnapshotSize field value if set, zero value otherwise.
 func (o *CreateOrganizationQuota) GetMaxSnapshotSize() float32 {
 	if o == nil || IsNil(o.MaxSnapshotSize) {
@@ -370,6 +403,9 @@ func (o CreateOrganizationQuota) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.SnapshotQuota) {
 		toSerialize["snapshotQuota"] = o.SnapshotQuota
 	}
+	if !IsNil(o.TotalSnapshotQuota) {
+		toSerialize["totalSnapshotQuota"] = o.TotalSnapshotQuota
+	}
 	if !IsNil(o.MaxSnapshotSize) {
 		toSerialize["maxSnapshotSize"] = o.MaxSnapshotSize
 	}
@@ -405,6 +441,7 @@ func (o *CreateOrganizationQuota) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "maxMemoryPerSandbox")
 		delete(additionalProperties, "maxDiskPerSandbox")
 		delete(additionalProperties, "snapshotQuota")
+		delete(additionalProperties, "totalSnapshotQuota")
 		delete(additionalProperties, "maxSnapshotSize")
 		delete(additionalProperties, "volumeQuota")
 		o.AdditionalProperties = additionalProperties
