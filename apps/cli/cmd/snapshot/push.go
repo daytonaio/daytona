@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -23,6 +24,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 var PushCmd = &cobra.Command{
@@ -33,6 +35,11 @@ var PushCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		sourceImage := args[0]
+
+		isTTY := term.IsTerminal(int(os.Stdout.Fd()))
+		isCI := isCIEnvironment()
+		showOutput := !quietFlag
+		showDynamicProgress := !quietFlag && !noProgressFlag && !isCI && isTTY
 
 		err := common.ValidateImageName(sourceImage)
 		if err != nil {
@@ -111,7 +118,16 @@ var PushCmd = &cobra.Command{
 		}
 		defer pushReader.Close()
 
-		err = jsonmessage.DisplayJSONMessagesStream(pushReader, os.Stdout, 0, true, nil)
+		if showOutput && !showDynamicProgress {
+			views_common.RenderInfoMessage("Pushing snapshot...")
+		}
+
+		pushOutput := io.Writer(os.Stdout)
+		if quietFlag {
+			pushOutput = io.Discard
+		}
+
+		err = jsonmessage.DisplayJSONMessagesStream(pushReader, pushOutput, os.Stdout.Fd(), showDynamicProgress, nil)
 		if err != nil {
 			return err
 		}
@@ -153,27 +169,47 @@ var PushCmd = &cobra.Command{
 			return apiclient_cli.HandleErrorResponse(res, err)
 		}
 
-		views_common.RenderInfoMessageBold(fmt.Sprintf("Successfully pushed %s to Daytona", sourceImage))
+		if showOutput {
+			views_common.RenderInfoMessageBold(fmt.Sprintf("Successfully pushed %s to Daytona", sourceImage))
+		}
 
-		err = views_util.WithInlineSpinner("Waiting for the snapshot to be validated", func() error {
-			return common.AwaitSnapshotState(ctx, apiClient, nameFlag, apiclient.SNAPSHOTSTATE_ACTIVE)
-		})
+		if showOutput && showDynamicProgress {
+			err = views_util.WithInlineSpinner("Waiting for the snapshot to be validated", func() error {
+				return common.AwaitSnapshotState(ctx, apiClient, nameFlag, apiclient.SNAPSHOTSTATE_ACTIVE)
+			})
+		} else {
+			if showOutput {
+				views_common.RenderInfoMessage("Waiting for the snapshot to be validated...")
+			}
+			err = common.AwaitSnapshotState(ctx, apiClient, nameFlag, apiclient.SNAPSHOTSTATE_ACTIVE)
+		}
 		if err != nil {
 			return err
 		}
 
-		views_common.RenderInfoMessage(fmt.Sprintf("%s  Use '%s' to create a new sandbox using this snapshot", views_common.Checkmark, nameFlag))
+		if showOutput {
+			views_common.RenderInfoMessage(fmt.Sprintf("%s  Use '%s' to create a new sandbox using this snapshot", views_common.Checkmark, nameFlag))
+		}
 		return nil
 	},
 }
 
 var (
-	nameFlag string
+	nameFlag       string
+	quietFlag      bool
+	noProgressFlag bool
 )
+
+func isCIEnvironment() bool {
+	ci := strings.TrimSpace(strings.ToLower(os.Getenv("CI")))
+	return ci != "" && ci != "0" && ci != "false"
+}
 
 func init() {
 	PushCmd.Flags().StringVarP(&entrypointFlag, "entrypoint", "e", "", "The entrypoint command for the image")
 	PushCmd.Flags().StringVarP(&nameFlag, "name", "n", "", "Specify the Snapshot name")
+	PushCmd.Flags().BoolVarP(&quietFlag, "quiet", "q", false, "Suppress all non-error output")
+	PushCmd.Flags().BoolVar(&noProgressFlag, "no-progress", false, "Disable dynamic progress output and animations")
 	PushCmd.Flags().Int32Var(&cpuFlag, "cpu", 0, "CPU cores that will be allocated to the underlying sandboxes (default: 1)")
 	PushCmd.Flags().Int32Var(&memoryFlag, "memory", 0, "Memory that will be allocated to the underlying sandboxes in GB (default: 1)")
 	PushCmd.Flags().Int32Var(&diskFlag, "disk", 0, "Disk space that will be allocated to the underlying sandboxes in GB (default: 3)")
