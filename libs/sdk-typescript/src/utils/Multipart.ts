@@ -92,8 +92,8 @@ export function parseMultipart(body: Uint8Array, boundary: string): MultipartPar
 export async function parseMultipartWithFormData(
   bodyBytes: Uint8Array,
   contentType: string,
-): Promise<Map<string, { filename: string; data: Uint8Array }>> {
-  const result = new Map<string, { filename: string; data: Uint8Array }>()
+): Promise<Array<{ fieldName: string; filename: string; contentType: string; data: Uint8Array }>> {
+  const result: Array<{ fieldName: string; filename: string; contentType: string; data: Uint8Array }> = []
 
   // Create a Blob and parse with FormData API
   const blob = new Blob([bodyBytes.slice()], { type: contentType })
@@ -107,8 +107,10 @@ export async function parseMultipartWithFormData(
         (async () => {
           const file = value as File
           const arrayBuffer = await file.arrayBuffer()
-          result.set(fieldName, {
+          result.push({
+            fieldName,
             filename: file.name,
+            contentType: file.type,
             data: new Uint8Array(arrayBuffer),
           })
         })(),

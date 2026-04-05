@@ -21,7 +21,7 @@ from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
 from .._utils.stream import process_streaming_response
 from .._utils.timeout import with_timeout
-from ..common.errors import DaytonaError
+from ..common.errors import DaytonaError, DaytonaValidationError
 from ..common.image import Image
 from ..common.snapshot import CreateSnapshotParams, PaginatedSnapshots, Snapshot
 from .object_storage import ObjectStorage
@@ -58,10 +58,10 @@ class SnapshotService:
             ```
         """
         if page is not None and page < 1:
-            raise DaytonaError("page must be a positive integer")
+            raise DaytonaValidationError("page must be a positive integer")
 
         if limit is not None and limit < 1:
-            raise DaytonaError("limit must be a positive integer")
+            raise DaytonaValidationError("limit must be a positive integer")
 
         response = self.__snapshots_api.get_all_snapshots(limit=limit, page=page)
         return PaginatedSnapshots(

@@ -15,7 +15,7 @@ import {
 import { FileSystemApi } from '@daytonaio/toolbox-api-client'
 import { dynamicImport } from './utils/Import'
 import { RUNTIME, Runtime } from './utils/Runtime'
-import { DaytonaError } from './errors/DaytonaError'
+import { createDaytonaError, DaytonaError } from './errors/DaytonaError'
 import {
   normalizeResponseStream,
   processDownloadFilesResponseWithBusboy,
@@ -75,6 +75,20 @@ export interface FileDownloadRequest {
 }
 
 /**
+ * Structured error metadata for a failed bulk file download item.
+ *
+ * @interface
+ * @property {string} message - Human-readable error message.
+ * @property {number | undefined} [statusCode] - HTTP-style status code for the per-file failure.
+ * @property {string | undefined} [errorCode] - Machine-readable error code for the per-file failure.
+ */
+export interface FileDownloadErrorDetails {
+  message: string
+  statusCode?: number
+  errorCode?: string
+}
+
+/**
  * Represents the response to a single file download request.
  *
  * @interface
@@ -82,11 +96,13 @@ export interface FileDownloadRequest {
  * @property {Buffer | string | undefined} [result] - The download result - file path (if destination provided in the request)
  * or bytes content (if no destination in the request), undefined if failed or no data received.
  * @property {string | undefined} [error] - Error message if the download failed, undefined if successful.
+ * @property {FileDownloadErrorDetails | undefined} [errorDetails] - Structured error metadata when the server provides it.
  */
 export interface FileDownloadResponse {
   source: string
   result?: Buffer | string
   error?: string
+  errorDetails?: FileDownloadErrorDetails
 }
 
 /**
@@ -95,13 +111,23 @@ export interface FileDownloadResponse {
  * @interface
  * @property {string | undefined} [destination] - Destination path in the local filesystem where the file content will be streamed to.
  * @property {string | undefined} [error] - Error message if the download failed, undefined if successful.
+ * @property {FileDownloadErrorDetails | undefined} [errorDetails] - Structured error metadata for a failed download item.
  * @property {Buffer | string | Uint8Array | undefined} [result] - The download result - file path (if destination provided in the request)
  * or bytes content (if no destination in the request), undefined if failed or no data received.
  */
 export interface DownloadMetadata {
   destination?: string
   error?: string
+  errorDetails?: FileDownloadErrorDetails
   result?: Buffer | string | Uint8Array
+}
+
+function createFileDownloadError(error: string, errorDetails?: FileDownloadErrorDetails): DaytonaError {
+  if (!errorDetails) {
+    return new DaytonaError(error)
+  }
+
+  return createDaytonaError(errorDetails.message, errorDetails.statusCode, undefined, errorDetails.errorCode)
 }
 
 /**
@@ -191,7 +217,7 @@ export class FileSystem {
       const response = await this.downloadFiles([{ source: remotePath }], timeout)
 
       if (response[0].error) {
-        throw new DaytonaError(response[0].error)
+        throw createFileDownloadError(response[0].error, response[0].errorDetails)
       }
 
       return response[0].result as Buffer
@@ -200,7 +226,7 @@ export class FileSystem {
     const response = await this.downloadFiles([{ source: remotePath, destination: dst }], timeout)
 
     if (response[0].error) {
-      throw new DaytonaError(response[0].error)
+      throw createFileDownloadError(response[0].error, response[0].errorDetails)
     }
   }
 
@@ -213,7 +239,8 @@ export class FileSystem {
    * @returns {Promise<FileDownloadResponse[]>} Array of download results.
    *
    * @throws {DaytonaError} If the request itself fails (network issues, invalid request/response, etc.). Individual
-   * file download errors are returned in the `FileDownloadResponse.error` field.
+   * file download errors are returned in `FileDownloadResponse.error`. When the daemon provides structured
+   * per-file metadata, it is also available in `FileDownloadResponse.errorDetails`.
    *
    * @example
    * // Download multiple files
@@ -274,6 +301,7 @@ export class FileSystem {
         source: f.source,
         result: error ? undefined : (metadata!.result as Buffer | string),
         error,
+        errorDetails: error ? metadata?.errorDetails : undefined,
       }
     })
   }

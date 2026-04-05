@@ -869,7 +869,7 @@ class FileSystemApi:
     ) -> Dict[str, object]:
         """Download multiple files
 
-        Download multiple files by providing their paths
+        Download multiple files by providing their paths. Successful files are returned as multipart parts named `file`. Per-file failures are returned as multipart parts named `error` with JSON payloads shaped like ErrorResponse.
 
         :param download_files: Paths of files to download (required)
         :type download_files: FilesDownloadRequest
@@ -936,7 +936,7 @@ class FileSystemApi:
     ) -> ApiResponse[Dict[str, object]]:
         """Download multiple files
 
-        Download multiple files by providing their paths
+        Download multiple files by providing their paths. Successful files are returned as multipart parts named `file`. Per-file failures are returned as multipart parts named `error` with JSON payloads shaped like ErrorResponse.
 
         :param download_files: Paths of files to download (required)
         :type download_files: FilesDownloadRequest
@@ -1003,7 +1003,7 @@ class FileSystemApi:
     ) -> RESTResponseType:
         """Download multiple files
 
-        Download multiple files by providing their paths
+        Download multiple files by providing their paths. Successful files are returned as multipart parts named `file`. Per-file failures are returned as multipart parts named `error` with JSON payloads shaped like ErrorResponse.
 
         :param download_files: Paths of files to download (required)
         :type download_files: FilesDownloadRequest

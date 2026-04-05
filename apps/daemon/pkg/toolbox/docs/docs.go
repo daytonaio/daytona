@@ -1077,7 +1077,7 @@ const docTemplate = `{
         },
         "/files/bulk-download": {
             "post": {
-                "description": "Download multiple files by providing their paths",
+                "description": "Download multiple files by providing their paths. Successful files are returned as multipart parts named ` + "`" + `file` + "`" + `. Per-file failures are returned as multipart parts named ` + "`" + `error` + "`" + ` with JSON payloads shaped like ErrorResponse.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1102,7 +1102,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Multipart response with file parts and JSON error parts",
                         "schema": {
                             "$ref": "#/definitions/gin.H"
                         }

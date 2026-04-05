@@ -761,7 +761,9 @@ paths:
       - file-system
   /files/bulk-download:
     post:
-      description: Download multiple files by providing their paths
+      description: Download multiple files by providing their paths. Successful files
+        are returned as multipart parts named `file`. Per-file failures are returned
+        as multipart parts named `error` with JSON payloads shaped like ErrorResponse.
       operationId: DownloadFiles
       requestBody:
         content:
@@ -776,7 +778,7 @@ paths:
             multipart/form-data:
               schema:
                 $ref: "#/components/schemas/gin.H"
-          description: OK
+          description: Multipart response with file parts and JSON error parts
       summary: Download multiple files
       tags:
       - file-system

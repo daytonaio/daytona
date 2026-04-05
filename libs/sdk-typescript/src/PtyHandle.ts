@@ -5,7 +5,7 @@
 
 import WebSocket from 'isomorphic-ws'
 import { PtyResult } from './types/Pty'
-import { DaytonaError } from './errors/DaytonaError'
+import { DaytonaConnectionError, DaytonaError, DaytonaTimeoutError } from './errors/DaytonaError'
 import { PtySessionInfo } from '@daytonaio/toolbox-api-client'
 import { WithInstrumentation } from './utils/otel.decorator'
 
@@ -94,7 +94,7 @@ export class PtyHandle {
 
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
-        reject(new DaytonaError('PTY connection timeout'))
+        reject(new DaytonaTimeoutError('PTY connection timeout'))
       }, 10000) // 10 second timeout
 
       const checkConnection = () => {
@@ -103,7 +103,7 @@ export class PtyHandle {
           resolve()
         } else if (this.ws.readyState === WebSocket.CLOSED || this._error) {
           clearTimeout(timeout)
-          reject(new DaytonaError(this._error || 'Connection failed'))
+          reject(new DaytonaConnectionError(this._error || 'Connection failed'))
         } else {
           setTimeout(checkConnection, 100)
         }
@@ -132,7 +132,7 @@ export class PtyHandle {
   @WithInstrumentation()
   async sendInput(data: string | Uint8Array): Promise<void> {
     if (!this.isConnected()) {
-      throw new DaytonaError('PTY is not connected')
+      throw new DaytonaConnectionError('PTY is not connected')
     }
 
     try {
@@ -143,7 +143,7 @@ export class PtyHandle {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
-      throw new DaytonaError(`Failed to send input to PTY: ${errorMessage}`)
+      throw new DaytonaConnectionError(`Failed to send input to PTY: ${errorMessage}`)
     }
   }
 

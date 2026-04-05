@@ -14,7 +14,7 @@ from websockets.asyncio.connection import Connection
 
 from daytona_toolbox_api_client_async import PtySessionInfo
 
-from ..common.errors import DaytonaError
+from ..common.errors import DaytonaConnectionError, DaytonaError, DaytonaTimeoutError
 from ..common.pty import PtyResult, PtySize
 
 
@@ -128,7 +128,7 @@ class AsyncPtyHandle:
 
         while not self._connection_established:
             if asyncio.get_event_loop().time() - start_time > timeout:
-                raise DaytonaError("PTY connection timeout")
+                raise DaytonaTimeoutError("PTY connection timeout")
 
             # Check if WebSocket is closed (handle different websocket implementations)
             is_closed = False
@@ -139,7 +139,7 @@ class AsyncPtyHandle:
                 pass
 
             if is_closed or self._error:
-                raise DaytonaError(self._error or "Connection failed")
+                raise DaytonaConnectionError(self._error or "Connection failed")
 
             await asyncio.sleep(0.1)
 
@@ -155,7 +155,7 @@ class AsyncPtyHandle:
             RuntimeError: If sending input fails
         """
         if not self.is_connected():
-            raise DaytonaError("PTY is not connected")
+            raise DaytonaConnectionError("PTY is not connected")
 
         try:
             if isinstance(data, str):
@@ -163,7 +163,7 @@ class AsyncPtyHandle:
             else:
                 await self._ws.send(data)
         except Exception as e:
-            raise DaytonaError(f"Failed to send input to PTY: {e}") from e
+            raise DaytonaConnectionError(f"Failed to send input to PTY: {e}") from e
 
     async def wait(self) -> PtyResult:
         """

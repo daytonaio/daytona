@@ -10,7 +10,58 @@ import { dynamicImport } from './Import'
 import { collectStreamBytes, toBuffer, toUint8Array } from './Binary'
 import { extractBoundary, getHeader, parseMultipartWithFormData } from './Multipart'
 import { parseMultipart } from './Multipart'
-import { DownloadMetadata } from '../FileSystem'
+import type { DownloadMetadata, FileDownloadErrorDetails } from '../FileSystem'
+
+type DownloadErrorPartResult = {
+  message: string
+  errorDetails?: FileDownloadErrorDetails
+}
+
+/**
+ * Parses a bulk-download error part into the legacy message and structured metadata.
+ */
+function parseDownloadErrorPart(data: Uint8Array, contentType?: string): DownloadErrorPartResult {
+  let message = new TextDecoder('utf-8').decode(data).trim()
+  if (!contentType || !/application\/json/i.test(contentType)) {
+    return { message }
+  }
+
+  try {
+    const payload = JSON.parse(message) as unknown
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+      return { message }
+    }
+
+    const payloadObject = payload as Record<string, unknown>
+    const structuredMessage = payloadObject.message
+    const statusCode = payloadObject.statusCode ?? payloadObject.status_code
+    const errorCode = payloadObject.code ?? payloadObject.error_code
+
+    if (typeof structuredMessage === 'string') {
+      message = structuredMessage
+    }
+
+    return {
+      message,
+      errorDetails: {
+        message,
+        statusCode: typeof statusCode === 'number' ? statusCode : undefined,
+        errorCode: typeof errorCode === 'string' ? errorCode : undefined,
+      },
+    }
+  } catch {
+    return { message }
+  }
+}
+
+/**
+ * Records a per-file error part on the corresponding download metadata entry.
+ */
+function assignDownloadErrorPart(metadata: DownloadMetadata, data: Uint8Array, contentType?: string): void {
+  const { message, errorDetails } = parseDownloadErrorPart(data, contentType)
+  metadata.error = message
+  metadata.errorDetails = errorDetails
+}
 
 /**
  * Safely aborts a stream
@@ -60,7 +111,7 @@ export async function processDownloadFilesResponseWithBusboy(
       preservePath: true,
     })
 
-    bb.on('file', (fieldName: string, fileStream: any, fileInfo: { filename?: string }) => {
+    bb.on('file', (fieldName: string, fileStream: any, fileInfo: { filename?: string; mimeType?: string }) => {
       const source = fileInfo?.filename
       if (!source) {
         abortStream(stream)
@@ -76,11 +127,11 @@ export async function processDownloadFilesResponseWithBusboy(
       }
 
       if (fieldName === 'error') {
-        // Collect error message
+        // Collect per-file error metadata.
         const chunks: Buffer[] = []
         fileStream.on('data', (chunk: Buffer) => chunks.push(chunk))
         fileStream.on('end', () => {
-          metadata.error = Buffer.concat(chunks).toString('utf-8').trim()
+          assignDownloadErrorPart(metadata, Buffer.concat(chunks), fileInfo?.mimeType)
         })
         fileStream.on('error', (err: any) => {
           metadata.error = `Stream error: ${err.message}`
@@ -195,18 +246,20 @@ export async function processDownloadFilesResponseWithBuffered(
   // Try native FormData parsing for multipart/form-data
   if (/^multipart\/form-data/i.test(contentType) && typeof Response !== 'undefined') {
     try {
-      const formDataMap = await parseMultipartWithFormData(bodyBytes, contentType)
+      const formDataParts = await parseMultipartWithFormData(bodyBytes, contentType)
 
-      formDataMap.forEach((value, fieldName) => {
-        const metadata = metadataMap.get(value.filename)
-        if (!metadata) return
-
-        if (fieldName.includes('error')) {
-          metadata.error = new TextDecoder('utf-8').decode(value.data).trim()
-        } else {
-          metadata.result = toBuffer(value.data)
+      for (const part of formDataParts) {
+        const metadata = metadataMap.get(part.filename)
+        if (!metadata) {
+          continue
         }
-      })
+
+        if (part.fieldName === 'error') {
+          assignDownloadErrorPart(metadata, part.data, part.contentType)
+        } else {
+          metadata.result = toBuffer(part.data)
+        }
+      }
 
       return
     } catch {
@@ -227,7 +280,7 @@ export async function processDownloadFilesResponseWithBuffered(
     if (!metadata) continue
 
     if (part.name === 'error') {
-      metadata.error = new TextDecoder('utf-8').decode(part.data).trim()
+      assignDownloadErrorPart(metadata, part.data, part.headers['content-type'])
     } else if (part.name === 'file') {
       metadata.result = toBuffer(part.data)
     }
