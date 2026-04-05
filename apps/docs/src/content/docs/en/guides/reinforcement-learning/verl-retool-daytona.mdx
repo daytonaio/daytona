@@ -62,7 +62,7 @@ With Docker containers, throughput plateaus as concurrency increases. Container 
 
 ### 4. Setup
 
-#### Clone veRL and initialize the recipe submodule
+#### Clone veRL and Initialize the Recipe Submodule
 
 ```bash
 git clone https://github.com/verl-project/verl.git
@@ -71,7 +71,7 @@ git submodule update --init --recursive recipe
 cd recipe && git pull origin main && cd ..
 ```
 
-#### Download the model checkpoint
+#### Download the Model Checkpoint
 
 The ReTool recipe expects a fine-tuned SFT checkpoint. Download the pre-trained 32B checkpoint from HuggingFace:
 
@@ -82,7 +82,7 @@ huggingface-cli download JoeYing/ReTool-Qwen-32B-SFT --local-dir checkpoint/ReTo
 
 See the [ReTool recipe README](https://github.com/verl-project/verl-recipe/tree/main/retool) for SFT data preparation if you want to train your own checkpoint on a different model size.
 
-#### Download the datasets
+#### Download the Datasets
 
 ```bash
 huggingface-cli download BytedTsinghua-SIA/DAPO-Math-17k --repo-type dataset --local-dir dataset/BytedTsinghua-SIA/DAPO-Math-17k
@@ -90,9 +90,9 @@ huggingface-cli download yentinglin/aime_2025 --repo-type dataset --local-dir da
 huggingface-cli download Maxwell-Jia/AIME_2024 --repo-type dataset --local-dir dataset/Maxwell-Jia/AIME_2024
 ```
 
-#### Create an environment and install dependencies
+#### Create an Environment and Install Dependencies
 
-:::note[Python]
+:::note[Note]
 veRL documents Python 3.10+ for installation.
 :::
 
@@ -103,7 +103,7 @@ pip install -e .
 pip install daytona
 ```
 
-#### Export the Daytona API key
+#### Export the Daytona API Key
 
 Get your API key from the [Daytona Dashboard](https://app.daytona.io/dashboard/keys) and export it before running the recipe or the benchmark:
 
