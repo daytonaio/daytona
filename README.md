@@ -38,7 +38,7 @@ Daytona provides an extensive set of features and tools for interacting with san
 - **Platform**: governance and operational controls for organizations standardizing on Daytona
 - **Sandboxes**: isolated full composable computers that execute workloads and retain state
 - **Agent tools**: programmatic capabilities for application code, agents, and integrations
-- **Human tools**: interfaces for sandbox overview, debugging, and direct interaction
+- **Human tools**: interfaces and remote sessions for interacting with sandboxes
 - **System tools**: platform-level hooks and controls for lifecycle events and network access
 
 | Platform                                                          | Sandboxes                                                               | Agent tools                                                                       | Human tools                                                               | System tools                                                  |
@@ -47,10 +47,10 @@ Daytona provides an extensive set of features and tools for interacting with san
 | [API Keys](https://www.daytona.io/docs/api-keys/)                 | [Snapshots](https://www.daytona.io/docs/snapshots/)                     | [File system operations](https://www.daytona.io/docs/file-system-operations/)     | [Web terminal](https://www.daytona.io/docs/web-terminal/)                 | [Network limits](https://www.daytona.io/docs/network-limits/) |
 | [Limits](https://www.daytona.io/docs/limits/)                     | [Declarative builder](https://www.daytona.io/docs/declarative-builder/) | [Language server protocol](https://www.daytona.io/docs/language-server-protocol/) | [SSH access](https://www.daytona.io/docs/ssh-access/)                     |                                                               |
 | [Billing](https://www.daytona.io/docs/billing/)                   | [Volumes](https://www.daytona.io/docs/volumes/)                         | [Computer use](https://www.daytona.io/docs/computer-use/)                         | [VNC access](https://www.daytona.io/docs/vnc-access/)                     |                                                               |
-| [Audit logs](https://www.daytona.io/docs/audit-logs/)             | [Regions](https://www.daytona.io/docs/regions/)                         | [MCP server](https://www.daytona.io/docs/mcp/)                                    | [VPN connection](https://www.daytona.io/docs/vpn-connections/)             |                                                               |
+| [Audit logs](https://www.daytona.io/docs/audit-logs/)             | [Regions](https://www.daytona.io/docs/regions/)                         | [MCP server](https://www.daytona.io/docs/mcp/)                                    | [VPN connection](https://www.daytona.io/docs/vpn-connections/)            |                                                               |
 | [OpenTelemetry](https://www.daytona.io/docs/otel-collection/)     |                                                                         | [Git operations](https://www.daytona.io/docs/git-operations/)                     | [Preview](https://www.daytona.io/docs/preview/)                           |                                                               |
-| [Security Exhibit](https://www.daytona.io/docs/security-exhibit/) |                                                                         | [Pseudo terminal (PTY)](https://www.daytona.io/docs/pty/)                         | [Custom preview proxy](https://www.daytona.io/docs/custom-preview-proxy/) |                                                               |
-|                                                                   |                                                                         | [Log streaming](https://www.daytona.io/docs/log-streaming/)                       | [Playground](https://www.daytona.io/docs/playground/)                     |                                                               |
+| [Integrations](https://www.daytona.io/docs/guides/)               |                                                                         | [Pseudo terminal (PTY)](https://www.daytona.io/docs/pty/)                         | [Custom preview proxy](https://www.daytona.io/docs/custom-preview-proxy/) |                                                               |
+| [Security exhibit](https://www.daytona.io/docs/security-exhibit/) |                                                                         | [Log streaming](https://www.daytona.io/docs/log-streaming/)                       | [Playground](https://www.daytona.io/docs/playground/)                     |                                                               |
 
 ## Architecture
 
@@ -62,22 +62,22 @@ Daytona platform is organized into multiple plane components, each serving a spe
 
 ### Applications
 
-Runnable applications and services for the Daytona platform. Each directory is a deployable or buildable component. All related content is available in the [apps](apps) directory.
+Runnable applications and services for the Daytona platform. Each directory is a deployable or buildable component, available in the [apps](apps) directory.
 
 - [API](apps/api): NestJS-based RESTful service; primary entry point for all platform operations
-- [CLI](apps/cli): Go command-line access to core features for interacting with sandboxes
+- [CLI](apps/cli): Go command-line interface access to core features for interacting with sandboxes
 - [Daemon](apps/daemon): code execution agent that runs inside each sandbox
 - [Dashboard](apps/dashboard): web user interface for visual sandbox management
 - [Docs](apps/docs): documentation content; website published to [daytona.io/docs](https://www.daytona.io/docs/)
 - [OpenTelemetry](apps/otel-collector): trace and metric collection for Daytona SDK operations
 - [Proxy](apps/proxy): reverse proxy for custom routing and preview URLs
-- [Runner](apps/runner): compute nodes that power Daytona's compute plane
+- [Runner](apps/runner): compute nodes that power Daytona's compute plane and run sandboxes
 - [Snapshot manager](apps/snapshot-manager): orchestrates the creation of sandbox snapshots
 - [SSH gateway](apps/ssh-gateway): standalone SSH gateway that accepts authenticated `ssh` connections
 
 ### Client libraries
 
-Client libraries integrate the Daytona platform from application code through developer-facing SDKs backed by OpenAPI-generated REST clients and toolbox API clients. Each directory is a publishable package for a specific language or runtime. All related content is available in the [libs](libs) directory.
+Client libraries integrate the Daytona platform from application code through developer-facing SDKs backed by OpenAPI-generated REST clients and toolbox API clients. Each directory is a publishable package for a specific language or runtime, available in the [libs](libs) directory.
 
 #### Python
 
@@ -85,7 +85,7 @@ Client libraries integrate the Daytona platform from application code through de
 pip install daytona
 ```
 
-Available standalone packages and libraries for interacting with Daytona using Python:
+Standalone packages and libraries for interacting with Daytona using Python:
 
 > [sdk-python](libs/sdk-python) • [api-client-python](libs/api-client-python) • [api-client-python-async](libs/api-client-python-async) • [toolbox-api-client-python](libs/toolbox-api-client-python) • [toolbox-api-client-python-async](libs/toolbox-api-client-python-async)
 
@@ -95,7 +95,7 @@ Available standalone packages and libraries for interacting with Daytona using P
 npm install @daytonaio/sdk
 ```
 
-Available standalone packages and libraries for interacting with Daytona using TypeScript:
+Standalone packages and libraries for interacting with Daytona using TypeScript:
 
 > [sdk-typescript](libs/sdk-typescript) • [api-client](libs/api-client) • [toolbox-api-client](libs/toolbox-api-client)
 
@@ -105,7 +105,7 @@ Available standalone packages and libraries for interacting with Daytona using T
 gem install daytona
 ```
 
-Available standalone packages and libraries for interacting with Daytona using Ruby:
+Standalone packages and libraries for interacting with Daytona using Ruby:
 
 > [sdk-ruby](libs/sdk-ruby) • [api-client-ruby](libs/api-client-ruby) • [toolbox-api-client-ruby](libs/toolbox-api-client-ruby)
 
@@ -115,7 +115,7 @@ Available standalone packages and libraries for interacting with Daytona using R
 go get github.com/daytonaio/daytona/libs/sdk-go
 ```
 
-Available standalone packages and libraries for interacting with Daytona using Go:
+Standalone packages and libraries for interacting with Daytona using Go:
 
 > [sdk-go](libs/sdk-go) • [api-client-go](libs/api-client-go) • [toolbox-api-client-go](libs/toolbox-api-client-go)
 
@@ -125,16 +125,17 @@ Available standalone packages and libraries for interacting with Daytona using G
 io.daytona:sdk
 ```
 
-Available standalone packages and libraries for interacting with Daytona using Java:
+Standalone packages and libraries for interacting with Daytona using Java:
 
 > [sdk-java](libs/sdk-java) • [api-client-java](libs/api-client-java) • [toolbox-api-client-java](libs/toolbox-api-client-java)
 
 ## Deployment
 
-Daytona is available as a managed service on [app.daytona.io](https://app.daytona.io).
+Daytona can run as a fully hosted service, as an open-source stack you operate, or in a hybrid setup where Daytona orchestrates sandboxes while execution happens on machines you manage. Self-hosting steps are in the [OSS deployment guide](https://www.daytona.io/docs/oss-deployment/); custom regions and runners are covered under [customer managed compute](https://www.daytona.io/docs/runners/).
 
-- [Open source](https://www.daytona.io/docs/oss-deployment/): self-host Daytona platform on the infrastructure you control
-- [Customer managed compute](https://www.daytona.io/docs/runners/): attach runners to operate Daytona sandboxes on your compute infrastructure
+- **[Managed service](https://app.daytona.io)**: hosted control plane, dashboard, and API with sandbox execution on Daytona-managed runners in shared or dedicated regions
+- **[Open source deployment](https://www.daytona.io/docs/oss-deployment/)**: Docker Compose stack in the [docker](docker) directory (API, runners, proxy, SSH gateway, registry, database, object storage, and related services); the guide covers local access, DNS for preview URLs, and runner networking options
+- **[Customer managed compute](https://www.daytona.io/docs/runners/)**: custom regions and runner machines under your control for workload execution, data locality, and capacity, with the control plane handling scheduling, health reporting, and sandbox connectivity
 
 ## Quick Start
 
