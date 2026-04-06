@@ -3,7 +3,7 @@ title: Open Source Deployment
 description: Run Daytona Open Source locally using Docker Compose.
 ---
 
-This guide will walk you through running Daytona Open Source locally using Docker Compose.
+This guide will walk you through running Daytona Open Source using Docker Compose locally on your machine or on a server behind a public domain with HTTPS.
 
 The compose file can be found in the [docker](https://github.com/daytonaio/daytona/tree/main/docker) folder of the Daytona repository.
 
@@ -28,7 +28,7 @@ The Docker Compose configuration includes all the necessary services to run Dayt
 - **Jaeger**: Distributed tracing
 - **PgAdmin**: Database administration interface
 
-## Quick Start
+## Local Deployment Quick Start
 
 1. Clone the [Daytona repository](https://github.com/daytonaio/daytona)
 2. [Install Docker and Docker Compose](https://docs.docker.com/get-docker/)
@@ -46,7 +46,59 @@ The Docker Compose configuration includes all the necessary services to run Dayt
    - Registry UI: http://localhost:5100
    - MinIO Console: http://localhost:9001 (minioadmin / minioadmin)
 
+## Domain Deployment Quick Start
+
+This path deploys Daytona on a server behind a public domain with HTTPS, using Caddy as the reverse proxy and Let's Encrypt for TLS certificates.
+
+### Prerequisites
+
+1. **A server or local machine** with at least **4 GB RAM** (8 GB recommended). Ubuntu 22.04+, Debian 12+, or Fedora 39+ on any cloud provider or bare-metal host — or **macOS 13+** (Ventura or later) with [Docker Desktop](https://www.docker.com/products/docker-desktop/) for local domain deployment.
+
+   > **macOS behind a router:** If the Mac is connected to a router (e.g. a Mac Mini on a home or office network), you must configure port forwarding and a stable local IP before proceeding. Port forwarding exposes the Mac directly to inbound internet traffic, bypassing the router's NAT firewall.
+   >
+   > - **Assign a static local IP.** Set a DHCP reservation in the router for the Mac's MAC address, or configure a static IP on the Mac itself. Port forwards break silently if the Mac's IP changes after a DHCP lease renewal. Get the current IP with `ipconfig getifaddr en0`.
+   > - **Forward ports 80 and 443** from the router to the Mac's static local IP. These are required for Caddy to serve HTTPS and complete ACME certificate challenges. If the router serves its own admin panel on port 443 (common on consumer routers), move the admin UI to another port first so it doesn't intercept HTTPS traffic.
+   > - **Forward port 2222 only if you need remote SSH access to sandboxes.** The SSH Gateway bypasses Caddy and exposes a raw TCP listener. If you only access sandboxes from the local network, skip this forward and connect to the Mac's local IP on port 2222 directly. If you do forward it, restrict the source IP range in your router's port forwarding rules to known addresses (e.g. your office or VPN exit IP).
+   > - **ISP limitations:** Many residential ISPs block inbound traffic on ports 80/443 or use Carrier-Grade NAT (CGNAT), which prevents port forwarding entirely. Run `curl -4 ifconfig.me` and compare the result to the WAN IP in your router's admin panel — if they differ, you are behind CGNAT and will need a tunnel service (e.g. Cloudflare Tunnel) instead of port forwarding.
+   >
+   > **Network isolation (recommended):** The Mac will share a network segment with every other device on the LAN. If your router supports VLANs or a guest/DMZ network, place the Mac on an isolated segment to prevent lateral access to other devices in the event of a compromise.
+
+2. **A registered domain name.** This guide uses `daytona.example.com` as a placeholder — replace it everywhere with your actual domain.
+
+3. **A DNS provider API token** for automated wildcard TLS certificate provisioning. Wildcard certificates require a DNS-01 challenge, which means your certificate tool must be able to create DNS TXT records programmatically. See the [DNS Provider Reference](#dns-provider-reference) section for provider-specific instructions.
+
+4. **Ports 80, 443, and 2222** open on both the server's host firewall and any cloud-provider-level firewall (e.g., DigitalOcean Cloud Firewalls, AWS Security Groups). On macOS, Docker Desktop handles port binding and the built-in firewall does not block these ports by default — but enabling **System Settings → Network → Firewall** is recommended if the Mac is exposed to the internet via port forwarding.
+
+5. **SSH access** to the server as root or a user with sudo privileges. On macOS, the script runs as your normal user and prompts for `sudo` only when needed (Caddy binary installation).
+
+6. [Docker and Docker Compose installed](https://docs.docker.com/get-docker/)
+
+### Steps
+
+1. Clone the [Daytona repository](https://github.com/daytonaio/daytona)
+2. [Install Docker and Docker Compose](https://docs.docker.com/get-docker/)
+3. Configure DNS records at your DNS provider — see [DNS
+Configuration](#domain-deployment). This step must be done manually before proceeding.
+4. Run the setup wizard:
+
+   ```bash
+   ./scripts/setup-domain-oss-deployment.sh
+   ```
+
+5. During the setup process, input your domain, email address, password, and credentials for the databases you wish to use.
+
+6. Access the services:
+   - Daytona Dashboard: https://daytona.example.com
+     - Username: Chosen during setup
+     - Password: Chosen during setup
+     - Make sure that the default snapshot is active at https://daytona.example.com/dashboard/snapshots
+   - PgAdmin: https://daytona.example.com:5050 (credentials set during setup)
+   - Registry UI: https://daytona.example.com:5100 (admin credentials set during setup)
+   - MinIO Console: https://daytona.example.com:9001 (credentials set during setup)
+
 ## DNS Setup for Proxy URLs
+
+### Local Development
 
 For local development, you need to resolve `*.proxy.localhost` domains to `127.0.0.1`:
 
@@ -58,18 +110,206 @@ This configures dnsmasq with `address=/proxy.localhost/127.0.0.1`.
 
 **Without this setup**, SDK examples and direct proxy access won't work.
 
+### Domain Deployment
+
+For domain deployments, create DNS records at your DNS provider pointing to your server's public IP:
+
+| Record Type | Name | Value | Proxy Status |
+|-------------|------|-------|--------------|
+| A | `daytona.example.com` | `YOUR_SERVER_IP` | See note below |
+| A or CNAME | `proxy.daytona.example.com` | `YOUR_SERVER_IP` (A) or `daytona.example.com` (CNAME) | **Must be DNS-only** |
+| A or CNAME (wildcard) | `*.proxy.daytona.example.com` | `YOUR_SERVER_IP` (A) or `daytona.example.com` (CNAME) | **Must be DNS-only** |
+
+The wildcard `*.proxy.daytona.example.com` covers subdomains like `8080-sandboxid.proxy.daytona.example.com`, but it does **not** cover the bare `proxy.daytona.example.com` itself. The proxy service uses the bare domain for OIDC callbacks (e.g., `proxy.daytona.example.com/callback`), so it needs its own record.
+
+Either A records or CNAME records work. CNAME records point to another hostname instead of an IP, so if your server IP changes you only update one A record. The Daytona team recommends CNAME for the proxy records.
+
+#### Cloudflare-Specific Warning
+
+If you use Cloudflare, the wildcard record for `*.proxy.daytona.example.com` **must** have the proxy toggled OFF (grey cloud / "DNS only"). Cloudflare's free Universal SSL certificate covers `*.example.com` but does **not** cover sub-subdomain wildcards like `*.proxy.example.com`. If the orange cloud proxy is enabled, Cloudflare will intercept the traffic but fail the TLS handshake because it has no certificate for that depth.
+
+The base domain record (`daytona.example.com`) can be either proxied or DNS-only. For simplicity, setting all records to DNS-only is recommended so Caddy handles all TLS uniformly.
+
+This limitation is Cloudflare-specific to the free tier. Other DNS providers that do not act as a TLS-terminating proxy (DigitalOcean DNS, AWS Route 53, Namecheap, etc.) do not have this issue.
+
+#### Verification
+
+Wait 1-5 minutes for DNS propagation, then:
+
+```bash
+# All three should return your server's actual IP (NOT Cloudflare IPs like 104.x.x.x)
+dig +short daytona.example.com
+dig +short proxy.daytona.example.com
+dig +short anything.proxy.daytona.example.com
+```
+
+## Domain Deployment: What the Setup Script Does
+
+The `setup-domain-oss-deployment.sh` script automates the manual configuration steps required for a domain deployment. The sections below document what it does, for troubleshooting or if you need to customize the configuration beyond what the wizard supports.
+
+### Architecture
+
+Three services must be reachable from the internet:
+
+| Service | Internal Port | Purpose |
+|---------|---------------|---------|
+| **API** | 3000 | Dashboard, REST API |
+| **Proxy** | 4000 | Routes browser traffic to sandbox preview ports |
+| **SSH Gateway** | 2222 | SSH access to sandboxes |
+
+Caddy sits in front of the API and Proxy, terminates TLS, and routes requests based on hostname. Dex (the OIDC provider) is proxied through Caddy at the `/dex/*` path on the main domain. The SSH Gateway on port 2222 is TCP (not HTTP) and bypasses Caddy — it is exposed directly through the firewall.
+
+Sandbox preview URLs use the pattern `{{PORT}}-{{sandboxId}}.proxy.daytona.example.com`, which is why a wildcard DNS record is required.
+
+### Security Credentials
+
+The default Docker Compose file ships with placeholder secrets not safe for any non-localhost deployment. The setup script generates unique values for:
+
+- `ENCRYPTION_KEY` and `ENCRYPTION_SALT`
+- `PROXY_API_KEY`
+- `RUNNER_API_KEY` (used as both `DEFAULT_RUNNER_API_KEY` and `DAYTONA_RUNNER_TOKEN`)
+- `SSH_GATEWAY_API_KEY`
+
+To generate these manually:
+
+```bash
+openssl rand -hex 16
+```
+
+### Dex Configuration
+
+The script updates `docker/dex/config.yaml` to set:
+
+- `issuer` to `https://YOUR_DOMAIN/dex`
+- `redirectURIs` to use `https://YOUR_DOMAIN` instead of `localhost`
+- `staticPasswords` with your chosen email and bcrypt-hashed password
+
+:::caution
+The `redirectURIs` must use `https://` and your actual domain. If these still reference `localhost`, OIDC callbacks will fail after login.
+:::
+
+To generate a bcrypt password hash manually:
+
+```bash
+echo 'YOUR_PASSWORD' | htpasswd -BinC 10 admin | cut -d: -f2
+```
+
+### Docker Compose Environment Variables
+
+The script updates several environment variables in `docker/docker-compose.yaml` across multiple services — switching URLs from `localhost` to your domain, protocols from `http` to `https`, and replacing placeholder secrets with generated values. Key changes include:
+
+- **API**: `PROXY_DOMAIN`, `PROXY_PROTOCOL`, `PROXY_TEMPLATE_URL`, `DASHBOARD_URL`, `DASHBOARD_BASE_API_URL`, `PUBLIC_OIDC_DOMAIN`, `SSH_GATEWAY_URL`, `SSH_GATEWAY_COMMAND`, and all security key variables
+- **Proxy**: `PROXY_PROTOCOL`, `COOKIE_DOMAIN`, `OIDC_PUBLIC_DOMAIN`, and `PROXY_API_KEY`
+- **Runner**: `DAYTONA_RUNNER_TOKEN`
+- **SSH Gateway**: `API_KEY`
+
+### Caddy Installation and Configuration
+
+The script installs Caddy with your DNS provider's module (needed for wildcard TLS via DNS-01 challenge), creates a Caddyfile, sets up DNS provider credentials, and configures a service — systemd on Linux or a launchd LaunchAgent on macOS.
+
+Caddy handles certificate renewal automatically — no cron jobs are needed.
+
+### Dashboard Frontend Patch
+
+:::caution
+The Daytona OSS Docker images ship with `http://localhost:3000` hardcoded in the compiled frontend JavaScript bundle. Without patching this, the dashboard will load but **sandbox creation will fail** because the browser tries to reach `localhost:3000` on the user's machine.
+:::
+
+The script extracts the dashboard assets from the API container, replaces `http://localhost:3000` with `https://YOUR_DOMAIN`, and mounts the patched assets back via a Docker volume. If the Daytona API image is updated (e.g., via `docker compose pull`), this patch step must be re-run.
+
+### Firewall Configuration
+
+The script opens ports 22, 80, 443, and 2222 on Linux (via ufw or firewalld). If your cloud provider has an external firewall (DigitalOcean Cloud Firewalls, AWS Security Groups, etc.), you must create matching inbound rules there as well — the host firewall and cloud firewall are independent. On macOS, firewall configuration is skipped.
+
+## DNS Provider Reference
+
+### Cloudflare
+
+**API Token**: Cloudflare Dashboard > My Profile > API Tokens > Create Token. Use the "Edit zone DNS" template, or create a custom token with Zone: DNS: Edit permissions scoped to your domain.
+
+**Caddy module**: `github.com/caddy-dns/cloudflare`
+
+**DNS record note**: The wildcard record `*.proxy.yourdomain.com` must be set to DNS-only (grey cloud). See [Cloudflare-Specific Warning](#cloudflare-specific-warning).
+
+### DigitalOcean
+
+**API Token**: DigitalOcean Control Panel > API > Tokens > Generate New Token with read and write scopes.
+
+**Caddy module**: `github.com/caddy-dns/digitalocean`
+
+### AWS Route 53
+
+**Credentials**: Create an IAM user with `route53:ChangeResourceRecordSets`, `route53:GetChange`, and `route53:ListHostedZonesByName` permissions. Generate an access key.
+
+**Caddy module**: `github.com/caddy-dns/route53`
+
+### Hetzner
+
+**API Token**: Hetzner DNS Console > API Tokens > Create Token.
+
+**Caddy module**: `github.com/caddy-dns/hetzner`
+
+## Domain Deployment Troubleshooting
+
+### Sandbox creation fails with "Network Error" / `localhost:3000` in browser console
+
+The compiled dashboard JavaScript has `http://localhost:3000` hardcoded. Follow the [Dashboard Frontend Patch](#dashboard-frontend-patch) section. After patching, do a hard refresh (Cmd+Shift+R or Ctrl+Shift+R) in the browser.
+
+### Browser redirects to `localhost:5556` during login
+
+The Dex config file still has `issuer: http://localhost:5556/dex`. Update it to `issuer: https://yourdomain.com/dex` and restart Dex, then the API and Proxy services.
+
+### 502 Bad Gateway on dashboard or sandbox preview URLs
+
+Caddy cannot reach the API (port 3000) or Proxy (port 4000). Verify the containers are running with `docker compose ps` and that ports are published to the host.
+
+### TLS certificate check fails for wildcard
+
+Confirm the wildcard DNS records are DNS-only (not proxied through Cloudflare). Check Caddy logs for ACME errors:
+
+```bash
+# Linux
+sudo journalctl -u caddy --since "30 min ago" --no-pager | grep -i "error\|acme\|cert"
+
+# macOS
+cat /usr/local/var/log/caddy/error.log | grep -i "error\|acme\|cert"
+```
+
+A common issue is leaving a placeholder email in the Caddyfile — Let's Encrypt rejects `example.com` as a contact domain.
+
+If Caddy logs show `HTTP 429 rateLimited`, you have hit Let's Encrypt's rate limit of 5 duplicate certificates per 168 hours. This typically happens when re-deploying to multiple servers within a short period. Caddy will retry automatically — leave it running and certificates will be issued once the limit resets. Certificates are stored locally and reused across re-runs on the same server, so re-running the setup script on the same machine does not count against the limit.
+
+### Sandbox URLs show `http://` instead of `https://`
+
+`PROXY_PROTOCOL` is still set to `http` in the API or Proxy service. Set it to `https` in both and restart.
+
 ## Development Notes
 
 - The setup uses shared networking for simplified service communication
 - Database and storage data is persisted in Docker volumes
 - The registry is configured to allow image deletion for testing
 - Sandbox resource limits are disabled due to inability to partition cgroups in DinD environment where the sock is not mounted
+- The dashboard frontend patch (domain deployments only) is a workaround for a build-time bug in the Daytona Docker images and should be removed once the upstream project makes the SDK base URL configurable at runtime
 
 ## Security Considerations
 
 The `INTER_SANDBOX_NETWORK_ENABLED` runner environment variable controls whether sandboxes on the same runner can communicate over the network. In the Docker Compose configuration this defaults to `false`, creating an isolated bridge network with inter-container communication disabled.
 
 If you are deploying runners outside of the provided Docker Compose setup, ensure `INTER_SANDBOX_NETWORK_ENABLED` is explicitly set to `false` unless your use case requires inter-sandbox communication.
+
+For domain deployments, all placeholder secrets in the default Docker Compose file (`supersecretkey`, `super_secret_key`, `secret_api_token`, etc.) must be replaced with generated values. The `setup-domain-oss-deployment.sh` script handles this automatically.
+
+### Auxiliary Service Ports
+
+The setup script binds auxiliary service ports (PgAdmin, MinIO Console, Registry UI) to `127.0.0.1` in Docker Compose so they cannot be reached directly over the network. Caddy reverse-proxies each service on its original port with TLS and HTTP Basic Auth — nothing is visible until you authenticate:
+
+| Service | URL | Authentication |
+|---------|-----|----------------|
+| PgAdmin | `https://yourdomain.com:5050` | Caddy Basic Auth (PgAdmin email + password set during setup), then PgAdmin native login |
+| MinIO Console | `https://yourdomain.com:9001` | MinIO native login page (credentials set during setup) |
+| Registry UI | `https://yourdomain.com:5100` | Caddy Basic Auth (username: `admin`, password: Daytona admin password set during setup) |
+
+PgAdmin and Registry UI are protected by Caddy's HTTP Basic Auth — nothing is visible until you authenticate. MinIO Console uses its own native login page instead of Basic Auth because its SPA architecture (JavaScript API calls, WebSocket connections) is incompatible with HTTP Basic Auth.
 
 ## Additional Network Options
 
@@ -96,7 +336,7 @@ To configure extra CA certificates (for example, paired with `DB_TLS` env vars),
 
 ```yaml
 environment:
-  - NODE_EXTRA_CA_CERTS=/path/to/your/cert-bundle.pembundle
+  - NODE_EXTRA_CA_CERTS=/path/to/your/cert-bundle.pem
 ```
 
 The provided file is a cert bundle. Meaning it can contain multiple CA certificates in PEM format.
