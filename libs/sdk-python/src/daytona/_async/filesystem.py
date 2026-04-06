@@ -236,11 +236,16 @@ class AsyncFileSystem:
                     source: str | None = None
                     header_field = bytearray()
                     header_value = bytearray()
-                    part_headers: dict[str, str] = {}
+                    pending_headers: list[tuple[str, str]] = []
                     error_buffer = bytearray()
                     events: list[tuple[str, Any]] = []
 
                     def on_part_begin() -> None:
+                        # Keep callback-owned header state local and communicate via immutable
+                        # event payloads to avoid deferred-processing state races.
+                        pending_headers.clear()
+                        header_field.clear()
+                        header_value.clear()
                         events.append(("begin", None))
 
                     def on_header_field(data: bytes, start: int, end: int) -> None:
@@ -252,12 +257,12 @@ class AsyncFileSystem:
                     def on_header_end() -> None:
                         field = bytes(header_field).decode("utf-8", errors="ignore").lower()
                         value = bytes(header_value).decode("utf-8", errors="ignore")
-                        part_headers[field] = value
+                        pending_headers.append((field, value))
                         header_field.clear()
                         header_value.clear()
 
                     def on_headers_finished() -> None:
-                        events.append(("headers_finished", dict(part_headers)))
+                        events.append(("headers_finished", dict(pending_headers)))
 
                     def on_part_data(data: bytes, start: int, end: int) -> None:
                         events.append(("data", bytes(data[start:end])))
@@ -282,7 +287,6 @@ class AsyncFileSystem:
                         nonlocal writer, mode, source
                         for event_tag, event_payload in events:
                             if event_tag == "begin":
-                                part_headers.clear()
                                 error_buffer.clear()
                                 writer = None
                                 mode = None
