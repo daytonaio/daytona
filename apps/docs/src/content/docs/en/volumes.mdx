@@ -13,7 +13,7 @@ Volumes are FUSE-based mounts that provide shared file access across Daytona San
 
 ## Create volumes
 
-Daytona provides methods to create volumes using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/volumes) or programmatically using the Daytona [Python](/docs/en/python-sdk/sync/sandbox), [TypeScript](/docs/en/typescript-sdk/sandbox), [Ruby](/docs/en/ruby-sdk/sandbox), [Go](/docs/en/go-sdk/daytona#type-sandbox) **SDKs**, [CLI](/docs/en/tools/cli#daytona-create), or [API](/docs/en/tools/api#daytona/tag/sandbox).
+Daytona provides methods to create volumes using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/volumes) or programmatically using the Daytona [Python](/docs/en/python-sdk/sync/volume), [TypeScript](/docs/en/typescript-sdk/volume), [Ruby](/docs/en/ruby-sdk/volume/), [Go](/docs/en/go-sdk/daytona/#type-volumeservice) **SDKs**, [CLI](/docs/en/tools/cli#daytona-create), or [API](/docs/en/tools/api#daytona/tag/sandbox).
 
 For persistent per-user, per-tenant, or per-workspace storage, use one shared volume per use case, environment, or project (for example a volume for staging and another for production), and set a dedicated `subpath` when you create each sandbox. The sandbox sees only that prefix inside the volume; it cannot access sibling subpaths.
 
