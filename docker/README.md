@@ -40,6 +40,27 @@ The Docker Compose configuration includes all the necessary services to run Dayt
    - Registry UI: http://localhost:5100
    - MinIO Console: http://localhost:9001 (minioadmin / minioadmin)
 
+## Running On A VM
+
+If you want to access Daytona from outside the VM, export the public host of the VM and a wildcard-capable proxy host before starting Compose.
+
+For a VM that only has a public IP, `sslip.io` is the simplest option:
+
+```bash
+export DAYTONA_PUBLIC_HOST=203.0.113.10
+export DAYTONA_PROXY_HOST=203-0-113-10.sslip.io
+docker compose -f docker/docker-compose.yaml up -d
+```
+
+With that configuration:
+
+- Dashboard is served at `http://203.0.113.10:3000`
+- Dex is served at `http://203.0.113.10:5556/dex`
+- Preview URLs are served at `http://<port>-<sandbox-id>.203-0-113-10.sslip.io:4000`
+- SSH access uses `ssh -p 2222 <token>@203.0.113.10`
+
+`DAYTONA_PROXY_HOST` must resolve wildcard subdomains. A raw IP address is not enough for preview URLs because Daytona publishes per-sandbox hosts like `<port>-<sandbox-id>.<proxy-host>`.
+
 ## DNS Setup for Proxy URLs
 
 For local development, you need to resolve `*.proxy.localhost` domains to `127.0.0.1`:
