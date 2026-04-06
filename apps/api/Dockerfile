@@ -31,7 +31,7 @@ ENV NX_DAEMON=false
 
 RUN yarn nx build api --configuration=production --nxBail=true
 
-RUN VITE_BASE_API_URL=%DAYTONA_BASE_API_URL% yarn nx build dashboard --configuration=production --nxBail=true --output-style=stream
+RUN VITE_API_URL=%DAYTONA_BASE_API_URL%/api yarn nx build dashboard --configuration=production --nxBail=true --output-style=stream
 
 ARG VERSION=0.0.1
 ENV VERSION=${VERSION}

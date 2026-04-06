@@ -12,7 +12,7 @@ import { ReactNode, useMemo } from 'react'
 import { AuthProvider, AuthProviderProps } from 'react-oidc-context'
 import { ConfigContext } from '../contexts/ConfigContext'
 
-const apiUrl = (import.meta.env.VITE_BASE_API_URL ?? window.location.origin) + '/api'
+const apiUrl = import.meta.env.VITE_API_URL ?? window.location.origin + '/api'
 
 type Props = {
   children: ReactNode
