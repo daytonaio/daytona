@@ -131,11 +131,10 @@ Standalone packages and libraries for interacting with Daytona using Java:
 
 ## Deployment
 
-Daytona can run as a fully hosted service, as an open-source stack you operate, or in a hybrid setup where Daytona orchestrates sandboxes while execution happens on machines you manage. Self-hosting steps are in the [OSS deployment guide](https://www.daytona.io/docs/oss-deployment/); custom regions and runners are covered under [customer managed compute](https://www.daytona.io/docs/runners/).
+Daytona is available as a managed service on [app.daytona.io](https://app.daytona.io). Daytona can run as a fully hosted service, as an open-source stack you operate, or in a hybrid setup where Daytona orchestrates sandboxes while execution happens on machines you manage.
 
-- **[Managed service](https://app.daytona.io)**: hosted control plane, dashboard, and API with sandbox execution on Daytona-managed runners in shared or dedicated regions
-- **[Open source deployment](https://www.daytona.io/docs/oss-deployment/)**: Docker Compose stack in the [docker](docker) directory (API, runners, proxy, SSH gateway, registry, database, object storage, and related services); the guide covers local access, DNS for preview URLs, and runner networking options
-- **[Customer managed compute](https://www.daytona.io/docs/runners/)**: custom regions and runner machines under your control for workload execution, data locality, and capacity, with the control plane handling scheduling, health reporting, and sandbox connectivity
+- [Open source deployment](https://www.daytona.io/docs/oss-deployment/): full local stack from the [docker](docker) directory using Docker Compose
+- [Customer managed compute](https://www.daytona.io/docs/runners/): custom regions and runner machines that operate Daytona sandboxes on your own compute infrastructure
 
 ## Quick Start
 
