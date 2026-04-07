@@ -324,19 +324,19 @@ func run() int {
 		// Cancel context to stop the poller and other background services
 		cancel()
 
-		// Wait for the poller to fully stop so no new jobs are submitted
-		// before we begin draining in-flight work.
-		if pollerDone != nil {
-			<-pollerDone
-		}
-
 		shutdownTimeout := 5 * time.Minute
 		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), shutdownTimeout)
 		defer shutdownCancel()
 
-		// Drain in-flight HTTP requests and jobs in parallel.
+		// Drain poller, in-flight HTTP requests and jobs in parallel.
 		done := make(chan struct{})
 		go func() {
+			// Wait for the poller to fully stop so no new jobs are
+			// submitted before we drain in-flight work.
+			if pollerDone != nil {
+				<-pollerDone
+			}
+
 			var wg sync.WaitGroup
 
 			wg.Add(1)
