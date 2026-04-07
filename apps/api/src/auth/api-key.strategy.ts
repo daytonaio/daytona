@@ -3,14 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import {
-  Injectable,
-  UnauthorizedException,
-  ServiceUnavailableException,
-  HttpException,
-  Logger,
-  OnModuleInit,
-} from '@nestjs/common'
+import { Injectable, UnauthorizedException, HttpException, Logger, OnModuleInit } from '@nestjs/common'
 import { PassportStrategy } from '@nestjs/passport'
 import { Strategy } from 'passport-http-bearer'
 import { ApiKeyService } from '../api-key/api-key.service'
@@ -139,7 +132,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
       this.logger.debug('Authentication successful', result)
       return result
     } catch (error) {
-      this.rethrowIfTransient(error, 'user API key')
+      this.handleError(error, 'Error validating user API key')
     }
 
     try {
@@ -153,7 +146,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
         }
       }
     } catch (error) {
-      this.rethrowIfTransient(error, 'runner API key')
+      this.handleError(error, 'Error validating runner API key')
     }
 
     try {
@@ -166,7 +159,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
         }
       }
     } catch (error) {
-      this.rethrowIfTransient(error, 'region proxy API key')
+      this.handleError(error, 'Error validating region proxy API key')
     }
 
     try {
@@ -179,7 +172,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
         }
       }
     } catch (error) {
-      this.rethrowIfTransient(error, 'region SSH gateway API key')
+      this.handleError(error, 'Error validating region SSH gateway API key')
     }
 
     return null
@@ -224,12 +217,12 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
     }
   }
 
-  private rethrowIfTransient(error: unknown, context: string): void {
+  private handleError(error: unknown, message: string): void {
     if (!(error instanceof HttpException)) {
-      this.logger.error(`Transient error during ${context} validation:`, error)
-      throw new ServiceUnavailableException('Temporary authentication service error')
+      this.logger.error(message, error)
+      throw error
     }
-    this.logger.debug(`Error checking ${context}:`, error)
+    this.logger.debug(message, error)
   }
 
   private generateValidationCacheKey(token: string): string {
