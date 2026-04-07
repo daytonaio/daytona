@@ -36,6 +36,7 @@ export function SandboxTable({
   sandboxIsLoading,
   sandboxStateIsTransitioning,
   loading,
+  isRefetching = false,
   snapshots,
   snapshotsDataIsLoading,
   snapshotsDataHasMore,
@@ -177,10 +178,13 @@ export function SandboxTable({
         snapshotsDataHasMore={snapshotsDataHasMore}
         onChangeSnapshotSearchValue={onChangeSnapshotSearchValue}
         onRefresh={handleRefresh}
-        isRefreshing={isRefreshing}
+        isRefreshing={isRefreshing || isRefetching}
       />
 
-      <Table className="border-separate border-spacing-0" style={{ tableLayout: 'fixed', width: '100%' }}>
+      <Table
+        className={cn('border-separate border-spacing-0 transition-opacity duration-200', isRefetching && 'opacity-60')}
+        style={{ tableLayout: 'fixed', width: '100%' }}
+      >
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -208,7 +212,7 @@ export function SandboxTable({
           ))}
         </TableHeader>
         <TableBody>
-          {loading ? (
+          {loading && data.length === 0 ? (
             <TableRow>
               <TableCell colSpan={table.getAllColumns().length} className="h-10 text-center">
                 Loading...

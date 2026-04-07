@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { QueryKey, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, QueryKey, useQuery } from '@tanstack/react-query'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import {
@@ -54,6 +54,7 @@ export function useSandboxes(queryKey: QueryKey, params: SandboxQueryParams) {
 
   return useQuery<PaginatedSandboxes>({
     queryKey,
+    placeholderData: keepPreviousData,
     queryFn: async () => {
       if (!selectedOrganization) {
         throw new Error('No organization selected')

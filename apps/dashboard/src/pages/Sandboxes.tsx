@@ -82,6 +82,7 @@ const Sandboxes: React.FC = () => {
     totalItems,
     pageCount,
     isLoading: sandboxesDataIsLoading,
+    isRefetching: sandboxesDataIsRefetching,
     error: sandboxesDataError,
     pagination,
     onPaginationChange: handlePaginationChange,
@@ -674,6 +675,7 @@ const Sandboxes: React.FC = () => {
             isRefreshing={sandboxDataIsRefreshing}
             data={sandboxItems || []}
             loading={sandboxesDataIsLoading}
+            isRefetching={sandboxesDataIsRefetching}
             snapshots={snapshotsData?.items || []}
             snapshotsDataIsLoading={snapshotsDataIsLoading}
             snapshotsDataHasMore={snapshotsDataHasMore}

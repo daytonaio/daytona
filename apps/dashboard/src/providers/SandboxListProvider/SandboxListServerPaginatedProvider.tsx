@@ -71,6 +71,7 @@ export const SandboxListServerPaginatedProvider: React.FC<{ children: React.Reac
   const {
     data: sandboxesData,
     isLoading: sandboxesDataIsLoading,
+    isFetching: sandboxesDataIsFetching,
     error: sandboxesDataError,
     refetch: refetchSandboxesData,
   } = useSandboxes(queryKey, queryParams)
@@ -171,6 +172,7 @@ export const SandboxListServerPaginatedProvider: React.FC<{ children: React.Reac
       totalItems: sandboxesData?.total || 0,
       pageCount: sandboxesData?.totalPages || 0,
       isLoading: sandboxesDataIsLoading,
+      isRefetching: sandboxesDataIsFetching && Boolean(sandboxesData),
       error: sandboxesDataError ?? null,
       pagination: paginationParams,
       onPaginationChange: handlePaginationChange,
@@ -189,6 +191,7 @@ export const SandboxListServerPaginatedProvider: React.FC<{ children: React.Reac
     [
       sandboxesData,
       sandboxesDataIsLoading,
+      sandboxesDataIsFetching,
       sandboxesDataError,
       paginationParams,
       handlePaginationChange,

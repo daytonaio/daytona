@@ -20,12 +20,14 @@ interface SandboxDesiredStateUpdatedEvent {
 }
 
 interface UseSandboxListWsSyncOptions {
+  enabled?: boolean
   onSandboxCreated: (sandbox: Sandbox) => void
   onSandboxStateUpdated: (data: SandboxStateUpdatedEvent) => void
   onSandboxDesiredStateUpdated: (data: SandboxDesiredStateUpdatedEvent) => void
 }
 
 export function useSandboxListWsSync({
+  enabled = true,
   onSandboxCreated,
   onSandboxStateUpdated,
   onSandboxDesiredStateUpdated,
@@ -33,7 +35,7 @@ export function useSandboxListWsSync({
   const { notificationSocket } = useNotificationSocket()
 
   useEffect(() => {
-    if (!notificationSocket) {
+    if (!enabled || !notificationSocket) {
       return
     }
 
@@ -46,5 +48,5 @@ export function useSandboxListWsSync({
       notificationSocket.off('sandbox.state.updated', onSandboxStateUpdated)
       notificationSocket.off('sandbox.desired-state.updated', onSandboxDesiredStateUpdated)
     }
-  }, [notificationSocket, onSandboxCreated, onSandboxDesiredStateUpdated, onSandboxStateUpdated])
+  }, [enabled, notificationSocket, onSandboxCreated, onSandboxDesiredStateUpdated, onSandboxStateUpdated])
 }
