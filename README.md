@@ -226,7 +226,7 @@ public class Main {
 ```bash
 curl 'https://app.daytona.io/api/sandbox' \
   --request POST \
-  --header 'Authorization: Bearer <API_KEY>' \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
   --header 'Content-Type: application/json' \
   --data '{}'
 ```
@@ -239,7 +239,4 @@ daytona create
 
 ## Contributing
 
-> [!NOTE]
-> Daytona is Open Source under the [GNU AFFERO GENERAL PUBLIC LICENSE](LICENSE), and is the [copyright of its contributors](NOTICE). If you would like to contribute to the software, read the [Developer Certificate of Origin Version 1.1](https://developercertificate.org/).
-
-Navigate to the [contributing guide](CONTRIBUTING.md) to get started.
+Daytona is Open Source under the [GNU AFFERO GENERAL PUBLIC LICENSE](LICENSE), and is the [copyright of its contributors](NOTICE). If you would like to contribute to the software, read the [Developer Certificate of Origin Version 1.1](https://developercertificate.org/) and the [contributing guide](CONTRIBUTING.md) to get started.
