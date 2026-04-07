@@ -58,19 +58,8 @@
         "watchDepsTargetName": "watch-deps"
       }
     },
-    {
-      "plugin": "@nx/eslint/plugin",
-      "options": {
-        "targetName": "lint"
-      }
-    },
-    {
-      "plugin": "@nx/jest/plugin",
-      "options": {
-        "targetName": "test"
-      },
-      "exclude": ["apps/daytona-e2e/**/*"]
-    },
+    { "plugin": "@nx/eslint/plugin", "options": { "targetName": "lint" } },
+    { "plugin": "@nx/jest/plugin", "options": { "targetName": "test" }, "exclude": ["apps/daytona-e2e/**/*"] },
     {
       "plugin": "@nx/vite/plugin",
       "options": {
@@ -99,19 +88,9 @@
   ],
   "generators": {
     "@nx/react": {
-      "application": {
-        "babel": true,
-        "style": "scss",
-        "linter": "eslint",
-        "bundler": "vite"
-      },
-      "component": {
-        "style": "scss"
-      },
-      "library": {
-        "style": "scss",
-        "linter": "eslint"
-      }
+      "application": { "babel": true, "style": "scss", "linter": "eslint", "bundler": "vite" },
+      "component": { "style": "scss" },
+      "library": { "style": "scss", "linter": "eslint" }
     }
   },
   "targetDefaults": {
@@ -139,10 +118,7 @@
       "cache": true,
       "inputs": ["default", "^goProduction", { "dependentTasksOutputFiles": "**/*", "transitive": true }]
     },
-    "@nx-go/nx-go:lint": {
-      "cache": true,
-      "inputs": ["default", "^goProduction"]
-    },
+    "@nx-go/nx-go:lint": { "cache": true, "inputs": ["default", "^goProduction"] },
     "@nx-go/nx-go:tidy": {
       "cache": true,
       "inputs": ["default"],
@@ -165,9 +141,7 @@
         "cache-to": ["type=registry,ref=daytonaio/daytona-{projectName}:buildcache$ARCH,mode=max"]
       },
       "configurations": {
-        "production": {
-          "push": true
-        },
+        "production": { "push": true },
         "production-multi-platform": {
           "push": true,
           "platforms": ["linux/amd64", "linux/arm64"],
@@ -225,33 +199,12 @@
       "inputs": ["pythonLib", { "dependentTasksOutputFiles": "**/*", "transitive": true }],
       "outputs": ["{projectRoot}/dist/**"]
     },
-    "format": {
-      "cache": true,
-      "inputs": ["default"],
-      "outputs": []
-    },
-    "lint": {
-      "cache": true,
-      "inputs": ["default"],
-      "outputs": []
-    },
-    "test": {
-      "cache": true,
-      "inputs": ["default", "^default"],
-      "outputs": []
-    },
-    "generate:api-client": {
-      "cache": true
-    },
-    "docs": {
-      "cache": true,
-      "inputs": ["default", { "dependentTasksOutputFiles": "**/*", "transitive": true }]
-    },
-    "tidy": {
-      "cache": true,
-      "inputs": ["default"],
-      "outputs": ["{projectRoot}/go.mod", "{projectRoot}/go.sum"]
-    },
+    "format": { "cache": true, "inputs": ["default"], "outputs": [] },
+    "lint": { "cache": true, "inputs": ["default"], "outputs": [] },
+    "test": { "cache": true, "inputs": ["default", "^default"], "outputs": [] },
+    "generate:api-client": { "cache": true },
+    "docs": { "cache": true, "inputs": ["default", { "dependentTasksOutputFiles": "**/*", "transitive": true }] },
+    "tidy": { "cache": true, "inputs": ["default"], "outputs": ["{projectRoot}/go.mod", "{projectRoot}/go.sum"] },
     "build": {
       "cache": true,
       "inputs": ["production", "^production", { "dependentTasksOutputFiles": "**/*", "transitive": true }],
@@ -260,37 +213,15 @@
   },
   "release": {
     "projects": ["apps/*", "libs/*"],
-    "changelog": {
-      "workspaceChangelog": {
-        "file": false,
-        "createRelease": "github"
-      }
-    },
-    "version": {
-      "manifestRootsToUpdate": ["dist"],
-      "conventionalCommits": true
-    },
+    "changelog": { "workspaceChangelog": { "file": false, "createRelease": "github" } },
+    "version": { "manifestRootsToUpdate": ["dist"], "conventionalCommits": true },
     "conventionalCommits": {
       "types": {
-        "refactor": {
-          "semverBump": "patch",
-          "changelog": {
-            "title": "Refactor"
-          }
-        },
-        "chore": {
-          "semverBump": "patch",
-          "changelog": {
-            "title": "Chores"
-          }
-        },
-        "__INVALID__": {
-          "semverBump": "patch",
-          "changelog": {
-            "title": "Uncategorized changes"
-          }
-        }
+        "refactor": { "semverBump": "patch", "changelog": { "title": "Refactor" } },
+        "chore": { "semverBump": "patch", "changelog": { "title": "Chores" } },
+        "__INVALID__": { "semverBump": "patch", "changelog": { "title": "Uncategorized changes" } }
       }
     }
-  }
+  },
+  "nxCloudId": "69d4d7c6d23b3673e0643fe0"
 }
