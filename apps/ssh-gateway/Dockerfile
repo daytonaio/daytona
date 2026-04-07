@@ -36,7 +36,7 @@ COPY libs/api-client-go/ libs/api-client-go/
 
 RUN yarn nx build ssh-gateway --configuration=production --nxBail=true
 
-FROM alpine:3.18 AS ssh-gateway
+FROM alpine:3.22 AS ssh-gateway
 
 WORKDIR /usr/local/bin
 

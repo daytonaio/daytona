@@ -36,7 +36,7 @@ ARG VERSION=0.0.1
 RUN --mount=type=cache,target=/root/.cache/go-build \
   VERSION=$VERSION yarn nx build snapshot-manager --configuration=production --nxBail=true
 
-FROM alpine:3.18 AS snapshot-manager
+FROM alpine:3.22 AS snapshot-manager
 
 RUN apk add --no-cache curl
 
