@@ -12,6 +12,7 @@ declare module '*.png' {
 
 interface ImportMetaEnv {
   readonly VITE_API_URL: string
+  readonly VITE_CLIENT_SIDE_SANDBOX_PAGINATION?: string
 }
 
 interface ImportMeta {

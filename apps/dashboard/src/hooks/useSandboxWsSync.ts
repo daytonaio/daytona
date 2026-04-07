@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { queryKeys } from '@/hooks/queries/queryKeys'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { getSandboxesQueryKey } from '@/hooks/useSandboxes'
-import { queryKeys } from '@/hooks/queries/queryKeys'
 import { PaginatedSandboxes, Sandbox, SandboxDesiredState, SandboxState } from '@daytona/api-client'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
@@ -27,7 +26,7 @@ export function useSandboxWsSync({ sandboxId, refetchOnCreate = false }: UseSand
     const orgId = selectedOrganization.id
 
     const updateStateInListCache = (targetId: string, state: SandboxState) => {
-      queryClient.setQueriesData<PaginatedSandboxes>({ queryKey: getSandboxesQueryKey(orgId) }, (oldData) => {
+      queryClient.setQueriesData<PaginatedSandboxes>({ queryKey: queryKeys.sandboxes.list(orgId) }, (oldData) => {
         if (!oldData) return oldData
         return {
           ...oldData,
@@ -52,7 +51,7 @@ export function useSandboxWsSync({ sandboxId, refetchOnCreate = false }: UseSand
 
     const invalidate = () => {
       queryClient.invalidateQueries({
-        queryKey: getSandboxesQueryKey(orgId),
+        queryKey: queryKeys.sandboxes.list(orgId),
         refetchType: 'none',
       })
 
@@ -63,11 +62,11 @@ export function useSandboxWsSync({ sandboxId, refetchOnCreate = false }: UseSand
       }
     }
 
-    const handleCreated = (_sandbox: Sandbox) => {
+    const handleCreated = () => {
       if (sandboxId) return
 
       queryClient.invalidateQueries({
-        queryKey: getSandboxesQueryKey(orgId),
+        queryKey: queryKeys.sandboxes.list(orgId),
         refetchType: refetchOnCreate ? 'active' : 'none',
       })
     }
@@ -77,7 +76,7 @@ export function useSandboxWsSync({ sandboxId, refetchOnCreate = false }: UseSand
 
       // warm pool sandboxes — treat as created
       if (data.oldState === data.newState && data.newState === SandboxState.STARTED) {
-        handleCreated(data.sandbox)
+        handleCreated()
         return
       }
 

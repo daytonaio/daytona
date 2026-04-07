@@ -6,8 +6,8 @@
 import { CreateSandboxFromImageParams, CreateSandboxFromSnapshotParams, Daytona, Sandbox } from '@daytona/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from 'react-oidc-context'
+import { queryKeys } from '../queries/queryKeys'
 import { useSelectedOrganization } from '../useSelectedOrganization'
-import { getSandboxesQueryKey } from '../useSandboxes'
 
 export type CreateSandboxParams = (CreateSandboxFromSnapshotParams | CreateSandboxFromImageParams) & {
   target?: string
@@ -39,7 +39,7 @@ export const useCreateSandboxMutation = () => {
     },
     onSuccess: async () => {
       if (selectedOrganization?.id) {
-        await queryClient.invalidateQueries({ queryKey: getSandboxesQueryKey(selectedOrganization.id) })
+        await queryClient.invalidateQueries({ queryKey: queryKeys.sandboxes.list(selectedOrganization.id) })
       }
     },
   })

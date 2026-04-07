@@ -48,23 +48,6 @@ export interface SandboxQueryParams {
   sorting?: SandboxSorting
 }
 
-export const getSandboxesQueryKey = (organizationId: string | undefined, params?: SandboxQueryParams): QueryKey => {
-  const baseKey = ['sandboxes' as const, organizationId]
-
-  if (!params) {
-    return baseKey
-  }
-
-  const normalizedParams = {
-    page: params.page,
-    pageSize: params.pageSize,
-    ...(params.filters && { filters: params.filters }),
-    ...(params.sorting && { sorting: params.sorting }),
-  }
-
-  return [...baseKey, normalizedParams]
-}
-
 export function useSandboxes(queryKey: QueryKey, params: SandboxQueryParams) {
   const { sandboxApi } = useApi()
   const { selectedOrganization } = useSelectedOrganization()
@@ -118,7 +101,7 @@ export function useSandboxes(queryKey: QueryKey, params: SandboxQueryParams) {
               total: paginatedData.total + 1,
             }
           }
-        } catch (error) {
+        } catch {
           // TODO: rethrow if not 4xx
         }
       }
