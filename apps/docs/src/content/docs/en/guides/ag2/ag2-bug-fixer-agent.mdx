@@ -155,24 +155,25 @@ The optional `error_description` parameter can be used to pass additional contex
         if error_description:
             message += f"\n\nError: {error_description}"
 
-        code_executor.initiate_chat(
+        code_executor.run(
             recipient=bug_fixer,
             message=message,
             max_turns=8,
-        )
+        ).process()
 ```
 
 `code_executor` initiates the chat because it owns the problem — the broken code. `bug_fixer` receives it as its first message, proposes a fix, and waits for execution results.
 
 :::tip[Inspecting the fix run]
-Assign the return value of `initiate_chat` to a variable to access more details about the session:
+Assign the return value of `run()` before calling `process()` to access more details about the session:
 
 ```python
-result = code_executor.initiate_chat(recipient=bug_fixer, message=message, max_turns=8)
+response = code_executor.run(recipient=bug_fixer, message=message, max_turns=8)
+response.process()
 
-result.chat_history  # full message exchange between agents
-result.cost          # token usage and cost breakdown per model
-result.summary       # conversation summary (requires summary_method to be set)
+response.messages  # full message exchange between agents
+response.cost      # token usage and cost breakdown per model
+response.summary   # conversation summary (requires summary_method to be set)
 ```
 :::
 
@@ -304,11 +305,11 @@ The agent correctly identified both reversed operand bugs from the assertion fai
 
 #### How the message loop works
 
-`recipient=bug_fixer` in `initiate_chat` is what connects the two agents. AG2 sets up a managed back-and-forth loop between them — after each reply, the message is automatically forwarded to the other agent. The agents have no direct reference to each other outside of that call.
+`recipient=bug_fixer` in `run()` is what connects the two agents. AG2 sets up a managed back-and-forth loop between them — after each reply, the message is automatically forwarded to the other agent. The agents have no direct reference to each other outside of that call.
 
 Tracing the session above step by step:
 
-1. `code_executor.initiate_chat(recipient=bug_fixer, ...)` — AG2 starts the loop and `code_executor` sends the broken code as plain text to `bug_fixer`. Nothing is executed yet.
+1. `code_executor.run(recipient=bug_fixer, ...)` — AG2 starts the loop and `code_executor` sends the broken code as plain text to `bug_fixer`. Nothing is executed yet.
 2. `bug_fixer` (LLM) analyzes the code and replies with the fix wrapped in a ` ```python ` block.
 3. AG2 calls `_generate_code_execution_reply_using_executor` on `code_executor` — a reply method registered automatically when `code_execution_config` is set. It scans `bug_fixer`'s last message for fenced code blocks, extracts the block, and calls `DaytonaCodeExecutor.execute_code_blocks()`.
 4. Daytona runs the code in the sandbox and returns the exit code and output.
@@ -378,11 +379,11 @@ def fix_bug(broken_code: str, error_description: str = "") -> None:
         if error_description:
             message += f"\n\nError: {error_description}"
 
-        code_executor.initiate_chat(
+        code_executor.run(
             recipient=bug_fixer,
             message=message,
             max_turns=8,
-        )
+        ).process()
 
 
 if __name__ == "__main__":

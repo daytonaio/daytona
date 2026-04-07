@@ -65,11 +65,11 @@ def fix_bug(broken_code: str, error_description: str = "") -> None:
         if error_description:
             message += f"\n\nError: {error_description}"
 
-        code_executor.initiate_chat(
+        code_executor.run(
             recipient=bug_fixer,
             message=message,
             max_turns=8,
-        )
+        ).process()
 
 
 if __name__ == "__main__":
