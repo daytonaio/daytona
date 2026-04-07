@@ -43,5 +43,7 @@ export function OrGuard(guards: Type<CanActivate>[]): Type<CanActivate> {
     }
   }
 
-  return mixin(OrGuardMixin)
+  const Mixed = mixin(OrGuardMixin)
+  Object.defineProperty(Mixed, 'guards', { value: guards, writable: false })
+  return Mixed
 }
