@@ -149,6 +149,9 @@ def parse_session_command_logs(data: bytes) -> SessionCommandLogsResponse:
     return SessionCommandLogsResponse(output=output_str, stdout=stdout_str, stderr=stderr_str)
 
 
+_MARKER_RE = re.compile(re.escape(STDOUT_PREFIX) + b"|" + re.escape(STDERR_PREFIX))
+
+
 def demux_log(data: bytes) -> tuple[bytes, bytes]:
     """Demultiplex combined stdout/stderr log data.
 
@@ -158,46 +161,31 @@ def demux_log(data: bytes) -> tuple[bytes, bytes]:
     Returns:
         Tuple of (stdout_bytes, stderr_bytes)
     """
-    out_buf = bytearray()
-    err_buf = bytearray()
-    state = ""  # none, stdout, stderr
+    out_parts: list[bytes] = []
+    err_parts: list[bytes] = []
+    state = ""
+    pos = 0
 
-    while len(data) > 0:
-        # Find the nearest marker (stdout or stderr)
-        si = data.find(STDOUT_PREFIX)
-        ei = data.find(STDERR_PREFIX)
-
-        # Pick the closest marker index and type
-        next_idx = -1
-        next_marker = ""
-        if si != -1 and (ei == -1 or si < ei):
-            next_idx, next_marker = si, "stdout"
-        elif ei != -1:
-            next_idx, next_marker = ei, "stderr"
-
-        if next_idx == -1:
-            # No more markers → dump remainder into current state
+    for match in _MARKER_RE.finditer(data):
+        start = match.start()
+        if pos < start:
+            chunk = data[pos:start]
             if state == "stdout":
-                out_buf.extend(data)
+                out_parts.append(chunk)
             elif state == "stderr":
-                err_buf.extend(data)
-            break
+                err_parts.append(chunk)
 
-        # Write everything before the marker into current state
+        state = "stdout" if match.group() == STDOUT_PREFIX else "stderr"
+        pos = match.end()
+
+    if pos < len(data):
+        tail = data[pos:]
         if state == "stdout":
-            out_buf.extend(data[:next_idx])
+            out_parts.append(tail)
         elif state == "stderr":
-            err_buf.extend(data[:next_idx])
+            err_parts.append(tail)
 
-        # Advance past marker and switch state
-        if next_marker == "stdout":
-            data = data[next_idx + len(STDOUT_PREFIX) :]
-            state = "stdout"
-        else:
-            data = data[next_idx + len(STDERR_PREFIX) :]
-            state = "stderr"
-
-    return bytes(out_buf), bytes(err_buf)
+    return b"".join(out_parts), b"".join(err_parts)
 
 
 # Type aliases for callbacks

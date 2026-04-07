@@ -4,25 +4,52 @@ require 'net/http'
 
 module Daytona
   module Util
-    def self.demux(line) # rubocop:disable Metrics/MethodLength
-      stdout = ''.dup
-      stderr = ''.dup
+    STDOUT_PREFIX = "\x01\x01\01"
+    private_constant :STDOUT_PREFIX
 
-      until line.empty?
-        buff = line.start_with?(STDOUT_PREFIX) ? stdout : stderr
-        line = line[3..]
+    STDERR_PREFIX = "\x02\x02\02"
+    private_constant :STDERR_PREFIX
 
-        end_index = [
-          line.index(STDOUT_PREFIX),
-          line.index(STDERR_PREFIX)
-        ].compact.min || line.length
-        data = line[...end_index]
-        buff << data
+    PREFIX_LEN = STDOUT_PREFIX.bytesize
+    private_constant :PREFIX_LEN
 
-        line = line[end_index..]
+    def self.demux(line)
+      out_parts = []
+      err_parts = []
+      state = nil
+      pos = 0
+
+      while pos < line.bytesize
+        si = line.index(STDOUT_PREFIX, pos)
+        ei = line.index(STDERR_PREFIX, pos)
+
+        if si && (ei.nil? || si < ei)
+          next_idx = si
+          next_state = :stdout
+        elsif ei
+          next_idx = ei
+          next_state = :stderr
+        else
+          case state
+          when :stdout then out_parts << line[pos..]
+          when :stderr then err_parts << line[pos..]
+          end
+          break
+        end
+
+        if pos < next_idx
+          chunk = line[pos...next_idx]
+          case state
+          when :stdout then out_parts << chunk
+          when :stderr then err_parts << chunk
+          end
+        end
+
+        state = next_state
+        pos = next_idx + PREFIX_LEN
       end
 
-      [stdout, stderr]
+      [out_parts.join, err_parts.join]
     end
 
     # @param uri [URI]
@@ -46,11 +73,5 @@ module Daytona
         Sdk.logger.debug("Async stream (#{uri}) timeout: #{e.inspect}")
       end
     end
-
-    STDOUT_PREFIX = "\x01\x01\01"
-    private_constant :STDOUT_PREFIX
-
-    STDERR_PREFIX = "\x02\x02\02"
-    private_constant :STDERR_PREFIX
   end
 end
