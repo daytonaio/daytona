@@ -129,7 +129,7 @@ Standalone packages and libraries for interacting with Daytona using Java:
 
 > [sdk-java](libs/sdk-java) • [api-client-java](libs/api-client-java) • [toolbox-api-client-java](libs/toolbox-api-client-java)
 
-## Deployment
+## Deployments
 
 Daytona is available as a managed service on [app.daytona.io](https://app.daytona.io). Daytona can run as a fully hosted service, as an open-source stack you operate, or in a hybrid setup where Daytona orchestrates sandboxes while execution happens on machines you manage.
 
