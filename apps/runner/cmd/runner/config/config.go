@@ -59,6 +59,7 @@ type Config struct {
 	ApiVersion                         int           `envconfig:"API_VERSION" default:"2"`
 	InitializeDaemonTelemetry          bool          `envconfig:"INITIALIZE_DAEMON_TELEMETRY" default:"true"`
 	SnapshotErrorCacheRetention        time.Duration `envconfig:"SNAPSHOT_ERROR_CACHE_RETENTION" default:"10m" validate:"min=5m"`
+	BuildEngine                        string        `envconfig:"BUILD_ENGINE" default:"buildkit" validate:"oneof=buildkit legacy"`
 }
 
 var DEFAULT_API_PORT int = 8080
@@ -145,6 +146,10 @@ func GetContainerNetwork() string {
 
 func GetEnvironment() string {
 	return config.Environment
+}
+
+func GetBuildEngine() string {
+	return config.BuildEngine
 }
 
 func GetBuildLogFilePath(snapshotRef string) (string, error) {

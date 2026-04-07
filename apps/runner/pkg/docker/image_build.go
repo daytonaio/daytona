@@ -183,7 +183,12 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 		writer = io.MultiWriter(&log.DebugLogWriter{}, logFile)
 	}
 
-	err = d.runDockerImageBuildWithBuildKitSession(ctx, buildContext, buildOpts, writer)
+	switch config.GetBuildEngine() {
+	case "legacy":
+		err = d.runDockerImageBuildLegacy(ctx, buildContext, buildOpts, writer)
+	default:
+		err = d.runDockerImageBuildWithBuildKitSession(ctx, buildContext, buildOpts, writer)
+	}
 	if err != nil {
 		return err
 	}
