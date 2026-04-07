@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, ExecutionContext, Logger, CanActivate } from '@nestjs/common'
+import { Injectable, ExecutionContext, Logger } from '@nestjs/common'
+import { AuthContextGuard } from '../../common/guards/auth-context.guard'
 import { getAuthContext } from '../../common/utils/get-auth-context'
 import {
   SshGatewayAuthContext,
@@ -18,7 +19,7 @@ import {
  * Validates that the current request is authenticated with a `ssh-gateway` or `region-ssh-gateway` role auth context.
  */
 @Injectable()
-export class SshGatewayAuthContextGuard implements CanActivate {
+export class SshGatewayAuthContextGuard extends AuthContextGuard {
   protected readonly logger = new Logger(SshGatewayAuthContextGuard.name)
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

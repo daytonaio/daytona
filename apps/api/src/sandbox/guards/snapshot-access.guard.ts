@@ -3,14 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common'
+import { Injectable, ExecutionContext, ForbiddenException, Logger, NotFoundException } from '@nestjs/common'
+import { ResourceAccessGuard } from '../../common/guards/resource-access.guard'
 import { SnapshotService } from '../services/snapshot.service'
 import { isBaseAuthContext } from '../../common/interfaces/base-auth-context.interface'
 import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
@@ -22,10 +16,12 @@ import { isRegionAuthContext } from '../../common/interfaces/region-auth-context
 import { InvalidAuthenticationContextException } from '../../common/exceptions/invalid-authentication-context.exception'
 
 @Injectable()
-export class SnapshotAccessGuard implements CanActivate {
+export class SnapshotAccessGuard extends ResourceAccessGuard {
   private readonly logger = new Logger(SnapshotAccessGuard.name)
 
-  constructor(private readonly snapshotService: SnapshotService) {}
+  constructor(private readonly snapshotService: SnapshotService) {
+    super()
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()

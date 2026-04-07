@@ -3,24 +3,20 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  NotFoundException,
-  ForbiddenException,
-  Logger,
-} from '@nestjs/common'
+import { Injectable, ExecutionContext, NotFoundException, ForbiddenException, Logger } from '@nestjs/common'
+import { ResourceAccessGuard } from '../../common/guards/resource-access.guard'
 import { RegionService } from '../services/region.service'
 import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { getAuthContext } from '../../common/utils/get-auth-context'
 import { RegionType } from '../enums/region-type.enum'
 
 @Injectable()
-export class RegionAccessGuard implements CanActivate {
+export class RegionAccessGuard extends ResourceAccessGuard {
   private readonly logger = new Logger(RegionAccessGuard.name)
 
-  constructor(private readonly regionService: RegionService) {}
+  constructor(private readonly regionService: RegionService) {
+    super()
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()

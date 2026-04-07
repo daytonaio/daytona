@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { CanActivate, ExecutionContext, Injectable, Logger } from '@nestjs/common'
+import { ExecutionContext, Injectable, Logger } from '@nestjs/common'
+import { AuthContextGuard } from '../../common/guards/auth-context.guard'
 import { Reflector } from '@nestjs/core'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
@@ -26,7 +27,7 @@ import { AccessDeniedException } from '../../common/exceptions/access-denied.exc
  * Enforces the `@RequiredOrganizationMemberRole` and `@RequiredOrganizationResourcePermissions` decorators.
  */
 @Injectable()
-export class OrganizationAuthContextGuard implements CanActivate {
+export class OrganizationAuthContextGuard extends AuthContextGuard {
   private readonly logger = new Logger(OrganizationAuthContextGuard.name)
 
   constructor(
@@ -34,7 +35,9 @@ export class OrganizationAuthContextGuard implements CanActivate {
     private readonly organizationService: OrganizationService,
     private readonly organizationUserService: OrganizationUserService,
     private readonly reflector: Reflector,
-  ) {}
+  ) {
+    super()
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()

@@ -3,23 +3,19 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  NotFoundException,
-  ForbiddenException,
-  Logger,
-} from '@nestjs/common'
+import { Injectable, ExecutionContext, NotFoundException, ForbiddenException, Logger } from '@nestjs/common'
+import { ResourceAccessGuard } from '../../common/guards/resource-access.guard'
 import { JobService } from '../services/job.service'
 import { isRunnerAuthContext } from '../../common/interfaces/runner-auth-context.interface'
 import { getAuthContext } from '../../common/utils/get-auth-context'
 
 @Injectable()
-export class JobAccessGuard implements CanActivate {
+export class JobAccessGuard extends ResourceAccessGuard {
   private readonly logger = new Logger(JobAccessGuard.name)
 
-  constructor(private readonly jobService: JobService) {}
+  constructor(private readonly jobService: JobService) {
+    super()
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()
