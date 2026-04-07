@@ -6,11 +6,8 @@
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { queryKeys } from '@/hooks/queries/queryKeys'
+import { mutationKeys, SandboxMutationVariables } from './mutationKeys'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-
-interface StartSandboxVariables {
-  sandboxId: string
-}
 
 export const useStartSandboxMutation = () => {
   const { sandboxApi } = useApi()
@@ -18,11 +15,12 @@ export const useStartSandboxMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ sandboxId }: StartSandboxVariables) => {
+    mutationKey: mutationKeys.sandboxes.start,
+    mutationFn: async ({ sandboxId }: SandboxMutationVariables) => {
       await sandboxApi.startSandbox(sandboxId, selectedOrganization?.id)
     },
-    onSuccess: (_, { sandboxId }) => {
-      queryClient.invalidateQueries({
+    onSuccess: async (_, { sandboxId }) => {
+      await queryClient.invalidateQueries({
         queryKey: queryKeys.sandboxes.detail(selectedOrganization?.id ?? '', sandboxId),
       })
     },
