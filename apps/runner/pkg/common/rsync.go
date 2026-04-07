@@ -13,22 +13,23 @@ import (
 )
 
 // RsyncCopy copies files from srcPath to destPath using rsync with full attribute preservation.
-// It uses rsync with -aAX flags to preserve permissions, ownership, timestamps, symlinks,
-// devices, ACLs, and extended attributes.
+// It uses rsync with -aAXS flags to preserve permissions, ownership, timestamps, symlinks,
+// devices, ACLs, extended attributes, and sparse file efficiency.
 //
-// The timeout parameter specifies how long to wait for the rsync operation to complete.
+// Timeouts are controlled via the passed context.Context deadline (e.g. context.WithTimeout).
 // Trailing slashes are automatically added to paths to ensure contents are copied, not directories.
 func RsyncCopy(ctx context.Context, logger *slog.Logger, srcPath, destPath string) error {
 	logger.DebugContext(ctx, "rsync copy", "source", srcPath, "destination", destPath)
 
-	// Use rsync with -aAX flags:
+	// Use rsync with -aAXS flags:
 	// -a = archive mode (preserves permissions, ownership, timestamps, symlinks, devices)
 	// -A = preserve ACLs
 	// -X = preserve extended attributes (xattrs)
+	// -S = handle sparse files efficiently (avoids inflating sparse files to full size)
 	// Trailing slashes ensure we copy contents, not the directory itself
 	src := filepath.Clean(srcPath) + "/"
 	dest := filepath.Clean(destPath) + "/"
-	rsyncCmd := exec.CommandContext(ctx, "rsync", "-aAX", src, dest)
+	rsyncCmd := exec.CommandContext(ctx, "rsync", "-aAXS", src, dest)
 
 	var rsyncOut strings.Builder
 	var rsyncErr strings.Builder
