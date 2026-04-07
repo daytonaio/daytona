@@ -46,7 +46,6 @@
     "goApiClient": ["apiClient", "{workspaceRoot}/hack/go-client/postprocess.sh"],
     "tsApiClient": ["apiClient", "{workspaceRoot}/hack/ts-client/postprocess.sh"]
   },
-  "neverConnectToCloud": true,
   "plugins": [
     {
       "plugin": "@nx/webpack/plugin",
@@ -292,5 +291,6 @@
         }
       }
     }
-  }
+  },
+  "nxCloudId": "69d4d7c6d23b3673e0643fe0"
 }
