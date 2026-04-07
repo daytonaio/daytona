@@ -35,7 +35,7 @@ func (s *PTYSession) attachWebSocket(ws *websocket.Conn) {
 		"status": "connected",
 	}
 	if successJSON, err := json.Marshal(successMsg); err == nil {
-		_ = ws.WriteMessage(websocket.TextMessage, successJSON)
+		_ = cl.writeMessage(websocket.TextMessage, successJSON)
 	}
 
 	// reader (this client -> PTY); blocks until disconnect
@@ -59,8 +59,11 @@ func (s *PTYSession) clientWriter(cl *wsClient) {
 		case <-cl.done:
 			return
 		case b := <-cl.send:
+			cl.writeMu.Lock()
 			_ = cl.conn.SetWriteDeadline(time.Now().Add(writeWait))
-			if err := cl.conn.WriteMessage(websocket.BinaryMessage, b); err != nil {
+			err := cl.conn.WriteMessage(websocket.BinaryMessage, b)
+			cl.writeMu.Unlock()
+			if err != nil {
 				return
 			}
 		}
@@ -83,7 +86,7 @@ func (s *PTYSession) clientReader(cl *wsClient) {
 		// Send all message data to PTY (text or binary)
 		if err := s.sendToPTY(data); err != nil {
 			// Send error to client and close connection
-			_ = conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(
+			_ = cl.writeMessage(websocket.CloseMessage, websocket.FormatCloseMessage(
 				websocket.CloseInternalServerErr, "PTY session unavailable",
 			))
 			return
@@ -103,7 +106,7 @@ func (s *PTYSession) broadcast(b []byte) {
 		default:
 			// client's outbound queue is full -> drop the client
 			go func(id string, cl *wsClient) {
-				_ = cl.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(
+				_ = cl.writeMessage(websocket.CloseMessage, websocket.FormatCloseMessage(
 					websocket.ClosePolicyViolation, "slow consumer",
 				))
 				cl.close()
@@ -160,7 +163,7 @@ func (s *PTYSession) closeClientsWithExitCode(exitCode int, exitReason string) {
 
 	s.clientsMu.Lock()
 	for id, cl := range s.clients.Items() {
-		_ = cl.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(
+		_ = cl.writeMessage(websocket.CloseMessage, websocket.FormatCloseMessage(
 			wsCloseCode, string(closeJSON),
 		))
 		cl.close()
