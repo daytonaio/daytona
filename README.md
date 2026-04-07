@@ -64,16 +64,16 @@ Daytona platform is organized into multiple plane components, each serving a spe
 
 Runnable applications and services for the Daytona platform. Each directory is a deployable or buildable component, available in the [apps](apps) directory.
 
-- [API](apps/api): NestJS-based RESTful service; primary entry point for all platform operations
-- [CLI](apps/cli): Go command-line interface access to core features for interacting with sandboxes
-- [Daemon](apps/daemon): code execution agent that runs inside each sandbox
-- [Dashboard](apps/dashboard): web user interface for visual sandbox management
-- [Docs](apps/docs): documentation content; website published to [daytona.io/docs](https://www.daytona.io/docs/)
-- [OpenTelemetry](apps/otel-collector): trace and metric collection for Daytona SDK operations
-- [Proxy](apps/proxy): reverse proxy for custom routing and preview URLs
-- [Runner](apps/runner): compute nodes that power Daytona's compute plane and run sandboxes
-- [Snapshot manager](apps/snapshot-manager): orchestrates the creation of sandbox snapshots
-- [SSH gateway](apps/ssh-gateway): standalone SSH gateway that accepts authenticated `ssh` connections
+- [`api`](apps/api): NestJS-based RESTful service; primary entry point for all platform operations
+- [`cli`](apps/cli): Go command-line interface access to core features for interacting with sandboxes
+- [`daemon`](apps/daemon): code execution agent that runs inside each sandbox
+- [`dashboard`](apps/dashboard): web user interface for visual sandbox management
+- [`docs`](apps/docs): documentation content; website published to [daytona.io/docs](https://www.daytona.io/docs/)
+- [`otel-collector`](apps/otel-collector): trace and metric collection for Daytona SDK operations
+- [`proxy`](apps/proxy): reverse proxy for custom routing and preview URLs
+- [`runner`](apps/runner): compute nodes that power Daytona's compute plane and run sandboxes
+- [`snapshot-manager`](apps/snapshot-manager): orchestrates the creation of sandbox snapshots
+- [`ssh-gateway`](apps/ssh-gateway): standalone SSH gateway that accepts authenticated `ssh` connections
 
 ### Client libraries
 
