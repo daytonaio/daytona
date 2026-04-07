@@ -236,6 +236,7 @@ func run() int {
 	}
 
 	var executorService *executor.Executor
+	var pollerDone chan struct{}
 
 	if cfg.ApiVersion == 2 {
 		healthcheckService, err := healthcheck.NewService(&healthcheck.HealthcheckServiceConfig{
@@ -280,9 +281,11 @@ func run() int {
 			return 2
 		}
 
+		pollerDone = make(chan struct{})
 		go func() {
 			logger.Info("Starting poller service")
 			pollerService.Start(ctx)
+			close(pollerDone)
 		}()
 	}
 
@@ -320,6 +323,12 @@ func run() int {
 		}
 		// Cancel context to stop the poller and other background services
 		cancel()
+
+		// Wait for the poller to fully stop so no new jobs are submitted
+		// before we begin draining in-flight work.
+		if pollerDone != nil {
+			<-pollerDone
+		}
 
 		shutdownTimeout := 5 * time.Minute
 		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), shutdownTimeout)

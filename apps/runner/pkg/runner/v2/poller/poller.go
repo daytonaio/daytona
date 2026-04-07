@@ -86,7 +86,7 @@ func (s *Service) Start(ctx context.Context) {
 			if len(jobs) > 0 {
 				s.log.DebugContext(ctx, "Received jobs", "count", len(jobs))
 				for _, job := range jobs {
-					// Execute job in goroutine for parallel processing
+					// Execute job via executor (runs asynchronously for parallel processing)
 					s.executor.Execute(ctx, &job)
 				}
 			}

@@ -20,6 +20,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"sync"
 	"syscall"
 
 	"golang.org/x/sys/unix"
@@ -75,6 +76,7 @@ type ApiServer struct {
 	enableTLS   bool
 	httpServer  *http.Server
 	listener    net.Listener
+	mu          sync.Mutex
 	router      *gin.Engine
 	logRequests bool
 }
@@ -198,14 +200,20 @@ func (a *ApiServer) Start(ctx context.Context) error {
 // runner instance to bind during zero-downtime deploy. In-flight requests
 // continue to be served until Shutdown is called.
 func (a *ApiServer) Stop() {
+	a.mu.Lock()
+	defer a.mu.Unlock()
 	if a.listener != nil {
 		a.listener.Close()
+		a.listener = nil
 	}
 }
 
 // Shutdown gracefully drains in-flight HTTP requests. The provided context
 // controls how long to wait before forcefully closing connections.
 func (a *ApiServer) Shutdown(ctx context.Context) {
+	if a.httpServer == nil {
+		return
+	}
 	if err := a.httpServer.Shutdown(ctx); err != nil {
 		a.logger.Error("Failed to shutdown API server", "error", err)
 	}
