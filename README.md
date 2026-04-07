@@ -87,7 +87,7 @@ pip install daytona
 
 Standalone packages and libraries for interacting with Daytona using Python:
 
-> [sdk-python](libs/sdk-python) • [api-client-python](libs/api-client-python) • [api-client-python-async](libs/api-client-python-async) • [toolbox-api-client-python](libs/toolbox-api-client-python) • [toolbox-api-client-python-async](libs/toolbox-api-client-python-async)
+> `[sdk-python](libs/sdk-python)` • `[api-client-python](libs/api-client-python)` • `[api-client-python-async](libs/api-client-python-async)` • `[toolbox-api-client-python](libs/toolbox-api-client-python)` • `[toolbox-api-client-python-async](libs/toolbox-api-client-python-async)`
 
 #### TypeScript
 
@@ -97,7 +97,7 @@ npm install @daytonaio/sdk
 
 Standalone packages and libraries for interacting with Daytona using TypeScript:
 
-> [sdk-typescript](libs/sdk-typescript) • [api-client](libs/api-client) • [toolbox-api-client](libs/toolbox-api-client)
+> `[sdk-typescript](libs/sdk-typescript)` • `[api-client](libs/api-client)` • `[toolbox-api-client](libs/toolbox-api-client)`
 
 #### Ruby
 
@@ -107,7 +107,7 @@ gem install daytona
 
 Standalone packages and libraries for interacting with Daytona using Ruby:
 
-> [sdk-ruby](libs/sdk-ruby) • [api-client-ruby](libs/api-client-ruby) • [toolbox-api-client-ruby](libs/toolbox-api-client-ruby)
+> `[sdk-ruby](libs/sdk-ruby)` • `[api-client-ruby](libs/api-client-ruby)` • `[toolbox-api-client-ruby](libs/toolbox-api-client-ruby)`
 
 #### Go
 
@@ -117,7 +117,7 @@ go get github.com/daytonaio/daytona/libs/sdk-go
 
 Standalone packages and libraries for interacting with Daytona using Go:
 
-> [sdk-go](libs/sdk-go) • [api-client-go](libs/api-client-go) • [toolbox-api-client-go](libs/toolbox-api-client-go)
+> `[sdk-go](libs/sdk-go)` • `[api-client-go](libs/api-client-go)` • `[toolbox-api-client-go](libs/toolbox-api-client-go)`
 
 #### Java
 
@@ -127,13 +127,13 @@ io.daytona:sdk
 
 Standalone packages and libraries for interacting with Daytona using Java:
 
-> [sdk-java](libs/sdk-java) • [api-client-java](libs/api-client-java) • [toolbox-api-client-java](libs/toolbox-api-client-java)
+> `[sdk-java](libs/sdk-java)` • `[api-client-java](libs/api-client-java)` • `[toolbox-api-client-java](libs/toolbox-api-client-java)`
 
 ## Deployments
 
 Daytona is available as a managed service on [app.daytona.io](https://app.daytona.io). Daytona can run as a fully hosted service, as an open-source stack you operate, or in a hybrid setup where Daytona orchestrates sandboxes while execution happens on machines you manage.
 
-- [Open source deployment](https://www.daytona.io/docs/oss-deployment/): full local stack from the [docker](docker) directory using Docker Compose
+- [Open source deployment](https://www.daytona.io/docs/oss-deployment/): full local stack from the [`docker`](docker) directory using Docker Compose
 - [Customer managed compute](https://www.daytona.io/docs/runners/): custom regions and runner machines that operate Daytona sandboxes on your own compute infrastructure
 
 ## Quick Start
