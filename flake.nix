@@ -66,7 +66,7 @@
             fi
           }
           _nix_install_go_tool swag      "github.com/swaggo/swag/cmd/swag@v1.16.4"
-          _nix_install_go_tool gow       "github.com/mitranim/gow@latest"
+          _nix_install_go_tool gow       "github.com/mitranim/gow@v0.0.0-20260225145757-ff0f6779ab4c"
           _nix_install_go_tool gomarkdoc "github.com/princjef/gomarkdoc/cmd/gomarkdoc@v1.1.0"
           unset -f _nix_install_go_tool
         '';

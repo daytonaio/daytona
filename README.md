@@ -157,7 +157,7 @@ Open this repository in a [devcontainer](https://containers.dev/)-compatible edi
 If you prefer working outside the devcontainer — or are an AI agent executing build commands — use the Nix dev shells:
 
 ```bash
-# Enter the full dev shell (Go + Node + Python + Ruby)
+# Enter the full dev shell (Go + Node + Python + Ruby + JDK)
 nix develop
 
 # Or pick a language-specific shell
@@ -165,11 +165,13 @@ nix develop .#go       # Go services & libs
 nix develop .#node     # TypeScript / Node.js apps & libs
 nix develop .#python   # Python SDKs & libs
 nix develop .#ruby     # Ruby SDKs & libs
+nix develop .#java     # Java SDKs & libs
 ```
 
 **Prerequisites:** [Nix](https://nixos.org/download/) with flakes enabled (`experimental-features = nix-command flakes` in `~/.config/nix/nix.conf`).
 
 For non-interactive / CI usage:
+
 ```bash
 nix develop .#go --command bash -c "go build ./..."
 ```

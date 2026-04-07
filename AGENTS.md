@@ -190,10 +190,10 @@ nix develop .#python --command bash -c "poetry install"
 nix develop .#python --command bash -c "cd libs/sdk-python && poetry run pytest"
 
 # Lint
-nix develop .#python --command bash -c "yarn lint:py"
+nix develop --command bash -c "yarn lint:py"
 
 # Format
-nix develop .#python --command bash -c "yarn format:py"
+nix develop --command bash -c "yarn format:py"
 
 # Type check
 nix develop .#python --command bash -c "poetry run basedpyright"
