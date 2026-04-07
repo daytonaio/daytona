@@ -1,4 +1,4 @@
-smodule github.com/daytonaio/runner
+module github.com/daytonaio/runner
 
 go 1.25.4
 
