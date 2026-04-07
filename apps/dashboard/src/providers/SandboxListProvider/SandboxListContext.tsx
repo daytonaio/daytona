@@ -12,6 +12,7 @@ export interface SandboxListContextValue {
   totalItems: number
   pageCount: number
   isLoading: boolean
+  isRefetching: boolean
   error: unknown | null
 
   pagination: { pageIndex: number; pageSize: number }

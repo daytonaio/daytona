@@ -113,6 +113,8 @@ export const queryKeys = {
         },
       ] as const
     },
+    organization: (organizationId: string | undefined) =>
+      [...queryKeys.sandboxes.list(organizationId), 'organization'] as const,
     detail: (organizationId: string, sandboxId: string) =>
       [...queryKeys.sandboxes.all, organizationId, sandboxId, 'detail'] as const,
     terminalSession: (sandboxId: string) => [...queryKeys.sandboxes.all, sandboxId, 'terminal-session'] as const,

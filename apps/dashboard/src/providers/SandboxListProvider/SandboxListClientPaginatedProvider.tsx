@@ -5,6 +5,7 @@
 
 import { SandboxListContext, SandboxListContextValue } from './SandboxListContext'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { queryKeys } from '@/hooks/queries/queryKeys'
 import { DEFAULT_SANDBOX_SORTING, SandboxFilters, SandboxSorting } from '@/hooks/useSandboxes'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
@@ -16,8 +17,6 @@ import { Sandbox, SandboxDesiredState, SandboxState } from '@daytonaio/api-clien
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
-const QUERY_KEY_PREFIX = 'sandboxes-client'
-
 /**
  * @deprecated Temporary provider using client-side pagination and filtering while the
  * server-side paginated endpoint is not yet deployed to production.
@@ -28,11 +27,12 @@ export const SandboxListClientPaginatedProvider: React.FC<{ children: React.Reac
   const { selectedOrganization } = useSelectedOrganization()
   const queryClient = useQueryClient()
 
-  const queryKey = useMemo(() => [QUERY_KEY_PREFIX, selectedOrganization?.id] as const, [selectedOrganization?.id])
+  const queryKey = useMemo(() => queryKeys.sandboxes.organization(selectedOrganization?.id), [selectedOrganization?.id])
 
   const {
     data: allSandboxes = [],
     isLoading,
+    isFetching,
     error,
     refetch,
   } = useQuery<Sandbox[]>({
@@ -191,6 +191,7 @@ export const SandboxListClientPaginatedProvider: React.FC<{ children: React.Reac
   )
 
   useSandboxListWsSync({
+    enabled: !!selectedOrganization?.id,
     onSandboxCreated,
     onSandboxStateUpdated,
     onSandboxDesiredStateUpdated,
@@ -224,6 +225,7 @@ export const SandboxListClientPaginatedProvider: React.FC<{ children: React.Reac
       totalItems: processedData.totalItems,
       pageCount: processedData.pageCount,
       isLoading,
+      isRefetching: isFetching && allSandboxes.length > 0,
       error: error ?? null,
       pagination: paginationParams,
       onPaginationChange: handlePaginationChange,
@@ -241,7 +243,9 @@ export const SandboxListClientPaginatedProvider: React.FC<{ children: React.Reac
     }),
     [
       processedData,
+      allSandboxes.length,
       isLoading,
+      isFetching,
       error,
       paginationParams,
       handlePaginationChange,

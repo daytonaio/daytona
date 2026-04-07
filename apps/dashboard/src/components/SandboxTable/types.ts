@@ -20,6 +20,7 @@ export interface SandboxTableProps {
   sandboxIsLoading: Record<string, boolean>
   sandboxStateIsTransitioning: Record<string, boolean>
   loading: boolean
+  isRefetching?: boolean
   snapshots: SnapshotDto[]
   snapshotsDataIsLoading: boolean
   snapshotsDataHasMore?: boolean

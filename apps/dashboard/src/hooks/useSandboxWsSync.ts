@@ -15,6 +15,12 @@ interface UseSandboxWsSyncOptions {
   refetchOnCreate?: boolean
 }
 
+function isPaginatedSandboxes(data: unknown): data is PaginatedSandboxes {
+  return Boolean(
+    data && typeof data === 'object' && 'items' in data && Array.isArray((data as PaginatedSandboxes).items),
+  )
+}
+
 export function useSandboxWsSync({ sandboxId, refetchOnCreate = false }: UseSandboxWsSyncOptions = {}) {
   const { notificationSocket } = useNotificationSocket()
   const { selectedOrganization } = useSelectedOrganization()
@@ -26,13 +32,25 @@ export function useSandboxWsSync({ sandboxId, refetchOnCreate = false }: UseSand
     const orgId = selectedOrganization.id
 
     const updateStateInListCache = (targetId: string, state: SandboxState) => {
-      queryClient.setQueriesData<PaginatedSandboxes>({ queryKey: queryKeys.sandboxes.list(orgId) }, (oldData) => {
-        if (!oldData) return oldData
-        return {
-          ...oldData,
-          items: oldData.items.map((s) => (s.id === targetId ? { ...s, state } : s)),
-        }
-      })
+      queryClient.setQueriesData(
+        { queryKey: queryKeys.sandboxes.list(orgId) },
+        (oldData: PaginatedSandboxes | Sandbox[] | undefined) => {
+          if (!oldData) return oldData
+
+          if (Array.isArray(oldData)) {
+            return oldData.map((sandbox) => (sandbox.id === targetId ? { ...sandbox, state } : sandbox))
+          }
+
+          if (!isPaginatedSandboxes(oldData)) {
+            return oldData
+          }
+
+          return {
+            ...oldData,
+            items: oldData.items.map((s) => (s.id === targetId ? { ...s, state } : s)),
+          }
+        },
+      )
     }
 
     const updateStateInDetailCache = (targetId: string, state: SandboxState) => {
