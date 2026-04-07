@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"net"
 	"os/exec"
 	"strings"
 	"sync"
@@ -17,16 +18,17 @@ import (
 
 // NetRulesManager provides thread-safe operations for managing network rules
 type NetRulesManager struct {
-	log        *slog.Logger
-	ipt        *iptables.IPTables
-	mu         sync.Mutex
-	persistent bool
-	ctx        context.Context
-	cancel     context.CancelFunc
+	log          *slog.Logger
+	ipt          *iptables.IPTables
+	mu           sync.Mutex
+	persistent   bool
+	allowedCIDRs []*net.IPNet
+	ctx          context.Context
+	cancel       context.CancelFunc
 }
 
 // NewNetRulesManager creates a new instance of NetRulesManager
-func NewNetRulesManager(logger *slog.Logger, persistent bool) (*NetRulesManager, error) {
+func NewNetRulesManager(logger *slog.Logger, persistent bool, allowedCIDRs []*net.IPNet) (*NetRulesManager, error) {
 	ipt, err := iptables.NewWithProtocol(iptables.ProtocolIPv4)
 	if err != nil {
 		return nil, err
@@ -39,18 +41,56 @@ func NewNetRulesManager(logger *slog.Logger, persistent bool) (*NetRulesManager,
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &NetRulesManager{
-		log:        logger.With(slog.String("component", "netrules_manager")),
-		ipt:        ipt,
-		persistent: persistent,
-		ctx:        ctx,
-		cancel:     cancel,
+		log:          logger.With(slog.String("component", "netrules_manager")),
+		ipt:          ipt,
+		persistent:   persistent,
+		allowedCIDRs: allowedCIDRs,
+		ctx:          ctx,
+		cancel:       cancel,
 	}, nil
 }
 
 func (manager *NetRulesManager) Start() error {
+	if err := manager.ensureAllowedChain(); err != nil {
+		return err
+	}
+
 	// Start periodic reconciliation
 	if manager.persistent {
 		go manager.persistRulesLoop()
+	}
+
+	return nil
+}
+
+// ensureAllowedChain creates (or replaces) the shared DAYTONA-ALLOWED chain
+// that holds always-allowed CIDRs. Per-sandbox chains jump here via -j; the
+// shared chain uses ACCEPT so matching packets are allowed immediately, while
+// unmatched packets return to the sandbox chain and hit its DROP rule.
+func (manager *NetRulesManager) ensureAllowedChain() error {
+	if len(manager.allowedCIDRs) == 0 {
+		return nil
+	}
+
+	manager.mu.Lock()
+	defer manager.mu.Unlock()
+
+	// Create the chain (ignore "already exists")
+	if err := manager.ipt.NewChain("filter", AllowedChainName); err != nil {
+		if !strings.Contains(err.Error(), "Chain already exists") {
+			return err
+		}
+	}
+
+	// Rebuild from scratch so the rule set matches the current CIDR list
+	if err := manager.ipt.ClearChain("filter", AllowedChainName); err != nil {
+		return err
+	}
+
+	for _, cidr := range manager.allowedCIDRs {
+		if err := manager.ipt.AppendUnique("filter", AllowedChainName, "-j", "ACCEPT", "-d", cidr.String(), "-p", "all"); err != nil {
+			return err
+		}
 	}
 
 	return nil
