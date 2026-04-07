@@ -3,24 +3,20 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  NotFoundException,
-  ForbiddenException,
-  Logger,
-} from '@nestjs/common'
+import { Injectable, ExecutionContext, NotFoundException, ForbiddenException, Logger } from '@nestjs/common'
+import { ResourceAccessGuard } from '../../common/guards/resource-access.guard'
 import { DockerRegistryService } from '../services/docker-registry.service'
 import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { getAuthContext } from '../../common/utils/get-auth-context'
 import { RegistryType } from '../enums/registry-type.enum'
 
 @Injectable()
-export class DockerRegistryAccessGuard implements CanActivate {
+export class DockerRegistryAccessGuard extends ResourceAccessGuard {
   private readonly logger = new Logger(DockerRegistryAccessGuard.name)
 
-  constructor(private readonly dockerRegistryService: DockerRegistryService) {}
+  constructor(private readonly dockerRegistryService: DockerRegistryService) {
+    super()
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()

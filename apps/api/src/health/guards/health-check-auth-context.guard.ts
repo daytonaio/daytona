@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, ExecutionContext, Logger, CanActivate } from '@nestjs/common'
+import { Injectable, ExecutionContext, Logger } from '@nestjs/common'
+import { AuthContextGuard } from '../../common/guards/auth-context.guard'
 import { getAuthContext } from '../../common/utils/get-auth-context'
 import { isHealthCheckAuthContext } from '../../common/interfaces/health-check-auth-context.interface'
 
@@ -11,7 +12,7 @@ import { isHealthCheckAuthContext } from '../../common/interfaces/health-check-a
  * Validates that the current request is authenticated with a `health-check` role auth context.
  */
 @Injectable()
-export class HealthCheckAuthContextGuard implements CanActivate {
+export class HealthCheckAuthContextGuard extends AuthContextGuard {
   protected readonly logger = new Logger(HealthCheckAuthContextGuard.name)
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

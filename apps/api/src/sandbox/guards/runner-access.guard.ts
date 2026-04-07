@@ -3,14 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  NotFoundException,
-  ForbiddenException,
-  Logger,
-} from '@nestjs/common'
+import { Injectable, ExecutionContext, NotFoundException, ForbiddenException, Logger } from '@nestjs/common'
+import { ResourceAccessGuard } from '../../common/guards/resource-access.guard'
 import { RegionService } from '../../region/services/region.service'
 import { RunnerService } from '../services/runner.service'
 import { isBaseAuthContext } from '../../common/interfaces/base-auth-context.interface'
@@ -23,13 +17,15 @@ import { isSshGatewayAuthContext } from '../../common/interfaces/ssh-gateway-aut
 import { InvalidAuthenticationContextException } from '../../common/exceptions/invalid-authentication-context.exception'
 
 @Injectable()
-export class RunnerAccessGuard implements CanActivate {
+export class RunnerAccessGuard extends ResourceAccessGuard {
   private readonly logger = new Logger(RunnerAccessGuard.name)
 
   constructor(
     private readonly runnerService: RunnerService,
     private readonly regionService: RegionService,
-  ) {}
+  ) {
+    super()
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()

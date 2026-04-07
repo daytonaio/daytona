@@ -2,14 +2,8 @@
  * Copyright 2025 Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common'
+import { Injectable, ExecutionContext, ForbiddenException, Logger, NotFoundException } from '@nestjs/common'
+import { ResourceAccessGuard } from '../../common/guards/resource-access.guard'
 import { isBaseAuthContext } from '../../common/interfaces/base-auth-context.interface'
 import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { getAuthContext } from '../../common/utils/get-auth-context'
@@ -17,10 +11,12 @@ import { VolumeService } from '../services/volume.service'
 import { InvalidAuthenticationContextException } from '../../common/exceptions/invalid-authentication-context.exception'
 
 @Injectable()
-export class VolumeAccessGuard implements CanActivate {
+export class VolumeAccessGuard extends ResourceAccessGuard {
   private readonly logger = new Logger(VolumeAccessGuard.name)
 
-  constructor(private readonly volumeService: VolumeService) {}
+  constructor(private readonly volumeService: VolumeService) {
+    super()
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()
