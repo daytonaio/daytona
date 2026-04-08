@@ -167,6 +167,31 @@ jobs:
           GONOSUMDB=github.com/daytonaio/daytona go work sync
           git diff --exit-code || (echo "Code not formatted or linting errors! Hint: 'yarn generate:api-client', 'yarn lint:fix', 'yarn docs' and commit" && exit 1)
 
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - name: Get yarn cache directory
+        id: yarn-cache
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: yarn-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: yarn-${{ runner.os }}-${{ runner.arch }}-
+      - uses: actions/cache@v4
+        with:
+          path: .nx/cache
+          key: nx-test-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('yarn.lock') }}-${{ github.sha }}
+          restore-keys: nx-test-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('yarn.lock') }}-
+      - run: yarn install --immutable
+      - name: Run tests
+        run: yarn nx run-many --target=test --all --nxBail=true
+
   build:
     runs-on: ubuntu-latest
     steps:
