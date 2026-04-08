@@ -20,6 +20,7 @@ env:
   DAYTONA_AUTH0_AUDIENCE: ${{ secrets.DAYTONA_AUTH0_AUDIENCE }}
   POETRY_VIRTUALENVS_IN_PROJECT: true
   GONOSUMDB: github.com/daytonaio/daytona
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
 jobs:
   publish:

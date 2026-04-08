@@ -15,6 +15,7 @@ concurrency:
 
 env:
   POETRY_VIRTUALENVS_IN_PROJECT: true
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
 jobs:
   go-work:
@@ -162,7 +163,7 @@ jobs:
       - name: Build all
         run: |
           source "$(poetry env info --path)/bin/activate"
-          VERSION=0.0.0-dev yarn build --nxBail=true
+          VERSION=v0.0.0-dev yarn build --nxBail=true
 
   license-check:
     runs-on: ubuntu-latest

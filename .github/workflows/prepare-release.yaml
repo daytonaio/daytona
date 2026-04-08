@@ -11,6 +11,7 @@ on:
 env:
   VERSION: ${{ inputs.version }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
 jobs:
   prepare:
