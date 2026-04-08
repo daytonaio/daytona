@@ -46,7 +46,7 @@ Snapshots can be created using:
 
 - **Snapshot name**: Identifier used to reference the snapshot in the SDK or CLI.
 - **Image**: Base image for the snapshot. Must include either a tag or a digest (e.g., **`ubuntu:22.04`**). The **`latest`** tag is not allowed. Since images tagged `latest` get frequent updates, only specific tags are supported. Same applies to tags such as `lts` or `stable`, and we recommend avoiding those when defining an image to prevent unexpected behavior.
-- **Entrypoint** (optional): The entrypoint command for the snapshot. Ensure that the entrypoint is a long-running command. If not provided, or if the snapshot does not have an entrypoint, `sleep infinity` will be used as the default.
+- **Entrypoint** (optional): Override the container entrypoint for this snapshot. If omitted, the image default is used.
 - [**Resources**](/docs/en/sandboxes#resources) (optional): The resources you want the underlying Sandboxes to have. By default, Daytona Sandboxes use **1 vCPU**, **1GiB memory**, and **3GiB storage**.
 
 <Tabs>

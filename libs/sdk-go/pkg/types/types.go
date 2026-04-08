@@ -80,6 +80,7 @@ type CreateSnapshotParams struct {
 	Name           string
 	Image          any // string or *Image
 	Resources      *Resources
+	// Entrypoint overrides the container entrypoint. If empty, the image default is used.
 	Entrypoint     []string
 	SkipValidation *bool
 }

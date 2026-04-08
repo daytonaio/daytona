@@ -33,7 +33,7 @@ class CreateSnapshot(BaseModel):
     """ # noqa: E501
     name: StrictStr = Field(description="The name of the snapshot")
     image_name: Optional[StrictStr] = Field(default=None, description="The image name of the snapshot", serialization_alias="imageName")
-    entrypoint: Optional[List[StrictStr]] = Field(default=None, description="The entrypoint command for the snapshot")
+    entrypoint: Optional[List[StrictStr]] = Field(default=None, description="Override the container entrypoint for this snapshot. If omitted, the image default is used.")
     general: Optional[StrictBool] = Field(default=None, description="Whether the snapshot is general")
     cpu: Optional[StrictInt] = Field(default=None, description="CPU cores allocated to the resulting sandbox")
     gpu: Optional[StrictInt] = Field(default=None, description="GPU units allocated to the resulting sandbox")

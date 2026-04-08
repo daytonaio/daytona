@@ -25,7 +25,7 @@ type CreateSnapshot struct {
 	Name string `json:"name"`
 	// The image name of the snapshot
 	ImageName *string `json:"imageName,omitempty"`
-	// The entrypoint command for the snapshot
+	// Override the container entrypoint for this snapshot. If omitted, the image default is used.
 	Entrypoint []string `json:"entrypoint,omitempty"`
 	// Whether the snapshot is general
 	General *bool `json:"general,omitempty"`

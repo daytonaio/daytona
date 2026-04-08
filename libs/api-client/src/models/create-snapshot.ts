@@ -36,7 +36,7 @@ export interface CreateSnapshot {
      */
     'imageName'?: string;
     /**
-     * The entrypoint command for the snapshot
+     * Override the container entrypoint for this snapshot. If omitted, the image default is used.
      * @type {Array<string>}
      * @memberof CreateSnapshot
      */
