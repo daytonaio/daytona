@@ -1,0 +1,58 @@
+services:
+  db:
+    image: postgres:18
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_PASSWORD: pass
+      POSTGRES_USER: user
+      POSTGRES_DB: application_ctx
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U user -d application_ctx']
+      interval: 2s
+      timeout: 5s
+      retries: 15
+
+  redis:
+    image: redis:latest
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 2s
+      timeout: 5s
+      retries: 15
+
+  dex:
+    image: dexidp/dex:v2.42.0
+    ports:
+      - '5556:5556'
+    volumes:
+      - ../../.devcontainer/dex/config.yaml:/etc/dex/config.yaml
+    command: ['dex', 'serve', '/etc/dex/config.yaml']
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - '9000:9000'
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/ready']
+      interval: 2s
+      timeout: 5s
+      retries: 15
+
+  registry:
+    image: registry:2.8.2
+    ports:
+      - '5000:5000'
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: 'true'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '--quiet', 'http://localhost:5000/v2/']
+      interval: 2s
+      timeout: 5s
+      retries: 15
