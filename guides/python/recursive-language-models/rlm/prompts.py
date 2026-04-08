@@ -18,7 +18,7 @@ You MUST print this variable to see your assignment before proceeding.
 ## Environment
 - Repository: /workspace
 - Python execution: Write ONE ```python block per response
-- Shell access via os.system()
+- File access via Python built-ins (open, pathlib)
 
 ## CRITICAL RULES
 1. Each response must have exactly ONE ```python block
@@ -39,14 +39,20 @@ THOUGHT: [Your reasoning here]
 
 View files (with line numbers):
 ```python
-import os
-os.system('nl -ba /workspace/path/to/file.py | head -50')
+with open('/workspace/path/to/file.py') as f:
+    for i, line in enumerate(f, 1):
+        print(f'{i:6}\t{line}', end='')
+        if i >= 50:
+            break
 ```
 
 Search:
 ```python
-import os
-os.system('grep -rn "pattern" /workspace/src/')
+import pathlib
+for p in pathlib.Path('/workspace/src/').rglob('*.py'):
+    for i, line in enumerate(p.read_text(errors='replace').splitlines(), 1):
+        if 'pattern' in line:
+            print(f'{p}:{i}: {line}')
 ```
 
 Edit files (REQUIRED - safe and validates syntax):
@@ -103,8 +109,8 @@ should examine.
 
 ## Workflow
 1. Print task: see your assignment with print(task)
-2. Explore: find relevant files with grep/ls
-3. Read: view files with nl -ba to see line numbers
+2. Explore: search files using pathlib and re modules
+3. Read: open files with open() to view their contents
 4. Edit: use edit_file() with unique context strings
 5. Verify: check your changes work as expected
 6. Submit: generate diff with git diff
@@ -112,11 +118,11 @@ should examine.
 ## Submitting Your Work
 
 ```python
-import subprocess
-subprocess.run(['git', 'add', '-A'], cwd='/workspace')
-result = subprocess.run(['git', 'diff', '--cached', 'HEAD'],
-                        capture_output=True, text=True, cwd='/workspace')
-FINAL(result.stdout)
+import git
+repo = git.Repo('/workspace')
+repo.git.add(A=True)
+diff = repo.git.diff('--cached', 'HEAD')
+FINAL(diff)
 ```"""
 
 
@@ -144,14 +150,22 @@ Key facts about your environment:
 - Repository: /workspace
 - Python execution: Write ONE ```python block per response
 - Variables and imports PERSIST between responses - you can build on previous work
-- Shell access via os.system()
+- File access via Python built-ins (open, pathlib)
 
 ## Commands
 
 ```python
-import os
-os.system('nl -ba /workspace/file.py | head -50')  # View with line numbers
-os.system('grep -rn "pattern" /workspace/')  # Search
+with open('/workspace/file.py') as f:  # View with line numbers
+    for i, line in enumerate(f, 1):
+        print(f'{i:6}\t{line}', end='')
+        if i >= 50:
+            break
+
+import pathlib  # Search
+for p in pathlib.Path('/workspace/').rglob('*.py'):
+    for i, line in enumerate(p.read_text(errors='replace').splitlines(), 1):
+        if 'pattern' in line:
+            print(f'{p}:{i}: {line}')
 
 # Edit files (safe - validates syntax before writing)
 result = edit_file("/workspace/file.py", "old_text", "new_text")
@@ -174,8 +188,8 @@ SAFEGUARD_PROMPT = """STOP. Do NOT edit files or call FINAL() yet.
 
 First:
 1. Print your task with print(task) to see your assignment
-2. Find relevant files with grep
-3. Read them with nl -ba to see line numbers
+2. Find relevant files using pathlib and re modules
+3. Read them with open() to see their contents
 4. Understand the code before making changes"""
 
 
