@@ -45,7 +45,10 @@
       }
     },
     "test": {
-      "executor": "@nx-go/nx-go:test"
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd {projectRoot}/exporter && go test ./..."
+      }
     },
     "lint": {
       "executor": "@nx-go/nx-go:lint"
