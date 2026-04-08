@@ -9,11 +9,21 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
+	"strings"
 )
 
 type ApiErrorResponse struct {
 	Error   string `json:"error"`
 	Message any    `json:"message,omitempty"`
+}
+
+var apiSecretPatterns = []*regexp.Regexp{
+	regexp.MustCompile(`(?i)(api[_-]?key|access[_-]?key|secret[_-]?key|secret|token|password|passwd|authorization)[:=]\s*([^\s,;]+)`),
+	regexp.MustCompile(`(?i)(bearer\s+)[A-Za-z0-9._\-~+/=]+`),
+	regexp.MustCompile(`(?i)(AKIA[0-9A-Z]{16})`),
+	regexp.MustCompile(`(?i)(gh[pousr]_[A-Za-z0-9]{20,})`),
+	regexp.MustCompile(`(?i)(sk_live_[A-Za-z0-9]{16,})`),
 }
 
 func HandleErrorResponse(res *http.Response, requestErr error) error {
@@ -25,7 +35,7 @@ func HandleErrorResponse(res *http.Response, requestErr error) error {
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return err
+		return errors.New(redactString(string(body)))
 	}
 
 	var errResponse ApiErrorResponse
@@ -57,5 +67,13 @@ func HandleErrorResponse(res *http.Response, requestErr error) error {
 		errMessage += " - run 'daytona login' to reauthenticate"
 	}
 
-	return errors.New(errMessage)
+	return errors.New(redactString(errMessage))
+}
+
+func redactString(input string) string {
+	redacted := input
+	for _, pattern := range apiSecretPatterns {
+		redacted = pattern.ReplaceAllString(redacted, "$1[REDACTED]")
+	}
+	return strings.TrimSpace(redacted)
 }

@@ -8,7 +8,6 @@ import (
 	"fmt"
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
-	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/mark3labs/mcp-go/mcp"
 
 	log "github.com/sirupsen/logrus"
@@ -41,15 +40,13 @@ func DeleteFile(ctx context.Context, request mcp.CallToolRequest, args DeleteFil
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("filePath parameter is required")
 	}
 
-	// Execute delete command
-	execResponse, _, err := apiClient.ToolboxAPI.ExecuteCommandDeprecated(ctx, *args.Id).
-		ExecuteRequest(*apiclient.NewExecuteRequest(fmt.Sprintf("rm -rf %s", *args.FilePath))).
-		Execute()
+	// Use the toolbox file API instead of shell command interpolation.
+	_, err = apiClient.ToolboxAPI.DeleteFileDeprecated(ctx, *args.Id).Path(*args.FilePath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error deleting file: %v", err)
 	}
 
 	log.Infof("Deleted file: %s", *args.FilePath)
 
-	return mcp.NewToolResultText(fmt.Sprintf("Deleted file: %s\nOutput: %s", *args.FilePath, execResponse.Result)), nil
+	return mcp.NewToolResultText(fmt.Sprintf("Deleted file: %s", *args.FilePath)), nil
 }

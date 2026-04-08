@@ -7,9 +7,11 @@ package logger
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log/slog"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -17,6 +19,14 @@ import (
 	"github.com/mattn/go-isatty"
 	"github.com/sirupsen/logrus"
 )
+
+var secretPatterns = []*regexp.Regexp{
+	regexp.MustCompile(`(?i)(api[_-]?key|access[_-]?key|secret[_-]?key|secret|token|password|passwd|authorization)[:=]\s*([^\s,;]+)`),
+	regexp.MustCompile(`(?i)(bearer\s+)[A-Za-z0-9._\-~+/=]+`),
+	regexp.MustCompile(`(?i)(AKIA[0-9A-Z]{16})`),
+	regexp.MustCompile(`(?i)(gh[pousr]_[A-Za-z0-9]{20,})`),
+	regexp.MustCompile(`(?i)(sk_live_[A-Za-z0-9]{16,})`),
+}
 
 func NewLogger() *slog.Logger {
 	log := slog.New(tint.NewHandler(os.Stdout, &tint.Options{
@@ -45,7 +55,7 @@ func (h *slogHook) Levels() []logrus.Level {
 func (h *slogHook) Fire(entry *logrus.Entry) error {
 	attrs := make([]slog.Attr, 0, len(entry.Data))
 	for k, v := range entry.Data {
-		attrs = append(attrs, slog.Any(k, v))
+		attrs = append(attrs, slog.Any(k, redactValue(v)))
 	}
 
 	level := slog.LevelInfo
@@ -62,6 +72,27 @@ func (h *slogHook) Fire(entry *logrus.Entry) error {
 
 	h.logger.LogAttrs(context.Background(), level, entry.Message, attrs...)
 	return nil
+}
+
+func redactValue(value any) any {
+	switch typed := value.(type) {
+	case string:
+		return redactString(typed)
+	case fmt.Stringer:
+		return redactString(typed.String())
+	case []byte:
+		return redactString(string(typed))
+	default:
+		return value
+	}
+}
+
+func redactString(input string) string {
+	redacted := input
+	for _, pattern := range secretPatterns {
+		redacted = pattern.ReplaceAllString(redacted, "$1[REDACTED]")
+	}
+	return redacted
 }
 
 // parseLogLevel converts a string log level to slog.Level
