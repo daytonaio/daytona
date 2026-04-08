@@ -4,12 +4,19 @@ on:
     branches:
       - main
 
+permissions: {}
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout (GitHub)
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Set up QEMU for multi-architecture builds
         uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
       - name: Setup Docker buildx for multi-architecture builds

@@ -12,6 +12,8 @@ on:
         type: boolean
         default: true
 
+permissions: {}
+
 env:
   VERSION: ${{ inputs.version }}
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
@@ -29,6 +31,8 @@ jobs:
             platform: linux/amd64
 
     runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
 
     steps:
       - name: Validate version format
@@ -46,6 +50,8 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
@@ -112,6 +118,7 @@ jobs:
   docker_manifest:
     needs: docker_build
     runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+    permissions: {}
 
     steps:
       - name: Download sandbox digests
