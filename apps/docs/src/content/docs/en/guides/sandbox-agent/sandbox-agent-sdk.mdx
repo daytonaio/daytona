@@ -1,0 +1,108 @@
+---
+title: Run Sandbox Agent SDK in a Daytona Sandbox
+description: Use the Sandbox Agent SDK with the Daytona provider to create and control coding-agent sessions from a local script.
+---
+
+This guide shows how to run [Sandbox Agent](https://github.com/rivet-dev/sandbox-agent) inside a Daytona sandbox and control it with the [Sandbox Agent SDK](https://sandboxagent.dev/docs/sdk-overview).
+
+Sandbox Agent makes it easy to spin up AI coding agents in sandboxed environments and orchestrate them from your backend with straightforward HTTP calls.
+
+- **One API for Every Agent** - Manage Claude Code, Codex, OpenCode, Cursor, Amp, and Pi through a single, unified endpoint - no per-agent integration needed, with nothing left out feature-wise.
+- **Consistent Session Format** - Agents emit events differently. The built-in session schema reconciles those differences into one normalized, replayable format you can store however you like.
+- **Run Your Way** - Start it up as its own HTTP server, or skip the extra hop and embed it directly in your app with the TypeScript SDK.
+
+### 1. Workflow Overview
+
+The flow is split into two parts:
+
+- A local Node.js script starts a Daytona sandbox and boots the Sandbox Agent server in it.
+- The script opens a session, sends a prompt to an agent (Claude in this example), and streams the response.
+
+When the script exits, the sandbox is destroyed.
+
+### 2. Prerequisites
+
+- `DAYTONA_API_KEY`
+- `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`
+
+:::note[Network Access]
+Some model provider endpoints require Daytona Tier 3+. See [network limits](/docs/en/network-limits) for details.
+:::
+
+### 3. Project Setup
+
+Install dependencies:
+
+```bash
+npm install sandbox-agent @daytonaio/sdk dotenv tsx
+```
+
+Create a `.env` file:
+
+```bash
+DAYTONA_API_KEY=your_daytona_api_key
+ANTHROPIC_API_KEY=your_anthropic_api_key
+# OPENAI_API_KEY=your_openai_api_key
+```
+
+Create `index.ts` with the snippets below, then run:
+
+```bash
+node --import tsx index.ts
+```
+
+### 4. Example Usage
+
+First, forward your provider credentials into the sandbox:
+```ts
+import "dotenv/config";
+const envVars: Record<string, string> = {};
+if (process.env.ANTHROPIC_API_KEY) envVars.ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+if (process.env.OPENAI_API_KEY) envVars.OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+```
+
+Then start Sandbox Agent with the Daytona provider and open the inspector:
+
+```ts
+import { SandboxAgent } from "sandbox-agent";
+import { daytona } from "sandbox-agent/daytona";
+
+const sdk = await SandboxAgent.start({
+  sandbox: daytona({
+    create: { envVars },
+  }),
+});
+
+// The printed inspector URL is where you can open
+// the Sandbox Agent inspector UI.
+console.log("Inspector URL:", sdk.inspectorUrl);
+```
+
+Send a prompt, then stream events back:
+
+```ts
+const session = await sdk.createSession({ agent: "claude" });
+const off = session.onEvent((event) => {
+    console.log(`[event] from ${event.sender}`, event.payload);
+});
+await session.prompt([
+  { type: 'text', text: 'Summarize this repository' }
+]);
+off();
+```
+
+Read more about [Sessions and Events](https://sandboxagent.dev/docs/agent-sessions).
+
+Finally, once complete, clean up the sandbox:
+
+```ts
+await sdk.destroySandbox();
+```
+
+### 5. Customize the Agent
+
+To use a different agent, update any `createSession` calls (for example, `agent: "codex"`), and ensure the corresponding provider credentials are available in the environment.
+
+## References
+
+- [Sandbox Agent SDK docs](https://sandboxagent.dev/docs/sdk-overview)

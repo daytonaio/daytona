@@ -606,6 +606,18 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath(
+            '/docs/guides/sandbox-agent/sandbox-agent-sdk',
+            locale
+          ),
+          label: t('sidebarconfig.sandboxAgent'),
+          disablePagination: true,
+          attrs: {
+            icon: 'tools.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/guides/google-adk-code-generator', locale),
           label: t('sidebarconfig.googleAdk'),
           disablePagination: true,
