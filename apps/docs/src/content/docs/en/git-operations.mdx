@@ -145,18 +145,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/clone' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git), [Ruby SDK](/docs/en/ruby-sdk/git), [Go SDK](/docs/en/go-sdk/) and [API](/docs/en/tools/api/#daytona-toolbox) references:
-
-> [**clone (Python SDK)**](/docs/en/python-sdk/sync/git/#gitclone)
->
-> [**clone (TypeScript SDK)**](/docs/en/typescript-sdk/git/#clone)
->
-> [**clone (Ruby SDK)**](/docs/en/ruby-sdk/git/#clone)
->
-> [**Clone (Go SDK)**](/docs/en/go-sdk/daytona/#GitService.Clone)
->
-> [**clone repository (API)**](/docs/en/tools/api/#daytona-toolbox/tag/git/POST/git/clone)
-
 ### Get repository status
 
 Daytona provides methods to check the status of Git repositories in sandboxes. You can get the current branch, modified files, number of commits ahead and behind main branch.
@@ -255,18 +243,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/status?path='
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git), [Ruby SDK](/docs/en/ruby-sdk/git), [Go SDK](/docs/en/go-sdk/) and [API](/docs/en/tools/api/#daytona-toolbox) references:
-
-> [**status (Python SDK)**](/docs/en/python-sdk/sync/git/#gitstatus)
->
-> [**status (TypeScript SDK)**](/docs/en/typescript-sdk/git/#status)
->
-> [**status (Ruby SDK)**](/docs/en/ruby-sdk/git/#status)
->
-> [**Status (Go SDK)**](/docs/en/go-sdk/daytona/#GitService.Status)
->
-> [**get Git repository status (API)**](/docs/en/tools/api/#daytona-toolbox/tag/git/GET/git/status)
-
 ## Branch operations
 
 Daytona provides methods to manage branches in Git repositories. You can create, switch, and delete branches.
@@ -326,18 +302,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/branches' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git), [Ruby SDK](/docs/en/ruby-sdk/git), [Go SDK](/docs/en/go-sdk/) and [API](/docs/en/tools/api/#daytona-toolbox) references:
-
-> [**create_branch (Python SDK)**](/docs/en/python-sdk/sync/git/#gitcreate_branch)
->
-> [**createBranch (TypeScript SDK)**](/docs/en/typescript-sdk/git/#createbranch)
->
-> [**create_branch (Ruby SDK)**](/docs/en/ruby-sdk/git/#create_branch)
->
-> [**CreateBranch (Go SDK)**](/docs/en/go-sdk/daytona/#GitService.CreateBranch)
->
-> [**create branch (API)**](/docs/en/tools/api/#daytona-toolbox/tag/git/POST/git/branches)
-
 ### Checkout branches
 
 Daytona provides methods to checkout branches in Git repositories. The following snippet checks out the branch called `feature-branch`.
@@ -393,18 +357,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/checkout' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git), [Ruby SDK](/docs/en/ruby-sdk/git), [Go SDK](/docs/en/go-sdk/) and [API](/docs/en/tools/api/#daytona-toolbox) references:
-
-> [**checkout_branch (Python SDK)**](/docs/en/python-sdk/sync/git/#gitcheckout_branch)
->
-> [**checkoutBranch (TypeScript SDK)**](/docs/en/typescript-sdk/git/#checkoutbranch)
->
-> [**checkout_branch (Ruby SDK)**](/docs/en/ruby-sdk/git/#checkout_branch)
->
-> [**Checkout (Go SDK)**](/docs/en/go-sdk/daytona/#GitService.Checkout)
->
-> [**checkout branch (API)**](/docs/en/tools/api/#daytona-toolbox/tag/git/POST/git/checkout)
-
 ### Delete branches
 
 Daytona provides methods to delete branches in Git repositories. The following snippet deletes the branch called `old-feature`.
@@ -459,18 +411,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/branches' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git), [Ruby SDK](/docs/en/ruby-sdk/git), [Go SDK](/docs/en/go-sdk/) and [API](/docs/en/tools/api/#daytona-toolbox) references:
-
-> [**delete_branch (Python SDK)**](/docs/en/python-sdk/sync/git/#gitdelete_branch)
->
-> [**deleteBranch (TypeScript SDK)**](/docs/en/typescript-sdk/git/#deletebranch)
->
-> [**delete_branch (Ruby SDK)**](/docs/en/ruby-sdk/git/#delete_branch)
->
-> [**DeleteBranch (Go SDK)**](/docs/en/go-sdk/daytona/#GitService.DeleteBranch)
->
-> [**delete branch (API)**](/docs/en/tools/api/#daytona-toolbox/tag/git/DELETE/git/branches)
 
 ## Stage changes
 
@@ -553,18 +493,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/add' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git), [Ruby SDK](/docs/en/ruby-sdk/git), [Go SDK](/docs/en/go-sdk/) and [API](/docs/en/tools/api/#daytona-toolbox) references:
-
-> [**add (Python SDK)**](/docs/en/python-sdk/sync/git/#gitadd)
->
-> [**add (TypeScript SDK)**](/docs/en/typescript-sdk/git/#add)
->
-> [**add (Ruby SDK)**](/docs/en/ruby-sdk/git/#add)
->
-> [**Add (Go SDK)**](/docs/en/go-sdk/daytona/#GitService.Add)
->
-> [**add (API)**](/docs/en/tools/api/#daytona-toolbox/tag/git/POST/git/add)
 
 ## Commit changes
 
@@ -650,18 +578,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/commit' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git), [Ruby SDK](/docs/en/ruby-sdk/git), [Go SDK](/docs/en/go-sdk/) and [API](/docs/en/tools/api/#daytona-toolbox) references:
-
-> [**commit (Python SDK)**](/docs/en/python-sdk/sync/git/#gitcommit)
->
-> [**commit (TypeScript SDK)**](/docs/en/typescript-sdk/git/#commit)
->
-> [**commit (Ruby SDK)**](/docs/en/ruby-sdk/git/#commit)
->
-> [**Commit (Go SDK)**](/docs/en/go-sdk/daytona/#GitService.Commit)
->
-> [**commit (API)**](/docs/en/tools/api/#daytona-toolbox/tag/git/POST/git/commit)
-
 ## Remote operations
 
 Daytona provides methods to work with remote repositories in Git. You can push and pull changes from remote repositories.
@@ -743,18 +659,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/push' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git), [Ruby SDK](/docs/en/ruby-sdk/git), [Go SDK](/docs/en/go-sdk/) and [API](/docs/en/tools/api/#daytona-toolbox) references:
-
-> [**push (Python SDK)**](/docs/en/python-sdk/sync/git/#gitpush)
->
-> [**push (TypeScript SDK)**](/docs/en/typescript-sdk/git/#push)
->
-> [**push (Ruby SDK)**](/docs/en/ruby-sdk/git/#push)
->
-> [**Push (Go SDK)**](/docs/en/go-sdk/daytona/#GitService.Push)
->
-> [**push (API)**](/docs/en/tools/api/#daytona-toolbox/tag/git/POST/git/push)
-
 ### Pull changes
 
 Daytona provides methods to pull changes from remote repositories. The following snippet pulls the changes from a public repository.
@@ -832,15 +736,3 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/pull' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git), [Ruby SDK](/docs/en/ruby-sdk/git), [Go SDK](/docs/en/go-sdk/) and [API](/docs/en/tools/api/#daytona-toolbox) references:
-
-> [**pull (Python SDK)**](/docs/en/python-sdk/sync/git/#gitpull)
->
-> [**pull (TypeScript SDK)**](/docs/en/typescript-sdk/git/#pull)
->
-> [**pull (Ruby SDK)**](/docs/en/ruby-sdk/git/#pull)
->
-> [**Pull (Go SDK)**](/docs/en/go-sdk/daytona/#GitService.Pull)
->
-> [**pull (API)**](/docs/en/tools/api/#daytona-toolbox/tag/git/POST/git/pull)

@@ -162,32 +162,6 @@ daytona create --network-block-all
 If both `networkBlockAll` and `networkAllowList` are specified, `networkBlockAll` takes precedence and all network access will be blocked, ignoring the allow list.
 :::
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/daytona#createsandboxbaseparams), [TypeScript SDK](/docs/en/typescript-sdk/daytona#createsandboxbaseparams), [Ruby SDK](/docs/en/ruby-sdk/sandbox#network_allow_list), [Go SDK](/docs/en/go-sdk/types#SandboxBaseParams), [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox), and [CLI](/docs/en/tools/cli#daytona-create) references:
-
-> [**network_allow_list (Python SDK)**](/docs/en/python-sdk/sync/daytona#createsandboxbaseparams)
->
-> [**network_block_all (Python SDK)**](/docs/en/python-sdk/sync/daytona#createsandboxbaseparams)
->
-> [**network_allow_list (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#createsandboxbaseparams)
->
-> [**network_block_all (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#createsandboxbaseparams)
->
-> [**network_allow_list (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#network_allow_list)
->
-> [**network_block_all (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#network_allow_list)
->
-> [**network_allow_list (Go SDK)**](/docs/en/go-sdk/types#SandboxBaseParams)
->
-> [**network_block_all (Go SDK)**](/docs/en/go-sdk/types#SandboxBaseParams)
->
-> [**networkAllowList (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox)
->
-> [**networkBlockAll (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox)
->
-> [**--network-allow-list (CLI)**](/docs/en/tools/cli#daytona-create)
->
-> [**--network-block-all (CLI)**](/docs/en/tools/cli#daytona-create)
-
 ## Network allow list format
 
 The network allow list is a comma-separated list of IPv4 CIDR blocks. Set your allowed networks using the `networkAllowList` parameter when [creating a sandbox](/docs/en/sandboxes#create-sandboxes).

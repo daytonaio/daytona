@@ -87,14 +87,6 @@ lsp := sandbox.Lsp(types.LspLanguagePython, "workspace/project")
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), and [Go SDK](/docs/en/go-sdk/) references:
-
-> [**create_lsp_server (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxcreate_lsp_server)
->
-> [**createLspServer (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#createlspserver)
->
-> [**create_lsp_server (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#create_lsp_server)
-
 ### Supported languages
 
 The supported languages for creating LSP servers with Daytona are defined by the `LspLanguageId` enum:
@@ -103,12 +95,6 @@ The supported languages for creating LSP servers with Daytona are defined by the
 | ------------------------------ | -------------------------------------- |
 | **`LspLanguageId.PYTHON`**     | Python language server                 |
 | **`LspLanguageId.TYPESCRIPT`** | TypeScript/JavaScript language server  |
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/#lsplanguageid) and [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/#lsplanguageid) references:
-
-> [**LspLanguageId (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lsplanguageid)
->
-> [**LspLanguageId (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#lsplanguageid)
 
 ## Start LSP servers
 
@@ -172,18 +158,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/start' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
-
-> [**start (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverstart)
->
-> [**start (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#start)
->
-> [**start (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#start)
->
-> [**Start (Go SDK)**](/docs/en/go-sdk/daytona#LspServerService.Start)
->
-> [**start (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/start)
-
 ## Stop LSP servers
 
 Daytona provides methods to stop LSP servers.
@@ -238,18 +212,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/stop' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
-
-> [**stop (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverstop)
->
-> [**stop (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#stop)
->
-> [**stop (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#stop)
->
-> [**Stop (Go SDK)**](/docs/en/go-sdk/daytona#LspServerService.Stop)
->
-> [**stop (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/stop)
 
 ## Code completions
 
@@ -326,18 +288,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/completions' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
-
-> [**completions (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspservercompletions)
->
-> [**completions (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#completions)
->
-> [**completions (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#completions)
->
-> [**Completions (Go SDK)**](/docs/en/go-sdk/daytona#LspServerService.Completions)
->
-> [**completions (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/completions)
-
 ## File notifications
 
 Daytona provides methods to notify the LSP server when files are opened or closed. This enables features like diagnostics and completion tracking for the specified files.
@@ -398,18 +348,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/did-open' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
-
-> [**did_open (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverdid_open)
->
-> [**didOpen (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#didopen)
->
-> [**did_open (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#did_open)
->
-> [**DidOpen (Go SDK)**](/docs/en/go-sdk/daytona#LspServerService.DidOpen)
->
-> [**did_open (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/did-open)
-
 ### Close file
 
 Notifies the language server that a file has been closed. This allows the server to clean up resources associated with that file.
@@ -465,18 +403,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/did-close' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
-
-> [**did_close (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverdid_close)
->
-> [**didClose (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#didclose)
->
-> [**did_close (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#did_close)
->
-> [**DidClose (Go SDK)**](/docs/en/go-sdk/daytona#LspServerService.DidClose)
->
-> [**did_close (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/did-close)
 
 ## Document symbols
 
@@ -534,18 +460,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/document-symbols?lang
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
-
-> [**document_symbols (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverdocument_symbols)
->
-> [**documentSymbols (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#documentsymbols)
->
-> [**document_symbols (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#document_symbols)
->
-> [**DocumentSymbols (Go SDK)**](/docs/en/go-sdk/daytona#LspServerService.DocumentSymbols)
->
-> [**document_symbols (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/GET/lsp/document-symbols)
-
 ## Sandbox symbols
 
 Daytona provides methods to search for symbols across all files in the sandbox.
@@ -601,15 +515,3 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/workspacesymbols?quer
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp) references:
-
-> [**sandbox_symbols (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserversandbox_symbols)
->
-> [**sandboxSymbols (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#sandboxsymbols)
->
-> [**sandbox_symbols (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#sandbox_symbols)
->
-> [**SandboxSymbols (Go SDK)**](/docs/en/go-sdk/daytona#LspServerService.SandboxSymbols)
->
-> [**sandbox_symbols (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/GET/lsp/workspacesymbols)
