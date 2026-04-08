@@ -31,7 +31,7 @@ func (d *DockerClient) runDockerImageBuildWithBuildKitSession(
 	}
 
 	sess.Allow(authprovider.NewDockerAuthProvider(authprovider.DockerAuthProviderConfig{
-		ConfigFile: registryAuthConfigsToConfigFile(buildOpts.AuthConfigs),
+		AuthConfigProvider: authprovider.LoadAuthConfig(registryAuthConfigsToConfigFile(buildOpts.AuthConfigs)),
 	}))
 
 	dialer := func(c context.Context, protocol string, meta map[string][]string) (net.Conn, error) {
