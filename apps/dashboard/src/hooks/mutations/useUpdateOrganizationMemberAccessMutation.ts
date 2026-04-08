@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { OrganizationUser, UpdateOrganizationMemberAccess } from '@daytonaio/api-client'
+import { OrganizationUser, UpdateOrganizationMemberAccess } from '@daytona/api-client'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { mutationKeys } from './mutationKeys'
 import { queryKeys } from '../queries/queryKeys'
 import { useApi } from '../useApi'
+import { mutationKeys } from './mutationKeys'
 
 export interface UpdateOrganizationMemberAccessMutationVariables {
   organizationId?: string
