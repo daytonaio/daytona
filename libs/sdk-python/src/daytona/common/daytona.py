@@ -61,7 +61,7 @@ class DaytonaConfig(BaseModel):
         target (str | None): Target runner location for the Sandbox. Default region for the organization is used
             if not set here or in the environment variable `DAYTONA_TARGET`.
         connection_pool_maxsize (int | None): Maximum number of simultaneous HTTP connections
-            the SDK will open. Defaults to 100. Set to `None` to remove the limit, which is
+            the SDK will open. Defaults to 250. Set to `None` to remove the limit, which is
             recommended when running many concurrent long-lived operations like `process.exec`.
         _experimental (dict[str, any] | None): Configuration for experimental features.
 
@@ -86,7 +86,7 @@ class DaytonaConfig(BaseModel):
     target: str | None = None
     jwt_token: str | None = None
     organization_id: str | None = None
-    connection_pool_maxsize: int | None = 100
+    connection_pool_maxsize: int | None = 250
     _experimental: Annotated[
         dict[str, object] | None,
         Field(
