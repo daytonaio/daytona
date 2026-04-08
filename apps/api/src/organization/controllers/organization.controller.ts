@@ -51,6 +51,7 @@ import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
 import { OtelCollectorAuthContextGuard } from '../guards/otel-collector-auth-context.guard'
 import { OtelConfigDto } from '../dto/otel-config.dto'
 import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
+import { UserAuthContextGuard } from '../../user/guards/user-auth-context.guard'
 
 @Controller('organizations')
 @ApiTags('organizations')
@@ -78,6 +79,7 @@ export class OrganizationController {
     description: 'List of organization invitations',
     type: [OrganizationInvitationDto],
   })
+  @UseGuards(UserAuthContextGuard)
   async findInvitationsByUser(@IsUserAuthContext() authContext: UserAuthContext): Promise<OrganizationInvitationDto[]> {
     const invitations = await this.organizationInvitationService.findByUser(authContext.userId)
     return invitations.map(OrganizationInvitationDto.fromOrganizationInvitation)
@@ -93,6 +95,7 @@ export class OrganizationController {
     description: 'Count of organization invitations',
     type: Number,
   })
+  @UseGuards(UserAuthContextGuard)
   async getInvitationsCountByUser(@IsUserAuthContext() authContext: UserAuthContext): Promise<number> {
     return this.organizationInvitationService.getCountByUser(authContext.userId)
   }
@@ -117,6 +120,7 @@ export class OrganizationController {
     targetType: AuditTarget.ORGANIZATION_INVITATION,
     targetIdFromRequest: (req) => req.params.invitationId,
   })
+  @UseGuards(UserAuthContextGuard)
   async acceptInvitation(
     @IsUserAuthContext() authContext: UserAuthContext,
     @Param('invitationId') invitationId: string,
@@ -153,6 +157,7 @@ export class OrganizationController {
     targetType: AuditTarget.ORGANIZATION_INVITATION,
     targetIdFromRequest: (req) => req.params.invitationId,
   })
+  @UseGuards(UserAuthContextGuard)
   async declineInvitation(
     @IsUserAuthContext() authContext: UserAuthContext,
     @Param('invitationId') invitationId: string,
@@ -190,6 +195,7 @@ export class OrganizationController {
       }),
     },
   })
+  @UseGuards(UserAuthContextGuard)
   async create(
     @IsUserAuthContext() authContext: UserAuthContext,
     @Body() createOrganizationDto: CreateOrganizationDto,
@@ -251,6 +257,7 @@ export class OrganizationController {
     description: 'List of organizations',
     type: [OrganizationDto],
   })
+  @UseGuards(UserAuthContextGuard)
   async findAll(@IsUserAuthContext() authContext: UserAuthContext): Promise<OrganizationDto[]> {
     const organizations = await this.organizationService.findByUser(authContext.userId)
     return organizations.map(OrganizationDto.fromOrganization)

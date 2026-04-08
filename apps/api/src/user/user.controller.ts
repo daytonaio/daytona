@@ -33,6 +33,7 @@ import { AuditAction } from '../audit/enums/audit-action.enum'
 import { AuthenticatedRateLimitGuard } from '../common/guards/authenticated-rate-limit.guard'
 import { AuthStrategy } from '../auth/decorators/auth-strategy.decorator'
 import { AuthStrategyType } from '../auth/enums/auth-strategy-type.enum'
+import { UserAuthContextGuard } from './guards/user-auth-context.guard'
 
 @Controller('users')
 @ApiTags('users')
@@ -40,6 +41,7 @@ import { AuthStrategyType } from '../auth/enums/auth-strategy-type.enum'
 @ApiBearerAuth()
 @AuthStrategy(AuthStrategyType.JWT)
 @UseGuards(AuthenticatedRateLimitGuard)
+@UseGuards(UserAuthContextGuard)
 export class UserController {
   private readonly logger = new Logger(UserController.name)
 
