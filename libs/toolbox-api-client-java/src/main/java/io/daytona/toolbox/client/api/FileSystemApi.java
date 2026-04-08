@@ -489,7 +489,7 @@ public class FileSystemApi {
      <table border="1">
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
-        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 200 </td><td> Multipart response with file parts and JSON error parts </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call downloadFilesCall(FilesDownloadRequest downloadFiles, final ApiCallback _callback) throws ApiException {
@@ -550,7 +550,7 @@ public class FileSystemApi {
 
     /**
      * Download multiple files
-     * Download multiple files by providing their paths
+     * Download multiple files by providing their paths. Successful files are returned as multipart parts named &#x60;file&#x60;. Per-file failures are returned as multipart parts named &#x60;error&#x60; with JSON payloads shaped like ErrorResponse.
      * @param downloadFiles Paths of files to download (required)
      * @return Map&lt;String, Object&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -558,7 +558,7 @@ public class FileSystemApi {
      <table border="1">
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
-        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 200 </td><td> Multipart response with file parts and JSON error parts </td><td>  -  </td></tr>
      </table>
      */
     public Map<String, Object> downloadFiles(FilesDownloadRequest downloadFiles) throws ApiException {
@@ -568,7 +568,7 @@ public class FileSystemApi {
 
     /**
      * Download multiple files
-     * Download multiple files by providing their paths
+     * Download multiple files by providing their paths. Successful files are returned as multipart parts named &#x60;file&#x60;. Per-file failures are returned as multipart parts named &#x60;error&#x60; with JSON payloads shaped like ErrorResponse.
      * @param downloadFiles Paths of files to download (required)
      * @return ApiResponse&lt;Map&lt;String, Object&gt;&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -576,7 +576,7 @@ public class FileSystemApi {
      <table border="1">
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
-        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 200 </td><td> Multipart response with file parts and JSON error parts </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Map<String, Object>> downloadFilesWithHttpInfo(FilesDownloadRequest downloadFiles) throws ApiException {
@@ -587,7 +587,7 @@ public class FileSystemApi {
 
     /**
      * Download multiple files (asynchronously)
-     * Download multiple files by providing their paths
+     * Download multiple files by providing their paths. Successful files are returned as multipart parts named &#x60;file&#x60;. Per-file failures are returned as multipart parts named &#x60;error&#x60; with JSON payloads shaped like ErrorResponse.
      * @param downloadFiles Paths of files to download (required)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
@@ -596,7 +596,7 @@ public class FileSystemApi {
      <table border="1">
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
-        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 200 </td><td> Multipart response with file parts and JSON error parts </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call downloadFilesAsync(FilesDownloadRequest downloadFiles, final ApiCallback<Map<String, Object>> _callback) throws ApiException {
