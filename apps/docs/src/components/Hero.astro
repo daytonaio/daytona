@@ -1,6 +1,12 @@
 ---
 import { PAGE_TITLE_ID } from './TableOfContent/constants'
-const { data } = Astro.locals.starlightRoute.entry
+const route = Astro.locals.starlightRoute
+const { data } = route.entry
+const slug =
+  (route.entry as { slug?: string }).slug ??
+  route.entry.id ??
+  route.pathname ??
+  ''
 const { title = data.title, tagline, image, actions = [] } = data.hero || {}
 const is404Page = slug === '404' || slug.endsWith('/404')
 ---

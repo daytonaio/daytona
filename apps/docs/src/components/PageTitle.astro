@@ -7,13 +7,18 @@ import { PAGE_TITLE_ID } from './TableOfContent/constants'
 const { origin, pathname } = Astro.url
 const normalizedPath = pathname.replace(/\/$/, '')
 const markdownUrl = `${origin}${normalizedPath || '/docs/en'}.md`
+const route = Astro.locals.starlightRoute
+const entry = Astro.props.entry ?? route?.entry
+const pageLocale = Astro.props.locale ?? route?.lang ?? 'en'
+const llmUrl = entry?.data?.llmUrl
+const toolboxLlmUrl = entry?.data?.toolboxLlmUrl
 
-const markdownRaw = Astro.props.entry.body
+const markdownRaw = entry?.body ?? null
 ---
 
 {
-  !Astro.props.entry.data.hideTitleOnPage && (
-    <h1 id={PAGE_TITLE_ID}>{Astro.props.entry.data.title}</h1>
+  entry && !entry.data.hideTitleOnPage && (
+    <h1 id={PAGE_TITLE_ID}>{entry.data.title}</h1>
   )
 }
 <div class="title-actions">
@@ -65,7 +70,7 @@ const markdownRaw = Astro.props.entry.body
   />
 
   {
-    (entry.data.licence || entry.data.distribution) && (
+    entry && (entry.data.licence || entry.data.distribution) && (
       <dl class="tiers-distribution-list">
         <div>
           <>
