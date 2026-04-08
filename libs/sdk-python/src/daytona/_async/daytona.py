@@ -52,6 +52,7 @@ from ..common.daytona import (
 from ..common.errors import DaytonaError
 from ..common.image import Image
 from ..common.protocols import SandboxCodeToolbox
+from ..internal.pool_tracker import AsyncPoolSaturationTracker
 from .sandbox import AsyncPaginatedSandboxes, AsyncSandbox
 from .snapshot import AsyncSnapshotService
 from .volume import AsyncVolumeService
@@ -214,6 +215,8 @@ class AsyncDaytona:
             if not self._organization_id:
                 raise DaytonaError("Organization ID is required when using JWT token")
             self._api_client.default_headers["X-Daytona-Organization-ID"] = self._organization_id
+
+        self._pool_tracker: AsyncPoolSaturationTracker = AsyncPoolSaturationTracker(pool_size)
 
         # Initialize API clients with the api_client instance
         self._sandbox_api: SandboxApi = SandboxApi(self._api_client)
@@ -527,6 +530,7 @@ class AsyncDaytona:
             self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
+            self._pool_tracker,
         )
 
         if sandbox.state != SandboxState.STARTED:
@@ -621,6 +625,7 @@ class AsyncDaytona:
             self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
+            self._pool_tracker,
         )
 
     @intercept_errors(message_prefix="Failed to list sandboxes: ")
@@ -660,6 +665,7 @@ class AsyncDaytona:
                     self._toolbox_api_client,
                     self._sandbox_api,
                     self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
+                    self._pool_tracker,
                 )
                 for sandbox in response.items
             ],
