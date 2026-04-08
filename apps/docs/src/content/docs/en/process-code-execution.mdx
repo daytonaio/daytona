@@ -1,5 +1,6 @@
 ---
 title: Process and Code Execution
+description: Execute code in your sandboxes using stateless and stateful execution.
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
@@ -192,7 +193,7 @@ finally:
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-import { Daytona } from '@daytonaio/sdk'
+import { Daytona } from '@daytona/sdk'
 
 const daytona = new Daytona()
 
@@ -1090,7 +1091,7 @@ except DaytonaError as e:
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
-import { DaytonaError } from '@daytonaio/sdk'
+import { DaytonaError } from '@daytona/sdk'
 
 try {
     const response = await sandbox.process.codeRun("invalid typescript code");

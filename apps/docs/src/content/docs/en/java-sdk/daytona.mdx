@@ -1,0 +1,243 @@
+---
+title: "Daytona"
+hideTitleOnPage: true
+---
+
+## Daytona
+
+Main class for interacting with the Daytona API.
+
+Provides methods to create, retrieve, and list Sandboxes, and exposes service accessors for
+Snapshots and Volumes.
+
+Implements `AutoCloseable` for deterministic HTTP resource cleanup.
+
+### Constructors
+
+#### new Daytona()
+```java
+public Daytona()
+```
+
+Creates a client using environment variables.
+
+Reads `DAYTONA_API_KEY`, `DAYTONA_API_URL`, and `DAYTONA_TARGET`.
+
+**Throws**:
+
+- `DaytonaException` - if required authentication is missing
+
+#### new Daytona()
+```java
+public Daytona(DaytonaConfig config)
+```
+
+Creates a client with explicit configuration.
+
+**Parameters**:
+
+- `config` _DaytonaConfig_ - SDK configuration containing API key and endpoint settings
+
+**Throws**:
+
+- `DaytonaException` - if configuration is invalid or missing credentials
+
+### Methods
+
+#### create()
+```java
+public Sandbox create()
+```
+
+Creates a Sandbox with default parameters and timeout.
+
+**Returns**:
+
+- `Sandbox` - created and started `Sandbox`
+
+**Throws**:
+
+- `DaytonaException` - if creation or startup fails
+
+#### create()
+```java
+public Sandbox create(CreateSandboxFromSnapshotParams params)
+```
+
+Creates a Sandbox from snapshot-oriented parameters using default timeout.
+
+**Parameters**:
+
+- `params` _CreateSandboxFromSnapshotParams_ - snapshot creation parameters
+
+**Returns**:
+
+- `Sandbox` - created and started `Sandbox`
+
+**Throws**:
+
+- `DaytonaException` - if creation or startup fails
+
+#### create()
+```java
+public Sandbox create(CreateSandboxFromImageParams params)
+```
+
+Creates a Sandbox from image-oriented parameters using default timeout.
+
+**Parameters**:
+
+- `params` _CreateSandboxFromImageParams_ - image creation parameters
+
+**Returns**:
+
+- `Sandbox` - created and started `Sandbox`
+
+**Throws**:
+
+- `DaytonaException` - if creation or startup fails
+
+#### create()
+```java
+public Sandbox create(CreateSandboxFromSnapshotParams params, long timeoutSeconds)
+```
+
+Creates a Sandbox from snapshot parameters.
+
+**Parameters**:
+
+- `params` _CreateSandboxFromSnapshotParams_ - snapshot creation parameters including env vars, labels, and lifecycle options
+- `timeoutSeconds` _long_ - maximum seconds to wait for the Sandbox to reach `started`
+
+**Returns**:
+
+- `Sandbox` - created and started `Sandbox`
+
+**Throws**:
+
+- `DaytonaException` - if creation fails or the Sandbox does not start in time
+
+#### create()
+```java
+public Sandbox create(CreateSandboxFromImageParams params, long timeoutSeconds)
+```
+
+Creates a Sandbox from image parameters.
+
+**Parameters**:
+
+- `params` _CreateSandboxFromImageParams_ - image creation parameters including image source and optional resources
+- `timeoutSeconds` _long_ - maximum seconds to wait for the Sandbox to reach `started`
+
+**Returns**:
+
+- `Sandbox` - created and started `Sandbox`
+
+**Throws**:
+
+- `DaytonaException` - if creation fails or the Sandbox does not start in time
+
+#### create()
+```java
+public Sandbox create(CreateSandboxFromImageParams params, long timeoutSeconds, java.util.function.Consumer<String> onSnapshotCreateLogs)
+```
+
+Creates a new Sandbox from a declarative image with build log streaming.
+
+**Parameters**:
+
+- `params` _CreateSandboxFromImageParams_ - creation parameters including the image definition
+- `timeoutSeconds` _long_ - maximum seconds to wait for the Sandbox to reach `started`
+- `onSnapshotCreateLogs` _java.util.function.Consumer\<String\>_ - callback for build log lines; `null` to skip streaming
+
+**Returns**:
+
+- `Sandbox` - created and started `Sandbox`
+
+**Throws**:
+
+- `DaytonaException` - if creation fails or the Sandbox does not start in time
+
+#### get()
+```java
+public Sandbox get(String sandboxIdOrName)
+```
+
+Retrieves a Sandbox by ID or name.
+
+**Parameters**:
+
+- `sandboxIdOrName` _String_ - Sandbox identifier or name
+
+**Returns**:
+
+- `Sandbox` - resolved `Sandbox`
+
+**Throws**:
+
+- `DaytonaException` - if the Sandbox is not found or request fails
+
+#### list()
+```java
+public PaginatedSandboxes list()
+```
+
+Lists Sandboxes using default pagination.
+
+**Returns**:
+
+- `PaginatedSandboxes` - first page of Sandboxes with default page size
+
+**Throws**:
+
+- `DaytonaException` - if listing fails
+
+#### list()
+```java
+public PaginatedSandboxes list(Map<String, String> labels, Integer page, Integer limit)
+```
+
+Lists Sandboxes with optional label filtering and pagination.
+
+**Parameters**:
+
+- `labels` _Map\<String, String\>_ - label filter map; only Sandboxes with matching labels are returned
+- `page` _Integer_ - page number starting from 1
+- `limit` _Integer_ - maximum items per page
+
+**Returns**:
+
+- `PaginatedSandboxes` - paginated Sandbox list
+
+**Throws**:
+
+- `DaytonaException` - if listing fails
+
+#### snapshot()
+```java
+public SnapshotService snapshot()
+```
+
+Returns Snapshot management service.
+
+**Returns**:
+
+- `SnapshotService` - snapshot service instance
+
+#### volume()
+```java
+public VolumeService volume()
+```
+
+Returns Volume management service.
+
+**Returns**:
+
+- `VolumeService` - volume service instance
+
+#### close()
+```java
+public void close()
+```
+
+Closes this client and releases underlying HTTP resources.

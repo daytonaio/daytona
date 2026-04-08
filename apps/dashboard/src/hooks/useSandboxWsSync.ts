@@ -7,7 +7,7 @@ import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { getSandboxesQueryKey } from '@/hooks/useSandboxes'
 import { queryKeys } from '@/hooks/queries/queryKeys'
-import { PaginatedSandboxes, Sandbox, SandboxDesiredState, SandboxState } from '@daytonaio/api-client'
+import { PaginatedSandboxes, Sandbox, SandboxDesiredState, SandboxState } from '@daytona/api-client'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 

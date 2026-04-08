@@ -42,6 +42,9 @@ export class SnapshotSubscriber implements EntitySubscriberInterface<Snapshot> {
   }
 
   beforeRemove(event: RemoveEvent<Snapshot>) {
+    if (!event.databaseEntity) {
+      return
+    }
     this.eventEmitter.emit(SnapshotEvents.REMOVED, new SnapshotRemovedEvent(event.databaseEntity as Snapshot))
   }
 }

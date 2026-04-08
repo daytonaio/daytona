@@ -5,7 +5,7 @@
 
 import type { OrganizationWallet } from '@/billing-api/types/OrganizationWallet'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { OrganizationUserRoleEnum } from '@daytonaio/api-client'
+import { OrganizationUserRoleEnum } from '@daytona/api-client'
 import { UseQueryOptions } from '@tanstack/react-query'
 import { useOrganizationBillingPortalUrlQuery } from './useOrganizationBillingPortalUrlQuery'
 import {

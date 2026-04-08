@@ -3,18 +3,10 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useApi } from '@/hooks/useApi'
-import {
-  Runner,
-  RunnerState,
-  OrganizationRolePermissionsEnum,
-  CreateRunner,
-  CreateRunnerResponse,
-} from '@daytonaio/api-client'
-import { RunnerTable } from '@/components/RunnerTable'
-import { CreateRunnerDialog } from '@/components/CreateRunnerDialog'
+import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
+import { CreateRunnerSheet } from '@/components/CreateRunnerSheet'
 import RunnerDetailsSheet from '@/components/RunnerDetailsSheet'
+import { RunnerTable } from '@/components/RunnerTable'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -25,11 +17,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { toast } from 'sonner'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { useApi } from '@/hooks/useApi'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
-import { handleApiError } from '@/lib/error-handling'
 import { useRegions } from '@/hooks/useRegions'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { handleApiError } from '@/lib/error-handling'
+import {
+  CreateRunner,
+  CreateRunnerResponse,
+  OrganizationRolePermissionsEnum,
+  Runner,
+  RunnerState,
+} from '@daytona/api-client'
+import { PlusIcon } from 'lucide-react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 const Runners: React.FC = () => {
   const { runnersApi } = useApi()
@@ -50,6 +52,7 @@ const Runners: React.FC = () => {
   const [showRunnerDetails, setShowRunnerDetails] = useState(false)
 
   const [autoRefresh, setAutoRefresh] = useState(false)
+  const createRunnerSheetRef = useRef<{ open: () => void }>(null)
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -212,12 +215,29 @@ const Runners: React.FC = () => {
     [authenticatedUserHasPermission],
   )
 
+  const rootCommands: CommandConfig[] = useMemo(() => {
+    if (!writePermitted || regions.length === 0) {
+      return []
+    }
+
+    return [
+      {
+        id: 'create-runner',
+        label: 'Create Runner',
+        icon: <PlusIcon className="w-4 h-4" />,
+        onSelect: () => createRunnerSheetRef.current?.open(),
+      },
+    ]
+  }, [writePermitted, regions.length])
+
+  useRegisterCommands(rootCommands, { groupId: 'runner-actions', groupLabel: 'Runner actions', groupOrder: 0 })
+
   return (
     <div className="px-6 py-2">
       <div className="mb-2 h-12 flex items-center justify-between">
         <h1 className="text-2xl font-medium">Runners</h1>
         {writePermitted && regions.length > 0 && (
-          <CreateRunnerDialog regions={regions} onCreateRunner={handleCreateRunner} />
+          <CreateRunnerSheet regions={regions} onCreateRunner={handleCreateRunner} ref={createRunnerSheetRef} />
         )}
       </div>
 

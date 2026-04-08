@@ -129,6 +129,9 @@ export class JobStateHandlerService {
         )
         updateData.state = SandboxState.STARTED
         updateData.errorReason = null
+        if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
+          Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.NONE))
+        }
         const metadata = job.getResultMetadata()
         if (metadata?.daemonVersion && typeof metadata.daemonVersion === 'string') {
           updateData.daemonVersion = metadata.daemonVersion
@@ -171,6 +174,9 @@ export class JobStateHandlerService {
         this.logger.debug(`START_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STARTED`)
         updateData.state = SandboxState.STARTED
         updateData.errorReason = null
+        if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
+          Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.NONE))
+        }
         const metadata = job.getResultMetadata()
         if (metadata?.daemonVersion && typeof metadata.daemonVersion === 'string') {
           updateData.daemonVersion = metadata.daemonVersion
@@ -213,6 +219,7 @@ export class JobStateHandlerService {
         this.logger.debug(`STOP_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STOPPED`)
         updateData.state = SandboxState.STOPPED
         updateData.errorReason = null
+        Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.NONE))
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`STOP_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
         updateData.state = SandboxState.ERROR
@@ -237,25 +244,39 @@ export class JobStateHandlerService {
         this.logger.warn(`Sandbox ${sandboxId} not found for DESTROY_SANDBOX job ${job.id}`)
         return
       }
-      if (sandbox.desiredState !== SandboxDesiredState.DESTROYED) {
-        // Don't log anything because sandboxes can be destroyed on runners when archiving or moving to a new runner
-        return
-      }
-
       const updateData: Partial<Sandbox> = {}
 
-      if (job.status === JobStatus.COMPLETED) {
-        this.logger.debug(
-          `DESTROY_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as DESTROYED`,
-        )
-        updateData.state = SandboxState.DESTROYED
+      if (sandbox.desiredState === SandboxDesiredState.DESTROYED) {
+        if (job.status === JobStatus.COMPLETED) {
+          this.logger.debug(
+            `DESTROY_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as DESTROYED`,
+          )
+          updateData.state = SandboxState.DESTROYED
+          updateData.errorReason = null
+        } else if (job.status === JobStatus.FAILED) {
+          this.logger.error(`DESTROY_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
+          updateData.state = SandboxState.ERROR
+          const { recoverable, errorReason } = sanitizeSandboxError(job.errorMessage)
+          updateData.errorReason = errorReason || 'Failed to destroy sandbox'
+          updateData.recoverable = recoverable
+        }
+      } else if (
+        sandbox.desiredState === SandboxDesiredState.ARCHIVED &&
+        sandbox.backupState === BackupState.COMPLETED
+      ) {
+        if (job.status === JobStatus.COMPLETED) {
+          this.logger.debug(
+            `DESTROY_SANDBOX job ${job.id} completed during archiving, marking sandbox ${sandboxId} as ARCHIVED`,
+          )
+        } else if (job.status === JobStatus.FAILED) {
+          this.logger.warn(
+            `DESTROY_SANDBOX job ${job.id} failed during archiving for sandbox ${sandboxId}: ${job.errorMessage}. Marking as ARCHIVED since backup is complete.`,
+          )
+        }
+        updateData.state = SandboxState.ARCHIVED
         updateData.errorReason = null
-      } else if (job.status === JobStatus.FAILED) {
-        this.logger.error(`DESTROY_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-        updateData.state = SandboxState.ERROR
-        const { recoverable, errorReason } = sanitizeSandboxError(job.errorMessage)
-        updateData.errorReason = errorReason || 'Failed to destroy sandbox'
-        updateData.recoverable = recoverable
+      } else {
+        return
       }
 
       await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
@@ -473,6 +494,9 @@ export class JobStateHandlerService {
         )
         updateData.state = SandboxState.STARTED
         updateData.errorReason = null
+        if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
+          Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.NONE))
+        }
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`RECOVER_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
         updateData.state = SandboxState.ERROR

@@ -22,7 +22,7 @@
     "generate:api-client": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": ["apiClient"],
+      "inputs": ["goApiClient"],
       "outputs": [
         "{projectRoot}/*.go",
         "{projectRoot}/go.mod",
@@ -32,7 +32,8 @@
       "options": {
         "commands": [
           "rm -f {projectRoot}/*.go",
-          "yarn run openapi-generator-cli generate --git-repo-id=daytona/libs/api-client-go --git-user-id=daytonaio -i dist/apps/api/openapi.json -g go --additional-properties=disallowAdditionalPropertiesIfNotPresent=false,packageName=apiclient,moduleVersion=$DEFAULT_PACKAGE_VERSION,generateInterfaces=true,enumClassPrefix=true,structPrefix=true -o libs/api-client-go"
+          "yarn run openapi-generator-cli generate --git-repo-id=daytona/libs/api-client-go --git-user-id=daytonaio -i dist/apps/api/openapi.json -g go --additional-properties=disallowAdditionalPropertiesIfNotPresent=false,packageName=apiclient,moduleVersion=$DEFAULT_PACKAGE_VERSION,generateInterfaces=true,enumClassPrefix=true,structPrefix=true -o libs/api-client-go",
+          "bash hack/go-client/postprocess.sh libs/api-client-go apiclient api-client-go"
         ],
         "parallel": false
       },
@@ -56,13 +57,14 @@
         { "env": "VERSION" },
         { "dependentTasksOutputFiles": "**/*", "transitive": true }
       ],
-      "outputs": ["{workspaceRoot}/apps/cli/go.mod", "{workspaceRoot}/libs/sdk-go/go.mod"],
+      "outputs": ["{workspaceRoot}/apps/cli/go.mod", "{workspaceRoot}/libs/sdk-go/go.mod", "{projectRoot}/VERSION"],
       "options": {
         "cwd": "{workspaceRoot}",
         "commands": [
           "cd apps/cli && go mod edit -require=github.com/daytonaio/daytona/libs/api-client-go@$VERSION",
           "cd libs/sdk-go && go mod edit -require=github.com/daytonaio/daytona/libs/api-client-go@$VERSION",
-          "cd apps/otel-collector/exporter && go mod edit -require=github.com/daytonaio/daytona/libs/api-client-go@$VERSION"
+          "cd apps/otel-collector/exporter && go mod edit -require=github.com/daytonaio/daytona/libs/api-client-go@$VERSION",
+          "echo \"$VERSION\" > libs/api-client-go/VERSION"
         ],
         "parallel": false
       },

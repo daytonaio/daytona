@@ -1,117 +1,188 @@
 # Daytona Ruby SDK
 
-The official Ruby SDK for [Daytona](https://daytona.io) - a platform for secure, isolated sandbox environments.
+The official Ruby SDK for [Daytona](https://daytona.io), an open-source, secure and elastic infrastructure for running AI-generated code. Daytona provides full composable computers — [sandboxes](https://www.daytona.io/docs/en/sandboxes/) — that you can manage programmatically using the Daytona SDK.
+
+The SDK provides an interface for sandbox management, file system operations, Git operations, language server protocol support, process and code execution, and computer use. For more information, see the [documentation](https://www.daytona.io/docs/en/ruby-sdk/).
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'daytona'
-```
-
-And then execute:
-
-```bash
-bundle install
-```
-
-Or install it yourself as:
+Install the package using **gem**:
 
 ```bash
 gem install daytona
 ```
 
-## Quick Start
+## Get API key
+
+Generate an API key from the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys) to authenticate SDK requests and access Daytona services. For more information, see the [API keys](https://www.daytona.io/docs/en/api-keys/) documentation.
+
+## Configuration
+
+Configure the SDK using [environment variables](https://www.daytona.io/docs/en/configuration/#environment-variables) or by passing a [configuration object](https://www.daytona.io/docs/en/configuration/#configuration-in-code):
+
+- `DAYTONA_API_KEY`: Your Daytona [API key](https://www.daytona.io/docs/en/api-keys/)
+- `DAYTONA_API_URL`: The Daytona [API URL](https://www.daytona.io/docs/en/tools/api/)
+- `DAYTONA_TARGET`: Your target [region](https://www.daytona.io/docs/en/regions/) environment (e.g. `us`, `eu`)
 
 ```ruby
 require 'daytona'
 
-# Initialize the client (uses DAYTONA_API_KEY environment variable)
+# Initialize with environment variables
 daytona = Daytona::Daytona.new
 
-# Or with explicit configuration
+# Initialize with configuration object
 config = Daytona::Config.new(
-  api_key: 'your-api-key',
+  api_key: 'YOUR_API_KEY',
+  api_url: 'YOUR_API_URL',
   target: 'us'
 )
+```
+
+## Create a sandbox
+
+Create a sandbox to run your code securely in an isolated environment.
+
+```ruby
+require 'daytona'
+
+config = Daytona::Config.new(api_key: 'YOUR_API_KEY')
 daytona = Daytona::Daytona.new(config)
-
-# Create a sandbox
 sandbox = daytona.create
+```
 
-# Execute code
-response = sandbox.process.code_run(code: 'print("Hello, World!")')
+## Examples and guides
+
+Daytona provides [examples](https://www.daytona.io/docs/en/getting-started/#examples) and [guides](https://www.daytona.io/docs/en/guides/) for common sandbox operations, best practices, and a wide range of topics, from basic usage to advanced topics, showcasing various types of integrations between Daytona and other tools.
+
+### Create a sandbox with custom resources
+
+Create a sandbox with [custom resources](https://www.daytona.io/docs/en/sandboxes/#resources) (CPU, memory, disk).
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+sandbox = daytona.create(
+    Daytona::CreateSandboxFromImageParams.new(
+        image: Daytona::Image.debian_slim('3.12'),
+        resources: Daytona::Resources.new(cpu: 2, memory: 4, disk: 8)
+    )
+)
+```
+
+### Create an ephemeral sandbox
+
+Create an [ephemeral sandbox](https://www.daytona.io/docs/en/sandboxes/#ephemeral-sandboxes) that is automatically deleted when stopped.
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+sandbox = daytona.create(
+    Daytona::CreateSandboxFromSnapshotParams.new(ephemeral: true, auto_stop_interval: 5)
+)
+```
+
+### Create a sandbox from a snapshot
+
+Create a sandbox from a [snapshot](https://www.daytona.io/docs/en/snapshots/).
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+sandbox = daytona.create(
+    Daytona::CreateSandboxFromSnapshotParams.new(
+        snapshot: 'my-snapshot-name'
+    )
+)
+```
+
+### Execute commands
+
+Execute commands in the sandbox.
+
+```ruby
+# Execute any shell command
+response = sandbox.process.exec(command: 'ls -la')
 puts response.result
 
-# Clean up
-daytona.delete(sandbox)
+# Setting a working directory and a timeout
+response = sandbox.process.exec(command: 'sleep 3', cwd: 'workspace/src', timeout: 5)
+puts response.result
+
+# Passing environment variables
+response = sandbox.process.exec(
+  command: 'echo $CUSTOM_SECRET',
+  env: { 'CUSTOM_SECRET' => 'DAYTONA' }
+)
+puts response.result
 ```
 
-## Configuration
+### File operations
 
-The SDK can be configured using environment variables:
+Upload, download, and search files in the sandbox.
 
-| Variable | Description |
-|----------|-------------|
-| `DAYTONA_API_KEY` | API key for authentication |
-| `DAYTONA_API_URL` | URL of the Daytona API (defaults to `https://app.daytona.io/api`) |
-| `DAYTONA_TARGET` | Target location for Sandboxes |
+```ruby
+# Upload a text file from string content
+content = "Hello, World!"
+sandbox.fs.upload_file(content, "tmp/hello.txt")
 
-## Documentation
+# Download and get file content
+content = sandbox.fs.download_file("workspace/data/file.txt")
+puts content
 
-- [Ruby SDK Reference](https://www.daytona.io/docs/en/ruby-sdk)
-- [Getting Started Guide](https://www.daytona.io/docs/en/getting-started)
-- [API Documentation](https://www.daytona.io/docs/en/tools/api)
-
-## Examples
-
-See the [examples/ruby](https://github.com/daytonaio/daytona/tree/main/examples/ruby) directory for more usage examples:
-
-- [Lifecycle management](https://github.com/daytonaio/daytona/tree/main/examples/ruby/lifecycle)
-- [File operations](https://github.com/daytonaio/daytona/tree/main/examples/ruby/file-operations)
-- [Git operations](https://github.com/daytonaio/daytona/tree/main/examples/ruby/git-lsp)
-- [Process execution](https://github.com/daytonaio/daytona/tree/main/examples/ruby/exec-command)
-- [PTY sessions](https://github.com/daytonaio/daytona/tree/main/examples/ruby/pty)
-- [Volumes](https://github.com/daytonaio/daytona/tree/main/examples/ruby/volumes)
-
-## Development
-
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt.
-
-### Publishing a New Version
-
-From the repository root:
-
-```bash
-# Set your RubyGems API key and version
-export RUBYGEMS_API_KEY="your-rubygems-api-key"
-export RUBYGEMS_PKG_VERSION="X.Y.Z" # pre-release format example: "X.Y.Z.alpha.1"
-
-# Publish (builds and publishes all Ruby gems)
-yarn nx publish sdk-ruby
+# Get file metadata
+info = sandbox.fs.get_file_info("workspace/data/file.txt")
+puts "Size: #{info.size} bytes"
+puts "Modified: #{info.mod_time}"
+puts "Mode: #{info.mode}"
 ```
 
-This will automatically:
+### Git operations
 
-- Set the version for all Ruby gems (api-client, toolbox-api-client, sdk)
-- Build all gems in the correct dependency order
-- Publish to RubyGems
+Clone, list branches, and add files to the sandbox.
 
-For more details, see [PUBLISHING.md](../../PUBLISHING.md).
+```ruby
+# Basic clone
+sandbox.git.clone(
+  url: 'https://github.com/daytonaio/daytona.git',
+  path: 'workspace/repo'
+)
 
-## Requirements
+# List branches
+response = sandbox.git.branches('workspace/repo')
+puts "Branches: #{response.branches}"
 
-- Ruby >= 3.2.0
+# Add files
+sandbox.git.add('workspace/repo', ['README.md'])
+```
+
+### Language server protocol
+
+Create and start a language server to get code completions, document symbols, and more.
+
+```ruby
+# Create a language server
+lsp_server = sandbox.create_lsp_server(
+  language_id: Daytona::LspServer::Language::PYTHON,
+  path_to_project: 'workspace/project'
+)
+lsp_server.start
+
+# Notify server that a file is open
+lsp_server.did_open('workspace/project/main.py')
+
+# Get document symbols
+symbols = lsp_server.document_symbols('workspace/project/main.py')
+
+# Get completions
+completions = lsp_server.completions(
+  path: 'workspace/project/main.py',
+  position: Daytona::LspServer::Position.new(line: 10, character: 15)
+)
+```
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/daytonaio/daytona.
-
-## Code of Conduct
-
-Everyone interacting in the Daytona SDK project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/daytonaio/daytona/blob/main/CODE_OF_CONDUCT.md).
-
-## License
-
-See [LICENSE](https://github.com/daytonaio/daytona/blob/main/LICENSE) for details.
+Daytona is Open Source under the [Apache License 2.0](https://github.com/daytonaio/daytona/blob/main/libs/sdk-ruby/LICENSE), and is the [copyright of its contributors](https://github.com/daytonaio/daytona/blob/main/NOTICE). If you would like to contribute to the software, read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/). Afterwards, navigate to the [contributing guide](../../CONTRIBUTING.md) to get started.

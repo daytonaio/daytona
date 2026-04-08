@@ -22,8 +22,11 @@ from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, Strict
 from typing import Any, ClassVar, Dict, List, Optional
 from daytona_api_client_async.models.create_build_info import CreateBuildInfo
 from daytona_api_client_async.models.sandbox_volume import SandboxVolume
+from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
+
+_JSON_ADAPTER = TypeAdapter(Dict[str, Any])
 
 class CreateWorkspace(BaseModel):
     """
@@ -80,8 +83,7 @@ class CreateWorkspace(BaseModel):
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
-        return json.dumps(self.to_dict())
+        return _JSON_ADAPTER.dump_json(self.to_dict()).decode()
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:

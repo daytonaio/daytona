@@ -8,7 +8,7 @@
  * Stores data per-project in ~/.local/share/opencode/storage/daytona/{projectId}.json
  */
 
-import { Daytona, type Sandbox } from '@daytonaio/sdk'
+import { Daytona, type Sandbox } from '@daytona/sdk'
 import { logger } from './logger'
 import type { SessionSandboxMap, SandboxInfo } from './types'
 import { SessionGitManager } from '../git/session-git-manager'

@@ -300,3 +300,11 @@ type PreviewLink struct {
 	URL   string
 	Token string
 }
+
+// SignedPreviewLink contains the signed URL, authentication token, port, and sandbox ID for a sandbox preview.
+type SignedPreviewLink struct {
+	SandboxID string
+	Port      int
+	Token     string
+	URL       string
+}

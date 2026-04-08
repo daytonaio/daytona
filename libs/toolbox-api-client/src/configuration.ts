@@ -12,6 +12,8 @@
  * Do not edit the class manually.
  */
 
+import * as packageJson from '../package.json';
+
 
 export interface ConfigurationParameters {
     apiKey?: string | Promise<string> | ((name: string) => string) | ((name: string) => Promise<string>);
@@ -92,6 +94,7 @@ export class Configuration {
         this.baseOptions = {
             ...param.baseOptions,
             headers: {
+                'User-Agent': `toolbox-api-client-typescript/${packageJson.version}`,
                 ...param.baseOptions?.headers,
             },
         };

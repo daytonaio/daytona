@@ -13,7 +13,7 @@ import {
   PtyCreateRequest,
   PtySessionInfo,
   SessionSendInputRequest,
-} from '@daytonaio/toolbox-api-client'
+} from '@daytona/toolbox-api-client'
 import { SandboxCodeToolbox } from './Sandbox'
 import { ExecuteResponse } from './types/ExecuteResponse'
 import { ArtifactParser } from './utils/ArtifactParser'
@@ -110,7 +110,7 @@ export class Process {
         Object.entries(env)
           .map(([key, value]) => {
             const encodedValue = Buffer.from(value).toString('base64')
-            return `export ${key}="$(echo '${encodedValue}' | base64 -d)"`
+            return `export ${key}="$(printf '%s' '${encodedValue}' | base64 -d)"`
           })
           .join('; ') + '; '
       command = `${safeEnvExports}${command}`

@@ -257,7 +257,11 @@ func (p *Proxy) validateAndCache(
 		return nil, validationErr
 	}
 
-	if err := p.sandboxAuthKeyValidCache.Set(ctx, cacheKey, isValid, 2*time.Minute); err != nil {
+	cacheTTL := 2 * time.Minute
+	if !isValid {
+		cacheTTL = 5 * time.Second
+	}
+	if err := p.sandboxAuthKeyValidCache.Set(ctx, cacheKey, isValid, cacheTTL); err != nil {
 		log.Errorf("Failed to set sandbox auth key valid in cache: %v", err)
 	}
 

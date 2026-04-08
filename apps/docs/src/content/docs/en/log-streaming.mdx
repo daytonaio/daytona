@@ -1,5 +1,6 @@
 ---
 title: Log Streaming
+description: Stream logs as they are being produced, while the process is still running.
 ---
 
 Log streaming allows you to access and process logs as they are being produced, while the process is still running. When executing long-running processes in a sandbox, you often want to access and process their logs in **real-time**. 
@@ -77,7 +78,7 @@ if __name__ == "__main__":
 <TabItem label="Typescript" icon="seti:typescript">
 
 ```typescript
-import { Daytona, SessionExecuteRequest } from '@daytonaio/sdk'
+import { Daytona, SessionExecuteRequest } from '@daytona/sdk'
 
 async function main() {
   const daytona = new Daytona()
@@ -288,7 +289,7 @@ sandbox.delete()
 <TabItem label="Typescript" icon="seti:typescript">
 
 ```typescript
-import { Daytona, SessionExecuteRequest } from '@daytonaio/sdk'
+import { Daytona, SessionExecuteRequest } from '@daytona/sdk'
 
 async function main() {
   const daytona = new Daytona()

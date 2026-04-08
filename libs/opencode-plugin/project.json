@@ -50,7 +50,12 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{workspaceRoot}/dist/libs/opencode-plugin",
-        "command": "npm publish --tag $NPM_TAG --access public --registry https://registry.npmjs.org/ --//registry.npmjs.org/:_authToken=$NPM_TOKEN",
+        "commands": [
+          "npm publish --tag $NPM_TAG --access public --registry https://registry.npmjs.org/ --//registry.npmjs.org/:_authToken=$NPM_TOKEN",
+          "node -e \"const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')); pkg.name = '@daytonaio/opencode'; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));\"",
+          "cp ../../../libs/opencode-plugin/README.legacy.md README.md",
+          "npm publish --tag $NPM_TAG --access public --registry https://registry.npmjs.org/ --//registry.npmjs.org/:_authToken=$NPM_TOKEN"
+        ],
         "parallel": false
       },
       "dependsOn": [

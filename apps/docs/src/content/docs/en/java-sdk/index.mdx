@@ -1,0 +1,81 @@
+---
+title: Java SDK Reference
+description: Interact with Daytona Sandboxes using the Java SDK
+next: /docs/en/java-sdk/daytona
+---
+
+The Daytona Java SDK provides a robust interface for programmatically interacting with Daytona Sandboxes. It targets Java 11+ and uses OkHttp and Jackson.
+
+## Installation
+
+### Gradle
+
+Add the Daytona SDK dependency to your `build.gradle.kts`:
+
+```kotlin
+dependencies {
+    implementation("io.daytona:sdk-java:0.1.0")
+}
+```
+
+### Maven
+
+Add the Daytona SDK dependency to your `pom.xml`:
+
+```xml
+<dependency>
+  <groupId>io.daytona</groupId>
+  <artifactId>sdk-java</artifactId>
+  <version>0.1.0</version>
+</dependency>
+```
+
+## Getting Started
+
+### Create a Sandbox
+
+Create a Daytona Sandbox to run your code securely in an isolated environment. The following snippet is an example "Hello World" program that runs securely inside a Daytona Sandbox.
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.ExecuteResponse;
+
+public class Main {
+    public static void main(String[] args) {
+        // Initialize the SDK (uses environment variables by default)
+        try (Daytona daytona = new Daytona()) {
+            // Create a new sandbox
+            Sandbox sandbox = daytona.create();
+
+            // Execute a command
+            ExecuteResponse response = sandbox.getProcess().executeCommand("echo 'Hello, World!'");
+            System.out.println(response.getResult());
+
+            // Clean up
+            sandbox.delete();
+        }
+    }
+}
+```
+
+## Configuration
+
+The Daytona SDK can be configured using environment variables or by passing a configuration object:
+
+```java
+// Using environment variables (DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET)
+Daytona daytona = new Daytona();
+```
+
+```java
+// Using explicit configuration
+DaytonaConfig config = new DaytonaConfig.Builder()
+    .apiKey("YOUR_API_KEY")
+    .apiUrl("YOUR_API_URL")
+    .target("us")
+    .build();
+Daytona daytona = new Daytona(config);
+```
+
+For more information on configuring the Daytona SDK, see [configuration](/docs/en/configuration).

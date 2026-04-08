@@ -1,5 +1,6 @@
 ---
 title: Sandboxes
+description: Isolated runtime environments you can manage programmatically to run code.
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
@@ -9,23 +10,43 @@ Daytona provides **full composable computers** &mdash; **sandboxes** &mdash; for
 
 Sandboxes have **1 vCPU**, **1GB RAM**, and **3GiB disk** by default. [Organizations](/docs/en/organizations) get a maximum sandbox resource limit of **4 vCPUs**, **8GB RAM**, and **10GB disk**. For more power, see [resources](#resources) or contact [support@daytona.io](mailto:support@daytona.io).
 
-Sandboxes are built from OCI-compliant images. A [snapshot](/docs/en/snapshots) captures a fully configured environment: base OS, installed packages, dependencies, and configuration to create new sandboxes.
+Sandboxes use [snapshots](/docs/en/snapshots) to capture a fully configured environment (base OS, installed packages, dependencies, and configuration) to create new sandboxes.
 
-Each sandbox has its own network stack with per-sandbox firewall rules. By default, sandboxes follow standard network policies, but you can restrict egress to a specific set of allowed destinations or block all outbound traffic entirely. For details on configuring network access, see [network settings](/docs/en/network-limits).
+Each sandbox has its own network stack with per-sandbox firewall rules. By default, sandboxes follow standard network policies, but you can restrict egress to a specific set of allowed destinations or block all outbound traffic entirely. For details on configuring network access, see [network limits](/docs/en/network-limits).
 
-For a detailed overview of the Daytona platform, see [architecture](/docs/en/architecture).
+A detailed overview of the Daytona platform is available in the [architecture](/docs/en/architecture) section.
 
 ## Sandbox lifecycle
 
-Throughout its lifecycle, a Daytona Sandbox can have several different states. The diagram below shows the states and possible transitions between them.
+Throughout its lifecycle, a sandbox can have several different states. Each state reflects the current status of your sandbox:
+
+- [**Creating**](#create-sandboxes): the sandbox is provisioning and will be ready to use
+- [**Starting**](#start-sandboxes): the sandbox is starting and will be ready to use
+- [**Started**](#start-sandboxes): the sandbox has started and is ready to use
+- [**Stopping**](#stop-sandboxes): the sandbox is stopping and will no longer accept requests
+- [**Stopped**](#stop-sandboxes): the sandbox has stopped and is no longer running
+- [**Deleting**](#delete-sandboxes): the sandbox is deleting and will be removed
+- [**Deleted**](#delete-sandboxes): the sandbox has been deleted and no longer exists
+- [**Archiving**](#archive-sandboxes): the sandbox is archiving and its state will be preserved
+- [**Archived**](#archive-sandboxes): the sandbox has been archived and its state is preserved
+- [**Resizing**](#resize-sandboxes): the sandbox is being resized to a new set of resources
+- [**Error**](#recover-sandboxes): the sandbox is in an error state and needs to be recovered
+- **Restoring**: the sandbox is being restored from archive and will be ready to use shortly
+- **Unknown**: the default sandbox state before it is created
+- **Pulling Snapshot**: the sandbox is pulling a [snapshot](/docs/en/snapshots) to provide a base environment
+- **Building Snapshot**: the sandbox is building a [snapshot](/docs/en/snapshots) to provide a base environment
+- **Build Pending**: the sandbox build is pending and will start shortly
+- **Build Failed**: the sandbox build failed and needs to be retried
+
+To view or update the current state of a sandbox, navigate to the [sandbox details page](#sandbox-details-page) or access the sandbox `state` attribute using the [SDKs](/docs/en/getting-started/#sdks), [API](/docs/en/tools/api/#daytona/tag/sandbox/GET/sandbox/{sandboxIdOrName}), or [CLI](/docs/en/tools/cli/#daytona-info).
+
+The diagram below demonstrates the states and possible transitions between them.
 
 <SandboxDiagram />
 
 ## Multiple runtime support
 
-Daytona Sandboxes support Python, TypeScript, and JavaScript programming language runtimes for direct code execution inside the sandbox.
-
-The `language` parameter controls which programming language runtime is used for the sandbox:
+Daytona sandboxes support Python, TypeScript, and JavaScript programming language runtimes for direct code execution inside the sandbox. The `language` parameter controls which programming language runtime is used for the sandbox:
 
 - **`python`**
 - **`typescript`**
@@ -33,34 +54,42 @@ The `language` parameter controls which programming language runtime is used for
 
 If omitted, the Daytona SDK will default to `python`. To override this, explicitly set the `language` value when creating the sandbox.
 
-:::note
-**Sandbox Names**: You can specify a custom name for your sandbox using the `name` parameter. If not provided, the sandbox ID will be used as the name. Sandbox names are reusable - once a sandbox with a specific name is destroyed, that name becomes available for use again.
-:::
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona/) references:
+
+> [**CreateSandboxBaseParams.language (Python SDK)**](/docs/en/python-sdk/sync/daytona#createsandboxbaseparams)
+>
+> [**CreateSandboxBaseParams.language (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#createsandboxbaseparams)
+>
+> [**create (Ruby SDK)**](/docs/en/ruby-sdk/daytona#create)
+>
+> [**SandboxBaseParams.Language (Go SDK)**](/docs/en/go-sdk/types#SandboxBaseParams)
+>
+> [**create sandbox (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox)
 
 ## Create Sandboxes
 
-Daytona provides methods to create sandboxes using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programatically using the Daytona [Python](/docs/en/python-sdk/sync/sandbox), [TypeScript](/docs/en/typescript-sdk/sandbox), [Ruby](/docs/en/ruby-sdk/sandbox), [Go](/docs/en/go-sdk/daytona#type-sandbox) **SDKs**, [CLI](/docs/en/tools/cli#daytona-create), or [API](/docs/en/tools/api#daytona/tag/sandbox).
+Daytona provides methods to create sandboxes using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the Daytona [Python](/docs/en/python-sdk/sync/sandbox), [TypeScript](/docs/en/typescript-sdk/sandbox), [Ruby](/docs/en/ruby-sdk/sandbox), [Go](/docs/en/go-sdk/daytona#type-sandbox) **SDKs**, [CLI](/docs/en/tools/cli#daytona-create), or [API](/docs/en/tools/api#daytona/tag/sandbox).
 
 You can specify [programming language runtime](/docs/en/sandboxes#multiple-runtime-support), [snapshots](/docs/en/snapshots), [resources](/docs/en/sandboxes#resources), [regions](/docs/en/regions), [environment variables](/docs/en/configuration#environment-variables), and [volumes](/docs/en/volumes) for each sandbox. Running sandboxes utilize CPU, memory, and disk storage. Every resource is charged per second of usage.
 
 1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
 2. Click the **Create Sandbox** button
-3. Enter the name of the sandbox
-4. Select a source for the sandbox:
+3. Enter the name of the sandbox (optional)
+4. Select a source for the sandbox (optional):
 
 - [Snapshot](/docs/en/snapshots): a pre-configured sandbox template
 - **Image**: OCI-compliant container image ([public](/docs/en/snapshots#using-public-images), [local](/docs/en/snapshots#using-local-images), [private registries](/docs/en/snapshots#using-images-from-private-registries)). Images require setting [sandbox resources](/docs/en/sandboxes#resources). Default: **1 vCPU**, **1GB RAM**, **3GiB disk**.
 
-5. Select a [region](/docs/en/regions): if not specified, your organization's default region will be used
-6. Define [sandbox lifecycle management](#automated-lifecycle-management) options or set as an [ephemeral sandbox](#ephemeral-sandboxes)
-7. Add environment variables in key-value pairs or import them from a **`.env`** file
-8. Add labels in key-value pairs
-9. Select network settings:
+5. Select a [region](/docs/en/regions) (optional): if not specified, your organization's default region will be used
+6. Define [sandbox lifecycle management](#automated-lifecycle-management) options (optional) or set as an [ephemeral sandbox](#ephemeral-sandboxes)
+7. Add environment variables in key-value pairs or import them from a **`.env`** file (optional)
+8. Add labels in key-value pairs (optional)
+9. Select network settings (optional):
 
 - **Public HTTP preview**: allow public access to HTTP [preview URLs](/docs/en/preview)
 - **Block all network access**: block all outbound network access
 
-10. Click the **Create** button to create the sandbox
+10. Click the **Create** button to create a sandbox
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -90,7 +119,7 @@ sandbox = daytona.create(params)
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-import { Daytona } from '@daytonaio/sdk';
+import { Daytona } from '@daytona/sdk';
 
 const daytona = new Daytona();
 
@@ -154,7 +183,7 @@ daytona create [flags]
 curl 'https://app.daytona.io/api/sandbox' \
   --request POST \
   --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{}'
 ```
 
@@ -208,7 +237,7 @@ sandbox = daytona.create(params)
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-import { Daytona, Image } from "@daytonaio/sdk";
+import { Daytona, Image } from "@daytona/sdk";
 
 async function main() {
   const daytona = new Daytona();
@@ -278,7 +307,7 @@ daytona create --cpu 2 --memory 4096 --disk 8
 curl 'https://app.daytona.io/api/sandbox' \
   --request POST \
   --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{
   "cpu": 2,
   "memory": 4,
@@ -337,7 +366,7 @@ sandbox = daytona.create(params)
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-import { Daytona } from '@daytonaio/sdk';
+import { Daytona } from '@daytona/sdk';
 
 const daytona = new Daytona();
 
@@ -451,7 +480,7 @@ daytona start [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/start' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -547,7 +576,7 @@ daytona list [flags]
 
 ```bash
 curl 'https://app.daytona.io/api/sandbox' \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -691,7 +720,7 @@ daytona stop [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/stop' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -774,7 +803,7 @@ daytona archive [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/archive' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -828,7 +857,7 @@ sandbox.recover
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/recover' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -890,7 +919,7 @@ end
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/recover' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -912,10 +941,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [T
 This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
 :::
 
-Daytona provides methods to resize sandbox resources (CPU, memory, and disk) after creation.
-
-Resizing a started sandbox allows you to `increase CPU and memory` without interruption. 
-To `increase disk capacity` or `decrease CPU and memory`, the sandbox must be stopped first.
+Daytona provides methods to resize [sandbox resources](#resources) after creation. On a running sandbox, you can increase CPU and memory without interruption. To decrease CPU or memory, or to increase disk capacity, stop the sandbox first. Disk size can only be increased and cannot be decreased.
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -928,7 +954,7 @@ To `increase disk capacity` or `decrease CPU and memory`, the sandbox must be st
     # Resize a started sandbox (CPU and memory can be increased)
     sandbox.resize(Resources(cpu=2, memory=4))
 
-    # Resize a stopped sandbox (CPU, memory, and disk can be changed)
+    # Resize a stopped sandbox (CPU and memory can change, disk can only increase)
     sandbox.stop()
     sandbox.resize(Resources(cpu=4, memory=8, disk=20))
     sandbox.start()
@@ -937,7 +963,7 @@ To `increase disk capacity` or `decrease CPU and memory`, the sandbox must be st
 
   <TabItem label="TypeScript" icon="seti:typescript">
     ```typescript
-    import { Daytona } from '@daytonaio/sdk';
+    import { Daytona } from '@daytona/sdk';
 
     const daytona = new Daytona();
     const sandbox = await daytona.create();
@@ -945,7 +971,7 @@ To `increase disk capacity` or `decrease CPU and memory`, the sandbox must be st
     // Resize a started sandbox (CPU and memory can be increased)
     await sandbox.resize({ cpu: 2, memory: 4 });
 
-    // Resize a stopped sandbox (CPU, memory, and disk can be changed)
+    // Resize a stopped sandbox (CPU and memory can change, disk can only increase)
     await sandbox.stop();
     await sandbox.resize({ cpu: 4, memory: 8, disk: 20 });
     await sandbox.start();
@@ -962,7 +988,7 @@ To `increase disk capacity` or `decrease CPU and memory`, the sandbox must be st
     # Resize a started sandbox (CPU and memory can be increased)
     sandbox.resize(Daytona::Resources.new(cpu: 2, memory: 4))
 
-    # Resize a stopped sandbox (CPU, memory, and disk can be changed)
+    # Resize a stopped sandbox (CPU and memory can change, disk can only increase)
     sandbox.stop
     sandbox.resize(Daytona::Resources.new(cpu: 4, memory: 8, disk: 20))
     sandbox.start
@@ -974,7 +1000,7 @@ To `increase disk capacity` or `decrease CPU and memory`, the sandbox must be st
     // Resize a started sandbox (CPU and memory can be increased)
     err := sandbox.Resize(ctx, &types.Resources{CPU: 2, Memory: 4})
 
-    // Resize a stopped sandbox (CPU, memory, and disk can be changed)
+    // Resize a stopped sandbox (CPU and memory can change, disk can only increase)
     err = sandbox.Stop(ctx)
     err = sandbox.Resize(ctx, &types.Resources{CPU: 4, Memory: 8, Disk: 20})
     err = sandbox.Start(ctx)
@@ -987,7 +1013,7 @@ To `increase disk capacity` or `decrease CPU and memory`, the sandbox must be st
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/resize' \
   --request POST \
   --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{
   "cpu": 2,
   "memory": 4,
@@ -998,12 +1024,7 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/resize' \
   </TabItem>
 </Tabs>
 
-:::note
-- **started** sandboxes: CPU and memory can only be increased, not decreased. Disk cannot be changed.
-- **stopped** sandboxes: CPU, memory, and disk can be changed. Disk can only be increased.
-:::
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxresize), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#resize), [Go SDK](/docs/en/go-sdk/daytona/#Sandbox.Resize), and [Ruby SDK](/docs/en/ruby-sdk/sandbox#resize) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxresize), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#resize), [Go SDK](/docs/en/go-sdk/daytona/#Sandbox.Resize), [Ruby SDK](/docs/en/ruby-sdk/sandbox#resize) and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/resize) references:
 
 > [**resize (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxresize)
 >
@@ -1012,6 +1033,8 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sand
 > [**Resize (Go SDK)**](/docs/en/go-sdk/daytona/#Sandbox.Resize)
 >
 > [**resize (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#resize)
+>
+> [**resize (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/resize)
 
 ## Delete Sandboxes
 
@@ -1069,7 +1092,7 @@ daytona delete [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}' \
   --request DELETE \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 </TabItem>
 </Tabs>
@@ -1096,7 +1119,10 @@ Daytona Sandboxes can be automatically stopped, archived, and deleted based on u
 
 The auto-stop interval parameter sets the amount of time after which a running sandbox will be automatically stopped.
 
-The auto-stop interval will trigger even if there are internal processes running in the sandbox. The system differentiates between "internal processes" and "active user interaction". Merely having a script or background task running is not sufficient to keep the sandbox alive.
+The auto-stop interval triggers even if there are internal processes running in the sandbox. The system differentiates between "internal processes" and "active user interaction". Merely having a script or background task running is not sufficient to keep the sandbox alive.
+
+- [What resets the timer](#what-resets-the-timer)
+- [What does not reset the timer](#what-does-not-reset-the-timer)
 
 The parameter can either be set to:
 
@@ -1161,7 +1187,7 @@ sandbox, err := client.Create(ctx, params)
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autostop/{interval}' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -1181,20 +1207,21 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [T
 
 The inactivity timer resets only for specific external interactions:
 
-- Accessing [sandbox previews](/docs/en/preview) (network requests through preview URLs)
+- Updates to [sandbox lifecycle states](#sandbox-lifecycle)
+- Network requests through [sandbox previews](/docs/en/preview)
 - Active [SSH connections](/docs/en/ssh-access)
-- [Daytona Toolbox SDK API](/docs/en/tools/api/#daytona-toolbox) calls
+- API requests to the [Daytona Toolbox SDK](/docs/en/tools/api/#daytona-toolbox)
 
 #### What does not reset the timer
 
 The following do not reset the timer:
 
-- SDK calls that are not toolbox actions
+- SDK requests that are not toolbox actions
 - Background scripts (e.g., `npm run dev` run as a fire-and-forget command)
 - Long-running tasks without external interaction
 - Processes that don't involve active monitoring
 
-If you run a long-running task like LLM inference that takes more than 15 minutes without any external interaction, the sandbox may auto-stop mid-process because the process itself doesn't count as "activity".
+If you run a long-running task like LLM inference that takes more than 15 minutes to complete without any external interaction, the sandbox may auto-stop mid-process because the process itself doesn't count as "activity", therefore the timer is not reset.
 
 ### Auto-archive interval
 
@@ -1265,7 +1292,7 @@ sandbox, err := client.Create(ctx, params)
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autoarchive/{interval}' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -1379,7 +1406,7 @@ err = sandbox.SetAutoDeleteInterval(ctx, &disableInterval)
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autodelete/{interval}' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>

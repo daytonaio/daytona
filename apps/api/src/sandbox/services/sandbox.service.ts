@@ -14,6 +14,7 @@ import { SandboxClass } from '../enums/sandbox-class.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { RunnerService } from './runner.service'
 import { SandboxError } from '../../exceptions/sandbox-error.exception'
+import { StateChangeInProgressError } from '../../exceptions/state-change-in-progress.exception'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { BackupState } from '../enums/backup-state.enum'
@@ -272,7 +273,7 @@ export class SandboxService {
     this.assertSandboxNotErrored(sandbox)
 
     if (String(sandbox.state) !== String(sandbox.desiredState)) {
-      throw new SandboxError('State change in progress')
+      throw new StateChangeInProgressError()
     }
 
     if (sandbox.state !== SandboxState.STOPPED) {
@@ -280,7 +281,7 @@ export class SandboxService {
     }
 
     if (sandbox.pending) {
-      throw new SandboxError('Sandbox state change in progress')
+      throw new StateChangeInProgressError()
     }
 
     if (sandbox.autoDeleteInterval === 0) {
@@ -517,7 +518,9 @@ export class SandboxService {
 
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
 
-      this.eventEmitter.emit(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox))
+      this.eventEmitter
+        .emitAsync(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox))
+        .catch((err) => this.logger.error('Failed to emit SandboxCreatedEvent', err))
 
       return this.toSandboxDto(insertedSandbox)
     } catch (error) {
@@ -739,7 +742,9 @@ export class SandboxService {
 
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
 
-      this.eventEmitter.emit(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox))
+      this.eventEmitter
+        .emitAsync(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox))
+        .catch((err) => this.logger.error('Failed to emit SandboxCreatedEvent', err))
 
       return this.toSandboxDto(insertedSandbox)
     } catch (error) {
@@ -1232,7 +1237,7 @@ export class SandboxService {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
     if (sandbox.pending && sandbox.state !== SandboxState.PENDING_BUILD) {
-      throw new SandboxError('Sandbox state change in progress')
+      throw new StateChangeInProgressError()
     }
 
     const updateData = Sandbox.getSoftDeleteUpdate(sandbox)
@@ -1271,7 +1276,7 @@ export class SandboxService {
           sandbox.desiredState !== SandboxDesiredState.ARCHIVED ||
           (sandbox.state !== SandboxState.STOPPED && sandbox.state !== SandboxState.ARCHIVING)
         ) {
-          throw new SandboxError('State change in progress')
+          throw new StateChangeInProgressError()
         }
       }
 
@@ -1280,7 +1285,7 @@ export class SandboxService {
       }
 
       if (sandbox.pending) {
-        throw new SandboxError('Sandbox state change in progress')
+        throw new StateChangeInProgressError()
       }
 
       this.organizationService.assertOrganizationIsNotSuspended(organization)
@@ -1330,7 +1335,7 @@ export class SandboxService {
     this.assertSandboxNotErrored(sandbox)
 
     if (String(sandbox.state) !== String(sandbox.desiredState)) {
-      throw new SandboxError('State change in progress')
+      throw new StateChangeInProgressError()
     }
 
     if (sandbox.state !== SandboxState.STARTED) {
@@ -1338,7 +1343,7 @@ export class SandboxService {
     }
 
     if (sandbox.pending) {
-      throw new SandboxError('Sandbox state change in progress')
+      throw new StateChangeInProgressError()
     }
 
     const updateData: Partial<Sandbox> = {
@@ -1368,7 +1373,7 @@ export class SandboxService {
     }
 
     if (sandbox.pending) {
-      throw new SandboxError('Sandbox state change in progress')
+      throw new StateChangeInProgressError()
     }
 
     // Validate runner exists
@@ -1432,7 +1437,7 @@ export class SandboxService {
       }
 
       if (sandbox.pending) {
-        throw new SandboxError('Sandbox state change in progress')
+        throw new StateChangeInProgressError()
       }
 
       // If no resize parameters provided, throw error

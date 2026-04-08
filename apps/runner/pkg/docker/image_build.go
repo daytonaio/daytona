@@ -19,7 +19,6 @@ import (
 
 	"github.com/docker/docker/api/types/build"
 	docker_registry "github.com/docker/docker/api/types/registry"
-	"github.com/docker/docker/pkg/jsonmessage"
 )
 
 func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSnapshotRequestDTO) error {
@@ -125,6 +124,10 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 		}
 	}
 
+	if err := tarWriter.Close(); err != nil {
+		return fmt.Errorf("finalize build context tar: %w", err)
+	}
+
 	buildContext := io.NopCloser(buildContextTar)
 
 	var authConfigs map[string]docker_registry.AuthConfig
@@ -155,7 +158,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 		}
 	}
 
-	resp, err := d.apiClient.ImageBuild(ctx, buildContext, build.ImageBuildOptions{
+	buildOpts := build.ImageBuildOptions{
 		Tags:        []string{buildImageDto.Snapshot},
 		Dockerfile:  "Dockerfile",
 		Remove:      true,
@@ -163,11 +166,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 		PullParent:  true,
 		Platform:    "linux/amd64", // Force AMD64 architecture
 		AuthConfigs: authConfigs,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to build image: %w", err)
 	}
-	defer resp.Body.Close()
 
 	logFilePath, err := config.GetBuildLogFilePath(buildImageDto.Snapshot)
 	if err != nil {
@@ -184,7 +183,12 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 		writer = io.MultiWriter(&log.DebugLogWriter{}, logFile)
 	}
 
-	err = jsonmessage.DisplayJSONMessagesStream(resp.Body, writer, 0, true, nil)
+	switch config.GetBuildEngine() {
+	case "legacy":
+		err = d.runDockerImageBuildLegacy(ctx, buildContext, buildOpts, writer)
+	default:
+		err = d.runDockerImageBuildWithBuildKitSession(ctx, buildContext, buildOpts, writer)
+	}
 	if err != nil {
 		return err
 	}

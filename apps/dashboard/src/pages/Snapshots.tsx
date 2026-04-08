@@ -4,7 +4,7 @@
  */
 
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
-import { CreateSnapshotDialog } from '@/components/snapshots/CreateSnapshotDialog'
+import { CreateSnapshotSheet } from '@/components/snapshots/CreateSnapshotSheet'
 import { SnapshotTable } from '@/components/snapshots/SnapshotTable'
 import { Button } from '@/components/ui/button'
 import {
@@ -33,7 +33,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { createBulkActionToast } from '@/lib/bulk-action-toast'
 import { handleApiError } from '@/lib/error-handling'
 import { pluralize } from '@/lib/utils'
-import { OrganizationRolePermissionsEnum, PaginatedSnapshots, SnapshotDto, SnapshotState } from '@daytonaio/api-client'
+import { OrganizationRolePermissionsEnum, PaginatedSnapshots, SnapshotDto, SnapshotState } from '@daytona/api-client'
 import { useQueryClient } from '@tanstack/react-query'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -330,7 +330,7 @@ const Snapshots: React.FC = () => {
     <PageLayout>
       <PageHeader>
         <PageTitle>Snapshots</PageTitle>
-        {writePermitted && <CreateSnapshotDialog className="ml-auto" ref={dialogRef} />}
+        {writePermitted && <CreateSnapshotSheet className="ml-auto" ref={dialogRef} />}
       </PageHeader>
 
       <PageContent size="full">

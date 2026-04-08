@@ -12,7 +12,7 @@ import {
   Sandbox,
   SandboxState,
   SnapshotDto,
-} from '@daytonaio/api-client'
+} from '@daytona/api-client'
 import { ColumnFiltersState, SortingState, Table } from '@tanstack/react-table'
 
 export interface SandboxTableProps {

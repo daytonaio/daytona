@@ -51,7 +51,7 @@ pip install daytona
 ### TypeScript SDK
 
 ```bash
-npm install @daytonaio/sdk
+npm install @daytona/sdk
 ```
 
 ---
@@ -100,7 +100,7 @@ daytona.delete(sandbox)
 ### Typescript SDK
 
 ```jsx
-import { Daytona } from '@daytonaio/sdk'
+import { Daytona } from '@daytona/sdk'
 
 async function main() {
   // Initialize the Daytona client
@@ -135,4 +135,4 @@ main().catch(console.error)
 
 ## Contributing
 
-Daytona is Open Source under the [GNU AFFERO GENERAL PUBLIC LICENSE](LICENSE), and is the [copyright of its contributors](NOTICE). If you would like to contribute to the software, read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/). Afterwards, navigate to the [contributing guide](CONTRIBUTING.md) to get started.
+Daytona is Open Source under the [GNU AFFERO GENERAL PUBLIC LICENSE](LICENSE), and is the [copyright of its contributors](../../NOTICE). If you would like to contribute to the software, read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/). Afterwards, navigate to the [contributing guide](CONTRIBUTING.md) to get started.

@@ -4,7 +4,8 @@
  */
 
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
-import { CreateEndpointDialog } from '@/components/Webhooks/CreateEndpointDialog'
+import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
+import { CreateEndpointSheet } from '@/components/Webhooks/CreateEndpointSheet'
 import { WebhooksEndpointTable } from '@/components/Webhooks/WebhooksEndpointTable'
 import { WebhooksMessagesTable } from '@/components/Webhooks/WebhooksMessagesTable/WebhooksMessagesTable'
 import { Button } from '@/components/ui/button'
@@ -13,8 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useDeleteWebhookEndpointMutation } from '@/hooks/mutations/useDeleteWebhookEndpointMutation'
 import { useUpdateWebhookEndpointMutation } from '@/hooks/mutations/useUpdateWebhookEndpointMutation'
 import { handleApiError } from '@/lib/error-handling'
-import { RefreshCcw } from 'lucide-react'
-import React, { useCallback, useState } from 'react'
+import { PlusIcon, RefreshCcw } from 'lucide-react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { EndpointOut } from 'svix'
 import { useEndpoints } from 'svix-react'
@@ -23,6 +24,7 @@ const Webhooks: React.FC = () => {
   const endpoints = useEndpoints()
   const [mutatingEndpointId, setMutatingEndpointId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('endpoints')
+  const createEndpointSheetRef = useRef<{ open: () => void }>(null)
 
   const updateMutation = useUpdateWebhookEndpointMutation()
   const deleteMutation = useDeleteWebhookEndpointMutation()
@@ -73,6 +75,26 @@ const Webhooks: React.FC = () => {
     [mutatingEndpointId, updateMutation.isPending, deleteMutation.isPending],
   )
 
+  const rootCommands: CommandConfig[] = useMemo(() => {
+    if (endpoints.error) {
+      return []
+    }
+
+    return [
+      {
+        id: 'add-endpoint',
+        label: 'Add Endpoint',
+        icon: <PlusIcon className="w-4 h-4" />,
+        onSelect: () => {
+          setActiveTab('endpoints')
+          createEndpointSheetRef.current?.open()
+        },
+      },
+    ]
+  }, [endpoints.error])
+
+  useRegisterCommands(rootCommands, { groupId: 'webhook-actions', groupLabel: 'Webhook actions', groupOrder: 0 })
+
   if (endpoints.error) {
     return (
       <PageLayout>
@@ -111,7 +133,11 @@ const Webhooks: React.FC = () => {
             Docs
           </Button>
         </a>
-        {activeTab === 'endpoints' && <CreateEndpointDialog onSuccess={handleSuccess} />}
+        <CreateEndpointSheet
+          onSuccess={handleSuccess}
+          ref={createEndpointSheetRef}
+          className={activeTab === 'endpoints' ? '' : 'hidden'}
+        />
       </PageHeader>
 
       <PageContent>

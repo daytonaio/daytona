@@ -9,7 +9,7 @@ import {
   Configuration as AnalyticsConfiguration,
   TelemetryApi as AnalyticsTelemetryApi,
   UsageApi as AnalyticsUsageApi,
-} from '@daytonaio/analytics-api-client'
+} from '@daytona/analytics-api-client'
 import {
   ApiKeysApi,
   AuditApi,
@@ -24,7 +24,7 @@ import {
   UsersApi,
   VolumesApi,
   WebhooksApi,
-} from '@daytonaio/api-client'
+} from '@daytona/api-client'
 import axios, { AxiosError } from 'axios'
 import { DaytonaError } from './errors'
 

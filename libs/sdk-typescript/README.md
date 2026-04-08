@@ -9,13 +9,13 @@ The SDK provides an interface for sandbox management, file system operations, Gi
 Install the package using **npm**:
 
 ```bash
-npm install @daytonaio/sdk
+npm install @daytona/sdk
 ```
 
 or using **yarn**:
 
 ```bash
-yarn add @daytonaio/sdk
+yarn add @daytona/sdk
 ```
 
 ## Get API key
@@ -31,7 +31,7 @@ Configure the SDK using [environment variables](https://www.daytona.io/docs/en/c
 - `DAYTONA_TARGET`: Your target [region](https://www.daytona.io/docs/en/regions/) environment (e.g. `us`, `eu`)
 
 ```typescript
-import { Daytona } from '@daytonaio/sdk'
+import { Daytona } from '@daytona/sdk'
 
 // Initialize with environment variables
 const daytona = new Daytona();
@@ -49,7 +49,7 @@ const daytona = new Daytona({
 Create a sandbox to run your code securely in an isolated environment.
 
 ```typescript
-import { Daytona } from '@daytonaio/sdk'
+import { Daytona } from '@daytona/sdk'
 
 const daytona = new Daytona({apiKey: "YOUR_API_KEY"});
 const sandbox = await daytona.create({
@@ -68,7 +68,7 @@ Daytona provides [examples](https://www.daytona.io/docs/en/getting-started/#exam
 Create a sandbox with [custom resources](https://www.daytona.io/docs/en/sandboxes/#resources) (CPU, memory, disk).
 
 ```typescript
-import { Daytona, Image } from '@daytonaio/sdk';
+import { Daytona, Image } from '@daytona/sdk';
 
 const daytona = new Daytona();
 const sandbox = await daytona.create({
@@ -82,7 +82,7 @@ const sandbox = await daytona.create({
 Create an [ephemeral sandbox](https://www.daytona.io/docs/en/sandboxes/#ephemeral-sandboxes) that is automatically deleted when stopped.
 
 ```typescript
-import { Daytona } from '@daytonaio/sdk';
+import { Daytona } from '@daytona/sdk';
 
 const daytona = new Daytona();
 const sandbox = await daytona.create({
@@ -96,7 +96,7 @@ const sandbox = await daytona.create({
 Create a sandbox from a [snapshot](https://www.daytona.io/docs/en/snapshots/).
 
 ```typescript
-import { Daytona } from '@daytonaio/sdk';
+import { Daytona } from '@daytona/sdk';
 
 const daytona = new Daytona();
 const sandbox = await daytona.create({
@@ -177,4 +177,4 @@ const completions = await lsp.completions('path/to/file.ts', {
 
 ## Contributing
 
-Daytona is Open Source under the [Apache License 2.0](/libs/sdk-typescript//LICENSE), and is the [copyright of its contributors](/NOTICE). If you would like to contribute to the software, read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/). Afterwards, navigate to the [contributing guide](/CONTRIBUTING.md) to get started.
+Daytona is Open Source under the [Apache License 2.0](./LICENSE), and is the [copyright of its contributors](../../NOTICE). If you would like to contribute to the software, read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/). Afterwards, navigate to the [contributing guide](../../CONTRIBUTING.md) to get started.

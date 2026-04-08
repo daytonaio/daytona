@@ -1,0 +1,374 @@
+---
+title: "ComputerUse"
+hideTitleOnPage: true
+---
+
+## ComputerUse
+
+Desktop automation operations for a Sandbox.
+
+Provides a Java facade for computer-use features including desktop session management,
+screenshots, mouse and keyboard automation, display/window inspection, and screen recording.
+
+### Methods
+
+#### start()
+```java
+public ComputerUseStartResponse start()
+```
+
+Starts the computer-use desktop stack (VNC/noVNC and related processes).
+
+**Returns**:
+
+- `ComputerUseStartResponse` - start response containing process status details
+
+#### stop()
+```java
+public ComputerUseStopResponse stop()
+```
+
+Stops all computer-use desktop processes.
+
+**Returns**:
+
+- `ComputerUseStopResponse` - stop response containing process status details
+
+#### getStatus()
+```java
+public ComputerUseStatusResponse getStatus()
+```
+
+Returns current computer-use status.
+
+**Returns**:
+
+- `ComputerUseStatusResponse` - overall computer-use status
+
+#### takeScreenshot()
+```java
+public ScreenshotResponse takeScreenshot()
+```
+
+Captures a full-screen screenshot without cursor.
+
+**Returns**:
+
+- `ScreenshotResponse` - screenshot payload (base64 image and metadata)
+
+#### takeScreenshot()
+```java
+public ScreenshotResponse takeScreenshot(boolean showCursor)
+```
+
+Captures a full-screen screenshot.
+
+**Parameters**:
+
+- `showCursor` _boolean_ - whether to render cursor in the screenshot
+
+**Returns**:
+
+- `ScreenshotResponse` - screenshot payload (base64 image and metadata)
+
+#### takeRegionScreenshot()
+```java
+public ScreenshotResponse takeRegionScreenshot(int x, int y, int width, int height)
+```
+
+Captures a screenshot of a rectangular region without cursor.
+
+**Parameters**:
+
+- `x` _int_ - region top-left X coordinate
+- `y` _int_ - region top-left Y coordinate
+- `width` _int_ - region width in pixels
+- `height` _int_ - region height in pixels
+
+**Returns**:
+
+- `ScreenshotResponse` - region screenshot payload
+
+#### takeCompressedScreenshot()
+```java
+public ScreenshotResponse takeCompressedScreenshot(String format, int quality, double scale)
+```
+
+Captures a compressed full-screen screenshot.
+
+**Parameters**:
+
+- `format` _String_ - output image format (for example: `png`, `jpeg`, `webp`)
+- `quality` _int_ - compression quality (typically 1-100, format dependent)
+- `scale` _double_ - screenshot scale factor (for example: `0.5` for 50%)
+
+**Returns**:
+
+- `ScreenshotResponse` - compressed screenshot payload
+
+#### click()
+```java
+public MouseClickResponse click(int x, int y)
+```
+
+Performs a left mouse click at the given coordinates.
+
+**Parameters**:
+
+- `x` _int_ - target X coordinate
+- `y` _int_ - target Y coordinate
+
+**Returns**:
+
+- `MouseClickResponse` - click response with resulting cursor position
+
+#### click()
+```java
+public MouseClickResponse click(int x, int y, String button)
+```
+
+Performs a mouse click at the given coordinates with a specific button.
+
+**Parameters**:
+
+- `x` _int_ - target X coordinate
+- `y` _int_ - target Y coordinate
+- `button` _String_ - button type (`left`, `right`, `middle`)
+
+**Returns**:
+
+- `MouseClickResponse` - click response with resulting cursor position
+
+#### doubleClick()
+```java
+public MouseClickResponse doubleClick(int x, int y)
+```
+
+Performs a double left-click at the given coordinates.
+
+**Parameters**:
+
+- `x` _int_ - target X coordinate
+- `y` _int_ - target Y coordinate
+
+**Returns**:
+
+- `MouseClickResponse` - click response with resulting cursor position
+
+#### moveMouse()
+```java
+public MousePositionResponse moveMouse(int x, int y)
+```
+
+Moves the mouse cursor to the given coordinates.
+
+**Parameters**:
+
+- `x` _int_ - target X coordinate
+- `y` _int_ - target Y coordinate
+
+**Returns**:
+
+- `MousePositionResponse` - new mouse position
+
+#### getMousePosition()
+```java
+public MousePositionResponse getMousePosition()
+```
+
+Returns current mouse position.
+
+**Returns**:
+
+- `MousePositionResponse` - current mouse cursor coordinates
+
+#### drag()
+```java
+public MouseDragResponse drag(int startX, int startY, int endX, int endY)
+```
+
+Drags the mouse from one point to another using the left button.
+
+**Parameters**:
+
+- `startX` _int_ - drag start X coordinate
+- `startY` _int_ - drag start Y coordinate
+- `endX` _int_ - drag end X coordinate
+- `endY` _int_ - drag end Y coordinate
+
+**Returns**:
+
+- `MouseDragResponse` - drag response with resulting cursor position
+
+#### scroll()
+```java
+public ScrollResponse scroll(int x, int y, int deltaX, int deltaY)
+```
+
+Scrolls at the given coordinates.
+
+The current toolbox API supports directional scrolling (`up`/`down`) with an
+amount. This method maps `deltaY` to vertical scroll direction and magnitude.
+If `deltaY` is `0`, `deltaX` is used as a fallback.
+
+**Parameters**:
+
+- `x` _int_ - anchor X coordinate
+- `y` _int_ - anchor Y coordinate
+- `deltaX` _int_ - horizontal delta (used only when `deltaY == 0`)
+- `deltaY` _int_ - vertical delta
+
+**Returns**:
+
+- `ScrollResponse` - scroll response indicating operation success
+
+#### typeText()
+```java
+public void typeText(String text)
+```
+
+Types text using keyboard automation.
+
+**Parameters**:
+
+- `text` _String_ - text to type
+
+#### pressKey()
+```java
+public void pressKey(String key)
+```
+
+Presses a single key.
+
+**Parameters**:
+
+- `key` _String_ - key to press (for example: `Enter`, `Escape`, `a`)
+
+#### pressHotkey()
+```java
+public void pressHotkey(String... keys)
+```
+
+Presses a key combination as a hotkey sequence.
+
+Keys are joined with `+` before being sent (for example,
+`pressHotkey("ctrl", "shift", "t") -> "ctrl+shift+t"`).
+
+**Parameters**:
+
+- `keys` _String..._ - hotkey parts to combine
+
+#### getDisplayInfo()
+```java
+public DisplayInfoResponse getDisplayInfo()
+```
+
+Returns display configuration information.
+
+**Returns**:
+
+- `DisplayInfoResponse` - display information including available displays and their geometry
+
+#### getWindows()
+```java
+public WindowsResponse getWindows()
+```
+
+Returns currently open windows.
+
+**Returns**:
+
+- `WindowsResponse` - window list and metadata
+
+#### startRecording()
+```java
+public Recording startRecording()
+```
+
+Starts a recording with default options.
+
+**Returns**:
+
+- `Recording` - newly started recording metadata
+
+#### startRecording()
+```java
+public Recording startRecording(String label)
+```
+
+Starts a recording with an optional label.
+
+**Parameters**:
+
+- `label` _String_ - optional recording label
+
+**Returns**:
+
+- `Recording` - newly started recording metadata
+
+#### stopRecording()
+```java
+public Recording stopRecording(String id)
+```
+
+Stops an active recording.
+
+**Parameters**:
+
+- `id` _String_ - recording identifier
+
+**Returns**:
+
+- `Recording` - finalized recording metadata
+
+#### listRecordings()
+```java
+public ListRecordingsResponse listRecordings()
+```
+
+Lists all recordings for the current sandbox session.
+
+**Returns**:
+
+- `ListRecordingsResponse` - recordings list response
+
+#### getRecording()
+```java
+public Recording getRecording(String id)
+```
+
+Returns metadata for a specific recording.
+
+**Parameters**:
+
+- `id` _String_ - recording identifier
+
+**Returns**:
+
+- `Recording` - recording details
+
+#### downloadRecording()
+```java
+public File downloadRecording(String id)
+```
+
+Downloads a recording file.
+
+**Parameters**:
+
+- `id` _String_ - recording identifier
+
+**Returns**:
+
+- `File` - downloaded temporary/local file handle returned by the API client
+
+#### deleteRecording()
+```java
+public void deleteRecording(String id)
+```
+
+Deletes a recording.
+
+**Parameters**:
+
+- `id` _String_ - recording identifier

@@ -45,7 +45,21 @@ export class FailedAuthTrackerService {
       const hitKey = `${keyPrefix}{${key}:${throttlerName}}:hits`
       const blockedKey = `${keyPrefix}{${key}:${throttlerName}}:blocked`
 
-      // Increment hits
+      // Fast path: if already blocked, reject immediately with a single GET
+      const blocked = await this.redis.get(blockedKey)
+      if (blocked) {
+        const blockedTtl = await this.redis.pttl(blockedKey)
+        const retryAfter = Math.max(1, Math.ceil(blockedTtl / 1000))
+        setRateLimitHeaders(response, {
+          throttlerName,
+          limit,
+          remaining: 0,
+          resetSeconds: retryAfter,
+          retryAfterSeconds: retryAfter,
+        })
+        throw new ThrottlerException()
+      }
+
       const hits = await this.redis.incr(hitKey)
       if (hits === 1) {
         await this.redis.pexpire(hitKey, ttl)

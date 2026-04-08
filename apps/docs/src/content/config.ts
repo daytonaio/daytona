@@ -12,6 +12,8 @@ export const collections = {
         licence: z.string().optional(),
         distribution: z.string().optional(),
         hideTitleOnPage: z.boolean().optional(),
+        llmUrl: z.string().optional(),
+        toolboxLlmUrl: z.string().optional(),
       }),
     }),
   }),
@@ -31,6 +33,7 @@ export enum NavigationCategory {
   GUIDES,
   RUBY_SDK,
   GO_SDK,
+  JAVA_SDK,
 }
 
 /**
@@ -99,6 +102,15 @@ export const getSidebarConfig = (
             icon: 'package.svg',
           },
           relatedGroupCategory: NavigationCategory.GO_SDK,
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/java-sdk', locale),
+          label: t('sidebarconfig.javaSdkReference'),
+          attrs: {
+            icon: 'package.svg',
+          },
+          relatedGroupCategory: NavigationCategory.JAVA_SDK,
         },
         {
           type: 'link',
@@ -896,6 +908,25 @@ export const getSidebarConfig = (
           type: 'link',
           href: localizePath('/docs/go-sdk/daytona', locale),
           label: t('sidebarconfig.daytona'),
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: t('sidebarconfig.javaSdkReference'),
+      homePageHref: localizePath('/docs/java-sdk', locale),
+      category: NavigationCategory.JAVA_SDK,
+      autopopulateFromDir: localizePath('/docs/java-sdk', locale),
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/java-sdk/daytona', locale),
+          label: t('sidebarconfig.daytona'),
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/java-sdk/sandbox', locale),
+          label: t('sidebarconfig.sandbox'),
         },
       ],
     },

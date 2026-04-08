@@ -12,6 +12,8 @@ on:
         type: boolean
         default: true
 
+permissions: {}
+
 env:
   VERSION: ${{ inputs.version }}
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
@@ -29,21 +31,33 @@ jobs:
             platform: linux/amd64
 
     runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
 
     steps:
-      - name: Prepare
+      - name: Validate version format
         run: |
-          platform=${{ matrix.platform }}
-          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "::error::Invalid version format: $VERSION (expected X.Y.Z or X.Y.Z-suffix)"
+            exit 1
+          fi
+
+      - name: Prepare
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          echo "PLATFORM_PAIR=${PLATFORM//\//-}" >> $GITHUB_ENV
 
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: docker.io
           username: daytonaio
@@ -51,7 +65,7 @@ jobs:
 
       - name: Build and push sandbox by digest
         id: build-sandbox
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: ./images/sandbox
           file: ./images/sandbox/Dockerfile
@@ -69,7 +83,7 @@ jobs:
 
       - name: Build and push sandbox-slim by digest
         id: build-sandbox-slim
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: ./images/sandbox-slim
           file: ./images/sandbox-slim/Dockerfile
@@ -104,6 +118,7 @@ jobs:
   docker_manifest:
     needs: docker_build
     runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+    permissions: {}
 
     steps:
       - name: Download sandbox digests
@@ -121,10 +136,10 @@ jobs:
           merge-multiple: true
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: docker.io
           username: daytonaio
@@ -132,25 +147,29 @@ jobs:
 
       - name: Create and push sandbox manifest
         working-directory: ${{ runner.temp }}/digests/sandbox
+        env:
+          PUSH_LATEST: ${{ inputs.push_latest }}
         run: |
-          TAGS="-t ${{ env.REGISTRY_IMAGE }}:${{ env.VERSION }}"
-          if [ "${{ inputs.push_latest }}" = "true" ]; then
-            TAGS="$TAGS -t ${{ env.REGISTRY_IMAGE }}:latest"
+          TAGS="-t ${REGISTRY_IMAGE}:${VERSION}"
+          if [ "$PUSH_LATEST" = "true" ]; then
+            TAGS="$TAGS -t ${REGISTRY_IMAGE}:latest"
           fi
           docker buildx imagetools create $TAGS \
-            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+            $(printf "${REGISTRY_IMAGE}@sha256:%s " *)
 
       - name: Create and push sandbox-slim manifest
         working-directory: ${{ runner.temp }}/digests/sandbox-slim
+        env:
+          PUSH_LATEST: ${{ inputs.push_latest }}
         run: |
-          TAGS="-t ${{ env.REGISTRY_IMAGE }}:${{ env.VERSION }}-slim"
-          if [ "${{ inputs.push_latest }}" = "true" ]; then
-            TAGS="$TAGS -t ${{ env.REGISTRY_IMAGE }}:latest-slim"
+          TAGS="-t ${REGISTRY_IMAGE}:${VERSION}-slim"
+          if [ "$PUSH_LATEST" = "true" ]; then
+            TAGS="$TAGS -t ${REGISTRY_IMAGE}:latest-slim"
           fi
           docker buildx imagetools create $TAGS \
-            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+            $(printf "${REGISTRY_IMAGE}@sha256:%s " *)
 
       - name: Inspect images
         run: |
-          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ env.VERSION }}
-          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ env.VERSION }}-slim
+          docker buildx imagetools inspect "${REGISTRY_IMAGE}:${VERSION}"
+          docker buildx imagetools inspect "${REGISTRY_IMAGE}:${VERSION}-slim"

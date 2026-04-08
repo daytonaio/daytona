@@ -1,0 +1,161 @@
+---
+title: "PtyHandle"
+hideTitleOnPage: true
+---
+
+## PtyHandle
+
+Handle for interacting with an active PTY session.
+
+Supports bidirectional I/O, resize, kill, and waiting for connection/exit events.
+
+### Methods
+
+#### waitForConnection()
+```java
+public void waitForConnection(long timeoutSeconds)
+```
+
+Waits for PTY websocket connection to be fully established.
+
+**Parameters**:
+
+- `timeoutSeconds` _long_ - maximum seconds to wait
+
+**Throws**:
+
+- `DaytonaException` - if connection fails or times out
+
+#### sendInput()
+```java
+public void sendInput(String data)
+```
+
+Sends text input to PTY.
+
+**Parameters**:
+
+- `data` _String_ - UTF-8 text to send
+
+**Throws**:
+
+- `DaytonaException` - if sending fails
+
+#### sendInput()
+```java
+public void sendInput(byte[] data)
+```
+
+Sends binary input to PTY.
+
+**Parameters**:
+
+- `data` _byte[]_ - binary payload
+
+**Throws**:
+
+- `DaytonaException` - if sending fails
+
+#### waitForExit()
+```java
+public PtyResult waitForExit()
+```
+
+Waits until the PTY session exits.
+
+**Returns**:
+
+- `PtyResult` - final PTY result
+
+**Throws**:
+
+- `DaytonaException` - if interrupted while waiting
+
+#### waitForExit()
+```java
+public PtyResult waitForExit(long timeoutSeconds)
+```
+
+Waits for PTY exit with timeout.
+
+**Parameters**:
+
+- `timeoutSeconds` _long_ - maximum seconds to wait
+
+**Returns**:
+
+- `PtyResult` - final PTY result, or timeout result when exit does not occur in time
+
+**Throws**:
+
+- `DaytonaException` - if interrupted while waiting
+
+#### resize()
+```java
+public void resize(int cols, int rows)
+```
+
+Resizes terminal dimensions.
+
+**Parameters**:
+
+- `cols` _int_ - terminal width in columns
+- `rows` _int_ - terminal height in rows
+
+#### kill()
+```java
+public void kill()
+```
+
+Terminates PTY session.
+
+#### disconnect()
+```java
+public void disconnect()
+```
+
+Disconnects the PTY websocket.
+
+#### getSessionId()
+```java
+public String getSessionId()
+```
+
+Returns PTY session identifier.
+
+**Returns**:
+
+- `String` - session ID
+
+#### getExitCode()
+```java
+public Integer getExitCode()
+```
+
+Returns PTY exit code when available.
+
+**Returns**:
+
+- `Integer` - exit code, or `null` if not known yet
+
+#### getError()
+```java
+public String getError()
+```
+
+Returns PTY error or exit reason.
+
+**Returns**:
+
+- `String` - error message, or `null` when none
+
+#### isConnected()
+```java
+public boolean isConnected()
+```
+
+Returns websocket connectivity status.
+
+**Returns**:
+
+- `boolean` - `true` when socket is currently connected

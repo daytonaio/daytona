@@ -1,0 +1,57 @@
+{
+  "name": "api-client-java",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/api-client-java",
+  "tags": [],
+  "targets": {
+    "generate:api-client": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["apiClient"],
+      "outputs": ["{projectRoot}/src"],
+      "options": {
+        "commands": [
+          "rm -rf {projectRoot}/src {projectRoot}/docs {projectRoot}/api",
+          "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i dist/apps/api/openapi.json -g java --additional-properties=groupId=io.daytona,artifactId=api-client,artifactVersion=$DEFAULT_PACKAGE_VERSION,apiPackage=io.daytona.api.client.api,modelPackage=io.daytona.api.client.model,invokerPackage=io.daytona.api.client,library=okhttp-gson,java8=true,hideGenerationTimestamp=true,useRuntimeException=true,disallowAdditionalPropertiesIfNotPresent=false -o {projectRoot}",
+          "bash hack/java-client/postprocess.sh {projectRoot} api-client-java",
+          "chmod +x {projectRoot}/gradlew && {projectRoot}/gradlew -p {projectRoot} publishToMavenLocal -q || true"
+        ],
+        "parallel": false
+      },
+      "dependsOn": [
+        {
+          "target": "openapi",
+          "projects": "api"
+        }
+      ]
+    },
+    "set-version": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "V=${MAVEN_PKG_VERSION:-$DEFAULT_PACKAGE_VERSION}; if [ -n \"$V\" ]; then sed -i \"s/^version = .*/version = '$V'/\" build.gradle && find src -name ApiClient.java -path '*/client/ApiClient.java' -exec sed -i \"s|setUserAgent(\\\"api-client-java/[^\\\"]*\\\")|setUserAgent(\\\"api-client-java/$V\\\")|\" {} + && find src -name Configuration.java -path '*/client/Configuration.java' -exec sed -i \"s|VERSION = \\\"[^\\\"]*\\\"|VERSION = \\\"$V\\\"|\" {} + && echo \"api-client-java version: $V\"; else echo \"api-client-java version: unchanged\"; fi"
+      },
+      "cache": true,
+      "inputs": [{ "env": "MAVEN_PKG_VERSION" }, { "env": "DEFAULT_PACKAGE_VERSION" }],
+      "outputs": ["{projectRoot}/build.gradle"]
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "chmod +x gradlew && ./gradlew build -x test"
+      },
+      "dependsOn": ["set-version"],
+      "outputs": ["{projectRoot}/build/libs"]
+    },
+    "publish": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "chmod +x gradlew && test -n \"$MAVEN_PKG_VERSION\" || { echo 'ERROR: MAVEN_PKG_VERSION is required for publish'; exit 1; } && rm -rf build/staging-deploy build/central-bundle.zip && ./gradlew publishToMavenLocal && ./gradlew clean publishMavenPublicationToReleaseRepository && if ! echo \"$MAVEN_PKG_VERSION\" | grep -q SNAPSHOT; then find build/staging-deploy -name 'maven-metadata.xml*' -delete && cd build/staging-deploy && zip -r ../central-bundle.zip . && cd .. && curl -s -w '\\nHTTP %{http_code}\\n' --fail-with-body -X POST 'https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC' -H \"Authorization: Bearer $(echo -n $MAVEN_USERNAME:$MAVEN_PASSWORD | base64 -w0)\" -F 'bundle=@central-bundle.zip'; fi"
+      },
+      "dependsOn": ["build"]
+    }
+  }
+}

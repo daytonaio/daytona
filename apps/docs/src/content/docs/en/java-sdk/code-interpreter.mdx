@@ -1,0 +1,216 @@
+---
+title: "CodeInterpreter"
+hideTitleOnPage: true
+---
+
+## CodeInterpreter
+
+Stateful code interpretation interface for a Sandbox.
+
+Provides Python code execution in interpreter contexts that preserve state between runs.
+
+### Methods
+
+#### runCode()
+```java
+public ExecutionResult runCode(String code)
+```
+
+Executes Python code in the default interpreter context.
+
+**Parameters**:
+
+- `code` _String_ - Python code to execute
+
+**Returns**:
+
+- `ExecutionResult` - aggregated execution result
+
+**Throws**:
+
+- `DaytonaException` - if code is empty, connection fails, or execution fails
+
+#### runCode()
+```java
+public ExecutionResult runCode(String code, RunCodeOptions options)
+```
+
+Executes Python code with streaming callbacks and options.
+
+**Parameters**:
+
+- `code` _String_ - Python code to execute
+- `options` _RunCodeOptions_ - execution options including callbacks and timeout; may be `null`
+
+**Returns**:
+
+- `ExecutionResult` - aggregated execution result
+
+**Throws**:
+
+- `DaytonaException` - if code is empty, connection fails, or execution fails
+
+#### createContext()
+```java
+public InterpreterContext createContext()
+```
+
+Creates a new interpreter context using sandbox defaults.
+
+**Returns**:
+
+- `InterpreterContext` - created interpreter context metadata
+
+**Throws**:
+
+- `DaytonaException` - if context creation fails
+
+#### createContext()
+```java
+public InterpreterContext createContext(String cwd)
+```
+
+Creates a new interpreter context.
+
+**Parameters**:
+
+- `cwd` _String_ - working directory for the new context; `null` uses sandbox default
+
+**Returns**:
+
+- `InterpreterContext` - created interpreter context metadata
+
+**Throws**:
+
+- `DaytonaException` - if context creation fails
+
+#### listContexts()
+```java
+public List<InterpreterContext> listContexts()
+```
+
+Lists all user-created interpreter contexts.
+
+**Returns**:
+
+- `List\<InterpreterContext\>` - list of interpreter contexts; empty list when no contexts exist
+
+**Throws**:
+
+- `DaytonaException` - if listing contexts fails
+
+#### deleteContext()
+```java
+public void deleteContext(String contextId)
+```
+
+Deletes an interpreter context.
+
+**Parameters**:
+
+- `contextId` _String_ - context identifier to delete
+
+**Throws**:
+
+- `DaytonaException` - if deletion fails
+
+## RunCodeOptions
+
+Options for `CodeInterpreter#runCode(String, RunCodeOptions)`.
+
+### Constructors
+
+#### new RunCodeOptions()
+```java
+public RunCodeOptions()
+```
+
+### Methods
+
+#### getTimeout()
+```java
+public Integer getTimeout()
+```
+
+**Returns**:
+
+- `Integer` -
+
+#### setTimeout()
+```java
+public RunCodeOptions setTimeout(Integer timeout)
+```
+
+**Parameters**:
+
+- `timeout` _Integer_ -
+
+**Returns**:
+
+- `RunCodeOptions` -
+
+#### getOnStdout()
+```java
+public Consumer<String> getOnStdout()
+```
+
+**Returns**:
+
+- `Consumer\<String\>` -
+
+#### setOnStdout()
+```java
+public RunCodeOptions setOnStdout(Consumer<String> onStdout)
+```
+
+**Parameters**:
+
+- `onStdout` _Consumer\<String\>_ -
+
+**Returns**:
+
+- `RunCodeOptions` -
+
+#### getOnStderr()
+```java
+public Consumer<String> getOnStderr()
+```
+
+**Returns**:
+
+- `Consumer\<String\>` -
+
+#### setOnStderr()
+```java
+public RunCodeOptions setOnStderr(Consumer<String> onStderr)
+```
+
+**Parameters**:
+
+- `onStderr` _Consumer\<String\>_ -
+
+**Returns**:
+
+- `RunCodeOptions` -
+
+#### getOnError()
+```java
+public Consumer<CodeInterpreter.ExecutionError> getOnError()
+```
+
+**Returns**:
+
+- `Consumer\<CodeInterpreter.ExecutionError\>` -
+
+#### setOnError()
+```java
+public RunCodeOptions setOnError(Consumer<CodeInterpreter.ExecutionError> onError)
+```
+
+**Parameters**:
+
+- `onError` _Consumer\<CodeInterpreter.ExecutionError\>_ -
+
+**Returns**:
+
+- `RunCodeOptions` -

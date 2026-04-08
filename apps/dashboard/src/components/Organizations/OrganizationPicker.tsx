@@ -16,13 +16,13 @@ import { useOrganizations } from '@/hooks/useOrganizations'
 import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
-import { Organization } from '@daytonaio/api-client'
+import { Organization } from '@daytona/api-client'
 import { Building2, ChevronsUpDown, Copy, PlusCircle, SquareUserRound } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { useCopyToClipboard } from 'usehooks-ts'
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { CommandHighlight, useRegisterCommands, type CommandConfig } from '../CommandPalette'
-import { CreateOrganizationDialog } from './CreateOrganizationDialog'
+import { CreateOrganizationSheet } from './CreateOrganizationSheet'
 
 function useOrganizationCommands() {
   const { organizations } = useOrganizations()
@@ -71,7 +71,7 @@ export const OrganizationPicker: React.FC = () => {
 
   const { organizations, refreshOrganizations } = useOrganizations()
   const { selectedOrganization, onSelectOrganization } = useSelectedOrganization()
-  const { sharedRegions: regions, loadingSharedRegions: loadingRegions, getRegionName } = useRegions()
+  const { sharedRegions: regions, loadingSharedRegions: loadingRegions } = useRegions()
 
   const [optimisticSelectedOrganization, setOptimisticSelectedOrganization] = useState(selectedOrganization)
   const [loadingSelectOrganization, setLoadingSelectOrganization] = useState(false)
@@ -97,7 +97,7 @@ export const OrganizationPicker: React.FC = () => {
     setLoadingSelectOrganization(false)
   }
 
-  const [showCreateOrganizationDialog, setShowCreateOrganizationDialog] = useState(false)
+  const [showCreateOrganizationSheet, setShowCreateOrganizationSheet] = useState(false)
 
   const handleCreateOrganization = async (name: string, defaultRegionId: string) => {
     try {
@@ -173,7 +173,7 @@ export const OrganizationPicker: React.FC = () => {
           <div>
             <DropdownMenuItem
               className="cursor-pointer text-primary flex items-center gap-2"
-              onClick={() => setShowCreateOrganizationDialog(true)}
+              onClick={() => setShowCreateOrganizationSheet(true)}
             >
               <PlusCircle className="w-4 h-4 flex-shrink-0" />
               <span>Create Organization</span>
@@ -182,12 +182,11 @@ export const OrganizationPicker: React.FC = () => {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <CreateOrganizationDialog
-        open={showCreateOrganizationDialog}
-        onOpenChange={setShowCreateOrganizationDialog}
+      <CreateOrganizationSheet
+        open={showCreateOrganizationSheet}
+        onOpenChange={setShowCreateOrganizationSheet}
         regions={regions}
         loadingRegions={loadingRegions}
-        getRegionName={getRegionName}
         onCreateOrganization={handleCreateOrganization}
       />
     </SidebarMenuItem>

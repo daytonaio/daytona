@@ -15,8 +15,26 @@ import loadTranslations from 'src/i18n/loadTranslations'
 import gtConfig from '../../../gt.config.json'
 import styles from './OpenPageDropdown.module.scss'
 
+function getAbsoluteUrl(url: string) {
+  if (/^https?:\/\//i.test(url)) {
+    return url
+  }
+
+  if (typeof window === 'undefined') {
+    return url
+  }
+
+  try {
+    return new URL(url, window.location.origin).toString()
+  } catch {
+    return url
+  }
+}
+
 function getPromptUrl(baseURL: string, url: string) {
-  return `${baseURL}?q=${encodeURIComponent(`Read ${url} so I can ask questions about it.`)}`
+  const absoluteUrl = getAbsoluteUrl(url)
+
+  return `${baseURL}?q=${encodeURIComponent(`Read ${absoluteUrl} so I can ask questions about it.`)}`
 }
 
 const menuItems = {

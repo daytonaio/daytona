@@ -14,8 +14,9 @@ import { RefreshCw, BarChart3 } from 'lucide-react'
 import { Spinner } from '@/components/ui/spinner'
 import { format } from 'date-fns'
 import { subHours } from 'date-fns'
-import { MetricSeries } from '@daytonaio/api-client'
+import { MetricSeries } from '@daytona/api-client'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { getMetricDisplayName } from '@/constants/metrics'
 
 interface MetricsTabProps {
   sandboxId: string
@@ -34,7 +35,7 @@ const BYTES_TO_GIB = 1024 * 1024 * 1024
 type ViewMode = '%' | 'GiB'
 
 const METRIC_GROUPS = [
-  { key: 'cpu', title: 'CPU', prefix: '.cpu.', hasToggle: false },
+  { key: 'cpu', title: 'CPU (cores)', prefix: '.cpu.', hasToggle: false },
   { key: 'memory', title: 'Memory', prefix: '.memory.', hasToggle: true },
   { key: 'filesystem', title: 'Filesystem', prefix: '.filesystem.', hasToggle: true },
 ]
@@ -73,7 +74,7 @@ function buildChartConfig(series: MetricSeries[]): ChartConfig {
   const config: ChartConfig = {}
   series.forEach((s, index) => {
     config[s.metricName] = {
-      label: s.metricName.replace(/^daytona\.sandbox\./, ''),
+      label: getMetricDisplayName(s.metricName),
       color: CHART_COLORS[index % CHART_COLORS.length],
     }
   })
@@ -217,6 +218,48 @@ export const MetricsTab: React.FC<MetricsTabProps> = ({ sandboxId }) => {
         filteredSeries = filteredSeries.filter((s) => s.metricName.endsWith('.utilization'))
       } else if (mode === 'GiB') {
         filteredSeries = filteredSeries.filter((s) => !s.metricName.endsWith('.utilization'))
+      }
+
+      // Convert CPU utilization from percentage to cores using the limit value
+      if (group.key === 'cpu') {
+        const limitSeries = allSeries.find((s) => s.metricName.endsWith('.cpu.limit'))
+        const utilizationSeries = filteredSeries.find((s) => s.metricName.endsWith('.cpu.utilization'))
+        if (limitSeries && utilizationSeries) {
+          // Build a sorted list of limit values and a Map for O(1) exact-match lookups
+          const limitByTimestamp = new Map<string, number>()
+          const sortedLimits = [...limitSeries.dataPoints]
+            .filter((dp) => dp.value != null)
+            .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+          for (const dp of sortedLimits) {
+            limitByTimestamp.set(dp.timestamp, dp.value!)
+          }
+
+          const convertedUtilization: MetricSeries = {
+            ...utilizationSeries,
+            dataPoints: utilizationSeries.dataPoints.flatMap((dp) => {
+              if (dp.value == null) return [dp]
+              // Exact match first, then carry forward the most recent limit before this timestamp
+              let limitValue = limitByTimestamp.get(dp.timestamp)
+              if (limitValue == null) {
+                for (const lp of sortedLimits) {
+                  if (lp.timestamp > dp.timestamp) break
+                  limitValue = lp.value!
+                }
+              }
+              // Drop the data point if no limit is available, creating a gap in the chart
+              if (limitValue == null) return []
+              return [
+                {
+                  ...dp,
+                  value: Math.round((dp.value / 100) * limitValue * 100) / 100,
+                },
+              ]
+            }),
+          }
+          filteredSeries = filteredSeries.map((s) =>
+            s.metricName === utilizationSeries.metricName ? convertedUtilization : s,
+          )
+        }
       }
 
       return {

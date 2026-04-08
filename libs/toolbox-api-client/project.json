@@ -17,12 +17,13 @@
     },
     "generate:api-client": {
       "executor": "nx:run-commands",
-      "inputs": ["apiClient"],
+      "inputs": ["tsApiClient"],
       "outputs": ["{projectRoot}/src"],
       "options": {
         "commands": [
           "rm -rf {projectRoot}/src",
-          "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i apps/daemon/pkg/toolbox/docs/swagger.json -g typescript-axios --additional-properties=supportsES6=true,typescriptThreePlus=true,withSeparateModelsAndApi=true,apiPackage=api,modelPackage=models,useTags=true,enumPropertyNaming=UPPERCASE --type-mappings=DateTime=Date -o libs/toolbox-api-client/src"
+          "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i apps/daemon/pkg/toolbox/docs/swagger.json -g typescript-axios --additional-properties=supportsES6=true,typescriptThreePlus=true,withSeparateModelsAndApi=true,apiPackage=api,modelPackage=models,useTags=true,enumPropertyNaming=UPPERCASE --type-mappings=DateTime=Date -o libs/toolbox-api-client/src",
+          "bash hack/ts-client/postprocess.sh libs/toolbox-api-client/src toolbox-api-client-typescript"
         ],
         "parallel": false
       },
@@ -47,7 +48,11 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{workspaceRoot}/dist/libs/toolbox-api-client",
-        "command": "npm publish --tag $NPM_TAG --access public --registry https://registry.npmjs.org/ --//registry.npmjs.org/:_authToken=$NPM_TOKEN",
+        "commands": [
+          "npm publish --tag $NPM_TAG --access public --registry https://registry.npmjs.org/ --//registry.npmjs.org/:_authToken=$NPM_TOKEN",
+          "node -e \"const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')); pkg.name = '@daytonaio/toolbox-api-client'; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));\"",
+          "npm publish --tag $NPM_TAG --access public --registry https://registry.npmjs.org/ --//registry.npmjs.org/:_authToken=$NPM_TOKEN"
+        ],
         "parallel": false
       },
       "dependsOn": ["build"]

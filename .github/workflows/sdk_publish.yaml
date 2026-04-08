@@ -20,33 +20,55 @@ on:
       rubygems_pkg_version:
         description: 'RubyGems package version (default: version)'
         required: false
+      maven_pkg_version:
+        description: 'Maven package version (default: version)'
+        required: false
 
 env:
   VERSION: ${{ inputs.version }}
   PYPI_PKG_VERSION: ${{ inputs.pypi_pkg_version || inputs.version}}
   NPM_PKG_VERSION: ${{ inputs.npm_pkg_version || inputs.version}}
   RUBYGEMS_PKG_VERSION: ${{ inputs.rubygems_pkg_version || inputs.version}}
+  MAVEN_PKG_VERSION: ${{ inputs.maven_pkg_version || inputs.version}}
   NPM_TAG: ${{ inputs.npm_tag }}
-  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-  PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-  RUBYGEMS_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
   POETRY_VIRTUALENVS_IN_PROJECT: true
+
+permissions: {}
 
 jobs:
   publish:
     runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+    permissions:
+      contents: read
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+      RUBYGEMS_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+      MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+      MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+      MAVEN_GPG_SIGNING_KEY: ${{ secrets.MAVEN_GPG_SIGNING_KEY }}
+      MAVEN_GPG_SIGNING_PASSWORD: ${{ secrets.MAVEN_GPG_SIGNING_PASSWORD }}
+      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
     steps:
+      - name: Validate version format
+        run: |
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "::error::Invalid version format: $VERSION (expected vX.Y.Z or vX.Y.Z-suffix)"
+            exit 1
+          fi
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-tags: true
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: ./.github/actions/setup-toolchain
         with:
           install-swag: 'false'
-      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
+      - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
 
       - name: Configure git
         run: |
@@ -70,11 +92,15 @@ jobs:
     if: ${{ inputs.npm_tag == 'latest' }}
     needs: publish
     runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+    permissions: {}
     name: Update Homebrew CLI tap
     steps:
       - name: Update version
         run: |
           curl -f -X POST -H "Accept: application/vnd.github+json" \
-          -H "Authorization: Bearer ${{ secrets.GITHUBBOT_TOKEN }}" \
+          -H "Authorization: Bearer ${GITHUBBOT_TOKEN}" \
           https://api.github.com/repos/daytonaio/homebrew-cli/dispatches \
-          -d "{\"event_type\": \"update-version\", \"client_payload\": {\"version\": \"${{ env.VERSION }}\"}}"
+          -d "{\"event_type\": \"update-version\", \"client_payload\": {\"version\": \"$VERSION\"}}"
+
+        env:
+          GITHUBBOT_TOKEN: ${{ secrets.GITHUBBOT_TOKEN }}

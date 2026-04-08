@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { useApi } from '@/hooks/useApi'
 import {
   Region,
@@ -12,9 +12,10 @@ import {
   CreateRegionResponse,
   SnapshotManagerCredentials,
   UpdateRegion,
-} from '@daytonaio/api-client'
+} from '@daytona/api-client'
 import { RegionTable } from '@/components/RegionTable'
-import { CreateRegionDialog } from '@/components/CreateRegionDialog'
+import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
+import { CreateRegionSheet } from '@/components/CreateRegionSheet'
 import { UpdateRegionDialog } from '@/components/UpdateRegionDialog'
 import RegionDetailsSheet from '@/components/RegionDetailsSheet'
 import {
@@ -42,7 +43,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { useRegions } from '@/hooks/useRegions'
 import { getMaskedToken } from '@/lib/utils'
-import { Copy } from 'lucide-react'
+import { Copy, PlusIcon } from 'lucide-react'
 
 const Regions: React.FC = () => {
   const { organizationsApi } = useApi()
@@ -66,7 +67,6 @@ const Regions: React.FC = () => {
   const [regeneratedSnapshotManagerCreds, setRegeneratedSnapshotManagerCreds] =
     useState<SnapshotManagerCredentials | null>(null)
   const [regionForRegenerate, setRegionForRegenerate] = useState<Region | null>(null)
-  const [copied, setCopied] = useState(false)
   const [isApiKeyRevealed, setIsApiKeyRevealed] = useState(false)
   const [isSnapshotManagerPasswordRevealed, setIsSnapshotManagerPasswordRevealed] = useState(false)
 
@@ -77,6 +77,7 @@ const Regions: React.FC = () => {
   // Update Region Dialog state
   const [showUpdateRegionDialog, setShowUpdateRegionDialog] = useState(false)
   const [regionToUpdate, setRegionToUpdate] = useState<Region | null>(null)
+  const createRegionSheetRef = useRef<{ open: () => void }>(null)
 
   const handleCreateRegion = async (createRegionData: CreateRegion): Promise<CreateRegionResponse | null> => {
     if (!selectedOrganization) {
@@ -123,6 +124,23 @@ const Regions: React.FC = () => {
     () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.DELETE_REGIONS),
     [authenticatedUserHasPermission],
   )
+
+  const rootCommands: CommandConfig[] = useMemo(() => {
+    if (!writePermitted) {
+      return []
+    }
+
+    return [
+      {
+        id: 'create-region',
+        label: 'Create Region',
+        icon: <PlusIcon className="w-4 h-4" />,
+        onSelect: () => createRegionSheetRef.current?.open(),
+      },
+    ]
+  }, [writePermitted])
+
+  useRegisterCommands(rootCommands, { groupId: 'region-actions', groupLabel: 'Region actions', groupOrder: 0 })
 
   const handleRegenerateProxyApiKey = async (region: Region) => {
     setRegionForRegenerate(region)
@@ -242,8 +260,6 @@ const Regions: React.FC = () => {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
       toast.success('Copied to clipboard')
     } catch (err) {
       console.error('Failed to copy text:', err)
@@ -255,10 +271,11 @@ const Regions: React.FC = () => {
     <div className="px-6 py-2">
       <div className="mb-2 h-12 flex items-center justify-between">
         <h1 className="text-2xl font-medium">Regions</h1>
-        <CreateRegionDialog
+        <CreateRegionSheet
           onCreateRegion={handleCreateRegion}
           writePermitted={writePermitted}
           loadingData={loadingRegions}
+          ref={createRegionSheetRef}
         />
       </div>
 
@@ -354,7 +371,6 @@ const Regions: React.FC = () => {
           if (!isOpen) {
             setRegionForRegenerate(null)
             setRegeneratedApiKey(null)
-            setCopied(false)
             setIsApiKeyRevealed(false)
           }
         }}
@@ -411,7 +427,6 @@ const Regions: React.FC = () => {
                   setShowRegenerateProxyApiKeyDialog(false)
                   setRegionForRegenerate(null)
                   setRegeneratedApiKey(null)
-                  setCopied(false)
                   setIsApiKeyRevealed(false)
                 }}
                 className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
@@ -431,7 +446,6 @@ const Regions: React.FC = () => {
           if (!isOpen) {
             setRegionForRegenerate(null)
             setRegeneratedApiKey(null)
-            setCopied(false)
             setIsApiKeyRevealed(false)
           }
         }}
@@ -488,7 +502,6 @@ const Regions: React.FC = () => {
                   setShowRegenerateSshGatewayApiKeyDialog(false)
                   setRegionForRegenerate(null)
                   setRegeneratedApiKey(null)
-                  setCopied(false)
                   setIsApiKeyRevealed(false)
                 }}
                 className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
@@ -508,7 +521,6 @@ const Regions: React.FC = () => {
           if (!isOpen) {
             setRegionForRegenerate(null)
             setRegeneratedSnapshotManagerCreds(null)
-            setCopied(false)
             setIsSnapshotManagerPasswordRevealed(false)
           }
         }}
@@ -584,7 +596,6 @@ const Regions: React.FC = () => {
                   setShowRegenerateSnapshotManagerCredsDialog(false)
                   setRegionForRegenerate(null)
                   setRegeneratedSnapshotManagerCreds(null)
-                  setCopied(false)
                   setIsSnapshotManagerPasswordRevealed(false)
                 }}
                 className="bg-secondary text-secondary-foreground hover:bg-secondary/80"

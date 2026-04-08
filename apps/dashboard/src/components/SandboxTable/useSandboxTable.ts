@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Sandbox, Region } from '@daytonaio/api-client'
+import { Sandbox, Region } from '@daytona/api-client'
 import {
   useReactTable,
   getCoreRowModel,

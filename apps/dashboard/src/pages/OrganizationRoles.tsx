@@ -3,15 +3,17 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { CreateOrganizationRoleDialog } from '@/components/OrganizationRoles/CreateOrganizationRoleDialog'
+import { CreateOrganizationRoleSheet } from '@/components/OrganizationRoles/CreateOrganizationRoleSheet'
+import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { OrganizationRoleTable } from '@/components/OrganizationRoles/OrganizationRoleTable'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { useApi } from '@/hooks/useApi'
 import { useOrganizationRoles } from '@/hooks/useOrganizationRoles'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
-import { OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
-import React, { useState } from 'react'
+import { OrganizationRolePermissionsEnum } from '@daytona/api-client'
+import { PlusIcon } from 'lucide-react'
+import React, { useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 const OrganizationRoles: React.FC = () => {
@@ -21,6 +23,7 @@ const OrganizationRoles: React.FC = () => {
   const { roles, loadingRoles, refreshRoles } = useOrganizationRoles()
 
   const [loadingRoleAction, setLoadingRoleAction] = useState<Record<string, boolean>>({})
+  const createRoleSheetRef = useRef<{ open: () => void }>(null)
 
   const handleCreateRole = async (
     name: string,
@@ -90,11 +93,25 @@ const OrganizationRoles: React.FC = () => {
     }
   }
 
+  const rootCommands: CommandConfig[] = useMemo(
+    () => [
+      {
+        id: 'create-role',
+        label: 'Create Role',
+        icon: <PlusIcon className="w-4 h-4" />,
+        onSelect: () => createRoleSheetRef.current?.open(),
+      },
+    ],
+    [],
+  )
+
+  useRegisterCommands(rootCommands, { groupId: 'role-actions', groupLabel: 'Role actions', groupOrder: 0 })
+
   return (
     <PageLayout>
       <PageHeader>
         <PageTitle>Roles</PageTitle>
-        <CreateOrganizationRoleDialog className="ml-auto" onCreateRole={handleCreateRole} />
+        <CreateOrganizationRoleSheet className="ml-auto" onCreateRole={handleCreateRole} ref={createRoleSheetRef} />
       </PageHeader>
 
       <PageContent>

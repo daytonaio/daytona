@@ -8,48 +8,59 @@ on:
         required: true
         default: 'v0.0.0-dev'
 
+permissions: {}
+
 env:
   VERSION: ${{ inputs.version }}
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
-  DAYTONA_API_URL: ${{ secrets.DAYTONA_API_URL }}
-  DAYTONA_AUTH0_DOMAIN: ${{ secrets.DAYTONA_AUTH0_DOMAIN }}
-  DAYTONA_AUTH0_CLIENT_ID: ${{ secrets.DAYTONA_AUTH0_CLIENT_ID }}
-  DAYTONA_AUTH0_CALLBACK_PORT: ${{ secrets.DAYTONA_AUTH0_CALLBACK_PORT }}
-  DAYTONA_AUTH0_CLIENT_SECRET: ${{ secrets.DAYTONA_AUTH0_CLIENT_SECRET }}
-  DAYTONA_AUTH0_AUDIENCE: ${{ secrets.DAYTONA_AUTH0_AUDIENCE }}
   POETRY_VIRTUALENVS_IN_PROJECT: true
   GONOSUMDB: github.com/daytonaio/daytona
 
 jobs:
   publish:
     runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+    permissions:
+      contents: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
     steps:
+      - name: Validate version format
+        run: |
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "::error::Invalid version format: $VERSION (expected vX.Y.Z or vX.Y.Z-suffix)"
+            exit 1
+          fi
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-tags: true
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: ./.github/actions/setup-toolchain
         with:
           run-go-work-sync: 'false'
 
-      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
+      - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
 
       - name: Configure git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
           git config --global user.name "Daytona Release Bot"
           git config --global user.email "daytona-release@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
 
       - name: Tag Go modules
         run: |
-          git tag libs/api-client-go/${{ inputs.version }}
-          git tag libs/toolbox-api-client-go/${{ inputs.version }}
-          git tag libs/sdk-go/${{ inputs.version }}
-          git push origin libs/api-client-go/${{ inputs.version }} libs/toolbox-api-client-go/${{ inputs.version }} libs/sdk-go/${{ inputs.version }}
+          git tag "libs/api-client-go/$VERSION"
+          git tag "libs/toolbox-api-client-go/$VERSION"
+          git tag "libs/sdk-go/$VERSION"
+          git push origin "libs/api-client-go/$VERSION" "libs/toolbox-api-client-go/$VERSION" "libs/sdk-go/$VERSION"
 
       - name: Go work sync
         run: |
@@ -82,11 +93,22 @@ jobs:
           }' > apps/runner/package.json
 
       - name: Create release
-        run: yarn nx release ${{ inputs.version }} --skip-publish --verbose
+        run: yarn nx release "$VERSION" --skip-publish --verbose
 
   build_projects:
     needs: publish
     runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+    permissions:
+      contents: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      DAYTONA_API_URL: ${{ secrets.DAYTONA_API_URL }}
+      DAYTONA_AUTH0_DOMAIN: ${{ secrets.DAYTONA_AUTH0_DOMAIN }}
+      DAYTONA_AUTH0_CLIENT_ID: ${{ secrets.DAYTONA_AUTH0_CLIENT_ID }}
+      DAYTONA_AUTH0_CALLBACK_PORT: ${{ secrets.DAYTONA_AUTH0_CALLBACK_PORT }}
+      DAYTONA_AUTH0_CLIENT_SECRET: ${{ secrets.DAYTONA_AUTH0_CLIENT_SECRET }}
+      DAYTONA_AUTH0_AUDIENCE: ${{ secrets.DAYTONA_AUTH0_AUDIENCE }}
+      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
     steps:
       - name: Checkout code
@@ -94,9 +116,10 @@ jobs:
         with:
           fetch-tags: true
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: ./.github/actions/setup-toolchain
-      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
+      - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
 
       - name: Install gettext
         run: sudo apt-get install -y gettext
@@ -129,25 +152,25 @@ jobs:
 
       - name: Upload runner to release assets
         run: |
-          gh release upload ${{ inputs.version }} dist/apps/runner-amd64#daytona-runner-${{ inputs.version }}-amd64 --clobber
+          gh release upload "$VERSION" "dist/apps/runner-amd64#daytona-runner-${VERSION}-amd64" --clobber
 
       - name: Upload runner .deb to release assets
         run: |
           DEB_VERSION="${VERSION#v}"
-          gh release upload ${{ inputs.version }} "dist/apps/runner-deb/daytona-runner_${DEB_VERSION}_amd64.deb#daytona-runner-${DEB_VERSION}-amd64.deb" --clobber
+          gh release upload "$VERSION" "dist/apps/runner-deb/daytona-runner_${DEB_VERSION}_amd64.deb#daytona-runner-${DEB_VERSION}-amd64.deb" --clobber
 
       - name: Upload daemon to release assets
         run: |
-          gh release upload ${{ inputs.version }} dist/apps/daemon-amd64#daytona-daemon-${{ inputs.version }}-amd64 --clobber
+          gh release upload "$VERSION" "dist/apps/daemon-amd64#daytona-daemon-${VERSION}-amd64" --clobber
 
       - name: Upload CLI to release assets
         run: |
-          gh release upload ${{ inputs.version }} dist/apps/cli/daytona-linux-amd64#daytona-cli-${{ inputs.version }}-linux-amd64 --clobber
-          gh release upload ${{ inputs.version }} dist/apps/cli/daytona-linux-arm64#daytona-cli-${{ inputs.version }}-linux-arm64 --clobber
-          gh release upload ${{ inputs.version }} dist/apps/cli/daytona-darwin-amd64#daytona-cli-${{ inputs.version }}-darwin-amd64 --clobber
-          gh release upload ${{ inputs.version }} dist/apps/cli/daytona-darwin-arm64#daytona-cli-${{ inputs.version }}-darwin-arm64 --clobber
-          gh release upload ${{ inputs.version }} dist/apps/cli/daytona-windows-amd64.exe#daytona-cli-${{ inputs.version }}-windows-amd64.exe --clobber
-          gh release upload ${{ inputs.version }} dist/apps/cli/daytona-windows-arm64.exe#daytona-cli-${{ inputs.version }}-windows-arm64.exe --clobber
+          gh release upload "$VERSION" "dist/apps/cli/daytona-linux-amd64#daytona-cli-${VERSION}-linux-amd64" --clobber
+          gh release upload "$VERSION" "dist/apps/cli/daytona-linux-arm64#daytona-cli-${VERSION}-linux-arm64" --clobber
+          gh release upload "$VERSION" "dist/apps/cli/daytona-darwin-amd64#daytona-cli-${VERSION}-darwin-amd64" --clobber
+          gh release upload "$VERSION" "dist/apps/cli/daytona-darwin-arm64#daytona-cli-${VERSION}-darwin-arm64" --clobber
+          gh release upload "$VERSION" "dist/apps/cli/daytona-windows-amd64.exe#daytona-cli-${VERSION}-windows-amd64.exe" --clobber
+          gh release upload "$VERSION" "dist/apps/cli/daytona-windows-arm64.exe#daytona-cli-${VERSION}-windows-arm64.exe" --clobber
 
       - name: Upload computer-use artifact
         uses: actions/upload-artifact@v4
@@ -176,6 +199,10 @@ jobs:
             arch: amd64
           - runner: [self-hosted, Linux, ARM64, github-actions-runner-arm]
             arch: arm64
+    permissions:
+      contents: read
+    env:
+      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
     steps:
       - name: Checkout code
@@ -183,6 +210,7 @@ jobs:
         with:
           fetch-tags: true
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Download computer-use artifact
         uses: actions/download-artifact@v4
@@ -209,7 +237,9 @@ jobs:
           node-version: 22
 
       - name: Generate go.work.sum
-        run: GONOSUMDB=github.com/daytonaio/daytona go work sync
+        run: |
+          GONOSUMDB=github.com/daytonaio/daytona go work sync
+          touch go.work.sum
 
       - name: Log in to the Container registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
@@ -219,7 +249,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
       - name: Project dependencies
         run: corepack enable
@@ -234,16 +264,24 @@ jobs:
       - run: yarn install --immutable
 
       - name: Publish docker images
+        env:
+          ARCH: -${{ matrix.arch }}
         run: |
-          VERSION=${{ inputs.version }} ARCH="-${{ matrix.arch }}" yarn docker:production
+          yarn docker:production
 
   # Push combined manifest
   docker_push_manifest:
     needs: docker_build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -266,11 +304,16 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Push manifest
         run: |
-          VERSION=${{ inputs.version }} yarn push-manifest
+          yarn push-manifest
 
   sync_gosum:
     needs: build_projects
     runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
     steps:
       - name: Checkout code
@@ -278,6 +321,7 @@ jobs:
         with:
           fetch-tags: true
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: actions/setup-go@v5
         with:
@@ -285,12 +329,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
+      - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
 
       - name: Configure git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "Daytona Release Bot"
           git config --global user.email "daytona-release@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
 
       - name: Project dependencies
         run: corepack enable
@@ -306,19 +353,19 @@ jobs:
 
       - name: Sync go.sum and create PR
         run: |
-          git checkout -b sync-gosum-${{ inputs.version }}
+          git checkout -b "sync-gosum-$VERSION"
           GONOSUMDB=github.com/daytonaio/daytona go work sync
           if git diff --quiet -- **/go.sum; then
             echo "No go.sum changes detected; skipping commit and PR creation."
           else
             git add **/go.sum
-            git commit -s -m "chore: sync go.sum for ${{ inputs.version }}"
-            git push origin sync-gosum-${{ inputs.version }}
+            git commit -s -m "chore: sync go.sum for $VERSION"
+            git push origin "sync-gosum-$VERSION"
             gh pr create \
-              --title "chore: sync go.sum for ${{ inputs.version }}" \
-              --body "Automated PR to sync go.sum after release ${{ inputs.version }}" \
+              --title "chore: sync go.sum for $VERSION" \
+              --body "Automated PR to sync go.sum after release $VERSION" \
               --base main \
-              --head sync-gosum-${{ inputs.version }}
+              --head "sync-gosum-$VERSION"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

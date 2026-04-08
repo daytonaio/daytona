@@ -13,23 +13,24 @@
   "author": "",
   "license": "Apache-2.0",
   "type": "module",
+  "packageManager": "pnpm@10.29.3",
   "engines": {
     "node": ">=22.13.0"
   },
   "dependencies": {
-    "@daytonaio/sdk": "^0.120.0",
-    "@mastra/core": "beta",
-    "@mastra/fastembed": "beta",
-    "@mastra/libsql": "beta",
-    "@mastra/loggers": "beta",
-    "@mastra/mcp": "beta",
-    "@mastra/memory": "beta",
-    "@mastra/observability": "beta",
+    "@daytonaio/sdk": "^0.159.0",
+    "@mastra/core": "^1.21.0",
+    "@mastra/fastembed": "^1.0.1",
+    "@mastra/libsql": "^1.7.3",
+    "@mastra/loggers": "^1.1.0",
+    "@mastra/mcp": "^1.4.1",
+    "@mastra/memory": "^1.13.0",
+    "@mastra/observability": "^1.7.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^24.1.0",
-    "mastra": "beta",
+    "mastra": "^1.3.19",
     "typescript": "^5.8.3"
   }
 }

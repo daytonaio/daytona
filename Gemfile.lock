@@ -12,6 +12,7 @@ PATH
       daytona_api_client (= 0.0.0.pre.dev)
       daytona_toolbox_api_client (= 0.0.0.pre.dev)
       dotenv (~> 2.0)
+      observer (~> 0.1)
       opentelemetry-exporter-otlp (~> 0.29)
       opentelemetry-exporter-otlp-metrics (~> 0.1)
       opentelemetry-metrics-sdk (~> 0.2)

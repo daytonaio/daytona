@@ -1,0 +1,448 @@
+---
+title: "Sandbox"
+hideTitleOnPage: true
+---
+
+## Sandbox
+
+Represents a Daytona Sandbox instance.
+
+Exposes lifecycle controls and operation facades for process execution, file-system access,
+and Git.
+
+**Properties**:
+
+- `process` _Process_ - Process execution interface for this Sandbox.
+- `fs` _FileSystem_ - File-system operations interface for this Sandbox.
+- `git` _Git_ - Git operations interface for this Sandbox.
+- `computerUse` _ComputerUse_ - Computer use (desktop automation) interface for this Sandbox.
+- `codeInterpreter` _CodeInterpreter_ - Stateful code interpreter for this Sandbox (Python).
+
+### Methods
+
+#### createLspServer()
+```java
+public LspServer createLspServer(String languageId, String pathToProject)
+```
+
+Creates an LSP server instance for the specified language and project.
+
+**Parameters**:
+
+- `languageId` _String_ - language server to start (e.g. "typescript", "python", "go")
+- `pathToProject` _String_ - absolute path to the project root inside the sandbox
+
+**Returns**:
+
+- `LspServer` - a new `LspServer` configured for the given language
+
+#### start()
+```java
+public void start()
+```
+
+Starts this Sandbox with default timeout.
+
+**Throws**:
+
+- `DaytonaException` - if the Sandbox fails to start
+
+#### start()
+```java
+public void start(long timeoutSeconds)
+```
+
+Starts this Sandbox and waits for readiness.
+
+**Parameters**:
+
+- `timeoutSeconds` _long_ - maximum seconds to wait; `0` disables timeout
+
+**Throws**:
+
+- `DaytonaException` - if start fails or times out
+
+#### stop()
+```java
+public void stop()
+```
+
+Stops this Sandbox with default timeout.
+
+**Throws**:
+
+- `DaytonaException` - if the Sandbox fails to stop
+
+#### stop()
+```java
+public void stop(long timeoutSeconds)
+```
+
+Stops this Sandbox and waits until fully stopped.
+
+**Parameters**:
+
+- `timeoutSeconds` _long_ - maximum seconds to wait; `0` disables timeout
+
+**Throws**:
+
+- `DaytonaException` - if stop fails or times out
+
+#### waitUntilStopped()
+```java
+public void waitUntilStopped(long timeoutSeconds)
+```
+
+Waits until Sandbox reaches `stopped` (or `destroyed`) state.
+
+**Parameters**:
+
+- `timeoutSeconds` _long_ - maximum seconds to wait; `0` disables timeout
+
+**Throws**:
+
+- `DaytonaException` - if timeout is invalid, state becomes error, or timeout expires
+
+#### delete()
+```java
+public void delete()
+```
+
+Deletes this Sandbox with default timeout behavior.
+
+**Throws**:
+
+- `DaytonaException` - if deletion fails
+
+#### delete()
+```java
+public void delete(long timeoutSeconds)
+```
+
+Deletes this Sandbox.
+
+**Parameters**:
+
+- `timeoutSeconds` _long_ - reserved timeout parameter for parity with other SDKs
+
+**Throws**:
+
+- `DaytonaException` - if deletion fails
+
+#### setLabels()
+```java
+public Map<String, String> setLabels(Map<String, String> labels)
+```
+
+Replaces Sandbox labels.
+
+**Parameters**:
+
+- `labels` _Map\<String, String\>_ - label map to apply
+
+**Returns**:
+
+- `Map\<String, String\>` - updated labels
+
+**Throws**:
+
+- `DaytonaException` - if label update fails
+
+#### setAutostopInterval()
+```java
+public void setAutostopInterval(int minutes)
+```
+
+Sets Sandbox auto-stop interval.
+
+**Parameters**:
+
+- `minutes` _int_ - idle minutes before automatic stop
+
+**Throws**:
+
+- `DaytonaException` - if the update fails
+
+#### setAutoArchiveInterval()
+```java
+public void setAutoArchiveInterval(int minutes)
+```
+
+Sets Sandbox auto-archive interval.
+
+**Parameters**:
+
+- `minutes` _int_ - minutes in stopped state before automatic archive
+
+**Throws**:
+
+- `DaytonaException` - if the update fails
+
+#### setAutoDeleteInterval()
+```java
+public void setAutoDeleteInterval(int minutes)
+```
+
+Sets Sandbox auto-delete interval.
+
+**Parameters**:
+
+- `minutes` _int_ - minutes before automatic deletion after stop
+
+**Throws**:
+
+- `DaytonaException` - if the update fails
+
+#### getUserHomeDir()
+```java
+public String getUserHomeDir()
+```
+
+Returns home directory path for Sandbox user.
+
+**Returns**:
+
+- `String` - absolute home directory path
+
+**Throws**:
+
+- `DaytonaException` - if the request fails
+
+#### getWorkDir()
+```java
+public String getWorkDir()
+```
+
+Returns current working directory path.
+
+**Returns**:
+
+- `String` - absolute working directory path
+
+**Throws**:
+
+- `DaytonaException` - if the request fails
+
+#### waitUntilStarted()
+```java
+public void waitUntilStarted(long timeoutSeconds)
+```
+
+Waits until Sandbox reaches `started` state.
+
+**Parameters**:
+
+- `timeoutSeconds` _long_ - maximum seconds to wait; `0` disables timeout
+
+**Throws**:
+
+- `DaytonaException` - if timeout is invalid, state becomes failure, or timeout expires
+
+#### refreshData()
+```java
+public void refreshData()
+```
+
+Refreshes local Sandbox fields from latest API state.
+
+**Throws**:
+
+- `DaytonaException` - if refresh fails
+
+#### getId()
+```java
+public String getId()
+```
+
+Returns Sandbox ID.
+
+**Returns**:
+
+- `String` - Sandbox ID
+
+#### getName()
+```java
+public String getName()
+```
+
+Returns Sandbox name.
+
+**Returns**:
+
+- `String` - Sandbox name
+
+#### getState()
+```java
+public String getState()
+```
+
+Returns Sandbox state.
+
+**Returns**:
+
+- `String` - lifecycle state
+
+#### getTarget()
+```java
+public String getTarget()
+```
+
+Returns target region.
+
+**Returns**:
+
+- `String` - target identifier
+
+#### getUser()
+```java
+public String getUser()
+```
+
+Returns Sandbox OS user.
+
+**Returns**:
+
+- `String` - OS user
+
+#### getToolboxProxyUrl()
+```java
+public String getToolboxProxyUrl()
+```
+
+Returns toolbox proxy URL.
+
+**Returns**:
+
+- `String` - proxy URL
+
+#### getCpu()
+```java
+public int getCpu()
+```
+
+Returns allocated CPU cores.
+
+**Returns**:
+
+- `int` - CPU cores
+
+#### getGpu()
+```java
+public int getGpu()
+```
+
+Returns allocated GPU units.
+
+**Returns**:
+
+- `int` - GPU units
+
+#### getMemory()
+```java
+public int getMemory()
+```
+
+Returns allocated memory in GiB.
+
+**Returns**:
+
+- `int` - memory in GiB
+
+#### getDisk()
+```java
+public int getDisk()
+```
+
+Returns allocated disk in GiB.
+
+**Returns**:
+
+- `int` - disk in GiB
+
+#### getEnv()
+```java
+public Map<String, String> getEnv()
+```
+
+Returns Sandbox environment variables.
+
+**Returns**:
+
+- `Map\<String, String\>` - environment map
+
+#### getLabels()
+```java
+public Map<String, String> getLabels()
+```
+
+Returns Sandbox labels.
+
+**Returns**:
+
+- `Map\<String, String\>` - labels map
+
+#### getAutoStopInterval()
+```java
+public Integer getAutoStopInterval()
+```
+
+Returns auto-stop interval in minutes.
+
+**Returns**:
+
+- `Integer` - auto-stop interval
+
+#### getAutoArchiveInterval()
+```java
+public Integer getAutoArchiveInterval()
+```
+
+Returns auto-archive interval in minutes.
+
+**Returns**:
+
+- `Integer` - auto-archive interval
+
+#### getAutoDeleteInterval()
+```java
+public Integer getAutoDeleteInterval()
+```
+
+Returns auto-delete interval in minutes.
+
+**Returns**:
+
+- `Integer` - auto-delete interval
+
+#### getProcess()
+```java
+public Process getProcess()
+```
+
+Returns process operations facade.
+
+**Returns**:
+
+- `Process` - process interface
+
+#### getFs()
+```java
+public FileSystem getFs()
+```
+
+Returns file-system operations facade.
+
+**Returns**:
+
+- `FileSystem` - file-system interface
+
+#### getGit()
+```java
+public Git getGit()
+```
+
+Returns Git operations facade.
+
+**Returns**:
+
+- `Git` - Git interface

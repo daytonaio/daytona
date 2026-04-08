@@ -21,8 +21,11 @@ from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from daytona_toolbox_api_client_async.models.completion_context import CompletionContext
 from daytona_toolbox_api_client_async.models.lsp_position import LspPosition
+from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
+
+_JSON_ADAPTER = TypeAdapter(Dict[str, Any])
 
 class LspCompletionParams(BaseModel):
     """
@@ -49,8 +52,7 @@ class LspCompletionParams(BaseModel):
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
-        return json.dumps(self.to_dict())
+        return _JSON_ADAPTER.dump_json(self.to_dict()).decode()
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:

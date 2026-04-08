@@ -42,9 +42,10 @@
       "apiClient",
       "{workspaceRoot}/hack/python-client/openapi-templates/**/*",
       "{workspaceRoot}/hack/python-client/postprocess.sh"
-    ]
+    ],
+    "goApiClient": ["apiClient", "{workspaceRoot}/hack/go-client/postprocess.sh"],
+    "tsApiClient": ["apiClient", "{workspaceRoot}/hack/ts-client/postprocess.sh"]
   },
-  "neverConnectToCloud": true,
   "plugins": [
     {
       "plugin": "@nx/webpack/plugin",
@@ -214,7 +215,7 @@
         "cwd": "{projectRoot}",
         "commands": [
           "rm -rf dist",
-          "if [ -n \"$PYPI_PKG_VERSION\" ] || [ -n \"$DEFAULT_PACKAGE_VERSION\" ]; then VER=${PYPI_PKG_VERSION:-$DEFAULT_PACKAGE_VERSION}; sed -i \"s/^VERSION = \\\".*\\\"$/VERSION = \\\"$VER\\\"/\" setup.py && poetry version \"$VER\"; fi && poetry build"
+          "if [ -n \"$PYPI_PKG_VERSION\" ] || [ -n \"$DEFAULT_PACKAGE_VERSION\" ]; then VER=${PYPI_PKG_VERSION:-$DEFAULT_PACKAGE_VERSION}; sed -i \"s/^VERSION = \\\".*\\\"$/VERSION = \\\"$VER\\\"/\" setup.py && poetry version \"$VER\" && find . -maxdepth 2 -name '__init__.py' -exec sed -i \"s/__version__ = \\\"[^\\\"]*\\\"/__version__ = \\\"$VER\\\"/\" {} +; fi && poetry build"
         ],
         "parallel": false
       },
@@ -290,5 +291,6 @@
         }
       }
     }
-  }
+  },
+  "nxCloudId": "69d4d7c6d23b3673e0643fe0"
 }

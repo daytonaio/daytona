@@ -11,8 +11,8 @@ import {
   ReplaceRequest,
   ReplaceResult,
   SearchFilesResponse,
-} from '@daytonaio/toolbox-api-client'
-import { FileSystemApi } from '@daytonaio/toolbox-api-client'
+} from '@daytona/toolbox-api-client'
+import { FileSystemApi } from '@daytona/toolbox-api-client'
 import { dynamicImport } from './utils/Import'
 import { RUNTIME, Runtime } from './utils/Runtime'
 import { createDaytonaError, DaytonaError } from './errors/DaytonaError'

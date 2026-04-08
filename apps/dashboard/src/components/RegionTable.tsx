@@ -5,7 +5,7 @@
 
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { getRelativeTimeString } from '@/lib/utils'
-import { Region, RegionType } from '@daytonaio/api-client'
+import { Region, RegionType } from '@daytona/api-client'
 import {
   ColumnDef,
   flexRender,

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { MoreHorizontal } from 'lucide-react'
 import {
   ColumnDef,
@@ -14,13 +14,13 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { OrganizationRole, OrganizationUser, OrganizationUserRoleEnum } from '@daytonaio/api-client'
+import { OrganizationUser, OrganizationUserRoleEnum } from '@daytona/api-client'
 import { Pagination } from '@/components/Pagination'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
+import { UpsertOrganizationAccessSheet } from '@/components/OrganizationMembers/UpsertOrganizationAccessSheet'
 import { RemoveOrganizationMemberDialog } from '@/components/OrganizationMembers/RemoveOrganizationMemberDialog'
-import { UpdateOrganizationMemberAccess } from '@/components/OrganizationMembers/UpdateOrganizationMemberAccessDialog'
 import { capitalize } from '@/lib/utils'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { TableEmptyState } from '../TableEmptyState'
@@ -28,23 +28,21 @@ import { TableEmptyState } from '../TableEmptyState'
 interface DataTableProps {
   data: OrganizationUser[]
   loadingData: boolean
-  availableAssignments: OrganizationRole[]
-  loadingAvailableAssignments: boolean
   onUpdateMemberAccess: (userId: string, role: OrganizationUserRoleEnum, assignedRoleIds: string[]) => Promise<boolean>
   onRemoveMember: (userId: string) => Promise<boolean>
   loadingMemberAction: Record<string, boolean>
   ownerMode: boolean
+  currentUserId?: string
 }
 
 export function OrganizationMemberTable({
   data,
   loadingData,
-  availableAssignments,
-  loadingAvailableAssignments,
   onUpdateMemberAccess,
   onRemoveMember,
   loadingMemberAction,
   ownerMode,
+  currentUserId,
 }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [memberToUpdate, setMemberToUpdate] = useState<OrganizationUser | null>(null)
@@ -66,6 +64,7 @@ export function OrganizationMemberTable({
       setIsRemoveDialogOpen(true)
     },
     ownerMode,
+    currentUserId,
   })
 
   const table = useReactTable({
@@ -108,6 +107,18 @@ export function OrganizationMemberTable({
     }
     return false
   }
+
+  const initialMemberAccess = useMemo(
+    () =>
+      memberToUpdate
+        ? {
+            email: memberToUpdate.email,
+            role: memberToUpdate.role,
+            assignedRoleIds: memberToUpdate.assignedRoles.map((assignment) => assignment.id),
+          }
+        : undefined,
+    [memberToUpdate],
+  )
 
   return (
     <>
@@ -156,7 +167,9 @@ export function OrganizationMemberTable({
       </div>
 
       {memberToUpdate && (
-        <UpdateOrganizationMemberAccess
+        <UpsertOrganizationAccessSheet
+          mode="edit"
+          trigger={null}
           open={isUpdateMemberAccessDialogOpen}
           onOpenChange={(open) => {
             setIsUpdateMemberAccessDialogOpen(open)
@@ -164,12 +177,11 @@ export function OrganizationMemberTable({
               setMemberToUpdate(null)
             }
           }}
-          initialRole={memberToUpdate.role}
-          initialAssignments={memberToUpdate.assignedRoles}
-          availableAssignments={availableAssignments}
-          loadingAvailableAssignments={loadingAvailableAssignments}
-          onUpdateAccess={handleUpdateMemberAccess}
-          processingUpdateAccess={loadingMemberAction[memberToUpdate.userId]}
+          initialMember={initialMemberAccess}
+          title="Update Access"
+          description="Manage access to the organization with an appropriate role and assignments."
+          onSubmit={({ role, assignedRoleIds }) => handleUpdateMemberAccess(role, assignedRoleIds)}
+          reducedRoleWarning="Removing assignments will automatically revoke any API keys this member created using permissions granted from those assignments."
         />
       )}
 
@@ -195,11 +207,13 @@ const getColumns = ({
   onUpdateAssignedRoles,
   onRemove,
   ownerMode,
+  currentUserId,
 }: {
   onUpdateMemberRole: (member: OrganizationUser) => void
   onUpdateAssignedRoles: (member: OrganizationUser) => void
   onRemove: (userId: string) => void
   ownerMode: boolean
+  currentUserId?: string
 }): ColumnDef<OrganizationUser>[] => {
   const columns: ColumnDef<OrganizationUser>[] = [
     {
@@ -213,8 +227,9 @@ const getColumns = ({
       },
       cell: ({ row }) => {
         const role = capitalize(row.original.role)
+        const canUpdateAccess = row.original.userId !== currentUserId
 
-        if (!ownerMode) {
+        if (!ownerMode || !canUpdateAccess) {
           return <div className="px-3 text-sm">{role}</div>
         }
 
@@ -235,12 +250,18 @@ const getColumns = ({
           return <div className="px-3 w-32">Assignments</div>
         },
         cell: ({ row }) => {
+          const canUpdateAccess = row.original.userId !== currentUserId
+
           if (row.original.role === OrganizationUserRoleEnum.OWNER) {
             return <div className="px-3 text-sm text-muted-foreground">Full Access</div>
           }
 
           const roleCount = row.original.assignedRoles?.length || 0
           const roleText = roleCount === 1 ? '1 role' : `${roleCount} roles`
+
+          if (!canUpdateAccess) {
+            return <div className="px-3 text-sm">{roleText}</div>
+          }
 
           return (
             <Button variant="ghost" className="w-auto px-3" onClick={() => onUpdateAssignedRoles(row.original)}>
@@ -252,6 +273,8 @@ const getColumns = ({
       {
         id: 'actions',
         cell: ({ row }) => {
+          const canUpdateAccess = row.original.userId !== currentUserId
+
           return (
             <div className="text-right">
               <DropdownMenu>
@@ -263,10 +286,12 @@ const getColumns = ({
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem className="cursor-pointer" onClick={() => onUpdateMemberRole(row.original)}>
-                    Change Role
-                  </DropdownMenuItem>
-                  {row.original.role !== OrganizationUserRoleEnum.OWNER && (
+                  {canUpdateAccess && (
+                    <DropdownMenuItem className="cursor-pointer" onClick={() => onUpdateMemberRole(row.original)}>
+                      Change Role
+                    </DropdownMenuItem>
+                  )}
+                  {canUpdateAccess && row.original.role !== OrganizationUserRoleEnum.OWNER && (
                     <DropdownMenuItem className="cursor-pointer" onClick={() => onUpdateAssignedRoles(row.original)}>
                       Manage Assignments
                     </DropdownMenuItem>

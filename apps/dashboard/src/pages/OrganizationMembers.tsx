@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { CreateOrganizationInvitationDialog } from '@/components/OrganizationMembers/CreateOrganizationInvitationDialog'
+import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { OrganizationInvitationTable } from '@/components/OrganizationMembers/OrganizationInvitationTable'
 import { OrganizationMemberTable } from '@/components/OrganizationMembers/OrganizationMemberTable'
+import { UpsertOrganizationAccessSheet } from '@/components/OrganizationMembers/UpsertOrganizationAccessSheet'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { useApi } from '@/hooks/useApi'
-import { useOrganizationRoles } from '@/hooks/useOrganizationRoles'
 import { useOrganizations } from '@/hooks/useOrganizations'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
@@ -17,8 +17,9 @@ import {
   OrganizationInvitation,
   OrganizationUserRoleEnum,
   UpdateOrganizationInvitationRoleEnum,
-} from '@daytonaio/api-client'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+} from '@daytona/api-client'
+import { PlusIcon } from 'lucide-react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { toast } from 'sonner'
 
@@ -29,10 +30,10 @@ const OrganizationMembers: React.FC = () => {
   const { refreshOrganizations } = useOrganizations()
   const { selectedOrganization, organizationMembers, refreshOrganizationMembers, authenticatedUserOrganizationMember } =
     useSelectedOrganization()
-  const { roles, loadingRoles } = useOrganizationRoles()
 
   const [invitations, setInvitations] = useState<OrganizationInvitation[]>([])
   const [loadingInvitations, setLoadingInvitations] = useState(true)
+  const createInvitationSheetRef = useRef<{ open: () => void }>(null)
 
   const [loadingMemberAction, setLoadingMemberAction] = useState<Record<string, boolean>>({})
   const [loadingInvitationAction, setLoadingInvitationAction] = useState<Record<string, boolean>>({})
@@ -175,16 +176,33 @@ const OrganizationMembers: React.FC = () => {
     return authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
   }, [authenticatedUserOrganizationMember])
 
+  const rootCommands: CommandConfig[] = useMemo(() => {
+    if (!authenticatedUserIsOwner) {
+      return []
+    }
+
+    return [
+      {
+        id: 'create-organization-invitation',
+        label: 'Invite Member',
+        icon: <PlusIcon className="w-4 h-4" />,
+        onSelect: () => createInvitationSheetRef.current?.open(),
+      },
+    ]
+  }, [authenticatedUserIsOwner])
+
+  useRegisterCommands(rootCommands, { groupId: 'member-actions', groupLabel: 'Member actions', groupOrder: 0 })
+
   return (
     <PageLayout>
       <PageHeader>
         <PageTitle>Members</PageTitle>
         {authenticatedUserIsOwner && (
-          <CreateOrganizationInvitationDialog
+          <UpsertOrganizationAccessSheet
+            mode="create"
             className="ml-auto"
-            availableRoles={roles}
-            loadingAvailableRoles={loadingRoles}
-            onCreateInvitation={handleCreateInvitation}
+            onSubmit={({ email, role, assignedRoleIds }) => handleCreateInvitation(email, role, assignedRoleIds)}
+            ref={createInvitationSheetRef}
           />
         )}
       </PageHeader>
@@ -192,13 +210,12 @@ const OrganizationMembers: React.FC = () => {
       <PageContent>
         <OrganizationMemberTable
           data={organizationMembers}
-          loadingData={loadingRoles}
-          availableAssignments={roles}
-          loadingAvailableAssignments={loadingRoles}
+          loadingData={false}
           onUpdateMemberAccess={handleUpdateMemberAccess}
           onRemoveMember={handleRemoveMember}
           loadingMemberAction={loadingMemberAction}
           ownerMode={authenticatedUserIsOwner}
+          currentUserId={user?.profile.sub}
         />
 
         {authenticatedUserIsOwner && (
@@ -210,8 +227,6 @@ const OrganizationMembers: React.FC = () => {
             <OrganizationInvitationTable
               data={invitations}
               loadingData={loadingInvitations}
-              availableRoles={roles}
-              loadingAvailableRoles={loadingRoles}
               onCancelInvitation={handleCancelInvitation}
               onUpdateInvitation={handleUpdateInvitation}
               loadingInvitationAction={loadingInvitationAction}

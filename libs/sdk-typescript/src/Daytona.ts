@@ -12,7 +12,7 @@ import {
   VolumesApi,
   SandboxVolume,
   ConfigApi,
-} from '@daytonaio/api-client'
+} from '@daytona/api-client'
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios'
 import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
 import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
@@ -291,13 +291,17 @@ export class Daytona implements AsyncDisposable {
       orgHeader['X-Daytona-Organization-ID'] = this.organizationId
     }
 
+    const isLegacyPackage = packageJson.name === '@daytonaio/sdk'
+    const sdkLabel = isLegacyPackage ? 'sdk-typescript-legacy' : 'sdk-typescript'
+
     const configuration = new Configuration({
       basePath: this.apiUrl,
       baseOptions: {
         headers: {
           Authorization: `Bearer ${this.apiKey || this.jwtToken}`,
-          'X-Daytona-Source': 'typescript-sdk',
+          'X-Daytona-Source': sdkLabel,
           'X-Daytona-SDK-Version': packageJson.version,
+          'User-Agent': `${sdkLabel}/${packageJson.version}`,
           ...orgHeader,
         },
       },

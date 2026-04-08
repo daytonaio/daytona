@@ -35,7 +35,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { isStoppable, isTransitioning } from '@/lib/utils/sandbox'
 import { SandboxSessionProvider } from '@/providers/SandboxSessionProvider'
-import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
+import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytona/api-client'
 import { isAxiosError } from 'axios'
 import { Container, GripVertical, RefreshCw } from 'lucide-react'
 import { useQueryState } from 'nuqs'
@@ -44,7 +44,7 @@ import { useEffect, useState } from 'react'
 import { Group, Panel, Separator } from 'react-resizable-panels'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { CreateSshAccessDialog } from './CreateSshAccessDialog'
+import { CreateSshAccessSheet } from './CreateSshAccessSheet'
 import { RevokeSshAccessDialog } from './RevokeSshAccessDialog'
 import { SandboxContentTabs } from './SandboxContentTabs'
 import { SandboxHeader } from './SandboxHeader'
@@ -290,7 +290,7 @@ export default function SandboxDetails() {
 
         {sandboxId && (
           <>
-            <CreateSshAccessDialog
+            <CreateSshAccessSheet
               sandboxId={sandboxId}
               open={createSshDialogOpen}
               onOpenChange={setCreateSshDialogOpen}

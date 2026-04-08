@@ -63,7 +63,7 @@ module Daytona
           end
         end
         safe_env_exports = env.map do |key, value|
-          "export #{key}=\"$(echo '#{Base64.strict_encode64(value)}' | base64 -d)\""
+          "export #{key}=\"$(printf '%s' '#{Base64.strict_encode64(value)}' | base64 -d)\""
         end.join('; ')
         command = "#{safe_env_exports}; #{command}"
       end

@@ -3,6 +3,8 @@ on:
   push:
     branches: [main]
 
+permissions: {}
+
 jobs:
   translate:
     runs-on: ubuntu-latest
@@ -13,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: generaltranslation/translate@v0
+      - uses: generaltranslation/translate@5d317803006bc9f21ee9baef68eb04ede5c9709a # v0
         with:
           gt_api_key: ${{ secrets.GT_API_KEY }}
           gt_project_id: ${{ secrets.GT_PROJECT_ID }}

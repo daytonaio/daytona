@@ -39,6 +39,7 @@ type wsClient struct {
 	send      chan []byte   // outbound queue for this client (PTY -> WS)
 	done      chan struct{} // closed when the client is shutting down
 	closeOnce sync.Once
+	writeMu   sync.Mutex // serializes all writes to conn
 }
 
 // PTYSession represents a single PTY session with multi-client support

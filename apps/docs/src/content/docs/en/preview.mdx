@@ -1,5 +1,6 @@
 ---
 title: Preview
+description: Access services running in your sandboxes through preview URLs.
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components'
@@ -169,13 +170,34 @@ puts "Token: #{signed_url.token}"
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Create a signed preview URL that expires in 3600 seconds (1 hour)
+signedPreview, err := sandbox.GetSignedPreviewLink(ctx, 3000, 3600)
+if err != nil {
+    log.Fatal(err)
+}
+
+fmt.Printf("URL: %s\n", signedPreview.URL)   // Token is embedded in the URL
+fmt.Printf("Token: %s\n", signedPreview.Token) // Can be used to revoke access
+
+// Revoke the token before expiry if needed
+if err := sandbox.ExpireSignedPreviewLink(ctx, 3000, signedPreview.Token); err != nil {
+    log.Fatal(err)
+}
+```
+
+</TabItem>
 <TabItem label="CLI" icon="seti:shell">
+
 ```bash
 daytona preview-url <sandbox-name> --port 3000 --expires 3600
 ```
 
 </TabItem>
 <TabItem label="API" icon="seti:json">
+
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxId}/ports/3000/signed-preview-url?expiresInSeconds=3600' \
   --header 'Authorization: Bearer <API_KEY>'
@@ -184,13 +206,17 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxId}/ports/3000/signed-preview-u
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), [Go SDK](/docs/en/go-sdk/daytona), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
 
 > [**create_signed_preview_url (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxcreate_signed_preview_url)
 >
 > [**getSignedPreviewUrl (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#getsignedpreviewurl)
 >
 > [**create_signed_preview_url (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#create_signed_preview_url)
+>
+> [**GetSignedPreviewLink (Go SDK)**](/docs/en/go-sdk/daytona#Sandbox.GetSignedPreviewLink)
+>
+> [**ExpireSignedPreviewLink (Go SDK)**](/docs/en/go-sdk/daytona#Sandbox.ExpireSignedPreviewLink)
 >
 > [**Get Signed Preview URL (API)**](/docs/en/tools/api/#daytona/tag/sandbox/GET/sandbox/{sandboxIdOrName}/ports/{port}/signed-preview-url)
 

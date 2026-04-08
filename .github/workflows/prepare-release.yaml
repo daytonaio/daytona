@@ -8,23 +8,37 @@ on:
         required: true
         default: 'v0.0.0-dev'
 
+permissions: {}
+
 env:
   VERSION: ${{ inputs.version }}
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   prepare:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
     steps:
+      - name: Validate version format
+        run: |
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "::error::Invalid version format: $VERSION (expected vX.Y.Z or vX.Y.Z-suffix)"
+            exit 1
+          fi
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-tags: true
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: ./.github/actions/setup-toolchain
-      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
+      - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
 
       - name: Configure git
         run: |
@@ -34,17 +48,20 @@ jobs:
 
       - name: Create release branch
         run: |
-          git checkout -b prepare-release-${{ inputs.version }}
+          git checkout -b "prepare-release-$VERSION"
 
       - name: Prepare release
         run: |
-          VERSION=${{ inputs.version }} yarn prepare-release
+          yarn prepare-release
 
       - name: Push branch and create PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git push origin prepare-release-${{ inputs.version }}
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
+          git push origin "prepare-release-$VERSION"
           gh pr create \
-            --title "chore: prepare release ${{ inputs.version }}" \
-            --body "Automated PR to prepare release ${{ inputs.version }}" \
+            --title "chore: prepare release $VERSION" \
+            --body "Automated PR to prepare release $VERSION" \
             --base main \
-            --head prepare-release-${{ inputs.version }}
+            --head "prepare-release-$VERSION"

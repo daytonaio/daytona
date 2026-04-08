@@ -133,9 +133,10 @@ module Daytona
       create_authenticated_client = lambda do
         client = DaytonaToolboxApiClient::ApiClient.new(toolbox_api_config)
         client.default_headers['Authorization'] = "Bearer #{config.api_key || config.jwt_token}"
-        client.default_headers['X-Daytona-Source'] = 'ruby-sdk'
+        client.default_headers['X-Daytona-Source'] = 'sdk-ruby'
         client.default_headers['X-Daytona-SDK-Version'] = Sdk::VERSION
         client.default_headers['X-Daytona-Organization-ID'] = config.organization_id if config.jwt_token
+        client.user_agent = "sdk-ruby/#{Sdk::VERSION}"
         client
       end
 
@@ -555,6 +556,8 @@ module Daytona
     # @return [void]
     # @raise [Daytona::Sdk::Error]
     def wait_for_states(operation:, target_states:)
+      interval = INITIAL_POLL_INTERVAL
+      start_time = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
       loop do
         case state
         when *target_states then return
@@ -562,13 +565,22 @@ module Daytona
           raise Sdk::Error, "Sandbox #{id} failed to #{operation} with state: #{state}, error reason: #{error_reason}"
         end
 
-        sleep(IDLE_DURATION)
+        sleep(interval)
+        if ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - start_time > 5
+          interval = [interval * BACKOFF_MULTIPLIER, MAX_POLL_INTERVAL].min
+        end
         refresh
       end
     end
 
-    IDLE_DURATION = 0.1
-    private_constant :IDLE_DURATION
+    INITIAL_POLL_INTERVAL = 0.1
+    private_constant :INITIAL_POLL_INTERVAL
+
+    MAX_POLL_INTERVAL = 1.0
+    private_constant :MAX_POLL_INTERVAL
+
+    BACKOFF_MULTIPLIER = 1.1
+    private_constant :BACKOFF_MULTIPLIER
 
     NO_TIMEOUT = 0
     private_constant :NO_TIMEOUT

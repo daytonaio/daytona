@@ -7,7 +7,7 @@ import { Image } from 'astro:assets'
 
 import opencodePluginGif from '../../../../../assets/docs/images/opencode-plugin.gif'
 
-This guide demonstrates how to run the [Daytona OpenCode plugin](https://www.npmjs.com/package/@daytonaio/opencode) which integrates Daytona sandboxes and OpenCode. When the plugin is active, all agent operations occur in secure sandboxes, with one sandbox per OpenCode session. The plugin also has the ability to sync changes between sandboxes and local Git branches.
+This guide demonstrates how to run the [Daytona OpenCode plugin](https://www.npmjs.com/package/@daytona/opencode) which integrates Daytona sandboxes and OpenCode. When the plugin is active, all agent operations occur in secure sandboxes, with one sandbox per OpenCode session. The plugin also has the ability to sync changes between sandboxes and local Git branches.
 
 ### 1. Workflow Overview
 
@@ -31,7 +31,7 @@ Add the Daytona plugin to your project by creating or editing `opencode.json` in
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["@daytonaio/opencode"]
+  "plugin": ["@daytona/opencode"]
 }
 ```
 

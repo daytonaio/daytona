@@ -6,7 +6,7 @@
 import { queryKeys } from '@/hooks/queries/queryKeys'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { PaginatedSnapshots, SnapshotDto, SnapshotState } from '@daytonaio/api-client'
+import { PaginatedSnapshots, SnapshotDto, SnapshotState } from '@daytona/api-client'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 

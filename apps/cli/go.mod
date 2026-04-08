@@ -4,7 +4,7 @@ go 1.25.4
 
 require (
 	github.com/charmbracelet/bubbletea v1.1.0
-	github.com/daytonaio/daytona/libs/api-client-go v0.158.1
+	github.com/daytonaio/daytona/libs/api-client-go v0.162.0
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/mark3labs/mcp-go v0.32.0
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
@@ -80,7 +80,7 @@ require (
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.41.0 // indirect
 	golang.org/x/text v0.34.0 // indirect
-	golang.org/x/time v0.10.0 // indirect
+	golang.org/x/time v0.11.0 // indirect
 	google.golang.org/grpc v1.79.3 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gotest.tools/v3 v3.5.1 // indirect

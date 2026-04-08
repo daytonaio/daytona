@@ -4,6 +4,7 @@
  */
 
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { CreateVolumeSheet } from '@/components/CreateVolumeSheet'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -13,12 +14,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { VolumeTable } from '@/components/VolumeTable'
-import { useCreateVolumeMutation } from '@/hooks/mutations/useCreateVolumeMutation'
 import { useDeleteVolumeMutation } from '@/hooks/mutations/useDeleteVolumeMutation'
 import { queryKeys } from '@/hooks/queries/queryKeys'
 import { useVolumesQuery } from '@/hooks/queries/useVolumesQuery'
@@ -27,28 +24,24 @@ import { useVolumeWsSync } from '@/hooks/useVolumeWsSync'
 import { createBulkActionToast } from '@/lib/bulk-action-toast'
 import { handleApiError } from '@/lib/error-handling'
 import { pluralize } from '@/lib/utils'
-import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytonaio/api-client'
+import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytona/api-client'
 import { useQueryClient } from '@tanstack/react-query'
-import { Plus } from 'lucide-react'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 const Volumes: React.FC = () => {
   const queryClient = useQueryClient()
 
-  const [showCreateDialog, setShowCreateDialog] = useState(false)
-  const [newVolumeName, setNewVolumeName] = useState('')
-
   const [volumeToDelete, setVolumeToDelete] = useState<VolumeDto | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [processingVolumeAction, setProcessingVolumeAction] = useState<Record<string, boolean>>({})
+  const createVolumeSheetRef = useRef<{ open: () => void }>(null)
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
   useVolumeWsSync()
 
   const queryKey = useMemo(() => queryKeys.volumes.list(selectedOrganization?.id ?? ''), [selectedOrganization?.id])
   const { data: volumes = [], isLoading: loadingVolumes, error: volumesError } = useVolumesQuery()
-  const createVolumeMutation = useCreateVolumeMutation()
   const deleteVolumeMutation = useDeleteVolumeMutation({ invalidateOnSuccess: false })
 
   useEffect(() => {
@@ -67,28 +60,6 @@ const Volumes: React.FC = () => {
     },
     [queryClient, queryKey],
   )
-
-  const handleCreate = async () => {
-    const volumeName = newVolumeName.trim()
-    if (!volumeName) {
-      toast.error('Volume name is required')
-      return
-    }
-
-    try {
-      await createVolumeMutation.mutateAsync({
-        volume: {
-          name: volumeName,
-        },
-        organizationId: selectedOrganization?.id,
-      })
-      setShowCreateDialog(false)
-      setNewVolumeName('')
-      toast.success(`Creating volume ${volumeName}`)
-    } catch (error) {
-      handleApiError(error, 'Failed to create volume')
-    }
-  }
 
   const handleDelete = async (volume: VolumeDto) => {
     setProcessingVolumeAction((prev) => ({ ...prev, [volume.id]: true }))
@@ -185,71 +156,9 @@ const Volumes: React.FC = () => {
     <PageLayout>
       <PageHeader>
         <PageTitle>Volumes</PageTitle>
-        <Dialog
-          open={showCreateDialog}
-          onOpenChange={(isOpen) => {
-            setShowCreateDialog(isOpen)
-            if (isOpen) {
-              return
-            }
-            setNewVolumeName('')
-          }}
-        >
-          {writePermitted && (
-            <DialogTrigger asChild>
-              <Button variant="default" size="sm" disabled={loadingVolumes} className="ml-auto" title="Create Volume">
-                <Plus className="w-4 h-4" />
-                Create Volume
-              </Button>
-            </DialogTrigger>
-          )}
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New Volume</DialogTitle>
-              <DialogDescription>Instantly Access Shared Files with Volume Mounts</DialogDescription>
-            </DialogHeader>
-            <form
-              id="create-volume-form"
-              className="space-y-6 overflow-y-auto px-1 pb-1"
-              onSubmit={async (e) => {
-                e.preventDefault()
-                await handleCreate()
-              }}
-            >
-              <div className="space-y-3">
-                <Label htmlFor="name">Volume Name</Label>
-                <Input
-                  id="name"
-                  value={newVolumeName}
-                  onChange={(e) => setNewVolumeName(e.target.value)}
-                  placeholder="my-volume"
-                />
-              </div>
-            </form>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button type="button" size="sm" variant="secondary">
-                  Cancel
-                </Button>
-              </DialogClose>
-              {createVolumeMutation.isPending ? (
-                <Button type="button" size="sm" variant="default" disabled>
-                  Creating...
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  size="sm"
-                  form="create-volume-form"
-                  variant="default"
-                  disabled={!newVolumeName.trim() || createVolumeMutation.isPending}
-                >
-                  Create
-                </Button>
-              )}
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        {writePermitted && (
+          <CreateVolumeSheet className="ml-auto" disabled={loadingVolumes} ref={createVolumeSheetRef} />
+        )}
       </PageHeader>
 
       <PageContent size="full">
@@ -257,7 +166,13 @@ const Volumes: React.FC = () => {
           data={volumes}
           loading={loadingVolumes}
           processingVolumeAction={processingVolumeAction}
-          onCreateVolume={() => setShowCreateDialog(true)}
+          onCreateVolume={
+            writePermitted
+              ? () => {
+                  createVolumeSheetRef.current?.open()
+                }
+              : undefined
+          }
           onDelete={(volume) => {
             setVolumeToDelete(volume)
             setShowDeleteDialog(true)

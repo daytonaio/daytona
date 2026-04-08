@@ -51,7 +51,7 @@ pip install daytona
 ### TypeScript SDK
 
 ```bash
-npm install @daytonaio/sdk
+npm install @daytona/sdk
 ```
 
 ### Ruby SDK
@@ -102,7 +102,7 @@ print(response.result)
 ### Typescript SDK
 
 ```jsx
-import { Daytona } from "@daytonaio/sdk";
+import { Daytona } from "@daytona/sdk";
 
 const daytona = new Daytona({apiKey: "YOUR_API_KEY"});
 const sandbox = await daytona.create();
@@ -143,6 +143,44 @@ func main() {
   fmt.Println(response.Result)
 }
 ```
+
+---
+
+## Development
+
+### Devcontainer (full environment)
+
+Open this repository in a [devcontainer](https://containers.dev/)-compatible editor (VS Code, GitHub Codespaces) for a batteries-included setup with all languages, tools, and supporting services.
+
+### Nix (lightweight, agent-friendly)
+
+If you prefer working outside the devcontainer — or are an AI agent executing build commands — use the Nix dev shells:
+
+```bash
+# Enter the full dev shell (Go + Node + Python + Ruby + JDK)
+nix develop
+
+# Or pick a language-specific shell
+nix develop .#go       # Go services & libs
+nix develop .#node     # TypeScript / Node.js apps & libs
+nix develop .#python   # Python SDKs & libs
+nix develop .#ruby     # Ruby SDKs & libs
+nix develop .#java     # Java SDKs & libs
+```
+
+**Prerequisites:** [Nix](https://nixos.org/download/) with flakes enabled (`experimental-features = nix-command flakes` in `~/.config/nix/nix.conf`).
+
+For non-interactive / CI usage:
+
+```bash
+nix develop .#go --command bash -c "go build ./..."
+```
+
+Optional: Install [direnv](https://direnv.net/) + [nix-direnv](https://github.com/nix-community/nix-direnv) for automatic shell activation when you `cd` into the project.
+
+See [`AGENTS.md`](AGENTS.md) for the full shell reference, project-to-shell mapping, and common commands.
+
+> **Note:** Supporting services (PostgreSQL, Redis, etc.) are still managed via `docker compose -f .devcontainer/docker-compose.yaml up`.
 
 ---
 

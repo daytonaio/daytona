@@ -12,7 +12,7 @@ import {
   CommandList,
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { SandboxState } from '@daytonaio/api-client'
+import { SandboxState } from '@daytona/api-client'
 import { X } from 'lucide-react'
 import { STATUSES, getStateLabel } from '../constants'
 

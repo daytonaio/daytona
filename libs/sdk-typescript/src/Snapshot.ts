@@ -11,7 +11,7 @@ import {
   CreateSnapshot,
   Configuration,
   PaginatedSnapshots as PaginatedSnapshotsDto,
-} from '@daytonaio/api-client'
+} from '@daytona/api-client'
 import { DaytonaError } from './errors/DaytonaError'
 import { Image } from './Image'
 import { Resources } from './Daytona'

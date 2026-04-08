@@ -9,6 +9,7 @@ import { In, IsNull, Not } from 'typeorm'
 import { randomUUID } from 'crypto'
 
 import { SandboxConflictError } from '../errors/sandbox-conflict.error'
+import { JobConflictError } from '../errors/job-conflict.error'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { RunnerService } from '../services/runner.service'
@@ -708,7 +709,9 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             }
 
             // Process sandbox asynchronously but track the promise
-            const processPromise = this.syncInstanceState(row.sandbox_id)
+            const processPromise = this.syncInstanceState(row.sandbox_id).catch((err) => {
+              this.logger.error(`Error syncing sandbox state for ${row.sandbox_id}`, err)
+            })
             pendingProcesses.push(processPromise)
             processedCount++
 
@@ -722,7 +725,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           })
 
           stream.on('end', () => {
-            Promise.all(pendingProcesses)
+            Promise.allSettled(pendingProcesses)
               .then(() => {
                 resolve()
               })
@@ -873,6 +876,11 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             break
           }
 
+          if (error instanceof JobConflictError) {
+            this.logger.debug(`Job already in progress for sandbox ${sandboxId}, skipping`)
+            break
+          }
+
           this.logger.error(`Error processing desired state for sandbox ${sandboxId}:`, error)
 
           const { recoverable, errorReason } = sanitizeSandboxError(error)
@@ -883,7 +891,8 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             recoverable,
           }
 
-          await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
+          // Update sandbox to error state without safeguards
+          await this.sandboxRepository.updateWhere(sandboxId, { updateData, whereCondition: {} })
 
           // Break sync loop since sandbox is in error state.
           break

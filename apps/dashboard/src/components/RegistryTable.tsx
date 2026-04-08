@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { DockerRegistry, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
+import { DockerRegistry, OrganizationRolePermissionsEnum } from '@daytona/api-client'
 import {
   ColumnDef,
   flexRender,
@@ -24,7 +24,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
-import { DialogTrigger } from './ui/dialog'
 import { Pagination } from './Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
@@ -170,11 +169,9 @@ const getColumns = ({
 
             <DropdownMenuContent align="end">
               {writePermitted && (
-                <DialogTrigger asChild>
-                  <DropdownMenuItem onClick={() => onEdit(row.original)} className="cursor-pointer" disabled={loading}>
-                    Edit
-                  </DropdownMenuItem>
-                </DialogTrigger>
+                <DropdownMenuItem onClick={() => onEdit(row.original)} className="cursor-pointer" disabled={loading}>
+                  Edit
+                </DropdownMenuItem>
               )}
               {deletePermitted && (
                 <>

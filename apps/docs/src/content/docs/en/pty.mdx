@@ -1,5 +1,6 @@
 ---
 title: Pseudo Terminal (PTY)
+description: Interact with pseudo terminal sessions in your sandboxes.
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
@@ -677,7 +678,7 @@ print(f"Session completed with exit code: {pty_handle.exit_code}")
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-import { Daytona, Sandbox } from '@daytonaio/sdk'
+import { Daytona, Sandbox } from '@daytona/sdk'
 
 // Create PTY session
 const ptyHandle = await sandbox.process.createPty({
@@ -848,7 +849,7 @@ if pty_handle.error:
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-import { Daytona, Sandbox } from '@daytonaio/sdk'
+import { Daytona, Sandbox } from '@daytona/sdk'
 
 // Create PTY session
 const ptyHandle = await sandbox.process.createPty({

@@ -3,12 +3,15 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
+import { OrganizationRolePermissionsEnum } from '@daytona/api-client'
 import { OrganizationSuspendedError } from '@/api/errors'
+import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { CreateSandboxSheet } from '@/components/Sandbox/CreateSandboxSheet'
 import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
 import { SandboxTable } from '@/components/SandboxTable'
+import { CreateSshAccessSheet } from '@/components/sandboxes/CreateSshAccessSheet'
+import { RevokeSshAccessDialog } from '@/components/sandboxes/RevokeSshAccessDialog'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +23,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
@@ -43,16 +45,10 @@ import { createBulkActionToast } from '@/lib/bulk-action-toast'
 import { handleApiError } from '@/lib/error-handling'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
 import { formatDuration, pluralize } from '@/lib/utils'
-import {
-  OrganizationUserRoleEnum,
-  Sandbox,
-  SandboxDesiredState,
-  SandboxState,
-  SshAccessDto,
-} from '@daytonaio/api-client'
+import { OrganizationUserRoleEnum, Sandbox, SandboxDesiredState, SandboxState } from '@daytona/api-client'
 import { QueryKey, useQueryClient } from '@tanstack/react-query'
-import { Check, Copy } from 'lucide-react'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { PlusIcon } from 'lucide-react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -266,11 +262,8 @@ const Sandboxes: React.FC = () => {
 
   const [showCreateSshDialog, setShowCreateSshDialog] = useState(false)
   const [showRevokeSshDialog, setShowRevokeSshDialog] = useState(false)
-  const [sshAccess, setSshAccess] = useState<SshAccessDto | null>(null)
-  const [sshExpiryMinutes, setSshExpiryMinutes] = useState<number>(60)
-  const [revokeSshToken, setRevokeSshToken] = useState<string>('')
   const [sshSandboxId, setSshSandboxId] = useState<string>('')
-  const [copied, setCopied] = useState<string | null>(null)
+  const createSandboxSheetRef = useRef<{ open: () => void }>(null)
 
   // Snapshot Filter
 
@@ -831,44 +824,9 @@ const Sandboxes: React.FC = () => {
     }
   }
 
-  const handleCreateSshAccess = async (id: string) => {
-    setSandboxIsLoading((prev) => ({ ...prev, [id]: true }))
-    try {
-      const response = await sandboxApi.createSshAccess(id, selectedOrganization?.id, sshExpiryMinutes)
-      setSshAccess(response.data)
-      setSshSandboxId(id)
-      setShowCreateSshDialog(true)
-      toast.success('SSH access created successfully')
-    } catch (error) {
-      handleApiError(error, 'Failed to create SSH access')
-    } finally {
-      setSandboxIsLoading((prev) => ({ ...prev, [id]: false }))
-    }
-  }
-
   const openCreateSshDialog = (id: string) => {
     setSshSandboxId(id)
     setShowCreateSshDialog(true)
-  }
-
-  const handleRevokeSshAccess = async (id: string) => {
-    if (!revokeSshToken.trim()) {
-      toast.error('Please enter a token to revoke')
-      return
-    }
-
-    setSandboxIsLoading((prev) => ({ ...prev, [id]: true }))
-    try {
-      await sandboxApi.revokeSshAccess(id, selectedOrganization?.id, revokeSshToken)
-      setRevokeSshToken('')
-      setSshSandboxId('')
-      setShowRevokeSshDialog(false)
-      toast.success('SSH access revoked successfully')
-    } catch (error) {
-      handleApiError(error, 'Failed to revoke SSH access')
-    } finally {
-      setSandboxIsLoading((prev) => ({ ...prev, [id]: false }))
-    }
   }
 
   const openRevokeSshDialog = (id: string) => {
@@ -876,15 +834,28 @@ const Sandboxes: React.FC = () => {
     setShowRevokeSshDialog(true)
   }
 
-  const copyToClipboard = async (text: string, label: string) => {
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopied(label)
-      setTimeout(() => setCopied(null), 2000)
-    } catch (err) {
-      console.error('Failed to copy text:', err)
+  const writePermitted = useMemo(
+    () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SANDBOXES),
+    [authenticatedUserHasPermission],
+  )
+  const canCreateSandbox = writePermitted && !selectedOrganization?.suspended
+
+  const rootCommands: CommandConfig[] = useMemo(() => {
+    if (!canCreateSandbox) {
+      return []
     }
-  }
+
+    return [
+      {
+        id: 'create-sandbox',
+        label: 'Create Sandbox',
+        icon: <PlusIcon className="w-4 h-4" />,
+        onSelect: () => createSandboxSheetRef.current?.open(),
+      },
+    ]
+  }, [canCreateSandbox])
+
+  useRegisterCommands(rootCommands, { groupId: 'sandbox-actions', groupLabel: 'Sandbox actions', groupOrder: 0 })
 
   // Redirect user to the onboarding page if they haven't created an api key yet
   // Perform only once per user
@@ -923,19 +894,7 @@ const Sandboxes: React.FC = () => {
       <PageHeader>
         <PageTitle>Sandboxes</PageTitle>
         <div className="flex items-center gap-2 ml-auto">
-          {!sandboxesDataIsLoading && (!sandboxesData?.items || sandboxesData.items.length === 0) && (
-            <>
-              <Button variant="link" className="text-primary" onClick={() => navigate(RoutePath.ONBOARDING)} size="sm">
-                Onboarding guide
-              </Button>
-              <Button variant="link" className="text-primary" asChild size="sm">
-                <a href={DAYTONA_DOCS_URL} target="_blank" rel="noopener noreferrer" className="text-primary">
-                  Docs
-                </a>
-              </Button>
-            </>
-          )}
-          {authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SANDBOXES) && <CreateSandboxSheet />}
+          {canCreateSandbox && <CreateSandboxSheet ref={createSandboxSheetRef} />}
         </div>
       </PageHeader>
       <PageContent size="full" className="flex-1 max-h-[calc(100vh-65px)]">
@@ -1018,116 +977,27 @@ const Sandboxes: React.FC = () => {
           </AlertDialog>
         )}
 
-        {/* Create SSH Access Dialog */}
-        <AlertDialog
+        <CreateSshAccessSheet
+          sandboxId={sshSandboxId}
           open={showCreateSshDialog}
           onOpenChange={(isOpen) => {
             setShowCreateSshDialog(isOpen)
             if (!isOpen) {
-              setSshAccess(null)
-              setSshExpiryMinutes(60)
               setSshSandboxId('')
             }
           }}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Create SSH Access</AlertDialogTitle>
-              <AlertDialogDescription>
-                {sshAccess
-                  ? 'SSH access has been created successfully. Use the token below to connect:'
-                  : 'Set the expiration time for SSH access:'}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="space-y-4">
-              {!sshAccess ? (
-                <div className="space-y-3">
-                  <Label className="text-sm font-medium">Expiry (minutes):</Label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="1440"
-                    value={sshExpiryMinutes}
-                    onChange={(e) => setSshExpiryMinutes(Number(e.target.value))}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                </div>
-              ) : (
-                <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
-                  <span className="overflow-x-auto pr-2 cursor-text select-all">{sshAccess.sshCommand}</span>
-                  {(copied === 'SSH Command' && <Check className="w-4 h-4" />) || (
-                    <Copy
-                      className="w-4 h-4 cursor-pointer"
-                      onClick={() => copyToClipboard(sshAccess.sshCommand, 'SSH Command')}
-                    />
-                  )}
-                </div>
-              )}
-            </div>
-            <AlertDialogFooter>
-              {!sshAccess ? (
-                <>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => handleCreateSshAccess(sshSandboxId)}
-                    disabled={!sshSandboxId}
-                    className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                  >
-                    Create
-                  </AlertDialogAction>
-                </>
-              ) : (
-                <AlertDialogAction
-                  onClick={() => setShowCreateSshDialog(false)}
-                  className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                >
-                  Close
-                </AlertDialogAction>
-              )}
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        />
 
-        {/* Revoke SSH Access Dialog */}
-        <AlertDialog
+        <RevokeSshAccessDialog
+          sandboxId={sshSandboxId}
           open={showRevokeSshDialog}
           onOpenChange={(isOpen) => {
             setShowRevokeSshDialog(isOpen)
             if (!isOpen) {
-              setRevokeSshToken('')
               setSshSandboxId('')
             }
           }}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Revoke SSH Access</AlertDialogTitle>
-              <AlertDialogDescription>Enter the SSH access token you want to revoke:</AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-3">
-                <label className="text-sm font-medium">SSH Token:</label>
-                <input
-                  type="text"
-                  value={revokeSshToken}
-                  onChange={(e) => setRevokeSshToken(e.target.value)}
-                  placeholder="Enter SSH token to revoke"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                />
-              </div>
-            </div>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => handleRevokeSshAccess(sshSandboxId)}
-                disabled={!revokeSshToken.trim() || !sshSandboxId}
-                className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
-              >
-                Revoke Access
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        />
 
         <SandboxDetailsSheet
           sandbox={selectedSandbox}

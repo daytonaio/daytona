@@ -1,4 +1,4 @@
-import { Daytona, Sandbox, Image, DaytonaTimeoutError, ExecutionError, OutputMessage } from '@daytonaio/sdk'
+import { Daytona, Sandbox, Image, DaytonaTimeoutError, ExecutionError, OutputMessage } from '@daytona/sdk'
 
 async function basicExec(sandbox: Sandbox) {
   //  run some typescript code directly

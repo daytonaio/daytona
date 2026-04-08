@@ -228,6 +228,7 @@ module Daytona
         client.default_headers[HEADER_SOURCE] = SOURCE_RUBY
         client.default_headers[HEADER_SDK_VERSION] = Sdk::VERSION
         client.default_headers[HEADER_ORGANIZATION_ID] = config.organization_id if config.jwt_token
+        client.user_agent = "sdk-ruby/#{Sdk::VERSION}"
       end
     end
 
@@ -281,7 +282,7 @@ module Daytona
     # @return [Daytona::CodeToolbox]
     def code_toolbox_from_labels(labels) = code_toolbox_from_language(labels[LABEL_CODE_TOOLBOX_LANGUAGE]&.to_sym)
 
-    SOURCE_RUBY = 'ruby-sdk'
+    SOURCE_RUBY = 'sdk-ruby'
     private_constant :SOURCE_RUBY
 
     HEADER_SOURCE = 'X-Daytona-Source'

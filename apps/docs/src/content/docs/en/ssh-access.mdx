@@ -1,5 +1,6 @@
 ---
 title: SSH Access
+description: Access your sandboxes using SSH token-based authentication.
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
@@ -63,7 +64,7 @@ print(f"SSH Token: {ssh_access.token}")
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-import { Daytona } from '@daytonaio/sdk'
+import { Daytona } from '@daytona/sdk'
 
 const daytona = new Daytona()
 const sandbox = await daytona.get('sandbox-abc123')

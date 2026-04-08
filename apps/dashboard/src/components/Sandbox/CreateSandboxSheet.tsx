@@ -32,11 +32,11 @@ import { parseEnvFile } from '@/lib/env'
 import { handleApiError } from '@/lib/error-handling'
 import { imageNameSchema } from '@/lib/schema'
 import { cn, getRegionFullDisplayName } from '@/lib/utils'
-import { Sandbox } from '@daytonaio/sdk'
+import { Sandbox } from '@daytona/sdk'
 import { useForm } from '@tanstack/react-form'
 import { Info, Minus, Plus, Upload } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
-import { ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ComponentProps, Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { createSearchParams, generatePath, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -145,7 +145,7 @@ const InfoTooltipButton = ({ className, ...props }: ComponentProps<'button'>) =>
   )
 }
 
-export const CreateSandboxSheet = ({ className }: { className?: string }) => {
+export const CreateSandboxSheet = ({ className, ref }: { className?: string; ref?: Ref<{ open: () => void }> }) => {
   const navigate = useNavigate()
   const createSandboxEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_CREATE_SANDBOX)
   const [open, setOpen] = useState(false)
@@ -155,6 +155,10 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
   const { selectedOrganization } = useSelectedOrganization()
   const { reset: resetCreateSandboxMutation, ...createSandboxMutation } = useCreateSandboxMutation()
   const formRef = useRef<HTMLFormElement>(null)
+
+  useImperativeHandle(ref, () => ({
+    open: () => setOpen(true),
+  }))
 
   const maxCpu = selectedOrganization?.maxCpuPerSandbox
   const maxMemory = selectedOrganization?.maxMemoryPerSandbox
@@ -247,6 +251,7 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
       }
     },
   })
+  const { reset: resetForm } = form
 
   const handleSourceChange = useCallback(
     (val: string) => {
@@ -264,9 +269,9 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
   )
 
   const resetState = useCallback(() => {
-    form.reset(defaultValues)
+    resetForm(defaultValues)
     resetCreateSandboxMutation()
-  }, [resetCreateSandboxMutation, form])
+  }, [resetForm, resetCreateSandboxMutation])
 
   const handleEnvFileImport = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -325,7 +330,7 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
       }}
     >
       <SheetTrigger asChild>
-        <Button variant="default" size="sm" title="Create Sandbox">
+        <Button variant="default" size="sm">
           <Plus className="size-4" />
           Create Sandbox
         </Button>
@@ -900,12 +905,16 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
             </div>
           </form>
         </ScrollArea>
-        <SheetFooter className="p-5 pt-3 border-t border-border sm:justify-start">
+        <SheetFooter className="border-t border-border p-4 px-5">
+          <Button type="button" size="sm" variant="secondary" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
           <form.Subscribe
             selector={(state) => [state.canSubmit, state.isSubmitting]}
             children={([canSubmit, isSubmitting]) => (
               <Button
                 type="submit"
+                size="sm"
                 form="create-sandbox-form"
                 variant="default"
                 disabled={!canSubmit || isSubmitting || !selectedOrganization?.id}

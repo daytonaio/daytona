@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { IOrganizationsContext, OrganizationsContext } from '@/contexts/OrganizationsContext'
+import { LocalStorageKey } from '@/enums/LocalStorageKey'
+import { useApi } from '@/hooks/useApi'
+import { handleApiError } from '@/lib/error-handling'
+import { Organization } from '@daytona/api-client'
 import { ReactNode, useCallback, useMemo, useState } from 'react'
 import { suspend } from 'suspend-react'
-import { useApi } from '@/hooks/useApi'
-import { OrganizationsContext, IOrganizationsContext } from '@/contexts/OrganizationsContext'
-import { Organization } from '@daytonaio/api-client'
-import { handleApiError } from '@/lib/error-handling'
-import { LocalStorageKey } from '@/enums/LocalStorageKey'
 
 type Props = {
   children: ReactNode
@@ -45,12 +45,14 @@ export function OrganizationsProvider(props: Props) {
 
   // After creating a new org, the selected org was updated unnecessarily so we reload the page just in case
   const refreshOrganizations = useCallback(async (selectedOrganizationId?: string) => {
-    if (selectedOrganizationId) {
-      localStorage.setItem(LocalStorageKey.SelectedOrganizationId, selectedOrganizationId)
-    }
-    setTimeout(() => {
-      window.location.reload()
-    }, 500)
+    return new Promise<void>(() => {
+      if (selectedOrganizationId) {
+        localStorage.setItem(LocalStorageKey.SelectedOrganizationId, selectedOrganizationId)
+      }
+      setTimeout(() => {
+        window.location.reload()
+      }, 500)
+    })
   }, [])
 
   const contextValue: IOrganizationsContext = useMemo(() => {

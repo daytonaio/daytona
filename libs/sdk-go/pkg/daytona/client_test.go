@@ -752,7 +752,7 @@ func TestSDKSourceHeader(t *testing.T) {
 	sourceHeader, exists := cfg.DefaultHeader["X-Daytona-Source"]
 	assert.True(t, exists)
 	assert.Equal(t, sdkSource, sourceHeader)
-	assert.Equal(t, "go-sdk", sdkSource)
+	assert.Equal(t, "sdk-go", sdkSource)
 }
 
 // TestServicesInitialization tests that services are properly initialized
@@ -794,7 +794,7 @@ func TestCreateToolboxClient(t *testing.T) {
 		// Check SDK source header
 		sourceHeader, exists := cfg.DefaultHeader["X-Daytona-Source"]
 		assert.True(t, exists)
-		assert.Equal(t, "go-sdk", sourceHeader)
+		assert.Equal(t, "sdk-go", sourceHeader)
 	})
 
 	t.Run("creates toolbox client with JWT auth", func(t *testing.T) {

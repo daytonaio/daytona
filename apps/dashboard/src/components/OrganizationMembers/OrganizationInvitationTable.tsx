@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { MoreHorizontal } from 'lucide-react'
 import {
   ColumnDef,
@@ -14,21 +14,19 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { OrganizationInvitation, OrganizationRole, UpdateOrganizationInvitationRoleEnum } from '@daytonaio/api-client'
+import { OrganizationInvitation, UpdateOrganizationInvitationRoleEnum } from '@daytona/api-client'
 import { Pagination } from '@/components/Pagination'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
 import { CancelOrganizationInvitationDialog } from '@/components/OrganizationMembers/CancelOrganizationInvitationDialog'
-import { UpdateOrganizationInvitationDialog } from './UpdateOrganizationInvitationDialog'
+import { UpsertOrganizationAccessSheet } from '@/components/OrganizationMembers/UpsertOrganizationAccessSheet'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { TableEmptyState } from '../TableEmptyState'
 
 interface DataTableProps {
   data: OrganizationInvitation[]
   loadingData: boolean
-  availableRoles: OrganizationRole[]
-  loadingAvailableRoles: boolean
   onCancelInvitation: (invitationId: string) => Promise<boolean>
   onUpdateInvitation: (
     invitationId: string,
@@ -41,8 +39,6 @@ interface DataTableProps {
 export function OrganizationInvitationTable({
   data,
   loadingData,
-  availableRoles,
-  loadingAvailableRoles,
   onCancelInvitation,
   onUpdateInvitation,
   loadingInvitationAction,
@@ -86,6 +82,18 @@ export function OrganizationInvitationTable({
     }
     return false
   }
+
+  const initialInvitationMember = useMemo(
+    () =>
+      invitationToUpdate
+        ? {
+            email: invitationToUpdate.email,
+            role: invitationToUpdate.role,
+            assignedRoleIds: invitationToUpdate.assignedRoles.map((role) => role.id),
+          }
+        : undefined,
+    [invitationToUpdate],
+  )
 
   const columns = getColumns({ onCancel: handleCancel, onUpdate: handleUpdate })
 
@@ -153,7 +161,8 @@ export function OrganizationInvitationTable({
       </div>
 
       {invitationToUpdate && (
-        <UpdateOrganizationInvitationDialog
+        <UpsertOrganizationAccessSheet
+          mode="edit"
           open={isUpdateDialogOpen}
           onOpenChange={(open) => {
             setIsUpdateDialogOpen(open)
@@ -161,10 +170,12 @@ export function OrganizationInvitationTable({
               setInvitationToUpdate(null)
             }
           }}
-          invitation={invitationToUpdate}
-          availableRoles={availableRoles}
-          loadingAvailableRoles={loadingAvailableRoles}
-          onUpdateInvitation={handleConfirmUpdate}
+          trigger={null}
+          initialMember={initialInvitationMember}
+          title="Update Invitation"
+          description="Modify organization access for the invited member."
+          onSubmit={({ role, assignedRoleIds }) => handleConfirmUpdate(role, assignedRoleIds)}
+          reducedRoleWarning="Removing assignments will reduce the invited member's access when they accept this invitation."
         />
       )}
 

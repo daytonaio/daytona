@@ -4,6 +4,7 @@
  */
 
 import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { JobConflictError } from '../errors/job-conflict.error'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, LessThan, In, EntityManager } from 'typeorm'
 import { Job } from '../entities/job.entity'
@@ -93,7 +94,7 @@ export class JobService {
         ) {
           this.logger.error(`An incomplete job already exists for ${resourceType} ${resourceId} on runner ${runnerId}`)
         }
-        throw new ConflictException('An operation is already in progress for this resource')
+        throw new JobConflictError()
       }
       this.logger.error(`Error creating job: ${error}`)
       throw error

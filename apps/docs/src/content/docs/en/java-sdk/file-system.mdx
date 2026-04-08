@@ -1,0 +1,190 @@
+---
+title: "FileSystem"
+hideTitleOnPage: true
+---
+
+## FileSystem
+
+File system operations facade for a specific Sandbox.
+
+Provides methods for directory management, file upload/download, metadata inspection, and
+search/replace operations.
+
+### Methods
+
+#### createFolder()
+```java
+public void createFolder(String path, String mode)
+```
+
+Creates a directory in the Sandbox.
+
+**Parameters**:
+
+- `path` _String_ - directory path
+- `mode` _String_ - POSIX mode (for example `755`); defaults to `755` when `null`
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if creation fails
+
+#### deleteFile()
+```java
+public void deleteFile(String path)
+```
+
+Deletes a file.
+
+**Parameters**:
+
+- `path` _String_ - file path to delete
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if deletion fails
+
+#### downloadFile()
+```java
+public byte[] downloadFile(String remotePath)
+```
+
+Downloads a file into memory.
+
+**Parameters**:
+
+- `remotePath` _String_ - source file path in the Sandbox
+
+**Returns**:
+
+- `byte[]` - file bytes; empty array when no file payload is returned
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if download or local read fails
+
+#### uploadFile()
+```java
+public void uploadFile(byte[] content, String remotePath)
+```
+
+Uploads in-memory file content to a Sandbox path.
+
+**Parameters**:
+
+- `content` _byte[]_ - file bytes; `null` uploads an empty file
+- `remotePath` _String_ - destination file path in the Sandbox
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if upload fails
+
+#### listFiles()
+```java
+public List<FileInfo> listFiles(String path)
+```
+
+Lists files and directories under a path.
+
+**Parameters**:
+
+- `path` _String_ - directory path
+
+**Returns**:
+
+- `List\<FileInfo\>` - file metadata entries
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if listing fails
+
+#### getFileDetails()
+```java
+public FileInfo getFileDetails(String path)
+```
+
+Returns metadata for a single file or directory.
+
+**Parameters**:
+
+- `path` _String_ - file or directory path
+
+**Returns**:
+
+- `FileInfo` - metadata record
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if lookup fails
+
+#### findFiles()
+```java
+public List<Map<String, Object>> findFiles(String path, String pattern)
+```
+
+Searches files by content pattern.
+
+**Parameters**:
+
+- `path` _String_ - root directory to search
+- `pattern` _String_ - text pattern to find
+
+**Returns**:
+
+- `List\<Map\<String, Object\>\>` - list of matches containing file, line, and content
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if the search request fails
+
+#### searchFiles()
+```java
+public Map<String, Object> searchFiles(String path, String pattern)
+```
+
+Searches files by file-name pattern.
+
+**Parameters**:
+
+- `path` _String_ - root directory to search
+- `pattern` _String_ - file-name pattern
+
+**Returns**:
+
+- `Map\<String, Object\>` - result map containing `files`
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if the search request fails
+
+#### replaceInFiles()
+```java
+public void replaceInFiles(List<String> files, String pattern, String newValue)
+```
+
+Performs in-place replacement in multiple files.
+
+**Parameters**:
+
+- `files` _List\<String\>_ - files to process
+- `pattern` _String_ - pattern to replace
+- `newValue` _String_ - replacement text
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if replacement fails
+
+#### moveFiles()
+```java
+public void moveFiles(String source, String destination)
+```
+
+Moves or renames a file or directory.
+
+**Parameters**:
+
+- `source` _String_ - source path
+- `destination` _String_ - destination path
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if move fails

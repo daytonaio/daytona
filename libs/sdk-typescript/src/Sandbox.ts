@@ -17,7 +17,7 @@ import {
   SshAccessValidationDto,
   SignedPortPreviewUrl,
   ResizeSandbox,
-} from '@daytonaio/api-client'
+} from '@daytona/api-client'
 import { Resources } from './Daytona'
 import {
   FileSystemApi,
@@ -27,7 +27,7 @@ import {
   InfoApi,
   ComputerUseApi,
   InterpreterApi,
-} from '@daytonaio/toolbox-api-client'
+} from '@daytona/toolbox-api-client'
 import { FileSystem } from './FileSystem'
 import { Git } from './Git'
 import { CodeRunParams, Process } from './Process'
@@ -358,7 +358,7 @@ export class Sandbox implements SandboxDto {
       throw new DaytonaValidationError('Timeout must be a non-negative number')
     }
 
-    const checkInterval = 100 // Wait 100 ms between checks
+    let checkInterval = 100
     const startTime = Date.now()
 
     while (this.state !== 'started') {
@@ -379,6 +379,9 @@ export class Sandbox implements SandboxDto {
       }
 
       await new Promise((resolve) => setTimeout(resolve, checkInterval))
+      if (Date.now() - startTime > 5000) {
+        checkInterval = Math.min(checkInterval * 1.1, 1000)
+      }
     }
   }
 
@@ -399,7 +402,7 @@ export class Sandbox implements SandboxDto {
       throw new DaytonaValidationError('Timeout must be a non-negative number')
     }
 
-    const checkInterval = 100 // Wait 100 ms between checks
+    let checkInterval = 100
     const startTime = Date.now()
 
     // Treat destroyed as stopped to cover ephemeral sandboxes that are automatically deleted after stopping
@@ -421,6 +424,9 @@ export class Sandbox implements SandboxDto {
       }
 
       await new Promise((resolve) => setTimeout(resolve, checkInterval))
+      if (Date.now() - startTime > 5000) {
+        checkInterval = Math.min(checkInterval * 1.1, 1000)
+      }
     }
   }
 
@@ -645,7 +651,7 @@ export class Sandbox implements SandboxDto {
       throw new DaytonaValidationError('Timeout must be a non-negative number')
     }
 
-    const checkInterval = 100 // Wait 100 ms between checks
+    let checkInterval = 100
     const startTime = Date.now()
 
     while (this.state === SandboxState.RESIZING) {
@@ -667,6 +673,9 @@ export class Sandbox implements SandboxDto {
       }
 
       await new Promise((resolve) => setTimeout(resolve, checkInterval))
+      if (Date.now() - startTime > 5000) {
+        checkInterval = Math.min(checkInterval * 1.1, 1000)
+      }
     }
   }
 

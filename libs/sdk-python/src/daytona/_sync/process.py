@@ -139,7 +139,7 @@ class Process:
             safe_env_exports = (
                 " ".join(
                     [
-                        f"""export {key}="$(echo '{base64.b64encode(value.encode()).decode()}' | base64 -d)";"""
+                        f"""export {key}="$(printf '%s' '{base64.b64encode(value.encode()).decode()}' | base64 -d)";"""
                         for key, value in env.items()
                     ]
                 )

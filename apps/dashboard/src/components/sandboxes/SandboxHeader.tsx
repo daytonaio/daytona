@@ -18,7 +18,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
 import { isArchivable, isRecoverable, isStartable, isStoppable } from '@/lib/utils/sandbox'
-import { Sandbox } from '@daytonaio/api-client'
+import { Sandbox } from '@daytona/api-client'
 import { ArrowLeft, MoreHorizontal, Play, RefreshCw, Square, Wrench } from 'lucide-react'
 
 interface SandboxHeaderProps {

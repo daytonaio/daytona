@@ -55,6 +55,11 @@ func (s *SessionService) Execute(sessionId, cmdId, cmd string, async, isCombined
 
 	defer logFile.Close()
 
+	cmdFilePath := filepath.Join(logDir, "cmd.sh")
+	if err := os.WriteFile(cmdFilePath, []byte(cmd), 0600); err != nil {
+		return nil, common_errors.NewBadRequestError(fmt.Errorf("failed to write command file: %w", err))
+	}
+
 	inputPipeCommand := `cat /dev/null > "$ip" &`
 	if async {
 		inputPipeCommand = `while :; do sleep 3600; done > "$ip" &`
@@ -67,7 +72,7 @@ func (s *SessionService) Execute(sessionId, cmdId, cmd string, async, isCombined
 		toOctalEscapes(log.STDOUT_PREFIX),               // %s  -> stdout prefix
 		toOctalEscapes(log.STDERR_PREFIX),               // %s  -> stderr prefix
 		inputPipeCommand,                                // %s  -> stdin behavior
-		cmd,                                             // %s  -> verbatim script body
+		cmdFilePath,                                     // %q  -> command file path
 		exitCodeFilePath,                                // %q
 	)
 
@@ -167,9 +172,9 @@ var cmdWrapperFormat string = `
 	%s
 	ip_pid=$!
 
-	# Run your command
-	{ %s; } < "$ip" > "$sp" 2> "$ep"
-	echo "$?" >> %s
+	# Run your command from file (avoids heredoc parsing issues with pipe-fed shells)
+	{ . %q; } < "$ip" > "$sp" 2> "$ep"
+	echo "$?" >> %q
 
 	# Stop the stdin holder so it doesn't outlive the command
 	kill "$ip_pid" 2>/dev/null; wait "$ip_pid" 2>/dev/null
