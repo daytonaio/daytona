@@ -45,6 +45,16 @@ import { SnapshotInfoResponse } from '@daytonaio/runner-api-client'
 import { SnapshotActivatedEvent } from '../events/snapshot-activated.event'
 import { TypedConfigService } from '../../config/typed-config.service'
 
+/** Fisher-Yates shuffle — uniform random permutation in O(n). */
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
+
 const SYNC_AGAIN = 'sync-again'
 const DONT_SYNC_AGAIN = 'dont-sync-again'
 const DEFAULT_SNAPSHOT_DEACTIVATION_TIMEOUT_MINUTES = 14 * 24 * 60 // 14 days
@@ -283,9 +293,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         0,
         Math.ceil(sharedRunners.length / 3) - sharedSnapshotRunnersDistinctRunnersIds.size,
       )
-      runnersToPropagateTo.push(
-        ...unallocatedSharedRunners.sort(() => Math.random() - 0.5).slice(0, sharedRunnersPropagateLimit),
-      )
+      runnersToPropagateTo.push(...shuffleArray(unallocatedSharedRunners).slice(0, sharedRunnersPropagateLimit))
 
       if (runnersToPropagateTo.length === 0) {
         return
