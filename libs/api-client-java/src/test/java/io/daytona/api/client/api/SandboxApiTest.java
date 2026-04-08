@@ -18,10 +18,12 @@ import java.math.BigDecimal;
 import io.daytona.api.client.model.CreateSandbox;
 import io.daytona.api.client.model.MetricsResponse;
 import java.time.OffsetDateTime;
+import io.daytona.api.client.model.Organization;
 import io.daytona.api.client.model.PaginatedLogs;
 import io.daytona.api.client.model.PaginatedSandboxes;
 import io.daytona.api.client.model.PaginatedTraces;
 import io.daytona.api.client.model.PortPreviewUrl;
+import io.daytona.api.client.model.RegionQuota;
 import io.daytona.api.client.model.ResizeSandbox;
 import io.daytona.api.client.model.Sandbox;
 import io.daytona.api.client.model.SandboxLabels;
@@ -159,6 +161,19 @@ public class SandboxApiTest {
     }
 
     /**
+     * Get organization by sandbox ID
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void getOrganizationBySandboxIdTest() throws ApiException {
+        String sandboxId = null;
+        String xDaytonaOrganizationID = null;
+        Organization response = api.getOrganizationBySandboxId(sandboxId, xDaytonaOrganizationID);
+        // TODO: test validations
+    }
+
+    /**
      * Get preview URL for a sandbox port
      *
      * @throws ApiException if the Api call fails
@@ -169,6 +184,19 @@ public class SandboxApiTest {
         BigDecimal port = null;
         String xDaytonaOrganizationID = null;
         PortPreviewUrl response = api.getPortPreviewUrl(sandboxIdOrName, port, xDaytonaOrganizationID);
+        // TODO: test validations
+    }
+
+    /**
+     * Get region quota by sandbox ID
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void getRegionQuotaBySandboxIdTest() throws ApiException {
+        String sandboxId = null;
+        String xDaytonaOrganizationID = null;
+        RegionQuota response = api.getRegionQuotaBySandboxId(sandboxId, xDaytonaOrganizationID);
         // TODO: test validations
     }
 

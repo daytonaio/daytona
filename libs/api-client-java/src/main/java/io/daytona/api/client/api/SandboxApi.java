@@ -31,10 +31,12 @@ import java.math.BigDecimal;
 import io.daytona.api.client.model.CreateSandbox;
 import io.daytona.api.client.model.MetricsResponse;
 import java.time.OffsetDateTime;
+import io.daytona.api.client.model.Organization;
 import io.daytona.api.client.model.PaginatedLogs;
 import io.daytona.api.client.model.PaginatedSandboxes;
 import io.daytona.api.client.model.PaginatedTraces;
 import io.daytona.api.client.model.PortPreviewUrl;
+import io.daytona.api.client.model.RegionQuota;
 import io.daytona.api.client.model.ResizeSandbox;
 import io.daytona.api.client.model.Sandbox;
 import io.daytona.api.client.model.SandboxLabels;
@@ -1213,6 +1215,142 @@ public class SandboxApi {
         return localVarCall;
     }
     /**
+     * Build call for getOrganizationBySandboxId
+     * @param sandboxId ID of the sandbox (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Organization </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getOrganizationBySandboxIdCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/sandbox/{sandboxId}/organization"
+            .replace("{" + "sandboxId" + "}", localVarApiClient.escapeString(sandboxId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (xDaytonaOrganizationID != null) {
+            localVarHeaderParams.put("X-Daytona-Organization-ID", localVarApiClient.parameterToString(xDaytonaOrganizationID));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call getOrganizationBySandboxIdValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'sandboxId' is set
+        if (sandboxId == null) {
+            throw new ApiException("Missing the required parameter 'sandboxId' when calling getOrganizationBySandboxId(Async)");
+        }
+
+        return getOrganizationBySandboxIdCall(sandboxId, xDaytonaOrganizationID, _callback);
+
+    }
+
+    /**
+     * Get organization by sandbox ID
+     * 
+     * @param sandboxId ID of the sandbox (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return Organization
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Organization </td><td>  -  </td></tr>
+     </table>
+     */
+    public Organization getOrganizationBySandboxId(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+        ApiResponse<Organization> localVarResp = getOrganizationBySandboxIdWithHttpInfo(sandboxId, xDaytonaOrganizationID);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Get organization by sandbox ID
+     * 
+     * @param sandboxId ID of the sandbox (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return ApiResponse&lt;Organization&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Organization </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Organization> getOrganizationBySandboxIdWithHttpInfo(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+        okhttp3.Call localVarCall = getOrganizationBySandboxIdValidateBeforeCall(sandboxId, xDaytonaOrganizationID, null);
+        Type localVarReturnType = new TypeToken<Organization>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Get organization by sandbox ID (asynchronously)
+     * 
+     * @param sandboxId ID of the sandbox (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Organization </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getOrganizationBySandboxIdAsync(String sandboxId, String xDaytonaOrganizationID, final ApiCallback<Organization> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = getOrganizationBySandboxIdValidateBeforeCall(sandboxId, xDaytonaOrganizationID, _callback);
+        Type localVarReturnType = new TypeToken<Organization>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for getPortPreviewUrl
      * @param sandboxIdOrName ID or name of the sandbox (required)
      * @param port Port number to get preview URL for (required)
@@ -1355,6 +1493,142 @@ public class SandboxApi {
 
         okhttp3.Call localVarCall = getPortPreviewUrlValidateBeforeCall(sandboxIdOrName, port, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<PortPreviewUrl>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for getRegionQuotaBySandboxId
+     * @param sandboxId ID of the sandbox (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Region quota </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getRegionQuotaBySandboxIdCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/sandbox/{sandboxId}/region-quota"
+            .replace("{" + "sandboxId" + "}", localVarApiClient.escapeString(sandboxId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (xDaytonaOrganizationID != null) {
+            localVarHeaderParams.put("X-Daytona-Organization-ID", localVarApiClient.parameterToString(xDaytonaOrganizationID));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call getRegionQuotaBySandboxIdValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'sandboxId' is set
+        if (sandboxId == null) {
+            throw new ApiException("Missing the required parameter 'sandboxId' when calling getRegionQuotaBySandboxId(Async)");
+        }
+
+        return getRegionQuotaBySandboxIdCall(sandboxId, xDaytonaOrganizationID, _callback);
+
+    }
+
+    /**
+     * Get region quota by sandbox ID
+     * 
+     * @param sandboxId ID of the sandbox (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return RegionQuota
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Region quota </td><td>  -  </td></tr>
+     </table>
+     */
+    public RegionQuota getRegionQuotaBySandboxId(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+        ApiResponse<RegionQuota> localVarResp = getRegionQuotaBySandboxIdWithHttpInfo(sandboxId, xDaytonaOrganizationID);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Get region quota by sandbox ID
+     * 
+     * @param sandboxId ID of the sandbox (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return ApiResponse&lt;RegionQuota&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Region quota </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<RegionQuota> getRegionQuotaBySandboxIdWithHttpInfo(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+        okhttp3.Call localVarCall = getRegionQuotaBySandboxIdValidateBeforeCall(sandboxId, xDaytonaOrganizationID, null);
+        Type localVarReturnType = new TypeToken<RegionQuota>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Get region quota by sandbox ID (asynchronously)
+     * 
+     * @param sandboxId ID of the sandbox (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Region quota </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getRegionQuotaBySandboxIdAsync(String sandboxId, String xDaytonaOrganizationID, final ApiCallback<RegionQuota> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = getRegionQuotaBySandboxIdValidateBeforeCall(sandboxId, xDaytonaOrganizationID, _callback);
+        Type localVarReturnType = new TypeToken<RegionQuota>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }

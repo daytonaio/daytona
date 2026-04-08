@@ -46,19 +46,19 @@ import java.util.Set;
 import io.daytona.api.client.JSON;
 
 /**
- * WebhookControllerGetStatus200Response
+ * AdminGetWebhookStatus200Response
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
-public class WebhookControllerGetStatus200Response {
+public class AdminGetWebhookStatus200Response {
   public static final String SERIALIZED_NAME_ENABLED = "enabled";
   @SerializedName(SERIALIZED_NAME_ENABLED)
   @javax.annotation.Nullable
   private Boolean enabled;
 
-  public WebhookControllerGetStatus200Response() {
+  public AdminGetWebhookStatus200Response() {
   }
 
-  public WebhookControllerGetStatus200Response enabled(@javax.annotation.Nullable Boolean enabled) {
+  public AdminGetWebhookStatus200Response enabled(@javax.annotation.Nullable Boolean enabled) {
     this.enabled = enabled;
     return this;
   }
@@ -89,9 +89,9 @@ public class WebhookControllerGetStatus200Response {
    *
    * @param key name of the property
    * @param value value of the property
-   * @return the WebhookControllerGetStatus200Response instance itself
+   * @return the AdminGetWebhookStatus200Response instance itself
    */
-  public WebhookControllerGetStatus200Response putAdditionalProperty(String key, Object value) {
+  public AdminGetWebhookStatus200Response putAdditionalProperty(String key, Object value) {
     if (this.additionalProperties == null) {
         this.additionalProperties = new HashMap<String, Object>();
     }
@@ -130,9 +130,9 @@ public class WebhookControllerGetStatus200Response {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    WebhookControllerGetStatus200Response webhookControllerGetStatus200Response = (WebhookControllerGetStatus200Response) o;
-    return Objects.equals(this.enabled, webhookControllerGetStatus200Response.enabled)&&
-        Objects.equals(this.additionalProperties, webhookControllerGetStatus200Response.additionalProperties);
+    AdminGetWebhookStatus200Response adminGetWebhookStatus200Response = (AdminGetWebhookStatus200Response) o;
+    return Objects.equals(this.enabled, adminGetWebhookStatus200Response.enabled)&&
+        Objects.equals(this.additionalProperties, adminGetWebhookStatus200Response.additionalProperties);
   }
 
   @Override
@@ -143,7 +143,7 @@ public class WebhookControllerGetStatus200Response {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class WebhookControllerGetStatus200Response {\n");
+    sb.append("class AdminGetWebhookStatus200Response {\n");
     sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
@@ -178,12 +178,12 @@ public class WebhookControllerGetStatus200Response {
    * Validates the JSON Element and throws an exception if issues found
    *
    * @param jsonElement JSON Element
-   * @throws IOException if the JSON Element is invalid with respect to WebhookControllerGetStatus200Response
+   * @throws IOException if the JSON Element is invalid with respect to AdminGetWebhookStatus200Response
    */
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
-        if (!WebhookControllerGetStatus200Response.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in WebhookControllerGetStatus200Response is not found in the empty JSON string", WebhookControllerGetStatus200Response.openapiRequiredFields.toString()));
+        if (!AdminGetWebhookStatus200Response.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
+          throw new IllegalArgumentException(String.format("The required field(s) %s in AdminGetWebhookStatus200Response is not found in the empty JSON string", AdminGetWebhookStatus200Response.openapiRequiredFields.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
@@ -193,16 +193,16 @@ public class WebhookControllerGetStatus200Response {
     @SuppressWarnings("unchecked")
     @Override
     public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-       if (!WebhookControllerGetStatus200Response.class.isAssignableFrom(type.getRawType())) {
-         return null; // this class only serializes 'WebhookControllerGetStatus200Response' and its subtypes
+       if (!AdminGetWebhookStatus200Response.class.isAssignableFrom(type.getRawType())) {
+         return null; // this class only serializes 'AdminGetWebhookStatus200Response' and its subtypes
        }
        final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
-       final TypeAdapter<WebhookControllerGetStatus200Response> thisAdapter
-                        = gson.getDelegateAdapter(this, TypeToken.get(WebhookControllerGetStatus200Response.class));
+       final TypeAdapter<AdminGetWebhookStatus200Response> thisAdapter
+                        = gson.getDelegateAdapter(this, TypeToken.get(AdminGetWebhookStatus200Response.class));
 
-       return (TypeAdapter<T>) new TypeAdapter<WebhookControllerGetStatus200Response>() {
+       return (TypeAdapter<T>) new TypeAdapter<AdminGetWebhookStatus200Response>() {
            @Override
-           public void write(JsonWriter out, WebhookControllerGetStatus200Response value) throws IOException {
+           public void write(JsonWriter out, AdminGetWebhookStatus200Response value) throws IOException {
              JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
              obj.remove("additionalProperties");
              // serialize additional properties
@@ -230,12 +230,12 @@ public class WebhookControllerGetStatus200Response {
            }
 
            @Override
-           public WebhookControllerGetStatus200Response read(JsonReader in) throws IOException {
+           public AdminGetWebhookStatus200Response read(JsonReader in) throws IOException {
              JsonElement jsonElement = elementAdapter.read(in);
              validateJsonElement(jsonElement);
              JsonObject jsonObj = jsonElement.getAsJsonObject();
              // store additional fields in the deserialized instance
-             WebhookControllerGetStatus200Response instance = thisAdapter.fromJsonTree(jsonObj);
+             AdminGetWebhookStatus200Response instance = thisAdapter.fromJsonTree(jsonObj);
              for (Map.Entry<String, JsonElement> entry : jsonObj.entrySet()) {
                if (!openapiFields.contains(entry.getKey())) {
                  if (entry.getValue().isJsonPrimitive()) { // primitive type
@@ -262,18 +262,18 @@ public class WebhookControllerGetStatus200Response {
   }
 
   /**
-   * Create an instance of WebhookControllerGetStatus200Response given an JSON string
+   * Create an instance of AdminGetWebhookStatus200Response given an JSON string
    *
    * @param jsonString JSON string
-   * @return An instance of WebhookControllerGetStatus200Response
-   * @throws IOException if the JSON string is invalid with respect to WebhookControllerGetStatus200Response
+   * @return An instance of AdminGetWebhookStatus200Response
+   * @throws IOException if the JSON string is invalid with respect to AdminGetWebhookStatus200Response
    */
-  public static WebhookControllerGetStatus200Response fromJson(String jsonString) throws IOException {
-    return JSON.getGson().fromJson(jsonString, WebhookControllerGetStatus200Response.class);
+  public static AdminGetWebhookStatus200Response fromJson(String jsonString) throws IOException {
+    return JSON.getGson().fromJson(jsonString, AdminGetWebhookStatus200Response.class);
   }
 
   /**
-   * Convert an instance of WebhookControllerGetStatus200Response to an JSON string
+   * Convert an instance of AdminGetWebhookStatus200Response to an JSON string
    *
    * @return JSON string
    */

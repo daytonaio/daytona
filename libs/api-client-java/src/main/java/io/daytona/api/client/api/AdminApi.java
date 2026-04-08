@@ -28,9 +28,19 @@ import java.io.IOException;
 
 
 import io.daytona.api.client.model.AdminCreateRunner;
+import io.daytona.api.client.model.AdminGetWebhookStatus200Response;
+import java.math.BigDecimal;
 import io.daytona.api.client.model.CreateRunnerResponse;
+import io.daytona.api.client.model.CreateUser;
+import io.daytona.api.client.model.DockerRegistry;
+import java.time.OffsetDateTime;
+import io.daytona.api.client.model.PaginatedAuditLogs;
 import io.daytona.api.client.model.RunnerFull;
 import io.daytona.api.client.model.Sandbox;
+import io.daytona.api.client.model.SendWebhookDto;
+import io.daytona.api.client.model.SetSnapshotGeneralStatusDto;
+import io.daytona.api.client.model.SnapshotDto;
+import io.daytona.api.client.model.User;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -75,6 +85,136 @@ public class AdminApi {
         this.localCustomBaseUrl = customBaseUrl;
     }
 
+    /**
+     * Build call for adminCanCleanupImage
+     * @param imageName Image name with tag to check (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Boolean indicating if image can be cleaned up </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminCanCleanupImageCall(String imageName, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/admin/snapshots/can-cleanup-image";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        if (imageName != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("imageName", imageName));
+        }
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call adminCanCleanupImageValidateBeforeCall(String imageName, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'imageName' is set
+        if (imageName == null) {
+            throw new ApiException("Missing the required parameter 'imageName' when calling adminCanCleanupImage(Async)");
+        }
+
+        return adminCanCleanupImageCall(imageName, _callback);
+
+    }
+
+    /**
+     * Check if an image can be cleaned up
+     * 
+     * @param imageName Image name with tag to check (required)
+     * @return Boolean
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Boolean indicating if image can be cleaned up </td><td>  -  </td></tr>
+     </table>
+     */
+    public Boolean adminCanCleanupImage(String imageName) throws ApiException {
+        ApiResponse<Boolean> localVarResp = adminCanCleanupImageWithHttpInfo(imageName);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Check if an image can be cleaned up
+     * 
+     * @param imageName Image name with tag to check (required)
+     * @return ApiResponse&lt;Boolean&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Boolean indicating if image can be cleaned up </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Boolean> adminCanCleanupImageWithHttpInfo(String imageName) throws ApiException {
+        okhttp3.Call localVarCall = adminCanCleanupImageValidateBeforeCall(imageName, null);
+        Type localVarReturnType = new TypeToken<Boolean>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Check if an image can be cleaned up (asynchronously)
+     * 
+     * @param imageName Image name with tag to check (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Boolean indicating if image can be cleaned up </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminCanCleanupImageAsync(String imageName, final ApiCallback<Boolean> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = adminCanCleanupImageValidateBeforeCall(imageName, _callback);
+        Type localVarReturnType = new TypeToken<Boolean>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
     /**
      * Build call for adminCreateRunner
      * @param adminCreateRunner  (required)
@@ -203,6 +343,128 @@ public class AdminApi {
         return localVarCall;
     }
     /**
+     * Build call for adminCreateUser
+     * @param createUser  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminCreateUserCall(CreateUser createUser, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = createUser;
+
+        // create path and map variables
+        String localVarPath = "/admin/users";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call adminCreateUserValidateBeforeCall(CreateUser createUser, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'createUser' is set
+        if (createUser == null) {
+            throw new ApiException("Missing the required parameter 'createUser' when calling adminCreateUser(Async)");
+        }
+
+        return adminCreateUserCall(createUser, _callback);
+
+    }
+
+    /**
+     * Create user
+     * 
+     * @param createUser  (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public void adminCreateUser(CreateUser createUser) throws ApiException {
+        adminCreateUserWithHttpInfo(createUser);
+    }
+
+    /**
+     * Create user
+     * 
+     * @param createUser  (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> adminCreateUserWithHttpInfo(CreateUser createUser) throws ApiException {
+        okhttp3.Call localVarCall = adminCreateUserValidateBeforeCall(createUser, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Create user (asynchronously)
+     * 
+     * @param createUser  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminCreateUserAsync(CreateUser createUser, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = adminCreateUserValidateBeforeCall(createUser, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for adminDeleteRunner
      * @param id Runner ID (required)
      * @param _callback Callback for upload/download progress
@@ -322,6 +584,300 @@ public class AdminApi {
 
         okhttp3.Call localVarCall = adminDeleteRunnerValidateBeforeCall(id, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for adminGetAllAuditLogs
+     * @param page Page number of the results (optional, default to 1)
+     * @param limit Number of results per page (optional, default to 100)
+     * @param from From date (ISO 8601 format) (optional)
+     * @param to To date (ISO 8601 format) (optional)
+     * @param nextToken Token for cursor-based pagination. When provided, takes precedence over page parameter. (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Paginated list of all audit logs </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminGetAllAuditLogsCall(BigDecimal page, BigDecimal limit, OffsetDateTime from, OffsetDateTime to, String nextToken, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/admin/audit";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        if (page != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("page", page));
+        }
+
+        if (limit != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("limit", limit));
+        }
+
+        if (from != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("from", from));
+        }
+
+        if (to != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("to", to));
+        }
+
+        if (nextToken != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("nextToken", nextToken));
+        }
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call adminGetAllAuditLogsValidateBeforeCall(BigDecimal page, BigDecimal limit, OffsetDateTime from, OffsetDateTime to, String nextToken, final ApiCallback _callback) throws ApiException {
+        return adminGetAllAuditLogsCall(page, limit, from, to, nextToken, _callback);
+
+    }
+
+    /**
+     * Get all audit logs
+     * 
+     * @param page Page number of the results (optional, default to 1)
+     * @param limit Number of results per page (optional, default to 100)
+     * @param from From date (ISO 8601 format) (optional)
+     * @param to To date (ISO 8601 format) (optional)
+     * @param nextToken Token for cursor-based pagination. When provided, takes precedence over page parameter. (optional)
+     * @return PaginatedAuditLogs
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Paginated list of all audit logs </td><td>  -  </td></tr>
+     </table>
+     */
+    public PaginatedAuditLogs adminGetAllAuditLogs(BigDecimal page, BigDecimal limit, OffsetDateTime from, OffsetDateTime to, String nextToken) throws ApiException {
+        ApiResponse<PaginatedAuditLogs> localVarResp = adminGetAllAuditLogsWithHttpInfo(page, limit, from, to, nextToken);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Get all audit logs
+     * 
+     * @param page Page number of the results (optional, default to 1)
+     * @param limit Number of results per page (optional, default to 100)
+     * @param from From date (ISO 8601 format) (optional)
+     * @param to To date (ISO 8601 format) (optional)
+     * @param nextToken Token for cursor-based pagination. When provided, takes precedence over page parameter. (optional)
+     * @return ApiResponse&lt;PaginatedAuditLogs&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Paginated list of all audit logs </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<PaginatedAuditLogs> adminGetAllAuditLogsWithHttpInfo(BigDecimal page, BigDecimal limit, OffsetDateTime from, OffsetDateTime to, String nextToken) throws ApiException {
+        okhttp3.Call localVarCall = adminGetAllAuditLogsValidateBeforeCall(page, limit, from, to, nextToken, null);
+        Type localVarReturnType = new TypeToken<PaginatedAuditLogs>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Get all audit logs (asynchronously)
+     * 
+     * @param page Page number of the results (optional, default to 1)
+     * @param limit Number of results per page (optional, default to 100)
+     * @param from From date (ISO 8601 format) (optional)
+     * @param to To date (ISO 8601 format) (optional)
+     * @param nextToken Token for cursor-based pagination. When provided, takes precedence over page parameter. (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Paginated list of all audit logs </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminGetAllAuditLogsAsync(BigDecimal page, BigDecimal limit, OffsetDateTime from, OffsetDateTime to, String nextToken, final ApiCallback<PaginatedAuditLogs> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = adminGetAllAuditLogsValidateBeforeCall(page, limit, from, to, nextToken, _callback);
+        Type localVarReturnType = new TypeToken<PaginatedAuditLogs>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for adminGetMessageAttempts
+     * @param organizationId  (required)
+     * @param messageId  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> List of delivery attempts </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminGetMessageAttemptsCall(String organizationId, String messageId, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/admin/webhooks/organizations/{organizationId}/messages/{messageId}/attempts"
+            .replace("{" + "organizationId" + "}", localVarApiClient.escapeString(organizationId.toString()))
+            .replace("{" + "messageId" + "}", localVarApiClient.escapeString(messageId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call adminGetMessageAttemptsValidateBeforeCall(String organizationId, String messageId, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'organizationId' is set
+        if (organizationId == null) {
+            throw new ApiException("Missing the required parameter 'organizationId' when calling adminGetMessageAttempts(Async)");
+        }
+
+        // verify the required parameter 'messageId' is set
+        if (messageId == null) {
+            throw new ApiException("Missing the required parameter 'messageId' when calling adminGetMessageAttempts(Async)");
+        }
+
+        return adminGetMessageAttemptsCall(organizationId, messageId, _callback);
+
+    }
+
+    /**
+     * Get delivery attempts for a webhook message
+     * 
+     * @param organizationId  (required)
+     * @param messageId  (required)
+     * @return List&lt;Object&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> List of delivery attempts </td><td>  -  </td></tr>
+     </table>
+     */
+    public List<Object> adminGetMessageAttempts(String organizationId, String messageId) throws ApiException {
+        ApiResponse<List<Object>> localVarResp = adminGetMessageAttemptsWithHttpInfo(organizationId, messageId);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Get delivery attempts for a webhook message
+     * 
+     * @param organizationId  (required)
+     * @param messageId  (required)
+     * @return ApiResponse&lt;List&lt;Object&gt;&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> List of delivery attempts </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<List<Object>> adminGetMessageAttemptsWithHttpInfo(String organizationId, String messageId) throws ApiException {
+        okhttp3.Call localVarCall = adminGetMessageAttemptsValidateBeforeCall(organizationId, messageId, null);
+        Type localVarReturnType = new TypeToken<List<Object>>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Get delivery attempts for a webhook message (asynchronously)
+     * 
+     * @param organizationId  (required)
+     * @param messageId  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> List of delivery attempts </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminGetMessageAttemptsAsync(String organizationId, String messageId, final ApiCallback<List<Object>> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = adminGetMessageAttemptsValidateBeforeCall(organizationId, messageId, _callback);
+        Type localVarReturnType = new TypeToken<List<Object>>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }
     /**
@@ -452,6 +1008,376 @@ public class AdminApi {
         return localVarCall;
     }
     /**
+     * Build call for adminGetUser
+     * @param id  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> User details </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminGetUserCall(String id, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/admin/users/{id}"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call adminGetUserValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling adminGetUser(Async)");
+        }
+
+        return adminGetUserCall(id, _callback);
+
+    }
+
+    /**
+     * Get user by ID
+     * 
+     * @param id  (required)
+     * @return User
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> User details </td><td>  -  </td></tr>
+     </table>
+     */
+    public User adminGetUser(String id) throws ApiException {
+        ApiResponse<User> localVarResp = adminGetUserWithHttpInfo(id);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Get user by ID
+     * 
+     * @param id  (required)
+     * @return ApiResponse&lt;User&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> User details </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<User> adminGetUserWithHttpInfo(String id) throws ApiException {
+        okhttp3.Call localVarCall = adminGetUserValidateBeforeCall(id, null);
+        Type localVarReturnType = new TypeToken<User>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Get user by ID (asynchronously)
+     * 
+     * @param id  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> User details </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminGetUserAsync(String id, final ApiCallback<User> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = adminGetUserValidateBeforeCall(id, _callback);
+        Type localVarReturnType = new TypeToken<User>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for adminGetWebhookStatus
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Webhook service status </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminGetWebhookStatusCall(final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/admin/webhooks/status";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call adminGetWebhookStatusValidateBeforeCall(final ApiCallback _callback) throws ApiException {
+        return adminGetWebhookStatusCall(_callback);
+
+    }
+
+    /**
+     * Get webhook service status
+     * 
+     * @return AdminGetWebhookStatus200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Webhook service status </td><td>  -  </td></tr>
+     </table>
+     */
+    public AdminGetWebhookStatus200Response adminGetWebhookStatus() throws ApiException {
+        ApiResponse<AdminGetWebhookStatus200Response> localVarResp = adminGetWebhookStatusWithHttpInfo();
+        return localVarResp.getData();
+    }
+
+    /**
+     * Get webhook service status
+     * 
+     * @return ApiResponse&lt;AdminGetWebhookStatus200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Webhook service status </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<AdminGetWebhookStatus200Response> adminGetWebhookStatusWithHttpInfo() throws ApiException {
+        okhttp3.Call localVarCall = adminGetWebhookStatusValidateBeforeCall(null);
+        Type localVarReturnType = new TypeToken<AdminGetWebhookStatus200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Get webhook service status (asynchronously)
+     * 
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Webhook service status </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminGetWebhookStatusAsync(final ApiCallback<AdminGetWebhookStatus200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = adminGetWebhookStatusValidateBeforeCall(_callback);
+        Type localVarReturnType = new TypeToken<AdminGetWebhookStatus200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for adminInitializeWebhooks
+     * @param organizationId  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Webhooks initialized successfully </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Organization not found </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminInitializeWebhooksCall(String organizationId, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/admin/webhooks/organizations/{organizationId}/initialize"
+            .replace("{" + "organizationId" + "}", localVarApiClient.escapeString(organizationId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call adminInitializeWebhooksValidateBeforeCall(String organizationId, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'organizationId' is set
+        if (organizationId == null) {
+            throw new ApiException("Missing the required parameter 'organizationId' when calling adminInitializeWebhooks(Async)");
+        }
+
+        return adminInitializeWebhooksCall(organizationId, _callback);
+
+    }
+
+    /**
+     * Initialize webhooks for an organization
+     * 
+     * @param organizationId  (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Webhooks initialized successfully </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Organization not found </td><td>  -  </td></tr>
+     </table>
+     */
+    public void adminInitializeWebhooks(String organizationId) throws ApiException {
+        adminInitializeWebhooksWithHttpInfo(organizationId);
+    }
+
+    /**
+     * Initialize webhooks for an organization
+     * 
+     * @param organizationId  (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Webhooks initialized successfully </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Organization not found </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> adminInitializeWebhooksWithHttpInfo(String organizationId) throws ApiException {
+        okhttp3.Call localVarCall = adminInitializeWebhooksValidateBeforeCall(organizationId, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Initialize webhooks for an organization (asynchronously)
+     * 
+     * @param organizationId  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Webhooks initialized successfully </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Organization not found </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminInitializeWebhooksAsync(String organizationId, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = adminInitializeWebhooksValidateBeforeCall(organizationId, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for adminListRunners
      * @param regionId Filter runners by region ID (optional)
      * @param _callback Callback for upload/download progress
@@ -574,6 +1500,118 @@ public class AdminApi {
         okhttp3.Call localVarCall = adminListRunnersValidateBeforeCall(regionId, _callback);
         Type localVarReturnType = new TypeToken<List<RunnerFull>>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for adminListUsers
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminListUsersCall(final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/admin/users";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call adminListUsersValidateBeforeCall(final ApiCallback _callback) throws ApiException {
+        return adminListUsersCall(_callback);
+
+    }
+
+    /**
+     * List all users
+     * 
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public void adminListUsers() throws ApiException {
+        adminListUsersWithHttpInfo();
+    }
+
+    /**
+     * List all users
+     * 
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> adminListUsersWithHttpInfo() throws ApiException {
+        okhttp3.Call localVarCall = adminListUsersValidateBeforeCall(null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * List all users (asynchronously)
+     * 
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminListUsersAsync(final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = adminListUsersValidateBeforeCall(_callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
         return localVarCall;
     }
     /**
@@ -700,6 +1738,524 @@ public class AdminApi {
 
         okhttp3.Call localVarCall = adminRecoverSandboxValidateBeforeCall(sandboxId, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for adminRegenerateKeyPair
+     * @param id  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminRegenerateKeyPairCall(String id, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/admin/users/{id}/regenerate-key-pair"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call adminRegenerateKeyPairValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling adminRegenerateKeyPair(Async)");
+        }
+
+        return adminRegenerateKeyPairCall(id, _callback);
+
+    }
+
+    /**
+     * Regenerate user key pair
+     * 
+     * @param id  (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public void adminRegenerateKeyPair(String id) throws ApiException {
+        adminRegenerateKeyPairWithHttpInfo(id);
+    }
+
+    /**
+     * Regenerate user key pair
+     * 
+     * @param id  (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> adminRegenerateKeyPairWithHttpInfo(String id) throws ApiException {
+        okhttp3.Call localVarCall = adminRegenerateKeyPairValidateBeforeCall(id, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Regenerate user key pair (asynchronously)
+     * 
+     * @param id  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminRegenerateKeyPairAsync(String id, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = adminRegenerateKeyPairValidateBeforeCall(id, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for adminSendWebhook
+     * @param organizationId  (required)
+     * @param sendWebhookDto  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Webhook message sent successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminSendWebhookCall(String organizationId, SendWebhookDto sendWebhookDto, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = sendWebhookDto;
+
+        // create path and map variables
+        String localVarPath = "/admin/webhooks/organizations/{organizationId}/send"
+            .replace("{" + "organizationId" + "}", localVarApiClient.escapeString(organizationId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call adminSendWebhookValidateBeforeCall(String organizationId, SendWebhookDto sendWebhookDto, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'organizationId' is set
+        if (organizationId == null) {
+            throw new ApiException("Missing the required parameter 'organizationId' when calling adminSendWebhook(Async)");
+        }
+
+        // verify the required parameter 'sendWebhookDto' is set
+        if (sendWebhookDto == null) {
+            throw new ApiException("Missing the required parameter 'sendWebhookDto' when calling adminSendWebhook(Async)");
+        }
+
+        return adminSendWebhookCall(organizationId, sendWebhookDto, _callback);
+
+    }
+
+    /**
+     * Send a webhook message to an organization
+     * 
+     * @param organizationId  (required)
+     * @param sendWebhookDto  (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Webhook message sent successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public void adminSendWebhook(String organizationId, SendWebhookDto sendWebhookDto) throws ApiException {
+        adminSendWebhookWithHttpInfo(organizationId, sendWebhookDto);
+    }
+
+    /**
+     * Send a webhook message to an organization
+     * 
+     * @param organizationId  (required)
+     * @param sendWebhookDto  (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Webhook message sent successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> adminSendWebhookWithHttpInfo(String organizationId, SendWebhookDto sendWebhookDto) throws ApiException {
+        okhttp3.Call localVarCall = adminSendWebhookValidateBeforeCall(organizationId, sendWebhookDto, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Send a webhook message to an organization (asynchronously)
+     * 
+     * @param organizationId  (required)
+     * @param sendWebhookDto  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Webhook message sent successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminSendWebhookAsync(String organizationId, SendWebhookDto sendWebhookDto, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = adminSendWebhookValidateBeforeCall(organizationId, sendWebhookDto, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for adminSetDefaultRegistry
+     * @param id ID of the docker registry (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> The docker registry has been set as default. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminSetDefaultRegistryCall(String id, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/admin/docker-registry/{id}/set-default"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call adminSetDefaultRegistryValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling adminSetDefaultRegistry(Async)");
+        }
+
+        return adminSetDefaultRegistryCall(id, _callback);
+
+    }
+
+    /**
+     * Set default registry
+     * 
+     * @param id ID of the docker registry (required)
+     * @return DockerRegistry
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> The docker registry has been set as default. </td><td>  -  </td></tr>
+     </table>
+     */
+    public DockerRegistry adminSetDefaultRegistry(String id) throws ApiException {
+        ApiResponse<DockerRegistry> localVarResp = adminSetDefaultRegistryWithHttpInfo(id);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Set default registry
+     * 
+     * @param id ID of the docker registry (required)
+     * @return ApiResponse&lt;DockerRegistry&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> The docker registry has been set as default. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<DockerRegistry> adminSetDefaultRegistryWithHttpInfo(String id) throws ApiException {
+        okhttp3.Call localVarCall = adminSetDefaultRegistryValidateBeforeCall(id, null);
+        Type localVarReturnType = new TypeToken<DockerRegistry>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Set default registry (asynchronously)
+     * 
+     * @param id ID of the docker registry (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> The docker registry has been set as default. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminSetDefaultRegistryAsync(String id, final ApiCallback<DockerRegistry> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = adminSetDefaultRegistryValidateBeforeCall(id, _callback);
+        Type localVarReturnType = new TypeToken<DockerRegistry>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for adminSetSnapshotGeneralStatus
+     * @param id Snapshot ID (required)
+     * @param setSnapshotGeneralStatusDto  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Snapshot general status has been set </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminSetSnapshotGeneralStatusCall(String id, SetSnapshotGeneralStatusDto setSnapshotGeneralStatusDto, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = setSnapshotGeneralStatusDto;
+
+        // create path and map variables
+        String localVarPath = "/admin/snapshots/{id}/general"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PATCH", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call adminSetSnapshotGeneralStatusValidateBeforeCall(String id, SetSnapshotGeneralStatusDto setSnapshotGeneralStatusDto, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling adminSetSnapshotGeneralStatus(Async)");
+        }
+
+        // verify the required parameter 'setSnapshotGeneralStatusDto' is set
+        if (setSnapshotGeneralStatusDto == null) {
+            throw new ApiException("Missing the required parameter 'setSnapshotGeneralStatusDto' when calling adminSetSnapshotGeneralStatus(Async)");
+        }
+
+        return adminSetSnapshotGeneralStatusCall(id, setSnapshotGeneralStatusDto, _callback);
+
+    }
+
+    /**
+     * Set snapshot general status
+     * 
+     * @param id Snapshot ID (required)
+     * @param setSnapshotGeneralStatusDto  (required)
+     * @return SnapshotDto
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Snapshot general status has been set </td><td>  -  </td></tr>
+     </table>
+     */
+    public SnapshotDto adminSetSnapshotGeneralStatus(String id, SetSnapshotGeneralStatusDto setSnapshotGeneralStatusDto) throws ApiException {
+        ApiResponse<SnapshotDto> localVarResp = adminSetSnapshotGeneralStatusWithHttpInfo(id, setSnapshotGeneralStatusDto);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Set snapshot general status
+     * 
+     * @param id Snapshot ID (required)
+     * @param setSnapshotGeneralStatusDto  (required)
+     * @return ApiResponse&lt;SnapshotDto&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Snapshot general status has been set </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<SnapshotDto> adminSetSnapshotGeneralStatusWithHttpInfo(String id, SetSnapshotGeneralStatusDto setSnapshotGeneralStatusDto) throws ApiException {
+        okhttp3.Call localVarCall = adminSetSnapshotGeneralStatusValidateBeforeCall(id, setSnapshotGeneralStatusDto, null);
+        Type localVarReturnType = new TypeToken<SnapshotDto>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Set snapshot general status (asynchronously)
+     * 
+     * @param id Snapshot ID (required)
+     * @param setSnapshotGeneralStatusDto  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Snapshot general status has been set </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminSetSnapshotGeneralStatusAsync(String id, SetSnapshotGeneralStatusDto setSnapshotGeneralStatusDto, final ApiCallback<SnapshotDto> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = adminSetSnapshotGeneralStatusValidateBeforeCall(id, setSnapshotGeneralStatusDto, _callback);
+        Type localVarReturnType = new TypeToken<SnapshotDto>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }

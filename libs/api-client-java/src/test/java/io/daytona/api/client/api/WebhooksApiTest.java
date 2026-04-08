@@ -14,9 +14,7 @@
 package io.daytona.api.client.api;
 
 import io.daytona.api.client.ApiException;
-import io.daytona.api.client.model.SendWebhookDto;
 import io.daytona.api.client.model.WebhookAppPortalAccess;
-import io.daytona.api.client.model.WebhookControllerGetStatus200Response;
 import io.daytona.api.client.model.WebhookInitializationStatus;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -57,59 +55,6 @@ public class WebhooksApiTest {
         String organizationId = null;
         String xDaytonaOrganizationID = null;
         WebhookInitializationStatus response = api.webhookControllerGetInitializationStatus(organizationId, xDaytonaOrganizationID);
-        // TODO: test validations
-    }
-
-    /**
-     * Get delivery attempts for a webhook message
-     *
-     * @throws ApiException if the Api call fails
-     */
-    @Test
-    public void webhookControllerGetMessageAttemptsTest() throws ApiException {
-        String organizationId = null;
-        String messageId = null;
-        String xDaytonaOrganizationID = null;
-        List<Object> response = api.webhookControllerGetMessageAttempts(organizationId, messageId, xDaytonaOrganizationID);
-        // TODO: test validations
-    }
-
-    /**
-     * Get webhook service status
-     *
-     * @throws ApiException if the Api call fails
-     */
-    @Test
-    public void webhookControllerGetStatusTest() throws ApiException {
-        String xDaytonaOrganizationID = null;
-        WebhookControllerGetStatus200Response response = api.webhookControllerGetStatus(xDaytonaOrganizationID);
-        // TODO: test validations
-    }
-
-    /**
-     * Initialize webhooks for an organization
-     *
-     * @throws ApiException if the Api call fails
-     */
-    @Test
-    public void webhookControllerInitializeWebhooksTest() throws ApiException {
-        String organizationId = null;
-        String xDaytonaOrganizationID = null;
-        api.webhookControllerInitializeWebhooks(organizationId, xDaytonaOrganizationID);
-        // TODO: test validations
-    }
-
-    /**
-     * Send a webhook message to an organization
-     *
-     * @throws ApiException if the Api call fails
-     */
-    @Test
-    public void webhookControllerSendWebhookTest() throws ApiException {
-        String organizationId = null;
-        SendWebhookDto sendWebhookDto = null;
-        String xDaytonaOrganizationID = null;
-        api.webhookControllerSendWebhook(organizationId, sendWebhookDto, xDaytonaOrganizationID);
         // TODO: test validations
     }
 

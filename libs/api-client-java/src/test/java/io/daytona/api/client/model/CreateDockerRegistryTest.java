@@ -77,20 +77,4 @@ public class CreateDockerRegistryTest {
         // TODO: test project
     }
 
-    /**
-     * Test the property 'registryType'
-     */
-    @Test
-    public void registryTypeTest() {
-        // TODO: test registryType
-    }
-
-    /**
-     * Test the property 'isDefault'
-     */
-    @Test
-    public void isDefaultTest() {
-        // TODO: test isDefault
-    }
-
 }

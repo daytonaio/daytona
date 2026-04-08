@@ -75,72 +75,6 @@ public class CreateDockerRegistry {
   @javax.annotation.Nullable
   private String project;
 
-  /**
-   * Registry type
-   */
-  @JsonAdapter(RegistryTypeEnum.Adapter.class)
-  public enum RegistryTypeEnum {
-    INTERNAL("internal"),
-    
-    ORGANIZATION("organization"),
-    
-    TRANSIENT("transient"),
-    
-    BACKUP("backup");
-
-    private String value;
-
-    RegistryTypeEnum(String value) {
-      this.value = value;
-    }
-
-    public String getValue() {
-      return value;
-    }
-
-    @Override
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    public static RegistryTypeEnum fromValue(String value) {
-      for (RegistryTypeEnum b : RegistryTypeEnum.values()) {
-        if (b.value.equals(value)) {
-          return b;
-        }
-      }
-      throw new IllegalArgumentException("Unexpected value '" + value + "'");
-    }
-
-    public static class Adapter extends TypeAdapter<RegistryTypeEnum> {
-      @Override
-      public void write(final JsonWriter jsonWriter, final RegistryTypeEnum enumeration) throws IOException {
-        jsonWriter.value(enumeration.getValue());
-      }
-
-      @Override
-      public RegistryTypeEnum read(final JsonReader jsonReader) throws IOException {
-        String value =  jsonReader.nextString();
-        return RegistryTypeEnum.fromValue(value);
-      }
-    }
-
-    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
-      String value = jsonElement.getAsString();
-      RegistryTypeEnum.fromValue(value);
-    }
-  }
-
-  public static final String SERIALIZED_NAME_REGISTRY_TYPE = "registryType";
-  @SerializedName(SERIALIZED_NAME_REGISTRY_TYPE)
-  @javax.annotation.Nonnull
-  private RegistryTypeEnum registryType = RegistryTypeEnum.ORGANIZATION;
-
-  public static final String SERIALIZED_NAME_IS_DEFAULT = "isDefault";
-  @SerializedName(SERIALIZED_NAME_IS_DEFAULT)
-  @javax.annotation.Nullable
-  private Boolean isDefault;
-
   public CreateDockerRegistry() {
   }
 
@@ -238,44 +172,6 @@ public class CreateDockerRegistry {
     this.project = project;
   }
 
-
-  public CreateDockerRegistry registryType(@javax.annotation.Nonnull RegistryTypeEnum registryType) {
-    this.registryType = registryType;
-    return this;
-  }
-
-  /**
-   * Registry type
-   * @return registryType
-   */
-  @javax.annotation.Nonnull
-  public RegistryTypeEnum getRegistryType() {
-    return registryType;
-  }
-
-  public void setRegistryType(@javax.annotation.Nonnull RegistryTypeEnum registryType) {
-    this.registryType = registryType;
-  }
-
-
-  public CreateDockerRegistry isDefault(@javax.annotation.Nullable Boolean isDefault) {
-    this.isDefault = isDefault;
-    return this;
-  }
-
-  /**
-   * Set as default registry
-   * @return isDefault
-   */
-  @javax.annotation.Nullable
-  public Boolean getIsDefault() {
-    return isDefault;
-  }
-
-  public void setIsDefault(@javax.annotation.Nullable Boolean isDefault) {
-    this.isDefault = isDefault;
-  }
-
   /**
    * A container for additional, undeclared properties.
    * This is a holder for any undeclared properties as specified with
@@ -335,15 +231,13 @@ public class CreateDockerRegistry {
         Objects.equals(this.url, createDockerRegistry.url) &&
         Objects.equals(this.username, createDockerRegistry.username) &&
         Objects.equals(this.password, createDockerRegistry.password) &&
-        Objects.equals(this.project, createDockerRegistry.project) &&
-        Objects.equals(this.registryType, createDockerRegistry.registryType) &&
-        Objects.equals(this.isDefault, createDockerRegistry.isDefault)&&
+        Objects.equals(this.project, createDockerRegistry.project)&&
         Objects.equals(this.additionalProperties, createDockerRegistry.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, url, username, password, project, registryType, isDefault, additionalProperties);
+    return Objects.hash(name, url, username, password, project, additionalProperties);
   }
 
   @Override
@@ -355,8 +249,6 @@ public class CreateDockerRegistry {
     sb.append("    username: ").append(toIndentedString(username)).append("\n");
     sb.append("    password: ").append(toIndentedString(password)).append("\n");
     sb.append("    project: ").append(toIndentedString(project)).append("\n");
-    sb.append("    registryType: ").append(toIndentedString(registryType)).append("\n");
-    sb.append("    isDefault: ").append(toIndentedString(isDefault)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -385,8 +277,6 @@ public class CreateDockerRegistry {
     openapiFields.add("username");
     openapiFields.add("password");
     openapiFields.add("project");
-    openapiFields.add("registryType");
-    openapiFields.add("isDefault");
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>();
@@ -394,7 +284,6 @@ public class CreateDockerRegistry {
     openapiRequiredFields.add("url");
     openapiRequiredFields.add("username");
     openapiRequiredFields.add("password");
-    openapiRequiredFields.add("registryType");
   }
 
   /**
@@ -432,11 +321,6 @@ public class CreateDockerRegistry {
       if ((jsonObj.get("project") != null && !jsonObj.get("project").isJsonNull()) && !jsonObj.get("project").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `project` to be a primitive type in the JSON string but got `%s`", jsonObj.get("project").toString()));
       }
-      if (!jsonObj.get("registryType").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `registryType` to be a primitive type in the JSON string but got `%s`", jsonObj.get("registryType").toString()));
-      }
-      // validate the required field `registryType`
-      RegistryTypeEnum.validateJsonElement(jsonObj.get("registryType"));
   }
 
   public static class CustomTypeAdapterFactory implements TypeAdapterFactory {

@@ -68,11 +68,6 @@ public class CreateSnapshot {
   @javax.annotation.Nullable
   private List<String> entrypoint = new ArrayList<>();
 
-  public static final String SERIALIZED_NAME_GENERAL = "general";
-  @SerializedName(SERIALIZED_NAME_GENERAL)
-  @javax.annotation.Nullable
-  private Boolean general;
-
   public static final String SERIALIZED_NAME_CPU = "cpu";
   @SerializedName(SERIALIZED_NAME_CPU)
   @javax.annotation.Nullable
@@ -168,25 +163,6 @@ public class CreateSnapshot {
 
   public void setEntrypoint(@javax.annotation.Nullable List<String> entrypoint) {
     this.entrypoint = entrypoint;
-  }
-
-
-  public CreateSnapshot general(@javax.annotation.Nullable Boolean general) {
-    this.general = general;
-    return this;
-  }
-
-  /**
-   * Whether the snapshot is general
-   * @return general
-   */
-  @javax.annotation.Nullable
-  public Boolean getGeneral() {
-    return general;
-  }
-
-  public void setGeneral(@javax.annotation.Nullable Boolean general) {
-    this.general = general;
   }
 
 
@@ -361,7 +337,6 @@ public class CreateSnapshot {
     return Objects.equals(this.name, createSnapshot.name) &&
         Objects.equals(this.imageName, createSnapshot.imageName) &&
         Objects.equals(this.entrypoint, createSnapshot.entrypoint) &&
-        Objects.equals(this.general, createSnapshot.general) &&
         Objects.equals(this.cpu, createSnapshot.cpu) &&
         Objects.equals(this.gpu, createSnapshot.gpu) &&
         Objects.equals(this.memory, createSnapshot.memory) &&
@@ -373,7 +348,7 @@ public class CreateSnapshot {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, imageName, entrypoint, general, cpu, gpu, memory, disk, buildInfo, regionId, additionalProperties);
+    return Objects.hash(name, imageName, entrypoint, cpu, gpu, memory, disk, buildInfo, regionId, additionalProperties);
   }
 
   @Override
@@ -383,7 +358,6 @@ public class CreateSnapshot {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    imageName: ").append(toIndentedString(imageName)).append("\n");
     sb.append("    entrypoint: ").append(toIndentedString(entrypoint)).append("\n");
-    sb.append("    general: ").append(toIndentedString(general)).append("\n");
     sb.append("    cpu: ").append(toIndentedString(cpu)).append("\n");
     sb.append("    gpu: ").append(toIndentedString(gpu)).append("\n");
     sb.append("    memory: ").append(toIndentedString(memory)).append("\n");
@@ -416,7 +390,6 @@ public class CreateSnapshot {
     openapiFields.add("name");
     openapiFields.add("imageName");
     openapiFields.add("entrypoint");
-    openapiFields.add("general");
     openapiFields.add("cpu");
     openapiFields.add("gpu");
     openapiFields.add("memory");

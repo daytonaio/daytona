@@ -43,6 +43,7 @@ src/main/java/io/daytona/api/client/auth/HttpBearerAuth.java
 src/main/java/io/daytona/api/client/model/AbstractOpenApiSchema.java
 src/main/java/io/daytona/api/client/model/AccountProvider.java
 src/main/java/io/daytona/api/client/model/AdminCreateRunner.java
+src/main/java/io/daytona/api/client/model/AdminGetWebhookStatus200Response.java
 src/main/java/io/daytona/api/client/model/Announcement.java
 src/main/java/io/daytona/api/client/model/ApiKeyList.java
 src/main/java/io/daytona/api/client/model/ApiKeyResponse.java
@@ -211,7 +212,6 @@ src/main/java/io/daytona/api/client/model/UserPublicKey.java
 src/main/java/io/daytona/api/client/model/VolumeDto.java
 src/main/java/io/daytona/api/client/model/VolumeState.java
 src/main/java/io/daytona/api/client/model/WebhookAppPortalAccess.java
-src/main/java/io/daytona/api/client/model/WebhookControllerGetStatus200Response.java
 src/main/java/io/daytona/api/client/model/WebhookEvent.java
 src/main/java/io/daytona/api/client/model/WebhookInitializationStatus.java
 src/main/java/io/daytona/api/client/model/WindowsResponse.java
@@ -239,6 +239,7 @@ src/test/java/io/daytona/api/client/api/WebhooksApiTest.java
 src/test/java/io/daytona/api/client/api/WorkspaceApiTest.java
 src/test/java/io/daytona/api/client/model/AccountProviderTest.java
 src/test/java/io/daytona/api/client/model/AdminCreateRunnerTest.java
+src/test/java/io/daytona/api/client/model/AdminGetWebhookStatus200ResponseTest.java
 src/test/java/io/daytona/api/client/model/AnnouncementTest.java
 src/test/java/io/daytona/api/client/model/ApiKeyListTest.java
 src/test/java/io/daytona/api/client/model/ApiKeyResponseTest.java
@@ -407,7 +408,6 @@ src/test/java/io/daytona/api/client/model/UserTest.java
 src/test/java/io/daytona/api/client/model/VolumeDtoTest.java
 src/test/java/io/daytona/api/client/model/VolumeStateTest.java
 src/test/java/io/daytona/api/client/model/WebhookAppPortalAccessTest.java
-src/test/java/io/daytona/api/client/model/WebhookControllerGetStatus200ResponseTest.java
 src/test/java/io/daytona/api/client/model/WebhookEventTest.java
 src/test/java/io/daytona/api/client/model/WebhookInitializationStatusTest.java
 src/test/java/io/daytona/api/client/model/WindowsResponseTest.java

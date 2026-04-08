@@ -24,17 +24,17 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
- * Model tests for WebhookControllerGetStatus200Response
+ * Model tests for AdminGetWebhookStatus200Response
  */
-public class WebhookControllerGetStatus200ResponseTest {
-    private final WebhookControllerGetStatus200Response model = new WebhookControllerGetStatus200Response();
+public class AdminGetWebhookStatus200ResponseTest {
+    private final AdminGetWebhookStatus200Response model = new AdminGetWebhookStatus200Response();
 
     /**
-     * Model tests for WebhookControllerGetStatus200Response
+     * Model tests for AdminGetWebhookStatus200Response
      */
     @Test
-    public void testWebhookControllerGetStatus200Response() {
-        // TODO: test WebhookControllerGetStatus200Response
+    public void testAdminGetWebhookStatus200Response() {
+        // TODO: test AdminGetWebhookStatus200Response
     }
 
     /**
