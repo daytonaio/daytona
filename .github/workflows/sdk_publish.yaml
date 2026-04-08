@@ -33,9 +33,13 @@ env:
   NPM_TAG: ${{ inputs.npm_tag }}
   POETRY_VIRTUALENVS_IN_PROJECT: true
 
+permissions: {}
+
 jobs:
   publish:
     runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+    permissions:
+      contents: read
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
@@ -59,6 +63,7 @@ jobs:
         with:
           fetch-tags: true
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: ./.github/actions/setup-toolchain
         with:
@@ -87,6 +92,7 @@ jobs:
     if: ${{ inputs.npm_tag == 'latest' }}
     needs: publish
     runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+    permissions: {}
     name: Update Homebrew CLI tap
     steps:
       - name: Update version

@@ -8,12 +8,17 @@ on:
         required: true
         default: 'v0.0.0-dev'
 
+permissions: {}
+
 env:
   VERSION: ${{ inputs.version }}
 
 jobs:
   prepare:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     env:
       NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
@@ -30,6 +35,7 @@ jobs:
         with:
           fetch-tags: true
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: ./.github/actions/setup-toolchain
       - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
@@ -52,6 +58,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
           git push origin "prepare-release-$VERSION"
           gh pr create \
             --title "chore: prepare release $VERSION" \
