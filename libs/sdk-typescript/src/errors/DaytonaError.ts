@@ -226,16 +226,16 @@ function getAxiosResponseDataObject(error: AxiosError): Record<string, unknown> 
 }
 
 function extractAxiosErrorCode(responseData?: Record<string, unknown>): string | undefined {
-  if (typeof responseData?.error === 'string') {
-    return responseData.error
-  }
-
   if (typeof responseData?.code === 'string') {
     return responseData.code
   }
 
   if (typeof responseData?.error_code === 'string') {
     return responseData.error_code
+  }
+
+  if (typeof responseData?.error === 'string') {
+    return responseData.error
   }
 
   return undefined
