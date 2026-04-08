@@ -16379,19 +16379,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"amqplib@npm:0.5.2":
-  version: 0.5.2
-  resolution: "amqplib@npm:0.5.2"
-  dependencies:
-    bitsyntax: "npm:~0.0.4"
-    bluebird: "npm:^3.4.6"
-    buffer-more-ints: "npm:0.0.2"
-    readable-stream: "npm:1.x >=1.1.9"
-    safe-buffer: "npm:^5.0.1"
-  checksum: 10c0/1e28e73ecf05612149d2e2e1520906be350226e5a22016e4e6775e3c6620c17c2f96f5363fc68bac00521ffacfc1360d2db51421312c625ce9ccefff58f4b01f
-  languageName: node
-  linkType: hard
-
 "ansi-align@npm:^3.0.0":
   version: 3.0.1
   resolution: "ansi-align@npm:3.0.1"
@@ -33738,20 +33725,6 @@ __metadata:
   version: 1.4.2
   resolution: "regenerate@npm:1.4.2"
   checksum: 10c0/f73c9eba5d398c818edc71d1c6979eaa05af7a808682749dd079f8df2a6d91a9b913db216c2c9b03e0a8ba2bba8701244a93f45211afbff691c32c7b275db1b8
-  languageName: node
-  linkType: hard
-
-"regenerator-runtime@npm:^0.11.0":
-  version: 0.11.1
-  resolution: "regenerator-runtime@npm:0.11.1"
-  checksum: 10c0/69cfa839efcf2d627fe358bf302ab8b24e5f182cb69f13e66f0612d3640d7838aad1e55662135e3ef2c1cc4322315b757626094fab13a48f9a64ab4bdeb8795b
-  languageName: node
-  linkType: hard
-
-"regenerator-runtime@npm:^0.12.0":
-  version: 0.12.1
-  resolution: "regenerator-runtime@npm:0.12.1"
-  checksum: 10c0/dbefbb38f5d6d55261aec1182d7c97ac93f2eec6ef9c756d9656eb5152f5cb3f8d873df020ddb4a3a8126c2ac1a3c2e534413cffe18d8f89b1c2a480a0a38601
   languageName: node
   linkType: hard
 
