@@ -7,7 +7,7 @@
  * Type definitions and constants for the Daytona OpenCode plugin
  */
 
-import type { Sandbox } from '@daytonaio/sdk'
+import type { Sandbox } from '@daytona/sdk'
 
 // OpenCode Types
 

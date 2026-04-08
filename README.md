@@ -51,7 +51,7 @@ pip install daytona
 ### TypeScript SDK
 
 ```bash
-npm install @daytonaio/sdk
+npm install @daytona/sdk
 ```
 
 ### Ruby SDK
@@ -102,7 +102,7 @@ print(response.result)
 ### Typescript SDK
 
 ```jsx
-import { Daytona } from "@daytonaio/sdk";
+import { Daytona } from "@daytona/sdk";
 
 const daytona = new Daytona({apiKey: "YOUR_API_KEY"});
 const sandbox = await daytona.create();

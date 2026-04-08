@@ -5,7 +5,7 @@
 
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { ModelsAggregatedUsage } from '@daytonaio/analytics-api-client'
+import { ModelsAggregatedUsage } from '@daytona/analytics-api-client'
 import NumberFlow from '@number-flow/react'
 import { motion } from 'framer-motion'
 import React from 'react'

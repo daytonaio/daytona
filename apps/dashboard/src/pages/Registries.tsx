@@ -21,7 +21,7 @@ import { useDeleteRegistryMutation } from '@/hooks/mutations/useDeleteRegistryMu
 import { useRegistriesQuery } from '@/hooks/queries/useRegistriesQuery'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
-import { OrganizationRolePermissionsEnum, type DockerRegistry } from '@daytonaio/api-client'
+import { OrganizationRolePermissionsEnum, type DockerRegistry } from '@daytona/api-client'
 import { PlusIcon } from 'lucide-react'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'

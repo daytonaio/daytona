@@ -1,4 +1,4 @@
-import { Daytona } from '@daytonaio/sdk'
+import { Daytona } from '@daytona/sdk'
 import * as fs from 'fs'
 import * as path from 'path'
 

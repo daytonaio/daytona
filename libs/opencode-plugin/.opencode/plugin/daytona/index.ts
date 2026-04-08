@@ -19,7 +19,7 @@
  * Daytona Sandbox Integration Tools
  *
  * Requires:
- * - npm install @daytonaio/sdk
+ * - npm install @daytona/sdk
  * - Environment: DAYTONA_API_KEY
  */
 

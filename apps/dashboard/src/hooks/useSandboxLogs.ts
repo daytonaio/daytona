@@ -7,7 +7,7 @@ import { useQuery, UseQueryOptions } from '@tanstack/react-query'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { queryKeys } from '@/hooks/queries/queryKeys'
-import { PaginatedLogs } from '@daytonaio/api-client'
+import { PaginatedLogs } from '@daytona/api-client'
 
 export interface LogsQueryParams {
   from: Date

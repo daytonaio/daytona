@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { PAGE_SIZE_OPTIONS } from '@/constants/Pagination'
-import { ModelsSandboxUsage } from '@daytonaio/analytics-api-client'
+import { ModelsSandboxUsage } from '@daytona/analytics-api-client'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 import React, { useMemo, useState } from 'react'
 

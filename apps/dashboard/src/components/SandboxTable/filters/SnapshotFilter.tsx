@@ -13,7 +13,7 @@ import {
   CommandList,
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { SnapshotDto } from '@daytonaio/api-client'
+import { SnapshotDto } from '@daytona/api-client'
 import { Loader2, X } from 'lucide-react'
 import { useState } from 'react'
 

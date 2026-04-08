@@ -36,7 +36,7 @@ Install the Daytona SDK and Anthropic SDK to your project:
   </TabItem>
 
   <TabItem label="TypeScript" icon="seti:typescript">
-    `bash npm install @daytonaio/sdk @anthropic-ai/sdk dotenv `
+    `bash npm install @daytona/sdk @anthropic-ai/sdk dotenv `
   </TabItem>
 
   <TabItem label="Ruby" icon="seti:ruby">
@@ -96,7 +96,7 @@ Now create a [Daytona sandbox](/docs/en/sandboxes/#basic-sandbox-creation) and u
   <TabItem label="TypeScript" icon="seti:typescript">
     ```typescript
     import 'dotenv/config'
-    import { Daytona } from '@daytonaio/sdk';
+    import { Daytona } from '@daytona/sdk';
 
     // Create sandbox
     const daytona = new Daytona(); // The sandbox language is Python by default.
@@ -168,7 +168,7 @@ First, let's create a function to handle code execution and chart extraction. Th
   <TabItem label="TypeScript" icon="seti:typescript">
     ```typescript
     import fs from 'fs'
-    import { Sandbox } from '@daytonaio/sdk'
+    import { Sandbox } from '@daytona/sdk'
 
     interface ExecutionResult {
       stdout: string
@@ -746,7 +746,7 @@ Here are the complete, ready-to-run examples with the agentic loop:
     import "dotenv/config";
     import fs from "fs";
     import Anthropic from "@anthropic-ai/sdk";
-    import { Daytona, Sandbox } from "@daytonaio/sdk";
+    import { Daytona, Sandbox } from "@daytona/sdk";
     import type {
       MessageParam,
       Tool,

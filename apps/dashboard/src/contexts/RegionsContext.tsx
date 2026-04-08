@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Region } from '@daytonaio/api-client'
+import { Region } from '@daytona/api-client'
 import { createContext } from 'react'
 
 export interface IRegionsContext {
