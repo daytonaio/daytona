@@ -22,7 +22,7 @@ import { useCreateRegistryMutation } from '@/hooks/mutations/useCreateRegistryMu
 import { useUpdateRegistryMutation } from '@/hooks/mutations/useUpdateRegistryMutation'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
-import { DockerRegistry } from '@daytonaio/api-client'
+import { DockerRegistry } from '@daytona/api-client'
 import { useForm } from '@tanstack/react-form'
 import { EyeIcon, EyeOffIcon, Plus } from 'lucide-react'
 import { Ref, type ReactNode, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
