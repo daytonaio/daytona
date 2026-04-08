@@ -10,12 +10,12 @@ on:
 
 env:
   VERSION: ${{ inputs.version }}
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
 jobs:
   prepare:
     runs-on: ubuntu-latest
+    env:
+      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
     steps:
       - name: Validate version format
@@ -49,6 +49,8 @@ jobs:
           yarn prepare-release
 
       - name: Push branch and create PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git push origin "prepare-release-$VERSION"
           gh pr create \
