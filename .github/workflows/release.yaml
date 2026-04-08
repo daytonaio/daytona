@@ -200,7 +200,7 @@ jobs:
           - runner: [self-hosted, Linux, ARM64, github-actions-runner-arm]
             arch: arm64
     permissions:
-      contents: read
+      contents: write
     env:
       NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
