@@ -18,6 +18,7 @@ import { SandboxOrganizationUpdatedEvent } from '../events/sandbox-organization-
 import { ConfigService } from '@nestjs/config'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
+import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { SandboxState } from '../enums/sandbox-state.enum'
@@ -53,8 +54,7 @@ export class SandboxWarmPoolService {
     @InjectRepository(WarmPool)
     private readonly warmPoolRepository: Repository<WarmPool>,
     private readonly sandboxRepository: SandboxRepository,
-    @InjectRepository(Snapshot)
-    private readonly snapshotRepository: Repository<Snapshot>,
+    private readonly snapshotRepository: SnapshotRepository,
     @InjectRepository(Runner)
     private readonly runnerRepository: Repository<Runner>,
     private readonly redisLockProvider: RedisLockProvider,

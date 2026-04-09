@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
+import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
@@ -34,8 +35,7 @@ export class JobStateHandlerService {
 
   constructor(
     private readonly sandboxRepository: SandboxRepository,
-    @InjectRepository(Snapshot)
-    private readonly snapshotRepository: Repository<Snapshot>,
+    private readonly snapshotRepository: SnapshotRepository,
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly organizationUsageService: OrganizationUsageService,
@@ -313,10 +313,12 @@ export class JobStateHandlerService {
         })
         if (snapshot && (snapshot.state === SnapshotState.PULLING || snapshot.state === SnapshotState.BUILDING)) {
           this.logger.debug(`Marking snapshot ${snapshot.id} as ACTIVE after initial pull completed`)
-          snapshot.state = SnapshotState.ACTIVE
-          snapshot.errorReason = null
-          snapshot.lastUsedAt = new Date()
-          await this.snapshotRepository.save(snapshot)
+          const updateData: Partial<Snapshot> = {
+            state: SnapshotState.ACTIVE,
+            errorReason: null,
+            lastUsedAt: new Date(),
+          }
+          await this.snapshotRepository.update(snapshot.id, { updateData, entity: snapshot })
         }
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`PULL_SNAPSHOT job ${job.id} failed for snapshot ${snapshotRef}: ${job.errorMessage}`)
@@ -329,9 +331,11 @@ export class JobStateHandlerService {
         })
         if (snapshot && snapshot.state === SnapshotState.PULLING) {
           this.logger.error(`Marking snapshot ${snapshot.id} as ERROR after initial pull failed`)
-          snapshot.state = SnapshotState.ERROR
-          snapshot.errorReason = job.errorMessage || 'Failed to pull snapshot on initial runner'
-          await this.snapshotRepository.save(snapshot)
+          const updateData: Partial<Snapshot> = {
+            state: SnapshotState.ERROR,
+            errorReason: job.errorMessage || 'Failed to pull snapshot on initial runner',
+          }
+          await this.snapshotRepository.update(snapshot.id, { updateData, entity: snapshot })
         }
       }
 
@@ -364,10 +368,12 @@ export class JobStateHandlerService {
         this.logger.debug(`BUILD_SNAPSHOT job ${job.id} completed successfully for snapshot ref ${snapshotRef}`)
 
         if (snapshot?.state === SnapshotState.BUILDING) {
-          snapshot.state = SnapshotState.ACTIVE
-          snapshot.errorReason = null
-          snapshot.lastUsedAt = new Date()
-          await this.snapshotRepository.save(snapshot)
+          const updateData: Partial<Snapshot> = {
+            state: SnapshotState.ACTIVE,
+            errorReason: null,
+            lastUsedAt: new Date(),
+          }
+          await this.snapshotRepository.update(snapshot.id, { updateData, entity: snapshot })
           this.logger.debug(`Marked snapshot ${snapshot.id} as ACTIVE after build completed`)
         }
 
@@ -380,9 +386,11 @@ export class JobStateHandlerService {
         this.logger.error(`BUILD_SNAPSHOT job ${job.id} failed for snapshot ref ${snapshotRef}: ${job.errorMessage}`)
 
         if (snapshot?.state === SnapshotState.BUILDING) {
-          snapshot.state = SnapshotState.ERROR
-          snapshot.errorReason = job.errorMessage || 'Failed to build snapshot'
-          await this.snapshotRepository.save(snapshot)
+          const updateData: Partial<Snapshot> = {
+            state: SnapshotState.ERROR,
+            errorReason: job.errorMessage || 'Failed to build snapshot',
+          }
+          await this.snapshotRepository.update(snapshot.id, { updateData, entity: snapshot })
         }
 
         if (snapshotRunner) {

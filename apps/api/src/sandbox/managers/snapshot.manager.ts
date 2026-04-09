@@ -7,6 +7,7 @@ import { Injectable, Logger, NotFoundException, OnApplicationShutdown } from '@n
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { In, IsNull, Not, Repository } from 'typeorm'
+import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -61,8 +62,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
   constructor(
     @InjectRedis() private readonly redis: Redis,
-    @InjectRepository(Snapshot)
-    private readonly snapshotRepository: Repository<Snapshot>,
+    private readonly snapshotRepository: SnapshotRepository,
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     @InjectRepository(Runner)
@@ -645,7 +645,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         syncState = SYNC_AGAIN
       } else {
         const message = error.message || String(error)
-        await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, message)
+        await this.updateSnapshotState(snapshot, SnapshotState.ERROR, message)
       }
     }
 
@@ -715,7 +715,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     const timeoutMinutes = 30
     const timeoutMs = timeoutMinutes * 60 * 1000
     if (Date.now() - snapshot.updatedAt.getTime() > timeoutMs) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout processing snapshot on initial runner')
+      await this.updateSnapshotState(snapshot, SnapshotState.ERROR, 'Timeout processing snapshot on initial runner')
       return DONT_SYNC_AGAIN
     }
 
@@ -729,7 +729,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     if (snapshot.ref && snapshotRunner) {
       if (snapshotRunner.state === SnapshotRunnerState.READY && snapshot.size != null) {
-        await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
+        await this.updateSnapshotState(snapshot, SnapshotState.ACTIVE)
         return DONT_SYNC_AGAIN
       } else if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
         await this.snapshotRunnerRepository.delete(snapshotRunner.id)
@@ -773,7 +773,6 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       await runnerAdapter.inspectSnapshotInRegistry(snapshot.ref, internalRegistry)
     } catch (error) {
       this.logger.error(`Failed to inspect snapshot ${snapshot.ref} in registry: ${error}`)
-      await this.snapshotRepository.save(snapshot)
       return DONT_SYNC_AGAIN
     }
 
@@ -808,7 +807,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     } else {
       await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.READY)
     }
-    await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
+    await this.updateSnapshotState(snapshot, SnapshotState.ACTIVE)
 
     // Best effort removal of old snapshot from transient registry
     const transientRegistry = await this.dockerRegistryService.findTransientRegistryBySnapshotImageName(
@@ -836,7 +835,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     const timeoutMs = timeoutMinutes * 60 * 1000
     if (Date.now() - snapshot.updatedAt.getTime() > timeoutMs) {
       await this.updateSnapshotState(
-        snapshot.id,
+        snapshot,
         SnapshotState.ERROR,
         'Timeout processing snapshot pull on initial runner',
       )
@@ -865,7 +864,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       )
     } catch (err) {
       // Validation errors are still returned synchronously
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, err.message)
+      await this.updateSnapshotState(snapshot, SnapshotState.ERROR, err.message)
       throw err
     }
   }
@@ -892,7 +891,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       )
     } catch (err) {
       this.logger.error(`Error building snapshot ${snapshot.name}: ${fromAxiosError(err)}`)
-      await this.updateSnapshotState(snapshot.id, SnapshotState.BUILD_FAILED, fromAxiosError(err).message)
+      await this.updateSnapshotState(snapshot, SnapshotState.BUILD_FAILED, fromAxiosError(err).message)
     }
   }
 
@@ -924,14 +923,17 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         return DONT_SYNC_AGAIN
       }
 
-      snapshot.initialRunnerId = initialRunner.id
-      await this.snapshotRepository.save(snapshot)
+      const updateData: Partial<Snapshot> = {
+        initialRunnerId: initialRunner.id,
+      }
+
+      await this.snapshotRepository.update(snapshot.id, { updateData, entity: snapshot })
     } else {
       initialRunner = await this.runnerService.findOneOrFail(snapshot.initialRunnerId)
     }
 
     if (snapshot.buildInfo) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.BUILDING)
+      await this.updateSnapshotState(snapshot, SnapshotState.BUILDING)
       await this.runnerService.createSnapshotRunnerEntry(
         initialRunner.id,
         snapshot.buildInfo.snapshotRef,
@@ -969,11 +971,9 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         if (digestSyncState === DONT_SYNC_AGAIN) {
           return DONT_SYNC_AGAIN
         }
-
-        await this.snapshotRepository.save(snapshot)
       }
 
-      await this.updateSnapshotState(snapshot.id, SnapshotState.PULLING)
+      await this.updateSnapshotState(snapshot, SnapshotState.PULLING)
       await this.runnerService.createSnapshotRunnerEntry(
         initialRunner.id,
         snapshot.ref,
@@ -985,33 +985,24 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     return SYNC_AGAIN
   }
 
-  private async updateSnapshotState(snapshotId: string, state: SnapshotState, errorReason?: string, size?: number) {
-    const partialUpdate: Partial<Snapshot> = {
+  private async updateSnapshotState(snapshot: Snapshot, state: SnapshotState, errorReason?: string, size?: number) {
+    const updateData: Partial<Snapshot> = {
       state,
     }
 
     if (state === SnapshotState.ACTIVE) {
-      partialUpdate.lastUsedAt = new Date()
+      updateData.lastUsedAt = new Date()
     }
 
     if (errorReason !== undefined) {
-      partialUpdate.errorReason = errorReason
+      updateData.errorReason = errorReason
     }
 
     if (size !== undefined) {
-      partialUpdate.size = size
+      updateData.size = size
     }
 
-    const result = await this.snapshotRepository.update(
-      {
-        id: snapshotId,
-      },
-      partialUpdate,
-    )
-
-    if (!result.affected) {
-      throw new NotFoundException(`Snapshot with ID ${snapshotId} not found`)
-    }
+    await this.snapshotRepository.update(snapshot.id, { updateData, entity: snapshot })
   }
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'cleanup-old-buildinfo-snapshot-runners' })
@@ -1099,11 +1090,26 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       }
 
       // Deactivate the snapshots
-      const snapshotIds = oldSnapshots.map((snapshot) => snapshot.id)
-      await this.snapshotRepository.update({ id: In(snapshotIds) }, { state: SnapshotState.INACTIVE })
+      const settledResults = await Promise.allSettled(
+        oldSnapshots.map((snapshot) =>
+          this.snapshotRepository.update(snapshot.id, {
+            updateData: { state: SnapshotState.INACTIVE },
+            entity: snapshot,
+          }),
+        ),
+      )
+
+      const deactivatedSnapshots: Snapshot[] = []
+      for (const [i, result] of settledResults.entries()) {
+        if (result.status === 'fulfilled') {
+          deactivatedSnapshots.push(oldSnapshots[i])
+        } else {
+          this.logger.warn(`Failed to deactivate snapshot ${oldSnapshots[i].id}: ${result.reason}`)
+        }
+      }
 
       // Get internal names of deactivated snapshots
-      const refs = oldSnapshots.map((snapshot) => snapshot.ref).filter((name) => name) // Filter out null/undefined values
+      const refs = deactivatedSnapshots.map((snapshot) => snapshot.ref).filter((name) => name) // Filter out null/undefined values
 
       if (refs.length > 0) {
         // Set associated SnapshotRunner records to REMOVING state
@@ -1113,7 +1119,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         )
 
         this.logger.debug(
-          `Deactivated ${oldSnapshots.length} snapshots and marked ${result.affected} SnapshotRunners for removal`,
+          `Deactivated ${deactivatedSnapshots.length} snapshots and marked ${result.affected} SnapshotRunners for removal`,
         )
       }
     } catch (error) {
@@ -1190,16 +1196,14 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     sizeGB: number,
     entrypoint?: string[] | string,
   ) {
-    let shouldSave = false
+    const updateData: Partial<Snapshot> = {}
+
     if (!snapshot.ref) {
-      shouldSave = true
       const sanitizedUrl = internalRegistry.url.replace(/^https?:\/\//, '')
-      snapshot.ref = `${sanitizedUrl}/${internalRegistry.project || 'daytona'}/daytona-${hash}:daytona`
+      updateData.ref = `${sanitizedUrl}/${internalRegistry.project || 'daytona'}/daytona-${hash}:daytona`
     }
 
     if (!snapshot.size) {
-      shouldSave = true
-
       const organization = await this.organizationService.findOne(snapshot.organizationId)
       if (!organization) {
         throw new NotFoundException(`Organization with ID ${snapshot.organizationId} not found`)
@@ -1207,11 +1211,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
       const MAX_SIZE_GB = organization.maxSnapshotSize
 
-      snapshot.size = sizeGB
+      updateData.size = sizeGB
 
       if (sizeGB > MAX_SIZE_GB) {
         await this.updateSnapshotState(
-          snapshot.id,
+          snapshot,
           SnapshotState.ERROR,
           `Snapshot size (${sizeGB.toFixed(2)}GB) exceeds maximum allowed size of ${MAX_SIZE_GB}GB`,
           sizeGB,
@@ -1223,17 +1227,12 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     // If entrypoint is not explicitly set, set it from snapshotInfoResponse
     if (!snapshot.entrypoint) {
       if (entrypoint && entrypoint.length > 0) {
-        shouldSave = true
-        if (Array.isArray(entrypoint)) {
-          snapshot.entrypoint = entrypoint
-        } else {
-          snapshot.entrypoint = [entrypoint]
-        }
+        updateData.entrypoint = Array.isArray(entrypoint) ? entrypoint : [entrypoint]
       }
     }
 
-    if (shouldSave) {
-      await this.snapshotRepository.save(snapshot)
+    if (Object.keys(updateData).length > 0) {
+      await this.snapshotRepository.update(snapshot.id, { updateData, entity: snapshot })
     }
   }
 

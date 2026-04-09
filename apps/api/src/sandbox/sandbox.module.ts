@@ -28,7 +28,7 @@ import { OrganizationModule } from '../organization/organization.module'
 import { SandboxWarmPoolService } from './services/sandbox-warm-pool.service'
 import { WarmPool } from './entities/warm-pool.entity'
 import { PreviewController } from './controllers/preview.controller'
-import { SnapshotSubscriber } from './subscribers/snapshot.subscriber'
+import { SnapshotRepository } from './repositories/snapshot.repository'
 import { VolumeController } from './controllers/volume.controller'
 import { VolumeService } from './services/volume.service'
 import { VolumeManager } from './managers/volume.manager'
@@ -108,7 +108,6 @@ import { SandboxActivityService } from './services/sandbox-activity.service'
     SandboxLookupCacheInvalidationService,
     SnapshotManager,
     RedisLockProvider,
-    SnapshotSubscriber,
     VolumeService,
     VolumeManager,
     VolumeSubscriber,
@@ -136,6 +135,12 @@ import { SandboxActivityService } from './services/sandbox-activity.service'
         sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService,
       ) => new SandboxRepository(dataSource, eventEmitter, sandboxLookupCacheInvalidationService),
     },
+    {
+      provide: SnapshotRepository,
+      inject: [DataSource, EventEmitter2],
+      useFactory: (dataSource: DataSource, eventEmitter: EventEmitter2) =>
+        new SnapshotRepository(dataSource, eventEmitter),
+    },
   ],
   exports: [
     SandboxService,
@@ -145,6 +150,7 @@ import { SandboxActivityService } from './services/sandbox-activity.service'
     VolumeService,
     VolumeManager,
     SandboxRepository,
+    SnapshotRepository,
     RunnerAdapterFactory,
     SandboxActivityService,
   ],
