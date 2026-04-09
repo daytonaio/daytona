@@ -44,7 +44,6 @@ from ..common.process import (
 from ..common.protocols import SandboxCodeToolbox
 from ..common.pty import PtySize
 from ..handle.async_pty_handle import AsyncPtyHandle
-from ..internal.pool_tracker import AsyncPoolSaturationTracker
 
 
 class AsyncProcess:
@@ -54,18 +53,15 @@ class AsyncProcess:
         self,
         code_toolbox: SandboxCodeToolbox,
         api_client: ProcessApi,
-        pool_tracker: AsyncPoolSaturationTracker | None = None,
     ):
         """Initialize a new Process instance.
 
         Args:
             code_toolbox (SandboxCodeToolbox): Language-specific code execution toolbox.
             api_client (ProcessApi): API client for process operations.
-            pool_tracker (AsyncPoolSaturationTracker | None): Tracker for connection pool saturation.
         """
         self._code_toolbox: SandboxCodeToolbox = code_toolbox
         self._api_client: ProcessApi = api_client
-        self._pool_tracker: AsyncPoolSaturationTracker | None = pool_tracker
 
     @staticmethod
     def _parse_output(lines: list[str]) -> ExecutionArtifacts:
@@ -155,16 +151,10 @@ class AsyncProcess:
 
         execute_request = ExecuteRequest(command=command, cwd=cwd, timeout=timeout)
 
-        if self._pool_tracker:
-            self._pool_tracker.acquire()
-        try:
-            response = await self._api_client.execute_command(
-                request=execute_request,
-                _request_timeout=http_timeout(timeout + 5 if timeout else None),
-            )
-        finally:
-            if self._pool_tracker:
-                self._pool_tracker.release()
+        response = await self._api_client.execute_command(
+            request=execute_request,
+            _request_timeout=http_timeout(timeout + 5 if timeout else None),
+        )
 
         # Post-process the output to extract ExecutionArtifacts
         artifacts = AsyncProcess._parse_output(response.result.split("\n"))
@@ -387,17 +377,11 @@ class AsyncProcess:
             print(f"Command stderr: {result.stderr}")
             ```
         """
-        if self._pool_tracker:
-            self._pool_tracker.acquire()
-        try:
-            response = await self._api_client.session_execute_command(
-                session_id=session_id,
-                request=req,
-                _request_timeout=http_timeout(timeout + 5 if timeout else None),
-            )
-        finally:
-            if self._pool_tracker:
-                self._pool_tracker.release()
+        response = await self._api_client.session_execute_command(
+            session_id=session_id,
+            request=req,
+            _request_timeout=http_timeout(timeout + 5 if timeout else None),
+        )
 
         loop = asyncio.get_running_loop()
         raw = response.output.encode("utf-8", "ignore") if response.output else b""

@@ -119,12 +119,12 @@ class AsyncSandbox(SandboxDto):
         self._code_toolbox: SandboxCodeToolbox = code_toolbox
         # Wrap the toolbox API client to inject the sandbox ID into the resource path
         self._toolbox_api: ToolboxApiClientProxy[ApiClient] = ToolboxApiClientProxy(
-            toolbox_api, self.id, self.toolbox_proxy_url
+            toolbox_api, self.id, self.toolbox_proxy_url, pool_tracker
         )
 
         self._fs = AsyncFileSystem(FileSystemApi(self._toolbox_api))
         self._git = AsyncGit(GitApi(self._toolbox_api))
-        self._process = AsyncProcess(code_toolbox, ProcessApi(self._toolbox_api), pool_tracker)
+        self._process = AsyncProcess(code_toolbox, ProcessApi(self._toolbox_api))
         self._computer_use = AsyncComputerUse(ComputerUseApi(self._toolbox_api))
         self._code_interpreter = AsyncCodeInterpreter(InterpreterApi(self._toolbox_api))
         self._info_api: InfoApi = InfoApi(self._toolbox_api)
