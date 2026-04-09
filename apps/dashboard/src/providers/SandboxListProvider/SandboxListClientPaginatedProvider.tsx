@@ -3,19 +3,19 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { SandboxListContext, SandboxListContextValue } from './SandboxListContext'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { queryKeys } from '@/hooks/queries/queryKeys'
-import { DEFAULT_SANDBOX_SORTING, SandboxFilters, SandboxSorting } from '@/hooks/useSandboxes'
 import { useApi } from '@/hooks/useApi'
+import { DEFAULT_SANDBOX_SORTING, SandboxFilters, SandboxSorting } from '@/hooks/useSandboxes'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
-import { compareSandboxesBySorting, matchesSandboxFilters } from './SandboxListClientUtils'
-import { useSandboxListMutations } from './useSandboxListMutations'
-import { useSandboxListWsSync } from './useSandboxListWsSync'
-import { Sandbox, SandboxDesiredState, SandboxState } from '@daytonaio/api-client'
+import { Sandbox, SandboxDesiredState, SandboxState } from '@daytona/api-client'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { compareSandboxesBySorting, matchesSandboxFilters } from './SandboxListClientUtils'
+import { SandboxListContext, SandboxListContextValue } from './SandboxListContext'
+import { useSandboxListMutations } from './useSandboxListMutations'
+import { useSandboxListWsSync } from './useSandboxListWsSync'
 
 /**
  * @deprecated Temporary provider using client-side pagination and filtering while the

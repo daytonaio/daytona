@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { SandboxListContext, SandboxListContextValue } from './SandboxListContext'
-import { useSandboxListMutations } from './useSandboxListMutations'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { queryKeys } from '@/hooks/queries/queryKeys'
 import { useSandboxWsSync } from '@/hooks/useSandboxWsSync'
@@ -17,9 +15,11 @@ import {
 } from '@/hooks/useSandboxes'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
-import { Sandbox, SandboxState } from '@daytonaio/api-client'
+import { Sandbox, SandboxState } from '@daytona/api-client'
 import { QueryKey, useQueryClient } from '@tanstack/react-query'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { SandboxListContext, SandboxListContextValue } from './SandboxListContext'
+import { useSandboxListMutations } from './useSandboxListMutations'
 
 export const SandboxListServerPaginatedProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const queryClient = useQueryClient()

@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { SandboxMutationVariables } from '@/hooks/mutations/mutationKeys'
 import { useArchiveSandboxMutation } from '@/hooks/mutations/useArchiveSandboxMutation'
 import { useDeleteSandboxMutation } from '@/hooks/mutations/useDeleteSandboxMutation'
 import { useRecoverSandboxMutation } from '@/hooks/mutations/useRecoverSandboxMutation'
 import { useStartSandboxMutation } from '@/hooks/mutations/useStartSandboxMutation'
 import { useStopSandboxMutation } from '@/hooks/mutations/useStopSandboxMutation'
-import { SandboxMutationVariables } from '@/hooks/mutations/mutationKeys'
-import { SandboxState } from '@daytonaio/api-client'
+import { SandboxState } from '@daytona/api-client'
 import { useCallback } from 'react'
 
 interface UseSandboxListMutationsOptions {

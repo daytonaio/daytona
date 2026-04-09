@@ -4,7 +4,7 @@
  */
 
 import { SandboxFilters, SandboxSorting } from '@/hooks/useSandboxes'
-import { Sandbox } from '@daytonaio/api-client'
+import { Sandbox } from '@daytona/api-client'
 import { createContext } from 'react'
 
 export interface SandboxListContextValue {

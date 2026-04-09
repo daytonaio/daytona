@@ -4,7 +4,7 @@
  */
 
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
-import { Sandbox, SandboxDesiredState, SandboxState } from '@daytonaio/api-client'
+import { Sandbox, SandboxDesiredState, SandboxState } from '@daytona/api-client'
 import { useEffect } from 'react'
 
 interface SandboxStateUpdatedEvent {

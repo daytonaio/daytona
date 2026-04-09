@@ -10,7 +10,7 @@ import {
   ListSandboxesPaginatedStatesEnum,
   Sandbox,
   SandboxState,
-} from '@daytonaio/api-client'
+} from '@daytona/api-client'
 
 const stateEnumToSandboxState: Record<ListSandboxesPaginatedStatesEnum, SandboxState> = {
   [ListSandboxesPaginatedStatesEnum.CREATING]: SandboxState.CREATING,
