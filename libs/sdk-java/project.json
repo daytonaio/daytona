@@ -17,11 +17,21 @@
       "options": {
         "cwd": "{projectRoot}",
         "command": "V=${MAVEN_PKG_VERSION:-$DEFAULT_PACKAGE_VERSION}; if [ -n \"$V\" ]; then sed -i \"s/^version = .*/version = \\\"$V\\\"/\" build.gradle.kts && echo \"sdk-java version: $V\"; else echo \"sdk-java version: unchanged\"; fi"
-      }
+      },
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/build.gradle.kts",
+        { "env": "MAVEN_PKG_VERSION" },
+        { "env": "DEFAULT_PACKAGE_VERSION" }
+      ],
+      "outputs": ["{projectRoot}/build.gradle.kts"]
     },
     "build": {
       "executor": "nx:run-commands",
-      "inputs": ["default"],
+      "inputs": [
+        "default",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
       "outputs": ["{projectRoot}/build"],
       "options": {
         "cwd": "{projectRoot}",
