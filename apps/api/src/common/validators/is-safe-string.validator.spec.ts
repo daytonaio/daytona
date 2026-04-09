@@ -87,6 +87,9 @@ describe('IsSafeDisplayStringConstraint', () => {
       ['object tag', '<object data="evil.swf">'],
       ['embed tag', '<embed src="evil.swf">'],
       ['form tag', '<form action="evil.com">'],
+      ['unclosed img tag (XSS bypass)', '<img src=x onerror=alert(1)'],
+      ['unclosed script tag', '<script type="text/javascript"'],
+      ['unclosed tag at end of string', 'hello <b'],
     ]
 
     it.each(htmlStrings)('should reject %s: %s', (_description, value) => {

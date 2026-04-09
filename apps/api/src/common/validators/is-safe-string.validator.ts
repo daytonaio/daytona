@@ -10,8 +10,8 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator'
 
-// Matches opening or closing HTML tags: <div>, </div>, <img />, etc.
-const HTML_TAG_PATTERN = /<[a-zA-Z/][^>]*>/
+// Matches opening or closing HTML tags: <div>, </div>, <img />, etc. (includes unclosed tags)
+const HTML_TAG_PATTERN = /<[a-zA-Z/][^>]*>?/
 
 // Matches URL schemes and www prefix
 const URL_PATTERN =
