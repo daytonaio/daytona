@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/daytonaio/common-go/pkg/log"
 	"github.com/daytonaio/common-go/pkg/telemetry"
@@ -57,6 +58,21 @@ func (s *server) initTelemetry(ctx context.Context, serviceName, entrypointLogFi
 
 	if snapshot != nil && *snapshot != "" {
 		extraLabels["daytona_snapshot"] = *snapshot
+	}
+
+	if envLabels := os.Getenv("DAYTONA_SANDBOX_OTEL_EXTRA_LABELS"); envLabels != "" {
+		for pair := range strings.SplitSeq(envLabels, ",") {
+			parts := strings.SplitN(pair, "=", 2)
+			if len(parts) != 2 {
+				s.logger.WarnContext(ctx, "Skipping malformed extra label", "label", pair)
+				continue
+			}
+			key := strings.TrimSpace(parts[0])
+			value := strings.TrimSpace(parts[1])
+			if key != "" {
+				extraLabels[key] = value
+			}
+		}
 	}
 
 	if len(extraLabels) > 0 {

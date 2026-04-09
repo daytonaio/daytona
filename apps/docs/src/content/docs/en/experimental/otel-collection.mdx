@@ -73,6 +73,24 @@ To enable telemetry collection from sandboxes:
 
 Once configured, all sandboxes will automatically export their telemetry data to your specified OTLP endpoint.
 
+### Resource Labels
+
+All sandbox telemetry is automatically annotated with the following OTel resource attributes:
+
+- `daytona_organization_id` - The organization the sandbox belongs to
+- `daytona_region_id` - The region the sandbox is running in
+- `daytona_snapshot` - The snapshot used to create the sandbox
+
+#### Custom Resource Labels
+
+You can attach additional resource labels by setting the `DAYTONA_SANDBOX_OTEL_EXTRA_LABELS` environment variable on a sandbox. Labels are specified as a comma-separated list of `key=value` pairs:
+
+```bash
+DAYTONA_SANDBOX_OTEL_EXTRA_LABELS="team=backend,env=staging,app=my-service"
+```
+
+These labels are added as OTel resource attributes to all traces, logs, and metrics emitted by the sandbox. This is useful for filtering and grouping telemetry data by custom dimensions in your observability platform.
+
 ---
 
 ## SDK Tracing Configuration
