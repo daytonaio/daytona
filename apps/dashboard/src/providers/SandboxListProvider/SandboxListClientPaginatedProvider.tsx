@@ -73,7 +73,7 @@ export const SandboxListClientPaginatedProvider: React.FC<{ children: React.Reac
     filtered.sort((a, b) => compareSandboxesBySorting(a, b, sorting))
 
     const totalItems = filtered.length
-    const pageCount = Math.max(1, Math.ceil(totalItems / paginationParams.pageSize))
+    const pageCount = Math.ceil(totalItems / paginationParams.pageSize)
     const start = paginationParams.pageIndex * paginationParams.pageSize
     const items = filtered.slice(start, start + paginationParams.pageSize)
 
