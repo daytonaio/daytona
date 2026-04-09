@@ -1,13 +1,3 @@
-<div align="center">
-
-[![Documentation](https://img.shields.io/github/v/release/daytonaio/docs?label=Docs&color=23cc71)](https://www.daytona.io/docs)
-![License](https://img.shields.io/badge/License-AGPL--3-blue)
-[![Go Report Card](https://goreportcard.com/badge/github.com/daytonaio/daytona)](https://goreportcard.com/report/github.com/daytonaio/daytona)
-[![Issues - daytona](https://img.shields.io/github/issues/daytonaio/daytona)](https://github.com/daytonaio/daytona/issues)
-![GitHub Release](https://img.shields.io/github/v/release/daytonaio/daytona)
-
-</div>
-
 &nbsp;
 
 <div align="center">
@@ -33,59 +23,138 @@
     <a href="https://x.com/daytonaio"> Connect on X </a>
 </p>
 
-<p align="center">
-    <a href="https://www.producthunt.com/posts/daytona-2?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-daytona&#0045;2" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=957617&theme=neutral&period=daily&t=1746176740150" alt="Daytona&#0032; - Secure&#0032;and&#0032;elastic&#0032;infra&#0032;for&#0032;running&#0032;your&#0032;AI&#0045;generated&#0032;code&#0046; | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
-    <a href="https://www.producthunt.com/posts/daytona-2?embed=true&utm_source=badge-top-post-topic-badge&utm_medium=badge&utm_souce=badge-daytona&#0045;2" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-topic-badge.svg?post_id=957617&theme=neutral&period=monthly&topic_id=237&t=1746176740150" alt="Daytona&#0032; - Secure&#0032;and&#0032;elastic&#0032;infra&#0032;for&#0032;running&#0032;your&#0032;AI&#0045;generated&#0032;code&#0046; | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
-</p>
+&nbsp;
 
----
+Daytona is a secure and elastic infrastructure runtime for AI-generated code execution and agent workflows. Our open-source platform provides [sandboxes](https://www.daytona.io/docs/sandboxes/), full composable computers with complete isolation, a dedicated kernel, filesystem, network stack, and allocated vCPU, RAM, and disk.
 
-## Installation
+Sandboxes are the core component of the Daytona platform, spinning up in under 90ms from code to execution and running any code in Python, TypeScript, and JavaScript. Built on OCI/Docker compatibility, massive parallelization, and unlimited persistence, sandboxes deliver consistent, predictable environments for agent workflows.
 
-### Python SDK
+Agents and developers interact with sandboxes programmatically using the Daytona [SDKs](https://www.daytona.io/docs/#3-install-the-sdk), [API](https://www.daytona.io/docs/tools/api/#daytona/), and [CLI](https://www.daytona.io/docs/tools/cli/). Operations span sandbox lifecycle management, filesystem operations, process and code execution, and runtime configuration through base images, packages, and tooling. Our stateful environment [snapshots](https://www.daytona.io/docs/snapshots/) enable persistent agent operations across sessions, making Daytona the ideal foundation for AI agent architectures.
+
+## Features
+
+Daytona provides an extensive set of features and tools for interacting with sandboxes.
+
+- **Platform**: governance and operational controls for organizations standardizing on Daytona
+- **Sandboxes**: isolated full composable computers that execute workloads and retain state
+- **Agent tools**: programmatic capabilities for application code, agents, and integrations
+- **Human tools**: interfaces and remote sessions for interacting with sandboxes
+- **System tools**: platform-level hooks and controls for lifecycle events and network access
+
+| Platform                                                          | Sandboxes                                                               | Agent tools                                                                       | Human tools                                                               | System tools                                                  |
+| :---------------------------------------------------------------- | :---------------------------------------------------------------------- | :-------------------------------------------------------------------------------- | :------------------------------------------------------------------------ | :------------------------------------------------------------ |
+| [Organizations](https://www.daytona.io/docs/organizations/)       | [Environment](https://www.daytona.io/docs/environment/)                 | [Process & code execution](https://www.daytona.io/docs/process-code-execution/)   | [Dashboard](https://www.daytona.io/docs/getting-started#dashboard)        | [Webhooks](https://www.daytona.io/docs/webhooks/)             |
+| [API Keys](https://www.daytona.io/docs/api-keys/)                 | [Snapshots](https://www.daytona.io/docs/snapshots/)                     | [File system operations](https://www.daytona.io/docs/file-system-operations/)     | [Web terminal](https://www.daytona.io/docs/web-terminal/)                 | [Network limits](https://www.daytona.io/docs/network-limits/) |
+| [Limits](https://www.daytona.io/docs/limits/)                     | [Declarative builder](https://www.daytona.io/docs/declarative-builder/) | [Language server protocol](https://www.daytona.io/docs/language-server-protocol/) | [SSH access](https://www.daytona.io/docs/ssh-access/)                     |                                                               |
+| [Billing](https://www.daytona.io/docs/billing/)                   | [Volumes](https://www.daytona.io/docs/volumes/)                         | [Computer use](https://www.daytona.io/docs/computer-use/)                         | [VNC access](https://www.daytona.io/docs/vnc-access/)                     |                                                               |
+| [Audit logs](https://www.daytona.io/docs/audit-logs/)             | [Regions](https://www.daytona.io/docs/regions/)                         | [MCP server](https://www.daytona.io/docs/mcp/)                                    | [VPN connection](https://www.daytona.io/docs/vpn-connections/)            |                                                               |
+| [OpenTelemetry](https://www.daytona.io/docs/otel-collection/)     |                                                                         | [Git operations](https://www.daytona.io/docs/git-operations/)                     | [Preview](https://www.daytona.io/docs/preview/)                           |                                                               |
+| [Integrations](https://www.daytona.io/docs/guides/)               |                                                                         | [Pseudo terminal (PTY)](https://www.daytona.io/docs/pty/)                         | [Custom preview proxy](https://www.daytona.io/docs/custom-preview-proxy/) |                                                               |
+| [Security exhibit](https://www.daytona.io/docs/security-exhibit/) |                                                                         | [Log streaming](https://www.daytona.io/docs/log-streaming/)                       | [Playground](https://www.daytona.io/docs/playground/)                     |                                                               |
+
+## Architecture
+
+Daytona platform is organized into multiple plane components, each serving a specific purpose. A detailed overview of each component is available in the [architecture documentation](https://www.daytona.io/docs/architecture/).
+
+- **Interface plane**: provides client interfaces for interacting with Daytona
+- **Control plane**: orchestrates all sandbox operations
+- **Compute plane**: runs and manages sandbox instances
+
+### Applications
+
+Runnable applications and services for the Daytona platform. Each directory is a deployable or buildable component, available in the [apps](apps) directory.
+
+- [`api`](apps/api): NestJS-based RESTful service; primary entry point for all platform operations
+- [`cli`](apps/cli): Go command-line interface access to core features for interacting with sandboxes
+- [`daemon`](apps/daemon): code execution agent that runs inside each sandbox
+- [`dashboard`](apps/dashboard): web user interface for visual sandbox management
+- [`docs`](apps/docs): documentation content; website published to [daytona.io/docs](https://www.daytona.io/docs/)
+- [`otel-collector`](apps/otel-collector): trace and metric collection for Daytona SDK operations
+- [`proxy`](apps/proxy): reverse proxy for custom routing and preview URLs
+- [`runner`](apps/runner): compute nodes that power Daytona's compute plane and run sandboxes
+- [`snapshot-manager`](apps/snapshot-manager): orchestrates the creation of sandbox snapshots
+- [`ssh-gateway`](apps/ssh-gateway): standalone SSH gateway that accepts authenticated `ssh` connections
+
+### Client libraries
+
+Client libraries integrate the Daytona platform from application code through developer-facing SDKs backed by OpenAPI-generated REST clients and toolbox API clients. Each directory is a publishable package for a specific language or runtime, available in the [libs](libs) directory.
+
+#### Python
 
 ```bash
 pip install daytona
 ```
 
-### TypeScript SDK
+Standalone packages and libraries for interacting with Daytona using Python:
+
+> [`sdk-python`](libs/sdk-python) • [`api-client-python`](libs/api-client-python) • [`api-client-python-async`](libs/api-client-python-async) • [`toolbox-api-client-python`](libs/toolbox-api-client-python) • [`toolbox-api-client-python-async`](libs/toolbox-api-client-python-async)
+
+#### TypeScript
 
 ```bash
 npm install @daytona/sdk
 ```
 
-### Ruby SDK
+Standalone packages and libraries for interacting with Daytona using TypeScript:
+
+> [`sdk-typescript`](libs/sdk-typescript) • [`api-client`](libs/api-client) • [`toolbox-api-client`](libs/toolbox-api-client)
+
+#### Ruby
 
 ```bash
 gem install daytona
 ```
 
-### Go SDK
+Standalone packages and libraries for interacting with Daytona using Ruby:
+
+> [`sdk-ruby`](libs/sdk-ruby) • [`api-client-ruby`](libs/api-client-ruby) • [`toolbox-api-client-ruby`](libs/toolbox-api-client-ruby)
+
+#### Go
 
 ```bash
 go get github.com/daytonaio/daytona/libs/sdk-go
 ```
 
----
+Standalone packages and libraries for interacting with Daytona using Go:
 
-## Features
+> [`sdk-go`](libs/sdk-go) • [`api-client-go`](libs/api-client-go) • [`toolbox-api-client-go`](libs/toolbox-api-client-go)
 
-- **Lightning-Fast Infrastructure**: Sub-90ms Sandbox creation from code to execution.
-- **Separated & Isolated Runtime**: Execute AI-generated code with zero risk to your infrastructure.
-- **Massive Parallelization for Concurrent AI Workflows**: Fork Sandbox filesystem and memory state (Coming soon!)
-- **Programmatic Control**: File, Git, LSP, and Execute API
-- **Unlimited Persistence**: Your Sandboxes can live forever
-- **OCI/Docker Compatibility**: Use any OCI/Docker image to create a Sandbox
+#### Java
 
----
+**Gradle** (`build.gradle.kts`):
+
+```kotlin
+dependencies {
+    implementation("io.daytona:sdk:0.1.0")
+}
+```
+
+**Maven** (`pom.xml`):
+
+```xml
+<dependency>
+  <groupId>io.daytona</groupId>
+  <artifactId>sdk</artifactId>
+  <version>0.1.0</version>
+</dependency>
+```
+
+Standalone packages and libraries for interacting with Daytona using Java:
+
+> [`sdk-java`](libs/sdk-java) • [`api-client-java`](libs/api-client-java) • [`toolbox-api-client-java`](libs/toolbox-api-client-java)
+
+## Deployments
+
+Daytona is available as a managed service on [app.daytona.io](https://app.daytona.io). Daytona can run as a fully hosted service, as an open-source stack you operate, or in a hybrid setup where Daytona orchestrates sandboxes while execution happens on machines you manage.
+
+- [Open source deployment](https://www.daytona.io/docs/oss-deployment/): full local stack from the [`docker`](docker) directory using Docker Compose
+- [Customer managed compute](https://www.daytona.io/docs/runners/): custom regions and runner machines that operate Daytona sandboxes on your own compute infrastructure
 
 ## Quick Start
 
 1. Create an account at [app.daytona.io](https://app.daytona.io)
-2. Generate a [new API key](https://app.daytona.io/dashboard/keys)
-3. Follow [documentation](https://www.daytona.io/docs/) to start using Daytona
-
-## Creating your first Sandbox
+2. Generate an [API key](https://app.daytona.io/dashboard/keys)
+3. Create a sandbox
 
 ### Python SDK
 
@@ -104,7 +173,7 @@ print(response.result)
 ```jsx
 import { Daytona } from "@daytona/sdk";
 
-const daytona = new Daytona({apiKey: "YOUR_API_KEY"});
+const daytona = new Daytona({ apiKey: "YOUR_API_KEY" });
 const sandbox = await daytona.create();
 const response = await sandbox.process.codeRun('print("Hello World!")');
 console.log(response.result);
@@ -144,7 +213,43 @@ func main() {
 }
 ```
 
----
+### Java SDK
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.DaytonaConfig;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.ExecuteResponse;
+
+public class Main {
+  public static void main(String[] args) {
+    DaytonaConfig config = new DaytonaConfig.Builder()
+        .apiKey("YOUR_API_KEY")
+        .build();
+    try (Daytona daytona = new Daytona(config)) {
+      Sandbox sandbox = daytona.create();
+      ExecuteResponse response = sandbox.getProcess().executeCommand("echo 'Hello World!'");
+      System.out.println(response.getResult());
+    }
+  }
+}
+```
+
+### API
+
+```bash
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{}'
+```
+
+### CLI
+
+```bash
+daytona create
+```
 
 ## Development
 
@@ -186,4 +291,5 @@ See [`AGENTS.md`](AGENTS.md) for the full shell reference, project-to-shell mapp
 
 ## Contributing
 
-Daytona is Open Source under the [GNU AFFERO GENERAL PUBLIC LICENSE](LICENSE), and is the [copyright of its contributors](NOTICE). If you would like to contribute to the software, read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/). Afterwards, navigate to the [contributing guide](CONTRIBUTING.md) to get started.
+> [!NOTE]
+> Daytona is Open Source under the [GNU AFFERO GENERAL PUBLIC LICENSE](LICENSE), and is the [copyright of its contributors](NOTICE). If you would like to contribute to the software, read the [Developer Certificate of Origin Version 1.1](https://developercertificate.org/) and the [contributing guide](CONTRIBUTING.md) to get started.
