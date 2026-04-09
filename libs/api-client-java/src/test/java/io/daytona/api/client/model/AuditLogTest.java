@@ -66,6 +66,22 @@ public class AuditLogTest {
     }
 
     /**
+     * Test the property 'actorApiKeyPrefix'
+     */
+    @Test
+    public void actorApiKeyPrefixTest() {
+        // TODO: test actorApiKeyPrefix
+    }
+
+    /**
+     * Test the property 'actorApiKeySuffix'
+     */
+    @Test
+    public void actorApiKeySuffixTest() {
+        // TODO: test actorApiKeySuffix
+    }
+
+    /**
      * Test the property 'organizationId'
      */
     @Test
