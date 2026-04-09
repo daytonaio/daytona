@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, UnauthorizedException, HttpException, Logger, OnModuleInit } from '@nestjs/common'
+import {
+  Injectable,
+  UnauthorizedException,
+  ServiceUnavailableException,
+  HttpException,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common'
 import { PassportStrategy } from '@nestjs/passport'
 import { Strategy } from 'passport-http-bearer'
 import { ApiKeyService } from '../api-key/api-key.service'
@@ -219,10 +226,8 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
 
   private handleError(error: unknown, message: string): void {
     if (!(error instanceof HttpException)) {
-      this.logger.error(message, error)
-      throw error
+      throw new ServiceUnavailableException(message, { cause: error })
     }
-    this.logger.debug(message, error)
   }
 
   private generateValidationCacheKey(token: string): string {

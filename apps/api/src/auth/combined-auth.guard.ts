@@ -20,13 +20,9 @@ export class CombinedAuthGuard extends AuthGuard(['api-key', 'jwt']) {
   private readonly logger = new Logger(CombinedAuthGuard.name)
 
   handleRequest(err: any, user: any) {
-    if (err && !(err instanceof HttpException)) {
-      this.logger.error('Transient authentication error', err)
+    if (err && (!(err instanceof HttpException) || err.getStatus() >= 500)) {
+      this.logger.error('Temporary authentication service error', err)
       throw new ServiceUnavailableException('Temporary authentication service error')
-    }
-
-    if (err instanceof HttpException && err.getStatus() >= 500) {
-      throw err
     }
 
     if (err || !user) {
