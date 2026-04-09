@@ -51,7 +51,7 @@ runs:
           exit 1
         fi
 
-    - uses: actions/setup-go@v5
+    - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
       if: inputs.install-go == 'true'
       with:
         go-version-file: go.work
@@ -59,18 +59,18 @@ runs:
         cache-dependency-path: |
           **/go.sum
 
-    - uses: actions/setup-java@v4
+    - uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
       if: inputs.install-java == 'true'
       with:
         java-version: 21
         distribution: 'temurin'
 
-    - uses: actions/setup-python@v5
+    - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
       if: inputs.install-python == 'true'
       with:
         python-version: '3.12'
 
-    - uses: ruby/setup-ruby@v1
+    - uses: ruby/setup-ruby@b8d447ba7506ac7e0c8fbc50762276fb3b7df731 # v1
       if: inputs.install-ruby == 'true'
       with:
         ruby-version: '3.4.5'
@@ -82,7 +82,7 @@ runs:
       run: |
         bundle install
 
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
       if: inputs.install-node == 'true'
       with:
         node-version: 22
@@ -113,7 +113,7 @@ runs:
       shell: bash
       run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
 
-    - uses: actions/cache@v4
+    - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
       if: inputs.run-yarn-install == 'true'
       with:
         path: ${{ steps.yarn-cache.outputs.dir }}
@@ -127,7 +127,7 @@ runs:
 
     - name: Cache Poetry virtualenv
       if: inputs.run-poetry-install == 'true'
-      uses: actions/cache@v4
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
       with:
         path: .venv
         key: poetry-venv-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('poetry.lock') }}
