@@ -29,6 +29,7 @@ export const getOrganizationMembersQueryOptions = (
       throw error
     }
   },
+  staleTime: 30 * 1000, // 30 seconds
 })
 
 export function useOrganizationMembersQuery(organizationId?: string | null) {

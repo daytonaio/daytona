@@ -120,14 +120,12 @@ export function SelectedOrganizationProvider(props: Props) {
   const contextValue: ISelectedOrganizationContext = useMemo(() => {
     return {
       selectedOrganization,
-      organizationMembers,
       authenticatedUserOrganizationMember,
       authenticatedUserHasPermission,
       onSelectOrganization: handleSelectOrganization,
     }
   }, [
     selectedOrganization,
-    organizationMembers,
     authenticatedUserOrganizationMember,
     authenticatedUserHasPermission,
     handleSelectOrganization,

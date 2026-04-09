@@ -9,7 +9,6 @@ import { createContext } from 'react'
 
 export interface ISelectedOrganizationContext {
   selectedOrganization: Organization | null
-  organizationMembers: OrganizationUser[]
   authenticatedUserOrganizationMember: OrganizationUser | null
   authenticatedUserHasPermission: (permission: OrganizationRolePermissionsEnum) => boolean
   onSelectOrganization: (organizationId: string) => Promise<boolean>

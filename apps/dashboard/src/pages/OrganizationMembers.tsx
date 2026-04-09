@@ -17,6 +17,7 @@ import { useDeleteOrganizationMemberMutation } from '@/hooks/mutations/useDelete
 import { useUpdateOrganizationInvitationMutation } from '@/hooks/mutations/useUpdateOrganizationInvitationMutation'
 import { useUpdateOrganizationMemberAccessMutation } from '@/hooks/mutations/useUpdateOrganizationMemberAccessMutation'
 import { useOrganizationInvitationsQuery } from '@/hooks/queries/useOrganizationInvitationsQuery'
+import { useOrganizationMembersQuery } from '@/hooks/queries/useOrganizationMembersQuery'
 import { useOrganizations } from '@/hooks/useOrganizations'
 import { usePendingMutationKeys } from '@/hooks/usePendingMutationKeys'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
@@ -53,7 +54,8 @@ const OrganizationMembers: React.FC = () => {
   const { user } = useAuth()
 
   const { refreshOrganizations } = useOrganizations()
-  const { selectedOrganization, organizationMembers, authenticatedUserOrganizationMember } = useSelectedOrganization()
+  const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
+  const { data: organizationMembers = [] } = useOrganizationMembersQuery(selectedOrganization?.id)
 
   const {
     data: invitations = [],
