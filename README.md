@@ -41,16 +41,16 @@ Daytona provides an extensive set of features and tools for interacting with san
 - **Human tools**: interfaces and remote sessions for interacting with sandboxes
 - **System tools**: platform-level hooks and controls for lifecycle events and network access
 
-| Platform                                                          | Sandboxes                                                               | Agent tools                                                                       | Human tools                                                               | System tools                                                  |
-| :---------------------------------------------------------------- | :---------------------------------------------------------------------- | :-------------------------------------------------------------------------------- | :------------------------------------------------------------------------ | :------------------------------------------------------------ |
-| [Organizations](https://www.daytona.io/docs/organizations/)       | [Environment](https://www.daytona.io/docs/environment/)                 | [Process & code execution](https://www.daytona.io/docs/process-code-execution/)   | [Dashboard](https://www.daytona.io/docs/getting-started#dashboard)        | [Webhooks](https://www.daytona.io/docs/webhooks/)             |
-| [API Keys](https://www.daytona.io/docs/api-keys/)                 | [Snapshots](https://www.daytona.io/docs/snapshots/)                     | [File system operations](https://www.daytona.io/docs/file-system-operations/)     | [Web terminal](https://www.daytona.io/docs/web-terminal/)                 | [Network limits](https://www.daytona.io/docs/network-limits/) |
-| [Limits](https://www.daytona.io/docs/limits/)                     | [Declarative builder](https://www.daytona.io/docs/declarative-builder/) | [Language server protocol](https://www.daytona.io/docs/language-server-protocol/) | [SSH access](https://www.daytona.io/docs/ssh-access/)                     |                                                               |
-| [Billing](https://www.daytona.io/docs/billing/)                   | [Volumes](https://www.daytona.io/docs/volumes/)                         | [Computer use](https://www.daytona.io/docs/computer-use/)                         | [VNC access](https://www.daytona.io/docs/vnc-access/)                     |                                                               |
-| [Audit logs](https://www.daytona.io/docs/audit-logs/)             | [Regions](https://www.daytona.io/docs/regions/)                         | [MCP server](https://www.daytona.io/docs/mcp/)                                    | [VPN connection](https://www.daytona.io/docs/vpn-connections/)            |                                                               |
-| [OpenTelemetry](https://www.daytona.io/docs/otel-collection/)     |                                                                         | [Git operations](https://www.daytona.io/docs/git-operations/)                     | [Preview](https://www.daytona.io/docs/preview/)                           |                                                               |
-| [Integrations](https://www.daytona.io/docs/guides/)               |                                                                         | [Pseudo terminal (PTY)](https://www.daytona.io/docs/pty/)                         | [Custom preview proxy](https://www.daytona.io/docs/custom-preview-proxy/) |                                                               |
-| [Security exhibit](https://www.daytona.io/docs/security-exhibit/) |                                                                         | [Log streaming](https://www.daytona.io/docs/log-streaming/)                       | [Playground](https://www.daytona.io/docs/playground/)                     |                                                               |
+| Platform                                                                   | Sandboxes                                                               | Agent tools                                                                       | Human tools                                                               | System tools                                                  |
+| :------------------------------------------------------------------------- | :---------------------------------------------------------------------- | :-------------------------------------------------------------------------------- | :------------------------------------------------------------------------ | :------------------------------------------------------------ |
+| [Organizations](https://www.daytona.io/docs/organizations/)                | [Environment](https://www.daytona.io/docs/configuration/)               | [Process & code execution](https://www.daytona.io/docs/process-code-execution/)   | [Dashboard](https://www.daytona.io/docs/getting-started#dashboard)        | [Webhooks](https://www.daytona.io/docs/webhooks/)             |
+| [API Keys](https://www.daytona.io/docs/api-keys/)                          | [Snapshots](https://www.daytona.io/docs/snapshots/)                     | [File system operations](https://www.daytona.io/docs/file-system-operations/)     | [Web terminal](https://www.daytona.io/docs/web-terminal/)                 | [Network limits](https://www.daytona.io/docs/network-limits/) |
+| [Limits](https://www.daytona.io/docs/limits/)                              | [Declarative builder](https://www.daytona.io/docs/declarative-builder/) | [Language server protocol](https://www.daytona.io/docs/language-server-protocol/) | [SSH access](https://www.daytona.io/docs/ssh-access/)                     |                                                               |
+| [Billing](https://www.daytona.io/docs/billing/)                            | [Volumes](https://www.daytona.io/docs/volumes/)                         | [Computer use](https://www.daytona.io/docs/computer-use/)                         | [VNC access](https://www.daytona.io/docs/vnc-access/)                     |                                                               |
+| [Audit logs](https://www.daytona.io/docs/audit-logs/)                      | [Regions](https://www.daytona.io/docs/regions/)                         | [MCP server](https://www.daytona.io/docs/mcp/)                                    | [VPN connection](https://www.daytona.io/docs/vpn-connections/)            |                                                               |
+| [OpenTelemetry](https://www.daytona.io/docs/experimental/otel-collection/) |                                                                         | [Git operations](https://www.daytona.io/docs/git-operations/)                     | [Preview](https://www.daytona.io/docs/preview/)                           |                                                               |
+| [Integrations](https://www.daytona.io/docs/guides/)                        |                                                                         | [Pseudo terminal (PTY)](https://www.daytona.io/docs/pty/)                         | [Custom preview proxy](https://www.daytona.io/docs/custom-preview-proxy/) |                                                               |
+| [Security exhibit](https://www.daytona.io/docs/security-exhibit/)          |                                                                         | [Log streaming](https://www.daytona.io/docs/log-streaming/)                       | [Playground](https://www.daytona.io/docs/playground/)                     |                                                               |
 
 ## Architecture
 
@@ -121,7 +121,7 @@ Standalone packages and libraries for interacting with Daytona using Go:
 
 #### Java
 
-**Gradle** (`build.gradle.kts`):
+Gradle (`build.gradle.kts`):
 
 ```kotlin
 dependencies {
@@ -129,7 +129,7 @@ dependencies {
 }
 ```
 
-**Maven** (`pom.xml`):
+Maven (`pom.xml`):
 
 ```xml
 <dependency>
