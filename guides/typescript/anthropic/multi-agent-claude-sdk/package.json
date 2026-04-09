@@ -18,7 +18,7 @@
   "license": "MIT",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.0",
-    "@daytonaio/sdk": "^0.125.0",
+    "@daytona/sdk": "^0.163.0",
     "dotenv": "^16.3.1"
   },
   "devDependencies": {

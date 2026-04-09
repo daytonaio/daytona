@@ -6,7 +6,7 @@
 import { createTool } from '@mastra/core/tools'
 import z from 'zod'
 import { getDaytonaClient, getSandboxById, createFileUploadFormat, normalizeSandboxPath } from './utils'
-import { Sandbox, CreateSandboxBaseParams, CodeRunParams, DaytonaNotFoundError, CodeLanguage } from '@daytonaio/sdk'
+import { Sandbox, CreateSandboxBaseParams, CodeRunParams, DaytonaNotFoundError, CodeLanguage } from '@daytona/sdk'
 
 export const createSandbox = createTool({
   id: 'createSandbox',

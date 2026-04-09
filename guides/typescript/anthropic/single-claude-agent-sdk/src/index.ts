@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Daytona, Sandbox, OutputMessage, ExecutionResult } from '@daytonaio/sdk'
-import { InterpreterContext, ExecuteResponse } from '@daytonaio/toolbox-api-client'
+import { Daytona, Sandbox, OutputMessage, ExecutionResult } from '@daytona/sdk'
+import { InterpreterContext, ExecuteResponse } from '@daytona/toolbox-api-client'
 import * as dotenv from 'dotenv'
 import * as readline from 'readline'
 

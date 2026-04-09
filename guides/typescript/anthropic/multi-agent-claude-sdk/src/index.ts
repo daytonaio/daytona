@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Daytona } from '@daytonaio/sdk'
+import { Daytona } from '@daytona/sdk'
 import * as dotenv from 'dotenv'
 import * as readline from 'readline'
 import Anthropic from '@anthropic-ai/sdk'

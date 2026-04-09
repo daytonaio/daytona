@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Sandbox } from '@daytonaio/sdk'
+import { Sandbox } from '@daytona/sdk'
 import { LettaMessage, ApprovalRequestMessage, ResultMessage, ToolCall } from './types'
 import { renderMarkdown } from './utils'
 
