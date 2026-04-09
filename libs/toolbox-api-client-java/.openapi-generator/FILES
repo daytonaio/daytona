@@ -31,6 +31,11 @@ src/main/java/io/daytona/toolbox/client/auth/Authentication.java
 src/main/java/io/daytona/toolbox/client/auth/HttpBasicAuth.java
 src/main/java/io/daytona/toolbox/client/auth/HttpBearerAuth.java
 src/main/java/io/daytona/toolbox/client/model/AbstractOpenApiSchema.java
+src/main/java/io/daytona/toolbox/client/model/Chart.java
+src/main/java/io/daytona/toolbox/client/model/ChartElement.java
+src/main/java/io/daytona/toolbox/client/model/CodeRunArtifacts.java
+src/main/java/io/daytona/toolbox/client/model/CodeRunRequest.java
+src/main/java/io/daytona/toolbox/client/model/CodeRunResponse.java
 src/main/java/io/daytona/toolbox/client/model/Command.java
 src/main/java/io/daytona/toolbox/client/model/CompletionContext.java
 src/main/java/io/daytona/toolbox/client/model/CompletionItem.java
@@ -54,7 +59,7 @@ src/main/java/io/daytona/toolbox/client/model/GitCloneRequest.java
 src/main/java/io/daytona/toolbox/client/model/GitCommitInfo.java
 src/main/java/io/daytona/toolbox/client/model/GitCommitRequest.java
 src/main/java/io/daytona/toolbox/client/model/GitCommitResponse.java
-src/main/java/io/daytona/toolbox/client/model/GitGitDeleteBranchRequest.java
+src/main/java/io/daytona/toolbox/client/model/GitDeleteBranchRequest.java
 src/main/java/io/daytona/toolbox/client/model/GitRepoRequest.java
 src/main/java/io/daytona/toolbox/client/model/GitStatus.java
 src/main/java/io/daytona/toolbox/client/model/InitializeRequest.java
@@ -100,6 +105,7 @@ src/main/java/io/daytona/toolbox/client/model/ScreenshotResponse.java
 src/main/java/io/daytona/toolbox/client/model/ScrollResponse.java
 src/main/java/io/daytona/toolbox/client/model/SearchFilesResponse.java
 src/main/java/io/daytona/toolbox/client/model/Session.java
+src/main/java/io/daytona/toolbox/client/model/SessionCommandLogsResponse.java
 src/main/java/io/daytona/toolbox/client/model/SessionExecuteRequest.java
 src/main/java/io/daytona/toolbox/client/model/SessionExecuteResponse.java
 src/main/java/io/daytona/toolbox/client/model/SessionSendInputRequest.java
@@ -119,6 +125,11 @@ src/test/java/io/daytona/toolbox/client/api/LspApiTest.java
 src/test/java/io/daytona/toolbox/client/api/PortApiTest.java
 src/test/java/io/daytona/toolbox/client/api/ProcessApiTest.java
 src/test/java/io/daytona/toolbox/client/api/ServerApiTest.java
+src/test/java/io/daytona/toolbox/client/model/ChartElementTest.java
+src/test/java/io/daytona/toolbox/client/model/ChartTest.java
+src/test/java/io/daytona/toolbox/client/model/CodeRunArtifactsTest.java
+src/test/java/io/daytona/toolbox/client/model/CodeRunRequestTest.java
+src/test/java/io/daytona/toolbox/client/model/CodeRunResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/CommandTest.java
 src/test/java/io/daytona/toolbox/client/model/CompletionContextTest.java
 src/test/java/io/daytona/toolbox/client/model/CompletionItemTest.java
@@ -142,7 +153,7 @@ src/test/java/io/daytona/toolbox/client/model/GitCloneRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/GitCommitInfoTest.java
 src/test/java/io/daytona/toolbox/client/model/GitCommitRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/GitCommitResponseTest.java
-src/test/java/io/daytona/toolbox/client/model/GitGitDeleteBranchRequestTest.java
+src/test/java/io/daytona/toolbox/client/model/GitDeleteBranchRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/GitRepoRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/GitStatusTest.java
 src/test/java/io/daytona/toolbox/client/model/InitializeRequestTest.java
@@ -187,6 +198,7 @@ src/test/java/io/daytona/toolbox/client/model/ReplaceResultTest.java
 src/test/java/io/daytona/toolbox/client/model/ScreenshotResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/ScrollResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/SearchFilesResponseTest.java
+src/test/java/io/daytona/toolbox/client/model/SessionCommandLogsResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/SessionExecuteRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/SessionExecuteResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/SessionSendInputRequestTest.java

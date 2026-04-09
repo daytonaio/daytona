@@ -13,6 +13,11 @@ client.go
 configuration.go
 go.mod
 go.sum
+model_chart.go
+model_chart_element.go
+model_code_run_artifacts.go
+model_code_run_request.go
+model_code_run_response.go
 model_command.go
 model_completion_context.go
 model_completion_item.go
@@ -36,7 +41,7 @@ model_git_clone_request.go
 model_git_commit_info.go
 model_git_commit_request.go
 model_git_commit_response.go
-model_git_git_delete_branch_request.go
+model_git_delete_branch_request.go
 model_git_repo_request.go
 model_git_status.go
 model_initialize_request.go
@@ -82,6 +87,7 @@ model_screenshot_response.go
 model_scroll_response.go
 model_search_files_response.go
 model_session.go
+model_session_command_logs_response.go
 model_session_execute_request.go
 model_session_execute_response.go
 model_session_send_input_request.go

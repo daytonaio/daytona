@@ -15,6 +15,11 @@ daytona_toolbox_api_client/api_response.py
 daytona_toolbox_api_client/configuration.py
 daytona_toolbox_api_client/exceptions.py
 daytona_toolbox_api_client/models/__init__.py
+daytona_toolbox_api_client/models/chart.py
+daytona_toolbox_api_client/models/chart_element.py
+daytona_toolbox_api_client/models/code_run_artifacts.py
+daytona_toolbox_api_client/models/code_run_request.py
+daytona_toolbox_api_client/models/code_run_response.py
 daytona_toolbox_api_client/models/command.py
 daytona_toolbox_api_client/models/completion_context.py
 daytona_toolbox_api_client/models/completion_item.py
@@ -38,7 +43,7 @@ daytona_toolbox_api_client/models/git_clone_request.py
 daytona_toolbox_api_client/models/git_commit_info.py
 daytona_toolbox_api_client/models/git_commit_request.py
 daytona_toolbox_api_client/models/git_commit_response.py
-daytona_toolbox_api_client/models/git_git_delete_branch_request.py
+daytona_toolbox_api_client/models/git_delete_branch_request.py
 daytona_toolbox_api_client/models/git_repo_request.py
 daytona_toolbox_api_client/models/git_status.py
 daytona_toolbox_api_client/models/initialize_request.py
@@ -84,6 +89,7 @@ daytona_toolbox_api_client/models/screenshot_response.py
 daytona_toolbox_api_client/models/scroll_response.py
 daytona_toolbox_api_client/models/search_files_response.py
 daytona_toolbox_api_client/models/session.py
+daytona_toolbox_api_client/models/session_command_logs_response.py
 daytona_toolbox_api_client/models/session_execute_request.py
 daytona_toolbox_api_client/models/session_execute_response.py
 daytona_toolbox_api_client/models/session_send_input_request.py

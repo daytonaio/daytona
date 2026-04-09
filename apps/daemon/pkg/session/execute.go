@@ -20,7 +20,7 @@ import (
 	"github.com/daytonaio/common-go/pkg/log"
 )
 
-func (s *SessionService) Execute(sessionId, cmdId, cmd string, async, isCombinedOutput, suppressInputEcho bool) (*SessionExecute, error) {
+func (s *SessionService) Execute(sessionId, cmdId, cmd string, async, isCombinedOutput, skipServerDemux, suppressInputEcho bool) (*SessionExecute, error) {
 	session, ok := s.sessions.Get(sessionId)
 	if !ok {
 		return nil, common_errors.NewNotFoundError(errors.New("session not found"))
@@ -124,21 +124,65 @@ func (s *SessionService) Execute(sessionId, cmdId, cmd string, async, isCombined
 				return nil, common_errors.NewBadRequestError(fmt.Errorf("failed to read log file: %w", err))
 			}
 
-			logContent := string(logBytes)
-
 			if isCombinedOutput {
-				// remove prefixes from log bytes
-				logBytes = bytes.ReplaceAll(bytes.ReplaceAll(logBytes, log.STDOUT_PREFIX, []byte{}), log.STDERR_PREFIX, []byte{})
-				logContent = string(logBytes)
+				stripped := bytes.ReplaceAll(bytes.ReplaceAll(logBytes, log.STDOUT_PREFIX, []byte{}), log.STDERR_PREFIX, []byte{})
+				output := string(stripped)
+				return &SessionExecute{
+					CommandId: cmdId,
+					Output:    &output,
+					ExitCode:  &exitCodeInt,
+				}, nil
 			}
 
-			return &SessionExecute{
+			output := string(logBytes)
+			result := &SessionExecute{
 				CommandId: cmdId,
-				Output:    &logContent,
+				Output:    &output,
 				ExitCode:  &exitCodeInt,
-			}, nil
+			}
+
+			if !skipServerDemux {
+				stdoutBytes, stderrBytes := DemuxLogBytes(logBytes)
+				stdoutStr := string(stdoutBytes)
+				stderrStr := string(stderrBytes)
+				result.Stdout = &stdoutStr
+				result.Stderr = &stderrStr
+			}
+
+			return result, nil
 		}
 	}
+}
+
+func DemuxLogBytes(data []byte) (stdout, stderr []byte) {
+	prefixLen := len(log.STDOUT_PREFIX)
+	var outBuf, errBuf []byte
+	pos := 0
+
+	for pos < len(data) {
+		if pos+prefixLen <= len(data) && bytes.Equal(data[pos:pos+prefixLen], log.STDOUT_PREFIX) {
+			end := findNextMarker(data, pos+prefixLen, prefixLen)
+			outBuf = append(outBuf, data[pos+prefixLen:end]...)
+			pos = end
+		} else if pos+prefixLen <= len(data) && bytes.Equal(data[pos:pos+prefixLen], log.STDERR_PREFIX) {
+			end := findNextMarker(data, pos+prefixLen, prefixLen)
+			errBuf = append(errBuf, data[pos+prefixLen:end]...)
+			pos = end
+		} else {
+			pos++
+		}
+	}
+
+	return outBuf, errBuf
+}
+
+func findNextMarker(data []byte, from int, prefixLen int) int {
+	for i := from; i+prefixLen <= len(data); i++ {
+		if bytes.Equal(data[i:i+prefixLen], log.STDOUT_PREFIX) || bytes.Equal(data[i:i+prefixLen], log.STDERR_PREFIX) {
+			return i
+		}
+	}
+	return len(data)
 }
 
 func toOctalEscapes(b []byte) string {

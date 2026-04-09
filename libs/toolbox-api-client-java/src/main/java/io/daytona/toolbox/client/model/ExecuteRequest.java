@@ -21,6 +21,8 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -59,6 +61,11 @@ public class ExecuteRequest {
   @SerializedName(SERIALIZED_NAME_CWD)
   @javax.annotation.Nullable
   private String cwd;
+
+  public static final String SERIALIZED_NAME_ENVS = "envs";
+  @SerializedName(SERIALIZED_NAME_ENVS)
+  @javax.annotation.Nullable
+  private Map<String, String> envs = new HashMap<>();
 
   public static final String SERIALIZED_NAME_TIMEOUT = "timeout";
   @SerializedName(SERIALIZED_NAME_TIMEOUT)
@@ -103,6 +110,33 @@ public class ExecuteRequest {
 
   public void setCwd(@javax.annotation.Nullable String cwd) {
     this.cwd = cwd;
+  }
+
+
+  public ExecuteRequest envs(@javax.annotation.Nullable Map<String, String> envs) {
+    this.envs = envs;
+    return this;
+  }
+
+  public ExecuteRequest putEnvsItem(String key, String envsItem) {
+    if (this.envs == null) {
+      this.envs = new HashMap<>();
+    }
+    this.envs.put(key, envsItem);
+    return this;
+  }
+
+  /**
+   * Environment variables to set for the command
+   * @return envs
+   */
+  @javax.annotation.Nullable
+  public Map<String, String> getEnvs() {
+    return envs;
+  }
+
+  public void setEnvs(@javax.annotation.Nullable Map<String, String> envs) {
+    this.envs = envs;
   }
 
 
@@ -181,13 +215,14 @@ public class ExecuteRequest {
     ExecuteRequest executeRequest = (ExecuteRequest) o;
     return Objects.equals(this.command, executeRequest.command) &&
         Objects.equals(this.cwd, executeRequest.cwd) &&
+        Objects.equals(this.envs, executeRequest.envs) &&
         Objects.equals(this.timeout, executeRequest.timeout)&&
         Objects.equals(this.additionalProperties, executeRequest.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(command, cwd, timeout, additionalProperties);
+    return Objects.hash(command, cwd, envs, timeout, additionalProperties);
   }
 
   @Override
@@ -196,6 +231,7 @@ public class ExecuteRequest {
     sb.append("class ExecuteRequest {\n");
     sb.append("    command: ").append(toIndentedString(command)).append("\n");
     sb.append("    cwd: ").append(toIndentedString(cwd)).append("\n");
+    sb.append("    envs: ").append(toIndentedString(envs)).append("\n");
     sb.append("    timeout: ").append(toIndentedString(timeout)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
@@ -222,6 +258,7 @@ public class ExecuteRequest {
     openapiFields = new HashSet<String>();
     openapiFields.add("command");
     openapiFields.add("cwd");
+    openapiFields.add("envs");
     openapiFields.add("timeout");
 
     // a set of required properties/fields (JSON key names)

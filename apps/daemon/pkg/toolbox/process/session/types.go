@@ -29,6 +29,7 @@ type SessionExecuteResponse struct {
 } // @name SessionExecuteResponse
 
 type SessionCommandLogsResponse struct {
+	Output string `json:"output" validate:"required"`
 	Stdout string `json:"stdout" validate:"required"`
 	Stderr string `json:"stderr" validate:"required"`
 } // @name SessionCommandLogsResponse

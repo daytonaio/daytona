@@ -33,6 +33,12 @@ export interface ExecuteRequest {
      */
     'cwd'?: string;
     /**
+     * Environment variables to set for the command
+     * @type {{ [key: string]: string; }}
+     * @memberof ExecuteRequest
+     */
+    'envs'?: { [key: string]: string; };
+    /**
      * Timeout in seconds, defaults to 10 seconds
      * @type {number}
      * @memberof ExecuteRequest

@@ -24,33 +24,41 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
- * Model tests for GitGitDeleteBranchRequest
+ * Model tests for SessionCommandLogsResponse
  */
-public class GitGitDeleteBranchRequestTest {
-    private final GitGitDeleteBranchRequest model = new GitGitDeleteBranchRequest();
+public class SessionCommandLogsResponseTest {
+    private final SessionCommandLogsResponse model = new SessionCommandLogsResponse();
 
     /**
-     * Model tests for GitGitDeleteBranchRequest
+     * Model tests for SessionCommandLogsResponse
      */
     @Test
-    public void testGitGitDeleteBranchRequest() {
-        // TODO: test GitGitDeleteBranchRequest
+    public void testSessionCommandLogsResponse() {
+        // TODO: test SessionCommandLogsResponse
     }
 
     /**
-     * Test the property 'name'
+     * Test the property 'output'
      */
     @Test
-    public void nameTest() {
-        // TODO: test name
+    public void outputTest() {
+        // TODO: test output
     }
 
     /**
-     * Test the property 'path'
+     * Test the property 'stderr'
      */
     @Test
-    public void pathTest() {
-        // TODO: test path
+    public void stderrTest() {
+        // TODO: test stderr
+    }
+
+    /**
+     * Test the property 'stdout'
+     */
+    @Test
+    public void stdoutTest() {
+        // TODO: test stdout
     }
 
 }

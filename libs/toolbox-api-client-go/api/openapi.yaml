@@ -1052,7 +1052,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/git.GitDeleteBranchRequest"
+              $ref: "#/components/schemas/GitDeleteBranchRequest"
         description: Delete branch request
         required: true
       responses:
@@ -1470,6 +1470,29 @@ paths:
       summary: Check if port is in use
       tags:
       - port
+  /process/code-run:
+    post:
+      description: "Execute Python, JavaScript, or TypeScript code and return output,\
+        \ exit code, and artifacts"
+      operationId: CodeRun
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CodeRunRequest"
+        description: Code execution request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CodeRunResponse"
+          description: OK
+      summary: Execute code
+      tags:
+      - process
+      x-codegen-request-body-name: request
   /process/execute:
     post:
       description: Execute a shell command and return the output and exit code
@@ -1782,8 +1805,9 @@ paths:
       - process
   /process/session/entrypoint/logs:
     get:
-      description: Get logs for a sandbox entrypoint session. Supports both HTTP and
-        WebSocket streaming.
+      description: "Get logs for a sandbox entrypoint session. Returns JSON with separated\
+        \ stdout/stderr for SDK >= 0.161.0, plain text otherwise. Supports WebSocket\
+        \ streaming."
       operationId: GetEntrypointLogs
       parameters:
       - description: Follow logs in real-time (WebSocket only)
@@ -1794,9 +1818,12 @@ paths:
       responses:
         "200":
           content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionCommandLogsResponse"
             text/plain:
               schema:
-                type: string
+                $ref: "#/components/schemas/SessionCommandLogsResponse"
           description: Entrypoint log content
       summary: Get entrypoint logs
       tags:
@@ -1901,8 +1928,9 @@ paths:
       x-codegen-request-body-name: request
   /process/session/{sessionId}/command/{commandId}/logs:
     get:
-      description: Get logs for a specific command within a session. Supports both
-        HTTP and WebSocket streaming.
+      description: "Get logs for a specific command within a session. Returns JSON\
+        \ with separated stdout/stderr for SDK >= 0.163.0, plain text otherwise. Supports\
+        \ WebSocket streaming."
       operationId: GetSessionCommandLogs
       parameters:
       - description: Session ID
@@ -1925,10 +1953,13 @@ paths:
       responses:
         "200":
           content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionCommandLogsResponse"
             text/plain:
               schema:
-                type: string
-          description: Log content
+                $ref: "#/components/schemas/SessionCommandLogsResponse"
+          description: "Log content (JSON for new SDKs, plain text for old SDKs)"
       summary: Get session command logs
       tags:
       - process
@@ -2014,6 +2045,494 @@ paths:
       - info
 components:
   schemas:
+    Chart:
+      example:
+        y_ticks:
+        - 4.145608029883936
+        - 4.145608029883936
+        x_ticks:
+        - 2.027123023002322
+        - 2.027123023002322
+        y_label: y_label
+        y_tick_labels:
+        - y_tick_labels
+        - y_tick_labels
+        y_scale: y_scale
+        x_tick_labels:
+        - x_tick_labels
+        - x_tick_labels
+        elements:
+        - y_label: y_label
+          max: 1.4658129805029452
+          png: png
+          x_label: x_label
+          label: label
+          outliers:
+          - 2.3021358869347655
+          - 2.3021358869347655
+          title: title
+          type: type
+          points:
+          - - 7.061401241503109
+            - 7.061401241503109
+          - - 7.061401241503109
+            - 7.061401241503109
+          first_quartile: 6.027456183070403
+          min: 5.637376656633329
+          median: 5.962133916683182
+          angle: 0.8008281904610115
+          radius: 9.301444243932576
+          value: value
+          group: group
+          third_quartile: 3.616076749251911
+        - y_label: y_label
+          max: 1.4658129805029452
+          png: png
+          x_label: x_label
+          label: label
+          outliers:
+          - 2.3021358869347655
+          - 2.3021358869347655
+          title: title
+          type: type
+          points:
+          - - 7.061401241503109
+            - 7.061401241503109
+          - - 7.061401241503109
+            - 7.061401241503109
+          first_quartile: 6.027456183070403
+          min: 5.637376656633329
+          median: 5.962133916683182
+          angle: 0.8008281904610115
+          radius: 9.301444243932576
+          value: value
+          group: group
+          third_quartile: 3.616076749251911
+        png: png
+        x_scale: x_scale
+        x_label: x_label
+        title: title
+        type: type
+      properties:
+        elements:
+          items:
+            $ref: "#/components/schemas/ChartElement"
+          type: array
+        png:
+          type: string
+        title:
+          type: string
+        type:
+          type: string
+        x_label:
+          type: string
+        x_scale:
+          type: string
+        x_tick_labels:
+          items:
+            type: string
+          type: array
+        x_ticks:
+          items:
+            type: number
+          type: array
+        y_label:
+          type: string
+        y_scale:
+          type: string
+        y_tick_labels:
+          items:
+            type: string
+          type: array
+        y_ticks:
+          items:
+            type: number
+          type: array
+      type: object
+    ChartElement:
+      example:
+        y_label: y_label
+        max: 1.4658129805029452
+        png: png
+        x_label: x_label
+        label: label
+        outliers:
+        - 2.3021358869347655
+        - 2.3021358869347655
+        title: title
+        type: type
+        points:
+        - - 7.061401241503109
+          - 7.061401241503109
+        - - 7.061401241503109
+          - 7.061401241503109
+        first_quartile: 6.027456183070403
+        min: 5.637376656633329
+        median: 5.962133916683182
+        angle: 0.8008281904610115
+        radius: 9.301444243932576
+        value: value
+        group: group
+        third_quartile: 3.616076749251911
+      properties:
+        angle:
+          type: number
+        first_quartile:
+          type: number
+        group:
+          type: string
+        label:
+          type: string
+        max:
+          type: number
+        median:
+          type: number
+        min:
+          type: number
+        outliers:
+          items:
+            type: number
+          type: array
+        png:
+          type: string
+        points:
+          items:
+            items:
+              type: number
+            type: array
+          type: array
+        radius:
+          type: number
+        third_quartile:
+          type: number
+        title:
+          type: string
+        type:
+          type: string
+        value:
+          type: string
+        x_label:
+          type: string
+        y_label:
+          type: string
+      type: object
+    CodeRunArtifacts:
+      example:
+        charts:
+        - y_ticks:
+          - 4.145608029883936
+          - 4.145608029883936
+          x_ticks:
+          - 2.027123023002322
+          - 2.027123023002322
+          y_label: y_label
+          y_tick_labels:
+          - y_tick_labels
+          - y_tick_labels
+          y_scale: y_scale
+          x_tick_labels:
+          - x_tick_labels
+          - x_tick_labels
+          elements:
+          - y_label: y_label
+            max: 1.4658129805029452
+            png: png
+            x_label: x_label
+            label: label
+            outliers:
+            - 2.3021358869347655
+            - 2.3021358869347655
+            title: title
+            type: type
+            points:
+            - - 7.061401241503109
+              - 7.061401241503109
+            - - 7.061401241503109
+              - 7.061401241503109
+            first_quartile: 6.027456183070403
+            min: 5.637376656633329
+            median: 5.962133916683182
+            angle: 0.8008281904610115
+            radius: 9.301444243932576
+            value: value
+            group: group
+            third_quartile: 3.616076749251911
+          - y_label: y_label
+            max: 1.4658129805029452
+            png: png
+            x_label: x_label
+            label: label
+            outliers:
+            - 2.3021358869347655
+            - 2.3021358869347655
+            title: title
+            type: type
+            points:
+            - - 7.061401241503109
+              - 7.061401241503109
+            - - 7.061401241503109
+              - 7.061401241503109
+            first_quartile: 6.027456183070403
+            min: 5.637376656633329
+            median: 5.962133916683182
+            angle: 0.8008281904610115
+            radius: 9.301444243932576
+            value: value
+            group: group
+            third_quartile: 3.616076749251911
+          png: png
+          x_scale: x_scale
+          x_label: x_label
+          title: title
+          type: type
+        - y_ticks:
+          - 4.145608029883936
+          - 4.145608029883936
+          x_ticks:
+          - 2.027123023002322
+          - 2.027123023002322
+          y_label: y_label
+          y_tick_labels:
+          - y_tick_labels
+          - y_tick_labels
+          y_scale: y_scale
+          x_tick_labels:
+          - x_tick_labels
+          - x_tick_labels
+          elements:
+          - y_label: y_label
+            max: 1.4658129805029452
+            png: png
+            x_label: x_label
+            label: label
+            outliers:
+            - 2.3021358869347655
+            - 2.3021358869347655
+            title: title
+            type: type
+            points:
+            - - 7.061401241503109
+              - 7.061401241503109
+            - - 7.061401241503109
+              - 7.061401241503109
+            first_quartile: 6.027456183070403
+            min: 5.637376656633329
+            median: 5.962133916683182
+            angle: 0.8008281904610115
+            radius: 9.301444243932576
+            value: value
+            group: group
+            third_quartile: 3.616076749251911
+          - y_label: y_label
+            max: 1.4658129805029452
+            png: png
+            x_label: x_label
+            label: label
+            outliers:
+            - 2.3021358869347655
+            - 2.3021358869347655
+            title: title
+            type: type
+            points:
+            - - 7.061401241503109
+              - 7.061401241503109
+            - - 7.061401241503109
+              - 7.061401241503109
+            first_quartile: 6.027456183070403
+            min: 5.637376656633329
+            median: 5.962133916683182
+            angle: 0.8008281904610115
+            radius: 9.301444243932576
+            value: value
+            group: group
+            third_quartile: 3.616076749251911
+          png: png
+          x_scale: x_scale
+          x_label: x_label
+          title: title
+          type: type
+      properties:
+        charts:
+          items:
+            $ref: "#/components/schemas/Chart"
+          type: array
+      type: object
+    CodeRunRequest:
+      example:
+        code: code
+        envs:
+          key: envs
+        language: language
+        argv:
+        - argv
+        - argv
+        timeout: 0
+      properties:
+        argv:
+          items:
+            type: string
+          type: array
+        code:
+          type: string
+        envs:
+          additionalProperties:
+            type: string
+          type: object
+        language:
+          description: "python, javascript, typescript"
+          type: string
+        timeout:
+          type: integer
+      required:
+      - code
+      - language
+      type: object
+    CodeRunResponse:
+      example:
+        result: result
+        exitCode: 7
+        artifacts:
+          charts:
+          - y_ticks:
+            - 4.145608029883936
+            - 4.145608029883936
+            x_ticks:
+            - 2.027123023002322
+            - 2.027123023002322
+            y_label: y_label
+            y_tick_labels:
+            - y_tick_labels
+            - y_tick_labels
+            y_scale: y_scale
+            x_tick_labels:
+            - x_tick_labels
+            - x_tick_labels
+            elements:
+            - y_label: y_label
+              max: 1.4658129805029452
+              png: png
+              x_label: x_label
+              label: label
+              outliers:
+              - 2.3021358869347655
+              - 2.3021358869347655
+              title: title
+              type: type
+              points:
+              - - 7.061401241503109
+                - 7.061401241503109
+              - - 7.061401241503109
+                - 7.061401241503109
+              first_quartile: 6.027456183070403
+              min: 5.637376656633329
+              median: 5.962133916683182
+              angle: 0.8008281904610115
+              radius: 9.301444243932576
+              value: value
+              group: group
+              third_quartile: 3.616076749251911
+            - y_label: y_label
+              max: 1.4658129805029452
+              png: png
+              x_label: x_label
+              label: label
+              outliers:
+              - 2.3021358869347655
+              - 2.3021358869347655
+              title: title
+              type: type
+              points:
+              - - 7.061401241503109
+                - 7.061401241503109
+              - - 7.061401241503109
+                - 7.061401241503109
+              first_quartile: 6.027456183070403
+              min: 5.637376656633329
+              median: 5.962133916683182
+              angle: 0.8008281904610115
+              radius: 9.301444243932576
+              value: value
+              group: group
+              third_quartile: 3.616076749251911
+            png: png
+            x_scale: x_scale
+            x_label: x_label
+            title: title
+            type: type
+          - y_ticks:
+            - 4.145608029883936
+            - 4.145608029883936
+            x_ticks:
+            - 2.027123023002322
+            - 2.027123023002322
+            y_label: y_label
+            y_tick_labels:
+            - y_tick_labels
+            - y_tick_labels
+            y_scale: y_scale
+            x_tick_labels:
+            - x_tick_labels
+            - x_tick_labels
+            elements:
+            - y_label: y_label
+              max: 1.4658129805029452
+              png: png
+              x_label: x_label
+              label: label
+              outliers:
+              - 2.3021358869347655
+              - 2.3021358869347655
+              title: title
+              type: type
+              points:
+              - - 7.061401241503109
+                - 7.061401241503109
+              - - 7.061401241503109
+                - 7.061401241503109
+              first_quartile: 6.027456183070403
+              min: 5.637376656633329
+              median: 5.962133916683182
+              angle: 0.8008281904610115
+              radius: 9.301444243932576
+              value: value
+              group: group
+              third_quartile: 3.616076749251911
+            - y_label: y_label
+              max: 1.4658129805029452
+              png: png
+              x_label: x_label
+              label: label
+              outliers:
+              - 2.3021358869347655
+              - 2.3021358869347655
+              title: title
+              type: type
+              points:
+              - - 7.061401241503109
+                - 7.061401241503109
+              - - 7.061401241503109
+                - 7.061401241503109
+              first_quartile: 6.027456183070403
+              min: 5.637376656633329
+              median: 5.962133916683182
+              angle: 0.8008281904610115
+              radius: 9.301444243932576
+              value: value
+              group: group
+              third_quartile: 3.616076749251911
+            png: png
+            x_scale: x_scale
+            x_label: x_label
+            title: title
+            type: type
+      properties:
+        artifacts:
+          $ref: "#/components/schemas/CodeRunArtifacts"
+        exitCode:
+          type: integer
+        result:
+          type: string
+      type: object
     Command:
       example:
         exitCode: 0
@@ -2206,6 +2725,8 @@ components:
     ExecuteRequest:
       example:
         cwd: cwd
+        envs:
+          key: envs
         command: command
         timeout: 0
       properties:
@@ -2214,6 +2735,11 @@ components:
         cwd:
           description: Current working directory
           type: string
+        envs:
+          additionalProperties:
+            type: string
+          description: Environment variables to set for the command
+          type: object
         timeout:
           description: "Timeout in seconds, defaults to 10 seconds"
           type: integer
@@ -2429,6 +2955,19 @@ components:
           type: string
       required:
       - hash
+      type: object
+    GitDeleteBranchRequest:
+      example:
+        path: path
+        name: name
+      properties:
+        name:
+          type: string
+        path:
+          type: string
+      required:
+      - name
+      - path
       type: object
     GitRepoRequest:
       example:
@@ -3178,6 +3717,23 @@ components:
       - commands
       - sessionId
       type: object
+    SessionCommandLogsResponse:
+      example:
+        output: output
+        stdout: stdout
+        stderr: stderr
+      properties:
+        output:
+          type: string
+        stderr:
+          type: string
+        stdout:
+          type: string
+      required:
+      - output
+      - stderr
+      - stdout
+      type: object
     SessionExecuteRequest:
       example:
         async: true
@@ -3331,16 +3887,6 @@ components:
     gin.H:
       additionalProperties:
         type: object
-      type: object
-    git.GitDeleteBranchRequest:
-      properties:
-        name:
-          type: string
-        path:
-          type: string
-      required:
-      - name
-      - path
       type: object
     UploadFile_request:
       properties:

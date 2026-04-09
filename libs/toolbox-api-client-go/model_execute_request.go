@@ -24,6 +24,8 @@ type ExecuteRequest struct {
 	Command string `json:"command"`
 	// Current working directory
 	Cwd *string `json:"cwd,omitempty"`
+	// Environment variables to set for the command
+	Envs *map[string]string `json:"envs,omitempty"`
 	// Timeout in seconds, defaults to 10 seconds
 	Timeout *int32 `json:"timeout,omitempty"`
 }
@@ -104,6 +106,38 @@ func (o *ExecuteRequest) SetCwd(v string) {
 	o.Cwd = &v
 }
 
+// GetEnvs returns the Envs field value if set, zero value otherwise.
+func (o *ExecuteRequest) GetEnvs() map[string]string {
+	if o == nil || IsNil(o.Envs) {
+		var ret map[string]string
+		return ret
+	}
+	return *o.Envs
+}
+
+// GetEnvsOk returns a tuple with the Envs field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ExecuteRequest) GetEnvsOk() (*map[string]string, bool) {
+	if o == nil || IsNil(o.Envs) {
+		return nil, false
+	}
+	return o.Envs, true
+}
+
+// HasEnvs returns a boolean if a field has been set.
+func (o *ExecuteRequest) HasEnvs() bool {
+	if o != nil && !IsNil(o.Envs) {
+		return true
+	}
+
+	return false
+}
+
+// SetEnvs gets a reference to the given map[string]string and assigns it to the Envs field.
+func (o *ExecuteRequest) SetEnvs(v map[string]string) {
+	o.Envs = &v
+}
+
 // GetTimeout returns the Timeout field value if set, zero value otherwise.
 func (o *ExecuteRequest) GetTimeout() int32 {
 	if o == nil || IsNil(o.Timeout) {
@@ -149,6 +183,9 @@ func (o ExecuteRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize["command"] = o.Command
 	if !IsNil(o.Cwd) {
 		toSerialize["cwd"] = o.Cwd
+	}
+	if !IsNil(o.Envs) {
+		toSerialize["envs"] = o.Envs
 	}
 	if !IsNil(o.Timeout) {
 		toSerialize["timeout"] = o.Timeout

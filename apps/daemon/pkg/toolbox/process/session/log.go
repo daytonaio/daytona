@@ -14,13 +14,14 @@ import (
 // GetSessionCommandLogs godoc
 //
 //	@Summary		Get session command logs
-//	@Description	Get logs for a specific command within a session. Supports both HTTP and WebSocket streaming.
+//	@Description	Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.163.0, plain text otherwise. Supports WebSocket streaming.
 //	@Tags			process
+//	@Produce		json
 //	@Produce		text/plain
-//	@Param			sessionId	path		string	true	"Session ID"
-//	@Param			commandId	path		string	true	"Command ID"
-//	@Param			follow		query		boolean	false	"Follow logs in real-time (WebSocket only)"
-//	@Success		200			{string}	string	"Log content"
+//	@Param			sessionId	path		string						true	"Session ID"
+//	@Param			commandId	path		string						true	"Command ID"
+//	@Param			follow		query		boolean						false	"Follow logs in real-time (WebSocket only)"
+//	@Success		200			{object}	SessionCommandLogsResponse	"Log content (JSON for new SDKs, plain text for old SDKs)"
 //	@Router			/process/session/{sessionId}/command/{commandId}/logs [get]
 //
 //	@id				GetSessionCommandLogs
@@ -51,21 +52,34 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 		return
 	}
 
+	if !session.SkipServerDemux(sdkVersion) && !opts.IsCombinedOutput {
+		stdout, stderr := session.DemuxLogBytes(logBytes)
+		c.JSON(http.StatusOK, SessionCommandLogsResponse{
+			Output: string(logBytes),
+			Stdout: string(stdout),
+			Stderr: string(stderr),
+		})
+		return
+	}
+
 	c.String(http.StatusOK, string(logBytes))
 }
 
 // GetEntrypointLogs godoc
 //
 //	@Summary		Get entrypoint logs
-//	@Description	Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.
+//	@Description	Get logs for a sandbox entrypoint session. Returns JSON with separated stdout/stderr for SDK >= 0.161.0, plain text otherwise. Supports WebSocket streaming.
 //	@Tags			process
+//	@Produce		json
 //	@Produce		text/plain
-//	@Param			follow	query		boolean	false	"Follow logs in real-time (WebSocket only)"
-//	@Success		200		{string}	string	"Entrypoint log content"
+//	@Param			follow	query		boolean						false	"Follow logs in real-time (WebSocket only)"
+//	@Success		200		{object}	SessionCommandLogsResponse	"Entrypoint log content"
 //	@Router			/process/session/entrypoint/logs [get]
 //
 //	@id				GetEntrypointLogs
 func (s *SessionController) GetEntrypointLogs(c *gin.Context) {
+	sdkVersion := util.ExtractSdkVersionFromHeader(c.Request.Header)
+
 	opts := session.FetchLogsOptions{
 		IsCombinedOutput:   false,
 		IsWebsocketUpgrade: c.Request.Header.Get("Upgrade") == "websocket",
@@ -79,6 +93,16 @@ func (s *SessionController) GetEntrypointLogs(c *gin.Context) {
 	}
 
 	if logBytes == nil {
+		return
+	}
+
+	if !session.SkipServerDemux(sdkVersion) {
+		stdout, stderr := session.DemuxLogBytes(logBytes)
+		c.JSON(http.StatusOK, SessionCommandLogsResponse{
+			Output: string(logBytes),
+			Stdout: string(stdout),
+			Stderr: string(stderr),
+		})
 		return
 	}
 

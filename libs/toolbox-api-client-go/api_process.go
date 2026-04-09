@@ -23,6 +23,20 @@ import (
 type ProcessAPI interface {
 
 	/*
+	CodeRun Execute code
+
+	Execute Python, JavaScript, or TypeScript code and return output, exit code, and artifacts
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ProcessAPICodeRunRequest
+	*/
+	CodeRun(ctx context.Context) ProcessAPICodeRunRequest
+
+	// CodeRunExecute executes the request
+	//  @return CodeRunResponse
+	CodeRunExecute(r ProcessAPICodeRunRequest) (*CodeRunResponse, *http.Response, error)
+
+	/*
 	ConnectPtySession Connect to PTY session via WebSocket
 
 	Establish a WebSocket connection to interact with a pseudo-terminal session
@@ -109,7 +123,7 @@ type ProcessAPI interface {
 	/*
 	GetEntrypointLogs Get entrypoint logs
 
-	Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.
+	Get logs for a sandbox entrypoint session. Returns JSON with separated stdout/stderr for SDK >= 0.161.0, plain text otherwise. Supports WebSocket streaming.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ProcessAPIGetEntrypointLogsRequest
@@ -117,8 +131,8 @@ type ProcessAPI interface {
 	GetEntrypointLogs(ctx context.Context) ProcessAPIGetEntrypointLogsRequest
 
 	// GetEntrypointLogsExecute executes the request
-	//  @return string
-	GetEntrypointLogsExecute(r ProcessAPIGetEntrypointLogsRequest) (string, *http.Response, error)
+	//  @return SessionCommandLogsResponse
+	GetEntrypointLogsExecute(r ProcessAPIGetEntrypointLogsRequest) (*SessionCommandLogsResponse, *http.Response, error)
 
 	/*
 	GetEntrypointSession Get entrypoint session details
@@ -183,7 +197,7 @@ type ProcessAPI interface {
 	/*
 	GetSessionCommandLogs Get session command logs
 
-	Get logs for a specific command within a session. Supports both HTTP and WebSocket streaming.
+	Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.163.0, plain text otherwise. Supports WebSocket streaming.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param sessionId Session ID
@@ -193,8 +207,8 @@ type ProcessAPI interface {
 	GetSessionCommandLogs(ctx context.Context, sessionId string, commandId string) ProcessAPIGetSessionCommandLogsRequest
 
 	// GetSessionCommandLogsExecute executes the request
-	//  @return string
-	GetSessionCommandLogsExecute(r ProcessAPIGetSessionCommandLogsRequest) (string, *http.Response, error)
+	//  @return SessionCommandLogsResponse
+	GetSessionCommandLogsExecute(r ProcessAPIGetSessionCommandLogsRequest) (*SessionCommandLogsResponse, *http.Response, error)
 
 	/*
 	ListPtySessions List all PTY sessions
@@ -272,6 +286,117 @@ type ProcessAPI interface {
 
 // ProcessAPIService ProcessAPI service
 type ProcessAPIService service
+
+type ProcessAPICodeRunRequest struct {
+	ctx context.Context
+	ApiService ProcessAPI
+	request *CodeRunRequest
+}
+
+// Code execution request
+func (r ProcessAPICodeRunRequest) Request(request CodeRunRequest) ProcessAPICodeRunRequest {
+	r.request = &request
+	return r
+}
+
+func (r ProcessAPICodeRunRequest) Execute() (*CodeRunResponse, *http.Response, error) {
+	return r.ApiService.CodeRunExecute(r)
+}
+
+/*
+CodeRun Execute code
+
+Execute Python, JavaScript, or TypeScript code and return output, exit code, and artifacts
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ProcessAPICodeRunRequest
+*/
+func (a *ProcessAPIService) CodeRun(ctx context.Context) ProcessAPICodeRunRequest {
+	return ProcessAPICodeRunRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return CodeRunResponse
+func (a *ProcessAPIService) CodeRunExecute(r ProcessAPICodeRunRequest) (*CodeRunResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *CodeRunResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.CodeRun")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/process/code-run"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.request == nil {
+		return localVarReturnValue, nil, reportError("request is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.request
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
 
 type ProcessAPIConnectPtySessionRequest struct {
 	ctx context.Context
@@ -894,14 +1019,14 @@ func (r ProcessAPIGetEntrypointLogsRequest) Follow(follow bool) ProcessAPIGetEnt
 	return r
 }
 
-func (r ProcessAPIGetEntrypointLogsRequest) Execute() (string, *http.Response, error) {
+func (r ProcessAPIGetEntrypointLogsRequest) Execute() (*SessionCommandLogsResponse, *http.Response, error) {
 	return r.ApiService.GetEntrypointLogsExecute(r)
 }
 
 /*
 GetEntrypointLogs Get entrypoint logs
 
-Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.
+Get logs for a sandbox entrypoint session. Returns JSON with separated stdout/stderr for SDK >= 0.161.0, plain text otherwise. Supports WebSocket streaming.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ProcessAPIGetEntrypointLogsRequest
@@ -914,13 +1039,13 @@ func (a *ProcessAPIService) GetEntrypointLogs(ctx context.Context) ProcessAPIGet
 }
 
 // Execute executes the request
-//  @return string
-func (a *ProcessAPIService) GetEntrypointLogsExecute(r ProcessAPIGetEntrypointLogsRequest) (string, *http.Response, error) {
+//  @return SessionCommandLogsResponse
+func (a *ProcessAPIService) GetEntrypointLogsExecute(r ProcessAPIGetEntrypointLogsRequest) (*SessionCommandLogsResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  string
+		localVarReturnValue  *SessionCommandLogsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.GetEntrypointLogs")
@@ -947,7 +1072,7 @@ func (a *ProcessAPIService) GetEntrypointLogsExecute(r ProcessAPIGetEntrypointLo
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"text/plain"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "text/plain"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -1417,14 +1542,14 @@ func (r ProcessAPIGetSessionCommandLogsRequest) Follow(follow bool) ProcessAPIGe
 	return r
 }
 
-func (r ProcessAPIGetSessionCommandLogsRequest) Execute() (string, *http.Response, error) {
+func (r ProcessAPIGetSessionCommandLogsRequest) Execute() (*SessionCommandLogsResponse, *http.Response, error) {
 	return r.ApiService.GetSessionCommandLogsExecute(r)
 }
 
 /*
 GetSessionCommandLogs Get session command logs
 
-Get logs for a specific command within a session. Supports both HTTP and WebSocket streaming.
+Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.163.0, plain text otherwise. Supports WebSocket streaming.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param sessionId Session ID
@@ -1441,13 +1566,13 @@ func (a *ProcessAPIService) GetSessionCommandLogs(ctx context.Context, sessionId
 }
 
 // Execute executes the request
-//  @return string
-func (a *ProcessAPIService) GetSessionCommandLogsExecute(r ProcessAPIGetSessionCommandLogsRequest) (string, *http.Response, error) {
+//  @return SessionCommandLogsResponse
+func (a *ProcessAPIService) GetSessionCommandLogsExecute(r ProcessAPIGetSessionCommandLogsRequest) (*SessionCommandLogsResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  string
+		localVarReturnValue  *SessionCommandLogsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.GetSessionCommandLogs")
@@ -1476,7 +1601,7 @@ func (a *ProcessAPIService) GetSessionCommandLogsExecute(r ProcessAPIGetSessionC
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"text/plain"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "text/plain"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)

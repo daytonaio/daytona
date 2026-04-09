@@ -5,8 +5,10 @@ package process
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
 	"os/exec"
 	"strings"
 	"sync/atomic"
@@ -50,6 +52,13 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 		if request.Cwd != nil {
 			cmd.Dir = *request.Cwd
+		}
+		if len(request.Envs) > 0 {
+			envPairs := make([]string, 0, len(request.Envs))
+			for key, value := range request.Envs {
+				envPairs = append(envPairs, fmt.Sprintf("%s=%s", key, value))
+			}
+			cmd.Env = append(os.Environ(), envPairs...)
 		}
 
 		// set maximum execution time

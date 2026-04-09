@@ -36,7 +36,7 @@ import type { GitCommitRequest } from '../models';
 // @ts-ignore
 import type { GitCommitResponse } from '../models';
 // @ts-ignore
-import type { GitGitDeleteBranchRequest } from '../models';
+import type { GitDeleteBranchRequest } from '../models';
 // @ts-ignore
 import type { GitRepoRequest } from '../models';
 // @ts-ignore
@@ -232,11 +232,11 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
         /**
          * Delete a branch from the Git repository
          * @summary Delete a branch
-         * @param {GitGitDeleteBranchRequest} request Delete branch request
+         * @param {GitDeleteBranchRequest} request Delete branch request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteBranch: async (request: GitGitDeleteBranchRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        deleteBranch: async (request: GitDeleteBranchRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'request' is not null or undefined
             assertParamExists('deleteBranch', 'request', request)
             const localVarPath = `/git/branches`;
@@ -526,11 +526,11 @@ export const GitApiFp = function(configuration?: Configuration) {
         /**
          * Delete a branch from the Git repository
          * @summary Delete a branch
-         * @param {GitGitDeleteBranchRequest} request Delete branch request
+         * @param {GitDeleteBranchRequest} request Delete branch request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteBranch(request: GitGitDeleteBranchRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async deleteBranch(request: GitDeleteBranchRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteBranch(request, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['GitApi.deleteBranch']?.[localVarOperationServerIndex]?.url;
@@ -664,11 +664,11 @@ export const GitApiFactory = function (configuration?: Configuration, basePath?:
         /**
          * Delete a branch from the Git repository
          * @summary Delete a branch
-         * @param {GitGitDeleteBranchRequest} request Delete branch request
+         * @param {GitDeleteBranchRequest} request Delete branch request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteBranch(request: GitGitDeleteBranchRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+        deleteBranch(request: GitDeleteBranchRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.deleteBranch(request, options).then((request) => request(axios, basePath));
         },
         /**
@@ -794,12 +794,12 @@ export class GitApi extends BaseAPI {
     /**
      * Delete a branch from the Git repository
      * @summary Delete a branch
-     * @param {GitGitDeleteBranchRequest} request Delete branch request
+     * @param {GitDeleteBranchRequest} request Delete branch request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof GitApi
      */
-    public deleteBranch(request: GitGitDeleteBranchRequest, options?: RawAxiosRequestConfig) {
+    public deleteBranch(request: GitDeleteBranchRequest, options?: RawAxiosRequestConfig) {
         return GitApiFp(this.configuration).deleteBranch(request, options).then((request) => request(this.axios, this.basePath));
     }
 

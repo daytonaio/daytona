@@ -34,7 +34,7 @@ import io.daytona.toolbox.client.model.GitCloneRequest;
 import io.daytona.toolbox.client.model.GitCommitInfo;
 import io.daytona.toolbox.client.model.GitCommitRequest;
 import io.daytona.toolbox.client.model.GitCommitResponse;
-import io.daytona.toolbox.client.model.GitGitDeleteBranchRequest;
+import io.daytona.toolbox.client.model.GitDeleteBranchRequest;
 import io.daytona.toolbox.client.model.GitRepoRequest;
 import io.daytona.toolbox.client.model.GitStatus;
 import io.daytona.toolbox.client.model.ListBranchResponse;
@@ -710,7 +710,7 @@ public class GitApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteBranchCall(GitGitDeleteBranchRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deleteBranchCall(GitDeleteBranchRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -755,7 +755,7 @@ public class GitApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deleteBranchValidateBeforeCall(GitGitDeleteBranchRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deleteBranchValidateBeforeCall(GitDeleteBranchRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling deleteBranch(Async)");
@@ -777,7 +777,7 @@ public class GitApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public void deleteBranch(GitGitDeleteBranchRequest request) throws ApiException {
+    public void deleteBranch(GitDeleteBranchRequest request) throws ApiException {
         deleteBranchWithHttpInfo(request);
     }
 
@@ -794,7 +794,7 @@ public class GitApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> deleteBranchWithHttpInfo(GitGitDeleteBranchRequest request) throws ApiException {
+    public ApiResponse<Void> deleteBranchWithHttpInfo(GitDeleteBranchRequest request) throws ApiException {
         okhttp3.Call localVarCall = deleteBranchValidateBeforeCall(request, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -813,7 +813,7 @@ public class GitApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteBranchAsync(GitGitDeleteBranchRequest request, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call deleteBranchAsync(GitDeleteBranchRequest request, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deleteBranchValidateBeforeCall(request, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);

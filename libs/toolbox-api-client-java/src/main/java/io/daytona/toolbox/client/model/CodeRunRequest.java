@@ -20,7 +20,11 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -46,58 +50,146 @@ import java.util.Set;
 import io.daytona.toolbox.client.JSON;
 
 /**
- * GitGitDeleteBranchRequest
+ * CodeRunRequest
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
-public class GitGitDeleteBranchRequest {
-  public static final String SERIALIZED_NAME_NAME = "name";
-  @SerializedName(SERIALIZED_NAME_NAME)
-  @javax.annotation.Nonnull
-  private String name;
+public class CodeRunRequest {
+  public static final String SERIALIZED_NAME_ARGV = "argv";
+  @SerializedName(SERIALIZED_NAME_ARGV)
+  @javax.annotation.Nullable
+  private List<String> argv = new ArrayList<>();
 
-  public static final String SERIALIZED_NAME_PATH = "path";
-  @SerializedName(SERIALIZED_NAME_PATH)
+  public static final String SERIALIZED_NAME_CODE = "code";
+  @SerializedName(SERIALIZED_NAME_CODE)
   @javax.annotation.Nonnull
-  private String path;
+  private String code;
 
-  public GitGitDeleteBranchRequest() {
+  public static final String SERIALIZED_NAME_ENVS = "envs";
+  @SerializedName(SERIALIZED_NAME_ENVS)
+  @javax.annotation.Nullable
+  private Map<String, String> envs = new HashMap<>();
+
+  public static final String SERIALIZED_NAME_LANGUAGE = "language";
+  @SerializedName(SERIALIZED_NAME_LANGUAGE)
+  @javax.annotation.Nonnull
+  private String language;
+
+  public static final String SERIALIZED_NAME_TIMEOUT = "timeout";
+  @SerializedName(SERIALIZED_NAME_TIMEOUT)
+  @javax.annotation.Nullable
+  private Integer timeout;
+
+  public CodeRunRequest() {
   }
 
-  public GitGitDeleteBranchRequest name(@javax.annotation.Nonnull String name) {
-    this.name = name;
+  public CodeRunRequest argv(@javax.annotation.Nullable List<String> argv) {
+    this.argv = argv;
+    return this;
+  }
+
+  public CodeRunRequest addArgvItem(String argvItem) {
+    if (this.argv == null) {
+      this.argv = new ArrayList<>();
+    }
+    this.argv.add(argvItem);
     return this;
   }
 
   /**
-   * Get name
-   * @return name
+   * Get argv
+   * @return argv
    */
-  @javax.annotation.Nonnull
-  public String getName() {
-    return name;
+  @javax.annotation.Nullable
+  public List<String> getArgv() {
+    return argv;
   }
 
-  public void setName(@javax.annotation.Nonnull String name) {
-    this.name = name;
+  public void setArgv(@javax.annotation.Nullable List<String> argv) {
+    this.argv = argv;
   }
 
 
-  public GitGitDeleteBranchRequest path(@javax.annotation.Nonnull String path) {
-    this.path = path;
+  public CodeRunRequest code(@javax.annotation.Nonnull String code) {
+    this.code = code;
     return this;
   }
 
   /**
-   * Get path
-   * @return path
+   * Get code
+   * @return code
    */
   @javax.annotation.Nonnull
-  public String getPath() {
-    return path;
+  public String getCode() {
+    return code;
   }
 
-  public void setPath(@javax.annotation.Nonnull String path) {
-    this.path = path;
+  public void setCode(@javax.annotation.Nonnull String code) {
+    this.code = code;
+  }
+
+
+  public CodeRunRequest envs(@javax.annotation.Nullable Map<String, String> envs) {
+    this.envs = envs;
+    return this;
+  }
+
+  public CodeRunRequest putEnvsItem(String key, String envsItem) {
+    if (this.envs == null) {
+      this.envs = new HashMap<>();
+    }
+    this.envs.put(key, envsItem);
+    return this;
+  }
+
+  /**
+   * Get envs
+   * @return envs
+   */
+  @javax.annotation.Nullable
+  public Map<String, String> getEnvs() {
+    return envs;
+  }
+
+  public void setEnvs(@javax.annotation.Nullable Map<String, String> envs) {
+    this.envs = envs;
+  }
+
+
+  public CodeRunRequest language(@javax.annotation.Nonnull String language) {
+    this.language = language;
+    return this;
+  }
+
+  /**
+   * python, javascript, typescript
+   * @return language
+   */
+  @javax.annotation.Nonnull
+  public String getLanguage() {
+    return language;
+  }
+
+  public void setLanguage(@javax.annotation.Nonnull String language) {
+    this.language = language;
+  }
+
+
+  public CodeRunRequest timeout(@javax.annotation.Nullable Integer timeout) {
+    this.timeout = timeout;
+    return this;
+  }
+
+  /**
+   * Get timeout
+   * @return timeout
+   */
+  @javax.annotation.Nullable
+  public Integer getTimeout() {
+    return timeout;
+  }
+
+  public void setTimeout(@javax.annotation.Nullable Integer timeout) {
+    this.timeout = timeout;
   }
 
   /**
@@ -113,9 +205,9 @@ public class GitGitDeleteBranchRequest {
    *
    * @param key name of the property
    * @param value value of the property
-   * @return the GitGitDeleteBranchRequest instance itself
+   * @return the CodeRunRequest instance itself
    */
-  public GitGitDeleteBranchRequest putAdditionalProperty(String key, Object value) {
+  public CodeRunRequest putAdditionalProperty(String key, Object value) {
     if (this.additionalProperties == null) {
         this.additionalProperties = new HashMap<String, Object>();
     }
@@ -154,23 +246,29 @@ public class GitGitDeleteBranchRequest {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    GitGitDeleteBranchRequest gitGitDeleteBranchRequest = (GitGitDeleteBranchRequest) o;
-    return Objects.equals(this.name, gitGitDeleteBranchRequest.name) &&
-        Objects.equals(this.path, gitGitDeleteBranchRequest.path)&&
-        Objects.equals(this.additionalProperties, gitGitDeleteBranchRequest.additionalProperties);
+    CodeRunRequest codeRunRequest = (CodeRunRequest) o;
+    return Objects.equals(this.argv, codeRunRequest.argv) &&
+        Objects.equals(this.code, codeRunRequest.code) &&
+        Objects.equals(this.envs, codeRunRequest.envs) &&
+        Objects.equals(this.language, codeRunRequest.language) &&
+        Objects.equals(this.timeout, codeRunRequest.timeout)&&
+        Objects.equals(this.additionalProperties, codeRunRequest.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, path, additionalProperties);
+    return Objects.hash(argv, code, envs, language, timeout, additionalProperties);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class GitGitDeleteBranchRequest {\n");
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    path: ").append(toIndentedString(path)).append("\n");
+    sb.append("class CodeRunRequest {\n");
+    sb.append("    argv: ").append(toIndentedString(argv)).append("\n");
+    sb.append("    code: ").append(toIndentedString(code)).append("\n");
+    sb.append("    envs: ").append(toIndentedString(envs)).append("\n");
+    sb.append("    language: ").append(toIndentedString(language)).append("\n");
+    sb.append("    timeout: ").append(toIndentedString(timeout)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -194,40 +292,47 @@ public class GitGitDeleteBranchRequest {
   static {
     // a set of all properties/fields (JSON key names)
     openapiFields = new HashSet<String>();
-    openapiFields.add("name");
-    openapiFields.add("path");
+    openapiFields.add("argv");
+    openapiFields.add("code");
+    openapiFields.add("envs");
+    openapiFields.add("language");
+    openapiFields.add("timeout");
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("name");
-    openapiRequiredFields.add("path");
+    openapiRequiredFields.add("code");
+    openapiRequiredFields.add("language");
   }
 
   /**
    * Validates the JSON Element and throws an exception if issues found
    *
    * @param jsonElement JSON Element
-   * @throws IOException if the JSON Element is invalid with respect to GitGitDeleteBranchRequest
+   * @throws IOException if the JSON Element is invalid with respect to CodeRunRequest
    */
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
-        if (!GitGitDeleteBranchRequest.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in GitGitDeleteBranchRequest is not found in the empty JSON string", GitGitDeleteBranchRequest.openapiRequiredFields.toString()));
+        if (!CodeRunRequest.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
+          throw new IllegalArgumentException(String.format("The required field(s) %s in CodeRunRequest is not found in the empty JSON string", CodeRunRequest.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
-      for (String requiredField : GitGitDeleteBranchRequest.openapiRequiredFields) {
+      for (String requiredField : CodeRunRequest.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
           throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
-      if (!jsonObj.get("name").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("name").toString()));
+      // ensure the optional json data is an array if present
+      if (jsonObj.get("argv") != null && !jsonObj.get("argv").isJsonNull() && !jsonObj.get("argv").isJsonArray()) {
+        throw new IllegalArgumentException(String.format("Expected the field `argv` to be an array in the JSON string but got `%s`", jsonObj.get("argv").toString()));
       }
-      if (!jsonObj.get("path").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `path` to be a primitive type in the JSON string but got `%s`", jsonObj.get("path").toString()));
+      if (!jsonObj.get("code").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format("Expected the field `code` to be a primitive type in the JSON string but got `%s`", jsonObj.get("code").toString()));
+      }
+      if (!jsonObj.get("language").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format("Expected the field `language` to be a primitive type in the JSON string but got `%s`", jsonObj.get("language").toString()));
       }
   }
 
@@ -235,16 +340,16 @@ public class GitGitDeleteBranchRequest {
     @SuppressWarnings("unchecked")
     @Override
     public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-       if (!GitGitDeleteBranchRequest.class.isAssignableFrom(type.getRawType())) {
-         return null; // this class only serializes 'GitGitDeleteBranchRequest' and its subtypes
+       if (!CodeRunRequest.class.isAssignableFrom(type.getRawType())) {
+         return null; // this class only serializes 'CodeRunRequest' and its subtypes
        }
        final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
-       final TypeAdapter<GitGitDeleteBranchRequest> thisAdapter
-                        = gson.getDelegateAdapter(this, TypeToken.get(GitGitDeleteBranchRequest.class));
+       final TypeAdapter<CodeRunRequest> thisAdapter
+                        = gson.getDelegateAdapter(this, TypeToken.get(CodeRunRequest.class));
 
-       return (TypeAdapter<T>) new TypeAdapter<GitGitDeleteBranchRequest>() {
+       return (TypeAdapter<T>) new TypeAdapter<CodeRunRequest>() {
            @Override
-           public void write(JsonWriter out, GitGitDeleteBranchRequest value) throws IOException {
+           public void write(JsonWriter out, CodeRunRequest value) throws IOException {
              JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
              obj.remove("additionalProperties");
              // serialize additional properties
@@ -272,12 +377,12 @@ public class GitGitDeleteBranchRequest {
            }
 
            @Override
-           public GitGitDeleteBranchRequest read(JsonReader in) throws IOException {
+           public CodeRunRequest read(JsonReader in) throws IOException {
              JsonElement jsonElement = elementAdapter.read(in);
              validateJsonElement(jsonElement);
              JsonObject jsonObj = jsonElement.getAsJsonObject();
              // store additional fields in the deserialized instance
-             GitGitDeleteBranchRequest instance = thisAdapter.fromJsonTree(jsonObj);
+             CodeRunRequest instance = thisAdapter.fromJsonTree(jsonObj);
              for (Map.Entry<String, JsonElement> entry : jsonObj.entrySet()) {
                if (!openapiFields.contains(entry.getKey())) {
                  if (entry.getValue().isJsonPrimitive()) { // primitive type
@@ -304,18 +409,18 @@ public class GitGitDeleteBranchRequest {
   }
 
   /**
-   * Create an instance of GitGitDeleteBranchRequest given an JSON string
+   * Create an instance of CodeRunRequest given an JSON string
    *
    * @param jsonString JSON string
-   * @return An instance of GitGitDeleteBranchRequest
-   * @throws IOException if the JSON string is invalid with respect to GitGitDeleteBranchRequest
+   * @return An instance of CodeRunRequest
+   * @throws IOException if the JSON string is invalid with respect to CodeRunRequest
    */
-  public static GitGitDeleteBranchRequest fromJson(String jsonString) throws IOException {
-    return JSON.getGson().fromJson(jsonString, GitGitDeleteBranchRequest.class);
+  public static CodeRunRequest fromJson(String jsonString) throws IOException {
+    return JSON.getGson().fromJson(jsonString, CodeRunRequest.class);
   }
 
   /**
-   * Convert an instance of GitGitDeleteBranchRequest to an JSON string
+   * Convert an instance of CodeRunRequest to an JSON string
    *
    * @return JSON string
    */

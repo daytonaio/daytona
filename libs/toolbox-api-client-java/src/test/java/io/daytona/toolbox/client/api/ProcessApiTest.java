@@ -14,6 +14,8 @@
 package io.daytona.toolbox.client.api;
 
 import io.daytona.toolbox.client.ApiException;
+import io.daytona.toolbox.client.model.CodeRunRequest;
+import io.daytona.toolbox.client.model.CodeRunResponse;
 import io.daytona.toolbox.client.model.Command;
 import io.daytona.toolbox.client.model.CreateSessionRequest;
 import io.daytona.toolbox.client.model.ExecuteRequest;
@@ -24,6 +26,7 @@ import io.daytona.toolbox.client.model.PtyListResponse;
 import io.daytona.toolbox.client.model.PtyResizeRequest;
 import io.daytona.toolbox.client.model.PtySessionInfo;
 import io.daytona.toolbox.client.model.Session;
+import io.daytona.toolbox.client.model.SessionCommandLogsResponse;
 import io.daytona.toolbox.client.model.SessionExecuteRequest;
 import io.daytona.toolbox.client.model.SessionExecuteResponse;
 import io.daytona.toolbox.client.model.SessionSendInputRequest;
@@ -42,6 +45,20 @@ import java.util.Map;
 public class ProcessApiTest {
 
     private final ProcessApi api = new ProcessApi();
+
+    /**
+     * Execute code
+     *
+     * Execute Python, JavaScript, or TypeScript code and return output, exit code, and artifacts
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void codeRunTest() throws ApiException {
+        CodeRunRequest request = null;
+        CodeRunResponse response = api.codeRun(request);
+        // TODO: test validations
+    }
 
     /**
      * Connect to PTY session via WebSocket
@@ -130,14 +147,14 @@ public class ProcessApiTest {
     /**
      * Get entrypoint logs
      *
-     * Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.
+     * Get logs for a sandbox entrypoint session. Returns JSON with separated stdout/stderr for SDK &gt;&#x3D; 0.161.0, plain text otherwise. Supports WebSocket streaming.
      *
      * @throws ApiException if the Api call fails
      */
     @Test
     public void getEntrypointLogsTest() throws ApiException {
         Boolean follow = null;
-        String response = api.getEntrypointLogs(follow);
+        SessionCommandLogsResponse response = api.getEntrypointLogs(follow);
         // TODO: test validations
     }
 
@@ -200,7 +217,7 @@ public class ProcessApiTest {
     /**
      * Get session command logs
      *
-     * Get logs for a specific command within a session. Supports both HTTP and WebSocket streaming.
+     * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK &gt;&#x3D; 0.163.0, plain text otherwise. Supports WebSocket streaming.
      *
      * @throws ApiException if the Api call fails
      */
@@ -209,7 +226,7 @@ public class ProcessApiTest {
         String sessionId = null;
         String commandId = null;
         Boolean follow = null;
-        String response = api.getSessionCommandLogs(sessionId, commandId, follow);
+        SessionCommandLogsResponse response = api.getSessionCommandLogs(sessionId, commandId, follow);
         // TODO: test validations
     }
 

@@ -17,22 +17,25 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
 
 _JSON_ADAPTER = TypeAdapter(Dict[str, Any])
 
-class GitGitDeleteBranchRequest(BaseModel):
+class CodeRunRequest(BaseModel):
     """
-    GitGitDeleteBranchRequest
+    CodeRunRequest
     """ # noqa: E501
-    name: StrictStr
-    path: StrictStr
+    argv: Optional[List[StrictStr]] = None
+    code: StrictStr
+    envs: Optional[Dict[str, StrictStr]] = None
+    language: StrictStr = Field(description="python, javascript, typescript")
+    timeout: Optional[StrictInt] = None
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "path"]
+    __properties: ClassVar[List[str]] = ["argv", "code", "envs", "language", "timeout"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -51,7 +54,7 @@ class GitGitDeleteBranchRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of GitGitDeleteBranchRequest from a JSON string"""
+        """Create an instance of CodeRunRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -83,7 +86,7 @@ class GitGitDeleteBranchRequest(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of GitGitDeleteBranchRequest from a dict"""
+        """Create an instance of CodeRunRequest from a dict"""
         if obj is None:
             return None
 
@@ -91,8 +94,11 @@ class GitGitDeleteBranchRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "name": obj.get("name"),
-            "path": obj.get("path")
+            "argv": obj.get("argv"),
+            "code": obj.get("code"),
+            "envs": obj.get("envs"),
+            "language": obj.get("language"),
+            "timeout": obj.get("timeout")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

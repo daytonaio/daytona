@@ -16,38 +16,38 @@ import (
 	"fmt"
 )
 
-// checks if the GitGitDeleteBranchRequest type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &GitGitDeleteBranchRequest{}
+// checks if the GitDeleteBranchRequest type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &GitDeleteBranchRequest{}
 
-// GitGitDeleteBranchRequest struct for GitGitDeleteBranchRequest
-type GitGitDeleteBranchRequest struct {
+// GitDeleteBranchRequest struct for GitDeleteBranchRequest
+type GitDeleteBranchRequest struct {
 	Name string `json:"name"`
 	Path string `json:"path"`
 }
 
-type _GitGitDeleteBranchRequest GitGitDeleteBranchRequest
+type _GitDeleteBranchRequest GitDeleteBranchRequest
 
-// NewGitGitDeleteBranchRequest instantiates a new GitGitDeleteBranchRequest object
+// NewGitDeleteBranchRequest instantiates a new GitDeleteBranchRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGitGitDeleteBranchRequest(name string, path string) *GitGitDeleteBranchRequest {
-	this := GitGitDeleteBranchRequest{}
+func NewGitDeleteBranchRequest(name string, path string) *GitDeleteBranchRequest {
+	this := GitDeleteBranchRequest{}
 	this.Name = name
 	this.Path = path
 	return &this
 }
 
-// NewGitGitDeleteBranchRequestWithDefaults instantiates a new GitGitDeleteBranchRequest object
+// NewGitDeleteBranchRequestWithDefaults instantiates a new GitDeleteBranchRequest object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewGitGitDeleteBranchRequestWithDefaults() *GitGitDeleteBranchRequest {
-	this := GitGitDeleteBranchRequest{}
+func NewGitDeleteBranchRequestWithDefaults() *GitDeleteBranchRequest {
+	this := GitDeleteBranchRequest{}
 	return &this
 }
 
 // GetName returns the Name field value
-func (o *GitGitDeleteBranchRequest) GetName() string {
+func (o *GitDeleteBranchRequest) GetName() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -58,7 +58,7 @@ func (o *GitGitDeleteBranchRequest) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
-func (o *GitGitDeleteBranchRequest) GetNameOk() (*string, bool) {
+func (o *GitDeleteBranchRequest) GetNameOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -66,12 +66,12 @@ func (o *GitGitDeleteBranchRequest) GetNameOk() (*string, bool) {
 }
 
 // SetName sets field value
-func (o *GitGitDeleteBranchRequest) SetName(v string) {
+func (o *GitDeleteBranchRequest) SetName(v string) {
 	o.Name = v
 }
 
 // GetPath returns the Path field value
-func (o *GitGitDeleteBranchRequest) GetPath() string {
+func (o *GitDeleteBranchRequest) GetPath() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -82,7 +82,7 @@ func (o *GitGitDeleteBranchRequest) GetPath() string {
 
 // GetPathOk returns a tuple with the Path field value
 // and a boolean to check if the value has been set.
-func (o *GitGitDeleteBranchRequest) GetPathOk() (*string, bool) {
+func (o *GitDeleteBranchRequest) GetPathOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -90,11 +90,11 @@ func (o *GitGitDeleteBranchRequest) GetPathOk() (*string, bool) {
 }
 
 // SetPath sets field value
-func (o *GitGitDeleteBranchRequest) SetPath(v string) {
+func (o *GitDeleteBranchRequest) SetPath(v string) {
 	o.Path = v
 }
 
-func (o GitGitDeleteBranchRequest) MarshalJSON() ([]byte, error) {
+func (o GitDeleteBranchRequest) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -102,14 +102,14 @@ func (o GitGitDeleteBranchRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o GitGitDeleteBranchRequest) ToMap() (map[string]interface{}, error) {
+func (o GitDeleteBranchRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
 	toSerialize["path"] = o.Path
 	return toSerialize, nil
 }
 
-func (o *GitGitDeleteBranchRequest) UnmarshalJSON(data []byte) (err error) {
+func (o *GitDeleteBranchRequest) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -132,53 +132,53 @@ func (o *GitGitDeleteBranchRequest) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varGitGitDeleteBranchRequest := _GitGitDeleteBranchRequest{}
+	varGitDeleteBranchRequest := _GitDeleteBranchRequest{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varGitGitDeleteBranchRequest)
+	err = decoder.Decode(&varGitDeleteBranchRequest)
 
 	if err != nil {
 		return err
 	}
 
-	*o = GitGitDeleteBranchRequest(varGitGitDeleteBranchRequest)
+	*o = GitDeleteBranchRequest(varGitDeleteBranchRequest)
 
 	return err
 }
 
-type NullableGitGitDeleteBranchRequest struct {
-	value *GitGitDeleteBranchRequest
+type NullableGitDeleteBranchRequest struct {
+	value *GitDeleteBranchRequest
 	isSet bool
 }
 
-func (v NullableGitGitDeleteBranchRequest) Get() *GitGitDeleteBranchRequest {
+func (v NullableGitDeleteBranchRequest) Get() *GitDeleteBranchRequest {
 	return v.value
 }
 
-func (v *NullableGitGitDeleteBranchRequest) Set(val *GitGitDeleteBranchRequest) {
+func (v *NullableGitDeleteBranchRequest) Set(val *GitDeleteBranchRequest) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableGitGitDeleteBranchRequest) IsSet() bool {
+func (v NullableGitDeleteBranchRequest) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableGitGitDeleteBranchRequest) Unset() {
+func (v *NullableGitDeleteBranchRequest) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableGitGitDeleteBranchRequest(val *GitGitDeleteBranchRequest) *NullableGitGitDeleteBranchRequest {
-	return &NullableGitGitDeleteBranchRequest{value: val, isSet: true}
+func NewNullableGitDeleteBranchRequest(val *GitDeleteBranchRequest) *NullableGitDeleteBranchRequest {
+	return &NullableGitDeleteBranchRequest{value: val, isSet: true}
 }
 
-func (v NullableGitGitDeleteBranchRequest) MarshalJSON() ([]byte, error) {
+func (v NullableGitDeleteBranchRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableGitGitDeleteBranchRequest) UnmarshalJSON(src []byte) error {
+func (v *NullableGitDeleteBranchRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

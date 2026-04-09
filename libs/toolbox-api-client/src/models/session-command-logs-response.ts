@@ -17,20 +17,26 @@
 /**
  * 
  * @export
- * @interface GitGitDeleteBranchRequest
+ * @interface SessionCommandLogsResponse
  */
-export interface GitGitDeleteBranchRequest {
+export interface SessionCommandLogsResponse {
     /**
      * 
      * @type {string}
-     * @memberof GitGitDeleteBranchRequest
+     * @memberof SessionCommandLogsResponse
      */
-    'name': string;
+    'output': string;
     /**
      * 
      * @type {string}
-     * @memberof GitGitDeleteBranchRequest
+     * @memberof SessionCommandLogsResponse
      */
-    'path': string;
+    'stderr': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SessionCommandLogsResponse
+     */
+    'stdout': string;
 }
 

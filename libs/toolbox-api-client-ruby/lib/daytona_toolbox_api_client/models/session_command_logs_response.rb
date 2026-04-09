@@ -14,16 +14,19 @@ require 'date'
 require 'time'
 
 module DaytonaToolboxApiClient
-  class GitGitDeleteBranchRequest
-    attr_accessor :name
+  class SessionCommandLogsResponse
+    attr_accessor :output
 
-    attr_accessor :path
+    attr_accessor :stderr
+
+    attr_accessor :stdout
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'name' => :'name',
-        :'path' => :'path'
+        :'output' => :'output',
+        :'stderr' => :'stderr',
+        :'stdout' => :'stdout'
       }
     end
 
@@ -40,8 +43,9 @@ module DaytonaToolboxApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'name' => :'String',
-        :'path' => :'String'
+        :'output' => :'String',
+        :'stderr' => :'String',
+        :'stdout' => :'String'
       }
     end
 
@@ -55,28 +59,34 @@ module DaytonaToolboxApiClient
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `DaytonaToolboxApiClient::GitGitDeleteBranchRequest` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `DaytonaToolboxApiClient::SessionCommandLogsResponse` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `DaytonaToolboxApiClient::GitGitDeleteBranchRequest`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `DaytonaToolboxApiClient::SessionCommandLogsResponse`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }
 
-      if attributes.key?(:'name')
-        self.name = attributes[:'name']
+      if attributes.key?(:'output')
+        self.output = attributes[:'output']
       else
-        self.name = nil
+        self.output = nil
       end
 
-      if attributes.key?(:'path')
-        self.path = attributes[:'path']
+      if attributes.key?(:'stderr')
+        self.stderr = attributes[:'stderr']
       else
-        self.path = nil
+        self.stderr = nil
+      end
+
+      if attributes.key?(:'stdout')
+        self.stdout = attributes[:'stdout']
+      else
+        self.stdout = nil
       end
     end
 
@@ -85,12 +95,16 @@ module DaytonaToolboxApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
-      if @name.nil?
-        invalid_properties.push('invalid value for "name", name cannot be nil.')
+      if @output.nil?
+        invalid_properties.push('invalid value for "output", output cannot be nil.')
       end
 
-      if @path.nil?
-        invalid_properties.push('invalid value for "path", path cannot be nil.')
+      if @stderr.nil?
+        invalid_properties.push('invalid value for "stderr", stderr cannot be nil.')
+      end
+
+      if @stdout.nil?
+        invalid_properties.push('invalid value for "stdout", stdout cannot be nil.')
       end
 
       invalid_properties
@@ -100,29 +114,40 @@ module DaytonaToolboxApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      return false if @name.nil?
-      return false if @path.nil?
+      return false if @output.nil?
+      return false if @stderr.nil?
+      return false if @stdout.nil?
       true
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] name Value to be assigned
-    def name=(name)
-      if name.nil?
-        fail ArgumentError, 'name cannot be nil'
+    # @param [Object] output Value to be assigned
+    def output=(output)
+      if output.nil?
+        fail ArgumentError, 'output cannot be nil'
       end
 
-      @name = name
+      @output = output
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] path Value to be assigned
-    def path=(path)
-      if path.nil?
-        fail ArgumentError, 'path cannot be nil'
+    # @param [Object] stderr Value to be assigned
+    def stderr=(stderr)
+      if stderr.nil?
+        fail ArgumentError, 'stderr cannot be nil'
       end
 
-      @path = path
+      @stderr = stderr
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] stdout Value to be assigned
+    def stdout=(stdout)
+      if stdout.nil?
+        fail ArgumentError, 'stdout cannot be nil'
+      end
+
+      @stdout = stdout
     end
 
     # Checks equality by comparing each attribute.
@@ -130,8 +155,9 @@ module DaytonaToolboxApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          name == o.name &&
-          path == o.path
+          output == o.output &&
+          stderr == o.stderr &&
+          stdout == o.stdout
     end
 
     # @see the `==` method
@@ -143,7 +169,7 @@ module DaytonaToolboxApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [name, path].hash
+      [output, stderr, stdout].hash
     end
 
     # Builds the object from hash

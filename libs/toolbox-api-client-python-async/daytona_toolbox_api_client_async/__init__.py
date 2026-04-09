@@ -44,6 +44,11 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client_async.exceptions import ApiException
 
     # import models into sdk package
+    from daytona_toolbox_api_client_async.models.chart import Chart
+    from daytona_toolbox_api_client_async.models.chart_element import ChartElement
+    from daytona_toolbox_api_client_async.models.code_run_artifacts import CodeRunArtifacts
+    from daytona_toolbox_api_client_async.models.code_run_request import CodeRunRequest
+    from daytona_toolbox_api_client_async.models.code_run_response import CodeRunResponse
     from daytona_toolbox_api_client_async.models.command import Command
     from daytona_toolbox_api_client_async.models.completion_context import CompletionContext
     from daytona_toolbox_api_client_async.models.completion_item import CompletionItem
@@ -67,7 +72,7 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client_async.models.git_commit_info import GitCommitInfo
     from daytona_toolbox_api_client_async.models.git_commit_request import GitCommitRequest
     from daytona_toolbox_api_client_async.models.git_commit_response import GitCommitResponse
-    from daytona_toolbox_api_client_async.models.git_git_delete_branch_request import GitGitDeleteBranchRequest
+    from daytona_toolbox_api_client_async.models.git_delete_branch_request import GitDeleteBranchRequest
     from daytona_toolbox_api_client_async.models.git_repo_request import GitRepoRequest
     from daytona_toolbox_api_client_async.models.git_status import GitStatus
     from daytona_toolbox_api_client_async.models.initialize_request import InitializeRequest
@@ -113,6 +118,7 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client_async.models.scroll_response import ScrollResponse
     from daytona_toolbox_api_client_async.models.search_files_response import SearchFilesResponse
     from daytona_toolbox_api_client_async.models.session import Session
+    from daytona_toolbox_api_client_async.models.session_command_logs_response import SessionCommandLogsResponse
     from daytona_toolbox_api_client_async.models.session_execute_request import SessionExecuteRequest
     from daytona_toolbox_api_client_async.models.session_execute_response import SessionExecuteResponse
     from daytona_toolbox_api_client_async.models.session_send_input_request import SessionSendInputRequest
@@ -146,6 +152,11 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "ApiAttributeError": "daytona_toolbox_api_client_async.exceptions",
     "ApiException": "daytona_toolbox_api_client_async.exceptions",
     # models
+    "Chart": "daytona_toolbox_api_client_async.models.chart",
+    "ChartElement": "daytona_toolbox_api_client_async.models.chart_element",
+    "CodeRunArtifacts": "daytona_toolbox_api_client_async.models.code_run_artifacts",
+    "CodeRunRequest": "daytona_toolbox_api_client_async.models.code_run_request",
+    "CodeRunResponse": "daytona_toolbox_api_client_async.models.code_run_response",
     "Command": "daytona_toolbox_api_client_async.models.command",
     "CompletionContext": "daytona_toolbox_api_client_async.models.completion_context",
     "CompletionItem": "daytona_toolbox_api_client_async.models.completion_item",
@@ -169,7 +180,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "GitCommitInfo": "daytona_toolbox_api_client_async.models.git_commit_info",
     "GitCommitRequest": "daytona_toolbox_api_client_async.models.git_commit_request",
     "GitCommitResponse": "daytona_toolbox_api_client_async.models.git_commit_response",
-    "GitGitDeleteBranchRequest": "daytona_toolbox_api_client_async.models.git_git_delete_branch_request",
+    "GitDeleteBranchRequest": "daytona_toolbox_api_client_async.models.git_delete_branch_request",
     "GitRepoRequest": "daytona_toolbox_api_client_async.models.git_repo_request",
     "GitStatus": "daytona_toolbox_api_client_async.models.git_status",
     "InitializeRequest": "daytona_toolbox_api_client_async.models.initialize_request",
@@ -215,6 +226,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "ScrollResponse": "daytona_toolbox_api_client_async.models.scroll_response",
     "SearchFilesResponse": "daytona_toolbox_api_client_async.models.search_files_response",
     "Session": "daytona_toolbox_api_client_async.models.session",
+    "SessionCommandLogsResponse": "daytona_toolbox_api_client_async.models.session_command_logs_response",
     "SessionExecuteRequest": "daytona_toolbox_api_client_async.models.session_execute_request",
     "SessionExecuteResponse": "daytona_toolbox_api_client_async.models.session_execute_response",
     "SessionSendInputRequest": "daytona_toolbox_api_client_async.models.session_send_input_request",
@@ -262,6 +274,11 @@ __all__ = [
     "PortApi",
     "ProcessApi",
     "ServerApi",
+    "Chart",
+    "ChartElement",
+    "CodeRunArtifacts",
+    "CodeRunRequest",
+    "CodeRunResponse",
     "Command",
     "CompletionContext",
     "CompletionItem",
@@ -285,7 +302,7 @@ __all__ = [
     "GitCommitInfo",
     "GitCommitRequest",
     "GitCommitResponse",
-    "GitGitDeleteBranchRequest",
+    "GitDeleteBranchRequest",
     "GitRepoRequest",
     "GitStatus",
     "InitializeRequest",
@@ -331,6 +348,7 @@ __all__ = [
     "ScrollResponse",
     "SearchFilesResponse",
     "Session",
+    "SessionCommandLogsResponse",
     "SessionExecuteRequest",
     "SessionExecuteResponse",
     "SessionSendInputRequest",
