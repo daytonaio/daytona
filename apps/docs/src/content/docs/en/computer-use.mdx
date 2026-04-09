@@ -4,6 +4,8 @@ description: Programmatic control of desktop environments within Daytona sandbox
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
+import CardGrid from '@components/cards/CardGrid.astro'
+import LinkCard from '@components/cards/LinkCard.astro'
 
 Computer Use enables programmatic control of desktop environments within sandboxes. It provides mouse, keyboard, screenshot, screen recording, and display operations for automating GUI interactions and testing desktop applications.
 
@@ -1713,3 +1715,54 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/display/windo
 
 </TabItem>
 </Tabs>
+
+## References
+
+<CardGrid
+  gridNumber={2}
+  mobileGridNumber={2}
+  colsMinWidth="240px"
+  colsMinWidthMobile="280px"
+>
+  <LinkCard
+    title="Computer Use TypeScript SDK"
+    link="/docs/en/typescript-sdk/computer-use"
+    icon="seti:typescript"
+  >
+    <p>TypeScript SDK reference for computer use operations.</p>
+  </LinkCard>
+  <LinkCard
+    title="Computer Use Python Sync SDK"
+    link="/docs/en/python-sdk/sync/computer-use"
+    icon="seti:python"
+  >
+    <p>Python Sync SDK reference for computer use operations.</p>
+  </LinkCard>
+  <LinkCard
+    title="Computer Use Python Async SDK"
+    link="/docs/en/python-sdk/async/async-computer-use"
+    icon="seti:python"
+  >
+    <p>Python Async SDK reference for computer use operations.</p>
+  </LinkCard>
+  <LinkCard title="Computer Use Ruby SDK" link="/docs/en/ruby-sdk/computer-use" icon="seti:ruby">
+    <p>Ruby SDK reference for computer use operations.</p>
+  </LinkCard>
+  <LinkCard
+    title="Computer Use Go SDK"
+    link="/docs/en/go-sdk/daytona#ComputerUseService"
+    icon="seti:go"
+  >
+    <p>Go SDK reference for computer use operations.</p>
+  </LinkCard>
+  <LinkCard title="Computer Use Java SDK" link="/docs/en/java-sdk/computer-use" icon="seti:java">
+    <p>Java SDK reference for computer use operations.</p>
+  </LinkCard>
+  <LinkCard
+    title="Computer Use Toolbox API"
+    link="/docs/en/tools/api/#daytona-toolbox/tag/computer-use"
+    icon="seti:json"
+  >
+    <p>OpenAPI specification for computer use Toolbox API endpoints.</p>
+  </LinkCard>
+</CardGrid>

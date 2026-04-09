@@ -4,6 +4,8 @@ description: Access services running in your sandboxes through preview URLs.
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components'
+import CardGrid from '@components/cards/CardGrid.astro'
+import LinkCard from '@components/cards/LinkCard.astro'
 
 Daytona provides preview URLs for accessing services running in your sandboxes. Any process listening for HTTP traffic on ports `3000` - `9999` can be previewed through a generated URL.
 
@@ -215,3 +217,50 @@ To skip the warning page:
 - Send the `X-Daytona-Skip-Preview-Warning: true` header
 - Upgrade to [Tier 3](/docs/en/limits)
 - Deploy a [custom preview proxy](/docs/en/custom-domain-authentication)
+
+## References
+
+<CardGrid
+  gridNumber={2}
+  mobileGridNumber={2}
+  colsMinWidth="240px"
+  colsMinWidthMobile="280px"
+>
+  <LinkCard
+    title="Sandbox TypeScript SDK"
+    link="/docs/en/typescript-sdk/sandbox"
+    icon="seti:typescript"
+  >
+    <p>TypeScript SDK reference for preview URL operations.</p>
+  </LinkCard>
+  <LinkCard
+    title="Sandbox Python Sync SDK"
+    link="/docs/en/python-sdk/sync/sandbox"
+    icon="seti:python"
+  >
+    <p>Python Sync SDK reference for preview URL operations.</p>
+  </LinkCard>
+  <LinkCard
+    title="Sandbox Python Async SDK"
+    link="/docs/en/python-sdk/async/async-sandbox"
+    icon="seti:python"
+  >
+    <p>Python Async SDK reference for preview URL operations.</p>
+  </LinkCard>
+  <LinkCard title="Sandbox Ruby SDK" link="/docs/en/ruby-sdk/sandbox" icon="seti:ruby">
+    <p>Ruby SDK reference for preview URL operations.</p>
+  </LinkCard>
+  <LinkCard
+    title="Sandbox Go SDK"
+    link="/docs/en/go-sdk/daytona#Sandbox.GetPreviewLink"
+    icon="seti:go"
+  >
+    <p>Go SDK reference for preview URL operations.</p>
+  </LinkCard>
+  <LinkCard title="Sandbox API" link="/docs/en/tools/api/#daytona/tag/sandbox" icon="seti:json">
+    <p>OpenAPI specification for sandbox API endpoints.</p>
+  </LinkCard>
+  <LinkCard title="Preview CLI" link="/docs/en/tools/cli#daytona-preview-url" icon="seti:shell">
+    <p>CLI reference for preview URL operations.</p>
+  </LinkCard>
+</CardGrid>

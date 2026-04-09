@@ -4,6 +4,8 @@ description: Interact with language server protocol servers in your sandboxes.
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
+import CardGrid from '@components/cards/CardGrid.astro'
+import LinkCard from '@components/cards/LinkCard.astro'
 
 Daytona provides Language Server Protocol (LSP) support through sandbox instances. This enables advanced language features like code completion, diagnostics, and more.
 
@@ -515,3 +517,54 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/workspacesymbols?quer
 
 </TabItem>
 </Tabs>
+
+## References
+
+<CardGrid
+  gridNumber={2}
+  mobileGridNumber={2}
+  colsMinWidth="240px"
+  colsMinWidthMobile="280px"
+>
+  <LinkCard
+    title="LSP Server TypeScript SDK"
+    link="/docs/en/typescript-sdk/lsp-server"
+    icon="seti:typescript"
+  >
+    <p>TypeScript SDK reference for LSP server operations.</p>
+  </LinkCard>
+  <LinkCard
+    title="LSP Server Python Sync SDK"
+    link="/docs/en/python-sdk/sync/lsp-server"
+    icon="seti:python"
+  >
+    <p>Python Sync SDK reference for LSP server operations.</p>
+  </LinkCard>
+  <LinkCard
+    title="LSP Server Python Async SDK"
+    link="/docs/en/python-sdk/async/async-lsp-server"
+    icon="seti:python"
+  >
+    <p>Python Async SDK reference for LSP server operations.</p>
+  </LinkCard>
+  <LinkCard title="LSP Server Ruby SDK" link="/docs/en/ruby-sdk/lsp-server" icon="seti:ruby">
+    <p>Ruby SDK reference for LSP server operations.</p>
+  </LinkCard>
+  <LinkCard
+    title="LSP Server Go SDK"
+    link="/docs/en/go-sdk/daytona#LspServerService"
+    icon="seti:go"
+  >
+    <p>Go SDK reference for LSP server operations.</p>
+  </LinkCard>
+  <LinkCard title="LSP Server Java SDK" link="/docs/en/java-sdk/lsp-server" icon="seti:java">
+    <p>Java SDK reference for LSP server operations.</p>
+  </LinkCard>
+  <LinkCard
+    title="LSP Server Toolbox API"
+    link="/docs/en/tools/api/#daytona-toolbox/tag/lsp"
+    icon="seti:json"
+  >
+    <p>OpenAPI specification for LSP server Toolbox API endpoints.</p>
+  </LinkCard>
+</CardGrid>

@@ -18,9 +18,9 @@ tableOfContents: true
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona is an open-source, secure and elastic infrastructure for running AI-generated code. Daytona provides full composable computers — [sandboxes](/docs/en/sandboxes) — that you can manage programmatically using the Daytona SDKs, [CLI](/docs/en/tools/cli), and [API](/docs/en/tools/api) to run and control code execution.
+Daytona is an open-source, secure and elastic infrastructure for running AI-generated code. Daytona provides full composable computers — [sandboxes](/docs/en/sandboxes) — that you can manage programmatically using the **Daytona SDKs**, [CLI](/docs/en/tools/cli), and [API](/docs/en/tools/api) to run and control code execution.
 
-Daytona SDK is available for [Python](/docs/en/python-sdk), [TypeScript](/docs/en/typescript-sdk), [Ruby](/docs/en/ruby-sdk) and [Go](/docs/en/go-sdk) interfaces.
+Daytona SDK is available for [Python](/docs/en/python-sdk), [TypeScript](/docs/en/typescript-sdk), [Ruby](/docs/en/ruby-sdk), [Go](/docs/en/go-sdk), and [Java](/docs/en/java-sdk) interfaces.
 
 ## 1. Create an account
 
@@ -32,7 +32,7 @@ Generate an API key from the [Daytona Dashboard ↗](https://app.daytona.io/dash
 
 ## 3. Install the SDK
 
-Install the Daytona [Python](/docs/python-sdk), [TypeScript](/docs/typescript-sdk), [Ruby](/docs/ruby-sdk) or [Go](/docs/go-sdk) SDKs to interact with sandboxes from code.
+Install the Daytona [Python](/docs/python-sdk), [TypeScript](/docs/typescript-sdk), [Ruby](/docs/ruby-sdk), [Go](/docs/go-sdk), or [Java](/docs/java-sdk) SDKs to interact with sandboxes from code.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -49,7 +49,6 @@ npm install @daytona/sdk
 ```
 
 </TabItem>
-
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```bash
@@ -57,11 +56,35 @@ gem install daytona
 ```
 
 </TabItem>
-
 <TabItem label="Go" icon="seti:go">
 
 ```bash
 go get github.com/daytonaio/daytona/libs/sdk-go
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+**Gradle**
+
+Add the Daytona SDK dependency to your `build.gradle.kts`:
+
+```kotlin
+dependencies {
+    implementation("io.daytona:sdk-java:0.1.0")
+}
+```
+
+**Maven**
+
+Add the Daytona SDK dependency to your `pom.xml`:
+
+```xml
+<dependency>
+  <groupId>io.daytona</groupId>
+  <artifactId>sdk-java</artifactId>
+  <version>0.1.0</version>
+</dependency>
 ```
 
 </TabItem>
@@ -148,6 +171,29 @@ func main() {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+`Main.java`
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.DaytonaConfig;
+
+public class Main {
+    public static void main(String[] args) {
+        DaytonaConfig config = new DaytonaConfig.Builder()
+            .apiKey("YOUR_API_KEY")
+            .build();
+
+        try (Daytona daytona = new Daytona(config)) {
+            Sandbox sandbox = daytona.create();
+            System.out.println(sandbox.getId());
+        }
+    }
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -156,6 +202,13 @@ curl https://app.daytona.io/api/sandbox \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{}'
+```
+
+</TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```shell
+daytona create
 ```
 
 </TabItem>
@@ -311,6 +364,44 @@ func main() {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+`Main.java`
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.DaytonaConfig;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.ExecuteResponse;
+
+public class Main {
+    public static void main(String[] args) {
+        DaytonaConfig config = new DaytonaConfig.Builder()
+            .apiKey("YOUR_API_KEY") // Replace with your API key
+            .build();
+
+        try (Daytona daytona = new Daytona(config)) {
+            // Create the Sandbox instance
+            Sandbox sandbox = daytona.create();
+
+            // Run the code securely inside the Sandbox
+            ExecuteResponse response = sandbox.getProcess().executeCommand("echo \"Hello World\"");
+
+            // Check the response
+            if (response.getExitCode() != 0) {
+                System.err.println("Error: " + response.getExitCode() + " " + response.getResult());
+            } else {
+                System.out.println(response.getResult());
+            }
+
+            // Clean up
+            sandbox.delete();
+        }
+    }
+}
+```
+
+</TabItem>
 </Tabs>
 
 ## Summary
@@ -322,7 +413,7 @@ By following the steps above, you successfully create a Daytona account, obtain 
 Use the following resources to interact with sandboxes:
 
 - Learn more about Daytona with the [Getting Started](/docs/en/getting-started) guide
-- Get started with [Python](/docs/en/python-sdk), [TypeScript](/docs/en/typescript-sdk), [Ruby](/docs/en/ruby-sdk) or [Go](/docs/en/go-sdk) **SDKs**
+- Get started with [Python](/docs/en/python-sdk), [TypeScript](/docs/en/typescript-sdk), [Ruby](/docs/en/ruby-sdk), [Go](/docs/en/go-sdk), and [Java](/docs/en/java-sdk) **SDKs**
 - Install the [CLI](/docs/en/getting-started#cli) to manage sandboxes from the command line
 - Use the [API](/docs/en/tools/api) to manage sandboxes programmatically
 - View [examples](/docs/en/getting-started#examples) for common sandbox operations and best practices

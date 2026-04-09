@@ -4,6 +4,8 @@ description: Manage your organizations and their resources.
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
+import CardGrid from '@components/cards/CardGrid.astro'
+import LinkCard from '@components/cards/LinkCard.astro'
 
 Daytona provides organizations as a way to group resources and enable collaboration. Users can work individually in their personal organization or together in a collaborative organization.
 
@@ -555,3 +557,20 @@ curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/experimental-conf
 
 </TabItem>
 </Tabs>
+
+## References
+
+<CardGrid
+  gridNumber={2}
+  mobileGridNumber={2}
+  colsMinWidth="240px"
+  colsMinWidthMobile="280px"
+>
+  <LinkCard
+    title="Organizations API"
+    link="/docs/en/tools/api/#daytona/tag/organizations"
+    icon="seti:json"
+  >
+    <p>OpenAPI specification for organizations API endpoints.</p>
+  </LinkCard>
+</CardGrid>

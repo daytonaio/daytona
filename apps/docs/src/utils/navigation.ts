@@ -379,6 +379,7 @@ export function getHeaderActiveState(
   currentPath: string
 ): HeaderActiveState {
   const referencePaths = {
+    referencesHub: `${baseUrl}/en/references`,
     typescriptSdk: `${baseUrl}/en/typescript-sdk`,
     pythonSdk: `${baseUrl}/en/python-sdk`,
     rubySdk: `${baseUrl}/en/ruby-sdk`,
@@ -387,6 +388,11 @@ export function getHeaderActiveState(
     api: `${baseUrl}/en/tools/api`,
     cli: `${baseUrl}/en/tools/cli`,
   }
+
+  const isReferencesHubActive = isActiveOrParentPath(
+    referencePaths.referencesHub,
+    currentPath
+  )
 
   const isTypescriptSdkActive = isActiveOrParentPath(
     referencePaths.typescriptSdk,
@@ -417,6 +423,7 @@ export function getHeaderActiveState(
     isApiActive,
     isCliActive,
     isReferencesActive:
+      isReferencesHubActive ||
       isTypescriptSdkActive ||
       isPythonSdkActive ||
       isRubySdkActive ||

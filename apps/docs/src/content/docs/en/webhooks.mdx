@@ -3,6 +3,9 @@ title: Webhooks
 description: Connect your applications to Daytona events in real-time with webhooks for automation, monitoring, and integrations.
 ---
 
+import CardGrid from '@components/cards/CardGrid.astro'
+import LinkCard from '@components/cards/LinkCard.astro'
+
 Webhooks are HTTP callbacks that Daytona sends to your specified endpoints when specific events occur.
 Think of them as "reverse API calls" - instead of your application asking Daytona for updates, Daytona
 proactively notifies your application when something important happens.
@@ -16,10 +19,8 @@ Webhooks enable powerful automation and integration scenarios:
 - **Audit & compliance**: maintain detailed logs of all important changes
 
 :::note
-Webhooks are available to organization admins and members with appropriate permissions. If you don't see **Webhooks** in [Daytona Dashboard ↗](https://app.daytona.io/dashboard), contact [support@daytona.io](mailto:support@daytona.io) to enable webhooks for your organization. Provide your organization ID (found in your organization settings) when requesting access.
+Webhooks are available to organization admins and members with appropriate permissions. If you don't see **Webhooks** in [Daytona Dashboard ↗](https://app.daytona.io/dashboard), contact [support@daytona.io](mailto:support@daytona.io) to enable webhooks for your organization.
 :::
-
-For more information, see the [API](/docs/en/tools/api/#daytona/tag/webhooks) reference.
 
 ## Accessing webhooks
 
@@ -301,3 +302,27 @@ Sent when a volume's state changes.
 | **`oldState`**       | string | Previous volume state                               |
 | **`newState`**       | string | New volume state                                    |
 | **`updatedAt`**      | string | ISO 8601 timestamp when the volume was last updated |
+
+## References
+
+<CardGrid
+  gridNumber={2}
+  mobileGridNumber={2}
+  colsMinWidth="240px"
+  colsMinWidthMobile="280px"
+>
+  <LinkCard
+    title="Webhooks API"
+    link="/docs/en/tools/api/#daytona/tag/webhooks"
+    icon="seti:json"
+  >
+    <p>OpenAPI specification for webhooks API endpoints.</p>
+  </LinkCard>
+  <LinkCard
+    title="Webhook events"
+    link="/docs/en/tools/api/#daytona/webhook/undefined/"
+    icon="seti:json"
+  >
+    <p>OpenAPI specification for webhook events.</p>
+  </LinkCard>
+</CardGrid>

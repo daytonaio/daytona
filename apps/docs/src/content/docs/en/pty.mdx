@@ -4,6 +4,8 @@ description: Interact with pseudo terminal sessions in your sandboxes.
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
+import CardGrid from '@components/cards/CardGrid.astro'
+import LinkCard from '@components/cards/LinkCard.astro'
 
 Daytona provides powerful pseudo terminal (PTY) capabilities through the `process` module in sandboxes. PTY sessions allow you to create interactive terminal sessions that can execute commands, handle user input, and manage terminal operations.
 
@@ -933,6 +935,7 @@ ensure
   pty_handle&.kill
 end
 ```
+
 </TabItem>
 <TabItem label="Go" icon="seti:go">
 
@@ -1445,6 +1448,7 @@ if result.exit_code != 0:
     print(f"Command failed: {result.exit_code}")
     print(f"Error: {result.error}")
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -1494,3 +1498,54 @@ if result.ExitCode != nil && *result.ExitCode != 0 {
 - **Connection issues**: verify sandbox status, network connectivity, and proper session IDs
 - **Performance issues**: use appropriate terminal dimensions and efficient data handlers
 - **Process management**: use explicit `kill()` calls and proper timeout handling for long-running processes
+
+## References
+
+<CardGrid
+  gridNumber={2}
+  mobileGridNumber={2}
+  colsMinWidth="240px"
+  colsMinWidthMobile="280px"
+>
+  <LinkCard
+    title="PTY TypeScript SDK"
+    link="/docs/en/typescript-sdk/pty"
+    icon="seti:typescript"
+  >
+    <p>TypeScript SDK reference for PTY operations.</p>
+  </LinkCard>
+  <LinkCard
+    title="PTY Python Sync SDK"
+    link="/docs/en/python-sdk/sync/process"
+    icon="seti:python"
+  >
+    <p>Python Sync SDK reference for PTY operations.</p>
+  </LinkCard>
+  <LinkCard
+    title="PTY Python Async SDK"
+    link="/docs/en/python-sdk/async/async-process"
+    icon="seti:python"
+  >
+    <p>Python Async SDK reference for PTY operations.</p>
+  </LinkCard>
+  <LinkCard title="PTY Ruby SDK" link="/docs/en/ruby-sdk/process" icon="seti:ruby">
+    <p>Ruby SDK reference for PTY operations.</p>
+  </LinkCard>
+  <LinkCard
+    title="PTY Go SDK"
+    link="/docs/en/go-sdk/daytona#ProcessService"
+    icon="seti:go"
+  >
+    <p>Go SDK reference for PTY operations.</p>
+  </LinkCard>
+  <LinkCard title="PTY Java SDK" link="/docs/en/java-sdk/pty" icon="seti:java">
+    <p>Java SDK reference for PTY operations.</p>
+  </LinkCard>
+  <LinkCard
+    title="PTY Toolbox API"
+    link="/docs/en/tools/api/#daytona-toolbox/tag/process"
+    icon="seti:json"
+  >
+    <p>OpenAPI specification for PTY Toolbox API endpoints.</p>
+  </LinkCard>
+</CardGrid>
