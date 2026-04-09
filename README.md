@@ -121,8 +121,22 @@ Standalone packages and libraries for interacting with Daytona using Go:
 
 #### Java
 
-```bash
-io.daytona:sdk
+**Gradle** (`build.gradle.kts`):
+
+```kotlin
+dependencies {
+    implementation("io.daytona:sdk:0.1.0")
+}
+```
+
+**Maven** (`pom.xml`):
+
+```xml
+<dependency>
+  <groupId>io.daytona</groupId>
+  <artifactId>sdk</artifactId>
+  <version>0.1.0</version>
+</dependency>
 ```
 
 Standalone packages and libraries for interacting with Daytona using Java:
