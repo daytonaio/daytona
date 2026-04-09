@@ -534,12 +534,22 @@ export class SnapshotService {
 
     // validate usage quotas
     await this.organizationUsageService.incrementPendingSnapshotUsage(organization.id, addedSnapshotCount)
+    await this.organizationUsageService.incrementPendingTotalSnapshotUsage(organization.id, addedSnapshotCount)
 
     const usageOverview = await this.organizationUsageService.getSnapshotUsageOverview(organization.id)
+    const totalUsageOverview = await this.organizationUsageService.getTotalSnapshotUsageOverview(organization.id)
 
     try {
       if (usageOverview.currentSnapshotUsage + usageOverview.pendingSnapshotUsage > organization.snapshotQuota) {
         throw new ForbiddenException(`Snapshot quota exceeded. Maximum allowed: ${organization.snapshotQuota}`)
+      }
+      if (
+        totalUsageOverview.currentTotalSnapshotUsage + totalUsageOverview.pendingTotalSnapshotUsage >
+        organization.totalSnapshotQuota
+      ) {
+        throw new ForbiddenException(
+          `Total snapshot quota exceeded. Maximum allowed: ${organization.totalSnapshotQuota}`,
+        )
       }
     } catch (error) {
       await this.rollbackPendingUsage(organization.id, addedSnapshotCount)
@@ -558,6 +568,10 @@ export class SnapshotService {
 
     try {
       await this.organizationUsageService.decrementPendingSnapshotUsage(organizationId, pendingSnapshotCountIncrement)
+      await this.organizationUsageService.decrementPendingTotalSnapshotUsage(
+        organizationId,
+        pendingSnapshotCountIncrement,
+      )
     } catch (error) {
       this.logger.error(`Error rolling back pending snapshot usage: ${error}`)
     }

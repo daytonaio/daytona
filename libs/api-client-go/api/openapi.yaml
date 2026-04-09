@@ -9561,9 +9561,11 @@ components:
       type: object
     OrganizationUsageOverview:
       example:
+        totalSnapshotQuotaAll: 3.616076749251911
         totalSnapshotQuota: 7.061401241503109
-        currentVolumeUsage: 2.027123023002322
-        totalVolumeQuota: 3.616076749251911
+        currentVolumeUsage: 7.386281948385884
+        currentTotalSnapshotUsage: 2.027123023002322
+        totalVolumeQuota: 4.145608029883936
         currentSnapshotUsage: 9.301444243932576
         regionUsage:
         - totalCpuQuota: 0.8008281904610115
@@ -9589,32 +9591,39 @@ components:
           type: number
         currentSnapshotUsage:
           type: number
+        totalSnapshotQuotaAll:
+          type: number
+        currentTotalSnapshotUsage:
+          type: number
         totalVolumeQuota:
           type: number
         currentVolumeUsage:
           type: number
       required:
       - currentSnapshotUsage
+      - currentTotalSnapshotUsage
       - currentVolumeUsage
       - regionUsage
       - totalSnapshotQuota
+      - totalSnapshotQuotaAll
       - totalVolumeQuota
       type: object
     UpdateOrganizationQuota:
       example:
-        sandboxCreateRateLimitTtlSeconds: 4.145608029883936
-        sandboxLifecycleRateLimit: 3.616076749251911
-        volumeQuota: 2.3021358869347655
-        maxSnapshotSize: 5.637376656633329
-        authenticatedRateLimit: 7.061401241503109
-        sandboxCreateRateLimit: 9.301444243932576
+        totalSnapshotQuota: 5.637376656633329
+        sandboxCreateRateLimitTtlSeconds: 7.386281948385884
+        sandboxLifecycleRateLimit: 2.027123023002322
+        volumeQuota: 7.061401241503109
+        maxSnapshotSize: 2.3021358869347655
+        authenticatedRateLimit: 9.301444243932576
+        sandboxCreateRateLimit: 3.616076749251911
         snapshotQuota: 5.962133916683182
-        sandboxLifecycleRateLimitTtlSeconds: 7.386281948385884
+        sandboxLifecycleRateLimitTtlSeconds: 1.2315135367772556
         maxCpuPerSandbox: 0.8008281904610115
         maxDiskPerSandbox: 1.4658129805029452
-        snapshotDeactivationTimeoutMinutes: 1.2315135367772556
+        snapshotDeactivationTimeoutMinutes: 1.0246457001441578
         maxMemoryPerSandbox: 6.027456183070403
-        authenticatedRateLimitTtlSeconds: 2.027123023002322
+        authenticatedRateLimitTtlSeconds: 4.145608029883936
       properties:
         maxCpuPerSandbox:
           nullable: true
@@ -9626,6 +9635,9 @@ components:
           nullable: true
           type: number
         snapshotQuota:
+          nullable: true
+          type: number
+        totalSnapshotQuota:
           nullable: true
           type: number
         maxSnapshotSize:
@@ -9669,6 +9681,7 @@ components:
       - sandboxLifecycleRateLimitTtlSeconds
       - snapshotDeactivationTimeoutMinutes
       - snapshotQuota
+      - totalSnapshotQuota
       - volumeQuota
       type: object
     UpdateOrganizationRegionQuota:
@@ -10247,11 +10260,12 @@ components:
         snapshotQuota: 7.061401241503109
         totalCpuQuota: 0.8008281904610115
         maxCpuPerSandbox: 5.962133916683182
+        totalSnapshotQuota: 9.301444243932576
         maxDiskPerSandbox: 2.3021358869347655
         maxMemoryPerSandbox: 5.637376656633329
-        volumeQuota: 3.616076749251911
+        volumeQuota: 2.027123023002322
         totalMemoryQuota: 6.027456183070403
-        maxSnapshotSize: 9.301444243932576
+        maxSnapshotSize: 3.616076749251911
         totalDiskQuota: 1.4658129805029452
       properties:
         totalCpuQuota:
@@ -10267,6 +10281,8 @@ components:
         maxDiskPerSandbox:
           type: number
         snapshotQuota:
+          type: number
+        totalSnapshotQuota:
           type: number
         maxSnapshotSize:
           type: number
@@ -10284,11 +10300,12 @@ components:
           snapshotQuota: 7.061401241503109
           totalCpuQuota: 0.8008281904610115
           maxCpuPerSandbox: 5.962133916683182
+          totalSnapshotQuota: 9.301444243932576
           maxDiskPerSandbox: 2.3021358869347655
           maxMemoryPerSandbox: 5.637376656633329
-          volumeQuota: 3.616076749251911
+          volumeQuota: 2.027123023002322
           totalMemoryQuota: 6.027456183070403
-          maxSnapshotSize: 9.301444243932576
+          maxSnapshotSize: 3.616076749251911
           totalDiskQuota: 1.4658129805029452
         email: email
       properties:

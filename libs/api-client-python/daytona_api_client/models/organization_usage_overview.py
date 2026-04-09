@@ -34,10 +34,12 @@ class OrganizationUsageOverview(BaseModel):
     region_usage: List[RegionUsageOverview] = Field(serialization_alias="regionUsage")
     total_snapshot_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalSnapshotQuota")
     current_snapshot_usage: Union[StrictFloat, StrictInt] = Field(serialization_alias="currentSnapshotUsage")
+    total_snapshot_quota_all: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalSnapshotQuotaAll")
+    current_total_snapshot_usage: Union[StrictFloat, StrictInt] = Field(serialization_alias="currentTotalSnapshotUsage")
     total_volume_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalVolumeQuota")
     current_volume_usage: Union[StrictFloat, StrictInt] = Field(serialization_alias="currentVolumeUsage")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["regionUsage", "totalSnapshotQuota", "currentSnapshotUsage", "totalVolumeQuota", "currentVolumeUsage"]
+    __properties: ClassVar[List[str]] = ["regionUsage", "totalSnapshotQuota", "currentSnapshotUsage", "totalSnapshotQuotaAll", "currentTotalSnapshotUsage", "totalVolumeQuota", "currentVolumeUsage"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -106,6 +108,8 @@ class OrganizationUsageOverview(BaseModel):
             "region_usage": [RegionUsageOverview.from_dict(_item) for _item in obj["regionUsage"]] if obj.get("regionUsage") is not None else None,
             "total_snapshot_quota": obj.get("totalSnapshotQuota"),
             "current_snapshot_usage": obj.get("currentSnapshotUsage"),
+            "total_snapshot_quota_all": obj.get("totalSnapshotQuotaAll"),
+            "current_total_snapshot_usage": obj.get("currentTotalSnapshotUsage"),
             "total_volume_quota": obj.get("totalVolumeQuota"),
             "current_volume_usage": obj.get("currentVolumeUsage")
         })

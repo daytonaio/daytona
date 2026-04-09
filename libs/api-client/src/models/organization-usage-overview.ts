@@ -46,6 +46,18 @@ export interface OrganizationUsageOverview {
      * @type {number}
      * @memberof OrganizationUsageOverview
      */
+    'totalSnapshotQuotaAll': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof OrganizationUsageOverview
+     */
+    'currentTotalSnapshotUsage': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof OrganizationUsageOverview
+     */
     'totalVolumeQuota': number;
     /**
      * 

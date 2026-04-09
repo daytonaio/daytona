@@ -33,11 +33,17 @@ export class OrganizationUsageOverviewDto {
   })
   regionUsage: RegionUsageOverviewDto[]
 
-  // Snapshot usage
+  // Snapshot usage (active snapshots)
   @ApiProperty()
   totalSnapshotQuota: number
   @ApiProperty()
   currentSnapshotUsage: number
+
+  // Total snapshot usage (all snapshots regardless of state)
+  @ApiProperty()
+  totalSnapshotQuotaAll: number
+  @ApiProperty()
+  currentTotalSnapshotUsage: number
 
   // Volume usage
   @ApiProperty()
