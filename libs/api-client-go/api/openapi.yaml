@@ -13691,8 +13691,6 @@ components:
       properties:
         name:
           type: string
-      required:
-      - name
       type: object
     JobStatus:
       enum:

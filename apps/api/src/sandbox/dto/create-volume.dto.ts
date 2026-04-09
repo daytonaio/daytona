@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiProperty, ApiSchema } from '@nestjs/swagger'
-import { IsString } from 'class-validator'
+import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
+import { IsOptional, IsString } from 'class-validator'
 import { IsSafeDisplayString } from '../../common/validators'
 
 @ApiSchema({ name: 'CreateVolume' })
 export class CreateVolumeDto {
-  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsString()
   @IsSafeDisplayString()
   name?: string
