@@ -170,6 +170,7 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
               action: { type: 'keyword' },
               targetType: { type: 'keyword' },
               statusCode: { type: 'integer' },
+              errorMessage: { type: 'text', index: false },
               createdAt: { type: 'date' },
             },
           },

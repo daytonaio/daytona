@@ -16,6 +16,7 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { JobStateHandlerService } from './job-state-handler.service'
 import { propagation, context as otelContext } from '@opentelemetry/api'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
+import { truncateErrorMessage } from '../../common/utils/truncate-error-message'
 
 const REDIS_BLOCKING_COMMAND_TIMEOUT_BUFFER_MS = 3_000
 
@@ -246,7 +247,7 @@ export class JobService {
 
     job.status = status
     if (errorMessage) {
-      job.errorMessage = errorMessage
+      job.errorMessage = truncateErrorMessage(errorMessage)
     }
 
     if (status === JobStatus.IN_PROGRESS && !job.startedAt) {

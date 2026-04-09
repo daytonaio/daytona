@@ -24,6 +24,7 @@ import { AuditService } from '../services/audit.service'
 import { AuthContext } from '../../common/interfaces/auth-context.interface'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { TypedConfigService } from '../../config/typed-config.service'
+import { truncateErrorMessage } from '../../common/utils/truncate-error-message'
 
 type RequestWithUser = Request & {
   user?: AuthContext
@@ -102,7 +103,9 @@ export class AuditInterceptor implements NestInterceptor {
         observer.complete()
       } catch (handlerError) {
         const errorMessage =
-          handlerError instanceof HttpException ? handlerError.message : 'An unexpected error occurred.'
+          handlerError instanceof HttpException
+            ? truncateErrorMessage(handlerError.message)
+            : 'An unexpected error occurred.'
         const statusCode = this.resolveErrorStatusCode(handlerError)
         await this.recordHandlerError(auditLog, errorMessage, statusCode)
 
