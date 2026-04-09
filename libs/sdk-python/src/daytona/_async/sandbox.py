@@ -38,6 +38,7 @@ from ..common.errors import DaytonaError, DaytonaNotFoundError, DaytonaValidatio
 from ..common.lsp_server import LspLanguageId, LspLanguageIdLiteral
 from ..common.protocols import SandboxCodeToolbox
 from ..common.sandbox import Resources
+from ..internal.pool_tracker import AsyncPoolSaturationTracker
 from ..internal.toolbox_api_client_proxy import ToolboxApiClientProxy
 from .code_interpreter import AsyncCodeInterpreter
 from .computer_use import AsyncComputerUse
@@ -101,6 +102,7 @@ class AsyncSandbox(SandboxDto):
         toolbox_api: ApiClient,
         sandbox_api: SandboxApi,
         code_toolbox: SandboxCodeToolbox,
+        pool_tracker: AsyncPoolSaturationTracker | None = None,
     ):
         """Initialize a new Sandbox instance.
 
@@ -109,6 +111,7 @@ class AsyncSandbox(SandboxDto):
             toolbox_api (ApiClient): API client for toolbox operations.
             sandbox_api (SandboxApi): API client for Sandbox operations.
             code_toolbox (SandboxCodeToolbox): Language-specific toolbox implementation.
+            pool_tracker (AsyncPoolSaturationTracker | None): Tracker for connection pool saturation.
         """
         super().__init__(**sandbox_dto.model_dump())
         self.__process_sandbox_dto(sandbox_dto)
@@ -116,7 +119,7 @@ class AsyncSandbox(SandboxDto):
         self._code_toolbox: SandboxCodeToolbox = code_toolbox
         # Wrap the toolbox API client to inject the sandbox ID into the resource path
         self._toolbox_api: ToolboxApiClientProxy[ApiClient] = ToolboxApiClientProxy(
-            toolbox_api, self.id, self.toolbox_proxy_url
+            toolbox_api, self.id, self.toolbox_proxy_url, pool_tracker
         )
 
         self._fs = AsyncFileSystem(FileSystemApi(self._toolbox_api))
