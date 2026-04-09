@@ -20,6 +20,7 @@ type Config struct {
 	RecordingsDir            string        `envconfig:"DAYTONA_RECORDINGS_DIR"`
 	OrganizationId           *string       `envconfig:"DAYTONA_ORGANIZATION_ID"`
 	RegionId                 *string       `envconfig:"DAYTONA_REGION_ID"`
+	Snapshot                 *string       `envconfig:"DAYTONA_SANDBOX_SNAPSHOT"`
 }
 
 var defaultDaemonLogFilePath = "/tmp/daytona-daemon.log"
