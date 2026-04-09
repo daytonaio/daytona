@@ -70,7 +70,7 @@ runs:
       with:
         python-version: '3.12'
 
-    - uses: ruby/setup-ruby@b8d447ba7506ac7e0c8fbc50762276fb3b7df731 # v1
+    - uses: ruby/setup-ruby@e65c17d16e57e481586a6a5a0282698790062f92 # v1.300.0
       if: inputs.install-ruby == 'true'
       with:
         ruby-version: '3.4.5'
