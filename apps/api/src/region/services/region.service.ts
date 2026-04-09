@@ -206,13 +206,17 @@ export class RegionService {
   }
 
   /**
-   * @param type - The type of the regions to find.
+   * @param regionTypes - Types of regions to find.
    * @returns The regions found ordered by name ascending.
    */
-  async findAllByRegionType(regionType: RegionType): Promise<RegionDto[]> {
+  async findAllByRegionTypes(regionTypes: RegionType[]): Promise<RegionDto[]> {
+    if (regionTypes.length === 0) {
+      return []
+    }
+
     const regions = await this.regionRepository.find({
       where: {
-        regionType,
+        regionType: In(regionTypes),
       },
       order: {
         name: 'ASC',
