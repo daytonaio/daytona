@@ -4,8 +4,6 @@ description: Interact with the file system in your sandboxes.
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
-import CardGrid from '@components/cards/CardGrid.astro'
-import LinkCard from '@components/cards/LinkCard.astro'
 
 Daytona provides comprehensive file system operations through the `fs` module in sandboxes.
 
@@ -1007,53 +1005,3 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/move?source=&destin
 </TabItem>
 </Tabs>
 
-## References
-
-<CardGrid
-  gridNumber={2}
-  mobileGridNumber={2}
-  colsMinWidth="240px"
-  colsMinWidthMobile="280px"
->
-  <LinkCard
-    title="File System TypeScript SDK"
-    link="/docs/en/typescript-sdk/file-system"
-    icon="seti:typescript"
-  >
-    <p>TypeScript SDK reference for file system operations.</p>
-  </LinkCard>
-  <LinkCard
-    title="File System Python Sync SDK"
-    link="/docs/en/python-sdk/sync/file-system"
-    icon="seti:python"
-  >
-    <p>Python Sync SDK reference for file system operations.</p>
-  </LinkCard>
-  <LinkCard
-    title="File System Python Async SDK"
-    link="/docs/en/python-sdk/async/async-file-system"
-    icon="seti:python"
-  >
-    <p>Python Async SDK reference for file system operations.</p>
-  </LinkCard>
-  <LinkCard title="File System Ruby SDK" link="/docs/en/ruby-sdk/file-system" icon="seti:ruby">
-    <p>Ruby SDK reference for file system operations.</p>
-  </LinkCard>
-  <LinkCard
-    title="File System Go SDK"
-    link="/docs/en/go-sdk/daytona#FileSystemService"
-    icon="seti:go"
-  >
-    <p>Go SDK reference for file system operations.</p>
-  </LinkCard>
-  <LinkCard title="File System Java SDK" link="/docs/en/java-sdk/file-system" icon="seti:java">
-    <p>Java SDK reference for file system operations.</p>
-  </LinkCard>
-  <LinkCard
-    title="File System Toolbox API"
-    link="/docs/en/tools/api/#daytona-toolbox/tag/file-system"
-    icon="seti:json"
-  >
-    <p>OpenAPI specification for file system Toolbox API endpoints.</p>
-  </LinkCard>
-</CardGrid>

@@ -4,8 +4,6 @@ description: Access your sandboxes using SSH token-based authentication.
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
-import CardGrid from '@components/cards/CardGrid.astro'
-import LinkCard from '@components/cards/LinkCard.astro'
 
 Daytona provides SSH access to your sandboxes using token-based authentication. This allows you to connect from local terminals, IDEs, and development tools without installing additional software.
 
@@ -185,42 +183,3 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxId}/ssh-access' \
 - [Web Terminal](/docs/en/web-terminal): browser-based terminal access to sandboxes
 - [Preview](/docs/en/preview): generate preview URLs for accessing sandbox services
 
-## References
-
-<CardGrid
-  gridNumber={2}
-  mobileGridNumber={2}
-  colsMinWidth="240px"
-  colsMinWidthMobile="280px"
->
-  <LinkCard
-    title="Sandbox TypeScript SDK"
-    link="/docs/en/typescript-sdk/sandbox"
-    icon="seti:typescript"
-  >
-    <p>TypeScript SDK reference for SSH access operations.</p>
-  </LinkCard>
-  <LinkCard
-    title="Sandbox Python Sync SDK"
-    link="/docs/en/python-sdk/sync/sandbox"
-    icon="seti:python"
-  >
-    <p>Python Sync SDK reference for SSH access operations.</p>
-  </LinkCard>
-  <LinkCard
-    title="Sandbox Python Async SDK"
-    link="/docs/en/python-sdk/async/async-sandbox"
-    icon="seti:python"
-  >
-    <p>Python Async SDK reference for SSH access operations.</p>
-  </LinkCard>
-  <LinkCard title="Sandbox Ruby SDK" link="/docs/en/ruby-sdk/sandbox" icon="seti:ruby">
-    <p>Ruby SDK reference for SSH access operations.</p>
-  </LinkCard>
-  <LinkCard title="Sandbox API" link="/docs/en/tools/api/#daytona/tag/sandbox" icon="seti:json">
-    <p>OpenAPI specification for sandbox API endpoints.</p>
-  </LinkCard>
-  <LinkCard title="SSH CLI" link="/docs/en/tools/cli#daytona-ssh" icon="seti:shell">
-    <p>CLI reference for SSH operations.</p>
-  </LinkCard>
-</CardGrid>

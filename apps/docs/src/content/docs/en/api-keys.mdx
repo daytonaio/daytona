@@ -4,8 +4,6 @@ description: Create and manage API keys for your organization.
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
-import CardGrid from '@components/cards/CardGrid.astro'
-import LinkCard from '@components/cards/LinkCard.astro'
 
 Daytona API keys authenticate requests to the [Daytona API](/docs/en/tools/api). They are used by the Daytona [SDKs](/docs/en/getting-started#sdks) and [CLI](/docs/en/getting-started#cli) to access and manage resources in your organization.
 
@@ -141,21 +139,4 @@ curl 'https://app.daytona.io/api/api-keys/{userId}/my-api-key' \
 
 </TabItem>
 </Tabs>
-
-## References
-
-<CardGrid
-  gridNumber={2}
-  mobileGridNumber={2}
-  colsMinWidth="240px"
-  colsMinWidthMobile="280px"
->
-  <LinkCard
-    title="API keys API"
-    link="/docs/en/tools/api/#daytona/tag/api-keys"
-    icon="seti:json"
-  >
-    <p>OpenAPI specification for API keys API endpoints.</p>
-  </LinkCard>
-</CardGrid>
 

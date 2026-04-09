@@ -3,9 +3,6 @@ title: Audit Logs
 description: View and monitor all user actions across your Daytona organization.
 ---
 
-import CardGrid from '@components/cards/CardGrid.astro'
-import LinkCard from '@components/cards/LinkCard.astro'
-
 Daytona audit logs provide a detailed record of user and system activity across your organization. Use this feature to track sandbox lifecycle events, user access, system changes, and more.
 
 - **Security audits**: monitor for unauthorized access or sandbox misuse
@@ -116,19 +113,3 @@ The outcome field indicates the result of the action. Statuses follow standard H
 | Redirect    | Redirects (3xx codes)         |
 | Error       | Client/server error (4xx/5xx) |
 
-## References
-
-<CardGrid
-  gridNumber={2}
-  mobileGridNumber={2}
-  colsMinWidth="240px"
-  colsMinWidthMobile="280px"
->
-  <LinkCard
-    title="Audit logs API"
-    link="/docs/en/tools/api/#daytona/tag/audit"
-    icon="seti:json"
-  >
-    <p>OpenAPI specification for audit logs API endpoints.</p>
-  </LinkCard>
-</CardGrid>

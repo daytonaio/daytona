@@ -5,8 +5,6 @@ description: Shared file access across sandboxes.
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 import Label from '@components/Label.astro'
-import CardGrid from '@components/cards/CardGrid.astro'
-import LinkCard from '@components/cards/LinkCard.astro'
 
 Volumes are FUSE-based mounts that provide shared file access across Daytona Sandboxes. They enable sandboxes to read from large files instantly - no need to upload files manually to each sandbox. Volume data is stored in an S3-compatible object store.
 
@@ -585,44 +583,3 @@ Daytona Volumes are included at no additional cost. Each organization can create
 
 You can view your current volume usage in the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/volumes).
 
-## References
-
-<CardGrid
-  gridNumber={2}
-  mobileGridNumber={2}
-  colsMinWidth="240px"
-  colsMinWidthMobile="280px"
->
-  <LinkCard title="Volume TypeScript SDK" link="/docs/en/typescript-sdk/volume" icon="seti:typescript">
-    <p>TypeScript SDK reference for volume operations.</p>
-  </LinkCard>
-  <LinkCard
-    title="Volume Python Sync SDK"
-    link="/docs/en/python-sdk/sync/volume"
-    icon="seti:python"
-  >
-    <p>Python Sync SDK reference for volume operations.</p>
-  </LinkCard>
-  <LinkCard
-    title="Volume Python Async SDK"
-    link="/docs/en/python-sdk/async/async-volume"
-    icon="seti:python"
-  >
-    <p>Python Async SDK reference for volume operations.</p>
-  </LinkCard>
-  <LinkCard title="Volume Ruby SDK" link="/docs/en/ruby-sdk/volume-service" icon="seti:ruby">
-    <p>Ruby SDK reference for volume operations.</p>
-  </LinkCard>
-  <LinkCard title="Volume Go SDK" link="/docs/en/go-sdk/daytona#VolumeService" icon="seti:go">
-    <p>Go SDK reference for volume operations.</p>
-  </LinkCard>
-  <LinkCard title="Volume Java SDK" link="/docs/en/java-sdk/volume-service" icon="seti:java">
-    <p>Java SDK reference for volume operations.</p>
-  </LinkCard>
-  <LinkCard title="Volume API" link="/docs/en/tools/api/#daytona/tag/volumes" icon="seti:json">
-    <p>OpenAPI specification for volume API endpoints.</p>
-  </LinkCard>
-  <LinkCard title="Volume CLI" link="/docs/en/tools/cli#daytona-volume" icon="seti:shell">
-    <p>CLI reference for volume operations.</p>
-  </LinkCard>
-</CardGrid>

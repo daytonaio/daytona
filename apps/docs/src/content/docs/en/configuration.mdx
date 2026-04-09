@@ -4,8 +4,6 @@ description: Configure your environment using code, environment variables, or a 
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
-import CardGrid from '@components/cards/CardGrid.astro'
-import LinkCard from '@components/cards/LinkCard.astro'
 
 Daytona supports multiple methods to configure your environment, in order of precedence:
 
@@ -159,46 +157,3 @@ If no configuration is provided, Daytona will use its built-in default values:
 | API URL    | https://app.daytona.io/api          |
 | Target     | Default region for the organization |
 
-## References
-
-<CardGrid
-  gridNumber={2}
-  mobileGridNumber={2}
-  colsMinWidth="240px"
-  colsMinWidthMobile="280px"
->
-  <LinkCard
-    title="DaytonaConfig TypeScript SDK"
-    link="/docs/en/typescript-sdk/daytona#daytonaconfig"
-    icon="seti:typescript"
-  >
-    <p>TypeScript SDK reference for environment configuration operations.</p>
-  </LinkCard>
-  <LinkCard
-    title="DaytonaConfig Python Sync SDK"
-    link="/docs/en/python-sdk/sync/daytona#daytonaconfig"
-    icon="seti:python"
-  >
-    <p>Python Sync SDK reference for environment configuration operations.</p>
-  </LinkCard>
-  <LinkCard
-    title="DaytonaConfig Python Async SDK"
-    link="/docs/en/python-sdk/async/async-daytona#daytonaconfig"
-    icon="seti:python"
-  >
-    <p>Python Async SDK reference for environment configuration operations.</p>
-  </LinkCard>
-  <LinkCard title="Config Ruby SDK" link="/docs/en/ruby-sdk/config#config" icon="seti:ruby">
-    <p>Ruby SDK reference for environment configuration operations.</p>
-  </LinkCard>
-  <LinkCard
-    title="DaytonaConfig Go SDK"
-    link="/docs/en/go-sdk/types#DaytonaConfig"
-    icon="seti:go"
-  >
-    <p>Go SDK reference for environment configuration operations.</p>
-  </LinkCard>
-  <LinkCard title="DaytonaConfig Java SDK" link="/docs/en/java-sdk/config" icon="seti:java">
-    <p>Java SDK reference for environment configuration operations.</p>
-  </LinkCard>
-</CardGrid>

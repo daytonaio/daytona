@@ -5,8 +5,6 @@ description: Pre-configured sandbox templates you can use to create sandboxes.
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 import Label from '@components/Label.astro'
-import CardGrid from '@components/cards/CardGrid.astro'
-import LinkCard from '@components/cards/LinkCard.astro'
 
 Snapshots are sandbox templates created from [Docker](https://www.docker.com/) or [OCI](https://opencontainers.org/) compatible images. Sandboxes can use a [default snapshot](#default-snapshots) or custom snapshots to provide a consistent and reproducible sandbox environments for your dependencies, settings, and resources.
 
@@ -1106,56 +1104,3 @@ All default snapshots are based on the `daytonaio/sandbox:<version>` image. For 
 - `typescript` (v5.9.3)
 - `typescript-language-server` (v5.1.3)
 
-## References
-
-<CardGrid
-  gridNumber={2}
-  mobileGridNumber={2}
-  colsMinWidth="240px"
-  colsMinWidthMobile="280px"
->
-  <LinkCard
-    title="Snapshot TypeScript SDK"
-    link="/docs/en/typescript-sdk/snapshot"
-    icon="seti:typescript"
-  >
-    <p>TypeScript SDK reference for snapshot operations.</p>
-  </LinkCard>
-  <LinkCard
-    title="Snapshot Python Sync SDK"
-    link="/docs/en/python-sdk/sync/snapshot"
-    icon="seti:python"
-  >
-    <p>Python Sync SDK reference for snapshot operations.</p>
-  </LinkCard>
-  <LinkCard
-    title="Snapshot Python Async SDK"
-    link="/docs/en/python-sdk/async/async-snapshot"
-    icon="seti:python"
-  >
-    <p>Python Async SDK reference for snapshot operations.</p>
-  </LinkCard>
-  <LinkCard title="Snapshot Ruby SDK" link="/docs/en/ruby-sdk/snapshot" icon="seti:ruby">
-    <p>Ruby SDK reference for snapshot operations.</p>
-  </LinkCard>
-  <LinkCard
-    title="Snapshot Go SDK"
-    link="/docs/en/go-sdk/daytona#SnapshotService"
-    icon="seti:go"
-  >
-    <p>Go SDK reference for snapshot operations.</p>
-  </LinkCard>
-  <LinkCard title="Snapshot Java SDK" link="/docs/en/java-sdk/snapshot" icon="seti:java">
-    <p>Java SDK reference for snapshot operations.</p>
-  </LinkCard>
-  <LinkCard
-    title="Snapshot API"
-    link="/docs/en/tools/api/#daytona/tag/snapshots"
-    icon="seti:json"
-  >
-    <p>OpenAPI specification for snapshot API endpoints.</p>
-  </LinkCard>
-  <LinkCard title="Snapshot CLI" link="/docs/en/tools/cli#daytona-snapshot" icon="seti:shell">
-    <p>CLI reference for snapshot operations.</p>
-  </LinkCard>
-</CardGrid>
