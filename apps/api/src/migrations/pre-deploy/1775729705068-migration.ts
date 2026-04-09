@@ -5,8 +5,8 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm'
 
-export class Migration1770000000000 implements MigrationInterface {
-  name = 'Migration1770000000000'
+export class Migration1775729705068 implements MigrationInterface {
+  name = 'Migration1775729705068'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`ALTER TABLE "audit_log" ADD "actorApiKeyPrefix" character varying`)
