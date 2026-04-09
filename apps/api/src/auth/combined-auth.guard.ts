@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common'
+import { Injectable, HttpException, Logger, UnauthorizedException, ServiceUnavailableException } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 
 /**
@@ -20,6 +20,11 @@ export class CombinedAuthGuard extends AuthGuard(['api-key', 'jwt']) {
   private readonly logger = new Logger(CombinedAuthGuard.name)
 
   handleRequest(err: any, user: any) {
+    if (err && (!(err instanceof HttpException) || err.getStatus() >= 500)) {
+      this.logger.error('Temporary authentication service error', err)
+      throw new ServiceUnavailableException('Temporary authentication service error')
+    }
+
     if (err || !user) {
       this.logger.debug('Authentication failed', { err, user })
       throw new UnauthorizedException('Invalid credentials')
