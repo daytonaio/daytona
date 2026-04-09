@@ -66,6 +66,13 @@ gem install daytona
 go get github.com/daytonaio/daytona/libs/sdk-go
 ```
 
+### Rust SDK
+
+```toml
+[dependencies]
+daytona = "0.0.0"
+```
+
 ---
 
 ## Features
@@ -141,6 +148,38 @@ func main() {
   sandbox, _ := client.Create(ctx, nil)
   response, _ := sandbox.Process.ExecuteCommand(ctx, "echo 'Hello World!'")
   fmt.Println(response.Result)
+}
+```
+
+### Rust SDK
+
+```rust
+use daytona::{Client, Config, CreateSandboxParams, CodeLanguage};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let config = Config::builder().api_key("YOUR_API_KEY").build();
+    let client = Client::new(config)?;
+
+    let params = CreateSandboxParams {
+        language: Some(CodeLanguage::Python),
+        ..Default::default()
+    };
+
+    let sandbox = client.create(params).await?;
+    let result = sandbox.process().await?.execute_command(
+        "python3 -c 'print(\"Sum of 3 and 4 is\", 3 + 4)'",
+        None, None, None
+    ).await?;
+
+    if result.exit_code != 0 {
+        eprintln!("Error running code: {} {}", result.exit_code, result.result);
+    } else {
+        println!("{}", result.result);
+    }
+
+    sandbox.delete().await?;
+    Ok(())
 }
 ```
 
