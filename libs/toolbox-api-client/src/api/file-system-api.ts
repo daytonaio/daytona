@@ -163,7 +163,7 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
             };
         },
         /**
-         * Download multiple files by providing their paths
+         * Download multiple files by providing their paths. Successful files are returned as multipart parts named `file`. Per-file failures are returned as multipart parts named `error` with JSON payloads shaped like ErrorResponse.
          * @summary Download multiple files
          * @param {FilesDownloadRequest} downloadFiles Paths of files to download
          * @param {*} [options] Override http request option.
@@ -620,7 +620,7 @@ export const FileSystemApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Download multiple files by providing their paths
+         * Download multiple files by providing their paths. Successful files are returned as multipart parts named `file`. Per-file failures are returned as multipart parts named `error` with JSON payloads shaped like ErrorResponse.
          * @summary Download multiple files
          * @param {FilesDownloadRequest} downloadFiles Paths of files to download
          * @param {*} [options] Override http request option.
@@ -798,7 +798,7 @@ export const FileSystemApiFactory = function (configuration?: Configuration, bas
             return localVarFp.downloadFile(path, options).then((request) => request(axios, basePath));
         },
         /**
-         * Download multiple files by providing their paths
+         * Download multiple files by providing their paths. Successful files are returned as multipart parts named `file`. Per-file failures are returned as multipart parts named `error` with JSON payloads shaped like ErrorResponse.
          * @summary Download multiple files
          * @param {FilesDownloadRequest} downloadFiles Paths of files to download
          * @param {*} [options] Override http request option.
@@ -952,7 +952,7 @@ export class FileSystemApi extends BaseAPI {
     }
 
     /**
-     * Download multiple files by providing their paths
+     * Download multiple files by providing their paths. Successful files are returned as multipart parts named `file`. Per-file failures are returned as multipart parts named `error` with JSON payloads shaped like ErrorResponse.
      * @summary Download multiple files
      * @param {FilesDownloadRequest} downloadFiles Paths of files to download
      * @param {*} [options] Override http request option.

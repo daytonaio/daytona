@@ -5,9 +5,9 @@ import base64
 import re
 from pathlib import Path
 
+# pylint: disable=import-error
 from litellm import completion  # pylint: disable=import-error
 
-# pylint: disable=import-error
 from daytona import CreateSandboxFromSnapshotParams, Daytona
 
 CODING_MODEL = "anthropic/claude-sonnet-4-0"

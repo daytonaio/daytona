@@ -17,7 +17,13 @@ import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'ax
 import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
 import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
 import { SandboxJsCodeToolbox } from './code-toolbox/SandboxJsCodeToolbox'
-import { DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError } from './errors/DaytonaError'
+import {
+  DaytonaAuthenticationError,
+  createAxiosDaytonaError,
+  DaytonaError,
+  DaytonaTimeoutError,
+  DaytonaValidationError,
+} from './errors/DaytonaError'
 import { Image } from './Image'
 import { Sandbox, PaginatedSandboxes } from './Sandbox'
 import { SnapshotService } from './Snapshot'
@@ -280,7 +286,7 @@ export class Daytona implements AsyncDisposable {
     const orgHeader: Record<string, string> = {}
     if (!this.apiKey) {
       if (!this.organizationId) {
-        throw new DaytonaError('Organization ID is required when using JWT token')
+        throw new DaytonaAuthenticationError('Organization ID is required when using JWT token')
       }
       orgHeader['X-Daytona-Organization-ID'] = this.organizationId
     }
@@ -444,14 +450,14 @@ export class Daytona implements AsyncDisposable {
     }
 
     if (options.timeout < 0) {
-      throw new DaytonaError('Timeout must be a non-negative number')
+      throw new DaytonaValidationError('Timeout must be a non-negative number')
     }
 
     if (
       params.autoStopInterval !== undefined &&
       (!Number.isInteger(params.autoStopInterval) || params.autoStopInterval < 0)
     ) {
-      throw new DaytonaError('autoStopInterval must be a non-negative integer')
+      throw new DaytonaValidationError('autoStopInterval must be a non-negative integer')
     }
 
     if (params.ephemeral) {
@@ -467,7 +473,7 @@ export class Daytona implements AsyncDisposable {
       params.autoArchiveInterval !== undefined &&
       (!Number.isInteger(params.autoArchiveInterval) || params.autoArchiveInterval < 0)
     ) {
-      throw new DaytonaError('autoArchiveInterval must be a non-negative integer')
+      throw new DaytonaValidationError('autoArchiveInterval must be a non-negative integer')
     }
 
     const codeToolbox = this.getCodeToolbox(params.language as CodeLanguage)
@@ -540,7 +546,7 @@ export class Daytona implements AsyncDisposable {
           if (options.timeout) {
             const elapsed = (Date.now() - startTime) / 1000
             if (elapsed > options.timeout) {
-              throw new DaytonaError(
+              throw new DaytonaTimeoutError(
                 `Sandbox build has been pending for more than ${options.timeout} seconds. Please check the sandbox state again later.`,
               )
             }
@@ -582,10 +588,11 @@ export class Daytona implements AsyncDisposable {
 
       return sandbox
     } catch (error) {
-      if (error instanceof DaytonaError && error.message.includes('Operation timed out')) {
+      if (error instanceof DaytonaTimeoutError) {
         const errMsg = `Failed to create and start sandbox within ${options.timeout} seconds. Operation timed out.`
-        throw new DaytonaError(errMsg)
+        throw new DaytonaTimeoutError(errMsg, error.statusCode, error.headers, error.errorCode)
       }
+
       throw error
     }
   }
@@ -712,7 +719,7 @@ export class Daytona implements AsyncDisposable {
    * @private
    * @param {CodeLanguage} [language] - Programming language for the toolbox
    * @returns {SandboxCodeToolbox} The appropriate code toolbox instance
-   * @throws {DaytonaError} - `DaytonaError` - When an unsupported language is specified
+   * @throws {DaytonaValidationError} - `DaytonaValidationError` - When an unsupported language is specified
    */
   private getCodeToolbox(language?: CodeLanguage) {
     switch (language) {
@@ -725,7 +732,7 @@ export class Daytona implements AsyncDisposable {
         return new SandboxPythonCodeToolbox()
       default: {
         const errMsg = `Unsupported language: ${language}, supported languages: ${Object.values(CodeLanguage).join(', ')}`
-        throw new DaytonaError(errMsg)
+        throw new DaytonaValidationError(errMsg)
       }
     }
   }
@@ -760,33 +767,11 @@ export class Daytona implements AsyncDisposable {
         return response
       },
       (error) => {
-        let errorMessage: string
-
-        if (error instanceof AxiosError && error.message.includes('timeout of')) {
-          errorMessage = 'Operation timed out'
-        } else {
-          errorMessage = error.response?.data?.message || error.response?.data || error.message || String(error)
+        if (error instanceof AxiosError) {
+          throw createAxiosDaytonaError(error)
         }
 
-        if (typeof errorMessage === 'object') {
-          try {
-            errorMessage = JSON.stringify(errorMessage)
-          } catch {
-            errorMessage = String(errorMessage)
-          }
-        }
-
-        const statusCode = error.response?.status
-        const headers = error.response?.headers
-
-        switch (statusCode) {
-          case 404:
-            throw new DaytonaNotFoundError(errorMessage, statusCode, headers)
-          case 429:
-            throw new DaytonaRateLimitError(errorMessage, statusCode, headers)
-          default:
-            throw new DaytonaError(errorMessage, statusCode, headers)
-        }
+        throw new DaytonaError(error instanceof Error ? error.message : String(error))
       },
     )
 

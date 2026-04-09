@@ -3,7 +3,11 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
+from typing import Any, cast
+
+from .errors import DaytonaError, DaytonaValidationError, create_daytona_error
 
 
 @dataclass
@@ -46,8 +50,74 @@ class FileDownloadResponse:
         result (str | bytes | None): The download result - file path (if destination provided in the request)
             or bytes content (if no destination in the request), None if failed or no data received.
         error (str | None): Error message if the download failed, None if successful.
+        error_details (FileDownloadErrorDetails | None): Structured error metadata when the server provides it.
     """
 
     source: str
     result: str | bytes | None = None
     error: str | None = None
+    error_details: FileDownloadErrorDetails | None = None
+
+
+@dataclass
+class FileDownloadErrorDetails:
+    """Structured error metadata for a failed bulk file download item."""
+
+    message: str
+    status_code: int | None = None
+    error_code: str | None = None
+
+
+def create_file_download_error(response: FileDownloadResponse) -> DaytonaError:
+    """Create the appropriate Daytona exception for a failed file download response."""
+
+    if response.error is None:
+        raise DaytonaValidationError("response.error must not be None")
+
+    if response.error_details is None:
+        return DaytonaError(response.error)
+
+    return create_daytona_error(
+        response.error_details.message,
+        status_code=response.error_details.status_code,
+        error_code=response.error_details.error_code,
+    )
+
+
+def parse_file_download_error_payload(
+    payload: bytes,
+    content_type: str | None,
+) -> tuple[str, FileDownloadErrorDetails | None]:
+    """Parse a bulk-download error part into the legacy message and structured metadata."""
+
+    message = payload.decode("utf-8", errors="ignore").strip()
+    if not content_type or "application/json" not in content_type.lower():
+        return message, None
+
+    try:
+        data = json.loads(message)
+    except json.JSONDecodeError:
+        return message, None
+
+    if not isinstance(data, dict):
+        return message, None
+
+    payload_dict = cast(dict[str, Any], data)
+    structured_message = payload_dict.get("message")
+    status_code = payload_dict.get("statusCode")
+    if status_code is None:
+        status_code = payload_dict.get("status_code")
+    error_code = payload_dict.get("code")
+    if error_code is None:
+        error_code = payload_dict.get("error_code")
+
+    if isinstance(structured_message, str):
+        message = structured_message
+
+    details = FileDownloadErrorDetails(
+        message=message,
+        status_code=status_code if isinstance(status_code, int) else None,
+        error_code=error_code if isinstance(error_code, str) else None,
+    )
+
+    return message, details

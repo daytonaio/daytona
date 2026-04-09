@@ -218,7 +218,7 @@ module DaytonaToolboxApiClient
     end
 
     # Download multiple files
-    # Download multiple files by providing their paths
+    # Download multiple files by providing their paths. Successful files are returned as multipart parts named `file`. Per-file failures are returned as multipart parts named `error` with JSON payloads shaped like ErrorResponse.
     # @param download_files [FilesDownloadRequest] Paths of files to download
     # @param [Hash] opts the optional parameters
     # @return [Hash<String, Object>]
@@ -228,7 +228,7 @@ module DaytonaToolboxApiClient
     end
 
     # Download multiple files
-    # Download multiple files by providing their paths
+    # Download multiple files by providing their paths. Successful files are returned as multipart parts named &#x60;file&#x60;. Per-file failures are returned as multipart parts named &#x60;error&#x60; with JSON payloads shaped like ErrorResponse.
     # @param download_files [FilesDownloadRequest] Paths of files to download
     # @param [Hash] opts the optional parameters
     # @return [Array<(Hash<String, Object>, Integer, Hash)>] Hash<String, Object> data, response status code and response headers

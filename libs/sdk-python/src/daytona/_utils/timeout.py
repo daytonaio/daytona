@@ -16,7 +16,7 @@ import time
 from types import FrameType, TracebackType
 from typing import Any, Callable, TypeVar, cast
 
-from ..common.errors import DaytonaError, DaytonaTimeoutError
+from ..common.errors import DaytonaTimeoutError, DaytonaValidationError
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -366,7 +366,7 @@ def with_timeout() -> Callable[[F], F]:
 
     Raises:
         DaytonaTimeoutError: When the function exceeds the specified timeout.
-        DaytonaError: If timeout is negative.
+        DaytonaValidationError: If timeout is negative.
 
     Example:
         ```python
@@ -408,7 +408,7 @@ def with_timeout() -> Callable[[F], F]:
                 if timeout is None or timeout == 0:
                     return await func(*args, **kwargs)
                 if timeout < 0:
-                    raise DaytonaError("Timeout must be a non-negative number or None.")
+                    raise DaytonaValidationError("Timeout must be a non-negative number or None.")
 
                 # Add ourselves to the async timeout stack for nested timeout tracking
                 stack = _async_timeout_stack.get().copy()
@@ -467,7 +467,7 @@ def with_timeout() -> Callable[[F], F]:
             if timeout is None or timeout == 0:
                 return func(*args, **kwargs)
             if timeout < 0:
-                raise DaytonaError("Timeout must be a non-negative number or None.")
+                raise DaytonaValidationError("Timeout must be a non-negative number or None.")
 
             # Strategy 1: Unix/Linux main thread - use signals with nested timeout support
             if hasattr(signal, "SIGALRM") and threading.current_thread() is threading.main_thread():

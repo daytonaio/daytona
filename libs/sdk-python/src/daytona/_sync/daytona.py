@@ -50,7 +50,7 @@ from ..common.daytona import (
     CreateSandboxFromSnapshotParams,
     DaytonaConfig,
 )
-from ..common.errors import DaytonaError
+from ..common.errors import DaytonaAuthenticationError, DaytonaValidationError
 from ..common.image import Image
 from ..common.protocols import SandboxCodeToolbox
 from ..internal.urllib3_retry import RemoteDisconnectedRetry
@@ -180,7 +180,7 @@ class Daytona:
         self._api_url = api_url or default_api_url
 
         if not self._api_key and not self._jwt_token:
-            raise DaytonaError("API key or JWT token is required")
+            raise DaytonaAuthenticationError("API key or JWT token is required")
 
         # Create API configuration without api_key
         configuration = Configuration(host=self._api_url)
@@ -214,7 +214,7 @@ class Daytona:
 
         if not self._api_key:
             if not self._organization_id:
-                raise DaytonaError("Organization ID is required when using JWT token")
+                raise DaytonaAuthenticationError("Organization ID is required when using JWT token")
             self._api_client.default_headers["X-Daytona-Organization-ID"] = self._organization_id
 
         # Initialize API clients with the api_client instance
@@ -388,13 +388,13 @@ class Daytona:
         code_toolbox = self._get_code_toolbox(params.language)
 
         if timeout and timeout < 0:
-            raise DaytonaError("Timeout must be a non-negative number")
+            raise DaytonaValidationError("Timeout must be a non-negative number")
 
         if params.auto_stop_interval is not None and params.auto_stop_interval < 0:
-            raise DaytonaError("auto_stop_interval must be a non-negative integer")
+            raise DaytonaValidationError("auto_stop_interval must be a non-negative integer")
 
         if params.auto_archive_interval is not None and params.auto_archive_interval < 0:
-            raise DaytonaError("auto_archive_interval must be a non-negative integer")
+            raise DaytonaValidationError("auto_archive_interval must be a non-negative integer")
 
         target = self._target
 
@@ -503,7 +503,7 @@ class Daytona:
 
         enum_language = to_enum(CodeLanguage, language)
         if enum_language is None:
-            raise DaytonaError(f"Unsupported language: {language}")
+            raise DaytonaValidationError(f"Unsupported language: {language}")
         language = enum_language
 
         toolboxes = {
@@ -515,7 +515,7 @@ class Daytona:
         try:
             return toolboxes[language.value]()
         except KeyError as e:
-            raise DaytonaError(f"Unsupported language: {language}") from e
+            raise DaytonaValidationError(f"Unsupported language: {language}") from e
 
     @with_instrumentation()
     def delete(self, sandbox: Sandbox, timeout: float = 60) -> None:
@@ -559,7 +559,7 @@ class Daytona:
             ```
         """
         if not sandbox_id_or_name:
-            raise DaytonaError("sandbox_id_or_name is required")
+            raise DaytonaValidationError("sandbox_id_or_name is required")
 
         # Get the sandbox instance
         sandbox_instance = self._sandbox_api.get_sandbox(sandbox_id_or_name)
@@ -596,10 +596,10 @@ class Daytona:
             ```
         """
         if page is not None and page < 1:
-            raise DaytonaError("page must be a positive integer")
+            raise DaytonaValidationError("page must be a positive integer")
 
         if limit is not None and limit < 1:
-            raise DaytonaError("limit must be a positive integer")
+            raise DaytonaValidationError("limit must be a positive integer")
 
         response = self._sandbox_api.list_sandboxes_paginated(labels=json.dumps(labels), page=page, limit=limit)
 
@@ -635,7 +635,7 @@ class Daytona:
 
         enum_language = to_enum(CodeLanguage, language)
         if enum_language is None:
-            raise DaytonaError(f"Invalid code-toolbox-language: {language}")
+            raise DaytonaValidationError(f"Invalid code-toolbox-language: {language}")
         return enum_language
 
     @with_instrumentation()

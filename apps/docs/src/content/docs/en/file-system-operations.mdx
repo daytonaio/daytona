@@ -469,20 +469,35 @@ Daytona provides methods to download a single file from sandboxes by providing t
 <TabItem label="Python" icon="seti:python">
 
 ```python
-content = sandbox.fs.download_file("file1.txt")
+from daytona import DaytonaNotFoundError
 
-with open("local_file.txt", "wb") as f:
-    f.write(content)
+try:
+    content = sandbox.fs.download_file("file1.txt")
+except DaytonaNotFoundError as error:
+    print(f"Missing file: {error}")
+else:
+    with open("local_file.txt", "wb") as f:
+        f.write(content)
 
-print(content.decode('utf-8'))
+    print(content.decode("utf-8"))
 ```
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-const downloadedFile = await sandbox.fs.downloadFile('file1.txt')
-console.log('File content:', downloadedFile.toString())
+import { DaytonaNotFoundError } from '@daytonaio/sdk'
+
+try {
+  const downloadedFile = await sandbox.fs.downloadFile('file1.txt')
+  console.log('File content:', downloadedFile.toString())
+} catch (error) {
+  if (error instanceof DaytonaNotFoundError) {
+    console.error(`Missing file: ${error.message}`)
+  } else {
+    throw error
+  }
+}
 ```
 
 </TabItem>
@@ -528,6 +543,8 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/download?path='
 </TabItem>
 </Tabs>
 
+In the Python and TypeScript SDKs, `download_file` and `downloadFile` raise typed Daytona exceptions when the daemon returns structured per-file error metadata. Missing files map to not-found errors, invalid paths such as directories map to validation errors, and permission failures map to authorization errors.
+
 For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
 
 > [**download_file (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemdownload_file)
@@ -559,6 +576,11 @@ results = sandbox.fs.download_files(files_to_download)
 for result in results:
     if result.error:
         print(f"Error downloading {result.source}: {result.error}")
+        if result.error_details:
+            print(
+                f"  status={result.error_details.status_code} "
+                f"code={result.error_details.error_code}"
+            )
     elif result.result:
         print(f"Downloaded {result.source} to {result.result}")
 ```
@@ -578,6 +600,11 @@ const results = await sandbox.fs.downloadFiles(files)
 results.forEach(result => {
   if (result.error) {
     console.error(`Error downloading ${result.source}: ${result.error}`)
+    if (result.errorDetails) {
+      console.error(
+        `  status=${result.errorDetails.statusCode} code=${result.errorDetails.errorCode}`
+      )
+    }
   } else if (result.result) {
     console.log(`Downloaded ${result.source} to ${result.result}`)
   }
@@ -648,6 +675,13 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/bulk-download' \
 
 </TabItem>
 </Tabs>
+
+Bulk downloads keep the existing `error` string for compatibility and now also include structured metadata on each failed item:
+
+- Python: `result.error_details.message`, `result.error_details.status_code`, `result.error_details.error_code`
+- TypeScript: `result.errorDetails.message`, `result.errorDetails.statusCode`, `result.errorDetails.errorCode`
+
+The toolbox bulk-download API returns successful files as multipart `file` parts and per-file failures as multipart `error` parts with JSON payloads containing `message`, `statusCode`, and `code`.
 
 For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
 

@@ -34,8 +34,18 @@ if TYPE_CHECKING:
         CreateSandboxFromSnapshotParams,
         DaytonaConfig,
     )
-    from .common.errors import DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError, DaytonaTimeoutError
-    from .common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUpload
+    from .common.errors import (
+        DaytonaAuthenticationError,
+        DaytonaAuthorizationError,
+        DaytonaConflictError,
+        DaytonaConnectionError,
+        DaytonaError,
+        DaytonaNotFoundError,
+        DaytonaRateLimitError,
+        DaytonaTimeoutError,
+        DaytonaValidationError,
+    )
+    from .common.filesystem import FileDownloadErrorDetails, FileDownloadRequest, FileDownloadResponse, FileUpload
     from .common.image import Image
     from .common.lsp_server import LspCompletionPosition, LspLanguageId
     from .common.process import CodeRunParams, ExecuteResponse, ExecutionArtifacts, OutputHandler, SessionExecuteRequest
@@ -68,6 +78,7 @@ __all__ = [
     "CompositeChart",
     "FileDownloadRequest",
     "FileDownloadResponse",
+    "FileDownloadErrorDetails",
     "FileUpload",
     "VolumeMount",
     "AsyncDaytona",
@@ -94,6 +105,11 @@ __all__ = [
     "OutputMessage",
     "OutputHandler",
     "DaytonaTimeoutError",
+    "DaytonaAuthenticationError",
+    "DaytonaAuthorizationError",
+    "DaytonaConflictError",
+    "DaytonaValidationError",
+    "DaytonaConnectionError",
 ]
 
 # Mapping of symbol name -> (absolute module path, attribute name) for external packages
@@ -143,7 +159,13 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "DaytonaNotFoundError": "common.errors",
     "DaytonaRateLimitError": "common.errors",
     "DaytonaTimeoutError": "common.errors",
+    "DaytonaAuthenticationError": "common.errors",
+    "DaytonaAuthorizationError": "common.errors",
+    "DaytonaConflictError": "common.errors",
+    "DaytonaValidationError": "common.errors",
+    "DaytonaConnectionError": "common.errors",
     # common.filesystem
+    "FileDownloadErrorDetails": "common.filesystem",
     "FileDownloadRequest": "common.filesystem",
     "FileDownloadResponse": "common.filesystem",
     "FileUpload": "common.filesystem",

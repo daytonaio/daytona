@@ -167,7 +167,8 @@ Downloads multiple files from the Sandbox. If the files already exist locally, t
 **Raises**:
 
 - `Exception` - Only if the request itself fails (network issues, invalid request/response, etc.). Individual
-  file download errors are returned in the `FileDownloadResponse.error` field.
+  file download errors are returned in `FileDownloadResponse.error`. When the daemon provides structured
+  per-file metadata, it is also available in `FileDownloadResponse.error_details`.
   
 
 **Example**:
@@ -621,4 +622,32 @@ Represents the response to a single file download request.
 - `result` _str | bytes | None_ - The download result - file path (if destination provided in the request)
   or bytes content (if no destination in the request), None if failed or no data received.
 - `error` _str | None_ - Error message if the download failed, None if successful.
+- `error_details` _FileDownloadErrorDetails | None_ - Structured error metadata when the server provides it.
+
+## FileDownloadErrorDetails
+
+```python
+@dataclass
+class FileDownloadErrorDetails()
+```
+
+Structured error metadata for a failed bulk file download item.
+
+#### create\_file\_download\_error
+
+```python
+def create_file_download_error(response: FileDownloadResponse) -> DaytonaError
+```
+
+Create the appropriate Daytona exception for a failed file download response.
+
+#### parse\_file\_download\_error\_payload
+
+```python
+def parse_file_download_error_payload(
+        payload: bytes, content_type: str | None
+) -> tuple[str, FileDownloadErrorDetails | None]
+```
+
+Parse a bulk-download error part into the legacy message and structured metadata.
 

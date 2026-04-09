@@ -13,7 +13,7 @@ from websockets.sync.client import ClientConnection
 
 from daytona_toolbox_api_client import PtySessionInfo
 
-from ..common.errors import DaytonaError
+from ..common.errors import DaytonaConnectionError, DaytonaError, DaytonaTimeoutError
 from ..common.pty import PtyResult, PtySize
 
 
@@ -106,16 +106,16 @@ class PtyHandle:
             return
 
         if self._ws is None:
-            raise DaytonaError("WebSocket connection is not available")
+            raise DaytonaConnectionError("WebSocket connection is not available")
 
         # Wait for connection established control message
         start_time = time.time()
         while not self._connection_established:
             if time.time() - start_time > timeout:
-                raise DaytonaError("PTY connection timeout")
+                raise DaytonaTimeoutError("PTY connection timeout")
 
             if self._error:
-                raise DaytonaError(self._error or "Connection failed")
+                raise DaytonaConnectionError(self._error or "Connection failed")
 
             # Try to receive a control message
             try:
@@ -130,7 +130,7 @@ class PtyHandle:
             except TimeoutError:
                 continue  # Keep waiting
             except (ConnectionClosedOK, ConnectionClosedError) as e:
-                raise DaytonaError("Connection closed during setup") from e
+                raise DaytonaConnectionError("Connection closed during setup") from e
 
     def send_input(self, data: str | bytes) -> None:
         """
@@ -143,10 +143,10 @@ class PtyHandle:
             DaytonaError: If PTY is not connected or sending fails
         """
         if not self.is_connected():
-            raise DaytonaError("PTY is not connected")
+            raise DaytonaConnectionError("PTY is not connected")
 
         if self._ws is None:
-            raise DaytonaError("WebSocket connection is not available")
+            raise DaytonaConnectionError("WebSocket connection is not available")
 
         try:
             if isinstance(data, str):
@@ -154,7 +154,7 @@ class PtyHandle:
             else:
                 self._ws.send(data)
         except Exception as e:
-            raise DaytonaError(f"Failed to send input to PTY: {e}") from e
+            raise DaytonaConnectionError(f"Failed to send input to PTY: {e}") from e
 
     def resize(self, pty_size: PtySize) -> PtySessionInfo:
         """

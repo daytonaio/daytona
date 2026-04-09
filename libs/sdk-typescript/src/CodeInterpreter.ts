@@ -10,7 +10,12 @@
 import WebSocket from 'isomorphic-ws'
 import { InterpreterApi, InterpreterContext } from '@daytona/toolbox-api-client'
 import { Configuration } from '@daytona/api-client'
-import { DaytonaError, DaytonaTimeoutError } from './errors/DaytonaError'
+import {
+  DaytonaConnectionError,
+  DaytonaError,
+  DaytonaTimeoutError,
+  DaytonaValidationError,
+} from './errors/DaytonaError'
 import { ExecutionError, ExecutionResult, RunCodeOptions } from './types/CodeInterpreter'
 import { createSandboxWebSocket } from './utils/WebSocket'
 
@@ -69,7 +74,7 @@ export class CodeInterpreter {
    */
   public async runCode(code: string, options: RunCodeOptions = {}): Promise<ExecutionResult> {
     if (!code || !code.trim()) {
-      throw new DaytonaError('Code is required for execution')
+      throw new DaytonaValidationError('Code is required for execution')
     }
 
     const url = `${this.clientConfig.basePath.replace(/^http/, 'ws')}/process/interpreter/execute`
@@ -178,7 +183,7 @@ export class CodeInterpreter {
       }
 
       const handleError = (error: Error) => {
-        fail(new DaytonaError(`Failed to execute code: ${error.message ?? String(error)}`))
+        fail(new DaytonaConnectionError(`Failed to execute code: ${error.message ?? String(error)}`))
       }
 
       const detach = () => {
@@ -314,8 +319,8 @@ export class CodeInterpreter {
       )
     }
     if (message) {
-      return new DaytonaError(message + ` (close code ${code})`)
+      return new DaytonaConnectionError(message + ` (close code ${code})`)
     }
-    return new DaytonaError(`Code execution failed: WebSocket closed with code ${code}`)
+    return new DaytonaConnectionError(`Code execution failed: WebSocket closed with code ${code}`)
   }
 }

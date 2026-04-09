@@ -84,7 +84,7 @@ public class FileSystemApiTest {
     /**
      * Download multiple files
      *
-     * Download multiple files by providing their paths
+     * Download multiple files by providing their paths. Successful files are returned as multipart parts named &#x60;file&#x60;. Per-file failures are returned as multipart parts named &#x60;error&#x60; with JSON payloads shaped like ErrorResponse.
      *
      * @throws ApiException if the Api call fails
      */

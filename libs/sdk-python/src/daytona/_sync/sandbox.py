@@ -35,7 +35,7 @@ from daytona_toolbox_api_client import (
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
 from .._utils.timeout import http_timeout, with_timeout
-from ..common.errors import DaytonaError, DaytonaNotFoundError
+from ..common.errors import DaytonaError, DaytonaNotFoundError, DaytonaValidationError
 from ..common.lsp_server import LspLanguageId, LspLanguageIdLiteral
 from ..common.protocols import SandboxCodeToolbox
 from ..common.sandbox import Resources
@@ -432,7 +432,7 @@ class Sandbox(SandboxDto):
                 Set to 0 to disable auto-stop. Defaults to 15.
 
         Raises:
-            DaytonaError: If interval is negative
+            DaytonaValidationError: If interval is negative
 
         Example:
             ```python
@@ -443,7 +443,7 @@ class Sandbox(SandboxDto):
             ```
         """
         if interval < 0:
-            raise DaytonaError("Auto-stop interval must be a non-negative integer")
+            raise DaytonaValidationError("Auto-stop interval must be a non-negative integer")
 
         _ = self._sandbox_api.set_autostop_interval(self.id, interval)
         self.auto_stop_interval = interval
@@ -460,7 +460,7 @@ class Sandbox(SandboxDto):
                 Set to 0 for the maximum interval. Default is 7 days.
 
         Raises:
-            DaytonaError: If interval is negative
+            DaytonaValidationError: If interval is negative
 
         Example:
             ```python
@@ -471,7 +471,7 @@ class Sandbox(SandboxDto):
             ```
         """
         if interval < 0:
-            raise DaytonaError("Auto-archive interval must be a non-negative integer")
+            raise DaytonaValidationError("Auto-archive interval must be a non-negative integer")
 
         _ = self._sandbox_api.set_auto_archive_interval(self.id, interval)
         self.auto_archive_interval = interval

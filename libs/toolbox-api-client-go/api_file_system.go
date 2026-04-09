@@ -65,7 +65,7 @@ type FileSystemAPI interface {
 	/*
 	DownloadFiles Download multiple files
 
-	Download multiple files by providing their paths
+	Download multiple files by providing their paths. Successful files are returned as multipart parts named `file`. Per-file failures are returned as multipart parts named `error` with JSON payloads shaped like ErrorResponse.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return FileSystemAPIDownloadFilesRequest
@@ -551,7 +551,7 @@ func (r FileSystemAPIDownloadFilesRequest) Execute() (map[string]map[string]inte
 /*
 DownloadFiles Download multiple files
 
-Download multiple files by providing their paths
+Download multiple files by providing their paths. Successful files are returned as multipart parts named `file`. Per-file failures are returned as multipart parts named `error` with JSON payloads shaped like ErrorResponse.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return FileSystemAPIDownloadFilesRequest
