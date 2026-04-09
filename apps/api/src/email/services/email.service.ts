@@ -10,6 +10,7 @@ import path from 'path'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
 import { OrganizationInvitationCreatedEvent } from '../../organization/events/organization-invitation-created.event'
+import { EmailUtils } from '../../common/utils/email.util'
 import { EmailModuleOptions } from '../email.module'
 
 @Injectable()
@@ -49,7 +50,7 @@ export class EmailService {
         to: payload.inviteeEmail,
         subject: 'Invitation to join a Daytona organization',
         html: await renderFile(path.join(__dirname, 'assets/templates/organization-invitation.template.ejs'), {
-          organizationName: payload.organizationName,
+          organizationName: EmailUtils.sanitizeForDisplay(payload.organizationName),
           invitedBy: payload.invitedBy,
           invitationLink: `${this.options.dashboardUrl}/user/invitations?id=${payload.invitationId}`,
           expiresAt: new Date(payload.expiresAt).toLocaleDateString('en-US', {
