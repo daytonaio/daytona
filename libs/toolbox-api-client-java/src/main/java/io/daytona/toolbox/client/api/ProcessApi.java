@@ -1679,7 +1679,7 @@ public class ProcessApi {
 
     /**
      * Get session command logs
-     * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK &gt;&#x3D; 0.163.0, plain text otherwise. Supports WebSocket streaming.
+     * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK &gt;&#x3D; 0.164.0, plain text otherwise. Supports WebSocket streaming.
      * @param sessionId Session ID (required)
      * @param commandId Command ID (required)
      * @param follow Follow logs in real-time (WebSocket only) (optional)
@@ -1699,7 +1699,7 @@ public class ProcessApi {
 
     /**
      * Get session command logs
-     * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK &gt;&#x3D; 0.163.0, plain text otherwise. Supports WebSocket streaming.
+     * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK &gt;&#x3D; 0.164.0, plain text otherwise. Supports WebSocket streaming.
      * @param sessionId Session ID (required)
      * @param commandId Command ID (required)
      * @param follow Follow logs in real-time (WebSocket only) (optional)
@@ -1720,7 +1720,7 @@ public class ProcessApi {
 
     /**
      * Get session command logs (asynchronously)
-     * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK &gt;&#x3D; 0.163.0, plain text otherwise. Supports WebSocket streaming.
+     * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK &gt;&#x3D; 0.164.0, plain text otherwise. Supports WebSocket streaming.
      * @param sessionId Session ID (required)
      * @param commandId Command ID (required)
      * @param follow Follow logs in real-time (WebSocket only) (optional)

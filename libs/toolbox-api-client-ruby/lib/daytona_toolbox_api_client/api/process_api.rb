@@ -787,7 +787,7 @@ module DaytonaToolboxApiClient
     end
 
     # Get session command logs
-    # Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.163.0, plain text otherwise. Supports WebSocket streaming.
+    # Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.164.0, plain text otherwise. Supports WebSocket streaming.
     # @param session_id [String] Session ID
     # @param command_id [String] Command ID
     # @param [Hash] opts the optional parameters
@@ -799,7 +799,7 @@ module DaytonaToolboxApiClient
     end
 
     # Get session command logs
-    # Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK &gt;&#x3D; 0.163.0, plain text otherwise. Supports WebSocket streaming.
+    # Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK &gt;&#x3D; 0.164.0, plain text otherwise. Supports WebSocket streaming.
     # @param session_id [String] Session ID
     # @param command_id [String] Command ID
     # @param [Hash] opts the optional parameters

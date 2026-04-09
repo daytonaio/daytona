@@ -477,7 +477,7 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.163.0, plain text otherwise. Supports WebSocket streaming.
+         * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.164.0, plain text otherwise. Supports WebSocket streaming.
          * @summary Get session command logs
          * @param {string} sessionId Session ID
          * @param {string} commandId Command ID
@@ -870,7 +870,7 @@ export const ProcessApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.163.0, plain text otherwise. Supports WebSocket streaming.
+         * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.164.0, plain text otherwise. Supports WebSocket streaming.
          * @summary Get session command logs
          * @param {string} sessionId Session ID
          * @param {string} commandId Command ID
@@ -1082,7 +1082,7 @@ export const ProcessApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.getSessionCommand(sessionId, commandId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.163.0, plain text otherwise. Supports WebSocket streaming.
+         * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.164.0, plain text otherwise. Supports WebSocket streaming.
          * @summary Get session command logs
          * @param {string} sessionId Session ID
          * @param {string} commandId Command ID
@@ -1300,7 +1300,7 @@ export class ProcessApi extends BaseAPI {
     }
 
     /**
-     * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.163.0, plain text otherwise. Supports WebSocket streaming.
+     * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.164.0, plain text otherwise. Supports WebSocket streaming.
      * @summary Get session command logs
      * @param {string} sessionId Session ID
      * @param {string} commandId Command ID

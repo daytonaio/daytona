@@ -197,7 +197,7 @@ type ProcessAPI interface {
 	/*
 	GetSessionCommandLogs Get session command logs
 
-	Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.163.0, plain text otherwise. Supports WebSocket streaming.
+	Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.164.0, plain text otherwise. Supports WebSocket streaming.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param sessionId Session ID
@@ -1549,7 +1549,7 @@ func (r ProcessAPIGetSessionCommandLogsRequest) Execute() (*SessionCommandLogsRe
 /*
 GetSessionCommandLogs Get session command logs
 
-Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.163.0, plain text otherwise. Supports WebSocket streaming.
+Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.164.0, plain text otherwise. Supports WebSocket streaming.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param sessionId Session ID
