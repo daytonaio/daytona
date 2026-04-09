@@ -85,6 +85,8 @@ export class AuditLog {
     this.id = params.id || v4()
     this.actorId = params.actorId
     this.actorEmail = params.actorEmail
+    this.actorApiKeyPrefix = params.actorApiKeyPrefix
+    this.actorApiKeySuffix = params.actorApiKeySuffix
     this.organizationId = params.organizationId
     this.action = params.action
     this.targetType = params.targetType
