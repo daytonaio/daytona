@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { UnauthorizedException } from '@nestjs/common'
+import { HttpException, HttpStatus, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { GlobalAuthGuard } from './global-auth.guard'
 import { AuthStrategyType } from './enums/auth-strategy-type.enum'
@@ -97,8 +97,14 @@ describe('[AUTH] GlobalAuthGuard', () => {
       expect(() => guard.handleRequest(null, null, null)).toThrow(UnauthorizedException)
     })
 
-    it('should throw UnauthorizedException when error is present', () => {
-      expect(() => guard.handleRequest(new Error('fail'), null, null)).toThrow(UnauthorizedException)
+    it('should throw ServiceUnavailableException when error is present and not a HttpException', () => {
+      expect(() => guard.handleRequest(new Error('fail'), null, null)).toThrow(ServiceUnavailableException)
+    })
+
+    it('should throw ServiceUnavailableException when error is present and a HttpException with status code >= 500', () => {
+      expect(() => guard.handleRequest(new HttpException('fail', HttpStatus.GATEWAY_TIMEOUT), null, null)).toThrow(
+        ServiceUnavailableException,
+      )
     })
   })
 })
