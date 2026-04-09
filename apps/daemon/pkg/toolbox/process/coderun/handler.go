@@ -80,7 +80,9 @@ func CodeRun(logger *slog.Logger) gin.HandlerFunc {
 			timeout := time.Duration(*request.Timeout) * time.Second
 			timer := time.AfterFunc(timeout, func() {
 				timeoutReached.Store(true)
-				_ = syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+				if killErr := syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL); killErr != nil {
+					logger.Error("failed to kill process group", "error", killErr)
+				}
 			})
 			defer timer.Stop()
 		}

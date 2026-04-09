@@ -33,7 +33,7 @@ type Chart struct {
 	YTickLabels []string       `json:"y_tick_labels,omitempty"`
 	XScale      string         `json:"x_scale,omitempty"`
 	YScale      string         `json:"y_scale,omitempty"`
-	Elements    []ChartElement `json:"elements,omitempty"`
+	Elements    []ChartElement `json:"elements"`
 } // @name Chart
 
 type ChartElement struct {

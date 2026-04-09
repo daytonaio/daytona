@@ -153,15 +153,7 @@ err := sandbox.Git.Clone(ctx, url, path, options.WithBranch("develop"))
 func WithCodeRunLanguage(language types.CodeLanguage) func(*CodeRun)
 ```
 
-WithCodeRunTimeout sets the timeout for code execution.
 
-Example:
-
-```
-result, err := sandbox.Process.CodeRun(ctx, code,
-    options.WithCodeRunTimeout(30*time.Second),
-)
-```
 
 <a name="WithCodeRunParams"></a>
 ## func WithCodeRunParams

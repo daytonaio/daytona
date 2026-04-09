@@ -319,7 +319,7 @@ public class Daytona implements AutoCloseable {
         if (language == null || language.isEmpty()) {
             language = CodeLanguage.PYTHON.getValue();
         }
-        CodeLanguage.fromValue(language);
+        language = CodeLanguage.fromValue(language).getValue();
         labels.put(CODE_TOOLBOX_LANGUAGE_LABEL, language);
         if (!labels.isEmpty()) {
             body.setLabels(labels);

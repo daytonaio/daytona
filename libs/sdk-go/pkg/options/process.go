@@ -80,13 +80,6 @@ func WithCodeRunParams(params types.CodeRunParams) func(*CodeRun) {
 	}
 }
 
-// WithCodeRunTimeout sets the timeout for code execution.
-//
-// Example:
-//
-//	result, err := sandbox.Process.CodeRun(ctx, code,
-//	    options.WithCodeRunTimeout(30*time.Second),
-//	)
 func WithCodeRunLanguage(language types.CodeLanguage) func(*CodeRun) {
 	return func(opts *CodeRun) {
 		opts.Language = language

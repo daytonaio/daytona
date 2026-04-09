@@ -6,7 +6,8 @@ from __future__ import annotations
 from enum import Enum
 from typing import Union
 
-from typing_extensions import TypeAlias
+from pydantic import Field
+from typing_extensions import TypeAlias, override
 
 from daytona_toolbox_api_client import Chart as GeneratedChart
 from daytona_toolbox_api_client import ChartElement as GeneratedChartElement
@@ -44,7 +45,17 @@ class BoxAndWhiskerData(GeneratedChartElement):
 
 
 class Chart(GeneratedChart):
-    pass
+    elements: list[GeneratedChartElement] = Field(  # pyright: ignore[reportIncompatibleVariableOverride]
+        default_factory=list
+    )
+
+    @classmethod
+    @override
+    def model_validate(cls, obj: object, **kwargs: object) -> Chart:
+        instance = super().model_validate(obj, **kwargs)  # pyright: ignore[reportArgumentType]
+        if cls is Chart:
+            return _resolve_chart_subclass(instance)
+        return instance  # type: ignore[return-value]
 
 
 class Chart2D(Chart):
@@ -79,23 +90,23 @@ class CompositeChart(Chart):
     pass
 
 
+_CHART_TYPE_MAP: dict[str, type[Chart]] = {
+    ChartType.LINE.value: LineChart,
+    ChartType.SCATTER.value: ScatterChart,
+    ChartType.BAR.value: BarChart,
+    ChartType.PIE.value: PieChart,
+    ChartType.BOX_AND_WHISKER.value: BoxAndWhiskerChart,
+    ChartType.COMPOSITE_CHART.value: CompositeChart,
+}
+
+
 def parse_chart(chart: GeneratedChartLike) -> Chart:
-    chart_type = chart.type or ChartType.UNKNOWN.value
-    chart_class: type[Chart]
+    chart_class = _CHART_TYPE_MAP.get(chart.type or "", Chart)
+    return chart_class.model_validate(chart.model_dump(exclude_none=True))
 
-    if chart_type == ChartType.LINE.value:
-        chart_class = LineChart
-    elif chart_type == ChartType.SCATTER.value:
-        chart_class = ScatterChart
-    elif chart_type == ChartType.BAR.value:
-        chart_class = BarChart
-    elif chart_type == ChartType.PIE.value:
-        chart_class = PieChart
-    elif chart_type == ChartType.BOX_AND_WHISKER.value:
-        chart_class = BoxAndWhiskerChart
-    elif chart_type == ChartType.COMPOSITE_CHART.value:
-        chart_class = CompositeChart
-    else:
-        chart_class = Chart
 
+def _resolve_chart_subclass(chart: Chart) -> Chart:
+    chart_class = _CHART_TYPE_MAP.get(chart.type or "", Chart)
+    if isinstance(chart, chart_class):
+        return chart
     return chart_class.model_validate(chart.model_dump(exclude_none=True))

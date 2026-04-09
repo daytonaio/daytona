@@ -125,7 +125,7 @@ def print_chart(chart: Chart):
         print(f"Y Tick Labels: {chart.y_tick_labels}")
         print(f"Y Scale: {chart.y_scale}")
         print("Elements:")
-        for element in chart.elements or []:
+        for element in chart.elements:
             print(f"\n\tLabel: {element.label}")
             print(f"\tPoints: {element.points}")
     elif chart.type == ChartType.SCATTER and isinstance(chart, ScatterChart):
@@ -138,20 +138,20 @@ def print_chart(chart: Chart):
         print(f"Y Tick Labels: {chart.y_tick_labels}")
         print(f"Y Scale: {chart.y_scale}")
         print("Elements:")
-        for element in chart.elements or []:
+        for element in chart.elements:
             print(f"\n\tLabel: {element.label}")
             print(f"\tPoints: {element.points}")
     elif chart.type == ChartType.BAR and isinstance(chart, BarChart):
         print(f"X Label: {chart.x_label}")
         print(f"Y Label: {chart.y_label}")
         print("Elements:")
-        for element in chart.elements or []:
+        for element in chart.elements:
             print(f"\n\tLabel: {element.label}")
             print(f"\tGroup: {element.group}")
             print(f"\tValue: {element.value}")
     elif chart.type == ChartType.PIE and isinstance(chart, PieChart):
         print("Elements:")
-        for element in chart.elements or []:
+        for element in chart.elements:
             print(f"\n\tLabel: {element.label}")
             print(f"\tAngle: {element.angle}")
             print(f"\tRadius: {element.radius}")
@@ -159,7 +159,7 @@ def print_chart(chart: Chart):
         print(f"X Label: {chart.x_label}")
         print(f"Y Label: {chart.y_label}")
         print("Elements:")
-        for element in chart.elements or []:
+        for element in chart.elements:
             print(f"\n\tLabel: {element.label}")
             print(f"\tMin: {element.min}")
             print(f"\tFirst Quartile: {element.first_quartile}")
@@ -169,7 +169,7 @@ def print_chart(chart: Chart):
             print(f"\tOutliers: {element.outliers}")
     elif chart.type == ChartType.COMPOSITE_CHART and isinstance(chart, CompositeChart):
         print("Elements:\n")
-        for element in chart.elements or []:
+        for element in chart.elements:
             print_chart(Chart.model_validate(element.model_dump(exclude_none=True)))
     print()
 

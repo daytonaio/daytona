@@ -844,6 +844,7 @@ func TestSandboxTargetField(t *testing.T) {
 			-1,          // autoDeleteInterval
 			false,       // networkBlockAll
 			nil,         // networkAllowList
+			"",          // language
 		)
 
 		assert.Equal(t, "test-id", sandbox.ID)
