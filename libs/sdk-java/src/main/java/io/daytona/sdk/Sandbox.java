@@ -95,17 +95,12 @@ public class Sandbox {
         return new LspServer(new io.daytona.toolbox.client.api.LspApi(toolboxApiClient));
     }
 
-    io.daytona.sdk.codetoolbox.CodeToolbox getCodeToolbox() {
+    String getLanguage() {
         String lang = "python";
-        if (labels != null && labels.containsKey("code-toolbox-language")) {
-            lang = labels.get("code-toolbox-language");
+        if (labels != null && labels.containsKey(Daytona.CODE_TOOLBOX_LANGUAGE_LABEL)) {
+            lang = labels.get(Daytona.CODE_TOOLBOX_LANGUAGE_LABEL);
         }
-        if ("typescript".equalsIgnoreCase(lang)) {
-            return new io.daytona.sdk.codetoolbox.TypeScriptCodeToolbox();
-        } else if ("javascript".equalsIgnoreCase(lang)) {
-            return new io.daytona.sdk.codetoolbox.JavaScriptCodeToolbox();
-        }
-        return new io.daytona.sdk.codetoolbox.PythonCodeToolbox();
+        return lang;
     }
 
     /**

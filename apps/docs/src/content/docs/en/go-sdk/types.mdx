@@ -12,8 +12,8 @@ import "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 
 ## Index
 
+- [Constants](<#constants>)
 - [type Chart](<#Chart>)
-- [type ChartType](<#ChartType>)
 - [type CodeLanguage](<#CodeLanguage>)
 - [type CodeRunParams](<#CodeRunParams>)
 - [type CreateSnapshotParams](<#CreateSnapshotParams>)
@@ -51,41 +51,21 @@ import "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 - [type VolumeMount](<#VolumeMount>)
 
 
+## Constants
+
+<a name="CodeToolboxLanguageLabel"></a>
+
+```go
+const CodeToolboxLanguageLabel = "code-toolbox-language"
+```
+
 <a name="Chart"></a>
 ## type Chart
 
-Chart represents a chart
-
-```go
-type Chart struct {
-    Type     ChartType
-    Title    string
-    Elements any
-    PNG      *string // Optional base64-encoded PNG representation
-}
-```
-
-<a name="ChartType"></a>
-## type ChartType
-
 
 
 ```go
-type ChartType string
-```
-
-<a name="ChartTypeLine"></a>
-
-```go
-const (
-    ChartTypeLine           ChartType = "line"
-    ChartTypeScatter        ChartType = "scatter"
-    ChartTypeBar            ChartType = "bar"
-    ChartTypePie            ChartType = "pie"
-    ChartTypeBoxAndWhisker  ChartType = "box_and_whisker"
-    ChartTypeCompositeChart ChartType = "composite_chart"
-    ChartTypeUnknown        ChartType = "unknown"
-)
+type Chart = toolbox.Chart
 ```
 
 <a name="CodeLanguage"></a>

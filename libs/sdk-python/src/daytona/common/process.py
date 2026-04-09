@@ -128,66 +128,6 @@ class SessionCommandLogsResponse:
     stderr: str | None = None
 
 
-def parse_session_command_logs(data: bytes) -> SessionCommandLogsResponse:
-    """Parse combined stdout/stderr output into separate streams.
-
-    Args:
-        data: Combined log bytes with STDOUT_PREFIX and STDERR_PREFIX markers
-
-    Returns:
-        SessionCommandLogsResponse with separated stdout and stderr
-    """
-    stdout_bytes, stderr_bytes = demux_log(data)
-
-    # Convert bytes to strings, ignoring potential encoding issues
-    stdout_str = stdout_bytes.decode("utf-8", "ignore")
-    stderr_str = stderr_bytes.decode("utf-8", "ignore")
-
-    # For backwards compatibility, logs field contains the original combined data
-    output_str = data.decode("utf-8", "ignore")
-
-    return SessionCommandLogsResponse(output=output_str, stdout=stdout_str, stderr=stderr_str)
-
-
-_MARKER_RE = re.compile(re.escape(STDOUT_PREFIX) + b"|" + re.escape(STDERR_PREFIX))
-
-
-def demux_log(data: bytes) -> tuple[bytes, bytes]:
-    """Demultiplex combined stdout/stderr log data.
-
-    Args:
-        data: Combined log bytes with STDOUT_PREFIX and STDERR_PREFIX markers
-
-    Returns:
-        Tuple of (stdout_bytes, stderr_bytes)
-    """
-    out_parts: list[bytes] = []
-    err_parts: list[bytes] = []
-    state = ""
-    pos = 0
-
-    for match in _MARKER_RE.finditer(data):
-        start = match.start()
-        if pos < start:
-            chunk = data[pos:start]
-            if state == "stdout":
-                out_parts.append(chunk)
-            elif state == "stderr":
-                err_parts.append(chunk)
-
-        state = "stdout" if match.group() == STDOUT_PREFIX else "stderr"
-        pos = match.end()
-
-    if pos < len(data):
-        tail = data[pos:]
-        if state == "stdout":
-            out_parts.append(tail)
-        elif state == "stderr":
-            err_parts.append(tail)
-
-    return b"".join(out_parts), b"".join(err_parts)
-
-
 # Type aliases for callbacks
 T = TypeVar("T")
 OutputHandler = Union[

@@ -84,7 +84,7 @@ type PaginatedSandboxes struct {
 //
 // This is typically called internally by the SDK. Users should create sandboxes
 // using [Client.Create] rather than calling this directly.
-func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, name string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList *string) *Sandbox {
+func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, name string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList *string, language types.CodeLanguage) *Sandbox {
 	var otelSt *otelState
 	if client != nil {
 		otelSt = client.Otel
@@ -103,7 +103,7 @@ func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, nam
 		ToolboxClient:       toolboxClient,
 		FileSystem:          NewFileSystemService(toolboxClient, otelSt),
 		Git:                 NewGitService(toolboxClient, otelSt),
-		Process:             NewProcessService(toolboxClient, otelSt),
+		Process:             NewProcessService(toolboxClient, otelSt, language),
 		CodeInterpreter:     NewCodeInterpreterService(toolboxClient, otelSt),
 		ComputerUse:         NewComputerUseService(toolboxClient, otelSt),
 	}

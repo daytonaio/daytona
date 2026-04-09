@@ -37,6 +37,8 @@ import java.lang.reflect.Field;
  * @see Sandbox
  */
 public class Daytona implements AutoCloseable {
+    public static final String CODE_TOOLBOX_LANGUAGE_LABEL = "code-toolbox-language";
+
     private final DaytonaConfig config;
     private final io.daytona.api.client.ApiClient apiClient;
     private final SandboxApi sandboxApi;
@@ -313,9 +315,12 @@ public class Daytona implements AutoCloseable {
         Map<String, String> labels = params.getLabels() == null
                 ? new HashMap<String, String>()
                 : new HashMap<String, String>(params.getLabels());
-        if (params.getLanguage() != null && !params.getLanguage().isEmpty()) {
-            labels.put("code-toolbox-language", params.getLanguage());
+        String language = params.getLanguage();
+        if (language == null || language.isEmpty()) {
+            language = CodeLanguage.PYTHON.getValue();
         }
+        CodeLanguage.fromValue(language);
+        labels.put(CODE_TOOLBOX_LANGUAGE_LABEL, language);
         if (!labels.isEmpty()) {
             body.setLabels(labels);
         }

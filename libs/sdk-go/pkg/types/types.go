@@ -3,7 +3,13 @@
 
 package types
 
-import "time"
+import (
+	"time"
+
+	toolbox "github.com/daytonaio/daytona/libs/toolbox-api-client-go"
+)
+
+const CodeToolboxLanguageLabel = "code-toolbox-language"
 
 // CodeLanguage
 type CodeLanguage string
@@ -275,25 +281,7 @@ type Position struct {
 	Character int // zero-based
 }
 
-type ChartType string
-
-const (
-	ChartTypeLine           ChartType = "line"
-	ChartTypeScatter        ChartType = "scatter"
-	ChartTypeBar            ChartType = "bar"
-	ChartTypePie            ChartType = "pie"
-	ChartTypeBoxAndWhisker  ChartType = "box_and_whisker"
-	ChartTypeCompositeChart ChartType = "composite_chart"
-	ChartTypeUnknown        ChartType = "unknown"
-)
-
-// Chart represents a chart
-type Chart struct {
-	Type     ChartType
-	Title    string
-	Elements any
-	PNG      *string // Optional base64-encoded PNG representation
-}
+type Chart = toolbox.Chart
 
 // PreviewLink contains the URL and authentication token for a sandbox preview.
 type PreviewLink struct {

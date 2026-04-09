@@ -74,7 +74,9 @@ def main
   response = sandbox.process.code_run(code: CODE)
 
   if response.exit_code == 0
-    response.artifacts.charts.each do |chart|
+    charts = response.artifacts&.charts || []
+
+    charts.each do |chart|
       img_data = Base64.decode64(chart.png)
       title = chart.title || Time.now.to_i
       filename = "#{title}.png"
@@ -97,7 +99,7 @@ def print_chart(chart)
   case chart.type
   when Daytona::Charts::ChartType::LINE
     puts "X Label: #{chart.x_label}"
-    puts "Y Label: #{chart.title}"
+    puts "Y Label: #{chart.y_label}"
     puts "X Ticks: #{chart.x_ticks}"
     puts "X Tick Labels: #{chart.x_tick_labels}"
     puts "X Scale: #{chart.x_scale}"
@@ -138,7 +140,6 @@ def print_chart(chart)
       puts "\n  Label: #{element.label}"
       puts "  Angle: #{element.angle}"
       puts "  Radius: #{element.radius}"
-      puts "  Autopct: #{element.autopct}"
     end
   when Daytona::Charts::ChartType::BOX_AND_WHISKER
     puts "X Label: #{chart.x_label}"
@@ -155,7 +156,7 @@ def print_chart(chart)
     end
   when Daytona::Charts::ChartType::COMPOSITE_CHART
     puts "Elements:\n"
-    chart.element.each { print_chart(_1) }
+    chart.elements.each { print_chart(_1) }
   else
     raise ArgumentError, "Unknown chart: #{chart.type}"
   end

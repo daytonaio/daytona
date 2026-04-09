@@ -12,7 +12,7 @@ Sandbox class for Daytona SDK.
 #### new Sandbox()
 
 ```ruby
-def initialize(code_toolbox:, sandbox_dto:, config:, sandbox_api:, otel_state:)
+def initialize(sandbox_dto:, config:, sandbox_api:, otel_state:)
 
 ```
 
@@ -320,17 +320,6 @@ def daemon_version()
 **Returns**:
 
 - `String` - The version of the daemon running in the sandbox
-
-#### code_toolbox()
-
-```ruby
-def code_toolbox()
-
-```
-
-**Returns**:
-
-- `Daytona:SandboxPythonCodeToolbox, Daytona:SandboxTsCodeToolbox`
 
 #### config()
 

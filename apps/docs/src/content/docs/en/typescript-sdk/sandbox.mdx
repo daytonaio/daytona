@@ -230,8 +230,7 @@ new Sandbox(
    sandboxDto: Sandbox, 
    clientConfig: Configuration, 
    axiosInstance: AxiosInstance, 
-   sandboxApi: SandboxApi, 
-   codeToolbox: SandboxCodeToolbox): Sandbox
+   sandboxApi: SandboxApi): Sandbox
 ```
 
 Creates a new Sandbox instance
@@ -241,8 +240,7 @@ Creates a new Sandbox instance
 - `sandboxDto` _Sandbox_ - The API Sandbox instance
 - `clientConfig` _Configuration_
 - `axiosInstance` _AxiosInstance_
-- `sandboxApi` _SandboxApi_ - API client for Sandbox operations
-- `codeToolbox` _SandboxCodeToolbox_ - Language-specific toolbox implementation
+- `sandboxApi` _SandboxApi_
 
 
 **Returns**:
@@ -993,34 +991,9 @@ or encounters an error.
     - _Inherited from_: `PaginatedSandboxes.page`
 - `total` _number_
     - _Inherited from_: `PaginatedSandboxes.total`
-- `totalPages` _number_
+- `totalPages` _number_ - PaginatedSandboxes
     - _Inherited from_: `PaginatedSandboxes.totalPages`
 
 
 
-
 - `Omit`\<`PaginatedSandboxesDto`, `"items"`\>
-## SandboxCodeToolbox
-
-Interface defining methods that a code toolbox must implement
-
-### Methods
-
-#### getRunCommand()
-
-```ts
-getRunCommand(code: string, params?: CodeRunParams): string
-```
-
-Generates a command to run the provided code
-
-**Parameters**:
-
-- `code` _string_
-- `params?` _CodeRunParams_
-
-
-**Returns**:
-
-- `string`
-
