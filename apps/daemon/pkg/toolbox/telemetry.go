@@ -48,17 +48,6 @@ func (s *server) initTelemetry(ctx context.Context, serviceName, entrypointLogFi
 	}
 
 	extraLabels := make(map[string]string)
-	if organizationId != nil && *organizationId != "" {
-		extraLabels["daytona_organization_id"] = *organizationId
-	}
-
-	if regionId != nil && *regionId != "" {
-		extraLabels["daytona_region_id"] = *regionId
-	}
-
-	if snapshot != nil && *snapshot != "" {
-		extraLabels["daytona_snapshot"] = *snapshot
-	}
 
 	if envLabels := os.Getenv("DAYTONA_SANDBOX_OTEL_EXTRA_LABELS"); envLabels != "" {
 		for pair := range strings.SplitSeq(envLabels, ",") {
@@ -73,6 +62,18 @@ func (s *server) initTelemetry(ctx context.Context, serviceName, entrypointLogFi
 				extraLabels[key] = value
 			}
 		}
+	}
+
+	if organizationId != nil && *organizationId != "" {
+		extraLabels["daytona_organization_id"] = *organizationId
+	}
+
+	if regionId != nil && *regionId != "" {
+		extraLabels["daytona_region_id"] = *regionId
+	}
+
+	if snapshot != nil && *snapshot != "" {
+		extraLabels["daytona_snapshot"] = *snapshot
 	}
 
 	if len(extraLabels) > 0 {
