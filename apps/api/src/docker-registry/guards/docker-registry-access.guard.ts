@@ -3,35 +3,42 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, CanActivate, ExecutionContext, NotFoundException, ForbiddenException } from '@nestjs/common'
+import { Injectable, ExecutionContext, NotFoundException, ForbiddenException, Logger } from '@nestjs/common'
+import { ResourceAccessGuard } from '../../common/guards/resource-access.guard'
 import { DockerRegistryService } from '../services/docker-registry.service'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
-import { SystemRole } from '../../user/enums/system-role.enum'
+import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
 import { RegistryType } from '../enums/registry-type.enum'
 
 @Injectable()
-export class DockerRegistryAccessGuard implements CanActivate {
-  constructor(private readonly dockerRegistryService: DockerRegistryService) {}
+export class DockerRegistryAccessGuard extends ResourceAccessGuard {
+  private readonly logger = new Logger(DockerRegistryAccessGuard.name)
+
+  constructor(private readonly dockerRegistryService: DockerRegistryService) {
+    super()
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()
     const dockerRegistryId: string = request.params.dockerRegistryId || request.params.registryId || request.params.id
 
-    // TODO: initialize authContext safely
-    const authContext: OrganizationAuthContext = request.user
+    const authContext = getAuthContext(context, isOrganizationAuthContext)
 
     try {
       const dockerRegistry = await this.dockerRegistryService.findOneOrFail(dockerRegistryId)
-      if (authContext.role !== SystemRole.ADMIN && dockerRegistry.organizationId !== authContext.organizationId) {
+      if (dockerRegistry.organizationId !== authContext.organizationId) {
         throw new ForbiddenException('Request organization ID does not match resource organization ID')
       }
-      if (authContext.role !== SystemRole.ADMIN && dockerRegistry.registryType !== RegistryType.ORGANIZATION) {
-        // only allow access to registries manually created by the organization
+      if (dockerRegistry.registryType !== RegistryType.ORGANIZATION) {
+        // Allow access only to registries manually created by the organization
         throw new ForbiddenException(`Requested registry is not type "${RegistryType.ORGANIZATION}"`)
       }
       request.dockerRegistry = dockerRegistry
       return true
     } catch (error) {
+      if (!(error instanceof NotFoundException)) {
+        this.logger.error(error)
+      }
       throw new NotFoundException(`Docker registry with ID ${dockerRegistryId} not found`)
     }
   }

@@ -15,9 +15,19 @@ package io.daytona.api.client.api;
 
 import io.daytona.api.client.ApiException;
 import io.daytona.api.client.model.AdminCreateRunner;
+import io.daytona.api.client.model.AdminGetWebhookStatus200Response;
+import java.math.BigDecimal;
 import io.daytona.api.client.model.CreateRunnerResponse;
+import io.daytona.api.client.model.CreateUser;
+import io.daytona.api.client.model.DockerRegistry;
+import java.time.OffsetDateTime;
+import io.daytona.api.client.model.PaginatedAuditLogs;
 import io.daytona.api.client.model.RunnerFull;
 import io.daytona.api.client.model.Sandbox;
+import io.daytona.api.client.model.SendWebhookDto;
+import io.daytona.api.client.model.SetSnapshotGeneralStatusDto;
+import io.daytona.api.client.model.SnapshotDto;
+import io.daytona.api.client.model.User;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -35,6 +45,18 @@ public class AdminApiTest {
     private final AdminApi api = new AdminApi();
 
     /**
+     * Check if an image can be cleaned up
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void adminCanCleanupImageTest() throws ApiException {
+        String imageName = null;
+        Boolean response = api.adminCanCleanupImage(imageName);
+        // TODO: test validations
+    }
+
+    /**
      * Create runner
      *
      * @throws ApiException if the Api call fails
@@ -43,6 +65,18 @@ public class AdminApiTest {
     public void adminCreateRunnerTest() throws ApiException {
         AdminCreateRunner adminCreateRunner = null;
         CreateRunnerResponse response = api.adminCreateRunner(adminCreateRunner);
+        // TODO: test validations
+    }
+
+    /**
+     * Create user
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void adminCreateUserTest() throws ApiException {
+        CreateUser createUser = null;
+        api.adminCreateUser(createUser);
         // TODO: test validations
     }
 
@@ -59,6 +93,35 @@ public class AdminApiTest {
     }
 
     /**
+     * Get all audit logs
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void adminGetAllAuditLogsTest() throws ApiException {
+        BigDecimal page = null;
+        BigDecimal limit = null;
+        OffsetDateTime from = null;
+        OffsetDateTime to = null;
+        String nextToken = null;
+        PaginatedAuditLogs response = api.adminGetAllAuditLogs(page, limit, from, to, nextToken);
+        // TODO: test validations
+    }
+
+    /**
+     * Get delivery attempts for a webhook message
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void adminGetMessageAttemptsTest() throws ApiException {
+        String organizationId = null;
+        String messageId = null;
+        List<Object> response = api.adminGetMessageAttempts(organizationId, messageId);
+        // TODO: test validations
+    }
+
+    /**
      * Get runner by ID
      *
      * @throws ApiException if the Api call fails
@@ -67,6 +130,41 @@ public class AdminApiTest {
     public void adminGetRunnerByIdTest() throws ApiException {
         String id = null;
         RunnerFull response = api.adminGetRunnerById(id);
+        // TODO: test validations
+    }
+
+    /**
+     * Get user by ID
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void adminGetUserTest() throws ApiException {
+        String id = null;
+        User response = api.adminGetUser(id);
+        // TODO: test validations
+    }
+
+    /**
+     * Get webhook service status
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void adminGetWebhookStatusTest() throws ApiException {
+        AdminGetWebhookStatus200Response response = api.adminGetWebhookStatus();
+        // TODO: test validations
+    }
+
+    /**
+     * Initialize webhooks for an organization
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void adminInitializeWebhooksTest() throws ApiException {
+        String organizationId = null;
+        api.adminInitializeWebhooks(organizationId);
         // TODO: test validations
     }
 
@@ -83,6 +181,17 @@ public class AdminApiTest {
     }
 
     /**
+     * List all users
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void adminListUsersTest() throws ApiException {
+        api.adminListUsers();
+        // TODO: test validations
+    }
+
+    /**
      * Recover sandbox from error state as an admin
      *
      * @throws ApiException if the Api call fails
@@ -91,6 +200,56 @@ public class AdminApiTest {
     public void adminRecoverSandboxTest() throws ApiException {
         String sandboxId = null;
         Sandbox response = api.adminRecoverSandbox(sandboxId);
+        // TODO: test validations
+    }
+
+    /**
+     * Regenerate user key pair
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void adminRegenerateKeyPairTest() throws ApiException {
+        String id = null;
+        api.adminRegenerateKeyPair(id);
+        // TODO: test validations
+    }
+
+    /**
+     * Send a webhook message to an organization
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void adminSendWebhookTest() throws ApiException {
+        String organizationId = null;
+        SendWebhookDto sendWebhookDto = null;
+        api.adminSendWebhook(organizationId, sendWebhookDto);
+        // TODO: test validations
+    }
+
+    /**
+     * Set default registry
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void adminSetDefaultRegistryTest() throws ApiException {
+        String id = null;
+        DockerRegistry response = api.adminSetDefaultRegistry(id);
+        // TODO: test validations
+    }
+
+    /**
+     * Set snapshot general status
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void adminSetSnapshotGeneralStatusTest() throws ApiException {
+        String id = null;
+        SetSnapshotGeneralStatusDto setSnapshotGeneralStatusDto = null;
+        SnapshotDto response = api.adminSetSnapshotGeneralStatus(id, setSnapshotGeneralStatusDto);
         // TODO: test validations
     }
 

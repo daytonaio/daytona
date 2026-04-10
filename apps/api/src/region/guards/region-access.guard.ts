@@ -3,41 +3,36 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  NotFoundException,
-  ForbiddenException,
-  Logger,
-} from '@nestjs/common'
+import { Injectable, ExecutionContext, NotFoundException, ForbiddenException, Logger } from '@nestjs/common'
+import { ResourceAccessGuard } from '../../common/guards/resource-access.guard'
 import { RegionService } from '../services/region.service'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
-import { SystemRole } from '../../user/enums/system-role.enum'
+import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
 import { RegionType } from '../enums/region-type.enum'
 
 @Injectable()
-export class RegionAccessGuard implements CanActivate {
+export class RegionAccessGuard extends ResourceAccessGuard {
   private readonly logger = new Logger(RegionAccessGuard.name)
 
-  constructor(private readonly regionService: RegionService) {}
+  constructor(private readonly regionService: RegionService) {
+    super()
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()
     const regionId: string = request.params.regionId || request.params.id
 
-    // TODO: initialize authContext safely
-    const authContext: OrganizationAuthContext = request.user
+    const authContext = getAuthContext(context, isOrganizationAuthContext)
 
     try {
       const region = await this.regionService.findOne(regionId)
       if (!region) {
         throw new NotFoundException('Region not found')
       }
-      if (authContext.role !== SystemRole.ADMIN && region.organizationId !== authContext.organizationId) {
+      if (region.organizationId !== authContext.organizationId) {
         throw new ForbiddenException('Request organization ID does not match resource organization ID')
       }
-      if (authContext.role !== SystemRole.ADMIN && region.regionType !== RegionType.CUSTOM) {
+      if (region.regionType !== RegionType.CUSTOM) {
         throw new ForbiddenException('Region is not a custom region')
       }
       return true

@@ -5,16 +5,17 @@
 
 import { Injectable, ExecutionContext, Logger, CanActivate, Type, mixin } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
+import { InvalidAuthenticationContextException } from '../common/exceptions/invalid-authentication-context.exception'
 
 /**
- * Creates an OrGuard that allows access if at least one of the provided guards allows access.
- * It tries each guard in sequence and returns true on the first successful guard.
- * If all guards fail, it returns false.
+ * Utility guard that allows access if at least one of the provided guards succeeds.
+ * Intended for composing auth context guards.
  *
- * Usage:
- * ```typescript
- * @UseGuards(OrGuard([GuardA, GuardB]))
- * ```
+ * Guards are resolved via `moduleRef.get()`.
+ * This means they must be registered as providers in the controller's module or exported from an imported module.
+ * Using guards that are not registered as providers will result in a runtime error.
+ *
+ * @throws {InvalidAuthenticationContextException} if all guards fail.
  */
 export function OrGuard(guards: Type<CanActivate>[]): Type<CanActivate> {
   @Injectable()
@@ -25,8 +26,8 @@ export function OrGuard(guards: Type<CanActivate>[]): Type<CanActivate> {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
       for (const GuardClass of guards) {
+        const guard = this.moduleRef.get(GuardClass)
         try {
-          const guard = this.moduleRef.get(GuardClass, { strict: false })
           const result = await guard.canActivate(context)
 
           if (result) {
@@ -38,10 +39,11 @@ export function OrGuard(guards: Type<CanActivate>[]): Type<CanActivate> {
         }
       }
 
-      this.logger.debug('All guards in OrGuard failed')
-      return false
+      throw new InvalidAuthenticationContextException()
     }
   }
 
-  return mixin(OrGuardMixin)
+  const Mixed = mixin(OrGuardMixin)
+  Object.defineProperty(Mixed, 'guards', { value: guards, writable: false })
+  return Mixed
 }

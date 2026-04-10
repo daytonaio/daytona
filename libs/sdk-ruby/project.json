@@ -41,13 +41,6 @@
         "command": "bundle exec rubocop"
       }
     },
-    "test": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{projectRoot}",
-        "command": "bundle exec rake spec"
-      }
-    },
     "format": {
       "executor": "nx:run-commands",
       "options": {

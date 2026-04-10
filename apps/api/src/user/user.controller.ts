@@ -17,17 +17,11 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common'
-import { User } from './user.entity'
 import { UserService } from './user.service'
-import { CreateUserDto } from './dto/create-user.dto'
 import { ApiOAuth2, ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
-import { CombinedAuthGuard } from '../auth/combined-auth.guard'
-import { AuthContext } from '../common/decorators/auth-context.decorator'
-import { AuthContext as IAuthContext } from '../common/interfaces/auth-context.interface'
+import { IsUserAuthContext } from '../common/decorators/auth-context.decorator'
+import { UserAuthContext } from '../common/interfaces/user-auth-context.interface'
 import { UserDto } from './dto/user.dto'
-import { SystemActionGuard } from '../auth/system-action.guard'
-import { RequiredSystemRole } from '../common/decorators/required-role.decorator'
-import { SystemRole } from './enums/system-role.enum'
 import { TypedConfigService } from '../config/typed-config.service'
 import axios from 'axios'
 import { AccountProviderDto } from './dto/account-provider.dto'
@@ -36,14 +30,18 @@ import { AccountProvider } from './enums/account-provider.enum'
 import { CreateLinkedAccountDto } from './dto/create-linked-account.dto'
 import { Audit, TypedRequest } from '../audit/decorators/audit.decorator'
 import { AuditAction } from '../audit/enums/audit-action.enum'
-import { AuditTarget } from '../audit/enums/audit-target.enum'
 import { AuthenticatedRateLimitGuard } from '../common/guards/authenticated-rate-limit.guard'
+import { AuthStrategy } from '../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../auth/enums/auth-strategy-type.enum'
+import { UserAuthContextGuard } from './guards/user-auth-context.guard'
 
-@ApiTags('users')
 @Controller('users')
-@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
+@ApiTags('users')
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
+@AuthStrategy(AuthStrategyType.JWT)
+@UseGuards(AuthenticatedRateLimitGuard)
+@UseGuards(UserAuthContextGuard)
 export class UserController {
   private readonly logger = new Logger(UserController.name)
 
@@ -62,63 +60,13 @@ export class UserController {
     description: 'User details',
     type: UserDto,
   })
-  async getAuthenticatedUser(@AuthContext() authContext: IAuthContext): Promise<UserDto> {
+  async getAuthenticatedUser(@IsUserAuthContext() authContext: UserAuthContext): Promise<UserDto> {
     const user = await this.userService.findOne(authContext.userId)
     if (!user) {
       throw new NotFoundException(`User with ID ${authContext.userId} not found`)
     }
 
     return UserDto.fromUser(user)
-  }
-
-  @Post()
-  @ApiOperation({
-    summary: 'Create user',
-    operationId: 'createUser',
-  })
-  @RequiredSystemRole(SystemRole.ADMIN)
-  @Audit({
-    action: AuditAction.CREATE,
-    targetType: AuditTarget.USER,
-    targetIdFromResult: (result: User) => result?.id,
-    requestMetadata: {
-      body: (req: TypedRequest<CreateUserDto>) => ({
-        id: req.body?.id,
-        name: req.body?.name,
-        email: req.body?.email,
-        personalOrganizationQuota: req.body?.personalOrganizationQuota,
-        role: req.body?.role,
-        emailVerified: req.body?.emailVerified,
-      }),
-    },
-  })
-  async create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.userService.create(createUserDto)
-  }
-
-  @Get()
-  @ApiOperation({
-    summary: 'List all users',
-    operationId: 'listUsers',
-  })
-  @RequiredSystemRole(SystemRole.ADMIN)
-  async findAll(): Promise<User[]> {
-    return this.userService.findAll()
-  }
-
-  @Post('/:id/regenerate-key-pair')
-  @ApiOperation({
-    summary: 'Regenerate user key pair',
-    operationId: 'regenerateKeyPair',
-  })
-  @RequiredSystemRole(SystemRole.ADMIN)
-  @Audit({
-    action: AuditAction.REGENERATE_KEY_PAIR,
-    targetType: AuditTarget.USER,
-    targetIdFromRequest: (req) => req.params.id,
-  })
-  async regenerateKeyPair(@Param('id') id: string): Promise<User> {
-    return this.userService.regenerateKeyPair(id)
   }
 
   @Get('/account-providers')
@@ -184,7 +132,7 @@ export class UserController {
     },
   })
   async linkAccount(
-    @AuthContext() authContext: IAuthContext,
+    @IsUserAuthContext() authContext: UserAuthContext,
     @Body() createLinkedAccountDto: CreateLinkedAccountDto,
   ): Promise<void> {
     if (!this.configService.get('oidc.managementApi.enabled')) {
@@ -263,7 +211,7 @@ export class UserController {
     },
   })
   async unlinkAccount(
-    @AuthContext() authContext: IAuthContext,
+    @IsUserAuthContext() authContext: UserAuthContext,
     @Param('provider') provider: string,
     @Param('providerUserId') providerUserId: string,
   ): Promise<void> {
@@ -299,7 +247,7 @@ export class UserController {
     description: 'SMS MFA enrollment URL',
     type: String,
   })
-  async enrollInSmsMfa(@AuthContext() authContext: IAuthContext): Promise<string> {
+  async enrollInSmsMfa(@IsUserAuthContext() authContext: UserAuthContext): Promise<string> {
     if (!this.configService.get('oidc.managementApi.enabled')) {
       this.logger.warn('OIDC Management API is not enabled')
       throw new NotFoundException()
@@ -325,26 +273,6 @@ export class UserController {
       this.logger.error('Failed to enable SMS MFA', error?.message || String(error))
       throw new UnauthorizedException()
     }
-  }
-
-  @Get('/:id')
-  @ApiOperation({
-    summary: 'Get user by ID',
-    operationId: 'getUser',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'User details',
-    type: UserDto,
-  })
-  @RequiredSystemRole(SystemRole.ADMIN)
-  async getUserById(@Param('id') id: string): Promise<UserDto> {
-    const user = await this.userService.findOne(id)
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`)
-    }
-
-    return UserDto.fromUser(user)
   }
 
   private async getManagementApiToken(): Promise<string> {

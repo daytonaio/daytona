@@ -65,14 +65,6 @@ public class CreateSnapshotTest {
     }
 
     /**
-     * Test the property 'general'
-     */
-    @Test
-    public void generalTest() {
-        // TODO: test general
-    }
-
-    /**
      * Test the property 'cpu'
      */
     @Test

@@ -30,7 +30,6 @@ import io.daytona.api.client.model.OrganizationUser;
 import io.daytona.api.client.model.OtelConfig;
 import io.daytona.api.client.model.RegenerateApiKeyResponse;
 import io.daytona.api.client.model.Region;
-import io.daytona.api.client.model.RegionQuota;
 import io.daytona.api.client.model.SnapshotManagerCredentials;
 import io.daytona.api.client.model.UpdateOrganizationDefaultRegion;
 import io.daytona.api.client.model.UpdateOrganizationInvitation;
@@ -207,18 +206,6 @@ public class OrganizationsApiTest {
     }
 
     /**
-     * Get organization by sandbox ID
-     *
-     * @throws ApiException if the Api call fails
-     */
-    @Test
-    public void getOrganizationBySandboxIdTest() throws ApiException {
-        String sandboxId = null;
-        Organization response = api.getOrganizationBySandboxId(sandboxId);
-        // TODO: test validations
-    }
-
-    /**
      * Get count of organization invitations for authenticated user
      *
      * @throws ApiException if the Api call fails
@@ -263,18 +250,6 @@ public class OrganizationsApiTest {
         String id = null;
         String xDaytonaOrganizationID = null;
         Region response = api.getRegionById(id, xDaytonaOrganizationID);
-        // TODO: test validations
-    }
-
-    /**
-     * Get region quota by sandbox ID
-     *
-     * @throws ApiException if the Api call fails
-     */
-    @Test
-    public void getRegionQuotaBySandboxIdTest() throws ApiException {
-        String sandboxId = null;
-        RegionQuota response = api.getRegionQuotaBySandboxId(sandboxId);
         // TODO: test validations
     }
 

@@ -167,6 +167,14 @@ jobs:
           GONOSUMDB=github.com/daytonaio/daytona go work sync
           git diff --exit-code || (echo "Code not formatted or linting errors! Hint: 'yarn generate:api-client', 'yarn lint:fix', 'yarn docs' and commit" && exit 1)
 
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-toolchain
+      - name: Run tests
+        run: yarn test
+
   build:
     runs-on: ubuntu-latest
     steps:

@@ -34,22 +34,6 @@ public class AuditApiTest {
     private final AuditApi api = new AuditApi();
 
     /**
-     * Get all audit logs
-     *
-     * @throws ApiException if the Api call fails
-     */
-    @Test
-    public void getAllAuditLogsTest() throws ApiException {
-        BigDecimal page = null;
-        BigDecimal limit = null;
-        OffsetDateTime from = null;
-        OffsetDateTime to = null;
-        String nextToken = null;
-        PaginatedAuditLogs response = api.getAllAuditLogs(page, limit, from, to, nextToken);
-        // TODO: test validations
-    }
-
-    /**
      * Get audit logs for organization
      *
      * @throws ApiException if the Api call fails

@@ -16,7 +16,6 @@ package io.daytona.api.client.api;
 import io.daytona.api.client.ApiException;
 import io.daytona.api.client.model.AccountProvider;
 import io.daytona.api.client.model.CreateLinkedAccount;
-import io.daytona.api.client.model.CreateUser;
 import io.daytona.api.client.model.User;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -33,18 +32,6 @@ import java.util.Map;
 public class UsersApiTest {
 
     private final UsersApi api = new UsersApi();
-
-    /**
-     * Create user
-     *
-     * @throws ApiException if the Api call fails
-     */
-    @Test
-    public void createUserTest() throws ApiException {
-        CreateUser createUser = null;
-        api.createUser(createUser);
-        // TODO: test validations
-    }
 
     /**
      * Enroll in SMS MFA
@@ -80,18 +67,6 @@ public class UsersApiTest {
     }
 
     /**
-     * Get user by ID
-     *
-     * @throws ApiException if the Api call fails
-     */
-    @Test
-    public void getUserTest() throws ApiException {
-        String id = null;
-        User response = api.getUser(id);
-        // TODO: test validations
-    }
-
-    /**
      * Link account
      *
      * @throws ApiException if the Api call fails
@@ -100,29 +75,6 @@ public class UsersApiTest {
     public void linkAccountTest() throws ApiException {
         CreateLinkedAccount createLinkedAccount = null;
         api.linkAccount(createLinkedAccount);
-        // TODO: test validations
-    }
-
-    /**
-     * List all users
-     *
-     * @throws ApiException if the Api call fails
-     */
-    @Test
-    public void listUsersTest() throws ApiException {
-        api.listUsers();
-        // TODO: test validations
-    }
-
-    /**
-     * Regenerate user key pair
-     *
-     * @throws ApiException if the Api call fails
-     */
-    @Test
-    public void regenerateKeyPairTest() throws ApiException {
-        String id = null;
-        api.regenerateKeyPair(id);
         // TODO: test validations
     }
 

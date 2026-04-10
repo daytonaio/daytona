@@ -3,70 +3,68 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  NotFoundException,
-  ForbiddenException,
-  Logger,
-} from '@nestjs/common'
+import { Injectable, ExecutionContext, NotFoundException, ForbiddenException, Logger } from '@nestjs/common'
+import { ResourceAccessGuard } from '../../common/guards/resource-access.guard'
 import { RegionService } from '../../region/services/region.service'
 import { RunnerService } from '../services/runner.service'
-import { BaseAuthContext, OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
-import { SystemRole } from '../../user/enums/system-role.enum'
+import { isBaseAuthContext } from '../../common/interfaces/base-auth-context.interface'
+import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
+import { isRegionAuthContext } from '../../common/interfaces/region-auth-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
 import { RegionType } from '../../region/enums/region-type.enum'
-import { isRegionProxyContext } from '../../common/interfaces/region-proxy.interface'
-import { isRegionSSHGatewayContext } from '../../common/interfaces/region-ssh-gateway.interface'
-import { isProxyContext } from '../../common/interfaces/proxy-context.interface'
-import { isSshGatewayContext } from '../../common/interfaces/ssh-gateway-context.interface'
+import { isProxyAuthContext } from '../../common/interfaces/proxy-auth-context.interface'
+import { isSshGatewayAuthContext } from '../../common/interfaces/ssh-gateway-auth-context.interface'
+import { InvalidAuthenticationContextException } from '../../common/exceptions/invalid-authentication-context.exception'
 
 @Injectable()
-export class RunnerAccessGuard implements CanActivate {
+export class RunnerAccessGuard extends ResourceAccessGuard {
   private readonly logger = new Logger(RunnerAccessGuard.name)
 
   constructor(
     private readonly runnerService: RunnerService,
     private readonly regionService: RegionService,
-  ) {}
+  ) {
+    super()
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()
     const runnerId: string = request.params.runnerId || request.params.id
 
-    // TODO: initialize authContext safely
-    const authContext: BaseAuthContext = request.user
+    const authContext = getAuthContext(context, isBaseAuthContext)
 
     try {
       const runner = await this.runnerService.findOneOrFail(runnerId)
 
       switch (true) {
-        case isRegionProxyContext(authContext):
-        case isRegionSSHGatewayContext(authContext): {
-          // Use RunnerRegionAccessGuard to check access instead
-          return false
-        }
-        case isProxyContext(authContext):
-        case isSshGatewayContext(authContext):
-          return true
-        default: {
-          const orgAuthContext = authContext as OrganizationAuthContext
-
-          if (orgAuthContext.role !== SystemRole.ADMIN) {
-            const region = await this.regionService.findOne(runner.region)
-            if (!region) {
-              throw new NotFoundException('Region not found')
-            }
-            if (region.organizationId !== orgAuthContext.organizationId) {
-              throw new ForbiddenException('Request organization ID does not match resource organization ID')
-            }
-            if (region.regionType !== RegionType.CUSTOM) {
-              throw new ForbiddenException('Runner is not in a custom region')
-            }
+        case isRegionAuthContext(authContext): {
+          if (authContext.regionId !== runner.region) {
+            throw new ForbiddenException('Region ID does not match runner region ID')
           }
-          return true
+          break
         }
+        case isProxyAuthContext(authContext):
+        case isSshGatewayAuthContext(authContext):
+          break
+        case isOrganizationAuthContext(authContext): {
+          const region = await this.regionService.findOne(runner.region)
+          if (!region) {
+            throw new NotFoundException('Region not found')
+          }
+          if (region.organizationId !== authContext.organizationId) {
+            throw new ForbiddenException('Request organization ID does not match resource organization ID')
+          }
+          if (region.regionType !== RegionType.CUSTOM) {
+            throw new ForbiddenException('Runner is not in a custom region')
+          }
+          break
+        }
+        default:
+          throw new InvalidAuthenticationContextException()
       }
+
+      // Access granted
+      return true
     } catch (error) {
       if (!(error instanceof NotFoundException)) {
         this.logger.error(error)

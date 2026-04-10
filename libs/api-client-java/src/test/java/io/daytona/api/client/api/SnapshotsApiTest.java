@@ -17,7 +17,6 @@ import io.daytona.api.client.ApiException;
 import java.math.BigDecimal;
 import io.daytona.api.client.model.CreateSnapshot;
 import io.daytona.api.client.model.PaginatedSnapshots;
-import io.daytona.api.client.model.SetSnapshotGeneralStatusDto;
 import io.daytona.api.client.model.SnapshotDto;
 import io.daytona.api.client.model.Url;
 import org.junit.jupiter.api.Disabled;
@@ -46,19 +45,6 @@ public class SnapshotsApiTest {
         String id = null;
         String xDaytonaOrganizationID = null;
         SnapshotDto response = api.activateSnapshot(id, xDaytonaOrganizationID);
-        // TODO: test validations
-    }
-
-    /**
-     * Check if an image can be cleaned up
-     *
-     * @throws ApiException if the Api call fails
-     */
-    @Test
-    public void canCleanupImageTest() throws ApiException {
-        String imageName = null;
-        String xDaytonaOrganizationID = null;
-        Boolean response = api.canCleanupImage(imageName, xDaytonaOrganizationID);
         // TODO: test validations
     }
 
@@ -157,20 +143,6 @@ public class SnapshotsApiTest {
         String id = null;
         String xDaytonaOrganizationID = null;
         api.removeSnapshot(id, xDaytonaOrganizationID);
-        // TODO: test validations
-    }
-
-    /**
-     * Set snapshot general status
-     *
-     * @throws ApiException if the Api call fails
-     */
-    @Test
-    public void setSnapshotGeneralStatusTest() throws ApiException {
-        String id = null;
-        SetSnapshotGeneralStatusDto setSnapshotGeneralStatusDto = null;
-        String xDaytonaOrganizationID = null;
-        SnapshotDto response = api.setSnapshotGeneralStatus(id, setSnapshotGeneralStatusDto, xDaytonaOrganizationID);
         // TODO: test validations
     }
 

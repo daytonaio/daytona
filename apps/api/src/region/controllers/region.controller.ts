@@ -4,15 +4,15 @@
  */
 
 import { Controller, Get, Logger, HttpCode } from '@nestjs/common'
-import { ApiOAuth2, ApiResponse, ApiOperation, ApiTags, ApiBearerAuth } from '@nestjs/swagger'
+import { ApiResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { RegionDto } from '../dto/region.dto'
 import { RegionType } from '../enums/region-type.enum'
 import { RegionService } from '../services/region.service'
+import { Public } from '../../auth/decorators/public.decorator'
 
-@ApiTags('regions')
 @Controller('shared-regions')
-@ApiOAuth2(['openid', 'profile', 'email'])
-@ApiBearerAuth()
+@ApiTags('regions')
+@Public()
 export class RegionController {
   private readonly logger = new Logger(RegionController.name)
 

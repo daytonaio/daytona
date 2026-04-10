@@ -14,7 +14,6 @@ import {
   Logger,
   UseGuards,
   HttpCode,
-  UseInterceptors,
   Put,
   NotFoundException,
   ForbiddenException,
@@ -25,7 +24,6 @@ import {
   ParseBoolPipe,
 } from '@nestjs/common'
 import Redis from 'ioredis'
-import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { SandboxService as WorkspaceService } from '../services/sandbox.service'
 import {
   ApiOAuth2,
@@ -41,15 +39,14 @@ import { SandboxLabelsDto as WorkspaceLabelsDto } from '../dto/sandbox.dto'
 import { WorkspaceDto } from '../dto/workspace.deprecated.dto'
 import { RunnerService } from '../services/runner.service'
 import { SandboxState as WorkspaceState } from '../enums/sandbox-state.enum'
-import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { SandboxAccessGuard as WorkspaceAccessGuard } from '../guards/sandbox-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
-import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { IsOrganizationAuthContext } from '../../common/decorators/auth-context.decorator'
+import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
-import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
+import { OrganizationAuthContextGuard } from '../../organization/guards/organization-auth-context.guard'
 import { WorkspacePortPreviewUrlDto } from '../dto/workspace-port-preview-url.deprecated.dto'
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
@@ -61,13 +58,17 @@ import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 
-@ApiTags('workspace')
 @Controller('workspace')
-@ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
+@ApiTags('workspace')
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
+@ApiHeader(CustomHeaders.ORGANIZATION_ID)
+@AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
+@UseGuards(AuthenticatedRateLimitGuard)
+@UseGuards(OrganizationAuthContextGuard)
 export class WorkspaceController {
   private readonly logger = new Logger(WorkspaceController.name)
 
@@ -103,7 +104,7 @@ export class WorkspaceController {
     description: 'JSON encoded labels to filter by',
   })
   async listWorkspacees(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Query('verbose') verbose?: boolean,
     @Query('labels') labelsQuery?: string,
   ): Promise<WorkspaceDto[]> {
@@ -117,8 +118,7 @@ export class WorkspaceController {
   }
 
   @Post()
-  @HttpCode(200) //  for Daytona Api compatibility
-  @UseInterceptors(ContentTypeInterceptor)
+  @HttpCode(200)
   @ApiOperation({
     summary: '[DEPRECATED] Create a new workspace',
     operationId: 'createWorkspace_deprecated',
@@ -157,7 +157,7 @@ export class WorkspaceController {
     },
   })
   async createWorkspace(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Body() createWorkspaceDto: CreateWorkspaceDto,
   ): Promise<WorkspaceDto> {
     if (createWorkspaceDto.buildInfo) {
@@ -275,7 +275,7 @@ export class WorkspaceController {
     targetIdFromRequest: (req) => req.params.workspaceId,
   })
   async startWorkspace(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Param('workspaceId') workspaceId: string,
   ): Promise<void> {
     await this.workspaceService.start(workspaceId, authContext.organization)
@@ -309,7 +309,6 @@ export class WorkspaceController {
   }
 
   @Put(':workspaceId/labels')
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Replace workspace labels',
     operationId: 'replaceLabelsWorkspace_deprecated',

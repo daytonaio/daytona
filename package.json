@@ -11,6 +11,7 @@
     "lint:ts": "eslint \"{apps,libs,test}/**/*.{ts,tsx}\"",
     "lint:py": "pylint libs examples/python --recursive=y -sn && nbqa pylint examples/jupyter --recursive=y -sn && basedpyright",
     "lint:fix": "eslint \"{apps,libs,test}/**/*.{ts,tsx}\" --fix && nx run api:lint",
+    "test": "nx run-many --target=test --all --nxBail=true",
     "build": "nx run-many --target=build --all --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=development",
     "build:production": "nx run-many --target=build --all --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=production --nxBail=true",
     "docker:production": "SKIP_COMPUTER_USE_BUILD=true nx run-many --target=docker --all --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=production --output-style=stream",

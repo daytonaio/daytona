@@ -4,27 +4,30 @@
  */
 
 import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common'
-import { AuthGuard } from '@nestjs/passport'
 import { ApiOAuth2, ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 import { RequiredOrganizationMemberRole } from '../decorators/required-organization-member-role.decorator'
 import { CreateOrganizationInvitationDto } from '../dto/create-organization-invitation.dto'
 import { UpdateOrganizationInvitationDto } from '../dto/update-organization-invitation.dto'
 import { OrganizationInvitationDto } from '../dto/organization-invitation.dto'
 import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
-import { OrganizationActionGuard } from '../guards/organization-action.guard'
+import { OrganizationAuthContextGuard } from '../guards/organization-auth-context.guard'
 import { OrganizationInvitationService } from '../services/organization-invitation.service'
-import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { AuthContext as IAuthContext } from '../../common/interfaces/auth-context.interface'
+import { IsOrganizationAuthContext } from '../../common/decorators/auth-context.decorator'
+import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 
-@ApiTags('organizations')
 @Controller('organizations/:organizationId/invitations')
-@UseGuards(AuthGuard('jwt'), AuthenticatedRateLimitGuard, OrganizationActionGuard)
+@ApiTags('organizations')
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
+@AuthStrategy(AuthStrategyType.JWT)
+@UseGuards(AuthenticatedRateLimitGuard)
+@UseGuards(OrganizationAuthContextGuard)
 export class OrganizationInvitationController {
   constructor(private readonly organizationInvitationService: OrganizationInvitationService) {}
 
@@ -33,15 +36,15 @@ export class OrganizationInvitationController {
     summary: 'Create organization invitation',
     operationId: 'createOrganizationInvitation',
   })
-  @ApiResponse({
-    status: 201,
-    description: 'Organization invitation created successfully',
-    type: OrganizationInvitationDto,
-  })
   @ApiParam({
     name: 'organizationId',
     description: 'Organization ID',
     type: 'string',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Organization invitation created successfully',
+    type: OrganizationInvitationDto,
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
   @Audit({
@@ -58,7 +61,7 @@ export class OrganizationInvitationController {
     },
   })
   async create(
-    @AuthContext() authContext: IAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Param('organizationId') organizationId: string,
     @Body() createOrganizationInvitationDto: CreateOrganizationInvitationDto,
   ): Promise<OrganizationInvitationDto> {
@@ -75,11 +78,6 @@ export class OrganizationInvitationController {
     summary: 'Update organization invitation',
     operationId: 'updateOrganizationInvitation',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'Organization invitation updated successfully',
-    type: OrganizationInvitationDto,
-  })
   @ApiParam({
     name: 'organizationId',
     description: 'Organization ID',
@@ -89,6 +87,11 @@ export class OrganizationInvitationController {
     name: 'invitationId',
     description: 'Invitation ID',
     type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Organization invitation updated successfully',
+    type: OrganizationInvitationDto,
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
   @Audit({
@@ -121,15 +124,15 @@ export class OrganizationInvitationController {
     summary: 'List pending organization invitations',
     operationId: 'listOrganizationInvitations',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'List of pending organization invitations',
-    type: [OrganizationInvitationDto],
-  })
   @ApiParam({
     name: 'organizationId',
     description: 'Organization ID',
     type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of pending organization invitations',
+    type: [OrganizationInvitationDto],
   })
   async findPending(@Param('organizationId') organizationId: string): Promise<OrganizationInvitationDto[]> {
     const invitations = await this.organizationInvitationService.findPending(organizationId)
@@ -141,10 +144,6 @@ export class OrganizationInvitationController {
     summary: 'Cancel organization invitation',
     operationId: 'cancelOrganizationInvitation',
   })
-  @ApiResponse({
-    status: 204,
-    description: 'Organization invitation cancelled successfully',
-  })
   @ApiParam({
     name: 'organizationId',
     description: 'Organization ID',
@@ -154,6 +153,10 @@ export class OrganizationInvitationController {
     name: 'invitationId',
     description: 'Invitation ID',
     type: 'string',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Organization invitation cancelled successfully',
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
   @Audit({

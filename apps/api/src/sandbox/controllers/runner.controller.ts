@@ -30,44 +30,41 @@ import {
   ApiParam,
   ApiHeader,
 } from '@nestjs/swagger'
-import { SystemActionGuard } from '../../auth/system-action.guard'
-import { RequiredApiRole } from '../../common/decorators/required-role.decorator'
-import { SystemRole } from '../../user/enums/system-role.enum'
-import { ProxyGuard } from '../guards/proxy.guard'
+import { ProxyAuthContextGuard } from '../guards/proxy-auth-context.guard'
 import { RunnerDto } from '../dto/runner.dto'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
-import { SshGatewayGuard } from '../guards/ssh-gateway.guard'
-import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
+import { SshGatewayAuthContextGuard } from '../guards/ssh-gateway-auth-context.guard'
 import { OrGuard } from '../../auth/or.guard'
-import { RunnerAuthGuard } from '../../auth/runner-auth.guard'
-import { RunnerContextDecorator } from '../../common/decorators/runner-context.decorator'
-import { RunnerContext } from '../../common/interfaces/runner-context.interface'
+import { RunnerAuthContextGuard } from '../guards/runner-auth-context.guard'
+import { RunnerAuthContext } from '../../common/interfaces/runner-auth-context.interface'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { RunnerAccessGuard } from '../guards/runner-access.guard'
-import { RegionRunnerAccessGuard } from '../guards/region-runner-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
-import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { IsOrganizationAuthContext, IsRunnerAuthContext } from '../../common/decorators/auth-context.decorator'
+import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
-import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
+import { OrganizationAuthContextGuard } from '../../organization/guards/organization-auth-context.guard'
 import { CreateRunnerResponseDto } from '../dto/create-runner-response.dto'
-import { RegionSandboxAccessGuard } from '../guards/region-sandbox-access.guard'
+import { SandboxAccessGuard } from '../guards/sandbox-access.guard'
 import { RunnerFullDto } from '../dto/runner-full.dto'
 import { RegionType } from '../../region/enums/region-type.enum'
 import { RegionService } from '../../region/services/region.service'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
 import { FeatureFlags } from '../../common/constants/feature-flags'
 import { RunnerHealthcheckDto } from '../dto/runner-health.dto'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 
-@ApiTags('runners')
 @Controller('runners')
-@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard)
+@ApiTags('runners')
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
+@AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
+@UseGuards(AuthenticatedRateLimitGuard)
 export class RunnerController {
   constructor(
     private readonly runnerService: RunnerService,
@@ -76,6 +73,7 @@ export class RunnerController {
 
   @Post()
   @HttpCode(201)
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   @ApiOperation({
     summary: 'Create runner',
     operationId: 'createRunner',
@@ -84,6 +82,9 @@ export class RunnerController {
     status: 201,
     type: CreateRunnerResponseDto,
   })
+  @ApiHeader(CustomHeaders.ORGANIZATION_ID)
+  @UseGuards(OrganizationAuthContextGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.RUNNER,
@@ -95,13 +96,9 @@ export class RunnerController {
       }),
     },
   })
-  @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-  @UseGuards(OrganizationResourceActionGuard)
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async create(
     @Body() createRunnerDto: CreateRunnerDto,
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
   ): Promise<CreateRunnerResponseDto> {
     // validate that the runner region is a custom region owned by the organization
     const region = await this.regionService.findOne(createRunnerDto.regionId)
@@ -125,7 +122,6 @@ export class RunnerController {
   }
 
   @Get('/me')
-  @UseGuards(RunnerAuthGuard)
   @ApiOperation({
     summary: 'Get info for authenticated runner',
     operationId: 'getInfoForAuthenticatedRunner',
@@ -135,7 +131,9 @@ export class RunnerController {
     description: 'Runner info',
     type: RunnerFullDto,
   })
-  async getInfoForAuthenticatedRunner(@RunnerContextDecorator() runnerContext: RunnerContext): Promise<RunnerFullDto> {
+  @AuthStrategy(AuthStrategyType.API_KEY)
+  @UseGuards(RunnerAuthContextGuard)
+  async getInfoForAuthenticatedRunner(@IsRunnerAuthContext() runnerContext: RunnerAuthContext): Promise<RunnerFullDto> {
     return this.runnerService.findOneFullOrFail(runnerContext.runnerId)
   }
 
@@ -149,8 +147,8 @@ export class RunnerController {
     status: 200,
     type: RunnerFullDto,
   })
-  @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard, RegionSandboxAccessGuard]))
-  @RequiredApiRole([SystemRole.ADMIN])
+  @AuthStrategy(AuthStrategyType.API_KEY)
+  @UseGuards(OrGuard([ProxyAuthContextGuard, SshGatewayAuthContextGuard]), SandboxAccessGuard)
   async getRunnerBySandboxId(@Param('sandboxId') sandboxId: string): Promise<RunnerFullDto> {
     const runner = await this.runnerService.findBySandboxId(sandboxId)
 
@@ -167,18 +165,18 @@ export class RunnerController {
     summary: 'Get runners by snapshot ref',
     operationId: 'getRunnersBySnapshotRef',
   })
-  @ApiResponse({
-    status: 200,
-    type: [RunnerSnapshotDto],
-  })
   @ApiQuery({
     name: 'ref',
     description: 'Snapshot ref',
     type: String,
     required: true,
   })
-  @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard]))
-  @RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway'])
+  @ApiResponse({
+    status: 200,
+    type: [RunnerSnapshotDto],
+  })
+  @AuthStrategy(AuthStrategyType.API_KEY)
+  @UseGuards(OrGuard([ProxyAuthContextGuard, SshGatewayAuthContextGuard]))
   async getRunnersBySnapshotRef(@Query('ref') ref: string): Promise<RunnerSnapshotDto[]> {
     return this.runnerService.getRunnersBySnapshotRef(ref)
   }
@@ -189,17 +187,17 @@ export class RunnerController {
     summary: 'Get runner by ID',
     operationId: 'getRunnerById',
   })
-  @ApiResponse({
-    status: 200,
-    type: RunnerDto,
-  })
   @ApiParam({
     name: 'id',
     description: 'Runner ID',
     type: String,
   })
+  @ApiResponse({
+    status: 200,
+    type: RunnerDto,
+  })
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-  @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
+  @UseGuards(OrganizationAuthContextGuard, RunnerAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_RUNNERS])
   async getRunnerById(@Param('id', ParseUUIDPipe) id: string): Promise<RunnerDto> {
     const runner = await this.runnerService.findOneOrFail(id)
@@ -212,17 +210,17 @@ export class RunnerController {
     summary: 'Get runner by ID',
     operationId: 'getRunnerFullById',
   })
-  @ApiResponse({
-    status: 200,
-    type: RunnerFullDto,
-  })
   @ApiParam({
     name: 'id',
     description: 'Runner ID',
     type: String,
   })
-  @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard, RegionRunnerAccessGuard]))
-  @RequiredApiRole([SystemRole.ADMIN])
+  @ApiResponse({
+    status: 200,
+    type: RunnerFullDto,
+  })
+  @AuthStrategy(AuthStrategyType.API_KEY)
+  @UseGuards(OrGuard([ProxyAuthContextGuard, SshGatewayAuthContextGuard]), RunnerAccessGuard)
   async getRunnerByIdFull(@Param('id', ParseUUIDPipe) id: string): Promise<RunnerFullDto> {
     const runner = await this.runnerService.findOneOrFail(id)
     return RunnerFullDto.fromRunner(runner)
@@ -230,6 +228,7 @@ export class RunnerController {
 
   @Get()
   @HttpCode(200)
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   @ApiOperation({
     summary: 'List all runners',
     operationId: 'listRunners',
@@ -239,28 +238,31 @@ export class RunnerController {
     type: [RunnerDto],
   })
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-  @UseGuards(OrganizationResourceActionGuard)
+  @UseGuards(OrganizationAuthContextGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_RUNNERS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
-  async findAll(@AuthContext() authContext: OrganizationAuthContext): Promise<RunnerDto[]> {
+  async findAll(@IsOrganizationAuthContext() authContext: OrganizationAuthContext): Promise<RunnerDto[]> {
     return this.runnerService.findAllByOrganization(authContext.organizationId, RegionType.CUSTOM)
   }
 
   @Patch(':id/scheduling')
   @HttpCode(200)
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   @ApiOperation({
     summary: 'Update runner scheduling status',
     operationId: 'updateRunnerScheduling',
-  })
-  @ApiResponse({
-    status: 200,
-    type: RunnerDto,
   })
   @ApiParam({
     name: 'id',
     description: 'Runner ID',
     type: String,
   })
+  @ApiResponse({
+    status: 200,
+    type: RunnerDto,
+  })
+  @ApiHeader(CustomHeaders.ORGANIZATION_ID)
+  @UseGuards(OrganizationAuthContextGuard, RunnerAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
   @Audit({
     action: AuditAction.UPDATE_SCHEDULING,
     targetType: AuditTarget.RUNNER,
@@ -271,10 +273,6 @@ export class RunnerController {
       }),
     },
   })
-  @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-  @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async updateSchedulingStatus(
     @Param('id', ParseUUIDPipe) id: string,
     @Body('unschedulable') unschedulable: boolean,
@@ -285,19 +283,23 @@ export class RunnerController {
 
   @Patch(':id/draining')
   @HttpCode(200)
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   @ApiOperation({
     summary: 'Update runner draining status',
     operationId: 'updateRunnerDraining',
-  })
-  @ApiResponse({
-    status: 200,
-    type: RunnerDto,
   })
   @ApiParam({
     name: 'id',
     description: 'Runner ID',
     type: String,
   })
+  @ApiResponse({
+    status: 200,
+    type: RunnerDto,
+  })
+  @ApiHeader(CustomHeaders.ORGANIZATION_ID)
+  @UseGuards(OrganizationAuthContextGuard, RunnerAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
   @Audit({
     action: AuditAction.UPDATE_DRAINING,
     targetType: AuditTarget.RUNNER,
@@ -308,10 +310,6 @@ export class RunnerController {
       }),
     },
   })
-  @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-  @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async updateDrainingStatus(
     @Param('id', ParseUUIDPipe) id: string,
     @Body('draining') draining: boolean,
@@ -322,27 +320,27 @@ export class RunnerController {
 
   @Delete(':id')
   @HttpCode(204)
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   @ApiOperation({
     summary: 'Delete runner',
     operationId: 'deleteRunner',
-  })
-  @ApiResponse({
-    status: 204,
   })
   @ApiParam({
     name: 'id',
     description: 'Runner ID',
     type: String,
   })
+  @ApiResponse({
+    status: 204,
+  })
+  @ApiHeader(CustomHeaders.ORGANIZATION_ID)
+  @UseGuards(OrganizationAuthContextGuard, RunnerAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_RUNNERS])
   @Audit({
     action: AuditAction.DELETE,
     targetType: AuditTarget.RUNNER,
     targetIdFromRequest: (req) => req.params.id,
   })
-  @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-  @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_RUNNERS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.runnerService.remove(id)
   }
@@ -358,8 +356,10 @@ export class RunnerController {
     status: 200,
     description: 'Healthcheck received',
   })
+  @AuthStrategy(AuthStrategyType.API_KEY)
+  @UseGuards(RunnerAuthContextGuard)
   async runnerHealthcheck(
-    @RunnerContextDecorator() runnerContext: RunnerContext,
+    @IsRunnerAuthContext() runnerContext: RunnerAuthContext,
     @Body() healthcheck: RunnerHealthcheckDto,
   ): Promise<void> {
     await this.runnerService.updateRunnerHealth(

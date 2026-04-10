@@ -7,9 +7,11 @@ import { Controller, Get } from '@nestjs/common'
 import { TypedConfigService } from './typed-config.service'
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger'
 import { ConfigurationDto } from './dto/configuration.dto'
+import { Public } from '../auth/decorators/public.decorator'
 
 @ApiTags('config')
 @Controller('config')
+@Public()
 export class ConfigController {
   constructor(private readonly configService: TypedConfigService) {}
 

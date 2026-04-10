@@ -3,30 +3,25 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  NotFoundException,
-  ForbiddenException,
-  Logger,
-} from '@nestjs/common'
-import { BaseAuthContext } from '../../common/interfaces/auth-context.interface'
+import { Injectable, ExecutionContext, NotFoundException, ForbiddenException, Logger } from '@nestjs/common'
+import { ResourceAccessGuard } from '../../common/guards/resource-access.guard'
 import { JobService } from '../services/job.service'
-import { isRunnerContext, RunnerContext } from '../../common/interfaces/runner-context.interface'
+import { isRunnerAuthContext } from '../../common/interfaces/runner-auth-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
 
 @Injectable()
-export class JobAccessGuard implements CanActivate {
+export class JobAccessGuard extends ResourceAccessGuard {
   private readonly logger = new Logger(JobAccessGuard.name)
 
-  constructor(private readonly jobService: JobService) {}
+  constructor(private readonly jobService: JobService) {
+    super()
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()
     const jobId: string = request.params.jobId || request.params.id
 
-    // TODO: initialize authContext safely
-    const authContext: BaseAuthContext = request.user
+    const authContext = getAuthContext(context, isRunnerAuthContext)
 
     try {
       const job = await this.jobService.findOne(jobId)
@@ -34,13 +29,7 @@ export class JobAccessGuard implements CanActivate {
         throw new NotFoundException('Job not found')
       }
 
-      if (!isRunnerContext(authContext)) {
-        throw new ForbiddenException('User is not a runner')
-      }
-
-      const runnerContext = authContext as RunnerContext
-
-      if (runnerContext.runnerId !== job.runnerId) {
+      if (authContext.runnerId !== job.runnerId) {
         throw new ForbiddenException('Runner ID does not match job runner ID')
       }
 

@@ -99,19 +99,6 @@ public class DockerRegistryApiTest {
     }
 
     /**
-     * Set default registry
-     *
-     * @throws ApiException if the Api call fails
-     */
-    @Test
-    public void setDefaultRegistryTest() throws ApiException {
-        String id = null;
-        String xDaytonaOrganizationID = null;
-        DockerRegistry response = api.setDefaultRegistry(id, xDaytonaOrganizationID);
-        // TODO: test validations
-    }
-
-    /**
      * Update registry
      *
      * @throws ApiException if the Api call fails
