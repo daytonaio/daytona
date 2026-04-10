@@ -22,6 +22,18 @@ const SDK_FOLDERS = fs
 const CLI_FILE_PATH = path.join(DOCS_PATH, 'tools/cli.mdx')
 const EXCLUDE_FILES = ['404.md', 'index.mdx', 'api.mdx']
 
+const RECORD_TYPE = {
+  PAGE: 'page',
+  HEADING: 'heading',
+  API_OPERATION: 'api_operation',
+}
+
+const PAGE_RANK = {
+  PAGE: 100,
+  HEADING: 0,
+  API_OPERATION: 0,
+}
+
 function findWorkspaceRoot(startPath) {
   let current = path.resolve(startPath)
   const root = path.resolve(current, '/')
@@ -211,6 +223,8 @@ function extractHeadings(content, tag, slug) {
       tag,
       url: `/docs${headingSlug}`,
       slug: headingSlug,
+      recordType: RECORD_TYPE.HEADING,
+      pageRank: PAGE_RANK.HEADING,
     })
   }
 
@@ -245,6 +259,8 @@ function parseMarkdownFile(filePath, tag) {
     tag,
     url: `/docs${slug}`,
     slug,
+    recordType: RECORD_TYPE.PAGE,
+    pageRank: PAGE_RANK.PAGE,
   }
 
   return [mainData, ...headings]
@@ -361,6 +377,8 @@ function parseOpenAPISpec(specPath, apiName, baseUrl) {
           operationId,
           tags: tags.join(', '),
           searchableContent,
+          recordType: RECORD_TYPE.API_OPERATION,
+          pageRank: PAGE_RANK.API_OPERATION,
         })
       })
     })
