@@ -606,7 +606,10 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath('/docs/guides/google-adk-code-generator', locale),
+          href: localizePath(
+            '/docs/guides/google-adk/google-adk-code-generator',
+            locale
+          ),
           label: t('sidebarconfig.googleAdk'),
           disablePagination: true,
           attrs: {
@@ -623,6 +626,15 @@ export const getSidebarConfig = (
           disablePagination: true,
           attrs: {
             icon: 'letta-code.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/guides/ag2/ag2-bug-fixer-agent', locale),
+          label: t('sidebarconfig.ag2'),
+          disablePagination: true,
+          attrs: {
+            icon: 'ag2.svg',
           },
         },
         {
