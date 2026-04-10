@@ -23,7 +23,7 @@ nav.mobile-navigation {
 .search-modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 200;
+  z-index: 1200;
   background: rgba(0, 0, 0, 0.55);
   pointer-events: auto;
 }
@@ -34,7 +34,7 @@ html[data-theme='light'] .search-modal-backdrop {
 
 .searchbox-wrapper {
   position: fixed;
-  z-index: 201;
+  z-index: 1201;
   left: 50%;
   top: max(48px, 8vh);
   transform: translateX(-50%);
@@ -422,7 +422,7 @@ mark {
   .searchbox-wrapper {
     width: min(94vw, 560px);
     max-height: min(78vh, 640px);
-    top: max(24px, 5vh);
+    top: max(88px, calc(10vh + env(safe-area-inset-top, 0px)));
   }
 
   .search-input-shell__esc {
