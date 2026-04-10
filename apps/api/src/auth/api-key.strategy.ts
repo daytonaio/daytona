@@ -3,14 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import {
-  Injectable,
-  UnauthorizedException,
-  ServiceUnavailableException,
-  HttpException,
-  Logger,
-  OnModuleInit,
-} from '@nestjs/common'
+import { Injectable, UnauthorizedException, Logger, OnModuleInit } from '@nestjs/common'
 import { PassportStrategy } from '@nestjs/passport'
 import { Strategy } from 'passport-http-bearer'
 import { ApiKeyService } from '../api-key/api-key.service'
@@ -34,6 +27,7 @@ import { RegionProxyAuthContext } from '../common/interfaces/region-proxy-auth-c
 import { RegionSSHGatewayAuthContext } from '../common/interfaces/region-ssh-gateway-auth-context.interface'
 import { OtelCollectorAuthContext } from '../common/interfaces/otel-collector-auth-context.interface'
 import { HealthCheckAuthContext } from '../common/interfaces/health-check-auth-context.interface'
+import { handleAuthError } from './utils/handle-auth-error.util'
 
 type ApiKeyAuthContext =
   | UserAuthContext
@@ -158,7 +152,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, AuthStrategyType.
         organizationId: apiKey.organizationId,
       } satisfies UserAuthContext
     } catch (error) {
-      this.handleError(error, 'Error validating user API key')
+      handleAuthError(error, 'Error validating user API key')
     }
 
     /**
@@ -174,7 +168,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, AuthStrategyType.
         } satisfies RunnerAuthContext
       }
     } catch (error) {
-      this.handleError(error, 'Error validating runner API key')
+      handleAuthError(error, 'Error validating runner API key')
     }
 
     /**
@@ -189,7 +183,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, AuthStrategyType.
         } satisfies RegionProxyAuthContext
       }
     } catch (error) {
-      this.handleError(error, 'Error validating region proxy API key')
+      handleAuthError(error, 'Error validating region proxy API key')
     }
 
     /**
@@ -204,7 +198,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, AuthStrategyType.
         } satisfies RegionSSHGatewayAuthContext
       }
     } catch (error) {
-      this.handleError(error, 'Error validating region SSH gateway API key')
+      handleAuthError(error, 'Error validating region SSH gateway API key')
     }
 
     /**
@@ -252,12 +246,6 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, AuthStrategyType.
     } catch (error) {
       this.logger.error('Error getting or parsing API key cache:', error)
       return null
-    }
-  }
-
-  private handleError(error: unknown, message: string): void {
-    if (!(error instanceof HttpException)) {
-      throw new ServiceUnavailableException(message, { cause: error })
     }
   }
 
