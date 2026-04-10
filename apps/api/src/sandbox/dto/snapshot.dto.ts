@@ -32,10 +32,10 @@ export class SnapshotDto {
   state: SnapshotState
 
   @ApiProperty({ nullable: true })
-  size?: number
+  size: number | null
 
   @ApiProperty({ nullable: true })
-  entrypoint?: string[]
+  entrypoint: string[] | null
 
   @ApiProperty()
   cpu: number
@@ -50,7 +50,7 @@ export class SnapshotDto {
   disk: number
 
   @ApiProperty({ nullable: true })
-  errorReason?: string
+  errorReason: string | null
 
   @ApiProperty()
   createdAt: Date
@@ -59,7 +59,7 @@ export class SnapshotDto {
   updatedAt: Date
 
   @ApiProperty({ nullable: true })
-  lastUsedAt?: Date
+  lastUsedAt: Date | null
 
   @ApiPropertyOptional({
     description: 'Build information for the snapshot',
@@ -97,16 +97,16 @@ export class SnapshotDto {
       name: snapshot.name,
       imageName: snapshot.imageName,
       state: snapshot.state,
-      size: snapshot.size,
-      entrypoint: snapshot.entrypoint,
+      size: snapshot.size ?? null,
+      entrypoint: snapshot.entrypoint ?? null,
       cpu: snapshot.cpu,
       gpu: snapshot.gpu,
       mem: snapshot.mem,
       disk: snapshot.disk,
-      errorReason: snapshot.errorReason,
+      errorReason: snapshot.errorReason ?? null,
       createdAt: snapshot.createdAt,
       updatedAt: snapshot.updatedAt,
-      lastUsedAt: snapshot.lastUsedAt,
+      lastUsedAt: snapshot.lastUsedAt ?? null,
       buildInfo: snapshot.buildInfo
         ? {
             dockerfileContent: snapshot.buildInfo.dockerfileContent,
