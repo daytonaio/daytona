@@ -33,8 +33,6 @@ export type AlgoliaHit = {
   title: string
   description?: string
   content?: string
-  recordType?: string
-  pageRank?: number
   _highlightResult?: {
     title?: { value: string; matchLevel: string }
     description?: { value: string; matchLevel: string }
@@ -57,7 +55,6 @@ export const searchDocumentation = async (query: string): Promise<SearchResults>
     attributesToHighlight: ['title', 'description'],
     highlightPreTag: '<em>',
     highlightPostTag: '</em>',
-    optionalFilters: ['recordType:page'],
   }
 
   const { results } = await client.search({
