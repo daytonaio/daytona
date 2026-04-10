@@ -195,7 +195,6 @@ html[data-theme='light'] .searchbox-wrapper {
 .ais-SearchBox-input:focus {
   outline: none;
   border-color: var(--hover-color);
-  box-shadow: 0 0 0 1px var(--hover-color);
 }
 
 .ais-SearchBox-submit,
@@ -261,11 +260,11 @@ html[data-theme='light'] .searchbox-wrapper {
 
 .ais-Stats {
   margin: 0;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .custom-stats {
-  font-size: 12px;
+  font-size: 13px;
   font-family: 'Berkeley Mono', monospace;
   color: var(--secondary-text-color);
 }
