@@ -176,8 +176,8 @@ func classifyDownloadPathError(ctx *gin.Context, path string) *common.ErrorRespo
 }
 
 func multipartContentDisposition(formName string, path string) string {
-	escaped := strings.NewReplacer(`\`, `\\`, `"`, `\"`, "\r", "", "\n", "").Replace(path)
-	return fmt.Sprintf(`form-data; name="%s"; filename="%s"`, formName, escaped)
+	return fmt.Sprintf(`form-data; name="%s"; filename="%s"; filename*=utf-8''%s`,
+		formName, toLatin1(path), encodeRFC5987(path))
 }
 
 func classifyPathStatError(path string, err error) (int, string, string) {
@@ -221,4 +221,49 @@ func newFileDownloadErrorResponse(
 		Path:       path,
 		Method:     ctx.Request.Method,
 	}
+}
+
+// toLatin1 replaces characters outside ISO-8859-1 with '_'.
+func toLatin1(s string) string {
+	escaped := strings.NewReplacer(`\`, `\\`, `"`, `\"`, "\r", "", "\n", "", "\x00", "").Replace(s)
+	var buf []byte
+	for _, r := range escaped {
+		if r <= 0xFF {
+			buf = append(buf, byte(r))
+		} else {
+			buf = append(buf, '_')
+		}
+	}
+	return string(buf)
+}
+
+// encodeRFC5987 percent-encodes per RFC 5987 attr-char rules.
+// Safe: alphanumerics and !#$&+-.^_`|~ — everything else is encoded.
+func encodeRFC5987(s string) string {
+	var buf []byte
+	for _, b := range []byte(s) {
+		if isAttrChar(b) {
+			buf = append(buf, b)
+		} else {
+			buf = append(buf, fmt.Sprintf("%%%02X", b)...)
+		}
+	}
+	return string(buf)
+}
+
+// isAttrChar reports whether b is in the RFC 5987 attr-char safe set.
+func isAttrChar(b byte) bool {
+	switch {
+	case b >= 'a' && b <= 'z':
+		return true
+	case b >= 'A' && b <= 'Z':
+		return true
+	case b >= '0' && b <= '9':
+		return true
+	}
+	switch b {
+	case '!', '#', '$', '&', '+', '-', '.', '^', '_', '`', '|', '~':
+		return true
+	}
+	return false
 }

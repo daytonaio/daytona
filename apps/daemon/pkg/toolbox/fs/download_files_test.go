@@ -111,6 +111,72 @@ func TestClassifyPathStatError(t *testing.T) {
 	})
 }
 
+func TestToLatin1(t *testing.T) {
+	tests := []struct{ in, want string }{
+		{"hello.txt", "hello.txt"},
+		{"hello\u0000.txt", "hello.txt"},
+		{"hello\x00.txt", "hello.txt"},
+		{"café", "caf\xe9"},
+		{"日本語.txt", "___.txt"},
+		{"", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+			if got := toLatin1(tt.in); got != tt.want {
+				t.Errorf("toLatin1(%q) = %q, want %q", tt.in, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestEncodeRFC5987(t *testing.T) {
+	tests := []struct{ in, want string }{
+		{"hello.txt", "hello.txt"},
+		{"hello\x00.txt", "hello%00.txt"},
+		{"café", "caf%C3%A9"},
+		{"日本語", "%E6%97%A5%E6%9C%AC%E8%AA%9E"},
+		{"file (1).txt", "file%20%281%29.txt"},
+		{"a&b+c-d", "a&b+c-d"},
+		{"", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+			if got := encodeRFC5987(tt.in); got != tt.want {
+				t.Errorf("encodeRFC5987(%q) = %q, want %q", tt.in, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMultipartContentDisposition(t *testing.T) {
+	t.Run("ascii path", func(t *testing.T) {
+		got := multipartContentDisposition("file", "hello.txt")
+		want := `form-data; name="file"; filename="hello.txt"; filename*=utf-8''hello.txt`
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("unicode path", func(t *testing.T) {
+		got := multipartContentDisposition("file", "日本語.txt")
+		if !strings.Contains(got, `filename="___.txt"`) {
+			t.Errorf("expected latin1 fallback filename, got %q", got)
+		}
+		if !strings.Contains(got, `filename*=utf-8''%E6%97%A5%E6%9C%AC%E8%AA%9E.txt`) {
+			t.Errorf("expected RFC 5987 encoded filename*, got %q", got)
+		}
+	})
+
+	t.Run("escapes quotes and backslashes", func(t *testing.T) {
+		got := multipartContentDisposition("file", `a"b\c`)
+		if !strings.Contains(got, `filename="a\"b\\c"; filename*=utf-8''a%22b%5Cc`) {
+			t.Errorf("expected escaped filename, got %q", got)
+		}
+	})
+}
+
 func TestWriteErrorPart(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
