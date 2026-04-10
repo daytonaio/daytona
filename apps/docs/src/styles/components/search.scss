@@ -113,6 +113,8 @@ html[data-theme='light'] .searchbox-wrapper {
 .search-content {
   flex: 1;
   min-height: 0;
+  min-width: 0;
+  overflow-x: hidden;
   overflow-y: auto;
   padding: 10px 12px 14px;
 }
@@ -203,6 +205,7 @@ html[data-theme='light'] .searchbox-wrapper {
 }
 
 .search-index-block {
+  min-width: 0;
   padding-bottom: 8px;
   margin-bottom: 8px;
   border-bottom: 1px solid var(--border-color);
@@ -220,6 +223,8 @@ html[data-theme='light'] .searchbox-wrapper {
   align-items: center;
   gap: 8px;
   width: 100%;
+  min-width: 0;
+  flex-wrap: wrap;
   margin: 0 0 6px;
   padding: 0 2px;
 }
@@ -229,8 +234,10 @@ html[data-theme='light'] .searchbox-wrapper {
   list-style-type: none;
   padding: 0;
   margin: 0;
-  white-space: nowrap;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 4px;
+  max-width: 100%;
 }
 
 .ais-Pagination-item {
@@ -264,6 +271,7 @@ html[data-theme='light'] .searchbox-wrapper {
 }
 
 .custom-stats {
+  min-width: 0;
   font-size: 13px;
   font-family: 'Berkeley Mono', monospace;
   color: var(--secondary-text-color);
@@ -286,12 +294,14 @@ html[data-theme='light'] .searchbox-wrapper {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .ais-Hits-item {
   list-style: none;
   margin: 0;
   padding: 0;
+  min-width: 0;
 }
 
 .search-empty {
@@ -305,6 +315,7 @@ html[data-theme='light'] .searchbox-wrapper {
   display: flex;
   align-items: flex-start;
   gap: 10px;
+  min-width: 0;
   padding: 10px 8px;
   border-radius: 8px;
   text-decoration: none;
@@ -326,6 +337,7 @@ html[data-theme='light'] .searchbox-wrapper {
   align-items: flex-start;
   gap: 10px;
   width: 100%;
+  min-width: 0;
 }
 
 .search-hit__thumb {
@@ -381,6 +393,7 @@ html[data-theme='light'] .searchbox-wrapper {
   line-height: 1.35;
   color: var(--secondary-text-color);
   font-family: 'Berkeley Mono', monospace;
+  overflow-wrap: anywhere;
 }
 
 .search-hit__title {
@@ -388,6 +401,7 @@ html[data-theme='light'] .searchbox-wrapper {
   font-weight: 600;
   line-height: 1.35;
   color: var(--primary-text-color);
+  overflow-wrap: anywhere;
 }
 
 .search-hit__snippet {
@@ -398,12 +412,14 @@ html[data-theme='light'] .searchbox-wrapper {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 .search-hit__meta {
   font-size: 11px;
   color: var(--img-desc-text, var(--secondary-text-color));
   font-family: 'Berkeley Mono', monospace;
+  overflow-wrap: anywhere;
 }
 
 .ais-Highlight-highlighted,
