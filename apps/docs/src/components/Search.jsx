@@ -54,6 +54,35 @@ const INDEX_LABELS = {
   [API_INDEX_NAME]: 'API',
 }
 
+function humanizeSegment(segment) {
+  return segment
+    .replace(/_/g, ' ')
+    .split(/[\s-]+/)
+    .filter(Boolean)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ')
+}
+
+function formatSearchBreadcrumb(indexName, hit) {
+  const root = INDEX_LABELS[indexName] ?? hit.tag ?? 'Search'
+  if (indexName === API_INDEX_NAME && hit.tags) {
+    const firstTag = hit.tags.split(',')[0].trim()
+    if (firstTag) {
+      return `${root} > ${humanizeSegment(firstTag)}`
+    }
+  }
+  const slug = (hit.slug || '').replace(/^\//, '')
+  if (!slug) {
+    return root
+  }
+  const rawParts = slug.split(/[/+#]+/).filter(Boolean)
+  const humanized = rawParts.slice(0, 3).map(humanizeSegment)
+  if (humanized.length === 0) {
+    return root
+  }
+  return [root, ...humanized].join(' > ')
+}
+
 function SearchContent() {
   const [isSearchVisible, setIsSearchVisible] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -179,23 +208,32 @@ function SearchContent() {
 
   return (
     isSearchVisible && (
-      <div
-        id="searchbox-wrapper"
-        className="searchbox-wrapper"
-        ref={searchWrapperRef}
-      >
-        <InstantSearch indexName={DOCS_INDEX_NAME} searchClient={searchClient}>
+      <>
+        <div className="search-modal-backdrop" aria-hidden="true" />
+        <div
+          id="searchbox-wrapper"
+          className="searchbox-wrapper"
+          ref={searchWrapperRef}
+          role="dialog"
+          aria-label={t('Search documentation', {
+            $context: 'As in a search bar on a website',
+          })}
+        >
+          <InstantSearch indexName={DOCS_INDEX_NAME} searchClient={searchClient}>
           <div className="search-bar-container">
-            <SearchBox
-              translations={{
-                placeholder: t('Search documentation', {
-                  $context: 'As in a search bar on a website',
-                }),
-              }}
-              autoFocus
-              onChange={event => setSearchQuery(event.currentTarget.value)}
-              value={searchQuery}
-            />
+            <div className="search-input-shell">
+              <SearchBox
+                translations={{
+                  placeholder: t('Search documentation', {
+                    $context: 'As in a search bar on a website',
+                  }),
+                }}
+                autoFocus
+                onChange={event => setSearchQuery(event.currentTarget.value)}
+                value={searchQuery}
+              />
+              <kbd className="search-input-shell__esc">Esc</kbd>
+            </div>
           </div>
           <div className="search-content">
             {debounceQuery && (
@@ -239,21 +277,16 @@ function SearchContent() {
                 ))}
                 {(totalHits === 0 ||
                   (selectedIndexFilter !== null && !indexesWithHits.includes(selectedIndexFilter))) && (
-                  <div style={{
-                    textAlign: 'center',
-                    padding: '20px',
-                    color: 'var(--primary-text-color)',
-                    fontSize: '16px'
-                  }}>
-                    No results found for "<strong>{debounceQuery}</strong>"
+                  <div className="search-empty">
+                    No results found for &quot;<strong>{debounceQuery}</strong>&quot;
                   </div>
                 )}
               </>
             )}
-            <Configure hitsPerPage={10} clickAnalytics getRankingInfo={false} />
           </div>
-        </InstantSearch>
-      </div>
+          </InstantSearch>
+        </div>
+      </>
     )
   )
 }
@@ -261,6 +294,12 @@ function SearchContent() {
 function SearchIndex({ indexName, setDisplayHits, setIsSearchVisible, setTotalHits, onIndexHitsChange, debounceQuery }) {
   return (
     <Index indexName={indexName}>
+      <Configure
+        hitsPerPage={10}
+        clickAnalytics
+        getRankingInfo={false}
+        optionalFilters={['recordType:page']}
+      />
       <ConditionalSearchIndex
         indexName={indexName}
         setDisplayHits={setDisplayHits}
@@ -290,39 +329,44 @@ const ConditionalSearchIndexComponent = ({ indexName, setDisplayHits, setIsSearc
   }
 
   return (
-    <>
-      <div data-index={indexName}>
-        <div
-          className="stats-pagination-wrapper"
-          style={indexName === 'blogs_test' ? { marginTop: '24px' } : {}}
-        >
-          <Stats setDisplayHits={setDisplayHits} indexName={indexName} />
-          <Pagination
-            showFirst={false}
-            showPrevious
-            showNext
-            showLast={false}
-            padding={1}
-          />
-        </div>
-        <Hits
-          hitComponent={props => (
-            <Hit
-              {...props}
-              setIsSearchVisible={setIsSearchVisible}
-              indexName={indexName}
-            />
-          )}
+    <div data-index={indexName} className="search-index-block">
+      <div className="stats-pagination-wrapper">
+        <Stats setDisplayHits={setDisplayHits} indexName={indexName} />
+        <Pagination
+          showFirst={false}
+          showPrevious
+          showNext
+          showLast={false}
+          padding={1}
         />
       </div>
-      <hr style={{ marginBottom: '40px' }} />
-    </>
+      <Hits
+        hitComponent={props => (
+          <Hit
+            {...props}
+            setIsSearchVisible={setIsSearchVisible}
+            indexName={indexName}
+          />
+        )}
+      />
+    </div>
   )
 }
 
 const ConditionalSearchIndex = connectStats(ConditionalSearchIndexComponent)
 
 function Hit({ hit, setIsSearchVisible, indexName }) {
+  const isDocsFamily =
+    [DOCS_INDEX_NAME, CLI_INDEX_NAME, SDK_INDEX_NAME, API_INDEX_NAME].includes(
+      indexName
+    ) || indexName === 'website'
+  const isBlogs = indexName === 'blogs_test'
+  const isSection =
+    !isBlogs &&
+    isDocsFamily &&
+    typeof hit.url === 'string' &&
+    hit.url.includes('#')
+
   const handleClick = e => {
     e.preventDefault()
     let hitUrl = hit.url
@@ -348,6 +392,7 @@ function Hit({ hit, setIsSearchVisible, indexName }) {
 
   return (
     <div
+      className={`search-hit ${isBlogs ? 'search-hit--blog' : ''} ${isSection ? 'search-hit--section' : 'search-hit--page'}`}
       tabIndex="0"
       onKeyDown={e => {
         if (e.key === 'Enter') {
@@ -355,77 +400,72 @@ function Hit({ hit, setIsSearchVisible, indexName }) {
         }
       }}
     >
-      <a href={hit.url} tabIndex="-1" onClick={handleClick}>
-        {([DOCS_INDEX_NAME, CLI_INDEX_NAME, SDK_INDEX_NAME, API_INDEX_NAME].includes(indexName) || indexName === 'website') && (
+      <a
+        href={hit.url}
+        tabIndex="-1"
+        className="search-hit__link"
+        onClick={handleClick}
+      >
+        {isDocsFamily && (
           <>
-            <h5
-              style={{
-                fontSize: '20px',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <span style={{ fontSize: '10px', marginRight: '8px' }}>🟦</span>
-              <span style={{ marginLeft: '4px' }}>
+            <span
+              className="search-hit__glyph"
+              aria-hidden="true"
+            />
+            <div className="search-hit__body">
+              <div className="search-hit__breadcrumb">
+                {formatSearchBreadcrumb(indexName, hit)}
+              </div>
+              <div className="search-hit__title">
                 <Highlight attribute="title" hit={hit} />
-              </span>
-            </h5>
-            <h6
-              style={{
-                fontSize: '12px',
-                color: '#686868',
-                fontWeight: 500,
-                paddingLeft: '24px',
-              }}
-            >
-              {hit.slug}
-            </h6>
+              </div>
+              {hit.description ? (
+                <div className="search-hit__snippet">
+                  <Highlight attribute="description" hit={hit} />
+                </div>
+              ) : null}
+            </div>
           </>
         )}
-        {indexName === 'blogs_test' && hit.featuredImage?.url && (
+        {isBlogs && hit.featuredImage?.url && (
           <img
             src={hit.featuredImage.url}
             alt={hit.featuredImage.alt || 'Blog image'}
-            style={{
-              width: '100%',
-              maxWidth: '500px',
-              marginBottom: '12px',
-              border: '1px solid var(--border-color)',
-            }}
+            className="search-hit__thumb"
           />
         )}
-        {indexName === 'blogs_test' && (
-          <h5
-            style={{ fontSize: '20px', display: 'flex', alignItems: 'center' }}
-          >
-            <span style={{ fontSize: '10px', marginRight: '8px' }}>🟦</span>
-            <span style={{ marginLeft: '4px' }}>
-              <Highlight attribute="title" hit={hit} />
-            </span>
-          </h5>
+        {isBlogs && (
+          <div className="search-hit__main-row">
+            <span className="search-hit__glyph" aria-hidden="true" />
+            <div className="search-hit__body">
+              <div className="search-hit__breadcrumb">{hit.tag || 'Blog'}</div>
+              <div className="search-hit__title">
+                <Highlight attribute="title" hit={hit} />
+              </div>
+              {hit.author?.name && hit.publishedDate && (
+                <div className="search-hit__meta">
+                  {hit.publishedDate} · {hit.author.name}
+                </div>
+              )}
+              <div className="search-hit__snippet">
+                <Highlight attribute="description" hit={hit} />
+              </div>
+            </div>
+          </div>
         )}
-        {indexName === 'blogs_test' &&
-          hit.author?.name &&
-          hit.publishedDate && (
-            <p
-              style={{
-                fontSize: '14px',
-                paddingLeft: '24px',
-                paddingBottom: '8px',
-              }}
-            >
-              {hit.publishedDate} :: {hit.author.name}
-            </p>
-          )}
-        <p
-          style={{
-            fontSize: '14px',
-            paddingBottom: '16px',
-            paddingLeft: '24px',
-          }}
-        >
-          <Highlight attribute="description" hit={hit} />
-        </p>
+        {!isDocsFamily && !isBlogs && (
+          <>
+            <span className="search-hit__glyph" aria-hidden="true" />
+            <div className="search-hit__body">
+              <div className="search-hit__title">
+                <Highlight attribute="title" hit={hit} />
+              </div>
+              <div className="search-hit__snippet">
+                <Highlight attribute="description" hit={hit} />
+              </div>
+            </div>
+          </>
+        )}
       </a>
     </div>
   )
@@ -457,10 +497,11 @@ const CustomStats = ({ nbHits, indexName, setDisplayHits }) => {
 
   return (
     <div className="custom-stats">
-      <span style={{ color: 'var(--primary-text-color)' }}>
-        {getIndexLabel()}{' '}
+      <span className="custom-stats__label">{getIndexLabel()}</span>
+      <span className="custom-stats__count">
+        {' '}
+        ({nbHits})
       </span>
-      ({nbHits} results)
     </div>
   )
 }
