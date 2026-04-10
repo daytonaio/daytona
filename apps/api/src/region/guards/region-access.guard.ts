@@ -9,6 +9,7 @@ import { RegionService } from '../services/region.service'
 import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { getAuthContext } from '../../common/utils/get-auth-context'
 import { RegionType } from '../enums/region-type.enum'
+import { EntityNotFoundError } from 'typeorm'
 
 @Injectable()
 export class RegionAccessGuard extends ResourceAccessGuard {
@@ -37,7 +38,7 @@ export class RegionAccessGuard extends ResourceAccessGuard {
       }
       return true
     } catch (error) {
-      if (!(error instanceof NotFoundException)) {
+      if (!(error instanceof NotFoundException) && !(error instanceof EntityNotFoundError)) {
         this.logger.error(error)
       }
       throw new NotFoundException('Region not found')

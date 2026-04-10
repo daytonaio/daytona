@@ -8,6 +8,7 @@ import { ResourceAccessGuard } from '../../common/guards/resource-access.guard'
 import { JobService } from '../services/job.service'
 import { isRunnerAuthContext } from '../../common/interfaces/runner-auth-context.interface'
 import { getAuthContext } from '../../common/utils/get-auth-context'
+import { EntityNotFoundError } from 'typeorm'
 
 @Injectable()
 export class JobAccessGuard extends ResourceAccessGuard {
@@ -35,7 +36,7 @@ export class JobAccessGuard extends ResourceAccessGuard {
 
       return true
     } catch (error) {
-      if (!(error instanceof NotFoundException)) {
+      if (!(error instanceof NotFoundException) && !(error instanceof EntityNotFoundError)) {
         this.logger.error(error)
       }
       throw new NotFoundException('Job not found')

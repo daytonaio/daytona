@@ -14,6 +14,7 @@ import { getAuthContext } from '../../common/utils/get-auth-context'
 import { isProxyAuthContext } from '../../common/interfaces/proxy-auth-context.interface'
 import { isSshGatewayAuthContext } from '../../common/interfaces/ssh-gateway-auth-context.interface'
 import { InvalidAuthenticationContextException } from '../../common/exceptions/invalid-authentication-context.exception'
+import { EntityNotFoundError } from 'typeorm'
 
 @Injectable()
 export class SandboxAccessGuard extends ResourceAccessGuard {
@@ -67,7 +68,7 @@ export class SandboxAccessGuard extends ResourceAccessGuard {
       // Access granted
       return true
     } catch (error) {
-      if (!(error instanceof NotFoundException)) {
+      if (!(error instanceof NotFoundException) && !(error instanceof EntityNotFoundError)) {
         this.logger.error(error)
       }
       throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)

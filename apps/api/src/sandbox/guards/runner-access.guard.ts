@@ -15,6 +15,7 @@ import { RegionType } from '../../region/enums/region-type.enum'
 import { isProxyAuthContext } from '../../common/interfaces/proxy-auth-context.interface'
 import { isSshGatewayAuthContext } from '../../common/interfaces/ssh-gateway-auth-context.interface'
 import { InvalidAuthenticationContextException } from '../../common/exceptions/invalid-authentication-context.exception'
+import { EntityNotFoundError } from 'typeorm'
 
 @Injectable()
 export class RunnerAccessGuard extends ResourceAccessGuard {
@@ -66,7 +67,7 @@ export class RunnerAccessGuard extends ResourceAccessGuard {
       // Access granted
       return true
     } catch (error) {
-      if (!(error instanceof NotFoundException)) {
+      if (!(error instanceof NotFoundException) && !(error instanceof EntityNotFoundError)) {
         this.logger.error(error)
       }
       throw new NotFoundException('Runner not found')
