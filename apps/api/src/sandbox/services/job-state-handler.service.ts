@@ -578,7 +578,6 @@ export class JobStateHandlerService {
           memDeltaForQuota,
           diskDeltaForQuota,
         )
-        return
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`RESIZE_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
 
