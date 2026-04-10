@@ -26,14 +26,17 @@ import { ResourceType } from '../enums/resource-type.enum'
 import { JobService } from '../services/job.service'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import {
-  CreateSandboxDTO,
-  CreateBackupDTO,
-  BuildSnapshotRequestDTO,
-  PullSnapshotRequestDTO,
-  UpdateNetworkSettingsDTO,
-  InspectSnapshotInRegistryRequest,
-  RecoverSandboxDTO,
-} from '@daytona/runner-api-client'
+  CreateSandboxPayload,
+  CreateBackupPayload,
+  BuildSnapshotPayload,
+  PullSnapshotPayload,
+  UpdateNetworkSettingsPayload,
+  InspectSnapshotInRegistryPayload,
+  RecoverSandboxPayload,
+  ResizeSandboxPayload,
+  StartSandboxPayload,
+  StopSandboxPayload,
+} from '@daytona/runner-specs'
 import { SnapshotStateError } from '../errors/snapshot-state-error'
 
 /**
@@ -142,7 +145,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     otelEndpoint?: string,
     skipStart?: boolean,
   ): Promise<StartSandboxResponse | undefined> {
-    const payload: CreateSandboxDTO = {
+    const payload: CreateSandboxPayload = {
       id: sandbox.id,
       userId: sandbox.organizationId,
       snapshot: snapshotRef,
@@ -222,7 +225,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
   }
 
   async recoverSandbox(sandbox: Sandbox): Promise<void> {
-    const recoverSandboxDTO: RecoverSandboxDTO = {
+    const recoverSandboxDTO: RecoverSandboxPayload = {
       userId: sandbox.organizationId,
       snapshot: sandbox.snapshot,
       osUser: sandbox.osUser,
@@ -254,7 +257,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
   }
 
   async createBackup(sandbox: Sandbox, backupSnapshotName: string, registry?: DockerRegistry): Promise<void> {
-    const payload: CreateBackupDTO = {
+    const payload: CreateBackupPayload = {
       snapshot: backupSnapshotName,
       registry: undefined,
     }
@@ -287,21 +290,20 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     registry?: DockerRegistry,
     pushToInternalRegistry?: boolean,
   ): Promise<void> {
-    const payload: BuildSnapshotRequestDTO = {
+    const payload: BuildSnapshotPayload = {
       snapshot: buildInfo.snapshotRef,
       dockerfile: buildInfo.dockerfileContent,
       organizationId: organizationId,
       context: buildInfo.contextHashes,
       pushToInternalRegistry: pushToInternalRegistry,
-    }
-
-    if (sourceRegistries) {
-      payload.sourceRegistries = sourceRegistries.map((sourceRegistry) => ({
-        project: sourceRegistry.project,
-        url: sourceRegistry.url.replace(/^(https?:\/\/)/, ''),
-        username: sourceRegistry.username,
-        password: sourceRegistry.password,
-      }))
+      sourceRegistries: sourceRegistries
+        ? sourceRegistries.map((sourceRegistry) => ({
+            project: sourceRegistry.project,
+            url: sourceRegistry.url.replace(/^(https?:\/\/)/, ''),
+            username: sourceRegistry.username,
+            password: sourceRegistry.password,
+          }))
+        : [],
     }
 
     if (registry) {
@@ -332,7 +334,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     destinationRef?: string,
     newTag?: string,
   ): Promise<void> {
-    const payload: PullSnapshotRequestDTO = {
+    const payload: PullSnapshotPayload = {
       snapshot: snapshotName,
       newTag,
     }
@@ -456,7 +458,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
   }
 
   async inspectSnapshotInRegistry(snapshotName: string, registry?: DockerRegistry): Promise<SnapshotDigestResponse> {
-    const payload: InspectSnapshotInRegistryRequest = {
+    const payload: InspectSnapshotInRegistryPayload = {
       snapshot: snapshotName,
       registry: registry
         ? {
@@ -506,7 +508,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     networkAllowList?: string,
     networkLimitEgress?: boolean,
   ): Promise<void> {
-    const payload: UpdateNetworkSettingsDTO = {
+    const payload: UpdateNetworkSettingsPayload = {
       networkBlockAll: networkBlockAll,
       networkAllowList: networkAllowList,
       networkLimitEgress: networkLimitEgress,

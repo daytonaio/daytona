@@ -18,22 +18,22 @@ func (d *DockerClient) BuildSnapshot(ctx context.Context, req dto.BuildSnapshotR
 		return err
 	}
 
-	tag := req.Snapshot
+	tag := req.GetSnapshot()
 
-	if req.PushToInternalRegistry {
-		if req.Registry.Project == nil {
+	if req.GetPushToInternalRegistry() {
+		if req.GetRegistry().GetProject() == "" {
 			return common_errors.NewBadRequestError(errors.New("project is required when pushing to internal registry"))
 		}
-		tag = fmt.Sprintf("%s/%s/%s", req.Registry.Url, *req.Registry.Project, req.Snapshot)
+		tag = fmt.Sprintf("%s/%s/%s", req.GetRegistry().GetUrl(), req.GetRegistry().GetProject(), req.GetSnapshot())
 	}
 
-	err = d.TagImage(ctx, req.Snapshot, tag)
+	err = d.TagImage(ctx, req.GetSnapshot(), tag)
 	if err != nil {
 		return err
 	}
 
-	if req.PushToInternalRegistry {
-		err = d.PushImage(ctx, tag, req.Registry)
+	if req.GetPushToInternalRegistry() {
+		err = d.PushImage(ctx, tag, req.GetRegistry())
 		if err != nil {
 			return err
 		}

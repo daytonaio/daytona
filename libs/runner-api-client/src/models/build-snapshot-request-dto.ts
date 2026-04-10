@@ -15,7 +15,7 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
-import type { RegistryDTO } from './registry-dto';
+import type { SpecsgenRegistryInfo } from './specsgen-registry-info';
 
 /**
  * 
@@ -49,21 +49,21 @@ export interface BuildSnapshotRequestDTO {
     'pushToInternalRegistry'?: boolean;
     /**
      * 
-     * @type {RegistryDTO}
+     * @type {SpecsgenRegistryInfo}
      * @memberof BuildSnapshotRequestDTO
      */
-    'registry'?: RegistryDTO;
+    'registry'?: SpecsgenRegistryInfo;
     /**
-     * Snapshot ID and tag or the build\'s hash
+     * 
      * @type {string}
      * @memberof BuildSnapshotRequestDTO
      */
     'snapshot'?: string;
     /**
      * 
-     * @type {Array<RegistryDTO>}
+     * @type {Array<SpecsgenRegistryInfo>}
      * @memberof BuildSnapshotRequestDTO
      */
-    'sourceRegistries'?: Array<RegistryDTO>;
+    'sourceRegistries'?: Array<SpecsgenRegistryInfo>;
 }
 

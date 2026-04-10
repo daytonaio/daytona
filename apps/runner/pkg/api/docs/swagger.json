@@ -1345,16 +1345,15 @@
           "type": "boolean"
         },
         "registry": {
-          "$ref": "#/definitions/RegistryDTO"
+          "$ref": "#/definitions/specsgen.RegistryInfo"
         },
         "snapshot": {
-          "description": "Snapshot ID and tag or the build's hash",
           "type": "string"
         },
         "sourceRegistries": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/RegistryDTO"
+            "$ref": "#/definitions/specsgen.RegistryInfo"
           }
         }
       }
@@ -1364,7 +1363,7 @@
       "required": ["registry", "snapshot"],
       "properties": {
         "registry": {
-          "$ref": "#/definitions/RegistryDTO"
+          "$ref": "#/definitions/specsgen.RegistryInfo"
         },
         "snapshot": {
           "type": "string"
@@ -1421,7 +1420,6 @@
           "type": "boolean"
         },
         "organizationId": {
-          "description": "Nullable for backward compatibility",
           "type": "string"
         },
         "osUser": {
@@ -1434,7 +1432,7 @@
           "type": "string"
         },
         "registry": {
-          "$ref": "#/definitions/RegistryDTO"
+          "$ref": "#/definitions/specsgen.RegistryInfo"
         },
         "skipStart": {
           "type": "boolean"
@@ -1452,7 +1450,7 @@
         "volumes": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/dto.VolumeDTO"
+            "$ref": "#/definitions/specsgen.VolumeMount"
           }
         }
       }
@@ -1493,11 +1491,10 @@
       "required": ["snapshot"],
       "properties": {
         "registry": {
-          "$ref": "#/definitions/RegistryDTO"
+          "$ref": "#/definitions/specsgen.RegistryInfo"
         },
         "snapshot": {
-          "type": "string",
-          "example": "nginx:latest"
+          "type": "string"
         }
       }
     },
@@ -1526,13 +1523,13 @@
           "type": "string"
         },
         "destinationRegistry": {
-          "$ref": "#/definitions/RegistryDTO"
+          "$ref": "#/definitions/specsgen.RegistryInfo"
         },
         "newTag": {
           "type": "string"
         },
         "registry": {
-          "$ref": "#/definitions/RegistryDTO"
+          "$ref": "#/definitions/specsgen.RegistryInfo"
         },
         "snapshot": {
           "type": "string"
@@ -1592,26 +1589,8 @@
         "volumes": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/dto.VolumeDTO"
+            "$ref": "#/definitions/specsgen.VolumeMount"
           }
-        }
-      }
-    },
-    "RegistryDTO": {
-      "type": "object",
-      "required": ["url"],
-      "properties": {
-        "password": {
-          "type": "string"
-        },
-        "project": {
-          "type": "string"
-        },
-        "url": {
-          "type": "string"
-        },
-        "username": {
-          "type": "string"
         }
       }
     },
@@ -1815,20 +1794,6 @@
         }
       }
     },
-    "dto.VolumeDTO": {
-      "type": "object",
-      "properties": {
-        "mountPath": {
-          "type": "string"
-        },
-        "subpath": {
-          "type": "string"
-        },
-        "volumeId": {
-          "type": "string"
-        }
-      }
-    },
     "enums.BackupState": {
       "type": "string",
       "enum": ["NONE", "PENDING", "IN_PROGRESS", "COMPLETED", "FAILED"],
@@ -1870,6 +1835,39 @@
         "SandboxStateUnknown",
         "SandboxStatePullingSnapshot"
       ]
+    },
+    "specsgen.RegistryInfo": {
+      "type": "object",
+      "required": ["url"],
+      "properties": {
+        "password": {
+          "type": "string"
+        },
+        "project": {
+          "description": "Optional registry project / namespace.",
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        }
+      }
+    },
+    "specsgen.VolumeMount": {
+      "type": "object",
+      "properties": {
+        "mountPath": {
+          "type": "string"
+        },
+        "subpath": {
+          "type": "string"
+        },
+        "volumeId": {
+          "type": "string"
+        }
+      }
     }
   },
   "securityDefinitions": {

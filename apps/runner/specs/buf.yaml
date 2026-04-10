@@ -1,0 +1,10 @@
+version: v2
+modules:
+  - path: .
+    name: buf.build/daytonaio/runner-specs
+lint:
+  use:
+    - DEFAULT
+breaking:
+  use:
+    - FILE

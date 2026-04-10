@@ -1,0 +1,329 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ *
+ * Proto specification for Daytona v2 runner job payloads.
+ *
+ * This file is the canonical schema source for all job payload types exchanged
+ * between the Daytona API and v2 runners via the job queue.  Types generated
+ * from this file replace the OpenAPI/Swagger-derived runner-api-client DTOs.
+ *
+ * JSON field naming: protobuf snake_case fields are automatically mapped to
+ * camelCase JSON keys by protojson (e.g. cpu_quota → cpuQuota), which matches
+ * the conventions already used by both sides of the job queue.
+ *
+ * Code generation (requires buf CLI ≥ v1):
+ *   buf generate apps/runner/specs
+ * See buf.gen.yaml for output targets.
+ */
+
+syntax = "proto3";
+
+package runner.v2.jobs;
+
+option go_package = "github.com/daytonaio/runner/pkg/runner/v2/specs/gen;specsgen";
+
+// ─── Job protocol types ───────────────────────────────────────────────────────
+
+enum JobType {
+  JOB_TYPE_UNSPECIFIED = 0;
+  CREATE_SANDBOX = 1;
+  START_SANDBOX = 2;
+  STOP_SANDBOX = 3;
+  DESTROY_SANDBOX = 4;
+  RESIZE_SANDBOX = 5;
+  CREATE_BACKUP = 6;
+  BUILD_SNAPSHOT = 7;
+  PULL_SNAPSHOT = 8;
+  RECOVER_SANDBOX = 9;
+  INSPECT_SNAPSHOT_IN_REGISTRY = 10;
+  REMOVE_SNAPSHOT = 11;
+  UPDATE_SANDBOX_NETWORK_SETTINGS = 12;
+}
+
+enum JobStatus {
+  JOB_STATUS_UNSPECIFIED = 0;
+  PENDING = 1;
+  IN_PROGRESS = 2;
+  COMPLETED = 3;
+  FAILED = 4;
+}
+
+enum ResourceType {
+  RESOURCE_TYPE_UNSPECIFIED = 0;
+  SANDBOX = 1;
+  SNAPSHOT = 2;
+  BACKUP = 3;
+}
+
+// Job is the v2 runner job record delivered by the job queue.
+message Job {
+  // @gotags: json:"id"
+  string id = 1;
+  // @gotags: json:"type"
+  JobType type = 2;
+  // @gotags: json:"status"
+  JobStatus status = 3;
+  // @gotags: json:"resourceType"
+  ResourceType resource_type = 4;
+  // @gotags: json:"resourceId"
+  string resource_id = 5;
+  // @gotags: json:"payload,omitempty"
+  optional string payload = 6;
+  // @gotags: json:"traceContext,omitempty"
+  map<string, string> trace_context = 7;
+  // @gotags: json:"errorMessage,omitempty"
+  optional string error_message = 8;
+  // @gotags: json:"createdAt"
+  string created_at = 9;
+  // @gotags: json:"updatedAt,omitempty"
+  optional string updated_at = 10;
+}
+
+// UpdateJobStatus is sent by the runner to report job completion.
+message UpdateJobStatus {
+  // @gotags: json:"status"
+  JobStatus status = 1;
+  // @gotags: json:"errorMessage,omitempty"
+  optional string error_message = 2;
+  // @gotags: json:"resultMetadata,omitempty"
+  optional string result_metadata = 3;
+}
+
+// PollJobsResponse wraps the array returned by GET /jobs/poll.
+message PollJobsResponse {
+  repeated Job jobs = 1;
+}
+
+// ListJobsResponse wraps the paginated list returned by GET /jobs.
+message ListJobsResponse {
+  repeated Job items = 1;
+  int32 total = 2;
+  int32 page = 3;
+  // @gotags: json:"totalPages"
+  int32 total_pages = 4;
+}
+
+// ─── Runner healthcheck types ────────────────────────────────────────────────
+
+message RunnerHealthMetrics {
+  // @gotags: json:"currentCpuLoadAverage"
+  double current_cpu_load_average         = 1;
+  // @gotags: json:"currentCpuUsagePercentage"
+  double current_cpu_usage_percentage     = 2;
+  // @gotags: json:"currentMemoryUsagePercentage"
+  double current_memory_usage_percentage  = 3;
+  // @gotags: json:"currentDiskUsagePercentage"
+  double current_disk_usage_percentage    = 4;
+  // @gotags: json:"currentAllocatedCpu"
+  double current_allocated_cpu            = 5;
+  // @gotags: json:"currentAllocatedMemoryGiB"
+  double current_allocated_memory_gi_b    = 6;
+  // @gotags: json:"currentAllocatedDiskGiB"
+  double current_allocated_disk_gi_b      = 7;
+  // @gotags: json:"currentSnapshotCount"
+  int32  current_snapshot_count           = 8;
+  // @gotags: json:"currentStartedSandboxes"
+  int64  current_started_sandboxes        = 9;
+  double cpu                              = 10;
+  // @gotags: json:"memoryGiB"
+  double memory_gi_b                      = 11;
+  // @gotags: json:"diskGiB"
+  double disk_gi_b                        = 12;
+}
+
+message RunnerServiceHealth {
+  // @gotags: json:"serviceName" validate:"required"
+  string service_name            = 1;
+  bool healthy                   = 2;
+  // @gotags: json:"errorReason,omitempty"
+  optional string error_reason   = 3;
+}
+
+message RunnerHealthcheck {
+  optional RunnerHealthMetrics metrics              = 1;
+  // @gotags: json:"serviceHealth,omitempty"
+  repeated RunnerServiceHealth service_health        = 2;
+  optional string domain                             = 3;
+  // @gotags: json:"proxyUrl,omitempty"
+  optional string proxy_url                          = 4;
+  // @gotags: json:"apiUrl,omitempty"
+  optional string api_url                            = 5;
+  // @gotags: json:"appVersion"
+  string app_version                                 = 6;
+}
+
+// ─── Shared types ────────────────────────────────────────────────────────────
+
+// RegistryInfo carries OCI registry credentials.
+message RegistryInfo {
+  // Registry URL (without scheme).
+  // @gotags: json:"url" validate:"required"
+  string url = 1;
+  // Optional registry project / namespace.
+  optional string project = 2;
+  optional string username = 3;
+  optional string password = 4;
+}
+
+// VolumeMount describes a volume attached to a sandbox.
+message VolumeMount {
+  // @gotags: json:"volumeId"
+  string volume_id  = 1;
+  // @gotags: json:"mountPath"
+  string mount_path = 2;
+  optional string subpath = 3;
+}
+
+// ─── Sandbox job payloads ────────────────────────────────────────────────────
+
+// CreateSandboxPayload is the job payload for CREATE_SANDBOX jobs.
+message CreateSandboxPayload {
+  // @gotags: json:"id" validate:"required"
+  string id             = 1;
+  // @gotags: json:"fromVolumeId,omitempty"
+  optional string from_volume_id = 2;
+  // @gotags: json:"userId" validate:"required"
+  string user_id        = 3;
+  // @gotags: json:"snapshot" validate:"required"
+  string snapshot       = 4;
+  // @gotags: json:"osUser" validate:"required"
+  string os_user        = 5;
+  // @gotags: json:"cpuQuota" validate:"min=1"
+  int64  cpu_quota      = 6;
+  // @gotags: json:"gpuQuota" validate:"min=0"
+  int64  gpu_quota      = 7;
+  // @gotags: json:"memoryQuota" validate:"min=1"
+  int64  memory_quota   = 8;
+  // @gotags: json:"storageQuota" validate:"min=1"
+  int64  storage_quota  = 9;
+  map<string, string> env      = 10;
+  optional RegistryInfo registry       = 11;
+  repeated string entrypoint           = 12;
+  repeated VolumeMount volumes         = 13;
+  // @gotags: json:"networkBlockAll,omitempty"
+  optional bool   network_block_all    = 14;
+  // @gotags: json:"networkAllowList,omitempty"
+  optional string network_allow_list   = 15;
+  map<string, string> metadata         = 16;
+  // @gotags: json:"authToken,omitempty"
+  optional string auth_token           = 17;
+  // @gotags: json:"otelEndpoint,omitempty"
+  optional string otel_endpoint        = 18;
+  // @gotags: json:"skipStart,omitempty"
+  optional bool   skip_start           = 19;
+  // @gotags: json:"organizationId,omitempty"
+  optional string organization_id      = 20;
+  // @gotags: json:"regionId,omitempty"
+  optional string region_id            = 21;
+}
+
+// StartSandboxPayload is the job payload for START_SANDBOX jobs.
+message StartSandboxPayload {
+  // @gotags: json:"authToken,omitempty"
+  optional string auth_token = 1;
+  map<string, string> metadata = 2;
+}
+
+// StopSandboxPayload is the job payload for STOP_SANDBOX jobs.
+message StopSandboxPayload {
+  optional bool force = 1;
+}
+
+// ResizeSandboxPayload is the job payload for RESIZE_SANDBOX jobs.
+message ResizeSandboxPayload {
+  // @gotags: json:"cpu" validate:"omitempty,min=1"
+  int64 cpu    = 1;
+  // @gotags: json:"gpu" validate:"omitempty,min=0"
+  int64 gpu    = 2;
+  // @gotags: json:"memory" validate:"omitempty,min=1"
+  int64 memory = 3;
+  // @gotags: json:"disk" validate:"omitempty,min=1"
+  int64 disk   = 4;
+}
+
+// RecoverSandboxPayload is the job payload for RECOVER_SANDBOX jobs.
+message RecoverSandboxPayload {
+  // @gotags: json:"fromVolumeId,omitempty"
+  optional string from_volume_id     = 1;
+  // @gotags: json:"userId" validate:"required"
+  string user_id                     = 2;
+  optional string snapshot           = 3;
+  // @gotags: json:"osUser" validate:"required"
+  string os_user                     = 4;
+  // @gotags: json:"cpuQuota" validate:"min=1"
+  int64  cpu_quota                   = 5;
+  // @gotags: json:"gpuQuota" validate:"min=0"
+  int64  gpu_quota                   = 6;
+  // @gotags: json:"memoryQuota" validate:"min=1"
+  int64  memory_quota                = 7;
+  // @gotags: json:"storageQuota" validate:"min=1"
+  int64  storage_quota               = 8;
+  map<string, string> env            = 9;
+  repeated VolumeMount volumes       = 10;
+  // @gotags: json:"networkBlockAll,omitempty"
+  optional bool   network_block_all  = 11;
+  // @gotags: json:"networkAllowList,omitempty"
+  optional string network_allow_list = 12;
+  // @gotags: json:"errorReason" validate:"required"
+  string error_reason                = 13;
+  // @gotags: json:"backupErrorReason,omitempty"
+  optional string backup_error_reason = 14;
+}
+
+// UpdateNetworkSettingsPayload is the job payload for
+// UPDATE_SANDBOX_NETWORK_SETTINGS jobs.
+message UpdateNetworkSettingsPayload {
+  // @gotags: json:"networkBlockAll,omitempty"
+  optional bool   network_block_all    = 1;
+  // @gotags: json:"networkAllowList,omitempty"
+  optional string network_allow_list   = 2;
+  // @gotags: json:"networkLimitEgress,omitempty"
+  optional bool   network_limit_egress = 3;
+}
+
+// ─── Snapshot job payloads ───────────────────────────────────────────────────
+
+// CreateBackupPayload is the job payload for CREATE_BACKUP jobs.
+message CreateBackupPayload {
+  // @gotags: json:"snapshot" validate:"required"
+  string snapshot                = 1;
+  // @gotags: json:"registry" validate:"required"
+  RegistryInfo registry          = 2;
+}
+
+// BuildSnapshotPayload is the job payload for BUILD_SNAPSHOT jobs.
+message BuildSnapshotPayload {
+  optional string snapshot                    = 1;
+  // @gotags: json:"sourceRegistries,omitempty"
+  repeated RegistryInfo source_registries     = 2;
+  optional RegistryInfo registry              = 3;
+  // @gotags: json:"dockerfile" validate:"required"
+  string dockerfile                           = 4;
+  // @gotags: json:"organizationId" validate:"required"
+  string organization_id                      = 5;
+  repeated string context                     = 6;
+  // @gotags: json:"pushToInternalRegistry"
+  bool push_to_internal_registry              = 7;
+}
+
+// PullSnapshotPayload is the job payload for PULL_SNAPSHOT jobs.
+message PullSnapshotPayload {
+  // @gotags: json:"snapshot" validate:"required"
+  string snapshot                              = 1;
+  optional RegistryInfo registry               = 2;
+  // @gotags: json:"destinationRegistry,omitempty"
+  optional RegistryInfo destination_registry   = 3;
+  // @gotags: json:"destinationRef,omitempty"
+  optional string destination_ref              = 4;
+  // @gotags: json:"newTag,omitempty"
+  optional string new_tag                      = 5;
+}
+
+// InspectSnapshotInRegistryPayload is the job payload for
+// INSPECT_SNAPSHOT_IN_REGISTRY jobs.
+message InspectSnapshotInRegistryPayload {
+  // @gotags: json:"snapshot" validate:"required"
+  string snapshot                  = 1;
+  optional RegistryInfo registry   = 2;
+}

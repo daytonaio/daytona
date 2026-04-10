@@ -38,5 +38,6 @@ header:
     - 'libs/toolbox-api-client-go/**'
     - 'libs/api-client-java/**'
     - 'libs/toolbox-api-client-java/**'
+    - 'libs/runner-specs/src/generated/**'
 
   comment: on-failure

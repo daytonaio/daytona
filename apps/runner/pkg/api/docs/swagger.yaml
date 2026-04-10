@@ -12,13 +12,12 @@ definitions:
       pushToInternalRegistry:
         type: boolean
       registry:
-        $ref: '#/definitions/RegistryDTO'
+        $ref: '#/definitions/specsgen.RegistryInfo'
       snapshot:
-        description: Snapshot ID and tag or the build's hash
         type: string
       sourceRegistries:
         items:
-          $ref: '#/definitions/RegistryDTO'
+          $ref: '#/definitions/specsgen.RegistryInfo'
         type: array
     required:
       - dockerfile
@@ -27,7 +26,7 @@ definitions:
   CreateBackupDTO:
     properties:
       registry:
-        $ref: '#/definitions/RegistryDTO'
+        $ref: '#/definitions/specsgen.RegistryInfo'
       snapshot:
         type: string
     required:
@@ -68,7 +67,6 @@ definitions:
       networkBlockAll:
         type: boolean
       organizationId:
-        description: Nullable for backward compatibility
         type: string
       osUser:
         type: string
@@ -77,7 +75,7 @@ definitions:
       regionId:
         type: string
       registry:
-        $ref: '#/definitions/RegistryDTO'
+        $ref: '#/definitions/specsgen.RegistryInfo'
       skipStart:
         type: boolean
       snapshot:
@@ -89,7 +87,7 @@ definitions:
         type: string
       volumes:
         items:
-          $ref: '#/definitions/dto.VolumeDTO'
+          $ref: '#/definitions/specsgen.VolumeMount'
         type: array
     required:
       - id
@@ -127,9 +125,8 @@ definitions:
   InspectSnapshotInRegistryRequest:
     properties:
       registry:
-        $ref: '#/definitions/RegistryDTO'
+        $ref: '#/definitions/specsgen.RegistryInfo'
       snapshot:
-        example: nginx:latest
         type: string
     required:
       - snapshot
@@ -151,11 +148,11 @@ definitions:
       destinationRef:
         type: string
       destinationRegistry:
-        $ref: '#/definitions/RegistryDTO'
+        $ref: '#/definitions/specsgen.RegistryInfo'
       newTag:
         type: string
       registry:
-        $ref: '#/definitions/RegistryDTO'
+        $ref: '#/definitions/specsgen.RegistryInfo'
       snapshot:
         type: string
     required:
@@ -197,25 +194,12 @@ definitions:
         type: string
       volumes:
         items:
-          $ref: '#/definitions/dto.VolumeDTO'
+          $ref: '#/definitions/specsgen.VolumeMount'
         type: array
     required:
       - errorReason
       - osUser
       - userId
-    type: object
-  RegistryDTO:
-    properties:
-      password:
-        type: string
-      project:
-        type: string
-      url:
-        type: string
-      username:
-        type: string
-    required:
-      - url
     type: object
   ResizeSandboxDTO:
     properties:
@@ -361,15 +345,6 @@ definitions:
       networkLimitEgress:
         type: boolean
     type: object
-  dto.VolumeDTO:
-    properties:
-      mountPath:
-        type: string
-      subpath:
-        type: string
-      volumeId:
-        type: string
-    type: object
   enums.BackupState:
     enum:
       - NONE
@@ -412,6 +387,29 @@ definitions:
       - SandboxStateError
       - SandboxStateUnknown
       - SandboxStatePullingSnapshot
+  specsgen.RegistryInfo:
+    properties:
+      password:
+        type: string
+      project:
+        description: Optional registry project / namespace.
+        type: string
+      url:
+        type: string
+      username:
+        type: string
+    required:
+      - url
+    type: object
+  specsgen.VolumeMount:
+    properties:
+      mountPath:
+        type: string
+      subpath:
+        type: string
+      volumeId:
+        type: string
+    type: object
 info:
   contact: {}
   description: Daytona Runner API
