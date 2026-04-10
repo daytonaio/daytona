@@ -531,7 +531,7 @@ class Sandbox(SandboxDto):
         Args:
             port (int): The port to open the preview link on.
             expires_in_seconds (int | None): The number of seconds the signed preview
-                url will be valid for. Defaults to 60 seconds.
+                url will be valid for. Defaults to 300 seconds.
 
         Returns:
             SignedPortPreviewUrl: The response object for the signed preview url.

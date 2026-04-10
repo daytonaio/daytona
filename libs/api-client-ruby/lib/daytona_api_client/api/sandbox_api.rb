@@ -1091,7 +1091,7 @@ module DaytonaApiClient
     # @param port [Integer] Port number to get signed preview URL for
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @option opts [Integer] :expires_in_seconds Expiration time in seconds (default: 60 seconds)
+    # @option opts [Integer] :expires_in_seconds Expiration time in seconds (default: 300 seconds)
     # @return [SignedPortPreviewUrl]
     def get_signed_port_preview_url(sandbox_id_or_name, port, opts = {})
       data, _status_code, _headers = get_signed_port_preview_url_with_http_info(sandbox_id_or_name, port, opts)
@@ -1103,7 +1103,7 @@ module DaytonaApiClient
     # @param port [Integer] Port number to get signed preview URL for
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @option opts [Integer] :expires_in_seconds Expiration time in seconds (default: 60 seconds)
+    # @option opts [Integer] :expires_in_seconds Expiration time in seconds (default: 300 seconds)
     # @return [Array<(SignedPortPreviewUrl, Integer, Hash)>] SignedPortPreviewUrl data, response status code and response headers
     def get_signed_port_preview_url_with_http_info(sandbox_id_or_name, port, opts = {})
       if @api_client.config.debugging

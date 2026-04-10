@@ -282,7 +282,7 @@ module Daytona
     #
     # @param port [Integer] The port to open the preview link on
     # @param expires_in_seconds [Integer, nil] The number of seconds the signed preview URL
-    #   will be valid for. Defaults to 60 seconds.
+    #   will be valid for. Defaults to 300 seconds.
     # @return [DaytonaApiClient::SignedPortPreviewUrl] The signed preview URL response object
     #
     # @example

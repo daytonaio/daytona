@@ -4596,7 +4596,7 @@ class SandboxApi:
         sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         port: Annotated[StrictInt, Field(description="Port number to get signed preview URL for")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        expires_in_seconds: Annotated[Optional[StrictInt], Field(description="Expiration time in seconds (default: 60 seconds)")] = None,
+        expires_in_seconds: Annotated[Optional[StrictInt], Field(description="Expiration time in seconds (default: 300 seconds)")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4619,7 +4619,7 @@ class SandboxApi:
         :type port: int
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param expires_in_seconds: Expiration time in seconds (default: 60 seconds)
+        :param expires_in_seconds: Expiration time in seconds (default: 300 seconds)
         :type expires_in_seconds: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -4674,7 +4674,7 @@ class SandboxApi:
         sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         port: Annotated[StrictInt, Field(description="Port number to get signed preview URL for")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        expires_in_seconds: Annotated[Optional[StrictInt], Field(description="Expiration time in seconds (default: 60 seconds)")] = None,
+        expires_in_seconds: Annotated[Optional[StrictInt], Field(description="Expiration time in seconds (default: 300 seconds)")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4697,7 +4697,7 @@ class SandboxApi:
         :type port: int
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param expires_in_seconds: Expiration time in seconds (default: 60 seconds)
+        :param expires_in_seconds: Expiration time in seconds (default: 300 seconds)
         :type expires_in_seconds: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -4752,7 +4752,7 @@ class SandboxApi:
         sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         port: Annotated[StrictInt, Field(description="Port number to get signed preview URL for")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        expires_in_seconds: Annotated[Optional[StrictInt], Field(description="Expiration time in seconds (default: 60 seconds)")] = None,
+        expires_in_seconds: Annotated[Optional[StrictInt], Field(description="Expiration time in seconds (default: 300 seconds)")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4775,7 +4775,7 @@ class SandboxApi:
         :type port: int
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param expires_in_seconds: Expiration time in seconds (default: 60 seconds)
+        :param expires_in_seconds: Expiration time in seconds (default: 300 seconds)
         :type expires_in_seconds: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

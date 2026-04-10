@@ -563,7 +563,7 @@ export class Sandbox implements SandboxDto {
    * Retrieves a signed preview url for the sandbox at the specified port.
    *
    * @param {number} port - The port to open the preview link on.
-   * @param {number} [expiresInSeconds] - The number of seconds the signed preview url will be valid for. Defaults to 60 seconds.
+  * @param {number} [expiresInSeconds] - The number of seconds the signed preview url will be valid for. Defaults to 300 seconds.
    * @returns {Promise<SignedPortPreviewUrl>} The response object for the signed preview url.
    */
   public async getSignedPreviewUrl(port: number, expiresInSeconds?: number): Promise<SignedPortPreviewUrl> {

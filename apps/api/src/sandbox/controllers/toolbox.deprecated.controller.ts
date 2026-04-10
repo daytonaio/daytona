@@ -109,7 +109,6 @@ import { OrganizationResourceActionGuard } from '../../organization/guards/organ
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import followRedirects from 'follow-redirects'
-import { UploadFileDto } from '../dto/upload-file.dto'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
@@ -707,7 +706,28 @@ export class ToolboxController {
     description: 'Files uploaded successfully',
   })
   @ApiConsumes('multipart/form-data')
-  @ApiBody({ type: [UploadFileDto] })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        files: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              file: {
+                type: 'string',
+                format: 'binary',
+              },
+              path: {
+                type: 'string',
+              },
+            },
+          },
+        },
+      },
+    },
+  })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
   @Audit({
     action: AuditAction.TOOLBOX_BULK_UPLOAD_FILES,

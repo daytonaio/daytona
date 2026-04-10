@@ -4031,9 +4031,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              items:
-                $ref: '#/components/schemas/UploadFile'
-              type: array
+              $ref: '#/components/schemas/uploadFiles_deprecated_request'
         required: true
       responses:
         "200":
@@ -11648,6 +11646,17 @@ components:
       required:
       - appVersion
       type: object
+    UploadFile:
+      properties:
+        file:
+          format: binary
+          type: string
+        path:
+          type: string
+      required:
+      - file
+      - path
+      type: object
     ProjectDirResponse:
       example:
         dir: dir
@@ -11783,17 +11792,6 @@ components:
           type: array
       required:
       - files
-      type: object
-    UploadFile:
-      properties:
-        file:
-          format: binary
-          type: string
-        path:
-          type: string
-      required:
-      - file
-      - path
       type: object
     GitAddRequest:
       example:
@@ -14763,6 +14761,13 @@ components:
         file:
           format: binary
           type: string
+      type: object
+    uploadFiles_deprecated_request:
+      properties:
+        files:
+          items:
+            $ref: '#/components/schemas/UploadFile'
+          type: array
       type: object
     WebhookController_getStatus_200_response:
       example:
