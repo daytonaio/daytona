@@ -52,6 +52,8 @@ const TOOLBOX_API_PATH = path.join(
   'apps/daemon/pkg/toolbox/docs/swagger.json'
 )
 
+const MAX_CONTENT_LENGTH = 5000
+
 function processContent(content) {
   return content
     .split('\n')
@@ -63,6 +65,25 @@ function processContent(content) {
     .trim()
 }
 
+function cleanMarkdown(text) {
+  return text
+    .replace(/```[\s\S]*?```/g, '') // remove code blocks
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1') // remove images but keep alt text
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // remove links but keep text
+    .replace(/^#{1,6}\s+/gm, '') // remove headings
+    .replace(/[*_~`]/g, '') // remove formatting characters
+    .replace(/<[^>]+>/g, '') // remove HTML tags
+    .replace(/\{[^}]*\}/g, '') // remove curly braces and their content
+    .replace(/\|/g, '') // remove pipe characters
+    .replace(/^[\s\-:]+$/gm, '') // remove lines that are just whitespace, dashes, or colons
+    .replace(/\n{3,}/g, '\n\n') // collapse multiple newlines into two
+    .trim()
+}
+
+function extractSearchableContent(text) {
+  return cleanMarkdown(text).slice(0, MAX_CONTENT_LENGTH)
+}
+
 function extractSentences(text) {
   // Return text
   const match = text.match(/[^.!?]*[.!?]/g)
@@ -70,10 +91,6 @@ function extractSentences(text) {
   return sentences.length > 0
     ? sentences.filter(s => s.endsWith('.')).join(' ')
     : ''
-}
-
-function extractHyperlinks(text) {
-  return text.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '$1')
 }
 
 function isSentence(sentence) {
@@ -112,7 +129,10 @@ function extractCodeSnippets(content) {
   const codeRegexes = [
     /```(?:python|py)\n([\s\S]*?)```/g,
     /```(?:typescript|ts|tsx)\n([\s\S]*?)```/g,
+    /```(?:ruby|rb)\n([\s\S]*?)```/g,
+    /```(?:go|golang)\n([\s\S]*?)```/g,
     /```(?:bash|shell|sh)\n([\s\S]*?)```/g,
+    /```json\n([\s\S]*?)```/g,
   ]
   const codeSnippets = []
 
@@ -175,7 +195,8 @@ function extractHeadings(content, tag, slug) {
     currentTextBelow = currentTextBelow.trim()
 
     const heading = current.title
-    const description = extractHyperlinks(extractRealSentence(currentTextBelow))
+    const description = extractRealSentence(cleanMarkdown(currentTextBelow))
+    const content = extractSearchableContent(currentTextBelow)
     const codeSnippets = extractCodeSnippets(currentTextBelow)
     const headingSlug = `${slug}#${heading
       .toLowerCase()
@@ -185,6 +206,7 @@ function extractHeadings(content, tag, slug) {
     headings.push({
       title: heading,
       description,
+      content,
       codeSnippets,
       tag,
       url: `/docs${headingSlug}`,
@@ -203,16 +225,23 @@ function parseMarkdownFile(filePath, tag) {
 
   const title = data.title || cleanContent.match(/^#\s+(.*)/)?.[1] || 'Untitled'
   const description =
-    data.description || extractHyperlinks(extractRealSentence(cleanContent))
+    data.description || extractRealSentence(cleanMarkdown(cleanContent))
   const slug = filePath
     .replace(DOCS_PATH, '')
     .replace(/\\/g, '/')
     .replace(/\.mdx?$/, '')
   const headings = extractHeadings(cleanContent, tag, slug)
 
+  const firstHeadingMatch = cleanContent.match(/^#{2,6}\s+/m)
+  const introContent = firstHeadingMatch
+    ? cleanContent.slice(0, firstHeadingMatch.index)
+    : cleanContent
+  const searchableContent = extractSearchableContent(introContent)
+
   const mainData = {
     title,
     description,
+    content: searchableContent,
     tag,
     url: `/docs${slug}`,
     slug,
