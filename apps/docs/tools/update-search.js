@@ -225,6 +225,7 @@ function extractHeadings(content, tag, slug) {
       slug: headingSlug,
       recordType: RECORD_TYPE.HEADING,
       pageRank: PAGE_RANK.HEADING,
+      headingOrder: i,
     })
   }
 
