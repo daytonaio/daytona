@@ -55,7 +55,9 @@ const OrganizationMembers: React.FC = () => {
 
   const { refreshOrganizations } = useOrganizations()
   const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
-  const { data: organizationMembers = [] } = useOrganizationMembersQuery(selectedOrganization?.id)
+  const { data: organizationMembers = [], isLoading: loadingMembers } = useOrganizationMembersQuery(
+    selectedOrganization?.id,
+  )
 
   const {
     data: invitations = [],
@@ -211,7 +213,7 @@ const OrganizationMembers: React.FC = () => {
       <PageContent>
         <OrganizationMemberTable
           data={organizationMembers}
-          loadingData={false}
+          loadingData={loadingMembers}
           onUpdateMemberAccess={handleUpdateMemberAccess}
           onRemoveMember={handleRemoveMember}
           pendingMemberIds={pendingMemberIds}
