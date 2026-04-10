@@ -14,6 +14,7 @@ import { AuthStrategyType } from './enums/auth-strategy-type.enum'
 import { RequestWithAuthMetadata } from './interfaces/request-with-auth-metadata.interface'
 import { CustomHeaders } from '../common/constants/header.constants'
 import { TypedConfigService } from '../config/typed-config.service'
+import { handleAuthError } from './utils/handle-auth-error.util'
 
 interface JwtStrategyConfig {
   jwksUri: string
@@ -110,7 +111,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         organizationId,
       } satisfies UserAuthContext
     } catch (error) {
-      this.logger.error(`JWT validation failed for user ${userId}:`, error)
+      this.logger.debug(`Error validating JWT for user ${userId}:`, error)
+      handleAuthError(error, `Error validating JWT for user ${userId}`)
     }
 
     return null
