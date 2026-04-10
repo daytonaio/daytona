@@ -23,6 +23,11 @@ func HandleErrorResponse(res *http.Response, requestErr error) error {
 
 	defer res.Body.Close()
 
+	// 2xx: error is client-side (e.g. decode failure), not a server error
+	if res.StatusCode >= 200 && res.StatusCode < 300 {
+		return requestErr
+	}
+
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
