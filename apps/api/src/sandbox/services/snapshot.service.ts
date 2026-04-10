@@ -129,7 +129,7 @@ export class SnapshotService {
   private async readySnapshotRunnerExists(ref: string, regionId: string): Promise<boolean> {
     return await this.snapshotRunnerRepository
       .createQueryBuilder('sr')
-      .innerJoin('runner', 'r', 'r.id::text = sr."runnerId"::text')
+      .innerJoin('runner', 'r', 'r.id = sr."runnerId"::uuid')
       .where('sr."snapshotRef" = :ref', { ref })
       .andWhere('sr.state = :snapshotRunnerState', { snapshotRunnerState: SnapshotRunnerState.READY })
       .andWhere('r.region = :regionId', { regionId })
@@ -858,7 +858,7 @@ export class SnapshotService {
 
     const snapshotRunners = await this.snapshotRunnerRepository
       .createQueryBuilder('sr')
-      .innerJoin('runner', 'r', 'r.id::text = sr."runnerId"::text')
+      .innerJoin('runner', 'r', 'r.id = sr."runnerId"::uuid')
       .where('r.state = :runnerState', { runnerState: RunnerState.DECOMMISSIONED })
       .andWhere('sr."updatedAt" < :cutoff', { cutoff })
       .select('sr.id')
