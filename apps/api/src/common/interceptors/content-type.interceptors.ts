@@ -17,7 +17,9 @@ export class ContentTypeInterceptor implements NestInterceptor {
     if (request.readable) {
       const contentType = request.get('content-type') || ''
       const isJsonContentType =
-        !contentType || contentType.includes('application/json') || contentType.includes('text/json')
+        !contentType ||
+        contentType.toLowerCase().includes('application/json') ||
+        contentType.toLowerCase().includes('text/json')
 
       if (!isJsonContentType) {
         return next.handle()
