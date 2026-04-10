@@ -174,13 +174,18 @@ var cmdWrapperFormat string = `
 
 	# Run your command from file (avoids heredoc parsing issues with pipe-fed shells)
 	{ . %q; } < "$ip" > "$sp" 2> "$ep"
-	echo "$?" >> %q
+	_ec=$?
 
 	# Stop the stdin holder so it doesn't outlive the command
 	kill "$ip_pid" 2>/dev/null; wait "$ip_pid" 2>/dev/null
 
 	# drain labelers (cleanup via trap)
 	wait "$r1" "$r2"
+
+	# Write exit code only after labelers have flushed all output to the log file.
+	# Previously echo "$?" ran before wait, creating a race where clients polling
+	# the exit-code file would read an empty/incomplete log.
+	echo "$_ec" >> %q
 
 	# Ensure unlink even if the waits failed
 	cleanup
