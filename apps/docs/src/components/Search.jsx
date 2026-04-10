@@ -63,10 +63,24 @@ function humanizeSegment(segment) {
     .join(' ')
 }
 
+function firstApiTagSegment(tags) {
+  if (tags == null || tags === '') {
+    return ''
+  }
+  if (typeof tags === 'string') {
+    return tags.split(',')[0].trim()
+  }
+  if (Array.isArray(tags)) {
+    const first = tags.find(t => t != null && String(t).trim())
+    return first != null ? String(first).trim() : ''
+  }
+  return ''
+}
+
 function formatSearchBreadcrumb(indexName, hit) {
   const root = INDEX_LABELS[indexName] ?? hit.tag ?? 'Search'
   if (indexName === API_INDEX_NAME && hit.tags) {
-    const firstTag = hit.tags.split(',')[0].trim()
+    const firstTag = firstApiTagSegment(hit.tags)
     if (firstTag) {
       return `${root} > ${humanizeSegment(firstTag)}`
     }
