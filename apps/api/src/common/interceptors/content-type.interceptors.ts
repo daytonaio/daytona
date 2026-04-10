@@ -15,6 +15,16 @@ export class ContentTypeInterceptor implements NestInterceptor {
 
     // Check if we have raw body data but no parsed body
     if (request.readable) {
+      const contentType = request.get('content-type') || ''
+      const isJsonContentType =
+        !contentType ||
+        contentType.toLowerCase().includes('application/json') ||
+        contentType.toLowerCase().includes('text/json')
+
+      if (!isJsonContentType) {
+        return next.handle()
+      }
+
       // Create a promise to handle the body parsing
       await new Promise<void>((resolve, reject) => {
         let rawBody = ''
@@ -33,7 +43,7 @@ export class ContentTypeInterceptor implements NestInterceptor {
             }
             resolve()
           } catch (e) {
-            this.logger.error('Failed to parse JSON body:', e)
+            this.logger.warn('Failed to parse JSON body:', e)
             resolve() // Still resolve even on error to prevent hanging
           }
         })
