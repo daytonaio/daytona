@@ -208,7 +208,7 @@ function extractHeadings(content, tag, slug) {
 
     const heading = current.title
     const description = extractRealSentence(cleanMarkdown(currentTextBelow))
-    const content = extractSearchableContent(currentTextBelow)
+    const searchableContent = extractSearchableContent(currentTextBelow)
     const codeSnippets = extractCodeSnippets(currentTextBelow)
     const headingSlug = `${slug}#${heading
       .toLowerCase()
@@ -218,7 +218,7 @@ function extractHeadings(content, tag, slug) {
     headings.push({
       title: heading,
       description,
-      content,
+      content: searchableContent,
       codeSnippets,
       tag,
       url: `/docs${headingSlug}`,
