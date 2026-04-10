@@ -111,6 +111,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         organizationId,
       } satisfies UserAuthContext
     } catch (error) {
+      this.logger.debug(`Error validating JWT for user ${userId}:`, error)
       handleAuthError(error, `Error validating JWT for user ${userId}`)
     }
 
