@@ -45,6 +45,12 @@ COPY libs/computer-use/ libs/computer-use/
 # Pre-built computer-use binary and build script
 COPY dist/libs/computer-use-amd64 dist/libs/computer-use-amd64
 
+# Pin google.golang.org/genproto to a post-split version. The trimmed workspace
+# lacks snapshot-manager -> distribution/v3 which normally bumps genproto past the
+# split. Without this, in-toto-golang pulls in a pre-split version that conflicts
+# with the split genproto/googleapis/{api,rpc} modules.
+RUN GOWORK=off go -C apps/runner mod edit -require google.golang.org/genproto@v0.0.0-20240903143218-8af14fe29dc1
+
 ARG VERSION=0.0.1
 RUN --mount=type=cache,target=/root/.cache/go-build \
   SKIP_COMPUTER_USE_BUILD=true VERSION=$VERSION yarn nx build runner --configuration=production --nxBail=true
