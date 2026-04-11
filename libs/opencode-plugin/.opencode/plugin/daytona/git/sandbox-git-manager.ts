@@ -18,6 +18,9 @@ export class DaytonaSandboxGitManager {
 
   async ensureRepo(): Promise<void> {
     await this.ensureDirectory()
+    await this.sandbox.process.executeCommand(
+      'sudo apt-get update -qq && sudo apt-get install -y git 2>/dev/null || true',
+    )
     const isGit = await this.sandbox.process.executeCommand('git rev-parse --is-inside-work-tree', this.repoPath)
     if (!isGit || isGit.result.trim() !== 'true') {
       await this.sandbox.process.executeCommand('git init', this.repoPath)
