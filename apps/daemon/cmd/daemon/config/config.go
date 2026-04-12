@@ -12,9 +12,9 @@ import (
 
 type Config struct {
 	DaemonLogFilePath        string        `envconfig:"DAYTONA_DAEMON_LOG_FILE_PATH"`
-	DaemonLogMaxSizeMB       int           `envconfig:"DAYTONA_DAEMON_LOG_MAX_SIZE_MB" default:"100"`
-	DaemonLogMaxBackups      int           `envconfig:"DAYTONA_DAEMON_LOG_MAX_BACKUPS" default:"5"`
-	DaemonLogMaxAgeDays      int           `envconfig:"DAYTONA_DAEMON_LOG_MAX_AGE_DAYS" default:"14"`
+	DaemonLogMaxSizeMB       int           `envconfig:"DAYTONA_DAEMON_LOG_MAX_SIZE_MB" default:"100" validate:"min=1"`
+	DaemonLogMaxBackups      int           `envconfig:"DAYTONA_DAEMON_LOG_MAX_BACKUPS" default:"5" validate:"min=1"`
+	DaemonLogMaxAgeDays      int           `envconfig:"DAYTONA_DAEMON_LOG_MAX_AGE_DAYS" default:"14" validate:"min=1"`
 	DaemonLogCompress        bool          `envconfig:"DAYTONA_DAEMON_LOG_COMPRESS" default:"true"`
 	UserHomeAsWorkDir        bool          `envconfig:"DAYTONA_USER_HOME_AS_WORKDIR"`
 	SandboxId                string        `envconfig:"DAYTONA_SANDBOX_ID" validate:"required"`
