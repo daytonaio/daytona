@@ -6,7 +6,6 @@ package main
 import (
 	"context"
 	"errors"
-	"io"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -27,6 +26,7 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox"
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-isatty"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 func main() {
@@ -95,23 +95,24 @@ func run() int {
 		}
 	}
 
-	var logWriter io.Writer
 	if c.DaemonLogFilePath != "" {
-		logFile, err := os.OpenFile(c.DaemonLogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			logger.Error("Failed to open log file", "path", c.DaemonLogFilePath, "error", err)
-		} else {
-			defer logFile.Close()
-			logWriter = logFile
-
-			fileHandler := slog.NewTextHandler(logWriter, &slog.HandlerOptions{
-				Level: logLevel,
-			})
-			handler := log.NewMultiHandler([]slog.Handler{consoleHandler, fileHandler}...)
-
-			logger = slog.New(handler)
-			slog.SetDefault(logger)
+		logWriter := &lumberjack.Logger{
+			Filename:   c.DaemonLogFilePath,
+			MaxSize:    c.DaemonLogMaxSizeMB,
+			MaxAge:     c.DaemonLogMaxAgeDays,
+			MaxBackups: c.DaemonLogMaxBackups,
+			LocalTime:  true,
+			Compress:   c.DaemonLogCompress,
 		}
+		defer logWriter.Close()
+
+		fileHandler := slog.NewTextHandler(logWriter, &slog.HandlerOptions{
+			Level: logLevel,
+		})
+		handler := log.NewMultiHandler([]slog.Handler{consoleHandler, fileHandler}...)
+
+		logger = slog.New(handler)
+		slog.SetDefault(logger)
 	}
 
 	sessionService := session.NewSessionService(logger, configDir, c.TerminationGracePeriod, c.TerminationCheckInterval)
