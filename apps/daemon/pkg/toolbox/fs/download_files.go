@@ -177,7 +177,7 @@ func classifyDownloadPathError(ctx *gin.Context, path string) *common.ErrorRespo
 
 func multipartContentDisposition(formName string, path string) string {
 	return fmt.Sprintf(`form-data; name="%s"; filename="%s"; filename*=utf-8''%s`,
-		formName, toLatin1(path), encodeRFC5987(path))
+		formName, encodeRFC5987(path), encodeRFC5987(path))
 }
 
 func classifyPathStatError(path string, err error) (int, string, string) {
