@@ -1,0 +1,23 @@
+apps/runner/go.mod
+  f989598b2a4d14f5 3,9,20,49-51,55-56,87,95-96,107,124,129-130,140-141
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "82472df216e2b2095b179bff8bd8ce11362310f7",
+  "prompts": {
+    "f989598b2a4d14f5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ddd19975-2a21-47c5-806f-da399268abae",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Toma Puljak",
+      "messages": [],
+      "total_additions": 31,
+      "total_deletions": 34,
+      "accepted_lines": 31,
+      "overriden_lines": 0
+    }
+  }
+}
