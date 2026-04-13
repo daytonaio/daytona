@@ -1,0 +1,32 @@
+{
+  "name": "daytona-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/daytona-e2e",
+  "tags": [],
+  "implicitDependencies": ["api", "runner", "proxy", "dashboard"],
+  "targets": {
+    "e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "go test -tags e2e -timeout 300s -v -count=1 ./..."
+      },
+      "cache": true,
+      "inputs": [
+        "default",
+        "^goProduction",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true },
+        { "env": "DAYTONA_API_URL" },
+        { "env": "DAYTONA_API_KEY" }
+      ]
+    },
+    "e2e:cleanup": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "go test -tags e2e -run TestCleanupStaleSandboxes -v -timeout 60s ./..."
+      }
+    }
+  }
+}
