@@ -102,7 +102,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 
 ## Mount volumes
 
-Daytona provides an option to mount a volume to a sandbox. Daytona mounts volumes by listing them on sandbox creation. Once a volume is created, it can be mounted to a sandbox by specifying it in the `CreateSandboxFromSnapshotParams` object. For per-user or multi-tenant data, pass `subpath` so only the specified folder inside the volume is visible at `mount_path`.
+Daytona provides an option to mount a volume to a sandbox. Once a volume is created, it can be mounted to a sandbox by specifying it in the `CreateSandboxFromSnapshotParams` object. For per-user or multi-tenant data, pass `subpath` so only the specified folder inside the volume is visible at `mount_path`.
 
 Mount the entire volume (omit `subpath`) when every sandbox that uses that volume should see the same tree, for example shared assets or single-tenant workloads.
 
