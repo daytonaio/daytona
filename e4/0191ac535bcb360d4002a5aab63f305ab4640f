@@ -1,0 +1,27 @@
+apps/runner/pkg/docker/image_build_session.go
+  f989598b2a4d14f5 34
+libs/sdk-go/go.mod
+  f989598b2a4d14f5 9-10,23,31
+apps/runner/go.mod
+  f989598b2a4d14f5 3,9,20,49-51,55-56,87,95-96,107,124,129-130,140-141
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "e40191ac535bcb360d4002a5aab63f305ab4640f",
+  "prompts": {
+    "f989598b2a4d14f5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ddd19975-2a21-47c5-806f-da399268abae",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Toma Puljak",
+      "messages": [],
+      "total_additions": 34,
+      "total_deletions": 37,
+      "accepted_lines": 19,
+      "overriden_lines": 0
+    }
+  }
+}

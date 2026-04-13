@@ -1,0 +1,9 @@
+libs/sdk-go/go.mod
+  f989598b2a4d14f5 23,31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "50a1c55e397e699638dab43b55c30d724ac690b6",
+  "prompts": {}
+}
