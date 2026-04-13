@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh pr:*)",
+      "Bash(git fetch:*)",
+      "Bash(git cherry-pick:*)",
+      "Bash(git checkout:*)",
+      "Bash(go work:*)",
+      "Bash(git add:*)",
+      "Bash(gh api:*)",
+      "Bash(nix develop:*)",
+      "Bash(git rebase:*)",
+      "Bash(git apply:*)",
+      "Bash(git commit:*)",
+      "Bash(GIT_SEQUENCE_EDITOR=true git rebase:*)",
+      "Bash(grep -E \"\\\\.mdx?$\")"
+    ]
+  }
+}
