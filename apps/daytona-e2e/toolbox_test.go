@@ -81,6 +81,101 @@ func TestToolboxSmoke(t *testing.T) {
 		}
 	})
 
+	t.Run("CodeRun", func(t *testing.T) {
+		body, err := json.Marshal(map[string]interface{}{
+			"code":     "print(7 * 8)",
+			"language": "python",
+			"timeout":  30,
+		})
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodPost, baseURL+"/process/code-run", bytes.NewReader(body))
+		require.NoError(t, err)
+		req.Header.Set("Authorization", "Bearer "+cfg.APIKey)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := httpCli.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+
+		require.Equal(t, http.StatusOK, resp.StatusCode, "process/code-run must return 200: %s", string(respBody))
+		t.Logf("code-run response: %s", string(respBody))
+
+		var codeRunResult map[string]interface{}
+		require.NoError(t, json.Unmarshal(respBody, &codeRunResult))
+
+		exitCode, _ := codeRunResult["exitCode"].(float64)
+		assert.Equal(t, float64(0), exitCode, "exitCode must be 0")
+
+		result, _ := codeRunResult["result"].(string)
+		assert.Contains(t, result, "56", "result must contain code output")
+	})
+
+	t.Run("CodeRunWithEnvs", func(t *testing.T) {
+		body, err := json.Marshal(map[string]interface{}{
+			"code":     "import os; print(os.environ['E2E_VAR'])",
+			"language": "python",
+			"envs":     map[string]string{"E2E_VAR": "e2e-env-value"},
+			"timeout":  30,
+		})
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodPost, baseURL+"/process/code-run", bytes.NewReader(body))
+		require.NoError(t, err)
+		req.Header.Set("Authorization", "Bearer "+cfg.APIKey)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := httpCli.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+
+		require.Equal(t, http.StatusOK, resp.StatusCode, "code-run with envs must return 200: %s", string(respBody))
+
+		var codeRunResult map[string]interface{}
+		require.NoError(t, json.Unmarshal(respBody, &codeRunResult))
+
+		result, _ := codeRunResult["result"].(string)
+		assert.Contains(t, result, "e2e-env-value", "result must contain env var value")
+	})
+
+	t.Run("ExecuteCommandWithEnvs", func(t *testing.T) {
+		body, err := json.Marshal(map[string]interface{}{
+			"command": "printenv E2E_EXEC_VAR",
+			"timeout": 10,
+			"envs":    map[string]string{"E2E_EXEC_VAR": "exec-env-value"},
+		})
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodPost, baseURL+"/process/execute", bytes.NewReader(body))
+		require.NoError(t, err)
+		req.Header.Set("Authorization", "Bearer "+cfg.APIKey)
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := httpCli.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+
+		require.Equal(t, http.StatusOK, resp.StatusCode, "execute with envs must return 200: %s", string(respBody))
+
+		var execResult map[string]interface{}
+		require.NoError(t, json.Unmarshal(respBody, &execResult))
+
+		exitCode, _ := execResult["exitCode"].(float64)
+		assert.Equal(t, float64(0), exitCode, "exitCode must be 0")
+
+		result, _ := execResult["result"].(string)
+		assert.Contains(t, result, "exec-env-value", "result must contain env var value")
+	})
+
 	fileContent := fmt.Sprintf("e2e-test-content-%d", time.Now().UnixNano())
 	filePath := "/tmp/e2e-test-file.txt"
 
