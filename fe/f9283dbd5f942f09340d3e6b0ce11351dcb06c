@@ -1,0 +1,11 @@
+apps/runner/go.mod
+  f989598b2a4d14f5 3,9,20,49-51,55-56,87,95-96,107,124,129-130,140-141
+libs/sdk-go/go.mod
+  f989598b2a4d14f5 23,31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "fef9283dbd5f942f09340d3e6b0ce11351dcb06c",
+  "prompts": {}
+}
