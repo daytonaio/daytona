@@ -14524,9 +14524,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/nodemailer@npm:^6.4.17":
-  version: 6.4.19
-  resolution: "@types/nodemailer@npm:6.4.19"
+"@types/nodemailer@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "@types/nodemailer@npm:8.0.0"
   dependencies:
     "@types/node": "npm:*"
   checksum: 10c0/e5031df5d6557f4cdb9a0dbe1a96f3f54dc59c23d47477103fd42b5c9bc925ea1b4e51be560af5620b4d0c66fcfb015ce5ca8f914ed2f3a3086be6149d5932da
@@ -16900,7 +16900,7 @@ __metadata:
       optional: true
   bin:
     astro: astro.js
-  checksum: 10c0/ab5db79e202341b5232bbc66f8eefe7dd667dbe2d44f4577582485e8790e34dbd2e5475c617fe6bc055ab150353f03e56d5a9c1a2255223d16caf79391cc8c01
+  checksum: 10c0/7e27cb1a0c50d10a9945e2dc8c2223500e5e49ee8bcf7d52779bc754f4f44f70faf0ae6629487fb00819edf8c0b3183bf9e325afb66e77828f3e4da9700dcd74
   languageName: node
   linkType: hard
 
