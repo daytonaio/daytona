@@ -13,6 +13,7 @@ import {
   getRequiredOrganizationResourcePermissions,
   expectArrayMatch,
   createCoverageTracker,
+  isPublicEndpoint,
 } from '../../test/helpers/controller-metadata.helper'
 import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
 
@@ -21,6 +22,7 @@ describe('[AUTH] OrganizationInvitationController', () => {
 
   it('create', () => {
     const methodName = trackMethod('create')
+    expect(isPublicEndpoint(OrganizationInvitationController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(OrganizationInvitationController, methodName), [AuthStrategyType.JWT])
     expectArrayMatch(getAuthContextGuards(OrganizationInvitationController, methodName), [OrganizationAuthContextGuard])
     expect(getRequiredOrganizationMemberRole(OrganizationInvitationController, methodName)).toBe(
@@ -30,6 +32,7 @@ describe('[AUTH] OrganizationInvitationController', () => {
 
   it('update', () => {
     const methodName = trackMethod('update')
+    expect(isPublicEndpoint(OrganizationInvitationController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(OrganizationInvitationController, methodName), [AuthStrategyType.JWT])
     expectArrayMatch(getAuthContextGuards(OrganizationInvitationController, methodName), [OrganizationAuthContextGuard])
     expect(getRequiredOrganizationMemberRole(OrganizationInvitationController, methodName)).toBe(
@@ -39,6 +42,7 @@ describe('[AUTH] OrganizationInvitationController', () => {
 
   it('findPending', () => {
     const methodName = trackMethod('findPending')
+    expect(isPublicEndpoint(OrganizationInvitationController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(OrganizationInvitationController, methodName), [AuthStrategyType.JWT])
     expectArrayMatch(getAuthContextGuards(OrganizationInvitationController, methodName), [OrganizationAuthContextGuard])
     expect(getRequiredOrganizationMemberRole(OrganizationInvitationController, methodName)).toBeUndefined()
@@ -47,6 +51,7 @@ describe('[AUTH] OrganizationInvitationController', () => {
 
   it('cancel', () => {
     const methodName = trackMethod('cancel')
+    expect(isPublicEndpoint(OrganizationInvitationController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(OrganizationInvitationController, methodName), [AuthStrategyType.JWT])
     expectArrayMatch(getAuthContextGuards(OrganizationInvitationController, methodName), [OrganizationAuthContextGuard])
     expect(getRequiredOrganizationMemberRole(OrganizationInvitationController, methodName)).toBe(

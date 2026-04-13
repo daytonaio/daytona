@@ -13,6 +13,7 @@ import {
   getAllowedAuthStrategies,
   expectArrayMatch,
   createCoverageTracker,
+  isPublicEndpoint,
 } from '../../test/helpers/controller-metadata.helper'
 
 describe('[AUTH] SandboxTelemetryController', () => {
@@ -20,6 +21,7 @@ describe('[AUTH] SandboxTelemetryController', () => {
 
   it('getSandboxLogs', () => {
     const methodName = trackMethod('getSandboxLogs')
+    expect(isPublicEndpoint(SandboxTelemetryController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxTelemetryController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -30,6 +32,7 @@ describe('[AUTH] SandboxTelemetryController', () => {
 
   it('getSandboxTraces', () => {
     const methodName = trackMethod('getSandboxTraces')
+    expect(isPublicEndpoint(SandboxTelemetryController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxTelemetryController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -40,6 +43,7 @@ describe('[AUTH] SandboxTelemetryController', () => {
 
   it('getSandboxTraceSpans', () => {
     const methodName = trackMethod('getSandboxTraceSpans')
+    expect(isPublicEndpoint(SandboxTelemetryController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxTelemetryController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -50,6 +54,7 @@ describe('[AUTH] SandboxTelemetryController', () => {
 
   it('getSandboxMetrics', () => {
     const methodName = trackMethod('getSandboxMetrics')
+    expect(isPublicEndpoint(SandboxTelemetryController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxTelemetryController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,

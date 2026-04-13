@@ -11,6 +11,7 @@ import {
   getAllowedAuthStrategies,
   expectArrayMatch,
   createCoverageTracker,
+  isPublicEndpoint,
 } from '../../test/helpers/controller-metadata.helper'
 
 describe('[AUTH] WebhookController', () => {
@@ -18,6 +19,7 @@ describe('[AUTH] WebhookController', () => {
 
   it('getAppPortalAccess', () => {
     const methodName = trackMethod('getAppPortalAccess')
+    expect(isPublicEndpoint(WebhookController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(WebhookController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -27,6 +29,7 @@ describe('[AUTH] WebhookController', () => {
 
   it('getInitializationStatus', () => {
     const methodName = trackMethod('getInitializationStatus')
+    expect(isPublicEndpoint(WebhookController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(WebhookController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,

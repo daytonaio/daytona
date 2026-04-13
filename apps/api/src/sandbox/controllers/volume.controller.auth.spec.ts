@@ -16,6 +16,7 @@ import {
   getRequiredOrganizationResourcePermissions,
   expectArrayMatch,
   createCoverageTracker,
+  isPublicEndpoint,
 } from '../../test/helpers/controller-metadata.helper'
 
 describe('[AUTH] VolumeController', () => {
@@ -23,6 +24,7 @@ describe('[AUTH] VolumeController', () => {
 
   it('listVolumes', () => {
     const methodName = trackMethod('listVolumes')
+    expect(isPublicEndpoint(VolumeController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(VolumeController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -36,6 +38,7 @@ describe('[AUTH] VolumeController', () => {
 
   it('createVolume', () => {
     const methodName = trackMethod('createVolume')
+    expect(isPublicEndpoint(VolumeController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(VolumeController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -49,6 +52,7 @@ describe('[AUTH] VolumeController', () => {
 
   it('getVolume', () => {
     const methodName = trackMethod('getVolume')
+    expect(isPublicEndpoint(VolumeController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(VolumeController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -63,6 +67,7 @@ describe('[AUTH] VolumeController', () => {
 
   it('deleteVolume', () => {
     const methodName = trackMethod('deleteVolume')
+    expect(isPublicEndpoint(VolumeController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(VolumeController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -77,6 +82,7 @@ describe('[AUTH] VolumeController', () => {
 
   it('getVolumeByName', () => {
     const methodName = trackMethod('getVolumeByName')
+    expect(isPublicEndpoint(VolumeController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(VolumeController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,

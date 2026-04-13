@@ -16,6 +16,7 @@ import {
   getRequiredOrganizationResourcePermissions,
   expectArrayMatch,
   createCoverageTracker,
+  isPublicEndpoint,
 } from '../../test/helpers/controller-metadata.helper'
 
 describe('[AUTH] DockerRegistryController', () => {
@@ -23,6 +24,7 @@ describe('[AUTH] DockerRegistryController', () => {
 
   it('create', () => {
     const methodName = trackMethod('create')
+    expect(isPublicEndpoint(DockerRegistryController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(DockerRegistryController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -36,6 +38,7 @@ describe('[AUTH] DockerRegistryController', () => {
 
   it('findAll', () => {
     const methodName = trackMethod('findAll')
+    expect(isPublicEndpoint(DockerRegistryController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(DockerRegistryController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -47,6 +50,7 @@ describe('[AUTH] DockerRegistryController', () => {
 
   it('getTransientPushAccess', () => {
     const methodName = trackMethod('getTransientPushAccess')
+    expect(isPublicEndpoint(DockerRegistryController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(DockerRegistryController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -58,6 +62,7 @@ describe('[AUTH] DockerRegistryController', () => {
 
   it('findOne', () => {
     const methodName = trackMethod('findOne')
+    expect(isPublicEndpoint(DockerRegistryController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(DockerRegistryController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -70,6 +75,7 @@ describe('[AUTH] DockerRegistryController', () => {
 
   it('update', () => {
     const methodName = trackMethod('update')
+    expect(isPublicEndpoint(DockerRegistryController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(DockerRegistryController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -84,6 +90,7 @@ describe('[AUTH] DockerRegistryController', () => {
 
   it('remove', () => {
     const methodName = trackMethod('remove')
+    expect(isPublicEndpoint(DockerRegistryController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(DockerRegistryController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,

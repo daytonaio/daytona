@@ -20,6 +20,7 @@ import {
   getRequiredOrganizationResourcePermissions,
   expectArrayMatch,
   createCoverageTracker,
+  isPublicEndpoint,
 } from '../../test/helpers/controller-metadata.helper'
 
 describe('[AUTH] RunnerController', () => {
@@ -27,6 +28,7 @@ describe('[AUTH] RunnerController', () => {
 
   it('create', () => {
     const methodName = trackMethod('create')
+    expect(isPublicEndpoint(RunnerController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(RunnerController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -40,12 +42,14 @@ describe('[AUTH] RunnerController', () => {
 
   it('getInfoForAuthenticatedRunner', () => {
     const methodName = trackMethod('getInfoForAuthenticatedRunner')
+    expect(isPublicEndpoint(RunnerController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(RunnerController, methodName), [AuthStrategyType.API_KEY])
     expectArrayMatch(getAuthContextGuards(RunnerController, methodName), [RunnerAuthContextGuard])
   })
 
   it('getRunnerBySandboxId', () => {
     const methodName = trackMethod('getRunnerBySandboxId')
+    expect(isPublicEndpoint(RunnerController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(RunnerController, methodName), [AuthStrategyType.API_KEY])
     expectArrayMatch(getAuthContextGuards(RunnerController, methodName), [
       ProxyAuthContextGuard,
@@ -56,6 +60,7 @@ describe('[AUTH] RunnerController', () => {
 
   it('getRunnersBySnapshotRef', () => {
     const methodName = trackMethod('getRunnersBySnapshotRef')
+    expect(isPublicEndpoint(RunnerController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(RunnerController, methodName), [AuthStrategyType.API_KEY])
     expectArrayMatch(getAuthContextGuards(RunnerController, methodName), [
       ProxyAuthContextGuard,
@@ -65,6 +70,7 @@ describe('[AUTH] RunnerController', () => {
 
   it('getRunnerById', () => {
     const methodName = trackMethod('getRunnerById')
+    expect(isPublicEndpoint(RunnerController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(RunnerController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -79,6 +85,7 @@ describe('[AUTH] RunnerController', () => {
 
   it('getRunnerByIdFull', () => {
     const methodName = trackMethod('getRunnerByIdFull')
+    expect(isPublicEndpoint(RunnerController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(RunnerController, methodName), [AuthStrategyType.API_KEY])
     expectArrayMatch(getAuthContextGuards(RunnerController, methodName), [
       ProxyAuthContextGuard,
@@ -89,6 +96,7 @@ describe('[AUTH] RunnerController', () => {
 
   it('findAll', () => {
     const methodName = trackMethod('findAll')
+    expect(isPublicEndpoint(RunnerController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(RunnerController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -102,6 +110,7 @@ describe('[AUTH] RunnerController', () => {
 
   it('updateSchedulingStatus', () => {
     const methodName = trackMethod('updateSchedulingStatus')
+    expect(isPublicEndpoint(RunnerController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(RunnerController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -116,6 +125,7 @@ describe('[AUTH] RunnerController', () => {
 
   it('updateDrainingStatus', () => {
     const methodName = trackMethod('updateDrainingStatus')
+    expect(isPublicEndpoint(RunnerController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(RunnerController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -130,6 +140,7 @@ describe('[AUTH] RunnerController', () => {
 
   it('delete', () => {
     const methodName = trackMethod('delete')
+    expect(isPublicEndpoint(RunnerController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(RunnerController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -144,6 +155,7 @@ describe('[AUTH] RunnerController', () => {
 
   it('runnerHealthcheck', () => {
     const methodName = trackMethod('runnerHealthcheck')
+    expect(isPublicEndpoint(RunnerController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(RunnerController, methodName), [AuthStrategyType.API_KEY])
     expectArrayMatch(getAuthContextGuards(RunnerController, methodName), [RunnerAuthContextGuard])
   })

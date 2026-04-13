@@ -17,6 +17,7 @@ import {
   getRequiredOrganizationResourcePermissions,
   expectArrayMatch,
   createCoverageTracker,
+  isPublicEndpoint,
 } from '../../test/helpers/controller-metadata.helper'
 
 describe('[AUTH] SnapshotController', () => {
@@ -24,6 +25,7 @@ describe('[AUTH] SnapshotController', () => {
 
   it('createSnapshot', () => {
     const methodName = trackMethod('createSnapshot')
+    expect(isPublicEndpoint(SnapshotController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SnapshotController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -37,6 +39,7 @@ describe('[AUTH] SnapshotController', () => {
 
   it('getSnapshot', () => {
     const methodName = trackMethod('getSnapshot')
+    expect(isPublicEndpoint(SnapshotController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SnapshotController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -49,6 +52,7 @@ describe('[AUTH] SnapshotController', () => {
 
   it('removeSnapshot', () => {
     const methodName = trackMethod('removeSnapshot')
+    expect(isPublicEndpoint(SnapshotController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SnapshotController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -63,6 +67,7 @@ describe('[AUTH] SnapshotController', () => {
 
   it('getAllSnapshots', () => {
     const methodName = trackMethod('getAllSnapshots')
+    expect(isPublicEndpoint(SnapshotController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SnapshotController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -74,6 +79,7 @@ describe('[AUTH] SnapshotController', () => {
 
   it('getSnapshotBuildLogs', () => {
     const methodName = trackMethod('getSnapshotBuildLogs')
+    expect(isPublicEndpoint(SnapshotController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SnapshotController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -86,6 +92,7 @@ describe('[AUTH] SnapshotController', () => {
 
   it('getSnapshotBuildLogsUrl', () => {
     const methodName = trackMethod('getSnapshotBuildLogsUrl')
+    expect(isPublicEndpoint(SnapshotController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SnapshotController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -98,6 +105,7 @@ describe('[AUTH] SnapshotController', () => {
 
   it('activateSnapshot', () => {
     const methodName = trackMethod('activateSnapshot')
+    expect(isPublicEndpoint(SnapshotController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SnapshotController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -112,6 +120,7 @@ describe('[AUTH] SnapshotController', () => {
 
   it('deactivateSnapshot', () => {
     const methodName = trackMethod('deactivateSnapshot')
+    expect(isPublicEndpoint(SnapshotController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SnapshotController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,

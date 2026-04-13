@@ -11,6 +11,7 @@ import {
   getAllowedAuthStrategies,
   expectArrayMatch,
   createCoverageTracker,
+  isPublicEndpoint,
 } from '../test/helpers/controller-metadata.helper'
 
 describe('[AUTH] HealthController', () => {
@@ -18,12 +19,14 @@ describe('[AUTH] HealthController', () => {
 
   it('live', () => {
     const methodName = trackMethod('live')
+    expect(isPublicEndpoint(HealthController, methodName)).toBe(true)
     expectArrayMatch(getAllowedAuthStrategies(HealthController, methodName), [])
     expectArrayMatch(getAuthContextGuards(HealthController, methodName), [])
   })
 
   it('check', () => {
     const methodName = trackMethod('check')
+    expect(isPublicEndpoint(HealthController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(HealthController, methodName), [AuthStrategyType.API_KEY])
     expectArrayMatch(getAuthContextGuards(HealthController, methodName), [HealthCheckAuthContextGuard])
   })

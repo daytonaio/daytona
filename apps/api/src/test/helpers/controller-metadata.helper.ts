@@ -10,6 +10,7 @@ import { AuthContextGuard } from '../../common/guards/auth-context.guard'
 import { ResourceAccessGuard } from '../../common/guards/resource-access.guard'
 import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
 import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
+import { IS_PUBLIC_KEY } from '../../auth/decorators/public.decorator'
 import { RequiredSystemRole } from '../../user/decorators/required-system-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { RequiredOrganizationMemberRole } from '../../organization/decorators/required-organization-member-role.decorator'
@@ -214,27 +215,57 @@ export function getRequiredOrganizationResourcePermissions(
 }
 
 /**
+ * Returns `true` if the controller method or class is decorated with `@Public()`.
+ *
+ * Checks method-level metadata first, then falls back to class-level.
+ */
+export function isPublicEndpoint(controller: ControllerType): boolean
+export function isPublicEndpoint<T extends object>(controller: Type<T>, methodName: keyof T & string): boolean
+export function isPublicEndpoint(controller: ControllerType, methodName?: string): boolean {
+  if (methodName) {
+    assertMethodExists(controller, methodName)
+    const method = (controller.prototype as Record<string, unknown>)[methodName]
+    if (typeof method === 'function') {
+      const methodPublic = Reflect.getMetadata(IS_PUBLIC_KEY, method) as boolean | undefined
+      if (methodPublic !== undefined) return methodPublic
+    }
+  }
+
+  return (Reflect.getMetadata(IS_PUBLIC_KEY, controller) as boolean | undefined) ?? false
+}
+
+/**
  * Gets the names of the route handlers on a controller.
  */
-function getRouteHandlerNames(controller: ControllerType): string[] {
+function getRouteHandlerNames<T extends object>(controller: Type<T>): (keyof T & string)[] {
   return Object.getOwnPropertyNames(controller.prototype).filter((name) => {
     if (name === 'constructor') return false
     const method = (controller.prototype as Record<string, unknown>)[name]
     return typeof method === 'function' && Reflect.getMetadata(PATH_METADATA, method) !== undefined
-  })
+  }) as (keyof T & string)[]
 }
 
 /**
- * Registers an afterAll hook that fails if any route handler on the controller was not tested.
+ * Registers an afterAll hook that fails if any route handler on the controller was not tested or is not explicitly configured with `@AuthStrategy()` or `@Public()`.
  */
 export function createCoverageTracker<T extends object>(controller: Type<T>) {
   const tested = new Set<string>()
 
   afterAll(() => {
     const handlers = getRouteHandlerNames(controller)
+
     const untested = handlers.filter((h) => !tested.has(h))
     if (untested.length > 0) {
       throw new Error(`Untested route handlers on ${controller.name}: ${untested.join(', ')}.`)
+    }
+
+    const misconfigured = handlers.filter((h) => {
+      return getAllowedAuthStrategies(controller, h).length === 0 && !isPublicEndpoint(controller, h)
+    })
+    if (misconfigured.length > 0) {
+      throw new Error(
+        `Misconfigured route handlers on ${controller.name} have no @AuthStrategy() and no @Public(): ${misconfigured.join(', ')}.`,
+      )
     }
   })
 

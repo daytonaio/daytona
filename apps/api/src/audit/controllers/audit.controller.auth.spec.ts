@@ -14,6 +14,7 @@ import {
   getRequiredOrganizationResourcePermissions,
   expectArrayMatch,
   createCoverageTracker,
+  isPublicEndpoint,
 } from '../../test/helpers/controller-metadata.helper'
 
 describe('[AUTH] AuditController', () => {
@@ -21,6 +22,7 @@ describe('[AUTH] AuditController', () => {
 
   it('getOrganizationLogs', () => {
     const methodName = trackMethod('getOrganizationLogs')
+    expect(isPublicEndpoint(AuditController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(AuditController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,

@@ -10,6 +10,7 @@ import {
   getAllowedAuthStrategies,
   expectArrayMatch,
   createCoverageTracker,
+  isPublicEndpoint,
 } from '../test/helpers/controller-metadata.helper'
 import { UserAuthContextGuard } from './guards/user-auth-context.guard'
 
@@ -18,6 +19,7 @@ describe('[AUTH] UserController', () => {
 
   it('getAuthenticatedUser', () => {
     const methodName = trackMethod('getAuthenticatedUser')
+    expect(isPublicEndpoint(UserController, methodName)).toBe(false)
 
     expectArrayMatch(getAllowedAuthStrategies(UserController, methodName), [AuthStrategyType.JWT])
     expectArrayMatch(getAuthContextGuards(UserController, methodName), [UserAuthContextGuard])
@@ -25,24 +27,28 @@ describe('[AUTH] UserController', () => {
 
   it('getAvailableAccountProviders', () => {
     const methodName = trackMethod('getAvailableAccountProviders')
+    expect(isPublicEndpoint(UserController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(UserController, methodName), [AuthStrategyType.JWT])
     expectArrayMatch(getAuthContextGuards(UserController, methodName), [UserAuthContextGuard])
   })
 
   it('linkAccount', () => {
     const methodName = trackMethod('linkAccount')
+    expect(isPublicEndpoint(UserController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(UserController, methodName), [AuthStrategyType.JWT])
     expectArrayMatch(getAuthContextGuards(UserController, methodName), [UserAuthContextGuard])
   })
 
   it('unlinkAccount', () => {
     const methodName = trackMethod('unlinkAccount')
+    expect(isPublicEndpoint(UserController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(UserController, methodName), [AuthStrategyType.JWT])
     expectArrayMatch(getAuthContextGuards(UserController, methodName), [UserAuthContextGuard])
   })
 
   it('enrollInSmsMfa', () => {
     const methodName = trackMethod('enrollInSmsMfa')
+    expect(isPublicEndpoint(UserController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(UserController, methodName), [AuthStrategyType.JWT])
     expectArrayMatch(getAuthContextGuards(UserController, methodName), [UserAuthContextGuard])
   })
