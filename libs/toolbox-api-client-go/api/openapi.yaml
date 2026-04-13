@@ -1929,7 +1929,7 @@ paths:
   /process/session/{sessionId}/command/{commandId}/logs:
     get:
       description: "Get logs for a specific command within a session. Returns JSON\
-        \ with separated stdout/stderr for SDK >= 0.164.0, plain text otherwise. Supports\
+        \ with separated stdout/stderr for SDK >= 0.165.0, plain text otherwise. Supports\
         \ WebSocket streaming."
       operationId: GetSessionCommandLogs
       parameters:

@@ -14,7 +14,7 @@ import (
 // GetSessionCommandLogs godoc
 //
 //	@Summary		Get session command logs
-//	@Description	Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.164.0, plain text otherwise. Supports WebSocket streaming.
+//	@Description	Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.165.0, plain text otherwise. Supports WebSocket streaming.
 //	@Tags			process
 //	@Produce		json
 //	@Produce		text/plain

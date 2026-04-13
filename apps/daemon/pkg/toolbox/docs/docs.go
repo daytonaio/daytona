@@ -2782,7 +2782,7 @@ const docTemplate = `{
         },
         "/process/session/{sessionId}/command/{commandId}/logs": {
             "get": {
-                "description": "Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK \u003e= 0.164.0, plain text otherwise. Supports WebSocket streaming.",
+                "description": "Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK \u003e= 0.165.0, plain text otherwise. Supports WebSocket streaming.",
                 "produces": [
                     "application/json",
                     "text/plain"

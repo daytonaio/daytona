@@ -3229,7 +3229,7 @@ class ProcessApi:
     ) -> SessionCommandLogsResponse:
         """Get session command logs
 
-        Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.164.0, plain text otherwise. Supports WebSocket streaming.
+        Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.165.0, plain text otherwise. Supports WebSocket streaming.
 
         :param session_id: Session ID (required)
         :type session_id: str
@@ -3304,7 +3304,7 @@ class ProcessApi:
     ) -> ApiResponse[SessionCommandLogsResponse]:
         """Get session command logs
 
-        Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.164.0, plain text otherwise. Supports WebSocket streaming.
+        Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.165.0, plain text otherwise. Supports WebSocket streaming.
 
         :param session_id: Session ID (required)
         :type session_id: str
@@ -3379,7 +3379,7 @@ class ProcessApi:
     ) -> RESTResponseType:
         """Get session command logs
 
-        Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.164.0, plain text otherwise. Supports WebSocket streaming.
+        Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK >= 0.165.0, plain text otherwise. Supports WebSocket streaming.
 
         :param session_id: Session ID (required)
         :type session_id: str
