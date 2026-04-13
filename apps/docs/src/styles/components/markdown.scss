@@ -1,5 +1,5 @@
 .markdown-content {
-  > :not(h1, h2, h3, h4, h5, h6, p, aside) {
+  > :not(h1, h2, h3, h4, h5, h6, p, aside, .sl-heading-wrapper) {
     margin-bottom: 60px;
     @include for-mobile-screen-sizes {
       margin-bottom: 40px;
