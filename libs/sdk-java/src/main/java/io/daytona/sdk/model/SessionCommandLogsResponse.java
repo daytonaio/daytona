@@ -1,3 +1,6 @@
+// Copyright Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
 package io.daytona.sdk.model;
 
 public class SessionCommandLogsResponse extends io.daytona.toolbox.client.model.SessionCommandLogsResponse {
