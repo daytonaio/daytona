@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Sandbox } from '@daytonaio/sdk'
+import { Sandbox } from '@daytona/sdk'
 
 const PORT = 4096
 const HOSTNAME = '0.0.0.0'
@@ -16,7 +16,6 @@ function injectEnvVar(name: string, content: string): string {
 }
 
 export class Server {
-
   // Start an OpenCode server in the sandbox with Daytona-aware agent config
   static async start(sandbox: Sandbox): Promise<{ baseUrl: string; ready: Promise<void> }> {
     const previewLink = await sandbox.getPreviewLink(PORT)
@@ -41,7 +40,9 @@ export class Server {
       },
     })
     let resolveReady: () => void
-    const ready = new Promise<void>((r) => { resolveReady = r })
+    const ready = new Promise<void>((r) => {
+      resolveReady = r
+    })
     const sessionId = `opencode-serve-${Date.now()}`
     await sandbox.process.createSession(sessionId)
     const envVar = injectEnvVar('OPENCODE_CONFIG_CONTENT', opencodeConfig)
@@ -55,8 +56,12 @@ export class Server {
     sandbox.process.getSessionCommandLogs(
       sessionId,
       command.cmdId,
-      (stdout: string) => { if (stdout.includes(SERVER_READY_LINE)) resolveReady() },
-      () => {},
+      (stdout: string) => {
+        if (stdout.includes(SERVER_READY_LINE)) resolveReady()
+      },
+      () => {
+        return
+      },
     )
     return { baseUrl, ready }
   }

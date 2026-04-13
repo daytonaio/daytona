@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Daytona, Sandbox } from '@daytonaio/sdk'
+import { Daytona, Sandbox } from '@daytona/sdk'
 import { AgentResult, NetworkRun } from '@inngest/agent-kit'
 import type { TextMessage } from '@inngest/agent-kit'
 

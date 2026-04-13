@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Daytona, Sandbox } from '@daytonaio/sdk'
-import { FileUpload } from '@daytonaio/sdk/src/FileSystem'
+import { Daytona, Sandbox } from '@daytona/sdk'
+import { FileUpload } from '@daytona/sdk/src/FileSystem'
 
 let daytonaInstance: Daytona | null = null
 

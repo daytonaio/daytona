@@ -18,7 +18,7 @@
     "node": ">=22.13.0"
   },
   "dependencies": {
-    "@daytonaio/sdk": "^0.159.0",
+    "@daytona/sdk": "^0.163.0",
     "@mastra/core": "^1.21.0",
     "@mastra/fastembed": "^1.0.1",
     "@mastra/libsql": "^1.7.3",

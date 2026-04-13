@@ -18,7 +18,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@daytonaio/sdk": "^0.125.0",
+    "@daytona/sdk": "^0.163.0",
     "@opencode-ai/sdk": "^1.0.0",
     "dotenv": "^16.3.1"
   },

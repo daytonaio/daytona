@@ -9,7 +9,7 @@
     "serve": "tsx src/index.ts"
   },
   "dependencies": {
-    "@daytonaio/sdk": "^0.139.0",
+    "@daytona/sdk": "^0.163.0",
     "dotenv": "^16.4.5"
   },
   "devDependencies": {

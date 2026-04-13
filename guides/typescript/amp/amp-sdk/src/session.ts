@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Sandbox, PtyHandle } from '@daytonaio/sdk'
+import { Sandbox, PtyHandle } from '@daytona/sdk'
 import { AmpMessage, AssistantMessage, ResultMessage, UserMessage } from './types.js'
 import { renderMarkdown } from './utils.js'
 

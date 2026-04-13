@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Daytona, CodeLanguage, Sandbox } from '@daytonaio/sdk'
+import { Daytona, CodeLanguage, Sandbox } from '@daytona/sdk'
 import OpenAI from 'openai'
 import * as fs from 'fs'
 
-const CODING_MODEL = "gpt-5.1"
-const SUMMARY_MODEL = "gpt-4o"
+const CODING_MODEL = 'gpt-5.1'
+const SUMMARY_MODEL = 'gpt-4o'
 
 // Helper function to extract Python code from a given string
 function extractPython(text: string): string {
@@ -25,7 +25,7 @@ async function run() {
 
   try {
     sb = await dt.create({ language: CodeLanguage.PYTHON })
-  
+
     // Upload the CSV file to the sandbox
     const csvPath = 'cafe_sales_data.csv'
     const sandboxCsvPath = csvPath
@@ -33,7 +33,7 @@ async function run() {
 
     // Define the user prompt
     const userPrompt = `Give the three highest revenue products for the month of January and show them as a bar chart.`
-    console.log("Prompt:", userPrompt)
+    console.log('Prompt:', userPrompt)
 
     // Generate the system prompt with the first few rows of data for context
     const csvSample = fs.readFileSync(csvPath, 'utf8').split('\n').slice(0, 3).join('\n')
@@ -49,7 +49,7 @@ ${csvSample}
 After seeing the results of the code, answer the user's query.`
 
     // Generate the Python code with the LLM
-    console.log("Generating code...")
+    console.log('Generating code...')
     const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
@@ -61,7 +61,7 @@ After seeing the results of the code, answer the user's query.`
     messages.push(llmOutput.choices[0].message)
 
     // Extract and execute Python code from the LLM's response
-    console.log("Running code...")
+    console.log('Running code...')
     const code = extractPython(llmOutput.choices[0].message.content || '')
     const exec = await sb.process.codeRun(code)
     messages.push({ role: 'user', content: `Code execution result:\n${exec.result}.` })

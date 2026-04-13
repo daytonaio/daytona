@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Daytona, Sandbox } from '@daytonaio/sdk'
+import { Daytona, Sandbox } from '@daytona/sdk'
 import * as dotenv from 'dotenv'
 import * as readline from 'readline'
 import { Session } from './session.js'
@@ -21,7 +21,7 @@ async function main(): Promise<void> {
 
   const daytona = new Daytona({ apiKey })
   let sandbox: Sandbox | undefined
-  
+
   // Delete sandbox and exit on Ctrl+C or error.
   const cleanup = async () => {
     try {
