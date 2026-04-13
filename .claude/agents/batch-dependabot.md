@@ -35,12 +35,12 @@ For each PR, in order from oldest to newest:
 
 **yarn.lock conflicts:**
 
-- Run `git checkout --ours yarn.lock && yarn install`, then `git add package.json yarn.lock && git cherry-pick --continue --no-edit`
+- Run `git checkout --ours yarn.lock && nix develop .#node --command yarn install`, then `git add package.json yarn.lock && git cherry-pick --continue --no-edit`
 - This regenerates yarn.lock cleanly from the current dependency state
 
 **go.mod / go.sum conflicts:**
 
-- Run `git checkout --theirs <conflicting files> && go work sync`
+- Run `git checkout --theirs <conflicting files> && nix develop .#go --command go work sync`
 - Then `git add -A && git cherry-pick --continue --no-edit`
 - IMPORTANT: This approach can revert version bumps from earlier cherry-picks. You MUST run the post-cherry-pick validation (Step 3) to catch and fix these regressions.
 
@@ -72,7 +72,7 @@ grep -r 'api-client-go v' --include='go.mod' .
 grep -r 'toolbox-api-client-go v' --include='go.mod' .
 ```
 
-Compare each version against what's on the `main` branch. If any module shows a LOWER version than main, fix it by editing the go.mod file and running `go work sync`.
+Compare each version against what's on the `main` branch. If any module shows a LOWER version than main, fix it by editing the go.mod file and running `nix develop .#go --command go work sync`.
 
 Pay special attention to these internal dependencies:
 
@@ -90,7 +90,7 @@ If any dependency had a MAJOR version bump (e.g., buildkit 0.22 -> 0.28, nodemai
 ### 3c. Run go work sync
 
 ```bash
-go work sync
+nix develop .#go --command go work sync
 ```
 
 This ensures all indirect dependencies are consistent across the monorepo.
@@ -98,7 +98,7 @@ This ensures all indirect dependencies are consistent across the monorepo.
 ### 3d. Regenerate lock files if needed
 
 - If any Python deps changed: `nix develop .#python --command poetry lock`
-- If any Node deps changed and yarn.lock looks stale: `yarn install`
+- If any Node deps changed and yarn.lock looks stale: `nix develop .#node --command yarn install`
 
 ### 3e. Verify builds
 
@@ -107,7 +107,7 @@ This ensures all indirect dependencies are consistent across the monorepo.
 nix develop .#go --command bash -c "CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./apps/runner/..."
 
 # Node apps
-yarn install
+nix develop .#node --command yarn install
 ```
 
 ### 3f. Commit all fixes
