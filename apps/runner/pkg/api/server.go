@@ -20,7 +20,10 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
-	"time"
+	"sync"
+	"syscall"
+
+	"golang.org/x/sys/unix"
 
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/internal"
@@ -72,6 +75,8 @@ type ApiServer struct {
 	tlsKeyFile  string
 	enableTLS   bool
 	httpServer  *http.Server
+	listener    net.Listener
+	mu          sync.Mutex
 	router      *gin.Engine
 	logRequests bool
 }
@@ -81,11 +86,6 @@ func (a *ApiServer) Start(ctx context.Context) error {
 	docs.SwaggerInfo.Title = "Daytona Runner API"
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Version = internal.Version
-
-	_, err := net.Dial("tcp", fmt.Sprintf(":%d", a.apiPort))
-	if err == nil {
-		return fmt.Errorf("cannot start API server, port %d is already in use", a.apiPort)
-	}
 
 	binding.Validator = new(DefaultValidator)
 
@@ -164,7 +164,20 @@ func (a *ApiServer) Start(ctx context.Context) error {
 		Handler: a.router,
 	}
 
-	listener, err := net.Listen("tcp", a.httpServer.Addr)
+	lc := net.ListenConfig{
+		Control: func(network, address string, c syscall.RawConn) error {
+			var setsockoptErr error
+			err := c.Control(func(fd uintptr) {
+				setsockoptErr = unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEPORT, 1)
+			})
+			if err != nil {
+				return err
+			}
+			return setsockoptErr
+		},
+	}
+	var err error
+	a.listener, err = lc.Listen(ctx, "tcp", a.httpServer.Addr)
 	if err != nil {
 		return err
 	}
@@ -173,19 +186,34 @@ func (a *ApiServer) Start(ctx context.Context) error {
 	go func() {
 		if a.enableTLS {
 			// Start HTTPS server
-			errChan <- a.httpServer.ServeTLS(listener, a.tlsCertFile, a.tlsKeyFile)
+			errChan <- a.httpServer.ServeTLS(a.listener, a.tlsCertFile, a.tlsKeyFile)
 		} else {
 			// Start HTTP server
-			errChan <- a.httpServer.Serve(listener)
+			errChan <- a.httpServer.Serve(a.listener)
 		}
 	}()
 
 	return <-errChan
 }
 
+// Stop closes the listener to release the port immediately, allowing a new
+// runner instance to bind during zero-downtime deploy. In-flight requests
+// continue to be served until Shutdown is called.
 func (a *ApiServer) Stop() {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if a.listener != nil {
+		a.listener.Close()
+		a.listener = nil
+	}
+}
+
+// Shutdown gracefully drains in-flight HTTP requests. The provided context
+// controls how long to wait before forcefully closing connections.
+func (a *ApiServer) Shutdown(ctx context.Context) {
+	if a.httpServer == nil {
+		return
+	}
 	if err := a.httpServer.Shutdown(ctx); err != nil {
 		a.logger.Error("Failed to shutdown API server", "error", err)
 	}
