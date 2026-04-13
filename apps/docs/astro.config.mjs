@@ -27,6 +27,7 @@ export default defineConfig({
     react(),
     starlight({
       title: 'Daytona',
+      favicon: '/favicon.ico',
       social: [
         {
           icon: 'github',
