@@ -487,18 +487,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/download?path='
 
 In the Python and TypeScript SDKs, `download_file` and `downloadFile` raise typed Daytona exceptions when the daemon returns structured per-file error metadata. Missing files map to not-found errors, invalid paths such as directories map to validation errors, and permission failures map to authorization errors.
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
-
-> [**download_file (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemdownload_file)
->
-> [**downloadFile (TypeScript SDK)**](/docs/en/typescript-sdk/file-system/#downloadfile)
->
-> [**download_file (Ruby SDK)**](/docs/en/ruby-sdk/file-system/#download_file)
->
-> [**DownloadFile (Go SDK)**](/docs/en/go-sdk/daytona/#FileSystemService.DownloadFile)
->
-> [**download file (API)**](/docs/en/tools/api#daytona-toolbox/tag/file-system/GET/files/download)
-
 #### Download multiple files
 
 Daytona provides methods to download multiple files from sandboxes by providing the paths to the files to download.
@@ -624,16 +612,6 @@ Bulk downloads keep the existing `error` string for compatibility and now also i
 - TypeScript: `result.errorDetails.message`, `result.errorDetails.statusCode`, `result.errorDetails.errorCode`
 
 The toolbox bulk-download API returns successful files as multipart `file` parts and per-file failures as multipart `error` parts with JSON payloads containing `message`, `statusCode`, and `code`.
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
-
-> [**download_files (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemdownload_files)
->
-> [**downloadFiles (TypeScript SDK)**](/docs/en/typescript-sdk/file-system/#downloadfiles)
->
-> [**download_file (Ruby SDK)**](/docs/en/ruby-sdk/file-system/#download_file)
->
-> [**download multiple files (API)**](/docs/en/tools/api#daytona-toolbox/tag/file-system/POST/files/bulk-download)
 
 ### Delete files
 
