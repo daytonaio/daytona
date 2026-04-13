@@ -23,6 +23,7 @@ import { join } from 'node:path'
 import { ApiKeyService } from './api-key/api-key.service'
 import { DAYTONA_ADMIN_USER_ID } from './app.service'
 import { OrganizationService } from './organization/services/organization.service'
+import { OrganizationResourcePermission } from './organization/enums/organization-resource-permission.enum'
 import { MicroserviceOptions, Transport } from '@nestjs/microservices'
 import { Partitioners } from 'kafkajs'
 import { isApiEnabled, isWorkerEnabled } from './common/utils/app-mode'
@@ -189,7 +190,12 @@ async function createAdminApiKey(app: INestApplication, apiKeyName: string) {
   const organizationService = app.get(OrganizationService)
 
   const personalOrg = await organizationService.findPersonal(DAYTONA_ADMIN_USER_ID)
-  const { value } = await apiKeyService.createApiKey(personalOrg.id, DAYTONA_ADMIN_USER_ID, apiKeyName, [])
+  const { value } = await apiKeyService.createApiKey(
+    personalOrg.id,
+    DAYTONA_ADMIN_USER_ID,
+    apiKeyName,
+    Object.values(OrganizationResourcePermission),
+  )
   Logger.log(
     `
 =========================================

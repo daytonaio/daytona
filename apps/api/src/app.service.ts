@@ -19,6 +19,7 @@ import { RunnerService } from './sandbox/services/runner.service'
 import { RunnerAdapterFactory } from './sandbox/runner-adapter/runnerAdapter'
 import { RegionType } from './region/enums/region-type.enum'
 import { RunnerState } from './sandbox/enums/runner-state.enum'
+import { OrganizationResourcePermission } from './organization/enums/organization-resource-permission.enum'
 
 export const DAYTONA_ADMIN_USER_ID = 'daytona-admin'
 
@@ -192,7 +193,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
       personalOrg.id,
       user.id,
       DAYTONA_ADMIN_USER_ID,
-      [],
+      Object.values(OrganizationResourcePermission),
       undefined,
       this.configService.getOrThrow('admin.apiKey'),
     )
