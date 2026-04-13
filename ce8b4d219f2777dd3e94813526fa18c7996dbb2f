@@ -1,0 +1,23 @@
+apps/runner/pkg/docker/image_build_session.go
+  f989598b2a4d14f5 34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "ce8b4d219f2777dd3e94813526fa18c7996dbb2f",
+  "prompts": {
+    "f989598b2a4d14f5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ddd19975-2a21-47c5-806f-da399268abae",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Toma Puljak",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
