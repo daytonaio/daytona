@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@astrojs/mdx": "2.2.4",
-    "@astrojs/node": "9.5.4",
+    "@astrojs/node": "10.0.0",
     "@astrojs/react": "^3.1.1",
     "@astrojs/starlight": "0.30.0",
     "@astrojs/starlight-tailwind": "^2.0.1",

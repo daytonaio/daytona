@@ -323,6 +323,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@astrojs/internal-helpers@npm:0.8.0":
+  version: 0.8.0
+  resolution: "@astrojs/internal-helpers@npm:0.8.0"
+  dependencies:
+    picomatch: "npm:^4.0.3"
+  checksum: 10c0/1befdd71b295e028d0a940cc7d72bb75d574c7543497836fb4daaa6332fb6187cb99196d49be5ca605cc75cb9f8b87c8eeb08543ca99b0aead8295fbf3aa1245
+  languageName: node
+  linkType: hard
+
 "@astrojs/markdown-remark@npm:5.0.0":
   version: 5.0.0
   resolution: "@astrojs/markdown-remark@npm:5.0.0"
@@ -455,16 +464,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@astrojs/node@npm:9.5.4":
-  version: 9.5.4
-  resolution: "@astrojs/node@npm:9.5.4"
+"@astrojs/node@npm:10.0.0":
+  version: 10.0.0
+  resolution: "@astrojs/node@npm:10.0.0"
   dependencies:
-    "@astrojs/internal-helpers": "npm:0.7.5"
+    "@astrojs/internal-helpers": "npm:0.8.0"
     send: "npm:^1.2.1"
     server-destroy: "npm:^1.0.1"
   peerDependencies:
-    astro: ^5.17.3
-  checksum: 10c0/90491c18fd0658c2f7e3104b2750244d1fe879a85d32f60a7b1b7bf6d4301e79bd657c17ec8b946c7e351648c514332cb75062b876575bc4de07255c47a327ac
+    astro: ^6.0.0-alpha.0
+  checksum: 10c0/9934f6d65a4253c3404e909e52d9099367750e08af34382f1e0a5f9a2f3b6c0bd0566097565011d68b34db47bb50a1a7a6297c0eb29bb6908e165bb823272d04
   languageName: node
   linkType: hard
 
@@ -19685,7 +19694,7 @@ __metadata:
   resolution: "daytona@workspace:."
   dependencies:
     "@astrojs/mdx": "npm:2.2.4"
-    "@astrojs/node": "npm:9.5.4"
+    "@astrojs/node": "npm:10.0.0"
     "@astrojs/react": "npm:^3.1.1"
     "@astrojs/starlight": "npm:0.30.0"
     "@astrojs/starlight-tailwind": "npm:^2.0.1"
