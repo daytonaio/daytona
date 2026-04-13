@@ -3,7 +3,7 @@
 # Builds the PR code, starts infrastructure + services locally, and runs E2E tests.
 # Gated by the 'run-e2e' label — maintainers add the label to approve the run.
 #
-# Infrastructure: postgres, redis, dex (via Docker Compose)
+# Infrastructure: postgres, redis, dex, registry, minio (via Docker Compose)
 # Services: API, runner, proxy, dashboard (started individually via nx serve)
 #
 # Uses `nx affected` to detect whether the E2E project or any of its implicit

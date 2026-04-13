@@ -14,7 +14,7 @@ services:
       retries: 15
 
   redis:
-    image: redis:latest
+    image: redis:8.6
     ports:
       - '6379:6379'
     healthcheck:
@@ -32,7 +32,7 @@ services:
     command: ['dex', 'serve', '/etc/dex/config.yaml']
 
   minio:
-    image: minio/minio:latest
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     ports:
       - '9000:9000'
     environment:
