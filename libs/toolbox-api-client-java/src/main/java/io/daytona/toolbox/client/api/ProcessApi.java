@@ -2263,4 +2263,136 @@ public class ProcessApi {
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }
+    /**
+     * Build call for terminateSessionCommand
+     * @param sessionId Session ID (required)
+     * @param commandId Command ID (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call terminateSessionCommandCall(String sessionId, String commandId, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/process/session/{sessionId}/command/{commandId}/terminate"
+            .replace("{" + "sessionId" + "}", localVarApiClient.escapeString(sessionId.toString()))
+            .replace("{" + "commandId" + "}", localVarApiClient.escapeString(commandId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call terminateSessionCommandValidateBeforeCall(String sessionId, String commandId, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'sessionId' is set
+        if (sessionId == null) {
+            throw new ApiException("Missing the required parameter 'sessionId' when calling terminateSessionCommand(Async)");
+        }
+
+        // verify the required parameter 'commandId' is set
+        if (commandId == null) {
+            throw new ApiException("Missing the required parameter 'commandId' when calling terminateSessionCommand(Async)");
+        }
+
+        return terminateSessionCommandCall(sessionId, commandId, _callback);
+
+    }
+
+    /**
+     * Terminate a session command
+     * Terminate a running command in a session. The daemon handles platform-specific termination.
+     * @param sessionId Session ID (required)
+     * @param commandId Command ID (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
+     </table>
+     */
+    public void terminateSessionCommand(String sessionId, String commandId) throws ApiException {
+        terminateSessionCommandWithHttpInfo(sessionId, commandId);
+    }
+
+    /**
+     * Terminate a session command
+     * Terminate a running command in a session. The daemon handles platform-specific termination.
+     * @param sessionId Session ID (required)
+     * @param commandId Command ID (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> terminateSessionCommandWithHttpInfo(String sessionId, String commandId) throws ApiException {
+        okhttp3.Call localVarCall = terminateSessionCommandValidateBeforeCall(sessionId, commandId, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Terminate a session command (asynchronously)
+     * Terminate a running command in a session. The daemon handles platform-specific termination.
+     * @param sessionId Session ID (required)
+     * @param commandId Command ID (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call terminateSessionCommandAsync(String sessionId, String commandId, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = terminateSessionCommandValidateBeforeCall(sessionId, commandId, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
 }

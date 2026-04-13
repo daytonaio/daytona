@@ -140,6 +140,7 @@ func run() int {
 		// Execute command asynchronously via session
 		command := util.ShellQuoteJoin(args)
 		_, err := sessionService.Execute(
+			context.Background(),
 			util.EntrypointSessionID,
 			util.EntrypointCommandID,
 			command,

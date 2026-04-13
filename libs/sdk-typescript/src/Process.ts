@@ -74,6 +74,7 @@ export class Process {
    * @param {string} [cwd] - Working directory for command execution. If not specified, uses the sandbox working directory.
    * @param {Record<string, string>} [env] - Environment variables to set for the command
    * @param {number} [timeout] - Maximum time in seconds to wait for the command to complete.
+   * @param {AbortSignal} [signal] - AbortSignal to cancel the command. When aborted, the server kills the running process.
    * @returns {Promise<ExecuteResponse>} Command execution results containing:
    *                                    - exitCode: The command's exit status
    *                                    - result: Standard output from the command
@@ -90,7 +91,13 @@ export class Process {
    *
    * @example
    * // Command with timeout
-   * const result = await process.executeCommand('sleep 10', undefined, 5);
+   * const result = await process.executeCommand('sleep 10', undefined, undefined, 5);
+   *
+   * @example
+   * // Command with AbortSignal
+   * const controller = new AbortController();
+   * setTimeout(() => controller.abort(), 5000);
+   * const result = await process.executeCommand('sleep 60', undefined, undefined, undefined, controller.signal);
    */
   @WithInstrumentation()
   public async executeCommand(
@@ -98,6 +105,7 @@ export class Process {
     cwd?: string,
     env?: Record<string, string>,
     timeout?: number,
+    signal?: AbortSignal,
   ): Promise<ExecuteResponse> {
     if (env && Object.keys(env).length) {
       const validKeyPattern = /^[A-Za-z_][A-Za-z0-9_]*$/
@@ -116,11 +124,14 @@ export class Process {
       command = `${safeEnvExports}${command}`
     }
 
-    const response = await this.apiClient.executeCommand({
-      command,
-      timeout,
-      cwd: cwd,
-    })
+    const response = await this.apiClient.executeCommand(
+      {
+        command,
+        timeout,
+        cwd: cwd,
+      },
+      signal ? { signal } : undefined,
+    )
 
     // Parse artifacts from the output
     const artifacts = ArtifactParser.parseArtifacts(response.data.result)
@@ -192,9 +203,14 @@ export class Process {
    * }
    */
   @WithInstrumentation()
-  public async codeRun(code: string, params?: CodeRunParams, timeout?: number): Promise<ExecuteResponse> {
+  public async codeRun(
+    code: string,
+    params?: CodeRunParams,
+    timeout?: number,
+    signal?: AbortSignal,
+  ): Promise<ExecuteResponse> {
     const runCommand = this.codeToolbox.getRunCommand(code, params)
-    return this.executeCommand(runCommand, undefined, params?.env, timeout)
+    return this.executeCommand(runCommand, undefined, params?.env, timeout, signal)
   }
 
   /**
@@ -318,11 +334,19 @@ export class Process {
     sessionId: string,
     req: SessionExecuteRequest,
     timeout?: number,
+    signal?: AbortSignal,
   ): Promise<SessionExecuteResponse> {
+    const options: Record<string, unknown> = {}
+    if (timeout) {
+      options.timeout = timeout * 1000
+    }
+    if (signal) {
+      options.signal = signal
+    }
     const response = await this.apiClient.sessionExecuteCommand(
       sessionId,
       req,
-      timeout ? { timeout: timeout * 1000 } : {},
+      Object.keys(options).length ? options : {},
     )
 
     // Demux the output if it exists
@@ -481,6 +505,18 @@ export class Process {
    */
   public async sendSessionCommandInput(sessionId: string, commandId: string, data: string): Promise<void> {
     await this.apiClient.sendInput(sessionId, commandId, { data })
+  }
+
+  /**
+   * Terminates a running command in a session.
+   *
+   * @param {string} sessionId - Unique identifier of the session
+   * @param {string} commandId - Unique identifier of the command
+   * @returns {Promise<void>}
+   */
+  @WithInstrumentation()
+  public async terminateSessionCommand(sessionId: string, commandId: string): Promise<void> {
+    await this.apiClient.terminateSessionCommand(sessionId, commandId)
   }
 
   /**

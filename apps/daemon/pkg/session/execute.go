@@ -5,6 +5,7 @@ package session
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -20,7 +21,7 @@ import (
 	"github.com/daytonaio/common-go/pkg/log"
 )
 
-func (s *SessionService) Execute(sessionId, cmdId, cmd string, async, isCombinedOutput, suppressInputEcho bool) (*SessionExecute, error) {
+func (s *SessionService) Execute(ctx context.Context, sessionId, cmdId, cmd string, async, isCombinedOutput, suppressInputEcho bool) (*SessionExecute, error) {
 	session, ok := s.sessions.Get(sessionId)
 	if !ok {
 		return nil, common_errors.NewNotFoundError(errors.New("session not found"))
@@ -89,6 +90,15 @@ func (s *SessionService) Execute(sessionId, cmdId, cmd string, async, isCombined
 
 	for {
 		select {
+		case <-ctx.Done():
+			command, ok := session.commands.Get(cmdId)
+			if ok {
+				if err := s.killCommand(session, command); err != nil {
+					s.logger.Debug("failed to kill command on client disconnect", "commandId", cmdId, "error", err)
+				}
+				command.ExitCode = util.Pointer(1)
+			}
+			return nil, common_errors.NewBadRequestError(errors.New("client disconnected"))
 		case <-session.ctx.Done():
 			command, ok := session.commands.Get(cmdId)
 			if !ok {
@@ -161,7 +171,7 @@ var cmdWrapperFormat string = `
 	
 	rm -f "$sp" "$ep" "$ip" && mkfifo "$sp" "$ep" "$ip" || exit 1
 
-	cleanup() { rm -f "$sp" "$ep" "$ip"; }
+	cleanup() { rm -f "$sp" "$ep" "$ip" "$dir/cmd.pid"; }
 	trap 'cleanup' EXIT HUP INT TERM
 
   # prefix each stream and append to shared log
@@ -172,8 +182,12 @@ var cmdWrapperFormat string = `
 	%s
 	ip_pid=$!
 
-	# Run your command from file (avoids heredoc parsing issues with pipe-fed shells)
-	{ . %q; } < "$ip" > "$sp" 2> "$ep"
+	# Run command as process group leader (setsid) so termination
+	# kills all descendants atomically via kill(-pgid, sig).
+	setsid sh -c '. "$1" < "$2" > "$3" 2> "$4"' _ %q "$ip" "$sp" "$ep" &
+	_cmd_pid=$!
+	echo "$_cmd_pid" > "$dir/cmd.pid"
+	wait "$_cmd_pid"
 	_ec=$?
 
 	# Stop the stdin holder so it doesn't outlive the command

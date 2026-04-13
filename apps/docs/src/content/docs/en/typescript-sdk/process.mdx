@@ -64,7 +64,8 @@ new Process(
 codeRun(
    code: string, 
    params?: CodeRunParams, 
-timeout?: number): Promise<ExecuteResponse>
+   timeout?: number, 
+signal?: AbortSignal): Promise<ExecuteResponse>
 ```
 
 Executes code in the Sandbox using the appropriate language runtime.
@@ -74,6 +75,7 @@ Executes code in the Sandbox using the appropriate language runtime.
 - `code` _string_ - Code to execute
 - `params?` _CodeRunParams_ - Parameters for code execution
 - `timeout?` _number_ - Maximum time in seconds to wait for execution to complete
+- `signal?` _AbortSignal_
 
 
 **Returns**:
@@ -309,7 +311,8 @@ executeCommand(
    command: string, 
    cwd?: string, 
    env?: Record<string, string>, 
-timeout?: number): Promise<ExecuteResponse>
+   timeout?: number, 
+signal?: AbortSignal): Promise<ExecuteResponse>
 ```
 
 Executes a shell command in the Sandbox.
@@ -320,6 +323,7 @@ Executes a shell command in the Sandbox.
 - `cwd?` _string_ - Working directory for command execution. If not specified, uses the sandbox working directory.
 - `env?` _Record\<string, string\>_ - Environment variables to set for the command
 - `timeout?` _number_ - Maximum time in seconds to wait for the command to complete.
+- `signal?` _AbortSignal_ - AbortSignal to cancel the command. When aborted, the server kills the running process.
 
 
 **Returns**:
@@ -344,7 +348,14 @@ const result = await process.executeCommand('ls', 'workspace/src');
 
 ```ts
 // Command with timeout
-const result = await process.executeCommand('sleep 10', undefined, 5);
+const result = await process.executeCommand('sleep 10', undefined, undefined, 5);
+```
+
+```ts
+// Command with AbortSignal
+const controller = new AbortController();
+setTimeout(() => controller.abort(), 5000);
+const result = await process.executeCommand('sleep 60', undefined, undefined, undefined, controller.signal);
 ```
 
 ***
@@ -355,7 +366,8 @@ const result = await process.executeCommand('sleep 10', undefined, 5);
 executeSessionCommand(
    sessionId: string, 
    req: SessionExecuteRequest, 
-timeout?: number): Promise<SessionExecuteResponse>
+   timeout?: number, 
+signal?: AbortSignal): Promise<SessionExecuteResponse>
 ```
 
 Executes a command in an existing session.
@@ -368,6 +380,7 @@ Executes a command in an existing session.
     - runAsync: Whether to execute asynchronously
     - suppressInputEcho: Whether to suppress input echo. Default is `false`.
 - `timeout?` _number_ - Timeout in seconds
+- `signal?` _AbortSignal_
 
 
 **Returns**:
@@ -809,6 +822,26 @@ Sends input data to a command executed in a session.
 - `sessionId` _string_ - Unique identifier of the session
 - `commandId` _string_ - Unique identifier of the command
 - `data` _string_ - Input data to send
+
+
+**Returns**:
+
+- `Promise<void>`
+
+***
+
+#### terminateSessionCommand()
+
+```ts
+terminateSessionCommand(sessionId: string, commandId: string): Promise<void>
+```
+
+Terminates a running command in a session.
+
+**Parameters**:
+
+- `sessionId` _string_ - Unique identifier of the session
+- `commandId` _string_ - Unique identifier of the command
 
 
 **Returns**:

@@ -80,6 +80,7 @@ func TestExecuteSyncCommandGetsEOFOnStdin(t *testing.T) {
 
 	go func() {
 		result, err := svc.Execute(
+			context.Background(),
 			sessionID,
 			"",
 			`if IFS= read -r line; then printf 'line:%s\n' "$line"; else printf 'eof\n'; fi`,
@@ -125,6 +126,7 @@ func TestExecuteSyncHeredoc(t *testing.T) {
 
 	go func() {
 		result, err := svc.Execute(
+			context.Background(),
 			sessionID,
 			"",
 			"cat <<'__EOF__'\nhello from heredoc\n__EOF__",
@@ -166,6 +168,7 @@ func TestExecuteAsyncCommandStillAcceptsInput(t *testing.T) {
 	})
 
 	result, err := svc.Execute(
+		context.Background(),
 		sessionID,
 		"",
 		`if IFS= read -r line; then printf 'line:%s\n' "$line"; else printf 'eof\n'; fi`,

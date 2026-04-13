@@ -79,7 +79,7 @@ def get_preview_link()
 #### exec()
 
 ```ruby
-def exec(command:, cwd:, env:, timeout:)
+def exec(command:, cwd:, env:, timeout:, signal:)
 
 ```
 
@@ -115,7 +115,7 @@ result = sandbox.process.exec("sleep 10", timeout: 5)
 #### code_run()
 
 ```ruby
-def code_run(code:, params:, timeout:)
+def code_run(code:, params:, timeout:, signal:)
 
 ```
 
@@ -257,7 +257,7 @@ end
 #### execute_session_command()
 
 ```ruby
-def execute_session_command(session_id:, req:)
+def execute_session_command(session_id:, req:, signal:)
 
 ```
 
@@ -420,6 +420,24 @@ such as responding to prompts or providing data to stdin.
 - `session_id` _String_ - Unique identifier of the session
 - `command_id` _String_ - Unique identifier of the command
 - `data` _String_ - Input data to send to the command
+
+**Returns**:
+
+- `void`
+
+#### terminate_session_command()
+
+```ruby
+def terminate_session_command(session_id:, command_id:)
+
+```
+
+Terminates a running command in a session
+
+**Parameters**:
+
+- `session_id` _String_ - Unique identifier of the session
+- `command_id` _String_ - Unique identifier of the command
 
 **Returns**:
 

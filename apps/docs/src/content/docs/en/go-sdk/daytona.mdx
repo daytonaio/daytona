@@ -196,6 +196,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(p \*ProcessService\) ListPtySessions\(ctx context.Context\) \(\[\]\*types.PtySessionInfo, error\)](<#ProcessService.ListPtySessions>)
   - [func \(p \*ProcessService\) ListSessions\(ctx context.Context\) \(\[\]map\[string\]any, error\)](<#ProcessService.ListSessions>)
   - [func \(p \*ProcessService\) ResizePtySession\(ctx context.Context, sessionID string, ptySize types.PtySize\) \(\*types.PtySessionInfo, error\)](<#ProcessService.ResizePtySession>)
+  - [func \(p \*ProcessService\) TerminateSessionCommand\(ctx context.Context, sessionID, commandID string\) error](<#ProcessService.TerminateSessionCommand>)
 - [type PtyHandle](<#PtyHandle>)
   - [func \(h \*PtyHandle\) DataChan\(\) \<\-chan \[\]byte](<#PtyHandle.DataChan>)
   - [func \(h \*PtyHandle\) Disconnect\(\) error](<#PtyHandle.Disconnect>)
@@ -3192,6 +3193,15 @@ fmt.Printf("New size: %dx%d\n", info.Cols, info.Rows)
 ```
 
 Returns updated \[types.PtySessionInfo\], or an error.
+
+<a name="ProcessService.TerminateSessionCommand"></a>
+### func \(\*ProcessService\) TerminateSessionCommand
+
+```go
+func (p *ProcessService) TerminateSessionCommand(ctx context.Context, sessionID, commandID string) error
+```
+
+TerminateSessionCommand terminates a running command in a session.
 
 <a name="PtyHandle"></a>
 ## type PtyHandle

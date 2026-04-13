@@ -52,24 +52,45 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 			cmd.Dir = *request.Cwd
 		}
 
+		killProcessGroup := func() {
+			if cmd.Process != nil {
+				if err := syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL); err != nil {
+					logger.Error("failed to kill process group", "error", err)
+				}
+			}
+		}
+
 		// set maximum execution time
 		var timeoutReached atomic.Bool
 		if request.Timeout != nil && *request.Timeout > 0 {
 			timeout := time.Duration(*request.Timeout) * time.Second
 			timer := time.AfterFunc(timeout, func() {
 				timeoutReached.Store(true)
-				if cmd.Process != nil {
-					// Kill the entire process group so child processes are also terminated
-					if err := syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL); err != nil {
-						logger.Error("failed to kill process group", "error", err)
-					}
-				}
+				killProcessGroup()
 			})
 			defer timer.Stop()
 		}
 
+		// Monitor HTTP request context for client disconnection.
+		// When the client drops the connection (e.g. via AbortSignal), Go's
+		// net/http cancels this context, and we kill the process group.
+		var clientDisconnected atomic.Bool
+		done := make(chan struct{})
+		go func() {
+			select {
+			case <-c.Request.Context().Done():
+				clientDisconnected.Store(true)
+				killProcessGroup()
+			case <-done:
+			}
+		}()
+
 		output, err := cmd.CombinedOutput()
+		close(done)
 		if err != nil {
+			if clientDisconnected.Load() {
+				return
+			}
 			if timeoutReached.Load() {
 				c.Error(common_errors.NewRequestTimeoutError(errors.New("command execution timeout")))
 				return

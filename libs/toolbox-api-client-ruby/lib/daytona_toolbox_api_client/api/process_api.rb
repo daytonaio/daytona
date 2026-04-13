@@ -1129,5 +1129,72 @@ module DaytonaToolboxApiClient
       end
       return data, status_code, headers
     end
+
+    # Terminate a session command
+    # Terminate a running command in a session. The daemon handles platform-specific termination.
+    # @param session_id [String] Session ID
+    # @param command_id [String] Command ID
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def terminate_session_command(session_id, command_id, opts = {})
+      terminate_session_command_with_http_info(session_id, command_id, opts)
+      nil
+    end
+
+    # Terminate a session command
+    # Terminate a running command in a session. The daemon handles platform-specific termination.
+    # @param session_id [String] Session ID
+    # @param command_id [String] Command ID
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def terminate_session_command_with_http_info(session_id, command_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ProcessApi.terminate_session_command ...'
+      end
+      # verify the required parameter 'session_id' is set
+      if @api_client.config.client_side_validation && session_id.nil?
+        fail ArgumentError, "Missing the required parameter 'session_id' when calling ProcessApi.terminate_session_command"
+      end
+      # verify the required parameter 'command_id' is set
+      if @api_client.config.client_side_validation && command_id.nil?
+        fail ArgumentError, "Missing the required parameter 'command_id' when calling ProcessApi.terminate_session_command"
+      end
+      # resource path
+      local_var_path = '/process/session/{sessionId}/command/{commandId}/terminate'.sub('{' + 'sessionId' + '}', CGI.escape(session_id.to_s)).sub('{' + 'commandId' + '}', CGI.escape(command_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ProcessApi.terminate_session_command",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ProcessApi#terminate_session_command\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
   end
 end

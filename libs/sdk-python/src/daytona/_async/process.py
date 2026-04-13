@@ -29,6 +29,7 @@ from .._utils.otel_decorator import with_instrumentation
 from .._utils.stream import std_demux_stream
 from .._utils.timeout import http_timeout
 from ..common.charts import Chart, parse_chart
+from ..common.errors import DaytonaError
 from ..common.process import (
     _VALID_ENV_KEY_REGEX,
     CodeRunParams,
@@ -103,6 +104,7 @@ class AsyncProcess:
         cwd: str | None = None,
         env: dict[str, str] | None = None,
         timeout: int | None = None,
+        abort_signal: asyncio.Event | None = None,
     ) -> ExecuteResponse:
         """Execute a shell command in the Sandbox.
 
@@ -113,6 +115,8 @@ class AsyncProcess:
             env (dict[str, str] | None): Environment variables to set for the command.
             timeout (int | None): Maximum time in seconds to wait for the command
                 to complete.
+            abort_signal (asyncio.Event | None): Optional abort signal. If set
+                before the request completes, the in-flight API call is cancelled.
 
         Returns:
             ExecuteResponse: Command execution results containing:
@@ -151,10 +155,32 @@ class AsyncProcess:
 
         execute_request = ExecuteRequest(command=command, cwd=cwd, timeout=timeout)
 
-        response = await self._api_client.execute_command(
-            request=execute_request,
-            _request_timeout=http_timeout(timeout + 5 if timeout else None),
-        )
+        if abort_signal is not None:
+            api_task = asyncio.create_task(
+                self._api_client.execute_command(
+                    request=execute_request,
+                    _request_timeout=http_timeout(timeout + 5 if timeout else None),
+                )
+            )
+            signal_task = asyncio.create_task(abort_signal.wait())
+            done, pending = await asyncio.wait(
+                {api_task, signal_task},
+                return_when=asyncio.FIRST_COMPLETED,
+            )
+            for task in pending:
+                _ = task.cancel()
+                try:
+                    await task
+                except asyncio.CancelledError:
+                    pass
+            if signal_task in done:
+                raise DaytonaError("Operation cancelled by abort signal")
+            response = api_task.result()
+        else:
+            response = await self._api_client.execute_command(
+                request=execute_request,
+                _request_timeout=http_timeout(timeout + 5 if timeout else None),
+            )
 
         # Post-process the output to extract ExecutionArtifacts
         artifacts = AsyncProcess._parse_output(response.result.split("\n"))
@@ -176,6 +202,7 @@ class AsyncProcess:
         code: str,
         params: CodeRunParams | None = None,
         timeout: int | None = None,
+        abort_signal: asyncio.Event | None = None,
     ) -> ExecuteResponse:
         """Executes code in the Sandbox using the appropriate language runtime.
 
@@ -184,6 +211,8 @@ class AsyncProcess:
             params (CodeRunParams | None): Parameters for code execution.
             timeout (int | None): Maximum time in seconds to wait for the code
                 to complete.
+            abort_signal (asyncio.Event | None): Optional abort signal. If set
+                before the request completes, the in-flight API call is cancelled.
 
         Returns:
             ExecuteResponse: Code execution result containing:
@@ -243,7 +272,7 @@ class AsyncProcess:
             ```
         """
         command = self._code_toolbox.get_run_command(code, params)
-        return await self.exec(command, env=params.env if params else None, timeout=timeout)
+        return await self.exec(command, env=params.env if params else None, timeout=timeout, abort_signal=abort_signal)
 
     @intercept_errors(message_prefix="Failed to create session: ")
     @with_instrumentation()
@@ -340,6 +369,7 @@ class AsyncProcess:
         session_id: str,
         req: SessionExecuteRequest,
         timeout: int | None = None,
+        abort_signal: asyncio.Event | None = None,
     ) -> SessionExecuteResponse:
         """Executes a command in the session.
 
@@ -348,6 +378,8 @@ class AsyncProcess:
             req (SessionExecuteRequest): Command execution request containing:
                 - command: The command to execute
                 - run_async: Whether to execute asynchronously
+            abort_signal (asyncio.Event | None): Optional abort signal. If set
+                before the request completes, the in-flight API call is cancelled.
 
         Returns:
             SessionExecuteResponse: Command execution results containing:
@@ -377,11 +409,34 @@ class AsyncProcess:
             print(f"Command stderr: {result.stderr}")
             ```
         """
-        response = await self._api_client.session_execute_command(
-            session_id=session_id,
-            request=req,
-            _request_timeout=http_timeout(timeout + 5 if timeout else None),
-        )
+        if abort_signal is not None:
+            api_task = asyncio.create_task(
+                self._api_client.session_execute_command(
+                    session_id=session_id,
+                    request=req,
+                    _request_timeout=http_timeout(timeout + 5 if timeout else None),
+                )
+            )
+            signal_task = asyncio.create_task(abort_signal.wait())
+            done, pending = await asyncio.wait(
+                {api_task, signal_task},
+                return_when=asyncio.FIRST_COMPLETED,
+            )
+            for task in pending:
+                _ = task.cancel()
+                try:
+                    await task
+                except asyncio.CancelledError:
+                    pass
+            if signal_task in done:
+                raise DaytonaError("Operation cancelled by abort signal")
+            response = api_task.result()
+        else:
+            response = await self._api_client.session_execute_command(
+                session_id=session_id,
+                request=req,
+                _request_timeout=http_timeout(timeout + 5 if timeout else None),
+            )
 
         loop = asyncio.get_running_loop()
         raw = response.output.encode("utf-8", "ignore") if response.output else b""
@@ -539,6 +594,20 @@ class AsyncProcess:
         """
         await self._api_client.send_input(
             session_id=session_id, command_id=command_id, request=SessionSendInputRequest(data=data)
+        )
+
+    @intercept_errors(message_prefix="Failed to terminate session command: ")
+    @with_instrumentation()
+    async def terminate_session_command(self, session_id: str, command_id: str) -> None:
+        """Terminates a running command in a session.
+
+        Args:
+            session_id (str): Unique identifier of the session.
+            command_id (str): Unique identifier of the command.
+        """
+        await self._api_client.terminate_session_command(
+            session_id=session_id,
+            command_id=command_id,
         )
 
     @intercept_errors(message_prefix="Failed to list sessions: ")

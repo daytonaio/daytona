@@ -3,8 +3,10 @@
 
 package io.daytona.sdk;
 
+import com.google.gson.reflect.TypeToken;
 import io.daytona.sdk.model.*;
 import io.daytona.sdk.exception.DaytonaException;
+import io.daytona.sdk.util.CancelToken;
 import io.daytona.toolbox.client.api.ProcessApi;
 import io.daytona.toolbox.client.model.CreateSessionRequest;
 import io.daytona.toolbox.client.model.ExecuteRequest;
@@ -14,10 +16,12 @@ import io.daytona.toolbox.client.model.PtyListResponse;
 import io.daytona.toolbox.client.model.PtyResizeRequest;
 import io.daytona.toolbox.client.model.PtySessionInfo;
 import io.daytona.toolbox.client.model.SessionSendInputRequest;
+
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
+import okhttp3.Call;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -61,7 +65,11 @@ public class Process {
      * @throws DaytonaException if execution fails
      */
     public ExecuteResponse executeCommand(String command) {
-        return executeCommand(command, null, null, null);
+        return executeCommand(command, null, null, null, null);
+    }
+
+    public ExecuteResponse executeCommand(String command, CancelToken signal) {
+        return executeCommand(command, null, null, null, signal);
     }
 
     /**
@@ -75,6 +83,10 @@ public class Process {
      * @throws DaytonaException if execution fails
      */
     public ExecuteResponse executeCommand(String command, String cwd, Map<String, String> env, Integer timeout) {
+        return executeCommand(command, cwd, env, timeout, null);
+    }
+
+    public ExecuteResponse executeCommand(String command, String cwd, Map<String, String> env, Integer timeout, CancelToken signal) {
         String resolvedCommand = command;
         if (env != null && !env.isEmpty()) {
             StringBuilder exportsBuilder = new StringBuilder();
@@ -102,7 +114,20 @@ public class Process {
         if (timeout != null) {
             request.timeout(timeout);
         }
-        io.daytona.toolbox.client.model.ExecuteResponse response = ExceptionMapper.callToolbox(() -> processApi.executeCommand(request));
+        if (signal == null) {
+            io.daytona.toolbox.client.model.ExecuteResponse response = ExceptionMapper.callToolbox(() -> processApi.executeCommand(request));
+            return toExecuteResponse(response);
+        }
+
+        Call call = ExceptionMapper.callToolbox(() -> processApi.executeCommandCall(request, null));
+        io.daytona.toolbox.client.model.ExecuteResponse response = this.<io.daytona.toolbox.client.model.ExecuteResponse>executeCancelableCall(
+                call,
+                signal,
+                "Interrupted while executing command",
+                () -> processApi.getApiClient()
+                        .execute(call, new TypeToken<io.daytona.toolbox.client.model.ExecuteResponse>() { }.getType())
+                        .getData()
+        );
         return toExecuteResponse(response);
     }
 
@@ -115,6 +140,10 @@ public class Process {
      */
     public ExecuteResponse codeRun(String code) {
         return codeRun(code, null, null);
+    }
+
+    public ExecuteResponse codeRun(String code, CancelToken signal) {
+        return codeRun(code, null, null, signal);
     }
 
     /**
@@ -134,6 +163,12 @@ public class Process {
         io.daytona.sdk.codetoolbox.CodeToolbox toolbox = sandbox.getCodeToolbox();
         String runCmd = toolbox.getRunCommand(code == null ? "" : code);
         return executeCommand(runCmd, null, env, timeout);
+    }
+
+    public ExecuteResponse codeRun(String code, Map<String, String> env, Integer timeout, CancelToken signal) {
+        io.daytona.sdk.codetoolbox.CodeToolbox toolbox = sandbox.getCodeToolbox();
+        String runCmd = toolbox.getRunCommand(code == null ? "" : code);
+        return executeCommand(runCmd, null, env, timeout, signal);
     }
 
     /**
@@ -182,6 +217,27 @@ public class Process {
                 .command(req.getCommand())
                 .runAsync(req.getRunAsync());
         io.daytona.toolbox.client.model.SessionExecuteResponse response = ExceptionMapper.callToolbox(() -> processApi.sessionExecuteCommand(sessionId, request));
+        return toSessionExecuteResponse(response);
+    }
+
+    public SessionExecuteResponse executeSessionCommand(String sessionId, SessionExecuteRequest req, CancelToken signal) {
+        io.daytona.toolbox.client.model.SessionExecuteRequest request = new io.daytona.toolbox.client.model.SessionExecuteRequest()
+                .command(req.getCommand())
+                .runAsync(req.getRunAsync());
+        if (signal == null) {
+            io.daytona.toolbox.client.model.SessionExecuteResponse response = ExceptionMapper.callToolbox(() -> processApi.sessionExecuteCommand(sessionId, request));
+            return toSessionExecuteResponse(response);
+        }
+
+        Call call = ExceptionMapper.callToolbox(() -> processApi.sessionExecuteCommandCall(sessionId, request, null));
+        io.daytona.toolbox.client.model.SessionExecuteResponse response = this.<io.daytona.toolbox.client.model.SessionExecuteResponse>executeCancelableCall(
+                call,
+                signal,
+                "Interrupted while executing session command",
+                () -> processApi.getApiClient()
+                        .execute(call, new TypeToken<io.daytona.toolbox.client.model.SessionExecuteResponse>() { }.getType())
+                        .getData()
+        );
         return toSessionExecuteResponse(response);
     }
 
@@ -267,6 +323,17 @@ public class Process {
                 commandId,
                 new SessionSendInputRequest().data(data)
         ));
+    }
+
+    /**
+     * Terminates a running command in a session.
+     *
+     * @param sessionId session identifier
+     * @param commandId command identifier
+     * @throws DaytonaException if termination fails
+     */
+    public void terminateSessionCommand(String sessionId, String commandId) {
+        ExceptionMapper.runToolbox(() -> processApi.terminateSessionCommand(sessionId, commandId));
     }
 
     /**
@@ -536,6 +603,55 @@ public class Process {
                 .replaceFirst("^https://", "wss://")
                 .replaceFirst("^http://", "ws://");
         return wsBase + path;
+    }
+
+    private <T> T executeCancelableCall(
+            Call call,
+            CancelToken signal,
+            String interruptedMessage,
+            ExceptionMapper.ToolboxSupplier<T> supplier
+    ) {
+        if (signal.isCancelled()) {
+            call.cancel();
+            throw new DaytonaException("Operation cancelled by signal");
+        }
+
+        final AtomicReference<T> resultRef = new AtomicReference<T>();
+        final AtomicReference<RuntimeException> errorRef = new AtomicReference<RuntimeException>();
+
+        Thread worker = new Thread(() -> {
+            try {
+                resultRef.set(ExceptionMapper.callToolbox(supplier));
+            } catch (RuntimeException e) {
+                errorRef.set(e);
+            }
+        });
+        worker.setDaemon(true);
+        worker.start();
+
+        while (worker.isAlive()) {
+            if (signal.isCancelled()) {
+                call.cancel();
+                throw new DaytonaException("Operation cancelled by signal");
+            }
+            try {
+                worker.join(50);
+            } catch (InterruptedException e) {
+                call.cancel();
+                Thread.currentThread().interrupt();
+                throw new DaytonaException(interruptedMessage, e);
+            }
+        }
+
+        if (signal.isCancelled()) {
+            throw new DaytonaException("Operation cancelled by signal");
+        }
+
+        RuntimeException error = errorRef.get();
+        if (error != null) {
+            throw error;
+        }
+        return resultRef.get();
     }
 
     private ExecuteResponse toExecuteResponse(io.daytona.toolbox.client.model.ExecuteResponse source) {

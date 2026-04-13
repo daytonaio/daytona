@@ -268,6 +268,21 @@ type ProcessAPI interface {
 	// SessionExecuteCommandExecute executes the request
 	//  @return SessionExecuteResponse
 	SessionExecuteCommandExecute(r ProcessAPISessionExecuteCommandRequest) (*SessionExecuteResponse, *http.Response, error)
+
+	/*
+	TerminateSessionCommand Terminate a session command
+
+	Terminate a running command in a session. The daemon handles platform-specific termination.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sessionId Session ID
+	@param commandId Command ID
+	@return ProcessAPITerminateSessionCommandRequest
+	*/
+	TerminateSessionCommand(ctx context.Context, sessionId string, commandId string) ProcessAPITerminateSessionCommandRequest
+
+	// TerminateSessionCommandExecute executes the request
+	TerminateSessionCommandExecute(r ProcessAPITerminateSessionCommandRequest) (*http.Response, error)
 }
 
 // ProcessAPIService ProcessAPI service
@@ -2054,4 +2069,100 @@ func (a *ProcessAPIService) SessionExecuteCommandExecute(r ProcessAPISessionExec
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ProcessAPITerminateSessionCommandRequest struct {
+	ctx context.Context
+	ApiService ProcessAPI
+	sessionId string
+	commandId string
+}
+
+func (r ProcessAPITerminateSessionCommandRequest) Execute() (*http.Response, error) {
+	return r.ApiService.TerminateSessionCommandExecute(r)
+}
+
+/*
+TerminateSessionCommand Terminate a session command
+
+Terminate a running command in a session. The daemon handles platform-specific termination.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sessionId Session ID
+ @param commandId Command ID
+ @return ProcessAPITerminateSessionCommandRequest
+*/
+func (a *ProcessAPIService) TerminateSessionCommand(ctx context.Context, sessionId string, commandId string) ProcessAPITerminateSessionCommandRequest {
+	return ProcessAPITerminateSessionCommandRequest{
+		ApiService: a,
+		ctx: ctx,
+		sessionId: sessionId,
+		commandId: commandId,
+	}
+}
+
+// Execute executes the request
+func (a *ProcessAPIService) TerminateSessionCommandExecute(r ProcessAPITerminateSessionCommandRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.TerminateSessionCommand")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/process/session/{sessionId}/command/{commandId}/terminate"
+	localVarPath = strings.Replace(localVarPath, "{"+"sessionId"+"}", url.PathEscape(parameterValueToString(r.sessionId, "sessionId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"commandId"+"}", url.PathEscape(parameterValueToString(r.commandId, "commandId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
 }

@@ -2787,6 +2787,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/process/session/{sessionId}/command/{commandId}/terminate": {
+            "post": {
+                "description": "Terminate a running command in a session. The daemon handles platform-specific termination.",
+                "tags": [
+                    "process"
+                ],
+                "summary": "Terminate a session command",
+                "operationId": "TerminateSessionCommand",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Command ID",
+                        "name": "commandId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/process/session/{sessionId}/exec": {
             "post": {
                 "description": "Execute a command within an existing shell session",

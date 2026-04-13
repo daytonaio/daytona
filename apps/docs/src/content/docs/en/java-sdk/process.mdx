@@ -33,6 +33,20 @@ Executes a shell command with default options.
 
 #### executeCommand()
 ```java
+public ExecuteResponse executeCommand(String command, CancelToken signal)
+```
+
+**Parameters**:
+
+- `command` _String_ -
+- `signal` _CancelToken_ -
+
+**Returns**:
+
+- `ExecuteResponse` -
+
+#### executeCommand()
+```java
 public ExecuteResponse executeCommand(String command, String cwd, Map<String, String> env, Integer timeout)
 ```
 
@@ -53,6 +67,23 @@ Executes a shell command.
 
 - `DaytonaException` - if execution fails
 
+#### executeCommand()
+```java
+public ExecuteResponse executeCommand(String command, String cwd, Map<String, String> env, Integer timeout, CancelToken signal)
+```
+
+**Parameters**:
+
+- `command` _String_ -
+- `cwd` _String_ -
+- `env` _Map\<String, String\>_ -
+- `timeout` _Integer_ -
+- `signal` _CancelToken_ -
+
+**Returns**:
+
+- `ExecuteResponse` -
+
 #### codeRun()
 ```java
 public ExecuteResponse codeRun(String code)
@@ -71,6 +102,20 @@ Executes source code using Sandbox language tooling.
 **Throws**:
 
 - `DaytonaException` - if execution fails
+
+#### codeRun()
+```java
+public ExecuteResponse codeRun(String code, CancelToken signal)
+```
+
+**Parameters**:
+
+- `code` _String_ -
+- `signal` _CancelToken_ -
+
+**Returns**:
+
+- `ExecuteResponse` -
 
 #### codeRun()
 ```java
@@ -96,6 +141,22 @@ implementations for language-specific command generation.
 **Throws**:
 
 - `DaytonaException` - if execution fails
+
+#### codeRun()
+```java
+public ExecuteResponse codeRun(String code, Map<String, String> env, Integer timeout, CancelToken signal)
+```
+
+**Parameters**:
+
+- `code` _String_ -
+- `env` _Map\<String, String\>_ -
+- `timeout` _Integer_ -
+- `signal` _CancelToken_ -
+
+**Returns**:
+
+- `ExecuteResponse` -
 
 #### createSession()
 ```java
@@ -165,6 +226,21 @@ Executes a command in an existing session.
 **Throws**:
 
 - `DaytonaException` - if execution fails
+
+#### executeSessionCommand()
+```java
+public SessionExecuteResponse executeSessionCommand(String sessionId, SessionExecuteRequest req, CancelToken signal)
+```
+
+**Parameters**:
+
+- `sessionId` _String_ -
+- `req` _SessionExecuteRequest_ -
+- `signal` _CancelToken_ -
+
+**Returns**:
+
+- `SessionExecuteResponse` -
 
 #### getSessionCommand()
 ```java
@@ -253,6 +329,22 @@ Sends input data to a command executed in a session.
 **Throws**:
 
 - `DaytonaException` - if sending input fails
+
+#### terminateSessionCommand()
+```java
+public void terminateSessionCommand(String sessionId, String commandId)
+```
+
+Terminates a running command in a session.
+
+**Parameters**:
+
+- `sessionId` _String_ - session identifier
+- `commandId` _String_ - command identifier
+
+**Throws**:
+
+- `DaytonaException` - if termination fails
 
 #### deleteSession()
 ```java

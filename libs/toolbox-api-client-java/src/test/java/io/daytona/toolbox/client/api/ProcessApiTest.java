@@ -285,4 +285,19 @@ public class ProcessApiTest {
         // TODO: test validations
     }
 
+    /**
+     * Terminate a session command
+     *
+     * Terminate a running command in a session. The daemon handles platform-specific termination.
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void terminateSessionCommandTest() throws ApiException {
+        String sessionId = null;
+        String commandId = null;
+        api.terminateSessionCommand(sessionId, commandId);
+        // TODO: test validations
+    }
+
 }

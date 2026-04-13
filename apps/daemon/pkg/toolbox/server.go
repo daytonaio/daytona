@@ -202,6 +202,7 @@ func (s *server) Start() error {
 			sessionGroup.DELETE("/:sessionId", sessionController.DeleteSession)
 			sessionGroup.GET("/:sessionId/command/:commandId", sessionController.GetSessionCommand)
 			sessionGroup.POST("/:sessionId/command/:commandId/input", sessionController.SendInput)
+			sessionGroup.POST("/:sessionId/command/:commandId/terminate", sessionController.TerminateSessionCommand)
 			sessionGroup.GET("/:sessionId/command/:commandId/logs", sessionController.GetSessionCommandLogs)
 		}
 

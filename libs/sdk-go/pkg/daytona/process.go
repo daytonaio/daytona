@@ -335,6 +335,18 @@ func (p *ProcessService) ExecuteSessionCommand(ctx context.Context, sessionID, c
 	})
 }
 
+// TerminateSessionCommand terminates a running command in a session.
+func (p *ProcessService) TerminateSessionCommand(ctx context.Context, sessionID, commandID string) error {
+	return withInstrumentationVoid(ctx, p.otel, "Process", "TerminateSessionCommand", func(ctx context.Context) error {
+		httpResp, err := p.toolboxClient.ProcessAPI.TerminateSessionCommand(ctx, sessionID, commandID).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
+
+		return nil
+	})
+}
+
 // GetSessionCommand retrieves the status of a command in a session.
 //
 // Parameters:

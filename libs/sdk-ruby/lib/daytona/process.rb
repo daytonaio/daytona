@@ -54,7 +54,7 @@ module Daytona
     #
     #   # Command with timeout
     #   result = sandbox.process.exec("sleep 10", timeout: 5)
-    def exec(command:, cwd: nil, env: nil, timeout: nil) # rubocop:disable Metrics/MethodLength
+    def exec(command:, cwd: nil, env: nil, timeout: nil, signal: nil) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
       if env && !env.empty?
         env.each_key do |key|
           unless key.match?(/\A[A-Za-z_][A-Za-z0-9_]*\z/)
@@ -68,7 +68,9 @@ module Daytona
         command = "#{safe_env_exports}; #{command}"
       end
 
-      response = toolbox_api.execute_command(DaytonaToolboxApiClient::ExecuteRequest.new(command:, cwd:, timeout:))
+      response = execute_with_signal(signal) do
+        toolbox_api.execute_command(DaytonaToolboxApiClient::ExecuteRequest.new(command:, cwd:, timeout:))
+      end
       # Post-process the output to extract ExecutionArtifacts
       artifacts = parse_output(response.result.split("\n", -1))
 
@@ -95,8 +97,8 @@ module Daytona
     #     print(f"Sum: {x + y}")
     #   CODE
     #   puts response.artifacts.stdout  # Prints: Sum: 30
-    def code_run(code:, params: nil, timeout: nil)
-      exec(command: code_toolbox.get_run_command(code, params), env: params&.env, timeout:)
+    def code_run(code:, params: nil, timeout: nil, signal: nil)
+      exec(command: code_toolbox.get_run_command(code, params), env: params&.env, timeout:, signal:)
     end
 
     # Creates a new long-running background session in the Sandbox
@@ -139,7 +141,7 @@ module Daytona
     #   session.commands.each do |cmd|
     #     puts "Command: #{cmd.command}"
     #   end
-    def get_entrypoint_session = toolbox_api.get_entrypoint_session
+    def get_entrypoint_session = toolbox_api.get_entrypoint_session # rubocop:disable Naming/AccessorMethodName
 
     # Gets information about a specific command executed in a session
     #
@@ -179,12 +181,14 @@ module Daytona
     #   result = sandbox.process.execute_session_command(session_id:, req:)
     #   puts "Command stdout: #{result.stdout}"
     #   puts "Command stderr: #{result.stderr}"
-    def execute_session_command(session_id:, req:) # rubocop:disable Metrics/MethodLength
-      response = toolbox_api.session_execute_command(
-        session_id,
-        DaytonaToolboxApiClient::SessionExecuteRequest.new(command: req.command, run_async: req.run_async,
-                                                           suppress_input_echo: req.suppress_input_echo)
-      )
+    def execute_session_command(session_id:, req:, signal: nil) # rubocop:disable Metrics/MethodLength
+      response = execute_with_signal(signal) do
+        toolbox_api.session_execute_command(
+          session_id,
+          DaytonaToolboxApiClient::SessionExecuteRequest.new(command: req.command, run_async: req.run_async,
+                                                             suppress_input_echo: req.suppress_input_echo)
+        )
+      end
 
       stdout, stderr = Util.demux(response.output || '')
 
@@ -284,7 +288,7 @@ module Daytona
     #   logs = sandbox.process.get_entrypoint_logs()
     #   puts "Command stdout: #{logs.stdout}"
     #   puts "Command stderr: #{logs.stderr}"
-    def get_entrypoint_logs = parse_session_command_logs(toolbox_api.get_entrypoint_logs)
+    def get_entrypoint_logs = parse_session_command_logs(toolbox_api.get_entrypoint_logs) # rubocop:disable Naming/AccessorMethodName
 
     # Asynchronously retrieves and processes the sandbox entrypoint logs as they become available
     #
@@ -355,6 +359,15 @@ module Daytona
         command_id,
         DaytonaToolboxApiClient::SessionSendInputRequest.new(data:)
       )
+    end
+
+    # Terminates a running command in a session
+    #
+    # @param session_id [String] Unique identifier of the session
+    # @param command_id [String] Unique identifier of the command
+    # @return [void]
+    def terminate_session_command(session_id:, command_id:)
+      toolbox_api.terminate_session_command(session_id, command_id)
     end
 
     #
@@ -532,7 +545,7 @@ module Daytona
 
     instrument :exec, :code_run, :create_session, :get_session, :get_session_command,
                :execute_session_command, :get_session_command_logs, :get_session_command_logs_async,
-               :send_session_command_input, :list_sessions, :delete_session,
+               :send_session_command_input, :terminate_session_command, :list_sessions, :delete_session,
                :create_pty_session, :connect_pty_session, :resize_pty_session,
                :delete_pty_session, :list_pty_sessions, :get_pty_session_info,
                component: 'Process'
@@ -542,11 +555,35 @@ module Daytona
     # @return [Daytona::OtelState, nil]
     attr_reader :otel_state
 
+    def execute_with_signal(signal) # rubocop:disable Metrics/MethodLength
+      return yield unless signal
+
+      result = nil
+      error = nil
+
+      thread = Thread.new do
+        result = yield
+      rescue StandardError => e
+        error = e
+      end
+
+      until thread.join(0.05)
+        next unless signal.cancelled?
+
+        thread.kill
+        raise Sdk::Error, 'Operation cancelled by signal'
+      end
+
+      raise error if error
+
+      result
+    end
+
     # Parse the output of a command to extract ExecutionArtifacts
     #
     # @param lines [Array<String>] A list of lines of output from a command
     # @return [Daytona::ExecutionArtifacts] The artifacts from the command execution
-    def parse_output(lines)
+    def parse_output(lines) # rubocop:disable Metrics/MethodLength
       artifacts = ExecutionArtifacts.new('', [])
       stdout_lines = []
 

@@ -40,6 +40,10 @@ func (c *Command) InputFilePath(sessionDir string) string {
 	return filepath.Join(sessionDir, c.Id, "input.pipe")
 }
 
+func (c *Command) PidFilePath(sessionDir string) string {
+	return filepath.Join(sessionDir, c.Id, "cmd.pid")
+}
+
 type Session struct {
 	SessionId string     `json:"sessionId" validate:"required"`
 	Commands  []*Command `json:"commands" validate:"required"`

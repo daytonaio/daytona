@@ -1,6 +1,21 @@
 # frozen_string_literal: true
 
 module Daytona
+  class CancelToken
+    def initialize
+      @mutex = Mutex.new
+      @cancelled = false
+    end
+
+    def cancel!
+      @mutex.synchronize { @cancelled = true }
+    end
+
+    def cancelled?
+      @mutex.synchronize { @cancelled }
+    end
+  end
+
   class ExecuteResponse
     # @return [Integer] The exit code from the command execution
     attr_reader :exit_code

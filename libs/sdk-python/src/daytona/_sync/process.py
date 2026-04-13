@@ -530,6 +530,20 @@ class Process:
             session_id=session_id, command_id=command_id, request=SessionSendInputRequest(data=data)
         )
 
+    @intercept_errors(message_prefix="Failed to terminate session command: ")
+    @with_instrumentation()
+    def terminate_session_command(self, session_id: str, command_id: str) -> None:
+        """Terminates a running command in a session.
+
+        Args:
+            session_id (str): Unique identifier of the session.
+            command_id (str): Unique identifier of the command.
+        """
+        self._api_client.terminate_session_command(
+            session_id=session_id,
+            command_id=command_id,
+        )
+
     @intercept_errors(message_prefix="Failed to list sessions: ")
     @with_instrumentation()
     def list_sessions(self) -> list[Session]:

@@ -2715,6 +2715,28 @@ paths:
       summary: Get session command logs
       tags:
         - process
+  /process/session/{sessionId}/command/{commandId}/terminate:
+    post:
+      description: Terminate a running command in a session. The daemon handles platform-specific
+        termination.
+      operationId: TerminateSessionCommand
+      parameters:
+        - description: Session ID
+          in: path
+          name: sessionId
+          required: true
+          type: string
+        - description: Command ID
+          in: path
+          name: commandId
+          required: true
+          type: string
+      responses:
+        '204':
+          description: No Content
+      summary: Terminate a session command
+      tags:
+        - process
   /process/session/{sessionId}/exec:
     post:
       consumes:
