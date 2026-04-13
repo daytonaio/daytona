@@ -1,0 +1,25 @@
+apps/daemon/go.mod
+  f989598b2a4d14f5 94
+libs/sdk-go/go.mod
+  f989598b2a4d14f5 6-10,23-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "7f98a829b4736b36f3c1294fed1aef1a75f10ba0",
+  "prompts": {
+    "f989598b2a4d14f5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ddd19975-2a21-47c5-806f-da399268abae",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Toma Puljak",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 15,
+      "overriden_lines": 0
+    }
+  }
+}
