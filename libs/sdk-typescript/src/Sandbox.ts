@@ -353,15 +353,11 @@ export class Sandbox implements SandboxDto {
     })
     const sandboxDto = response.data
 
-    const language = sandboxDto.labels && sandboxDto.labels['code-toolbox-language']
-    const codeToolbox = Daytona.getCodeToolbox(language as CodeLanguage)
-
     const forkedSandbox = new Sandbox(
       sandboxDto,
       structuredClone(this.clientConfig),
       Daytona.createAxiosInstance(),
       this.sandboxApi,
-      codeToolbox,
     )
 
     const timeElapsed = Date.now() - startTime
