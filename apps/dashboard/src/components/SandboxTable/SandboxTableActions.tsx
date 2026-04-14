@@ -7,6 +7,8 @@ import { RoutePath } from '@/enums/RoutePath'
 import { SandboxState } from '@daytona/api-client'
 import { Terminal, MoreVertical, Play, Square, Loader2, Wrench } from 'lucide-react'
 import { generatePath, useNavigate } from 'react-router-dom'
+import { useMemo } from 'react'
+import TooltipButton from '../TooltipButton'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,
@@ -16,7 +18,6 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
 import { SandboxTableActionsProps } from './types'
-import { useMemo } from 'react'
 
 export function SandboxTableActions({
   sandbox,
@@ -35,6 +36,16 @@ export function SandboxTableActions({
   onScreenRecordings,
 }: SandboxTableActionsProps) {
   const navigate = useNavigate()
+  const primaryActionTooltip =
+    sandbox.state === SandboxState.STARTING
+      ? 'Starting sandbox'
+      : sandbox.state === SandboxState.STOPPING
+        ? 'Stopping sandbox'
+        : sandbox.state === SandboxState.STARTED
+      ? 'Stop sandbox'
+      : sandbox.state === SandboxState.ERROR && sandbox.recoverable
+        ? 'Recover sandbox'
+        : 'Start sandbox'
 
   const menuItems = useMemo(() => {
     const items = []
@@ -146,9 +157,10 @@ export function SandboxTableActions({
 
   return (
     <div className="flex items-center justify-end gap-2">
-      <Button
+      <TooltipButton
         variant="outline"
         className="h-7 w-7 p-0 text-muted-foreground"
+        tooltipText={primaryActionTooltip}
         onClick={(e) => {
           e.stopPropagation()
           if (sandbox.state === SandboxState.STARTED) {
@@ -169,16 +181,20 @@ export function SandboxTableActions({
         ) : (
           <Play className="w-4 h-4" />
         )}
-      </Button>
+      </TooltipButton>
 
       {sandbox.state === SandboxState.STARTED ? (
-        <Button
+        <TooltipButton
           variant="outline"
           className="h-7 w-7 p-0 text-muted-foreground"
-          onClick={() => onOpenWebTerminal(sandbox.id)}
+          tooltipText="Open web terminal"
+          onClick={(e) => {
+            e.stopPropagation()
+            onOpenWebTerminal(sandbox.id)
+          }}
         >
           <Terminal className="w-4 h-4" />
-        </Button>
+        </TooltipButton>
       ) : (
         <Button variant="outline" className="h-7 w-7 p-0 text-muted-foreground" disabled>
           <Terminal className="w-4 h-4" />
@@ -187,7 +203,13 @@ export function SandboxTableActions({
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="h-7 w-7 p-0 text-muted-foreground">
+          <Button
+            variant="outline"
+            className="h-7 w-7 p-0 text-muted-foreground"
+            aria-label="Open sandbox actions"
+            title="Open sandbox actions"
+            onClick={(e) => e.stopPropagation()}
+          >
             <span className="sr-only">Open menu</span>
             <MoreVertical />
           </Button>
