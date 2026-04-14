@@ -536,6 +536,32 @@ export class OrganizationController {
     return otelConfigDto
   }
 
+  @Get('/:organizationId/otel-config')
+  @ApiOperation({
+    summary: 'Get organization OTEL config by organization ID',
+    operationId: 'getOrganizationOtelConfig',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'OTEL Config',
+    type: OtelConfigDto,
+  })
+  @AuthStrategy(AuthStrategyType.API_KEY)
+  @UseGuards(OtelCollectorAuthContextGuard)
+  async getOtelConfig(@Param('organizationId') organizationId: string): Promise<OtelConfigDto> {
+    const otelConfigDto = await this.organizationService.getOtelConfigByOrganizationId(organizationId)
+    if (!otelConfigDto) {
+      throw new NotFoundException(`Organization OTEL config for organization ${organizationId} not found`)
+    }
+
+    return otelConfigDto
+  }
+
   @Post('/:organizationId/sandbox-default-limited-network-egress')
   @ApiOperation({
     summary: 'Update sandbox default limited network egress',
