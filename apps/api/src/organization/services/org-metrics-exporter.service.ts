@@ -90,7 +90,13 @@ export class OrgMetricsExporterService {
   private async exportMetricsForOrganization(organization: Organization): Promise<void> {
     const regionQuotas = await this.organizationService.getRegionQuotas(organization.id)
     if (regionQuotas.length === 0) {
-      return
+      regionQuotas.push({
+        organizationId: organization.id,
+        regionId: organization.defaultRegionId || 'default',
+        totalCpuQuota: -1,
+        totalMemoryQuota: -1,
+        totalDiskQuota: -1,
+      })
     }
 
     const nowNano = `${Date.now() * 1_000_000}`
@@ -104,9 +110,15 @@ export class OrgMetricsExporterService {
       this.addDataPoint(metrics, 'daytona.sandbox.used_cpu', regionAttrs, usage.currentCpuUsage, nowNano)
       this.addDataPoint(metrics, 'daytona.sandbox.used_ram', regionAttrs, usage.currentMemoryUsage, nowNano)
       this.addDataPoint(metrics, 'daytona.sandbox.used_storage', regionAttrs, usage.currentDiskUsage, nowNano)
-      this.addDataPoint(metrics, 'daytona.sandbox.total_cpu', regionAttrs, rq.totalCpuQuota, nowNano)
-      this.addDataPoint(metrics, 'daytona.sandbox.total_ram', regionAttrs, rq.totalMemoryQuota, nowNano)
-      this.addDataPoint(metrics, 'daytona.sandbox.total_storage', regionAttrs, rq.totalDiskQuota, nowNano)
+      if (rq.totalCpuQuota > 0) {
+        this.addDataPoint(metrics, 'daytona.sandbox.total_cpu', regionAttrs, rq.totalCpuQuota, nowNano)
+      }
+      if (rq.totalMemoryQuota > 0) {
+        this.addDataPoint(metrics, 'daytona.sandbox.total_ram', regionAttrs, rq.totalMemoryQuota, nowNano)
+      }
+      if (rq.totalDiskQuota > 0) {
+        this.addDataPoint(metrics, 'daytona.sandbox.total_storage', regionAttrs, rq.totalDiskQuota, nowNano)
+      }
     }
 
     const payload = {
@@ -178,9 +190,7 @@ export class OrgMetricsExporterService {
 
     if (!response.ok) {
       const body = await response.text().catch(() => '')
-      this.logger.warn(
-        `Failed to push metrics for org ${organizationId}: HTTP ${response.status} - ${body}`,
-      )
+      this.logger.warn(`Failed to push metrics for org ${organizationId}: HTTP ${response.status} - ${body}`)
     }
   }
 }
