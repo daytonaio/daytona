@@ -385,6 +385,7 @@ export class Sandbox implements SandboxDto {
    * @param {number} [timeout] - Maximum time to wait in seconds. 0 means no timeout.
    *                            Defaults to 60-second timeout.
    * @returns {Promise<void>}
+   * @throws {DaytonaValidationError} - If timeout is a negative number
    * @throws {DaytonaError} - If the snapshot operation fails or times out
    *
    * @example
@@ -395,7 +396,7 @@ export class Sandbox implements SandboxDto {
   @WithInstrumentation()
   public async _experimental_createSnapshot(name: string, timeout = 60): Promise<void> {
     if (timeout < 0) {
-      throw new DaytonaError('Timeout must be a non-negative number')
+      throw new DaytonaValidationError('Timeout must be a non-negative number')
     }
 
     const req: CreateSandboxSnapshot = { name }
