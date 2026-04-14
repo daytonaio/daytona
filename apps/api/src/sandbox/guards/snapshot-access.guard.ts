@@ -67,10 +67,7 @@ export class SnapshotAccessGuard extends ResourceAccessGuard {
       // Access granted
       return true
     } catch (error) {
-      if (!(error instanceof NotFoundException)) {
-        this.logger.error(error)
-      }
-      throw new NotFoundException(`Snapshot with ID or name ${snapshotId} not found`)
+      this.handleResourceAccessError(error, this.logger, `Snapshot with ID or name ${snapshotId} not found`)
     }
   }
 }

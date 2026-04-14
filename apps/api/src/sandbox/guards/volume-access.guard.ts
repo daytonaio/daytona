@@ -47,10 +47,11 @@ export class VolumeAccessGuard extends ResourceAccessGuard {
       // Access granted
       return true
     } catch (error) {
-      if (!(error instanceof NotFoundException)) {
-        this.logger.error(error)
-      }
-      throw new NotFoundException(`Volume with ${volumeId ? 'ID' : 'name'} ${volumeId || volumeName} not found`)
+      this.handleResourceAccessError(
+        error,
+        this.logger,
+        `Volume with ${volumeId ? 'ID' : 'name'} ${volumeId || volumeName} not found`,
+      )
     }
   }
 }

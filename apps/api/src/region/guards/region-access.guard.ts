@@ -37,10 +37,7 @@ export class RegionAccessGuard extends ResourceAccessGuard {
       }
       return true
     } catch (error) {
-      if (!(error instanceof NotFoundException)) {
-        this.logger.error(error)
-      }
-      throw new NotFoundException('Region not found')
+      this.handleResourceAccessError(error, this.logger, 'Region not found')
     }
   }
 }

@@ -35,10 +35,7 @@ export class JobAccessGuard extends ResourceAccessGuard {
 
       return true
     } catch (error) {
-      if (!(error instanceof NotFoundException)) {
-        this.logger.error(error)
-      }
-      throw new NotFoundException('Job not found')
+      this.handleResourceAccessError(error, this.logger, 'Job not found')
     }
   }
 }

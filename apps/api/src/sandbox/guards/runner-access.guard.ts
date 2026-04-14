@@ -66,10 +66,7 @@ export class RunnerAccessGuard extends ResourceAccessGuard {
       // Access granted
       return true
     } catch (error) {
-      if (!(error instanceof NotFoundException)) {
-        this.logger.error(error)
-      }
-      throw new NotFoundException('Runner not found')
+      this.handleResourceAccessError(error, this.logger, 'Runner not found')
     }
   }
 }
