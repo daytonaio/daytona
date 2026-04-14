@@ -65,13 +65,22 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"log"
+
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
 )
 
 func main() {
-	client, _ := daytona.NewClient()
-	volume, _ := client.Volume.Create(context.Background(), "my-awesome-volume")
-	_ = volume
+	client, err := daytona.NewClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+	volume, err := client.Volume.Create(context.Background(), "my-awesome-volume")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Volume ID: %s\n", volume.ID)
 }
 ```
 
