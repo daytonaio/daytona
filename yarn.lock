@@ -16899,7 +16899,7 @@ __metadata:
     sharp:
       optional: true
   bin:
-    astro: astro.js
+    astro: bin/astro.mjs
   checksum: 10c0/7e27cb1a0c50d10a9945e2dc8c2223500e5e49ee8bcf7d52779bc754f4f44f70faf0ae6629487fb00819edf8c0b3183bf9e325afb66e77828f3e4da9700dcd74
   languageName: node
   linkType: hard
