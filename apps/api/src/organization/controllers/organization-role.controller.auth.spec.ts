@@ -13,6 +13,7 @@ import {
   getRequiredOrganizationResourcePermissions,
   expectArrayMatch,
   createCoverageTracker,
+  isPublicEndpoint,
 } from '../../test/helpers/controller-metadata.helper'
 import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
 
@@ -21,6 +22,7 @@ describe('[AUTH] OrganizationRoleController', () => {
 
   it('create', () => {
     const methodName = trackMethod('create')
+    expect(isPublicEndpoint(OrganizationRoleController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(OrganizationRoleController, methodName), [AuthStrategyType.JWT])
     expectArrayMatch(getAuthContextGuards(OrganizationRoleController, methodName), [OrganizationAuthContextGuard])
     expect(getRequiredOrganizationMemberRole(OrganizationRoleController, methodName)).toBe(OrganizationMemberRole.OWNER)
@@ -28,6 +30,7 @@ describe('[AUTH] OrganizationRoleController', () => {
 
   it('findAll', () => {
     const methodName = trackMethod('findAll')
+    expect(isPublicEndpoint(OrganizationRoleController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(OrganizationRoleController, methodName), [AuthStrategyType.JWT])
     expectArrayMatch(getAuthContextGuards(OrganizationRoleController, methodName), [OrganizationAuthContextGuard])
     expect(getRequiredOrganizationMemberRole(OrganizationRoleController, methodName)).toBeUndefined()
@@ -36,6 +39,7 @@ describe('[AUTH] OrganizationRoleController', () => {
 
   it('updateRole', () => {
     const methodName = trackMethod('updateRole')
+    expect(isPublicEndpoint(OrganizationRoleController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(OrganizationRoleController, methodName), [AuthStrategyType.JWT])
     expectArrayMatch(getAuthContextGuards(OrganizationRoleController, methodName), [OrganizationAuthContextGuard])
     expect(getRequiredOrganizationMemberRole(OrganizationRoleController, methodName)).toBe(OrganizationMemberRole.OWNER)
@@ -43,6 +47,7 @@ describe('[AUTH] OrganizationRoleController', () => {
 
   it('delete', () => {
     const methodName = trackMethod('delete')
+    expect(isPublicEndpoint(OrganizationRoleController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(OrganizationRoleController, methodName), [AuthStrategyType.JWT])
     expectArrayMatch(getAuthContextGuards(OrganizationRoleController, methodName), [OrganizationAuthContextGuard])
     expect(getRequiredOrganizationMemberRole(OrganizationRoleController, methodName)).toBe(OrganizationMemberRole.OWNER)

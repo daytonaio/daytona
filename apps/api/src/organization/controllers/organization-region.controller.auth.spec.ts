@@ -16,6 +16,7 @@ import {
   getRequiredOrganizationResourcePermissions,
   expectArrayMatch,
   createCoverageTracker,
+  isPublicEndpoint,
 } from '../../test/helpers/controller-metadata.helper'
 
 describe('[AUTH] OrganizationRegionController', () => {
@@ -23,6 +24,7 @@ describe('[AUTH] OrganizationRegionController', () => {
 
   it('listAvailableRegions', () => {
     const methodName = trackMethod('listAvailableRegions')
+    expect(isPublicEndpoint(OrganizationRegionController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(OrganizationRegionController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -34,6 +36,7 @@ describe('[AUTH] OrganizationRegionController', () => {
 
   it('createRegion', () => {
     const methodName = trackMethod('createRegion')
+    expect(isPublicEndpoint(OrganizationRegionController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(OrganizationRegionController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -47,6 +50,7 @@ describe('[AUTH] OrganizationRegionController', () => {
 
   it('getRegionById', () => {
     const methodName = trackMethod('getRegionById')
+    expect(isPublicEndpoint(OrganizationRegionController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(OrganizationRegionController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -59,6 +63,7 @@ describe('[AUTH] OrganizationRegionController', () => {
 
   it('deleteRegion', () => {
     const methodName = trackMethod('deleteRegion')
+    expect(isPublicEndpoint(OrganizationRegionController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(OrganizationRegionController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -73,6 +78,7 @@ describe('[AUTH] OrganizationRegionController', () => {
 
   it('regenerateProxyApiKey', () => {
     const methodName = trackMethod('regenerateProxyApiKey')
+    expect(isPublicEndpoint(OrganizationRegionController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(OrganizationRegionController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -87,6 +93,7 @@ describe('[AUTH] OrganizationRegionController', () => {
 
   it('updateRegion', () => {
     const methodName = trackMethod('updateRegion')
+    expect(isPublicEndpoint(OrganizationRegionController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(OrganizationRegionController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -101,6 +108,7 @@ describe('[AUTH] OrganizationRegionController', () => {
 
   it('regenerateSshGatewayApiKey', () => {
     const methodName = trackMethod('regenerateSshGatewayApiKey')
+    expect(isPublicEndpoint(OrganizationRegionController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(OrganizationRegionController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -115,6 +123,7 @@ describe('[AUTH] OrganizationRegionController', () => {
 
   it('regenerateSnapshotManagerCredentials', () => {
     const methodName = trackMethod('regenerateSnapshotManagerCredentials')
+    expect(isPublicEndpoint(OrganizationRegionController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(OrganizationRegionController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,

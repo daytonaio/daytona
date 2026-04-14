@@ -19,6 +19,7 @@ import {
   getRequiredOrganizationResourcePermissions,
   expectArrayMatch,
   createCoverageTracker,
+  isPublicEndpoint,
 } from '../../test/helpers/controller-metadata.helper'
 
 describe('[AUTH] SandboxController', () => {
@@ -26,6 +27,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('listSandboxes', () => {
     const methodName = trackMethod('listSandboxes')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -37,6 +39,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('listSandboxesPaginated', () => {
     const methodName = trackMethod('listSandboxesPaginated')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -48,6 +51,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('createSandbox', () => {
     const methodName = trackMethod('createSandbox')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -61,12 +65,14 @@ describe('[AUTH] SandboxController', () => {
 
   it('getSandboxesForRunner', () => {
     const methodName = trackMethod('getSandboxesForRunner')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [AuthStrategyType.API_KEY])
     expectArrayMatch(getAuthContextGuards(SandboxController, methodName), [RunnerAuthContextGuard])
   })
 
   it('getSandbox', () => {
     const methodName = trackMethod('getSandbox')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -83,6 +89,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('deleteSandbox', () => {
     const methodName = trackMethod('deleteSandbox')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -97,6 +104,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('recoverSandbox', () => {
     const methodName = trackMethod('recoverSandbox')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -111,6 +119,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('startSandbox', () => {
     const methodName = trackMethod('startSandbox')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -125,6 +134,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('stopSandbox', () => {
     const methodName = trackMethod('stopSandbox')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -139,6 +149,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('resizeSandbox', () => {
     const methodName = trackMethod('resizeSandbox')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -153,6 +164,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('replaceLabels', () => {
     const methodName = trackMethod('replaceLabels')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -167,6 +179,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('updateSandboxState', () => {
     const methodName = trackMethod('updateSandboxState')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [AuthStrategyType.API_KEY])
     expectArrayMatch(getAuthContextGuards(SandboxController, methodName), [RunnerAuthContextGuard])
     expectArrayMatch(getResourceAccessGuards(SandboxController, methodName), [SandboxAccessGuard])
@@ -174,6 +187,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('createBackup', () => {
     const methodName = trackMethod('createBackup')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -188,6 +202,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('updatePublicStatus', () => {
     const methodName = trackMethod('updatePublicStatus')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -202,6 +217,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('updateLastActivity', () => {
     const methodName = trackMethod('updateLastActivity')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -218,6 +234,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('setAutostopInterval', () => {
     const methodName = trackMethod('setAutostopInterval')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -232,6 +249,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('setAutoArchiveInterval', () => {
     const methodName = trackMethod('setAutoArchiveInterval')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -246,6 +264,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('setAutoDeleteInterval', () => {
     const methodName = trackMethod('setAutoDeleteInterval')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -260,6 +279,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('archiveSandbox', () => {
     const methodName = trackMethod('archiveSandbox')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -274,6 +294,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('getPortPreviewUrl', () => {
     const methodName = trackMethod('getPortPreviewUrl')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -286,6 +307,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('getSignedPortPreviewUrl', () => {
     const methodName = trackMethod('getSignedPortPreviewUrl')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -298,6 +320,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('expireSignedPortPreviewUrl', () => {
     const methodName = trackMethod('expireSignedPortPreviewUrl')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -310,6 +333,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('getBuildLogs', () => {
     const methodName = trackMethod('getBuildLogs')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -322,6 +346,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('getBuildLogsUrl', () => {
     const methodName = trackMethod('getBuildLogsUrl')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -334,6 +359,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('createSshAccess', () => {
     const methodName = trackMethod('createSshAccess')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -348,6 +374,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('revokeSshAccess', () => {
     const methodName = trackMethod('revokeSshAccess')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -362,12 +389,14 @@ describe('[AUTH] SandboxController', () => {
 
   it('validateSshAccess', () => {
     const methodName = trackMethod('validateSshAccess')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [AuthStrategyType.API_KEY])
     expectArrayMatch(getAuthContextGuards(SandboxController, methodName), [SshGatewayAuthContextGuard])
   })
 
   it('getToolboxProxyUrl', () => {
     const methodName = trackMethod('getToolboxProxyUrl')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -380,6 +409,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('getOrganizationBySandboxId', () => {
     const methodName = trackMethod('getOrganizationBySandboxId')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [AuthStrategyType.API_KEY])
     expectArrayMatch(getAuthContextGuards(SandboxController, methodName), [ProxyAuthContextGuard])
     expectArrayMatch(getResourceAccessGuards(SandboxController, methodName), [SandboxAccessGuard])
@@ -387,6 +417,7 @@ describe('[AUTH] SandboxController', () => {
 
   it('getRegionQuotaBySandboxId', () => {
     const methodName = trackMethod('getRegionQuotaBySandboxId')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [AuthStrategyType.API_KEY])
     expectArrayMatch(getAuthContextGuards(SandboxController, methodName), [ProxyAuthContextGuard])
     expectArrayMatch(getResourceAccessGuards(SandboxController, methodName), [SandboxAccessGuard])

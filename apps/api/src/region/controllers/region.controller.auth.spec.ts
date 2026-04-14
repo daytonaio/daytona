@@ -9,6 +9,7 @@ import {
   getAllowedAuthStrategies,
   expectArrayMatch,
   createCoverageTracker,
+  isPublicEndpoint,
 } from '../../test/helpers/controller-metadata.helper'
 
 describe('[AUTH] RegionController', () => {
@@ -16,6 +17,7 @@ describe('[AUTH] RegionController', () => {
 
   it('listRegions', () => {
     const methodName = trackMethod('listRegions')
+    expect(isPublicEndpoint(RegionController, methodName)).toBe(true)
     expectArrayMatch(getAllowedAuthStrategies(RegionController, methodName), [])
     expectArrayMatch(getAuthContextGuards(RegionController, methodName), [])
   })

@@ -11,6 +11,7 @@ import {
   getAllowedAuthStrategies,
   expectArrayMatch,
   createCoverageTracker,
+  isPublicEndpoint,
 } from '../../test/helpers/controller-metadata.helper'
 
 describe('[AUTH] PreviewController', () => {
@@ -18,18 +19,21 @@ describe('[AUTH] PreviewController', () => {
 
   it('isSandboxPublic', () => {
     const methodName = trackMethod('isSandboxPublic')
+    expect(isPublicEndpoint(PreviewController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(PreviewController, methodName), [AuthStrategyType.API_KEY])
     expectArrayMatch(getAuthContextGuards(PreviewController, methodName), [ProxyAuthContextGuard])
   })
 
   it('isValidAuthToken', () => {
     const methodName = trackMethod('isValidAuthToken')
+    expect(isPublicEndpoint(PreviewController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(PreviewController, methodName), [AuthStrategyType.API_KEY])
     expectArrayMatch(getAuthContextGuards(PreviewController, methodName), [ProxyAuthContextGuard])
   })
 
   it('hasSandboxAccess', () => {
     const methodName = trackMethod('hasSandboxAccess')
+    expect(isPublicEndpoint(PreviewController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(PreviewController, methodName), [
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
@@ -39,6 +43,7 @@ describe('[AUTH] PreviewController', () => {
 
   it('getSandboxIdFromSignedPreviewUrlToken', () => {
     const methodName = trackMethod('getSandboxIdFromSignedPreviewUrlToken')
+    expect(isPublicEndpoint(PreviewController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(PreviewController, methodName), [AuthStrategyType.API_KEY])
     expectArrayMatch(getAuthContextGuards(PreviewController, methodName), [ProxyAuthContextGuard])
   })
