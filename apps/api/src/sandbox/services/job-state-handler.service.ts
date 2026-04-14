@@ -740,10 +740,11 @@ export class JobStateHandlerService {
             snapshotRef = `${payload.registry.url}/${project}/daytona-${hash}:daytona`
           }
 
-          const snapshotSize =
+          const snapshotSizeBytes =
             (typeof metadata?.sizeBytes === 'number' && metadata.sizeBytes) ||
             (typeof metadata?.SizeBytes === 'number' && metadata.SizeBytes) ||
             undefined
+          const snapshotSize = snapshotSizeBytes != null ? snapshotSizeBytes / (1024 * 1024 * 1024) : undefined
 
           const snapshotId = uuidv4()
 
