@@ -22,14 +22,14 @@ import (
 )
 
 func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSnapshotRequestDTO) error {
-	if !strings.Contains(buildImageDto.Snapshot, ":") || strings.HasSuffix(buildImageDto.Snapshot, ":") {
+	if !strings.Contains(buildImageDto.GetSnapshot(), ":") || strings.HasSuffix(buildImageDto.GetSnapshot(), ":") {
 		return fmt.Errorf("invalid image format: must contain exactly one colon (e.g., 'myimage:1.0')")
 	}
 
 	d.logger.InfoContext(ctx, "Building image")
 
 	// Check if image already exists
-	exists, err := d.ImageExists(ctx, buildImageDto.Snapshot, true)
+	exists, err := d.ImageExists(ctx, buildImageDto.GetSnapshot(), true)
 	if err != nil {
 		return fmt.Errorf("failed to check if image exists: %w", err)
 	}
@@ -132,10 +132,10 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 
 	var authConfigs map[string]docker_registry.AuthConfig
 
-	if len(buildImageDto.SourceRegistries) > 0 {
-		authConfigs = make(map[string]docker_registry.AuthConfig, len(buildImageDto.SourceRegistries)*2)
-		for _, sourceRegistry := range buildImageDto.SourceRegistries {
-			if !sourceRegistry.HasAuth() {
+	if len(buildImageDto.GetSourceRegistries()) > 0 {
+		authConfigs = make(map[string]docker_registry.AuthConfig, len(buildImageDto.GetSourceRegistries())*2)
+		for _, sourceRegistry := range buildImageDto.GetSourceRegistries() {
+			if sourceRegistry == nil || !dto.RegistryHasAuth(sourceRegistry) {
 				continue
 			}
 
@@ -159,7 +159,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 	}
 
 	buildOpts := build.ImageBuildOptions{
-		Tags:        []string{buildImageDto.Snapshot},
+		Tags:        []string{buildImageDto.GetSnapshot()},
 		Dockerfile:  "Dockerfile",
 		Remove:      true,
 		ForceRemove: true,
@@ -168,7 +168,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 		AuthConfigs: authConfigs,
 	}
 
-	logFilePath, err := config.GetBuildLogFilePath(buildImageDto.Snapshot)
+	logFilePath, err := config.GetBuildLogFilePath(buildImageDto.GetSnapshot())
 	if err != nil {
 		return err
 	}

@@ -21,6 +21,7 @@
     "serve:skip-proxy": "nx run-many --target=serve --all --exclude=proxy,daemon --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=development",
     "serve:production": "nx run-many --target=serve --all --exclude=daemon --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=production",
     "generate:api-client": "nx run-many --target=generate:api-client --all --exclude=analytics-api-client --parallel=$(getconf _NPROCESSORS_ONLN)",
+    "generate:specs": "nx run runner-specs:generate:specs",
     "migration:generate": "cd apps/api && npx ts-node -P ./tsconfig.json -r tsconfig-paths/register ../../node_modules/typeorm/cli.js migration:generate -d ./src/migrations/pre-deploy/data-source.ts ./src/migrations/pre-deploy/migration && npx ts-node -P ./tsconfig.json -r tsconfig-paths/register ../../node_modules/typeorm/cli.js migration:generate -d ./src/migrations/post-deploy/data-source.ts ./src/migrations/post-deploy/migration",
     "migration:run:init": "cd apps/api && npx ts-node -P ./tsconfig.json -r tsconfig-paths/register ../../node_modules/typeorm/cli.js migration:run -d ./src/migrations/data-source.ts",
     "migration:run:pre-deploy": "cd apps/api && npx ts-node -P ./tsconfig.json -r tsconfig-paths/register ../../node_modules/typeorm/cli.js migration:run -d ./src/migrations/pre-deploy/data-source.ts",
@@ -213,6 +214,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.22.0",
     "@babel/preset-typescript": "^7.22.0",
+    "@bufbuild/buf": "^1.67.0",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
     "@eslint/js": "^9.8.0",

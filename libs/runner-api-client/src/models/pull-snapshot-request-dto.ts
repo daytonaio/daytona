@@ -15,7 +15,7 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
-import type { RegistryDTO } from './registry-dto';
+import type { SpecsgenRegistryInfo } from './specsgen-registry-info';
 
 /**
  * 
@@ -31,10 +31,10 @@ export interface PullSnapshotRequestDTO {
     'destinationRef'?: string;
     /**
      * 
-     * @type {RegistryDTO}
+     * @type {SpecsgenRegistryInfo}
      * @memberof PullSnapshotRequestDTO
      */
-    'destinationRegistry'?: RegistryDTO;
+    'destinationRegistry'?: SpecsgenRegistryInfo;
     /**
      * 
      * @type {string}
@@ -43,10 +43,10 @@ export interface PullSnapshotRequestDTO {
     'newTag'?: string;
     /**
      * 
-     * @type {RegistryDTO}
+     * @type {SpecsgenRegistryInfo}
      * @memberof PullSnapshotRequestDTO
      */
-    'registry'?: RegistryDTO;
+    'registry'?: SpecsgenRegistryInfo;
     /**
      * 
      * @type {string}

@@ -107,7 +107,7 @@ func (d *DockerClient) createBackup(containerId string, backupDto dto.CreateBack
 		return err
 	}
 
-	err = d.PushImage(ctx, backupDto.Snapshot, &backupDto.Registry)
+	err = d.PushImage(ctx, backupDto.Snapshot, backupDto.GetRegistry())
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
 			cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateNone, backupDto.Snapshot, nil)

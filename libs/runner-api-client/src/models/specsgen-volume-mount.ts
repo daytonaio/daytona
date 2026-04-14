@@ -17,25 +17,25 @@
 /**
  * 
  * @export
- * @interface DtoVolumeDTO
+ * @interface SpecsgenVolumeMount
  */
-export interface DtoVolumeDTO {
+export interface SpecsgenVolumeMount {
     /**
      * 
      * @type {string}
-     * @memberof DtoVolumeDTO
+     * @memberof SpecsgenVolumeMount
      */
     'mountPath'?: string;
     /**
      * 
      * @type {string}
-     * @memberof DtoVolumeDTO
+     * @memberof SpecsgenVolumeMount
      */
     'subpath'?: string;
     /**
      * 
      * @type {string}
-     * @memberof DtoVolumeDTO
+     * @memberof SpecsgenVolumeMount
      */
     'volumeId'?: string;
 }

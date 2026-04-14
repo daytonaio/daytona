@@ -67,7 +67,7 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 }
 
 func getRegistryAuth(reg *dto.RegistryDTO) string {
-	if reg == nil || !reg.HasAuth() {
+	if reg == nil || !dto.RegistryHasAuth(reg) {
 		// Sometimes registry auth fails if "" is sent, so sending "empty" instead
 		return "empty"
 	}

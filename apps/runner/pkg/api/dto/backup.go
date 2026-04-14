@@ -3,7 +3,8 @@
 
 package dto
 
+import specsgen "github.com/daytonaio/runner/pkg/runner/v2/specs/gen"
+
 type CreateBackupDTO struct {
-	Registry RegistryDTO `json:"registry" validate:"required"`
-	Snapshot string      `json:"snapshot" validate:"required"`
+	*specsgen.CreateBackupPayload
 } //	@name	CreateBackupDTO

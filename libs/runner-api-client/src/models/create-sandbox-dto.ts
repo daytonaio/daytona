@@ -15,10 +15,10 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
-import type { DtoVolumeDTO } from './dto-volume-dto';
+import type { SpecsgenRegistryInfo } from './specsgen-registry-info';
 // May contain unused imports in some cases
 // @ts-ignore
-import type { RegistryDTO } from './registry-dto';
+import type { SpecsgenVolumeMount } from './specsgen-volume-mount';
 
 /**
  * 
@@ -93,7 +93,7 @@ export interface CreateSandboxDTO {
      */
     'networkBlockAll'?: boolean;
     /**
-     * Nullable for backward compatibility
+     * 
      * @type {string}
      * @memberof CreateSandboxDTO
      */
@@ -118,10 +118,10 @@ export interface CreateSandboxDTO {
     'regionId'?: string;
     /**
      * 
-     * @type {RegistryDTO}
+     * @type {SpecsgenRegistryInfo}
      * @memberof CreateSandboxDTO
      */
-    'registry'?: RegistryDTO;
+    'registry'?: SpecsgenRegistryInfo;
     /**
      * 
      * @type {boolean}
@@ -148,9 +148,9 @@ export interface CreateSandboxDTO {
     'userId': string;
     /**
      * 
-     * @type {Array<DtoVolumeDTO>}
+     * @type {Array<SpecsgenVolumeMount>}
      * @memberof CreateSandboxDTO
      */
-    'volumes'?: Array<DtoVolumeDTO>;
+    'volumes'?: Array<SpecsgenVolumeMount>;
 }
 

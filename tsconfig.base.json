@@ -17,6 +17,7 @@
     "paths": {
       "@daytona/api-client": ["libs/api-client/src/index.ts"],
       "@daytona/runner-api-client": ["libs/runner-api-client/src/index.ts"],
+      "@daytona/runner-specs": ["libs/runner-specs/src/index.ts"],
       "@daytona/sdk": ["libs/sdk-typescript/src/index.ts"],
       "@daytona/toolbox-api-client": ["libs/toolbox-api-client/src/index.ts"],
       "@daytona/analytics-api-client": ["libs/analytics-api-client/src/index.ts"]

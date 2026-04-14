@@ -3,7 +3,11 @@
 
 package dto
 
-import "strings"
+import (
+	"strings"
+
+	specsgen "github.com/daytonaio/runner/pkg/runner/v2/specs/gen"
+)
 
 type SnapshotInfoResponse struct {
 	Name       string   `json:"name" example:"nginx:latest"`
@@ -19,8 +23,7 @@ type SnapshotDigestResponse struct {
 } //	@name	SnapshotDigestResponse
 
 type InspectSnapshotInRegistryRequestDTO struct {
-	Snapshot string       `json:"snapshot" validate:"required" example:"nginx:latest"`
-	Registry *RegistryDTO `json:"registry,omitempty"`
+	*specsgen.InspectSnapshotInRegistryPayload
 } //	@name	InspectSnapshotInRegistryRequest
 
 func HashWithoutPrefix(hash string) string {

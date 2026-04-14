@@ -1,0 +1,33 @@
+version: v2
+# Run from repo root: buf generate apps/runner/specs
+#
+# Required plugins (installed once per environment):
+#   go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+#   npm install -g ts-proto
+#
+# Both plugins must be on PATH (e.g. export PATH=$PATH:$(go env GOPATH)/bin)
+inputs:
+  - directory: .
+plugins:
+  # Go: generates protobuf message types into apps/runner/pkg/runner/v2/specs/gen/
+  # Package: specsgen  (imported by specs/converters.go and executor handlers)
+  - local: protoc-gen-go
+    out: apps/runner/pkg/runner/v2/specs/gen
+    opt:
+      - paths=source_relative
+
+  # TypeScript: generates plain interfaces into libs/runner-specs/src/generated/
+  # outputEncodeMethods=false  — no binary serialization; JSON handled by JSON.stringify/parse
+  # outputJsonMethods=false    — no toJSON/fromJSON helpers
+  # useOptionals=messages       — only message-typed and optional fields become T | undefined
+  # esModuleInterop=true       — compatible with CommonJS / ESM interop
+  - local: protoc-gen-ts_proto
+    out: libs/runner-specs/src/generated
+    opt:
+      - outputEncodeMethods=false
+      - outputJsonMethods=false
+      - useOptionals=messages
+      - stringEnums=true
+      - exportCommonSymbols=false
+      - esModuleInterop=true
+      - env=node

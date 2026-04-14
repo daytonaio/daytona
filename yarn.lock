@@ -3603,6 +3603,89 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@bufbuild/buf-darwin-arm64@npm:1.67.0":
+  version: 1.67.0
+  resolution: "@bufbuild/buf-darwin-arm64@npm:1.67.0"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@bufbuild/buf-darwin-x64@npm:1.67.0":
+  version: 1.67.0
+  resolution: "@bufbuild/buf-darwin-x64@npm:1.67.0"
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@bufbuild/buf-linux-aarch64@npm:1.67.0":
+  version: 1.67.0
+  resolution: "@bufbuild/buf-linux-aarch64@npm:1.67.0"
+  conditions: os=linux & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@bufbuild/buf-linux-armv7@npm:1.67.0":
+  version: 1.67.0
+  resolution: "@bufbuild/buf-linux-armv7@npm:1.67.0"
+  conditions: os=linux & cpu=arm
+  languageName: node
+  linkType: hard
+
+"@bufbuild/buf-linux-x64@npm:1.67.0":
+  version: 1.67.0
+  resolution: "@bufbuild/buf-linux-x64@npm:1.67.0"
+  conditions: os=linux & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@bufbuild/buf-win32-arm64@npm:1.67.0":
+  version: 1.67.0
+  resolution: "@bufbuild/buf-win32-arm64@npm:1.67.0"
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@bufbuild/buf-win32-x64@npm:1.67.0":
+  version: 1.67.0
+  resolution: "@bufbuild/buf-win32-x64@npm:1.67.0"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@bufbuild/buf@npm:^1.67.0":
+  version: 1.67.0
+  resolution: "@bufbuild/buf@npm:1.67.0"
+  dependencies:
+    "@bufbuild/buf-darwin-arm64": "npm:1.67.0"
+    "@bufbuild/buf-darwin-x64": "npm:1.67.0"
+    "@bufbuild/buf-linux-aarch64": "npm:1.67.0"
+    "@bufbuild/buf-linux-armv7": "npm:1.67.0"
+    "@bufbuild/buf-linux-x64": "npm:1.67.0"
+    "@bufbuild/buf-win32-arm64": "npm:1.67.0"
+    "@bufbuild/buf-win32-x64": "npm:1.67.0"
+  dependenciesMeta:
+    "@bufbuild/buf-darwin-arm64":
+      optional: true
+    "@bufbuild/buf-darwin-x64":
+      optional: true
+    "@bufbuild/buf-linux-aarch64":
+      optional: true
+    "@bufbuild/buf-linux-armv7":
+      optional: true
+    "@bufbuild/buf-linux-x64":
+      optional: true
+    "@bufbuild/buf-win32-arm64":
+      optional: true
+    "@bufbuild/buf-win32-x64":
+      optional: true
+  bin:
+    buf: bin/buf
+    protoc-gen-buf-breaking: bin/protoc-gen-buf-breaking
+    protoc-gen-buf-lint: bin/protoc-gen-buf-lint
+  checksum: 10c0/fa8e038dd58edf94d42b8ec6c334047fe37df6ae8ab4ef7694df770eb9fc051fd50315e683bc621a794f269c77bfb616b6c100284349c674a36780d2c73e0429
+  languageName: node
+  linkType: hard
+
 "@bufbuild/protobuf@npm:^2.5.0":
   version: 2.9.0
   resolution: "@bufbuild/protobuf@npm:2.9.0"
@@ -19697,6 +19780,7 @@ __metadata:
     "@aws-sdk/lib-storage": "npm:^3.798.0"
     "@babel/preset-env": "npm:^7.22.0"
     "@babel/preset-typescript": "npm:^7.22.0"
+    "@bufbuild/buf": "npm:^1.67.0"
     "@clickhouse/client": "npm:^1.16.0"
     "@dotenvx/dotenvx": "npm:^1.25.1"
     "@esbuild-plugins/node-globals-polyfill": "npm:^0.2.3"

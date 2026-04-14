@@ -15,7 +15,7 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
-import type { DtoVolumeDTO } from './dto-volume-dto';
+import type { SpecsgenVolumeMount } from './specsgen-volume-mount';
 
 /**
  * 
@@ -103,9 +103,9 @@ export interface RecoverSandboxDTO {
     'userId': string;
     /**
      * 
-     * @type {Array<DtoVolumeDTO>}
+     * @type {Array<SpecsgenVolumeMount>}
      * @memberof RecoverSandboxDTO
      */
-    'volumes'?: Array<DtoVolumeDTO>;
+    'volumes'?: Array<SpecsgenVolumeMount>;
 }
 

@@ -1438,16 +1438,15 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "registry": {
-                    "$ref": "#/definitions/RegistryDTO"
+                    "$ref": "#/definitions/specsgen.RegistryInfo"
                 },
                 "snapshot": {
-                    "description": "Snapshot ID and tag or the build's hash",
                     "type": "string"
                 },
                 "sourceRegistries": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/RegistryDTO"
+                        "$ref": "#/definitions/specsgen.RegistryInfo"
                     }
                 }
             }
@@ -1460,7 +1459,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "registry": {
-                    "$ref": "#/definitions/RegistryDTO"
+                    "$ref": "#/definitions/specsgen.RegistryInfo"
                 },
                 "snapshot": {
                     "type": "string"
@@ -1522,7 +1521,6 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "organizationId": {
-                    "description": "Nullable for backward compatibility",
                     "type": "string"
                 },
                 "osUser": {
@@ -1535,7 +1533,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "registry": {
-                    "$ref": "#/definitions/RegistryDTO"
+                    "$ref": "#/definitions/specsgen.RegistryInfo"
                 },
                 "skipStart": {
                     "type": "boolean"
@@ -1553,7 +1551,7 @@ const docTemplate = `{
                 "volumes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.VolumeDTO"
+                        "$ref": "#/definitions/specsgen.VolumeMount"
                     }
                 }
             }
@@ -1601,11 +1599,10 @@ const docTemplate = `{
             ],
             "properties": {
                 "registry": {
-                    "$ref": "#/definitions/RegistryDTO"
+                    "$ref": "#/definitions/specsgen.RegistryInfo"
                 },
                 "snapshot": {
-                    "type": "string",
-                    "example": "nginx:latest"
+                    "type": "string"
                 }
             }
         },
@@ -1638,13 +1635,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "destinationRegistry": {
-                    "$ref": "#/definitions/RegistryDTO"
+                    "$ref": "#/definitions/specsgen.RegistryInfo"
                 },
                 "newTag": {
                     "type": "string"
                 },
                 "registry": {
-                    "$ref": "#/definitions/RegistryDTO"
+                    "$ref": "#/definitions/specsgen.RegistryInfo"
                 },
                 "snapshot": {
                     "type": "string"
@@ -1708,28 +1705,8 @@ const docTemplate = `{
                 "volumes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.VolumeDTO"
+                        "$ref": "#/definitions/specsgen.VolumeMount"
                     }
-                }
-            }
-        },
-        "RegistryDTO": {
-            "type": "object",
-            "required": [
-                "url"
-            ],
-            "properties": {
-                "password": {
-                    "type": "string"
-                },
-                "project": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
                 }
             }
         },
@@ -1947,20 +1924,6 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.VolumeDTO": {
-            "type": "object",
-            "properties": {
-                "mountPath": {
-                    "type": "string"
-                },
-                "subpath": {
-                    "type": "string"
-                },
-                "volumeId": {
-                    "type": "string"
-                }
-            }
-        },
         "enums.BackupState": {
             "type": "string",
             "enum": [
@@ -2008,6 +1971,41 @@ const docTemplate = `{
                 "SandboxStateUnknown",
                 "SandboxStatePullingSnapshot"
             ]
+        },
+        "specsgen.RegistryInfo": {
+            "type": "object",
+            "required": [
+                "url"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "project": {
+                    "description": "Optional registry project / namespace.",
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "specsgen.VolumeMount": {
+            "type": "object",
+            "properties": {
+                "mountPath": {
+                    "type": "string"
+                },
+                "subpath": {
+                    "type": "string"
+                },
+                "volumeId": {
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {

@@ -118,7 +118,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 	}
 
 	volumeMountPathBinds := make([]string, 0)
-	if sandboxDto.Volumes != nil {
+	if len(sandboxDto.Volumes) > 0 {
 		volumeMountPathBinds, err = d.getVolumesMountPathBinds(ctx, sandboxDto.Volumes)
 		if err != nil {
 			return "", "", err

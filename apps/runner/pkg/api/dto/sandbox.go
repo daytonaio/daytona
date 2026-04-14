@@ -3,60 +3,22 @@
 
 package dto
 
-type CreateSandboxDTO struct {
-	Id               string            `json:"id" validate:"required"`
-	FromVolumeId     string            `json:"fromVolumeId,omitempty"`
-	UserId           string            `json:"userId" validate:"required"`
-	Snapshot         string            `json:"snapshot" validate:"required"`
-	OsUser           string            `json:"osUser" validate:"required"`
-	CpuQuota         int64             `json:"cpuQuota" validate:"min=1"`
-	GpuQuota         int64             `json:"gpuQuota" validate:"min=0"`
-	MemoryQuota      int64             `json:"memoryQuota" validate:"min=1"`
-	StorageQuota     int64             `json:"storageQuota" validate:"min=1"`
-	Env              map[string]string `json:"env,omitempty"`
-	Registry         *RegistryDTO      `json:"registry,omitempty"`
-	Entrypoint       []string          `json:"entrypoint,omitempty"`
-	Volumes          []VolumeDTO       `json:"volumes,omitempty"`
-	NetworkBlockAll  *bool             `json:"networkBlockAll,omitempty"`
-	NetworkAllowList *string           `json:"networkAllowList,omitempty"`
-	Metadata         map[string]string `json:"metadata,omitempty"`
-	AuthToken        *string           `json:"authToken,omitempty"`
-	OtelEndpoint     *string           `json:"otelEndpoint,omitempty"`
-	SkipStart        *bool             `json:"skipStart,omitempty"`
+import specsgen "github.com/daytonaio/runner/pkg/runner/v2/specs/gen"
 
-	// Nullable for backward compatibility
-	OrganizationId *string `json:"organizationId,omitempty"`
-	RegionId       *string `json:"regionId,omitempty"`
+type CreateSandboxDTO struct {
+	*specsgen.CreateSandboxPayload
 } //	@name	CreateSandboxDTO
 
 type ResizeSandboxDTO struct {
-	Cpu    int64 `json:"cpu,omitempty" validate:"omitempty,min=1"`
-	Gpu    int64 `json:"gpu,omitempty" validate:"omitempty,min=0"`
-	Memory int64 `json:"memory,omitempty" validate:"omitempty,min=1"`
-	Disk   int64 `json:"disk,omitempty" validate:"omitempty,min=1"`
+	*specsgen.ResizeSandboxPayload
 } //	@name	ResizeSandboxDTO
 
 type UpdateNetworkSettingsDTO struct {
-	NetworkBlockAll    *bool   `json:"networkBlockAll,omitempty"`
-	NetworkAllowList   *string `json:"networkAllowList,omitempty"`
-	NetworkLimitEgress *bool   `json:"networkLimitEgress,omitempty"`
+	*specsgen.UpdateNetworkSettingsPayload
 } //	@name	UpdateNetworkSettingsDTO
 
 type RecoverSandboxDTO struct {
-	FromVolumeId      string            `json:"fromVolumeId,omitempty"`
-	UserId            string            `json:"userId" validate:"required"`
-	Snapshot          *string           `json:"snapshot,omitempty"`
-	OsUser            string            `json:"osUser" validate:"required"`
-	CpuQuota          int64             `json:"cpuQuota" validate:"min=1"`
-	GpuQuota          int64             `json:"gpuQuota" validate:"min=0"`
-	MemoryQuota       int64             `json:"memoryQuota" validate:"min=1"`
-	StorageQuota      int64             `json:"storageQuota" validate:"min=1"`
-	Env               map[string]string `json:"env,omitempty"`
-	Volumes           []VolumeDTO       `json:"volumes,omitempty"`
-	NetworkBlockAll   *bool             `json:"networkBlockAll,omitempty"`
-	NetworkAllowList  *string           `json:"networkAllowList,omitempty"`
-	ErrorReason       string            `json:"errorReason" validate:"required"`
-	BackupErrorReason string            `json:"backupErrorReason,omitempty"`
+	*specsgen.RecoverSandboxPayload
 } //	@name	RecoverSandboxDTO
 
 type IsRecoverableDTO struct {
@@ -66,10 +28,11 @@ type IsRecoverableDTO struct {
 type IsRecoverableResponse struct {
 	Recoverable bool `json:"recoverable"`
 } //	@name	IsRecoverableResponse
+
 type StartSandboxResponse struct {
 	DaemonVersion string `json:"daemonVersion"`
 } //	@name	StartSandboxResponse
 
 type StopSandboxDTO struct {
-	Force bool `json:"force,omitempty"`
+	*specsgen.StopSandboxPayload
 } //	@name	StopSandboxDTO
