@@ -1,5 +1,5 @@
 .markdown-content {
-  > :not(h1, h2, h3, h4, h5, h6, p, aside, .sl-heading-wrapper) {
+  > :not(h1, h2, h3, h4, h5, h6, p, aside, .sl-heading-wrapper, ol, ul) {
     margin-bottom: 60px;
     @include for-mobile-screen-sizes {
       margin-bottom: 40px;
@@ -306,6 +306,34 @@
 
       &:last-child {
         margin-bottom: 0;
+      }
+
+      > ul {
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+        padding: 0 10px 0 0;
+        margin-left: 14px;
+        list-style-image: url(/src/assets/icons/facts.svg);
+
+        li {
+          padding-left: 10px;
+          margin: 0 0 4px;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+
+        li > ul {
+          padding: 0 15px;
+          margin: 0;
+          list-style: none;
+
+          li:before {
+            content: '- ';
+            color: var(--primary-text-color);
+          }
+        }
       }
     }
 
