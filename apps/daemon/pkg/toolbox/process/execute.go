@@ -45,7 +45,7 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 		}
 
 		// Pipe command via stdin to avoid OS ARG_MAX limits on large commands
-		cmd := exec.Command(common.GetShell())
+		cmd := exec.Command(common.GetShell(), "-s")
 		cmd.Stdin = strings.NewReader(request.Command)
 		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 		if request.Cwd != nil {
