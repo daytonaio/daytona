@@ -157,7 +157,10 @@ export const CreateSandboxSheet = ({ className, ref }: { className?: string; ref
   const formRef = useRef<HTMLFormElement>(null)
 
   useImperativeHandle(ref, () => ({
-    open: () => setOpen(true),
+    open: () => {
+      console.log('a')
+      setOpen(true)
+    },
   }))
 
   const maxCpu = selectedOrganization?.maxCpuPerSandbox
@@ -318,9 +321,9 @@ export const CreateSandboxSheet = ({ className, ref }: { className?: string; ref
     }
   }, [open, resetState])
 
-  if (!createSandboxEnabled) {
-    return null
-  }
+  // if (!createSandboxEnabled) {
+  //   return null
+  // }
 
   return (
     <Sheet

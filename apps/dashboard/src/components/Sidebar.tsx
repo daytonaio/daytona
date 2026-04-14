@@ -24,10 +24,10 @@ import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 import { useTheme } from '@/contexts/ThemeContext'
 import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
+import { useUserOrganizationInvitationsQuery } from '@/hooks/queries/useUserOrganizationInvitationsQuery'
 import { useWebhookAppPortalAccessQuery } from '@/hooks/queries/useWebhookAppPortalAccessQuery'
 import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
 import { useWebhooks } from '@/hooks/useWebhooks'
 import { cn, getMetaKey } from '@/lib/utils'
 import { usePylon, usePylonCommands } from '@/vendor/pylon'
@@ -118,13 +118,14 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
   const sidebar = useSidebar()
   const { selectedOrganization, authenticatedUserOrganizationMember, authenticatedUserHasPermission } =
     useSelectedOrganization()
-  const { count: organizationInvitationsCount } = useUserOrganizationInvitations()
+  const { data: userOrganizationInvitations = [] } = useUserOrganizationInvitationsQuery()
   const { isInitialized: webhooksInitialized } = useWebhooks()
   const webhooksAccess = useWebhookAppPortalAccessQuery(selectedOrganization?.id)
   const orgInfraEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_INFRASTRUCTURE)
   const organizationExperimentsEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_EXPERIMENTS)
   const playgroundEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_PLAYGROUND)
   const webhooksEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_WEBHOOKS)
+  const organizationInvitationsCount = userOrganizationInvitations.length
 
   const sidebarItems = useMemo(() => {
     const arr: SidebarItem[] = [

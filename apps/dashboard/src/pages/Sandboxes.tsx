@@ -850,7 +850,10 @@ const Sandboxes: React.FC = () => {
         id: 'create-sandbox',
         label: 'Create Sandbox',
         icon: <PlusIcon className="w-4 h-4" />,
-        onSelect: () => createSandboxSheetRef.current?.open(),
+        onSelect: () => {
+          console.log(createSandboxSheetRef)
+          createSandboxSheetRef.current?.open()
+        },
       },
     ]
   }, [canCreateSandbox])

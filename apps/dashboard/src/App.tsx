@@ -11,7 +11,6 @@ import UserOrganizationInvitations from '@/pages/UserOrganizationInvitations'
 import { NotificationSocketProvider } from '@/providers/NotificationSocketProvider'
 import { OrganizationsProvider } from '@/providers/OrganizationsProvider'
 import { SelectedOrganizationProvider } from '@/providers/SelectedOrganizationProvider'
-import { UserOrganizationInvitationsProvider } from '@/providers/UserOrganizationInvitationsProvider'
 import { initPylon } from '@/vendor/pylon'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytona/api-client'
 import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
@@ -143,15 +142,13 @@ function App() {
               <OrganizationsProvider>
                 <SelectedOrganizationProvider>
                   <RegionsProvider>
-                    <UserOrganizationInvitationsProvider>
-                      <NotificationSocketProvider>
-                        <CommandPaletteProvider>
-                          <BannerProvider>
-                            <Dashboard />
-                          </BannerProvider>
-                        </CommandPaletteProvider>
-                      </NotificationSocketProvider>
-                    </UserOrganizationInvitationsProvider>
+                    <NotificationSocketProvider>
+                      <CommandPaletteProvider>
+                        <BannerProvider>
+                          <Dashboard />
+                        </BannerProvider>
+                      </CommandPaletteProvider>
+                    </NotificationSocketProvider>
                   </RegionsProvider>
                 </SelectedOrganizationProvider>
               </OrganizationsProvider>

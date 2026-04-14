@@ -6,47 +6,31 @@
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { OrganizationInvitationActionDialog } from '@/components/UserOrganizationInvitations/OrganizationInvitationActionDialog'
 import { UserOrganizationInvitationTable } from '@/components/UserOrganizationInvitations/UserOrganizationInvitationTable'
-import { useApi } from '@/hooks/useApi'
-import { useOrganizations } from '@/hooks/useOrganizations'
-import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
+import { useAcceptUserOrganizationInvitationMutation } from '@/hooks/mutations/useAcceptUserOrganizationInvitationMutation'
+import { useDeclineUserOrganizationInvitationMutation } from '@/hooks/mutations/useDeclineUserOrganizationInvitationMutation'
+import { useUserOrganizationInvitationsQuery } from '@/hooks/queries/useUserOrganizationInvitationsQuery'
 import { handleApiError } from '@/lib/error-handling'
 import { OrganizationInvitation } from '@daytona/api-client'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
 const UserOrganizationInvitations: React.FC = () => {
-  const { organizationsApi } = useApi()
-
-  const { refreshOrganizations } = useOrganizations()
-  const { setCount } = useUserOrganizationInvitations()
-
-  const [invitations, setInvitations] = useState<OrganizationInvitation[]>([])
-  const [loadingInvitations, setLoadingInvitations] = useState(true)
+  const {
+    data: invitations = [],
+    isLoading: loadingInvitations,
+    error: invitationsError,
+  } = useUserOrganizationInvitationsQuery()
+  const acceptInvitationMutation = useAcceptUserOrganizationInvitationMutation()
+  const declineInvitationMutation = useDeclineUserOrganizationInvitationMutation()
 
   const [loadingInvitationAction, setLoadingInvitationAction] = useState<Record<string, boolean>>({})
 
-  const fetchInvitations = useCallback(
-    async (showTableLoadingState = true) => {
-      if (showTableLoadingState) {
-        setLoadingInvitations(true)
-      }
-      try {
-        const response = await organizationsApi.listOrganizationInvitationsForAuthenticatedUser()
-        setInvitations(response.data)
-        setCount(response.data.length)
-      } catch (error) {
-        handleApiError(error, 'Failed to fetch invitations')
-      } finally {
-        setLoadingInvitations(false)
-      }
-    },
-    [organizationsApi, setCount],
-  )
-
   useEffect(() => {
-    fetchInvitations()
-  }, [fetchInvitations])
+    if (invitationsError) {
+      handleApiError(invitationsError, 'Failed to fetch invitations')
+    }
+  }, [invitationsError])
 
   const [searchParams, setSearchParams] = useSearchParams()
   const [invitationActionDialogOpen, setInvitationActionDialogOpen] = useState(false)
@@ -72,10 +56,11 @@ const UserOrganizationInvitations: React.FC = () => {
   const handleAcceptInvitation = async (invitation: OrganizationInvitation): Promise<boolean> => {
     setLoadingInvitationAction((prev) => ({ ...prev, [invitation.id]: true }))
     try {
-      await organizationsApi.acceptOrganizationInvitation(invitation.id)
+      await acceptInvitationMutation.mutateAsync({
+        invitationId: invitation.id,
+        organizationId: invitation.organizationId,
+      })
       toast.success('Invitation accepted successfully')
-      await refreshOrganizations(invitation.organizationId)
-      await fetchInvitations(false)
       return true
     } catch (error) {
       handleApiError(error, 'Failed to accept invitation')
@@ -88,9 +73,8 @@ const UserOrganizationInvitations: React.FC = () => {
   const handleDeclineInvitation = async (invitation: OrganizationInvitation): Promise<boolean> => {
     setLoadingInvitationAction((prev) => ({ ...prev, [invitation.id]: true }))
     try {
-      await organizationsApi.declineOrganizationInvitation(invitation.id)
+      await declineInvitationMutation.mutateAsync({ invitationId: invitation.id })
       toast.success('Invitation declined successfully')
-      await fetchInvitations(false)
       return true
     } catch (error) {
       handleApiError(error, 'Failed to decline invitation')
