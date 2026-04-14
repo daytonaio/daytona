@@ -911,7 +911,16 @@ export class SandboxService {
         })
 
         if (insertedForkedSandbox) {
-          await this.destroy(insertedForkedSandbox.id)
+          try {
+            const updateData = Sandbox.getSoftDeleteUpdate(insertedForkedSandbox)
+            const destroyedSandbox = await this.sandboxRepository.updateWhere(insertedForkedSandbox.id, {
+              updateData,
+              whereCondition: { pending: true, state: SandboxState.CREATING },
+            })
+            this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(destroyedSandbox))
+          } catch (destroyError) {
+            this.logger.error(`Failed to rollback forked sandbox ${insertedForkedSandbox.id}`, destroyError)
+          }
         }
 
         throw error
