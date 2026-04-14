@@ -20,6 +20,7 @@ COPY apps/daemon/pkg/toolbox/docs/swagger.json apps/daemon/pkg/toolbox/docs/swag
 
 # Lib dependencies (api imports runner-api-client)
 COPY libs/runner-api-client/ libs/runner-api-client/
+COPY libs/runner-proto/ libs/runner-proto/
 
 # Docs build arguments
 ENV PUBLIC_WEB_URL=https://daytona.io
