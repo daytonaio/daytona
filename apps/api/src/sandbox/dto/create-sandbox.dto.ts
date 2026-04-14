@@ -8,6 +8,7 @@ import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { SandboxVolume } from './sandbox.dto'
 import { CreateBuildInfoDto } from './create-build-info.dto'
+import { IsSafeDisplayString } from '../../common/validators'
 
 @ApiSchema({ name: 'CreateSandbox' })
 export class CreateSandboxDto {
@@ -17,6 +18,7 @@ export class CreateSandboxDto {
   })
   @IsOptional()
   @IsString()
+  @IsSafeDisplayString()
   name?: string
 
   @ApiPropertyOptional({

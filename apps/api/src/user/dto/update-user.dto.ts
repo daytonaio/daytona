@@ -4,18 +4,20 @@
  */
 
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator'
+import { IsBoolean, IsEmail, IsEnum, IsOptional, IsString } from 'class-validator'
 import { SystemRole } from '../enums/system-role.enum'
+import { IsSafeDisplayString } from '../../common/validators'
 
 @ApiSchema({ name: 'UpdateUser' })
 export class UpdateUserDto {
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
+  @IsSafeDisplayString()
   name?: string
 
   @ApiPropertyOptional()
-  @IsString()
+  @IsEmail()
   @IsOptional()
   email?: string
 
