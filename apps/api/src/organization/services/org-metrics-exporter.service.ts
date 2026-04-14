@@ -56,7 +56,7 @@ export class OrgMetricsExporterService {
     }
 
     const lockKey = 'org-metrics-export'
-    const acquired = await this.redisLockProvider.lock(lockKey, 55)
+    const acquired = await this.redisLockProvider.lock(lockKey, 300)
     if (!acquired) {
       return
     }
