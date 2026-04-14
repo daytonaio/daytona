@@ -23,8 +23,13 @@ func GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 	// Build the target URL
 	targetURL := fmt.Sprintf("http://localhost:%s", targetPort)
 
-	// Get the wildcard path and normalize it
-	path := ctx.Param("path")
+	// Get the wildcard path preserving original percent-encoding.
+	// ctx.Param() decodes the path, which causes mutations when the decoded
+	// form is re-encoded by Go's url package (e.g. "(" → "%28", "%40" → "@").
+	escapedFull := ctx.Request.URL.EscapedPath()
+	decodedParam := ctx.Param("path")
+	prefixLen := len(ctx.Request.URL.Path) - len(decodedParam)
+	path := escapedFull[prefixLen:]
 
 	// Ensure path always has a leading slash but not duplicate slashes
 	if path == "" {

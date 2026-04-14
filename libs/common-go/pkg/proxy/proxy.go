@@ -54,6 +54,7 @@ func NewProxyRequestHandler(getProxyTarget func(*gin.Context) (targetUrl *url.UR
 				req.URL.Scheme = target.Scheme
 				req.URL.Host = target.Host
 				req.URL.Path = target.Path
+				req.URL.RawPath = target.RawPath
 				if target.RawQuery == "" || req.URL.RawQuery == "" {
 					req.URL.RawQuery = target.RawQuery + req.URL.RawQuery
 				} else {
