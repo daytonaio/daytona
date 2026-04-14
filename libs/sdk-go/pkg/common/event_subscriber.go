@@ -75,6 +75,7 @@ type EventSubscriber struct {
 	disconnectTimer *time.Timer
 
 	// reconnection state
+	connecting       bool
 	reconnecting     bool
 	reconnectAttempt int
 	maxReconnects    int
@@ -98,21 +99,18 @@ func NewEventSubscriber(apiURL, token, organizationID string) *EventSubscriber {
 // or already established. Non-blocking. Starts a background goroutine to
 // connect if not already connected and no attempt is currently running.
 func (es *EventSubscriber) EnsureConnected() {
-	es.mu.RLock()
-	if es.connected {
-		es.mu.RUnlock()
+	es.mu.Lock()
+	if es.connected || es.reconnecting || es.connecting {
+		es.mu.Unlock()
 		return
 	}
-	if es.reconnecting {
-		es.mu.RUnlock()
-		return
-	}
-	es.mu.RUnlock()
+	es.connecting = true
+	es.mu.Unlock()
 
 	go func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		_ = es.Connect(ctx) // Callers check IsConnected when they need it
+		_ = es.Connect(ctx)
 	}()
 }
 
@@ -148,13 +146,16 @@ func (es *EventSubscriber) Connect(ctx context.Context) error {
 		es.mu.Lock()
 		es.failed = true
 		es.failError = fmt.Sprintf("WebSocket connection failed: %v", err)
+		es.connecting = false
+		errMsg := es.failError
 		es.mu.Unlock()
-		return fmt.Errorf("%s", es.failError)
+		return fmt.Errorf("%s", errMsg)
 	}
 
 	es.mu.Lock()
 	es.client = client
 	es.connected = true
+	es.connecting = false
 	es.failed = false
 	es.failError = ""
 	es.reconnectAttempt = 0
