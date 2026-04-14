@@ -61,6 +61,14 @@ fmt.Println("Computer use processes started")
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var result = sandbox.computerUse.start();
+System.out.println("Computer use processes started: " + result.getMessage());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -112,6 +120,14 @@ fmt.Println("Computer use processes stopped")
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var result = sandbox.computerUse.stop();
+System.out.println("Computer use processes stopped: " + result.getMessage());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -160,6 +176,14 @@ if err != nil {
 }
 
 fmt.Printf("Computer use status: %v\n", status["status"])
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var response = sandbox.computerUse.getStatus();
+System.out.println("Computer use status: " + response.getStatus());
 ```
 
 </TabItem>
@@ -393,6 +417,20 @@ result, err = sandbox.ComputerUse.Mouse().Click(ctx, 100, 200, &rightButton, nil
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Single left click
+sandbox.computerUse.click(100, 200);
+
+// Double click
+sandbox.computerUse.doubleClick(100, 200);
+
+// Right click
+sandbox.computerUse.click(100, 200, "right");
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -451,6 +489,14 @@ fmt.Printf("Mouse moved to: %v, %v\n", result["x"], result["y"])
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var result = sandbox.computerUse.moveMouse(100, 200);
+System.out.println("Mouse moved to: " + result.getX() + ", " + result.getY());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -504,6 +550,14 @@ if err != nil {
 }
 
 fmt.Printf("Dragged to %v, %v\n", result["x"], result["y"])
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var result = sandbox.computerUse.drag(50, 50, 150, 150);
+System.out.println("Drag ended at: " + result.getX() + ", " + result.getY());
 ```
 
 </TabItem>
@@ -579,6 +633,17 @@ success, err = sandbox.ComputerUse.Mouse().Scroll(ctx, 100, 200, "down", &amount
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Scroll up (negative vertical delta maps to "up")
+sandbox.computerUse.scroll(100, 200, 0, -3);
+
+// Scroll down
+sandbox.computerUse.scroll(100, 200, 0, 5);
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -634,6 +699,14 @@ if err != nil {
 }
 
 fmt.Printf("Mouse is at: %v, %v\n", position["x"], position["y"])
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var position = sandbox.computerUse.getMousePosition();
+System.out.println("Mouse is at: " + position.getX() + ", " + position.getY());
 ```
 
 </TabItem>
@@ -694,6 +767,13 @@ if err != nil {
 // With delay between characters
 delay := 100
 err = sandbox.ComputerUse.Keyboard().Type(ctx, "Slow typing", &delay)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+sandbox.computerUse.typeText("Hello, World!");
 ```
 
 </TabItem>
@@ -773,6 +853,20 @@ err = sandbox.ComputerUse.Keyboard().Press(ctx, "c", []string{"ctrl"})
 
 // Press Ctrl+Shift+T
 err = sandbox.ComputerUse.Keyboard().Press(ctx, "t", []string{"ctrl", "shift"})
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Press Enter
+sandbox.computerUse.pressKey("Return");
+
+// Press Ctrl+C
+sandbox.computerUse.pressHotkey("ctrl", "c");
+
+// Press Ctrl+Shift+T
+sandbox.computerUse.pressHotkey("ctrl", "shift", "t");
 ```
 
 </TabItem>
@@ -856,6 +950,20 @@ err = sandbox.ComputerUse.Keyboard().Hotkey(ctx, "alt+tab")
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Copy
+sandbox.computerUse.pressHotkey("ctrl", "c");
+
+// Paste
+sandbox.computerUse.pressHotkey("ctrl", "v");
+
+// Alt+Tab
+sandbox.computerUse.pressHotkey("alt", "tab");
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -926,6 +1034,18 @@ withCursor, err := sandbox.ComputerUse.Screenshot().TakeFullScreen(ctx, &showCur
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var screenshot = sandbox.computerUse.takeScreenshot();
+Integer sizeBytes = screenshot.getSizeBytes();
+System.out.println("Screenshot payload size: " + (sizeBytes != null ? sizeBytes + " bytes" : "n/a"));
+
+// With cursor visible
+var withCursor = sandbox.computerUse.takeScreenshot(true);
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -979,6 +1099,15 @@ if err != nil {
 }
 
 fmt.Printf("Captured region: %dx%d\n", screenshot.Width, screenshot.Height)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var screenshot = sandbox.computerUse.takeRegionScreenshot(100, 100, 300, 200);
+Integer sizeBytes = screenshot.getSizeBytes();
+System.out.println("Captured region, payload size: " + (sizeBytes != null ? sizeBytes + " bytes" : "n/a"));
 ```
 
 </TabItem>
@@ -1052,6 +1181,20 @@ jpeg = sandbox.computer_use.screenshot.take_compressed(
 scaled = sandbox.computer_use.screenshot.take_compressed(
   options: Daytona::ComputerUse::ScreenshotOptions.new(format: "png", scale: 0.5)
 )
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Compressed full screen (format, quality 1-100, scale factor)
+var screenshot = sandbox.computerUse.takeCompressedScreenshot("png", 80, 1.0);
+
+// High quality JPEG at full scale
+var jpeg = sandbox.computerUse.takeCompressedScreenshot("jpeg", 95, 1.0);
+
+// Scaled down PNG
+var scaled = sandbox.computerUse.takeCompressedScreenshot("png", 80, 0.5);
 ```
 
 </TabItem>
@@ -1194,6 +1337,25 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+
+import java.util.Map;
+
+try (Daytona daytona = new Daytona()) {
+    CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
+    params.setSnapshot("daytonaio/sandbox:0.6.0");
+    params.setName("my-sandbox");
+    params.setEnvVars(Map.of("DAYTONA_RECORDINGS_DIR", "/home/daytona/my-recordings"));
+    Sandbox sandbox = daytona.create(params);
+}
+```
+
+</TabItem>
 </Tabs>
 
 ### Start Recording
@@ -1243,6 +1405,16 @@ if err != nil {
 
 fmt.Printf("Recording started: %s\n", *recording.Id)
 fmt.Printf("File path: %s\n", *recording.FilePath)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Start recording with a custom label
+var recording = sandbox.computerUse.startRecording("test-1");
+System.out.println("Recording started: " + recording.getId());
+System.out.println("File path: " + recording.getFilePath());
 ```
 
 </TabItem>
@@ -1306,6 +1478,16 @@ if err != nil {
 
 fmt.Printf("Recording stopped: %f seconds\n", *stoppedRecording.DurationSeconds)
 fmt.Printf("Saved to: %s\n", *stoppedRecording.FilePath)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Stop the recording
+var stoppedRecording = sandbox.computerUse.stopRecording(recording.getId());
+System.out.println("Recording stopped: " + stoppedRecording.getDurationSeconds() + " seconds");
+System.out.println("Saved to: " + stoppedRecording.getFilePath());
 ```
 
 </TabItem>
@@ -1375,6 +1557,19 @@ for _, rec := range recordingsList.Recordings {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var recordingsList = sandbox.computerUse.listRecordings();
+System.out.println("Total recordings: " + recordingsList.getRecordings().size());
+for (var rec : recordingsList.getRecordings()) {
+    System.out.println(
+        "- " + rec.getFileName() + ": " + rec.getDurationSeconds() + "s (" + rec.getSizeBytes() + " bytes)"
+    );
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1433,6 +1628,16 @@ fmt.Printf("Duration: %.2fs\n", *recordingDetail.DurationSeconds)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var recordingDetail = sandbox.computerUse.getRecording("recording-id");
+System.out.println("Recording: " + recordingDetail.getFileName());
+System.out.println("Status: " + recordingDetail.getStatus());
+System.out.println("Duration: " + recordingDetail.getDurationSeconds() + "s");
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1480,6 +1685,14 @@ if err != nil {
 }
 
 fmt.Println("Recording deleted successfully")
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+sandbox.computerUse.deleteRecording("recording-id");
+System.out.println("Recording deleted successfully");
 ```
 
 </TabItem>
@@ -1554,6 +1767,24 @@ err = sandbox.ComputerUse.Recording().Download(ctx, recording.GetId(), downloadP
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+
+// Download returns a temp file from the API client; copy it to a stable path
+var tempFile = sandbox.computerUse.downloadRecording(recording.getId());
+Files.copy(tempFile.toPath(), Path.of("local_recording.mp4"), StandardCopyOption.REPLACE_EXISTING);
+System.out.println("Recording saved to local_recording.mp4");
+
+var downloadPath = Path.of("recordings", "recording_" + recording.getId() + ".mp4");
+Files.createDirectories(downloadPath.getParent());
+Files.copy(tempFile.toPath(), downloadPath, StandardCopyOption.REPLACE_EXISTING);
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1571,6 +1802,7 @@ All SDK implementations stream the recording file directly to disk without loadi
 - **TypeScript**: Uses Node.js `pipeline()` with backpressure handling
 - **Ruby**: Uses Typhoeus streaming with `on_body` callbacks
 - **Go**: Uses `io.Copy()` with 32KB internal buffer
+- **Java**: The OpenAPI client streams the response body into a temporary file via OkHttp
 :::
 
 ### Recording Dashboard
@@ -1647,6 +1879,21 @@ fmt.Printf("Displays: %v\n", info["displays"])
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var info = sandbox.computerUse.getDisplayInfo();
+if (info.getDisplays() != null) {
+    for (var display : info.getDisplays()) {
+        System.out.println(
+            "Display " + display.getId() + ": " + display.getWidth() + "x" + display.getHeight()
+                + " at " + display.getX() + "," + display.getY()
+        );
+    }
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1702,6 +1949,20 @@ if err != nil {
 }
 
 fmt.Printf("Open windows: %v\n", result["windows"])
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var windows = sandbox.computerUse.getWindows();
+var list = windows.getWindows();
+if (list != null) {
+    System.out.println("Found " + list.size() + " open windows:");
+    for (var window : list) {
+        System.out.println("- " + window.getTitle() + " (ID: " + window.getId() + ")");
+    }
+}
 ```
 
 </TabItem>

@@ -126,6 +126,34 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Basic clone
+sandbox.git.clone("https://github.com/user/repo.git", "workspace/repo");
+
+// Clone with authentication
+sandbox.git.clone(
+    "https://github.com/user/repo.git",
+    "workspace/repo",
+    null,
+    null,
+    "git",
+    "personal_access_token"
+);
+
+// Clone specific branch
+sandbox.git.clone(
+    "https://github.com/user/repo.git",
+    "workspace/repo",
+    "develop",
+    null,
+    null,
+    null
+);
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -230,6 +258,31 @@ if err != nil {
 }
 for _, branch := range branches {
 	fmt.Printf("Branch: %s\n", branch)
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.model.GitStatus;
+import java.util.List;
+
+// Get repository status
+GitStatus status = sandbox.git.status("workspace/repo");
+System.out.println("Current branch: " + status.getCurrentBranch());
+System.out.println("Commits ahead: " + status.getAhead());
+System.out.println("Commits behind: " + status.getBehind());
+for (GitStatus.FileStatus file : status.getFileStatus()) {
+    System.out.println("File: " + file.getPath());
+}
+
+// List branches
+Object rawBranches = sandbox.git.branches("workspace/repo").get("branches");
+if (rawBranches instanceof List<?> branchList) {
+    for (Object branch : branchList) {
+        System.out.println("Branch: " + branch);
+    }
 }
 ```
 
@@ -477,6 +530,25 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import java.util.List;
+
+// Stage a single file
+sandbox.git.add("workspace/repo", List.of("file.txt"));
+
+// Stage multiple files
+sandbox.git.add(
+    "workspace/repo",
+    List.of("src/main.py", "tests/test_main.py", "README.md")
+);
+
+// Stage whole repository
+sandbox.git.add("workspace/repo", List.of("."));
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -557,6 +629,24 @@ if err != nil {
 	log.Fatal(err)
 }
 fmt.Printf("Commit SHA: %s\n", response.SHA)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.model.GitCommitResponse;
+import java.util.List;
+
+// Stage and commit changes
+sandbox.git.add("workspace/repo", List.of("README.md"));
+GitCommitResponse response = sandbox.git.commit(
+    "workspace/repo",
+    "Update documentation",
+    "John Doe",
+    "john@example.com"
+);
+System.out.println("Commit hash: " + response.getHash());
 ```
 
 </TabItem>
@@ -643,6 +733,14 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Push without authentication (for public repos or SSH)
+sandbox.git.push("workspace/repo");
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -718,6 +816,14 @@ err = sandbox.Git.Pull(ctx, "workspace/repo",
 if err != nil {
 	log.Fatal(err)
 }
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Pull without authentication
+sandbox.git.pull("workspace/repo");
 ```
 
 </TabItem>

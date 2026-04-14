@@ -121,6 +121,40 @@ fmt.Println(result.Result)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.model.ExecuteResponse;
+import java.util.Map;
+
+// Run code (stateless; language matches the sandbox image)
+ExecuteResponse response = sandbox.process.codeRun(
+    """
+    def greet(name):
+        return f"Hello, {name}!"
+
+    print(greet("Daytona"))
+    """
+);
+System.out.println(response.getResult());
+
+// Run code with environment variables and timeout (seconds)
+response = sandbox.process.codeRun(
+    "import os; print('FOO:', os.environ.get('FOO'))",
+    Map.of("FOO", "BAR"),
+    null
+);
+System.out.println(response.getResult());
+
+response = sandbox.process.codeRun(
+    "import time; time.sleep(2); print(\"Done\")",
+    null,
+    5
+);
+System.out.println(response.getResult());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -267,6 +301,22 @@ if err != nil {
 }
 ```
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.RunCodeOptions;
+
+// Default interpreter context (Python)
+sandbox.codeInterpreter.runCode(
+    """
+    counter = 1
+    print(f'Counter initialized at {counter}')
+    """,
+    new RunCodeOptions().setOnStdout(chunk -> System.out.print("[STDOUT] " + chunk))
+);
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -398,6 +448,31 @@ fmt.Println(response.Result)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.model.ExecuteResponse;
+import java.util.Map;
+
+// Execute any shell command
+ExecuteResponse response = sandbox.process.executeCommand("ls -la");
+System.out.println(response.getResult());
+
+// Working directory and timeout (seconds)
+response = sandbox.process.executeCommand("sleep 3", "workspace/src", null, 5);
+System.out.println(response.getResult());
+
+// Environment variables
+response = sandbox.process.executeCommand(
+    "echo $CUSTOM_SECRET",
+    ".",
+    Map.of("CUSTOM_SECRET", "DAYTONA"),
+    null
+);
+System.out.println(response.getResult());
+```
+
+</TabItem>
 <TabItem label="CLI" icon="seti:shell">
 
 ```bash
@@ -513,6 +588,26 @@ if err != nil {
 }
 for _, sess := range sessions {
 	fmt.Printf("Session: %s, Commands: %v\n", sess["sessionId"], sess["commands"])
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.model.Command;
+import io.daytona.sdk.model.Session;
+
+// Check session's executed commands
+Session session = sandbox.process.getSession(sessionId);
+System.out.println("Session " + sessionId + ":");
+for (Command command : session.getCommands()) {
+    System.out.println("Command: " + command.getCommand() + ", Exit Code: " + command.getExitCode());
+}
+
+// List all running sessions
+for (Session s : sandbox.process.listSessions()) {
+    System.out.println("Session: " + s.getSessionId() + ", Commands: " + s.getCommands());
 }
 ```
 
@@ -645,6 +740,31 @@ go func() {
 for msg := range stdout {
 	fmt.Printf("[STDOUT]: %s\n", msg)
 }
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.model.Command;
+import io.daytona.sdk.model.Session;
+
+// Entrypoint session details
+Session session = sandbox.process.getEntrypointSession();
+System.out.println("Entrypoint session: " + session.getSessionId());
+Command cmd = session.getCommands().get(0);
+System.out.println("Entrypoint command id: " + cmd.getId());
+System.out.println("Command: " + cmd.getCommand());
+
+// Entrypoint logs (HTTP)
+String logs = sandbox.process.getEntrypointLogs();
+System.out.println(logs);
+
+// Stream entrypoint logs (WebSocket)
+sandbox.process.getEntrypointLogs(
+    chunk -> System.out.println("[STDOUT]: " + chunk),
+    chunk -> System.out.println("[STDERR]: " + chunk)
+);
 ```
 
 </TabItem>
@@ -806,6 +926,35 @@ for msg := range stdout {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.model.SessionExecuteRequest;
+import io.daytona.sdk.model.SessionExecuteResponse;
+
+String sessionId = "interactive-session";
+sandbox.process.createSession(sessionId);
+
+SessionExecuteResponse command = sandbox.process.executeSessionCommand(
+    sessionId,
+    new SessionExecuteRequest("pip uninstall requests", true)
+);
+String cmdId = command.getCmdId();
+
+Thread logThread = new Thread(() -> sandbox.process.getSessionCommandLogs(
+    sessionId,
+    cmdId,
+    log -> System.out.println("[STDOUT]: " + log),
+    log -> System.out.println("[STDERR]: " + log)
+));
+logThread.start();
+
+Thread.sleep(1000);
+sandbox.process.sendSessionCommandInput(sessionId, cmdId, "y");
+logThread.join();
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -900,6 +1049,21 @@ Daytona provides methods to manage session resources. You should use sessions fo
    // Do work...
    ```
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+   ```java
+   import io.daytona.sdk.model.Session;
+
+   // Clean up session
+   String sessionId = "long-running-cmd";
+   try {
+       sandbox.process.createSession(sessionId);
+       Session session = sandbox.process.getSession(sessionId);
+       // Do work...
+   } finally {
+       sandbox.process.deleteSession(sessionId);
+   }
+   ```
+</TabItem>
 <TabItem label="API" icon="seti:json">
    ```bash
    # Create session
@@ -973,6 +1137,22 @@ if err != nil {
 if result != nil && result.ExitCode != 0 {
 	fmt.Println("Exit code:", result.ExitCode)
 	fmt.Println("Error output:", result.Result)
+}
+```
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+```java
+import io.daytona.sdk.exception.DaytonaException;
+import io.daytona.sdk.model.ExecuteResponse;
+
+try {
+    ExecuteResponse response = sandbox.process.codeRun("invalid python code");
+    if (response.getExitCode() != null && response.getExitCode() != 0) {
+        System.out.println("Exit code: " + response.getExitCode());
+        System.out.println("Error output: " + response.getResult());
+    }
+} catch (DaytonaException e) {
+    System.out.println("Execution failed: " + e.getMessage());
 }
 ```
 </TabItem>

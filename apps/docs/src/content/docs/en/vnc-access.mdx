@@ -84,6 +84,14 @@ fmt.Println("VNC processes started")
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var result = sandbox.computerUse.start();
+System.out.println("VNC processes started: " + result.getMessage());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -135,6 +143,14 @@ fmt.Println("VNC processes stopped")
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var result = sandbox.computerUse.stop();
+System.out.println("VNC processes stopped: " + result.getMessage());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -183,6 +199,14 @@ if err != nil {
 }
 
 fmt.Printf("VNC status: %v\n", status["status"])
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var response = sandbox.computerUse.getStatus();
+System.out.println("VNC status: " + response.getStatus());
 ```
 
 </TabItem>
@@ -246,6 +270,24 @@ await sandbox.computerUse.keyboard.press('Return');
 
 // Take a screenshot
 const screenshot = await sandbox.computerUse.screenshot.takeFullScreen();
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Start VNC processes
+sandbox.computerUse.start();
+
+// Click to open browser
+sandbox.computerUse.click(50, 50);
+
+// Type a URL
+sandbox.computerUse.typeText("https://www.daytona.io/docs/");
+sandbox.computerUse.pressKey("Return");
+
+// Take a screenshot
+var screenshot = sandbox.computerUse.takeScreenshot();
 ```
 
 </TabItem>
