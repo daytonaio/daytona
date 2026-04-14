@@ -850,6 +850,67 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Get organization OTEL config by organization ID
+    # @param organization_id [String] Organization ID
+    # @param [Hash] opts the optional parameters
+    # @return [OtelConfig]
+    def get_organization_otel_config(organization_id, opts = {})
+      data, _status_code, _headers = get_organization_otel_config_with_http_info(organization_id, opts)
+      data
+    end
+
+    # Get organization OTEL config by organization ID
+    # @param organization_id [String] Organization ID
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(OtelConfig, Integer, Hash)>] OtelConfig data, response status code and response headers
+    def get_organization_otel_config_with_http_info(organization_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: OrganizationsApi.get_organization_otel_config ...'
+      end
+      # verify the required parameter 'organization_id' is set
+      if @api_client.config.client_side_validation && organization_id.nil?
+        fail ArgumentError, "Missing the required parameter 'organization_id' when calling OrganizationsApi.get_organization_otel_config"
+      end
+      # resource path
+      local_var_path = '/organizations/{organizationId}/otel-config'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'OtelConfig'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"OrganizationsApi.get_organization_otel_config",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: OrganizationsApi#get_organization_otel_config\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Get organization OTEL config by sandbox auth token
     # @param auth_token [String] Sandbox Auth Token
     # @param [Hash] opts the optional parameters
