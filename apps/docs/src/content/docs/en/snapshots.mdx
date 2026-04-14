@@ -166,8 +166,11 @@ Once the snapshot is pulled, validated, and has an `Active` state, it is ready t
 <TabItem label="Python" icon="seti:python">
 
 ```python
+from daytona import Daytona, CreateSnapshotParams
+
+daytona = Daytona()
 daytona.snapshot.create(
-    CreateSnapshotParams(name='my-awesome-snapshot', image='python:3.11-slim'),
+    CreateSnapshotParams(name="my-awesome-snapshot", image="python:3.11-slim"),
     on_logs=lambda chunk: print(chunk, end=""),
 )
 ```
@@ -176,14 +179,26 @@ daytona.snapshot.create(
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-await daytona.snapshot.create({ name: 'my-awesome-snapshot', image: 'python:3.11-slim' }, { onLogs: console.log });
+import { Daytona } from "@daytona/sdk";
+
+const daytona = new Daytona();
+await daytona.snapshot.create(
+  { name: "my-awesome-snapshot", image: "python:3.11-slim" },
+  { onLogs: console.log },
+);
 ```
 
 </TabItem>
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
-params = CreateSnapshotParams.new(name: 'my-awesome-snapshot', image: 'python:3.11-slim')
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+params = Daytona::CreateSnapshotParams.new(
+  name: 'my-awesome-snapshot',
+  image: 'python:3.11-slim'
+)
 snapshot = daytona.snapshot.create(params) do |chunk|
   print chunk
 end
@@ -193,17 +208,24 @@ end
 <TabItem label="Go" icon="seti:go">
 
 ```go
-snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotParams{
-    Name:  "my-awesome-snapshot",
-    Image: "python:3.11-slim",
-})
-if err != nil {
-    return err
-}
+package main
 
-// Stream build logs
-for log := range logChan {
-    fmt.Println(log)
+import (
+	"context"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+	client, _ := daytona.NewClient()
+	ctx := context.Background()
+	snapshot, logChan, _ := client.Snapshot.Create(ctx, &types.CreateSnapshotParams{
+		Name:  "my-awesome-snapshot",
+		Image: "python:3.11-slim",
+	})
+	_ = snapshot
+	for range logChan {
+	}
 }
 ```
 
@@ -212,11 +234,12 @@ for log := range logChan {
 
 ```java
 import io.daytona.sdk.Daytona;
+import io.daytona.sdk.model.Snapshot;
 
 public class App {
     public static void main(String[] args) {
         try (Daytona daytona = new Daytona()) {
-            daytona.snapshot().create("my-awesome-snapshot", "python:3.11-slim");
+            Snapshot snapshot = daytona.snapshot().create("my-awesome-snapshot", "python:3.11-slim");
         }
     }
 }
