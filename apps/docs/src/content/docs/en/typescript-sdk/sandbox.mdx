@@ -284,7 +284,7 @@ used to create new Sandboxes. The Sandbox will temporarily enter a
 
 ```ts
 const sandbox = await daytona.get('my-sandbox');
-await sandbox.createSnapshot('my-snapshot');
+await sandbox._experimental_createSnapshot('my-snapshot');
 console.log('Snapshot created successfully');
 ```
 
@@ -316,6 +316,8 @@ with the same disk contents but operates independently from that point on.
 - `Promise<Sandbox>` - The forked Sandbox.
 
 **Throws**:
+
+- If timeout is a negative number
 
 - If the fork operation fails or times out
 

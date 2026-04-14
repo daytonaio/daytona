@@ -344,6 +344,7 @@ export class Sandbox implements SandboxDto {
    * @param {number} [timeout] - Maximum time to wait in seconds. 0 means no timeout.
    *                            Defaults to 60-second timeout.
    * @returns {Promise<Sandbox>} The forked Sandbox.
+   * @throws {DaytonaValidationError} - If timeout is a negative number
    * @throws {DaytonaError} - If the fork operation fails or times out
    *
    * @example
@@ -354,7 +355,7 @@ export class Sandbox implements SandboxDto {
   @WithInstrumentation()
   public async _experimental_fork(params?: { name?: string }, timeout = 60): Promise<Sandbox> {
     if (timeout < 0) {
-      throw new DaytonaError('Timeout must be a non-negative number')
+      throw new DaytonaValidationError('Timeout must be a non-negative number')
     }
 
     const response = await this.sandboxApi.forkSandbox(this.id, { name: params?.name }, undefined, {
@@ -390,7 +391,7 @@ export class Sandbox implements SandboxDto {
    *
    * @example
    * const sandbox = await daytona.get('my-sandbox');
-   * await sandbox.createSnapshot('my-snapshot');
+   * await sandbox._experimental_createSnapshot('my-snapshot');
    * console.log('Snapshot created successfully');
    */
   @WithInstrumentation()
