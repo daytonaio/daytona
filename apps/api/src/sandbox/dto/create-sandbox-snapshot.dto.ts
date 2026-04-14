@@ -5,6 +5,7 @@
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 import { IsString } from 'class-validator'
+import { IsSafeDisplayString } from '../../common/validators'
 
 @ApiSchema({ name: 'CreateSandboxSnapshot' })
 export class CreateSandboxSnapshotDto {
@@ -13,5 +14,6 @@ export class CreateSandboxSnapshotDto {
     example: 'my-dev-env-v1',
   })
   @IsString()
+  @IsSafeDisplayString()
   name: string
 }

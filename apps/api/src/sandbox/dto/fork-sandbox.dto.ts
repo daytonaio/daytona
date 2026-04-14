@@ -5,6 +5,7 @@
 
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { IsOptional, IsString } from 'class-validator'
+import { IsSafeDisplayString } from '../../common/validators'
 
 @ApiSchema({ name: 'ForkSandbox' })
 export class ForkSandboxDto {
@@ -14,5 +15,6 @@ export class ForkSandboxDto {
   })
   @IsOptional()
   @IsString()
+  @IsSafeDisplayString()
   name?: string
 }
