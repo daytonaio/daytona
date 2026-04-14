@@ -65,7 +65,18 @@ export class OrgMetricsExporterService {
         return
       }
 
-      await Promise.allSettled(organizations.map((org) => this.exportMetricsForOrganization(org)))
+      const exportResults = await Promise.allSettled(
+        organizations.map((org) => this.exportMetricsForOrganization(org)),
+      )
+
+      exportResults.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          this.logger.warn(
+            `Failed to export metrics for organization ${organizations[index].id}`,
+            result.reason,
+          )
+        }
+      })
     } catch (error) {
       this.logger.warn('Failed to export organization metrics', error)
     } finally {
