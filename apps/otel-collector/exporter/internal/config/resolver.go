@@ -82,6 +82,9 @@ func (r *Resolver) GetOrganizationOtelConfigByOrgId(ctx context.Context, orgId s
 	}
 
 	cfg := r.apiclient.GetConfig()
+	if len(cfg.Servers) == 0 {
+		return nil, fmt.Errorf("api client has no configured servers")
+	}
 	baseURL := cfg.Servers[0].URL
 	url := fmt.Sprintf("%s/organizations/%s/otel-config", baseURL, orgId)
 
