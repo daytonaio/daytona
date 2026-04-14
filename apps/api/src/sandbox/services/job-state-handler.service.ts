@@ -551,7 +551,7 @@ export class JobStateHandlerService {
       }
 
       // Calculate deltas before updating sandbox
-      const payload = job.payload as { cpu?: number; memory?: number; disk?: number }
+      const payload = job.getPayload<{ cpu?: number; memory?: number; disk?: number }>() ?? {}
 
       // For cold resize (previousState === STOPPED), cpu/memory don't affect org quota.
       const isHotResize = previousState === SandboxState.STARTED
