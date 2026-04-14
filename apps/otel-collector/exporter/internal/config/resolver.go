@@ -5,6 +5,10 @@ package config
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
 	"time"
 
 	common_cache "github.com/daytonaio/common-go/pkg/cache"
@@ -57,6 +61,70 @@ func (r *Resolver) GetOrganizationOtelConfig(ctx context.Context, authToken stri
 	}
 
 	if err := r.cache.Set(ctx, authToken, *config, r.cacheTTL); err != nil {
+		return nil, err
+	}
+
+	if config.Endpoint == "(none)" {
+		return nil, nil
+	}
+
+	return config, nil
+}
+
+func (r *Resolver) GetOrganizationOtelConfigByOrgId(ctx context.Context, orgId string) (*apiclient.OtelConfig, error) {
+	cacheKey := "org:" + orgId
+	otelConfig, err := r.cache.Get(ctx, cacheKey)
+	if err == nil {
+		if otelConfig.Endpoint == "(none)" {
+			return nil, nil
+		}
+		return otelConfig, nil
+	}
+
+	cfg := r.apiclient.GetConfig()
+	baseURL := cfg.Servers[0].URL
+	url := fmt.Sprintf("%s/organizations/%s/otel-config", baseURL, orgId)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	for key, value := range cfg.DefaultHeader {
+		req.Header.Set(key, value)
+	}
+
+	httpClient := cfg.HTTPClient
+	if httpClient == nil {
+		httpClient = http.DefaultClient
+	}
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to call API: %w", err)
+	}
+	defer resp.Body.Close()
+
+	config := &apiclient.OtelConfig{
+		Endpoint: "(none)",
+	}
+
+	if resp.StatusCode == http.StatusOK {
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read response body: %w", err)
+		}
+
+		var apiConfig apiclient.OtelConfig
+		if err := json.Unmarshal(body, &apiConfig); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal response: %w", err)
+		}
+		config = &apiConfig
+	} else if resp.StatusCode != http.StatusNotFound {
+		return nil, fmt.Errorf("unexpected status code %d from API", resp.StatusCode)
+	}
+
+	if err := r.cache.Set(ctx, cacheKey, *config, r.cacheTTL); err != nil {
 		return nil, err
 	}
 

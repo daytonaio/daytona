@@ -39,6 +39,7 @@ func NewFactory() exporter.Factory {
 func createDefaultConfig() component.Config {
 	return &Config{
 		SandboxAuthTokenHeader: "sandbox-auth-token",
+		OrganizationIdHeader:   "organization-id",
 		CacheTTL:               5 * time.Minute,
 		DefaultTimeout:         30 * time.Second,
 		RetrySettings:          configretry.NewDefaultBackOffConfig(),

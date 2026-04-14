@@ -91,29 +91,45 @@ func newTracesExporter(cfg exporterConfig) IExporter[ptrace.Traces] {
 
 //lint:ignore U1000 Used by the built collector
 func (e *Exporter[T]) push(ctx context.Context, data T) error {
-	// Extract sandbox token from context metadata
-	sandboxToken, err := e.extractSandboxToken(ctx)
-	if err != nil {
-		return consumererror.NewPermanent(fmt.Errorf("failed to extract sandbox token: %w", err))
+	sandboxToken, sandboxErr := e.extractSandboxToken(ctx)
+	if sandboxErr == nil {
+		endpointConfig, err := e.resolver.GetOrganizationOtelConfig(ctx, sandboxToken)
+		if err != nil {
+			return fmt.Errorf("failed to get endpoint config for sandbox %w", err)
+		}
+
+		if endpointConfig == nil {
+			e.logger.Debug("No endpoint configuration found for sandbox token, dropping data")
+			return nil
+		}
+
+		e.logger.Debug("Exporting data via sandbox token",
+			zap.String("endpoint", endpointConfig.Endpoint),
+		)
+		return e.exportViaHTTP(ctx, data, endpointConfig)
 	}
 
-	// Get endpoint configuration
-	endpointConfig, err := e.resolver.GetOrganizationOtelConfig(ctx, sandboxToken)
+	orgId, orgErr := e.extractOrganizationId(ctx)
+	if orgErr != nil {
+		return consumererror.NewPermanent(fmt.Errorf("no sandbox token or organization ID in metadata: sandbox=%w, org=%w", sandboxErr, orgErr))
+	}
+
+	endpointConfig, err := e.resolver.GetOrganizationOtelConfigByOrgId(ctx, orgId)
 	if err != nil {
-		return fmt.Errorf("failed to get endpoint config for sandbox %w", err)
+		return fmt.Errorf("failed to get endpoint config for organization %s: %w", orgId, err)
 	}
 
 	if endpointConfig == nil {
-		e.logger.Debug("No endpoint configuration found for sandbox token, dropping data")
+		e.logger.Debug("No endpoint configuration found for organization, dropping data",
+			zap.String("organizationId", orgId),
+		)
 		return nil
 	}
 
-	e.logger.Debug("Exporting data",
-		zap.String("protocol", "http"),
+	e.logger.Debug("Exporting data via organization ID",
+		zap.String("organizationId", orgId),
 		zap.String("endpoint", endpointConfig.Endpoint),
 	)
-
-	// Route to appropriate protocol handler
 	return e.exportViaHTTP(ctx, data, endpointConfig)
 }
 
@@ -201,13 +217,11 @@ func (e *Exporter[T]) getOrCreateHTTPClient(cfg *apiclient.OtelConfig) *http.Cli
 }
 
 func (e *Exporter[T]) extractSandboxToken(ctx context.Context) (string, error) {
-	// Try to get client info first (contains HTTP headers)
 	clientInfo := client.FromContext(ctx)
 	if token := clientInfo.Metadata.Get(e.config.SandboxAuthTokenHeader); len(token) > 0 {
 		return token[0], nil
 	}
 
-	// Fallback: try gRPC metadata (if using gRPC protocol)
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
 		if tokens := md.Get(e.config.SandboxAuthTokenHeader); len(tokens) > 0 {
 			return tokens[0], nil
@@ -215,6 +229,21 @@ func (e *Exporter[T]) extractSandboxToken(ctx context.Context) (string, error) {
 	}
 
 	return "", fmt.Errorf("sandbox token header '%s' not found in metadata", e.config.SandboxAuthTokenHeader)
+}
+
+func (e *Exporter[T]) extractOrganizationId(ctx context.Context) (string, error) {
+	clientInfo := client.FromContext(ctx)
+	if ids := clientInfo.Metadata.Get(e.config.OrganizationIdHeader); len(ids) > 0 {
+		return ids[0], nil
+	}
+
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		if ids := md.Get(e.config.OrganizationIdHeader); len(ids) > 0 {
+			return ids[0], nil
+		}
+	}
+
+	return "", fmt.Errorf("organization ID header '%s' not found in metadata", e.config.OrganizationIdHeader)
 }
 
 //lint:ignore U1000 Used by the built collector

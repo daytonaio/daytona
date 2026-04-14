@@ -17,6 +17,11 @@ type Config struct {
 	// Default: "sandbox-auth-token"
 	SandboxAuthTokenHeader string `mapstructure:"sandbox_auth_token_header"`
 
+	// OrganizationIdHeader is the HTTP header name that contains the organization ID.
+	// Used as a fallback when sandbox auth token is not present (e.g. org-level metrics).
+	// Default: "organization-id"
+	OrganizationIdHeader string `mapstructure:"organization_id_header"`
+
 	// CacheTTL is the duration to cache endpoint configurations.
 	// Default: 5m
 	CacheTTL time.Duration `mapstructure:"cache_ttl"`
