@@ -309,36 +309,11 @@ func (p *Proxy) parseHost(host string) (targetPort string, sandboxIdOrSignedToke
 // updateLastActivity updates the last activity timestamp for a sandbox.
 // If shouldPollUpdate is true, it starts a goroutine that updates every 50 seconds.
 func (p *Proxy) updateLastActivity(ctx context.Context, sandboxId string, shouldPollUpdate bool, doneCh chan struct{}) {
-	// Prevent frequent updates by caching the last update
-	cached, err := p.sandboxLastActivityUpdateCache.Has(ctx, sandboxId)
-	if err != nil {
-		// If cache doesn't work, skip the update to avoid spamming the API
-		log.Errorf("failed to check last activity update cache for sandbox %s: %v", sandboxId, err)
-		return
-	}
-
-	// Poll interval is 50 seconds to avoid spamming the API which will also cache updates for 45 seconds
 	pollInterval := 50 * time.Second
 
-	if !cached {
-		_, err := p.apiclient.SandboxAPI.UpdateLastActivity(ctx, sandboxId).Execute()
-		if err != nil {
-			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-				return
-			}
-			log.Errorf("failed to update last activity for sandbox %s: %v", sandboxId, err)
-			return
-		}
-
-		// Expire a bit before the poll interval to avoid skipping one interval
-		err = p.sandboxLastActivityUpdateCache.Set(ctx, sandboxId, true, pollInterval-5*time.Second)
-		if err != nil {
-			log.Errorf("failed to set last activity update cache for sandbox %s: %v", sandboxId, err)
-		}
-	}
+	p.doActivityUpdate(ctx, sandboxId, pollInterval)
 
 	if shouldPollUpdate {
-		// Update keep alive every pollInterval until stopped
 		go func() {
 			ticker := time.NewTicker(pollInterval)
 			defer ticker.Stop()
@@ -346,12 +321,52 @@ func (p *Proxy) updateLastActivity(ctx context.Context, sandboxId string, should
 			for {
 				select {
 				case <-ticker.C:
-					p.updateLastActivity(context.WithoutCancel(ctx), sandboxId, false, doneCh)
+					tickCtx, cancel := context.WithTimeout(context.Background(), time.Duration(p.config.ApiClientTimeoutSec)*time.Second)
+					done := make(chan struct{})
+					go func() {
+						defer close(done)
+						p.doActivityUpdate(tickCtx, sandboxId, pollInterval)
+					}()
+					select {
+					case <-done:
+						cancel()
+					case <-doneCh:
+						cancel()
+						return
+					}
 				case <-doneCh:
 					return
 				}
 			}
 		}()
+	}
+}
+
+func (p *Proxy) doActivityUpdate(ctx context.Context, sandboxId string, pollInterval time.Duration) {
+	cacheCtx := context.WithoutCancel(ctx)
+
+	cached, err := p.sandboxLastActivityUpdateCache.Has(cacheCtx, sandboxId)
+	if err != nil {
+		log.Errorf("failed to check last activity update cache for sandbox %s: %v", sandboxId, err)
+		return
+	}
+
+	if cached {
+		return
+	}
+
+	_, err = p.apiclient.SandboxAPI.UpdateLastActivity(ctx, sandboxId).Execute()
+	if err != nil {
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			return
+		}
+		log.Errorf("failed to update last activity for sandbox %s: %v", sandboxId, err)
+		return
+	}
+
+	err = p.sandboxLastActivityUpdateCache.Set(cacheCtx, sandboxId, true, pollInterval-5*time.Second)
+	if err != nil {
+		log.Errorf("failed to set last activity update cache for sandbox %s: %v", sandboxId, err)
 	}
 }
 
