@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 
 	common_cache "github.com/daytonaio/common-go/pkg/cache"
@@ -86,7 +87,7 @@ func (r *Resolver) GetOrganizationOtelConfigByOrgId(ctx context.Context, orgId s
 		return nil, fmt.Errorf("api client has no configured servers")
 	}
 	baseURL := cfg.Servers[0].URL
-	url := fmt.Sprintf("%s/organizations/%s/otel-config", baseURL, orgId)
+	url := fmt.Sprintf("%s/organizations/%s/otel-config", baseURL, url.PathEscape(orgId))
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
