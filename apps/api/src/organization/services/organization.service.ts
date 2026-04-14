@@ -394,32 +394,15 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
 
   async getOtelConfigBySandboxAuthToken(sandboxAuthToken: string): Promise<OtelConfigDto | null> {
     const organization = await this.findBySandboxAuthToken(sandboxAuthToken)
-    if (!organization) {
-      return null
-    }
-
-    if (!organization._experimentalConfig || !organization._experimentalConfig.otel) {
-      return null
-    }
-
-    const otelConfig = organization._experimentalConfig.otel
-    const decryptedHeaders: Record<string, string> = {}
-    if (otelConfig.headers && typeof otelConfig.headers === 'object') {
-      for (const [key, value] of Object.entries(otelConfig.headers)) {
-        if (typeof key === 'string' && key.trim() && typeof value === 'string' && value.trim()) {
-          decryptedHeaders[key] = await this.encryptionService.decrypt(value)
-        }
-      }
-    }
-
-    return {
-      endpoint: otelConfig.endpoint,
-      headers: Object.keys(decryptedHeaders).length > 0 ? decryptedHeaders : undefined,
-    }
+    return this.resolveOtelConfig(organization)
   }
 
   async getOtelConfigByOrganizationId(organizationId: string): Promise<OtelConfigDto | null> {
     const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+    return this.resolveOtelConfig(organization)
+  }
+
+  private async resolveOtelConfig(organization: Organization | null): Promise<OtelConfigDto | null> {
     if (!organization) {
       return null
     }

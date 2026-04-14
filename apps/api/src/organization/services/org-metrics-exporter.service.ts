@@ -32,6 +32,8 @@ interface OtlpMetric {
   }
 }
 
+const MAX_CONCURRENT_EXPORTS = 5
+
 @Injectable()
 export class OrgMetricsExporterService {
   private readonly logger = new Logger(OrgMetricsExporterService.name)
@@ -65,18 +67,19 @@ export class OrgMetricsExporterService {
         return
       }
 
-      const exportResults = await Promise.allSettled(
-        organizations.map((org) => this.exportMetricsForOrganization(org)),
-      )
+      for (let i = 0; i < organizations.length; i += MAX_CONCURRENT_EXPORTS) {
+        const batch = organizations.slice(i, i + MAX_CONCURRENT_EXPORTS)
+        const results = await Promise.allSettled(batch.map((org) => this.exportMetricsForOrganization(org)))
 
-      exportResults.forEach((result, index) => {
-        if (result.status === 'rejected') {
-          this.logger.warn(
-            `Failed to export metrics for organization ${organizations[index].id}`,
-            result.reason,
-          )
+        for (let j = 0; j < results.length; j++) {
+          if (results[j].status === 'rejected') {
+            this.logger.warn(
+              `Failed to export metrics for organization ${batch[j].id}`,
+              (results[j] as PromiseRejectedResult).reason,
+            )
+          }
         }
-      })
+      }
     } catch (error) {
       this.logger.warn('Failed to export organization metrics', error)
     } finally {
