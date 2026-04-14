@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, ExecutionContext, NotFoundException, ForbiddenException, Logger } from '@nestjs/common'
+import { Injectable, ExecutionContext, ForbiddenException, Logger } from '@nestjs/common'
 import { ResourceAccessGuard } from '../../common/guards/resource-access.guard'
 import { SandboxService } from '../services/sandbox.service'
 import { isBaseAuthContext } from '../../common/interfaces/base-auth-context.interface'
@@ -14,7 +14,6 @@ import { getAuthContext } from '../../common/utils/get-auth-context'
 import { isProxyAuthContext } from '../../common/interfaces/proxy-auth-context.interface'
 import { isSshGatewayAuthContext } from '../../common/interfaces/ssh-gateway-auth-context.interface'
 import { InvalidAuthenticationContextException } from '../../common/exceptions/invalid-authentication-context.exception'
-import { EntityNotFoundError } from 'typeorm'
 
 @Injectable()
 export class SandboxAccessGuard extends ResourceAccessGuard {
@@ -68,10 +67,7 @@ export class SandboxAccessGuard extends ResourceAccessGuard {
       // Access granted
       return true
     } catch (error) {
-      if (!(error instanceof NotFoundException) && !(error instanceof EntityNotFoundError)) {
-        this.logger.error(error)
-      }
-      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
+      this.handleResourceAccessError(error, this.logger, `Sandbox with ID or name ${sandboxIdOrName} not found`)
     }
   }
 }

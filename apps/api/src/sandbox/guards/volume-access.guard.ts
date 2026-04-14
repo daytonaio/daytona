@@ -9,7 +9,6 @@ import { isOrganizationAuthContext } from '../../common/interfaces/organization-
 import { getAuthContext } from '../../common/utils/get-auth-context'
 import { VolumeService } from '../services/volume.service'
 import { InvalidAuthenticationContextException } from '../../common/exceptions/invalid-authentication-context.exception'
-import { EntityNotFoundError } from 'typeorm'
 
 @Injectable()
 export class VolumeAccessGuard extends ResourceAccessGuard {
@@ -48,10 +47,11 @@ export class VolumeAccessGuard extends ResourceAccessGuard {
       // Access granted
       return true
     } catch (error) {
-      if (!(error instanceof NotFoundException) && !(error instanceof EntityNotFoundError)) {
-        this.logger.error(error)
-      }
-      throw new NotFoundException(`Volume with ${volumeId ? 'ID' : 'name'} ${volumeId || volumeName} not found`)
+      this.handleResourceAccessError(
+        error,
+        this.logger,
+        `Volume with ${volumeId ? 'ID' : 'name'} ${volumeId || volumeName} not found`,
+      )
     }
   }
 }

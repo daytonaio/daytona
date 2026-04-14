@@ -14,7 +14,6 @@ import { isSshGatewayAuthContext } from '../../common/interfaces/ssh-gateway-aut
 import { isProxyAuthContext } from '../../common/interfaces/proxy-auth-context.interface'
 import { isRegionAuthContext } from '../../common/interfaces/region-auth-context.interface'
 import { InvalidAuthenticationContextException } from '../../common/exceptions/invalid-authentication-context.exception'
-import { EntityNotFoundError } from 'typeorm'
 
 @Injectable()
 export class SnapshotAccessGuard extends ResourceAccessGuard {
@@ -68,10 +67,7 @@ export class SnapshotAccessGuard extends ResourceAccessGuard {
       // Access granted
       return true
     } catch (error) {
-      if (!(error instanceof NotFoundException) && !(error instanceof EntityNotFoundError)) {
-        this.logger.error(error)
-      }
-      throw new NotFoundException(`Snapshot with ID or name ${snapshotId} not found`)
+      this.handleResourceAccessError(error, this.logger, `Snapshot with ID or name ${snapshotId} not found`)
     }
   }
 }

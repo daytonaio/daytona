@@ -3,13 +3,12 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, ExecutionContext, NotFoundException, ForbiddenException, Logger } from '@nestjs/common'
+import { Injectable, ExecutionContext, ForbiddenException, Logger } from '@nestjs/common'
 import { ResourceAccessGuard } from '../../common/guards/resource-access.guard'
 import { DockerRegistryService } from '../services/docker-registry.service'
 import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { getAuthContext } from '../../common/utils/get-auth-context'
 import { RegistryType } from '../enums/registry-type.enum'
-import { EntityNotFoundError } from 'typeorm'
 
 @Injectable()
 export class DockerRegistryAccessGuard extends ResourceAccessGuard {
@@ -37,10 +36,7 @@ export class DockerRegistryAccessGuard extends ResourceAccessGuard {
       request.dockerRegistry = dockerRegistry
       return true
     } catch (error) {
-      if (!(error instanceof NotFoundException) && !(error instanceof EntityNotFoundError)) {
-        this.logger.error(error)
-      }
-      throw new NotFoundException(`Docker registry with ID ${dockerRegistryId} not found`)
+      this.handleResourceAccessError(error, this.logger, `Docker registry with ID ${dockerRegistryId} not found`)
     }
   }
 }
