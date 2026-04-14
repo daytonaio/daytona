@@ -740,10 +740,15 @@ export class JobStateHandlerService {
             snapshotRef = `${payload.registry.url}/${project}/daytona-${hash}:daytona`
           }
 
+          const rawSnapshotSizeBytes = metadata?.sizeBytes ?? metadata?.size_bytes
           const snapshotSizeBytes =
-            (typeof metadata?.sizeBytes === 'number' && metadata.sizeBytes) ||
-            (typeof metadata?.size_bytes === 'number' && metadata.size_bytes) ||
-            undefined
+            typeof rawSnapshotSizeBytes === 'number' && Number.isFinite(rawSnapshotSizeBytes)
+              ? rawSnapshotSizeBytes
+              : typeof rawSnapshotSizeBytes === 'bigint'
+                ? Number(rawSnapshotSizeBytes)
+                : typeof rawSnapshotSizeBytes === 'string' && /^-?\d+$/.test(rawSnapshotSizeBytes)
+                  ? Number(rawSnapshotSizeBytes)
+                  : undefined
           const snapshotSize = snapshotSizeBytes != null ? snapshotSizeBytes / (1024 * 1024 * 1024) : undefined
 
           const snapshotId = uuidv4()
