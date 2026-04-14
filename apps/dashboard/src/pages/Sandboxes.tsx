@@ -6,7 +6,9 @@
 import { OrganizationRolePermissionsEnum } from '@daytona/api-client'
 import { OrganizationSuspendedError } from '@/api/errors'
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
+import { ForkTreeDialog } from '@/components/ForkTreeDialog'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { RecursiveDeleteDialog } from '@/components/RecursiveDeleteDialog'
 import { CreateSandboxSheet } from '@/components/Sandbox/CreateSandboxSheet'
 import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
 import { SandboxTable } from '@/components/SandboxTable'
@@ -23,6 +25,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
@@ -209,6 +212,48 @@ const Sandboxes: React.FC = () => {
   const [sandboxToDelete, setSandboxToDelete] = useState<string | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
+  const [forkTreeSandboxId, setForkTreeSandboxId] = useState<string | null>(null)
+  const [recursiveDeleteSandboxId, setRecursiveDeleteSandboxId] = useState<string | null>(null)
+
+  // Create Snapshot Dialog
+
+  const [sandboxToSnapshot, setSandboxToSnapshot] = useState<string | null>(null)
+  const [snapshotName, setSnapshotName] = useState('')
+  const [snapshotIsLoading, setSnapshotIsLoading] = useState(false)
+
+  const handleCreateSnapshot = (id: string) => {
+    setSandboxToSnapshot(id)
+    setSnapshotName('')
+  }
+
+  const handleFork = async (id: string) => {
+    try {
+      await sandboxApi.forkSandbox(id, {}, selectedOrganization?.id)
+      toast.success('Fork started')
+      await refetchSandboxesData()
+    } catch {
+      toast.error('Failed to fork sandbox')
+    }
+  }
+
+  const handleViewForks = (id: string) => {
+    setForkTreeSandboxId(id)
+  }
+
+  const openDeleteDialog = async (id: string) => {
+    try {
+      const forksRes = await sandboxApi.getSandboxForks(id, selectedOrganization?.id)
+      if (forksRes.data.length > 0) {
+        setRecursiveDeleteSandboxId(id)
+        return
+      }
+    } catch {
+      // Fall through to normal delete if fork check fails
+    }
+    setSandboxToDelete(id)
+    setShowDeleteDialog(true)
+  }
+
   // Sandbox Details Drawer
 
   const [selectedSandbox, setSelectedSandbox] = useState<Sandbox | null>(null)
@@ -305,7 +350,7 @@ const Sandboxes: React.FC = () => {
   // Subscribe to Sandbox Events
 
   useEffect(() => {
-    const handleSandboxCreatedEvent = (sandbox: Sandbox) => {
+    const handleSandboxCreatedEvent = (_sandbox: Sandbox) => {
       const isFirstPage = paginationParams.pageIndex === 0
       const isDefaultFilters = Object.keys(filters).length === 0
       const isDefaultSorting =
@@ -903,10 +948,7 @@ const Sandboxes: React.FC = () => {
           sandboxStateIsTransitioning={sandboxStateIsTransitioning}
           handleStart={handleStart}
           handleStop={handleStop}
-          handleDelete={(id: string) => {
-            setSandboxToDelete(id)
-            setShowDeleteDialog(true)
-          }}
+          handleDelete={openDeleteDialog}
           handleBulkDelete={handleBulkDelete}
           handleBulkStart={handleBulkStart}
           handleBulkStop={handleBulkStop}
@@ -944,6 +986,9 @@ const Sandboxes: React.FC = () => {
           handleRecover={handleRecover}
           getRegionName={getRegionName}
           handleScreenRecordings={handleScreenRecordings}
+          handleCreateSnapshot={handleCreateSnapshot}
+          handleFork={handleFork}
+          handleViewForks={handleViewForks}
         />
 
         {sandboxToDelete && (
@@ -971,6 +1016,58 @@ const Sandboxes: React.FC = () => {
                   disabled={sandboxIsLoading[sandboxToDelete]}
                 >
                   {sandboxIsLoading[sandboxToDelete] ? 'Deleting...' : 'Delete'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+
+        {sandboxToSnapshot && (
+          <AlertDialog
+            open={!!sandboxToSnapshot}
+            onOpenChange={(isOpen) => {
+              if (!isOpen) {
+                setSandboxToSnapshot(null)
+                setSnapshotName('')
+              }
+            }}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Create Snapshot</AlertDialogTitle>
+                <AlertDialogDescription>Enter a name for the new snapshot.</AlertDialogDescription>
+              </AlertDialogHeader>
+              <Input
+                value={snapshotName}
+                onChange={(e) => setSnapshotName(e.target.value)}
+                placeholder="Snapshot name"
+                disabled={snapshotIsLoading}
+              />
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={snapshotIsLoading}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  disabled={!snapshotName.trim() || snapshotIsLoading}
+                  onClick={async (e) => {
+                    e.preventDefault()
+                    if (!sandboxToSnapshot || !snapshotName.trim()) return
+                    setSnapshotIsLoading(true)
+                    try {
+                      await sandboxApi.createSandboxSnapshot(
+                        sandboxToSnapshot,
+                        { name: snapshotName.trim() },
+                        selectedOrganization?.id,
+                      )
+                      toast.success('Snapshot creation started')
+                      setSandboxToSnapshot(null)
+                      setSnapshotName('')
+                    } catch (error) {
+                      handleApiError(error, 'Failed to create snapshot')
+                    } finally {
+                      setSnapshotIsLoading(false)
+                    }
+                  }}
+                >
+                  {snapshotIsLoading ? 'Creating...' : 'Create'}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -1006,10 +1103,9 @@ const Sandboxes: React.FC = () => {
           sandboxIsLoading={sandboxIsLoading}
           handleStart={handleStart}
           handleStop={handleStop}
-          handleDelete={(id) => {
-            setSandboxToDelete(id)
-            setShowDeleteDialog(true)
+          handleDelete={async (id) => {
             setShowSandboxDetails(false)
+            await openDeleteDialog(id)
           }}
           handleArchive={handleArchive}
           getWebTerminalUrl={getWebTerminalUrl}
@@ -1018,6 +1114,25 @@ const Sandboxes: React.FC = () => {
           handleRecover={handleRecover}
           getRegionName={getRegionName}
         />
+
+        {forkTreeSandboxId && (
+          <ForkTreeDialog
+            sandboxId={forkTreeSandboxId}
+            open={!!forkTreeSandboxId}
+            onClose={() => setForkTreeSandboxId(null)}
+          />
+        )}
+
+        {recursiveDeleteSandboxId && (
+          <RecursiveDeleteDialog
+            sandboxId={recursiveDeleteSandboxId}
+            open={!!recursiveDeleteSandboxId}
+            onClose={() => setRecursiveDeleteSandboxId(null)}
+            onDeleted={async () => {
+              await markAllSandboxQueriesAsStale(true)
+            }}
+          />
+        )}
       </PageContent>
     </PageLayout>
   )

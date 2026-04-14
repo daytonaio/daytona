@@ -53,6 +53,9 @@ interface UseSandboxTableProps {
   regionsData: Region[]
   handleRecover: (id: string) => void
   getRegionName: (regionId: string) => string | undefined
+  handleCreateSnapshot: (id: string) => void
+  handleFork: (id: string) => void
+  handleViewForks: (id: string) => void
 }
 
 export function useSandboxTable({
@@ -79,6 +82,9 @@ export function useSandboxTable({
   regionsData,
   handleRecover,
   getRegionName,
+  handleCreateSnapshot,
+  handleFork,
+  handleViewForks,
 }: UseSandboxTableProps) {
   // Column visibility state management with persistence
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
@@ -125,6 +131,9 @@ export function useSandboxTable({
         handleRecover,
         getRegionName,
         handleScreenRecordings,
+        handleCreateSnapshot,
+        handleFork,
+        handleViewForks,
       }),
     [
       handleStart,
@@ -141,6 +150,9 @@ export function useSandboxTable({
       handleRecover,
       getRegionName,
       handleScreenRecordings,
+      handleCreateSnapshot,
+      handleFork,
+      handleViewForks,
     ],
   )
 

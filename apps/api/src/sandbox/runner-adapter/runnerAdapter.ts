@@ -110,6 +110,15 @@ export interface RunnerAdapter {
     networkLimitEgress?: boolean,
   ): Promise<void>
 
+  forkSandbox(sourceSandboxId: string, newSandboxId: string): Promise<void>
+
+  createSnapshotFromSandbox(
+    sandboxId: string,
+    snapshotName: string,
+    organizationId: string,
+    registry?: DockerRegistry,
+  ): Promise<void>
+
   recoverSandbox(sandbox: Sandbox): Promise<void>
 
   resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void>

@@ -70,6 +70,7 @@ src/main/java/io/daytona/api/client/model/CreateRegionResponse.java
 src/main/java/io/daytona/api/client/model/CreateRunner.java
 src/main/java/io/daytona/api/client/model/CreateRunnerResponse.java
 src/main/java/io/daytona/api/client/model/CreateSandbox.java
+src/main/java/io/daytona/api/client/model/CreateSandboxSnapshot.java
 src/main/java/io/daytona/api/client/model/CreateSessionRequest.java
 src/main/java/io/daytona/api/client/model/CreateSnapshot.java
 src/main/java/io/daytona/api/client/model/CreateUser.java
@@ -83,6 +84,7 @@ src/main/java/io/daytona/api/client/model/ExecuteRequest.java
 src/main/java/io/daytona/api/client/model/ExecuteResponse.java
 src/main/java/io/daytona/api/client/model/FileInfo.java
 src/main/java/io/daytona/api/client/model/FileStatus.java
+src/main/java/io/daytona/api/client/model/ForkSandbox.java
 src/main/java/io/daytona/api/client/model/GitAddRequest.java
 src/main/java/io/daytona/api/client/model/GitBranchRequest.java
 src/main/java/io/daytona/api/client/model/GitCheckoutRequest.java
@@ -165,6 +167,7 @@ src/main/java/io/daytona/api/client/model/ReplaceRequest.java
 src/main/java/io/daytona/api/client/model/ReplaceResult.java
 src/main/java/io/daytona/api/client/model/ResizeSandbox.java
 src/main/java/io/daytona/api/client/model/Runner.java
+src/main/java/io/daytona/api/client/model/RunnerClass.java
 src/main/java/io/daytona/api/client/model/RunnerFull.java
 src/main/java/io/daytona/api/client/model/RunnerHealthMetrics.java
 src/main/java/io/daytona/api/client/model/RunnerHealthcheck.java
@@ -265,6 +268,7 @@ src/test/java/io/daytona/api/client/model/CreateRegionResponseTest.java
 src/test/java/io/daytona/api/client/model/CreateRegionTest.java
 src/test/java/io/daytona/api/client/model/CreateRunnerResponseTest.java
 src/test/java/io/daytona/api/client/model/CreateRunnerTest.java
+src/test/java/io/daytona/api/client/model/CreateSandboxSnapshotTest.java
 src/test/java/io/daytona/api/client/model/CreateSandboxTest.java
 src/test/java/io/daytona/api/client/model/CreateSessionRequestTest.java
 src/test/java/io/daytona/api/client/model/CreateSnapshotTest.java
@@ -279,6 +283,7 @@ src/test/java/io/daytona/api/client/model/ExecuteRequestTest.java
 src/test/java/io/daytona/api/client/model/ExecuteResponseTest.java
 src/test/java/io/daytona/api/client/model/FileInfoTest.java
 src/test/java/io/daytona/api/client/model/FileStatusTest.java
+src/test/java/io/daytona/api/client/model/ForkSandboxTest.java
 src/test/java/io/daytona/api/client/model/GitAddRequestTest.java
 src/test/java/io/daytona/api/client/model/GitBranchRequestTest.java
 src/test/java/io/daytona/api/client/model/GitCheckoutRequestTest.java
@@ -360,6 +365,7 @@ src/test/java/io/daytona/api/client/model/RegistryPushAccessDtoTest.java
 src/test/java/io/daytona/api/client/model/ReplaceRequestTest.java
 src/test/java/io/daytona/api/client/model/ReplaceResultTest.java
 src/test/java/io/daytona/api/client/model/ResizeSandboxTest.java
+src/test/java/io/daytona/api/client/model/RunnerClassTest.java
 src/test/java/io/daytona/api/client/model/RunnerFullTest.java
 src/test/java/io/daytona/api/client/model/RunnerHealthMetricsTest.java
 src/test/java/io/daytona/api/client/model/RunnerHealthcheckTest.java

@@ -20,6 +20,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.daytona.api.client.model.RegionType;
+import io.daytona.api.client.model.RunnerClass;
 import io.daytona.api.client.model.RunnerState;
 import io.daytona.api.client.model.SandboxClass;
 import java.io.IOException;
@@ -195,6 +196,11 @@ public class RunnerFull {
   @SerializedName(SERIALIZED_NAME_API_VERSION)
   @javax.annotation.Nonnull
   private String apiVersion;
+
+  public static final String SERIALIZED_NAME_RUNNER_CLASS = "runnerClass";
+  @SerializedName(SERIALIZED_NAME_RUNNER_CLASS)
+  @javax.annotation.Nonnull
+  private RunnerClass runnerClass;
 
   public static final String SERIALIZED_NAME_APP_VERSION = "appVersion";
   @Deprecated
@@ -755,6 +761,25 @@ public class RunnerFull {
   }
 
 
+  public RunnerFull runnerClass(@javax.annotation.Nonnull RunnerClass runnerClass) {
+    this.runnerClass = runnerClass;
+    return this;
+  }
+
+  /**
+   * The class of the runner
+   * @return runnerClass
+   */
+  @javax.annotation.Nonnull
+  public RunnerClass getRunnerClass() {
+    return runnerClass;
+  }
+
+  public void setRunnerClass(@javax.annotation.Nonnull RunnerClass runnerClass) {
+    this.runnerClass = runnerClass;
+  }
+
+
   @Deprecated
   public RunnerFull appVersion(@javax.annotation.Nullable String appVersion) {
     this.appVersion = appVersion;
@@ -898,6 +923,7 @@ public class RunnerFull {
         Objects.equals(this.updatedAt, runnerFull.updatedAt) &&
         Objects.equals(this.version, runnerFull.version) &&
         Objects.equals(this.apiVersion, runnerFull.apiVersion) &&
+        Objects.equals(this.runnerClass, runnerFull.runnerClass) &&
         Objects.equals(this.appVersion, runnerFull.appVersion) &&
         Objects.equals(this.apiKey, runnerFull.apiKey) &&
         Objects.equals(this.regionType, runnerFull.regionType)&&
@@ -906,7 +932,7 @@ public class RunnerFull {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, domain, apiUrl, proxyUrl, cpu, memory, disk, gpu, gpuType, propertyClass, currentCpuUsagePercentage, currentMemoryUsagePercentage, currentDiskUsagePercentage, currentAllocatedCpu, currentAllocatedMemoryGiB, currentAllocatedDiskGiB, currentSnapshotCount, currentStartedSandboxes, availabilityScore, region, name, state, lastChecked, unschedulable, createdAt, updatedAt, version, apiVersion, appVersion, apiKey, regionType, additionalProperties);
+    return Objects.hash(id, domain, apiUrl, proxyUrl, cpu, memory, disk, gpu, gpuType, propertyClass, currentCpuUsagePercentage, currentMemoryUsagePercentage, currentDiskUsagePercentage, currentAllocatedCpu, currentAllocatedMemoryGiB, currentAllocatedDiskGiB, currentSnapshotCount, currentStartedSandboxes, availabilityScore, region, name, state, lastChecked, unschedulable, createdAt, updatedAt, version, apiVersion, runnerClass, appVersion, apiKey, regionType, additionalProperties);
   }
 
   @Override
@@ -941,6 +967,7 @@ public class RunnerFull {
     sb.append("    updatedAt: ").append(toIndentedString(updatedAt)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
+    sb.append("    runnerClass: ").append(toIndentedString(runnerClass)).append("\n");
     sb.append("    appVersion: ").append(toIndentedString(appVersion)).append("\n");
     sb.append("    apiKey: ").append(toIndentedString(apiKey)).append("\n");
     sb.append("    regionType: ").append(toIndentedString(regionType)).append("\n");
@@ -995,6 +1022,7 @@ public class RunnerFull {
     openapiFields.add("updatedAt");
     openapiFields.add("version");
     openapiFields.add("apiVersion");
+    openapiFields.add("runnerClass");
     openapiFields.add("appVersion");
     openapiFields.add("apiKey");
     openapiFields.add("regionType");
@@ -1014,6 +1042,7 @@ public class RunnerFull {
     openapiRequiredFields.add("updatedAt");
     openapiRequiredFields.add("version");
     openapiRequiredFields.add("apiVersion");
+    openapiRequiredFields.add("runnerClass");
     openapiRequiredFields.add("apiKey");
   }
 
@@ -1077,6 +1106,8 @@ public class RunnerFull {
       if (!jsonObj.get("apiVersion").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `apiVersion` to be a primitive type in the JSON string but got `%s`", jsonObj.get("apiVersion").toString()));
       }
+      // validate the required field `runnerClass`
+      RunnerClass.validateJsonElement(jsonObj.get("runnerClass"));
       if ((jsonObj.get("appVersion") != null && !jsonObj.get("appVersion").isJsonNull()) && !jsonObj.get("appVersion").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `appVersion` to be a primitive type in the JSON string but got `%s`", jsonObj.get("appVersion").toString()));
       }

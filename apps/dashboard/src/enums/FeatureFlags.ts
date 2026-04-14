@@ -10,4 +10,5 @@ export enum FeatureFlags {
   DASHBOARD_WEBHOOKS = 'dashboard_webhooks',
   SANDBOX_SPENDING = 'sandbox_spending',
   DASHBOARD_CREATE_SANDBOX = 'dashboard_create-sandbox',
+  SANDBOX_LINUX_VM = 'sandbox_linux_vm',
 }

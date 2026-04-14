@@ -70,6 +70,8 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 // import { UpdateSandboxNetworkSettingsDto } from '../dto/update-sandbox-network-settings.dto'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
+import { CreateSandboxSnapshotDto } from '../dto/create-sandbox-snapshot.dto'
+import { ForkSandboxDto } from '../dto/fork-sandbox.dto'
 import { ProxyAuthContextGuard } from '../guards/proxy-auth-context.guard'
 import { OrGuard } from '../../auth/or.guard'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
@@ -697,6 +699,136 @@ export class SandboxController {
   ): Promise<SandboxDto> {
     const sandbox = await this.sandboxService.createBackup(sandboxIdOrName, authContext.organizationId)
     return this.sandboxService.toSandboxDto(sandbox)
+  }
+
+  @Post(':sandboxIdOrName/snapshot')
+  @HttpCode(200)
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.SANDBOX_LINUX_VM, defaultValue: false }] })
+  @ApiOperation({
+    summary: 'Create a snapshot from a sandbox',
+    operationId: 'createSandboxSnapshot',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Snapshot creation has been initiated',
+    type: SandboxDto,
+  })
+  @UseGuards(OrganizationAuthContextGuard, SandboxAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @Audit({
+    action: AuditAction.SNAPSHOT,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxIdOrName,
+    targetIdFromResult: (result: SandboxDto) => result?.id,
+    requestMetadata: {
+      body: (req: TypedRequest<CreateSandboxSnapshotDto>) => ({
+        name: req.body?.name,
+      }),
+    },
+  })
+  async createSandboxSnapshot(
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Body() dto: CreateSandboxSnapshotDto,
+  ): Promise<SandboxDto> {
+    const sandbox = await this.sandboxService.createSnapshotFromSandbox(sandboxIdOrName, authContext.organization, dto)
+    return this.sandboxService.toSandboxDto(sandbox)
+  }
+
+  @Post(':sandboxIdOrName/fork')
+  @HttpCode(200)
+  @SkipThrottle({ authenticated: true })
+  @ThrottlerScope('sandbox-create')
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.SANDBOX_LINUX_VM, defaultValue: false }] })
+  @ApiOperation({
+    summary: 'Fork a sandbox',
+    operationId: 'forkSandbox',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Fork operation has been initiated',
+    type: SandboxDto,
+  })
+  @UseGuards(OrganizationAuthContextGuard, SandboxAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @Audit({
+    action: AuditAction.FORK,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxIdOrName,
+    targetIdFromResult: (result: SandboxDto) => result?.id,
+    requestMetadata: {
+      body: (req: TypedRequest<ForkSandboxDto>) => ({
+        name: req.body?.name,
+      }),
+    },
+  })
+  async forkSandbox(
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Body() dto: ForkSandboxDto,
+  ): Promise<SandboxDto> {
+    const sandbox = await this.sandboxService.forkSandbox(sandboxIdOrName, authContext.organization, dto)
+    return this.sandboxService.toSandboxDto(sandbox)
+  }
+
+  @Get(':sandboxIdOrName/forks')
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.SANDBOX_LINUX_VM, defaultValue: false }] })
+  @ApiOperation({
+    summary: 'Get sandbox fork children',
+    operationId: 'getSandboxForks',
+  })
+  @ApiParam({ name: 'sandboxIdOrName', type: String })
+  @ApiQuery({ name: 'includeDestroyed', required: false, type: Boolean })
+  @ApiResponse({ status: 200, type: [SandboxDto] })
+  @UseGuards(OrganizationAuthContextGuard, SandboxAccessGuard)
+  async getSandboxForks(
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Query('includeDestroyed') includeDestroyed?: boolean,
+  ): Promise<SandboxDto[]> {
+    const children = await this.sandboxService.getForkChildren(
+      authContext.organizationId,
+      sandboxIdOrName,
+      includeDestroyed,
+    )
+    return this.sandboxService.toSandboxDtos(children)
+  }
+
+  @Get(':sandboxIdOrName/parent')
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.SANDBOX_LINUX_VM, defaultValue: false }] })
+  @ApiOperation({
+    summary: 'Get sandbox fork parent',
+    operationId: 'getSandboxParent',
+  })
+  @ApiParam({ name: 'sandboxIdOrName', type: String })
+  @ApiResponse({ status: 200, type: SandboxDto })
+  @UseGuards(OrganizationAuthContextGuard, SandboxAccessGuard)
+  async getSandboxParent(
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+  ): Promise<SandboxDto> {
+    const parent = await this.sandboxService.getForkParent(authContext.organizationId, sandboxIdOrName)
+    if (!parent) {
+      throw new NotFoundException(`Parent sandbox not found for sandbox ${sandboxIdOrName}`)
+    }
+    return this.sandboxService.toSandboxDto(parent)
+  }
+
+  @Get(':sandboxIdOrName/ancestors')
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.SANDBOX_LINUX_VM, defaultValue: false }] })
+  @ApiOperation({
+    summary: 'Get sandbox fork ancestor chain',
+    operationId: 'getSandboxAncestors',
+  })
+  @ApiParam({ name: 'sandboxIdOrName', type: String })
+  @ApiResponse({ status: 200, type: [SandboxDto] })
+  @UseGuards(OrganizationAuthContextGuard, SandboxAccessGuard)
+  async getSandboxAncestors(
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+  ): Promise<SandboxDto[]> {
+    const ancestors = await this.sandboxService.getForkAncestors(authContext.organizationId, sandboxIdOrName)
+    return this.sandboxService.toSandboxDtos(ancestors)
   }
 
   @Post(':sandboxIdOrName/public/:isPublic')

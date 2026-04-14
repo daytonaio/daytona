@@ -9,7 +9,10 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { In, Repository } from 'typeorm'
-import { SANDBOX_STATES_CONSUMING_COMPUTE } from '../constants/sandbox-states-consuming-compute.constant'
+import {
+  SANDBOX_STATES_CONDITIONALLY_CONSUMING_COMPUTE,
+  SANDBOX_STATES_CONSUMING_COMPUTE,
+} from '../constants/sandbox-states-consuming-compute.constant'
 import { SANDBOX_STATES_CONSUMING_DISK } from '../constants/sandbox-states-consuming-disk.constant'
 import { SNAPSHOT_STATES_CONSUMING_RESOURCES } from '../constants/snapshot-states-consuming-resources.constant'
 import { VOLUME_STATES_CONSUMING_RESOURCES } from '../constants/volume-states-consuming-resources.constant'
@@ -613,15 +616,15 @@ export class OrganizationUsageService {
     } = await this.sandboxRepository
       .createQueryBuilder('sandbox')
       .select([
-        `SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) OR (sandbox.state = :resizingState AND sandbox."desiredState" = :startedDesiredState) THEN sandbox.cpu ELSE 0 END) as used_cpu`,
-        `SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) OR (sandbox.state = :resizingState AND sandbox."desiredState" = :startedDesiredState) THEN sandbox.mem ELSE 0 END) as used_mem`,
+        `SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) OR (sandbox.state IN (:...statesConditionallyConsumingCompute) AND sandbox."desiredState" = :startedDesiredState) THEN sandbox.cpu ELSE 0 END) as used_cpu`,
+        `SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) OR (sandbox.state IN (:...statesConditionallyConsumingCompute) AND sandbox."desiredState" = :startedDesiredState) THEN sandbox.mem ELSE 0 END) as used_mem`,
         'SUM(CASE WHEN sandbox.state IN (:...statesConsumingDisk) THEN sandbox.disk ELSE 0 END) as used_disk',
       ])
       .where('sandbox.organizationId = :organizationId', { organizationId })
       .andWhere('sandbox.region = :regionId', { regionId })
       .setParameter('statesConsumingCompute', SANDBOX_STATES_CONSUMING_COMPUTE)
       .setParameter('statesConsumingDisk', SANDBOX_STATES_CONSUMING_DISK)
-      .setParameter('resizingState', SandboxState.RESIZING)
+      .setParameter('statesConditionallyConsumingCompute', SANDBOX_STATES_CONDITIONALLY_CONSUMING_COMPUTE)
       .setParameter('startedDesiredState', SandboxDesiredState.STARTED)
       .getRawOne()
 
@@ -1212,7 +1215,10 @@ export class OrganizationUsageService {
 
   @OnEvent(SandboxEvents.STATE_UPDATED)
   async handleSandboxStateUpdated(event: SandboxStateUpdatedEvent) {
-    if (event.oldState === SandboxState.RESIZING || event.newState === SandboxState.RESIZING) {
+    if (
+      SANDBOX_STATES_CONDITIONALLY_CONSUMING_COMPUTE.includes(event.oldState) ||
+      SANDBOX_STATES_CONDITIONALLY_CONSUMING_COMPUTE.includes(event.newState)
+    ) {
       return
     }
 

@@ -25,6 +25,8 @@ const STATE_LABEL_MAPPING: Record<SandboxState, string> = {
   [SandboxState.UNKNOWN]: 'Unknown',
   [SandboxState.ARCHIVING]: 'Archiving',
   [SandboxState.RESIZING]: 'Resizing',
+  [SandboxState.SNAPSHOTTING]: 'Snapshotting',
+  [SandboxState.FORKING]: 'Forking',
 }
 
 export const STATUSES: FacetedFilterOption[] = [

@@ -99,6 +99,9 @@ module DaytonaApiClient
     # The api version of the runner
     attr_accessor :api_version
 
+    # The class of the runner
+    attr_accessor :runner_class
+
     # The app version of the runner
     attr_accessor :app_version
 
@@ -161,6 +164,7 @@ module DaytonaApiClient
         :'updated_at' => :'updatedAt',
         :'version' => :'version',
         :'api_version' => :'apiVersion',
+        :'runner_class' => :'runnerClass',
         :'app_version' => :'appVersion',
         :'api_key' => :'apiKey',
         :'region_type' => :'regionType'
@@ -208,6 +212,7 @@ module DaytonaApiClient
         :'updated_at' => :'String',
         :'version' => :'String',
         :'api_version' => :'String',
+        :'runner_class' => :'RunnerClass',
         :'app_version' => :'String',
         :'api_key' => :'String',
         :'region_type' => :'RegionType'
@@ -374,6 +379,12 @@ module DaytonaApiClient
         self.api_version = nil
       end
 
+      if attributes.key?(:'runner_class')
+        self.runner_class = attributes[:'runner_class']
+      else
+        self.runner_class = nil
+      end
+
       if attributes.key?(:'app_version')
         self.app_version = attributes[:'app_version']
       end
@@ -446,6 +457,10 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "api_version", api_version cannot be nil.')
       end
 
+      if @runner_class.nil?
+        invalid_properties.push('invalid value for "runner_class", runner_class cannot be nil.')
+      end
+
       if @api_key.nil?
         invalid_properties.push('invalid value for "api_key", api_key cannot be nil.')
       end
@@ -470,6 +485,7 @@ module DaytonaApiClient
       return false if @updated_at.nil?
       return false if @version.nil?
       return false if @api_version.nil?
+      return false if @runner_class.nil?
       return false if @api_key.nil?
       true
     end
@@ -605,6 +621,16 @@ module DaytonaApiClient
     end
 
     # Custom attribute writer method with validation
+    # @param [Object] runner_class Value to be assigned
+    def runner_class=(runner_class)
+      if runner_class.nil?
+        fail ArgumentError, 'runner_class cannot be nil'
+      end
+
+      @runner_class = runner_class
+    end
+
+    # Custom attribute writer method with validation
     # @param [Object] api_key Value to be assigned
     def api_key=(api_key)
       if api_key.nil?
@@ -647,6 +673,7 @@ module DaytonaApiClient
           updated_at == o.updated_at &&
           version == o.version &&
           api_version == o.api_version &&
+          runner_class == o.runner_class &&
           app_version == o.app_version &&
           api_key == o.api_key &&
           region_type == o.region_type
@@ -661,7 +688,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, domain, api_url, proxy_url, cpu, memory, disk, gpu, gpu_type, _class, current_cpu_usage_percentage, current_memory_usage_percentage, current_disk_usage_percentage, current_allocated_cpu, current_allocated_memory_gi_b, current_allocated_disk_gi_b, current_snapshot_count, current_started_sandboxes, availability_score, region, name, state, last_checked, unschedulable, created_at, updated_at, version, api_version, app_version, api_key, region_type].hash
+      [id, domain, api_url, proxy_url, cpu, memory, disk, gpu, gpu_type, _class, current_cpu_usage_percentage, current_memory_usage_percentage, current_disk_usage_percentage, current_allocated_cpu, current_allocated_memory_gi_b, current_allocated_disk_gi_b, current_snapshot_count, current_started_sandboxes, availability_score, region, name, state, last_checked, unschedulable, created_at, updated_at, version, api_version, runner_class, app_version, api_key, region_type].hash
     end
 
     # Builds the object from hash

@@ -683,6 +683,8 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             SandboxState.ERROR,
             SandboxState.BUILD_FAILED,
             SandboxState.RESIZING,
+            SandboxState.FORKING,
+            SandboxState.SNAPSHOTTING,
           ],
         })
         .andWhere('sandbox."desiredState"::text != sandbox.state::text')
@@ -830,7 +832,13 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
       while (new Date().getTime() - startedAt.getTime() <= 10000) {
         if (
-          [SandboxState.DESTROYED, SandboxState.BUILD_FAILED, SandboxState.RESIZING].includes(sandbox.state) ||
+          [
+            SandboxState.DESTROYED,
+            SandboxState.BUILD_FAILED,
+            SandboxState.RESIZING,
+            SandboxState.SNAPSHOTTING,
+            SandboxState.FORKING,
+          ].includes(sandbox.state) ||
           (sandbox.state === SandboxState.ERROR && sandbox.desiredState !== SandboxDesiredState.ARCHIVED)
         ) {
           // Break sync loop if sandbox reaches a terminal state.

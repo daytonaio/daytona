@@ -45,6 +45,7 @@
     "@aws-sdk/credential-provider-node": "^3.901.0",
     "@aws-sdk/credential-providers": "^3.901.0",
     "@aws-sdk/lib-storage": "^3.798.0",
+    "@bufbuild/protobuf": "^2.11.0",
     "@clickhouse/client": "^1.16.0",
     "@dotenvx/dotenvx": "^1.25.1",
     "@esm2cjs/cacheable-lookup": "^7.0.0",
@@ -213,6 +214,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.22.0",
     "@babel/preset-typescript": "^7.22.0",
+    "@bufbuild/protoc-gen-es": "^2.11.0",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
     "@eslint/js": "^9.8.0",

@@ -26,4 +26,5 @@ libs
 !libs/toolbox-api-client-go
 !libs/toolbox-api-client
 !libs/sdk-go
+!libs/runner-proto
 Dockerfile

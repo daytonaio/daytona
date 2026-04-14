@@ -8,6 +8,7 @@ import { IsEnum, IsOptional } from 'class-validator'
 import { Runner } from '../entities/runner.entity'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerState } from '../enums/runner-state.enum'
+import { RunnerClass } from '../enums/runner-class.enum'
 
 @ApiSchema({ name: 'Runner' })
 export class RunnerDto {
@@ -198,6 +199,15 @@ export class RunnerDto {
   })
   apiVersion: string
 
+  @ApiProperty({
+    description: 'The class of the runner',
+    enum: RunnerClass,
+    enumName: 'RunnerClass',
+    example: RunnerClass.CONTAINER,
+  })
+  @IsEnum(RunnerClass)
+  runnerClass: RunnerClass
+
   @ApiPropertyOptional({
     description: 'The app version of the runner',
     example: 'v0.0.0-dev',
@@ -218,6 +228,7 @@ export class RunnerDto {
       gpu: runner.gpu,
       gpuType: runner.gpuType,
       class: runner.class,
+      runnerClass: runner.runnerClass,
       currentCpuUsagePercentage: runner.currentCpuUsagePercentage,
       currentMemoryUsagePercentage: runner.currentMemoryUsagePercentage,
       currentDiskUsagePercentage: runner.currentDiskUsagePercentage,

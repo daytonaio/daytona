@@ -54,6 +54,7 @@ models/create-region-response.ts
 models/create-region.ts
 models/create-runner-response.ts
 models/create-runner.ts
+models/create-sandbox-snapshot.ts
 models/create-sandbox.ts
 models/create-session-request.ts
 models/create-snapshot.ts
@@ -68,6 +69,7 @@ models/execute-request.ts
 models/execute-response.ts
 models/file-info.ts
 models/file-status.ts
+models/fork-sandbox.ts
 models/git-add-request.ts
 models/git-branch-request.ts
 models/git-checkout-request.ts
@@ -150,6 +152,7 @@ models/registry-push-access-dto.ts
 models/replace-request.ts
 models/replace-result.ts
 models/resize-sandbox.ts
+models/runner-class.ts
 models/runner-full.ts
 models/runner-health-metrics.ts
 models/runner-healthcheck.ts

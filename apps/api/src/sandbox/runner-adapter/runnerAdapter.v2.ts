@@ -4,6 +4,8 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common'
+import { create, toJson } from '@bufbuild/protobuf'
+import { SnapshotSandboxPayloadSchema, ForkSandboxPayloadSchema, RegistrySchema } from '@daytona/runner-proto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, IsNull, Not } from 'typeorm'
 import {
@@ -44,13 +46,13 @@ import { SnapshotStateError } from '../errors/snapshot-state-error'
 @Injectable()
 export class RunnerAdapterV2 implements RunnerAdapter {
   private readonly logger = new Logger(RunnerAdapterV2.name)
-  private runner: Runner
+  protected runner: Runner
 
   constructor(
-    private readonly sandboxRepository: SandboxRepository,
+    protected readonly sandboxRepository: SandboxRepository,
     @InjectRepository(Job)
-    private readonly jobRepository: Repository<Job>,
-    private readonly jobService: JobService,
+    protected readonly jobRepository: Repository<Job>,
+    protected readonly jobService: JobService,
   ) {}
 
   async init(runner: Runner): Promise<void> {
@@ -524,6 +526,64 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     this.logger.debug(
       `Created UPDATE_SANDBOX_NETWORK_SETTINGS job for sandbox ${sandboxId} on runner ${this.runner.id}`,
     )
+  }
+
+  async forkSandbox(sourceSandboxId: string, newSandboxId: string): Promise<void> {
+    const payload = toJson(
+      ForkSandboxPayloadSchema,
+      create(ForkSandboxPayloadSchema, {
+        sourceSandboxId,
+        newSandboxId,
+      }),
+    ) as Record<string, unknown>
+
+    await this.jobService.createJob(
+      null,
+      JobType.FORK_SANDBOX,
+      this.runner.id,
+      ResourceType.SANDBOX,
+      newSandboxId,
+      payload,
+    )
+
+    this.logger.debug(
+      `Created FORK_SANDBOX job for sandbox ${sourceSandboxId} -> ${newSandboxId} on runner ${this.runner.id}`,
+    )
+  }
+
+  async createSnapshotFromSandbox(
+    sandboxId: string,
+    snapshotName: string,
+    organizationId: string,
+    registry?: DockerRegistry,
+  ): Promise<void> {
+    const payload = toJson(
+      SnapshotSandboxPayloadSchema,
+      create(SnapshotSandboxPayloadSchema, {
+        sandboxId,
+        name: snapshotName,
+        organizationId,
+        registry: registry
+          ? create(RegistrySchema, {
+              url: registry.url.replace(/^(https?:\/\/)/, ''),
+              username: registry.username ?? undefined,
+              password: registry.password ?? undefined,
+              project: registry.project ?? undefined,
+            })
+          : undefined,
+      }),
+    ) as Record<string, unknown>
+
+    await this.jobService.createJob(
+      null,
+      JobType.SNAPSHOT_SANDBOX,
+      this.runner.id,
+      ResourceType.SANDBOX,
+      sandboxId,
+      payload,
+    )
+
+    this.logger.debug(`Created SNAPSHOT_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }
 
   async resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void> {

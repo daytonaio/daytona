@@ -68,6 +68,9 @@ export function SandboxTable({
   filters,
   onFiltersChange,
   handleRecover,
+  handleCreateSnapshot,
+  handleFork,
+  handleViewForks,
 }: SandboxTableProps) {
   const navigate = useNavigate()
   const { authenticatedUserHasPermission } = useSelectedOrganization()
@@ -98,6 +101,9 @@ export function SandboxTable({
     regionsData,
     handleRecover,
     getRegionName,
+    handleCreateSnapshot,
+    handleFork,
+    handleViewForks,
   })
 
   const [pendingBulkAction, setPendingBulkAction] = useState<BulkAction | null>(null)

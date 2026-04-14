@@ -18,6 +18,9 @@
 import type { RegionType } from './region-type';
 // May contain unused imports in some cases
 // @ts-ignore
+import type { RunnerClass } from './runner-class';
+// May contain unused imports in some cases
+// @ts-ignore
 import type { RunnerState } from './runner-state';
 // May contain unused imports in some cases
 // @ts-ignore
@@ -199,6 +202,12 @@ export interface RunnerFull {
      * @deprecated
      */
     'apiVersion': string;
+    /**
+     * The class of the runner
+     * @type {RunnerClass}
+     * @memberof RunnerFull
+     */
+    'runnerClass': RunnerClass;
     /**
      * The app version of the runner
      * @type {string}

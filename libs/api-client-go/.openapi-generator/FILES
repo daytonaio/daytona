@@ -52,6 +52,7 @@ model_create_region_response.go
 model_create_runner.go
 model_create_runner_response.go
 model_create_sandbox.go
+model_create_sandbox_snapshot.go
 model_create_session_request.go
 model_create_snapshot.go
 model_create_user.go
@@ -65,6 +66,7 @@ model_execute_request.go
 model_execute_response.go
 model_file_info.go
 model_file_status.go
+model_fork_sandbox.go
 model_git_add_request.go
 model_git_branch_request.go
 model_git_checkout_request.go
@@ -147,6 +149,7 @@ model_replace_request.go
 model_replace_result.go
 model_resize_sandbox.go
 model_runner.go
+model_runner_class.go
 model_runner_full.go
 model_runner_health_metrics.go
 model_runner_healthcheck.go

@@ -1675,6 +1675,8 @@ paths:
             - archived
             - archiving
             - resizing
+            - snapshotting
+            - forking
             type: string
           type: array
         style: form
@@ -2215,6 +2217,204 @@ paths:
         - profile
         - email
       summary: Create sandbox backup
+      tags:
+      - sandbox
+  /sandbox/{sandboxIdOrName}/snapshot:
+    post:
+      operationId: createSandboxSnapshot
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: sandboxIdOrName
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSandboxSnapshot'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
+          description: Snapshot creation has been initiated
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Create a snapshot from a sandbox
+      tags:
+      - sandbox
+  /sandbox/{sandboxIdOrName}/fork:
+    post:
+      operationId: forkSandbox
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: sandboxIdOrName
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForkSandbox'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
+          description: Fork operation has been initiated
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Fork a sandbox
+      tags:
+      - sandbox
+  /sandbox/{sandboxIdOrName}/forks:
+    get:
+      operationId: getSandboxForks
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: sandboxIdOrName
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: includeDestroyed
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Sandbox'
+                type: array
+          description: ""
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Get sandbox fork children
+      tags:
+      - sandbox
+  /sandbox/{sandboxIdOrName}/parent:
+    get:
+      operationId: getSandboxParent
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: sandboxIdOrName
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
+          description: ""
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Get sandbox fork parent
+      tags:
+      - sandbox
+  /sandbox/{sandboxIdOrName}/ancestors:
+    get:
+      operationId: getSandboxAncestors
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: sandboxIdOrName
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Sandbox'
+                type: array
+          description: ""
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Get sandbox fork ancestor chain
       tags:
       - sandbox
   /sandbox/{sandboxIdOrName}/public/{isPublic}:
@@ -10261,6 +10461,8 @@ components:
       - archived
       - archiving
       - resizing
+      - snapshotting
+      - forking
       type: string
     SandboxDesiredState:
       description: The desired state of the sandbox
@@ -10852,6 +11054,8 @@ components:
           - archived
           - archiving
           - resizing
+          - snapshotting
+          - forking
           example: started
           type: string
         errorReason:
@@ -10864,6 +11068,27 @@ components:
           type: boolean
       required:
       - state
+      type: object
+    CreateSandboxSnapshot:
+      example:
+        name: my-dev-env-v1
+      properties:
+        name:
+          description: Name for the new snapshot
+          example: my-dev-env-v1
+          type: string
+      required:
+      - name
+      type: object
+    ForkSandbox:
+      example:
+        name: my-forked-sandbox
+      properties:
+        name:
+          description: "The name for the forked sandbox. If not provided, a unique\
+            \ name will be generated."
+          example: my-forked-sandbox
+          type: string
       type: object
     PortPreviewUrl:
       example:
@@ -11076,6 +11301,12 @@ components:
       - decommissioned
       - unresponsive
       type: string
+    RunnerClass:
+      description: The class of the runner
+      enum:
+      - container
+      - vm
+      type: string
     RunnerFull:
       example:
         currentStartedSandboxes: 5
@@ -11107,6 +11338,7 @@ components:
         disk: 100
         domain: runner1.example.com
         name: runner1
+        runnerClass: container
         region: us
         lastChecked: 2024-10-01T12:00:00Z
       properties:
@@ -11225,6 +11457,11 @@ components:
           description: The api version of the runner
           example: "0"
           type: string
+        runnerClass:
+          allOf:
+          - $ref: '#/components/schemas/RunnerClass'
+          description: The class of the runner
+          example: container
         appVersion:
           deprecated: true
           description: The app version of the runner
@@ -11250,6 +11487,7 @@ components:
       - memory
       - name
       - region
+      - runnerClass
       - state
       - unschedulable
       - updatedAt
@@ -11306,6 +11544,7 @@ components:
         disk: 100
         domain: runner1.example.com
         name: runner1
+        runnerClass: container
         region: us
         lastChecked: 2024-10-01T12:00:00Z
       properties:
@@ -11424,6 +11663,11 @@ components:
           description: The api version of the runner
           example: "0"
           type: string
+        runnerClass:
+          allOf:
+          - $ref: '#/components/schemas/RunnerClass'
+          description: The class of the runner
+          example: container
         appVersion:
           deprecated: true
           description: The app version of the runner
@@ -11439,6 +11683,7 @@ components:
       - memory
       - name
       - region
+      - runnerClass
       - state
       - unschedulable
       - updatedAt
@@ -13716,6 +13961,8 @@ components:
       - INSPECT_SNAPSHOT_IN_REGISTRY
       - REMOVE_SNAPSHOT
       - UPDATE_SANDBOX_NETWORK_SETTINGS
+      - SNAPSHOT_SANDBOX
+      - FORK_SANDBOX
       type: string
     Job:
       example:

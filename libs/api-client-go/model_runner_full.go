@@ -79,6 +79,8 @@ type RunnerFull struct {
 	// The api version of the runner
 	// Deprecated
 	ApiVersion string `json:"apiVersion"`
+	// The class of the runner
+	RunnerClass RunnerClass `json:"runnerClass"`
 	// The app version of the runner
 	// Deprecated
 	AppVersion *string `json:"appVersion,omitempty"`
@@ -95,7 +97,7 @@ type _RunnerFull RunnerFull
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunnerFull(id string, cpu float32, memory float32, disk float32, class SandboxClass, region string, name string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string, apiVersion string, apiKey string) *RunnerFull {
+func NewRunnerFull(id string, cpu float32, memory float32, disk float32, class SandboxClass, region string, name string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string, apiVersion string, runnerClass RunnerClass, apiKey string) *RunnerFull {
 	this := RunnerFull{}
 	this.Id = id
 	this.Cpu = cpu
@@ -110,6 +112,7 @@ func NewRunnerFull(id string, cpu float32, memory float32, disk float32, class S
 	this.UpdatedAt = updatedAt
 	this.Version = version
 	this.ApiVersion = apiVersion
+	this.RunnerClass = runnerClass
 	this.ApiKey = apiKey
 	return &this
 }
@@ -920,6 +923,30 @@ func (o *RunnerFull) SetApiVersion(v string) {
 	o.ApiVersion = v
 }
 
+// GetRunnerClass returns the RunnerClass field value
+func (o *RunnerFull) GetRunnerClass() RunnerClass {
+	if o == nil {
+		var ret RunnerClass
+		return ret
+	}
+
+	return o.RunnerClass
+}
+
+// GetRunnerClassOk returns a tuple with the RunnerClass field value
+// and a boolean to check if the value has been set.
+func (o *RunnerFull) GetRunnerClassOk() (*RunnerClass, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.RunnerClass, true
+}
+
+// SetRunnerClass sets field value
+func (o *RunnerFull) SetRunnerClass(v RunnerClass) {
+	o.RunnerClass = v
+}
+
 // GetAppVersion returns the AppVersion field value if set, zero value otherwise.
 // Deprecated
 func (o *RunnerFull) GetAppVersion() string {
@@ -1079,6 +1106,7 @@ func (o RunnerFull) ToMap() (map[string]interface{}, error) {
 	toSerialize["updatedAt"] = o.UpdatedAt
 	toSerialize["version"] = o.Version
 	toSerialize["apiVersion"] = o.ApiVersion
+	toSerialize["runnerClass"] = o.RunnerClass
 	if !IsNil(o.AppVersion) {
 		toSerialize["appVersion"] = o.AppVersion
 	}
@@ -1112,6 +1140,7 @@ func (o *RunnerFull) UnmarshalJSON(data []byte) (err error) {
 		"updatedAt",
 		"version",
 		"apiVersion",
+		"runnerClass",
 		"apiKey",
 	}
 
@@ -1170,6 +1199,7 @@ func (o *RunnerFull) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "updatedAt")
 		delete(additionalProperties, "version")
 		delete(additionalProperties, "apiVersion")
+		delete(additionalProperties, "runnerClass")
 		delete(additionalProperties, "appVersion")
 		delete(additionalProperties, "apiKey")
 		delete(additionalProperties, "regionType")

@@ -21,6 +21,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from daytona_api_client.models.region_type import RegionType
+from daytona_api_client.models.runner_class import RunnerClass
 from daytona_api_client.models.runner_state import RunnerState
 from daytona_api_client.models.sandbox_class import SandboxClass
 from pydantic import TypeAdapter
@@ -61,11 +62,12 @@ class RunnerFull(BaseModel):
     updated_at: StrictStr = Field(description="The last update timestamp of the runner", serialization_alias="updatedAt")
     version: StrictStr = Field(description="The version of the runner (deprecated in favor of apiVersion)")
     api_version: StrictStr = Field(description="The api version of the runner", serialization_alias="apiVersion")
+    runner_class: RunnerClass = Field(description="The class of the runner", serialization_alias="runnerClass")
     app_version: Optional[StrictStr] = Field(default=None, description="The app version of the runner", serialization_alias="appVersion")
     api_key: StrictStr = Field(description="The API key for the runner", serialization_alias="apiKey")
     region_type: Optional[RegionType] = Field(default=None, description="The region type of the runner", serialization_alias="regionType")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version", "apiVersion", "appVersion", "apiKey", "regionType"]
+    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version", "apiVersion", "runnerClass", "appVersion", "apiKey", "regionType"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -152,6 +154,7 @@ class RunnerFull(BaseModel):
             "updated_at": obj.get("updatedAt"),
             "version": obj.get("version"),
             "api_version": obj.get("apiVersion"),
+            "runner_class": obj.get("runnerClass"),
             "app_version": obj.get("appVersion"),
             "api_key": obj.get("apiKey"),
             "region_type": obj.get("regionType")

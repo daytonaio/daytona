@@ -54,6 +54,7 @@ daytona_api_client_async/models/create_region_response.py
 daytona_api_client_async/models/create_runner.py
 daytona_api_client_async/models/create_runner_response.py
 daytona_api_client_async/models/create_sandbox.py
+daytona_api_client_async/models/create_sandbox_snapshot.py
 daytona_api_client_async/models/create_session_request.py
 daytona_api_client_async/models/create_snapshot.py
 daytona_api_client_async/models/create_user.py
@@ -67,6 +68,7 @@ daytona_api_client_async/models/execute_request.py
 daytona_api_client_async/models/execute_response.py
 daytona_api_client_async/models/file_info.py
 daytona_api_client_async/models/file_status.py
+daytona_api_client_async/models/fork_sandbox.py
 daytona_api_client_async/models/git_add_request.py
 daytona_api_client_async/models/git_branch_request.py
 daytona_api_client_async/models/git_checkout_request.py
@@ -149,6 +151,7 @@ daytona_api_client_async/models/replace_request.py
 daytona_api_client_async/models/replace_result.py
 daytona_api_client_async/models/resize_sandbox.py
 daytona_api_client_async/models/runner.py
+daytona_api_client_async/models/runner_class.py
 daytona_api_client_async/models/runner_full.py
 daytona_api_client_async/models/runner_health_metrics.py
 daytona_api_client_async/models/runner_healthcheck.py
