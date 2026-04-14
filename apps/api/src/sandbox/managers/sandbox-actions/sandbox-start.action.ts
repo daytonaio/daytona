@@ -393,7 +393,7 @@ export class SandboxStartAction extends SandboxAction {
       internalRegistry,
       entrypoint,
       metadata,
-      this.configService.get('sandboxOtel.endpointUrl'),
+      this.configService.get('otelCollector.endpointUrl'),
     )
 
     await this.updateSandboxState(sandbox, SandboxState.CREATING, lockCode, undefined, undefined, result?.daemonVersion)
@@ -835,7 +835,7 @@ export class SandboxStartAction extends SandboxAction {
       registry,
       undefined,
       metadata,
-      this.configService.get('sandboxOtel.endpointUrl'),
+      this.configService.get('otelCollector.endpointUrl'),
     )
     return null
   }

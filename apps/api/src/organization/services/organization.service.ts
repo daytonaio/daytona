@@ -418,6 +418,40 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     }
   }
 
+  async getOtelConfigByOrganizationId(organizationId: string): Promise<OtelConfigDto | null> {
+    const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+    if (!organization) {
+      return null
+    }
+
+    if (!organization._experimentalConfig || !organization._experimentalConfig.otel) {
+      return null
+    }
+
+    const otelConfig = organization._experimentalConfig.otel
+    const decryptedHeaders: Record<string, string> = {}
+    if (otelConfig.headers && typeof otelConfig.headers === 'object') {
+      for (const [key, value] of Object.entries(otelConfig.headers)) {
+        if (typeof key === 'string' && key.trim() && typeof value === 'string' && value.trim()) {
+          decryptedHeaders[key] = await this.encryptionService.decrypt(value)
+        }
+      }
+    }
+
+    return {
+      endpoint: otelConfig.endpoint,
+      headers: Object.keys(decryptedHeaders).length > 0 ? decryptedHeaders : undefined,
+    }
+  }
+
+  async findOrganizationsWithOtelConfig(): Promise<Organization[]> {
+    return this.organizationRepository
+      .createQueryBuilder('organization')
+      .where(`organization."experimentalConfig"::jsonb -> 'otel' ->> 'endpoint' IS NOT NULL`)
+      .andWhere(`organization."experimentalConfig"::jsonb -> 'otel' ->> 'endpoint' != ''`)
+      .getMany()
+  }
+
   private async validatedExperimentalConfig(
     experimentalConfig: Record<string, any> | null,
   ): Promise<Record<string, any> | null> {
