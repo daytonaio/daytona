@@ -37,12 +37,7 @@ const {
 <div class="navbar-links">
   <details class="mobile-dropdown" open={isReferencesActive}>
     <summary class:list={[{ active: isReferencesActive }]}>
-      <a
-        href={`${import.meta.env.BASE_URL}/en/references`}
-        class="references-hub-link"
-      >
-        {Astro.locals.t('header.references' as any)}
-      </a>
+      {Astro.locals.t('header.references' as any)}
       <svg
         class="chevron"
         width="10"
@@ -117,28 +112,6 @@ const {
     @media (max-width: 1024px) {
       display: flex;
     }
-  }
-
-  /* Reset global `a` typography (Inter) so this matches other nav labels */
-  .mobile-dropdown summary .references-hub-link {
-    text-decoration: none;
-    text-transform: uppercase;
-    font-size: 14px;
-    font-family: 'Berkeley Mono', monospace;
-    font-weight: 400;
-    letter-spacing: -0.01rem;
-    line-height: 1.4;
-    color: var(--primary-text-color);
-    transition: all 0.2s;
-    cursor: pointer;
-  }
-
-  .mobile-dropdown summary:hover .references-hub-link {
-    color: var(--hover-color);
-  }
-
-  .mobile-dropdown summary.active .references-hub-link {
-    color: var(--hover-color);
   }
 
   .navbar-links > a,

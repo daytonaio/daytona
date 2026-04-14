@@ -51,12 +51,7 @@ const {
     <div class="navbar-links">
       <div class="dropdown">
         <span class:list={['dropdown-trigger', { active: isReferencesActive }]}>
-          <a
-            href={`${import.meta.env.BASE_URL}/en/references`}
-            class="references-hub-link"
-          >
-            {Astro.locals.t('header.references' as any)}
-          </a>
+          {Astro.locals.t('header.references' as any)}
           <svg
             class="chevron"
             width="10"
@@ -197,29 +192,6 @@ const {
 
   .navbar-links .dropdown-trigger.active,
   .navbar-links > a.active {
-    color: var(--hover-color);
-  }
-
-  /* Reset global `a` typography (Inter) so this matches .navbar-links > a */
-  .navbar-links .dropdown-trigger .references-hub-link {
-    text-decoration: none;
-    text-transform: uppercase;
-    font-size: 14px;
-    font-family: 'Berkeley Mono', monospace;
-    font-weight: 400;
-    letter-spacing: -0.01rem;
-    line-height: 1.4;
-    color: var(--primary-text-color);
-    transition: all 0.2s;
-    cursor: pointer;
-  }
-
-  .navbar-links .dropdown:hover .references-hub-link,
-  .navbar-links .dropdown-trigger:hover .references-hub-link {
-    color: var(--hover-color);
-  }
-
-  .navbar-links .dropdown-trigger.active .references-hub-link {
     color: var(--hover-color);
   }
 
