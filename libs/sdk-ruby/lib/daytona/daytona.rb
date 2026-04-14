@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Copyright Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 require 'json'
 require 'uri'
 
@@ -44,12 +47,27 @@ module Daytona
       @snapshots_api = DaytonaApiClient::SnapshotsApi.new(api_client)
       @snapshot = SnapshotService.new(snapshots_api:, object_storage_api:, default_region_id: config.target,
                                       otel_state:)
+      # Event subscriber for real-time sandbox updates
+      @event_subscriber = nil
+
+      # Create and start WebSocket event subscriber connection in the background (non-blocking).
+      token = config.api_key || config.jwt_token
+      return unless token
+
+      @event_subscriber = EventSubscriber.new(
+        api_url: config.api_url,
+        token: token,
+        organization_id: config.organization_id
+      )
+      @event_subscriber.ensure_connected
     end
 
     # Shuts down OTel providers, flushing any pending telemetry data.
     #
     # @return [void]
     def close
+      @event_subscriber&.disconnect
+      @event_subscriber = nil
       ::Daytona.shutdown_otel(@otel_state)
       @otel_state = nil
     end
@@ -254,7 +272,8 @@ module Daytona
         config:,
         sandbox_api:,
         code_toolbox:,
-        otel_state: @otel_state
+        otel_state: @otel_state,
+        event_subscriber: @event_subscriber
       )
     end
 

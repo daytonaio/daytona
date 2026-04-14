@@ -114,6 +114,9 @@ type Client struct {
 	// apiClient is the underlying OpenAPI-generated client
 	apiClient *apiclient.APIClient
 
+	// eventSubscriber handles WebSocket event subscriptions for real-time sandbox updates
+	eventSubscriber *common.EventSubscriber
+
 	// Volume provides methods for managing persistent volumes.
 	Volume *VolumeService
 
@@ -258,6 +261,16 @@ func NewClientWithConfig(config *types.DaytonaConfig) (*Client, error) {
 	client.Volume = NewVolumeService(client)
 	client.Snapshot = NewSnapshotService(client)
 
+	// Create and start WebSocket event subscriber connection in the background (non-blocking)
+	token := client.apiKey
+	if token == "" {
+		token = client.jwtToken
+	}
+	if token != "" {
+		client.eventSubscriber = common.NewEventSubscriber(client.apiURL, token, client.organizationID)
+		client.eventSubscriber.EnsureConnected()
+	}
+
 	return client, nil
 }
 
@@ -265,7 +278,16 @@ func NewClientWithConfig(config *types.DaytonaConfig) (*Client, error) {
 // When OpenTelemetry is enabled, Close flushes and shuts down the OTel providers.
 // It is safe to call Close even when OTel is not enabled.
 func (c *Client) Close(ctx context.Context) error {
+	if c.eventSubscriber != nil {
+		c.eventSubscriber.Disconnect()
+		c.eventSubscriber = nil
+	}
 	return shutdownOtel(ctx, c.Otel)
+}
+
+// getEventSubscriber returns the event subscriber, initializing it if needed.
+func (c *Client) getEventSubscriber() *common.EventSubscriber {
+	return c.eventSubscriber
 }
 
 // getAuthContext returns a context with authentication for api-client-go
@@ -537,17 +559,7 @@ func (c *Client) doCreate(ctx context.Context, params any, opts ...func(*options
 		return nil, err
 	}
 
-	autoArchiveInterval := 0
-	if sandboxResp.AutoArchiveInterval != nil {
-		autoArchiveInterval = int(*sandboxResp.AutoArchiveInterval)
-	}
-
-	autoDeleteInterval := 0
-	if sandboxResp.AutoDeleteInterval != nil {
-		autoDeleteInterval = int(*sandboxResp.AutoDeleteInterval)
-	}
-
-	sandbox := NewSandbox(c, toolboxClient, sandboxResp.GetId(), sandboxResp.GetName(), sandboxResp.GetState(), sandboxResp.GetTarget(), autoArchiveInterval, autoDeleteInterval, sandboxResp.GetNetworkBlockAll(), sandboxResp.NetworkAllowList)
+	sandbox := NewSandbox(c, toolboxClient, sandboxResp)
 
 	// Handle snapshot build logs
 	if sandbox.State == apiclient.SANDBOXSTATE_PENDING_BUILD {
@@ -632,29 +644,7 @@ func (c *Client) doGet(ctx context.Context, sandboxIDOrName string) (*Sandbox, e
 		return nil, err
 	}
 
-	autoArchiveInterval := 0
-	if sandboxResp.AutoArchiveInterval != nil {
-		autoArchiveInterval = int(*sandboxResp.AutoArchiveInterval)
-	}
-
-	autoDeleteInterval := 0
-	if sandboxResp.AutoDeleteInterval != nil {
-		autoDeleteInterval = int(*sandboxResp.AutoDeleteInterval)
-	}
-
-	// Capture sandbox state
-	sandbox := NewSandbox(c,
-		toolboxClient,
-		sandboxResp.GetId(),
-		sandboxResp.GetName(),
-		sandboxResp.GetState(),
-		sandboxResp.GetTarget(),
-		autoArchiveInterval,
-		autoDeleteInterval,
-		sandboxResp.GetNetworkBlockAll(),
-		sandboxResp.NetworkAllowList,
-	)
-	return sandbox, nil
+	return NewSandbox(c, toolboxClient, sandboxResp), nil
 }
 
 // List retrieves sandboxes with optional label filtering and pagination.
@@ -724,27 +714,7 @@ func (c *Client) doList(ctx context.Context, labels map[string]string, page *int
 			return nil, err
 		}
 
-		autoArchiveInterval := 0
-		if items[i].AutoArchiveInterval != nil {
-			autoArchiveInterval = int(*items[i].AutoArchiveInterval)
-		}
-
-		autoDeleteInterval := 0
-		if items[i].AutoDeleteInterval != nil {
-			autoDeleteInterval = int(*items[i].AutoDeleteInterval)
-		}
-
-		sandboxes[i] = NewSandbox(c,
-			toolboxClient,
-			items[i].GetId(),
-			items[i].GetName(),
-			items[i].GetState(),
-			items[i].GetTarget(),
-			autoArchiveInterval,
-			autoDeleteInterval,
-			items[i].GetNetworkBlockAll(),
-			items[i].NetworkAllowList,
-		)
+		sandboxes[i] = NewSandbox(c, toolboxClient, &items[i])
 	}
 
 	return &PaginatedSandboxes{

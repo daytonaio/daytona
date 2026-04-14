@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Copyright Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 module Daytona
   # Represents stdout or stderr output from code execution
   class OutputMessage

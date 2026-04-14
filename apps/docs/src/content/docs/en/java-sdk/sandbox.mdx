@@ -8,7 +8,8 @@ hideTitleOnPage: true
 Represents a Daytona Sandbox instance.
 
 Exposes lifecycle controls and operation facades for process execution, file-system access,
-and Git.
+and Git. State changes are detected instantly via WebSocket events with periodic polling as a
+safety net.
 
 **Properties**:
 
@@ -119,15 +120,15 @@ Deletes this Sandbox with default timeout behavior.
 public void delete(long timeoutSeconds)
 ```
 
-Deletes this Sandbox.
+Deletes this Sandbox and waits for it to reach the `destroyed` state.
 
 **Parameters**:
 
-- `timeoutSeconds` _long_ - reserved timeout parameter for parity with other SDKs
+- `timeoutSeconds` _long_ - maximum seconds to wait; `0` disables timeout
 
 **Throws**:
 
-- `DaytonaException` - if deletion fails
+- `DaytonaException` - if deletion fails or times out
 
 #### setLabels()
 ```java
@@ -238,6 +239,21 @@ Waits until Sandbox reaches `started` state.
 
 - `DaytonaException` - if timeout is invalid, state becomes failure, or timeout expires
 
+#### waitForResizeComplete()
+```java
+public void waitForResizeComplete(long timeoutSeconds)
+```
+
+Waits for a resize operation to complete.
+
+**Parameters**:
+
+- `timeoutSeconds` _long_ - maximum seconds to wait; `0` disables timeout
+
+**Throws**:
+
+- `DaytonaException` - if resize times out or fails
+
 #### refreshData()
 ```java
 public void refreshData()
@@ -254,8 +270,6 @@ Refreshes local Sandbox fields from latest API state.
 public String getId()
 ```
 
-Returns Sandbox ID.
-
 **Returns**:
 
 - `String` - Sandbox ID
@@ -264,8 +278,6 @@ Returns Sandbox ID.
 ```java
 public String getName()
 ```
-
-Returns Sandbox name.
 
 **Returns**:
 
@@ -276,8 +288,6 @@ Returns Sandbox name.
 public String getState()
 ```
 
-Returns Sandbox state.
-
 **Returns**:
 
 - `String` - lifecycle state
@@ -286,8 +296,6 @@ Returns Sandbox state.
 ```java
 public String getTarget()
 ```
-
-Returns target region.
 
 **Returns**:
 
@@ -298,8 +306,6 @@ Returns target region.
 public String getUser()
 ```
 
-Returns Sandbox OS user.
-
 **Returns**:
 
 - `String` - OS user
@@ -308,8 +314,6 @@ Returns Sandbox OS user.
 ```java
 public String getToolboxProxyUrl()
 ```
-
-Returns toolbox proxy URL.
 
 **Returns**:
 
@@ -320,8 +324,6 @@ Returns toolbox proxy URL.
 public int getCpu()
 ```
 
-Returns allocated CPU cores.
-
 **Returns**:
 
 - `int` - CPU cores
@@ -330,8 +332,6 @@ Returns allocated CPU cores.
 ```java
 public int getGpu()
 ```
-
-Returns allocated GPU units.
 
 **Returns**:
 
@@ -342,8 +342,6 @@ Returns allocated GPU units.
 public int getMemory()
 ```
 
-Returns allocated memory in GiB.
-
 **Returns**:
 
 - `int` - memory in GiB
@@ -352,8 +350,6 @@ Returns allocated memory in GiB.
 ```java
 public int getDisk()
 ```
-
-Returns allocated disk in GiB.
 
 **Returns**:
 
@@ -364,8 +360,6 @@ Returns allocated disk in GiB.
 public Map<String, String> getEnv()
 ```
 
-Returns Sandbox environment variables.
-
 **Returns**:
 
 - `Map\<String, String\>` - environment map
@@ -374,8 +368,6 @@ Returns Sandbox environment variables.
 ```java
 public Map<String, String> getLabels()
 ```
-
-Returns Sandbox labels.
 
 **Returns**:
 
@@ -386,8 +378,6 @@ Returns Sandbox labels.
 public Integer getAutoStopInterval()
 ```
 
-Returns auto-stop interval in minutes.
-
 **Returns**:
 
 - `Integer` - auto-stop interval
@@ -396,8 +386,6 @@ Returns auto-stop interval in minutes.
 ```java
 public Integer getAutoArchiveInterval()
 ```
-
-Returns auto-archive interval in minutes.
 
 **Returns**:
 
@@ -408,8 +396,6 @@ Returns auto-archive interval in minutes.
 public Integer getAutoDeleteInterval()
 ```
 
-Returns auto-delete interval in minutes.
-
 **Returns**:
 
 - `Integer` - auto-delete interval
@@ -418,8 +404,6 @@ Returns auto-delete interval in minutes.
 ```java
 public Process getProcess()
 ```
-
-Returns process operations facade.
 
 **Returns**:
 
@@ -430,8 +414,6 @@ Returns process operations facade.
 public FileSystem getFs()
 ```
 
-Returns file-system operations facade.
-
 **Returns**:
 
 - `FileSystem` - file-system interface
@@ -440,8 +422,6 @@ Returns file-system operations facade.
 ```java
 public Git getGit()
 ```
-
-Returns Git operations facade.
 
 **Returns**:
 

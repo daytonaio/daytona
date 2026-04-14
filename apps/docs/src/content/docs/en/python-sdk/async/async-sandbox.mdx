@@ -54,6 +54,7 @@ def __init__(sandbox_dto: SandboxDto,
              toolbox_api: ApiClient,
              sandbox_api: SandboxApi,
              code_toolbox: SandboxCodeToolbox,
+             event_subscriber: AsyncEventSubscriber,
              pool_tracker: AsyncPoolSaturationTracker | None = None)
 ```
 
@@ -65,6 +66,7 @@ Initialize a new Sandbox instance.
 - `toolbox_api` _ApiClient_ - API client for toolbox operations.
 - `sandbox_api` _SandboxApi_ - API client for Sandbox operations.
 - `code_toolbox` _SandboxCodeToolbox_ - Language-specific toolbox implementation.
+- `event_subscriber` - AsyncEventSubscriber for real-time updates.
 - `pool_tracker` _AsyncPoolSaturationTracker | None_ - Tracker for connection pool saturation.
 
 #### AsyncSandbox.refresh\_data
@@ -291,7 +293,7 @@ print("Sandbox stopped successfully")
 async def delete(timeout: float | None = 60) -> None
 ```
 
-Deletes the Sandbox.
+Deletes the Sandbox and waits for it to reach the 'destroyed' state.
 
 **Arguments**:
 
@@ -308,8 +310,7 @@ Deletes the Sandbox.
 async def wait_for_sandbox_start(timeout: float | None = 60) -> None
 ```
 
-Waits for the Sandbox to reach the 'started' state. Polls the Sandbox status until it
-reaches the 'started' state, encounters an error or times out.
+Waits for the Sandbox to reach the 'started' state.
 
 **Arguments**:
 
@@ -318,7 +319,7 @@ reaches the 'started' state, encounters an error or times out.
 
 **Raises**:
 
-- `DaytonaError` - If timeout is negative; If Sandbox fails to start or times out
+- `DaytonaError` - If timeout is negative; If Sandbox fails to start or times out;
 
 #### AsyncSandbox.wait\_for\_sandbox\_stop
 
@@ -330,9 +331,7 @@ reaches the 'started' state, encounters an error or times out.
 async def wait_for_sandbox_stop(timeout: float | None = 60) -> None
 ```
 
-Waits for the Sandbox to reach the 'stopped' state. Polls the Sandbox status until it
-reaches the 'stopped' state, encounters an error or times out. It will wait up to 60 seconds
-for the Sandbox to stop.
+Waits for the Sandbox to reach the 'stopped' state.
 Treats destroyed as stopped to cover ephemeral sandboxes that are automatically deleted after stopping.
 
 **Arguments**:
@@ -575,8 +574,7 @@ await sandbox.resize(Resources(cpu=2, memory=4, disk=30))
 async def wait_for_resize_complete(timeout: float | None = 60) -> None
 ```
 
-Waits for the Sandbox resize operation to complete. Polls the Sandbox status until
-the state is no longer 'resizing'.
+Waits for the Sandbox resize operation to complete.
 
 **Arguments**:
 
