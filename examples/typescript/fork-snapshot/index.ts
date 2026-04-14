@@ -12,7 +12,7 @@ async function main() {
 
   // Fork the sandbox — creates a copy-on-write clone with identical filesystem
   console.log('Forking sandbox')
-  const forked = await daytona.fork(sandbox)
+  const forked = await daytona._experimental_fork(sandbox)
   console.log(`Forked sandbox: ${forked.id}`)
 
   // Verify the forked sandbox has the same file
@@ -24,7 +24,7 @@ async function main() {
 
   // Create a snapshot from the forked sandbox
   console.log('Creating snapshot from forked sandbox')
-  await forked.createSnapshot('my-fork-snapshot')
+  await forked._experimental_createSnapshot('my-fork-snapshot')
   console.log('Snapshot created')
 
   // Create a new sandbox from the snapshot

@@ -348,11 +348,11 @@ export class Sandbox implements SandboxDto {
    *
    * @example
    * const sandbox = await daytona.get('my-sandbox');
-   * const forked = await sandbox.fork({ name: 'my-fork' });
+   * const forked = await sandbox._experimental_fork({ name: 'my-fork' });
    * console.log(`Forked sandbox: ${forked.id}`);
    */
   @WithInstrumentation()
-  public async fork(params?: { name?: string }, timeout = 60): Promise<Sandbox> {
+  public async _experimental_fork(params?: { name?: string }, timeout = 60): Promise<Sandbox> {
     if (timeout < 0) {
       throw new DaytonaError('Timeout must be a non-negative number')
     }
@@ -393,7 +393,7 @@ export class Sandbox implements SandboxDto {
    * console.log('Snapshot created successfully');
    */
   @WithInstrumentation()
-  public async createSnapshot(name: string, timeout = 60): Promise<void> {
+  public async _experimental_createSnapshot(name: string, timeout = 60): Promise<void> {
     if (timeout < 0) {
       throw new DaytonaError('Timeout must be a non-negative number')
     }
