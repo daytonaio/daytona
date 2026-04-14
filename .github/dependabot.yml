@@ -1,0 +1,15 @@
+# Copyright Daytona Platforms Inc.
+# SPDX-License-Identifier: AGPL-3.0
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "chore(deps)"
