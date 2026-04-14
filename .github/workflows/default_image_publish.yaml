@@ -49,7 +49,7 @@ jobs:
           echo "PLATFORM_PAIR=${PLATFORM//\//-}" >> $GITHUB_ENV
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           persist-credentials: false
 
@@ -100,7 +100,7 @@ jobs:
           touch "${{ runner.temp }}/digests/sandbox-slim/${digest#sha256:}"
 
       - name: Upload sandbox digest
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: digests-default-${{ env.PLATFORM_PAIR }}
           path: ${{ runner.temp }}/digests/sandbox/*
@@ -108,7 +108,7 @@ jobs:
           retention-days: 1
 
       - name: Upload sandbox-slim digest
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: digests-slim-${{ env.PLATFORM_PAIR }}
           path: ${{ runner.temp }}/digests/sandbox-slim/*
@@ -122,14 +122,14 @@ jobs:
 
     steps:
       - name: Download sandbox digests
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           path: ${{ runner.temp }}/digests/sandbox
           pattern: digests-default-*
           merge-multiple: true
 
       - name: Download sandbox-slim digests
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           path: ${{ runner.temp }}/digests/sandbox-slim
           pattern: digests-slim-*
