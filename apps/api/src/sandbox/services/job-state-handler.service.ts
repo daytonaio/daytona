@@ -742,7 +742,7 @@ export class JobStateHandlerService {
 
           const snapshotSizeBytes =
             (typeof metadata?.sizeBytes === 'number' && metadata.sizeBytes) ||
-            (typeof metadata?.SizeBytes === 'number' && metadata.SizeBytes) ||
+            (typeof metadata?.size_bytes === 'number' && metadata.size_bytes) ||
             undefined
           const snapshotSize = snapshotSizeBytes != null ? snapshotSizeBytes / (1024 * 1024 * 1024) : undefined
 
