@@ -91,6 +91,10 @@ jobs:
             "name": "runner",
             "version": "0.0.0"
           }' > apps/runner/package.json
+          echo '{
+            "name": "daytona-e2e",
+            "version": "0.0.0"
+          }' > apps/daytona-e2e/package.json
 
       - name: Create release
         run: yarn nx release "$VERSION" --skip-publish --verbose
