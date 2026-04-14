@@ -3,7 +3,7 @@ FROM node:24-slim AS daytona
 ENV CI=true
 
 # Install dependencies (apt instead of apk)
-RUN apt-get update && apt-get install -y --no-install-recommends bash curl && \
+RUN apt-get update && apt-get install -y --no-install-recommends bash curl python3 make g++ && \
   rm -rf /var/lib/apt/lists/*
 RUN npm install -g corepack && corepack enable
 
@@ -26,6 +26,7 @@ COPY libs/api-client/ libs/api-client/
 COPY libs/analytics-api-client/ libs/analytics-api-client/
 COPY libs/toolbox-api-client/ libs/toolbox-api-client/
 COPY libs/sdk-typescript/ libs/sdk-typescript/
+COPY libs/runner-proto/ libs/runner-proto/
 
 ENV NX_DAEMON=false
 

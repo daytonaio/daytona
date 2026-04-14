@@ -1,0 +1,13 @@
+version: v2
+clean: true
+plugins:
+  - local:
+      - node
+      - ../../node_modules/.bin/protoc-gen-es
+    out: gen/ts
+    opt: target=ts
+  - local: protoc-gen-go
+    out: gen/go
+    opt: paths=source_relative
+inputs:
+  - directory: proto

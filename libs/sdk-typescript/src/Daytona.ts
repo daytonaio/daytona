@@ -307,7 +307,7 @@ export class Daytona implements AsyncDisposable {
       },
     })
 
-    const axiosInstance = this.createAxiosInstance()
+    const axiosInstance = Daytona.createAxiosInstance()
 
     this.sandboxApi = new SandboxApi(configuration, '', axiosInstance)
     this.objectStorageApi = new ObjectStorageApi(configuration, '', axiosInstance)
@@ -476,7 +476,7 @@ export class Daytona implements AsyncDisposable {
       throw new DaytonaValidationError('autoArchiveInterval must be a non-negative integer')
     }
 
-    const codeToolbox = this.getCodeToolbox(params.language as CodeLanguage)
+    const codeToolbox = Daytona.getCodeToolbox(params.language as CodeLanguage)
 
     try {
       let buildInfo: any | undefined
@@ -574,7 +574,7 @@ export class Daytona implements AsyncDisposable {
       const sandbox = new Sandbox(
         sandboxInstance,
         new Configuration(structuredClone(this.clientConfig)),
-        this.createAxiosInstance(),
+        Daytona.createAxiosInstance(),
         this.sandboxApi,
         codeToolbox,
       )
@@ -612,12 +612,12 @@ export class Daytona implements AsyncDisposable {
     const response = await this.sandboxApi.getSandbox(sandboxIdOrName)
     const sandboxInstance = response.data
     const language = sandboxInstance.labels && sandboxInstance.labels['code-toolbox-language']
-    const codeToolbox = this.getCodeToolbox(language as CodeLanguage)
+    const codeToolbox = Daytona.getCodeToolbox(language as CodeLanguage)
 
     return new Sandbox(
       sandboxInstance,
       structuredClone(this.clientConfig),
-      this.createAxiosInstance(),
+      Daytona.createAxiosInstance(),
       this.sandboxApi,
       codeToolbox,
     )
@@ -654,9 +654,9 @@ export class Daytona implements AsyncDisposable {
         return new Sandbox(
           sandbox,
           structuredClone(this.clientConfig),
-          this.createAxiosInstance(),
+          Daytona.createAxiosInstance(),
           this.sandboxApi,
-          this.getCodeToolbox(language),
+          Daytona.getCodeToolbox(language),
         )
       }),
       total: response.data.total,
@@ -698,6 +698,25 @@ export class Daytona implements AsyncDisposable {
   }
 
   /**
+   * Forks a Sandbox, creating a new Sandbox with an identical filesystem.
+   *
+   * @param {Sandbox} sandbox - The Sandbox to fork
+   * @param {object} [params] - Fork parameters
+   * @param {string} [params.name] - Optional name for the forked Sandbox
+   * @param {number} [timeout] - Timeout in seconds (0 means no timeout, default is 60)
+   * @returns {Promise<Sandbox>} The forked Sandbox
+   *
+   * @example
+   * const sandbox = await daytona.get('my-sandbox-id');
+   * const forked = await daytona.fork(sandbox, { name: 'my-fork' });
+   * console.log(`Forked sandbox: ${forked.id}`);
+   */
+  @WithInstrumentation()
+  public async fork(sandbox: Sandbox, params?: { name?: string }, timeout = 60): Promise<Sandbox> {
+    return await sandbox.fork(params, timeout)
+  }
+
+  /**
    * Deletes a Sandbox.
    *
    * @param {Sandbox} sandbox - The Sandbox to delete
@@ -716,12 +735,12 @@ export class Daytona implements AsyncDisposable {
   /**
    * Gets the appropriate code toolbox based on language.
    *
-   * @private
+   * @hidden
    * @param {CodeLanguage} [language] - Programming language for the toolbox
    * @returns {SandboxCodeToolbox} The appropriate code toolbox instance
    * @throws {DaytonaValidationError} - `DaytonaValidationError` - When an unsupported language is specified
    */
-  private getCodeToolbox(language?: CodeLanguage) {
+  public static getCodeToolbox(language?: CodeLanguage) {
     switch (language) {
       case CodeLanguage.JAVASCRIPT:
         return new SandboxJsCodeToolbox()
@@ -737,7 +756,10 @@ export class Daytona implements AsyncDisposable {
     }
   }
 
-  private createAxiosInstance(): AxiosInstance {
+  /**
+   * @hidden
+   */
+  public static createAxiosInstance(): AxiosInstance {
     const axiosInstance = axios.create({
       timeout: 24 * 60 * 60 * 1000, // 24 hours
     })

@@ -55,6 +55,7 @@ lib/daytona_api_client/models/create_region_response.rb
 lib/daytona_api_client/models/create_runner.rb
 lib/daytona_api_client/models/create_runner_response.rb
 lib/daytona_api_client/models/create_sandbox.rb
+lib/daytona_api_client/models/create_sandbox_snapshot.rb
 lib/daytona_api_client/models/create_session_request.rb
 lib/daytona_api_client/models/create_snapshot.rb
 lib/daytona_api_client/models/create_user.rb
@@ -68,6 +69,7 @@ lib/daytona_api_client/models/execute_request.rb
 lib/daytona_api_client/models/execute_response.rb
 lib/daytona_api_client/models/file_info.rb
 lib/daytona_api_client/models/file_status.rb
+lib/daytona_api_client/models/fork_sandbox.rb
 lib/daytona_api_client/models/git_add_request.rb
 lib/daytona_api_client/models/git_branch_request.rb
 lib/daytona_api_client/models/git_checkout_request.rb
@@ -150,6 +152,7 @@ lib/daytona_api_client/models/replace_request.rb
 lib/daytona_api_client/models/replace_result.rb
 lib/daytona_api_client/models/resize_sandbox.rb
 lib/daytona_api_client/models/runner.rb
+lib/daytona_api_client/models/runner_class.rb
 lib/daytona_api_client/models/runner_full.rb
 lib/daytona_api_client/models/runner_health_metrics.rb
 lib/daytona_api_client/models/runner_healthcheck.rb

@@ -55,6 +55,9 @@ export interface SandboxTableProps {
   onFiltersChange: (filters: SandboxFilters) => void
   handleRecover: (id: string) => void
   handleScreenRecordings: (id: string) => void
+  handleCreateSnapshot: (id: string) => void
+  handleFork: (id: string) => void
+  handleViewForks: (id: string) => void
 }
 
 export interface SandboxTableActionsProps {
@@ -62,6 +65,7 @@ export interface SandboxTableActionsProps {
   writePermitted: boolean
   deletePermitted: boolean
   isLoading: boolean
+  runnerClass?: string
   onStart: (id: string) => void
   onStop: (id: string) => void
   onDelete: (id: string) => void
@@ -70,6 +74,9 @@ export interface SandboxTableActionsProps {
   onOpenWebTerminal: (id: string) => void
   onCreateSshAccess: (id: string) => void
   onRevokeSshAccess: (id: string) => void
+  onFork?: () => void
+  onCreateSnapshot?: () => void
+  onViewForks?: () => void
   onRecover: (id: string) => void
   onScreenRecordings: (id: string) => void
 }

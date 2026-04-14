@@ -79,6 +79,8 @@ type Runner struct {
 	// The api version of the runner
 	// Deprecated
 	ApiVersion string `json:"apiVersion"`
+	// The class of the runner
+	RunnerClass RunnerClass `json:"runnerClass"`
 	// The app version of the runner
 	// Deprecated
 	AppVersion *string `json:"appVersion,omitempty"`
@@ -91,7 +93,7 @@ type _Runner Runner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunner(id string, cpu float32, memory float32, disk float32, class SandboxClass, region string, name string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string, apiVersion string) *Runner {
+func NewRunner(id string, cpu float32, memory float32, disk float32, class SandboxClass, region string, name string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string, apiVersion string, runnerClass RunnerClass) *Runner {
 	this := Runner{}
 	this.Id = id
 	this.Cpu = cpu
@@ -106,6 +108,7 @@ func NewRunner(id string, cpu float32, memory float32, disk float32, class Sandb
 	this.UpdatedAt = updatedAt
 	this.Version = version
 	this.ApiVersion = apiVersion
+	this.RunnerClass = runnerClass
 	return &this
 }
 
@@ -915,6 +918,30 @@ func (o *Runner) SetApiVersion(v string) {
 	o.ApiVersion = v
 }
 
+// GetRunnerClass returns the RunnerClass field value
+func (o *Runner) GetRunnerClass() RunnerClass {
+	if o == nil {
+		var ret RunnerClass
+		return ret
+	}
+
+	return o.RunnerClass
+}
+
+// GetRunnerClassOk returns a tuple with the RunnerClass field value
+// and a boolean to check if the value has been set.
+func (o *Runner) GetRunnerClassOk() (*RunnerClass, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.RunnerClass, true
+}
+
+// SetRunnerClass sets field value
+func (o *Runner) SetRunnerClass(v RunnerClass) {
+	o.RunnerClass = v
+}
+
 // GetAppVersion returns the AppVersion field value if set, zero value otherwise.
 // Deprecated
 func (o *Runner) GetAppVersion() string {
@@ -1018,6 +1045,7 @@ func (o Runner) ToMap() (map[string]interface{}, error) {
 	toSerialize["updatedAt"] = o.UpdatedAt
 	toSerialize["version"] = o.Version
 	toSerialize["apiVersion"] = o.ApiVersion
+	toSerialize["runnerClass"] = o.RunnerClass
 	if !IsNil(o.AppVersion) {
 		toSerialize["appVersion"] = o.AppVersion
 	}
@@ -1047,6 +1075,7 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		"updatedAt",
 		"version",
 		"apiVersion",
+		"runnerClass",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -1104,6 +1133,7 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "updatedAt")
 		delete(additionalProperties, "version")
 		delete(additionalProperties, "apiVersion")
+		delete(additionalProperties, "runnerClass")
 		delete(additionalProperties, "appVersion")
 		o.AdditionalProperties = additionalProperties
 	}

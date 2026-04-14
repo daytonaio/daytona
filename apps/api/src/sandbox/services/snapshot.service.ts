@@ -513,7 +513,7 @@ export class SnapshotService {
     return region.proxyUrl + '/snapshots/' + snapshot.id + '/build-logs'
   }
 
-  private async validateOrganizationQuotas(
+  async validateOrganizationQuotas(
     organization: Organization,
     addedSnapshotCount: number,
     cpu?: number,

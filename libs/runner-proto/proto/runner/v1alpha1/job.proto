@@ -1,0 +1,42 @@
+// Copyright Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
+syntax = "proto3";
+
+package runner.v1alpha1;
+
+option go_package = "github.com/daytonaio/daytona/gen/proto/runner/v1alpha1;runnerv1alpha1";
+
+enum JobType {
+  JOB_TYPE_UNSPECIFIED      = 0;
+  JOB_TYPE_SNAPSHOT_SANDBOX = 1;
+  JOB_TYPE_FORK_SANDBOX     = 2;
+}
+
+message Registry {
+  string          url      = 1;
+  optional string username = 2;
+  optional string password = 3;
+  optional string project  = 4;
+}
+
+message SnapshotSandboxPayload {
+  string            sandbox_id      = 1;
+  string            name            = 2;
+  string            organization_id = 3;
+  optional Registry registry        = 4;
+}
+
+message ForkSandboxPayload {
+  string source_sandbox_id = 1;
+  string new_sandbox_id    = 2;
+}
+
+message SnapshotSandboxResult {
+  int64  size_bytes = 1;
+  string hash       = 2;
+}
+
+message ForkSandboxResult {
+  optional string daemon_version = 1;
+}

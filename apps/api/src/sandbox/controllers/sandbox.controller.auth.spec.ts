@@ -422,4 +422,68 @@ describe('[AUTH] SandboxController', () => {
     expectArrayMatch(getAuthContextGuards(SandboxController, methodName), [ProxyAuthContextGuard])
     expectArrayMatch(getResourceAccessGuards(SandboxController, methodName), [SandboxAccessGuard])
   })
+
+  it('createSandboxSnapshot', () => {
+    const methodName = trackMethod('createSandboxSnapshot')
+    expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
+      AuthStrategyType.API_KEY,
+      AuthStrategyType.JWT,
+    ])
+    expectArrayMatch(getAuthContextGuards(SandboxController, methodName), [OrganizationAuthContextGuard])
+    expectArrayMatch(getResourceAccessGuards(SandboxController, methodName), [SandboxAccessGuard])
+    expect(getRequiredOrganizationMemberRole(SandboxController, methodName)).toBeUndefined()
+    expectArrayMatch(getRequiredOrganizationResourcePermissions(SandboxController, methodName), [
+      OrganizationResourcePermission.WRITE_SANDBOXES,
+    ])
+  })
+
+  it('forkSandbox', () => {
+    const methodName = trackMethod('forkSandbox')
+    expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
+      AuthStrategyType.API_KEY,
+      AuthStrategyType.JWT,
+    ])
+    expectArrayMatch(getAuthContextGuards(SandboxController, methodName), [OrganizationAuthContextGuard])
+    expectArrayMatch(getResourceAccessGuards(SandboxController, methodName), [SandboxAccessGuard])
+    expect(getRequiredOrganizationMemberRole(SandboxController, methodName)).toBeUndefined()
+    expectArrayMatch(getRequiredOrganizationResourcePermissions(SandboxController, methodName), [
+      OrganizationResourcePermission.WRITE_SANDBOXES,
+    ])
+  })
+
+  it('getSandboxForks', () => {
+    const methodName = trackMethod('getSandboxForks')
+    expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
+      AuthStrategyType.API_KEY,
+      AuthStrategyType.JWT,
+    ])
+    expectArrayMatch(getAuthContextGuards(SandboxController, methodName), [OrganizationAuthContextGuard])
+    expectArrayMatch(getResourceAccessGuards(SandboxController, methodName), [SandboxAccessGuard])
+    expect(getRequiredOrganizationMemberRole(SandboxController, methodName)).toBeUndefined()
+    expect(getRequiredOrganizationResourcePermissions(SandboxController, methodName)).toBeUndefined()
+  })
+
+  it('getSandboxParent', () => {
+    const methodName = trackMethod('getSandboxParent')
+    expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
+      AuthStrategyType.API_KEY,
+      AuthStrategyType.JWT,
+    ])
+    expectArrayMatch(getAuthContextGuards(SandboxController, methodName), [OrganizationAuthContextGuard])
+    expectArrayMatch(getResourceAccessGuards(SandboxController, methodName), [SandboxAccessGuard])
+    expect(getRequiredOrganizationMemberRole(SandboxController, methodName)).toBeUndefined()
+    expect(getRequiredOrganizationResourcePermissions(SandboxController, methodName)).toBeUndefined()
+  })
+
+  it('getSandboxAncestors', () => {
+    const methodName = trackMethod('getSandboxAncestors')
+    expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
+      AuthStrategyType.API_KEY,
+      AuthStrategyType.JWT,
+    ])
+    expectArrayMatch(getAuthContextGuards(SandboxController, methodName), [OrganizationAuthContextGuard])
+    expectArrayMatch(getResourceAccessGuards(SandboxController, methodName), [SandboxAccessGuard])
+    expect(getRequiredOrganizationMemberRole(SandboxController, methodName)).toBeUndefined()
+    expect(getRequiredOrganizationResourcePermissions(SandboxController, methodName)).toBeUndefined()
+  })
 })

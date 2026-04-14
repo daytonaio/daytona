@@ -44,6 +44,8 @@ class SandboxState(str, Enum):
     ARCHIVED = 'archived'
     ARCHIVING = 'archiving'
     RESIZING = 'resizing'
+    SNAPSHOTTING = 'snapshotting'
+    FORKING = 'forking'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

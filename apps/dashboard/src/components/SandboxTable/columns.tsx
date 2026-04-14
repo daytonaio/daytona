@@ -55,6 +55,9 @@ interface GetColumnsProps {
   handleRecover: (id: string) => void
   getRegionName: (regionId: string) => string | undefined
   handleScreenRecordings: (id: string) => void
+  handleCreateSnapshot: (id: string) => void
+  handleFork: (id: string) => void
+  handleViewForks: (id: string) => void
 }
 
 export function getColumns({
@@ -72,6 +75,9 @@ export function getColumns({
   handleRecover,
   getRegionName,
   handleScreenRecordings,
+  handleCreateSnapshot,
+  handleFork,
+  handleViewForks,
 }: GetColumnsProps): ColumnDef<Sandbox>[] {
   const handleOpenWebTerminal = async (sandboxId: string) => {
     const url = await getWebTerminalUrl(sandboxId)
@@ -328,6 +334,9 @@ export function getColumns({
             onRevokeSshAccess={handleRevokeSshAccess}
             onRecover={handleRecover}
             onScreenRecordings={handleScreenRecordings}
+            onCreateSnapshot={() => handleCreateSnapshot(row.original.id)}
+            onFork={() => handleFork(row.original.id)}
+            onViewForks={() => handleViewForks(row.original.id)}
           />
         </div>
       ),

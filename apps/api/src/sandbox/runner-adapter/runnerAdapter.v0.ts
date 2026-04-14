@@ -416,6 +416,19 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     await this.sandboxApiClient.updateNetworkSettings(sandboxId, updateNetworkSettingsDto)
   }
 
+  async forkSandbox(_sourceSandboxId: string, _newSandboxId: string): Promise<void> {
+    throw new Error('forkSandbox is not supported for V0 runners')
+  }
+
+  async createSnapshotFromSandbox(
+    _sandboxId: string,
+    _snapshotName: string,
+    _organizationId: string,
+    _registry?: DockerRegistry,
+  ): Promise<void> {
+    throw new Error('createSnapshotFromSandbox is not supported for V0 runners')
+  }
+
   async recoverSandbox(sandbox: Sandbox): Promise<void> {
     const recoverSandboxDTO: RecoverSandboxDTO = {
       userId: sandbox.organizationId,

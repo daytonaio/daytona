@@ -49,6 +49,7 @@ import { ProxyCacheInvalidationService } from './services/proxy-cache-invalidati
 import { RegionModule } from '../region/region.module'
 import { Region } from '../region/entities/region.entity'
 import { SnapshotRegion } from './entities/snapshot-region.entity'
+import { SandboxFork } from './entities/sandbox-fork.entity'
 import { JobController } from './controllers/job.controller'
 import { JobService } from './services/job.service'
 import { JobStateHandlerService } from './services/job-state-handler.service'
@@ -80,6 +81,7 @@ import { SandboxActivityService } from './services/sandbox-activity.service'
       Region,
       Job,
       SandboxLastActivity,
+      SandboxFork,
     ]),
   ],
   controllers: [

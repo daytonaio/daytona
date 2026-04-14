@@ -29,6 +29,8 @@ import java.io.IOException;
 
 import java.math.BigDecimal;
 import io.daytona.api.client.model.CreateSandbox;
+import io.daytona.api.client.model.CreateSandboxSnapshot;
+import io.daytona.api.client.model.ForkSandbox;
 import io.daytona.api.client.model.MetricsResponse;
 import java.time.OffsetDateTime;
 import io.daytona.api.client.model.Organization;
@@ -500,6 +502,152 @@ public class SandboxApi {
         return localVarCall;
     }
     /**
+     * Build call for createSandboxSnapshot
+     * @param sandboxIdOrName  (required)
+     * @param createSandboxSnapshot  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Snapshot creation has been initiated </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call createSandboxSnapshotCall(String sandboxIdOrName, CreateSandboxSnapshot createSandboxSnapshot, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = createSandboxSnapshot;
+
+        // create path and map variables
+        String localVarPath = "/sandbox/{sandboxIdOrName}/snapshot"
+            .replace("{" + "sandboxIdOrName" + "}", localVarApiClient.escapeString(sandboxIdOrName.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (xDaytonaOrganizationID != null) {
+            localVarHeaderParams.put("X-Daytona-Organization-ID", localVarApiClient.parameterToString(xDaytonaOrganizationID));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call createSandboxSnapshotValidateBeforeCall(String sandboxIdOrName, CreateSandboxSnapshot createSandboxSnapshot, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'sandboxIdOrName' is set
+        if (sandboxIdOrName == null) {
+            throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling createSandboxSnapshot(Async)");
+        }
+
+        // verify the required parameter 'createSandboxSnapshot' is set
+        if (createSandboxSnapshot == null) {
+            throw new ApiException("Missing the required parameter 'createSandboxSnapshot' when calling createSandboxSnapshot(Async)");
+        }
+
+        return createSandboxSnapshotCall(sandboxIdOrName, createSandboxSnapshot, xDaytonaOrganizationID, _callback);
+
+    }
+
+    /**
+     * Create a snapshot from a sandbox
+     * 
+     * @param sandboxIdOrName  (required)
+     * @param createSandboxSnapshot  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return Sandbox
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Snapshot creation has been initiated </td><td>  -  </td></tr>
+     </table>
+     */
+    public Sandbox createSandboxSnapshot(String sandboxIdOrName, CreateSandboxSnapshot createSandboxSnapshot, String xDaytonaOrganizationID) throws ApiException {
+        ApiResponse<Sandbox> localVarResp = createSandboxSnapshotWithHttpInfo(sandboxIdOrName, createSandboxSnapshot, xDaytonaOrganizationID);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Create a snapshot from a sandbox
+     * 
+     * @param sandboxIdOrName  (required)
+     * @param createSandboxSnapshot  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return ApiResponse&lt;Sandbox&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Snapshot creation has been initiated </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Sandbox> createSandboxSnapshotWithHttpInfo(String sandboxIdOrName, CreateSandboxSnapshot createSandboxSnapshot, String xDaytonaOrganizationID) throws ApiException {
+        okhttp3.Call localVarCall = createSandboxSnapshotValidateBeforeCall(sandboxIdOrName, createSandboxSnapshot, xDaytonaOrganizationID, null);
+        Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Create a snapshot from a sandbox (asynchronously)
+     * 
+     * @param sandboxIdOrName  (required)
+     * @param createSandboxSnapshot  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Snapshot creation has been initiated </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call createSandboxSnapshotAsync(String sandboxIdOrName, CreateSandboxSnapshot createSandboxSnapshot, String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = createSandboxSnapshotValidateBeforeCall(sandboxIdOrName, createSandboxSnapshot, xDaytonaOrganizationID, _callback);
+        Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for createSshAccess
      * @param sandboxIdOrName ID or name of the sandbox (required)
      * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
@@ -928,6 +1076,152 @@ public class SandboxApi {
 
         okhttp3.Call localVarCall = expireSignedPortPreviewUrlValidateBeforeCall(sandboxIdOrName, port, token, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for forkSandbox
+     * @param sandboxIdOrName  (required)
+     * @param forkSandbox  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Fork operation has been initiated </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call forkSandboxCall(String sandboxIdOrName, ForkSandbox forkSandbox, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = forkSandbox;
+
+        // create path and map variables
+        String localVarPath = "/sandbox/{sandboxIdOrName}/fork"
+            .replace("{" + "sandboxIdOrName" + "}", localVarApiClient.escapeString(sandboxIdOrName.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (xDaytonaOrganizationID != null) {
+            localVarHeaderParams.put("X-Daytona-Organization-ID", localVarApiClient.parameterToString(xDaytonaOrganizationID));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call forkSandboxValidateBeforeCall(String sandboxIdOrName, ForkSandbox forkSandbox, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'sandboxIdOrName' is set
+        if (sandboxIdOrName == null) {
+            throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling forkSandbox(Async)");
+        }
+
+        // verify the required parameter 'forkSandbox' is set
+        if (forkSandbox == null) {
+            throw new ApiException("Missing the required parameter 'forkSandbox' when calling forkSandbox(Async)");
+        }
+
+        return forkSandboxCall(sandboxIdOrName, forkSandbox, xDaytonaOrganizationID, _callback);
+
+    }
+
+    /**
+     * Fork a sandbox
+     * 
+     * @param sandboxIdOrName  (required)
+     * @param forkSandbox  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return Sandbox
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Fork operation has been initiated </td><td>  -  </td></tr>
+     </table>
+     */
+    public Sandbox forkSandbox(String sandboxIdOrName, ForkSandbox forkSandbox, String xDaytonaOrganizationID) throws ApiException {
+        ApiResponse<Sandbox> localVarResp = forkSandboxWithHttpInfo(sandboxIdOrName, forkSandbox, xDaytonaOrganizationID);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Fork a sandbox
+     * 
+     * @param sandboxIdOrName  (required)
+     * @param forkSandbox  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return ApiResponse&lt;Sandbox&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Fork operation has been initiated </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Sandbox> forkSandboxWithHttpInfo(String sandboxIdOrName, ForkSandbox forkSandbox, String xDaytonaOrganizationID) throws ApiException {
+        okhttp3.Call localVarCall = forkSandboxValidateBeforeCall(sandboxIdOrName, forkSandbox, xDaytonaOrganizationID, null);
+        Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Fork a sandbox (asynchronously)
+     * 
+     * @param sandboxIdOrName  (required)
+     * @param forkSandbox  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Fork operation has been initiated </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call forkSandboxAsync(String sandboxIdOrName, ForkSandbox forkSandbox, String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = forkSandboxValidateBeforeCall(sandboxIdOrName, forkSandbox, xDaytonaOrganizationID, _callback);
+        Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }
     /**
@@ -1777,6 +2071,286 @@ public class SandboxApi {
         return localVarCall;
     }
     /**
+     * Build call for getSandboxAncestors
+     * @param sandboxIdOrName  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getSandboxAncestorsCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/sandbox/{sandboxIdOrName}/ancestors"
+            .replace("{" + "sandboxIdOrName" + "}", localVarApiClient.escapeString(sandboxIdOrName.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (xDaytonaOrganizationID != null) {
+            localVarHeaderParams.put("X-Daytona-Organization-ID", localVarApiClient.parameterToString(xDaytonaOrganizationID));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call getSandboxAncestorsValidateBeforeCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'sandboxIdOrName' is set
+        if (sandboxIdOrName == null) {
+            throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling getSandboxAncestors(Async)");
+        }
+
+        return getSandboxAncestorsCall(sandboxIdOrName, xDaytonaOrganizationID, _callback);
+
+    }
+
+    /**
+     * Get sandbox fork ancestor chain
+     * 
+     * @param sandboxIdOrName  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return List&lt;Sandbox&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public List<Sandbox> getSandboxAncestors(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+        ApiResponse<List<Sandbox>> localVarResp = getSandboxAncestorsWithHttpInfo(sandboxIdOrName, xDaytonaOrganizationID);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Get sandbox fork ancestor chain
+     * 
+     * @param sandboxIdOrName  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return ApiResponse&lt;List&lt;Sandbox&gt;&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<List<Sandbox>> getSandboxAncestorsWithHttpInfo(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+        okhttp3.Call localVarCall = getSandboxAncestorsValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, null);
+        Type localVarReturnType = new TypeToken<List<Sandbox>>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Get sandbox fork ancestor chain (asynchronously)
+     * 
+     * @param sandboxIdOrName  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getSandboxAncestorsAsync(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback<List<Sandbox>> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = getSandboxAncestorsValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, _callback);
+        Type localVarReturnType = new TypeToken<List<Sandbox>>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for getSandboxForks
+     * @param sandboxIdOrName  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param includeDestroyed  (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getSandboxForksCall(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean includeDestroyed, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/sandbox/{sandboxIdOrName}/forks"
+            .replace("{" + "sandboxIdOrName" + "}", localVarApiClient.escapeString(sandboxIdOrName.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        if (includeDestroyed != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("includeDestroyed", includeDestroyed));
+        }
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (xDaytonaOrganizationID != null) {
+            localVarHeaderParams.put("X-Daytona-Organization-ID", localVarApiClient.parameterToString(xDaytonaOrganizationID));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call getSandboxForksValidateBeforeCall(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean includeDestroyed, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'sandboxIdOrName' is set
+        if (sandboxIdOrName == null) {
+            throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling getSandboxForks(Async)");
+        }
+
+        return getSandboxForksCall(sandboxIdOrName, xDaytonaOrganizationID, includeDestroyed, _callback);
+
+    }
+
+    /**
+     * Get sandbox fork children
+     * 
+     * @param sandboxIdOrName  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param includeDestroyed  (optional)
+     * @return List&lt;Sandbox&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public List<Sandbox> getSandboxForks(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean includeDestroyed) throws ApiException {
+        ApiResponse<List<Sandbox>> localVarResp = getSandboxForksWithHttpInfo(sandboxIdOrName, xDaytonaOrganizationID, includeDestroyed);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Get sandbox fork children
+     * 
+     * @param sandboxIdOrName  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param includeDestroyed  (optional)
+     * @return ApiResponse&lt;List&lt;Sandbox&gt;&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<List<Sandbox>> getSandboxForksWithHttpInfo(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean includeDestroyed) throws ApiException {
+        okhttp3.Call localVarCall = getSandboxForksValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, includeDestroyed, null);
+        Type localVarReturnType = new TypeToken<List<Sandbox>>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Get sandbox fork children (asynchronously)
+     * 
+     * @param sandboxIdOrName  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param includeDestroyed  (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getSandboxForksAsync(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean includeDestroyed, final ApiCallback<List<Sandbox>> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = getSandboxForksValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, includeDestroyed, _callback);
+        Type localVarReturnType = new TypeToken<List<Sandbox>>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for getSandboxLogs
      * @param sandboxId ID of the sandbox (required)
      * @param from Start of time range (ISO 8601) (required)
@@ -2137,6 +2711,142 @@ public class SandboxApi {
 
         okhttp3.Call localVarCall = getSandboxMetricsValidateBeforeCall(sandboxId, from, to, xDaytonaOrganizationID, metricNames, _callback);
         Type localVarReturnType = new TypeToken<MetricsResponse>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for getSandboxParent
+     * @param sandboxIdOrName  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getSandboxParentCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/sandbox/{sandboxIdOrName}/parent"
+            .replace("{" + "sandboxIdOrName" + "}", localVarApiClient.escapeString(sandboxIdOrName.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (xDaytonaOrganizationID != null) {
+            localVarHeaderParams.put("X-Daytona-Organization-ID", localVarApiClient.parameterToString(xDaytonaOrganizationID));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call getSandboxParentValidateBeforeCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'sandboxIdOrName' is set
+        if (sandboxIdOrName == null) {
+            throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling getSandboxParent(Async)");
+        }
+
+        return getSandboxParentCall(sandboxIdOrName, xDaytonaOrganizationID, _callback);
+
+    }
+
+    /**
+     * Get sandbox fork parent
+     * 
+     * @param sandboxIdOrName  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return Sandbox
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public Sandbox getSandboxParent(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+        ApiResponse<Sandbox> localVarResp = getSandboxParentWithHttpInfo(sandboxIdOrName, xDaytonaOrganizationID);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Get sandbox fork parent
+     * 
+     * @param sandboxIdOrName  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return ApiResponse&lt;Sandbox&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Sandbox> getSandboxParentWithHttpInfo(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+        okhttp3.Call localVarCall = getSandboxParentValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, null);
+        Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Get sandbox fork parent (asynchronously)
+     * 
+     * @param sandboxIdOrName  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getSandboxParentAsync(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = getSandboxParentValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, _callback);
+        Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }

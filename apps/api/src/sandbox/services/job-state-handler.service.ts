@@ -4,6 +4,7 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Snapshot } from '../entities/snapshot.entity'
@@ -24,6 +25,9 @@ import { Sandbox } from '../entities/sandbox.entity'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { ResourceType } from '../enums/resource-type.enum'
 import { getStateChangeLockKey } from '../utils/lock-key.util'
+import { v4 as uuidv4 } from 'uuid'
+import { SnapshotEvents } from '../constants/snapshot-events'
+import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 
 /**
  * Service for handling entity state updates based on job completion (v2 runners only).
@@ -40,6 +44,7 @@ export class JobStateHandlerService {
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   /**
@@ -85,6 +90,12 @@ export class JobStateHandlerService {
         break
       case JobType.RECOVER_SANDBOX:
         await this.handleRecoverSandboxJobCompletion(job)
+        break
+      case JobType.FORK_SANDBOX:
+        await this.handleForkSandboxJobCompletion(job)
+        break
+      case JobType.SNAPSHOT_SANDBOX:
+        await this.handleCreateSandboxSnapshotJobCompletion(job)
         break
       default:
         break
@@ -596,6 +607,179 @@ export class JobStateHandlerService {
       await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
     } catch (error) {
       this.logger.error(`Error handling RESIZE_SANDBOX job completion for sandbox ${sandboxId}:`, error)
+    }
+  }
+
+  private async handleForkSandboxJobCompletion(job: Job): Promise<void> {
+    const forkedSandboxId = job.resourceId
+    const payload = job.getPayload<{ sourceSandboxId: string }>()
+    if (!forkedSandboxId || !payload?.sourceSandboxId) return
+
+    try {
+      // Rollback source sandbox to its initial state
+      const sourceSandbox = await this.sandboxRepository.findOne({ where: { id: payload.sourceSandboxId } })
+      if (!sourceSandbox) {
+        this.logger.warn(`Source sandbox ${payload.sourceSandboxId} not found for FORK_SANDBOX job ${job.id}`)
+        return
+      }
+
+      const sourceSandboxInitialState =
+        sourceSandbox.desiredState === SandboxDesiredState.STARTED
+          ? SandboxState.STARTED
+          : sourceSandbox.desiredState === SandboxDesiredState.STOPPED
+            ? SandboxState.STOPPED
+            : null
+
+      if (!sourceSandboxInitialState) {
+        this.logger.error(
+          `Source sandbox ${payload.sourceSandboxId} has unexpected desiredState ${sourceSandbox.desiredState} for FORK_SANDBOX job ${job.id}`,
+        )
+        return
+      }
+
+      await this.sandboxRepository.update(payload.sourceSandboxId, {
+        updateData: { state: sourceSandboxInitialState },
+        entity: sourceSandbox,
+      })
+
+      // Update forked sandbox to its desired state
+      const forkedSandbox = await this.sandboxRepository.findOne({ where: { id: forkedSandboxId } })
+      if (!forkedSandbox) {
+        this.logger.warn(`Sandbox ${forkedSandboxId} not found for FORK_SANDBOX job ${job.id}`)
+        return
+      }
+
+      if (forkedSandbox.desiredState !== SandboxDesiredState.STARTED) {
+        this.logger.error(
+          `Sandbox ${forkedSandboxId} is not in desired state STARTED for FORK_SANDBOX job ${job.id}. Desired state: ${forkedSandbox.desiredState}`,
+        )
+        return
+      }
+
+      const updateData: Partial<Sandbox> = {}
+
+      if (job.status === JobStatus.COMPLETED) {
+        this.logger.debug(
+          `FORK_SANDBOX job ${job.id} completed successfully, marking sandbox ${forkedSandboxId} as STARTED`,
+        )
+        updateData.state = SandboxState.STARTED
+        updateData.errorReason = null
+        if ([BackupState.ERROR, BackupState.COMPLETED].includes(forkedSandbox.backupState)) {
+          Object.assign(updateData, Sandbox.getBackupStateUpdate(forkedSandbox, BackupState.NONE))
+        }
+        const metadata = job.getResultMetadata()
+        if (metadata?.daemonVersion && typeof metadata.daemonVersion === 'string') {
+          updateData.daemonVersion = metadata.daemonVersion
+        }
+      } else if (job.status === JobStatus.FAILED) {
+        this.logger.error(`FORK_SANDBOX job ${job.id} failed for sandbox ${forkedSandboxId}: ${job.errorMessage}`)
+        updateData.state = SandboxState.ERROR
+        const { recoverable, errorReason } = sanitizeSandboxError(job.errorMessage)
+        updateData.errorReason = errorReason || 'Failed to fork sandbox'
+        updateData.recoverable = recoverable
+      }
+
+      await this.sandboxRepository.update(forkedSandboxId, { updateData, entity: forkedSandbox })
+    } catch (error) {
+      this.logger.error(`Error handling FORK_SANDBOX job completion for sandbox ${forkedSandboxId}:`, error)
+    }
+  }
+
+  private async handleCreateSandboxSnapshotJobCompletion(job: Job): Promise<void> {
+    const sandboxId = job.resourceId
+    if (!sandboxId) return
+
+    try {
+      const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
+      if (!sandbox) {
+        this.logger.warn(`Sandbox ${sandboxId} not found for SNAPSHOT_SANDBOX job ${job.id}`)
+        return
+      }
+
+      if (sandbox.state !== SandboxState.SNAPSHOTTING) {
+        this.logger.warn(
+          `Sandbox ${sandboxId} is not in SNAPSHOTTING state for SNAPSHOT_SANDBOX job ${job.id}. State: ${sandbox.state}`,
+        )
+        return
+      }
+
+      const restoredState =
+        sandbox.desiredState === SandboxDesiredState.STARTED
+          ? SandboxState.STARTED
+          : sandbox.desiredState === SandboxDesiredState.STOPPED
+            ? SandboxState.STOPPED
+            : null
+
+      if (!restoredState) {
+        this.logger.error(
+          `Sandbox ${sandboxId} has unexpected desiredState ${sandbox.desiredState} for SNAPSHOT_SANDBOX job ${job.id}`,
+        )
+        return
+      }
+
+      await this.sandboxRepository.update(sandbox.id, {
+        updateData: { state: restoredState },
+        entity: sandbox,
+      })
+
+      if (job.status === JobStatus.COMPLETED) {
+        const payload = job.getPayload<{ name?: string; registry?: { url?: string; project?: string } }>()
+        const metadata = job.getResultMetadata()
+        const snapshotName = payload?.name
+        const hash =
+          (typeof metadata?.hash === 'string' && metadata.hash) ||
+          (typeof metadata?.Hash === 'string' && metadata.Hash) ||
+          undefined
+
+        if (!snapshotName) {
+          this.logger.error(`SNAPSHOT_SANDBOX job ${job.id} payload missing snapshot name`)
+        } else {
+          let snapshotRef = snapshotName
+          if (hash && payload?.registry?.url) {
+            const project = payload.registry.project || 'daytona'
+            snapshotRef = `${payload.registry.url}/${project}/daytona-${hash}:daytona`
+          }
+
+          const snapshotSize =
+            (typeof metadata?.sizeBytes === 'number' && metadata.sizeBytes) ||
+            (typeof metadata?.SizeBytes === 'number' && metadata.SizeBytes) ||
+            undefined
+
+          const snapshotId = uuidv4()
+
+          const snapshot = this.snapshotRepository.create({
+            id: snapshotId,
+            organizationId: sandbox.organizationId,
+            name: snapshotName,
+            imageName: '',
+            ref: snapshotRef,
+            state: SnapshotState.ACTIVE,
+            cpu: sandbox.cpu,
+            gpu: sandbox.gpu,
+            mem: sandbox.mem,
+            disk: sandbox.disk,
+            size: snapshotSize,
+            initialRunnerId: job.runnerId || undefined,
+            lastUsedAt: new Date(),
+            snapshotRegions: [{ snapshotId, regionId: sandbox.region }],
+          })
+
+          if (job.runnerId) {
+            const snapshotRunner = this.snapshotRunnerRepository.create({
+              snapshotRef,
+              runnerId: job.runnerId,
+              state: SnapshotRunnerState.READY,
+            })
+            await this.snapshotRunnerRepository.save(snapshotRunner)
+          }
+
+          const insertedSnapshot = await this.snapshotRepository.insert(snapshot)
+
+          this.eventEmitter.emit(SnapshotEvents.CREATED, new SnapshotCreatedEvent(insertedSnapshot))
+        }
+      }
+    } catch (error) {
+      this.logger.error(`Error handling SNAPSHOT_SANDBOX job completion for sandbox ${sandboxId}:`, error)
     }
   }
 }

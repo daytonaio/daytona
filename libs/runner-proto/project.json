@@ -1,0 +1,20 @@
+{
+  "name": "runner-proto",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/runner-proto",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "proto": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["{projectRoot}/proto/**/*.proto", "{projectRoot}/buf.yaml", "{projectRoot}/buf.gen.yaml"],
+      "outputs": ["{projectRoot}/gen/ts", "{projectRoot}/gen/go"],
+      "options": {
+        "commands": ["buf lint", "buf generate"],
+        "parallel": false,
+        "cwd": "{projectRoot}"
+      }
+    }
+  }
+}

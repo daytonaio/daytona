@@ -310,6 +310,8 @@ export class Sandbox {
             SandboxState.ERROR,
             SandboxState.BUILD_FAILED,
             SandboxState.RESIZING,
+            SandboxState.SNAPSHOTTING,
+            SandboxState.FORKING,
           ].includes(this.state)
         ) {
           break
@@ -324,6 +326,8 @@ export class Sandbox {
             SandboxState.ERROR,
             SandboxState.BUILD_FAILED,
             SandboxState.RESIZING,
+            SandboxState.SNAPSHOTTING,
+            SandboxState.FORKING,
           ].includes(this.state)
         ) {
           break

@@ -61,7 +61,11 @@ public enum SandboxState {
   
   ARCHIVING("archiving"),
   
-  RESIZING("resizing");
+  RESIZING("resizing"),
+  
+  SNAPSHOTTING("snapshotting"),
+  
+  FORKING("forking");
 
   private String value;
 

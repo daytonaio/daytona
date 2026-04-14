@@ -19,7 +19,8 @@
       "@daytona/runner-api-client": ["libs/runner-api-client/src/index.ts"],
       "@daytona/sdk": ["libs/sdk-typescript/src/index.ts"],
       "@daytona/toolbox-api-client": ["libs/toolbox-api-client/src/index.ts"],
-      "@daytona/analytics-api-client": ["libs/analytics-api-client/src/index.ts"]
+      "@daytona/analytics-api-client": ["libs/analytics-api-client/src/index.ts"],
+      "@daytona/runner-proto": ["libs/runner-proto/gen/ts/runner/v1alpha1/job_pb.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

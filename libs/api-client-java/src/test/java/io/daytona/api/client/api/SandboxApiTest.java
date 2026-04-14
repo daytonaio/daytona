@@ -16,6 +16,8 @@ package io.daytona.api.client.api;
 import io.daytona.api.client.ApiException;
 import java.math.BigDecimal;
 import io.daytona.api.client.model.CreateSandbox;
+import io.daytona.api.client.model.CreateSandboxSnapshot;
+import io.daytona.api.client.model.ForkSandbox;
 import io.daytona.api.client.model.MetricsResponse;
 import java.time.OffsetDateTime;
 import io.daytona.api.client.model.Organization;
@@ -90,6 +92,20 @@ public class SandboxApiTest {
     }
 
     /**
+     * Create a snapshot from a sandbox
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void createSandboxSnapshotTest() throws ApiException {
+        String sandboxIdOrName = null;
+        CreateSandboxSnapshot createSandboxSnapshot = null;
+        String xDaytonaOrganizationID = null;
+        Sandbox response = api.createSandboxSnapshot(sandboxIdOrName, createSandboxSnapshot, xDaytonaOrganizationID);
+        // TODO: test validations
+    }
+
+    /**
      * Create SSH access for sandbox
      *
      * @throws ApiException if the Api call fails
@@ -128,6 +144,20 @@ public class SandboxApiTest {
         String token = null;
         String xDaytonaOrganizationID = null;
         api.expireSignedPortPreviewUrl(sandboxIdOrName, port, token, xDaytonaOrganizationID);
+        // TODO: test validations
+    }
+
+    /**
+     * Fork a sandbox
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void forkSandboxTest() throws ApiException {
+        String sandboxIdOrName = null;
+        ForkSandbox forkSandbox = null;
+        String xDaytonaOrganizationID = null;
+        Sandbox response = api.forkSandbox(sandboxIdOrName, forkSandbox, xDaytonaOrganizationID);
         // TODO: test validations
     }
 
@@ -215,6 +245,33 @@ public class SandboxApiTest {
     }
 
     /**
+     * Get sandbox fork ancestor chain
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void getSandboxAncestorsTest() throws ApiException {
+        String sandboxIdOrName = null;
+        String xDaytonaOrganizationID = null;
+        List<Sandbox> response = api.getSandboxAncestors(sandboxIdOrName, xDaytonaOrganizationID);
+        // TODO: test validations
+    }
+
+    /**
+     * Get sandbox fork children
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void getSandboxForksTest() throws ApiException {
+        String sandboxIdOrName = null;
+        String xDaytonaOrganizationID = null;
+        Boolean includeDestroyed = null;
+        List<Sandbox> response = api.getSandboxForks(sandboxIdOrName, xDaytonaOrganizationID, includeDestroyed);
+        // TODO: test validations
+    }
+
+    /**
      * Get sandbox logs
      *
      * Retrieve OTEL logs for a sandbox within a time range
@@ -250,6 +307,19 @@ public class SandboxApiTest {
         String xDaytonaOrganizationID = null;
         List<String> metricNames = null;
         MetricsResponse response = api.getSandboxMetrics(sandboxId, from, to, xDaytonaOrganizationID, metricNames);
+        // TODO: test validations
+    }
+
+    /**
+     * Get sandbox fork parent
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void getSandboxParentTest() throws ApiException {
+        String sandboxIdOrName = null;
+        String xDaytonaOrganizationID = null;
+        Sandbox response = api.getSandboxParent(sandboxIdOrName, xDaytonaOrganizationID);
         // TODO: test validations
     }
 
