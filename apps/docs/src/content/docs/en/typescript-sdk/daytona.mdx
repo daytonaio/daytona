@@ -75,6 +75,41 @@ Creates a new Daytona client instance.
 
 ### Methods
 
+#### \_experimental\_fork()
+
+```ts
+_experimental_fork(
+   sandbox: Sandbox, 
+   params?: {
+  name: string;
+ }, 
+timeout?: number): Promise<Sandbox>
+```
+
+Forks a Sandbox, creating a new Sandbox with an identical filesystem.
+
+**Parameters**:
+
+- `sandbox` _Sandbox_ - The Sandbox to fork
+- `params?` _Fork parameters_
+- `name?` _string_ - Optional name for the forked Sandbox
+- `timeout?` _number = 60_ - Timeout in seconds (0 means no timeout, default is 60)
+
+
+**Returns**:
+
+- `Promise<Sandbox>` - The forked Sandbox
+
+**Example:**
+
+```ts
+const sandbox = await daytona.get('my-sandbox-id');
+const forked = await daytona._experimental_fork(sandbox, { name: 'my-fork' });
+console.log(`Forked sandbox: ${forked.id}`);
+```
+
+***
+
 #### \[asyncDispose\]()
 
 ```ts
@@ -214,41 +249,6 @@ Deletes a Sandbox.
 ```ts
 const sandbox = await daytona.get('my-sandbox-id');
 await daytona.delete(sandbox);
-```
-
-***
-
-#### fork()
-
-```ts
-fork(
-   sandbox: Sandbox, 
-   params?: {
-  name: string;
- }, 
-timeout?: number): Promise<Sandbox>
-```
-
-Forks a Sandbox, creating a new Sandbox with an identical filesystem.
-
-**Parameters**:
-
-- `sandbox` _Sandbox_ - The Sandbox to fork
-- `params?` _Fork parameters_
-- `name?` _string_ - Optional name for the forked Sandbox
-- `timeout?` _number = 60_ - Timeout in seconds (0 means no timeout, default is 60)
-
-
-**Returns**:
-
-- `Promise<Sandbox>` - The forked Sandbox
-
-**Example:**
-
-```ts
-const sandbox = await daytona.get('my-sandbox-id');
-const forked = await daytona.fork(sandbox, { name: 'my-fork' });
-console.log(`Forked sandbox: ${forked.id}`);
 ```
 
 ***
