@@ -490,7 +490,7 @@ Use this to expose domain-specific operations (database queries, API testing, cl
 | **Pause/Resume** (\#3) | Long-running or iterative tasks | `pause_on_exit` \+ `client.resume(state)` |
 | **Handoffs** (\#4) | Pipeline: analyze → write → review | `handoffs=[next_agent]` |
 | **Agents as Tools** (\#5) | Parallel independent analyses | `agent.as_tool(run_config=...)` |
-| **Memory** (\#6) | Preferences that persist across sessions | `SandboxMemoryConfig` |
+| **Memory** (\#6) | Preferences that persist across sessions | `Memory()` \+ `MemoryReadConfig`/`MemoryWriteConfig` |
 | **Custom Capabilities** (\#7) | Domain-specific sandbox operations | Subclass `Capability` |
 
 ## What's Next
