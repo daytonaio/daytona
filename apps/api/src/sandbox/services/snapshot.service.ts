@@ -36,6 +36,7 @@ import { OrganizationUsageService } from '../../organization/services/organizati
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SnapshotSortDirection, SnapshotSortField } from '../dto/list-snapshots-query.dto'
 import { PER_SANDBOX_LIMIT_MESSAGE } from '../../common/constants/error-messages'
+import { getEffectivePerSandboxLimits } from '../../organization/utils/sandbox-limits.util'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
 import { Region } from '../../region/entities/region.entity'
@@ -176,6 +177,7 @@ export class SnapshotService {
         createSnapshotDto.cpu,
         createSnapshotDto.memory,
         createSnapshotDto.disk,
+        regionId,
       )
 
       if (pendingSnapshotCountIncremented) {
@@ -243,6 +245,7 @@ export class SnapshotService {
         createSnapshotDto.cpu,
         createSnapshotDto.memory,
         createSnapshotDto.disk,
+        regionId,
       )
 
       if (pendingSnapshotCountIncremented) {
@@ -519,23 +522,31 @@ export class SnapshotService {
     cpu?: number,
     memory?: number,
     disk?: number,
+    regionId?: string,
   ): Promise<{
     pendingSnapshotCountIncremented: boolean
   }> {
+    const regionQuota = regionId ? await this.organizationService.getRegionQuota(organization.id, regionId) : null
+
     // validate per-sandbox quotas
-    if (cpu && cpu > organization.maxCpuPerSandbox) {
+    const { maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox } = getEffectivePerSandboxLimits(
+      organization,
+      regionQuota,
+    )
+
+    if (cpu && cpu > maxCpuPerSandbox) {
       throw new ForbiddenException(
-        `CPU request ${cpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox}).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+        `CPU request ${cpu} exceeds maximum allowed per sandbox (${maxCpuPerSandbox}).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
-    if (memory && memory > organization.maxMemoryPerSandbox) {
+    if (memory && memory > maxMemoryPerSandbox) {
       throw new ForbiddenException(
-        `Memory request ${memory}GB exceeds maximum allowed per sandbox (${organization.maxMemoryPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+        `Memory request ${memory}GB exceeds maximum allowed per sandbox (${maxMemoryPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
-    if (disk && disk > organization.maxDiskPerSandbox) {
+    if (disk && disk > maxDiskPerSandbox) {
       throw new ForbiddenException(
-        `Disk request ${disk}GB exceeds maximum allowed per sandbox (${organization.maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+        `Disk request ${disk}GB exceeds maximum allowed per sandbox (${maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
 

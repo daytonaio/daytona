@@ -41,6 +41,27 @@ export class RegionQuota {
   })
   totalDiskQuota: number
 
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'max_cpu_per_sandbox',
+  })
+  maxCpuPerSandbox: number | null
+
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'max_memory_per_sandbox',
+  })
+  maxMemoryPerSandbox: number | null
+
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'max_disk_per_sandbox',
+  })
+  maxDiskPerSandbox: number | null
+
   @CreateDateColumn({
     type: 'timestamp with time zone',
   })
@@ -57,11 +78,17 @@ export class RegionQuota {
     totalCpuQuota: number,
     totalMemoryQuota: number,
     totalDiskQuota: number,
+    maxCpuPerSandbox: number | null = null,
+    maxMemoryPerSandbox: number | null = null,
+    maxDiskPerSandbox: number | null = null,
   ) {
     this.organizationId = organizationId
     this.regionId = regionId
     this.totalCpuQuota = totalCpuQuota
     this.totalMemoryQuota = totalMemoryQuota
     this.totalDiskQuota = totalDiskQuota
+    this.maxCpuPerSandbox = maxCpuPerSandbox
+    this.maxMemoryPerSandbox = maxMemoryPerSandbox
+    this.maxDiskPerSandbox = maxDiskPerSandbox
   }
 }

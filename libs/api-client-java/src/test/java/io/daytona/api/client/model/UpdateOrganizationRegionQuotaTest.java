@@ -62,4 +62,28 @@ public class UpdateOrganizationRegionQuotaTest {
         // TODO: test totalDiskQuota
     }
 
+    /**
+     * Test the property 'maxCpuPerSandbox'
+     */
+    @Test
+    public void maxCpuPerSandboxTest() {
+        // TODO: test maxCpuPerSandbox
+    }
+
+    /**
+     * Test the property 'maxMemoryPerSandbox'
+     */
+    @Test
+    public void maxMemoryPerSandboxTest() {
+        // TODO: test maxMemoryPerSandbox
+    }
+
+    /**
+     * Test the property 'maxDiskPerSandbox'
+     */
+    @Test
+    public void maxDiskPerSandboxTest() {
+        // TODO: test maxDiskPerSandbox
+    }
+
 }

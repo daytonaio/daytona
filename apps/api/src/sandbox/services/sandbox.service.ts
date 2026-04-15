@@ -87,6 +87,7 @@ import { DefaultRegionRequiredException } from '../../organization/exceptions/De
 import { SnapshotService } from './snapshot.service'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { RegionType } from '../../region/enums/region-type.enum'
+import { getEffectivePerSandboxLimits } from '../../organization/utils/sandbox-limits.util'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
@@ -163,20 +164,29 @@ export class SandboxService {
     pendingMemoryIncremented: boolean
     pendingDiskIncremented: boolean
   }> {
+    const regionQuota = region.enforceQuotas
+      ? await this.organizationService.getRegionQuota(organization.id, region.id)
+      : null
+
     // validate per-sandbox quotas
-    if (cpu > organization.maxCpuPerSandbox) {
+    const { maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox } = getEffectivePerSandboxLimits(
+      organization,
+      regionQuota,
+    )
+
+    if (cpu > maxCpuPerSandbox) {
       throw new ForbiddenException(
-        `CPU request ${cpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox}).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+        `CPU request ${cpu} exceeds maximum allowed per sandbox (${maxCpuPerSandbox}).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
-    if (memory > organization.maxMemoryPerSandbox) {
+    if (memory > maxMemoryPerSandbox) {
       throw new ForbiddenException(
-        `Memory request ${memory}GB exceeds maximum allowed per sandbox (${organization.maxMemoryPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+        `Memory request ${memory}GB exceeds maximum allowed per sandbox (${maxMemoryPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
-    if (disk > organization.maxDiskPerSandbox) {
+    if (disk > maxDiskPerSandbox) {
       throw new ForbiddenException(
-        `Disk request ${disk}GB exceeds maximum allowed per sandbox (${organization.maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+        `Disk request ${disk}GB exceeds maximum allowed per sandbox (${maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
 
@@ -188,8 +198,6 @@ export class SandboxService {
         pendingDiskIncremented: false,
       }
     }
-
-    const regionQuota = await this.organizationService.getRegionQuota(organization.id, region.id)
 
     if (!regionQuota) {
       if (region.regionType === RegionType.SHARED) {
@@ -1789,20 +1797,28 @@ export class SandboxService {
       // Validate organization quotas for the new resource values
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
-      // Validate per-sandbox quotas with total new values
-      if (newCpu > organization.maxCpuPerSandbox) {
+      const regionQuota = region.enforceQuotas
+        ? await this.organizationService.getRegionQuota(organization.id, region.id)
+        : null
+
+      const { maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox } = getEffectivePerSandboxLimits(
+        organization,
+        regionQuota,
+      )
+
+      if (newCpu > maxCpuPerSandbox) {
         throw new ForbiddenException(
-          `CPU request ${newCpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox}).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+          `CPU request ${newCpu} exceeds maximum allowed per sandbox (${maxCpuPerSandbox}).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
         )
       }
-      if (newMem > organization.maxMemoryPerSandbox) {
+      if (newMem > maxMemoryPerSandbox) {
         throw new ForbiddenException(
-          `Memory request ${newMem}GB exceeds maximum allowed per sandbox (${organization.maxMemoryPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+          `Memory request ${newMem}GB exceeds maximum allowed per sandbox (${maxMemoryPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
         )
       }
-      if (newDisk > organization.maxDiskPerSandbox) {
+      if (newDisk > maxDiskPerSandbox) {
         throw new ForbiddenException(
-          `Disk request ${newDisk}GB exceeds maximum allowed per sandbox (${organization.maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+          `Disk request ${newDisk}GB exceeds maximum allowed per sandbox (${maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
         )
       }
 

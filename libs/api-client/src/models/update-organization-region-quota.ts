@@ -38,5 +38,23 @@ export interface UpdateOrganizationRegionQuota {
      * @memberof UpdateOrganizationRegionQuota
      */
     'totalDiskQuota': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateOrganizationRegionQuota
+     */
+    'maxCpuPerSandbox': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateOrganizationRegionQuota
+     */
+    'maxMemoryPerSandbox': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateOrganizationRegionQuota
+     */
+    'maxDiskPerSandbox': number | null;
 }
 
