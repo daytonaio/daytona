@@ -1042,9 +1042,9 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sand
 This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
 :::
 
-Daytona provides methods to fork sandboxes. Forking creates a duplicate of your sandbox's filesystem and memory, and copies it into a new sandbox. The new sandbox is fully independent: it can be started, stopped, and deleted without affecting the original. 
+Daytona provides methods to fork sandboxes. Forking creates a duplicate of your sandbox's filesystem and memory, and copies it into a new sandbox. The new sandbox is fully independent: it can be started, stopped, and deleted without affecting the original. The sandbox must be in started state before forking.
 
-Daytona tracks the parent-child relationship in a fork tree, so you can always trace a fork's lineage back to the sandbox it was created from. You can fork a fork, building out branches as needed. If the parent sandbox is deleted, all its forks continue to run unaffected.
+Daytona tracks the parent-child relationship in a fork tree, so you can always trace a fork's lineage back to the sandbox it was created from. You can fork a fork, building out branches as needed. The parent sandbox cannot be deleted while it has active fork children.
 
 1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
 2. Click the three-dot menu (**⋮**) next to the sandbox you want to fork
@@ -1056,9 +1056,6 @@ Daytona tracks the parent-child relationship in a fork tree, so you can always t
 ```python
 # Fork sandbox through the Sandbox instance
 forked = sandbox._experimental_fork(name="my-forked-sandbox")
-
-# Or use the Daytona helper method
-forked = daytona._experimental_fork(sandbox, name="my-forked-sandbox")
 ```
 
 </TabItem>
