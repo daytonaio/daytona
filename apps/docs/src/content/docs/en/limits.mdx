@@ -5,7 +5,7 @@ description: Overview of your organization's resource limits and usage.
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-[Daytona Limits ↗](https://app.daytona.io/dashboard/limits) provide an overview of your organization's [current usage](#current-usage), [resources](#resources), [sandbox limits](#sandbox-limits), and [rate limits](#rate-limits). Daytona uses a [tier-based](#tier-upgrade) system where organizations are placed into tiers based on verification status, with each tier providing access to a specific compute pool and rate limits. For information on spending and wallet management, see [billing](/docs/en/billing).
+[Daytona Limits ↗](https://app.daytona.io/dashboard/limits) provide an overview of your organization's [current usage](#current-usage), [resources](#resources), [sandbox limits](#sandbox-limits), and [rate limits](#rate-limits). Daytona uses a [tier-based](#tiers) system where organizations are placed into tiers based on verification status, with each tier providing access to a specific compute pool and rate limits. For information on spending and wallet management, see [billing](/docs/en/billing).
 
 ## Current usage
 
@@ -77,7 +77,7 @@ The rate limit error response is a JSON object with the following properties:
 }
 ```
 
-All errors include [**`headers`**](#rate-limit-headers) and [**`statusCode`**](#example-rate-limit-error-response) properties, allowing access to rate limit headers directly from the error object. Headers support case-insensitive access:
+All errors include [**`headers`**](#rate-limit-headers) and status code properties, allowing access to rate limit headers directly from the error object. Headers support case-insensitive access:
 
 <Tabs>
   <TabItem label="TypeScript" icon="seti:typescript">
