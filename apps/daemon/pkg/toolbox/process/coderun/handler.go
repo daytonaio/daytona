@@ -6,12 +6,9 @@ package coderun
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
-	"os"
 	"os/exec"
-	"regexp"
 	"strings"
 	"sync/atomic"
 	"syscall"
@@ -21,8 +18,6 @@ import (
 	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
 )
-
-var validEnvKeyPattern = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)
 
 // CodeRun godoc
 //
@@ -50,7 +45,7 @@ func CodeRun(logger *slog.Logger) gin.HandlerFunc {
 			return
 		}
 
-		if err := validateEnvKeys(request.Envs); err != nil {
+		if err := common.ValidateEnvKeys(request.Envs); err != nil {
 			c.Error(common_errors.NewBadRequestError(err))
 			return
 		}
@@ -59,9 +54,7 @@ func CodeRun(logger *slog.Logger) gin.HandlerFunc {
 		cmd := exec.Command(common.GetShell())
 		cmd.Stdin = strings.NewReader(runCommand)
 		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-		if len(request.Envs) > 0 {
-			cmd.Env = append(os.Environ(), mapEnvsToPairs(request.Envs)...)
-		}
+		common.ApplyEnvs(cmd, request.Envs)
 
 		var outputBuf bytes.Buffer
 		cmd.Stdout = &outputBuf
@@ -131,23 +124,4 @@ func CodeRun(logger *slog.Logger) gin.HandlerFunc {
 			Artifacts: artifacts,
 		})
 	}
-}
-
-func validateEnvKeys(envs map[string]string) error {
-	for key := range envs {
-		if !validEnvKeyPattern.MatchString(key) {
-			return fmt.Errorf("invalid environment variable name: '%s'", key)
-		}
-	}
-
-	return nil
-}
-
-func mapEnvsToPairs(envs map[string]string) []string {
-	pairs := make([]string, 0, len(envs))
-	for key, value := range envs {
-		pairs = append(pairs, fmt.Sprintf("%s=%s", key, value))
-	}
-
-	return pairs
 }
