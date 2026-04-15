@@ -150,6 +150,7 @@ describe('[AUTH] OrganizationController', () => {
 
   it('getOtelConfig', () => {
     const methodName = trackMethod('getOtelConfig')
+    expect(isPublicEndpoint(OrganizationController, methodName)).toBe(false)
     expectArrayMatch(getAllowedAuthStrategies(OrganizationController, methodName), [AuthStrategyType.API_KEY])
     expectArrayMatch(getAuthContextGuards(OrganizationController, methodName), [OtelCollectorAuthContextGuard])
   })
