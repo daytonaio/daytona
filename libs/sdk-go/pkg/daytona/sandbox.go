@@ -781,7 +781,8 @@ func (s *Sandbox) doExperimentalForkWithTimeout(ctx context.Context, name *strin
 		autoDeleteInterval = int(*sandboxResp.AutoDeleteInterval)
 	}
 
-	forked := NewSandbox(s.client, toolboxClient, sandboxResp.GetId(), sandboxResp.GetName(), sandboxResp.GetState(), sandboxResp.GetTarget(), autoArchiveInterval, autoDeleteInterval, sandboxResp.GetNetworkBlockAll(), sandboxResp.NetworkAllowList)
+	language := types.CodeLanguage(sandboxResp.GetLabels()[types.CodeToolboxLanguageLabel])
+	forked := NewSandbox(s.client, toolboxClient, sandboxResp.GetId(), sandboxResp.GetName(), sandboxResp.GetState(), sandboxResp.GetTarget(), autoArchiveInterval, autoDeleteInterval, sandboxResp.GetNetworkBlockAll(), sandboxResp.NetworkAllowList, language)
 
 	if err := forked.WaitForStart(ctx, timeout); err != nil {
 		return nil, err

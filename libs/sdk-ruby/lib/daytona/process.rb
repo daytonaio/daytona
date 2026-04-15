@@ -53,16 +53,7 @@ module Daytona
     #   # Command with timeout
     #   result = sandbox.process.exec("sleep 10", timeout: 5)
     def exec(command:, cwd: nil, env: nil, timeout: nil)
-      envs = nil
-      if env && !env.empty?
-        env.each_key do |key|
-          unless key.match?(/\A[A-Za-z_][A-Za-z0-9_]*\z/)
-            raise ArgumentError,
-                  "Invalid environment variable name: '#{key}'"
-          end
-        end
-        envs = env
-      end
+      envs = env&.empty? ? nil : env
 
       response = toolbox_api.execute_command(DaytonaToolboxApiClient::ExecuteRequest.new(command:, cwd:, envs:,
                                                                                          timeout:))

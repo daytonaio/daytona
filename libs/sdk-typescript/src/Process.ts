@@ -97,15 +97,6 @@ export class Process {
     env?: Record<string, string>,
     timeout?: number,
   ): Promise<ExecuteResponse> {
-    if (env && Object.keys(env).length) {
-      const validKeyPattern = /^[A-Za-z_][A-Za-z0-9_]*$/
-      for (const key of Object.keys(env)) {
-        if (!validKeyPattern.test(key)) {
-          throw new Error(`Invalid environment variable name: '${key}'`)
-        }
-      }
-    }
-
     const response = await this.apiClient.executeCommand({
       command,
       timeout,

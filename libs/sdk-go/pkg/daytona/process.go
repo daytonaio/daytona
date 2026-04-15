@@ -218,7 +218,7 @@ func (p *ProcessService) CodeRun(ctx context.Context, code string, opts ...func(
 
 func convertCodeRunCharts(charts []toolbox.Chart) []types.Chart {
 	if len(charts) == 0 {
-		return nil
+		return []types.Chart{}
 	}
 
 	converted := make([]types.Chart, len(charts))
