@@ -25,6 +25,7 @@ from daytona_api_client_async import (
     CreateBuildInfo,
     CreateSandbox,
     ObjectStorageApi,
+    Sandbox as SandboxDto,
     SandboxApi,
     SandboxState,
     SandboxVolume,
@@ -537,7 +538,7 @@ class AsyncDaytona:
             response = response_ref["response"]
 
         sandbox = AsyncSandbox(
-            response,
+            await self._ensure_toolbox_proxy_url(response),
             self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
@@ -628,7 +629,7 @@ class AsyncDaytona:
             raise DaytonaValidationError("sandbox_id_or_name is required")
 
         # Get the sandbox instance
-        sandbox_instance = await self._sandbox_api.get_sandbox(sandbox_id_or_name)
+        sandbox_instance = await self._ensure_toolbox_proxy_url(await self._sandbox_api.get_sandbox(sandbox_id_or_name))
 
         # Create and return sandbox with Python code toolbox as default
         code_toolbox = SandboxPythonCodeToolbox()
@@ -674,7 +675,7 @@ class AsyncDaytona:
         return AsyncPaginatedSandboxes(
             items=[
                 AsyncSandbox(
-                    sandbox,
+                    await self._ensure_toolbox_proxy_url(sandbox),
                     self._toolbox_api_client,
                     self._sandbox_api,
                     self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
@@ -707,6 +708,14 @@ class AsyncDaytona:
         if enum_language is None:
             raise DaytonaValidationError(f"Invalid code-toolbox-language: {language}")
         return enum_language
+
+    async def _ensure_toolbox_proxy_url(self, sandbox: SandboxDto) -> SandboxDto:
+        if sandbox.toolbox_proxy_url:
+            return sandbox
+
+        proxy_url = await self._sandbox_api.get_toolbox_proxy_url(sandbox.id)
+        sandbox.toolbox_proxy_url = proxy_url.url
+        return sandbox
 
     @with_instrumentation()
     async def start(self, sandbox: AsyncSandbox, timeout: float = 60) -> None:

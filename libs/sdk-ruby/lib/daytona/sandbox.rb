@@ -10,6 +10,31 @@ module Daytona
     include Instrumentation
 
     DEFAULT_TIMEOUT = 60
+    SUBSCRIPTION_TTL = 300
+
+    def self.with_events(*method_names)
+      method_names.each do |method_name|
+        original = instance_method(method_name)
+
+        visibility = if private_method_defined?(method_name, false)
+                       :private
+                     elsif protected_method_defined?(method_name, false)
+                       :protected
+                     else
+                       :public
+                     end
+
+        define_method(method_name) do |*args, **kwargs, &blk|
+          ensure_subscribed
+          original.bind_call(self, *args, **kwargs, &blk)
+        end
+
+        case visibility
+        when :private then private method_name
+        when :protected then protected method_name
+        end
+      end
+    end
 
     # @return [String] The ID of the sandbox
     attr_reader :id
@@ -132,6 +157,8 @@ module Daytona
       @sandbox_api = sandbox_api
       @otel_state = otel_state
       @event_subscriber = event_subscriber
+      @event_subscribed = false
+      @unsubscribe_events = nil
 
       # Create toolbox API clients with dynamic configuration
       @toolbox_api_config = build_toolbox_api_config
@@ -175,7 +202,6 @@ module Daytona
       @lsp_api = lsp_api
       @info_api = info_api
 
-      # Subscribe to real-time events for this sandbox
       subscribe_to_events
     end
 
@@ -234,7 +260,9 @@ module Daytona
     #
     # @param expires_in_minutes [Integer] TThe number of minutes the SSH access token will be valid for
     # @return [DaytonaApiClient::SshAccessDto]
-    def create_ssh_access(expires_in_minutes) = sandbox_api.create_ssh_access(id, { expires_in_minutes: })
+    def create_ssh_access(expires_in_minutes)
+      sandbox_api.create_ssh_access(id, { expires_in_minutes: })
+    end
 
     # Deletes the Sandbox and waits for it to reach the 'destroyed' state.
     #
@@ -256,6 +284,8 @@ module Daytona
           safe_refresh: true
         )
       end
+    ensure
+      unsubscribe_from_events
     end
 
     # Gets the user's home directory path for the logged in user inside the Sandbox.
@@ -299,7 +329,9 @@ module Daytona
     #
     # @param port [Integer]
     # @return [DaytonaApiClient::PortPreviewUrl]
-    def preview_url(port) = sandbox_api.get_port_preview_url(id, port)
+    def preview_url(port)
+      sandbox_api.get_port_preview_url(id, port)
+    end
 
     # Creates a signed preview URL for the sandbox at the specified port.
     #
@@ -331,7 +363,9 @@ module Daytona
     # Refresh the Sandbox data from the API.
     #
     # @return [void]
-    def refresh = process_response(sandbox_api.get_sandbox(id))
+    def refresh
+      process_response(sandbox_api.get_sandbox(id))
+    end
 
     # Refreshes the sandbox activity to reset the timer for automated lifecycle management actions.
     #
@@ -353,7 +387,9 @@ module Daytona
     #
     # @param token [String]
     # @return [void]
-    def revoke_ssh_access(token) = sandbox_api.revoke_ssh_access(id, token:)
+    def revoke_ssh_access(token)
+      sandbox_api.revoke_ssh_access(id, token:)
+    end
 
     # Starts the Sandbox and waits for it to be ready.
     #
@@ -485,7 +521,9 @@ module Daytona
     #
     # @param token [String]
     # @return [DaytonaApiClient::SshAccessValidationDto]
-    def validate_ssh_access(token) = sandbox_api.validate_ssh_access(token)
+    def validate_ssh_access(token)
+      sandbox_api.validate_ssh_access(token)
+    end
 
     # Waits for the Sandbox to reach the 'started' state. Polls the Sandbox status until it
     # reaches the 'started' state or encounters an error.
@@ -524,6 +562,13 @@ module Daytona
       end
     end
 
+    with_events :archive, :auto_archive_interval=, :auto_delete_interval=, :auto_stop_interval=,
+                :create_ssh_access, :delete, :get_user_home_dir, :get_work_dir, :labels=,
+                :preview_url, :create_signed_preview_url, :expire_signed_preview_url,
+                :refresh, :refresh_activity, :revoke_ssh_access, :start, :recover, :stop,
+                :create_lsp_server, :validate_ssh_access, :wait_for_sandbox_start,
+                :wait_for_sandbox_stop, :resize, :wait_for_resize_complete
+
     instrument :archive, :auto_archive_interval=, :auto_delete_interval=, :auto_stop_interval=,
                :create_ssh_access, :delete, :get_user_home_dir, :get_work_dir, :labels=,
                :preview_url, :create_signed_preview_url, :expire_signed_preview_url,
@@ -541,6 +586,11 @@ module Daytona
     # @return [DaytonaToolboxApiClient::Configuration]
     def build_toolbox_api_config
       DaytonaToolboxApiClient::Configuration.new.configure do |cfg|
+        if @toolbox_proxy_url.nil? || @toolbox_proxy_url.empty?
+          proxy_response = @sandbox_api.get_toolbox_proxy_url(id)
+          @toolbox_proxy_url = proxy_response&.url || ''
+        end
+
         proxy_url = @toolbox_proxy_url
         proxy_url += '/' unless proxy_url.end_with?('/')
         full_url = "#{proxy_url}#{id}"
@@ -647,6 +697,8 @@ module Daytona
     # @return [void]
     # @raise [Daytona::Sdk::Error]
     def wait_for_state(target_states:, error_states:, safe_refresh: false) # rubocop:disable Metrics/MethodLength,Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
+      ensure_subscribed
+
       target_strings = target_states.map(&:to_s)
       error_strings = error_states.map(&:to_s)
 
@@ -691,12 +743,12 @@ module Daytona
             begin
               refresh
             rescue DaytonaApiClient::ApiError => e
-              apply_state(DaytonaApiClient::SandboxState::DESTROYED) if e.code == 404
-            rescue StandardError
-              nil # ignore other refresh errors
+              raise unless e.code == 404
+
+              apply_state(DaytonaApiClient::SandboxState::DESTROYED)
             end
           else
-            refresh rescue nil # rubocop:disable Style/RescueModifier
+            refresh
           end
         end
 
@@ -711,14 +763,26 @@ module Daytona
       end
     end
 
+    def ensure_subscribed
+      @waiter_mutex.synchronize do
+        subscribe_to_events unless @event_subscribed
+        return unless @event_subscribed
+
+        return if @event_subscriber&.refresh_subscription(id)
+
+        @event_subscribed = false
+        @unsubscribe_events = nil
+        subscribe_to_events
+      end
+    end
+
     def subscribe_to_events
-      return unless @event_subscriber
+      return if @event_subscribed || !@event_subscriber
 
-      @event_subscriber.ensure_connected
-
-      @event_subscriber.subscribe(
+      @unsubscribe_events = @event_subscriber.subscribe(
         id,
-        events: ['sandbox.state.updated', 'sandbox.created']
+        events: ['sandbox.state.updated', 'sandbox.created'],
+        ttl: SUBSCRIPTION_TTL
       ) do |event_name, data|
         next unless data.is_a?(Hash)
 
@@ -734,6 +798,17 @@ module Daytona
       rescue StandardError
         nil
       end
+
+      @event_subscribed = true
+    end
+
+    def unsubscribe_from_events
+      if @unsubscribe_events
+        @unsubscribe_events.call
+        @unsubscribe_events = nil
+      end
+
+      @event_subscribed = false
     end
 
     POLL_SAFETY_INTERVAL = 1

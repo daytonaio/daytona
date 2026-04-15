@@ -34,7 +34,7 @@ function extractIdFromEvent(data: any): string | undefined {
  * and dispatches sandbox events to per-sandbox handlers.
  */
 export class EventSubscriber {
-  private socket: Socket | null = null
+  private socket: Socket | undefined
   private _connected = false
   private _failed = false
   private _failError: string | null = null
@@ -45,6 +45,8 @@ export class EventSubscriber {
   private reconnectAttempts = 0
   private readonly maxReconnectAttempts = 10
   private disconnectTimer: ReturnType<typeof setTimeout> | null = null
+  private subscriptionTimers = new Map<string, ReturnType<typeof setTimeout>>()
+  private subscriptionTtls = new Map<string, number>()
   private static readonly DISCONNECT_DELAY_MS = 30_000
 
   constructor(
@@ -97,6 +99,12 @@ export class EventSubscriber {
 
   private doConnect(timeoutMs: number): Promise<void> {
     return new Promise<void>((resolve, reject) => {
+      if (this.socket) {
+        this.socket.removeAllListeners()
+        this.socket.disconnect()
+        this.socket = undefined
+      }
+
       // Strip /api suffix to get the origin
       const origin = this.apiUrl.replace(/\/api\/?$/, '')
 
@@ -217,7 +225,14 @@ export class EventSubscriber {
    * @param handler - Callback receiving (eventName, rawData).
    * @param events - List of Socket.IO event names to listen for.
    */
-  subscribe(resourceId: string, handler: EventHandler, events: string[]): () => void {
+  subscribe(resourceId: string, handler: EventHandler, events: string[], ttlSeconds = 0): () => void {
+    this.ensureConnected()
+
+    if (!this.listeners.has(resourceId)) {
+      this.listeners.set(resourceId, new Set())
+    }
+    this.listeners.get(resourceId)!.add(handler)
+
     // Cancel any pending delayed disconnect since we have a new subscriber
     if (this.disconnectTimer) {
       clearTimeout(this.disconnectTimer)
@@ -227,10 +242,13 @@ export class EventSubscriber {
     // Register any new events with the Socket.IO client
     this.registerEvents(events)
 
-    if (!this.listeners.has(resourceId)) {
-      this.listeners.set(resourceId, new Set())
+    if (ttlSeconds > 0) {
+      this.subscriptionTtls.set(resourceId, ttlSeconds)
+      this.startSubscriptionTimer(resourceId)
+    } else {
+      this.clearSubscriptionTimer(resourceId)
+      this.subscriptionTtls.delete(resourceId)
     }
-    this.listeners.get(resourceId)!.add(handler)
 
     return () => {
       const handlers = this.listeners.get(resourceId)
@@ -238,18 +256,25 @@ export class EventSubscriber {
         handlers.delete(handler)
         if (handlers.size === 0) {
           this.listeners.delete(resourceId)
+          this.clearSubscriptionTimer(resourceId)
+          this.subscriptionTtls.delete(resourceId)
         }
       }
 
       // Schedule delayed disconnect when no sandboxes are listening anymore
       if (this.listeners.size === 0) {
-        this.disconnectTimer = setTimeout(() => {
-          if (this.listeners.size === 0) {
-            this.disconnect()
-          }
-        }, EventSubscriber.DISCONNECT_DELAY_MS)
+        this.scheduleDelayedDisconnect()
       }
     }
+  }
+
+  refreshSubscription(resourceId: string): boolean {
+    if (!this.subscriptionTtls.has(resourceId)) {
+      return false
+    }
+
+    this.startSubscriptionTimer(resourceId)
+    return true
   }
 
   /** Whether the WebSocket is currently connected */
@@ -273,10 +298,15 @@ export class EventSubscriber {
       clearTimeout(this.disconnectTimer)
       this.disconnectTimer = null
     }
+    for (const timer of this.subscriptionTimers.values()) {
+      clearTimeout(timer)
+    }
+    this.subscriptionTimers.clear()
+    this.subscriptionTtls.clear()
     if (this.socket) {
       this.socket.removeAllListeners()
       this.socket.disconnect()
-      this.socket = null
+      this.socket = undefined
     }
     this._connected = false
     this.listeners.clear()
@@ -315,6 +345,69 @@ export class EventSubscriber {
           // Don't let a handler error break other handlers
         }
       }
+    }
+  }
+
+  private startSubscriptionTimer(resourceId: string): void {
+    const ttlSeconds = this.subscriptionTtls.get(resourceId)
+    if (!ttlSeconds || ttlSeconds <= 0) {
+      return
+    }
+
+    this.clearSubscriptionTimer(resourceId)
+
+    const timer = setTimeout(() => {
+      if (this.subscriptionTimers.get(resourceId) !== timer) {
+        return
+      }
+
+      this.clearSubscriptionTimer(resourceId)
+      this.subscriptionTtls.delete(resourceId)
+      this.unsubscribeResource(resourceId)
+    }, ttlSeconds * 1000)
+
+    if (typeof timer.unref === 'function') {
+      timer.unref()
+    }
+
+    this.subscriptionTimers.set(resourceId, timer)
+  }
+
+  private clearSubscriptionTimer(resourceId: string): void {
+    const timer = this.subscriptionTimers.get(resourceId)
+    if (!timer) {
+      return
+    }
+
+    clearTimeout(timer)
+    this.subscriptionTimers.delete(resourceId)
+  }
+
+  private unsubscribeResource(resourceId: string): void {
+    if (!this.listeners.has(resourceId)) {
+      return
+    }
+
+    this.listeners.delete(resourceId)
+
+    if (this.listeners.size === 0) {
+      this.scheduleDelayedDisconnect()
+    }
+  }
+
+  private scheduleDelayedDisconnect(): void {
+    if (this.disconnectTimer) {
+      clearTimeout(this.disconnectTimer)
+    }
+
+    this.disconnectTimer = setTimeout(() => {
+      if (this.listeners.size === 0) {
+        this.disconnect()
+      }
+    }, EventSubscriber.DISCONNECT_DELAY_MS)
+
+    if (typeof this.disconnectTimer.unref === 'function') {
+      this.disconnectTimer.unref()
     }
   }
 }

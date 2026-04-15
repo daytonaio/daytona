@@ -18,6 +18,8 @@ import (
 	"github.com/daytonaio/daytona/libs/toolbox-api-client-go"
 )
 
+const subscriptionTTL = 5 * time.Minute
+
 // Sandbox represents a Daytona sandbox environment.
 //
 // A Sandbox provides an isolated development environment with file system, git,
@@ -49,8 +51,9 @@ type Sandbox struct {
 	client           *Client
 	otel             *otelState
 	ToolboxClient    *toolbox.APIClient
-	waiterMu         sync.Mutex
+	mu               sync.RWMutex
 	stateWaiters     []chan apiclient.SandboxState
+	eventSubscribed  bool
 	unsubscribeEvent func()
 
 	ID                  string
@@ -121,22 +124,45 @@ func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, resp *apiclien
 
 	s.updateFromAPIResponse(resp)
 	s.subscribeToEvents()
+	s.ensureSubscribed()
 
 	return s
+}
+
+func (s *Sandbox) ensureSubscribed() {
+	s.mu.Lock()
+	if !s.eventSubscribed {
+		s.subscribeToEventsLocked()
+	}
+	if !s.eventSubscribed {
+		s.mu.Unlock()
+		return
+	}
+	if !s.client.getEventSubscriber().RefreshSubscription(s.ID) {
+		s.eventSubscribed = false
+		s.unsubscribeEvent = nil
+		s.subscribeToEventsLocked()
+	}
+	s.mu.Unlock()
 }
 
 // subscribeToEvents registers this sandbox with the client's EventSubscriber
 // for real-time state updates.
 func (s *Sandbox) subscribeToEvents() {
-	if s.client == nil {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.subscribeToEventsLocked()
+}
+
+func (s *Sandbox) subscribeToEventsLocked() {
+	if s.eventSubscribed || s.client == nil {
 		return
 	}
+
 	subscriber := s.client.getEventSubscriber()
 	if subscriber == nil {
 		return
 	}
-
-	subscriber.EnsureConnected()
 
 	unsub := subscriber.Subscribe(s.ID, func(event common.SandboxEvent) {
 		switch event.Type {
@@ -149,13 +175,26 @@ func (s *Sandbox) subscribeToEvents() {
 				s.updateFromAPIResponse(event.CreatedEvent)
 			}
 		}
-	}, []string{"sandbox.state.updated", "sandbox.created"})
+	}, []string{"sandbox.state.updated", "sandbox.created"}, subscriptionTTL)
 	s.unsubscribeEvent = unsub
+	s.eventSubscribed = true
+}
+
+func (s *Sandbox) unsubscribeLocked() {
+	if s.unsubscribeEvent != nil {
+		s.unsubscribeEvent()
+		s.unsubscribeEvent = nil
+	}
+	s.eventSubscribed = false
 }
 
 func (s *Sandbox) applyState(newState apiclient.SandboxState) {
-	s.waiterMu.Lock()
-	defer s.waiterMu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.applyStateLocked(newState)
+}
+
+func (s *Sandbox) applyStateLocked(newState apiclient.SandboxState) {
 
 	if newState == s.State {
 		return
@@ -181,6 +220,9 @@ func (s *Sandbox) applyState(newState apiclient.SandboxState) {
 
 // updateFromAPIResponse updates sandbox fields from an API sandbox response.
 func (s *Sandbox) updateFromAPIResponse(resp *apiclient.Sandbox) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	s.Name = resp.GetName()
 	s.OrganizationID = resp.GetOrganizationId()
 	s.Target = resp.GetTarget()
@@ -227,7 +269,7 @@ func (s *Sandbox) updateFromAPIResponse(resp *apiclient.Sandbox) {
 	}
 	s.ToolboxProxyUrl = newProxyURL
 
-	s.applyState(resp.GetState())
+	s.applyStateLocked(resp.GetState())
 }
 
 // waitForState waits for the sandbox to reach a target state using WebSocket events
@@ -240,13 +282,15 @@ func (s *Sandbox) waitForState(
 	errorStates []apiclient.SandboxState,
 	safeRefresh bool,
 ) error {
+	s.ensureSubscribed()
+
 	stateCh := make(chan apiclient.SandboxState, 1)
-	s.waiterMu.Lock()
+	s.mu.Lock()
 	s.stateWaiters = append(s.stateWaiters, stateCh)
-	s.waiterMu.Unlock()
+	s.mu.Unlock()
 	defer func() {
-		s.waiterMu.Lock()
-		defer s.waiterMu.Unlock()
+		s.mu.Lock()
+		defer s.mu.Unlock()
 
 		for i, waiter := range s.stateWaiters {
 			if waiter == stateCh {
@@ -256,10 +300,14 @@ func (s *Sandbox) waitForState(
 		}
 	}()
 
-	if containsSandboxState(errorStates, s.State) {
-		return fmt.Errorf("sandbox entered error state: %s", s.State)
+	s.mu.RLock()
+	currentState := s.State
+	s.mu.RUnlock()
+
+	if containsSandboxState(errorStates, currentState) {
+		return fmt.Errorf("sandbox entered error state: %s", currentState)
 	}
-	if containsSandboxState(targetStates, s.State) {
+	if containsSandboxState(targetStates, currentState) {
 		return nil
 	}
 
@@ -278,15 +326,33 @@ func (s *Sandbox) waitForState(
 				return nil
 			}
 		case <-pollTicker.C:
-			refreshErr := s.doRefreshData(ctx)
-			if refreshErr != nil && safeRefresh {
-				var notFoundErr *errors.DaytonaNotFoundError
-				if stderrors.As(refreshErr, &notFoundErr) {
-					s.applyState(apiclient.SANDBOXSTATE_DESTROYED)
+			if safeRefresh {
+				if err := s.refreshDataSafe(ctx); err != nil {
+					return err
 				}
+				continue
+			}
+
+			if err := s.doRefreshData(ctx); err != nil {
+				return err
 			}
 		}
 	}
+}
+
+func (s *Sandbox) refreshDataSafe(ctx context.Context) error {
+	refreshErr := s.doRefreshData(ctx)
+	if refreshErr == nil {
+		return nil
+	}
+
+	var notFoundErr *errors.DaytonaNotFoundError
+	if stderrors.As(refreshErr, &notFoundErr) {
+		s.applyState(apiclient.SANDBOXSTATE_DESTROYED)
+		return nil
+	}
+
+	return refreshErr
 }
 
 func containsSandboxState(states []apiclient.SandboxState, state apiclient.SandboxState) bool {
@@ -312,6 +378,7 @@ func containsSandboxState(states []apiclient.SandboxState, state apiclient.Sandb
 //	}
 //	fmt.Printf("Current state: %s\n", sandbox.State)
 func (s *Sandbox) RefreshData(ctx context.Context) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "RefreshData", func(ctx context.Context) error {
 		return s.doRefreshData(ctx)
 	})
@@ -339,6 +406,7 @@ func (s *Sandbox) doRefreshData(ctx context.Context) error {
 //	}
 //	fmt.Printf("Home directory: %s\n", homeDir) // e.g., "/home/daytona"
 func (s *Sandbox) GetUserHomeDir(ctx context.Context) (string, error) {
+	s.ensureSubscribed()
 	return withInstrumentation(ctx, s.otel, "Sandbox", "GetUserHomeDir", func(ctx context.Context) (string, error) {
 		resp, httpResp, err := s.ToolboxClient.InfoAPI.GetUserHomeDir(ctx).Execute()
 		if err != nil {
@@ -359,6 +427,7 @@ func (s *Sandbox) GetUserHomeDir(ctx context.Context) (string, error) {
 //	}
 //	fmt.Printf("Working directory: %s\n", workDir)
 func (s *Sandbox) GetWorkingDir(ctx context.Context) (string, error) {
+	s.ensureSubscribed()
 	return withInstrumentation(ctx, s.otel, "Sandbox", "GetWorkingDir", func(ctx context.Context) (string, error) {
 		resp, httpResp, err := s.ToolboxClient.InfoAPI.GetWorkDir(ctx).Execute()
 		if err != nil {
@@ -382,6 +451,7 @@ func (s *Sandbox) GetWorkingDir(ctx context.Context) (string, error) {
 //	}
 //	// Sandbox is now running
 func (s *Sandbox) Start(ctx context.Context) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "Start", func(ctx context.Context) error {
 		return s.StartWithTimeout(ctx, 60*time.Second)
 	})
@@ -399,6 +469,7 @@ func (s *Sandbox) Start(ctx context.Context) error {
 //	    return err
 //	}
 func (s *Sandbox) StartWithTimeout(ctx context.Context, timeout time.Duration) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "StartWithTimeout", func(ctx context.Context) error {
 		return s.doStartWithTimeout(ctx, timeout)
 	})
@@ -434,6 +505,7 @@ func (s *Sandbox) doStartWithTimeout(ctx context.Context, timeout time.Duration)
 //
 //	err := sandbox.Stop(ctx)
 func (s *Sandbox) Stop(ctx context.Context) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "Stop", func(ctx context.Context) error {
 		return s.StopWithTimeout(ctx, 60*time.Second, false)
 	})
@@ -449,6 +521,7 @@ func (s *Sandbox) Stop(ctx context.Context) error {
 //
 //	err := sandbox.StopWithTimeout(ctx, 2*time.Minute, false)
 func (s *Sandbox) StopWithTimeout(ctx context.Context, timeout time.Duration, force bool) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "StopWithTimeout", func(ctx context.Context) error {
 		return s.doStopWithTimeout(ctx, timeout, force)
 	})
@@ -488,6 +561,7 @@ func (s *Sandbox) doStopWithTimeout(ctx context.Context, timeout time.Duration, 
 //
 //	err := sandbox.Delete(ctx)
 func (s *Sandbox) Delete(ctx context.Context) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "Delete", func(ctx context.Context) error {
 		return s.DeleteWithTimeout(ctx, 60*time.Second)
 	})
@@ -499,6 +573,7 @@ func (s *Sandbox) Delete(ctx context.Context) error {
 //
 //	err := sandbox.DeleteWithTimeout(ctx, 2*time.Minute)
 func (s *Sandbox) DeleteWithTimeout(ctx context.Context, timeout time.Duration) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "DeleteWithTimeout", func(ctx context.Context) error {
 		return s.doDeleteWithTimeout(ctx, timeout)
 	})
@@ -520,6 +595,11 @@ func (s *Sandbox) doDeleteWithTimeout(ctx context.Context, timeout time.Duration
 	if err != nil {
 		return errors.ConvertAPIError(err, httpResp)
 	}
+	defer func() {
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		s.unsubscribeLocked()
+	}()
 	s.updateFromAPIResponse(sandboxResp)
 
 	err = s.waitForState(ctx,
@@ -532,11 +612,6 @@ func (s *Sandbox) doDeleteWithTimeout(ctx context.Context, timeout time.Duration
 			return errors.NewDaytonaTimeoutError(fmt.Sprintf("Sandbox was not destroyed within %s", timeout))
 		}
 		return errors.NewDaytonaError(fmt.Sprintf("Sandbox failed to delete: %v", err), 0, nil)
-	}
-
-	if s.unsubscribeEvent != nil {
-		s.unsubscribeEvent()
-		s.unsubscribeEvent = nil
 	}
 
 	return nil
@@ -556,6 +631,7 @@ func (s *Sandbox) doDeleteWithTimeout(ctx context.Context, timeout time.Duration
 //	}
 //	// Sandbox is now archived and can be restored later
 func (s *Sandbox) Archive(ctx context.Context) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "Archive", func(ctx context.Context) error {
 		return s.doArchive(ctx)
 	})
@@ -585,6 +661,7 @@ func (s *Sandbox) doArchive(ctx context.Context) error {
 //	}
 //	// Sandbox is now running
 func (s *Sandbox) WaitForStart(ctx context.Context, timeout time.Duration) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "WaitForStart", func(ctx context.Context) error {
 		return s.doWaitForStart(ctx, timeout)
 	})
@@ -624,6 +701,7 @@ func (s *Sandbox) doWaitForStart(ctx context.Context, timeout time.Duration) err
 //
 //	err := sandbox.WaitForStop(ctx, 2*time.Minute)
 func (s *Sandbox) WaitForStop(ctx context.Context, timeout time.Duration) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "WaitForStop", func(ctx context.Context) error {
 		return s.doWaitForStop(ctx, timeout)
 	})
@@ -667,6 +745,7 @@ func (s *Sandbox) doWaitForStop(ctx context.Context, timeout time.Duration) erro
 //	    "project": "api-server",
 //	})
 func (s *Sandbox) SetLabels(ctx context.Context, labels map[string]string) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "SetLabels", func(ctx context.Context) error {
 		return s.doSetLabels(ctx, labels)
 	})
@@ -703,6 +782,7 @@ func (s *Sandbox) doSetLabels(ctx context.Context, labels map[string]string) err
 //	}
 //	fmt.Printf("URL: %s\nToken: %s\n", preview.URL, preview.Token)
 func (s *Sandbox) GetPreviewLink(ctx context.Context, port int) (*types.PreviewLink, error) {
+	s.ensureSubscribed()
 	return withInstrumentation(ctx, s.otel, "Sandbox", "GetPreviewLink", func(ctx context.Context) (*types.PreviewLink, error) {
 		result, httpResp, err := s.client.apiClient.SandboxAPI.GetPortPreviewUrl(
 			s.client.getAuthContext(ctx),
@@ -732,6 +812,7 @@ func (s *Sandbox) GetPreviewLink(ctx context.Context, port int) (*types.PreviewL
 //	}
 //	fmt.Printf("Sandbox ID: %s\nPort: %d\nURL: %s\nToken: %s\n", preview.SandboxID, preview.Port, preview.URL, preview.Token)
 func (s *Sandbox) GetSignedPreviewLink(ctx context.Context, port int, expiresInSeconds int) (*types.SignedPreviewLink, error) {
+	s.ensureSubscribed()
 	return withInstrumentation(ctx, s.otel, "Sandbox", "GetSignedPreviewLink", func(ctx context.Context) (*types.SignedPreviewLink, error) {
 		result, httpResp, err := s.client.apiClient.SandboxAPI.GetSignedPortPreviewUrl(
 			s.client.getAuthContext(ctx),
@@ -763,6 +844,7 @@ func (s *Sandbox) GetSignedPreviewLink(ctx context.Context, port int, expiresInS
 //	    return err
 //	}
 func (s *Sandbox) ExpireSignedPreviewLink(ctx context.Context, port int, token string) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "ExpireSignedPreviewLink", func(ctx context.Context) error {
 		httpResp, err := s.client.apiClient.SandboxAPI.ExpireSignedPortPreviewUrl(
 			s.client.getAuthContext(ctx),
@@ -795,6 +877,7 @@ func (s *Sandbox) ExpireSignedPreviewLink(ctx context.Context, port int, token s
 //	interval := 0
 //	err := sandbox.SetAutoArchiveInterval(ctx, &interval)
 func (s *Sandbox) SetAutoArchiveInterval(ctx context.Context, intervalMinutes *int) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "SetAutoArchiveInterval", func(ctx context.Context) error {
 		return s.doSetAutoArchiveInterval(ctx, intervalMinutes)
 	})
@@ -842,6 +925,7 @@ func (s *Sandbox) doSetAutoArchiveInterval(ctx context.Context, intervalMinutes 
 //	interval := -1
 //	err := sandbox.SetAutoDeleteInterval(ctx, &interval)
 func (s *Sandbox) SetAutoDeleteInterval(ctx context.Context, intervalMinutes *int) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "SetAutoDeleteInterval", func(ctx context.Context) error {
 		return s.doSetAutoDeleteInterval(ctx, intervalMinutes)
 	})
@@ -881,6 +965,7 @@ func (s *Sandbox) doSetAutoDeleteInterval(ctx context.Context, intervalMinutes *
 //	sandbox.Stop(ctx)
 //	err := sandbox.Resize(ctx, &types.Resources{CPU: 2, Memory: 4, Disk: 30})
 func (s *Sandbox) Resize(ctx context.Context, resources *types.Resources) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "Resize", func(ctx context.Context) error {
 		return s.ResizeWithTimeout(ctx, resources, 60*time.Second)
 	})
@@ -896,6 +981,7 @@ func (s *Sandbox) Resize(ctx context.Context, resources *types.Resources) error 
 //
 //	err := sandbox.ResizeWithTimeout(ctx, &types.Resources{CPU: 4, Memory: 8}, 2*time.Minute)
 func (s *Sandbox) ResizeWithTimeout(ctx context.Context, resources *types.Resources, timeout time.Duration) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "ResizeWithTimeout", func(ctx context.Context) error {
 		return s.doResizeWithTimeout(ctx, resources, timeout)
 	})
@@ -961,6 +1047,7 @@ func (s *Sandbox) doResizeWithTimeout(ctx context.Context, resources *types.Reso
 //
 //	err := sandbox.WaitForResize(ctx, 2*time.Minute)
 func (s *Sandbox) WaitForResize(ctx context.Context, timeout time.Duration) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "WaitForResize", func(ctx context.Context) error {
 		if timeout < 0 {
 			return errors.NewDaytonaError("Timeout must be a non-negative number", 0, nil)

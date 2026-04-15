@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import functools
 import threading
 from typing import Any, Callable
 
@@ -49,7 +50,28 @@ from .git import Git
 from .lsp_server import LspServer
 from .process import Process
 
+SUBSCRIPTION_TTL = 300
 
+
+def with_events(cls: type) -> type:
+    for name in list(vars(cls)):
+        if name.startswith("_"):
+            continue
+        method = vars(cls)[name]
+        if not callable(method):
+            continue
+
+        @functools.wraps(method)
+        def wrapper(self: Any, *args: Any, _m: Any = method, **kwargs: Any) -> Any:
+            if getattr(self, "__pydantic_private__", None) is not None:
+                self._ensure_subscribed()
+            return _m(self, *args, **kwargs)
+
+        setattr(cls, name, wrapper)
+    return cls
+
+
+@with_events
 class Sandbox(SandboxDto):
     """Represents a Daytona Sandbox.
 
@@ -96,6 +118,8 @@ class Sandbox(SandboxDto):
     _code_interpreter: CodeInterpreter = PrivateAttr()
     _state_waiters: list[Callable[[SandboxState | None], None]] = PrivateAttr(default_factory=list)
     _state_waiters_lock: threading.Lock = PrivateAttr(default_factory=threading.Lock)
+    _event_subscribed: bool = PrivateAttr(default=False)
+    _unsubscribe_events: Callable[[], None] | None = PrivateAttr(default=None)
 
     # TODO: Remove model_config once everything is migrated to pydantic # pylint: disable=fixme
     model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)
@@ -122,6 +146,9 @@ class Sandbox(SandboxDto):
         self._sandbox_api: SandboxApi = sandbox_api
         self._code_toolbox: SandboxCodeToolbox = code_toolbox
         self._event_subscriber: SyncEventSubscriber = event_subscriber
+        if not self.toolbox_proxy_url:
+            proxy_url = self._sandbox_api.get_toolbox_proxy_url(self.id)
+            self.toolbox_proxy_url = proxy_url.url
         # Wrap the toolbox API client to inject the sandbox ID into the resource path
         self._toolbox_api: ToolboxApiClientProxy[ApiClient] = ToolboxApiClientProxy(
             toolbox_api, self.id, self.toolbox_proxy_url
@@ -134,9 +161,6 @@ class Sandbox(SandboxDto):
         self._code_interpreter = CodeInterpreter(InterpreterApi(self._toolbox_api))
         self._info_api: InfoApi = InfoApi(self._toolbox_api)
 
-        # Ensure event subscriber is connected (reconnect if auto-disconnected)
-        self._event_subscriber.ensure_connected()
-        # Subscribe to real-time events for this sandbox
         self._subscribe_to_events()
 
     @property
@@ -159,6 +183,7 @@ class Sandbox(SandboxDto):
     def code_interpreter(self) -> CodeInterpreter:
         return self._code_interpreter
 
+
     @intercept_errors(message_prefix="Failed to refresh sandbox data: ")
     @with_instrumentation()
     def refresh_data(self) -> None:
@@ -174,6 +199,7 @@ class Sandbox(SandboxDto):
         """
         instance = self._sandbox_api.get_sandbox(self.id)
         self.__process_sandbox_dto(instance)
+
 
     @intercept_errors(message_prefix="Failed to get user home directory: ")
     @with_instrumentation()
@@ -192,6 +218,7 @@ class Sandbox(SandboxDto):
         response = self._info_api.get_user_home_dir()
         return response.dir
 
+
     @deprecated(
         reason=(
             "Method is deprecated. Use `get_user_home_dir` instead. This method will be removed in a future version."
@@ -200,6 +227,7 @@ class Sandbox(SandboxDto):
     @with_instrumentation()
     def get_user_root_dir(self) -> str:
         return self.get_user_home_dir()
+
 
     @intercept_errors(message_prefix="Failed to get working directory path: ")
     @with_instrumentation()
@@ -218,6 +246,7 @@ class Sandbox(SandboxDto):
         """
         response = self._info_api.get_work_dir()
         return response.dir
+
 
     @with_instrumentation()
     def create_lsp_server(self, language_id: LspLanguageId | LspLanguageIdLiteral, path_to_project: str) -> LspServer:
@@ -245,6 +274,7 @@ class Sandbox(SandboxDto):
             LspApi(self._toolbox_api),
         )
 
+
     @intercept_errors(message_prefix="Failed to set labels: ")
     @with_instrumentation()
     def set_labels(self, labels: dict[str, str]) -> dict[str, str]:
@@ -271,6 +301,7 @@ class Sandbox(SandboxDto):
         self.labels = (self._sandbox_api.replace_labels(self.id, SandboxLabels(labels=labels))).labels
         return self.labels
 
+
     @intercept_errors(message_prefix="Failed to start sandbox: ")
     @with_timeout()
     @with_instrumentation()
@@ -295,6 +326,7 @@ class Sandbox(SandboxDto):
         # This method already handles a timeout, so we don't need to pass one to internal methods
         self.wait_for_sandbox_start(timeout=0)
 
+
     @intercept_errors(message_prefix="Failed to recover sandbox: ")
     @with_timeout()
     def recover(self, timeout: float | None = 60):
@@ -318,6 +350,7 @@ class Sandbox(SandboxDto):
         # This method already handles a timeout, so we don't need to pass one to internal methods
         self.wait_for_sandbox_start(timeout=0)
 
+
     @intercept_errors(message_prefix="Failed to stop sandbox: ")
     @with_timeout()
     @with_instrumentation()
@@ -338,10 +371,15 @@ class Sandbox(SandboxDto):
             print("Sandbox stopped successfully")
             ```
         """
-        _ = self._sandbox_api.stop_sandbox(self.id, force=force, _request_timeout=http_timeout(timeout))
+        _ = self._sandbox_api.stop_sandbox(
+            self.id,
+            force=force,  # pyright: ignore[reportCallIssue]
+            _request_timeout=http_timeout(timeout),
+        )
         self.__refresh_data_safe()
         # This method already handles a timeout, so we don't need to pass one to internal methods
         self.wait_for_sandbox_stop(timeout=0)
+
 
     @intercept_errors(message_prefix="Failed to remove sandbox: ")
     @with_timeout()
@@ -359,14 +397,16 @@ class Sandbox(SandboxDto):
         sandbox = self._sandbox_api.delete_sandbox(self.id, _request_timeout=http_timeout(timeout))
         self.__process_sandbox_dto(sandbox)
 
-        if self.state == SandboxState.DESTROYED:
-            return
+        try:
+            if self.state != SandboxState.DESTROYED:
+                self._wait_for_state(
+                    [SandboxState.DESTROYED],
+                    [SandboxState.ERROR, SandboxState.BUILD_FAILED],
+                    safe_refresh=True,
+                )
+        finally:
+            self._unsubscribe_from_events()
 
-        self._wait_for_state(
-            [SandboxState.DESTROYED],
-            [SandboxState.ERROR, SandboxState.BUILD_FAILED],
-            safe_refresh=True,
-        )
 
     @intercept_errors(message_prefix="Failure during waiting for sandbox to start: ")
     @with_timeout()
@@ -391,6 +431,7 @@ class Sandbox(SandboxDto):
             [SandboxState.ERROR, SandboxState.BUILD_FAILED],
         )
 
+
     @intercept_errors(message_prefix="Failure during waiting for sandbox to stop: ")
     @with_timeout()
     @with_instrumentation()
@@ -414,6 +455,7 @@ class Sandbox(SandboxDto):
             [SandboxState.STOPPED, SandboxState.DESTROYED],
             [SandboxState.ERROR, SandboxState.BUILD_FAILED],
         )
+
 
     @intercept_errors(message_prefix="Failed to set auto-stop interval: ")
     @with_instrumentation()
@@ -445,6 +487,7 @@ class Sandbox(SandboxDto):
         _ = self._sandbox_api.set_autostop_interval(self.id, interval)
         self.auto_stop_interval = interval
 
+
     @intercept_errors(message_prefix="Failed to set auto-archive interval: ")
     @with_instrumentation()
     def set_auto_archive_interval(self, interval: int) -> None:
@@ -473,6 +516,7 @@ class Sandbox(SandboxDto):
         _ = self._sandbox_api.set_auto_archive_interval(self.id, interval)
         self.auto_archive_interval = interval
 
+
     @intercept_errors(message_prefix="Failed to set auto-delete interval: ")
     @with_instrumentation()
     def set_auto_delete_interval(self, interval: int) -> None:
@@ -498,6 +542,7 @@ class Sandbox(SandboxDto):
         _ = self._sandbox_api.set_auto_delete_interval(self.id, interval)
         self.auto_delete_interval = interval
 
+
     @intercept_errors(message_prefix="Failed to get preview link: ")
     @with_instrumentation()
     def get_preview_link(self, port: int) -> PortPreviewUrl:
@@ -521,6 +566,7 @@ class Sandbox(SandboxDto):
         """
         return self._sandbox_api.get_port_preview_url(self.id, port)
 
+
     @intercept_errors(message_prefix="Failed to create signed preview url: ")
     def create_signed_preview_url(self, port: int, expires_in_seconds: int | None = None) -> SignedPortPreviewUrl:
         """Creates a signed preview URL for the sandbox at the specified port.
@@ -535,6 +581,7 @@ class Sandbox(SandboxDto):
         """
         return self._sandbox_api.get_signed_port_preview_url(self.id, port, expires_in_seconds=expires_in_seconds)
 
+
     @intercept_errors(message_prefix="Failed to expire signed preview url: ")
     def expire_signed_preview_url(self, port: int, token: str) -> None:
         """Expires a signed preview URL for the sandbox at the specified port.
@@ -544,6 +591,7 @@ class Sandbox(SandboxDto):
             token (str): The token to expire the signed preview url on.
         """
         self._sandbox_api.expire_signed_port_preview_url(self.id, port, token)
+
 
     @intercept_errors(message_prefix="Failed to archive sandbox: ")
     @with_instrumentation()
@@ -556,6 +604,7 @@ class Sandbox(SandboxDto):
         """
         _ = self._sandbox_api.archive_sandbox(self.id)
         self.refresh_data()
+
 
     @intercept_errors(message_prefix="Failed to resize sandbox: ")
     @with_timeout()
@@ -600,6 +649,7 @@ class Sandbox(SandboxDto):
         self.__process_sandbox_dto(sandbox)
         self.wait_for_resize_complete(timeout=0)
 
+
     @intercept_errors(message_prefix="Failure during waiting for resize to complete: ")
     @with_timeout()
     @with_instrumentation()
@@ -624,6 +674,7 @@ class Sandbox(SandboxDto):
 
         self._wait_for_state(target_states, error_states)
 
+
     @intercept_errors(message_prefix="Failed to create SSH access: ")
     @with_instrumentation()
     def create_ssh_access(self, expires_in_minutes: int | None = None) -> SshAccessDto:
@@ -633,6 +684,7 @@ class Sandbox(SandboxDto):
             expires_in_minutes (int | None): The number of minutes the SSH access token will be valid for.
         """
         return self._sandbox_api.create_ssh_access(self.id, expires_in_minutes=expires_in_minutes)
+
 
     @intercept_errors(message_prefix="Failed to revoke SSH access: ")
     @with_instrumentation()
@@ -644,6 +696,7 @@ class Sandbox(SandboxDto):
         """
         _ = self._sandbox_api.revoke_ssh_access(self.id, token)
 
+
     @intercept_errors(message_prefix="Failed to validate SSH access: ")
     @with_instrumentation()
     def validate_ssh_access(self, token: str) -> SshAccessValidationDto:
@@ -653,6 +706,7 @@ class Sandbox(SandboxDto):
             token (str): The token to validate.
         """
         return self._sandbox_api.validate_ssh_access(token)
+
 
     @intercept_errors(message_prefix="Failed to refresh sandbox activity: ")
     def refresh_activity(self) -> None:
@@ -669,6 +723,9 @@ class Sandbox(SandboxDto):
         self._sandbox_api.update_last_activity(self.id)
 
     def _subscribe_to_events(self) -> None:
+        if self._event_subscribed:
+            return
+
         def _on_event(event_name: str, data: Any) -> None:
             if not isinstance(data, dict):
                 return
@@ -688,11 +745,37 @@ class Sandbox(SandboxDto):
                     except ValueError:
                         pass
 
-        _ = self._event_subscriber.subscribe(
+        self._unsubscribe_events = self._event_subscriber.subscribe(
             self.id,
             _on_event,
             events=["sandbox.state.updated", "sandbox.created"],
+            ttl_seconds=SUBSCRIPTION_TTL,
         )
+        self._event_subscribed = True
+
+    def _ensure_subscribed(self) -> None:
+        with self._state_waiters_lock:
+            if not self._event_subscribed:
+                self._subscribe_to_events()
+
+            if not self._event_subscribed:
+                return
+
+            if not self._event_subscriber.refresh_subscription(self.id):
+                self._event_subscribed = False
+                self._unsubscribe_events = None
+                self._subscribe_to_events()
+
+    def _unsubscribe_from_events(self) -> None:
+        with self._state_waiters_lock:
+            self._unsubscribe_from_events_locked()
+
+    def _unsubscribe_from_events_locked(self) -> None:
+        if self._unsubscribe_events is not None:
+            self._unsubscribe_events()
+            self._unsubscribe_events = None
+
+        self._event_subscribed = False
 
     def _apply_state(self, new_state: SandboxState | None) -> None:
         if new_state == self.state:
@@ -717,6 +800,8 @@ class Sandbox(SandboxDto):
             error_states: States that indicate failure.
             safe_refresh: If True, use safe refresh that treats 404 as destroyed (for delete operations).
         """
+        self._ensure_subscribed()
+
         if self.state in target_states:
             return
         if self.state in error_states:
@@ -751,13 +836,10 @@ class Sandbox(SandboxDto):
                 if is_set:
                     break
 
-                try:
-                    if safe_refresh:
-                        self.__refresh_data_safe()
-                    else:
-                        self.refresh_data()
-                except Exception:
-                    pass  # Poll failed, will retry on next interval
+                if safe_refresh:
+                    self.__refresh_data_safe()
+                else:
+                    self.refresh_data()
 
             if result_state in error_states:
                 raise DaytonaError(

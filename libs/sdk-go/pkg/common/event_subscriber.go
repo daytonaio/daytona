@@ -61,6 +61,7 @@ type EventSubscriber struct {
 	organizationID string
 	client         *socketIOClient
 	connected      bool
+	closed         bool
 	failed         bool
 	failError      string
 
@@ -73,6 +74,10 @@ type EventSubscriber struct {
 
 	// delayed disconnect state
 	disconnectTimer *time.Timer
+	disconnectGeneration uint64
+
+	subscriptionTimers map[string]*time.Timer
+	subscriptionTTLs   map[string]time.Duration
 
 	// reconnection state
 	connecting       bool
@@ -90,6 +95,8 @@ func NewEventSubscriber(apiURL, token, organizationID string) *EventSubscriber {
 		organizationID:   organizationID,
 		listeners:        make(map[string]map[int]SandboxEventHandler),
 		registeredEvents: make(map[string]bool),
+		subscriptionTimers: make(map[string]*time.Timer),
+		subscriptionTTLs:   make(map[string]time.Duration),
 		maxReconnects:    100,
 		closeCh:          make(chan struct{}),
 	}
@@ -100,7 +107,7 @@ func NewEventSubscriber(apiURL, token, organizationID string) *EventSubscriber {
 // connect if not already connected and no attempt is currently running.
 func (es *EventSubscriber) EnsureConnected() {
 	es.mu.Lock()
-	if es.connected || es.reconnecting || es.connecting {
+	if es.closed || es.connected || es.reconnecting || es.connecting {
 		es.mu.Unlock()
 		return
 	}
@@ -117,7 +124,7 @@ func (es *EventSubscriber) EnsureConnected() {
 // Connect establishes the Socket.IO connection.
 func (es *EventSubscriber) Connect(ctx context.Context) error {
 	es.mu.Lock()
-	if es.connected {
+	if es.closed || es.connected {
 		es.mu.Unlock()
 		return nil
 	}
@@ -126,6 +133,13 @@ func (es *EventSubscriber) Connect(ctx context.Context) error {
 	case <-es.closeCh:
 		es.closeCh = make(chan struct{})
 	default:
+	}
+	es.mu.Unlock()
+
+	es.mu.Lock()
+	if es.client != nil {
+		es.client.Close()
+		es.client = nil
 	}
 	es.mu.Unlock()
 
@@ -153,6 +167,12 @@ func (es *EventSubscriber) Connect(ctx context.Context) error {
 	}
 
 	es.mu.Lock()
+	if es.closed {
+		es.connecting = false
+		es.mu.Unlock()
+		client.Close()
+		return nil
+	}
 	es.client = client
 	es.connected = true
 	es.connecting = false
@@ -169,8 +189,11 @@ func (es *EventSubscriber) Connect(ctx context.Context) error {
 // Returns an unsubscribe function.
 const disconnectDelay = 30 * time.Second
 
-func (es *EventSubscriber) Subscribe(sandboxID string, handler SandboxEventHandler, events []string) func() {
+func (es *EventSubscriber) Subscribe(sandboxID string, handler SandboxEventHandler, events []string, ttl time.Duration) func() {
+	es.EnsureConnected()
+
 	es.mu.Lock()
+	es.disconnectGeneration++
 	// Cancel any pending delayed disconnect
 	if es.disconnectTimer != nil {
 		es.disconnectTimer.Stop()
@@ -189,28 +212,40 @@ func (es *EventSubscriber) Subscribe(sandboxID string, handler SandboxEventHandl
 		es.listeners[sandboxID] = make(map[int]SandboxEventHandler)
 	}
 	es.listeners[sandboxID][subID] = handler
+	if ttl > 0 {
+		es.subscriptionTTLs[sandboxID] = ttl
+		es.startSubscriptionTimerLocked(sandboxID)
+	} else {
+		es.clearSubscriptionTimerLocked(sandboxID)
+		delete(es.subscriptionTTLs, sandboxID)
+	}
 	es.mu.Unlock()
 
 	return func() {
 		es.mu.Lock()
 		delete(es.listeners[sandboxID], subID)
 		if len(es.listeners[sandboxID]) == 0 {
-			delete(es.listeners, sandboxID)
+			es.unsubscribeResourceLocked(sandboxID)
 		}
 
 		// Schedule delayed disconnect when no entities are listening anymore
 		if len(es.listeners) == 0 {
-			es.disconnectTimer = time.AfterFunc(disconnectDelay, func() {
-				es.mu.RLock()
-				empty := len(es.listeners) == 0
-				es.mu.RUnlock()
-				if empty {
-					es.Disconnect()
-				}
-			})
+			es.scheduleDelayedDisconnectLocked()
 		}
 		es.mu.Unlock()
 	}
+}
+
+func (es *EventSubscriber) RefreshSubscription(resourceID string) bool {
+	es.mu.Lock()
+	defer es.mu.Unlock()
+
+	if _, ok := es.subscriptionTTLs[resourceID]; !ok {
+		return false
+	}
+
+	es.startSubscriptionTimerLocked(resourceID)
+	return true
 }
 
 // IsConnected returns whether the subscriber is currently connected.
@@ -236,13 +271,33 @@ func (es *EventSubscriber) FailError() string {
 
 // Disconnect closes the connection and cleans up resources.
 func (es *EventSubscriber) Disconnect() {
+	es.mu.Lock()
+	defer es.mu.Unlock()
+	es.disconnectLocked(true)
+}
+
+func (es *EventSubscriber) disconnect(permanent bool) {
+	es.mu.Lock()
+	defer es.mu.Unlock()
+	es.disconnectLocked(permanent)
+}
+
+func (es *EventSubscriber) disconnectLocked(permanent bool) {
 	select {
 	case <-es.closeCh:
 	default:
 		close(es.closeCh)
 	}
-
-	es.mu.Lock()
+	if permanent {
+		es.closed = true
+	}
+	es.connecting = false
+	es.reconnecting = false
+	if es.disconnectTimer != nil {
+		es.disconnectTimer.Stop()
+		es.disconnectTimer = nil
+	}
+	es.clearSubscriptionTimersLocked()
 	if es.client != nil {
 		es.client.Close()
 		es.client = nil
@@ -250,7 +305,6 @@ func (es *EventSubscriber) Disconnect() {
 	es.connected = false
 	es.listeners = make(map[string]map[int]SandboxEventHandler)
 	es.registeredEvents = make(map[string]bool)
-	es.mu.Unlock()
 }
 
 // handleEvent is called by the Socket.IO client for each event.
@@ -450,4 +504,71 @@ func (es *EventSubscriber) reconnectLoop() {
 	es.failed = true
 	es.failError = fmt.Sprintf("WebSocket reconnection failed after %d attempts", es.maxReconnects)
 	es.mu.Unlock()
+}
+
+func (es *EventSubscriber) startSubscriptionTimerLocked(resourceID string) {
+	ttl, ok := es.subscriptionTTLs[resourceID]
+	if !ok || ttl <= 0 {
+		return
+	}
+
+	es.clearSubscriptionTimerLocked(resourceID)
+
+	var timer *time.Timer
+	timer = time.AfterFunc(ttl, func() {
+		es.mu.Lock()
+		defer es.mu.Unlock()
+
+		current, ok := es.subscriptionTimers[resourceID]
+		if !ok || current != timer {
+			return
+		}
+
+		delete(es.subscriptionTimers, resourceID)
+		delete(es.subscriptionTTLs, resourceID)
+		es.unsubscribeResourceLocked(resourceID)
+		if len(es.listeners) == 0 {
+			es.scheduleDelayedDisconnectLocked()
+		}
+	})
+
+	es.subscriptionTimers[resourceID] = timer
+}
+
+func (es *EventSubscriber) clearSubscriptionTimerLocked(resourceID string) {
+	if timer, ok := es.subscriptionTimers[resourceID]; ok {
+		timer.Stop()
+		delete(es.subscriptionTimers, resourceID)
+	}
+}
+
+func (es *EventSubscriber) clearSubscriptionTimersLocked() {
+	for resourceID, timer := range es.subscriptionTimers {
+		timer.Stop()
+		delete(es.subscriptionTimers, resourceID)
+	}
+	for resourceID := range es.subscriptionTTLs {
+		delete(es.subscriptionTTLs, resourceID)
+	}
+}
+
+func (es *EventSubscriber) unsubscribeResourceLocked(resourceID string) {
+	delete(es.listeners, resourceID)
+	es.clearSubscriptionTimerLocked(resourceID)
+	delete(es.subscriptionTTLs, resourceID)
+}
+
+func (es *EventSubscriber) scheduleDelayedDisconnectLocked() {
+	if es.disconnectTimer != nil {
+		es.disconnectTimer.Stop()
+	}
+	myGeneration := es.disconnectGeneration
+
+	es.disconnectTimer = time.AfterFunc(disconnectDelay, func() {
+		es.mu.Lock()
+		defer es.mu.Unlock()
+		if myGeneration == es.disconnectGeneration && len(es.listeners) == 0 {
+			es.disconnectLocked(false)
+		}
+	})
 }

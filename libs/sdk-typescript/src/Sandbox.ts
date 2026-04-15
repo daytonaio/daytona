@@ -41,6 +41,24 @@ import { CodeInterpreter } from './CodeInterpreter'
 import { WithInstrumentation } from './utils/otel.decorator'
 import { EventSubscriber } from './utils/EventSubscriber'
 
+const SUBSCRIPTION_TTL = 300
+
+function withEvents<This extends { ensureSubscribed(): void }, Args extends unknown[], Return>(
+  _target: object,
+  _propertyKey: string,
+  descriptor: TypedPropertyDescriptor<(this: This, ...args: Args) => Return>,
+): void {
+  const original = descriptor.value
+  if (!original) {
+    return
+  }
+
+  descriptor.value = function (this: This, ...args: Args): Return {
+    this.ensureSubscribed()
+    return original.apply(this, args)
+  }
+}
+
 /**
  * Interface defining methods that a code toolbox must implement
  * @interface
@@ -135,6 +153,8 @@ export class Sandbox implements SandboxDto {
     (typeof this.stateWaiters)[number],
     (state: string) => string
   >()
+  private eventSubscribed = false
+  private unsubscribeEvents?: () => void
 
   /**
    * Creates a new Sandbox instance
@@ -155,9 +175,6 @@ export class Sandbox implements SandboxDto {
   ) {
     this.processSandboxDto(sandboxDto)
 
-    this.eventSubscriber.ensureConnected()
-    this.subscribeToEvents()
-
     const getPreviewToken = async () => (await this.getPreviewLink(1)).token
 
     this.fs = new FileSystem(this.clientConfig, new FileSystemApi(this.clientConfig, '', this.axiosInstance))
@@ -175,6 +192,8 @@ export class Sandbox implements SandboxDto {
     )
     this.computerUse = new ComputerUse(new ComputerUseApi(this.clientConfig, '', this.axiosInstance))
     this.infoApi = new InfoApi(this.clientConfig, '', this.axiosInstance)
+
+    this.subscribeToEvents()
   }
 
   /**
@@ -187,6 +206,7 @@ export class Sandbox implements SandboxDto {
    * console.log(`Sandbox user home: ${userHomeDir}`);
    */
   @WithInstrumentation()
+  @withEvents
   public async getUserHomeDir(): Promise<string | undefined> {
     const response = await this.infoApi.getUserHomeDir()
     return response.data.dir
@@ -196,6 +216,7 @@ export class Sandbox implements SandboxDto {
    * @deprecated Use `getUserHomeDir` instead. This method will be removed in a future version.
    */
   @WithInstrumentation()
+  @withEvents
   public async getUserRootDir(): Promise<string | undefined> {
     return this.getUserHomeDir()
   }
@@ -211,6 +232,7 @@ export class Sandbox implements SandboxDto {
    * console.log(`Sandbox working directory: ${workDir}`);
    */
   @WithInstrumentation()
+  @withEvents
   public async getWorkDir(): Promise<string | undefined> {
     const response = await this.infoApi.getWorkDir()
     return response.data.dir
@@ -230,6 +252,7 @@ export class Sandbox implements SandboxDto {
    * const lsp = await sandbox.createLspServer('typescript', 'workspace/project');
    */
   @WithInstrumentation()
+  @withEvents
   public async createLspServer(languageId: LspLanguageId | string, pathToProject: string): Promise<LspServer> {
     return new LspServer(
       languageId as LspLanguageId,
@@ -255,6 +278,7 @@ export class Sandbox implements SandboxDto {
    * });
    */
   @WithInstrumentation()
+  @withEvents
   public async setLabels(labels: Record<string, string>): Promise<Record<string, string>> {
     this.labels = (await this.sandboxApi.replaceLabels(this.id, { labels })).data.labels
     return this.labels
@@ -276,6 +300,7 @@ export class Sandbox implements SandboxDto {
    * console.log('Sandbox started successfully');
    */
   @WithInstrumentation()
+  @withEvents
   public async start(timeout = 60): Promise<void> {
     if (timeout < 0) {
       throw new DaytonaValidationError('Timeout must be a non-negative number')
@@ -301,6 +326,7 @@ export class Sandbox implements SandboxDto {
    * await sandbox.recover();
    * console.log('Sandbox recovered successfully');
    */
+  @withEvents
   public async recover(timeout = 60): Promise<void> {
     if (timeout < 0) {
       throw new DaytonaValidationError('Timeout must be a non-negative number')
@@ -329,6 +355,7 @@ export class Sandbox implements SandboxDto {
    * console.log('Sandbox stopped successfully');
    */
   @WithInstrumentation()
+  @withEvents
   public async stop(timeout = 60, force = false): Promise<void> {
     if (timeout < 0) {
       throw new DaytonaValidationError('Timeout must be a non-negative number')
@@ -360,6 +387,7 @@ export class Sandbox implements SandboxDto {
    * console.log(`Forked sandbox: ${forked.id}`);
    */
   @WithInstrumentation()
+  @withEvents
   public async _experimental_fork(params?: { name?: string }, timeout = 60): Promise<Sandbox> {
     if (timeout < 0) {
       throw new DaytonaValidationError('Timeout must be a non-negative number')
@@ -373,8 +401,15 @@ export class Sandbox implements SandboxDto {
     const language = sandboxDto.labels && sandboxDto.labels['code-toolbox-language']
     const codeToolbox = Daytona.getCodeToolbox(language as CodeLanguage)
 
+    const sandboxWithProxyUrl = sandboxDto.toolboxProxyUrl
+      ? sandboxDto
+      : {
+          ...sandboxDto,
+          toolboxProxyUrl: (await this.sandboxApi.getToolboxProxyUrl(sandboxDto.id)).data.url,
+        }
+
     return new Sandbox(
-      sandboxDto,
+      sandboxWithProxyUrl,
       structuredClone(this.clientConfig),
       Daytona.createAxiosInstance(),
       this.sandboxApi,
@@ -403,6 +438,7 @@ export class Sandbox implements SandboxDto {
    * console.log('Snapshot created successfully');
    */
   @WithInstrumentation()
+  @withEvents
   public async _experimental_createSnapshot(name: string, timeout = 60): Promise<void> {
     if (timeout < 0) {
       throw new DaytonaValidationError('Timeout must be a non-negative number')
@@ -424,6 +460,7 @@ export class Sandbox implements SandboxDto {
    * @returns {Promise<void>}
    */
   @WithInstrumentation()
+  @withEvents
   public async delete(timeout = 60): Promise<void> {
     if (timeout < 0) {
       throw new DaytonaValidationError('Timeout must be a non-negative number')
@@ -433,19 +470,25 @@ export class Sandbox implements SandboxDto {
     const response = await this.sandboxApi.deleteSandbox(this.id, undefined, { timeout: timeout * 1000 })
     this.processSandboxDto(response.data)
 
-    if (this.state === SandboxState.DESTROYED) {
-      return
+    try {
+      if (this.state !== SandboxState.DESTROYED) {
+        const timeElapsed = Date.now() - startTime
+        await this.waitForState(
+          [SandboxState.DESTROYED],
+          [SandboxState.ERROR, SandboxState.BUILD_FAILED],
+          timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout,
+          'Sandbox failed to be destroyed within the timeout period',
+          (state) => `Sandbox ${this.id} failed to delete with state: ${state}, error reason: ${this.errorReason}`,
+          true,
+        )
+      }
+    } finally {
+      if (this.unsubscribeEvents) {
+        this.unsubscribeEvents()
+        this.unsubscribeEvents = undefined
+      }
+      this.eventSubscribed = false
     }
-
-    const timeElapsed = Date.now() - startTime
-    return this.waitForState(
-      [SandboxState.DESTROYED],
-      [SandboxState.ERROR, SandboxState.BUILD_FAILED],
-      timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout,
-      'Sandbox failed to be destroyed within the timeout period',
-      (state) => `Sandbox ${this.id} failed to delete with state: ${state}, error reason: ${this.errorReason}`,
-      true,
-    )
   }
 
   /**
@@ -460,6 +503,7 @@ export class Sandbox implements SandboxDto {
    * @throws {DaytonaError} - `DaytonaError` - If the sandbox ends up in an error state or fails to start within the timeout period.
    */
   @WithInstrumentation()
+  @withEvents
   public async waitUntilStarted(timeout = 60) {
     if (timeout < 0) {
       throw new DaytonaValidationError('Timeout must be a non-negative number')
@@ -490,6 +534,7 @@ export class Sandbox implements SandboxDto {
    * @throws {DaytonaError} - `DaytonaError` - If the sandbox fails to stop within the timeout period.
    */
   @WithInstrumentation()
+  @withEvents
   public async waitUntilStopped(timeout = 60) {
     if (timeout < 0) {
       throw new DaytonaValidationError('Timeout must be a non-negative number')
@@ -502,7 +547,7 @@ export class Sandbox implements SandboxDto {
 
     return this.waitForState(
       [SandboxState.STOPPED, SandboxState.DESTROYED],
-      [SandboxState.ERROR],
+      [SandboxState.ERROR, SandboxState.BUILD_FAILED],
       timeout,
       'Sandbox failed to become stopped within the timeout period',
       (state) => `Sandbox failed to stop with status: ${state}, error reason: ${this.errorReason}`,
@@ -521,6 +566,7 @@ export class Sandbox implements SandboxDto {
    * console.log(`Resources: ${sandbox.cpu} CPU, ${sandbox.memory} GiB RAM`);
    */
   @WithInstrumentation()
+  @withEvents
   public async refreshData(): Promise<void> {
     const response = await this.sandboxApi.getSandbox(this.id)
     this.processSandboxDto(response.data)
@@ -538,6 +584,7 @@ export class Sandbox implements SandboxDto {
    * // Keep sandbox activity alive
    * await sandbox.refreshActivity();
    */
+  @withEvents
   public async refreshActivity(): Promise<void> {
     await this.sandboxApi.updateLastActivity(this.id)
   }
@@ -561,6 +608,7 @@ export class Sandbox implements SandboxDto {
    * await sandbox.setAutostopInterval(0);
    */
   @WithInstrumentation()
+  @withEvents
   public async setAutostopInterval(interval: number): Promise<void> {
     if (!Number.isInteger(interval) || interval < 0) {
       throw new DaytonaValidationError('autoStopInterval must be a non-negative integer')
@@ -587,6 +635,7 @@ export class Sandbox implements SandboxDto {
    * await sandbox.setAutoArchiveInterval(0);
    */
   @WithInstrumentation()
+  @withEvents
   public async setAutoArchiveInterval(interval: number): Promise<void> {
     if (!Number.isInteger(interval) || interval < 0) {
       throw new DaytonaValidationError('autoArchiveInterval must be a non-negative integer')
@@ -614,6 +663,7 @@ export class Sandbox implements SandboxDto {
    * await sandbox.setAutoDeleteInterval(-1);
    */
   @WithInstrumentation()
+  @withEvents
   public async setAutoDeleteInterval(interval: number): Promise<void> {
     await this.sandboxApi.setAutoDeleteInterval(this.id, interval)
     this.autoDeleteInterval = interval
@@ -634,6 +684,7 @@ export class Sandbox implements SandboxDto {
    * console.log(`Token: ${previewLink.token}`);
    */
   @WithInstrumentation()
+  @withEvents
   public async getPreviewLink(port: number): Promise<PortPreviewUrl> {
     return (await this.sandboxApi.getPortPreviewUrl(this.id, port)).data
   }
@@ -645,6 +696,7 @@ export class Sandbox implements SandboxDto {
    * @param {number} [expiresInSeconds] - The number of seconds the signed preview url will be valid for. Defaults to 60 seconds.
    * @returns {Promise<SignedPortPreviewUrl>} The response object for the signed preview url.
    */
+  @withEvents
   public async getSignedPreviewUrl(port: number, expiresInSeconds?: number): Promise<SignedPortPreviewUrl> {
     return (await this.sandboxApi.getSignedPortPreviewUrl(this.id, port, undefined, expiresInSeconds)).data
   }
@@ -656,6 +708,7 @@ export class Sandbox implements SandboxDto {
    * @param {string} token - The token to expire the signed preview url on.
    * @returns {Promise<void>}
    */
+  @withEvents
   public async expireSignedPreviewUrl(port: number, token: string): Promise<void> {
     await this.sandboxApi.expireSignedPortPreviewUrl(this.id, port, token)
   }
@@ -667,6 +720,7 @@ export class Sandbox implements SandboxDto {
    * Sandbox must be stopped before archiving.
    */
   @WithInstrumentation()
+  @withEvents
   public async archive(): Promise<void> {
     await this.sandboxApi.archiveSandbox(this.id)
     await this.refreshData()
@@ -696,6 +750,7 @@ export class Sandbox implements SandboxDto {
    * await sandbox.resize({ cpu: 2, memory: 4, disk: 30 });
    */
   @WithInstrumentation()
+  @withEvents
   public async resize(resources: Resources, timeout = 60): Promise<void> {
     if (timeout < 0) {
       throw new DaytonaValidationError('Timeout must be a non-negative number')
@@ -725,6 +780,7 @@ export class Sandbox implements SandboxDto {
    * @throws {DaytonaError} - If the sandbox ends up in an error state or resize times out.
    */
   @WithInstrumentation()
+  @withEvents
   public async waitForResizeComplete(timeout = 60): Promise<void> {
     if (timeout < 0) {
       throw new DaytonaValidationError('Timeout must be a non-negative number')
@@ -754,6 +810,7 @@ export class Sandbox implements SandboxDto {
    * @returns {Promise<SshAccessDto>} The SSH access token.
    */
   @WithInstrumentation()
+  @withEvents
   public async createSshAccess(expiresInMinutes?: number): Promise<SshAccessDto> {
     return (await this.sandboxApi.createSshAccess(this.id, undefined, expiresInMinutes)).data
   }
@@ -765,6 +822,7 @@ export class Sandbox implements SandboxDto {
    * @returns {Promise<void>}
    */
   @WithInstrumentation()
+  @withEvents
   public async revokeSshAccess(token: string): Promise<void> {
     await this.sandboxApi.revokeSshAccess(this.id, undefined, token)
   }
@@ -776,6 +834,7 @@ export class Sandbox implements SandboxDto {
    * @returns {Promise<SshAccessValidationDto>} The SSH access validation result.
    */
   @WithInstrumentation()
+  @withEvents
   public async validateSshAccess(token: string): Promise<SshAccessValidationDto> {
     return (await this.sandboxApi.validateSshAccess(token)).data
   }
@@ -785,7 +844,11 @@ export class Sandbox implements SandboxDto {
    * Auto-updates sandbox metadata on every event.
    */
   private subscribeToEvents(): void {
-    this.eventSubscriber.subscribe(
+    if (this.eventSubscribed) {
+      return
+    }
+
+    this.unsubscribeEvents = this.eventSubscriber.subscribe(
       this.id,
       (eventName: string, data: any) => {
         if (!data || typeof data !== 'object') return
@@ -802,7 +865,25 @@ export class Sandbox implements SandboxDto {
         }
       },
       ['sandbox.state.updated', 'sandbox.created'],
+      SUBSCRIPTION_TTL,
     )
+    this.eventSubscribed = true
+  }
+
+  private ensureSubscribed(): void {
+    if (!this.eventSubscribed) {
+      this.subscribeToEvents()
+    }
+
+    if (!this.eventSubscribed) {
+      return
+    }
+
+    if (!this.eventSubscriber.refreshSubscription(this.id)) {
+      this.eventSubscribed = false
+      this.unsubscribeEvents = undefined
+      this.subscribeToEvents()
+    }
   }
 
   /**
@@ -824,9 +905,11 @@ export class Sandbox implements SandboxDto {
     errorMessageFn: (state: string) => string,
     safeRefresh = false,
   ): Promise<void> {
+    this.ensureSubscribed()
+
     return new Promise<void>((resolve, reject) => {
       let timeoutTimer: ReturnType<typeof setTimeout> | null = null
-      let pollTimer: ReturnType<typeof setInterval> | null = null
+      let pollTimer: ReturnType<typeof setTimeout> | null = null
       let settled = false
 
       const waiter = {
@@ -851,7 +934,7 @@ export class Sandbox implements SandboxDto {
         if (settled) return
         settled = true
         if (timeoutTimer) clearTimeout(timeoutTimer)
-        if (pollTimer) clearInterval(pollTimer)
+        if (pollTimer) clearTimeout(pollTimer)
         this.removeStateWaiter(waiter)
       }
 
@@ -870,16 +953,31 @@ export class Sandbox implements SandboxDto {
       }
 
       // Periodic poll as safety net for missed events
-      const doPoll = () => {
+      const doPoll = async () => {
         if (settled) return
-        const refreshPromise = safeRefresh ? this.refreshDataSafe() : this.refreshData()
-        refreshPromise.catch(() => {
-          // Poll failed, will retry on next interval
-        })
+
+        try {
+          if (safeRefresh) {
+            await this.refreshDataSafe()
+          } else {
+            await this.refreshData()
+          }
+        } catch (error) {
+          waiter.reject(error instanceof Error ? error : new DaytonaError(String(error)))
+          return
+        }
+
+        if (!settled) {
+          pollTimer = setTimeout(() => {
+            void doPoll()
+          }, 1_000)
+        }
       }
 
       // Poll periodically as safety net for missed WebSocket events
-      pollTimer = setInterval(doPoll, 1_000)
+      pollTimer = setTimeout(() => {
+        void doPoll()
+      }, 1_000)
     })
   }
 
@@ -931,8 +1029,6 @@ export class Sandbox implements SandboxDto {
 
     if (newState) {
       this.applyState(newState)
-    } else {
-      this.state = newState
     }
   }
 
@@ -948,7 +1044,10 @@ export class Sandbox implements SandboxDto {
     } catch (error) {
       if (error instanceof DaytonaNotFoundError) {
         this.applyState(SandboxState.DESTROYED)
+        return
       }
+
+      throw error
     }
   }
 

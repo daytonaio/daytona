@@ -261,7 +261,6 @@ func NewClientWithConfig(config *types.DaytonaConfig) (*Client, error) {
 	client.Volume = NewVolumeService(client)
 	client.Snapshot = NewSnapshotService(client)
 
-	// Create and start WebSocket event subscriber connection in the background (non-blocking)
 	token := client.apiKey
 	if token == "" {
 		token = client.jwtToken

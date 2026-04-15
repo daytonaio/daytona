@@ -50,7 +50,6 @@ module Daytona
       # Event subscriber for real-time sandbox updates
       @event_subscriber = nil
 
-      # Create and start WebSocket event subscriber connection in the background (non-blocking).
       token = config.api_key || config.jwt_token
       return unless token
 

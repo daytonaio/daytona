@@ -24,10 +24,15 @@ module Daytona
       @registered_events = Set.new
       @mutex = Mutex.new
       @disconnect_timer = nil
+      @subscription_timers = {}
+      @subscription_ttls = {}
       @reconnect_thread = nil
+      @connect_thread = nil
       @last_event_at = Time.now
       @reconnecting = false
+      @connecting = false
       @close_requested = false
+      @closed = false
       @max_reconnects = 100
     end
 
@@ -36,13 +41,18 @@ module Daytona
     # and no attempt is currently running.
     # @return [void]
     def ensure_connected
-      return if @connected
-      return if @connect_thread&.alive?
+      @mutex.synchronize do
+        return if @closed || @connected || @connecting || @connect_thread&.alive?
 
-      @connect_thread = Thread.new do
-        connect
-      rescue StandardError
-        # Callers check connected? when they need it
+        @connect_thread = Thread.new do
+          connect
+        rescue StandardError
+          # Callers check connected? when they need it
+        ensure
+          @mutex.synchronize do
+            @connect_thread = nil if @connect_thread == Thread.current
+          end
+        end
       end
     end
 
@@ -50,7 +60,11 @@ module Daytona
     # @return [void]
     # @raise [StandardError] on connection failure
     def connect
-      return if @connected
+      @mutex.synchronize do
+        return if @closed || @connected || @connecting
+
+        @connecting = true
+      end
 
       # Close any existing stale connection before creating a fresh one
       @client&.close rescue nil # rubocop:disable Style/RescueModifier
@@ -71,6 +85,8 @@ module Daytona
     rescue StandardError => e
       @failed = true
       @fail_error = "WebSocket connection failed: #{e.message}"
+    ensure
+      @mutex.synchronize { @connecting = false }
     end
 
     # Subscribe to specific events for a resource.
@@ -80,38 +96,64 @@ module Daytona
     # @return [Proc] Unsubscribe function.
     DISCONNECT_DELAY = 30
 
-    def subscribe(resource_id, events:, &handler)
-      # Cancel any pending delayed disconnect
-      @disconnect_timer&.kill
-      @disconnect_timer = nil
+    def subscribe(resource_id, events:, ttl: 0, &handler)
+      ensure_connected
 
-      # Register any new events with the Socket.IO client (idempotent)
-      register_events(events)
+      timer_to_stop = nil
 
       @mutex.synchronize do
+        return -> {} if @closed
+
+        # Register any new events with the Socket.IO client (idempotent)
+        register_events(events)
+
         @listeners[resource_id] ||= []
         @listeners[resource_id] << handler
+
+        @disconnect_timer&.kill
+        @disconnect_timer = nil
+
+        if ttl.positive?
+          @subscription_ttls[resource_id] = ttl
+          timer_to_stop = start_subscription_timer_locked(resource_id)
+        else
+          timer_to_stop = cancel_subscription_timer_locked(resource_id)
+          @subscription_ttls.delete(resource_id)
+        end
       end
 
+      stop_thread(timer_to_stop)
+
       lambda {
-        return if @close_requested
+        return if @close_requested || @closed
 
         should_schedule = false
+        timer_to_stop = nil
         @mutex.synchronize do
           @listeners[resource_id]&.delete(handler)
-          @listeners.delete(resource_id) if @listeners[resource_id] && @listeners[resource_id].empty?
+          if @listeners[resource_id] && @listeners[resource_id].empty?
+            timer_to_stop = unsubscribe_resource_locked(resource_id)
+          end
           should_schedule = @listeners.empty?
+
+          schedule_delayed_disconnect_locked if should_schedule
         end
 
-        # Schedule delayed disconnect when no resources are listening anymore
-        if should_schedule
-          @disconnect_timer = Thread.new do
-            sleep(DISCONNECT_DELAY)
-            empty = @mutex.synchronize { @listeners.empty? }
-            disconnect if empty
-          end
-        end
+        stop_thread(timer_to_stop)
       }
+    end
+
+    def refresh_subscription(resource_id)
+      timer_to_stop = nil
+
+      @mutex.synchronize do
+        return false unless @subscription_ttls.key?(resource_id)
+
+        timer_to_stop = start_subscription_timer_locked(resource_id)
+      end
+
+      stop_thread(timer_to_stop)
+      true
     end
 
     # @return [Boolean]
@@ -129,15 +171,11 @@ module Daytona
 
     # Disconnect and clean up.
     def disconnect
-      @close_requested = true
-      @reconnect_thread&.kill
-      @reconnect_thread = nil
-      @disconnect_timer&.kill
-      @disconnect_timer = nil
-      @client&.close
-      @connected = false
-      @mutex.synchronize { @listeners.clear }
-      @registered_events.clear
+      thread_state = @mutex.synchronize do
+        begin_disconnect_locked(permanent: true, skip_thread: Thread.current)
+      end
+
+      finalize_disconnect(thread_state)
     end
 
     private
@@ -147,6 +185,60 @@ module Daytona
     # need to track which events we care about for filtering in handle_event.
     def register_events(events)
       events.each { |evt| @registered_events.add(evt) }
+    end
+
+    def start_subscription_timer_locked(resource_id)
+      ttl = @subscription_ttls[resource_id]
+      return unless ttl&.positive?
+
+      previous_timer = cancel_subscription_timer_locked(resource_id)
+      timer = Thread.new do
+        sleep(ttl)
+        @mutex.synchronize do
+          current_timer = @subscription_timers[resource_id]
+          next unless current_timer == Thread.current
+
+          @subscription_timers.delete(resource_id)
+          @subscription_ttls.delete(resource_id)
+          @listeners.delete(resource_id)
+          schedule_delayed_disconnect_locked if @listeners.empty?
+        end
+      end
+      timer.abort_on_exception = false
+      @subscription_timers[resource_id] = timer
+      previous_timer
+    end
+
+    def cancel_subscription_timer_locked(resource_id)
+      @subscription_timers.delete(resource_id)
+    end
+
+    def cancel_subscription_timers_locked
+      timers = @subscription_timers.values
+      @subscription_timers = {}
+      @subscription_ttls = {}
+      timers
+    end
+
+    def unsubscribe_resource_locked(resource_id)
+      @listeners.delete(resource_id)
+      @subscription_ttls.delete(resource_id)
+      cancel_subscription_timer_locked(resource_id)
+    end
+
+    def schedule_delayed_disconnect_locked
+      @disconnect_timer&.kill
+      @disconnect_timer = Thread.new do
+        sleep(DISCONNECT_DELAY)
+        thread_state = @mutex.synchronize do
+          next unless @listeners.empty?
+
+          begin_disconnect_locked(permanent: false, skip_thread: Thread.current)
+        end
+
+        finalize_disconnect(thread_state) if thread_state
+      end
+      @disconnect_timer.abort_on_exception = false
     end
 
     def handle_event(event_name, data)
@@ -238,6 +330,57 @@ module Daytona
         @fail_error = "WebSocket reconnection failed after #{@max_reconnects} attempts"
         @reconnecting = false
       end
+    end
+
+    def begin_disconnect_locked(permanent:, skip_thread:)
+      @closed = true if permanent
+      @close_requested = true
+
+      thread_state = {
+        client: @client,
+        reconnect_thread: @reconnect_thread,
+        connect_thread: @connect_thread,
+        disconnect_timer: @disconnect_timer,
+        subscription_timers: cancel_subscription_timers_locked,
+        skip_thread:
+      }
+
+      @client = nil
+      @reconnect_thread = nil
+      @connect_thread = nil
+      @disconnect_timer = nil
+      @connected = false
+      @connecting = false
+      @listeners.clear
+      @registered_events.clear
+
+      thread_state
+    end
+
+    def finalize_disconnect(thread_state)
+      return unless thread_state
+
+      [thread_state[:reconnect_thread], thread_state[:connect_thread], thread_state[:disconnect_timer],
+       *thread_state[:subscription_timers]].each do |thread|
+        next unless thread
+        next if thread == thread_state[:skip_thread]
+
+        stop_thread(thread)
+      end
+
+      thread_state[:client]&.close
+    rescue StandardError
+      nil
+    end
+
+    def stop_thread(thread)
+      return unless thread
+      return if thread == Thread.current
+
+      thread.kill
+      thread.join
+    rescue StandardError
+      nil
     end
   end
 end

@@ -8,6 +8,7 @@ import {
   SnapshotsApi,
   ObjectStorageApi,
   SandboxApi,
+  Sandbox as SandboxDto,
   SandboxState,
   VolumesApi,
   SandboxVolume,
@@ -323,7 +324,6 @@ export class Daytona implements AsyncDisposable {
     )
     this.clientConfig = configuration
 
-    // Create and start WebSocket event subscriber connection in the background (non-blocking)
     this.eventSubscriber = new EventSubscriber(this.apiUrl, this.apiKey || this.jwtToken, this.organizationId)
     this.eventSubscriber.ensureConnected()
 
@@ -580,7 +580,7 @@ export class Daytona implements AsyncDisposable {
       }
 
       const sandbox = new Sandbox(
-        sandboxInstance,
+        await this.ensureToolboxProxyUrl(sandboxInstance),
         new Configuration(structuredClone(this.clientConfig)),
         Daytona.createAxiosInstance(),
         this.sandboxApi,
@@ -619,7 +619,7 @@ export class Daytona implements AsyncDisposable {
   @WithInstrumentation()
   public async get(sandboxIdOrName: string): Promise<Sandbox> {
     const response = await this.sandboxApi.getSandbox(sandboxIdOrName)
-    const sandboxInstance = response.data
+    const sandboxInstance = await this.ensureToolboxProxyUrl(response.data)
     const language = sandboxInstance.labels && sandboxInstance.labels['code-toolbox-language']
     const codeToolbox = Daytona.getCodeToolbox(language as CodeLanguage)
 
@@ -659,20 +659,35 @@ export class Daytona implements AsyncDisposable {
     )
 
     return {
-      items: response.data.items.map((sandbox) => {
-        const language = sandbox.labels?.['code-toolbox-language'] as CodeLanguage
-        return new Sandbox(
-          sandbox,
-          structuredClone(this.clientConfig),
-          Daytona.createAxiosInstance(),
-          this.sandboxApi,
-          Daytona.getCodeToolbox(language),
-          this.eventSubscriber,
-        )
-      }),
+      items: await Promise.all(
+        response.data.items.map(async (sandbox) => {
+          const hydratedSandbox = await this.ensureToolboxProxyUrl(sandbox)
+          const language = hydratedSandbox.labels?.['code-toolbox-language'] as CodeLanguage
+          return new Sandbox(
+            hydratedSandbox,
+            structuredClone(this.clientConfig),
+            Daytona.createAxiosInstance(),
+            this.sandboxApi,
+            Daytona.getCodeToolbox(language),
+            this.eventSubscriber,
+          )
+        }),
+      ),
       total: response.data.total,
       page: response.data.page,
       totalPages: response.data.totalPages,
+    }
+  }
+
+  private async ensureToolboxProxyUrl(sandboxDto: SandboxDto): Promise<SandboxDto> {
+    if (sandboxDto.toolboxProxyUrl) {
+      return sandboxDto
+    }
+
+    const proxyUrl = await this.sandboxApi.getToolboxProxyUrl(sandboxDto.id)
+    return {
+      ...sandboxDto,
+      toolboxProxyUrl: proxyUrl.data.url,
     }
   }
 

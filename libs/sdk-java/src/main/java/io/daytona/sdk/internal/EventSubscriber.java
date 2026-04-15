@@ -13,6 +13,7 @@ import io.socket.engineio.client.transports.WebSocket;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,10 +52,16 @@ public class EventSubscriber {
     private final Map<String, Map<Integer, BiConsumer<String, JsonNode>>> listeners = new ConcurrentHashMap<>();
     private final AtomicInteger nextSubId = new AtomicInteger(0);
     private final Set<String> registeredEvents = ConcurrentHashMap.newKeySet();
+    private final Set<String> socketBoundEvents = new HashSet<>();
+    private final Map<String, ScheduledFuture<?>> subscriptionTimers = new ConcurrentHashMap<>();
+    private final Map<String, Long> subscriptionTtls = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler;
     private ScheduledFuture<?> disconnectTimer;
+    private long disconnectGeneration;
 
     private volatile boolean connected;
+    private volatile boolean connecting;
+    private volatile boolean closed;
     private volatile boolean failed;
     private volatile String failError = "";
 
@@ -78,8 +85,11 @@ public class EventSubscriber {
      * Non-blocking; starts a background thread to connect if needed.
      */
     public void ensureConnected() {
-        if (connected) {
-            return;
+        synchronized (lock) {
+            if (connected || connecting || closed) {
+                return;
+            }
+            connecting = true;
         }
         scheduler.execute(() -> {
             try {
@@ -97,9 +107,17 @@ public class EventSubscriber {
     public void connect() {
         try {
             synchronized (lock) {
-                if (connected || socket != null) {
+                if (connected || closed) {
+                    connecting = false;
                     return;
                 }
+                if (socket != null) {
+                    socket.off();
+                    socket.disconnect();
+                    socket.close();
+                    socket = null;
+                }
+                socketBoundEvents.clear();
             }
 
             URI apiUri = URI.create(apiUrl);
@@ -124,15 +142,19 @@ public class EventSubscriber {
             sock.on(Socket.EVENT_CONNECT, args -> {
                 synchronized (lock) {
                     connected = true;
+                    connecting = false;
                     failed = false;
                     failError = "";
                 }
-                reregisterAllEvents(sock);
+                bindPendingEvents(sock);
             });
 
             sock.on(Socket.EVENT_CONNECT_ERROR, args -> {
+                String msg = args.length > 0 ? String.valueOf(args[0]) : "unknown";
                 synchronized (lock) {
                     connected = false;
+                    failed = true;
+                    failError = "WebSocket connection error: " + msg;
                 }
             });
 
@@ -142,8 +164,6 @@ public class EventSubscriber {
                 }
             });
 
-            reregisterAllEvents(sock);
-
             synchronized (lock) {
                 this.socket = sock;
             }
@@ -151,6 +171,7 @@ public class EventSubscriber {
             sock.connect();
         } catch (Exception e) {
             synchronized (lock) {
+                connecting = false;
                 failed = true;
                 failError = "WebSocket connection failed: " + e.getMessage();
             }
@@ -158,59 +179,77 @@ public class EventSubscriber {
     }
 
     /**
-     * Subscribes to events for a specific resource.
+     * Subscribes to events for a specific resource. Lazily connects if needed.
      *
      * @param resourceId entity identifier to listen for
      * @param handler    called with {@code (eventName, jsonData)} for matching events
      * @param events     Socket.IO event names to register
      * @return unsubscribe callback
      */
-    public Runnable subscribe(String resourceId, BiConsumer<String, JsonNode> handler, List<String> events) {
+    public Runnable subscribe(String resourceId, BiConsumer<String, JsonNode> handler, List<String> events, long ttlSeconds) {
+        int subId = nextSubId.getAndIncrement();
+
         synchronized (lock) {
+            listeners.computeIfAbsent(resourceId, k -> new ConcurrentHashMap<>()).put(subId, handler);
+
             if (disconnectTimer != null) {
                 disconnectTimer.cancel(false);
                 disconnectTimer = null;
             }
 
             for (String event : events) {
-                if (registeredEvents.add(event) && socket != null) {
-                    registerSocketEvent(socket, event);
+                if (registeredEvents.add(event)) {
+                    bindEventIfConnected(event);
                 }
+            }
+
+            if (ttlSeconds > 0) {
+                subscriptionTtls.put(resourceId, ttlSeconds);
+                scheduleSubscriptionTimerLocked(resourceId);
+            } else {
+                cancelSubscriptionTimerLocked(resourceId);
+                subscriptionTtls.remove(resourceId);
             }
         }
 
-        int subId = nextSubId.getAndIncrement();
-        listeners.computeIfAbsent(resourceId, k -> new ConcurrentHashMap<>()).put(subId, handler);
+        ensureConnected();
 
         return () -> {
-            Map<Integer, BiConsumer<String, JsonNode>> subs = listeners.get(resourceId);
-            if (subs != null) {
-                subs.remove(subId);
-                if (subs.isEmpty()) {
-                    listeners.remove(resourceId);
+            synchronized (lock) {
+                Map<Integer, BiConsumer<String, JsonNode>> subs = listeners.get(resourceId);
+                if (subs != null) {
+                    subs.remove(subId);
+                    if (subs.isEmpty()) {
+                        unsubscribeResourceLocked(resourceId);
+                    }
                 }
-            }
-            if (listeners.isEmpty()) {
-                synchronized (lock) {
-                    disconnectTimer = scheduler.schedule(() -> {
-                        if (listeners.isEmpty()) {
-                            disconnect();
-                        }
-                    }, DISCONNECT_DELAY_SECONDS, TimeUnit.SECONDS);
+                if (listeners.isEmpty()) {
+                    scheduleDelayedDisconnectLocked();
                 }
             }
         };
     }
 
-    boolean isConnected() {
+    public boolean refreshSubscription(String resourceId) {
+        synchronized (lock) {
+            if (!subscriptionTtls.containsKey(resourceId)) {
+                return false;
+            }
+
+            scheduleSubscriptionTimerLocked(resourceId);
+            return true;
+        }
+    }
+
+    public boolean isConnected() {
         return connected;
     }
 
-    boolean isFailed() {
+    public boolean isFailed() {
         return failed;
     }
 
-    String getFailError() {
+    public String getFailError() {
         return failError;
     }
 
@@ -223,6 +262,7 @@ public class EventSubscriber {
                 disconnectTimer.cancel(false);
                 disconnectTimer = null;
             }
+            cancelSubscriptionTimersLocked();
             if (socket != null) {
                 socket.off();
                 socket.disconnect();
@@ -230,15 +270,20 @@ public class EventSubscriber {
                 socket = null;
             }
             connected = false;
+            connecting = false;
+            socketBoundEvents.clear();
         }
         listeners.clear();
         registeredEvents.clear();
     }
 
     /**
-     * Shuts down the subscriber and its background scheduler.
+     * Shuts down the subscriber permanently. No further connections will be made.
      */
     public void shutdown() {
+        synchronized (lock) {
+            closed = true;
+        }
         disconnect();
         scheduler.shutdown();
         try {
@@ -251,14 +296,20 @@ public class EventSubscriber {
         }
     }
 
-    private void reregisterAllEvents(Socket sock) {
-        for (String event : registeredEvents) {
-            registerSocketEvent(sock, event);
+    private void bindPendingEvents(Socket sock) {
+        synchronized (lock) {
+            for (String event : registeredEvents) {
+                if (socketBoundEvents.add(event)) {
+                    sock.on(event, args -> handleEventArgs(event, args));
+                }
+            }
         }
     }
 
-    private void registerSocketEvent(Socket sock, String eventName) {
-        sock.on(eventName, args -> handleEventArgs(eventName, args));
+    private void bindEventIfConnected(String eventName) {
+        if (socket != null && socketBoundEvents.add(eventName)) {
+            socket.on(eventName, args -> handleEventArgs(eventName, args));
+        }
     }
 
     private void handleEventArgs(String eventName, Object[] args) {
@@ -284,6 +335,69 @@ public class EventSubscriber {
         }
 
         dispatch(entityId, eventName, data);
+    }
+
+    private void scheduleSubscriptionTimerLocked(String resourceId) {
+        Long ttlSeconds = subscriptionTtls.get(resourceId);
+        if (ttlSeconds == null || ttlSeconds <= 0) {
+            return;
+        }
+
+        cancelSubscriptionTimerLocked(resourceId);
+        final ScheduledFuture<?>[] timerRef = new ScheduledFuture<?>[1];
+        ScheduledFuture<?> timer = scheduler.schedule(() -> {
+            synchronized (lock) {
+                ScheduledFuture<?> currentTimer = subscriptionTimers.get(resourceId);
+                if (currentTimer == null || currentTimer != timerRef[0] || currentTimer.isCancelled()) {
+                    return;
+                }
+
+                subscriptionTimers.remove(resourceId);
+                subscriptionTtls.remove(resourceId);
+                unsubscribeResourceLocked(resourceId);
+                if (listeners.isEmpty()) {
+                    scheduleDelayedDisconnectLocked();
+                }
+            }
+        }, ttlSeconds, TimeUnit.SECONDS);
+        timerRef[0] = timer;
+        subscriptionTimers.put(resourceId, timer);
+    }
+
+    private void cancelSubscriptionTimerLocked(String resourceId) {
+        ScheduledFuture<?> timer = subscriptionTimers.remove(resourceId);
+        if (timer != null) {
+            timer.cancel(false);
+        }
+    }
+
+    private void cancelSubscriptionTimersLocked() {
+        for (ScheduledFuture<?> timer : subscriptionTimers.values()) {
+            timer.cancel(false);
+        }
+        subscriptionTimers.clear();
+        subscriptionTtls.clear();
+    }
+
+    private void unsubscribeResourceLocked(String resourceId) {
+        listeners.remove(resourceId);
+        cancelSubscriptionTimerLocked(resourceId);
+        subscriptionTtls.remove(resourceId);
+    }
+
+    private void scheduleDelayedDisconnectLocked() {
+        disconnectGeneration++;
+        final long myGen = disconnectGeneration;
+        if (disconnectTimer != null) {
+            disconnectTimer.cancel(false);
+        }
+        disconnectTimer = scheduler.schedule(() -> {
+            synchronized (lock) {
+                if (myGen == disconnectGeneration && listeners.isEmpty()) {
+                    disconnect();
+                }
+            }
+        }, DISCONNECT_DELAY_SECONDS, TimeUnit.SECONDS);
     }
 
     /**
