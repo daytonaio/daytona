@@ -33,10 +33,10 @@ class UpdateOrganizationRegionQuota(BaseModel):
     total_cpu_quota: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="totalCpuQuota")
     total_memory_quota: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="totalMemoryQuota")
     total_disk_quota: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="totalDiskQuota")
-    max_cpu_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxCpuPerSandbox")
-    max_memory_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxMemoryPerSandbox")
-    max_disk_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxDiskPerSandbox")
-    max_disk_per_non_ephemeral_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxDiskPerNonEphemeralSandbox")
+    max_cpu_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxCpuPerSandbox")
+    max_memory_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxMemoryPerSandbox")
+    max_disk_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxDiskPerSandbox")
+    max_disk_per_non_ephemeral_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxDiskPerNonEphemeralSandbox")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"]
 

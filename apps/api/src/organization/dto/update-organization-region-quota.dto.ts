@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiProperty, ApiSchema } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 
 @ApiSchema({ name: 'UpdateOrganizationRegionQuota' })
 export class UpdateOrganizationRegionQuotaDto {
@@ -16,15 +16,15 @@ export class UpdateOrganizationRegionQuotaDto {
   @ApiProperty({ nullable: true })
   totalDiskQuota?: number
 
-  @ApiProperty({ nullable: true })
+  @ApiPropertyOptional({ nullable: true })
   maxCpuPerSandbox?: number | null
 
-  @ApiProperty({ nullable: true })
+  @ApiPropertyOptional({ nullable: true })
   maxMemoryPerSandbox?: number | null
 
-  @ApiProperty({ nullable: true })
+  @ApiPropertyOptional({ nullable: true })
   maxDiskPerSandbox?: number | null
 
-  @ApiProperty({ nullable: true })
+  @ApiPropertyOptional({ nullable: true })
   maxDiskPerNonEphemeralSandbox?: number | null
 }

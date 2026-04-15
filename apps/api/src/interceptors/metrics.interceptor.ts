@@ -814,10 +814,11 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       organization_region_total_memory_quota_mb: request.totalMemoryQuota ? request.totalMemoryQuota * 1024 : null,
       organization_region_total_disk_quota_gb: request.totalDiskQuota,
       organization_region_max_cpu_per_sandbox: request.maxCpuPerSandbox,
-      organization_region_max_memory_per_sandbox: request.maxMemoryPerSandbox
+      organization_region_max_memory_per_sandbox_mb: request.maxMemoryPerSandbox
         ? request.maxMemoryPerSandbox * 1024
         : null,
       organization_region_max_disk_per_sandbox_gb: request.maxDiskPerSandbox,
+      organization_region_max_disk_per_non_ephemeral_sandbox_gb: request.maxDiskPerNonEphemeralSandbox,
     })
   }
 

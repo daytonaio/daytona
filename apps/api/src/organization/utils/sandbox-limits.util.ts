@@ -7,8 +7,8 @@ import { Organization } from '../entities/organization.entity'
 import { RegionQuotaDto } from '../dto/region-quota.dto'
 
 /**
- * Get the effective per-sandbox limits for an organization and region quota.
- * If the region quota is set, the region limits are used. Otherwise, the organization limits are used.
+ * Get the effective per-sandbox limits.
+ * If the region quota limit is set, it overrides the organization limit.
  *
  * @param organization - The organization to get the limits for.
  * @param regionQuota - The region quota to get the limits for.

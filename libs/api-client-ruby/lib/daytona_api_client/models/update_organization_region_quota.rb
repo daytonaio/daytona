@@ -114,26 +114,18 @@ module DaytonaApiClient
 
       if attributes.key?(:'max_cpu_per_sandbox')
         self.max_cpu_per_sandbox = attributes[:'max_cpu_per_sandbox']
-      else
-        self.max_cpu_per_sandbox = nil
       end
 
       if attributes.key?(:'max_memory_per_sandbox')
         self.max_memory_per_sandbox = attributes[:'max_memory_per_sandbox']
-      else
-        self.max_memory_per_sandbox = nil
       end
 
       if attributes.key?(:'max_disk_per_sandbox')
         self.max_disk_per_sandbox = attributes[:'max_disk_per_sandbox']
-      else
-        self.max_disk_per_sandbox = nil
       end
 
       if attributes.key?(:'max_disk_per_non_ephemeral_sandbox')
         self.max_disk_per_non_ephemeral_sandbox = attributes[:'max_disk_per_non_ephemeral_sandbox']
-      else
-        self.max_disk_per_non_ephemeral_sandbox = nil
       end
     end
 

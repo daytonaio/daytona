@@ -9927,10 +9927,6 @@ components:
           nullable: true
           type: number
       required:
-      - maxCpuPerSandbox
-      - maxDiskPerNonEphemeralSandbox
-      - maxDiskPerSandbox
-      - maxMemoryPerSandbox
       - totalCpuQuota
       - totalDiskQuota
       - totalMemoryQuota

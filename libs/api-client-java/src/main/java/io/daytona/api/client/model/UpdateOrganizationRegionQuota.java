@@ -22,6 +22,7 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import org.openapitools.jackson.nullable.JsonNullable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -286,9 +287,20 @@ public class UpdateOrganizationRegionQuota {
         Objects.equals(this.additionalProperties, updateOrganizationRegionQuota.additionalProperties);
   }
 
+  private static <T> boolean equalsNullable(JsonNullable<T> a, JsonNullable<T> b) {
+    return a == b || (a != null && b != null && a.isPresent() && b.isPresent() && Objects.deepEquals(a.get(), b.get()));
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(totalCpuQuota, totalMemoryQuota, totalDiskQuota, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, additionalProperties);
+  }
+
+  private static <T> int hashCodeNullable(JsonNullable<T> a) {
+    if (a == null) {
+      return 1;
+    }
+    return a.isPresent() ? Arrays.deepHashCode(new Object[]{a.get()}) : 31;
   }
 
   @Override
@@ -338,10 +350,6 @@ public class UpdateOrganizationRegionQuota {
     openapiRequiredFields.add("totalCpuQuota");
     openapiRequiredFields.add("totalMemoryQuota");
     openapiRequiredFields.add("totalDiskQuota");
-    openapiRequiredFields.add("maxCpuPerSandbox");
-    openapiRequiredFields.add("maxMemoryPerSandbox");
-    openapiRequiredFields.add("maxDiskPerSandbox");
-    openapiRequiredFields.add("maxDiskPerNonEphemeralSandbox");
   }
 
   /**

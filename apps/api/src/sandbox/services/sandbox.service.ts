@@ -89,6 +89,7 @@ import { SnapshotService } from './snapshot.service'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { RegionType } from '../../region/enums/region-type.enum'
 import { getEffectivePerSandboxLimits } from '../../organization/utils/sandbox-limits.util'
+import { RegionQuotaDto } from '../../organization/dto/region-quota.dto'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
@@ -161,14 +162,15 @@ export class SandboxService {
     disk: number,
     ephemeral: boolean,
     excludeSandboxId?: string,
+    regionQuota?: RegionQuotaDto | null,
   ): Promise<{
     pendingCpuIncremented: boolean
     pendingMemoryIncremented: boolean
     pendingDiskIncremented: boolean
   }> {
-    const regionQuota = region.enforceQuotas
-      ? await this.organizationService.getRegionQuota(organization.id, region.id)
-      : null
+    if (!regionQuota && region.enforceQuotas) {
+      regionQuota = await this.organizationService.getRegionQuota(organization.id, region.id)
+    }
 
     // validate per-sandbox quotas
     const { maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox } =
@@ -1052,7 +1054,19 @@ export class SandboxService {
 
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
-      const { pendingSnapshotCountIncremented } = await this.snapshotService.validateOrganizationQuotas(organization, 1)
+      const region = await this.regionService.findOne(sandbox.region)
+      if (!region) {
+        throw new NotFoundException(`Region with ID ${sandbox.region} not found`)
+      }
+
+      const { pendingSnapshotCountIncremented } = await this.snapshotService.validateOrganizationQuotas(
+        organization,
+        region,
+        1,
+        sandbox.cpu,
+        sandbox.mem,
+        sandbox.disk,
+      )
 
       if (pendingSnapshotCountIncremented) {
         pendingSnapshotCountIncrement = 1
@@ -1867,6 +1881,8 @@ export class SandboxService {
             memDeltaForQuota,
             diskDeltaForQuota,
             isEphemeral(sandbox),
+            undefined,
+            regionQuota,
           )
 
         if (pendingCpuIncremented) {

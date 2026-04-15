@@ -43,24 +43,24 @@ export interface UpdateOrganizationRegionQuota {
      * @type {number}
      * @memberof UpdateOrganizationRegionQuota
      */
-    'maxCpuPerSandbox': number | null;
+    'maxCpuPerSandbox'?: number | null;
     /**
      * 
      * @type {number}
      * @memberof UpdateOrganizationRegionQuota
      */
-    'maxMemoryPerSandbox': number | null;
+    'maxMemoryPerSandbox'?: number | null;
     /**
      * 
      * @type {number}
      * @memberof UpdateOrganizationRegionQuota
      */
-    'maxDiskPerSandbox': number | null;
+    'maxDiskPerSandbox'?: number | null;
     /**
      * 
      * @type {number}
      * @memberof UpdateOrganizationRegionQuota
      */
-    'maxDiskPerNonEphemeralSandbox': number | null;
+    'maxDiskPerNonEphemeralSandbox'?: number | null;
 }
 
