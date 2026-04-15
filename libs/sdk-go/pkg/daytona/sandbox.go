@@ -703,6 +703,182 @@ func (s *Sandbox) doSetAutoDeleteInterval(ctx context.Context, intervalMinutes *
 	return nil
 }
 
+// ExperimentalFork forks the sandbox with a default timeout of 60 seconds,
+// creating a new sandbox with an identical filesystem.
+//
+// The forked sandbox is a copy-on-write clone of the original. It starts
+// with the same disk contents but operates independently from that point on.
+// ExperimentalFork waits for the new sandbox to reach the "started" state before returning.
+//
+// Example:
+//
+//	forked, err := sandbox.ExperimentalFork(ctx, nil)
+//	if err != nil {
+//	    return err
+//	}
+//	fmt.Printf("Forked sandbox: %s\n", forked.ID)
+func (s *Sandbox) ExperimentalFork(ctx context.Context, name *string) (*Sandbox, error) {
+	return withInstrumentation(ctx, s.otel, "Sandbox", "ExperimentalFork", func(ctx context.Context) (*Sandbox, error) {
+		return s.ExperimentalForkWithTimeout(ctx, name, 60*time.Second)
+	})
+}
+
+// ExperimentalForkWithTimeout forks the sandbox with a custom timeout,
+// creating a new sandbox with an identical filesystem.
+//
+// The forked sandbox is a copy-on-write clone of the original. It starts
+// with the same disk contents but operates independently from that point on.
+// ExperimentalForkWithTimeout waits for the new sandbox to reach the "started" state before returning.
+// 0 means no timeout.
+//
+// Example:
+//
+//	forked, err := sandbox.ExperimentalForkWithTimeout(ctx, nil, 2*time.Minute)
+//	if err != nil {
+//	    return err
+//	}
+//	fmt.Printf("Forked sandbox: %s\n", forked.ID)
+func (s *Sandbox) ExperimentalForkWithTimeout(ctx context.Context, name *string, timeout time.Duration) (*Sandbox, error) {
+	return withInstrumentation(ctx, s.otel, "Sandbox", "ExperimentalForkWithTimeout", func(ctx context.Context) (*Sandbox, error) {
+		return s.doExperimentalForkWithTimeout(ctx, name, timeout)
+	})
+}
+
+func (s *Sandbox) doExperimentalForkWithTimeout(ctx context.Context, name *string, timeout time.Duration) (*Sandbox, error) {
+	if timeout < 0 {
+		return nil, errors.NewDaytonaError("Timeout must be a non-negative number", 0, nil)
+	}
+
+	if timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
+
+	forkReq := apiclient.NewForkSandbox()
+	if name != nil {
+		forkReq.SetName(*name)
+	}
+
+	authCtx := s.client.getAuthContext(ctx)
+	sandboxResp, httpResp, err := s.client.apiClient.SandboxAPI.ForkSandbox(authCtx, s.ID).ForkSandbox(*forkReq).Execute()
+	if err != nil {
+		return nil, errors.ConvertAPIError(err, httpResp)
+	}
+
+	toolboxClient, err := s.client.createToolboxClient(sandboxResp.GetToolboxProxyUrl(), sandboxResp.GetId())
+	if err != nil {
+		return nil, err
+	}
+
+	autoArchiveInterval := 0
+	if sandboxResp.AutoArchiveInterval != nil {
+		autoArchiveInterval = int(*sandboxResp.AutoArchiveInterval)
+	}
+
+	autoDeleteInterval := 0
+	if sandboxResp.AutoDeleteInterval != nil {
+		autoDeleteInterval = int(*sandboxResp.AutoDeleteInterval)
+	}
+
+	forked := NewSandbox(s.client, toolboxClient, sandboxResp.GetId(), sandboxResp.GetName(), sandboxResp.GetState(), sandboxResp.GetTarget(), autoArchiveInterval, autoDeleteInterval, sandboxResp.GetNetworkBlockAll(), sandboxResp.NetworkAllowList)
+
+	if err := forked.WaitForStart(ctx, timeout); err != nil {
+		return nil, err
+	}
+
+	return forked, nil
+}
+
+// ExperimentalCreateSnapshot creates a snapshot from the current state of the sandbox
+// with a default timeout of 60 seconds.
+//
+// This captures the sandbox's filesystem into a reusable snapshot that can be
+// used to create new sandboxes. The sandbox will temporarily enter a
+// 'snapshotting' state and return to its previous state when complete.
+//
+// Example:
+//
+//	err := sandbox.ExperimentalCreateSnapshot(ctx, "my-snapshot")
+//	if err != nil {
+//	    return err
+//	}
+func (s *Sandbox) ExperimentalCreateSnapshot(ctx context.Context, name string) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "ExperimentalCreateSnapshot", func(ctx context.Context) error {
+		return s.ExperimentalCreateSnapshotWithTimeout(ctx, name, 60*time.Second)
+	})
+}
+
+// ExperimentalCreateSnapshotWithTimeout creates a snapshot from the current state of the sandbox
+// with a custom timeout. 0 means no timeout.
+//
+// Example:
+//
+//	err := sandbox.ExperimentalCreateSnapshotWithTimeout(ctx, "my-snapshot", 2*time.Minute)
+func (s *Sandbox) ExperimentalCreateSnapshotWithTimeout(ctx context.Context, name string, timeout time.Duration) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "ExperimentalCreateSnapshotWithTimeout", func(ctx context.Context) error {
+		return s.doExperimentalCreateSnapshotWithTimeout(ctx, name, timeout)
+	})
+}
+
+func (s *Sandbox) doExperimentalCreateSnapshotWithTimeout(ctx context.Context, name string, timeout time.Duration) error {
+	if timeout < 0 {
+		return errors.NewDaytonaError("Timeout must be a non-negative number", 0, nil)
+	}
+
+	if timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
+
+	req := apiclient.NewCreateSandboxSnapshot(name)
+
+	authCtx := s.client.getAuthContext(ctx)
+	_, httpResp, err := s.client.apiClient.SandboxAPI.CreateSandboxSnapshot(authCtx, s.ID).CreateSandboxSnapshot(*req).Execute()
+	if err != nil {
+		return errors.ConvertAPIError(err, httpResp)
+	}
+
+	if err := s.RefreshData(ctx); err != nil {
+		return err
+	}
+
+	return s.waitForSnapshotComplete(ctx)
+}
+
+func (s *Sandbox) waitForSnapshotComplete(ctx context.Context) error {
+	checkInterval := 100 * time.Millisecond
+	startTime := time.Now()
+
+	for s.State == apiclient.SANDBOXSTATE_SNAPSHOTTING {
+		if err := s.RefreshData(ctx); err != nil {
+			return err
+		}
+
+		if s.State == apiclient.SANDBOXSTATE_ERROR || s.State == apiclient.SANDBOXSTATE_BUILD_FAILED {
+			return errors.NewDaytonaError(
+				fmt.Sprintf("Sandbox %s snapshot failed with state: %s", s.ID, s.State), 0, nil,
+			)
+		}
+
+		if s.State != apiclient.SANDBOXSTATE_SNAPSHOTTING {
+			return nil
+		}
+
+		select {
+		case <-ctx.Done():
+			return errors.NewDaytonaError("Sandbox snapshot did not complete within the timeout period", 0, nil)
+		case <-time.After(checkInterval):
+		}
+
+		if time.Since(startTime) > 5*time.Second {
+			checkInterval = min(time.Duration(float64(checkInterval)*1.1), 1*time.Second)
+		}
+	}
+	return nil
+}
+
 // Resize resizes the sandbox resources with a default timeout of 60 seconds.
 //
 // Changes the CPU, memory, or disk allocation for the sandbox. Resizing a started
