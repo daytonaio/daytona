@@ -84,7 +84,7 @@ export class SnapshotRepository extends BaseRepository<Snapshot> {
       snapshot.updatedAt = new Date()
     })
 
-    this.emitUpdateEvents(snapshot, previousSnapshot)
+    await this.emitUpdateEvents(snapshot, previousSnapshot)
 
     return snapshot
   }
@@ -95,8 +95,14 @@ export class SnapshotRepository extends BaseRepository<Snapshot> {
     return removed
   }
 
-  private emitUpdateEvents(updatedSnapshot: Snapshot, previousSnapshot: Pick<Snapshot, 'state'>): void {
+  private async emitUpdateEvents(updatedSnapshot: Snapshot, previousSnapshot: Pick<Snapshot, 'state'>): Promise<void> {
     if (previousSnapshot.state !== updatedSnapshot.state) {
+      if (!updatedSnapshot.snapshotRegions) {
+        updatedSnapshot.snapshotRegions = await this.dataSource
+          .getRepository(SnapshotRegion)
+          .find({ where: { snapshotId: updatedSnapshot.id } })
+      }
+
       this.eventEmitter.emit(
         SnapshotEvents.STATE_UPDATED,
         new SnapshotStateUpdatedEvent(updatedSnapshot, previousSnapshot.state, updatedSnapshot.state),
