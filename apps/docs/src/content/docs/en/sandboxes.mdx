@@ -1051,6 +1051,17 @@ Daytona tracks the parent-child relationship in a fork tree, so you can always t
 3. Select **Fork**
 
 <Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+# Fork sandbox through the Sandbox instance
+forked = sandbox._experimental_fork(name="my-forked-sandbox")
+
+# Or use the Daytona helper method
+forked = daytona._experimental_fork(sandbox, name="my-forked-sandbox")
+```
+
+</TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
@@ -1058,7 +1069,7 @@ Daytona tracks the parent-child relationship in a fork tree, so you can always t
 const forkedSandbox = await sandbox._experimental_fork({ name: "my-forked-sandbox" });
 
 // Or use the Daytona helper method
-const forkedSandbox1 = await daytona._experimental_fork(sandbox, { name: "my-forked-sandbox" });
+const forkedSandbox = await daytona._experimental_fork(sandbox, { name: "my-forked-sandbox" });
 ```
 
 </TabItem>
