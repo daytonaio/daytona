@@ -29,6 +29,7 @@ import { Sandbox, PaginatedSandboxes } from './Sandbox'
 import { SnapshotService } from './Snapshot'
 import { VolumeService } from './Volume'
 import * as packageJson from '../package.json'
+import { EventSubscriber } from './utils/EventSubscriber'
 import { processStreamingResponse } from './utils/Stream'
 import { DaytonaEnvReader, RUNTIME, Runtime } from './utils/Runtime'
 import { WithInstrumentation } from './utils/otel.decorator'
@@ -234,6 +235,7 @@ export class Daytona implements AsyncDisposable {
   private readonly organizationId?: string
   private readonly apiUrl: string
   private otelSdk?: NodeSDK
+  private eventSubscriber: EventSubscriber
   public readonly volume: VolumeService
   public readonly snapshot: SnapshotService
 
@@ -321,6 +323,10 @@ export class Daytona implements AsyncDisposable {
     )
     this.clientConfig = configuration
 
+    // Create and start WebSocket event subscriber connection in the background (non-blocking)
+    this.eventSubscriber = new EventSubscriber(this.apiUrl, this.apiKey || this.jwtToken, this.organizationId)
+    this.eventSubscriber.ensureConnected()
+
     if (!config?._experimental?.otelEnabled && envReader()?.get('DAYTONA_EXPERIMENTAL_OTEL_ENABLED') !== 'true') {
       return
     }
@@ -355,11 +361,13 @@ export class Daytona implements AsyncDisposable {
   }
 
   async [Symbol.asyncDispose](): Promise<void> {
-    if (!this.otelSdk) {
-      return
+    if (this.eventSubscriber) {
+      this.eventSubscriber.disconnect()
     }
 
-    await this.otelSdk.shutdown()
+    if (this.otelSdk) {
+      await this.otelSdk.shutdown()
+    }
   }
 
   /**
@@ -577,6 +585,7 @@ export class Daytona implements AsyncDisposable {
         Daytona.createAxiosInstance(),
         this.sandboxApi,
         codeToolbox,
+        this.eventSubscriber,
       )
 
       if (sandbox.state !== 'started') {
@@ -620,6 +629,7 @@ export class Daytona implements AsyncDisposable {
       Daytona.createAxiosInstance(),
       this.sandboxApi,
       codeToolbox,
+      this.eventSubscriber,
     )
   }
 
@@ -657,6 +667,7 @@ export class Daytona implements AsyncDisposable {
           Daytona.createAxiosInstance(),
           this.sandboxApi,
           Daytona.getCodeToolbox(language),
+          this.eventSubscriber,
         )
       }),
       total: response.data.total,

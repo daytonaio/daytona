@@ -220,7 +220,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(r \*RecordingService\) Start\(ctx context.Context, label \*string\) \(\*toolbox.Recording, error\)](<#RecordingService.Start>)
   - [func \(r \*RecordingService\) Stop\(ctx context.Context, id string\) \(\*toolbox.Recording, error\)](<#RecordingService.Stop>)
 - [type Sandbox](<#Sandbox>)
-  - [func NewSandbox\(client \*Client, toolboxClient \*toolbox.APIClient, id string, name string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList \*string\) \*Sandbox](<#NewSandbox>)
+  - [func NewSandbox\(client \*Client, toolboxClient \*toolbox.APIClient, resp \*apiclient.Sandbox\) \*Sandbox](<#NewSandbox>)
   - [func \(s \*Sandbox\) Archive\(ctx context.Context\) error](<#Sandbox.Archive>)
   - [func \(s \*Sandbox\) Delete\(ctx context.Context\) error](<#Sandbox.Delete>)
   - [func \(s \*Sandbox\) DeleteWithTimeout\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.DeleteWithTimeout>)
@@ -3694,32 +3694,43 @@ err = sandbox.FileSystem.UploadFile(ctx, "local.txt", "/home/user/remote.txt")
 
 ```go
 type Sandbox struct {
-    ID            string                 // Unique sandbox identifier
-    Name          string                 // Human-readable sandbox name
-    State         apiclient.SandboxState // Current sandbox state
-    Target        string                 // Target region/environment where the sandbox runs
-    ToolboxClient *toolbox.APIClient     // Internal API client
+    ToolboxClient *toolbox.APIClient
 
-    // AutoArchiveInterval is the time in minutes after stopping before auto-archiving.
-    // Set to 0 to disable auto-archiving.
+    ID                  string
+    Name                string
+    OrganizationID      string
+    State               apiclient.SandboxState
+    Target              string
+    Snapshot            string
+    User                string
+    Env                 map[string]string
+    Labels              map[string]string
+    Public              bool
+    CPU                 int32
+    GPU                 int32
+    Memory              int32
+    Disk                int32
+    ErrorReason         string
+    Recoverable         bool
+    BackupState         string
+    BackupCreatedAt     string
+    AutoStopInterval    int
     AutoArchiveInterval int
+    AutoDeleteInterval  int
+    ToolboxProxyUrl     string
+    NetworkBlockAll     bool
+    NetworkAllowList    *string
+    CreatedAt           string
+    UpdatedAt           string
 
-    // AutoDeleteInterval is the time in minutes after stopping before auto-deletion.
-    // Set to -1 to disable auto-deletion.
-    // Set to 0 to delete immediately upon stopping.
-    AutoDeleteInterval int
+    Volumes   []apiclient.SandboxVolume
+    BuildInfo *apiclient.BuildInfo
 
-    // NetworkBlockAll blocks all network access when true.
-    NetworkBlockAll bool
-
-    // NetworkAllowList is a comma-separated list of allowed CIDR addresses.
-    NetworkAllowList *string
-
-    FileSystem      *FileSystemService      // File system operations
-    Git             *GitService             // Git operations
-    Process         *ProcessService         // Process and PTY operations
-    CodeInterpreter *CodeInterpreterService // Python code execution
-    ComputerUse     *ComputerUseService     // Desktop automation
+    FileSystem      *FileSystemService
+    Git             *GitService
+    Process         *ProcessService
+    CodeInterpreter *CodeInterpreterService
+    ComputerUse     *ComputerUseService
     // contains filtered or unexported fields
 }
 ```
@@ -3728,7 +3739,7 @@ type Sandbox struct {
 ### func NewSandbox
 
 ```go
-func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, name string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList *string) *Sandbox
+func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, resp *apiclient.Sandbox) *Sandbox
 ```
 
 NewSandbox creates a new Sandbox instance.

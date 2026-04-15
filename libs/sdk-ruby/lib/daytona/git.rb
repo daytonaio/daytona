@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Copyright Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 module Daytona
   class Git
     include Instrumentation

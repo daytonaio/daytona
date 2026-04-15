@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Copyright Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 module Daytona
   class FileUpload
     # @return [String, IO] File contents as a string/bytes object or a local file path or IO object.

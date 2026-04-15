@@ -27,6 +27,7 @@ dependencies {
     api("com.squareup.okhttp3:okhttp:4.12.0")
     api("com.fasterxml.jackson.core:jackson-databind:2.17.2")
     api("com.fasterxml.jackson.core:jackson-annotations:2.17.2")
+    implementation("io.socket:socket.io-client:2.1.2")
 }
 
 publishing {

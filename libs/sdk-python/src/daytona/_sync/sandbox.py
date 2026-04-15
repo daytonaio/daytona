@@ -3,7 +3,8 @@
 
 from __future__ import annotations
 
-import time
+import threading
+from typing import Any, Callable
 
 from deprecated import deprecated
 from pydantic import ConfigDict, PrivateAttr
@@ -39,6 +40,7 @@ from ..common.errors import DaytonaError, DaytonaNotFoundError, DaytonaValidatio
 from ..common.lsp_server import LspLanguageId, LspLanguageIdLiteral
 from ..common.protocols import SandboxCodeToolbox
 from ..common.sandbox import Resources
+from ..internal.event_subscriber import SyncEventSubscriber
 from ..internal.toolbox_api_client_proxy import ToolboxApiClientProxy
 from .code_interpreter import CodeInterpreter
 from .computer_use import ComputerUse
@@ -92,6 +94,8 @@ class Sandbox(SandboxDto):
     _process: Process = PrivateAttr()
     _computer_use: ComputerUse = PrivateAttr()
     _code_interpreter: CodeInterpreter = PrivateAttr()
+    _state_waiters: list[Callable[[SandboxState | None], None]] = PrivateAttr(default_factory=list)
+    _state_waiters_lock: threading.Lock = PrivateAttr(default_factory=threading.Lock)
 
     # TODO: Remove model_config once everything is migrated to pydantic # pylint: disable=fixme
     model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)
@@ -102,6 +106,7 @@ class Sandbox(SandboxDto):
         toolbox_api: ApiClient,
         sandbox_api: SandboxApi,
         code_toolbox: SandboxCodeToolbox,
+        event_subscriber: SyncEventSubscriber,
     ):
         """Initialize a new Sandbox instance.
 
@@ -110,11 +115,13 @@ class Sandbox(SandboxDto):
             toolbox_api (ApiClient): API client for toolbox operations.
             sandbox_api (SandboxApi): API client for Sandbox operations.
             code_toolbox (SandboxCodeToolbox): Language-specific toolbox implementation.
+            event_subscriber: SyncEventSubscriber for real-time updates.
         """
         super().__init__(**sandbox_dto.model_dump())
         self.__process_sandbox_dto(sandbox_dto)
         self._sandbox_api: SandboxApi = sandbox_api
         self._code_toolbox: SandboxCodeToolbox = code_toolbox
+        self._event_subscriber: SyncEventSubscriber = event_subscriber
         # Wrap the toolbox API client to inject the sandbox ID into the resource path
         self._toolbox_api: ToolboxApiClientProxy[ApiClient] = ToolboxApiClientProxy(
             toolbox_api, self.id, self.toolbox_proxy_url
@@ -126,6 +133,11 @@ class Sandbox(SandboxDto):
         self._computer_use = ComputerUse(ComputerUseApi(self._toolbox_api))
         self._code_interpreter = CodeInterpreter(InterpreterApi(self._toolbox_api))
         self._info_api: InfoApi = InfoApi(self._toolbox_api)
+
+        # Ensure event subscriber is connected (reconnect if auto-disconnected)
+        self._event_subscriber.ensure_connected()
+        # Subscribe to real-time events for this sandbox
+        self._subscribe_to_events()
 
     @property
     def fs(self) -> FileSystem:
@@ -334,15 +346,27 @@ class Sandbox(SandboxDto):
     @intercept_errors(message_prefix="Failed to remove sandbox: ")
     @with_timeout()
     @with_instrumentation()
-    def delete(self, timeout: float | None = 60) -> None:
-        """Deletes the Sandbox.
+    def delete(
+        self,
+        timeout: float | None = 60,  # pylint: disable=unused-argument
+    ) -> None:
+        """Deletes the Sandbox and waits for it to reach the 'destroyed' state.
 
         Args:
             timeout (float | None): Timeout (in seconds) for sandbox deletion. 0 means no timeout.
                 Default is 60 seconds.
         """
-        _ = self._sandbox_api.delete_sandbox(self.id, _request_timeout=http_timeout(timeout))
-        self.__refresh_data_safe()
+        sandbox = self._sandbox_api.delete_sandbox(self.id, _request_timeout=http_timeout(timeout))
+        self.__process_sandbox_dto(sandbox)
+
+        if self.state == SandboxState.DESTROYED:
+            return
+
+        self._wait_for_state(
+            [SandboxState.DESTROYED],
+            [SandboxState.ERROR, SandboxState.BUILD_FAILED],
+            safe_refresh=True,
+        )
 
     @intercept_errors(message_prefix="Failure during waiting for sandbox to start: ")
     @with_timeout()
@@ -351,33 +375,21 @@ class Sandbox(SandboxDto):
         self,
         timeout: float | None = 60,  # pylint: disable=unused-argument # pyright: ignore[reportUnusedParameter]
     ) -> None:
-        """Waits for the Sandbox to reach the 'started' state. Polls the Sandbox status until it
-        reaches the 'started' state, encounters an error or times out.
+        """Waits for the Sandbox to reach the 'started' state.
 
         Args:
             timeout (float | None): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
 
         Raises:
-            DaytonaError: If timeout is negative; If Sandbox fails to start or times out
+            DaytonaError: If timeout is negative; If Sandbox fails to start or times out;
         """
-        check_interval = 0.1
-        start_time = time.monotonic()
+        if self.state == SandboxState.STARTED:
+            return
 
-        while self.state != "started":
-            self.refresh_data()
-
-            if self.state == "started":
-                return
-
-            if self.state in ["error", "build_failed"]:
-                err_msg = (
-                    f"Sandbox {self.id} failed to start with state: {self.state}, error reason: {self.error_reason}"
-                )
-                raise DaytonaError(err_msg)
-
-            time.sleep(check_interval)
-            if time.monotonic() - start_time > 5:
-                check_interval = min(check_interval * 1.1, 1.0)
+        self._wait_for_state(
+            [SandboxState.STARTED],
+            [SandboxState.ERROR, SandboxState.BUILD_FAILED],
+        )
 
     @intercept_errors(message_prefix="Failure during waiting for sandbox to stop: ")
     @with_timeout()
@@ -386,9 +398,7 @@ class Sandbox(SandboxDto):
         self,
         timeout: float | None = 60,  # pylint: disable=unused-argument # pyright: ignore[reportUnusedParameter]
     ) -> None:
-        """Waits for the Sandbox to reach the 'stopped' state. Polls the Sandbox status until it
-        reaches the 'stopped' state, encounters an error or times out. It will wait up to 60 seconds
-        for the Sandbox to stop.
+        """Waits for the Sandbox to reach the 'stopped' state.
         Treats destroyed as stopped to cover ephemeral sandboxes that are automatically deleted after stopping.
 
         Args:
@@ -397,26 +407,13 @@ class Sandbox(SandboxDto):
         Raises:
             DaytonaError: If timeout is negative. If Sandbox fails to stop or times out.
         """
-        check_interval = 0.1
-        start_time = time.monotonic()
+        if self.state in [SandboxState.STOPPED, SandboxState.DESTROYED]:
+            return
 
-        while self.state not in ["stopped", "destroyed"]:
-            try:
-                self.__refresh_data_safe()
-
-                if self.state in ["error", "build_failed"]:
-                    err_msg = (
-                        f"Sandbox {self.id} failed to stop with status: {self.state}, error reason: {self.error_reason}"
-                    )
-                    raise DaytonaError(err_msg)
-            except Exception as e:
-                # If there's a validation error, continue waiting
-                if "validation error" not in str(e):
-                    raise e
-
-            time.sleep(check_interval)
-            if time.monotonic() - start_time > 5:
-                check_interval = min(check_interval * 1.1, 1.0)
+        self._wait_for_state(
+            [SandboxState.STOPPED, SandboxState.DESTROYED],
+            [SandboxState.ERROR, SandboxState.BUILD_FAILED],
+        )
 
     @intercept_errors(message_prefix="Failed to set auto-stop interval: ")
     @with_instrumentation()
@@ -610,8 +607,7 @@ class Sandbox(SandboxDto):
         self,
         timeout: float | None = 60,  # pylint: disable=unused-argument # pyright: ignore[reportUnusedParameter]
     ) -> None:
-        """Waits for the Sandbox resize operation to complete. Polls the Sandbox status until
-        the state is no longer 'resizing'.
+        """Waits for the Sandbox resize operation to complete.
 
         Args:
             timeout (Optional[float]): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
@@ -619,22 +615,14 @@ class Sandbox(SandboxDto):
         Raises:
             DaytonaError: If timeout is negative. If resize operation times out.
         """
-        check_interval = 0.1
-        start_time = time.monotonic()
+        if self.state != SandboxState.RESIZING:
+            return
 
-        while self.state == "resizing":
-            self.refresh_data()
+        error_states = [SandboxState.ERROR, SandboxState.BUILD_FAILED]
+        exclude = {SandboxState.RESIZING} | set(error_states)
+        target_states = [s for s in SandboxState if s not in exclude]
 
-            if self.state != "resizing":
-                return
-
-            if self.state in ["error", "build_failed"]:
-                err_msg = f"Sandbox {self.id} resize failed with state: {self.state}, error reason: {self.error_reason}"
-                raise DaytonaError(err_msg)
-
-            time.sleep(check_interval)
-            if time.monotonic() - start_time > 5:
-                check_interval = min(check_interval * 1.1, 1.0)
+        self._wait_for_state(target_states, error_states)
 
     @intercept_errors(message_prefix="Failed to create SSH access: ")
     @with_instrumentation()
@@ -680,6 +668,106 @@ class Sandbox(SandboxDto):
         """
         self._sandbox_api.update_last_activity(self.id)
 
+    def _subscribe_to_events(self) -> None:
+        def _on_event(event_name: str, data: Any) -> None:
+            if not isinstance(data, dict):
+                return
+            raw: object = data.get("sandbox", data)  # pyright: ignore[reportUnknownVariableType]
+
+            if event_name == "sandbox.created":
+                sandbox_dto = SandboxDto.from_dict(raw)  # pyright: ignore[reportArgumentType]
+                if sandbox_dto is not None:
+                    self.__process_sandbox_dto(sandbox_dto)
+            else:
+                new_state = (  # pyright: ignore[reportUnknownVariableType]
+                    raw.get("state") if isinstance(raw, dict) else None
+                ) or data.get("newState")
+                if new_state is not None:
+                    try:
+                        self._apply_state(SandboxState(new_state))
+                    except ValueError:
+                        pass
+
+        _ = self._event_subscriber.subscribe(
+            self.id,
+            _on_event,
+            events=["sandbox.state.updated", "sandbox.created"],
+        )
+
+    def _apply_state(self, new_state: SandboxState | None) -> None:
+        if new_state == self.state:
+            return
+
+        self.state: SandboxState | None = new_state
+
+        with self._state_waiters_lock:
+            for waiter in list(self._state_waiters):
+                waiter(new_state)
+
+    def _wait_for_state(
+        self,
+        target_states: list[SandboxState],
+        error_states: list[SandboxState],
+        safe_refresh: bool = False,
+    ) -> None:
+        """Wait for sandbox to reach a target state via WebSocket events with periodic polling safety net.
+
+        Args:
+            target_states: States that indicate success.
+            error_states: States that indicate failure.
+            safe_refresh: If True, use safe refresh that treats 404 as destroyed (for delete operations).
+        """
+        if self.state in target_states:
+            return
+        if self.state in error_states:
+            raise DaytonaError(f"Sandbox {self.id} is in error state: {self.state}, error reason: {self.error_reason}")
+
+        state_changed = threading.Event()
+        resolve_lock = threading.Lock()
+        result_state: SandboxState | None = None
+
+        def _waiter(state: SandboxState | None) -> None:
+            nonlocal result_state
+            if state is None or (state not in target_states and state not in error_states):
+                return
+
+            with resolve_lock:
+                if state_changed.is_set():
+                    return
+
+                result_state = state
+                state_changed.set()
+
+        with self._state_waiters_lock:
+            self._state_waiters.append(_waiter)
+        try:
+            _waiter(self.state)
+
+            while not state_changed.is_set():
+                # Wait for event or poll interval, whichever comes first
+                # (timeout is handled by outer @with_timeout decorator)
+                is_set = state_changed.wait(timeout=1)
+
+                if is_set:
+                    break
+
+                try:
+                    if safe_refresh:
+                        self.__refresh_data_safe()
+                    else:
+                        self.refresh_data()
+                except Exception:
+                    pass  # Poll failed, will retry on next interval
+
+            if result_state in error_states:
+                raise DaytonaError(
+                    f"Sandbox {self.id} entered error state: {result_state}, error reason: {self.error_reason}"
+                )
+        finally:
+            with self._state_waiters_lock:
+                if _waiter in self._state_waiters:
+                    self._state_waiters.remove(_waiter)
+
     def __process_sandbox_dto(self, sandbox_dto: SandboxDto) -> None:
         self.id: str = sandbox_dto.id
         self.name: str = sandbox_dto.name
@@ -694,7 +782,6 @@ class Sandbox(SandboxDto):
         self.gpu: float | int = sandbox_dto.gpu
         self.memory: float | int = sandbox_dto.memory
         self.disk: float | int = sandbox_dto.disk
-        self.state: SandboxState | None = sandbox_dto.state
         self.error_reason: str | None = sandbox_dto.error_reason
         self.recoverable: bool | None = sandbox_dto.recoverable
         self.backup_state: str | None = sandbox_dto.backup_state
@@ -708,7 +795,11 @@ class Sandbox(SandboxDto):
         self.updated_at: str | None = sandbox_dto.updated_at
         self.network_block_all: bool = sandbox_dto.network_block_all
         self.network_allow_list: str | None = sandbox_dto.network_allow_list
-        self.toolbox_proxy_url: str = sandbox_dto.toolbox_proxy_url
+        new_proxy_url = sandbox_dto.toolbox_proxy_url
+        if new_proxy_url and new_proxy_url != self.toolbox_proxy_url and hasattr(self, "_toolbox_api"):
+            self._toolbox_api._toolbox_base_url = new_proxy_url
+        self.toolbox_proxy_url: str = new_proxy_url
+        self._apply_state(sandbox_dto.state)
 
     def __refresh_data_safe(self) -> None:
         """Refreshes the Sandbox data from the API, but does not throw an error if the sandbox has been deleted.
@@ -717,7 +808,7 @@ class Sandbox(SandboxDto):
         try:
             self.refresh_data()
         except DaytonaNotFoundError:
-            self.state = SandboxState.DESTROYED
+            self._apply_state(SandboxState.DESTROYED)
 
 
 class PaginatedSandboxes(PaginatedSandboxesDto):
