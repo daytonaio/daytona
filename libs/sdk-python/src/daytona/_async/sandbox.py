@@ -34,6 +34,7 @@ from daytona_toolbox_api_client_async import (
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
 from .._utils.timeout import http_timeout, with_timeout
+from ..common.daytona import CODE_TOOLBOX_LANGUAGE_LABEL
 from ..common.errors import DaytonaError, DaytonaNotFoundError, DaytonaValidationError
 from ..common.lsp_server import LspLanguageId, LspLanguageIdLiteral
 from ..common.sandbox import Resources
@@ -712,11 +713,13 @@ class AsyncSandbox(SandboxDto):
             self.id, ForkSandbox(name=name), _request_timeout=http_timeout(timeout)
         )
 
+        language = sandbox_dto.labels.get(CODE_TOOLBOX_LANGUAGE_LABEL) or ""
+
         forked = AsyncSandbox(
             sandbox_dto,
             self._toolbox_api._api_client,
             self._sandbox_api,
-            self._code_toolbox,
+            language,
         )
         await forked.wait_for_sandbox_start(timeout=0)
         return forked
