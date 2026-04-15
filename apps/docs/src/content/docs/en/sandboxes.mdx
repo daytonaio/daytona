@@ -1055,10 +1055,24 @@ Daytona tracks the parent-child relationship in a fork tree, so you can always t
 
 ```typescript
 // Fork sandbox through the Sandbox instance
-const forkedSandbox = await sandbox._experimental_fork({ name: "my-fork" });
+const forkedSandbox = await sandbox._experimental_fork({ name: "my-forked-sandbox" });
 
 // Or use the Daytona helper method
-const forkedSandbox1 = await daytona._experimental_fork(sandbox, { name: "my-fork" });
+const forkedSandbox1 = await daytona._experimental_fork(sandbox, { name: "my-forked-sandbox" });
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/fork' \
+  --request POST \
+  --header 'X-Daytona-Organization-ID: YOUR_ORGANIZATION_ID' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "name": "my-forked-sandbox"
+}'
 ```
 
 </TabItem>
@@ -1087,7 +1101,21 @@ Daytona provides methods to create [snapshots](/docs/en/snapshots) from sandboxe
 
 ```typescript
 // Create snapshot from sandbox
-await sandbox._experimental_createSnapshot("my-snapshot");
+await sandbox._experimental_createSnapshot("my-sandbox-snapshot");
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/snapshot' \
+  --request POST \
+  --header 'X-Daytona-Organization-ID: YOUR_ORGANIZATION_ID' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "name": "my-sandbox-snapshot"
+}'
 ```
 
 </TabItem>
