@@ -147,7 +147,7 @@ The previous example runs a single question and exits. In practice you'll often 
   </TabItem>
 </Tabs>
 
-This example uses `result.to_input_list()`, which serializes the full conversation (including tool calls and their results) into a format you can pass back on the next turn. The agent sees the entire history, so follow-ups like "break that down by quarter" or "now plot it" just work. The SDK also supports other state strategies (sessions, `conversation_id`, `previous_response_id`); see the [State and conversation management](https://openai.github.io/openai-agents-python/running_agents/#state-and-conversation-management)) docs for the full picture.
+This example uses `result.to_input_list()`, which serializes the full conversation (including tool calls and their results) into a format you can pass back on the next turn. The agent sees the entire history, so follow-ups like "break that down by quarter" or "now plot it" just work. The SDK also supports other state strategies: sessions, `conversation_id`, and `previous_response_id` – see the [State and conversation management](https://openai.github.io/openai-agents-python/running_agents/#state-and-conversation-management) docs for the full picture.
 
 This pattern composes with everything else in this guide. You can add handoffs, memory, pause/resume, etc. on top of a multi-turn loop.
 
