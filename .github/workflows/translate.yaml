@@ -13,9 +13,9 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - uses: generaltranslation/translate@5d317803006bc9f21ee9baef68eb04ede5c9709a # v0
+      - uses: generaltranslation/translate@7e7badcae4494bfa58c95415a933251992aedb7c # v0
         with:
           gt_api_key: ${{ secrets.GT_API_KEY }}
           gt_project_id: ${{ secrets.GT_PROJECT_ID }}
