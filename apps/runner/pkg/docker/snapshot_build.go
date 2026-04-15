@@ -7,14 +7,21 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/runner/pkg/api/dto"
 )
 
 func (d *DockerClient) BuildSnapshot(ctx context.Context, req dto.BuildSnapshotRequestDTO) error {
-	err := d.BuildImage(ctx, req)
+	buildCtx, cancel := context.WithTimeout(ctx, time.Duration(d.buildTimeoutMin)*time.Minute)
+	defer cancel()
+
+	err := d.BuildImage(buildCtx, req)
 	if err != nil {
+		if buildCtx.Err() == context.DeadlineExceeded {
+			return fmt.Errorf("build timed out after %d minutes: %w", d.buildTimeoutMin, err)
+		}
 		return err
 	}
 

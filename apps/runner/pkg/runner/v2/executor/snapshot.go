@@ -7,8 +7,6 @@ package executor
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/daytonaio/runner/pkg/api/dto"
@@ -21,16 +19,8 @@ func (e *Executor) buildSnapshot(ctx context.Context, job *apiclient.Job) (any, 
 		return nil, err
 	}
 
-	buildTimeoutMin := e.docker.BuildTimeoutMin()
-
-	buildCtx, cancel := context.WithTimeout(ctx, time.Duration(buildTimeoutMin)*time.Minute)
-	defer cancel()
-
-	err = e.docker.BuildSnapshot(buildCtx, request)
+	err = e.docker.BuildSnapshot(ctx, request)
 	if err != nil {
-		if buildCtx.Err() == context.DeadlineExceeded {
-			return nil, fmt.Errorf("build timed out after %d minutes: %w", buildTimeoutMin, err)
-		}
 		return nil, err
 	}
 

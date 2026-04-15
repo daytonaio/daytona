@@ -164,10 +164,6 @@ func (d *DockerClient) ApiClient() client.APIClient {
 	return d.apiClient
 }
 
-func (d *DockerClient) BuildTimeoutMin() int {
-	return d.buildTimeoutMin
-}
-
 const RUNNER_BRIDGE_NETWORK_NAME = "runner-bridge"
 
 type DockerClient struct {
