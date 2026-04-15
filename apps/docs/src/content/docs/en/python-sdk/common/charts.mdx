@@ -1,0 +1,119 @@
+---
+title: "Charts"
+hideTitleOnPage: true
+---
+
+## Chart
+
+```python
+class Chart(GeneratedChart)
+```
+
+Base chart class. All chart types inherit from this. Fields are sourced from the daemon's typed response.
+
+
+## ChartType
+
+```python
+class ChartType(str, Enum)
+```
+
+Supported chart types returned by the daemon's code-run endpoint.
+
+## PointData
+
+```python
+class PointData(GeneratedChartElement)
+```
+
+Data element for line and scatter charts. Fields: label, points.
+
+## BarData
+
+```python
+class BarData(GeneratedChartElement)
+```
+
+Data element for bar charts. Fields: label, value, group.
+
+## PieData
+
+```python
+class PieData(GeneratedChartElement)
+```
+
+Data element for pie charts. Fields: label, angle, radius.
+
+## BoxAndWhiskerData
+
+```python
+class BoxAndWhiskerData(GeneratedChartElement)
+```
+
+Data element for box-and-whisker charts.
+Fields: label, min, first_quartile, median, third_quartile, max, outliers.
+
+## Chart2D
+
+```python
+class Chart2D(Chart)
+```
+
+Chart with x/y axes. Adds x_label, y_label fields.
+
+## PointChart
+
+```python
+class PointChart(Chart2D)
+```
+
+Chart with axis ticks and scales. Adds x_ticks, y_ticks, x_scale, y_scale fields.
+
+## LineChart
+
+```python
+class LineChart(PointChart)
+```
+
+Line chart. Elements are PointData.
+
+## ScatterChart
+
+```python
+class ScatterChart(PointChart)
+```
+
+Scatter plot. Elements are PointData.
+
+## BarChart
+
+```python
+class BarChart(Chart2D)
+```
+
+Bar chart. Elements are BarData.
+
+## PieChart
+
+```python
+class PieChart(Chart)
+```
+
+Pie chart. Elements are PieData.
+
+## BoxAndWhiskerChart
+
+```python
+class BoxAndWhiskerChart(Chart2D)
+```
+
+Box-and-whisker chart. Elements are BoxAndWhiskerData.
+
+## CompositeChart
+
+```python
+class CompositeChart(Chart)
+```
+
+Composite chart containing multiple sub-charts as elements.
+

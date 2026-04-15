@@ -19,6 +19,8 @@ ChartElementLike: TypeAlias = GeneratedChartElement
 
 
 class ChartType(str, Enum):
+    """Supported chart types returned by the daemon's code-run endpoint."""
+
     LINE = "line"
     SCATTER = "scatter"
     BAR = "bar"
@@ -29,22 +31,26 @@ class ChartType(str, Enum):
 
 
 class PointData(GeneratedChartElement):
-    pass
+    """Data element for line and scatter charts. Fields: label, points."""
 
 
 class BarData(GeneratedChartElement):
-    pass
+    """Data element for bar charts. Fields: label, value, group."""
 
 
 class PieData(GeneratedChartElement):
-    pass
+    """Data element for pie charts. Fields: label, angle, radius."""
 
 
 class BoxAndWhiskerData(GeneratedChartElement):
-    pass
+    """Data element for box-and-whisker charts.
+    Fields: label, min, first_quartile, median, third_quartile, max, outliers.
+    """
 
 
 class Chart(GeneratedChart):
+    """Base chart class. All chart types inherit from this. Fields are sourced from the daemon's typed response."""
+
     elements: list[GeneratedChartElement] = Field(  # pyright: ignore[reportIncompatibleVariableOverride]
         default_factory=list
     )
@@ -59,35 +65,35 @@ class Chart(GeneratedChart):
 
 
 class Chart2D(Chart):
-    pass
+    """Chart with x/y axes. Adds x_label, y_label fields."""
 
 
 class PointChart(Chart2D):
-    pass
+    """Chart with axis ticks and scales. Adds x_ticks, y_ticks, x_scale, y_scale fields."""
 
 
 class LineChart(PointChart):
-    pass
+    """Line chart. Elements are PointData."""
 
 
 class ScatterChart(PointChart):
-    pass
+    """Scatter plot. Elements are PointData."""
 
 
 class BarChart(Chart2D):
-    pass
+    """Bar chart. Elements are BarData."""
 
 
 class PieChart(Chart):
-    pass
+    """Pie chart. Elements are PieData."""
 
 
 class BoxAndWhiskerChart(Chart2D):
-    pass
+    """Box-and-whisker chart. Elements are BoxAndWhiskerData."""
 
 
 class CompositeChart(Chart):
-    pass
+    """Composite chart containing multiple sub-charts as elements."""
 
 
 _CHART_TYPE_MAP: dict[str, type[Chart]] = {
