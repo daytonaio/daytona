@@ -417,6 +417,14 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         return
       }
     }
+
+    const timeoutMinutes = 120
+    const timeoutMs = timeoutMinutes * 60 * 1000
+    if (Date.now() - snapshotRunner.updatedAt.getTime() > timeoutMs) {
+      snapshotRunner.state = SnapshotRunnerState.ERROR
+      snapshotRunner.errorReason = 'Timeout while building snapshot on runner'
+      await this.snapshotRunnerRepository.save(snapshotRunner)
+    }
   }
 
   // Pulls stopped sandboxes' backup snapshots to another runner to prepare for reassignment during draining
