@@ -5,11 +5,6 @@ package config
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"net/url"
 	"time"
 
 	common_cache "github.com/daytonaio/common-go/pkg/cache"
@@ -82,50 +77,20 @@ func (r *Resolver) GetOrganizationOtelConfigByOrgId(ctx context.Context, orgId s
 		return otelConfig, nil
 	}
 
-	cfg := r.apiclient.GetConfig()
-	if len(cfg.Servers) == 0 {
-		return nil, fmt.Errorf("api client has no configured servers")
+	otelConfig, res, err := r.apiclient.OrganizationsAPI.GetOrganizationOtelConfig(ctx, orgId).Execute()
+	if err != nil && res != nil && res.StatusCode != 404 {
+		return nil, err
 	}
-	baseURL := cfg.Servers[0].URL
-	url := fmt.Sprintf("%s/organizations/%s/otel-config", baseURL, url.PathEscape(orgId))
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	for key, value := range cfg.DefaultHeader {
-		req.Header.Set(key, value)
-	}
-
-	httpClient := cfg.HTTPClient
-	if httpClient == nil {
-		httpClient = http.DefaultClient
-	}
-
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to call API: %w", err)
-	}
-	defer resp.Body.Close()
 
 	config := &apiclient.OtelConfig{
 		Endpoint: "(none)",
 	}
 
-	if resp.StatusCode == http.StatusOK {
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return nil, fmt.Errorf("failed to read response body: %w", err)
+	if otelConfig != nil {
+		config = &apiclient.OtelConfig{
+			Endpoint: otelConfig.Endpoint,
+			Headers:  otelConfig.Headers,
 		}
-
-		var apiConfig apiclient.OtelConfig
-		if err := json.Unmarshal(body, &apiConfig); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal response: %w", err)
-		}
-		config = &apiConfig
-	} else if resp.StatusCode != http.StatusNotFound {
-		return nil, fmt.Errorf("unexpected status code %d from API", resp.StatusCode)
 	}
 
 	if err := r.cache.Set(ctx, cacheKey, *config, r.cacheTTL); err != nil {

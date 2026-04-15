@@ -111,7 +111,7 @@ func (e *Exporter[T]) push(ctx context.Context, data T) error {
 
 	orgId, orgErr := e.extractOrganizationId(ctx)
 	if orgErr != nil {
-		return consumererror.NewPermanent(fmt.Errorf("no sandbox token or organization ID in metadata: sandbox=%w, org=%w", sandboxErr, orgErr))
+		return consumererror.NewPermanent(fmt.Errorf("no sandbox token or organization ID in metadata: sandbox=%v, org=%v", sandboxErr, orgErr))
 	}
 
 	endpointConfig, err := e.resolver.GetOrganizationOtelConfigByOrgId(ctx, orgId)
