@@ -1306,21 +1306,6 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [T
 
 Daytona Sandboxes can be automatically stopped, archived, and deleted based on user-defined intervals.
 
-### Auto-resume
-
-:::caution[Experimental]
-This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
-:::
-
-Daytona provides methods to auto-resume sandboxes from a stopped state. Once a sandbox is stopped, it remains in this state until it is [manually started](#start-sandboxes) again or auto-resumed. Auto-resuming starts the sandbox and resumes it from the last known state.
-
-To configure auto-resume, set the `wakeOnRequest` field when [creating a sandbox](#create-sandboxes):
-
-- `none`: the sandbox remains stopped until it is manually started again
-- `http`: auto-resumes the sandbox on [preview URL](/docs/en/preview) requests
-- `ssh`: auto-resumes the sandbox on [SSH access](/docs/en/ssh-access) requests
-- `http_and_ssh`: auto-resumes the sandbox on both [preview URL](/docs/en/preview) and [SSH access](/docs/en/ssh-access) requests
-
 ### Auto-stop interval
 
 The auto-stop interval parameter sets the amount of time after which a running sandbox will be automatically stopped.
