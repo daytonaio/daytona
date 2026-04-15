@@ -217,7 +217,7 @@ public class ProcessApiTest {
     /**
      * Get session command logs
      *
-     * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK &gt;&#x3D; 0.165.0, plain text otherwise. Supports WebSocket streaming.
+     * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK &gt;&#x3D; 0.167.0, plain text otherwise. Supports WebSocket streaming.
      *
      * @throws ApiException if the Api call fails
      */

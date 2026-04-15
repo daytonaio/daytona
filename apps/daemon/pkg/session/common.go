@@ -25,7 +25,7 @@ func SkipServerDemux(sdkVersion string) bool {
 	if isDevVersion(sdkVersion) {
 		return false
 	}
-	comparison, err := util.CompareVersions(sdkVersion, "0.165.0-0")
+	comparison, err := util.CompareVersions(sdkVersion, "0.167.0-0")
 	if err != nil {
 		return true
 	}

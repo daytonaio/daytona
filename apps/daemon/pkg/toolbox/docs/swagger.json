@@ -2395,7 +2395,7 @@
     },
     "/process/session/{sessionId}/command/{commandId}/logs": {
       "get": {
-        "description": "Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK \u003e= 0.165.0, plain text otherwise. Supports WebSocket streaming.",
+        "description": "Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK \u003e= 0.167.0, plain text otherwise. Supports WebSocket streaming.",
         "produces": ["application/json", "text/plain"],
         "tags": ["process"],
         "summary": "Get session command logs",
