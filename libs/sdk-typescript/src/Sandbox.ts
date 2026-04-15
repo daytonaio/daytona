@@ -358,6 +358,7 @@ export class Sandbox implements SandboxDto {
       throw new DaytonaValidationError('Timeout must be a non-negative number')
     }
 
+    const startTime = Date.now()
     const response = await this.sandboxApi.forkSandbox(this.id, { name: params?.name }, undefined, {
       timeout: timeout * 1000,
     })
@@ -366,13 +367,18 @@ export class Sandbox implements SandboxDto {
     const language = sandboxDto.labels && sandboxDto.labels['code-toolbox-language']
     const codeToolbox = Daytona.getCodeToolbox(language as CodeLanguage)
 
-    return new Sandbox(
+    const forkedSandbox = new Sandbox(
       sandboxDto,
       structuredClone(this.clientConfig),
       Daytona.createAxiosInstance(),
       this.sandboxApi,
       codeToolbox,
     )
+
+    const timeElapsed = Date.now() - startTime
+    await forkedSandbox.waitUntilStarted(timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout)
+
+    return forkedSandbox
   }
 
   /**
@@ -400,12 +406,46 @@ export class Sandbox implements SandboxDto {
       throw new DaytonaValidationError('Timeout must be a non-negative number')
     }
 
+    const startTime = Date.now()
     const req: CreateSandboxSnapshot = { name }
     await this.sandboxApi.createSandboxSnapshot(this.id, req, undefined, {
       timeout: timeout * 1000,
     })
 
     await this.refreshData()
+
+    const timeElapsed = Date.now() - startTime
+    const remainingTimeout = timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout
+    await this.waitForSnapshotComplete(remainingTimeout)
+  }
+
+  private async waitForSnapshotComplete(timeout: number) {
+    let checkInterval = 100
+    const startTime = Date.now()
+
+    while (this.state === SandboxState.SNAPSHOTTING) {
+      await this.refreshData()
+
+      // @ts-expect-error this.refreshData() can modify this.state so this check is fine
+      if (this.state === SandboxState.ERROR || this.state === SandboxState.BUILD_FAILED) {
+        throw new DaytonaError(
+          `Sandbox ${this.id} snapshot failed with state: ${this.state}, error reason: ${this.errorReason}`,
+        )
+      }
+
+      if (this.state !== SandboxState.SNAPSHOTTING) {
+        return
+      }
+
+      if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
+        throw new DaytonaTimeoutError('Sandbox snapshot did not complete within the timeout period')
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, checkInterval))
+      if (Date.now() - startTime > 5000) {
+        checkInterval = Math.min(checkInterval * 1.1, 1000)
+      }
+    }
   }
 
   /**

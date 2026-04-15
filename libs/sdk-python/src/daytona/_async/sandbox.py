@@ -7,7 +7,7 @@ import asyncio
 from deprecated import deprecated
 from pydantic import ConfigDict, PrivateAttr
 
-from daytona_api_client_async import BuildInfo
+from daytona_api_client_async import BuildInfo, CreateSandboxSnapshot, ForkSandbox
 from daytona_api_client_async import PaginatedSandboxes as PaginatedSandboxesDto
 from daytona_api_client_async import PortPreviewUrl, ResizeSandbox
 from daytona_api_client_async import Sandbox as SandboxDto
@@ -683,6 +683,94 @@ class AsyncSandbox(SandboxDto):
             ```
         """
         await self._sandbox_api.update_last_activity(self.id)
+
+    @intercept_errors(message_prefix="Failed to fork sandbox: ")
+    @with_timeout()
+    @with_instrumentation()
+    async def _experimental_fork(self, name: str | None = None, timeout: float | None = 60) -> "AsyncSandbox":
+        """Forks the Sandbox, creating a new Sandbox with an identical filesystem.
+
+        The forked Sandbox is a copy-on-write clone of the original. It starts
+        with the same disk contents but operates independently from that point on.
+
+        Args:
+            name (str | None): Optional name for the forked Sandbox. If not provided, a unique name will be generated.
+            timeout (float | None): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+
+        Returns:
+            AsyncSandbox: The forked Sandbox.
+
+        Raises:
+            DaytonaError: If the fork operation fails or times out.
+
+        Example:
+            ```python
+            sandbox = await daytona.get("my-sandbox")
+            forked = await sandbox._experimental_fork(name="my-fork")
+            print(f"Forked sandbox: {forked.id}")
+            ```
+        """
+        sandbox_dto = await self._sandbox_api.fork_sandbox(
+            self.id, ForkSandbox(name=name), _request_timeout=http_timeout(timeout)
+        )
+
+        forked = AsyncSandbox(
+            sandbox_dto,
+            self._toolbox_api._api_client,
+            self._sandbox_api,
+            self._code_toolbox,
+        )
+        await forked.wait_for_sandbox_start(timeout=0)
+        return forked
+
+    @intercept_errors(message_prefix="Failed to create snapshot: ")
+    @with_timeout()
+    @with_instrumentation()
+    async def _experimental_create_snapshot(self, name: str, timeout: float | None = 60) -> None:
+        """Creates a snapshot from the current state of the Sandbox.
+
+        This captures the Sandbox's filesystem into a reusable snapshot that can be
+        used to create new Sandboxes. The Sandbox will temporarily enter a
+        'snapshotting' state and return to its previous state when complete.
+
+        Args:
+            name (str): Name for the new snapshot.
+            timeout (float | None): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+
+        Raises:
+            DaytonaError: If the snapshot operation fails or times out.
+
+        Example:
+            ```python
+            sandbox = await daytona.get("my-sandbox")
+            await sandbox._experimental_create_snapshot("my-snapshot")
+            print("Snapshot created successfully")
+            ```
+        """
+        _ = await self._sandbox_api.create_sandbox_snapshot(
+            self.id, CreateSandboxSnapshot(name=name), _request_timeout=http_timeout(timeout)
+        )
+        await self.refresh_data()
+        await self.__wait_for_snapshot_complete()
+
+    async def __wait_for_snapshot_complete(self) -> None:
+        check_interval = 0.1
+        start_time = asyncio.get_event_loop().time()
+
+        while self.state == "snapshotting":
+            await self.refresh_data()
+
+            if self.state != "snapshotting":
+                return
+
+            if self.state in ["error", "build_failed"]:
+                raise DaytonaError(
+                    f"Sandbox {self.id} snapshot failed with state: {self.state}, error reason: {self.error_reason}"
+                )
+
+            await asyncio.sleep(check_interval)
+            if asyncio.get_event_loop().time() - start_time > 5:
+                check_interval = min(check_interval * 1.1, 1.0)
 
     def __process_sandbox_dto(self, sandbox_dto: SandboxDto) -> None:
         self.id: str = sandbox_dto.id

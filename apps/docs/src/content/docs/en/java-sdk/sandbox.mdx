@@ -249,6 +249,76 @@ Refreshes local Sandbox fields from latest API state.
 
 - `DaytonaException` - if refresh fails
 
+#### experimentalFork()
+```java
+public Sandbox experimentalFork()
+```
+
+Forks this Sandbox, creating a new Sandbox with an identical filesystem.
+Uses default timeout of 60 seconds.
+
+**Returns**:
+
+- `Sandbox` - the forked `Sandbox` in started state
+
+**Throws**:
+
+- `DaytonaException` - if the fork operation fails or times out
+
+#### experimentalFork()
+```java
+public Sandbox experimentalFork(String name, long timeoutSeconds)
+```
+
+Forks this Sandbox, creating a new Sandbox with an identical filesystem.
+The forked Sandbox is a copy-on-write clone of the original.
+
+**Parameters**:
+
+- `name` _String_ - optional name for the forked Sandbox; `null` for auto-generated
+- `timeoutSeconds` _long_ - maximum seconds to wait for the forked Sandbox to start; `0` disables timeout
+
+**Returns**:
+
+- `Sandbox` - the forked `Sandbox` in started state
+
+**Throws**:
+
+- `DaytonaException` - if the fork operation fails or times out
+
+#### experimentalCreateSnapshot()
+```java
+public void experimentalCreateSnapshot(String name)
+```
+
+Creates a snapshot from the current state of this Sandbox.
+Uses default timeout of 60 seconds.
+
+**Parameters**:
+
+- `name` _String_ - name for the new snapshot
+
+**Throws**:
+
+- `DaytonaException` - if the snapshot operation fails
+
+#### experimentalCreateSnapshot()
+```java
+public void experimentalCreateSnapshot(String name, long timeoutSeconds)
+```
+
+Creates a snapshot from the current state of this Sandbox.
+The Sandbox will temporarily enter a 'snapshotting' state and return to its previous state when complete.
+
+**Parameters**:
+
+- `name` _String_ - name for the new snapshot
+- `timeoutSeconds` _long_ - reserved timeout parameter for parity with other SDKs
+
+**Throws**:
+
+- `DaytonaException` - if the snapshot operation fails
+
 #### getId()
 ```java
 public String getId()

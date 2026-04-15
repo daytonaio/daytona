@@ -4,6 +4,8 @@
 package io.daytona.sdk;
 
 import io.daytona.api.client.api.SandboxApi;
+import io.daytona.api.client.model.CreateSandboxSnapshot;
+import io.daytona.api.client.model.ForkSandbox;
 import io.daytona.api.client.model.SandboxLabels;
 import io.daytona.api.client.model.ToolboxProxyUrl;
 import io.daytona.sdk.exception.DaytonaException;
@@ -20,6 +22,7 @@ import java.util.Map;
  */
 public class Sandbox {
     private final SandboxApi sandboxApi;
+    private final DaytonaConfig config;
     private final io.daytona.toolbox.client.ApiClient toolboxApiClient;
     private final io.daytona.toolbox.client.api.InfoApi infoApi;
     private final String apiKey;
@@ -53,6 +56,7 @@ public class Sandbox {
 
     Sandbox(SandboxApi sandboxApi, DaytonaConfig config, io.daytona.api.client.model.Sandbox data) {
         this.sandboxApi = sandboxApi;
+        this.config = config;
         this.apiKey = config.getApiKey();
         updateFromModel(data);
 
@@ -354,6 +358,88 @@ public class Sandbox {
             output = output.substring(0, output.length() - 1);
         }
         return output;
+    }
+
+    /**
+     * Forks this Sandbox, creating a new Sandbox with an identical filesystem.
+     * Uses default timeout of 60 seconds.
+     *
+     * @return the forked {@link Sandbox} in started state
+     * @throws DaytonaException if the fork operation fails or times out
+     */
+    public Sandbox experimentalFork() {
+        return experimentalFork(null, 60);
+    }
+
+    /**
+     * Forks this Sandbox, creating a new Sandbox with an identical filesystem.
+     * The forked Sandbox is a copy-on-write clone of the original.
+     *
+     * @param name optional name for the forked Sandbox; {@code null} for auto-generated
+     * @param timeoutSeconds maximum seconds to wait for the forked Sandbox to start; {@code 0} disables timeout
+     * @return the forked {@link Sandbox} in started state
+     * @throws DaytonaException if the fork operation fails or times out
+     */
+    public Sandbox experimentalFork(String name, long timeoutSeconds) {
+        ForkSandbox forkReq = new ForkSandbox();
+        if (name != null) {
+            forkReq.setName(name);
+        }
+        io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(
+            () -> sandboxApi.forkSandbox(id, forkReq, null)
+        );
+        Sandbox forked = new Sandbox(sandboxApi, config, response);
+        forked.waitUntilStarted(timeoutSeconds);
+        return forked;
+    }
+
+    /**
+     * Creates a snapshot from the current state of this Sandbox.
+     * Uses default timeout of 60 seconds.
+     *
+     * @param name name for the new snapshot
+     * @throws DaytonaException if the snapshot operation fails
+     */
+    public void experimentalCreateSnapshot(String name) {
+        experimentalCreateSnapshot(name, 60);
+    }
+
+    /**
+     * Creates a snapshot from the current state of this Sandbox.
+     * The Sandbox will temporarily enter a 'snapshotting' state and return to its previous state when complete.
+     *
+     * @param name name for the new snapshot
+     * @param timeoutSeconds reserved timeout parameter for parity with other SDKs
+     * @throws DaytonaException if the snapshot operation fails
+     */
+    public void experimentalCreateSnapshot(String name, long timeoutSeconds) {
+        CreateSandboxSnapshot req = new CreateSandboxSnapshot();
+        req.setName(name);
+        ExceptionMapper.callMain(() -> sandboxApi.createSandboxSnapshot(id, req, null));
+        refreshData();
+        waitForSnapshotComplete(timeoutSeconds);
+    }
+
+    private void waitForSnapshotComplete(long timeoutSeconds) {
+        long startedAt = System.currentTimeMillis();
+        while ("snapshotting".equalsIgnoreCase(state)) {
+            refreshData();
+            if ("error".equalsIgnoreCase(state) || "build_failed".equalsIgnoreCase(state)) {
+                throw new DaytonaException("Sandbox snapshot failed with state: " + state);
+            }
+            if (!"snapshotting".equalsIgnoreCase(state)) {
+                return;
+            }
+            if (timeoutSeconds > 0 && (System.currentTimeMillis() - startedAt) > timeoutSeconds * 1000L) {
+                throw new DaytonaException("Sandbox snapshot did not complete before timeout");
+            }
+            try {
+                Thread.sleep(250);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new DaytonaException("Interrupted while waiting for snapshot complete", e);
+            }
+        }
     }
 
     /**

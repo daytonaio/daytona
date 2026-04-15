@@ -224,6 +224,10 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) Archive\(ctx context.Context\) error](<#Sandbox.Archive>)
   - [func \(s \*Sandbox\) Delete\(ctx context.Context\) error](<#Sandbox.Delete>)
   - [func \(s \*Sandbox\) DeleteWithTimeout\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.DeleteWithTimeout>)
+  - [func \(s \*Sandbox\) ExperimentalCreateSnapshot\(ctx context.Context, name string\) error](<#Sandbox.ExperimentalCreateSnapshot>)
+  - [func \(s \*Sandbox\) ExperimentalCreateSnapshotWithTimeout\(ctx context.Context, name string, timeout time.Duration\) error](<#Sandbox.ExperimentalCreateSnapshotWithTimeout>)
+  - [func \(s \*Sandbox\) ExperimentalFork\(ctx context.Context, name \*string\) \(\*Sandbox, error\)](<#Sandbox.ExperimentalFork>)
+  - [func \(s \*Sandbox\) ExperimentalForkWithTimeout\(ctx context.Context, name \*string, timeout time.Duration\) \(\*Sandbox, error\)](<#Sandbox.ExperimentalForkWithTimeout>)
   - [func \(s \*Sandbox\) ExpireSignedPreviewLink\(ctx context.Context, port int, token string\) error](<#Sandbox.ExpireSignedPreviewLink>)
   - [func \(s \*Sandbox\) GetPreviewLink\(ctx context.Context, port int\) \(\*types.PreviewLink, error\)](<#Sandbox.GetPreviewLink>)
   - [func \(s \*Sandbox\) GetSignedPreviewLink\(ctx context.Context, port int, expiresInSeconds int\) \(\*types.SignedPreviewLink, error\)](<#Sandbox.GetSignedPreviewLink>)
@@ -3786,6 +3790,83 @@ Example:
 
 ```
 err := sandbox.DeleteWithTimeout(ctx, 2*time.Minute)
+```
+
+<a name="Sandbox.ExperimentalCreateSnapshot"></a>
+### func \(\*Sandbox\) ExperimentalCreateSnapshot
+
+```go
+func (s *Sandbox) ExperimentalCreateSnapshot(ctx context.Context, name string) error
+```
+
+ExperimentalCreateSnapshot creates a snapshot from the current state of the sandbox with a default timeout of 60 seconds.
+
+This captures the sandbox's filesystem into a reusable snapshot that can be used to create new sandboxes. The sandbox will temporarily enter a 'snapshotting' state and return to its previous state when complete.
+
+Example:
+
+```
+err := sandbox.ExperimentalCreateSnapshot(ctx, "my-snapshot")
+if err != nil {
+    return err
+}
+```
+
+<a name="Sandbox.ExperimentalCreateSnapshotWithTimeout"></a>
+### func \(\*Sandbox\) ExperimentalCreateSnapshotWithTimeout
+
+```go
+func (s *Sandbox) ExperimentalCreateSnapshotWithTimeout(ctx context.Context, name string, timeout time.Duration) error
+```
+
+ExperimentalCreateSnapshotWithTimeout creates a snapshot from the current state of the sandbox with a custom timeout. 0 means no timeout.
+
+Example:
+
+```
+err := sandbox.ExperimentalCreateSnapshotWithTimeout(ctx, "my-snapshot", 2*time.Minute)
+```
+
+<a name="Sandbox.ExperimentalFork"></a>
+### func \(\*Sandbox\) ExperimentalFork
+
+```go
+func (s *Sandbox) ExperimentalFork(ctx context.Context, name *string) (*Sandbox, error)
+```
+
+ExperimentalFork forks the sandbox with a default timeout of 60 seconds, creating a new sandbox with an identical filesystem.
+
+The forked sandbox is a copy\-on\-write clone of the original. It starts with the same disk contents but operates independently from that point on. ExperimentalFork waits for the new sandbox to reach the "started" state before returning.
+
+Example:
+
+```
+forked, err := sandbox.ExperimentalFork(ctx, nil)
+if err != nil {
+    return err
+}
+fmt.Printf("Forked sandbox: %s\n", forked.ID)
+```
+
+<a name="Sandbox.ExperimentalForkWithTimeout"></a>
+### func \(\*Sandbox\) ExperimentalForkWithTimeout
+
+```go
+func (s *Sandbox) ExperimentalForkWithTimeout(ctx context.Context, name *string, timeout time.Duration) (*Sandbox, error)
+```
+
+ExperimentalForkWithTimeout forks the sandbox with a custom timeout, creating a new sandbox with an identical filesystem.
+
+The forked sandbox is a copy\-on\-write clone of the original. It starts with the same disk contents but operates independently from that point on. ExperimentalForkWithTimeout waits for the new sandbox to reach the "started" state before returning. 0 means no timeout.
+
+Example:
+
+```
+forked, err := sandbox.ExperimentalForkWithTimeout(ctx, nil, 2*time.Minute)
+if err != nil {
+    return err
+}
+fmt.Printf("Forked sandbox: %s\n", forked.ID)
 ```
 
 <a name="Sandbox.ExpireSignedPreviewLink"></a>
