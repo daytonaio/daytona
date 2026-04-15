@@ -148,6 +148,13 @@ describe('[AUTH] OrganizationController', () => {
     expectArrayMatch(getAuthContextGuards(OrganizationController, methodName), [OtelCollectorAuthContextGuard])
   })
 
+  it('getOtelConfig', () => {
+    const methodName = trackMethod('getOtelConfig')
+    expect(isPublicEndpoint(OrganizationController, methodName)).toBe(false)
+    expectArrayMatch(getAllowedAuthStrategies(OrganizationController, methodName), [AuthStrategyType.API_KEY])
+    expectArrayMatch(getAuthContextGuards(OrganizationController, methodName), [OtelCollectorAuthContextGuard])
+  })
+
   it('updateSandboxDefaultLimitedNetworkEgress', () => {
     const methodName = trackMethod('updateSandboxDefaultLimitedNetworkEgress')
     expect(isPublicEndpoint(OrganizationController, methodName)).toBe(false)

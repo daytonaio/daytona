@@ -627,6 +627,46 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
         },
         /**
          * 
+         * @summary Get organization OTEL config by organization ID
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getOrganizationOtelConfig: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('getOrganizationOtelConfig', 'organizationId', organizationId)
+            const localVarPath = `/organizations/{organizationId}/otel-config`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Get organization OTEL config by sandbox auth token
          * @param {string} authToken Sandbox Auth Token
          * @param {*} [options] Override http request option.
@@ -1856,6 +1896,19 @@ export const OrganizationsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Get organization OTEL config by organization ID
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getOrganizationOtelConfig(organizationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OtelConfig>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getOrganizationOtelConfig(organizationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.getOrganizationOtelConfig']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Get organization OTEL config by sandbox auth token
          * @param {string} authToken Sandbox Auth Token
          * @param {*} [options] Override http request option.
@@ -2331,6 +2384,16 @@ export const OrganizationsApiFactory = function (configuration?: Configuration, 
         },
         /**
          * 
+         * @summary Get organization OTEL config by organization ID
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getOrganizationOtelConfig(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<OtelConfig> {
+            return localVarFp.getOrganizationOtelConfig(organizationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Get organization OTEL config by sandbox auth token
          * @param {string} authToken Sandbox Auth Token
          * @param {*} [options] Override http request option.
@@ -2756,6 +2819,18 @@ export class OrganizationsApi extends BaseAPI {
      */
     public getOrganizationInvitationsCountForAuthenticatedUser(options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).getOrganizationInvitationsCountForAuthenticatedUser(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get organization OTEL config by organization ID
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public getOrganizationOtelConfig(organizationId: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).getOrganizationOtelConfig(organizationId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

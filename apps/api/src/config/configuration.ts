@@ -305,10 +305,8 @@ const configuration = {
   warmPool: {
     candidateLimit: parseInt(process.env.WARM_POOL_CANDIDATE_LIMIT || '300', 10),
   },
-  sandboxOtel: {
-    endpointUrl: process.env.SANDBOX_OTEL_ENDPOINT_URL,
-  },
   otelCollector: {
+    endpointUrl: process.env.OTEL_COLLECTOR_ENDPOINT_URL || process.env.SANDBOX_OTEL_ENDPOINT_URL,
     apiKey: process.env.OTEL_COLLECTOR_API_KEY,
   },
   clickhouse: {

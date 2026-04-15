@@ -67,6 +67,43 @@ func (r *Resolver) GetOrganizationOtelConfig(ctx context.Context, authToken stri
 	return config, nil
 }
 
+func (r *Resolver) GetOrganizationOtelConfigByOrgId(ctx context.Context, orgId string) (*apiclient.OtelConfig, error) {
+	cacheKey := "org:" + orgId
+	otelConfig, err := r.cache.Get(ctx, cacheKey)
+	if err == nil {
+		if otelConfig.Endpoint == "(none)" {
+			return nil, nil
+		}
+		return otelConfig, nil
+	}
+
+	otelConfig, res, err := r.apiclient.OrganizationsAPI.GetOrganizationOtelConfig(ctx, orgId).Execute()
+	if err != nil && res != nil && res.StatusCode != 404 {
+		return nil, err
+	}
+
+	config := &apiclient.OtelConfig{
+		Endpoint: "(none)",
+	}
+
+	if otelConfig != nil {
+		config = &apiclient.OtelConfig{
+			Endpoint: otelConfig.Endpoint,
+			Headers:  otelConfig.Headers,
+		}
+	}
+
+	if err := r.cache.Set(ctx, cacheKey, *config, r.cacheTTL); err != nil {
+		return nil, err
+	}
+
+	if config.Endpoint == "(none)" {
+		return nil, nil
+	}
+
+	return config, nil
+}
+
 // InvalidateCache removes a specific sandbox configuration from the cache.
 func (r *Resolver) InvalidateCache(ctx context.Context, sandboxID string) error {
 	return r.cache.Delete(ctx, sandboxID)

@@ -577,6 +577,171 @@
           }
         }
       ]
+    },
+    {
+      "name": "Organization Quotas",
+      "description": "Organization-level resource usage and quota metrics by region",
+      "widgets": [
+        {
+          "title": "CPU Usage vs Quota",
+          "layout": {
+            "column": 1,
+            "row": 1,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.billboard"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT latest(daytona.sandbox.used_cpu) as 'Used CPU', latest(daytona.sandbox.total_cpu) as 'Total CPU' FROM Metric FACET region.id"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Memory Usage vs Quota",
+          "layout": {
+            "column": 5,
+            "row": 1,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.billboard"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT latest(daytona.sandbox.used_ram) as 'Used RAM', latest(daytona.sandbox.total_ram) as 'Total RAM' FROM Metric FACET region.id"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Storage Usage vs Quota",
+          "layout": {
+            "column": 9,
+            "row": 1,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.billboard"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT latest(daytona.sandbox.used_storage) as 'Used Storage', latest(daytona.sandbox.total_storage) as 'Total Storage' FROM Metric FACET region.id"
+              }
+            ]
+          }
+        },
+        {
+          "title": "CPU Quota Utilization Over Time",
+          "layout": {
+            "column": 1,
+            "row": 4,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.line"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT (latest(daytona.sandbox.used_cpu) / latest(daytona.sandbox.total_cpu)) * 100 as 'CPU Quota %' FROM Metric FACET region.id TIMESERIES AUTO"
+              }
+            ],
+            "yAxisLeft": {
+              "max": 100,
+              "min": 0
+            }
+          }
+        },
+        {
+          "title": "Memory Quota Utilization Over Time",
+          "layout": {
+            "column": 5,
+            "row": 4,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.line"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT (latest(daytona.sandbox.used_ram) / latest(daytona.sandbox.total_ram)) * 100 as 'Memory Quota %' FROM Metric FACET region.id TIMESERIES AUTO"
+              }
+            ],
+            "yAxisLeft": {
+              "max": 100,
+              "min": 0
+            }
+          }
+        },
+        {
+          "title": "Storage Quota Utilization Over Time",
+          "layout": {
+            "column": 9,
+            "row": 4,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.line"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT (latest(daytona.sandbox.used_storage) / latest(daytona.sandbox.total_storage)) * 100 as 'Storage Quota %' FROM Metric FACET region.id TIMESERIES AUTO"
+              }
+            ],
+            "yAxisLeft": {
+              "max": 100,
+              "min": 0
+            }
+          }
+        },
+        {
+          "title": "Organization Resource Summary",
+          "layout": {
+            "column": 1,
+            "row": 7,
+            "width": 12,
+            "height": 4
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.table"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT latest(daytona.sandbox.used_cpu) as 'Used CPU', latest(daytona.sandbox.total_cpu) as 'Total CPU', latest(daytona.sandbox.used_ram) as 'Used RAM (GiB)', latest(daytona.sandbox.total_ram) as 'Total RAM (GiB)', latest(daytona.sandbox.used_storage) as 'Used Storage (GiB)', latest(daytona.sandbox.total_storage) as 'Total Storage (GiB)' FROM Metric FACET region.id SINCE 5 minutes ago"
+              }
+            ]
+          }
+        }
+      ]
     }
   ]
 }

@@ -217,6 +217,18 @@ public class OrganizationsApiTest {
     }
 
     /**
+     * Get organization OTEL config by organization ID
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void getOrganizationOtelConfigTest() throws ApiException {
+        String organizationId = null;
+        OtelConfig response = api.getOrganizationOtelConfig(organizationId);
+        // TODO: test validations
+    }
+
+    /**
      * Get organization OTEL config by sandbox auth token
      *
      * @throws ApiException if the Api call fails

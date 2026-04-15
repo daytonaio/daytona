@@ -93,6 +93,34 @@ These labels are added as OTel resource attributes to all traces, logs, and metr
 
 ---
 
+## Organization-Level Metrics
+
+In addition to per-sandbox telemetry, Daytona exports organization-level resource metrics to your configured OTLP endpoint. These metrics are pushed every 60 seconds and provide a high-level view of resource consumption and quotas across your organization.
+
+### Exported Metrics
+
+| Metric | Unit | Description |
+| --- | --- | --- |
+| `daytona.sandbox.used_cpu` | cpu cores | Total CPU currently consumed by active sandboxes |
+| `daytona.sandbox.used_ram` | GiB | Total memory currently consumed by active sandboxes |
+| `daytona.sandbox.used_storage` | GiB | Total disk currently consumed by sandboxes |
+| `daytona.sandbox.total_cpu` | cpu cores | Total CPU quota for the organization |
+| `daytona.sandbox.total_ram` | GiB | Total memory quota for the organization |
+| `daytona.sandbox.total_storage` | GiB | Total disk quota for the organization |
+
+### Metric Attributes
+
+Each metric includes the following attributes for filtering and grouping:
+
+- **`organization.id`** (resource attribute) — The organization the metrics belong to
+- **`region.id`** (data point attribute) — The region the resource usage and quota applies to, since quotas are per-region
+
+### Configuration
+
+Organization metrics are automatically exported when you have a [sandbox collection endpoint configured](#configure-sandbox-collection). No additional setup is required — the same OTLP endpoint receives both sandbox telemetry and organization metrics.
+
+---
+
 ## SDK Tracing Configuration
 
 When enabled, the Daytona SDK automatically instruments all SDK operations including:

@@ -394,6 +394,15 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
 
   async getOtelConfigBySandboxAuthToken(sandboxAuthToken: string): Promise<OtelConfigDto | null> {
     const organization = await this.findBySandboxAuthToken(sandboxAuthToken)
+    return this.resolveOtelConfig(organization)
+  }
+
+  async getOtelConfigByOrganizationId(organizationId: string): Promise<OtelConfigDto | null> {
+    const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+    return this.resolveOtelConfig(organization)
+  }
+
+  private async resolveOtelConfig(organization: Organization | null): Promise<OtelConfigDto | null> {
     if (!organization) {
       return null
     }
@@ -416,6 +425,14 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       endpoint: otelConfig.endpoint,
       headers: Object.keys(decryptedHeaders).length > 0 ? decryptedHeaders : undefined,
     }
+  }
+
+  async findOrganizationsWithOtelConfig(): Promise<Organization[]> {
+    return this.organizationRepository
+      .createQueryBuilder('organization')
+      .where(`organization."experimentalConfig"::jsonb -> 'otel' ->> 'endpoint' IS NOT NULL`)
+      .andWhere(`organization."experimentalConfig"::jsonb -> 'otel' ->> 'endpoint' != ''`)
+      .getMany()
   }
 
   private async validatedExperimentalConfig(
