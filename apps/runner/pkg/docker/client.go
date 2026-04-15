@@ -67,21 +67,6 @@ func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerCli
 		config.BackupTimeoutMin = 60
 	}
 
-	if config.BuildTimeoutMin <= 0 {
-		logger.Warn("Invalid build timeout value. Using default value of 120 minutes")
-		config.BuildTimeoutMin = 120
-	}
-
-	if config.BuildCPUCores <= 0 {
-		logger.Warn("Invalid build CPU cores value. Using default value of 4")
-		config.BuildCPUCores = 4
-	}
-
-	if config.BuildMemoryGB <= 0 {
-		logger.Warn("Invalid build memory value. Using default value of 8 GB")
-		config.BuildMemoryGB = 8
-	}
-
 	var info system.Info
 	err := utils.RetryWithExponentialBackoff(
 		ctx,
