@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 600" width="1040" height="600" role="img" aria-labelledby="title desc">
+  <title id="title">Sandbox backend throughput comparison</title>
+  <desc id="desc">Line chart comparing Daytona and Docker container throughput as concurrency increases from 1 to 128. Daytona reaches 98 calls/s while Docker plateaus at 18.</desc>
+
+  <!-- Background -->
+  <rect width="1040" height="600" rx="16" fill="#0a0a0a" />
+  <!-- Border -->
+  <rect x="0.5" y="0.5" width="1039" height="599" rx="16" fill="none" stroke="#27272a" stroke-width="1" />
+
+  <!-- Title -->
+  <text x="88" y="56" fill="#fafafa" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="600" letter-spacing="-0.02em">
+    Tool Execution Throughput
+  </text>
+  <text x="88" y="82" fill="#71717a" font-family="Inter, system-ui, sans-serif" font-size="15">
+    cpu_bound_stdout · code executions per second · higher is better
+  </text>
+
+  <!-- Chart area: x=88..980, y=110..480 -->
+  <!-- Y range: 0..100, height=370. Each unit = 3.7px. y = 480 - val*3.7 -->
+
+  <!-- Gridlines -->
+  <line x1="88" y1="480" x2="980" y2="480" stroke="#27272a" stroke-width="1" />
+  <line x1="88" y1="406" x2="980" y2="406" stroke="#1c1c1e" stroke-width="1" />
+  <line x1="88" y1="332" x2="980" y2="332" stroke="#1c1c1e" stroke-width="1" />
+  <line x1="88" y1="258" x2="980" y2="258" stroke="#1c1c1e" stroke-width="1" />
+  <line x1="88" y1="184" x2="980" y2="184" stroke="#1c1c1e" stroke-width="1" />
+  <line x1="88" y1="110" x2="980" y2="110" stroke="#1c1c1e" stroke-width="1" />
+
+  <!-- Y-axis labels (0, 20, 40, 60, 80, 100) -->
+  <text x="74" y="485" fill="#52525b" font-family="ui-monospace, SFMono-Regular, monospace" font-size="14" text-anchor="end">0</text>
+  <text x="74" y="411" fill="#52525b" font-family="ui-monospace, SFMono-Regular, monospace" font-size="14" text-anchor="end">20</text>
+  <text x="74" y="337" fill="#52525b" font-family="ui-monospace, SFMono-Regular, monospace" font-size="14" text-anchor="end">40</text>
+  <text x="74" y="263" fill="#52525b" font-family="ui-monospace, SFMono-Regular, monospace" font-size="14" text-anchor="end">60</text>
+  <text x="74" y="189" fill="#52525b" font-family="ui-monospace, SFMono-Regular, monospace" font-size="14" text-anchor="end">80</text>
+  <text x="74" y="115" fill="#52525b" font-family="ui-monospace, SFMono-Regular, monospace" font-size="14" text-anchor="end">100</text>
+
+  <!-- Y-axis title -->
+  <text x="24" y="295" fill="#71717a" font-family="Inter, system-ui, sans-serif" font-size="13" text-anchor="middle" transform="rotate(-90 24 295)">calls / sec</text>
+
+  <!-- X-axis labels -->
+  <text x="88"    y="506" fill="#52525b" font-family="ui-monospace, SFMono-Regular, monospace" font-size="14" text-anchor="middle">1</text>
+  <text x="236.7" y="506" fill="#52525b" font-family="ui-monospace, SFMono-Regular, monospace" font-size="14" text-anchor="middle">4</text>
+  <text x="385.3" y="506" fill="#52525b" font-family="ui-monospace, SFMono-Regular, monospace" font-size="14" text-anchor="middle">8</text>
+  <text x="534"   y="506" fill="#52525b" font-family="ui-monospace, SFMono-Regular, monospace" font-size="14" text-anchor="middle">16</text>
+  <text x="682.7" y="506" fill="#52525b" font-family="ui-monospace, SFMono-Regular, monospace" font-size="14" text-anchor="middle">32</text>
+  <text x="831.3" y="506" fill="#52525b" font-family="ui-monospace, SFMono-Regular, monospace" font-size="14" text-anchor="middle">64</text>
+  <text x="980"   y="506" fill="#52525b" font-family="ui-monospace, SFMono-Regular, monospace" font-size="14" text-anchor="middle">128</text>
+
+  <!-- X-axis title -->
+  <text x="534" y="536" fill="#71717a" font-family="Inter, system-ui, sans-serif" font-size="13" text-anchor="middle">concurrent sandboxes</text>
+
+  <!-- Docker line (real benchmarked data) -->
+  <!-- cpu_bound_stdout: 1→6.61, 4→13.75, 8→14.12, 16→17.44, 32→17.40, 64→18.24, 128→18.00 -->
+  <!-- y = 480 - val*3.7 -->
+  <path
+    d="M88 455.54 L236.7 429.13 L385.3 427.76 L534 415.47 L682.7 415.62 L831.3 412.51 L980 413.4"
+    fill="none"
+    stroke="#71717a"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-dasharray="8 6"
+  />
+
+  <!-- Docker dots -->
+  <circle cx="88"    cy="455.54" r="5" fill="#0a0a0a" stroke="#71717a" stroke-width="2" />
+  <circle cx="236.7" cy="429.13" r="5" fill="#0a0a0a" stroke="#71717a" stroke-width="2" />
+  <circle cx="385.3" cy="427.76" r="5" fill="#0a0a0a" stroke="#71717a" stroke-width="2" />
+  <circle cx="534"   cy="415.47" r="5" fill="#0a0a0a" stroke="#71717a" stroke-width="2" />
+  <circle cx="682.7" cy="415.62" r="5" fill="#0a0a0a" stroke="#71717a" stroke-width="2" />
+  <circle cx="831.3" cy="412.51" r="5" fill="#0a0a0a" stroke="#71717a" stroke-width="2" />
+  <circle cx="980"   cy="413.4"  r="5" fill="#0a0a0a" stroke="#71717a" stroke-width="2" />
+
+  <!-- Daytona line (real benchmarked data) -->
+  <!-- cpu_bound_stdout: 1→1.51, 4→5.63, 8→11.07, 16→19.54, 32→39.45, 64→65.86, 128→98.43 -->
+  <path
+    d="M88 474.41 L236.7 459.17 L385.3 439.04 L534 407.7 L682.7 334.04 L831.3 236.32 L980 115.81"
+    fill="none"
+    stroke="#2ecc71"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Daytona area fill -->
+  <path
+    d="M88 474.41 L236.7 459.17 L385.3 439.04 L534 407.7 L682.7 334.04 L831.3 236.32 L980 115.81 L980 480 L88 480 Z"
+    fill="#2ecc71"
+    fill-opacity="0.07"
+  />
+
+  <!-- Daytona dots -->
+  <circle cx="88"    cy="474.41" r="6" fill="#2ecc71" stroke="#0a0a0a" stroke-width="2" />
+  <circle cx="236.7" cy="459.17" r="6" fill="#2ecc71" stroke="#0a0a0a" stroke-width="2" />
+  <circle cx="385.3" cy="439.04" r="6" fill="#2ecc71" stroke="#0a0a0a" stroke-width="2" />
+  <circle cx="534"   cy="407.7"  r="6" fill="#2ecc71" stroke="#0a0a0a" stroke-width="2" />
+  <circle cx="682.7" cy="334.04" r="6" fill="#2ecc71" stroke="#0a0a0a" stroke-width="2" />
+  <circle cx="831.3" cy="236.32" r="6" fill="#2ecc71" stroke="#0a0a0a" stroke-width="2" />
+  <circle cx="980"   cy="115.81" r="6" fill="#2ecc71" stroke="#0a0a0a" stroke-width="2" />
+
+  <!-- Peak label on Daytona -->
+  <rect x="878" y="96" width="96" height="28" rx="5" fill="#2ecc7118" stroke="#2ecc71" stroke-width="1" />
+  <text x="926" y="115" fill="#2ecc71" font-family="ui-monospace, SFMono-Regular, monospace" font-size="14" font-weight="600" text-anchor="middle">98 calls/s</text>
+
+  <!-- Plateau label on Docker -->
+  <rect x="856" y="388" width="118" height="28" rx="5" fill="#27272a" stroke="#3f3f46" stroke-width="1" />
+  <text x="915" y="407" fill="#71717a" font-family="ui-monospace, SFMono-Regular, monospace" font-size="13" text-anchor="middle">plateaus ~18/s</text>
+
+  <!-- 5.5x annotation -->
+  <line x1="976" y1="130" x2="976" y2="408" stroke="#52525b" stroke-width="1" stroke-dasharray="4 3" />
+  <rect x="950" y="258" width="52" height="24" rx="4" fill="#0a0a0a" stroke="#52525b" stroke-width="1" />
+  <text x="976" y="274" fill="#a1a1aa" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" text-anchor="middle">5.5x</text>
+
+  <!-- Legend -->
+  <circle cx="88" cy="572" r="6" fill="#2ecc71" />
+  <text x="104" y="577" fill="#a1a1aa" font-family="Inter, system-ui, sans-serif" font-size="14">Daytona sandboxes</text>
+
+  <line x1="240" y1="572" x2="260" y2="572" stroke="#71717a" stroke-width="2.5" stroke-dasharray="6 4" />
+  <circle cx="250" cy="572" r="5" fill="#0a0a0a" stroke="#71717a" stroke-width="2" />
+  <text x="274" y="577" fill="#71717a" font-family="Inter, system-ui, sans-serif" font-size="14">Docker containers</text>
+</svg>
