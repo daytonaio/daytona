@@ -56,8 +56,7 @@ runs:
       with:
         go-version-file: go.work
         cache: ${{ inputs.go-cache }}
-        cache-dependency-path: |
-          **/go.sum
+        cache-dependency-path: "**/go.sum"
 
     - uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
       if: inputs.install-java == 'true'
