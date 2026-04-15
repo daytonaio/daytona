@@ -1067,6 +1067,50 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
+  @Cron(CronExpression.EVERY_HOUR, { name: 'cleanup-stale-declarative-build-snapshot-runners' })
+  @TrackJobExecution()
+  @LogExecution('cleanup-stale-declarative-build-snapshot-runners')
+  @WithInstrumentation()
+  async cleanupStaleDeclarativeBuildSnapshotRunners() {
+    const lockKey = 'cleanup-stale-declarative-build-snapshot-runners-lock'
+    if (!(await this.redisLockProvider.lock(lockKey, 300))) {
+      return
+    }
+
+    try {
+      const oneDayAgo = new Date()
+      oneDayAgo.setDate(oneDayAgo.getDate() - 1)
+
+      const staleEntries = await this.snapshotRunnerRepository
+        .createQueryBuilder('sr')
+        .select('sr.id')
+        .where('sr.state = :state', { state: SnapshotRunnerState.READY })
+        .andWhere('EXISTS (SELECT 1 FROM build_info bi WHERE bi."snapshotRef" = sr."snapshotRef")')
+        .andWhere('COALESCE(sr."lastUsedAt", sr."updatedAt") < :threshold', { threshold: oneDayAgo })
+        .take(10000)
+        .getMany()
+
+      if (staleEntries.length === 0) {
+        return
+      }
+
+      const result = await this.snapshotRunnerRepository.update(
+        { id: In(staleEntries.map((e) => e.id)) },
+        { state: SnapshotRunnerState.REMOVING },
+      )
+
+      if (result.affected > 0) {
+        this.logger.debug(
+          `Marked ${result.affected} stale declarative build SnapshotRunners for removal (lastUsedAt or updatedAt older than 1 day)`,
+        )
+      }
+    } catch (error) {
+      this.logger.error(`Failed to cleanup stale declarative build snapshot runners: ${fromAxiosError(error)}`)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
+  }
+
   @Cron(CronExpression.EVERY_10_MINUTES, { name: 'deactivate-old-snapshots' })
   @TrackJobExecution()
   @LogExecution('deactivate-old-snapshots')
