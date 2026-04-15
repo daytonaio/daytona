@@ -6,7 +6,7 @@
 import { DataSource } from 'typeorm'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotRegion } from '../entities/snapshot-region.entity'
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { BaseRepository } from '../../common/repositories/base.repository'
@@ -17,6 +17,8 @@ import { SnapshotConflictError } from '../errors/snapshot-conflict.error'
 
 @Injectable()
 export class SnapshotRepository extends BaseRepository<Snapshot> {
+  private readonly logger = new Logger(SnapshotRepository.name)
+
   constructor(@InjectDataSource() dataSource: DataSource, eventEmitter: EventEmitter2) {
     super(dataSource, eventEmitter, Snapshot)
   }
@@ -98,9 +100,13 @@ export class SnapshotRepository extends BaseRepository<Snapshot> {
   private async emitUpdateEvents(updatedSnapshot: Snapshot, previousSnapshot: Pick<Snapshot, 'state'>): Promise<void> {
     if (previousSnapshot.state !== updatedSnapshot.state) {
       if (!updatedSnapshot.snapshotRegions) {
-        updatedSnapshot.snapshotRegions = await this.dataSource
-          .getRepository(SnapshotRegion)
-          .find({ where: { snapshotId: updatedSnapshot.id } })
+        try {
+          updatedSnapshot.snapshotRegions = await this.dataSource
+            .getRepository(SnapshotRegion)
+            .find({ where: { snapshotId: updatedSnapshot.id } })
+        } catch (error) {
+          this.logger.error(`Failed to load snapshot regions for event, snapshot ID ${updatedSnapshot.id}: ${error}`)
+        }
       }
 
       this.eventEmitter.emit(
