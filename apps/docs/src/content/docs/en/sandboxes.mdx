@@ -237,23 +237,23 @@ sandbox = daytona.create(params)
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-import { Daytona, Image } from "@daytona/sdk";
+import { Daytona, Image } from '@daytona/sdk'
 
 async function main() {
-  const daytona = new Daytona();
+  const daytona = new Daytona()
 
   // Create a sandbox with custom resources
   const sandbox = await daytona.create({
-    image: Image.debianSlim("3.12"),
+    image: Image.debianSlim('3.12'),
     resources: {
-      cpu: 2,     // 2 CPU cores
-      memory: 4,  // 4GB RAM
-      disk: 8,    // 8GB disk space
+      cpu: 2, // 2 CPU cores
+      memory: 4, // 4GB RAM
+      disk: 8, // 8GB disk space
     },
-  });
+  })
 }
 
-main();
+main()
 ```
 
 </TabItem>
@@ -366,15 +366,15 @@ sandbox = daytona.create(params)
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-import { Daytona } from '@daytona/sdk';
+import { Daytona } from '@daytona/sdk'
 
-const daytona = new Daytona();
+const daytona = new Daytona()
 
 // Create an ephemeral sandbox
 const sandbox = await daytona.create({
   ephemeral: true,
-  autoStopInterval: 5 // The ephemeral sandbox will be deleted after 5 minutes of inactivity
-});
+  autoStopInterval: 5, // The ephemeral sandbox will be deleted after 5 minutes of inactivity
+})
 ```
 
 </TabItem>
@@ -445,9 +445,9 @@ sandbox.start()
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-const sandbox = await daytona.create({ language: 'typescript' });
+const sandbox = await daytona.create({ language: 'typescript' })
 // Start Sandbox
-await sandbox.start();
+await sandbox.start()
 ```
 
 </TabItem>
@@ -524,15 +524,15 @@ result = daytona.list(labels={"env": "dev"})
 
 ```typescript
 // List all sandboxes
-const result = await daytona.list();
+const result = await daytona.list()
 
 // Iterate through results
 for (const sandbox of result.items) {
-    console.log(`Sandbox: ${sandbox.id} (state: ${sandbox.state})`);
+  console.log(`Sandbox: ${sandbox.id} (state: ${sandbox.state})`)
 }
 
 // List sandboxes with labels filter
-const filtered = await daytona.list({ 'env': 'dev' });
+const filtered = await daytona.list({ env: 'dev' })
 ```
 
 </TabItem>
@@ -659,18 +659,18 @@ sandbox.start()
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-const sandbox = await daytona.create({ language: 'typescript' });
+const sandbox = await daytona.create({ language: 'typescript' })
 
 // Stop sandbox
-await sandbox.stop();
+await sandbox.stop()
 
 console.log(sandbox.id) // 7cd11133-96c1-4cc8-9baa-c757b8f8c916
 
 // The sandbox ID can later be used to get the sandbox and start it
-const found = await daytona.get('7cd11133-96c1-4cc8-9baa-c757b8f8c916');
+const found = await daytona.get('7cd11133-96c1-4cc8-9baa-c757b8f8c916')
 
 // Start sandbox
-await found.start();
+await found.start()
 ```
 
 </TabItem>
@@ -771,7 +771,7 @@ sandbox.archive()
 
 ```typescript
 // Archive Sandbox
-await sandbox.archive();
+await sandbox.archive()
 ```
 
 </TabItem>
@@ -840,7 +840,7 @@ sandbox.recover()
 
 ```typescript
 // Recover sandbox
-await sandbox.recover();
+await sandbox.recover()
 ```
 
 </TabItem>
@@ -897,8 +897,8 @@ if sandbox.recoverable:
 ```typescript
 // Check if the Sandbox is recoverable
 if (sandbox.recoverable) {
-    await sandbox.recover();
-    console.log('Sandbox recovered successfully');
+  await sandbox.recover()
+  console.log('Sandbox recovered successfully')
 }
 ```
 
@@ -959,6 +959,7 @@ Daytona provides methods to resize [sandbox resources](#resources) after creatio
     sandbox.resize(Resources(cpu=4, memory=8, disk=20))
     sandbox.start()
     ```
+
   </TabItem>
 
   <TabItem label="TypeScript" icon="seti:typescript">
@@ -976,6 +977,7 @@ Daytona provides methods to resize [sandbox resources](#resources) after creatio
     await sandbox.resize({ cpu: 4, memory: 8, disk: 20 });
     await sandbox.start();
     ```
+
   </TabItem>
 
   <TabItem label="Ruby" icon="seti:ruby">
@@ -993,6 +995,7 @@ Daytona provides methods to resize [sandbox resources](#resources) after creatio
     sandbox.resize(Daytona::Resources.new(cpu: 4, memory: 8, disk: 20))
     sandbox.start
     ```
+
   </TabItem>
 
   <TabItem label="Go" icon="seti:go">
@@ -1005,6 +1008,7 @@ Daytona provides methods to resize [sandbox resources](#resources) after creatio
     err = sandbox.Resize(ctx, &types.Resources{CPU: 4, Memory: 8, Disk: 20})
     err = sandbox.Start(ctx)
     ```
+
   </TabItem>
 
   <TabItem label="API" icon="seti:json">
@@ -1042,7 +1046,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sand
 This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
 :::
 
-Daytona provides methods to fork sandboxes. Forking creates a duplicate of your sandbox's filesystem and memory, and copies it into a new sandbox. The new sandbox is fully independent: it can be started, stopped, and deleted without affecting the original. 
+Daytona provides methods to fork sandboxes. Forking creates a duplicate of your sandbox's filesystem and memory, and copies it into a new sandbox. The new sandbox is fully independent: it can be started, stopped, and deleted without affecting the original.
 
 Daytona tracks the parent-child relationship in a fork tree, so you can always trace a fork's lineage back to the sandbox it was created from. You can fork a fork, building out branches as needed. If the parent sandbox is deleted, all its forks continue to run unaffected.
 
@@ -1148,7 +1152,7 @@ sandbox._experimental_create_snapshot("my-sandbox-snapshot")
 
 ```typescript
 // Create snapshot from sandbox
-await sandbox._experimental_createSnapshot("my-sandbox-snapshot");
+await sandbox._experimental_createSnapshot('my-sandbox-snapshot')
 ```
 
 </TabItem>
@@ -1219,7 +1223,7 @@ sandbox.delete()
 
 ```typescript
 // Delete sandbox
-await sandbox.delete();
+await sandbox.delete()
 ```
 
 </TabItem>
@@ -1253,6 +1257,7 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}' \
   --request DELETE \
   --header 'Authorization: Bearer YOUR_API_KEY'
 ```
+
 </TabItem>
 </Tabs>
 
@@ -1321,10 +1326,10 @@ sandbox = daytona.create(CreateSandboxFromSnapshotParams(
 
 ```typescript
 const sandbox = await daytona.create({
-    snapshot: "my-snapshot-name",
-      // Disables the auto-stop feature - default is 15 minutes
-    autoStopInterval: 0,
-});
+  snapshot: 'my-snapshot-name',
+  // Disables the auto-stop feature - default is 15 minutes
+  autoStopInterval: 0,
+})
 ```
 
 </TabItem>
@@ -1426,10 +1431,10 @@ sandbox = daytona.create(CreateSandboxFromSnapshotParams(
 
 ```typescript
 const sandbox = await daytona.create({
-    snapshot: "my-snapshot-name",
-    // Auto-archive after a sandbox has been stopped for 1 hour
-    autoArchiveInterval: 60,
-});
+  snapshot: 'my-snapshot-name',
+  // Auto-archive after a sandbox has been stopped for 1 hour
+  autoArchiveInterval: 60,
+})
 ```
 
 </TabItem>
@@ -1520,10 +1525,10 @@ sandbox.set_auto_delete_interval(-1)
 
 ```typescript
 const sandbox = await daytona.create({
-    snapshot: "my-snapshot-name",
-    // Auto-delete after a sandbox has been stopped for 1 hour
-    autoDeleteInterval: 60,
-});
+  snapshot: 'my-snapshot-name',
+  // Auto-delete after a sandbox has been stopped for 1 hour
+  autoDeleteInterval: 60,
+})
 
 // Delete the sandbox immediately after it has been stopped
 await sandbox.setAutoDeleteInterval(0)
@@ -1620,10 +1625,10 @@ sandbox = daytona.create(CreateSandboxFromSnapshotParams(
 
 ```typescript
 const sandbox = await daytona.create({
-    snapshot: "my_awesome_snapshot",
-    // Disables the auto-stop feature - default is 15 minutes
-    autoStopInterval: 0,
-});
+  snapshot: 'my_awesome_snapshot',
+  // Disables the auto-stop feature - default is 15 minutes
+  autoStopInterval: 0,
+})
 ```
 
 </TabItem>
@@ -1656,4 +1661,3 @@ sandbox, err := client.Create(ctx, params)
 
 </TabItem>
 </Tabs>
-
