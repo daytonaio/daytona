@@ -153,6 +153,7 @@
   "sidebarconfig.trl": "TRL",
   "sidebarconfig.openenv": "OpenEnv",
   "sidebarconfig.verl": "veRL",
+  "sidebarconfig.openaiAgents": "OpenAI Agents SDK",
   "sidebarconfig.rlm": "RLMs",
   "sidebarconfig.recursiveLms": "RLMs",
   "sidebarconfig.dspyRlms": "RLMs via DSPy",

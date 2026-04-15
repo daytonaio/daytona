@@ -1,0 +1,277 @@
+---
+title: Text-to-SQL Agent with the OpenAI Agents SDK and Daytona
+description: Build a conversational agent that translates natural-language questions into SQL queries against real NASA spending data.
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+In this guide we use the [OpenAI Agents SDK](https://developers.openai.com/api/docs/guides/agents) and Daytona sandboxes to build a conversational agent that answers natural-language questions about NASA's federal spending. It translates questions into SQL, runs them against a SQLite database of real USAspending.gov data (FY2021-FY2025), and explains the results. The agent runs inside a Daytona sandbox, which provides isolated code execution, pause/resume across runs (so you can reconnect to the same sandbox without re-downloading data), cross-session memory (so the agent learns from previous conversations), and signed preview URLs for downloading query results.
+
+---
+
+### What a session looks like
+
+```
+> How much did NASA spend in FY2024?
+
+  [SQL]  (limit 10)
+    SELECT SUM(federal_action_obligation) AS total_obligations
+    FROM spending
+    WHERE fiscal_year = 2024;
+  → Result (1 rows)
+    | total_obligations |
+    |-------------------|
+    | 21352116106.41    |
+  ↓ https://8080-your-sandbox-id.proxy.daytona.works/query_1775081861_281.csv
+
+NASA obligated **$21.35 billion** in **FY2024**.
+
+> Who are the top 5 recipients?
+
+  [SQL]  (limit 10)
+    SELECT COALESCE(NULLIF(recipient_parent_name, ''), NULLIF(recipient_name, ''), 'UNKNOWN') AS recipient_entity,
+           SUM(federal_action_obligation) AS total_obligations
+    FROM spending
+    WHERE fiscal_year = 2024
+    GROUP BY recipient_entity
+    ORDER BY total_obligations DESC
+    LIMIT 5;
+  → Result (5 rows)
+    | recipient_entity                     | total_obligations |
+    |--------------------------------------|-------------------|
+    | CALIFORNIA INSTITUTE OF TECHNOLOGY   | 2247310017.56     |
+    | SPACE EXPLORATION TECHNOLOGIES CORP. | 1996992060.56     |
+    | THE BOEING COMPANY                   | 1540996029.73     |
+    | LOCKHEED MARTIN CORP                 | 1208072461.33     |
+    | NORTHROP GRUMMAN CORPORATION         | 641375071.34      |
+  ↓ https://8080-your-sandbox-id.proxy.daytona.works/query_1775081919_307.csv
+
+In FY2024, the top 5 recipients were **California Institute of Technology ($2.25B)**,
+**SpaceX ($2.00B)**, **Boeing ($1.54B)**, **Lockheed Martin ($1.21B)**,
+and **Northrop Grumman ($641.38M)**.
+```
+
+The agent keeps conversation context across turns, so one can naturally follow-up on previous questions. Each result also gets a download link via the Daytona sandbox's exposed port.
+
+## 1\. Setup
+
+Set your environment variables:
+
+```shell
+export OPENAI_API_KEY=...
+export DAYTONA_API_KEY=...       # from https://app.daytona.io/dashboard/keys
+```
+
+Clone the repo, install dependencies and run:
+
+```shell
+git clone https://github.com/openai/openai-agents-python
+cd openai-agents-python
+uv sync --extra daytona
+uv run python -m examples.sandbox.extensions.daytona.usaspending_text2sql.agent
+```
+
+On the first run, the agent fetches NASA spending data from the USAspending.gov API and builds a SQLite database inside the sandbox. This takes a few minutes. Subsequent runs reuse the paused sandbox and skip this step entirely.
+
+## 2\. The Workspace
+
+The manifest declares what goes into the sandbox:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```py
+    from agents.sandbox import Manifest
+    from agents.sandbox.entries import Dir, LocalDir, LocalFile
+
+    manifest = Manifest(
+        root=WORKSPACE_ROOT,
+        entries={
+            "setup_db.py": LocalFile(src=SETUP_DB_PATH),
+            "schema": LocalDir(src=SCHEMA_DIR),
+            "data": Dir(ephemeral=True),
+        },
+    )
+    ```
+  </TabItem>
+</Tabs>
+
+The main entries:
+
+- **`setup_db.py`** fetches NASA spending data from the USAspending.gov bulk download API and builds a SQLite database. It downloads contracts, grants, and IDVs for FY2021-FY2025, parses the CSVs, and creates an indexed `spending` table with \~30 columns covering amounts, recipients, locations, industry codes, and more. It's idempotent: if the DB already exists, it skips the download.  
+    
+- **`schema/`** contains documentation the agent uses to understand the data:  
+    
+  - `overview.md` has the table schema, column descriptions, and example SQL patterns. This gets injected directly into the agent's `developer_instructions`.  
+  - `tables/spending.md` has detailed per-column docs the agent can read via shell if needed.  
+  - `glossary.md` has official USAspending terminology (what "obligation" vs "outlay" means, etc.), fetched from the USAspending API during setup.
+
+- **`data/`** is where the SQLite DB lands. It's marked `ephemeral=True` so it's excluded from workspace snapshots (the DB can always be rebuilt from the API).
+
+## 3\. The SqlCapability
+
+The core of this example is a custom `Capability` that gives the agent a guardrailed `run_sql` tool. The agent could run `sqlite3` directly via the shell, but that would give it unrestricted access. The capability enforces safety at multiple levels:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```py
+    class SqlCapability(Capability):
+        type: Literal["sql"] = "sql"
+        db_path: str = "data/usaspending.db"
+        max_display_rows: int = 100
+        max_csv_rows: int = 10_000
+        timeout_seconds: float = 30.0
+        results_dir: str = "results"
+    ```
+  </TabItem>
+</Tabs>
+
+**Guardrails (defense in depth):**
+
+- **Read-only access**: SQLite opened with `?mode=ro` URI \+ `PRAGMA query_only = ON`  
+- **Statement validation**: Only `SELECT`, `WITH`, `EXPLAIN`, `PRAGMA` are allowed  
+- **Row limits**: 100 rows displayed to the model, up to 10,000 saved as downloadable CSV  
+- **Timeouts**: Queries killed after 30 seconds
+
+The tool returns structured JSON (columns, rows, row counts, CSV filename), and the capability injects instructions telling the agent to prefer aggregations, use the schema docs, and explain its query logic.
+
+## 4\. The Agent
+
+The pieces come together in a `SandboxAgent` with four capabilities:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```py
+    from agents.sandbox import SandboxAgent
+    from agents.sandbox.capabilities.compaction import Compaction
+    from agents.sandbox.capabilities.memory import Memory
+    from agents.sandbox.capabilities.shell import Shell
+    from agents.sandbox.config import MemoryReadConfig, MemoryWriteConfig
+
+    agent = SandboxAgent(
+        name="NASA Spending Q&A",
+        default_manifest=manifest,
+        model="gpt-5.4",
+        instructions=(
+            "You are a helpful data analyst that answers questions about NASA federal spending "
+            "by writing and executing SQL queries."
+        ),
+        developer_instructions=DEVELOPER_INSTRUCTIONS,
+        capabilities=[
+            SqlCapability(db_path="data/usaspending.db"),
+            Shell(),
+            Compaction(),
+            Memory(
+                read=MemoryReadConfig(live_update=False),
+                write=MemoryWriteConfig(batch_size=5),
+            ),
+        ],
+    )
+    ```
+  </TabItem>
+</Tabs>
+
+- **`SqlCapability`** provides the guardrailed `run_sql` tool (section 3).  
+- **`Shell()`** gives the agent general shell access, mainly so it can `cat schema/tables/spending.md` or `cat schema/glossary.md` when it needs column details or term definitions beyond what's in the overview.  
+- **`Compaction()`** handles long sessions. After the conversation grows past a token threshold, the SDK automatically compacts earlier turns to keep context manageable. Without this, a long Q\&A session would eventually hit the model's context limit.  
+- **`Memory()`** gives the agent cross-session recall. The `Memory` capability is covered in detail in section 8\. The key config choices here: `live_update=False` means the agent isn't instructed to edit memory files mid-conversation (and doesn't need `ApplyPatch`), and `batch_size=5` batches the expensive consolidation step to run every 5 turns instead of every turn.
+
+The `developer_instructions` load the full schema overview from `schema/overview.md` plus guidelines about data caveats (obligations vs outlays, masked recipients, etc.), so the agent starts every conversation already knowing the schema and quirks of the data.
+
+## 5\. The Conversation Loop
+
+Each turn appends the user's question to the conversation history, streams the agent's response (printing text deltas, tool calls, and formatted results), then carries the full history forward via `result.to_input_list()`. This is what lets follow-ups like "break that down by year" work, because the history includes tool calls and their results, so the agent knows what "that" refers to.
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```py
+    input_items = conversation + [{"role": "user", "content": question}]
+    result = Runner.run_streamed(agent, input_items, run_config=run_config)
+
+    async for event in result.stream_events():
+        # print text deltas, tool calls, and tool outputs as they arrive
+        ...
+
+    conversation = result.to_input_list()
+    ```
+  </TabItem>
+</Tabs>
+
+The actual example includes SQL syntax highlighting and table formatting for the terminal output. See `agent.py` for the full streaming loop.
+
+## 6\. Pause and Resume
+
+The first run is slow because `setup_db.py` needs to download data from the USAspending API. With `pause_on_exit=True`, the sandbox pauses instead of being deleted, so subsequent runs reconnect to the existing sandbox with the database already built.
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```py
+    # Core pattern (see agent.py for full error handling):
+    client = DaytonaSandboxClient()
+    options = DaytonaSandboxClientOptions(pause_on_exit=True, exposed_ports=(8080,))
+
+    saved_state = _load_session_state()  # returns None on first run
+    if saved_state is not None:
+        session = await client.resume(saved_state)
+    else:
+        session = await client.create(manifest=agent.default_manifest, options=options)
+
+    _save_session_state(session.state)
+    ```
+  </TabItem>
+</Tabs>
+
+The session state is serialized to a JSON file. On the next run, `client.resume()` uses the saved `sandbox_id` to find and wake the paused sandbox. If it's expired or been deleted, it falls through and creates a fresh one. Type `exit` to pause the sandbox, or `destroy` to delete it.
+
+## 7\. Downloadable Results via Exposed Ports
+
+Each query result is saved as a CSV inside the sandbox. To make these downloadable, a simple HTTP file server runs on port 8080:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```py
+    # Start a file server inside the sandbox
+    await session.exec("mkdir -p results", timeout=5.0)
+    await session.exec(
+        "nohup python3 -m http.server 8080 --directory results > /dev/null 2>&1 &",
+        timeout=5.0,
+    )
+
+    # Get the signed public URL
+    endpoint = await session.resolve_exposed_port(8080)
+    downloads_url = endpoint.url_for("http")
+    # -> https://8080-abc123.proxy.daytona.works
+    ```
+  </TabItem>
+</Tabs>
+
+The `run_sql` tool includes the CSV filename in its response, and the agent surfaces the download link. You can see this in the session example at the top: each result has a `↓` download URL (signed Daytona preview link).
+
+## 8\. Memory Across Sessions
+
+Within a single REPL session, the agent has the full conversation history and remembers every question and answer. But when you type `exit` and come back later, that history is gone. The `Memory` capability bridges this gap by extracting durable learnings from each session and making them available to future sessions.
+
+**How it works:**
+
+After each conversational turn, the SDK serializes the full exchange (input, tool calls, outputs, response) into a rollout file. A background pipeline then processes these:
+
+1. **Phase 1** (after every turn): A lightweight model (`gpt-5.4-mini`) reads the rollout and extracts durable facts (useful query patterns, data caveats, column quirks, user preferences) into `memory/raw_memories/` and `memory/rollout_summaries/`.  
+2. **Phase 2** (every 5 turns, or on shutdown): A stronger model (`gpt-5.4`) consolidates everything into `memory/MEMORY.md` (a detailed, grep-friendly handbook) and `memory/memory_summary.md` (a compact summary).
+
+Both phases run in background `asyncio` tasks, so they don't block the conversation.
+
+**How it persists:**
+
+Memory files live in the sandbox filesystem and survive as long as the paused sandbox does. When you reconnect, the `Memory` capability reads them back. If the sandbox is destroyed or can't be reconnected, memory is lost and the agent starts fresh.
+
+## Quick Reference
+
+| Component | What it does |
+| :---- | :---- |
+| `setup_db.py` | Fetches NASA data from USAspending API, builds SQLite DB |
+| `schema/overview.md` | Table schema and example queries, injected into agent instructions |
+| `schema/glossary.md` | Official USAspending term definitions |
+| `SqlCapability` | Guardrailed `run_sql` tool (read-only, row limits, timeouts) |
+| `Shell()` | General shell access for reading schema docs and memory |
+| `Compaction()` | Automatic context compression for long sessions |
+| `Memory()` | Cross-session learning: extracts and recalls durable facts |
+| `pause_on_exit=True` | Sandbox persists across runs (avoids re-downloading data) |
