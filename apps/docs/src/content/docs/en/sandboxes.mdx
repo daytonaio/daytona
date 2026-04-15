@@ -1050,6 +1050,20 @@ Daytona tracks the parent-child relationship in a fork tree, so you can always t
 2. Click the three-dot menu (**⋮**) next to the sandbox you want to fork
 3. Select **Fork**
 
+<Tabs syncKey="language">
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+// Fork sandbox through the Sandbox instance
+const forkedSandbox = await sandbox._experimental_fork({ name: "my-fork" });
+
+// Or use the Daytona helper method
+const forkedSandbox1 = await daytona._experimental_fork(sandbox, { name: "my-fork" });
+```
+
+</TabItem>
+</Tabs>
+
 ### View Forks
 
 Daytona provides methods to view forks. You can view the fork tree for a sandbox and all its related sandboxes.
@@ -1059,6 +1073,21 @@ Daytona provides methods to view forks. You can view the fork tree for a sandbox
 3. Select **View Forks**
 
 The fork tree displays each sandbox in the hierarchy along with its current state and creation time, allowing you to trace the lineage of any fork back to its origin.
+
+## Create Snapshot from Sandbox
+
+Daytona provides methods to create [snapshots](/docs/en/snapshots) from sandboxes. Snapshots are immutable copies of a sandbox's filesystem that can be used to create new sandboxes.
+
+<Tabs syncKey="language">
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+// Create snapshot from sandbox
+await sandbox._experimental_createSnapshot("my-snapshot");
+```
+
+</TabItem>
+</Tabs>
 
 ## Delete Sandboxes
 
