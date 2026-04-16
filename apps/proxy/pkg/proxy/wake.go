@@ -109,7 +109,7 @@ func (p *Proxy) waitForSandboxStarted(ctx context.Context, sandboxID string) boo
 
 			switch *info.State {
 			case apiclient.SANDBOXSTATE_STARTED:
-				log.Infof("Sandbox %s is now started", sandboxID)
+				log.Debugf("Sandbox %s is now started", sandboxID)
 				return true
 			case apiclient.SANDBOXSTATE_ERROR, apiclient.SANDBOXSTATE_BUILD_FAILED:
 				log.Errorf("Sandbox %s failed to start (state: %s)", sandboxID, *info.State)
