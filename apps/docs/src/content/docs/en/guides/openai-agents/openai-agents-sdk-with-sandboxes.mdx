@@ -1,0 +1,498 @@
+---
+title: Using the OpenAI Agents SDK with Daytona Sandboxes
+description: "Core patterns for using the OpenAI Agents SDK with Daytona sandboxes: shell access, handoffs, memory, and human-in-the-loop workflows."
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+This guide walks through the core patterns for running AI agents in isolated cloud sandboxes using the [OpenAI Agents SDK](https://developers.openai.com/api/docs/guides/agents) and Daytona. We start from a simple example and progressively layer on multi-agent handoffs, memory, structured outputs, and human-in-the-loop workflows.
+
+See also the [Text-to-SQL Agent with the OpenAI Agents SDK and Daytona](/docs/en/guides/openai-agents/text-to-sql-agent-openai-agents-sdk) guide for a complete project built on these patterns.
+
+---
+
+## Prerequisites
+
+Install the Agents SDK with the Daytona extra:
+
+```shell
+pip install openai-agents[daytona]
+```
+
+Set your environment variables:
+
+```shell
+export OPENAI_API_KEY=...
+export DAYTONA_API_KEY=...        # from https://app.daytona.io/dashboard/keys
+```
+
+## 1\. Give Your Agent a Shell
+
+The basic pattern: declare a workspace, give an agent shell access, and let it explore, write code, and run it.
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```py
+    from openai.types.responses import ResponseTextDeltaEvent
+
+    from agents import Runner
+    from agents.run import RunConfig
+    from agents.sandbox import Manifest, SandboxAgent, SandboxRunConfig
+    from agents.sandbox.capabilities import Shell
+    from agents.sandbox.entries import File
+    from agents.extensions.sandbox import DaytonaSandboxClient, DaytonaSandboxClientOptions
+
+    DAYTONA_ROOT = "/home/daytona/workspace"
+
+    # Declare workspace contents declaratively
+    # Use Daytona's home directory as root instead of the default /workspace.
+    manifest = Manifest(root=DAYTONA_ROOT, entries={
+        "data/sales.csv": File(content=b"quarter,revenue\nQ1,3200000\nQ2,3600000\nQ3,4200000\nQ4,3900000"),
+        "requirements.txt": File(content=b"pandas\nmatplotlib"),
+    })
+
+    agent = SandboxAgent(
+        name="Data Analyst",
+        model="gpt-5.4",
+        instructions=(
+            "You're a data analyst with shell access to a sandbox. "
+            "Inspect the workspace, install dependencies, write and run code to answer questions."
+        ),
+        default_manifest=manifest,
+        capabilities=[Shell()],
+    )
+
+    client = DaytonaSandboxClient()
+    run_config = RunConfig(
+        sandbox=SandboxRunConfig(client=client, options=DaytonaSandboxClientOptions())
+    )
+
+    result = Runner.run_streamed(
+        agent,
+        "Which quarter had the highest revenue? Write a script to plot the trend and save it as chart.png.",
+        run_config=run_config,
+    )
+    async for event in result.stream_events():
+        if event.type == "raw_response_event" and isinstance(event.data, ResponseTextDeltaEvent):
+            print(event.data.delta, end="", flush=True)
+        elif event.type == "run_item_stream_event":
+            if event.name == "tool_called":
+                raw = event.item.raw_item
+                name = raw.get("name", "") if isinstance(raw, dict) else getattr(raw, "name", "")
+                args = raw.get("arguments", "") if isinstance(raw, dict) else getattr(raw, "arguments", "")
+                print(f"\n[{name}] {args}")
+            elif event.name == "tool_output":
+                print(f"  → {event.item.output[:200]}")
+
+    await client.close()
+    ```
+  </TabItem>
+</Tabs>
+
+The agent will likely `cat` the CSV, `pip install -r requirements.txt`, write a Python script, run it, and report back, all through the shell tool. A typical run might look like:
+
+```
+[exec_command] {"cmd": "cat data/sales.csv"}
+  → quarter,revenue\nQ1,3200000\nQ2,3600000\nQ3,4200000\nQ4,3900000
+[exec_command] {"cmd": "pip install -r requirements.txt"}
+  → Successfully installed pandas matplotlib ...
+[exec_command] {"cmd": "python plot.py"}
+  → Chart saved to chart.png
+Q3 had the highest revenue at $4.2M. I've saved a trend chart to chart.png.
+```
+
+**What's happening:**
+
+- **`Manifest`** describes the workspace declaratively: files, directories, and environment variables (via `environment=Environment(value={"API_KEY": "..."})`, where `Environment` is imported from `agents.sandbox.manifest`). You can also pass `Manifest(entries={})` for an empty workspace and let the agent create everything from scratch.  
+- **`SandboxAgent`** adds `default_manifest` and `capabilities` on top of a regular `Agent`. You can still pass `tools=` (function tools) and `mcp_servers=` alongside capabilities.  
+- **`Shell`** gives the model an `exec_command` tool that can run `cat`, `ls`, `find`, `grep`, `pip install`, `python script.py`, etc. inside the sandbox. The agent can read *and* write: creating files, installing packages, and running programs are all fair game.  
+- **`DaytonaSandboxClient`** provisions a remote cloud sandbox.  
+- **`Runner.run_streamed`** streams text token-by-token and emits structured events when tools are called.
+
+The sandbox is fully isolated, so there's no risk to your host machine. The agent has full Linux access inside it.
+
+## 2\. Multi-Turn Conversations
+
+The previous example runs a single question and exits. In practice you'll often want an interactive session where the human asks questions, the agent responds, and conversation history carries forward. The sandbox stays alive across turns so the agent can build on previous work.
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```py
+    client = DaytonaSandboxClient()
+    session = await client.create(manifest=manifest, options=DaytonaSandboxClientOptions())
+    await session.start()
+
+    run_config = RunConfig(sandbox=SandboxRunConfig(session=session))
+
+    conversation = []
+    while True:
+        question = input("> ")
+        if question.strip().lower() == "exit":
+            break
+
+        input_items = conversation + [{"role": "user", "content": question}]
+        result = Runner.run_streamed(agent, input_items, run_config=run_config)
+
+        async for event in result.stream_events():
+            if event.type == "raw_response_event" and isinstance(event.data, ResponseTextDeltaEvent):
+                print(event.data.delta, end="", flush=True)
+        print()
+
+        # Carry conversation history forward so the agent remembers previous turns
+        conversation = result.to_input_list()
+
+    await session.aclose()
+    await client.close()
+    ```
+  </TabItem>
+</Tabs>
+
+This example uses `result.to_input_list()`, which serializes the full conversation (including tool calls and their results) into a format you can pass back on the next turn. The agent sees the entire history, so follow-ups like "break that down by quarter" or "now plot it" just work. The SDK also supports other state strategies: sessions, `conversation_id`, and `previous_response_id` – see the [State and conversation management](https://openai.github.io/openai-agents-python/running_agents/#state-and-conversation-management) docs for the full picture.
+
+This pattern composes with everything else in this guide. You can add handoffs, memory, pause/resume, etc. on top of a multi-turn loop.
+
+## 3\. Pause and Resume
+
+By default, when a session shuts down the sandbox is deleted. Setting `pause_on_exit=True` changes this: on shutdown, the SDK calls Daytona's pause API (`sandbox.stop()`) instead of `sandbox.delete()`. The sandbox stays on Daytona's infrastructure in a paused state, preserving the filesystem (including any installed packages).
+
+To reconnect on the next run, you need two things:
+
+1. **Daytona keeps the sandbox alive**, paused on their side, identifiable by its sandbox ID.  
+2. **Your code remembers the sandbox ID**. The SDK captures this in `DaytonaSandboxSessionState`, a Pydantic model you serialize to disk.
+
+When you call `client.resume(saved_state)`, the SDK uses the `sandbox_id` from that state to call `daytona.get(sandbox_id)`. If the sandbox is still there, it calls `sandbox.start()` to wake it. The workspace is already populated, so it skips full manifest apply but still reapplies ephemeral state (like environment variables) and restores snapshots if needed. If the sandbox has expired or been deleted, `resume()` falls through and creates a fresh one from the same config.
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```py
+    from pathlib import Path
+    from agents.extensions.sandbox import (
+        DaytonaSandboxClient,
+        DaytonaSandboxClientOptions,
+        DaytonaSandboxSessionState,
+    )
+
+    STATE_FILE = Path(".session_state.json")
+
+    client = DaytonaSandboxClient()
+    options = DaytonaSandboxClientOptions(pause_on_exit=True)
+
+    # Try to resume a previously paused sandbox
+    session = None
+    if STATE_FILE.exists():
+        saved = DaytonaSandboxSessionState.model_validate_json(STATE_FILE.read_text())
+        old_sandbox_id = saved.sandbox_id  # snapshot before resume() mutates it
+        try:
+            session = await client.resume(saved)
+            if session.state.sandbox_id == old_sandbox_id:
+                print("Reconnected to existing sandbox.")
+            else:
+                print("Previous sandbox expired. Created a new one.")
+        except Exception:
+            session = None  # fall through to fresh creation
+
+    if session is None:
+        session = await client.create(manifest=manifest, options=options)
+
+    # Save state immediately so crashes don't orphan the sandbox
+    STATE_FILE.write_text(session.state.model_dump_json(indent=2))
+
+    # ... run your agent ...
+
+    # On clean exit: aclose() persists the workspace, then pauses (or deletes) the remote sandbox
+    await session.aclose()
+    await client.close()
+    ```
+  </TabItem>
+</Tabs>
+
+The Agents SDK also has its own **workspace persistence** mechanism (`persist_workspace`/`hydrate_workspace`) that tars up workspace files and saves them externally (local disk, S3). This is useful when the sandbox itself is gone and you need to restore contents into a new one. It's distinct from **Daytona snapshots** (`sandbox_snapshot_name`), which are pre-built sandbox templates you create sandboxes *from*.
+
+## 4\. Handoffs: Routing Work Between Agents
+
+A `SandboxAgent` can hand off to a regular `Agent` and vice versa. Not every agent needs sandbox access: a copywriter can draft an email without a shell.
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```py
+    from agents import Agent, Runner
+    from agents.run import RunConfig
+    from agents.sandbox import Manifest, SandboxAgent, SandboxRunConfig
+    from agents.sandbox.capabilities import Shell
+    from agents.sandbox.entries import File
+    from agents.extensions.sandbox import DaytonaSandboxClient, DaytonaSandboxClientOptions
+
+    manifest = Manifest(root="/home/daytona/workspace", entries={
+        "data/sales.csv": File(content=b"quarter,region,revenue\nQ1,NA,3200000\nQ1,EU,2100000\n..."),
+    })
+
+    # The copywriter receives the analyst's findings (no sandbox needed)
+    copywriter = Agent(
+        name="Client Email Drafter",
+        model="gpt-5.4",
+        instructions="Turn the analyst's findings into a short, friendly client-facing email.",
+    )
+
+    # The analyst has shell access to crunch data, then hands off to the copywriter
+    analyst = SandboxAgent(
+        name="Data Analyst",
+        model="gpt-5.4",
+        instructions=(
+            "Analyze the sales data in the workspace. Write and run code to compute trends. "
+            "Then hand off your findings to the Client Email Drafter."
+        ),
+        default_manifest=manifest,
+        capabilities=[Shell()],
+        handoffs=[copywriter],
+    )
+
+    client = DaytonaSandboxClient()
+    result = await Runner.run(
+        analyst,
+        "Summarize Q1 performance by region for the client.",
+        run_config=RunConfig(sandbox=SandboxRunConfig(client=client, options=DaytonaSandboxClientOptions())),
+    )
+    await client.close()
+    print(result.final_output)  # a polished email, written by the copywriter
+    ```
+  </TabItem>
+</Tabs>
+
+**The flow:** Analyst (sandbox, reads CSV, runs a script) → Copywriter (no sandbox, writes the email). The final output comes from the copywriter, but it's grounded in the analyst's computed results.
+
+Handoffs can also be **circular**: agents pass control back and forth until one decides to respond directly instead of handing off, which ends the run. In the example above, that would look like:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```py
+    from agents import handoff
+
+    copywriter.handoffs = [handoff(analyst)]
+    analyst.handoffs = [handoff(copywriter)]
+    ```
+  </TabItem>
+</Tabs>
+
+You can also have multiple sandbox agents, each with their own isolated workspace and separate `RunConfig`, as shown in the next section.
+
+## 5\. Sandbox Agents as Tools
+
+Instead of handoffs (sequential), you can run sandbox agents as parallel tools under an orchestrator:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```py
+    import json
+    from pydantic import BaseModel
+
+    class PricingReview(BaseModel):
+        risk: str
+        summary: str
+
+    class RolloutReview(BaseModel):
+        risk: str
+        blockers: list[str]
+
+    # By default, Pydantic output_type results are stringified (repr) when passed back
+    # as tool output. This extractor ensures the orchestrator receives clean JSON instead.
+    async def structured_output_extractor(result) -> str:
+        final_output = result.final_output
+        if isinstance(final_output, BaseModel):
+            return json.dumps(final_output.model_dump(mode="json"), sort_keys=True)
+        return str(final_output)
+
+    # Each reviewer gets its own isolated workspace
+    pricing_agent = SandboxAgent(
+        name="Pricing Reviewer",
+        default_manifest=pricing_docs_manifest,
+        capabilities=[Shell()],
+        output_type=PricingReview,
+        ...
+    )
+    rollout_agent = SandboxAgent(
+        name="Rollout Reviewer",
+        default_manifest=rollout_docs_manifest,
+        capabilities=[Shell()],
+        output_type=RolloutReview,
+        ...
+    )
+
+    # Orchestrator calls them like tools, each in its own sandbox
+    client = DaytonaSandboxClient()
+    orchestrator = Agent(
+        name="Deal Desk Coordinator",
+        instructions="Use both review tools, then synthesize a recommendation.",
+        tools=[
+            pricing_agent.as_tool(
+                tool_name="review_pricing",
+                tool_description="Review the pricing packet.",
+                custom_output_extractor=structured_output_extractor,
+                run_config=RunConfig(sandbox=SandboxRunConfig(client=client, options=DaytonaSandboxClientOptions())),
+            ),
+            rollout_agent.as_tool(
+                tool_name="review_rollout",
+                tool_description="Review the rollout plan.",
+                custom_output_extractor=structured_output_extractor,
+                run_config=RunConfig(sandbox=SandboxRunConfig(client=client, options=DaytonaSandboxClientOptions())),
+            ),
+        ],
+    )
+
+    result = await Runner.run(orchestrator, "Review the Acme Corp renewal deal.")
+    print(result.final_output)
+
+    await client.close()
+    ```
+  </TabItem>
+</Tabs>
+
+Each sandbox agent runs in its own isolated environment. The orchestrator never sees the files; it only gets the structured output as JSON via the `custom_output_extractor`. This is great for **fan-out** patterns where you need multiple independent analyses.
+
+## 6\. Memory Across Sessions
+
+The `Memory` capability lets an agent learn from previous runs. It extracts durable facts and preferences from each conversation, consolidates them into structured files in the workspace, and automatically injects a summary into the agent's instructions on future runs.
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```py
+    from agents.sandbox import LocalSnapshotSpec, SandboxRunConfig
+    from agents.sandbox.capabilities import ApplyPatch, Memory, Shell
+
+    agent = SandboxAgent(
+        name="Data Analyst",
+        model="gpt-5.4",
+        instructions="Analyze the workspace and answer questions.",
+        default_manifest=manifest,
+        capabilities=[
+            Shell(),
+            ApplyPatch(),
+            Memory(),
+        ],
+    )
+
+    snapshot = LocalSnapshotSpec(base_path=Path("/tmp/my-agent-snapshots"))
+
+    # First run: agent learns user preferences.
+    # Memory artifacts are written to the workspace when the session closes.
+    session = await client.create(manifest=manifest, snapshot=snapshot)
+    async with session:
+        run_config = RunConfig(sandbox=SandboxRunConfig(session=session))
+        result1 = await Runner.run(agent, "Fix the bug. I prefer minimal patches.", run_config=run_config)
+
+    # Second run: resume the workspace so the agent sees the memory files from run 1.
+    resumed = await client.resume(session.state)
+    async with resumed:
+        run_config = RunConfig(sandbox=SandboxRunConfig(session=resumed))
+        result2 = await Runner.run(agent, "Add a test for the fix.", run_config=run_config)
+    ```
+  </TabItem>
+</Tabs>
+
+Memory consolidation runs as a background task and flushes when the session closes, so the close/resume cycle ensures run 2 sees the artifacts from run 1\. You can also keep a single sandbox session open across runs (like section 2), though memory visibility then depends on whether the background task has finished.
+
+`Memory()` with no arguments enables both reading and writing with live updates (the agent can repair stale memory in place). It requires `Shell` and `ApplyPatch` as sibling capabilities. You can tune the behavior:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```py
+    from agents.sandbox.config import MemoryReadConfig, MemoryWriteConfig
+
+    # Write-only (no auto-injection of memory into instructions):
+    Memory(read=None)
+
+    # Read-only (no background memory generation):
+    Memory(write=None)
+
+    # Custom write settings:
+    Memory(write=MemoryWriteConfig(
+        batch_size=2,
+        extra_prompt="Pay attention to which SQL patterns work best for this dataset.",
+    ))
+
+    # Disable live updates (agent reads memory but won't repair stale entries):
+    Memory(read=MemoryReadConfig(live_update=False))
+    ```
+  </TabItem>
+</Tabs>
+
+**How it works under the hood:**
+
+After each `Runner.run()` completes, the SDK serializes the run (user input, tool calls, outputs, and final response, filtering out system/developer items and reasoning) into a JSONL file in `rollouts/`. A background pipeline then processes these in two phases:
+
+1. **Phase 1 (per-rollout extraction):** A lightweight model (`gpt-5.4-mini`) reads each rollout transcript and extracts durable facts and preferences into `memory/raw_memories/` and `memory/rollout_summaries/`.  
+2. **Phase 2 (consolidation):** Once enough phase-1 results accumulate (controlled by `batch_size`), a stronger model (`gpt-5.4`) consolidates everything into `memory/MEMORY.md` (a structured, grep-friendly handbook) and `memory/memory_summary.md` (a compact index). A final phase-2 pass always runs on session shutdown.
+
+Both phases run in a background `asyncio.Task`, so they don't block the agent's main work.
+
+On subsequent runs, the `Memory` capability reads `memory/memory_summary.md` from the workspace and injects it into the agent's instructions (truncated to 15k tokens). The agent also gets guidance on when to grep `memory/MEMORY.md` for deeper context. This injection happens automatically — you don't need to wire it up yourself.
+
+The full set of generated artifacts:
+
+- `rollouts/`: JSONL rollout files (raw transcripts of each run)  
+- `memory/MEMORY.md`: detailed, grep-friendly handbook  
+- `memory/memory_summary.md`: compact summary, auto-injected into instructions  
+- `memory/raw_memories/`: individual learned facts (one file per rollout)  
+- `memory/raw_memories.md`: concatenated version of the above, fed into phase 2  
+- `memory/rollout_summaries/`: per-rollout summaries  
+- `memory/skills/`: optional reusable procedures the consolidation model may create
+
+If you combine this with pause/resume (\#3), the memory files survive across sessions. The workspace persistence model includes all runtime-created files by default (only `ephemeral=True` manifest entries are excluded). So on the next run, the agent starts with full context from previous sessions — no extra wiring needed.
+
+## 7\. Custom Capabilities
+
+Capabilities are plugins that inject tools and instructions into a sandbox agent. The built-in ones (`Shell`, `ApplyPatch`, `Vision`) cover common cases, but you can write your own:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```py
+    from agents.sandbox.capabilities.capability import Capability
+    from agents.tool import Tool, function_tool
+
+    class ExposePort(Capability):
+        type: str = "expose_port"
+
+        def tools(self) -> list[Tool]:
+            session = self.session  # bound automatically by the framework
+
+            @function_tool
+            async def get_app_url(port: int) -> str:
+                """Get the public URL for a port running in this sandbox."""
+                endpoint = await session.resolve_exposed_port(port)
+                return endpoint.url_for("http")
+
+            return [get_app_url]
+    ```
+  </TabItem>
+</Tabs>
+
+**Note:** `resolve_exposed_port` requires the port to be predeclared in the client options, e.g. `DaytonaSandboxClientOptions(exposed_ports=(8080,))`. Without this, the call raises `ExposedPortUnavailableError`.
+
+Use this to expose domain-specific operations (database queries, API testing, cloud storage access) as tools the agent can call.
+
+## Quick Reference: DaytonaSandboxClientOptions
+
+| Option | Default | Description |
+| :---- | :---- | :---- |
+| `image` | `None` | OCI-compliant image to boot from |
+| `env_vars` | `None` | Environment variables injected at creation |
+| `exposed_ports` | `()` | Ports accessible via signed preview URLs |
+| `pause_on_exit` | `False` | Pause sandbox instead of deleting on cleanup |
+| `auto_stop_interval` | `0` | Seconds of inactivity before auto-pause (0 \= disabled) |
+| `create_timeout` | `60` | Timeout in seconds for sandbox creation |
+| `resources` | `None` | CPU/memory/disk configuration |
+
+## Patterns at a Glance
+
+| Pattern | When to Use | Key Concept |
+| :---- | :---- | :---- |
+| **Give Your Agent a Shell** (\#1) | Agent needs to read, write, or run code | `Manifest` \+ `Shell` |
+| **Multi-Turn Conversations** (\#2) | Interactive sessions with a human | `result.to_input_list()` |
+| **Pause/Resume** (\#3) | Long-running or iterative tasks | `pause_on_exit` \+ `client.resume(state)` |
+| **Handoffs** (\#4) | Pipeline: analyze → write → review | `handoffs=[next_agent]` |
+| **Agents as Tools** (\#5) | Parallel independent analyses | `agent.as_tool(run_config=...)` |
+| **Memory** (\#6) | Preferences that persist across sessions | `Memory()` \+ `MemoryReadConfig`/`MemoryWriteConfig` |
+| **Custom Capabilities** (\#7) | Domain-specific sandbox operations | Subclass `Capability` |
+
+## What's Next
+
+For a complete project that puts these patterns to work, see [**Building a Text-to-SQL Agent with OpenAI Agents SDK and Daytona**](/docs/en/guides/openai-agents/text-to-sql-agent-openai-agents-sdk), a conversational agent that queries real federal spending data, combining multi-turn conversations, pause/resume, memory, and preview URLs.

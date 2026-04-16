@@ -597,6 +597,35 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath('/docs/guides/openai-agents', locale),
+          label: t('sidebarconfig.openaiAgents'),
+          disablePagination: true,
+          attrs: {
+            icon: 'openai.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/openai-agents/openai-agents-sdk-with-sandboxes',
+            locale
+          ),
+          label: t('sidebarconfig.openaiAgents'),
+          disablePagination: true,
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/openai-agents/text-to-sql-agent-openai-agents-sdk',
+            locale
+          ),
+          label: t('sidebarconfig.openaiAgents'),
+          disablePagination: true,
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/guides/amp/amp-sdk-coding-agent', locale),
           label: t('sidebarconfig.amp'),
           disablePagination: true,
