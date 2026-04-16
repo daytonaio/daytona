@@ -95,7 +95,7 @@ jobs:
           docker logout docker.io 2>/dev/null || true
           git config --global --unset-all user.name 2>/dev/null || true
           git config --global --unset-all user.email 2>/dev/null || true
-          git config --global --unset-all safe.directory 2>/dev/null || true
+          git config --global --fixed-value --unset-all safe.directory "$GITHUB_WORKSPACE" 2>/dev/null || true
 
   update-homebrew-tap:
     if: ${{ inputs.npm_tag == 'latest' }}

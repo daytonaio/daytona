@@ -105,7 +105,7 @@ jobs:
         run: |
           git config --global --unset-all user.name 2>/dev/null || true
           git config --global --unset-all user.email 2>/dev/null || true
-          git config --global --unset-all safe.directory 2>/dev/null || true
+          git config --global --fixed-value --unset-all safe.directory "$GITHUB_WORKSPACE" 2>/dev/null || true
           git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}" 2>/dev/null || true
 
   build_projects:
@@ -206,7 +206,7 @@ jobs:
         run: |
           git config --global --unset-all user.name 2>/dev/null || true
           git config --global --unset-all user.email 2>/dev/null || true
-          git config --global --unset-all safe.directory 2>/dev/null || true
+          git config --global --fixed-value --unset-all safe.directory "$GITHUB_WORKSPACE" 2>/dev/null || true
           git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}" 2>/dev/null || true
 
   # Separately build docker images for AMD64 and ARM64
@@ -401,5 +401,5 @@ jobs:
         run: |
           git config --global --unset-all user.name 2>/dev/null || true
           git config --global --unset-all user.email 2>/dev/null || true
-          git config --global --unset-all safe.directory 2>/dev/null || true
+          git config --global --fixed-value --unset-all safe.directory "$GITHUB_WORKSPACE" 2>/dev/null || true
           git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}" 2>/dev/null || true
