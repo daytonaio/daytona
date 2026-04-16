@@ -620,8 +620,11 @@ class AsyncDaytona:
         # Get the sandbox instance
         sandbox_instance = await self._sandbox_api.get_sandbox(sandbox_id_or_name)
 
-        # Create and return sandbox with Python code toolbox as default
-        code_toolbox = SandboxPythonCodeToolbox()
+        code_toolbox = self._get_code_toolbox(
+            self._validate_language_label(
+                sandbox_instance.labels.get("code-toolbox-language") if sandbox_instance.labels else None
+            )
+        )
         return AsyncSandbox(
             sandbox_instance,
             self._toolbox_api_client,
