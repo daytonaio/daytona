@@ -58,14 +58,11 @@ const RESOURCE_FILTERS = [
 
 export function SandboxTableHeader({
   table,
+  labelOptions,
   regionOptions,
   regionsDataIsLoading,
   snapshots,
-  snapshotsDataIsLoading,
-  snapshotsDataHasMore,
-  onChangeSnapshotSearchValue,
-  onRefresh,
-  isRefreshing = false,
+  loadingSnapshots,
 }: SandboxTableHeaderProps) {
   const [open, setOpen] = React.useState(false)
   const currentSort = table.getState().sorting[0]?.id || ''
@@ -79,19 +76,14 @@ export function SandboxTableHeader({
   ]
 
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-      <div className="flex flex-wrap gap-2 items-center">
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-center mb-4">
+      <div className="flex gap-2 items-center">
         <DebouncedInput
           value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
           onChange={(value) => table.getColumn('name')?.setFilterValue(value)}
-          placeholder="Search by Name or UUID"
-          className="w-[240px]"
+          placeholder="Search by Name"
+          className="max-w-[200px]"
         />
-
-        <Button variant="outline" onClick={onRefresh} disabled={isRefreshing} className="flex items-center gap-2">
-          <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
 
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
@@ -211,9 +203,7 @@ export function SandboxTableHeader({
                     value={(table.getColumn('snapshot')?.getFilterValue() as string[]) || []}
                     onFilterChange={(value) => table.getColumn('snapshot')?.setFilterValue(value)}
                     snapshots={snapshots}
-                    isLoading={snapshotsDataIsLoading}
-                    hasMore={snapshotsDataHasMore}
-                    onChangeSnapshotSearchValue={onChangeSnapshotSearchValue}
+                    loadingSnapshots={loadingSnapshots}
                   />
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
@@ -261,6 +251,7 @@ export function SandboxTableHeader({
                   <LabelFilter
                     value={(table.getColumn('labels')?.getFilterValue() as string[]) || []}
                     onFilterChange={(value) => table.getColumn('labels')?.setFilterValue(value)}
+                    options={labelOptions}
                   />
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
@@ -273,7 +264,7 @@ export function SandboxTableHeader({
               <DropdownMenuPortal>
                 <DropdownMenuSubContent className="p-3 w-92">
                   <LastEventFilter
-                    onFilterChange={(value) => table.getColumn('lastEvent')?.setFilterValue(value)}
+                    onFilterChange={(value: Date[] | undefined) => table.getColumn('lastEvent')?.setFilterValue(value)}
                     value={(table.getColumn('lastEvent')?.getFilterValue() as Date[]) || []}
                   />
                 </DropdownMenuSubContent>
@@ -296,9 +287,7 @@ export function SandboxTableHeader({
             value={(table.getColumn('snapshot')?.getFilterValue() as string[]) || []}
             onFilterChange={(value) => table.getColumn('snapshot')?.setFilterValue(value)}
             snapshots={snapshots}
-            isLoading={snapshotsDataIsLoading}
-            hasMore={snapshotsDataHasMore}
-            onChangeSnapshotSearchValue={onChangeSnapshotSearchValue}
+            loadingSnapshots={loadingSnapshots}
           />
         )}
 
@@ -327,6 +316,7 @@ export function SandboxTableHeader({
           <LabelFilterIndicator
             value={(table.getColumn('labels')?.getFilterValue() as string[]) || []}
             onFilterChange={(value) => table.getColumn('labels')?.setFilterValue(value)}
+            options={labelOptions}
           />
         )}
 

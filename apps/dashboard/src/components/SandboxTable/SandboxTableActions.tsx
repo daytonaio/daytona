@@ -5,6 +5,7 @@
 
 import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
+import { useRegions } from '@/hooks/useRegions'
 import { SandboxState } from '@daytona/api-client'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { Terminal, MoreVertical, Play, Square, Loader2, Wrench } from 'lucide-react'
@@ -42,6 +43,8 @@ export function SandboxTableActions({
 }: SandboxTableActionsProps) {
   const navigate = useNavigate()
   const linuxVmEnabled = useFeatureFlagEnabled(FeatureFlags.SANDBOX_LINUX_VM)
+  const { getRegionName } = useRegions()
+  const isExperimentalRegion = (getRegionName(sandbox.target) ?? '').toLowerCase() === 'experimental'
 
   const menuItems = useMemo(() => {
     const items = []
@@ -98,7 +101,11 @@ export function SandboxTableActions({
         })
       }
 
-      if (linuxVmEnabled && (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED)) {
+      if (
+        linuxVmEnabled &&
+        isExperimentalRegion &&
+        (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED)
+      ) {
         items.push({
           key: 'create-snapshot',
           label: 'Create Snapshot',
@@ -114,7 +121,7 @@ export function SandboxTableActions({
         })
       }
 
-      if (linuxVmEnabled) {
+      if (linuxVmEnabled && isExperimentalRegion) {
         items.push({
           key: 'view-forks',
           label: 'View Fork Tree',
@@ -174,6 +181,8 @@ export function SandboxTableActions({
     onFork,
     onViewForks,
     linuxVmEnabled,
+    isExperimentalRegion,
+    sandbox.target,
     navigate,
   ])
 

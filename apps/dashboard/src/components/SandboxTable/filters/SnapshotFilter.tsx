@@ -13,6 +13,7 @@ import {
   CommandList,
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Skeleton } from '@/components/ui/skeleton'
 import { SnapshotDto } from '@daytona/api-client'
 import { Loader2, X } from 'lucide-react'
 import { useState } from 'react'
@@ -21,19 +22,10 @@ interface SnapshotFilterProps {
   value: string[]
   onFilterChange: (value: string[] | undefined) => void
   snapshots: SnapshotDto[]
-  isLoading: boolean
-  hasMore?: boolean
-  onChangeSnapshotSearchValue: (name?: string) => void
+  loadingSnapshots: boolean
 }
 
-export function SnapshotFilterIndicator({
-  value,
-  onFilterChange,
-  snapshots,
-  isLoading,
-  hasMore,
-  onChangeSnapshotSearchValue,
-}: SnapshotFilterProps) {
+export function SnapshotFilterIndicator({ value, onFilterChange, snapshots, loadingSnapshots }: SnapshotFilterProps) {
   return (
     <div className="flex items-center h-6 gap-0.5 rounded-sm border border-border bg-muted/80 hover:bg-muted/50 text-sm">
       <Popover>
@@ -46,9 +38,7 @@ export function SnapshotFilterIndicator({
             value={value}
             onFilterChange={onFilterChange}
             snapshots={snapshots}
-            isLoading={isLoading}
-            hasMore={hasMore}
-            onChangeSnapshotSearchValue={onChangeSnapshotSearchValue}
+            loadingSnapshots={loadingSnapshots}
           />
         </PopoverContent>
       </Popover>
@@ -60,16 +50,7 @@ export function SnapshotFilterIndicator({
   )
 }
 
-export function SnapshotFilter({
-  value,
-  onFilterChange,
-  snapshots,
-  isLoading,
-  hasMore,
-  onChangeSnapshotSearchValue,
-}: SnapshotFilterProps) {
-  const [searchValue, setSearchValue] = useState('')
-
+export function SnapshotFilter({ value, onFilterChange, snapshots, loadingSnapshots }: SnapshotFilterProps) {
   const handleSelect = (snapshotName: string) => {
     const newValue = value.includes(snapshotName)
       ? value.filter((name) => name !== snapshotName)
@@ -77,45 +58,27 @@ export function SnapshotFilter({
     onFilterChange(newValue.length > 0 ? newValue : undefined)
   }
 
-  const handleSearchChange = (search: string | number) => {
-    const searchStr = String(search)
-    setSearchValue(searchStr)
-    if (onChangeSnapshotSearchValue) {
-      onChangeSnapshotSearchValue(searchStr || undefined)
-    }
-  }
-
   return (
     <Command>
-      <CommandInput placeholder="Search..." className="" value={searchValue} onValueChange={setSearchValue}>
-        <CommandInputButton
-          onClick={() => {
-            onFilterChange(undefined)
-            setSearchValue('')
-            if (onChangeSnapshotSearchValue) {
-              onChangeSnapshotSearchValue(undefined)
-            }
-          }}
+      <div className="flex items-center gap-2 justify-between p-2">
+        <CommandInput placeholder="Filter by snapshot..." className="border border-border rounded-md h-8" />
+        <button
+          className="text-sm text-muted-foreground hover:text-primary px-2"
+          onClick={() => onFilterChange(undefined)}
         >
           Clear
-        </CommandInputButton>
-      </CommandInput>
-      {hasMore && (
-        <div className="px-2 pb-2 mt-2">
-          <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1">
-            Please refine your search to see more Snapshots.
-          </div>
-        </div>
-      )}
+        </button>
+      </div>
       <CommandList>
-        {isLoading ? (
-          <div className="flex items-center justify-center py-6">
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            <span className="text-sm text-muted-foreground">Loading Snapshots...</span>
+        {loadingSnapshots ? (
+          <div className="p-1">
+            <Skeleton className="h-8 w-full mb-1" />
+            <Skeleton className="h-8 w-full mb-1" />
+            <Skeleton className="h-8 w-full" />
           </div>
         ) : (
           <>
-            <CommandEmpty>No Snapshots found.</CommandEmpty>
+            <CommandEmpty>No snapshots found.</CommandEmpty>
             <CommandGroup>
               {snapshots.map((snapshot) => (
                 <CommandCheckboxItem
