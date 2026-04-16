@@ -615,8 +615,6 @@ Common use cases for force stop include:
 - you need to reduce stop time and can accept immediate termination
 - the entrypoint ignores termination signals or hangs during shutdown
 
-Avoid force stop for normal shutdowns where the process should flush buffers, write final state, or run cleanup hooks.
-
 ## Pause Sandboxes
 
 :::caution[Experimental]
