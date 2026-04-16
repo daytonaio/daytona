@@ -459,11 +459,13 @@ class AsyncDaytona:
             ]
 
         # Create sandbox using dictionary
+        labels = dict(params.labels or {})
+        labels["code-toolbox-language"] = params.language
         sandbox_data = CreateSandbox(
             name=params.name,
             user=params.os_user,
             env=params.env_vars if params.env_vars else {},
-            labels=params.labels,
+            labels=labels,
             public=params.public,
             target=str(target) if target else None,
             auto_stop_interval=params.auto_stop_interval,
