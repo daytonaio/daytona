@@ -118,6 +118,9 @@ func TestToLatin1(t *testing.T) {
 		{"hello\x00.txt", "hello.txt"},
 		{"café", "caf\xe9"},
 		{"日本語.txt", "___.txt"},
+		{"hello\tworld.txt", "hello_world.txt"},
+		{"bell\x07.txt", "bell_.txt"},
+		{"del\x7f.txt", "del_.txt"},
 		{"", ""},
 	}
 

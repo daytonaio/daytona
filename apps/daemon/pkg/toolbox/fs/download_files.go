@@ -228,10 +228,12 @@ func toLatin1(s string) string {
 	escaped := strings.NewReplacer(`\`, `\\`, `"`, `\"`, "\r", "", "\n", "", "\x00", "").Replace(s)
 	var buf []byte
 	for _, r := range escaped {
-		if r <= 0xFF {
-			buf = append(buf, byte(r))
-		} else {
+		if r > 0xFF {
 			buf = append(buf, '_')
+		} else if r < 0x20 || r == 0x7F {
+			buf = append(buf, '_')
+		} else {
+			buf = append(buf, byte(r))
 		}
 	}
 	return string(buf)
