@@ -36,6 +36,7 @@ import { OrganizationUsageService } from '../../organization/services/organizati
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SnapshotSortDirection, SnapshotSortField } from '../dto/list-snapshots-query.dto'
 import { PER_SANDBOX_LIMIT_MESSAGE } from '../../common/constants/error-messages'
+import { getEffectivePerSandboxLimits } from '../../organization/utils/sandbox-limits.util'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
 import { Region } from '../../region/entities/region.entity'
@@ -143,7 +144,7 @@ export class SnapshotService {
       throw new DefaultRegionRequiredException()
     }
 
-    const regionId = await this.getValidatedOrDefaultRegionId(organization, createSnapshotDto.regionId)
+    const region = await this.getValidatedOrDefaultRegion(organization, createSnapshotDto.regionId)
 
     let pendingSnapshotCountIncrement: number | undefined
 
@@ -172,6 +173,7 @@ export class SnapshotService {
 
       const { pendingSnapshotCountIncremented } = await this.validateOrganizationQuotas(
         organization,
+        region,
         newSnapshotCount,
         createSnapshotDto.cpu,
         createSnapshotDto.memory,
@@ -194,7 +196,7 @@ export class SnapshotService {
           state,
           ref,
           general,
-          snapshotRegions: [{ snapshotId, regionId }],
+          snapshotRegions: [{ snapshotId, regionId: region.id }],
         })
 
         const insertedSnapshot = await this.snapshotRepository.insert(snapshot)
@@ -222,7 +224,7 @@ export class SnapshotService {
       throw new DefaultRegionRequiredException()
     }
 
-    const regionId = await this.getValidatedOrDefaultRegionId(organization, createSnapshotDto.regionId)
+    const region = await this.getValidatedOrDefaultRegion(organization, createSnapshotDto.regionId)
 
     let pendingSnapshotCountIncrement: number | undefined
     let entrypoint: string[] | undefined = undefined
@@ -239,6 +241,7 @@ export class SnapshotService {
 
       const { pendingSnapshotCountIncremented } = await this.validateOrganizationQuotas(
         organization,
+        region,
         newSnapshotCount,
         createSnapshotDto.cpu,
         createSnapshotDto.memory,
@@ -261,7 +264,7 @@ export class SnapshotService {
         mem: createSnapshotDto.memory, // Map memory to mem
         state: SnapshotState.PENDING,
         general,
-        snapshotRegions: [{ snapshotId, regionId }],
+        snapshotRegions: [{ snapshotId, regionId: region.id }],
       })
 
       const buildSnapshotRef = generateBuildSnapshotRef(
@@ -289,13 +292,13 @@ export class SnapshotService {
         snapshot.buildInfo = buildInfoEntity
       }
 
-      const internalRegistry = await this.dockerRegistryService.getAvailableInternalRegistry(regionId)
+      const internalRegistry = await this.dockerRegistryService.getAvailableInternalRegistry(region.id)
       if (!internalRegistry) {
         throw new Error('No internal registry found for snapshot')
       }
       snapshot.ref = `${internalRegistry.url.replace(/^(https?:\/\/)/, '')}/${internalRegistry.project || 'daytona'}/${buildSnapshotRef}`
 
-      const exists = await this.readySnapshotRunnerExists(snapshot.ref, regionId)
+      const exists = await this.readySnapshotRunnerExists(snapshot.ref, region.id)
 
       if (exists) {
         const existingSnapshot = await this.snapshotRepository.findOne({
@@ -515,6 +518,7 @@ export class SnapshotService {
 
   async validateOrganizationQuotas(
     organization: Organization,
+    region: Region,
     addedSnapshotCount: number,
     cpu?: number,
     memory?: number,
@@ -522,20 +526,29 @@ export class SnapshotService {
   ): Promise<{
     pendingSnapshotCountIncremented: boolean
   }> {
+    const regionQuota = region.enforceQuotas
+      ? await this.organizationService.getRegionQuota(organization.id, region.id)
+      : null
+
     // validate per-sandbox quotas
-    if (cpu && cpu > organization.maxCpuPerSandbox) {
+    const { maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox } = getEffectivePerSandboxLimits(
+      organization,
+      regionQuota,
+    )
+
+    if (cpu && cpu > maxCpuPerSandbox) {
       throw new ForbiddenException(
-        `CPU request ${cpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox}).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+        `CPU request ${cpu} exceeds maximum allowed per sandbox (${maxCpuPerSandbox}).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
-    if (memory && memory > organization.maxMemoryPerSandbox) {
+    if (memory && memory > maxMemoryPerSandbox) {
       throw new ForbiddenException(
-        `Memory request ${memory}GB exceeds maximum allowed per sandbox (${organization.maxMemoryPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+        `Memory request ${memory}GB exceeds maximum allowed per sandbox (${maxMemoryPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
-    if (disk && disk > organization.maxDiskPerSandbox) {
+    if (disk && disk > maxDiskPerSandbox) {
       throw new ForbiddenException(
-        `Disk request ${disk}GB exceeds maximum allowed per sandbox (${organization.maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+        `Disk request ${disk}GB exceeds maximum allowed per sandbox (${maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
 
@@ -599,6 +612,7 @@ export class SnapshotService {
     try {
       const snapshot = await this.snapshotRepository.findOne({
         where: { id: snapshotId },
+        relations: ['snapshotRegions'],
       })
 
       if (!snapshot) {
@@ -615,10 +629,18 @@ export class SnapshotService {
 
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
+      const regionId = snapshot.snapshotRegions?.[0]?.regionId
+      const region = regionId ? await this.regionRepository.findOne({ where: { id: regionId } }) : undefined
+
+      if (!region) {
+        throw new NotFoundException(`Region for snapshot ${snapshotId} not found`)
+      }
+
       const activatedSnapshotCount = 1
 
       const { pendingSnapshotCountIncremented } = await this.validateOrganizationQuotas(
         organization,
+        region,
         activatedSnapshotCount,
         snapshot.cpu,
         snapshot.mem,
@@ -751,12 +773,22 @@ export class SnapshotService {
    *
    * @param organization - The organization which is creating the snapshot.
    * @param regionId - The requested region ID. If omitted, the organization's default region is used.
-   * @returns The validated region ID
+   * @returns The validated region
    * @throws {NotFoundException} If the requested region is not available to the organization
    */
-  private async getValidatedOrDefaultRegionId(organization: Organization, regionId?: string): Promise<string> {
+  private async getValidatedOrDefaultRegion(organization: Organization, regionId?: string): Promise<Region> {
+    if (!organization.defaultRegionId) {
+      throw new DefaultRegionRequiredException()
+    }
+
+    regionId = regionId?.trim()
+
     if (!regionId) {
-      return organization.defaultRegionId
+      const region = await this.regionService.findOne(organization.defaultRegionId)
+      if (!region) {
+        throw new NotFoundException('Default region not found')
+      }
+      return region
     }
 
     const region = await this.regionRepository.findOne({
@@ -769,17 +801,17 @@ export class SnapshotService {
 
     const availableRegions = await this.organizationService.listAvailableRegions(organization.id)
 
-    if (!availableRegions.some((r) => r.id === regionId)) {
+    if (!availableRegions.some((r) => r.id === region.id)) {
       if (region.regionType === RegionType.SHARED) {
         // region is public, but the organization does not have a quota for it
-        throw new ForbiddenException(`Region ${regionId} is not available to the organization`)
+        throw new ForbiddenException(`Region ${region.id} is not available to the organization`)
       } else {
         // region is not public, respond as if the region was not found
-        throw new NotFoundException('Region not found')
+        throw new NotFoundException(`Region ${region.id} not found`)
       }
     }
 
-    return regionId
+    return region
   }
 
   /**

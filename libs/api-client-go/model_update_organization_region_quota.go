@@ -24,6 +24,10 @@ type UpdateOrganizationRegionQuota struct {
 	TotalCpuQuota NullableFloat32 `json:"totalCpuQuota"`
 	TotalMemoryQuota NullableFloat32 `json:"totalMemoryQuota"`
 	TotalDiskQuota NullableFloat32 `json:"totalDiskQuota"`
+	MaxCpuPerSandbox NullableFloat32 `json:"maxCpuPerSandbox,omitempty"`
+	MaxMemoryPerSandbox NullableFloat32 `json:"maxMemoryPerSandbox,omitempty"`
+	MaxDiskPerSandbox NullableFloat32 `json:"maxDiskPerSandbox,omitempty"`
+	MaxDiskPerNonEphemeralSandbox NullableFloat32 `json:"maxDiskPerNonEphemeralSandbox,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -127,6 +131,174 @@ func (o *UpdateOrganizationRegionQuota) SetTotalDiskQuota(v float32) {
 	o.TotalDiskQuota.Set(&v)
 }
 
+// GetMaxCpuPerSandbox returns the MaxCpuPerSandbox field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *UpdateOrganizationRegionQuota) GetMaxCpuPerSandbox() float32 {
+	if o == nil || IsNil(o.MaxCpuPerSandbox.Get()) {
+		var ret float32
+		return ret
+	}
+	return *o.MaxCpuPerSandbox.Get()
+}
+
+// GetMaxCpuPerSandboxOk returns a tuple with the MaxCpuPerSandbox field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UpdateOrganizationRegionQuota) GetMaxCpuPerSandboxOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.MaxCpuPerSandbox.Get(), o.MaxCpuPerSandbox.IsSet()
+}
+
+// HasMaxCpuPerSandbox returns a boolean if a field has been set.
+func (o *UpdateOrganizationRegionQuota) HasMaxCpuPerSandbox() bool {
+	if o != nil && o.MaxCpuPerSandbox.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetMaxCpuPerSandbox gets a reference to the given NullableFloat32 and assigns it to the MaxCpuPerSandbox field.
+func (o *UpdateOrganizationRegionQuota) SetMaxCpuPerSandbox(v float32) {
+	o.MaxCpuPerSandbox.Set(&v)
+}
+// SetMaxCpuPerSandboxNil sets the value for MaxCpuPerSandbox to be an explicit nil
+func (o *UpdateOrganizationRegionQuota) SetMaxCpuPerSandboxNil() {
+	o.MaxCpuPerSandbox.Set(nil)
+}
+
+// UnsetMaxCpuPerSandbox ensures that no value is present for MaxCpuPerSandbox, not even an explicit nil
+func (o *UpdateOrganizationRegionQuota) UnsetMaxCpuPerSandbox() {
+	o.MaxCpuPerSandbox.Unset()
+}
+
+// GetMaxMemoryPerSandbox returns the MaxMemoryPerSandbox field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *UpdateOrganizationRegionQuota) GetMaxMemoryPerSandbox() float32 {
+	if o == nil || IsNil(o.MaxMemoryPerSandbox.Get()) {
+		var ret float32
+		return ret
+	}
+	return *o.MaxMemoryPerSandbox.Get()
+}
+
+// GetMaxMemoryPerSandboxOk returns a tuple with the MaxMemoryPerSandbox field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UpdateOrganizationRegionQuota) GetMaxMemoryPerSandboxOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.MaxMemoryPerSandbox.Get(), o.MaxMemoryPerSandbox.IsSet()
+}
+
+// HasMaxMemoryPerSandbox returns a boolean if a field has been set.
+func (o *UpdateOrganizationRegionQuota) HasMaxMemoryPerSandbox() bool {
+	if o != nil && o.MaxMemoryPerSandbox.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetMaxMemoryPerSandbox gets a reference to the given NullableFloat32 and assigns it to the MaxMemoryPerSandbox field.
+func (o *UpdateOrganizationRegionQuota) SetMaxMemoryPerSandbox(v float32) {
+	o.MaxMemoryPerSandbox.Set(&v)
+}
+// SetMaxMemoryPerSandboxNil sets the value for MaxMemoryPerSandbox to be an explicit nil
+func (o *UpdateOrganizationRegionQuota) SetMaxMemoryPerSandboxNil() {
+	o.MaxMemoryPerSandbox.Set(nil)
+}
+
+// UnsetMaxMemoryPerSandbox ensures that no value is present for MaxMemoryPerSandbox, not even an explicit nil
+func (o *UpdateOrganizationRegionQuota) UnsetMaxMemoryPerSandbox() {
+	o.MaxMemoryPerSandbox.Unset()
+}
+
+// GetMaxDiskPerSandbox returns the MaxDiskPerSandbox field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *UpdateOrganizationRegionQuota) GetMaxDiskPerSandbox() float32 {
+	if o == nil || IsNil(o.MaxDiskPerSandbox.Get()) {
+		var ret float32
+		return ret
+	}
+	return *o.MaxDiskPerSandbox.Get()
+}
+
+// GetMaxDiskPerSandboxOk returns a tuple with the MaxDiskPerSandbox field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UpdateOrganizationRegionQuota) GetMaxDiskPerSandboxOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.MaxDiskPerSandbox.Get(), o.MaxDiskPerSandbox.IsSet()
+}
+
+// HasMaxDiskPerSandbox returns a boolean if a field has been set.
+func (o *UpdateOrganizationRegionQuota) HasMaxDiskPerSandbox() bool {
+	if o != nil && o.MaxDiskPerSandbox.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetMaxDiskPerSandbox gets a reference to the given NullableFloat32 and assigns it to the MaxDiskPerSandbox field.
+func (o *UpdateOrganizationRegionQuota) SetMaxDiskPerSandbox(v float32) {
+	o.MaxDiskPerSandbox.Set(&v)
+}
+// SetMaxDiskPerSandboxNil sets the value for MaxDiskPerSandbox to be an explicit nil
+func (o *UpdateOrganizationRegionQuota) SetMaxDiskPerSandboxNil() {
+	o.MaxDiskPerSandbox.Set(nil)
+}
+
+// UnsetMaxDiskPerSandbox ensures that no value is present for MaxDiskPerSandbox, not even an explicit nil
+func (o *UpdateOrganizationRegionQuota) UnsetMaxDiskPerSandbox() {
+	o.MaxDiskPerSandbox.Unset()
+}
+
+// GetMaxDiskPerNonEphemeralSandbox returns the MaxDiskPerNonEphemeralSandbox field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *UpdateOrganizationRegionQuota) GetMaxDiskPerNonEphemeralSandbox() float32 {
+	if o == nil || IsNil(o.MaxDiskPerNonEphemeralSandbox.Get()) {
+		var ret float32
+		return ret
+	}
+	return *o.MaxDiskPerNonEphemeralSandbox.Get()
+}
+
+// GetMaxDiskPerNonEphemeralSandboxOk returns a tuple with the MaxDiskPerNonEphemeralSandbox field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UpdateOrganizationRegionQuota) GetMaxDiskPerNonEphemeralSandboxOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.MaxDiskPerNonEphemeralSandbox.Get(), o.MaxDiskPerNonEphemeralSandbox.IsSet()
+}
+
+// HasMaxDiskPerNonEphemeralSandbox returns a boolean if a field has been set.
+func (o *UpdateOrganizationRegionQuota) HasMaxDiskPerNonEphemeralSandbox() bool {
+	if o != nil && o.MaxDiskPerNonEphemeralSandbox.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetMaxDiskPerNonEphemeralSandbox gets a reference to the given NullableFloat32 and assigns it to the MaxDiskPerNonEphemeralSandbox field.
+func (o *UpdateOrganizationRegionQuota) SetMaxDiskPerNonEphemeralSandbox(v float32) {
+	o.MaxDiskPerNonEphemeralSandbox.Set(&v)
+}
+// SetMaxDiskPerNonEphemeralSandboxNil sets the value for MaxDiskPerNonEphemeralSandbox to be an explicit nil
+func (o *UpdateOrganizationRegionQuota) SetMaxDiskPerNonEphemeralSandboxNil() {
+	o.MaxDiskPerNonEphemeralSandbox.Set(nil)
+}
+
+// UnsetMaxDiskPerNonEphemeralSandbox ensures that no value is present for MaxDiskPerNonEphemeralSandbox, not even an explicit nil
+func (o *UpdateOrganizationRegionQuota) UnsetMaxDiskPerNonEphemeralSandbox() {
+	o.MaxDiskPerNonEphemeralSandbox.Unset()
+}
+
 func (o UpdateOrganizationRegionQuota) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -140,6 +312,18 @@ func (o UpdateOrganizationRegionQuota) ToMap() (map[string]interface{}, error) {
 	toSerialize["totalCpuQuota"] = o.TotalCpuQuota.Get()
 	toSerialize["totalMemoryQuota"] = o.TotalMemoryQuota.Get()
 	toSerialize["totalDiskQuota"] = o.TotalDiskQuota.Get()
+	if o.MaxCpuPerSandbox.IsSet() {
+		toSerialize["maxCpuPerSandbox"] = o.MaxCpuPerSandbox.Get()
+	}
+	if o.MaxMemoryPerSandbox.IsSet() {
+		toSerialize["maxMemoryPerSandbox"] = o.MaxMemoryPerSandbox.Get()
+	}
+	if o.MaxDiskPerSandbox.IsSet() {
+		toSerialize["maxDiskPerSandbox"] = o.MaxDiskPerSandbox.Get()
+	}
+	if o.MaxDiskPerNonEphemeralSandbox.IsSet() {
+		toSerialize["maxDiskPerNonEphemeralSandbox"] = o.MaxDiskPerNonEphemeralSandbox.Get()
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -188,6 +372,10 @@ func (o *UpdateOrganizationRegionQuota) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "totalCpuQuota")
 		delete(additionalProperties, "totalMemoryQuota")
 		delete(additionalProperties, "totalDiskQuota")
+		delete(additionalProperties, "maxCpuPerSandbox")
+		delete(additionalProperties, "maxMemoryPerSandbox")
+		delete(additionalProperties, "maxDiskPerSandbox")
+		delete(additionalProperties, "maxDiskPerNonEphemeralSandbox")
 		o.AdditionalProperties = additionalProperties
 	}
 

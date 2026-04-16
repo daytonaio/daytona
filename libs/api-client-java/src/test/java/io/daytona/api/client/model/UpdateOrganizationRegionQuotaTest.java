@@ -21,6 +21,7 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -60,6 +61,38 @@ public class UpdateOrganizationRegionQuotaTest {
     @Test
     public void totalDiskQuotaTest() {
         // TODO: test totalDiskQuota
+    }
+
+    /**
+     * Test the property 'maxCpuPerSandbox'
+     */
+    @Test
+    public void maxCpuPerSandboxTest() {
+        // TODO: test maxCpuPerSandbox
+    }
+
+    /**
+     * Test the property 'maxMemoryPerSandbox'
+     */
+    @Test
+    public void maxMemoryPerSandboxTest() {
+        // TODO: test maxMemoryPerSandbox
+    }
+
+    /**
+     * Test the property 'maxDiskPerSandbox'
+     */
+    @Test
+    public void maxDiskPerSandboxTest() {
+        // TODO: test maxDiskPerSandbox
+    }
+
+    /**
+     * Test the property 'maxDiskPerNonEphemeralSandbox'
+     */
+    @Test
+    public void maxDiskPerNonEphemeralSandboxTest() {
+        // TODO: test maxDiskPerNonEphemeralSandbox
     }
 
 }

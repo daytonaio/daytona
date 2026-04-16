@@ -42,6 +42,7 @@ import { getStateChangeLockKey } from '../utils/lock-key.util'
 import { BackupState } from '../enums/backup-state.enum'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { sanitizeSandboxError } from '../utils/sanitize-error.util'
+import { isEphemeral } from '../utils/ephemeral.util'
 import { Sandbox } from '../entities/sandbox.entity'
 import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
@@ -130,8 +131,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
               let updateData: Partial<Sandbox> = {}
 
-              //  if auto-delete interval is 0, delete the sandbox immediately
-              if (sandbox.autoDeleteInterval === 0) {
+              if (isEphemeral(sandbox)) {
                 updateData = Sandbox.getSoftDeleteUpdate(sandbox)
               } else {
                 updateData.pending = true

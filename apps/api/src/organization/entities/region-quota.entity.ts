@@ -41,6 +41,39 @@ export class RegionQuota {
   })
   totalDiskQuota: number
 
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'max_cpu_per_sandbox',
+  })
+  maxCpuPerSandbox: number | null
+
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'max_memory_per_sandbox',
+  })
+  maxMemoryPerSandbox: number | null
+
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'max_disk_per_sandbox',
+  })
+  maxDiskPerSandbox: number | null
+
+  /**
+   * The maximum disk size allowed for non-ephemeral sandboxes.
+   * If `null`, fallback to `maxDiskPerSandbox`.
+   * If `0`, non-ephemeral sandboxes are not permitted in this region.
+   */
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'max_disk_per_non_ephemeral_sandbox',
+  })
+  maxDiskPerNonEphemeralSandbox: number | null
+
   @CreateDateColumn({
     type: 'timestamp with time zone',
   })
@@ -57,11 +90,19 @@ export class RegionQuota {
     totalCpuQuota: number,
     totalMemoryQuota: number,
     totalDiskQuota: number,
+    maxCpuPerSandbox: number | null = null,
+    maxMemoryPerSandbox: number | null = null,
+    maxDiskPerSandbox: number | null = null,
+    maxDiskPerNonEphemeralSandbox: number | null = null,
   ) {
     this.organizationId = organizationId
     this.regionId = regionId
     this.totalCpuQuota = totalCpuQuota
     this.totalMemoryQuota = totalMemoryQuota
     this.totalDiskQuota = totalDiskQuota
+    this.maxCpuPerSandbox = maxCpuPerSandbox
+    this.maxMemoryPerSandbox = maxMemoryPerSandbox
+    this.maxDiskPerSandbox = maxDiskPerSandbox
+    this.maxDiskPerNonEphemeralSandbox = maxDiskPerNonEphemeralSandbox
   }
 }

@@ -9898,6 +9898,10 @@ components:
     UpdateOrganizationRegionQuota:
       example:
         totalCpuQuota: 0.8008281904610115
+        maxCpuPerSandbox: 5.962133916683182
+        maxDiskPerSandbox: 2.3021358869347655
+        maxDiskPerNonEphemeralSandbox: 7.061401241503109
+        maxMemoryPerSandbox: 5.637376656633329
         totalMemoryQuota: 6.027456183070403
         totalDiskQuota: 1.4658129805029452
       properties:
@@ -9908,6 +9912,18 @@ components:
           nullable: true
           type: number
         totalDiskQuota:
+          nullable: true
+          type: number
+        maxCpuPerSandbox:
+          nullable: true
+          type: number
+        maxMemoryPerSandbox:
+          nullable: true
+          type: number
+        maxDiskPerSandbox:
+          nullable: true
+          type: number
+        maxDiskPerNonEphemeralSandbox:
           nullable: true
           type: number
       required:
@@ -11262,7 +11278,11 @@ components:
       example:
         organizationId: organizationId
         totalCpuQuota: 0.8008281904610115
+        maxCpuPerSandbox: 5.962133916683182
+        maxDiskPerSandbox: 2.3021358869347655
+        maxDiskPerNonEphemeralSandbox: 7.061401241503109
         regionId: regionId
+        maxMemoryPerSandbox: 5.637376656633329
         totalMemoryQuota: 6.027456183070403
         totalDiskQuota: 1.4658129805029452
       properties:
@@ -11276,7 +11296,23 @@ components:
           type: number
         totalDiskQuota:
           type: number
+        maxCpuPerSandbox:
+          nullable: true
+          type: number
+        maxMemoryPerSandbox:
+          nullable: true
+          type: number
+        maxDiskPerSandbox:
+          nullable: true
+          type: number
+        maxDiskPerNonEphemeralSandbox:
+          nullable: true
+          type: number
       required:
+      - maxCpuPerSandbox
+      - maxDiskPerNonEphemeralSandbox
+      - maxDiskPerSandbox
+      - maxMemoryPerSandbox
       - organizationId
       - regionId
       - totalCpuQuota

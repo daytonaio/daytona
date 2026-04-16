@@ -25,6 +25,14 @@ module DaytonaApiClient
 
     attr_accessor :total_disk_quota
 
+    attr_accessor :max_cpu_per_sandbox
+
+    attr_accessor :max_memory_per_sandbox
+
+    attr_accessor :max_disk_per_sandbox
+
+    attr_accessor :max_disk_per_non_ephemeral_sandbox
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
@@ -32,7 +40,11 @@ module DaytonaApiClient
         :'region_id' => :'regionId',
         :'total_cpu_quota' => :'totalCpuQuota',
         :'total_memory_quota' => :'totalMemoryQuota',
-        :'total_disk_quota' => :'totalDiskQuota'
+        :'total_disk_quota' => :'totalDiskQuota',
+        :'max_cpu_per_sandbox' => :'maxCpuPerSandbox',
+        :'max_memory_per_sandbox' => :'maxMemoryPerSandbox',
+        :'max_disk_per_sandbox' => :'maxDiskPerSandbox',
+        :'max_disk_per_non_ephemeral_sandbox' => :'maxDiskPerNonEphemeralSandbox'
       }
     end
 
@@ -53,13 +65,21 @@ module DaytonaApiClient
         :'region_id' => :'String',
         :'total_cpu_quota' => :'Float',
         :'total_memory_quota' => :'Float',
-        :'total_disk_quota' => :'Float'
+        :'total_disk_quota' => :'Float',
+        :'max_cpu_per_sandbox' => :'Float',
+        :'max_memory_per_sandbox' => :'Float',
+        :'max_disk_per_sandbox' => :'Float',
+        :'max_disk_per_non_ephemeral_sandbox' => :'Float'
       }
     end
 
     # List of attributes with nullable: true
     def self.openapi_nullable
       Set.new([
+        :'max_cpu_per_sandbox',
+        :'max_memory_per_sandbox',
+        :'max_disk_per_sandbox',
+        :'max_disk_per_non_ephemeral_sandbox'
       ])
     end
 
@@ -107,6 +127,30 @@ module DaytonaApiClient
         self.total_disk_quota = attributes[:'total_disk_quota']
       else
         self.total_disk_quota = nil
+      end
+
+      if attributes.key?(:'max_cpu_per_sandbox')
+        self.max_cpu_per_sandbox = attributes[:'max_cpu_per_sandbox']
+      else
+        self.max_cpu_per_sandbox = nil
+      end
+
+      if attributes.key?(:'max_memory_per_sandbox')
+        self.max_memory_per_sandbox = attributes[:'max_memory_per_sandbox']
+      else
+        self.max_memory_per_sandbox = nil
+      end
+
+      if attributes.key?(:'max_disk_per_sandbox')
+        self.max_disk_per_sandbox = attributes[:'max_disk_per_sandbox']
+      else
+        self.max_disk_per_sandbox = nil
+      end
+
+      if attributes.key?(:'max_disk_per_non_ephemeral_sandbox')
+        self.max_disk_per_non_ephemeral_sandbox = attributes[:'max_disk_per_non_ephemeral_sandbox']
+      else
+        self.max_disk_per_non_ephemeral_sandbox = nil
       end
     end
 
@@ -209,7 +253,11 @@ module DaytonaApiClient
           region_id == o.region_id &&
           total_cpu_quota == o.total_cpu_quota &&
           total_memory_quota == o.total_memory_quota &&
-          total_disk_quota == o.total_disk_quota
+          total_disk_quota == o.total_disk_quota &&
+          max_cpu_per_sandbox == o.max_cpu_per_sandbox &&
+          max_memory_per_sandbox == o.max_memory_per_sandbox &&
+          max_disk_per_sandbox == o.max_disk_per_sandbox &&
+          max_disk_per_non_ephemeral_sandbox == o.max_disk_per_non_ephemeral_sandbox
     end
 
     # @see the `==` method
@@ -221,7 +269,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [organization_id, region_id, total_cpu_quota, total_memory_quota, total_disk_quota].hash
+      [organization_id, region_id, total_cpu_quota, total_memory_quota, total_disk_quota, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, max_disk_per_non_ephemeral_sandbox].hash
     end
 
     # Builds the object from hash

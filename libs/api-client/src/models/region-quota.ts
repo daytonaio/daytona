@@ -50,5 +50,29 @@ export interface RegionQuota {
      * @memberof RegionQuota
      */
     'totalDiskQuota': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof RegionQuota
+     */
+    'maxCpuPerSandbox': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof RegionQuota
+     */
+    'maxMemoryPerSandbox': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof RegionQuota
+     */
+    'maxDiskPerSandbox': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof RegionQuota
+     */
+    'maxDiskPerNonEphemeralSandbox': number | null;
 }
 
