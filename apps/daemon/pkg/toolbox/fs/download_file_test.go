@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
 package fs
@@ -100,7 +100,8 @@ func TestDownloadFileContentDisposition(t *testing.T) {
 	})
 
 	t.Run("nonexistent file returns 404", func(t *testing.T) {
-		recorder := downloadFileContext(t, "/tmp/nonexistent-file-xyz.txt")
+		missingPath := filepath.Join(t.TempDir(), "does-not-exist.txt")
+		recorder := downloadFileContext(t, missingPath)
 
 		if recorder.Code != http.StatusNotFound {
 			t.Errorf("expected status %d, got %d", http.StatusNotFound, recorder.Code)
