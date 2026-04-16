@@ -294,6 +294,7 @@ jobs:
         if: always()
         run: |
           docker logout docker.io 2>/dev/null || true
+          docker logout ghcr.io 2>/dev/null || true
 
   # Push combined manifest
   docker_push_manifest:
@@ -331,6 +332,12 @@ jobs:
       - name: Push manifest
         run: |
           yarn push-manifest
+
+      - name: Cleanup credentials
+        if: always()
+        run: |
+          docker logout docker.io 2>/dev/null || true
+          docker logout ghcr.io 2>/dev/null || true
 
   sync_gosum:
     needs: build_projects

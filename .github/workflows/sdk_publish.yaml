@@ -93,9 +93,11 @@ jobs:
         run: |
           rm -f ~/.gem/credentials 2>/dev/null || true
           docker logout docker.io 2>/dev/null || true
+          docker logout ghcr.io 2>/dev/null || true
           git config --global --unset-all user.name 2>/dev/null || true
           git config --global --unset-all user.email 2>/dev/null || true
           git config --global --fixed-value --unset-all safe.directory "$GITHUB_WORKSPACE" 2>/dev/null || true
+          git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}" 2>/dev/null || true
 
   update-homebrew-tap:
     if: ${{ inputs.npm_tag == 'latest' }}

@@ -119,6 +119,7 @@ jobs:
         if: always()
         run: |
           docker logout docker.io 2>/dev/null || true
+          docker logout ghcr.io 2>/dev/null || true
 
   docker_manifest:
     needs: docker_build
@@ -183,3 +184,4 @@ jobs:
         if: always()
         run: |
           docker logout docker.io 2>/dev/null || true
+          docker logout ghcr.io 2>/dev/null || true
