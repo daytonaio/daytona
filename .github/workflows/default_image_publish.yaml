@@ -115,6 +115,12 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+      - name: Cleanup credentials
+        if: always()
+        run: |
+          docker logout docker.io 2>/dev/null || true
+          docker logout ghcr.io 2>/dev/null || true
+
   docker_manifest:
     needs: docker_build
     runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
@@ -173,3 +179,9 @@ jobs:
         run: |
           docker buildx imagetools inspect "${REGISTRY_IMAGE}:${VERSION}"
           docker buildx imagetools inspect "${REGISTRY_IMAGE}:${VERSION}-slim"
+
+      - name: Cleanup credentials
+        if: always()
+        run: |
+          docker logout docker.io 2>/dev/null || true
+          docker logout ghcr.io 2>/dev/null || true

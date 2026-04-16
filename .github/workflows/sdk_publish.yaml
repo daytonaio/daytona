@@ -88,6 +88,17 @@ jobs:
           source "$(poetry env info --path)/bin/activate"
           yarn publish
 
+      - name: Cleanup credentials
+        if: always()
+        run: |
+          rm -f ~/.gem/credentials 2>/dev/null || true
+          docker logout docker.io 2>/dev/null || true
+          docker logout ghcr.io 2>/dev/null || true
+          git config --global --fixed-value --unset-all user.name "Daytona Release Bot" 2>/dev/null || true
+          git config --global --fixed-value --unset-all user.email "daytona-release@users.noreply.github.com" 2>/dev/null || true
+          git config --global --fixed-value --unset-all safe.directory "$GITHUB_WORKSPACE" 2>/dev/null || true
+          git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}" 2>/dev/null || true
+
   update-homebrew-tap:
     if: ${{ inputs.npm_tag == 'latest' }}
     needs: publish
