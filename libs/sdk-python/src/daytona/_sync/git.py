@@ -10,7 +10,7 @@ from daytona_toolbox_api_client import (
     GitCheckoutRequest,
     GitCloneRequest,
     GitCommitRequest,
-    GitGitDeleteBranchRequest,
+    GitDeleteBranchRequest,
     GitRepoRequest,
     GitStatus,
     ListBranchResponse,
@@ -377,7 +377,7 @@ class Git:
             ```
         """
         self._api_client.delete_branch(
-            request=GitGitDeleteBranchRequest(
+            request=GitDeleteBranchRequest(
                 path=path,
                 name=name,
             ),

@@ -3,8 +3,6 @@
 
 package io.daytona.examples;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.daytona.sdk.CodeInterpreter;
 import io.daytona.sdk.Daytona;
 import io.daytona.sdk.Image;
@@ -12,12 +10,14 @@ import io.daytona.sdk.RunCodeOptions;
 import io.daytona.sdk.Sandbox;
 import io.daytona.sdk.model.CreateSandboxFromImageParams;
 import io.daytona.sdk.model.ExecuteResponse;
+import io.daytona.toolbox.client.model.Chart;
+import io.daytona.toolbox.client.model.CodeRunArtifacts;
 
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
+import java.util.List;
 
 public class Charts {
     public static void main(String[] args) {
@@ -43,27 +43,29 @@ public class Charts {
                 System.out.println("\n\n=== Process.codeRun ===");
                 ExecuteResponse processResult = sandbox.process.codeRun(CODE);
                 System.out.println("Exit code: " + processResult.getExitCode());
+                System.out.println("Clean result: " + processResult.getResult());
 
                 Path outputDir = Paths.get(System.getProperty("user.dir"));
-                ObjectMapper mapper = new ObjectMapper();
+                CodeRunArtifacts artifacts = processResult.getArtifacts();
+                List<Chart> charts = artifacts != null && artifacts.getCharts() != null ? artifacts.getCharts() : List.of();
                 int chartIndex = 0;
-                for (String line : processResult.getResult().split("\n")) {
-                    if (line.startsWith("dtn_artifact_k39fd2:")) {
-                        String json = line.substring("dtn_artifact_k39fd2:".length());
-                        JsonNode artifact = mapper.readTree(json);
-                        JsonNode value = artifact.get("value");
-                        String title = value.has("title") ? value.get("title").asText("chart") : "chart";
-                        String png = value.has("png") ? value.get("png").asText() : null;
-                        if (png != null && !png.isEmpty()) {
-                            String filename = title.replaceAll("[^a-zA-Z0-9_-]", "_") + ".png";
-                            Path dest = outputDir.resolve(filename);
-                            try (FileOutputStream fos = new FileOutputStream(dest.toFile())) {
-                                fos.write(Base64.getDecoder().decode(png));
-                            }
-                            System.out.println("Saved chart: " + dest);
-                            chartIndex++;
+                for (Chart chart : charts) {
+                    String title = chart.getTitle() != null && !chart.getTitle().isEmpty() ? chart.getTitle() : "chart_" + chartIndex;
+                    String png = chart.getPng();
+
+                    System.out.println("Chart type: " + chart.getType());
+                    System.out.println("Chart title: " + title);
+                    System.out.println("Chart elements: " + (chart.getElements() != null ? chart.getElements().size() : 0));
+
+                    if (png != null && !png.isEmpty()) {
+                        String filename = title.replaceAll("[^a-zA-Z0-9_-]", "_") + ".png";
+                        Path dest = outputDir.resolve(filename);
+                        try (FileOutputStream fos = new FileOutputStream(dest.toFile())) {
+                            fos.write(Base64.getDecoder().decode(png));
                         }
+                        System.out.println("Saved chart: " + dest);
                     }
+                    chartIndex++;
                 }
                 System.out.println("Total charts saved: " + chartIndex);
             } finally {

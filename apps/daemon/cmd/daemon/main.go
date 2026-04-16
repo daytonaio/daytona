@@ -154,6 +154,7 @@ func run() int {
 			command,
 			true,  // async=true for non-blocking
 			false, // isCombinedOutput=false
+			false, // skipServerDemux=false (internal, async so demux irrelevant)
 			true,  // suppressInputEcho=true
 		)
 		if err != nil {

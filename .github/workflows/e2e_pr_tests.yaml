@@ -151,12 +151,12 @@ jobs:
       - name: Wait for default snapshot to be available
         if: steps.affected.outputs.affected == 'true'
         run: |
-          echo "Waiting for default snapshot (ubuntu:22.04) to become active..."
+          echo "Waiting for default snapshot (python:3.12-slim) to become active..."
           echo "Runner must boot, API creates snapshot (pending), cron job transitions it to active"
           for i in $(seq 1 90); do
             BODY=$(curl -s \
               -H "Authorization: Bearer e2e_admin_api_key" \
-              "http://localhost:3001/api/snapshots/ubuntu%3A22.04" 2>/dev/null || echo "")
+              "http://localhost:3001/api/snapshots/python%3A3.12-slim" 2>/dev/null || echo "")
             STATE=$(echo "$BODY" | jq -r '.state // empty' 2>/dev/null || echo "")
             if [ "$STATE" = "active" ]; then
               echo "Default snapshot is active (attempt $i, elapsed ~$((i*2))s)"

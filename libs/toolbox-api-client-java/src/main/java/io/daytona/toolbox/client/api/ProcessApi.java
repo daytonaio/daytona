@@ -27,6 +27,8 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 
 
+import io.daytona.toolbox.client.model.CodeRunRequest;
+import io.daytona.toolbox.client.model.CodeRunResponse;
 import io.daytona.toolbox.client.model.Command;
 import io.daytona.toolbox.client.model.CreateSessionRequest;
 import io.daytona.toolbox.client.model.ExecuteRequest;
@@ -37,6 +39,7 @@ import io.daytona.toolbox.client.model.PtyListResponse;
 import io.daytona.toolbox.client.model.PtyResizeRequest;
 import io.daytona.toolbox.client.model.PtySessionInfo;
 import io.daytona.toolbox.client.model.Session;
+import io.daytona.toolbox.client.model.SessionCommandLogsResponse;
 import io.daytona.toolbox.client.model.SessionExecuteRequest;
 import io.daytona.toolbox.client.model.SessionExecuteResponse;
 import io.daytona.toolbox.client.model.SessionSendInputRequest;
@@ -84,6 +87,133 @@ public class ProcessApi {
         this.localCustomBaseUrl = customBaseUrl;
     }
 
+    /**
+     * Build call for codeRun
+     * @param request Code execution request (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call codeRunCall(CodeRunRequest request, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = request;
+
+        // create path and map variables
+        String localVarPath = "/process/code-run";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call codeRunValidateBeforeCall(CodeRunRequest request, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'request' is set
+        if (request == null) {
+            throw new ApiException("Missing the required parameter 'request' when calling codeRun(Async)");
+        }
+
+        return codeRunCall(request, _callback);
+
+    }
+
+    /**
+     * Execute code
+     * Execute Python, JavaScript, or TypeScript code and return output, exit code, and artifacts
+     * @param request Code execution request (required)
+     * @return CodeRunResponse
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public CodeRunResponse codeRun(CodeRunRequest request) throws ApiException {
+        ApiResponse<CodeRunResponse> localVarResp = codeRunWithHttpInfo(request);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Execute code
+     * Execute Python, JavaScript, or TypeScript code and return output, exit code, and artifacts
+     * @param request Code execution request (required)
+     * @return ApiResponse&lt;CodeRunResponse&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<CodeRunResponse> codeRunWithHttpInfo(CodeRunRequest request) throws ApiException {
+        okhttp3.Call localVarCall = codeRunValidateBeforeCall(request, null);
+        Type localVarReturnType = new TypeToken<CodeRunResponse>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Execute code (asynchronously)
+     * Execute Python, JavaScript, or TypeScript code and return output, exit code, and artifacts
+     * @param request Code execution request (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call codeRunAsync(CodeRunRequest request, final ApiCallback<CodeRunResponse> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = codeRunValidateBeforeCall(request, _callback);
+        Type localVarReturnType = new TypeToken<CodeRunResponse>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
     /**
      * Build call for connectPtySession
      * @param sessionId PTY session ID (required)
@@ -874,6 +1004,7 @@ public class ProcessApi {
         }
 
         final String[] localVarAccepts = {
+            "application/json",
             "text/plain"
         };
         final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
@@ -900,9 +1031,9 @@ public class ProcessApi {
 
     /**
      * Get entrypoint logs
-     * Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.
+     * Get logs for a sandbox entrypoint session. Returns JSON with separated stdout/stderr for SDK &gt;&#x3D; 0.161.0, plain text otherwise. Supports WebSocket streaming.
      * @param follow Follow logs in real-time (WebSocket only) (optional)
-     * @return String
+     * @return SessionCommandLogsResponse
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
      <table border="1">
@@ -911,16 +1042,16 @@ public class ProcessApi {
         <tr><td> 200 </td><td> Entrypoint log content </td><td>  -  </td></tr>
      </table>
      */
-    public String getEntrypointLogs(Boolean follow) throws ApiException {
-        ApiResponse<String> localVarResp = getEntrypointLogsWithHttpInfo(follow);
+    public SessionCommandLogsResponse getEntrypointLogs(Boolean follow) throws ApiException {
+        ApiResponse<SessionCommandLogsResponse> localVarResp = getEntrypointLogsWithHttpInfo(follow);
         return localVarResp.getData();
     }
 
     /**
      * Get entrypoint logs
-     * Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.
+     * Get logs for a sandbox entrypoint session. Returns JSON with separated stdout/stderr for SDK &gt;&#x3D; 0.161.0, plain text otherwise. Supports WebSocket streaming.
      * @param follow Follow logs in real-time (WebSocket only) (optional)
-     * @return ApiResponse&lt;String&gt;
+     * @return ApiResponse&lt;SessionCommandLogsResponse&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
      <table border="1">
@@ -929,15 +1060,15 @@ public class ProcessApi {
         <tr><td> 200 </td><td> Entrypoint log content </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<String> getEntrypointLogsWithHttpInfo(Boolean follow) throws ApiException {
+    public ApiResponse<SessionCommandLogsResponse> getEntrypointLogsWithHttpInfo(Boolean follow) throws ApiException {
         okhttp3.Call localVarCall = getEntrypointLogsValidateBeforeCall(follow, null);
-        Type localVarReturnType = new TypeToken<String>(){}.getType();
+        Type localVarReturnType = new TypeToken<SessionCommandLogsResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
     }
 
     /**
      * Get entrypoint logs (asynchronously)
-     * Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.
+     * Get logs for a sandbox entrypoint session. Returns JSON with separated stdout/stderr for SDK &gt;&#x3D; 0.161.0, plain text otherwise. Supports WebSocket streaming.
      * @param follow Follow logs in real-time (WebSocket only) (optional)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
@@ -949,10 +1080,10 @@ public class ProcessApi {
         <tr><td> 200 </td><td> Entrypoint log content </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getEntrypointLogsAsync(Boolean follow, final ApiCallback<String> _callback) throws ApiException {
+    public okhttp3.Call getEntrypointLogsAsync(Boolean follow, final ApiCallback<SessionCommandLogsResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getEntrypointLogsValidateBeforeCall(follow, _callback);
-        Type localVarReturnType = new TypeToken<String>(){}.getType();
+        Type localVarReturnType = new TypeToken<SessionCommandLogsResponse>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }
@@ -1476,7 +1607,7 @@ public class ProcessApi {
      <table border="1">
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
-        <tr><td> 200 </td><td> Log content </td><td>  -  </td></tr>
+        <tr><td> 200 </td><td> Log content (JSON for new SDKs, plain text for old SDKs) </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getSessionCommandLogsCall(String sessionId, String commandId, Boolean follow, final ApiCallback _callback) throws ApiException {
@@ -1511,6 +1642,7 @@ public class ProcessApi {
         }
 
         final String[] localVarAccepts = {
+            "application/json",
             "text/plain"
         };
         final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
@@ -1547,48 +1679,48 @@ public class ProcessApi {
 
     /**
      * Get session command logs
-     * Get logs for a specific command within a session. Supports both HTTP and WebSocket streaming.
+     * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK &gt;&#x3D; 0.167.0, plain text otherwise. Supports WebSocket streaming.
      * @param sessionId Session ID (required)
      * @param commandId Command ID (required)
      * @param follow Follow logs in real-time (WebSocket only) (optional)
-     * @return String
+     * @return SessionCommandLogsResponse
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
      <table border="1">
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
-        <tr><td> 200 </td><td> Log content </td><td>  -  </td></tr>
+        <tr><td> 200 </td><td> Log content (JSON for new SDKs, plain text for old SDKs) </td><td>  -  </td></tr>
      </table>
      */
-    public String getSessionCommandLogs(String sessionId, String commandId, Boolean follow) throws ApiException {
-        ApiResponse<String> localVarResp = getSessionCommandLogsWithHttpInfo(sessionId, commandId, follow);
+    public SessionCommandLogsResponse getSessionCommandLogs(String sessionId, String commandId, Boolean follow) throws ApiException {
+        ApiResponse<SessionCommandLogsResponse> localVarResp = getSessionCommandLogsWithHttpInfo(sessionId, commandId, follow);
         return localVarResp.getData();
     }
 
     /**
      * Get session command logs
-     * Get logs for a specific command within a session. Supports both HTTP and WebSocket streaming.
+     * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK &gt;&#x3D; 0.167.0, plain text otherwise. Supports WebSocket streaming.
      * @param sessionId Session ID (required)
      * @param commandId Command ID (required)
      * @param follow Follow logs in real-time (WebSocket only) (optional)
-     * @return ApiResponse&lt;String&gt;
+     * @return ApiResponse&lt;SessionCommandLogsResponse&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
      <table border="1">
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
-        <tr><td> 200 </td><td> Log content </td><td>  -  </td></tr>
+        <tr><td> 200 </td><td> Log content (JSON for new SDKs, plain text for old SDKs) </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<String> getSessionCommandLogsWithHttpInfo(String sessionId, String commandId, Boolean follow) throws ApiException {
+    public ApiResponse<SessionCommandLogsResponse> getSessionCommandLogsWithHttpInfo(String sessionId, String commandId, Boolean follow) throws ApiException {
         okhttp3.Call localVarCall = getSessionCommandLogsValidateBeforeCall(sessionId, commandId, follow, null);
-        Type localVarReturnType = new TypeToken<String>(){}.getType();
+        Type localVarReturnType = new TypeToken<SessionCommandLogsResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
     }
 
     /**
      * Get session command logs (asynchronously)
-     * Get logs for a specific command within a session. Supports both HTTP and WebSocket streaming.
+     * Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK &gt;&#x3D; 0.167.0, plain text otherwise. Supports WebSocket streaming.
      * @param sessionId Session ID (required)
      * @param commandId Command ID (required)
      * @param follow Follow logs in real-time (WebSocket only) (optional)
@@ -1599,13 +1731,13 @@ public class ProcessApi {
      <table border="1">
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
-        <tr><td> 200 </td><td> Log content </td><td>  -  </td></tr>
+        <tr><td> 200 </td><td> Log content (JSON for new SDKs, plain text for old SDKs) </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSessionCommandLogsAsync(String sessionId, String commandId, Boolean follow, final ApiCallback<String> _callback) throws ApiException {
+    public okhttp3.Call getSessionCommandLogsAsync(String sessionId, String commandId, Boolean follow, final ApiCallback<SessionCommandLogsResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSessionCommandLogsValidateBeforeCall(sessionId, commandId, follow, _callback);
-        Type localVarReturnType = new TypeToken<String>(){}.getType();
+        Type localVarReturnType = new TypeToken<SessionCommandLogsResponse>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }

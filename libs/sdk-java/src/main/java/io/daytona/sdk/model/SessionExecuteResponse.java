@@ -11,6 +11,8 @@ public class SessionExecuteResponse extends io.daytona.toolbox.client.model.Sess
         if (source != null) {
             setCmdId(source.getCmdId());
             setOutput(source.getOutput());
+            setStdout(source.getStdout());
+            setStderr(source.getStderr());
             setExitCode(source.getExitCode());
         }
     }

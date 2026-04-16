@@ -417,6 +417,17 @@ func (c *Client) doCreate(ctx context.Context, params any, opts ...func(*options
 		baseParams.Language = types.CodeLanguagePython
 	}
 
+	switch baseParams.Language {
+	case types.CodeLanguagePython, types.CodeLanguageJavaScript, types.CodeLanguageTypeScript:
+	default:
+		return nil, errors.NewDaytonaError(fmt.Sprintf("invalid %s: %s. Supported languages: python, javascript, typescript", types.CodeToolboxLanguageLabel, baseParams.Language), 0, nil)
+	}
+
+	if baseParams.Labels == nil {
+		baseParams.Labels = map[string]string{}
+	}
+	baseParams.Labels[types.CodeToolboxLanguageLabel] = string(baseParams.Language)
+
 	// Validate intervals
 	if baseParams.AutoStopInterval != nil && *baseParams.AutoStopInterval < 0 {
 		return nil, errors.NewDaytonaError("autoStopInterval must be a non-negative integer", 0, nil)
@@ -447,7 +458,7 @@ func (c *Client) doCreate(ctx context.Context, params any, opts ...func(*options
 	if baseParams.EnvVars != nil {
 		createReq.SetEnv(baseParams.EnvVars)
 	}
-	if baseParams.Labels != nil {
+	if len(baseParams.Labels) > 0 {
 		createReq.SetLabels(baseParams.Labels)
 	}
 	if c.region != "" {
@@ -547,7 +558,8 @@ func (c *Client) doCreate(ctx context.Context, params any, opts ...func(*options
 		autoDeleteInterval = int(*sandboxResp.AutoDeleteInterval)
 	}
 
-	sandbox := NewSandbox(c, toolboxClient, sandboxResp.GetId(), sandboxResp.GetName(), sandboxResp.GetState(), sandboxResp.GetTarget(), autoArchiveInterval, autoDeleteInterval, sandboxResp.GetNetworkBlockAll(), sandboxResp.NetworkAllowList)
+	language := types.CodeLanguage(sandboxResp.GetLabels()[types.CodeToolboxLanguageLabel])
+	sandbox := NewSandbox(c, toolboxClient, sandboxResp.GetId(), sandboxResp.GetName(), sandboxResp.GetState(), sandboxResp.GetTarget(), autoArchiveInterval, autoDeleteInterval, sandboxResp.GetNetworkBlockAll(), sandboxResp.NetworkAllowList, language)
 
 	// Handle snapshot build logs
 	if sandbox.State == apiclient.SANDBOXSTATE_PENDING_BUILD {
@@ -642,7 +654,7 @@ func (c *Client) doGet(ctx context.Context, sandboxIDOrName string) (*Sandbox, e
 		autoDeleteInterval = int(*sandboxResp.AutoDeleteInterval)
 	}
 
-	// Capture sandbox state
+	language := types.CodeLanguage(sandboxResp.GetLabels()[types.CodeToolboxLanguageLabel])
 	sandbox := NewSandbox(c,
 		toolboxClient,
 		sandboxResp.GetId(),
@@ -653,6 +665,7 @@ func (c *Client) doGet(ctx context.Context, sandboxIDOrName string) (*Sandbox, e
 		autoDeleteInterval,
 		sandboxResp.GetNetworkBlockAll(),
 		sandboxResp.NetworkAllowList,
+		language,
 	)
 	return sandbox, nil
 }
@@ -734,6 +747,7 @@ func (c *Client) doList(ctx context.Context, labels map[string]string, page *int
 			autoDeleteInterval = int(*items[i].AutoDeleteInterval)
 		}
 
+		lang := types.CodeLanguage(items[i].GetLabels()[types.CodeToolboxLanguageLabel])
 		sandboxes[i] = NewSandbox(c,
 			toolboxClient,
 			items[i].GetId(),
@@ -744,6 +758,7 @@ func (c *Client) doList(ctx context.Context, labels map[string]string, page *int
 			autoDeleteInterval,
 			items[i].GetNetworkBlockAll(),
 			items[i].NetworkAllowList,
+			lang,
 		)
 	}
 

@@ -1,4 +1,121 @@
 definitions:
+  Chart:
+    properties:
+      elements:
+        items:
+          $ref: '#/definitions/ChartElement'
+        type: array
+      png:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+      x_label:
+        type: string
+      x_scale:
+        type: string
+      x_tick_labels:
+        items:
+          type: string
+        type: array
+      x_ticks:
+        items:
+          type: number
+        type: array
+      y_label:
+        type: string
+      y_scale:
+        type: string
+      y_tick_labels:
+        items:
+          type: string
+        type: array
+      y_ticks:
+        items:
+          type: number
+        type: array
+    type: object
+  ChartElement:
+    properties:
+      angle:
+        type: number
+      first_quartile:
+        type: number
+      group:
+        type: string
+      label:
+        type: string
+      max:
+        type: number
+      median:
+        type: number
+      min:
+        type: number
+      outliers:
+        items:
+          type: number
+        type: array
+      png:
+        type: string
+      points:
+        items:
+          items:
+            type: number
+          type: array
+        type: array
+      radius:
+        type: number
+      third_quartile:
+        type: number
+      title:
+        type: string
+      type:
+        type: string
+      value:
+        type: string
+      x_label:
+        type: string
+      y_label:
+        type: string
+    type: object
+  CodeRunArtifacts:
+    properties:
+      charts:
+        items:
+          $ref: '#/definitions/Chart'
+        type: array
+    type: object
+  CodeRunRequest:
+    properties:
+      argv:
+        items:
+          type: string
+        type: array
+      code:
+        type: string
+      envs:
+        additionalProperties:
+          type: string
+        type: object
+      language:
+        description: python, javascript, typescript
+        type: string
+      timeout:
+        type: integer
+    required:
+      - code
+      - language
+    type: object
+  CodeRunResponse:
+    properties:
+      artifacts:
+        $ref: '#/definitions/CodeRunArtifacts'
+      exitCode:
+        type: integer
+      result:
+        type: string
+    type: object
   Command:
     properties:
       command:
@@ -118,6 +235,11 @@ definitions:
       cwd:
         description: Current working directory
         type: string
+      envs:
+        additionalProperties:
+          type: string
+        description: Environment variables to set for the command
+        type: object
       timeout:
         description: Timeout in seconds, defaults to 10 seconds
         type: integer
@@ -280,6 +402,16 @@ definitions:
         type: string
     required:
       - hash
+    type: object
+  GitDeleteBranchRequest:
+    properties:
+      name:
+        type: string
+      path:
+        type: string
+    required:
+      - name
+      - path
     type: object
   GitRepoRequest:
     properties:
@@ -770,6 +902,19 @@ definitions:
       - commands
       - sessionId
     type: object
+  SessionCommandLogsResponse:
+    properties:
+      output:
+        type: string
+      stderr:
+        type: string
+      stdout:
+        type: string
+    required:
+      - output
+      - stderr
+      - stdout
+    type: object
   SessionExecuteRequest:
     properties:
       async:
@@ -877,16 +1022,6 @@ definitions:
     type: object
   gin.H:
     additionalProperties: {}
-    type: object
-  git.GitDeleteBranchRequest:
-    properties:
-      name:
-        type: string
-      path:
-        type: string
-    required:
-      - name
-      - path
     type: object
 info:
   contact: {}
@@ -1883,7 +2018,7 @@ paths:
           name: request
           required: true
           schema:
-            $ref: '#/definitions/git.GitDeleteBranchRequest'
+            $ref: '#/definitions/GitDeleteBranchRequest'
       produces:
         - application/json
       responses:
@@ -2308,6 +2443,30 @@ paths:
       summary: Check if port is in use
       tags:
         - port
+  /process/code-run:
+    post:
+      consumes:
+        - application/json
+      description: Execute Python, JavaScript, or TypeScript code and return output,
+        exit code, and artifacts
+      operationId: CodeRun
+      parameters:
+        - description: Code execution request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/CodeRunRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/CodeRunResponse'
+      summary: Execute code
+      tags:
+        - process
   /process/execute:
     post:
       consumes:
@@ -2687,8 +2846,9 @@ paths:
         - process
   /process/session/{sessionId}/command/{commandId}/logs:
     get:
-      description: Get logs for a specific command within a session. Supports both
-        HTTP and WebSocket streaming.
+      description: Get logs for a specific command within a session. Returns JSON
+        with separated stdout/stderr for SDK >= 0.167.0, plain text otherwise. Supports
+        WebSocket streaming.
       operationId: GetSessionCommandLogs
       parameters:
         - description: Session ID
@@ -2706,12 +2866,13 @@ paths:
           name: follow
           type: boolean
       produces:
+        - application/json
         - text/plain
       responses:
         '200':
-          description: Log content
+          description: Log content (JSON for new SDKs, plain text for old SDKs)
           schema:
-            type: string
+            $ref: '#/definitions/SessionCommandLogsResponse'
       summary: Get session command logs
       tags:
         - process
@@ -2763,8 +2924,9 @@ paths:
         - process
   /process/session/entrypoint/logs:
     get:
-      description: Get logs for a sandbox entrypoint session. Supports both HTTP and
-        WebSocket streaming.
+      description: Get logs for a sandbox entrypoint session. Returns JSON with separated
+        stdout/stderr for SDK >= 0.161.0, plain text otherwise. Supports WebSocket
+        streaming.
       operationId: GetEntrypointLogs
       parameters:
         - description: Follow logs in real-time (WebSocket only)
@@ -2772,12 +2934,13 @@ paths:
           name: follow
           type: boolean
       produces:
+        - application/json
         - text/plain
       responses:
         '200':
           description: Entrypoint log content
           schema:
-            type: string
+            $ref: '#/definitions/SessionCommandLogsResponse'
       summary: Get entrypoint logs
       tags:
         - process

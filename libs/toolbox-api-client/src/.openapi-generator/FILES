@@ -16,6 +16,11 @@ common.ts
 configuration.ts
 git_push.sh
 index.ts
+models/chart-element.ts
+models/chart.ts
+models/code-run-artifacts.ts
+models/code-run-request.ts
+models/code-run-response.ts
 models/command.ts
 models/completion-context.ts
 models/completion-item.ts
@@ -39,7 +44,7 @@ models/git-clone-request.ts
 models/git-commit-info.ts
 models/git-commit-request.ts
 models/git-commit-response.ts
-models/git-git-delete-branch-request.ts
+models/git-delete-branch-request.ts
 models/git-repo-request.ts
 models/git-status.ts
 models/index.ts
@@ -85,6 +90,7 @@ models/replace-result.ts
 models/screenshot-response.ts
 models/scroll-response.ts
 models/search-files-response.ts
+models/session-command-logs-response.ts
 models/session-execute-request.ts
 models/session-execute-response.ts
 models/session-send-input-request.ts

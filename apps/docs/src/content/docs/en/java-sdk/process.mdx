@@ -77,25 +77,31 @@ Executes source code using Sandbox language tooling.
 public ExecuteResponse codeRun(String code, Map<String, String> env, Integer timeout)
 ```
 
-Executes source code using Sandbox language tooling.
-
-Base64-encodes the code and pipes it to the language runtime selected by
-the `code-toolbox-language` label. Uses `io.daytona.sdk.codetoolbox.CodeToolbox`
-implementations for language-specific command generation.
-
 **Parameters**:
 
-- `code` _String_ - source code to execute
-- `env` _Map\<String, String\>_ - environment variables to set during execution
-- `timeout` _Integer_ - timeout in seconds
+- `code` _String_ -
+- `env` _Map\<String, String\>_ -
+- `timeout` _Integer_ -
 
 **Returns**:
 
-- `ExecuteResponse` - execution result
+- `ExecuteResponse` -
 
-**Throws**:
+#### codeRun()
+```java
+public ExecuteResponse codeRun(String code, List<String> argv, Map<String, String> env, Integer timeout)
+```
 
-- `DaytonaException` - if execution fails
+**Parameters**:
+
+- `code` _String_ -
+- `argv` _List\<String\>_ -
+- `env` _Map\<String, String\>_ -
+- `timeout` _Integer_ -
+
+**Returns**:
+
+- `ExecuteResponse` -
 
 #### createSession()
 ```java
@@ -188,7 +194,7 @@ Returns metadata for a command executed in a session.
 
 #### getSessionCommandLogs()
 ```java
-public String getSessionCommandLogs(String sessionId, String commandId)
+public SessionCommandLogsResponse getSessionCommandLogs(String sessionId, String commandId)
 ```
 
 Returns logs for a command executed in a session.
@@ -200,7 +206,7 @@ Returns logs for a command executed in a session.
 
 **Returns**:
 
-- `String` - command logs
+- `SessionCommandLogsResponse` - command logs
 
 **Throws**:
 
@@ -208,14 +214,14 @@ Returns logs for a command executed in a session.
 
 #### getEntrypointLogs()
 ```java
-public String getEntrypointLogs()
+public SessionCommandLogsResponse getEntrypointLogs()
 ```
 
 Returns one-shot logs for the sandbox entrypoint session.
 
 **Returns**:
 
-- `String` - entrypoint logs
+- `SessionCommandLogsResponse` - entrypoint logs
 
 **Throws**:
 

@@ -3,6 +3,8 @@
 
 package io.daytona.sdk;
 
+import io.daytona.sdk.exception.DaytonaException;
+
 /**
  * Supported programming languages for direct code execution in a Sandbox.
  *
@@ -27,5 +29,14 @@ public enum CodeLanguage {
      */
     public String getValue() {
         return value;
+    }
+
+    public static CodeLanguage fromValue(String value) {
+        for (CodeLanguage lang : values()) {
+            if (lang.value.equals(value)) {
+                return lang;
+            }
+        }
+        throw new DaytonaException("Invalid " + Daytona.CODE_TOOLBOX_LANGUAGE_LABEL + ": " + value + ". Supported languages: python, javascript, typescript");
     }
 }

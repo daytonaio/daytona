@@ -31,9 +31,10 @@ class ExecuteRequest(BaseModel):
     """ # noqa: E501
     command: StrictStr
     cwd: Optional[StrictStr] = Field(default=None, description="Current working directory")
+    envs: Optional[Dict[str, StrictStr]] = Field(default=None, description="Environment variables to set for the command")
     timeout: Optional[StrictInt] = Field(default=None, description="Timeout in seconds, defaults to 10 seconds")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["command", "cwd", "timeout"]
+    __properties: ClassVar[List[str]] = ["command", "cwd", "envs", "timeout"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -94,6 +95,7 @@ class ExecuteRequest(BaseModel):
         _obj = cls.model_validate({
             "command": obj.get("command"),
             "cwd": obj.get("cwd"),
+            "envs": obj.get("envs"),
             "timeout": obj.get("timeout")
         })
         # store additional fields in additional_properties

@@ -20,6 +20,9 @@ module DaytonaToolboxApiClient
     # Current working directory
     attr_accessor :cwd
 
+    # Environment variables to set for the command
+    attr_accessor :envs
+
     # Timeout in seconds, defaults to 10 seconds
     attr_accessor :timeout
 
@@ -28,6 +31,7 @@ module DaytonaToolboxApiClient
       {
         :'command' => :'command',
         :'cwd' => :'cwd',
+        :'envs' => :'envs',
         :'timeout' => :'timeout'
       }
     end
@@ -47,6 +51,7 @@ module DaytonaToolboxApiClient
       {
         :'command' => :'String',
         :'cwd' => :'String',
+        :'envs' => :'Hash<String, String>',
         :'timeout' => :'Integer'
       }
     end
@@ -81,6 +86,12 @@ module DaytonaToolboxApiClient
 
       if attributes.key?(:'cwd')
         self.cwd = attributes[:'cwd']
+      end
+
+      if attributes.key?(:'envs')
+        if (value = attributes[:'envs']).is_a?(Hash)
+          self.envs = value
+        end
       end
 
       if attributes.key?(:'timeout')
@@ -125,6 +136,7 @@ module DaytonaToolboxApiClient
       self.class == o.class &&
           command == o.command &&
           cwd == o.cwd &&
+          envs == o.envs &&
           timeout == o.timeout
     end
 
@@ -137,7 +149,7 @@ module DaytonaToolboxApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [command, cwd, timeout].hash
+      [command, cwd, envs, timeout].hash
     end
 
     # Builds the object from hash

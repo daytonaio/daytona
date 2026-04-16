@@ -44,6 +44,11 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 			return
 		}
 
+		if err := common.ValidateEnvKeys(request.Envs); err != nil {
+			c.Error(common_errors.NewBadRequestError(err))
+			return
+		}
+
 		// Pipe command via stdin to avoid OS ARG_MAX limits on large commands
 		cmd := exec.Command(common.GetShell())
 		cmd.Stdin = strings.NewReader(request.Command)
@@ -51,6 +56,7 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 		if request.Cwd != nil {
 			cmd.Dir = *request.Cwd
 		}
+		common.ApplyEnvs(cmd, request.Envs)
 
 		// set maximum execution time
 		var timeoutReached atomic.Bool

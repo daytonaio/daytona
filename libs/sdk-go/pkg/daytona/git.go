@@ -350,7 +350,7 @@ func (g *GitService) DeleteBranch(ctx context.Context, path, name string, opts .
 	return withInstrumentationVoid(ctx, g.otel, "Git", "DeleteBranch", func(ctx context.Context) error {
 		// Apply options (force parameter not yet supported in toolbox API)
 		_ = options.Apply(opts...)
-		req := toolbox.NewGitGitDeleteBranchRequest(name, path)
+		req := toolbox.NewGitDeleteBranchRequest(name, path)
 		httpResp, err := g.toolboxClient.GitAPI.DeleteBranch(ctx).Request(*req).Execute()
 		if err != nil {
 			return errors.ConvertToolboxError(err, httpResp)

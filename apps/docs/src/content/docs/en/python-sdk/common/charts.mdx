@@ -6,25 +6,10 @@ hideTitleOnPage: true
 ## Chart
 
 ```python
-class Chart(BaseModel)
+class Chart(GeneratedChart)
 ```
 
-Represents a chart with metadata from matplotlib.
-
-**Attributes**:
-
-- `type` _ChartType_ - The type of chart
-- `title` _str_ - The title of the chart
-- `elements` _list[Any]_ - The elements of the chart
-- `png` _str | None_ - The PNG representation of the chart encoded in base64
-
-#### Chart.to\_dict
-
-```python
-def to_dict() -> dict[str, Any]
-```
-
-Return the metadata dictionary used to create the chart.
+Base chart class. All chart types inherit from this. Fields are sourced from the daemon's typed response.
 
 
 ## ChartType
@@ -33,16 +18,40 @@ Return the metadata dictionary used to create the chart.
 class ChartType(str, Enum)
 ```
 
-Chart types
+Supported chart types returned by the daemon's code-run endpoint.
 
-**Enum Members**:
-    - `LINE` ("line")
-    - `SCATTER` ("scatter")
-    - `BAR` ("bar")
-    - `PIE` ("pie")
-    - `BOX_AND_WHISKER` ("box_and_whisker")
-    - `COMPOSITE_CHART` ("composite_chart")
-    - `UNKNOWN` ("unknown")
+## PointData
+
+```python
+class PointData(GeneratedChartElement)
+```
+
+Data element for line and scatter charts. Fields: label, points.
+
+## BarData
+
+```python
+class BarData(GeneratedChartElement)
+```
+
+Data element for bar charts. Fields: label, value, group.
+
+## PieData
+
+```python
+class PieData(GeneratedChartElement)
+```
+
+Data element for pie charts. Fields: label, angle, radius.
+
+## BoxAndWhiskerData
+
+```python
+class BoxAndWhiskerData(GeneratedChartElement)
+```
+
+Data element for box-and-whisker charts.
+Fields: label, min, first_quartile, median, third_quartile, max, outliers.
 
 ## Chart2D
 
@@ -50,25 +59,7 @@ Chart types
 class Chart2D(Chart)
 ```
 
-Represents a 2D chart with metadata.
-
-**Attributes**:
-
-- `x_label` _str | None_ - The label of the x-axis
-- `y_label` _str | None_ - The label of the y-axis
-
-## PointData
-
-```python
-class PointData(BaseModel)
-```
-
-Represents a point in a 2D chart.
-
-**Attributes**:
-
-- `label` _str_ - The label of the point
-- `points` _list[tuple[str | float, str | float]]_ - The points of the chart
+Chart with x/y axes. Adds x_label, y_label fields.
 
 ## PointChart
 
@@ -76,17 +67,7 @@ Represents a point in a 2D chart.
 class PointChart(Chart2D)
 ```
 
-Represents a point chart with metadata.
-
-**Attributes**:
-
-- `x_ticks` _list[str | float]_ - The ticks of the x-axis
-- `x_tick_labels` _list[str]_ - The labels of the x-axis
-- `x_scale` _str_ - The scale of the x-axis
-- `y_ticks` _list[str | float]_ - The ticks of the y-axis
-- `y_tick_labels` _list[str]_ - The labels of the y-axis
-- `y_scale` _str_ - The scale of the y-axis
-- `elements` _list[PointData]_ - The points of the chart
+Chart with axis ticks and scales. Adds x_ticks, y_ticks, x_scale, y_scale fields.
 
 ## LineChart
 
@@ -94,11 +75,7 @@ Represents a point chart with metadata.
 class LineChart(PointChart)
 ```
 
-Represents a line chart with metadata.
-
-**Attributes**:
-
-- `type` _ChartType_ - The type of chart
+Line chart. Elements are PointData.
 
 ## ScatterChart
 
@@ -106,25 +83,7 @@ Represents a line chart with metadata.
 class ScatterChart(PointChart)
 ```
 
-Represents a scatter chart with metadata.
-
-**Attributes**:
-
-- `type` _ChartType_ - The type of chart
-
-## BarData
-
-```python
-class BarData(BaseModel)
-```
-
-Represents a bar in a bar chart.
-
-**Attributes**:
-
-- `label` _str_ - The label of the bar
-- `group` _str_ - The group of the bar
-- `value` _str_ - The value of the bar
+Scatter plot. Elements are PointData.
 
 ## BarChart
 
@@ -132,27 +91,7 @@ Represents a bar in a bar chart.
 class BarChart(Chart2D)
 ```
 
-Represents a bar chart with metadata.
-
-**Attributes**:
-
-- `type` _ChartType_ - The type of chart
-- `elements` _list[BarData]_ - The bars of the chart
-
-## PieData
-
-```python
-class PieData(BaseModel)
-```
-
-Represents a pie slice in a pie chart.
-
-**Attributes**:
-
-- `label` _str_ - The label of the pie slice
-- `angle` _float_ - The angle of the pie slice
-- `radius` _float_ - The radius of the pie slice
-- `autopct` _str | float_ - The autopct value of the pie slice
+Bar chart. Elements are BarData.
 
 ## PieChart
 
@@ -160,30 +99,7 @@ Represents a pie slice in a pie chart.
 class PieChart(Chart)
 ```
 
-Represents a pie chart with metadata.
-
-**Attributes**:
-
-- `type` _ChartType_ - The type of chart
-- `elements` _list[PieData]_ - The pie slices of the chart
-
-## BoxAndWhiskerData
-
-```python
-class BoxAndWhiskerData(BaseModel)
-```
-
-Represents a box and whisker in a box and whisker chart.
-
-**Attributes**:
-
-- `label` _str_ - The label of the box and whisker
-- `min` _float_ - The minimum value of the box and whisker
-- `first_quartile` _float_ - The first quartile of the box and whisker
-- `median` _float_ - The median of the box and whisker
-- `third_quartile` _float_ - The third quartile of the box and whisker
-- `max` _float_ - The maximum value of the box and whisker
-- `outliers` _list[float]_ - The outliers of the box and whisker
+Pie chart. Elements are PieData.
 
 ## BoxAndWhiskerChart
 
@@ -191,12 +107,7 @@ Represents a box and whisker in a box and whisker chart.
 class BoxAndWhiskerChart(Chart2D)
 ```
 
-Represents a box and whisker chart with metadata.
-
-**Attributes**:
-
-- `type` _ChartType_ - The type of chart
-- `elements` _list[BoxAndWhiskerData]_ - The box and whiskers of the chart
+Box-and-whisker chart. Elements are BoxAndWhiskerData.
 
 ## CompositeChart
 
@@ -204,11 +115,5 @@ Represents a box and whisker chart with metadata.
 class CompositeChart(Chart)
 ```
 
-Represents a composite chart with metadata. A composite chart is a chart
-that contains multiple charts (subplots).
-
-**Attributes**:
-
-- `type` _ChartType_ - The type of chart
-- `elements` _list[Chart]_ - The charts (subplots) of the composite chart
+Composite chart containing multiple sub-charts as elements.
 

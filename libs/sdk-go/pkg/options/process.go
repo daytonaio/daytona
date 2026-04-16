@@ -62,8 +62,9 @@ func WithExecuteTimeout(timeout time.Duration) func(*ExecuteCommand) {
 
 // CodeRun holds optional parameters for [daytona.ProcessService.CodeRun].
 type CodeRun struct {
-	Params  *types.CodeRunParams // Code execution parameters
-	Timeout *time.Duration       // Execution timeout
+	Params   *types.CodeRunParams // Code execution parameters
+	Timeout  *time.Duration       // Execution timeout
+	Language types.CodeLanguage   // Override the default language
 }
 
 // WithCodeRunParams sets the code execution parameters.
@@ -79,13 +80,12 @@ func WithCodeRunParams(params types.CodeRunParams) func(*CodeRun) {
 	}
 }
 
-// WithCodeRunTimeout sets the timeout for code execution.
-//
-// Example:
-//
-//	result, err := sandbox.Process.CodeRun(ctx, code,
-//	    options.WithCodeRunTimeout(30*time.Second),
-//	)
+func WithCodeRunLanguage(language types.CodeLanguage) func(*CodeRun) {
+	return func(opts *CodeRun) {
+		opts.Language = language
+	}
+}
+
 func WithCodeRunTimeout(timeout time.Duration) func(*CodeRun) {
 	return func(opts *CodeRun) {
 		opts.Timeout = &timeout

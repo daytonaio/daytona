@@ -35,9 +35,9 @@ from daytona_toolbox_api_client import (
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
 from .._utils.timeout import http_timeout, with_timeout
+from ..common.daytona import CODE_TOOLBOX_LANGUAGE_LABEL
 from ..common.errors import DaytonaError, DaytonaNotFoundError, DaytonaValidationError
 from ..common.lsp_server import LspLanguageId, LspLanguageIdLiteral
-from ..common.protocols import SandboxCodeToolbox
 from ..common.sandbox import Resources
 from ..internal.toolbox_api_client_proxy import ToolboxApiClientProxy
 from .code_interpreter import CodeInterpreter
@@ -101,7 +101,7 @@ class Sandbox(SandboxDto):
         sandbox_dto: SandboxDto,
         toolbox_api: ApiClient,
         sandbox_api: SandboxApi,
-        code_toolbox: SandboxCodeToolbox,
+        language: str,
     ):
         """Initialize a new Sandbox instance.
 
@@ -109,12 +109,10 @@ class Sandbox(SandboxDto):
             sandbox_dto (SandboxDto): The sandbox data from the API.
             toolbox_api (ApiClient): API client for toolbox operations.
             sandbox_api (SandboxApi): API client for Sandbox operations.
-            code_toolbox (SandboxCodeToolbox): Language-specific toolbox implementation.
         """
         super().__init__(**sandbox_dto.model_dump())
         self.__process_sandbox_dto(sandbox_dto)
         self._sandbox_api: SandboxApi = sandbox_api
-        self._code_toolbox: SandboxCodeToolbox = code_toolbox
         # Wrap the toolbox API client to inject the sandbox ID into the resource path
         self._toolbox_api: ToolboxApiClientProxy[ApiClient] = ToolboxApiClientProxy(
             toolbox_api, self.id, self.toolbox_proxy_url
@@ -122,7 +120,7 @@ class Sandbox(SandboxDto):
 
         self._fs = FileSystem(FileSystemApi(self._toolbox_api))
         self._git = Git(GitApi(self._toolbox_api))
-        self._process = Process(code_toolbox, ProcessApi(self._toolbox_api))
+        self._process = Process(language, ProcessApi(self._toolbox_api))
         self._computer_use = ComputerUse(ComputerUseApi(self._toolbox_api))
         self._code_interpreter = CodeInterpreter(InterpreterApi(self._toolbox_api))
         self._info_api: InfoApi = InfoApi(self._toolbox_api)
@@ -710,11 +708,13 @@ class Sandbox(SandboxDto):
             self.id, ForkSandbox(name=name), _request_timeout=http_timeout(timeout)
         )
 
+        language = sandbox_dto.labels.get(CODE_TOOLBOX_LANGUAGE_LABEL) or ""
+
         forked = Sandbox(
             sandbox_dto,
             self._toolbox_api._api_client,
             self._sandbox_api,
-            self._code_toolbox,
+            language,
         )
         forked.wait_for_sandbox_start(timeout=0)
         return forked

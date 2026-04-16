@@ -56,7 +56,6 @@ plt.show()
 # 4. Pie Chart
 plt.figure(figsize=(8, 8))
 plt.pie(values, labels=categories,
-        autopct='%1.1f%%',
         colors=plt.cm.Set3.colors, shadow=True, startangle=90)
 plt.title('Pie Chart (Distribution in %)')
 plt.axis('equal')
@@ -156,7 +155,6 @@ def print_chart(chart: Chart):
             print(f"\n\tLabel: {element.label}")
             print(f"\tAngle: {element.angle}")
             print(f"\tRadius: {element.radius}")
-            print(f"\tAutopct: {element.autopct}")
     elif chart.type == ChartType.BOX_AND_WHISKER and isinstance(chart, BoxAndWhiskerChart):
         print(f"X Label: {chart.x_label}")
         print(f"Y Label: {chart.y_label}")
@@ -172,7 +170,7 @@ def print_chart(chart: Chart):
     elif chart.type == ChartType.COMPOSITE_CHART and isinstance(chart, CompositeChart):
         print("Elements:\n")
         for element in chart.elements:
-            print_chart(element)
+            print_chart(Chart.model_validate(element.model_dump(exclude_none=True)))
     print()
 
 

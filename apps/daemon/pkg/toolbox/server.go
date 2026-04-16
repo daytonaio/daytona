@@ -32,6 +32,7 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/lsp"
 	"github.com/daytonaio/daemon/pkg/toolbox/port"
 	"github.com/daytonaio/daemon/pkg/toolbox/process"
+	"github.com/daytonaio/daemon/pkg/toolbox/process/coderun"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/interpreter"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/pty"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
@@ -189,6 +190,7 @@ func (s *server) Start() error {
 	processController := r.Group("/process")
 	{
 		processController.POST("/execute", process.ExecuteCommand(processLogger))
+		processController.POST("/code-run", coderun.CodeRun(processLogger))
 
 		sessionController := session.NewSessionController(s.logger, s.configDir, s.sessionService)
 		sessionGroup := processController.Group("/session")

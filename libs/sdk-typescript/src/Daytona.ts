@@ -14,9 +14,6 @@ import {
   ConfigApi,
 } from '@daytona/api-client'
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios'
-import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
-import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
-import { SandboxJsCodeToolbox } from './code-toolbox/SandboxJsCodeToolbox'
 import {
   DaytonaAuthenticationError,
   createAxiosDaytonaError,
@@ -41,6 +38,8 @@ import { CompressionAlgorithm } from '@opentelemetry/otlp-exporter-base'
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
 import { resourceFromAttributes } from '@opentelemetry/resources'
 import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api'
+
+export const CODE_TOOLBOX_LANGUAGE_LABEL = 'code-toolbox-language'
 
 /**
  * Represents a volume mount for a Sandbox.
@@ -443,10 +442,19 @@ export class Daytona implements AsyncDisposable {
     if (params == null) {
       params = { language: 'python' }
     }
+    if (!params.language) {
+      params.language = 'python'
+    }
 
     const labels = params.labels || {}
     if (params.language) {
-      labels['code-toolbox-language'] = params.language
+      const validLanguages = Object.values(CodeLanguage) as string[]
+      if (!validLanguages.includes(params.language)) {
+        throw new DaytonaValidationError(
+          `Invalid ${CODE_TOOLBOX_LANGUAGE_LABEL}: ${params.language}. Supported languages: ${validLanguages.join(', ')}`,
+        )
+      }
+      labels[CODE_TOOLBOX_LANGUAGE_LABEL] = params.language
     }
 
     if (options.timeout < 0) {
@@ -475,8 +483,6 @@ export class Daytona implements AsyncDisposable {
     ) {
       throw new DaytonaValidationError('autoArchiveInterval must be a non-negative integer')
     }
-
-    const codeToolbox = Daytona.getCodeToolbox(params.language as CodeLanguage)
 
     try {
       let buildInfo: any | undefined
@@ -576,7 +582,6 @@ export class Daytona implements AsyncDisposable {
         new Configuration(structuredClone(this.clientConfig)),
         Daytona.createAxiosInstance(),
         this.sandboxApi,
-        codeToolbox,
       )
 
       if (sandbox.state !== 'started') {
@@ -611,16 +616,8 @@ export class Daytona implements AsyncDisposable {
   public async get(sandboxIdOrName: string): Promise<Sandbox> {
     const response = await this.sandboxApi.getSandbox(sandboxIdOrName)
     const sandboxInstance = response.data
-    const language = sandboxInstance.labels && sandboxInstance.labels['code-toolbox-language']
-    const codeToolbox = Daytona.getCodeToolbox(language as CodeLanguage)
 
-    return new Sandbox(
-      sandboxInstance,
-      structuredClone(this.clientConfig),
-      Daytona.createAxiosInstance(),
-      this.sandboxApi,
-      codeToolbox,
-    )
+    return new Sandbox(sandboxInstance, structuredClone(this.clientConfig), Daytona.createAxiosInstance(), this.sandboxApi)
   }
 
   /**
@@ -650,14 +647,7 @@ export class Daytona implements AsyncDisposable {
 
     return {
       items: response.data.items.map((sandbox) => {
-        const language = sandbox.labels?.['code-toolbox-language'] as CodeLanguage
-        return new Sandbox(
-          sandbox,
-          structuredClone(this.clientConfig),
-          Daytona.createAxiosInstance(),
-          this.sandboxApi,
-          Daytona.getCodeToolbox(language),
-        )
+        return new Sandbox(sandbox, structuredClone(this.clientConfig), Daytona.createAxiosInstance(), this.sandboxApi)
       }),
       total: response.data.total,
       page: response.data.page,
@@ -730,30 +720,6 @@ export class Daytona implements AsyncDisposable {
   @WithInstrumentation()
   public async delete(sandbox: Sandbox, timeout = 60) {
     await sandbox.delete(timeout)
-  }
-
-  /**
-   * Gets the appropriate code toolbox based on language.
-   *
-   * @hidden
-   * @param {CodeLanguage} [language] - Programming language for the toolbox
-   * @returns {SandboxCodeToolbox} The appropriate code toolbox instance
-   * @throws {DaytonaValidationError} - `DaytonaValidationError` - When an unsupported language is specified
-   */
-  public static getCodeToolbox(language?: CodeLanguage) {
-    switch (language) {
-      case CodeLanguage.JAVASCRIPT:
-        return new SandboxJsCodeToolbox()
-      case CodeLanguage.TYPESCRIPT:
-        return new SandboxTsCodeToolbox()
-      case CodeLanguage.PYTHON:
-      case undefined:
-        return new SandboxPythonCodeToolbox()
-      default: {
-        const errMsg = `Unsupported language: ${language}, supported languages: ${Object.values(CodeLanguage).join(', ')}`
-        throw new DaytonaValidationError(errMsg)
-      }
-    }
   }
 
   /**

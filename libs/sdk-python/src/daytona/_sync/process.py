@@ -3,14 +3,13 @@
 
 from __future__ import annotations
 
-import base64
-import json
 import re
 
 import websockets
 from websockets.sync.client import connect
 
 from daytona_toolbox_api_client import (
+    CodeRunRequest,
     Command,
     CreateSessionRequest,
     ExecuteRequest,
@@ -26,9 +25,8 @@ from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
 from .._utils.stream import std_demux_stream
 from .._utils.timeout import http_timeout
-from ..common.charts import Chart, parse_chart
+from ..common.charts import parse_chart
 from ..common.process import (
-    _VALID_ENV_KEY_REGEX,
     CodeRunParams,
     ExecuteResponse,
     ExecutionArtifacts,
@@ -36,10 +34,7 @@ from ..common.process import (
     SessionCommandLogsResponse,
     SessionExecuteRequest,
     SessionExecuteResponse,
-    demux_log,
-    parse_session_command_logs,
 )
-from ..common.protocols import SandboxCodeToolbox
 from ..common.pty import PtySize
 from ..handle.pty_handle import PtyHandle
 
@@ -49,49 +44,16 @@ class Process:
 
     def __init__(
         self,
-        code_toolbox: SandboxCodeToolbox,
+        language: str,
         api_client: ProcessApi,
     ):
         """Initialize a new Process instance.
 
         Args:
-            code_toolbox (SandboxCodeToolbox): Language-specific code execution toolbox.
             api_client (ProcessApi): API client for process operations.
         """
-        self._code_toolbox: SandboxCodeToolbox = code_toolbox
+        self._language: str = language
         self._api_client: ProcessApi = api_client
-
-    @staticmethod
-    def _parse_output(lines: list[str]) -> ExecutionArtifacts:
-        """
-        Parse the output of a command to extract ExecutionArtifacts.
-
-        Args:
-            lines: A list of lines of output from a command
-
-        Returns:
-            ExecutionArtifacts: The artifacts from the command execution
-        """
-        stdout_lines: list[str] = []
-        charts: list[Chart] = []
-
-        for line in lines:
-            if not line.startswith("dtn_artifact_k39fd2:"):
-                stdout_lines.append(line)
-            else:
-                # Remove the prefix and parse JSON
-                json_str = line.replace("dtn_artifact_k39fd2:", "", 1).strip()
-                data = json.loads(json_str)
-                data_type = data.pop("type")
-
-                # Check if this is chart data
-                if data_type == "chart":
-                    chart_data = data.get("value", {})
-                    chart = parse_chart(**chart_data)
-                    if chart:
-                        charts.append(chart)
-
-        return ExecutionArtifacts(stdout="\n".join(stdout_lines), charts=charts)
 
     @intercept_errors(message_prefix="Failed to execute command: ")
     @with_instrumentation()
@@ -132,38 +94,21 @@ class Process:
             result = sandbox.process.exec("sleep 10", timeout=5)
             ```
         """
-        if env:
-            for key in env:
-                if not _VALID_ENV_KEY_REGEX.match(key):
-                    raise ValueError(f"Invalid environment variable name: {key!r}")
-            safe_env_exports = (
-                " ".join(
-                    [
-                        f"""export {key}="$(printf '%s' '{base64.b64encode(value.encode()).decode()}' | base64 -d)";"""
-                        for key, value in env.items()
-                    ]
-                )
-                + " "
-            )
-            command = f"{safe_env_exports}{command}"
-
-        execute_request = ExecuteRequest(command=command, cwd=cwd, timeout=timeout)
+        execute_request = ExecuteRequest(command=command, cwd=cwd, timeout=timeout, envs=env)
 
         response = self._api_client.execute_command(
             request=execute_request,
             _request_timeout=http_timeout(timeout + 5 if timeout else None),
         )
 
-        # Post-process the output to extract ExecutionArtifacts
-        artifacts = Process._parse_output(response.result.split("\n"))
+        result = response.result or ""
+        artifacts = ExecutionArtifacts(stdout=result, charts=[])
 
-        # Create new response with processed output and charts
-        # TODO: Remove model_construct once everything is migrated to pydantic # pylint: disable=fixme
         return ExecuteResponse.model_construct(
             exit_code=(
                 response.exit_code if response.exit_code is not None else response.additional_properties.get("code")
             ),
-            result=artifacts.stdout,
+            result=result,
             artifacts=artifacts,
             additional_properties=response.additional_properties,
         )
@@ -240,8 +185,35 @@ class Process:
                     print(f"Points: {element.points}")
             ```
         """
-        command = self._code_toolbox.get_run_command(code, params)
-        return self.exec(command, env=params.env if params else None, timeout=timeout)
+        code_run_params = params or CodeRunParams()
+        code_run_request = CodeRunRequest(
+            code=code,
+            language=self._language,
+            argv=code_run_params.argv,
+            envs=code_run_params.env,
+            timeout=timeout,
+        )
+
+        response = self._api_client.code_run(
+            request=code_run_request,
+            _request_timeout=http_timeout(timeout + 5 if timeout else None),
+        )
+
+        stdout = response.result or ""
+        charts = []
+        if response.artifacts and response.artifacts.charts:
+            charts = [parse_chart(chart) for chart in response.artifacts.charts]
+        artifacts = ExecutionArtifacts(stdout=stdout, charts=charts)
+
+        # TODO: Remove model_construct once everything is migrated to pydantic # pylint: disable=fixme
+        return ExecuteResponse.model_construct(
+            exit_code=(
+                response.exit_code if response.exit_code is not None else response.additional_properties.get("code")
+            ),
+            result=stdout,
+            artifacts=artifacts,
+            additional_properties=response.additional_properties,
+        )
 
     @intercept_errors(message_prefix="Failed to create session: ")
     @with_instrumentation()
@@ -381,13 +353,11 @@ class Process:
             _request_timeout=http_timeout(timeout + 5 if timeout else None),
         )
 
-        stdout, stderr = demux_log(response.output.encode("utf-8", "ignore") if response.output else b"")
-
         return SessionExecuteResponse.model_construct(
             cmd_id=response.cmd_id,
             output=response.output,
-            stdout=stdout.decode("utf-8", "ignore"),
-            stderr=stderr.decode("utf-8", "ignore"),
+            stdout=response.stdout or "",
+            stderr=response.stderr or "",
             exit_code=response.exit_code,
             additional_properties=response.additional_properties,
         )
@@ -417,11 +387,9 @@ class Process:
             print(f"Command stderr: {logs.stderr}")
             ```
         """
-        response = self._api_client.get_session_command_logs_without_preload_content(
-            session_id=session_id, command_id=command_id
-        )
+        response = self._api_client.get_session_command_logs(session_id=session_id, command_id=command_id)
 
-        return parse_session_command_logs(response.data)
+        return SessionCommandLogsResponse(output=response.output, stdout=response.stdout, stderr=response.stderr)
 
     @intercept_errors(message_prefix="Failed to get session command logs: ")
     async def get_session_command_logs_async(
@@ -483,9 +451,9 @@ class Process:
             print(f"Command stderr: {logs.stderr}")
             ```
         """
-        response = self._api_client.get_entrypoint_logs_without_preload_content()
+        response = self._api_client.get_entrypoint_logs()
 
-        return parse_session_command_logs(response.data)
+        return SessionCommandLogsResponse(output=response.output, stdout=response.stdout, stderr=response.stderr)
 
     @intercept_errors(message_prefix="Failed to get entrypoint logs: ")
     async def get_entrypoint_logs_async(self, on_stdout: OutputHandler[str], on_stderr: OutputHandler[str]) -> None:

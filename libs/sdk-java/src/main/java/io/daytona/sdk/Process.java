@@ -6,6 +6,8 @@ package io.daytona.sdk;
 import io.daytona.sdk.model.*;
 import io.daytona.sdk.exception.DaytonaException;
 import io.daytona.toolbox.client.api.ProcessApi;
+import io.daytona.toolbox.client.model.CodeRunRequest;
+import io.daytona.toolbox.client.model.CodeRunResponse;
 import io.daytona.toolbox.client.model.CreateSessionRequest;
 import io.daytona.toolbox.client.model.ExecuteRequest;
 import io.daytona.toolbox.client.model.PtyCreateRequest;
@@ -22,13 +24,11 @@ import okhttp3.WebSocketListener;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
 
 /**
  * Process and session execution interface for a Sandbox.
@@ -37,7 +37,6 @@ import java.util.regex.Pattern;
  * sessions.
  */
 public class Process {
-    private static final Pattern ENV_KEY_PATTERN = Pattern.compile("^[A-Za-z_][A-Za-z0-9_]*$");
     private static final int LOG_STREAM_NONE = 0;
     private static final int LOG_STREAM_STDOUT = 1;
     private static final int LOG_STREAM_STDERR = 2;
@@ -75,29 +74,12 @@ public class Process {
      * @throws DaytonaException if execution fails
      */
     public ExecuteResponse executeCommand(String command, String cwd, Map<String, String> env, Integer timeout) {
-        String resolvedCommand = command;
-        if (env != null && !env.isEmpty()) {
-            StringBuilder exportsBuilder = new StringBuilder();
-            for (Map.Entry<String, String> entry : env.entrySet()) {
-                String key = entry.getKey();
-                if (!ENV_KEY_PATTERN.matcher(key).matches()) {
-                    throw new DaytonaException("Invalid environment variable name: '" + key + "'");
-                }
-                String value = entry.getValue() == null ? "" : entry.getValue();
-                String encodedValue = Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8));
-                exportsBuilder.append("export ")
-                        .append(key)
-                        .append("=\"$(printf '%s' '")
-                        .append(encodedValue)
-                        .append("' | base64 -d)\"")
-                        .append("; ");
-            }
-            resolvedCommand = exportsBuilder + command;
-        }
-
-        ExecuteRequest request = new ExecuteRequest().command(resolvedCommand);
+        ExecuteRequest request = new ExecuteRequest().command(command);
         if (cwd != null) {
             request.cwd(cwd);
+        }
+        if (env != null) {
+            request.envs(env);
         }
         if (timeout != null) {
             request.timeout(timeout);
@@ -114,26 +96,29 @@ public class Process {
      * @throws DaytonaException if execution fails
      */
     public ExecuteResponse codeRun(String code) {
-        return codeRun(code, null, null);
+        return codeRun(code, null, null, null);
     }
 
-    /**
-     * Executes source code using Sandbox language tooling.
-     *
-     * <p>Base64-encodes the code and pipes it to the language runtime selected by
-     * the {@code code-toolbox-language} label. Uses {@link io.daytona.sdk.codetoolbox.CodeToolbox}
-     * implementations for language-specific command generation.
-     *
-     * @param code source code to execute
-     * @param env environment variables to set during execution
-     * @param timeout timeout in seconds
-     * @return execution result
-     * @throws DaytonaException if execution fails
-     */
     public ExecuteResponse codeRun(String code, Map<String, String> env, Integer timeout) {
-        io.daytona.sdk.codetoolbox.CodeToolbox toolbox = sandbox.getCodeToolbox();
-        String runCmd = toolbox.getRunCommand(code == null ? "" : code);
-        return executeCommand(runCmd, null, env, timeout);
+        return codeRun(code, null, env, timeout);
+    }
+
+    public ExecuteResponse codeRun(String code, List<String> argv, Map<String, String> env, Integer timeout) {
+        CodeRunRequest request = new CodeRunRequest()
+                .code(code == null ? "" : code)
+                .language(sandbox.getLanguage());
+        if (argv != null && !argv.isEmpty()) {
+            request.argv(argv);
+        }
+        if (env != null) {
+            request.envs(env);
+        }
+        if (timeout != null) {
+            request.timeout(timeout);
+        }
+
+        CodeRunResponse response = ExceptionMapper.callToolbox(() -> processApi.codeRun(request));
+        return toExecuteResponse(response);
     }
 
     /**
@@ -206,8 +191,8 @@ public class Process {
      * @return command logs
      * @throws DaytonaException if retrieval fails
      */
-    public String getSessionCommandLogs(String sessionId, String commandId) {
-        return ExceptionMapper.callToolbox(() -> processApi.getSessionCommandLogs(sessionId, commandId, null));
+    public SessionCommandLogsResponse getSessionCommandLogs(String sessionId, String commandId) {
+        return SessionCommandLogsResponse.from(ExceptionMapper.callToolbox(() -> processApi.getSessionCommandLogs(sessionId, commandId, null)));
     }
 
     /**
@@ -236,8 +221,8 @@ public class Process {
      * @return entrypoint logs
      * @throws DaytonaException if retrieval fails
      */
-    public String getEntrypointLogs() {
-        return ExceptionMapper.callToolbox(() -> processApi.getEntrypointLogs(false));
+    public SessionCommandLogsResponse getEntrypointLogs() {
+        return SessionCommandLogsResponse.from(ExceptionMapper.callToolbox(() -> processApi.getEntrypointLogs(false)));
     }
 
     /**
@@ -539,6 +524,10 @@ public class Process {
     }
 
     private ExecuteResponse toExecuteResponse(io.daytona.toolbox.client.model.ExecuteResponse source) {
+        return new ExecuteResponse(source);
+    }
+
+    private ExecuteResponse toExecuteResponse(CodeRunResponse source) {
         return new ExecuteResponse(source);
     }
 

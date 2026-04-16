@@ -14,14 +14,13 @@ Handles process and code execution within a Sandbox.
 #### Process.\_\_init\_\_
 
 ```python
-def __init__(code_toolbox: SandboxCodeToolbox, api_client: ProcessApi)
+def __init__(language: str, api_client: ProcessApi)
 ```
 
 Initialize a new Process instance.
 
 **Arguments**:
 
-- `code_toolbox` _SandboxCodeToolbox_ - Language-specific code execution toolbox.
 - `api_client` _ProcessApi_ - API client for process operations.
 
 #### Process.exec
@@ -807,40 +806,6 @@ Response from the command logs.
 - `output` _str | None_ - The combined output from the command
 - `stdout` _str | None_ - The stdout from the command
 - `stderr` _str | None_ - The stderr from the command
-
-#### parse\_session\_command\_logs
-
-```python
-def parse_session_command_logs(data: bytes) -> SessionCommandLogsResponse
-```
-
-Parse combined stdout/stderr output into separate streams.
-
-**Arguments**:
-
-- `data` - Combined log bytes with STDOUT_PREFIX and STDERR_PREFIX markers
-  
-
-**Returns**:
-
-  SessionCommandLogsResponse with separated stdout and stderr
-
-#### demux\_log
-
-```python
-def demux_log(data: bytes) -> tuple[bytes, bytes]
-```
-
-Demultiplex combined stdout/stderr log data.
-
-**Arguments**:
-
-- `data` - Combined log bytes with STDOUT_PREFIX and STDERR_PREFIX markers
-  
-
-**Returns**:
-
-  Tuple of (stdout_bytes, stderr_bytes)
 
 ##### OutputHandler
 

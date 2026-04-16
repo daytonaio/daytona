@@ -39,22 +39,26 @@ export {
 } from './errors/DaytonaError'
 export { Image } from './Image'
 export { Sandbox } from './Sandbox'
-export type { SandboxCodeToolbox } from './Sandbox'
 export type { CreateSnapshotParams } from './Snapshot'
 export { ComputerUse, Mouse, Keyboard, Screenshot, Display } from './ComputerUse'
-export type { ExecutionError, ExecutionResult, OutputMessage, RunCodeOptions } from './types/CodeInterpreter'
-
-// Chart and artifact types
-export { ChartType } from './types/Charts'
 export type {
   BarChart,
+  BarData,
   BoxAndWhiskerChart,
+  BoxAndWhiskerData,
   Chart,
+  Chart2D,
+  ChartElement,
   CompositeChart,
   LineChart,
   PieChart,
+  PieData,
+  PointChart,
+  PointData,
   ScatterChart,
 } from './types/Charts'
+export { ChartType } from './types/Charts'
+export type { ExecutionError, ExecutionResult, OutputMessage, RunCodeOptions } from './types/CodeInterpreter'
 
 export { SandboxState } from '@daytona/api-client'
 export type {

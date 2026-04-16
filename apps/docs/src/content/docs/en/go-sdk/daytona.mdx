@@ -175,7 +175,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
 - [type OutputChannels](<#OutputChannels>)
 - [type PaginatedSandboxes](<#PaginatedSandboxes>)
 - [type ProcessService](<#ProcessService>)
-  - [func NewProcessService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*ProcessService](<#NewProcessService>)
+  - [func NewProcessService\(toolboxClient \*toolbox.APIClient, otel \*otelState, language types.CodeLanguage\) \*ProcessService](<#NewProcessService>)
   - [func \(p \*ProcessService\) CodeRun\(ctx context.Context, code string, opts ...func\(\*options.CodeRun\)\) \(\*types.ExecuteResponse, error\)](<#ProcessService.CodeRun>)
   - [func \(p \*ProcessService\) ConnectPty\(ctx context.Context, sessionID string\) \(\*PtyHandle, error\)](<#ProcessService.ConnectPty>)
   - [func \(p \*ProcessService\) CreatePty\(ctx context.Context, id string, opts ...func\(\*options.CreatePty\)\) \(\*PtyHandle, error\)](<#ProcessService.CreatePty>)
@@ -184,13 +184,13 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(p \*ProcessService\) DeleteSession\(ctx context.Context, sessionID string\) error](<#ProcessService.DeleteSession>)
   - [func \(p \*ProcessService\) ExecuteCommand\(ctx context.Context, command string, opts ...func\(\*options.ExecuteCommand\)\) \(\*types.ExecuteResponse, error\)](<#ProcessService.ExecuteCommand>)
   - [func \(p \*ProcessService\) ExecuteSessionCommand\(ctx context.Context, sessionID, command string, runAsync bool, suppressInputEcho bool\) \(map\[string\]any, error\)](<#ProcessService.ExecuteSessionCommand>)
-  - [func \(p \*ProcessService\) GetEntrypointLogs\(ctx context.Context\) \(string, error\)](<#ProcessService.GetEntrypointLogs>)
+  - [func \(p \*ProcessService\) GetEntrypointLogs\(ctx context.Context\) \(\*toolbox.SessionCommandLogsResponse, error\)](<#ProcessService.GetEntrypointLogs>)
   - [func \(p \*ProcessService\) GetEntrypointLogsStream\(ctx context.Context, stdout, stderr chan\<\- string\) error](<#ProcessService.GetEntrypointLogsStream>)
   - [func \(p \*ProcessService\) GetEntrypointSession\(ctx context.Context\) \(\*toolbox.Session, error\)](<#ProcessService.GetEntrypointSession>)
   - [func \(p \*ProcessService\) GetPtySessionInfo\(ctx context.Context, sessionID string\) \(\*types.PtySessionInfo, error\)](<#ProcessService.GetPtySessionInfo>)
   - [func \(p \*ProcessService\) GetSession\(ctx context.Context, sessionID string\) \(map\[string\]any, error\)](<#ProcessService.GetSession>)
   - [func \(p \*ProcessService\) GetSessionCommand\(ctx context.Context, sessionID, commandID string\) \(map\[string\]any, error\)](<#ProcessService.GetSessionCommand>)
-  - [func \(p \*ProcessService\) GetSessionCommandLogs\(ctx context.Context, sessionID, commandID string\) \(map\[string\]any, error\)](<#ProcessService.GetSessionCommandLogs>)
+  - [func \(p \*ProcessService\) GetSessionCommandLogs\(ctx context.Context, sessionID, commandID string\) \(\*toolbox.SessionCommandLogsResponse, error\)](<#ProcessService.GetSessionCommandLogs>)
   - [func \(p \*ProcessService\) GetSessionCommandLogsStream\(ctx context.Context, sessionID, commandID string, stdout, stderr chan\<\- string\) error](<#ProcessService.GetSessionCommandLogsStream>)
   - [func \(p \*ProcessService\) KillPtySession\(ctx context.Context, sessionID string\) error](<#ProcessService.KillPtySession>)
   - [func \(p \*ProcessService\) ListPtySessions\(ctx context.Context\) \(\[\]\*types.PtySessionInfo, error\)](<#ProcessService.ListPtySessions>)
@@ -220,7 +220,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(r \*RecordingService\) Start\(ctx context.Context, label \*string\) \(\*toolbox.Recording, error\)](<#RecordingService.Start>)
   - [func \(r \*RecordingService\) Stop\(ctx context.Context, id string\) \(\*toolbox.Recording, error\)](<#RecordingService.Stop>)
 - [type Sandbox](<#Sandbox>)
-  - [func NewSandbox\(client \*Client, toolboxClient \*toolbox.APIClient, id string, name string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList \*string\) \*Sandbox](<#NewSandbox>)
+  - [func NewSandbox\(client \*Client, toolboxClient \*toolbox.APIClient, id string, name string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList \*string, language types.CodeLanguage\) \*Sandbox](<#NewSandbox>)
   - [func \(s \*Sandbox\) Archive\(ctx context.Context\) error](<#Sandbox.Archive>)
   - [func \(s \*Sandbox\) Delete\(ctx context.Context\) error](<#Sandbox.Delete>)
   - [func \(s \*Sandbox\) DeleteWithTimeout\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.DeleteWithTimeout>)
@@ -2562,7 +2562,7 @@ type ProcessService struct {
 ### func NewProcessService
 
 ```go
-func NewProcessService(toolboxClient *toolbox.APIClient, otel *otelState) *ProcessService
+func NewProcessService(toolboxClient *toolbox.APIClient, otel *otelState, language types.CodeLanguage) *ProcessService
 ```
 
 NewProcessService creates a new ProcessService with the provided toolbox client.
@@ -2576,14 +2576,38 @@ This is typically called internally by the SDK when creating a [Sandbox](<#Sandb
 func (p *ProcessService) CodeRun(ctx context.Context, code string, opts ...func(*options.CodeRun)) (*types.ExecuteResponse, error)
 ```
 
-CodeRun executes code in a language\-specific way.
+CodeRun executes code in a language\-specific runtime and returns the result.
 
-NOTE: This method is currently unavailable as the toolbox\-api\-client\-go does not expose a CodeRun endpoint. For code execution, use [ProcessService.ExecuteCommand](<#ProcessService.ExecuteCommand>) or [CodeInterpreterService](<#CodeInterpreterService>).
+The code is executed directly by the daemon's code\-run endpoint using the specified language runtime \(Python, JavaScript, or TypeScript\). This is different from [ProcessService.ExecuteCommand](<#ProcessService.ExecuteCommand>) which runs shell commands.
+
+Parameters:
+
+- code: The source code to execute
+- language: The language runtime to use \(e.g. \[types.CodeLanguagePython\]\)
 
 Optional parameters can be configured using functional options:
 
-- \[options.WithCodeRunParams\]: Set code execution parameters
+- \[options.WithCodeRunParams\]: Set argv and environment variables
 - \[options.WithCodeRunTimeout\]: Set execution timeout
+
+Example:
+
+```
+// Run Python code
+result, err := sandbox.Process.CodeRun(ctx, "print('Hello')", types.CodeLanguagePython)
+fmt.Println(result.Result)
+
+// Run with options
+result, err := sandbox.Process.CodeRun(ctx, code, types.CodeLanguagePython,
+    options.WithCodeRunParams(types.CodeRunParams{
+        Argv: []string{"--verbose"},
+        Env:  map[string]string{"DEBUG": "1"},
+    }),
+    options.WithCodeRunTimeout(30*time.Second),
+)
+```
+
+Returns \[types.ExecuteResponse\] containing the output, exit code, and any artifacts \(such as charts\), or an error.
 
 <a name="ProcessService.ConnectPty"></a>
 ### func \(\*ProcessService\) ConnectPty
@@ -2837,7 +2861,7 @@ Returns command result including id, exitCode \(if completed\), stdout, and stde
 ### func \(\*ProcessService\) GetEntrypointLogs
 
 ```go
-func (p *ProcessService) GetEntrypointLogs(ctx context.Context) (string, error)
+func (p *ProcessService) GetEntrypointLogs(ctx context.Context) (*toolbox.SessionCommandLogsResponse, error)
 ```
 
 GetEntrypointLogs retrieves the output logs of the sandbox entrypoint.
@@ -3021,7 +3045,7 @@ Returns command status including id, command text, and exitCode \(if completed\)
 ### func \(\*ProcessService\) GetSessionCommandLogs
 
 ```go
-func (p *ProcessService) GetSessionCommandLogs(ctx context.Context, sessionID, commandID string) (map[string]any, error)
+func (p *ProcessService) GetSessionCommandLogs(ctx context.Context, sessionID, commandID string) (*toolbox.SessionCommandLogsResponse, error)
 ```
 
 GetSessionCommandLogs retrieves the output logs of a command.
@@ -3732,7 +3756,7 @@ type Sandbox struct {
 ### func NewSandbox
 
 ```go
-func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, name string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList *string) *Sandbox
+func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, name string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList *string, language types.CodeLanguage) *Sandbox
 ```
 
 NewSandbox creates a new Sandbox instance.

@@ -66,6 +66,11 @@ module Daytona
         params.language = CodeLanguage::PYTHON
       end
 
+      unless CodeLanguage::ALL.include?(params.language.to_s.to_sym)
+        raise ArgumentError,
+              "Invalid #{CODE_TOOLBOX_LANGUAGE_LABEL}: #{params.language}. Supported languages: #{CodeLanguage::ALL.join(', ')}"
+      end
+
       _create(params, on_snapshot_create_logs:)
     end
 
@@ -81,7 +86,7 @@ module Daytona
     # @return [Daytona::Sandbox]
     def get(id)
       sandbox_dto = sandbox_api.get_sandbox(id)
-      to_sandbox(sandbox_dto:, code_toolbox: code_toolbox_from_labels(sandbox_dto.labels))
+      to_sandbox(sandbox_dto:)
     end
 
     # Lists Sandboxes filtered by labels.
@@ -102,10 +107,8 @@ module Daytona
         total: response.total,
         page: response.page,
         total_pages: response.total_pages,
-        items: response
-               .items
-               .map do |sandbox_dto|
-                 to_sandbox(sandbox_dto:, code_toolbox: code_toolbox_from_labels(sandbox_dto.labels))
+        items: response.items.map do |sandbox_dto|
+          to_sandbox(sandbox_dto:)
         end
       )
     end
@@ -150,7 +153,7 @@ module Daytona
       end
 
       labels = params.labels&.dup || {}
-      labels[LABEL_CODE_TOOLBOX_LANGUAGE] = params.language.to_s if params.language
+      labels[CODE_TOOLBOX_LANGUAGE_LABEL] = params.language.to_s if params.language
 
       create_sandbox = DaytonaApiClient::CreateSandbox.new(
         user: params.os_user,
@@ -204,7 +207,7 @@ module Daytona
         Util.stream_async(uri:, headers:, on_chunk: on_snapshot_create_logs)
       end
 
-      sandbox = to_sandbox(sandbox_dto: response, code_toolbox: code_toolbox_from_labels(response.labels))
+      sandbox = to_sandbox(sandbox_dto: response)
 
       if sandbox.state != DaytonaApiClient::SandboxState::STARTED
         sandbox.wait_for_sandbox_start([0.001, timeout - (Time.now - start_time)].max)
@@ -246,41 +249,15 @@ module Daytona
     end
 
     # @param sandbox_dto [DaytonaApiClient::Sandbox]
-    # @param code_toolbox [Daytona::SandboxPythonCodeToolbox, Daytona::SandboxTsCodeToolbox]
     # @return [Daytona::Sandbox]
-    def to_sandbox(sandbox_dto:, code_toolbox:)
+    def to_sandbox(sandbox_dto:)
       Sandbox.new(
         sandbox_dto:,
         config:,
         sandbox_api:,
-        code_toolbox:,
         otel_state: @otel_state
       )
     end
-
-    # Converts a language to a code toolbox
-    #
-    # @param language [Symbol]
-    # @return [Daytona::CodeToolbox]
-    # @raise [Daytona::Sdk::Error] If the language is not supported
-    def code_toolbox_from_language(language)
-      case language
-      when CodeLanguage::PYTHON, nil
-        SandboxPythonCodeToolbox.new
-      when SandboxTsCodeToolbox, CodeLanguage::TYPESCRIPT
-        SandboxTsCodeToolbox.new
-      when CodeLanguage::JAVASCRIPT
-        SandboxJsCodeToolbox.new
-      else
-        raise Sdk::Error, "Unsupported language: #{language}"
-      end
-    end
-
-    # Get code toolbox from Sandbox labels
-    #
-    # @param labels [Hash<String, String>]
-    # @return [Daytona::CodeToolbox]
-    def code_toolbox_from_labels(labels) = code_toolbox_from_language(labels[LABEL_CODE_TOOLBOX_LANGUAGE]&.to_sym)
 
     SOURCE_RUBY = 'sdk-ruby'
     private_constant :SOURCE_RUBY
@@ -293,8 +270,5 @@ module Daytona
 
     HEADER_ORGANIZATION_ID = 'X-Daytona-Organization-ID'
     private_constant :HEADER_ORGANIZATION_ID
-
-    LABEL_CODE_TOOLBOX_LANGUAGE = 'code-toolbox-language'
-    private_constant :LABEL_CODE_TOOLBOX_LANGUAGE
   end
 end

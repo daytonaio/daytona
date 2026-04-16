@@ -39,17 +39,17 @@ Handles process and code execution within a Sandbox.
 ```ts
 new Process(
    clientConfig: Configuration, 
-   codeToolbox: SandboxCodeToolbox, 
    apiClient: ProcessApi, 
-   getPreviewToken: () => Promise<string>): Process
+   getPreviewToken: () => Promise<string>, 
+   language?: string): Process
 ```
 
 **Parameters**:
 
 - `clientConfig` _Configuration_
-- `codeToolbox` _SandboxCodeToolbox_
 - `apiClient` _ProcessApi_
 - `getPreviewToken` _\(\) =\> Promise\<string\>_
+- `language?` _string_
 
 
 **Returns**:

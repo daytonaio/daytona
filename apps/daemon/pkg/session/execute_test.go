@@ -85,6 +85,7 @@ func TestExecuteSyncCommandGetsEOFOnStdin(t *testing.T) {
 			`if IFS= read -r line; then printf 'line:%s\n' "$line"; else printf 'eof\n'; fi`,
 			false,
 			true,
+			false,
 			true,
 		)
 		if err != nil {
@@ -130,6 +131,7 @@ func TestExecuteSyncHeredoc(t *testing.T) {
 			"cat <<'__EOF__'\nhello from heredoc\n__EOF__",
 			false,
 			true,
+			false,
 			true,
 		)
 		if err != nil {
@@ -171,6 +173,7 @@ func TestExecuteAsyncCommandStillAcceptsInput(t *testing.T) {
 		`if IFS= read -r line; then printf 'line:%s\n' "$line"; else printf 'eof\n'; fi`,
 		true,
 		true,
+		false,
 		true,
 	)
 	if err != nil {

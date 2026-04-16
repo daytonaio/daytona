@@ -21,7 +21,7 @@ import io.daytona.toolbox.client.model.GitCloneRequest;
 import io.daytona.toolbox.client.model.GitCommitInfo;
 import io.daytona.toolbox.client.model.GitCommitRequest;
 import io.daytona.toolbox.client.model.GitCommitResponse;
-import io.daytona.toolbox.client.model.GitGitDeleteBranchRequest;
+import io.daytona.toolbox.client.model.GitDeleteBranchRequest;
 import io.daytona.toolbox.client.model.GitRepoRequest;
 import io.daytona.toolbox.client.model.GitStatus;
 import io.daytona.toolbox.client.model.ListBranchResponse;
@@ -120,7 +120,7 @@ public class GitApiTest {
      */
     @Test
     public void deleteBranchTest() throws ApiException {
-        GitGitDeleteBranchRequest request = null;
+        GitDeleteBranchRequest request = null;
         api.deleteBranch(request);
         // TODO: test validations
     }

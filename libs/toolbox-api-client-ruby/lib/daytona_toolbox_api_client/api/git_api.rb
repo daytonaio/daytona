@@ -353,7 +353,7 @@ module DaytonaToolboxApiClient
 
     # Delete a branch
     # Delete a branch from the Git repository
-    # @param request [GitGitDeleteBranchRequest] Delete branch request
+    # @param request [GitDeleteBranchRequest] Delete branch request
     # @param [Hash] opts the optional parameters
     # @return [nil]
     def delete_branch(request, opts = {})
@@ -363,7 +363,7 @@ module DaytonaToolboxApiClient
 
     # Delete a branch
     # Delete a branch from the Git repository
-    # @param request [GitGitDeleteBranchRequest] Delete branch request
+    # @param request [GitDeleteBranchRequest] Delete branch request
     # @param [Hash] opts the optional parameters
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
     def delete_branch_with_http_info(request, opts = {})

@@ -84,7 +84,7 @@ type PaginatedSandboxes struct {
 //
 // This is typically called internally by the SDK. Users should create sandboxes
 // using [Client.Create] rather than calling this directly.
-func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, name string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList *string) *Sandbox {
+func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, name string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList *string, language types.CodeLanguage) *Sandbox {
 	var otelSt *otelState
 	if client != nil {
 		otelSt = client.Otel
@@ -103,7 +103,7 @@ func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, nam
 		ToolboxClient:       toolboxClient,
 		FileSystem:          NewFileSystemService(toolboxClient, otelSt),
 		Git:                 NewGitService(toolboxClient, otelSt),
-		Process:             NewProcessService(toolboxClient, otelSt),
+		Process:             NewProcessService(toolboxClient, otelSt, language),
 		CodeInterpreter:     NewCodeInterpreterService(toolboxClient, otelSt),
 		ComputerUse:         NewComputerUseService(toolboxClient, otelSt),
 	}
@@ -781,7 +781,8 @@ func (s *Sandbox) doExperimentalForkWithTimeout(ctx context.Context, name *strin
 		autoDeleteInterval = int(*sandboxResp.AutoDeleteInterval)
 	}
 
-	forked := NewSandbox(s.client, toolboxClient, sandboxResp.GetId(), sandboxResp.GetName(), sandboxResp.GetState(), sandboxResp.GetTarget(), autoArchiveInterval, autoDeleteInterval, sandboxResp.GetNetworkBlockAll(), sandboxResp.NetworkAllowList)
+	language := types.CodeLanguage(sandboxResp.GetLabels()[types.CodeToolboxLanguageLabel])
+	forked := NewSandbox(s.client, toolboxClient, sandboxResp.GetId(), sandboxResp.GetName(), sandboxResp.GetState(), sandboxResp.GetTarget(), autoArchiveInterval, autoDeleteInterval, sandboxResp.GetNetworkBlockAll(), sandboxResp.NetworkAllowList, language)
 
 	if err := forked.WaitForStart(ctx, timeout); err != nil {
 		return nil, err

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module Daytona
+  CODE_TOOLBOX_LANGUAGE_LABEL = 'code-toolbox-language'
+
   class CreateSandboxBaseParams
     # @return [Symbol, nil] Programming language for the Sandbox
     attr_accessor :language

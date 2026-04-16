@@ -1558,7 +1558,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/git.GitDeleteBranchRequest"
+                            "$ref": "#/definitions/GitDeleteBranchRequest"
                         }
                     }
                 ],
@@ -2138,6 +2138,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/process/code-run": {
+            "post": {
+                "description": "Execute Python, JavaScript, or TypeScript code and return output, exit code, and artifacts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "process"
+                ],
+                "summary": "Execute code",
+                "operationId": "CodeRun",
+                "parameters": [
+                    {
+                        "description": "Code execution request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CodeRunRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/CodeRunResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/process/execute": {
             "post": {
                 "description": "Execute a shell command and return the output and exit code",
@@ -2585,8 +2620,9 @@ const docTemplate = `{
         },
         "/process/session/entrypoint/logs": {
             "get": {
-                "description": "Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.",
+                "description": "Get logs for a sandbox entrypoint session. Returns JSON with separated stdout/stderr for SDK \u003e= 0.161.0, plain text otherwise. Supports WebSocket streaming.",
                 "produces": [
+                    "application/json",
                     "text/plain"
                 ],
                 "tags": [
@@ -2606,7 +2642,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Entrypoint log content",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/SessionCommandLogsResponse"
                         }
                     }
                 }
@@ -2746,8 +2782,9 @@ const docTemplate = `{
         },
         "/process/session/{sessionId}/command/{commandId}/logs": {
             "get": {
-                "description": "Get logs for a specific command within a session. Supports both HTTP and WebSocket streaming.",
+                "description": "Get logs for a specific command within a session. Returns JSON with separated stdout/stderr for SDK \u003e= 0.167.0, plain text otherwise. Supports WebSocket streaming.",
                 "produces": [
+                    "application/json",
                     "text/plain"
                 ],
                 "tags": [
@@ -2779,9 +2816,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Log content",
+                        "description": "Log content (JSON for new SDKs, plain text for old SDKs)",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/SessionCommandLogsResponse"
                         }
                     }
                 }
@@ -2903,6 +2940,183 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "Chart": {
+            "type": "object",
+            "properties": {
+                "elements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ChartElement"
+                    }
+                },
+                "png": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "x_label": {
+                    "type": "string"
+                },
+                "x_scale": {
+                    "type": "string"
+                },
+                "x_tick_labels": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "x_ticks": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "y_label": {
+                    "type": "string"
+                },
+                "y_scale": {
+                    "type": "string"
+                },
+                "y_tick_labels": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "y_ticks": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                }
+            }
+        },
+        "ChartElement": {
+            "type": "object",
+            "properties": {
+                "angle": {
+                    "type": "number"
+                },
+                "first_quartile": {
+                    "type": "number"
+                },
+                "group": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "max": {
+                    "type": "number"
+                },
+                "median": {
+                    "type": "number"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "outliers": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "png": {
+                    "type": "string"
+                },
+                "points": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "radius": {
+                    "type": "number"
+                },
+                "third_quartile": {
+                    "type": "number"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "x_label": {
+                    "type": "string"
+                },
+                "y_label": {
+                    "type": "string"
+                }
+            }
+        },
+        "CodeRunArtifacts": {
+            "type": "object",
+            "properties": {
+                "charts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Chart"
+                    }
+                }
+            }
+        },
+        "CodeRunRequest": {
+            "type": "object",
+            "required": [
+                "code",
+                "language"
+            ],
+            "properties": {
+                "argv": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "code": {
+                    "type": "string"
+                },
+                "envs": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "language": {
+                    "description": "python, javascript, typescript",
+                    "type": "string"
+                },
+                "timeout": {
+                    "type": "integer"
+                }
+            }
+        },
+        "CodeRunResponse": {
+            "type": "object",
+            "properties": {
+                "artifacts": {
+                    "$ref": "#/definitions/CodeRunArtifacts"
+                },
+                "exitCode": {
+                    "type": "integer"
+                },
+                "result": {
+                    "type": "string"
+                }
+            }
+        },
         "Command": {
             "type": "object",
             "required": [
@@ -3087,6 +3301,13 @@ const docTemplate = `{
                 "cwd": {
                     "description": "Current working directory",
                     "type": "string"
+                },
+                "envs": {
+                    "description": "Environment variables to set for the command",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "timeout": {
                     "description": "Timeout in seconds, defaults to 10 seconds",
@@ -3320,6 +3541,21 @@ const docTemplate = `{
             ],
             "properties": {
                 "hash": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitDeleteBranchRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "path"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "path": {
                     "type": "string"
                 }
             }
@@ -4058,6 +4294,25 @@ const docTemplate = `{
                 }
             }
         },
+        "SessionCommandLogsResponse": {
+            "type": "object",
+            "required": [
+                "output",
+                "stderr",
+                "stdout"
+            ],
+            "properties": {
+                "output": {
+                    "type": "string"
+                },
+                "stderr": {
+                    "type": "string"
+                },
+                "stdout": {
+                    "type": "string"
+                }
+            }
+        },
         "SessionExecuteRequest": {
             "type": "object",
             "required": [
@@ -4216,21 +4471,6 @@ const docTemplate = `{
         "gin.H": {
             "type": "object",
             "additionalProperties": {}
-        },
-        "git.GitDeleteBranchRequest": {
-            "type": "object",
-            "required": [
-                "name",
-                "path"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "path": {
-                    "type": "string"
-                }
-            }
         }
     }
 }`

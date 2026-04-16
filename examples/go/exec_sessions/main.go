@@ -93,9 +93,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to get command logs: %v", err)
 	}
-	if logContent, ok := logs["logs"].(string); ok {
-		log.Printf("Command logs: %s\n", logContent)
-	}
+	log.Printf("Command logs: %s\n", logs.GetOutput())
 
 	// Delete the session
 	if err := sandbox.Process.DeleteSession(ctx, sessionID); err != nil {
@@ -137,9 +135,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to get logs: %v", err)
 	}
-	if logContent, ok := logsAsync["logs"].(string); ok {
-		log.Printf("Command logs:\n%s\n", logContent)
-	}
+	log.Printf("Command logs:\n%s\n", logsAsync.GetOutput())
 
 	// Delete the async session
 	if err := sandbox.Process.DeleteSession(ctx, asyncSessionID); err != nil {

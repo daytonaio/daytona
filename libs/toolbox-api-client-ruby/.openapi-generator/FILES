@@ -16,6 +16,11 @@ lib/daytona_toolbox_api_client/api/server_api.rb
 lib/daytona_toolbox_api_client/api_client.rb
 lib/daytona_toolbox_api_client/api_error.rb
 lib/daytona_toolbox_api_client/configuration.rb
+lib/daytona_toolbox_api_client/models/chart.rb
+lib/daytona_toolbox_api_client/models/chart_element.rb
+lib/daytona_toolbox_api_client/models/code_run_artifacts.rb
+lib/daytona_toolbox_api_client/models/code_run_request.rb
+lib/daytona_toolbox_api_client/models/code_run_response.rb
 lib/daytona_toolbox_api_client/models/command.rb
 lib/daytona_toolbox_api_client/models/completion_context.rb
 lib/daytona_toolbox_api_client/models/completion_item.rb
@@ -39,7 +44,7 @@ lib/daytona_toolbox_api_client/models/git_clone_request.rb
 lib/daytona_toolbox_api_client/models/git_commit_info.rb
 lib/daytona_toolbox_api_client/models/git_commit_request.rb
 lib/daytona_toolbox_api_client/models/git_commit_response.rb
-lib/daytona_toolbox_api_client/models/git_git_delete_branch_request.rb
+lib/daytona_toolbox_api_client/models/git_delete_branch_request.rb
 lib/daytona_toolbox_api_client/models/git_repo_request.rb
 lib/daytona_toolbox_api_client/models/git_status.rb
 lib/daytona_toolbox_api_client/models/initialize_request.rb
@@ -85,6 +90,7 @@ lib/daytona_toolbox_api_client/models/screenshot_response.rb
 lib/daytona_toolbox_api_client/models/scroll_response.rb
 lib/daytona_toolbox_api_client/models/search_files_response.rb
 lib/daytona_toolbox_api_client/models/session.rb
+lib/daytona_toolbox_api_client/models/session_command_logs_response.rb
 lib/daytona_toolbox_api_client/models/session_execute_request.rb
 lib/daytona_toolbox_api_client/models/session_execute_response.rb
 lib/daytona_toolbox_api_client/models/session_send_input_request.rb

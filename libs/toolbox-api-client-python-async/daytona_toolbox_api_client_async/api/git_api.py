@@ -26,7 +26,7 @@ from daytona_toolbox_api_client_async.models.git_clone_request import GitCloneRe
 from daytona_toolbox_api_client_async.models.git_commit_info import GitCommitInfo
 from daytona_toolbox_api_client_async.models.git_commit_request import GitCommitRequest
 from daytona_toolbox_api_client_async.models.git_commit_response import GitCommitResponse
-from daytona_toolbox_api_client_async.models.git_git_delete_branch_request import GitGitDeleteBranchRequest
+from daytona_toolbox_api_client_async.models.git_delete_branch_request import GitDeleteBranchRequest
 from daytona_toolbox_api_client_async.models.git_repo_request import GitRepoRequest
 from daytona_toolbox_api_client_async.models.git_status import GitStatus
 from daytona_toolbox_api_client_async.models.list_branch_response import ListBranchResponse
@@ -1389,7 +1389,7 @@ class GitApi:
     @validate_call
     async def delete_branch(
         self,
-        request: Annotated[GitGitDeleteBranchRequest, Field(description="Delete branch request")],
+        request: Annotated[GitDeleteBranchRequest, Field(description="Delete branch request")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1408,7 +1408,7 @@ class GitApi:
         Delete a branch from the Git repository
 
         :param request: Delete branch request (required)
-        :type request: GitGitDeleteBranchRequest
+        :type request: GitDeleteBranchRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1456,7 +1456,7 @@ class GitApi:
     @validate_call
     async def delete_branch_with_http_info(
         self,
-        request: Annotated[GitGitDeleteBranchRequest, Field(description="Delete branch request")],
+        request: Annotated[GitDeleteBranchRequest, Field(description="Delete branch request")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1475,7 +1475,7 @@ class GitApi:
         Delete a branch from the Git repository
 
         :param request: Delete branch request (required)
-        :type request: GitGitDeleteBranchRequest
+        :type request: GitDeleteBranchRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1523,7 +1523,7 @@ class GitApi:
     @validate_call
     async def delete_branch_without_preload_content(
         self,
-        request: Annotated[GitGitDeleteBranchRequest, Field(description="Delete branch request")],
+        request: Annotated[GitDeleteBranchRequest, Field(description="Delete branch request")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1542,7 +1542,7 @@ class GitApi:
         Delete a branch from the Git repository
 
         :param request: Delete branch request (required)
-        :type request: GitGitDeleteBranchRequest
+        :type request: GitDeleteBranchRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of

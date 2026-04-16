@@ -71,8 +71,8 @@ public class ExecCommand {
                 "exec-session-1", new SessionExecuteRequest("echo $FOO", false));
         System.out.println("FOO=" + echoCmd.getOutput().trim());
 
-        String logs = sandbox.process.getSessionCommandLogs("exec-session-1", echoCmd.getCmdId());
-        System.out.println("Session command logs: " + logs);
+        var logs = sandbox.process.getSessionCommandLogs("exec-session-1", echoCmd.getCmdId());
+        System.out.println("Session command logs: " + logs.getStdout());
 
         sandbox.process.deleteSession("exec-session-1");
     }

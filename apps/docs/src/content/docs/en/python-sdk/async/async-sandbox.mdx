@@ -53,7 +53,7 @@ Represents a Daytona Sandbox.
 def __init__(sandbox_dto: SandboxDto,
              toolbox_api: ApiClient,
              sandbox_api: SandboxApi,
-             code_toolbox: SandboxCodeToolbox,
+             language: str,
              pool_tracker: AsyncPoolSaturationTracker | None = None)
 ```
 
@@ -64,7 +64,7 @@ Initialize a new Sandbox instance.
 - `sandbox_dto` _SandboxDto_ - The sandbox data from the API.
 - `toolbox_api` _ApiClient_ - API client for toolbox operations.
 - `sandbox_api` _SandboxApi_ - API client for Sandbox operations.
-- `code_toolbox` _SandboxCodeToolbox_ - Language-specific toolbox implementation.
+- `language` _str_ - Language code for the Sandbox code_run.
 - `pool_tracker` _AsyncPoolSaturationTracker | None_ - Tracker for connection pool saturation.
 
 #### AsyncSandbox.refresh\_data

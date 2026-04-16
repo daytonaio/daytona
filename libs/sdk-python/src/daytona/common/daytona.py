@@ -14,6 +14,8 @@ from .image import Image
 from .sandbox import Resources
 from .volume import VolumeMount
 
+CODE_TOOLBOX_LANGUAGE_LABEL = "code-toolbox-language"
+
 
 class CodeLanguage(str, Enum):
     """Programming languages supported by Daytona
