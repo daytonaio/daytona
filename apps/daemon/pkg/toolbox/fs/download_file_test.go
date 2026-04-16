@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -77,6 +78,9 @@ func TestDownloadFileContentDisposition(t *testing.T) {
 	})
 
 	t.Run("control characters in filename are replaced", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			t.Skip("Windows filesystems reject control characters in filenames")
+		}
 		tempDir := t.TempDir()
 		filePath := filepath.Join(tempDir, "hello\tworld.txt")
 		if err := os.WriteFile(filePath, []byte("content"), 0644); err != nil {

@@ -223,7 +223,9 @@ func newFileDownloadErrorResponse(
 	}
 }
 
-// toLatin1 replaces characters outside ISO-8859-1 with '_'.
+// toLatin1 sanitizes s for use in a quoted Content-Disposition filename= parameter.
+// It escapes backslashes and double quotes, strips CR/LF/NUL, replaces C0 control
+// characters (0x01-0x1F), DEL (0x7F), and non-Latin1 (>0xFF) runes with '_'.
 func toLatin1(s string) string {
 	escaped := strings.NewReplacer(`\`, `\\`, `"`, `\"`, "\r", "", "\n", "", "\x00", "").Replace(s)
 	var buf []byte
