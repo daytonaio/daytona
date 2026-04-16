@@ -88,6 +88,15 @@ jobs:
           source "$(poetry env info --path)/bin/activate"
           yarn publish
 
+      - name: Cleanup credentials
+        if: always()
+        run: |
+          rm -f ~/.gem/credentials
+          docker logout docker.io 2>/dev/null || true
+          git config --global --unset-all user.name 2>/dev/null || true
+          git config --global --unset-all user.email 2>/dev/null || true
+          git config --global --unset-all safe.directory 2>/dev/null || true
+
   update-homebrew-tap:
     if: ${{ inputs.npm_tag == 'latest' }}
     needs: publish

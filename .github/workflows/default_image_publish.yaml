@@ -173,3 +173,8 @@ jobs:
         run: |
           docker buildx imagetools inspect "${REGISTRY_IMAGE}:${VERSION}"
           docker buildx imagetools inspect "${REGISTRY_IMAGE}:${VERSION}-slim"
+
+      - name: Cleanup credentials
+        if: always()
+        run: |
+          docker logout docker.io 2>/dev/null || true

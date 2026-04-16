@@ -100,6 +100,14 @@ jobs:
       - name: Create release
         run: yarn nx release "$VERSION" --skip-publish --verbose
 
+      - name: Cleanup credentials
+        if: always()
+        run: |
+          git config --global --unset-all user.name 2>/dev/null || true
+          git config --global --unset-all user.email 2>/dev/null || true
+          git config --global --unset-all safe.directory 2>/dev/null || true
+          git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}" 2>/dev/null || true
+
   build_projects:
     needs: publish
     runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
@@ -193,6 +201,14 @@ jobs:
           retention-days: 1
           overwrite: true
 
+      - name: Cleanup credentials
+        if: always()
+        run: |
+          git config --global --unset-all user.name 2>/dev/null || true
+          git config --global --unset-all user.email 2>/dev/null || true
+          git config --global --unset-all safe.directory 2>/dev/null || true
+          git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}" 2>/dev/null || true
+
   # Separately build docker images for AMD64 and ARM64
   docker_build:
     needs: build_projects
@@ -273,6 +289,11 @@ jobs:
           ARCH: -${{ matrix.arch }}
         run: |
           yarn docker:production
+
+      - name: Cleanup credentials
+        if: always()
+        run: |
+          docker logout docker.io 2>/dev/null || true
 
   # Push combined manifest
   docker_push_manifest:
@@ -374,3 +395,11 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cleanup credentials
+        if: always()
+        run: |
+          git config --global --unset-all user.name 2>/dev/null || true
+          git config --global --unset-all user.email 2>/dev/null || true
+          git config --global --unset-all safe.directory 2>/dev/null || true
+          git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}" 2>/dev/null || true
