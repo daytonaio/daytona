@@ -53,7 +53,8 @@ from ..common.daytona import (
 from ..common.errors import DaytonaAuthenticationError, DaytonaValidationError
 from ..common.image import Image
 from ..common.protocols import SandboxCodeToolbox
-from ..internal.event_subscriber import SyncEventSubscriber
+from ..internal.event_dispatcher import SyncEventDispatcher
+from ..internal.event_subscription_manager import SyncEventSubscriptionManager
 from ..internal.urllib3_retry import RemoteDisconnectedRetry
 from .sandbox import PaginatedSandboxes, Sandbox
 from .snapshot import SnapshotService
@@ -230,11 +231,13 @@ class Daytona:
             SnapshotsApi(self._api_client), self._object_storage_api, self._target
         )
 
-        # Event subscriber for real-time sandbox updates
-        self._event_subscriber: SyncEventSubscriber = SyncEventSubscriber(
+        self._event_dispatcher: SyncEventDispatcher = SyncEventDispatcher(
             self._api_url, self._api_key or self._jwt_token or "", self._organization_id
         )
-        self._event_subscriber.ensure_connected()
+        self._event_dispatcher.ensure_connected()
+        self._subscription_manager: SyncEventSubscriptionManager = SyncEventSubscriptionManager(
+            self._event_dispatcher
+        )
 
         # Initialize OpenTelemetry if enabled
         otel_enabled = (config and config._experimental and config._experimental.get("otelEnabled")) or (
@@ -484,7 +487,7 @@ class Daytona:
             self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
-            event_subscriber=self._event_subscriber,
+            subscription_manager=self._subscription_manager,
         )
 
         if sandbox.state != SandboxState.STARTED:
@@ -579,7 +582,7 @@ class Daytona:
             self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
-            event_subscriber=self._event_subscriber,
+            subscription_manager=self._subscription_manager,
         )
 
     @intercept_errors(message_prefix="Failed to list sandboxes: ")
@@ -619,7 +622,7 @@ class Daytona:
                     self._toolbox_api_client,
                     self._sandbox_api,
                     self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
-                    event_subscriber=self._event_subscriber,
+                    subscription_manager=self._subscription_manager,
                 )
                 for sandbox in response.items
             ],

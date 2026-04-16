@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import functools
-import threading
 from typing import Any, Callable
 
 from deprecated import deprecated
@@ -41,7 +40,7 @@ from ..common.errors import DaytonaError, DaytonaNotFoundError, DaytonaValidatio
 from ..common.lsp_server import LspLanguageId, LspLanguageIdLiteral
 from ..common.protocols import SandboxCodeToolbox
 from ..common.sandbox import Resources
-from ..internal.event_subscriber import AsyncEventSubscriber
+from ..internal.event_subscription_manager import AsyncEventSubscriptionManager
 from ..internal.pool_tracker import AsyncPoolSaturationTracker
 from ..internal.toolbox_api_client_proxy import ToolboxApiClientProxy
 from .code_interpreter import AsyncCodeInterpreter
@@ -51,7 +50,6 @@ from .git import AsyncGit
 from .lsp_server import AsyncLspServer
 from .process import AsyncProcess
 
-SUBSCRIPTION_TTL = 300
 
 
 def with_events(cls: type) -> type:
@@ -129,9 +127,7 @@ class AsyncSandbox(SandboxDto):
     _computer_use: AsyncComputerUse = PrivateAttr()
     _code_interpreter: AsyncCodeInterpreter = PrivateAttr()
     _state_waiters: list[Callable[[SandboxState | None], None]] = PrivateAttr(default_factory=list)
-    _state_waiters_lock: threading.Lock = PrivateAttr(default_factory=threading.Lock)
-    _event_subscribed: bool = PrivateAttr(default=False)
-    _unsubscribe_events: Callable[[], None] | None = PrivateAttr(default=None)
+    _sub_id: str | None = PrivateAttr(default=None)
 
     # TODO: Remove model_config once everything is migrated to pydantic # pylint: disable=fixme
     model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)
@@ -142,7 +138,7 @@ class AsyncSandbox(SandboxDto):
         toolbox_api: ApiClient,
         sandbox_api: SandboxApi,
         code_toolbox: SandboxCodeToolbox,
-        event_subscriber: AsyncEventSubscriber,
+        subscription_manager: AsyncEventSubscriptionManager,
         pool_tracker: AsyncPoolSaturationTracker | None = None,
     ):
         """Initialize a new Sandbox instance.
@@ -152,14 +148,14 @@ class AsyncSandbox(SandboxDto):
             toolbox_api (ApiClient): API client for toolbox operations.
             sandbox_api (SandboxApi): API client for Sandbox operations.
             code_toolbox (SandboxCodeToolbox): Language-specific toolbox implementation.
-            event_subscriber: AsyncEventSubscriber for real-time updates.
+            subscription_manager: AsyncEventSubscriptionManager for real-time updates.
             pool_tracker (AsyncPoolSaturationTracker | None): Tracker for connection pool saturation.
         """
         super().__init__(**sandbox_dto.model_dump())
         self.__process_sandbox_dto(sandbox_dto)
         self._sandbox_api: SandboxApi = sandbox_api
         self._code_toolbox: SandboxCodeToolbox = code_toolbox
-        self._event_subscriber: AsyncEventSubscriber = event_subscriber
+        self._subscription_manager: AsyncEventSubscriptionManager = subscription_manager
         # Wrap the toolbox API client to inject the sandbox ID into the resource path
         self._toolbox_api: ToolboxApiClientProxy[ApiClient] = ToolboxApiClientProxy(
             toolbox_api, self.id, self.toolbox_proxy_url, pool_tracker
@@ -172,7 +168,7 @@ class AsyncSandbox(SandboxDto):
         self._code_interpreter = AsyncCodeInterpreter(InterpreterApi(self._toolbox_api))
         self._info_api: InfoApi = InfoApi(self._toolbox_api)
 
-        self._subscribe_to_events()
+        self._ensure_subscribed()
 
     @property
     def fs(self) -> AsyncFileSystem:
@@ -735,60 +731,41 @@ class AsyncSandbox(SandboxDto):
         """
         await self._sandbox_api.update_last_activity(self.id)
 
-    def _subscribe_to_events(self) -> None:
-        if self._event_subscribed:
-            return
-
-        def _on_event(event_name: str, data: Any) -> None:
-            if not isinstance(data, dict):
-                return
-            raw: object = data.get("sandbox", data)  # pyright: ignore[reportUnknownVariableType]
-
-            if event_name == "sandbox.created":
-                sandbox_dto = SandboxDto.from_dict(raw)  # pyright: ignore[reportArgumentType]
-                if sandbox_dto is not None:
-                    self.__process_sandbox_dto(sandbox_dto)
-            else:
-                new_state = (  # pyright: ignore[reportUnknownVariableType]
-                    raw.get("state") if isinstance(raw, dict) else None
-                ) or data.get("newState")
-                if new_state is not None:
-                    try:
-                        self._apply_state(SandboxState(new_state))
-                    except ValueError:
-                        pass
-
-        self._unsubscribe_events = self._event_subscriber.subscribe(
-            self.id,
-            _on_event,
-            events=["sandbox.state.updated", "sandbox.created"],
-            ttl_seconds=SUBSCRIPTION_TTL,
-        )
-        self._event_subscribed = True
-
     def _ensure_subscribed(self) -> None:
-        with self._state_waiters_lock:
-            if not self._event_subscribed:
-                self._subscribe_to_events()
-
-            if not self._event_subscribed:
+        if self._sub_id is not None:
+            if self._subscription_manager.refresh(self._sub_id):
                 return
+            self._sub_id = None
 
-            if not self._event_subscriber.refresh_subscription(self.id):
-                self._event_subscribed = False
-                self._unsubscribe_events = None
-                self._subscribe_to_events()
+        self._sub_id = self._subscription_manager.subscribe(
+            self.id,
+            self._handle_event,
+            events=["sandbox.state.updated", "sandbox.created"],
+        )
+
+    def _handle_event(self, event_name: str, data: Any) -> None:
+        if not isinstance(data, dict):
+            return
+        raw: object = data.get("sandbox", data)  # pyright: ignore[reportUnknownVariableType]
+
+        if event_name == "sandbox.created":
+            sandbox_dto = SandboxDto.from_dict(raw)  # pyright: ignore[reportArgumentType]
+            if sandbox_dto is not None:
+                self.__process_sandbox_dto(sandbox_dto)
+        else:
+            new_state = (  # pyright: ignore[reportUnknownVariableType]
+                raw.get("state") if isinstance(raw, dict) else None
+            ) or data.get("newState")
+            if new_state is not None:
+                try:
+                    self._apply_state(SandboxState(new_state))
+                except ValueError:
+                    pass
 
     def _unsubscribe_from_events(self) -> None:
-        with self._state_waiters_lock:
-            self._unsubscribe_from_events_locked()
-
-    def _unsubscribe_from_events_locked(self) -> None:
-        if self._unsubscribe_events is not None:
-            self._unsubscribe_events()
-            self._unsubscribe_events = None
-
-        self._event_subscribed = False
+        if self._sub_id is not None:
+            self._subscription_manager.unsubscribe(self._sub_id)
+            self._sub_id = None
 
     def _apply_state(self, new_state: SandboxState | None) -> None:
         if new_state == self.state:
@@ -819,7 +796,7 @@ class AsyncSandbox(SandboxDto):
         if self.state in error_states:
             raise DaytonaError(f"Sandbox {self.id} is in error state: {self.state}, error reason: {self.error_reason}")
 
-        state_changed = asyncio.Event()
+        state_resolved = asyncio.Event()
         result_state: SandboxState | None = None
 
         def _waiter(state: SandboxState | None) -> None:
@@ -829,16 +806,16 @@ class AsyncSandbox(SandboxDto):
 
             if state in target_states or state in error_states:
                 result_state = state
-                state_changed.set()
+                state_resolved.set()
 
         self._state_waiters.append(_waiter)
         try:
             _waiter(self.state)
 
             # Poll periodically as safety net for missed WebSocket events
-            while not state_changed.is_set():
+            while not state_resolved.is_set():
                 try:
-                    _ = await asyncio.wait_for(state_changed.wait(), timeout=1)
+                    _ = await asyncio.wait_for(state_resolved.wait(), timeout=1)
                     break
                 except asyncio.TimeoutError:
                     pass  # Ignore timeout error and fetch sandbox

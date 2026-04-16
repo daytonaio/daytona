@@ -1,7 +1,5 @@
-# Copyright 2025 Daytona Platforms Inc.
+# Copyright Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
-
-"""WebSocket event subscriber for real-time events via Socket.IO."""
 
 from __future__ import annotations
 
@@ -20,8 +18,8 @@ EventHandler = Callable[[str, Any], None]
 AsyncEventHandler = Callable[[str, Any], Union[Awaitable[None], None]]
 
 
-class AsyncEventSubscriber:
-    """Async event subscriber that connects to the Socket.IO notification gateway."""
+class AsyncEventDispatcher:
+    """Async event dispatcher that connects to the Socket.IO notification gateway."""
 
     _api_url: str
     _token: str
@@ -33,8 +31,6 @@ class AsyncEventSubscriber:
     _listeners: dict[str, list[AsyncEventHandler]]
     _registered_events: set[str]
     _disconnect_task: asyncio.Task[None] | None
-    _subscription_timers: dict[str, threading.Timer]
-    _subscription_ttls: dict[str, float]
     _disconnect_generation: int
     _lock: asyncio.Lock
 
@@ -51,8 +47,6 @@ class AsyncEventSubscriber:
         self._listeners = {}
         self._registered_events = set()
         self._disconnect_task = None
-        self._subscription_timers = {}
-        self._subscription_ttls = {}
         self._connect_task: asyncio.Task[None] | None = None
         self._disconnect_generation = 0
         self._lock = asyncio.Lock()
@@ -108,23 +102,23 @@ class AsyncEventSubscriber:
         async with self._lock:
             self._sio = sio
 
-        subscriber = self
+        dispatcher = self
 
         @sio.event  # type: ignore[misc]
         async def connect() -> None:  # pyright: ignore[reportUnusedFunction]
-            subscriber._connected = True
-            subscriber._failed = False
-            subscriber._fail_error = None
+            dispatcher._connected = True
+            dispatcher._failed = False
+            dispatcher._fail_error = None
 
         @sio.event  # type: ignore[misc]
         async def disconnect() -> None:  # pyright: ignore[reportUnusedFunction]
-            subscriber._connected = False
+            dispatcher._connected = False
 
         @sio.event  # type: ignore[misc]
         async def connect_error(data: Any) -> None:  # pyright: ignore[reportUnusedFunction]
-            subscriber._connected = False
-            subscriber._failed = True
-            subscriber._fail_error = f"WebSocket connection failed: {data}"
+            dispatcher._connected = False
+            dispatcher._failed = True
+            dispatcher._fail_error = f"WebSocket connection failed: {data}"
 
         # Re-register any events that were added before the socket was created
         async with self._lock:
@@ -157,19 +151,21 @@ class AsyncEventSubscriber:
             self._fail_error = f"WebSocket connection failed: {e}"
             raise ConnectionError(self._fail_error) from e
 
+        if not self._listeners:
+            self._schedule_delayed_disconnect()
+
     def subscribe(
         self,
         resource_id: str,
         handler: AsyncEventHandler,
         events: list[str],
-        ttl_seconds: float = 0,
     ) -> Callable[[], None]:
         """Subscribe to specific events for a resource.
 
         Args:
             resource_id: The ID of the resource (e.g. sandbox ID).
             handler: Callback receiving (event_name, raw_data).
-            events: List of Socket.IO event names to listen for (e.g. ["sandbox.state.updated", "sandbox.created"]).
+            events: List of Socket.IO event names to listen for.
 
         Returns:
             Unsubscribe function.
@@ -189,13 +185,6 @@ class AsyncEventSubscriber:
             self._listeners[resource_id] = []
         self._listeners[resource_id].append(handler)
 
-        if ttl_seconds > 0:
-            self._subscription_ttls[resource_id] = ttl_seconds
-            self._start_subscription_timer(resource_id)
-        else:
-            self._clear_subscription_timer(resource_id)
-            self._subscription_ttls.pop(resource_id, None)
-
         def unsubscribe() -> None:
             handlers = self._listeners.get(resource_id)
             if handlers and handler in handlers:
@@ -205,16 +194,9 @@ class AsyncEventSubscriber:
 
         return unsubscribe
 
-    def refresh_subscription(self, resource_id: str) -> bool:
-        if resource_id not in self._subscription_ttls:
-            return False
-
-        self._start_subscription_timer(resource_id)
-        return True
-
     def _register_events(self, events: list[str]) -> None:
         """Register Socket.IO event handlers (idempotent — each event is registered once)."""
-        subscriber = self
+        dispatcher = self
 
         for event_name in events:
             if event_name in self._registered_events:
@@ -229,7 +211,7 @@ class AsyncEventSubscriber:
                 async def _handler(data: Any) -> None:
                     resource_id = _extract_id_from_event(data)
                     if resource_id:
-                        await subscriber._dispatch(resource_id, evt, data)
+                        await dispatcher._dispatch(resource_id, evt, data)
 
                 return _handler
 
@@ -245,7 +227,7 @@ class AsyncEventSubscriber:
             await self._disconnect(expected_generation=generation)
 
         try:
-            self._disconnect_task = asyncio.get_event_loop().create_task(_delayed())
+            self._disconnect_task = asyncio.get_running_loop().create_task(_delayed())
         except RuntimeError:
             pass
 
@@ -269,6 +251,11 @@ class AsyncEventSubscriber:
         if self._connect_task and not self._connect_task.done():
             self._connect_task.cancel()
 
+        if self._disconnect_task and not self._disconnect_task.done():
+            if self._disconnect_task is not asyncio.current_task():
+                self._disconnect_task.cancel()
+            self._disconnect_task = None
+
         async with self._lock:
             if expected_generation is not None:
                 if expected_generation != self._disconnect_generation or self._listeners:
@@ -276,7 +263,6 @@ class AsyncEventSubscriber:
 
             sio = self._sio
             self._sio = None
-            self._clear_subscription_timers()
             self._listeners.clear()
             self._registered_events.clear()
             self._connected = False
@@ -293,60 +279,16 @@ class AsyncEventSubscriber:
             except Exception:
                 pass
 
-    def _start_subscription_timer(self, resource_id: str) -> None:
-        ttl_seconds = self._subscription_ttls.get(resource_id)
-        if ttl_seconds is None or ttl_seconds <= 0:
-            return
-
-        self._clear_subscription_timer(resource_id)
-
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = None
-
-        current_timer: threading.Timer | None = None
-
-        def _expire() -> None:
-            if self._subscription_timers.get(resource_id) is not current_timer:
-                return
-
-            self._clear_subscription_timer(resource_id)
-            self._subscription_ttls.pop(resource_id, None)
-            if loop is not None and loop.is_running():
-                loop.call_soon_threadsafe(self._unsubscribe_resource, resource_id)
-            else:
-                self._unsubscribe_resource(resource_id)
-
-        current_timer = threading.Timer(ttl_seconds, _expire)
-        current_timer.daemon = True
-        self._subscription_timers[resource_id] = current_timer
-        current_timer.start()
-
-    def _clear_subscription_timer(self, resource_id: str) -> None:
-        timer = self._subscription_timers.pop(resource_id, None)
-        if timer is not None:
-            timer.cancel()
-
-    def _clear_subscription_timers(self) -> None:
-        for timer in self._subscription_timers.values():
-            timer.cancel()
-        self._subscription_timers.clear()
-        self._subscription_ttls.clear()
-
     def _unsubscribe_resource(self, resource_id: str) -> None:
         if resource_id in self._listeners:
             del self._listeners[resource_id]
-
-        self._clear_subscription_timer(resource_id)
-        self._subscription_ttls.pop(resource_id, None)
 
         if not self._listeners:
             self._schedule_delayed_disconnect()
 
 
-class SyncEventSubscriber:
-    """Sync event subscriber using socketio.Client on a background thread."""
+class SyncEventDispatcher:
+    """Sync event dispatcher using socketio.Client on a background thread."""
 
     _api_url: str
     _token: str
@@ -360,8 +302,6 @@ class SyncEventSubscriber:
     _lock: threading.Lock
     _bg_thread: threading.Thread | None
     _disconnect_timer: threading.Timer | None
-    _subscription_timers: dict[str, threading.Timer]
-    _subscription_ttls: dict[str, float]
     _disconnect_generation: int
     _closed: bool
 
@@ -380,8 +320,6 @@ class SyncEventSubscriber:
         self._lock = threading.Lock()
         self._bg_thread = None
         self._disconnect_timer = None
-        self._subscription_timers = {}
-        self._subscription_ttls = {}
         self._disconnect_generation = 0
         self._closed = False
 
@@ -433,24 +371,24 @@ class SyncEventSubscriber:
 
         connected_event = threading.Event()
         error_holder: list[str] = []
-        subscriber = self
+        dispatcher = self
 
         @sio.event  # type: ignore[misc]
         def connect() -> None:  # pyright: ignore[reportUnusedFunction]
-            subscriber._connected = True
-            subscriber._failed = False
-            subscriber._fail_error = None
+            dispatcher._connected = True
+            dispatcher._failed = False
+            dispatcher._fail_error = None
             connected_event.set()
 
         @sio.event  # type: ignore[misc]
         def disconnect() -> None:  # pyright: ignore[reportUnusedFunction]
-            subscriber._connected = False
+            dispatcher._connected = False
 
         @sio.event  # type: ignore[misc]
         def connect_error(data: Any) -> None:  # pyright: ignore[reportUnusedFunction]
-            subscriber._connected = False
-            subscriber._failed = True
-            subscriber._fail_error = f"WebSocket connection failed: {data}"
+            dispatcher._connected = False
+            dispatcher._failed = True
+            dispatcher._fail_error = f"WebSocket connection failed: {data}"
             error_holder.append(str(data))
             connected_event.set()
 
@@ -491,12 +429,22 @@ class SyncEventSubscriber:
             self._fail_error = f"WebSocket connection failed: {err}"
             raise ConnectionError(self._fail_error)
 
+        with self._lock:
+            if not self._listeners:
+                generation = self._disconnect_generation
+                self._disconnect_timer = threading.Timer(
+                    self._DISCONNECT_DELAY,
+                    self._delayed_disconnect,
+                    args=(generation,),
+                )
+                self._disconnect_timer.daemon = True
+                self._disconnect_timer.start()
+
     def subscribe(
         self,
         resource_id: str,
         handler: EventHandler,
         events: list[str],
-        ttl_seconds: float = 0,
     ) -> Callable[[], None]:
         """Subscribe to specific events for a resource.
 
@@ -508,27 +456,17 @@ class SyncEventSubscriber:
         Returns:
             Unsubscribe function.
         """
-        self.ensure_connected()
-
-        if self._disconnect_timer:
-            self._disconnect_timer.cancel()
-            self._disconnect_timer = None
-
-        # Register any new events with the Socket.IO client
-        self._register_events(events)
-
         with self._lock:
+            if self._disconnect_timer:
+                self._disconnect_timer.cancel()
+                self._disconnect_timer = None
             self._disconnect_generation += 1
             if resource_id not in self._listeners:
                 self._listeners[resource_id] = []
             self._listeners[resource_id].append(handler)
 
-            if ttl_seconds > 0:
-                self._subscription_ttls[resource_id] = ttl_seconds
-                self._start_subscription_timer_locked(resource_id)
-            else:
-                self._clear_subscription_timer_locked(resource_id)
-                self._subscription_ttls.pop(resource_id, None)
+        self.ensure_connected()
+        self._register_events(events)
 
         def unsubscribe() -> None:
             with self._lock:
@@ -537,31 +475,21 @@ class SyncEventSubscriber:
                     handlers.remove(handler)
                     if not handlers:
                         self._unsubscribe_resource_locked(resource_id)
-                should_cleanup = not self._listeners
-
-            if should_cleanup:
-                generation = self._disconnect_generation
-                self._disconnect_timer = threading.Timer(
-                    self._DISCONNECT_DELAY,
-                    self._delayed_disconnect,
-                    args=(generation,),
-                )
-                self._disconnect_timer.daemon = True
-                self._disconnect_timer.start()
+                if not self._listeners:
+                    generation = self._disconnect_generation
+                    self._disconnect_timer = threading.Timer(
+                        self._DISCONNECT_DELAY,
+                        self._delayed_disconnect,
+                        args=(generation,),
+                    )
+                    self._disconnect_timer.daemon = True
+                    self._disconnect_timer.start()
 
         return unsubscribe
 
-    def refresh_subscription(self, resource_id: str) -> bool:
-        with self._lock:
-            if resource_id not in self._subscription_ttls:
-                return False
-
-            self._start_subscription_timer_locked(resource_id)
-            return True
-
     def _register_events(self, events: list[str]) -> None:
         """Register Socket.IO event handlers (idempotent — each event is registered once)."""
-        subscriber = self
+        dispatcher = self
 
         with self._lock:
             for event_name in events:
@@ -577,7 +505,7 @@ class SyncEventSubscriber:
                     def _handler(data: Any) -> None:
                         resource_id = _extract_id_from_event(data)
                         if resource_id:
-                            subscriber._dispatch(resource_id, evt, data)
+                            dispatcher._dispatch(resource_id, evt, data)
 
                     return _handler
 
@@ -617,7 +545,6 @@ class SyncEventSubscriber:
             sio = self._sio
             self._sio = None
             self._connected = False
-            self._clear_subscription_timers_locked()
             self._listeners.clear()
             self._registered_events.clear()
 
@@ -633,51 +560,8 @@ class SyncEventSubscriber:
             except Exception:
                 pass
 
-    def _start_subscription_timer_locked(self, resource_id: str) -> None:
-        ttl_seconds = self._subscription_ttls.get(resource_id)
-        if ttl_seconds is None or ttl_seconds <= 0:
-            return
-
-        self._clear_subscription_timer_locked(resource_id)
-
-        current_timer: threading.Timer | None = None
-
-        def _expire() -> None:
-            self._expire_subscription(resource_id, current_timer)
-
-        current_timer = threading.Timer(ttl_seconds, _expire)
-        current_timer.daemon = True
-        self._subscription_timers[resource_id] = current_timer
-        current_timer.start()
-
-    def _clear_subscription_timer_locked(self, resource_id: str) -> None:
-        timer = self._subscription_timers.pop(resource_id, None)
-        if timer is not None:
-            timer.cancel()
-
-    def _clear_subscription_timers_locked(self) -> None:
-        for timer in self._subscription_timers.values():
-            timer.cancel()
-        self._subscription_timers.clear()
-        self._subscription_ttls.clear()
-
-    def _expire_subscription(self, resource_id: str, current_timer: threading.Timer | None) -> None:
-        with self._lock:
-            if self._subscription_timers.get(resource_id) is not current_timer:
-                return
-            self._unsubscribe_resource_locked(resource_id)
-            should_cleanup = not self._listeners
-            generation = self._disconnect_generation
-
-        if should_cleanup:
-            self._disconnect_timer = threading.Timer(self._DISCONNECT_DELAY, self._delayed_disconnect, args=(generation,))
-            self._disconnect_timer.daemon = True
-            self._disconnect_timer.start()
-
     def _unsubscribe_resource_locked(self, resource_id: str) -> None:
         self._listeners.pop(resource_id, None)
-        self._clear_subscription_timer_locked(resource_id)
-        self._subscription_ttls.pop(resource_id, None)
 
 
 def _extract_id_from_event(data: Any) -> str | None:

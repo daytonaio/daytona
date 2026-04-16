@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-TOOLBOX_PORT = 2280
+TOOLBOX_PORT: int = 2280
 
 
 @dataclass

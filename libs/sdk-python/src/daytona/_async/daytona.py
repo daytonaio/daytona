@@ -53,7 +53,8 @@ from ..common.daytona import (
 from ..common.errors import DaytonaAuthenticationError, DaytonaValidationError
 from ..common.image import Image
 from ..common.protocols import SandboxCodeToolbox
-from ..internal.event_subscriber import AsyncEventSubscriber
+from ..internal.event_dispatcher import AsyncEventDispatcher
+from ..internal.event_subscription_manager import AsyncEventSubscriptionManager
 from ..internal.pool_tracker import AsyncPoolSaturationTracker
 from .sandbox import AsyncPaginatedSandboxes, AsyncSandbox
 from .snapshot import AsyncSnapshotService
@@ -234,11 +235,13 @@ class AsyncDaytona:
             self._target,
         )
 
-        # Event subscriber for real-time sandbox updates
-        self._event_subscriber: AsyncEventSubscriber = AsyncEventSubscriber(
+        self._event_dispatcher: AsyncEventDispatcher = AsyncEventDispatcher(
             self._api_url, self._api_key or self._jwt_token or "", self._organization_id
         )
-        self._event_subscriber.ensure_connected()
+        self._event_dispatcher.ensure_connected()
+        self._subscription_manager: AsyncEventSubscriptionManager = AsyncEventSubscriptionManager(
+            self._event_dispatcher
+        )
 
         # Initialize OpenTelemetry if enabled
         otel_enabled = (config and config._experimental and config._experimental.get("otelEnabled")) or (
@@ -322,9 +325,11 @@ class AsyncDaytona:
         if self._toolbox_api_client:
             await self._toolbox_api_client.close()
 
-        # Disconnect event subscriber
-        if self._event_subscriber:
-            await self._event_subscriber.disconnect()
+        if self._subscription_manager:
+            self._subscription_manager.shutdown()
+
+        if self._event_dispatcher:
+            await self._event_dispatcher.disconnect()
 
     @overload
     async def create(
@@ -542,7 +547,7 @@ class AsyncDaytona:
             self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
-            self._event_subscriber,
+            self._subscription_manager,
             self._pool_tracker,
         )
 
@@ -638,7 +643,7 @@ class AsyncDaytona:
             self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
-            self._event_subscriber,
+            self._subscription_manager,
             self._pool_tracker,
         )
 
@@ -679,7 +684,7 @@ class AsyncDaytona:
                     self._toolbox_api_client,
                     self._sandbox_api,
                     self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
-                    self._event_subscriber,
+                    self._subscription_manager,
                     self._pool_tracker,
                 )
                 for sandbox in response.items
