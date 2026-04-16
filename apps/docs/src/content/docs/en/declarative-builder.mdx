@@ -103,6 +103,21 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Define a declarative image with python packages
+Image declarativeImage = Image.debianSlim("3.12")
+    .pipInstall("requests", "pytest")
+    .workdir("/home/daytona");
+
+// Create a new sandbox with the declarative image and stream the build logs
+CreateSandboxFromImageParams params = new CreateSandboxFromImageParams();
+params.setImage(declarativeImage);
+Sandbox sandbox = daytona.create(params, 0L, System.out::println);
+```
+
+</TabItem>
 </Tabs>
 
 :::note
@@ -242,13 +257,33 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Create a python data science image
+String snapshotName = "data-science-snapshot";
+
+Image image = Image.debianSlim("3.12")
+    .pipInstall("pandas", "numpy")
+    .workdir("/home/daytona");
+
+// Create the snapshot and stream the build logs
+daytona.snapshot().create(snapshotName, image, System.out::println);
+
+// Create a new sandbox using the pre-built snapshot
+CreateSandboxFromSnapshotParams snapshotParams = new CreateSandboxFromSnapshotParams();
+snapshotParams.setSnapshot(snapshotName);
+Sandbox sandbox = daytona.create(snapshotParams);
+```
+
+</TabItem>
 </Tabs>
 
 ## Image configuration
 
 Daytona provides an option to define images programmatically using the Daytona SDK. You can specify base images, install packages, add files, set environment variables, and more.
 
-For a complete API reference and method signatures, see the [Python](/docs/python-sdk/common/image), [TypeScript](/docs/typescript-sdk/image), [Ruby](/docs/ruby-sdk/image), and [Go](/docs/go-sdk/daytona#type-DockerImage) SDK references.
+For a complete API reference and method signatures, see the [Python](/docs/python-sdk/common/image), [TypeScript](/docs/typescript-sdk/image), [Ruby](/docs/ruby-sdk/image), [Go](/docs/go-sdk/daytona#type-DockerImage), and [Java](/docs/java-sdk/image) SDK references.
 
 ### Base image selection
 
@@ -298,6 +333,17 @@ image := daytona.Base("python:3.12-slim-bookworm")
 // Use a Debian slim image with Python 3.12
 version := "3.12"
 image := daytona.DebianSlim(&version)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Create an image from a base
+Image image = Image.base("python:3.12-slim-bookworm");
+
+// Use a Debian slim image with Python 3.12
+image = Image.debianSlim("3.12");
 ```
 
 </TabItem>
@@ -370,6 +416,14 @@ image := daytona.DebianSlim(&version).
 image := daytona.DebianSlim(&version).
   AddLocalFile("pyproject.toml", "/tmp/pyproject.toml").
   Run("pip install /tmp[dev]")
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Add pip packages
+Image image = Image.debianSlim("3.12").pipInstall("requests", "pandas");
 ```
 
 </TabItem>
@@ -479,6 +533,18 @@ image := daytona.DebianSlim(&version).Workdir("/home/daytona")
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Set environment variables
+Image image = Image.debianSlim("3.12")
+    .env(java.util.Map.of("PROJECT_ROOT", "/home/daytona"));
+
+// Set working directory
+image = Image.debianSlim("3.12").workdir("/home/daytona");
+```
+
+</TabItem>
 </Tabs>
 
 ### Commands and entrypoints
@@ -556,6 +622,24 @@ image := daytona.DebianSlim(&version).Entrypoint([]string{"/bin/bash"})
 
 // Set default command
 image := daytona.DebianSlim(&version).Cmd([]string{"/bin/bash"})
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Run shell commands during build
+Image image = Image.debianSlim("3.12").runCommands(
+    "apt-get update && apt-get install -y git",
+    "groupadd -r daytona && useradd -r -g daytona -m daytona",
+    "mkdir -p /home/daytona/workspace"
+);
+
+// Set entrypoint
+image = Image.debianSlim("3.12").entrypoint("/bin/bash");
+
+// Set default command
+image = Image.debianSlim("3.12").cmd("/bin/bash");
 ```
 
 </TabItem>
