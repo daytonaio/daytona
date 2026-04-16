@@ -27,6 +27,7 @@ type UpdateOrganizationRegionQuota struct {
 	MaxCpuPerSandbox NullableFloat32 `json:"maxCpuPerSandbox"`
 	MaxMemoryPerSandbox NullableFloat32 `json:"maxMemoryPerSandbox"`
 	MaxDiskPerSandbox NullableFloat32 `json:"maxDiskPerSandbox"`
+	MaxDiskPerNonEphemeralSandbox NullableFloat32 `json:"maxDiskPerNonEphemeralSandbox"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -36,7 +37,7 @@ type _UpdateOrganizationRegionQuota UpdateOrganizationRegionQuota
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUpdateOrganizationRegionQuota(totalCpuQuota NullableFloat32, totalMemoryQuota NullableFloat32, totalDiskQuota NullableFloat32, maxCpuPerSandbox NullableFloat32, maxMemoryPerSandbox NullableFloat32, maxDiskPerSandbox NullableFloat32) *UpdateOrganizationRegionQuota {
+func NewUpdateOrganizationRegionQuota(totalCpuQuota NullableFloat32, totalMemoryQuota NullableFloat32, totalDiskQuota NullableFloat32, maxCpuPerSandbox NullableFloat32, maxMemoryPerSandbox NullableFloat32, maxDiskPerSandbox NullableFloat32, maxDiskPerNonEphemeralSandbox NullableFloat32) *UpdateOrganizationRegionQuota {
 	this := UpdateOrganizationRegionQuota{}
 	this.TotalCpuQuota = totalCpuQuota
 	this.TotalMemoryQuota = totalMemoryQuota
@@ -44,6 +45,7 @@ func NewUpdateOrganizationRegionQuota(totalCpuQuota NullableFloat32, totalMemory
 	this.MaxCpuPerSandbox = maxCpuPerSandbox
 	this.MaxMemoryPerSandbox = maxMemoryPerSandbox
 	this.MaxDiskPerSandbox = maxDiskPerSandbox
+	this.MaxDiskPerNonEphemeralSandbox = maxDiskPerNonEphemeralSandbox
 	return &this
 }
 
@@ -211,6 +213,32 @@ func (o *UpdateOrganizationRegionQuota) SetMaxDiskPerSandbox(v float32) {
 	o.MaxDiskPerSandbox.Set(&v)
 }
 
+// GetMaxDiskPerNonEphemeralSandbox returns the MaxDiskPerNonEphemeralSandbox field value
+// If the value is explicit nil, the zero value for float32 will be returned
+func (o *UpdateOrganizationRegionQuota) GetMaxDiskPerNonEphemeralSandbox() float32 {
+	if o == nil || o.MaxDiskPerNonEphemeralSandbox.Get() == nil {
+		var ret float32
+		return ret
+	}
+
+	return *o.MaxDiskPerNonEphemeralSandbox.Get()
+}
+
+// GetMaxDiskPerNonEphemeralSandboxOk returns a tuple with the MaxDiskPerNonEphemeralSandbox field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UpdateOrganizationRegionQuota) GetMaxDiskPerNonEphemeralSandboxOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.MaxDiskPerNonEphemeralSandbox.Get(), o.MaxDiskPerNonEphemeralSandbox.IsSet()
+}
+
+// SetMaxDiskPerNonEphemeralSandbox sets field value
+func (o *UpdateOrganizationRegionQuota) SetMaxDiskPerNonEphemeralSandbox(v float32) {
+	o.MaxDiskPerNonEphemeralSandbox.Set(&v)
+}
+
 func (o UpdateOrganizationRegionQuota) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -227,6 +255,7 @@ func (o UpdateOrganizationRegionQuota) ToMap() (map[string]interface{}, error) {
 	toSerialize["maxCpuPerSandbox"] = o.MaxCpuPerSandbox.Get()
 	toSerialize["maxMemoryPerSandbox"] = o.MaxMemoryPerSandbox.Get()
 	toSerialize["maxDiskPerSandbox"] = o.MaxDiskPerSandbox.Get()
+	toSerialize["maxDiskPerNonEphemeralSandbox"] = o.MaxDiskPerNonEphemeralSandbox.Get()
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -246,6 +275,7 @@ func (o *UpdateOrganizationRegionQuota) UnmarshalJSON(data []byte) (err error) {
 		"maxCpuPerSandbox",
 		"maxMemoryPerSandbox",
 		"maxDiskPerSandbox",
+		"maxDiskPerNonEphemeralSandbox",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -281,6 +311,7 @@ func (o *UpdateOrganizationRegionQuota) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "maxCpuPerSandbox")
 		delete(additionalProperties, "maxMemoryPerSandbox")
 		delete(additionalProperties, "maxDiskPerSandbox")
+		delete(additionalProperties, "maxDiskPerNonEphemeralSandbox")
 		o.AdditionalProperties = additionalProperties
 	}
 

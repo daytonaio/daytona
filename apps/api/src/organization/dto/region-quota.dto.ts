@@ -32,6 +32,9 @@ export class RegionQuotaDto {
   @ApiProperty({ nullable: true })
   maxDiskPerSandbox: number | null
 
+  @ApiProperty({ nullable: true })
+  maxDiskPerNonEphemeralSandbox: number | null
+
   constructor(regionQuota: RegionQuota) {
     this.organizationId = regionQuota.organizationId
     this.regionId = regionQuota.regionId
@@ -41,5 +44,6 @@ export class RegionQuotaDto {
     this.maxCpuPerSandbox = regionQuota.maxCpuPerSandbox
     this.maxMemoryPerSandbox = regionQuota.maxMemoryPerSandbox
     this.maxDiskPerSandbox = regionQuota.maxDiskPerSandbox
+    this.maxDiskPerNonEphemeralSandbox = regionQuota.maxDiskPerNonEphemeralSandbox
   }
 }

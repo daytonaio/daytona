@@ -68,5 +68,11 @@ export interface RegionQuota {
      * @memberof RegionQuota
      */
     'maxDiskPerSandbox': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof RegionQuota
+     */
+    'maxDiskPerNonEphemeralSandbox': number | null;
 }
 

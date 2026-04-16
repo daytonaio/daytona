@@ -56,5 +56,11 @@ export interface UpdateOrganizationRegionQuota {
      * @memberof UpdateOrganizationRegionQuota
      */
     'maxDiskPerSandbox': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateOrganizationRegionQuota
+     */
+    'maxDiskPerNonEphemeralSandbox': number | null;
 }
 

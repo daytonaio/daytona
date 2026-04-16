@@ -17,10 +17,16 @@ import { RegionQuotaDto } from '../dto/region-quota.dto'
 export function getEffectivePerSandboxLimits(
   organization: Organization,
   regionQuota: RegionQuotaDto | null | undefined,
-): { maxCpuPerSandbox: number; maxMemoryPerSandbox: number; maxDiskPerSandbox: number } {
+): {
+  maxCpuPerSandbox: number
+  maxMemoryPerSandbox: number
+  maxDiskPerSandbox: number
+  maxDiskPerNonEphemeralSandbox: number | null
+} {
   return {
     maxCpuPerSandbox: regionQuota?.maxCpuPerSandbox ?? organization.maxCpuPerSandbox,
     maxMemoryPerSandbox: regionQuota?.maxMemoryPerSandbox ?? organization.maxMemoryPerSandbox,
     maxDiskPerSandbox: regionQuota?.maxDiskPerSandbox ?? organization.maxDiskPerSandbox,
+    maxDiskPerNonEphemeralSandbox: regionQuota?.maxDiskPerNonEphemeralSandbox ?? null,
   }
 }

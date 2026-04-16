@@ -208,9 +208,19 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     regionQuota.totalCpuQuota = updateDto.totalCpuQuota ?? regionQuota.totalCpuQuota
     regionQuota.totalMemoryQuota = updateDto.totalMemoryQuota ?? regionQuota.totalMemoryQuota
     regionQuota.totalDiskQuota = updateDto.totalDiskQuota ?? regionQuota.totalDiskQuota
-    regionQuota.maxCpuPerSandbox = updateDto.maxCpuPerSandbox ?? regionQuota.maxCpuPerSandbox
-    regionQuota.maxMemoryPerSandbox = updateDto.maxMemoryPerSandbox ?? regionQuota.maxMemoryPerSandbox
-    regionQuota.maxDiskPerSandbox = updateDto.maxDiskPerSandbox ?? regionQuota.maxDiskPerSandbox
+
+    if (updateDto.maxCpuPerSandbox !== undefined) {
+      regionQuota.maxCpuPerSandbox = updateDto.maxCpuPerSandbox
+    }
+    if (updateDto.maxMemoryPerSandbox !== undefined) {
+      regionQuota.maxMemoryPerSandbox = updateDto.maxMemoryPerSandbox
+    }
+    if (updateDto.maxDiskPerSandbox !== undefined) {
+      regionQuota.maxDiskPerSandbox = updateDto.maxDiskPerSandbox
+    }
+    if (updateDto.maxDiskPerNonEphemeralSandbox !== undefined) {
+      regionQuota.maxDiskPerNonEphemeralSandbox = updateDto.maxDiskPerNonEphemeralSandbox
+    }
 
     await this.regionQuotaRepository.save(regionQuota)
   }

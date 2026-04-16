@@ -38,8 +38,9 @@ class RegionQuota(BaseModel):
     max_cpu_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxCpuPerSandbox")
     max_memory_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxMemoryPerSandbox")
     max_disk_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxDiskPerSandbox")
+    max_disk_per_non_ephemeral_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxDiskPerNonEphemeralSandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["organizationId", "regionId", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox"]
+    __properties: ClassVar[List[str]] = ["organizationId", "regionId", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -101,6 +102,11 @@ class RegionQuota(BaseModel):
         if self.max_disk_per_sandbox is None and "max_disk_per_sandbox" in self.model_fields_set:
             _dict['maxDiskPerSandbox'] = None
 
+        # set to None if max_disk_per_non_ephemeral_sandbox (nullable) is None
+        # and model_fields_set contains the field
+        if self.max_disk_per_non_ephemeral_sandbox is None and "max_disk_per_non_ephemeral_sandbox" in self.model_fields_set:
+            _dict['maxDiskPerNonEphemeralSandbox'] = None
+
         return _dict
 
     @classmethod
@@ -120,7 +126,8 @@ class RegionQuota(BaseModel):
             "total_disk_quota": obj.get("totalDiskQuota"),
             "max_cpu_per_sandbox": obj.get("maxCpuPerSandbox"),
             "max_memory_per_sandbox": obj.get("maxMemoryPerSandbox"),
-            "max_disk_per_sandbox": obj.get("maxDiskPerSandbox")
+            "max_disk_per_sandbox": obj.get("maxDiskPerSandbox"),
+            "max_disk_per_non_ephemeral_sandbox": obj.get("maxDiskPerNonEphemeralSandbox")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

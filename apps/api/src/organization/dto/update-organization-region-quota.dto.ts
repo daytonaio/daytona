@@ -24,4 +24,7 @@ export class UpdateOrganizationRegionQuotaDto {
 
   @ApiProperty({ nullable: true })
   maxDiskPerSandbox?: number | null
+
+  @ApiProperty({ nullable: true })
+  maxDiskPerNonEphemeralSandbox?: number | null
 }

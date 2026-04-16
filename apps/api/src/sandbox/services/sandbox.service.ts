@@ -79,6 +79,7 @@ import { RedisLockProvider } from '../common/redis-lock.provider'
 import { customAlphabet as customNanoid, nanoid, urlAlphabet } from 'nanoid'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { validateMountPaths, validateSubpaths } from '../utils/volume-mount-path-validation.util'
+import { isEphemeral } from '../utils/ephemeral.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { PortPreviewUrlDto, SignedPortPreviewUrlDto } from '../dto/port-preview-url.dto'
@@ -158,6 +159,7 @@ export class SandboxService {
     cpu: number,
     memory: number,
     disk: number,
+    ephemeral: boolean,
     excludeSandboxId?: string,
   ): Promise<{
     pendingCpuIncremented: boolean
@@ -169,10 +171,8 @@ export class SandboxService {
       : null
 
     // validate per-sandbox quotas
-    const { maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox } = getEffectivePerSandboxLimits(
-      organization,
-      regionQuota,
-    )
+    const { maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox } =
+      getEffectivePerSandboxLimits(organization, regionQuota)
 
     if (cpu > maxCpuPerSandbox) {
       throw new ForbiddenException(
@@ -188,6 +188,17 @@ export class SandboxService {
       throw new ForbiddenException(
         `Disk request ${disk}GB exceeds maximum allowed per sandbox (${maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
+    }
+
+    if (!ephemeral && maxDiskPerNonEphemeralSandbox !== null) {
+      if (maxDiskPerNonEphemeralSandbox === 0) {
+        throw new BadRequestError('Only ephemeral sandboxes are permitted in this region')
+      }
+      if (disk > maxDiskPerNonEphemeralSandbox) {
+        throw new ForbiddenException(
+          `Disk request ${disk}GB exceeds maximum allowed per non-ephemeral sandbox (${maxDiskPerNonEphemeralSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+        )
+      }
     }
 
     // e.g. region belonging to an organization
@@ -308,7 +319,7 @@ export class SandboxService {
       throw new StateChangeInProgressError()
     }
 
-    if (sandbox.autoDeleteInterval === 0) {
+    if (isEphemeral(sandbox)) {
       throw new SandboxError('Ephemeral sandboxes cannot be archived')
     }
 
@@ -449,7 +460,7 @@ export class SandboxService {
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
       const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
-        await this.validateOrganizationQuotas(organization, region, cpu, mem, disk)
+        await this.validateOrganizationQuotas(organization, region, cpu, mem, disk, isEphemeral(createSandboxDto))
 
       if (pendingCpuIncremented) {
         pendingCpuIncrement = cpu
@@ -659,7 +670,7 @@ export class SandboxService {
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
       const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
-        await this.validateOrganizationQuotas(organization, region, cpu, mem, disk)
+        await this.validateOrganizationQuotas(organization, region, cpu, mem, disk, isEphemeral(createSandboxDto))
 
       if (pendingCpuIncremented) {
         pendingCpuIncrement = cpu
@@ -799,7 +810,7 @@ export class SandboxService {
   async createBackup(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
-    if (sandbox.autoDeleteInterval === 0) {
+    if (isEphemeral(sandbox)) {
       throw new SandboxError('Ephemeral sandboxes cannot be backed up')
     }
 
@@ -876,6 +887,7 @@ export class SandboxService {
           forkedSandbox.cpu,
           forkedSandbox.mem,
           forkedSandbox.disk,
+          isEphemeral(forkedSandbox),
         )
 
       if (pendingCpuIncremented) {
@@ -1606,7 +1618,15 @@ export class SandboxService {
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
       const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
-        await this.validateOrganizationQuotas(organization, region, sandbox.cpu, sandbox.mem, sandbox.disk, sandbox.id)
+        await this.validateOrganizationQuotas(
+          organization,
+          region,
+          sandbox.cpu,
+          sandbox.mem,
+          sandbox.disk,
+          isEphemeral(sandbox),
+          sandbox.id,
+        )
 
       if (pendingCpuIncremented) {
         pendingCpuIncrement = sandbox.cpu
@@ -1663,7 +1683,7 @@ export class SandboxService {
 
     const updateData: Partial<Sandbox> = {
       pending: true,
-      desiredState: sandbox.autoDeleteInterval === 0 ? SandboxDesiredState.DESTROYED : SandboxDesiredState.STOPPED,
+      desiredState: isEphemeral(sandbox) ? SandboxDesiredState.DESTROYED : SandboxDesiredState.STOPPED,
     }
 
     const updatedSandbox = await this.sandboxRepository.updateWhere(sandbox.id, {
@@ -1671,7 +1691,7 @@ export class SandboxService {
       whereCondition: { pending: false, state: sandbox.state },
     })
 
-    if (sandbox.autoDeleteInterval === 0) {
+    if (isEphemeral(sandbox)) {
       this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(updatedSandbox))
     } else {
       this.eventEmitter.emit(SandboxEvents.STOPPED, new SandboxStoppedEvent(updatedSandbox, force))
@@ -1801,10 +1821,8 @@ export class SandboxService {
         ? await this.organizationService.getRegionQuota(organization.id, region.id)
         : null
 
-      const { maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox } = getEffectivePerSandboxLimits(
-        organization,
-        regionQuota,
-      )
+      const { maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox } =
+        getEffectivePerSandboxLimits(organization, regionQuota)
 
       if (newCpu > maxCpuPerSandbox) {
         throw new ForbiddenException(
@@ -1822,6 +1840,17 @@ export class SandboxService {
         )
       }
 
+      if (!isEphemeral(sandbox) && maxDiskPerNonEphemeralSandbox !== null) {
+        if (maxDiskPerNonEphemeralSandbox === 0) {
+          throw new BadRequestError('Non-ephemeral sandboxes are not permitted in this region')
+        }
+        if (newDisk > maxDiskPerNonEphemeralSandbox) {
+          throw new ForbiddenException(
+            `Disk request ${newDisk}GB exceeds maximum allowed per non-ephemeral sandbox (${maxDiskPerNonEphemeralSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+          )
+        }
+      }
+
       // For cold resize, cpu/memory don't affect quota until sandbox is STARTED.
       // For hot resize, track all deltas (positive reserves quota, negative frees quota for others).
       const cpuDeltaForQuota = isHotResize ? newCpu - sandbox.cpu : 0
@@ -1837,6 +1866,7 @@ export class SandboxService {
             cpuDeltaForQuota,
             memDeltaForQuota,
             diskDeltaForQuota,
+            isEphemeral(sandbox),
           )
 
         if (pendingCpuIncremented) {

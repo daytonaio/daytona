@@ -102,4 +102,12 @@ public class RegionQuotaTest {
         // TODO: test maxDiskPerSandbox
     }
 
+    /**
+     * Test the property 'maxDiskPerNonEphemeralSandbox'
+     */
+    @Test
+    public void maxDiskPerNonEphemeralSandboxTest() {
+        // TODO: test maxDiskPerNonEphemeralSandbox
+    }
+
 }

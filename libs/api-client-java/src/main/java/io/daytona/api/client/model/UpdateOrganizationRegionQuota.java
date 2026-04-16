@@ -81,6 +81,11 @@ public class UpdateOrganizationRegionQuota {
   @javax.annotation.Nullable
   private BigDecimal maxDiskPerSandbox;
 
+  public static final String SERIALIZED_NAME_MAX_DISK_PER_NON_EPHEMERAL_SANDBOX = "maxDiskPerNonEphemeralSandbox";
+  @SerializedName(SERIALIZED_NAME_MAX_DISK_PER_NON_EPHEMERAL_SANDBOX)
+  @javax.annotation.Nullable
+  private BigDecimal maxDiskPerNonEphemeralSandbox;
+
   public UpdateOrganizationRegionQuota() {
   }
 
@@ -197,6 +202,25 @@ public class UpdateOrganizationRegionQuota {
     this.maxDiskPerSandbox = maxDiskPerSandbox;
   }
 
+
+  public UpdateOrganizationRegionQuota maxDiskPerNonEphemeralSandbox(@javax.annotation.Nullable BigDecimal maxDiskPerNonEphemeralSandbox) {
+    this.maxDiskPerNonEphemeralSandbox = maxDiskPerNonEphemeralSandbox;
+    return this;
+  }
+
+  /**
+   * Get maxDiskPerNonEphemeralSandbox
+   * @return maxDiskPerNonEphemeralSandbox
+   */
+  @javax.annotation.Nullable
+  public BigDecimal getMaxDiskPerNonEphemeralSandbox() {
+    return maxDiskPerNonEphemeralSandbox;
+  }
+
+  public void setMaxDiskPerNonEphemeralSandbox(@javax.annotation.Nullable BigDecimal maxDiskPerNonEphemeralSandbox) {
+    this.maxDiskPerNonEphemeralSandbox = maxDiskPerNonEphemeralSandbox;
+  }
+
   /**
    * A container for additional, undeclared properties.
    * This is a holder for any undeclared properties as specified with
@@ -257,13 +281,14 @@ public class UpdateOrganizationRegionQuota {
         Objects.equals(this.totalDiskQuota, updateOrganizationRegionQuota.totalDiskQuota) &&
         Objects.equals(this.maxCpuPerSandbox, updateOrganizationRegionQuota.maxCpuPerSandbox) &&
         Objects.equals(this.maxMemoryPerSandbox, updateOrganizationRegionQuota.maxMemoryPerSandbox) &&
-        Objects.equals(this.maxDiskPerSandbox, updateOrganizationRegionQuota.maxDiskPerSandbox)&&
+        Objects.equals(this.maxDiskPerSandbox, updateOrganizationRegionQuota.maxDiskPerSandbox) &&
+        Objects.equals(this.maxDiskPerNonEphemeralSandbox, updateOrganizationRegionQuota.maxDiskPerNonEphemeralSandbox)&&
         Objects.equals(this.additionalProperties, updateOrganizationRegionQuota.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(totalCpuQuota, totalMemoryQuota, totalDiskQuota, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, additionalProperties);
+    return Objects.hash(totalCpuQuota, totalMemoryQuota, totalDiskQuota, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, additionalProperties);
   }
 
   @Override
@@ -276,6 +301,7 @@ public class UpdateOrganizationRegionQuota {
     sb.append("    maxCpuPerSandbox: ").append(toIndentedString(maxCpuPerSandbox)).append("\n");
     sb.append("    maxMemoryPerSandbox: ").append(toIndentedString(maxMemoryPerSandbox)).append("\n");
     sb.append("    maxDiskPerSandbox: ").append(toIndentedString(maxDiskPerSandbox)).append("\n");
+    sb.append("    maxDiskPerNonEphemeralSandbox: ").append(toIndentedString(maxDiskPerNonEphemeralSandbox)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -305,6 +331,7 @@ public class UpdateOrganizationRegionQuota {
     openapiFields.add("maxCpuPerSandbox");
     openapiFields.add("maxMemoryPerSandbox");
     openapiFields.add("maxDiskPerSandbox");
+    openapiFields.add("maxDiskPerNonEphemeralSandbox");
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>();
@@ -314,6 +341,7 @@ public class UpdateOrganizationRegionQuota {
     openapiRequiredFields.add("maxCpuPerSandbox");
     openapiRequiredFields.add("maxMemoryPerSandbox");
     openapiRequiredFields.add("maxDiskPerSandbox");
+    openapiRequiredFields.add("maxDiskPerNonEphemeralSandbox");
   }
 
   /**
