@@ -755,7 +755,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
 :::
 
-Daytona provides methods to pause sandboxes. Pause keeps both filesystem state and memory persistence, so sandboxes can resume from in-memory runtime state. Compared to regular stop behavior, pause is useful for workloads with active in-memory context and state continuity.
+Daytona provides methods to pause sandboxes. Pausing a sandbox keeps both filesystem state and memory persistence, so sandboxes can resume from in-memory runtime state. Compared to regular stop behavior, pause is useful for workloads with active in-memory context and state continuity.
 
 Daytona supports pause functionality through VM-based runners. Pause is handled through the existing stop action. This means stop behaves as pause and preserves memory state, while force stop performs a full shutdown without preserving memory state.
 
