@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -21,8 +22,6 @@ const (
 	WakePollIntervalMillis = 1000
 	PostStartDelayMillis   = 2000
 )
-
-const SandboxStateHeader = "X-Daytona-Sandbox-State"
 
 type SandboxStateInfo struct {
 	State         *apiclient.SandboxState `json:"state"`
@@ -76,7 +75,7 @@ func (p *Proxy) tryWakeSandbox(ctx context.Context, sandboxID string) bool {
 		return false
 	}
 
-	if *info.State != apiclient.SANDBOXSTATE_STOPPED {
+	if info.State == nil || *info.State != apiclient.SANDBOXSTATE_STOPPED {
 		return false
 	}
 
@@ -104,6 +103,11 @@ func (p *Proxy) waitForSandboxStarted(ctx context.Context, sandboxID string) boo
 			info, err := p.getSandboxStateInfo(ctx, sandboxID)
 			if err != nil {
 				log.Errorf("Failed to poll sandbox info for %s: %v", sandboxID, err)
+				continue
+			}
+
+			if info.State == nil {
+				log.Warnf("Sandbox %s has nil state, continuing to poll", sandboxID)
 				continue
 			}
 
@@ -161,8 +165,8 @@ func (p *Proxy) WakeOnRequestErrorHandler(ginCtx *gin.Context, originalHandler f
 			return
 		}
 
-		w.WriteHeader(http.StatusBadGateway)
-		_, _ = fmt.Fprintf(w, "Bad Gateway: %v", err)
+		log.WithError(err).WithField("path", r.URL.Path).Warn("proxy request failed")
+		http.Error(w, http.StatusText(http.StatusBadGateway), http.StatusBadGateway)
 	}
 }
 
@@ -175,11 +179,14 @@ func (p *Proxy) WakeOnRequestModifyResponse(ginCtx *gin.Context, originalModifyR
 		}
 
 		sandboxID := resolvedSandboxID(ginCtx, "")
-		if sandboxID == "" || res.Header.Get(SandboxStateHeader) != "stopped" {
+		if sandboxID == "" || res.Header.Get(common_proxy.SandboxStateHeader) != "stopped" {
 			return nil
 		}
 
 		if p.tryWakeSandbox(res.Request.Context(), sandboxID) {
+			if res.Body != nil {
+				res.Body.Close()
+			}
 			res.StatusCode = http.StatusServiceUnavailable
 			res.Status = "503 Service Unavailable"
 			res.Header.Set("Retry-After", "5")

@@ -13,6 +13,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const SandboxStateHeader = "X-Daytona-Sandbox-State"
+
 var proxyTransport = &http.Transport{
 	MaxIdleConns:        100,
 	MaxIdleConnsPerHost: 100,

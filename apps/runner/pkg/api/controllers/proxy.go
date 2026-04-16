@@ -45,7 +45,7 @@ func ProxyRequest(logger *slog.Logger) gin.HandlerFunc {
 			if err == nil {
 				state, err := r.Docker.GetSandboxState(ctx.Request.Context(), sandboxId)
 				if err == nil && state == enums.SandboxStateStopped {
-					ctx.Header("X-Daytona-Sandbox-State", "stopped")
+					ctx.Header(proxy.SandboxStateHeader, "stopped")
 					ctx.AbortWithStatus(http.StatusServiceUnavailable)
 					return
 				}
