@@ -51,25 +51,25 @@ runs:
           exit 1
         fi
 
-    - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+    - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
       if: inputs.install-go == 'true'
       with:
         go-version-file: go.work
         cache: ${{ inputs.go-cache }}
         cache-dependency-path: "**/go.sum"
 
-    - uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+    - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
       if: inputs.install-java == 'true'
       with:
         java-version: 21
         distribution: 'temurin'
 
-    - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       if: inputs.install-python == 'true'
       with:
         python-version: '3.12'
 
-    - uses: ruby/setup-ruby@e65c17d16e57e481586a6a5a0282698790062f92 # v1.300.0
+    - uses: ruby/setup-ruby@7372622e62b60b3cb750dcd2b9e32c247ffec26a # v1.302.0
       if: inputs.install-ruby == 'true'
       with:
         ruby-version: '3.4.5'
@@ -81,7 +81,7 @@ runs:
       run: |
         bundle install
 
-    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+    - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
       if: inputs.install-node == 'true'
       with:
         node-version: 22
@@ -112,7 +112,7 @@ runs:
       shell: bash
       run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
 
-    - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+    - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       if: inputs.run-yarn-install == 'true'
       with:
         path: ${{ steps.yarn-cache.outputs.dir }}
@@ -126,7 +126,7 @@ runs:
 
     - name: Cache Poetry virtualenv
       if: inputs.run-poetry-install == 'true'
-      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: .venv
         key: poetry-venv-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('poetry.lock') }}
