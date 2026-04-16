@@ -500,6 +500,26 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 >
 > [**start (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/start)
 
+### Auto-start on HTTP request
+
+:::caution[Experimental]
+This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
+:::
+
+Daytona can automatically start a stopped sandbox when an HTTP request is made to one of its [preview URLs](/docs/en/preview). This is useful for sandboxes that should remain available on-demand without requiring manual intervention to start them.
+
+When a request arrives at a stopped sandbox's preview URL, Daytona will:
+
+1. Detect that the sandbox is stopped
+2. Automatically start the sandbox
+3. Return a loading page that refreshes until the sandbox is ready
+
+Auto-start is available for VM sandboxes.
+
+:::note
+The first request to a stopped sandbox will see a brief loading page while the sandbox starts. Subsequent requests will be served normally once the sandbox is running.
+:::
+
 ## List Sandboxes
 
 Daytona provides options to view information about sandboxes in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) via the [sandbox details page](#sandbox-details-page) or programmatically using the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/daytona/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona) references.

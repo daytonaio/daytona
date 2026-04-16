@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
@@ -15,6 +16,7 @@ import (
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	proxy "github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/daytonaio/common-go/pkg/utils"
+	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/gin-gonic/gin"
 )
@@ -37,6 +39,19 @@ import (
 //	@Router			/sandboxes/{sandboxId}/toolbox/{path} [delete]
 func ProxyRequest(logger *slog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		sandboxId := ctx.Param("sandboxId")
+		if sandboxId != "" {
+			r, err := runner.GetInstance(nil)
+			if err == nil {
+				state, err := r.Docker.GetSandboxState(ctx.Request.Context(), sandboxId)
+				if err == nil && state == enums.SandboxStateStopped {
+					ctx.Header("X-Daytona-Sandbox-State", "stopped")
+					ctx.AbortWithStatus(http.StatusServiceUnavailable)
+					return
+				}
+			}
+		}
+
 		if ctx.Request.Header.Get("Upgrade") != "websocket" && regexp.MustCompile(`^/process/session/.+/command/.+/logs$`).MatchString(ctx.Param("path")) {
 			if ctx.Query("follow") == "true" {
 				ProxyCommandLogsStream(ctx, logger)
@@ -44,7 +59,7 @@ func ProxyRequest(logger *slog.Logger) gin.HandlerFunc {
 			}
 		}
 
-		proxy.NewProxyRequestHandler(getProxyTarget, nil)(ctx)
+		proxy.NewProxyRequestHandler(getProxyTarget, nil, nil)(ctx)
 	}
 }
 

@@ -31,9 +31,12 @@ import (
 )
 
 type RunnerInfo struct {
-	ApiUrl string `json:"apiUrl"`
-	ApiKey string `json:"apiKey"`
+	ApiUrl      string `json:"apiUrl"`
+	ApiKey      string `json:"apiKey"`
+	RunnerClass string `json:"class"`
 }
+
+const RESOLVED_SANDBOX_ID_KEY = "resolved-sandbox-id"
 
 const SANDBOX_AUTH_KEY_HEADER = "X-Daytona-Preview-Token"
 const SANDBOX_AUTH_KEY_QUERY_PARAM = "DAYTONA_SANDBOX_AUTH_KEY"
@@ -188,12 +191,12 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 					}
 
 					if regexp.MustCompile(`^/snapshots/[\w-]+/build-logs$`).MatchString(ctx.Request.URL.Path) {
-						common_proxy.NewProxyRequestHandler(proxy.getSnapshotTarget, nil)(ctx)
+						common_proxy.NewProxyRequestHandler(proxy.getSnapshotTarget, nil, nil)(ctx)
 						return
 					}
 
 					if regexp.MustCompile(`^/sandboxes/[\w-]+/build-logs$`).MatchString(ctx.Request.URL.Path) {
-						common_proxy.NewProxyRequestHandler(proxy.getSandboxBuildTarget, nil)(ctx)
+						common_proxy.NewProxyRequestHandler(proxy.getSandboxBuildTarget, nil, nil)(ctx)
 						return
 					}
 				}
@@ -209,7 +212,7 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 
 				prefix := fmt.Sprintf("/toolbox/%s", sandboxID)
 
-				modifyResponse := func(res *http.Response) error {
+				baseModifyResponse := func(res *http.Response) error {
 					if res.StatusCode >= 300 && res.StatusCode < 400 {
 						if loc := res.Header.Get("Location"); !strings.HasPrefix(loc, prefix) {
 							res.Header.Set("Location", prefix+loc)
@@ -218,7 +221,9 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 					return nil
 				}
 
-				common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, modifyResponse)(ctx)
+				modifyResponse := proxy.WakeOnRequestModifyResponse(ctx, baseModifyResponse)
+				errorHandler := proxy.WakeOnRequestErrorHandler(ctx, nil)
+				common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, modifyResponse, errorHandler)(ctx)
 				return
 			}
 
@@ -232,7 +237,9 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 			return
 		}
 
-		common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, nil)(ctx)
+		modifyResponse := proxy.WakeOnRequestModifyResponse(ctx, nil)
+		errorHandler := proxy.WakeOnRequestErrorHandler(ctx, nil)
+		common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, modifyResponse, errorHandler)(ctx)
 	})
 
 	httpServer := &http.Server{

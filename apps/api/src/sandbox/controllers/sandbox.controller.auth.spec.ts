@@ -124,7 +124,10 @@ describe('[AUTH] SandboxController', () => {
       AuthStrategyType.API_KEY,
       AuthStrategyType.JWT,
     ])
-    expectArrayMatch(getAuthContextGuards(SandboxController, methodName), [OrganizationAuthContextGuard])
+    expectArrayMatch(getAuthContextGuards(SandboxController, methodName), [
+      OrganizationAuthContextGuard,
+      ProxyAuthContextGuard,
+    ])
     expectArrayMatch(getResourceAccessGuards(SandboxController, methodName), [SandboxAccessGuard])
     expect(getRequiredOrganizationMemberRole(SandboxController, methodName)).toBeUndefined()
     expectArrayMatch(getRequiredOrganizationResourcePermissions(SandboxController, methodName), [
