@@ -399,9 +399,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@astrojs/react@npm:5.0.2":
-  version: 5.0.2
-  resolution: "@astrojs/react@npm:5.0.2"
+"@astrojs/react@npm:5.0.3":
+  version: 5.0.3
+  resolution: "@astrojs/react@npm:5.0.3"
   dependencies:
     "@astrojs/internal-helpers": "npm:0.8.0"
     "@vitejs/plugin-react": "npm:^5.2.0"
@@ -413,7 +413,7 @@ __metadata:
     "@types/react-dom": ^17.0.17 || ^18.0.6 || ^19.0.0
     react: ^17.0.2 || ^18.0.0 || ^19.0.0
     react-dom: ^17.0.2 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/1097e6d387c48cfb26fb315f51cbe0ca5926479127ea1fab4188f77a84fa9f8621ef220352a7132441f9caa06255e366c539e18107cbb46936fe1272cbdd1eb9
+  checksum: 10c0/b2fb11857f2c34f7d2b61711dba89cbd90f681e6481c0848f927f35702f5d3e8c7c68717125ca692685bd8af3bb55f5b0f784e89f4d9273d57ec40719b5c83c3
   languageName: node
   linkType: hard
 
@@ -438,9 +438,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@astrojs/starlight@npm:0.38.2":
-  version: 0.38.2
-  resolution: "@astrojs/starlight@npm:0.38.2"
+"@astrojs/starlight@npm:0.38.3":
+  version: 0.38.3
+  resolution: "@astrojs/starlight@npm:0.38.3"
   dependencies:
     "@astrojs/markdown-remark": "npm:^7.0.0"
     "@astrojs/mdx": "npm:^5.0.0"
@@ -472,7 +472,7 @@ __metadata:
     vfile: "npm:^6.0.2"
   peerDependencies:
     astro: ^6.0.0
-  checksum: 10c0/845666ddb4863f609b9653e618267747a964c106a4adb25c44ee15bd96554808a7f9ca302506a7dd22efb63f7a9e55943c5d01c5a8234a2630cc6d9d555f3be9
+  checksum: 10c0/24855fb3d3e2c3c5bce89de39d5aa26ed436a17630b5bf5b06a77f840be8cddb8cb6ff77d1b4b6d98e9da0602cf18762d94a5cfde6683f620df9130dfae42888
   languageName: node
   linkType: hard
 
@@ -16835,9 +16835,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"astro@npm:6.1.2":
-  version: 6.1.2
-  resolution: "astro@npm:6.1.2"
+"astro@npm:6.1.5":
+  version: 6.1.5
+  resolution: "astro@npm:6.1.5"
   dependencies:
     "@astrojs/compiler": "npm:^3.0.1"
     "@astrojs/internal-helpers": "npm:0.8.0"
@@ -16855,7 +16855,6 @@ __metadata:
     cookie: "npm:^1.1.1"
     devalue: "npm:^5.6.3"
     diff: "npm:^8.0.3"
-    dlv: "npm:^1.1.3"
     dset: "npm:^3.1.4"
     es-module-lexer: "npm:^2.0.0"
     esbuild: "npm:^0.27.3"
@@ -16900,7 +16899,7 @@ __metadata:
       optional: true
   bin:
     astro: bin/astro.mjs
-  checksum: 10c0/7e27cb1a0c50d10a9945e2dc8c2223500e5e49ee8bcf7d52779bc754f4f44f70faf0ae6629487fb00819edf8c0b3183bf9e325afb66e77828f3e4da9700dcd74
+  checksum: 10c0/f853234dcf65ed2c8546a781974197f3059c7855189f0aa226a2f78ae808368753c2bb26ca9de5801b5e95af751b057d9d725f0b0aef5eeb1f44b73f80c9bd06
   languageName: node
   linkType: hard
 
@@ -19751,8 +19750,8 @@ __metadata:
   dependencies:
     "@astrojs/mdx": "npm:5.0.3"
     "@astrojs/node": "npm:10.0.4"
-    "@astrojs/react": "npm:5.0.2"
-    "@astrojs/starlight": "npm:0.38.2"
+    "@astrojs/react": "npm:5.0.3"
+    "@astrojs/starlight": "npm:0.38.3"
     "@astrojs/starlight-tailwind": "npm:5.0.0"
     "@astrojs/tailwind": "npm:6.0.2"
     "@aws-sdk/client-s3": "npm:^3.787.0"
@@ -19885,7 +19884,7 @@ __metadata:
     "@vitejs/plugin-react": "npm:^4.2.0"
     "@vitest/ui": "npm:^1.3.1"
     algoliasearch: "npm:^5.30.0"
-    astro: "npm:6.1.2"
+    astro: "npm:6.1.5"
     astro-expressive-code: "npm:^0.41.2"
     autoprefixer: "npm:10.4.13"
     axios: "npm:^1.13.5"
