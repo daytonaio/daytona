@@ -209,3 +209,24 @@ jobs:
           token: ${{ github.token }}
           config: .licenserc-clients.yaml
           mode: 'check'
+
+  yarnrc-lint:
+    name: Yarnrc integrity check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Validate .yarnrc.yml
+        run: |
+          # Fail if any registry override points outside trusted hosts
+          if grep -E "npmRegistryServer|npmScopes" .yarnrc.yml 2>/dev/null | grep -vE "registry\.(npmjs|yarnpkg)\.(org|com)"; then
+            echo "::error::Suspicious registry override detected in .yarnrc.yml"
+            exit 1
+          fi
+          # Fail if enableScripts is explicitly enabled (opens postinstall attack vector)
+          if grep -qE "^enableScripts:\s*true" .yarnrc.yml 2>/dev/null; then
+            echo "::error::enableScripts: true is a supply chain risk -- remove or add exception with review"
+            exit 1
+          fi
+          echo "OK -- .yarnrc.yml passes integrity check"
