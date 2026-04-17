@@ -8083,6 +8083,7 @@ class SandboxApi:
         self,
         sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        skip_start: Annotated[Optional[StrictBool], Field(description="If true, the sandbox is left in STOPPED after recovery instead of being started.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -8103,6 +8104,8 @@ class SandboxApi:
         :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param skip_start: If true, the sandbox is left in STOPPED after recovery instead of being started.
+        :type skip_start: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -8128,6 +8131,7 @@ class SandboxApi:
         _param = self._recover_sandbox_serialize(
             sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
+            skip_start=skip_start,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -8153,6 +8157,7 @@ class SandboxApi:
         self,
         sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        skip_start: Annotated[Optional[StrictBool], Field(description="If true, the sandbox is left in STOPPED after recovery instead of being started.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -8173,6 +8178,8 @@ class SandboxApi:
         :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param skip_start: If true, the sandbox is left in STOPPED after recovery instead of being started.
+        :type skip_start: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -8198,6 +8205,7 @@ class SandboxApi:
         _param = self._recover_sandbox_serialize(
             sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
+            skip_start=skip_start,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -8223,6 +8231,7 @@ class SandboxApi:
         self,
         sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        skip_start: Annotated[Optional[StrictBool], Field(description="If true, the sandbox is left in STOPPED after recovery instead of being started.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -8243,6 +8252,8 @@ class SandboxApi:
         :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param skip_start: If true, the sandbox is left in STOPPED after recovery instead of being started.
+        :type skip_start: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -8268,6 +8279,7 @@ class SandboxApi:
         _param = self._recover_sandbox_serialize(
             sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
+            skip_start=skip_start,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -8288,6 +8300,7 @@ class SandboxApi:
         self,
         sandbox_id_or_name,
         x_daytona_organization_id,
+        skip_start,
         _request_auth,
         _content_type,
         _headers,
@@ -8312,6 +8325,10 @@ class SandboxApi:
         if sandbox_id_or_name is not None:
             _path_params['sandboxIdOrName'] = sandbox_id_or_name
         # process the query parameters
+        if skip_start is not None:
+            
+            _query_params.append(('skipStart', skip_start))
+            
         # process the header parameters
         if x_daytona_organization_id is not None:
             _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id

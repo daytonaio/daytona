@@ -3960,11 +3960,18 @@ type SandboxAPIRecoverSandboxRequest struct {
 	ApiService SandboxAPI
 	sandboxIdOrName string
 	xDaytonaOrganizationID *string
+	skipStart *bool
 }
 
 // Use with JWT to specify the organization ID
 func (r SandboxAPIRecoverSandboxRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIRecoverSandboxRequest {
 	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// If true, the sandbox is left in STOPPED after recovery instead of being started.
+func (r SandboxAPIRecoverSandboxRequest) SkipStart(skipStart bool) SandboxAPIRecoverSandboxRequest {
+	r.skipStart = &skipStart
 	return r
 }
 
@@ -4009,6 +4016,9 @@ func (a *SandboxAPIService) RecoverSandboxExecute(r SandboxAPIRecoverSandboxRequ
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.skipStart != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "skipStart", r.skipStart, "form", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

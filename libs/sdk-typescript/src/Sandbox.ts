@@ -275,6 +275,8 @@ export class Sandbox implements SandboxDto {
    *
    * @param {number} [timeout] - Maximum time to wait in seconds. 0 means no timeout.
    *                            Defaults to 60-second timeout.
+   * @param {boolean} [skipStart] - If true, the Sandbox is left in STOPPED after recovery instead of being started.
+   *                               Defaults to false.
    * @returns {Promise<void>}
    * @throws {DaytonaError} - `DaytonaError` - If Sandbox fails to recover or times out
    *
@@ -283,14 +285,17 @@ export class Sandbox implements SandboxDto {
    * await sandbox.recover();
    * console.log('Sandbox recovered successfully');
    */
-  public async recover(timeout = 60): Promise<void> {
+  public async recover(timeout = 60, skipStart = false): Promise<void> {
     if (timeout < 0) {
       throw new DaytonaValidationError('Timeout must be a non-negative number')
     }
 
     const startTime = Date.now()
-    const response = await this.sandboxApi.recoverSandbox(this.id, undefined, { timeout: timeout * 1000 })
+    const response = await this.sandboxApi.recoverSandbox(this.id, undefined, skipStart, { timeout: timeout * 1000 })
     this.processSandboxDto(response.data)
+    if (skipStart) {
+      return
+    }
     const timeElapsed = Date.now() - startTime
     await this.waitUntilStarted(timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout)
   }

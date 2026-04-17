@@ -1477,10 +1477,11 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
          * @summary Recover sandbox from error state
          * @param {string} sandboxIdOrName ID or name of the sandbox
          * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {boolean} [skipStart] If true, the sandbox is left in STOPPED after recovery instead of being started.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        recoverSandbox: async (sandboxIdOrName: string, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        recoverSandbox: async (sandboxIdOrName: string, xDaytonaOrganizationID?: string, skipStart?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'sandboxIdOrName' is not null or undefined
             assertParamExists('recoverSandbox', 'sandboxIdOrName', sandboxIdOrName)
             const localVarPath = `/sandbox/{sandboxIdOrName}/recover`
@@ -1501,6 +1502,10 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
             // authentication oauth2 required
+
+            if (skipStart !== undefined) {
+                localVarQueryParameter['skipStart'] = skipStart;
+            }
 
 
     
@@ -2517,11 +2522,12 @@ export const SandboxApiFp = function(configuration?: Configuration) {
          * @summary Recover sandbox from error state
          * @param {string} sandboxIdOrName ID or name of the sandbox
          * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {boolean} [skipStart] If true, the sandbox is left in STOPPED after recovery instead of being started.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async recoverSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.recoverSandbox(sandboxIdOrName, xDaytonaOrganizationID, options);
+        async recoverSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, skipStart?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.recoverSandbox(sandboxIdOrName, xDaytonaOrganizationID, skipStart, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SandboxApi.recoverSandbox']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -3051,11 +3057,12 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
          * @summary Recover sandbox from error state
          * @param {string} sandboxIdOrName ID or name of the sandbox
          * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {boolean} [skipStart] If true, the sandbox is left in STOPPED after recovery instead of being started.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        recoverSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Sandbox> {
-            return localVarFp.recoverSandbox(sandboxIdOrName, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        recoverSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, skipStart?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<Sandbox> {
+            return localVarFp.recoverSandbox(sandboxIdOrName, xDaytonaOrganizationID, skipStart, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3598,12 +3605,13 @@ export class SandboxApi extends BaseAPI {
      * @summary Recover sandbox from error state
      * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [skipStart] If true, the sandbox is left in STOPPED after recovery instead of being started.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SandboxApi
      */
-    public recoverSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-        return SandboxApiFp(this.configuration).recoverSandbox(sandboxIdOrName, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    public recoverSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, skipStart?: boolean, options?: RawAxiosRequestConfig) {
+        return SandboxApiFp(this.configuration).recoverSandbox(sandboxIdOrName, xDaytonaOrganizationID, skipStart, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
