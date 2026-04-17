@@ -469,11 +469,7 @@ export class SandboxController {
     @Param('sandboxIdOrName') sandboxIdOrName: string,
     @Query('skipStart', new ParseBoolPipe({ optional: true })) skipStart?: boolean,
   ): Promise<SandboxDto> {
-    const recoveredSandbox = await this.sandboxService.recover(
-      sandboxIdOrName,
-      authContext.organization,
-      skipStart,
-    )
+    const recoveredSandbox = await this.sandboxService.recover(sandboxIdOrName, authContext.organization, skipStart)
     let sandboxDto = await this.sandboxService.toSandboxDto(recoveredSandbox)
 
     if (!skipStart && sandboxDto.state !== SandboxState.STARTED) {
