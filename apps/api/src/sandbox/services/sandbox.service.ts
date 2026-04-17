@@ -1863,6 +1863,10 @@ export class SandboxService {
 
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
+        if (!sandbox.recoverable) {
+      throw new BadRequestError('Sandbox is not in a recoverable state')
+    }
+
     const region = await this.regionService.findOne(sandbox.region)
     if (!region) {
       throw new NotFoundException(`Region with ID ${sandbox.region} not found`)
@@ -1955,14 +1959,22 @@ export class SandboxService {
         return sandbox
       }
 
+      const updateData: Partial<Sandbox> = {
+        state: SandboxState.STOPPED,
+        desiredState: SandboxDesiredState.STOPPED,
+        errorReason: null,
+        recoverable: false,
+      }
+
+      if (sandbox.backupState === BackupState.ERROR) {
+        updateData.backupState = BackupState.NONE
+        updateData.backupErrorReason = null
+        updateData.backupSnapshot = null
+      }
+
       const updatedSandbox = await this.sandboxRepository.updateWhere(sandbox.id, {
-        updateData: {
-          state: SandboxState.STOPPED,
-          desiredState: SandboxDesiredState.STOPPED,
-          errorReason: null,
-          recoverable: false,
-        },
-        whereCondition: { state: SandboxState.ERROR },
+        updateData,
+        whereCondition: { recoverable: true, pending: false, state: sandbox.state  },
       })
 
       if (skipStart) {
@@ -2898,6 +2910,7 @@ export class SandboxService {
     backupSnapshot?: string | null,
     backupRegistryId?: string | null,
     backupErrorReason?: string | null,
+    recoverable?: boolean,
   ): Promise<void> {
     const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
       id: sandboxId,
@@ -2909,6 +2922,7 @@ export class SandboxService {
       backupSnapshot,
       backupRegistryId,
       backupErrorReason,
+      recoverable,
     )
 
     await this.sandboxRepository.update(sandboxId, { updateData, entity: sandboxToUpdate })

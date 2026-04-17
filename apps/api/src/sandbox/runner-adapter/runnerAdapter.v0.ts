@@ -182,6 +182,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       backupState: this.convertBackupState(sandboxInfo.data.backupState),
       backupSnapshot: sandboxInfo.data.backupSnapshot,
       backupErrorReason: sandboxInfo.data.backupError,
+      recoverable: sandboxInfo.data.recoverable,
       daemonVersion: sandboxInfo.data.daemonVersion,
     }
   }

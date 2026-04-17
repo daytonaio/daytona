@@ -475,9 +475,19 @@ export class JobStateHandlerService {
         Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.COMPLETED))
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`CREATE_BACKUP job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
+        const { recoverable, errorReason } = sanitizeSandboxError(job.errorMessage)
+        // Only surface recoverable=true for user-initiated backups (archive), so
+        const isUserInitiated = sandbox.desiredState === SandboxDesiredState.ARCHIVED
         Object.assign(
           updateData,
-          Sandbox.getBackupStateUpdate(sandbox, BackupState.ERROR, undefined, undefined, job.errorMessage),
+          Sandbox.getBackupStateUpdate(
+            sandbox,
+            BackupState.ERROR,
+            undefined,
+            undefined,
+            errorReason,
+            recoverable && isUserInitiated,
+          ),
         )
       }
 

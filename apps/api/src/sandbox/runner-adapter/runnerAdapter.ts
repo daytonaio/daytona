@@ -21,6 +21,7 @@ export interface RunnerSandboxInfo {
   backupState?: BackupState
   backupSnapshot?: string
   backupErrorReason?: string
+  recoverable?: boolean
 }
 
 export interface RunnerSnapshotInfo {

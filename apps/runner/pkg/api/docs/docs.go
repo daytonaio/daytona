@@ -1934,6 +1934,9 @@ const docTemplate = `{
                 "daemonVersion": {
                     "type": "string"
                 },
+                "recoverable": {
+                    "type": "boolean"
+                },
                 "state": {
                     "$ref": "#/definitions/enums.SandboxState"
                 }
