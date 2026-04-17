@@ -5,7 +5,7 @@ body {
   --secondary-text-color: #a2a2a2;
   --accent-text-color: #d0cfcf;
   --hover-color: #2ecc71;
-  --highlight-color: #007fff;
+  --highlight-color: #2ecc71;
   --border-color: #414141;
   --nav-color: #828282;
   --border: 1px solid var(--border-color);
@@ -52,4 +52,5 @@ html[data-theme='light'] body {
   --foreground-color: #636363;
 
   --selection-text-color: #058157;
+  --highlight-color: #058157;
 }
