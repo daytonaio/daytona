@@ -6,6 +6,7 @@
 import { CreateSandboxFromImageParams, CreateSandboxFromSnapshotParams, Daytona, Sandbox } from '@daytona/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from 'react-oidc-context'
+import { useConfig } from '../useConfig'
 import { useSelectedOrganization } from '../useSelectedOrganization'
 import { getSandboxesQueryKey } from '../useSandboxes'
 
@@ -16,6 +17,7 @@ export type CreateSandboxParams = (CreateSandboxFromSnapshotParams | CreateSandb
 export const useCreateSandboxMutation = () => {
   const { user } = useAuth()
   const { selectedOrganization } = useSelectedOrganization()
+  const { apiUrl } = useConfig()
   const queryClient = useQueryClient()
 
   return useMutation<Sandbox, unknown, CreateSandboxParams>({
@@ -27,7 +29,7 @@ export const useCreateSandboxMutation = () => {
       const { target, ...createParams } = params
       const client = new Daytona({
         jwtToken: user.access_token,
-        apiUrl: import.meta.env.VITE_API_URL,
+        apiUrl,
         organizationId: selectedOrganization.id,
         target,
       })

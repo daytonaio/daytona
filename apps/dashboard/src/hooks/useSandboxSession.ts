@@ -5,6 +5,7 @@
 
 import { queryKeys } from '@/hooks/queries/queryKeys'
 import { useApi } from '@/hooks/useApi'
+import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import {
   CreateSandboxBaseParams,
@@ -89,16 +90,17 @@ export function useSandboxSession(options?: UseSandboxSessionOptions): UseSandbo
   const { user } = useAuth()
   const { selectedOrganization } = useSelectedOrganization()
   const { sandboxApi, toolboxApi } = useApi()
+  const { apiUrl } = useConfig()
   const queryClient = useQueryClient()
 
   const client = useMemo(() => {
     if (!user?.access_token || !selectedOrganization?.id) return null
     return new Daytona({
       jwtToken: user.access_token,
-      apiUrl: import.meta.env.VITE_API_URL,
+      apiUrl,
       organizationId: selectedOrganization.id,
     })
-  }, [user?.access_token, selectedOrganization?.id])
+  }, [user?.access_token, selectedOrganization?.id, apiUrl])
 
   const createMutation = useMutation<Sandbox, Error, CreateSandboxParams | undefined>({
     mutationKey: ['create-sandbox', scope ?? 'default'],
