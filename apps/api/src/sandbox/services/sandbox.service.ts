@@ -1131,7 +1131,7 @@ export class SandboxService {
       },
     ]
 
-    return this.sandboxRepository.find({ where })
+    return this.sandboxRepository.find({ where, relations: ['lastActivityAt'] })
   }
 
   async findAll(
@@ -1196,7 +1196,11 @@ export class SandboxService {
     baseFindOptions.cpu = createRangeFilter(minCpu, maxCpu)
     baseFindOptions.mem = createRangeFilter(minMemoryGiB, maxMemoryGiB)
     baseFindOptions.disk = createRangeFilter(minDiskGiB, maxDiskGiB)
-    baseFindOptions.updatedAt = createRangeFilter(lastEventAfter, lastEventBefore)
+
+    const lastActivityFilter = createRangeFilter(lastEventAfter, lastEventBefore)
+    if (lastActivityFilter) {
+      baseFindOptions.lastActivityAt = { lastActivityAt: lastActivityFilter }
+    }
 
     const statesToInclude = (states || Object.values(SandboxState)).filter((state) => state !== SandboxState.DESTROYED)
     const errorStates = [SandboxState.ERROR, SandboxState.BUILD_FAILED]
@@ -1223,11 +1227,16 @@ export class SandboxService {
 
     const [items, total] = await this.sandboxRepository.findAndCount({
       where,
+      relations: ['lastActivityAt'],
       order: {
-        [sortField]: {
-          direction: sortDirection,
-          nulls: 'LAST',
-        },
+        ...(sortField === SandboxSortField.LAST_ACTIVITY_AT
+          ? { lastActivityAt: { lastActivityAt: { direction: sortDirection, nulls: 'LAST' } } }
+          : {
+              [sortField]: {
+                direction: sortDirection,
+                nulls: 'LAST',
+              },
+            }),
         ...(sortField !== SandboxSortField.CREATED_AT && { createdAt: 'DESC' }),
       },
       skip: (pageNum - 1) * limitNum,
@@ -1277,7 +1286,7 @@ export class SandboxService {
       where.state = In(states)
     }
 
-    let sandboxes = await this.sandboxRepository.find({ where })
+    let sandboxes = await this.sandboxRepository.find({ where, relations: ['lastActivityAt'] })
 
     if (skipReconcilingSandboxes) {
       sandboxes = sandboxes.filter((sandbox) => {
@@ -1295,7 +1304,7 @@ export class SandboxService {
     returnDestroyed?: boolean,
   ): Promise<Sandbox> {
     const stateFilter = returnDestroyed ? {} : { state: Not(SandboxState.DESTROYED) }
-    const relations: ['buildInfo'] = ['buildInfo']
+    const relations = ['buildInfo', 'lastActivityAt']
 
     // Try lookup by ID first
     let sandbox = await this.sandboxRepository.findOne({
@@ -1345,6 +1354,7 @@ export class SandboxService {
         id: sandboxId,
         ...(returnDestroyed ? {} : { state: Not(SandboxState.DESTROYED) }),
       },
+      relations: ['lastActivityAt'],
     })
 
     if (

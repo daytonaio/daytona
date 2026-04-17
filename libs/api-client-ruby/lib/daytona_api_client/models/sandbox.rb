@@ -99,6 +99,9 @@ module DaytonaApiClient
     # The last update timestamp of the sandbox
     attr_accessor :updated_at
 
+    # The last activity timestamp of the sandbox
+    attr_accessor :last_activity_at
+
     # The class of the sandbox
     attr_accessor :_class
 
@@ -164,6 +167,7 @@ module DaytonaApiClient
         :'build_info' => :'buildInfo',
         :'created_at' => :'createdAt',
         :'updated_at' => :'updatedAt',
+        :'last_activity_at' => :'lastActivityAt',
         :'_class' => :'class',
         :'daemon_version' => :'daemonVersion',
         :'runner_id' => :'runnerId',
@@ -212,6 +216,7 @@ module DaytonaApiClient
         :'build_info' => :'BuildInfo',
         :'created_at' => :'String',
         :'updated_at' => :'String',
+        :'last_activity_at' => :'String',
         :'_class' => :'String',
         :'daemon_version' => :'String',
         :'runner_id' => :'String',
@@ -383,6 +388,10 @@ module DaytonaApiClient
 
       if attributes.key?(:'updated_at')
         self.updated_at = attributes[:'updated_at']
+      end
+
+      if attributes.key?(:'last_activity_at')
+        self.last_activity_at = attributes[:'last_activity_at']
       end
 
       if attributes.key?(:'_class')
@@ -686,6 +695,7 @@ module DaytonaApiClient
           build_info == o.build_info &&
           created_at == o.created_at &&
           updated_at == o.updated_at &&
+          last_activity_at == o.last_activity_at &&
           _class == o._class &&
           daemon_version == o.daemon_version &&
           runner_id == o.runner_id &&
@@ -701,7 +711,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, memory, disk, state, desired_state, error_reason, recoverable, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, _class, daemon_version, runner_id, toolbox_proxy_url].hash
+      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, memory, disk, state, desired_state, error_reason, recoverable, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, last_activity_at, _class, daemon_version, runner_id, toolbox_proxy_url].hash
     end
 
     # Builds the object from hash

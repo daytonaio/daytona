@@ -257,6 +257,11 @@ public class Sandbox {
   @javax.annotation.Nullable
   private String updatedAt;
 
+  public static final String SERIALIZED_NAME_LAST_ACTIVITY_AT = "lastActivityAt";
+  @SerializedName(SERIALIZED_NAME_LAST_ACTIVITY_AT)
+  @javax.annotation.Nullable
+  private String lastActivityAt;
+
   /**
    * The class of the sandbox
    */
@@ -891,6 +896,25 @@ public class Sandbox {
   }
 
 
+  public Sandbox lastActivityAt(@javax.annotation.Nullable String lastActivityAt) {
+    this.lastActivityAt = lastActivityAt;
+    return this;
+  }
+
+  /**
+   * The last activity timestamp of the sandbox
+   * @return lastActivityAt
+   */
+  @javax.annotation.Nullable
+  public String getLastActivityAt() {
+    return lastActivityAt;
+  }
+
+  public void setLastActivityAt(@javax.annotation.Nullable String lastActivityAt) {
+    this.lastActivityAt = lastActivityAt;
+  }
+
+
   @Deprecated
   public Sandbox propertyClass(@javax.annotation.Nullable PropertyClassEnum propertyClass) {
     this.propertyClass = propertyClass;
@@ -1053,6 +1077,7 @@ public class Sandbox {
         Objects.equals(this.buildInfo, sandbox.buildInfo) &&
         Objects.equals(this.createdAt, sandbox.createdAt) &&
         Objects.equals(this.updatedAt, sandbox.updatedAt) &&
+        Objects.equals(this.lastActivityAt, sandbox.lastActivityAt) &&
         Objects.equals(this.propertyClass, sandbox.propertyClass) &&
         Objects.equals(this.daemonVersion, sandbox.daemonVersion) &&
         Objects.equals(this.runnerId, sandbox.runnerId) &&
@@ -1062,7 +1087,7 @@ public class Sandbox {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, organizationId, name, snapshot, user, env, labels, _public, networkBlockAll, networkAllowList, target, cpu, gpu, memory, disk, state, desiredState, errorReason, recoverable, backupState, backupCreatedAt, autoStopInterval, autoArchiveInterval, autoDeleteInterval, volumes, buildInfo, createdAt, updatedAt, propertyClass, daemonVersion, runnerId, toolboxProxyUrl, additionalProperties);
+    return Objects.hash(id, organizationId, name, snapshot, user, env, labels, _public, networkBlockAll, networkAllowList, target, cpu, gpu, memory, disk, state, desiredState, errorReason, recoverable, backupState, backupCreatedAt, autoStopInterval, autoArchiveInterval, autoDeleteInterval, volumes, buildInfo, createdAt, updatedAt, lastActivityAt, propertyClass, daemonVersion, runnerId, toolboxProxyUrl, additionalProperties);
   }
 
   @Override
@@ -1097,6 +1122,7 @@ public class Sandbox {
     sb.append("    buildInfo: ").append(toIndentedString(buildInfo)).append("\n");
     sb.append("    createdAt: ").append(toIndentedString(createdAt)).append("\n");
     sb.append("    updatedAt: ").append(toIndentedString(updatedAt)).append("\n");
+    sb.append("    lastActivityAt: ").append(toIndentedString(lastActivityAt)).append("\n");
     sb.append("    propertyClass: ").append(toIndentedString(propertyClass)).append("\n");
     sb.append("    daemonVersion: ").append(toIndentedString(daemonVersion)).append("\n");
     sb.append("    runnerId: ").append(toIndentedString(runnerId)).append("\n");
@@ -1152,6 +1178,7 @@ public class Sandbox {
     openapiFields.add("buildInfo");
     openapiFields.add("createdAt");
     openapiFields.add("updatedAt");
+    openapiFields.add("lastActivityAt");
     openapiFields.add("class");
     openapiFields.add("daemonVersion");
     openapiFields.add("runnerId");
@@ -1260,6 +1287,9 @@ public class Sandbox {
       }
       if ((jsonObj.get("updatedAt") != null && !jsonObj.get("updatedAt").isJsonNull()) && !jsonObj.get("updatedAt").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `updatedAt` to be a primitive type in the JSON string but got `%s`", jsonObj.get("updatedAt").toString()));
+      }
+      if ((jsonObj.get("lastActivityAt") != null && !jsonObj.get("lastActivityAt").isJsonNull()) && !jsonObj.get("lastActivityAt").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format("Expected the field `lastActivityAt` to be a primitive type in the JSON string but got `%s`", jsonObj.get("lastActivityAt").toString()));
       }
       if ((jsonObj.get("class") != null && !jsonObj.get("class").isJsonNull()) && !jsonObj.get("class").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `class` to be a primitive type in the JSON string but got `%s`", jsonObj.get("class").toString()));

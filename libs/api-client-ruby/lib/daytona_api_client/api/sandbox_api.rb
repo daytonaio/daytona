@@ -1858,7 +1858,7 @@ module DaytonaApiClient
         fail ArgumentError, 'invalid value for "opts[:"max_disk_gi_b"]" when calling SandboxApi.list_sandboxes_paginated, must be greater than or equal to 1.'
       end
 
-      allowable_values = ["id", "name", "state", "snapshot", "region", "updatedAt", "createdAt"]
+      allowable_values = ["id", "name", "state", "snapshot", "region", "updatedAt", "createdAt", "lastActivityAt"]
       if @api_client.config.client_side_validation && opts[:'sort'] && !allowable_values.include?(opts[:'sort'])
         fail ArgumentError, "invalid value for \"sort\", must be one of #{allowable_values}"
       end

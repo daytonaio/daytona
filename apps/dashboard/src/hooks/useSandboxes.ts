@@ -37,7 +37,7 @@ export interface SandboxSorting {
 }
 
 export const DEFAULT_SANDBOX_SORTING: SandboxSorting = {
-  field: ListSandboxesPaginatedSortEnum.UPDATED_AT,
+  field: ListSandboxesPaginatedSortEnum.LAST_ACTIVITY_AT,
   direction: ListSandboxesPaginatedOrderEnum.DESC,
 }
 

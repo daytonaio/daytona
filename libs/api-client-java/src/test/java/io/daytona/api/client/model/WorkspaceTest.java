@@ -272,6 +272,14 @@ public class WorkspaceTest {
     }
 
     /**
+     * Test the property 'lastActivityAt'
+     */
+    @Test
+    public void lastActivityAtTest() {
+        // TODO: test lastActivityAt
+    }
+
+    /**
      * Test the property 'propertyClass'
      */
     @Test

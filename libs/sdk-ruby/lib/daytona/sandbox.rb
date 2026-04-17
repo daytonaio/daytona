@@ -87,6 +87,9 @@ module Daytona
     # @return [String] The last update timestamp of the sandbox
     attr_reader :updated_at
 
+    # @return [String] The last activity timestamp of the sandbox
+    attr_reader :last_activity_at
+
     # @return [String] The version of the daemon running in the sandbox
     attr_reader :daemon_version
 
@@ -564,6 +567,7 @@ module Daytona
       @build_info = sandbox_dto.build_info
       @created_at = sandbox_dto.created_at
       @updated_at = sandbox_dto.updated_at
+      @last_activity_at = sandbox_dto.last_activity_at
       @daemon_version = sandbox_dto.daemon_version
       @network_block_all = sandbox_dto.network_block_all
       @network_allow_list = sandbox_dto.network_allow_list

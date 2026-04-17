@@ -3806,7 +3806,8 @@ export const ListSandboxesPaginatedSortEnum = {
     SNAPSHOT: 'snapshot',
     REGION: 'region',
     UPDATED_AT: 'updatedAt',
-    CREATED_AT: 'createdAt'
+    CREATED_AT: 'createdAt',
+    LAST_ACTIVITY_AT: 'lastActivityAt'
 } as const;
 export type ListSandboxesPaginatedSortEnum = typeof ListSandboxesPaginatedSortEnum[keyof typeof ListSandboxesPaginatedSortEnum];
 /**
