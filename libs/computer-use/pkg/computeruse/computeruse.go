@@ -194,32 +194,37 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 	// their widget trees. Runs after xfce4 so the session D-Bus is up.
 	// Path lives in /usr/libexec on Debian/Ubuntu; some distros ship it under
 	// /usr/lib/at-spi2-core/; as a last resort fall back to $PATH so images
-	// that put the binary somewhere unusual still work.
-	atspiCommand := "/usr/libexec/at-spi-bus-launcher"
-	if _, err := os.Stat(atspiCommand); err != nil {
-		if _, err := os.Stat("/usr/lib/at-spi2-core/at-spi-bus-launcher"); err == nil {
-			atspiCommand = "/usr/lib/at-spi2-core/at-spi-bus-launcher"
-		} else if p, err := exec.LookPath("at-spi-bus-launcher"); err == nil {
-			atspiCommand = p
-		} else {
-			log.Warnf("at-spi-bus-launcher not found in any known location; accessibility API will return 503 until the binary is installed")
-		}
+	// that put the binary somewhere unusual still work. If we can't find the
+	// binary anywhere, we skip registering the supervised process entirely —
+	// the a11y endpoints will return 503 cleanly instead of the supervisor
+	// thrashing on a nonexistent command.
+	atspiCommand := ""
+	if _, err := os.Stat("/usr/libexec/at-spi-bus-launcher"); err == nil {
+		atspiCommand = "/usr/libexec/at-spi-bus-launcher"
+	} else if _, err := os.Stat("/usr/lib/at-spi2-core/at-spi-bus-launcher"); err == nil {
+		atspiCommand = "/usr/lib/at-spi2-core/at-spi-bus-launcher"
+	} else if p, err := exec.LookPath("at-spi-bus-launcher"); err == nil {
+		atspiCommand = p
 	}
-	c.processes["atspi"] = &Process{
-		Name:        "atspi",
-		Command:     atspiCommand,
-		Args:        []string{"--launch-immediately"},
-		User:        user,
-		Priority:    250,
-		AutoRestart: true,
-		Env: map[string]string{
-			"DISPLAY":                  display,
-			"HOME":                     homeDir,
-			"USER":                     user,
-			"DBUS_SESSION_BUS_ADDRESS": dbusAddress,
-		},
-		LogFile: filepath.Join(c.configDir, "atspi.log"),
-		ErrFile: filepath.Join(c.configDir, "atspi.err"),
+	if atspiCommand == "" {
+		log.Warnf("at-spi-bus-launcher not found in any known location; accessibility API will return 503 until the binary is installed")
+	} else {
+		c.processes["atspi"] = &Process{
+			Name:        "atspi",
+			Command:     atspiCommand,
+			Args:        []string{"--launch-immediately"},
+			User:        user,
+			Priority:    250,
+			AutoRestart: true,
+			Env: map[string]string{
+				"DISPLAY":                  display,
+				"HOME":                     homeDir,
+				"USER":                     user,
+				"DBUS_SESSION_BUS_ADDRESS": dbusAddress,
+			},
+			LogFile: filepath.Join(c.configDir, "atspi.log"),
+			ErrFile: filepath.Join(c.configDir, "atspi.err"),
+		}
 	}
 
 	// Process 3: x11vnc (VNC Server)
