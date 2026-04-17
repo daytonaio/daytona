@@ -27,12 +27,18 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 
 
+import io.daytona.toolbox.client.model.AccessibilityInvokeRequest;
+import io.daytona.toolbox.client.model.AccessibilityNodeRequest;
+import io.daytona.toolbox.client.model.AccessibilityNodesResponse;
+import io.daytona.toolbox.client.model.AccessibilitySetValueRequest;
+import io.daytona.toolbox.client.model.AccessibilityTreeResponse;
 import java.math.BigDecimal;
 import io.daytona.toolbox.client.model.ComputerUseStartResponse;
 import io.daytona.toolbox.client.model.ComputerUseStatusResponse;
 import io.daytona.toolbox.client.model.ComputerUseStopResponse;
 import io.daytona.toolbox.client.model.DisplayInfoResponse;
 import java.io.File;
+import io.daytona.toolbox.client.model.FindAccessibilityNodesRequest;
 import io.daytona.toolbox.client.model.KeyboardHotkeyRequest;
 import io.daytona.toolbox.client.model.KeyboardPressRequest;
 import io.daytona.toolbox.client.model.KeyboardTypeRequest;
@@ -619,6 +625,437 @@ public class ComputerUseApi {
 
         okhttp3.Call localVarCall = dragValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<MouseDragResponse>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for findAccessibilityNodes
+     * @param request Find request (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call findAccessibilityNodesCall(FindAccessibilityNodesRequest request, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = request;
+
+        // create path and map variables
+        String localVarPath = "/computeruse/a11y/find";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call findAccessibilityNodesValidateBeforeCall(FindAccessibilityNodesRequest request, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'request' is set
+        if (request == null) {
+            throw new ApiException("Missing the required parameter 'request' when calling findAccessibilityNodes(Async)");
+        }
+
+        return findAccessibilityNodesCall(request, _callback);
+
+    }
+
+    /**
+     * Find accessibility nodes
+     * Search the AT-SPI tree for nodes matching a role/name/state filter and return a flat list.
+     * @param request Find request (required)
+     * @return AccessibilityNodesResponse
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public AccessibilityNodesResponse findAccessibilityNodes(FindAccessibilityNodesRequest request) throws ApiException {
+        ApiResponse<AccessibilityNodesResponse> localVarResp = findAccessibilityNodesWithHttpInfo(request);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Find accessibility nodes
+     * Search the AT-SPI tree for nodes matching a role/name/state filter and return a flat list.
+     * @param request Find request (required)
+     * @return ApiResponse&lt;AccessibilityNodesResponse&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<AccessibilityNodesResponse> findAccessibilityNodesWithHttpInfo(FindAccessibilityNodesRequest request) throws ApiException {
+        okhttp3.Call localVarCall = findAccessibilityNodesValidateBeforeCall(request, null);
+        Type localVarReturnType = new TypeToken<AccessibilityNodesResponse>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Find accessibility nodes (asynchronously)
+     * Search the AT-SPI tree for nodes matching a role/name/state filter and return a flat list.
+     * @param request Find request (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call findAccessibilityNodesAsync(FindAccessibilityNodesRequest request, final ApiCallback<AccessibilityNodesResponse> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = findAccessibilityNodesValidateBeforeCall(request, _callback);
+        Type localVarReturnType = new TypeToken<AccessibilityNodesResponse>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for focusAccessibilityNode
+     * @param request Node focus request (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call focusAccessibilityNodeCall(AccessibilityNodeRequest request, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = request;
+
+        // create path and map variables
+        String localVarPath = "/computeruse/a11y/node/focus";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call focusAccessibilityNodeValidateBeforeCall(AccessibilityNodeRequest request, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'request' is set
+        if (request == null) {
+            throw new ApiException("Missing the required parameter 'request' when calling focusAccessibilityNode(Async)");
+        }
+
+        return focusAccessibilityNodeCall(request, _callback);
+
+    }
+
+    /**
+     * Focus an accessibility node
+     * Move keyboard focus to the AT-SPI node identified by id (bus-name:object-path).
+     * @param request Node focus request (required)
+     * @return Object
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public Object focusAccessibilityNode(AccessibilityNodeRequest request) throws ApiException {
+        ApiResponse<Object> localVarResp = focusAccessibilityNodeWithHttpInfo(request);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Focus an accessibility node
+     * Move keyboard focus to the AT-SPI node identified by id (bus-name:object-path).
+     * @param request Node focus request (required)
+     * @return ApiResponse&lt;Object&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Object> focusAccessibilityNodeWithHttpInfo(AccessibilityNodeRequest request) throws ApiException {
+        okhttp3.Call localVarCall = focusAccessibilityNodeValidateBeforeCall(request, null);
+        Type localVarReturnType = new TypeToken<Object>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Focus an accessibility node (asynchronously)
+     * Move keyboard focus to the AT-SPI node identified by id (bus-name:object-path).
+     * @param request Node focus request (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call focusAccessibilityNodeAsync(AccessibilityNodeRequest request, final ApiCallback<Object> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = focusAccessibilityNodeValidateBeforeCall(request, _callback);
+        Type localVarReturnType = new TypeToken<Object>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for getAccessibilityTree
+     * @param scope Scope: focused | pid | all (default: focused) (optional)
+     * @param pid Process ID when scope&#x3D;pid (optional)
+     * @param maxDepth Max tree depth (-1 unbounded, 0 root only; default -1) (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getAccessibilityTreeCall(String scope, Integer pid, Integer maxDepth, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/computeruse/a11y/tree";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        if (scope != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("scope", scope));
+        }
+
+        if (pid != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("pid", pid));
+        }
+
+        if (maxDepth != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("maxDepth", maxDepth));
+        }
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call getAccessibilityTreeValidateBeforeCall(String scope, Integer pid, Integer maxDepth, final ApiCallback _callback) throws ApiException {
+        return getAccessibilityTreeCall(scope, pid, maxDepth, _callback);
+
+    }
+
+    /**
+     * Get accessibility tree
+     * Fetch the AT-SPI accessibility tree for the focused application, a specific PID, or all registered applications.
+     * @param scope Scope: focused | pid | all (default: focused) (optional)
+     * @param pid Process ID when scope&#x3D;pid (optional)
+     * @param maxDepth Max tree depth (-1 unbounded, 0 root only; default -1) (optional)
+     * @return AccessibilityTreeResponse
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public AccessibilityTreeResponse getAccessibilityTree(String scope, Integer pid, Integer maxDepth) throws ApiException {
+        ApiResponse<AccessibilityTreeResponse> localVarResp = getAccessibilityTreeWithHttpInfo(scope, pid, maxDepth);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Get accessibility tree
+     * Fetch the AT-SPI accessibility tree for the focused application, a specific PID, or all registered applications.
+     * @param scope Scope: focused | pid | all (default: focused) (optional)
+     * @param pid Process ID when scope&#x3D;pid (optional)
+     * @param maxDepth Max tree depth (-1 unbounded, 0 root only; default -1) (optional)
+     * @return ApiResponse&lt;AccessibilityTreeResponse&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<AccessibilityTreeResponse> getAccessibilityTreeWithHttpInfo(String scope, Integer pid, Integer maxDepth) throws ApiException {
+        okhttp3.Call localVarCall = getAccessibilityTreeValidateBeforeCall(scope, pid, maxDepth, null);
+        Type localVarReturnType = new TypeToken<AccessibilityTreeResponse>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Get accessibility tree (asynchronously)
+     * Fetch the AT-SPI accessibility tree for the focused application, a specific PID, or all registered applications.
+     * @param scope Scope: focused | pid | all (default: focused) (optional)
+     * @param pid Process ID when scope&#x3D;pid (optional)
+     * @param maxDepth Max tree depth (-1 unbounded, 0 root only; default -1) (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getAccessibilityTreeAsync(String scope, Integer pid, Integer maxDepth, final ApiCallback<AccessibilityTreeResponse> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = getAccessibilityTreeValidateBeforeCall(scope, pid, maxDepth, _callback);
+        Type localVarReturnType = new TypeToken<AccessibilityTreeResponse>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }
@@ -1724,6 +2161,145 @@ public class ComputerUseApi {
         return localVarCall;
     }
     /**
+     * Build call for invokeAccessibilityNode
+     * @param request Invoke request (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call invokeAccessibilityNodeCall(AccessibilityInvokeRequest request, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = request;
+
+        // create path and map variables
+        String localVarPath = "/computeruse/a11y/node/invoke";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call invokeAccessibilityNodeValidateBeforeCall(AccessibilityInvokeRequest request, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'request' is set
+        if (request == null) {
+            throw new ApiException("Missing the required parameter 'request' when calling invokeAccessibilityNode(Async)");
+        }
+
+        return invokeAccessibilityNodeCall(request, _callback);
+
+    }
+
+    /**
+     * Invoke an action on an accessibility node
+     * Call an AT-SPI Action on the node. Leave action empty to invoke the node&#39;s primary (first) action.
+     * @param request Invoke request (required)
+     * @return Object
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public Object invokeAccessibilityNode(AccessibilityInvokeRequest request) throws ApiException {
+        ApiResponse<Object> localVarResp = invokeAccessibilityNodeWithHttpInfo(request);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Invoke an action on an accessibility node
+     * Call an AT-SPI Action on the node. Leave action empty to invoke the node&#39;s primary (first) action.
+     * @param request Invoke request (required)
+     * @return ApiResponse&lt;Object&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Object> invokeAccessibilityNodeWithHttpInfo(AccessibilityInvokeRequest request) throws ApiException {
+        okhttp3.Call localVarCall = invokeAccessibilityNodeValidateBeforeCall(request, null);
+        Type localVarReturnType = new TypeToken<Object>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Invoke an action on an accessibility node (asynchronously)
+     * Call an AT-SPI Action on the node. Leave action empty to invoke the node&#39;s primary (first) action.
+     * @param request Invoke request (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call invokeAccessibilityNodeAsync(AccessibilityInvokeRequest request, final ApiCallback<Object> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = invokeAccessibilityNodeValidateBeforeCall(request, _callback);
+        Type localVarReturnType = new TypeToken<Object>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for listRecordings
      * @param _callback Callback for upload/download progress
      * @return Call to execute
@@ -2476,6 +3052,145 @@ public class ComputerUseApi {
 
         okhttp3.Call localVarCall = scrollValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<ScrollResponse>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for setAccessibilityNodeValue
+     * @param request Set value request (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call setAccessibilityNodeValueCall(AccessibilitySetValueRequest request, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = request;
+
+        // create path and map variables
+        String localVarPath = "/computeruse/a11y/node/value";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call setAccessibilityNodeValueValidateBeforeCall(AccessibilitySetValueRequest request, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'request' is set
+        if (request == null) {
+            throw new ApiException("Missing the required parameter 'request' when calling setAccessibilityNodeValue(Async)");
+        }
+
+        return setAccessibilityNodeValueCall(request, _callback);
+
+    }
+
+    /**
+     * Set the value of an accessibility node
+     * Write the given value to the node via EditableText.SetTextContents or, for numeric controls, Value.CurrentValue.
+     * @param request Set value request (required)
+     * @return Object
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public Object setAccessibilityNodeValue(AccessibilitySetValueRequest request) throws ApiException {
+        ApiResponse<Object> localVarResp = setAccessibilityNodeValueWithHttpInfo(request);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Set the value of an accessibility node
+     * Write the given value to the node via EditableText.SetTextContents or, for numeric controls, Value.CurrentValue.
+     * @param request Set value request (required)
+     * @return ApiResponse&lt;Object&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Object> setAccessibilityNodeValueWithHttpInfo(AccessibilitySetValueRequest request) throws ApiException {
+        okhttp3.Call localVarCall = setAccessibilityNodeValueValidateBeforeCall(request, null);
+        Type localVarReturnType = new TypeToken<Object>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Set the value of an accessibility node (asynchronously)
+     * Write the given value to the node via EditableText.SetTextContents or, for numeric controls, Value.CurrentValue.
+     * @param request Set value request (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call setAccessibilityNodeValueAsync(AccessibilitySetValueRequest request, final ApiCallback<Object> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = setAccessibilityNodeValueValidateBeforeCall(request, _callback);
+        Type localVarReturnType = new TypeToken<Object>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }

@@ -31,6 +31,12 @@ src/main/java/io/daytona/toolbox/client/auth/Authentication.java
 src/main/java/io/daytona/toolbox/client/auth/HttpBasicAuth.java
 src/main/java/io/daytona/toolbox/client/auth/HttpBearerAuth.java
 src/main/java/io/daytona/toolbox/client/model/AbstractOpenApiSchema.java
+src/main/java/io/daytona/toolbox/client/model/AccessibilityBounds.java
+src/main/java/io/daytona/toolbox/client/model/AccessibilityInvokeRequest.java
+src/main/java/io/daytona/toolbox/client/model/AccessibilityNodeRequest.java
+src/main/java/io/daytona/toolbox/client/model/AccessibilityNodesResponse.java
+src/main/java/io/daytona/toolbox/client/model/AccessibilitySetValueRequest.java
+src/main/java/io/daytona/toolbox/client/model/AccessibilityTreeResponse.java
 src/main/java/io/daytona/toolbox/client/model/Chart.java
 src/main/java/io/daytona/toolbox/client/model/ChartElement.java
 src/main/java/io/daytona/toolbox/client/model/CodeRunArtifacts.java
@@ -43,6 +49,7 @@ src/main/java/io/daytona/toolbox/client/model/CompletionList.java
 src/main/java/io/daytona/toolbox/client/model/ComputerUseStartResponse.java
 src/main/java/io/daytona/toolbox/client/model/ComputerUseStatusResponse.java
 src/main/java/io/daytona/toolbox/client/model/ComputerUseStopResponse.java
+src/main/java/io/daytona/toolbox/client/model/ComputeruseAccessibilityNode.java
 src/main/java/io/daytona/toolbox/client/model/CreateContextRequest.java
 src/main/java/io/daytona/toolbox/client/model/CreateSessionRequest.java
 src/main/java/io/daytona/toolbox/client/model/DisplayInfo.java
@@ -52,6 +59,7 @@ src/main/java/io/daytona/toolbox/client/model/ExecuteResponse.java
 src/main/java/io/daytona/toolbox/client/model/FileInfo.java
 src/main/java/io/daytona/toolbox/client/model/FileStatus.java
 src/main/java/io/daytona/toolbox/client/model/FilesDownloadRequest.java
+src/main/java/io/daytona/toolbox/client/model/FindAccessibilityNodesRequest.java
 src/main/java/io/daytona/toolbox/client/model/GitAddRequest.java
 src/main/java/io/daytona/toolbox/client/model/GitBranchRequest.java
 src/main/java/io/daytona/toolbox/client/model/GitCheckoutRequest.java
@@ -125,6 +133,12 @@ src/test/java/io/daytona/toolbox/client/api/LspApiTest.java
 src/test/java/io/daytona/toolbox/client/api/PortApiTest.java
 src/test/java/io/daytona/toolbox/client/api/ProcessApiTest.java
 src/test/java/io/daytona/toolbox/client/api/ServerApiTest.java
+src/test/java/io/daytona/toolbox/client/model/AccessibilityBoundsTest.java
+src/test/java/io/daytona/toolbox/client/model/AccessibilityInvokeRequestTest.java
+src/test/java/io/daytona/toolbox/client/model/AccessibilityNodeRequestTest.java
+src/test/java/io/daytona/toolbox/client/model/AccessibilityNodesResponseTest.java
+src/test/java/io/daytona/toolbox/client/model/AccessibilitySetValueRequestTest.java
+src/test/java/io/daytona/toolbox/client/model/AccessibilityTreeResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/ChartElementTest.java
 src/test/java/io/daytona/toolbox/client/model/ChartTest.java
 src/test/java/io/daytona/toolbox/client/model/CodeRunArtifactsTest.java
@@ -137,6 +151,7 @@ src/test/java/io/daytona/toolbox/client/model/CompletionListTest.java
 src/test/java/io/daytona/toolbox/client/model/ComputerUseStartResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/ComputerUseStatusResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/ComputerUseStopResponseTest.java
+src/test/java/io/daytona/toolbox/client/model/ComputeruseAccessibilityNodeTest.java
 src/test/java/io/daytona/toolbox/client/model/CreateContextRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/CreateSessionRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/DisplayInfoResponseTest.java
@@ -146,6 +161,7 @@ src/test/java/io/daytona/toolbox/client/model/ExecuteResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/FileInfoTest.java
 src/test/java/io/daytona/toolbox/client/model/FileStatusTest.java
 src/test/java/io/daytona/toolbox/client/model/FilesDownloadRequestTest.java
+src/test/java/io/daytona/toolbox/client/model/FindAccessibilityNodesRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/GitAddRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/GitBranchRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/GitCheckoutRequestTest.java
