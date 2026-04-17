@@ -209,3 +209,94 @@ jobs:
           token: ${{ github.token }}
           config: .licenserc-clients.yaml
           mode: 'check'
+
+  yarnrc-lint:
+    name: Yarnrc integrity check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Ensure PyYAML available
+        run: sudo apt-get install -y -q python3-yaml
+      - name: Validate .yarnrc.yml
+        run: |
+          python3 <<'PY'
+          import sys
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          import yaml
+
+          yarnrc = Path(".yarnrc.yml")
+          if not yarnrc.exists():
+              print("::error::.yarnrc.yml is required and must not be removed -- it carries supply chain hardening (npmMinimalAgeGate, etc.)")
+              sys.exit(1)
+
+          trusted_hosts = {"registry.npmjs.org", "registry.yarnpkg.com"}
+          errors = []
+
+          try:
+              config = yaml.safe_load(yarnrc.read_text(encoding="utf-8"))
+          except yaml.YAMLError as e:
+              print(f"::error::Failed to parse .yarnrc.yml: {e}")
+              sys.exit(1)
+
+          if config is None:
+              config = {}
+          elif not isinstance(config, dict):
+              print(f"::error::.yarnrc.yml must contain a top-level mapping, got: {type(config).__name__}")
+              sys.exit(1)
+
+          def is_truthy(value):
+              """Match Python True, integer 1, or any common YAML truthy string."""
+              if value is True:
+                  return True
+              if isinstance(value, bool):
+                  return False
+              if isinstance(value, int) and value == 1:
+                  return True
+              if isinstance(value, str) and value.strip().lower() in {"true", "yes", "on", "1"}:
+                  return True
+              return False
+
+          def check_registry(key, value, location):
+              if not isinstance(value, str):
+                  errors.append(f"{location}.{key} is not a string: {value!r}")
+                  return
+              parsed = urlparse(value)
+              if parsed.scheme != "https" or parsed.hostname not in trusted_hosts:
+                  errors.append(f"{location}.{key} must use https and a trusted host, got: {value}")
+
+          # Top-level registry overrides
+          for key in ("npmRegistryServer", "npmPublishRegistry"):
+              if key in config:
+                  check_registry(key, config[key], "root")
+
+          # Per-scope registry overrides
+          npm_scopes = config.get("npmScopes")
+          if npm_scopes is None:
+              npm_scopes = {}
+          elif not isinstance(npm_scopes, dict):
+              errors.append(f"root.npmScopes must be a mapping, got: {type(npm_scopes).__name__}")
+              npm_scopes = {}
+
+          for scope, scope_config in npm_scopes.items():
+              if not isinstance(scope_config, dict):
+                  errors.append(f"npmScopes.{scope} must be a mapping, got: {type(scope_config).__name__}")
+                  continue
+              for key in ("npmRegistryServer", "npmPublishRegistry"):
+                  if key in scope_config:
+                      check_registry(key, scope_config[key], f"npmScopes.{scope}")
+
+          # enableScripts (catches Python True, int 1, and YAML truthy strings)
+          if is_truthy(config.get("enableScripts")):
+              errors.append("enableScripts is enabled -- postinstall scripts can execute arbitrary code")
+
+          if errors:
+              for e in errors:
+                  print(f"::error::{e}")
+              sys.exit(1)
+
+          print("OK -- .yarnrc.yml passes integrity check")
+          PY
