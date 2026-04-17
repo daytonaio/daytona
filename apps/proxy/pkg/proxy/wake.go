@@ -147,7 +147,7 @@ func isWakeableError(err error) bool {
 		strings.Contains(errStr, "connection reset")
 }
 
-func (p *Proxy) WakeOnRequestErrorHandler(ginCtx *gin.Context, originalHandler func(http.ResponseWriter, *http.Request, error)) func(http.ResponseWriter, *http.Request, error) {
+func (p *Proxy) WakeOnRequestErrorHandler(ginCtx *gin.Context) func(http.ResponseWriter, *http.Request, error) {
 	return func(w http.ResponseWriter, r *http.Request, err error) {
 		sandboxID := resolvedSandboxID(ginCtx, "")
 		if sandboxID != "" && isWakeableError(err) {
@@ -160,12 +160,6 @@ func (p *Proxy) WakeOnRequestErrorHandler(ginCtx *gin.Context, originalHandler f
 			}
 		}
 
-		if originalHandler != nil {
-			originalHandler(w, r, err)
-			return
-		}
-
-		log.WithError(err).WithField("path", r.URL.Path).Warn("proxy request failed")
 		http.Error(w, http.StatusText(http.StatusBadGateway), http.StatusBadGateway)
 	}
 }
@@ -194,6 +188,18 @@ func (p *Proxy) WakeOnRequestModifyResponse(ginCtx *gin.Context, originalModifyR
 			res.Body = io.NopCloser(strings.NewReader(sandboxStartingHTML))
 			res.ContentLength = int64(len(sandboxStartingHTML))
 			res.Header.Set("Content-Length", fmt.Sprintf("%d", len(sandboxStartingHTML)))
+		} else {
+			// If wake failed, modify the response to indicate the sandbox is stopped
+			if res.Body != nil {
+				res.Body.Close()
+			}
+			res.StatusCode = http.StatusServiceUnavailable
+			res.Status = "503 Service Unavailable"
+			res.Header.Set("Content-Type", "application/json; charset=utf-8")
+			body := fmt.Sprintf(`{"error": "Sandbox %s is stopped. For instructions how to start it, visit https://www.daytona.io/docs/sandboxes/#start-sandboxes"}`, sandboxID)
+			res.Body = io.NopCloser(strings.NewReader(body))
+			res.ContentLength = int64(len(body))
+			res.Header.Set("Content-Length", fmt.Sprintf("%d", len(body)))
 		}
 
 		return nil

@@ -222,7 +222,7 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 				}
 
 				modifyResponse := proxy.WakeOnRequestModifyResponse(ctx, baseModifyResponse)
-				errorHandler := proxy.WakeOnRequestErrorHandler(ctx, nil)
+				errorHandler := proxy.WakeOnRequestErrorHandler(ctx)
 				common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, modifyResponse, errorHandler)(ctx)
 				return
 			}
@@ -238,7 +238,7 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 		}
 
 		modifyResponse := proxy.WakeOnRequestModifyResponse(ctx, nil)
-		errorHandler := proxy.WakeOnRequestErrorHandler(ctx, nil)
+		errorHandler := proxy.WakeOnRequestErrorHandler(ctx)
 		common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, modifyResponse, errorHandler)(ctx)
 	})
 

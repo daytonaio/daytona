@@ -40,15 +40,14 @@ import (
 func ProxyRequest(logger *slog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		sandboxId := ctx.Param("sandboxId")
-		if sandboxId != "" {
-			r, err := runner.GetInstance(nil)
-			if err == nil {
-				state, err := r.Docker.GetSandboxState(ctx.Request.Context(), sandboxId)
-				if err == nil && state == enums.SandboxStateStopped {
-					ctx.Header(proxy.SandboxStateHeader, "stopped")
-					ctx.AbortWithStatus(http.StatusServiceUnavailable)
-					return
-				}
+
+		r, err := runner.GetInstance(nil)
+		if err == nil {
+			state, err := r.Docker.GetSandboxState(ctx.Request.Context(), sandboxId)
+			if err == nil && state == enums.SandboxStateStopped {
+				ctx.Header(proxy.SandboxStateHeader, "stopped")
+				ctx.AbortWithStatus(http.StatusServiceUnavailable)
+				return
 			}
 		}
 
