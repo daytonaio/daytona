@@ -104,8 +104,10 @@ func (c *ComputerUse) Start() (*computeruse.Empty, error) {
 		return nil, fmt.Errorf("failed to get process status after start: %v", err)
 	}
 
-	// Check if all required processes are running
-	required := []string{"xvfb", "xfce4", "atspi", "x11vnc", "novnc"}
+	// Check if all required processes are running. atspi is deliberately
+	// excluded — a11y failures surface as 503 A11Y_UNAVAILABLE on the /a11y
+	// endpoints, and should not block the rest of computer-use from starting.
+	required := []string{"xvfb", "xfce4", "x11vnc", "novnc"}
 	var failed []string
 	for _, name := range required {
 		if s, ok := status[name]; !ok || !s.Running {
@@ -190,12 +192,17 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 	// Process 2.5: at-spi-bus-launcher (AT-SPI daemon for the accessibility API)
 	// Launches the org.a11y.Bus service so GTK/Qt/Electron apps can publish
 	// their widget trees. Runs after xfce4 so the session D-Bus is up.
-	// Path lives in /usr/libexec on Debian/Ubuntu.
+	// Path lives in /usr/libexec on Debian/Ubuntu; some distros ship it under
+	// /usr/lib/at-spi2-core/; as a last resort fall back to $PATH so images
+	// that put the binary somewhere unusual still work.
 	atspiCommand := "/usr/libexec/at-spi-bus-launcher"
 	if _, err := os.Stat(atspiCommand); err != nil {
-		// Some distros ship it under /usr/lib/at-spi2-core/
-		if _, err2 := os.Stat("/usr/lib/at-spi2-core/at-spi-bus-launcher"); err2 == nil {
+		if _, err := os.Stat("/usr/lib/at-spi2-core/at-spi-bus-launcher"); err == nil {
 			atspiCommand = "/usr/lib/at-spi2-core/at-spi-bus-launcher"
+		} else if p, err := exec.LookPath("at-spi-bus-launcher"); err == nil {
+			atspiCommand = p
+		} else {
+			log.Warnf("at-spi-bus-launcher not found in any known location; accessibility API will return 503 until the binary is installed")
 		}
 	}
 	c.processes["atspi"] = &Process{
@@ -394,6 +401,15 @@ func (c *ComputerUse) Stop() (*computeruse.Empty, error) {
 		process := processes[i]
 		c.stopProcess(process)
 	}
+
+	// Release the cached AT-SPI bus connection so a later Start() dials a
+	// fresh one — the bus address can change across launcher restarts.
+	c.atspiMu.Lock()
+	if c.atspiConn != nil {
+		_ = c.atspiConn.Close()
+		c.atspiConn = nil
+	}
+	c.atspiMu.Unlock()
 
 	return new(computeruse.Empty), nil
 }
