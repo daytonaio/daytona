@@ -236,17 +236,17 @@ jobs:
           for lineno, line in enumerate(yarnrc.read_text(encoding="utf-8").splitlines(), 1):
               without_comment = line.split("#", 1)[0]
 
-              # Any URL-bearing registry key (top-level or under npmScopes) must point to a trusted host
+              # Any URL-bearing registry key (top-level or under npmScopes) must use HTTPS and point to a trusted host
               match = re.match(r"^\s*(npmRegistryServer|npmPublishRegistry):\s*(\S+)\s*$", without_comment)
               if match:
                   key, value = match.group(1), match.group(2).strip("'\"")
                   parsed = urlparse(value)
-                  if parsed.scheme not in {"http", "https"} or parsed.hostname not in trusted_hosts:
-                      errors.append(f"Line {lineno}: {key} points to untrusted host: {value}")
+                  if parsed.scheme != "https" or parsed.hostname not in trusted_hosts:
+                      errors.append(f"Line {lineno}: {key} must use https and a trusted host, got: {value}")
 
-              # enableScripts: true at any indent level opens postinstall attack vector
-              if re.match(r"^\s*enableScripts:\s*true\s*$", without_comment):
-                  errors.append(f"Line {lineno}: enableScripts: true is a supply chain risk")
+              # enableScripts at any indent with any common YAML truthy value opens postinstall attack vector
+              if re.match(r"^\s*enableScripts:\s*(true|yes|on|1)\s*$", without_comment, re.IGNORECASE):
+                  errors.append(f"Line {lineno}: enableScripts enabled is a supply chain risk")
 
           if errors:
               for e in errors:
