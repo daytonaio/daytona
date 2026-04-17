@@ -1,14 +1,13 @@
 # Daytona Workspace Plugin for OpenCode
 
-This is an OpenCode workspace plugin that provisions Daytona sandboxes as remote development environments. It uses the experimental workspace API to create isolated sandboxes where the OpenCode server runs remotely.
+OpenCode plugin that provisions Daytona sandboxes as remote workspaces.
 
 ## Features
 
 - Create Daytona sandboxes as remote OpenCode workspaces
-- Automatic repository synchronization via tar archive upload
-- OpenCode server runs inside the sandbox, proxying all tool calls
+- Automatic repository upload to sandbox
 - Preview URLs for web servers running in sandboxes
-- Clean sandbox teardown when workspaces are removed
+- Sandbox cleanup when workspaces are removed
 
 ## Requirements
 
@@ -59,42 +58,15 @@ OPENCODE_EXPERIMENTAL_WORKSPACES=true opencode
 
 ### Creating a Daytona Workspace
 
-1. Press `Ctrl+W` in the session list to open the workspace creation menu
+1. Press `Ctrl+W` in the session list
 2. Select "Daytona" as the workspace type
-3. The plugin will:
-   - Create a new Daytona sandbox
-   - Upload your repository as a tar archive
-   - Install and start the OpenCode server inside the sandbox
-   - Wait for the server to become healthy
+3. The plugin will create a sandbox, upload your repository, and start the OpenCode server
 
-Once created, all file operations and bash commands run inside the remote sandbox.
+Once created, all commands run inside the remote sandbox.
 
 ### Removing a Workspace
 
 When you delete a Daytona workspace from OpenCode, the associated sandbox is automatically cleaned up.
-
-## How It Works
-
-### Architecture
-
-Unlike traditional tool plugins that intercept and forward commands, this workspace plugin:
-
-1. **Provisions a remote sandbox** with `create()` - uploads your repo and starts OpenCode server
-2. **Returns a remote target** with `target()` - OpenCode proxies all requests to the sandbox's server
-3. **Cleans up** with `remove()` - tears down the sandbox when the workspace is deleted
-
-### Repository Upload
-
-When creating a workspace:
-
-1. Your local repository is cloned (shallow, depth 1)
-2. The clone is packaged as a tar archive
-3. The archive is uploaded to the sandbox and extracted
-4. The OpenCode project ID is written to `.git/opencode` for session association
-
-### Tool Execution
-
-All OpenCode tools (bash, read, write, edit, glob, grep, etc.) work automatically through the remote target proxy. No custom tool implementations are needed.
 
 ## Development
 
@@ -130,8 +102,6 @@ OPENCODE_EXPERIMENTAL_WORKSPACES=true opencode
 
 ### Building
 
-Build the plugin:
-
 ```bash
 npx nx run opencode-plugin:build
 ```
@@ -150,8 +120,8 @@ libs/opencode-plugin/
 ├── .opencode/
 │   └── plugin/
 │       ├── daytona/
-│       │   └── index.ts          # Workspace adaptor implementation
-│       └── index.ts              # Plugin entry point
+│       │   └── index.ts
+│       └── index.ts
 ├── package.json
 ├── project.json
 ├── tsconfig.json
