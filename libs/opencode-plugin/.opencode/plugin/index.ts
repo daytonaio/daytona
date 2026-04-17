@@ -5,7 +5,7 @@
 
 /**
  * Main entry point for the OpenCode Daytona plugin.
- * Re-exports the default plugin from daytona.
+ * Re-exports the workspace adaptor plugin.
  */
 
-export { default } from './daytona/index.js'
+export { default, DaytonaWorkspacePlugin } from './daytona/index.js'
