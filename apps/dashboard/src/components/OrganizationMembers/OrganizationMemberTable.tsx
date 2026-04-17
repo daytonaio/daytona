@@ -21,7 +21,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
 import { UpsertOrganizationAccessSheet } from '@/components/OrganizationMembers/UpsertOrganizationAccessSheet'
 import { RemoveOrganizationMemberDialog } from '@/components/OrganizationMembers/RemoveOrganizationMemberDialog'
-import { capitalize } from '@/lib/utils'
+import { capitalize, cn } from '@/lib/utils'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { TableEmptyState } from '../TableEmptyState'
 
@@ -30,7 +30,7 @@ interface DataTableProps {
   loadingData: boolean
   onUpdateMemberAccess: (userId: string, role: OrganizationUserRoleEnum, assignedRoleIds: string[]) => Promise<boolean>
   onRemoveMember: (userId: string) => Promise<boolean>
-  loadingMemberAction: Record<string, boolean>
+  pendingMemberIds: Set<string>
   ownerMode: boolean
   currentUserId?: string
 }
@@ -40,7 +40,7 @@ export function OrganizationMemberTable({
   loadingData,
   onUpdateMemberAccess,
   onRemoveMember,
-  loadingMemberAction,
+  pendingMemberIds,
   ownerMode,
   currentUserId,
 }: DataTableProps) {
@@ -150,7 +150,9 @@ export function OrganizationMemberTable({
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && 'selected'}
-                    className={`h-14 ${loadingMemberAction[row.original.userId] ? 'opacity-50 pointer-events-none' : ''}`}
+                    className={cn('h-14', {
+                      'opacity-50 pointer-events-none': pendingMemberIds.has(row.original.userId),
+                    })}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
@@ -195,7 +197,7 @@ export function OrganizationMemberTable({
             }
           }}
           onRemoveMember={handleConfirmRemove}
-          loading={loadingMemberAction[memberToRemove]}
+          loading={memberToRemove ? pendingMemberIds.has(memberToRemove) : false}
         />
       )}
     </>
