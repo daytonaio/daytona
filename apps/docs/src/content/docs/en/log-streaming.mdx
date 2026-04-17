@@ -459,6 +459,7 @@ func main() {
 ```java
 import io.daytona.sdk.Daytona;
 import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.SessionCommandLogsResponse;
 import io.daytona.sdk.model.SessionExecuteRequest;
 import io.daytona.sdk.model.SessionExecuteResponse;
 
@@ -484,8 +485,10 @@ public class App {
                             "while true; do if (( RANDOM % 2 )); then echo \"All good at $(date)\"; else echo \"Oops, an error at $(date)\" >&2; fi; sleep 1; done",
                             true));
             Thread.sleep(5000);
-            String logs = sandbox.getProcess().getSessionCommandLogs(sessionId, asyncCmd.getCmdId());
-            System.out.println("[LOGS]: " + logs);
+            SessionCommandLogsResponse logs = sandbox.getProcess().getSessionCommandLogs(sessionId, asyncCmd.getCmdId());
+            System.out.println("[STDOUT]: " + logs.getStdout());
+            System.out.println("[STDERR]: " + logs.getStderr());
+            System.out.println("[OUTPUT]: " + logs.getOutput());
 
             sandbox.delete();
         }

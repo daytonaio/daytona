@@ -748,6 +748,7 @@ for msg := range stdout {
 ```java
 import io.daytona.sdk.model.Command;
 import io.daytona.sdk.model.Session;
+import io.daytona.sdk.model.SessionCommandLogsResponse;
 
 // Entrypoint session details
 Session session = sandbox.process.getEntrypointSession();
@@ -757,8 +758,9 @@ System.out.println("Entrypoint command id: " + cmd.getId());
 System.out.println("Command: " + cmd.getCommand());
 
 // Entrypoint logs (HTTP)
-String logs = sandbox.process.getEntrypointLogs();
-System.out.println(logs);
+SessionCommandLogsResponse logs = sandbox.process.getEntrypointLogs();
+System.out.println("[STDOUT]: " + logs.getStdout());
+System.out.println("[STDERR]: " + logs.getStderr());
 
 // Stream entrypoint logs (WebSocket)
 sandbox.process.getEntrypointLogs(
