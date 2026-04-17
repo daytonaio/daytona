@@ -93,6 +93,12 @@ public class JSON {
         gsonBuilder.registerTypeAdapter(OffsetDateTime.class, offsetDateTimeTypeAdapter);
         gsonBuilder.registerTypeAdapter(LocalDate.class, localDateTypeAdapter);
         gsonBuilder.registerTypeAdapter(byte[].class, byteArrayAdapter);
+        gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.AccessibilityBounds.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.AccessibilityInvokeRequest.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.AccessibilityNodeRequest.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.AccessibilityNodesResponse.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.AccessibilitySetValueRequest.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.AccessibilityTreeResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.Chart.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.ChartElement.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.CodeRunArtifacts.CustomTypeAdapterFactory());
@@ -105,6 +111,7 @@ public class JSON {
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.ComputerUseStartResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.ComputerUseStatusResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.ComputerUseStopResponse.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.ComputeruseAccessibilityNode.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.CreateContextRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.CreateSessionRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.DisplayInfo.CustomTypeAdapterFactory());
@@ -114,6 +121,7 @@ public class JSON {
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.FileInfo.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.FileStatus.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.FilesDownloadRequest.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.FindAccessibilityNodesRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.GitAddRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.GitBranchRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.GitCheckoutRequest.CustomTypeAdapterFactory());

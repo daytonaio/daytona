@@ -22,6 +22,16 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
+import type { AccessibilityInvokeRequest } from '../models';
+// @ts-ignore
+import type { AccessibilityNodeRequest } from '../models';
+// @ts-ignore
+import type { AccessibilityNodesResponse } from '../models';
+// @ts-ignore
+import type { AccessibilitySetValueRequest } from '../models';
+// @ts-ignore
+import type { AccessibilityTreeResponse } from '../models';
+// @ts-ignore
 import type { ComputerUseStartResponse } from '../models';
 // @ts-ignore
 import type { ComputerUseStatusResponse } from '../models';
@@ -29,6 +39,8 @@ import type { ComputerUseStatusResponse } from '../models';
 import type { ComputerUseStopResponse } from '../models';
 // @ts-ignore
 import type { DisplayInfoResponse } from '../models';
+// @ts-ignore
+import type { FindAccessibilityNodesRequest } from '../models';
 // @ts-ignore
 import type { KeyboardHotkeyRequest } from '../models';
 // @ts-ignore
@@ -211,6 +223,123 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Search the AT-SPI tree for nodes matching a role/name/state filter and return a flat list.
+         * @summary Find accessibility nodes
+         * @param {FindAccessibilityNodesRequest} request Find request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        findAccessibilityNodes: async (request: FindAccessibilityNodesRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'request' is not null or undefined
+            assertParamExists('findAccessibilityNodes', 'request', request)
+            const localVarPath = `/computeruse/a11y/find`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Move keyboard focus to the AT-SPI node identified by id (bus-name:object-path).
+         * @summary Focus an accessibility node
+         * @param {AccessibilityNodeRequest} request Node focus request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        focusAccessibilityNode: async (request: AccessibilityNodeRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'request' is not null or undefined
+            assertParamExists('focusAccessibilityNode', 'request', request)
+            const localVarPath = `/computeruse/a11y/node/focus`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Fetch the AT-SPI accessibility tree for the focused application, a specific PID, or all registered applications.
+         * @summary Get accessibility tree
+         * @param {string} [scope] Scope: focused | pid | all (default: focused)
+         * @param {number} [pid] Process ID when scope&#x3D;pid
+         * @param {number} [maxDepth] Max tree depth (-1 unbounded, 0 root only; default -1)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAccessibilityTree: async (scope?: string, pid?: number, maxDepth?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/computeruse/a11y/tree`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (scope !== undefined) {
+                localVarQueryParameter['scope'] = scope;
+            }
+
+            if (pid !== undefined) {
+                localVarQueryParameter['pid'] = pid;
+            }
+
+            if (maxDepth !== undefined) {
+                localVarQueryParameter['maxDepth'] = maxDepth;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -504,6 +633,42 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
+         * Call an AT-SPI Action on the node. Leave action empty to invoke the node\'s primary (first) action.
+         * @summary Invoke an action on an accessibility node
+         * @param {AccessibilityInvokeRequest} request Invoke request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        invokeAccessibilityNode: async (request: AccessibilityInvokeRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'request' is not null or undefined
+            assertParamExists('invokeAccessibilityNode', 'request', request)
+            const localVarPath = `/computeruse/a11y/node/invoke`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Get a list of all recordings (active and completed)
          * @summary List all recordings
          * @param {*} [options] Override http request option.
@@ -686,6 +851,42 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             // verify required parameter 'request' is not null or undefined
             assertParamExists('scroll', 'request', request)
             const localVarPath = `/computeruse/mouse/scroll`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Write the given value to the node via EditableText.SetTextContents or, for numeric controls, Value.CurrentValue.
+         * @summary Set the value of an accessibility node
+         * @param {AccessibilitySetValueRequest} request Set value request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        setAccessibilityNodeValue: async (request: AccessibilitySetValueRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'request' is not null or undefined
+            assertParamExists('setAccessibilityNodeValue', 'request', request)
+            const localVarPath = `/computeruse/a11y/node/value`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -1166,6 +1367,47 @@ export const ComputerUseApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Search the AT-SPI tree for nodes matching a role/name/state filter and return a flat list.
+         * @summary Find accessibility nodes
+         * @param {FindAccessibilityNodesRequest} request Find request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async findAccessibilityNodes(request: FindAccessibilityNodesRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AccessibilityNodesResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.findAccessibilityNodes(request, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ComputerUseApi.findAccessibilityNodes']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Move keyboard focus to the AT-SPI node identified by id (bus-name:object-path).
+         * @summary Focus an accessibility node
+         * @param {AccessibilityNodeRequest} request Node focus request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async focusAccessibilityNode(request: AccessibilityNodeRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.focusAccessibilityNode(request, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ComputerUseApi.focusAccessibilityNode']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Fetch the AT-SPI accessibility tree for the focused application, a specific PID, or all registered applications.
+         * @summary Get accessibility tree
+         * @param {string} [scope] Scope: focused | pid | all (default: focused)
+         * @param {number} [pid] Process ID when scope&#x3D;pid
+         * @param {number} [maxDepth] Max tree depth (-1 unbounded, 0 root only; default -1)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getAccessibilityTree(scope?: string, pid?: number, maxDepth?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AccessibilityTreeResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAccessibilityTree(scope, pid, maxDepth, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ComputerUseApi.getAccessibilityTree']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Get the status of all computer use processes
          * @summary Get computer use process status
          * @param {*} [options] Override http request option.
@@ -1278,6 +1520,19 @@ export const ComputerUseApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Call an AT-SPI Action on the node. Leave action empty to invoke the node\'s primary (first) action.
+         * @summary Invoke an action on an accessibility node
+         * @param {AccessibilityInvokeRequest} request Invoke request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async invokeAccessibilityNode(request: AccessibilityInvokeRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.invokeAccessibilityNode(request, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ComputerUseApi.invokeAccessibilityNode']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Get a list of all recordings (active and completed)
          * @summary List all recordings
          * @param {*} [options] Override http request option.
@@ -1352,6 +1607,19 @@ export const ComputerUseApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.scroll(request, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ComputerUseApi.scroll']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Write the given value to the node via EditableText.SetTextContents or, for numeric controls, Value.CurrentValue.
+         * @summary Set the value of an accessibility node
+         * @param {AccessibilitySetValueRequest} request Set value request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async setAccessibilityNodeValue(request: AccessibilitySetValueRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.setAccessibilityNodeValue(request, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ComputerUseApi.setAccessibilityNodeValue']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -1534,6 +1802,38 @@ export const ComputerUseApiFactory = function (configuration?: Configuration, ba
             return localVarFp.drag(request, options).then((request) => request(axios, basePath));
         },
         /**
+         * Search the AT-SPI tree for nodes matching a role/name/state filter and return a flat list.
+         * @summary Find accessibility nodes
+         * @param {FindAccessibilityNodesRequest} request Find request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        findAccessibilityNodes(request: FindAccessibilityNodesRequest, options?: RawAxiosRequestConfig): AxiosPromise<AccessibilityNodesResponse> {
+            return localVarFp.findAccessibilityNodes(request, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Move keyboard focus to the AT-SPI node identified by id (bus-name:object-path).
+         * @summary Focus an accessibility node
+         * @param {AccessibilityNodeRequest} request Node focus request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        focusAccessibilityNode(request: AccessibilityNodeRequest, options?: RawAxiosRequestConfig): AxiosPromise<object> {
+            return localVarFp.focusAccessibilityNode(request, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Fetch the AT-SPI accessibility tree for the focused application, a specific PID, or all registered applications.
+         * @summary Get accessibility tree
+         * @param {string} [scope] Scope: focused | pid | all (default: focused)
+         * @param {number} [pid] Process ID when scope&#x3D;pid
+         * @param {number} [maxDepth] Max tree depth (-1 unbounded, 0 root only; default -1)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAccessibilityTree(scope?: string, pid?: number, maxDepth?: number, options?: RawAxiosRequestConfig): AxiosPromise<AccessibilityTreeResponse> {
+            return localVarFp.getAccessibilityTree(scope, pid, maxDepth, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Get the status of all computer use processes
          * @summary Get computer use process status
          * @param {*} [options] Override http request option.
@@ -1619,6 +1919,16 @@ export const ComputerUseApiFactory = function (configuration?: Configuration, ba
             return localVarFp.getWindows(options).then((request) => request(axios, basePath));
         },
         /**
+         * Call an AT-SPI Action on the node. Leave action empty to invoke the node\'s primary (first) action.
+         * @summary Invoke an action on an accessibility node
+         * @param {AccessibilityInvokeRequest} request Invoke request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        invokeAccessibilityNode(request: AccessibilityInvokeRequest, options?: RawAxiosRequestConfig): AxiosPromise<object> {
+            return localVarFp.invokeAccessibilityNode(request, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Get a list of all recordings (active and completed)
          * @summary List all recordings
          * @param {*} [options] Override http request option.
@@ -1676,6 +1986,16 @@ export const ComputerUseApiFactory = function (configuration?: Configuration, ba
          */
         scroll(request: MouseScrollRequest, options?: RawAxiosRequestConfig): AxiosPromise<ScrollResponse> {
             return localVarFp.scroll(request, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Write the given value to the node via EditableText.SetTextContents or, for numeric controls, Value.CurrentValue.
+         * @summary Set the value of an accessibility node
+         * @param {AccessibilitySetValueRequest} request Set value request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        setAccessibilityNodeValue(request: AccessibilitySetValueRequest, options?: RawAxiosRequestConfig): AxiosPromise<object> {
+            return localVarFp.setAccessibilityNodeValue(request, options).then((request) => request(axios, basePath));
         },
         /**
          * Start all computer use processes and return their status
@@ -1838,6 +2158,44 @@ export class ComputerUseApi extends BaseAPI {
     }
 
     /**
+     * Search the AT-SPI tree for nodes matching a role/name/state filter and return a flat list.
+     * @summary Find accessibility nodes
+     * @param {FindAccessibilityNodesRequest} request Find request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ComputerUseApi
+     */
+    public findAccessibilityNodes(request: FindAccessibilityNodesRequest, options?: RawAxiosRequestConfig) {
+        return ComputerUseApiFp(this.configuration).findAccessibilityNodes(request, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Move keyboard focus to the AT-SPI node identified by id (bus-name:object-path).
+     * @summary Focus an accessibility node
+     * @param {AccessibilityNodeRequest} request Node focus request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ComputerUseApi
+     */
+    public focusAccessibilityNode(request: AccessibilityNodeRequest, options?: RawAxiosRequestConfig) {
+        return ComputerUseApiFp(this.configuration).focusAccessibilityNode(request, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Fetch the AT-SPI accessibility tree for the focused application, a specific PID, or all registered applications.
+     * @summary Get accessibility tree
+     * @param {string} [scope] Scope: focused | pid | all (default: focused)
+     * @param {number} [pid] Process ID when scope&#x3D;pid
+     * @param {number} [maxDepth] Max tree depth (-1 unbounded, 0 root only; default -1)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ComputerUseApi
+     */
+    public getAccessibilityTree(scope?: string, pid?: number, maxDepth?: number, options?: RawAxiosRequestConfig) {
+        return ComputerUseApiFp(this.configuration).getAccessibilityTree(scope, pid, maxDepth, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Get the status of all computer use processes
      * @summary Get computer use process status
      * @param {*} [options] Override http request option.
@@ -1941,6 +2299,18 @@ export class ComputerUseApi extends BaseAPI {
     }
 
     /**
+     * Call an AT-SPI Action on the node. Leave action empty to invoke the node\'s primary (first) action.
+     * @summary Invoke an action on an accessibility node
+     * @param {AccessibilityInvokeRequest} request Invoke request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ComputerUseApi
+     */
+    public invokeAccessibilityNode(request: AccessibilityInvokeRequest, options?: RawAxiosRequestConfig) {
+        return ComputerUseApiFp(this.configuration).invokeAccessibilityNode(request, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Get a list of all recordings (active and completed)
      * @summary List all recordings
      * @param {*} [options] Override http request option.
@@ -2009,6 +2379,18 @@ export class ComputerUseApi extends BaseAPI {
      */
     public scroll(request: MouseScrollRequest, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).scroll(request, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Write the given value to the node via EditableText.SetTextContents or, for numeric controls, Value.CurrentValue.
+     * @summary Set the value of an accessibility node
+     * @param {AccessibilitySetValueRequest} request Set value request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ComputerUseApi
+     */
+    public setAccessibilityNodeValue(request: AccessibilitySetValueRequest, options?: RawAxiosRequestConfig) {
+        return ComputerUseApiFp(this.configuration).setAccessibilityNodeValue(request, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

@@ -7,6 +7,248 @@ info:
 servers:
 - url: /
 paths:
+  /computeruse/a11y/find:
+    post:
+      description: Search the AT-SPI tree for nodes matching a role/name/state filter
+        and return a flat list.
+      operationId: FindAccessibilityNodes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FindAccessibilityNodesRequest"
+        description: Find request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessibilityNodesResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Not Found
+        "503":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Service Unavailable
+      summary: Find accessibility nodes
+      tags:
+      - computer-use
+      x-codegen-request-body-name: request
+  /computeruse/a11y/node/focus:
+    post:
+      description: Move keyboard focus to the AT-SPI node identified by id (bus-name:object-path).
+      operationId: FocusAccessibilityNode
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccessibilityNodeRequest"
+        description: Node focus request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Not Found
+        "503":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Service Unavailable
+      summary: Focus an accessibility node
+      tags:
+      - computer-use
+      x-codegen-request-body-name: request
+  /computeruse/a11y/node/invoke:
+    post:
+      description: Call an AT-SPI Action on the node. Leave action empty to invoke
+        the node's primary (first) action.
+      operationId: InvokeAccessibilityNode
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccessibilityInvokeRequest"
+        description: Invoke request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Not Found
+        "503":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Service Unavailable
+      summary: Invoke an action on an accessibility node
+      tags:
+      - computer-use
+      x-codegen-request-body-name: request
+  /computeruse/a11y/node/value:
+    post:
+      description: "Write the given value to the node via EditableText.SetTextContents\
+        \ or, for numeric controls, Value.CurrentValue."
+      operationId: SetAccessibilityNodeValue
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccessibilitySetValueRequest"
+        description: Set value request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Not Found
+        "503":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Service Unavailable
+      summary: Set the value of an accessibility node
+      tags:
+      - computer-use
+      x-codegen-request-body-name: request
+  /computeruse/a11y/tree:
+    get:
+      description: "Fetch the AT-SPI accessibility tree for the focused application,\
+        \ a specific PID, or all registered applications."
+      operationId: GetAccessibilityTree
+      parameters:
+      - description: "Scope: focused | pid | all (default: focused)"
+        in: query
+        name: scope
+        schema:
+          type: string
+      - description: Process ID when scope=pid
+        in: query
+        name: pid
+        schema:
+          type: integer
+      - description: "Max tree depth (-1 unbounded, 0 root only; default -1)"
+        in: query
+        name: maxDepth
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessibilityTreeResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Not Found
+        "503":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Service Unavailable
+      summary: Get accessibility tree
+      tags:
+      - computer-use
   /computeruse/display/info:
     get:
       description: Get information about all available displays
@@ -2045,6 +2287,131 @@ paths:
       - info
 components:
   schemas:
+    AccessibilityBounds:
+      example:
+        width: 6
+        x: 1
+        "y": 5
+        height: 0
+      properties:
+        height:
+          type: integer
+        width:
+          type: integer
+        x:
+          type: integer
+        "y":
+          type: integer
+      type: object
+    AccessibilityInvokeRequest:
+      example:
+        action: action
+        id: id
+      properties:
+        action:
+          type: string
+        id:
+          type: string
+      required:
+      - id
+      type: object
+    AccessibilityNodeRequest:
+      example:
+        id: id
+      properties:
+        id:
+          type: string
+      required:
+      - id
+      type: object
+    AccessibilityNodesResponse:
+      example:
+        truncated: true
+        matches:
+        - role: role
+          children:
+          - null
+          - null
+          bounds:
+            width: 6
+            x: 1
+            "y": 5
+            height: 0
+          name: name
+          description: description
+          id: id
+          actions:
+          - actions
+          - actions
+          states:
+          - states
+          - states
+        - role: role
+          children:
+          - null
+          - null
+          bounds:
+            width: 6
+            x: 1
+            "y": 5
+            height: 0
+          name: name
+          description: description
+          id: id
+          actions:
+          - actions
+          - actions
+          states:
+          - states
+          - states
+      properties:
+        matches:
+          items:
+            $ref: "#/components/schemas/computeruse.AccessibilityNode"
+          type: array
+        truncated:
+          type: boolean
+      type: object
+    AccessibilitySetValueRequest:
+      example:
+        id: id
+        value: value
+      properties:
+        id:
+          type: string
+        value:
+          type: string
+      required:
+      - id
+      type: object
+    AccessibilityTreeResponse:
+      example:
+        root:
+          role: role
+          children:
+          - null
+          - null
+          bounds:
+            width: 6
+            x: 1
+            "y": 5
+            height: 0
+          name: name
+          description: description
+          id: id
+          actions:
+          - actions
+          - actions
+          states:
+          - states
+          - states
+        truncated: true
+      properties:
+        root:
+          $ref: "#/components/schemas/computeruse.AccessibilityNode"
+        truncated:
+          type: boolean
+      type: object
     Chart:
       example:
         y_ticks:
@@ -2828,6 +3195,36 @@ components:
           type: array
       required:
       - paths
+      type: object
+    FindAccessibilityNodesRequest:
+      example:
+        role: role
+        scope: scope
+        limit: 0
+        name: name
+        pid: 6
+        nameMatch: nameMatch
+        states:
+        - states
+        - states
+      properties:
+        limit:
+          type: integer
+        name:
+          type: string
+        nameMatch:
+          description: '"exact" | "substring" | "regex"'
+          type: string
+        pid:
+          type: integer
+        role:
+          type: string
+        scope:
+          type: string
+        states:
+          items:
+            type: string
+          type: array
       type: object
     GitAddRequest:
       example:
@@ -3883,6 +4280,50 @@ components:
           type: string
       required:
       - dir
+      type: object
+    computeruse.AccessibilityNode:
+      example:
+        role: role
+        children:
+        - null
+        - null
+        bounds:
+          width: 6
+          x: 1
+          "y": 5
+          height: 0
+        name: name
+        description: description
+        id: id
+        actions:
+        - actions
+        - actions
+        states:
+        - states
+        - states
+      properties:
+        actions:
+          items:
+            type: string
+          type: array
+        bounds:
+          $ref: "#/components/schemas/AccessibilityBounds"
+        children:
+          items:
+            $ref: "#/components/schemas/computeruse.AccessibilityNode"
+          type: array
+        description:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+        states:
+          items:
+            type: string
+          type: array
       type: object
     gin.H:
       additionalProperties:

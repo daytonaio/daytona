@@ -16,6 +16,12 @@ common.ts
 configuration.ts
 git_push.sh
 index.ts
+models/accessibility-bounds.ts
+models/accessibility-invoke-request.ts
+models/accessibility-node-request.ts
+models/accessibility-nodes-response.ts
+models/accessibility-set-value-request.ts
+models/accessibility-tree-response.ts
 models/chart-element.ts
 models/chart.ts
 models/code-run-artifacts.ts
@@ -28,6 +34,7 @@ models/completion-list.ts
 models/computer-use-start-response.ts
 models/computer-use-status-response.ts
 models/computer-use-stop-response.ts
+models/computeruse-accessibility-node.ts
 models/create-context-request.ts
 models/create-session-request.ts
 models/display-info-response.ts
@@ -37,6 +44,7 @@ models/execute-response.ts
 models/file-info.ts
 models/file-status.ts
 models/files-download-request.ts
+models/find-accessibility-nodes-request.ts
 models/git-add-request.ts
 models/git-branch-request.ts
 models/git-checkout-request.ts

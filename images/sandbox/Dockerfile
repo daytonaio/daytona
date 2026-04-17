@@ -33,6 +33,9 @@ RUN apt-get update && apt-get install -y \
     xfce4 \
     xfce4-terminal \
     dbus-x11 \
+    # AT-SPI for accessibility API
+    at-spi2-core \
+    libatspi2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install pipx and uv
@@ -83,7 +86,10 @@ RUN npm install -g ts-node@10.9.2 typescript@5.9.3 typescript-language-server@5.
 RUN mkdir -p /usr/local/lib && chown daytona:daytona /usr/local/lib
 
 ENV LANG=en_US.UTF-8 \
-    LC_ALL=en_US.UTF-8
+    LC_ALL=en_US.UTF-8 \
+    GTK_MODULES=gail:atk-bridge \
+    QT_ACCESSIBILITY=1 \
+    NO_AT_BRIDGE=0
 
 # Switch to Daytona user
 USER daytona
