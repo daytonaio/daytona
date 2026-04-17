@@ -77,6 +77,12 @@ function getProxyOrigin(request: Request): string {
     return reqUrl.origin
   }
 
+  const functionsPort =
+    typeof process !== 'undefined' && process.env.FUNCTIONS_PORT
+  if (functionsPort) {
+    return `http://localhost:${functionsPort}`
+  }
+
   const site =
     import.meta.env.PUBLIC_WEB_URL ||
     import.meta.env.SITE ||

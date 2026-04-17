@@ -26,11 +26,15 @@ export default defineConfig({
   integrations: [
     react(),
     starlight({
-      favicon: '/favicon.ico',
       title: 'Daytona',
-      social: {
-        github: 'https://github.com/daytonaio',
-      },
+      favicon: '/favicon.ico',
+      social: [
+        {
+          icon: 'github',
+          label: 'GitHub',
+          href: 'https://github.com/daytonaio',
+        },
+      ],
       editLink: {
         baseUrl: 'https://github.com/daytonaio/daytona/blob/main/apps/docs/',
       },

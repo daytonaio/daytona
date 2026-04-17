@@ -2,12 +2,13 @@
 import arrowRight from '@assets/icons/arrow-right.svg?raw'
 import arrowLeft from '@assets/icons/arrow-left.svg?raw'
 import { getPagination } from '../utils/navigation.js'
-import { getSidebarConfig } from '../content/config.js'
+import { getSidebarConfig } from '../sidebar-config.js'
 
-const { dir } = Astro.props
+const dir = Astro.props.dir ?? Astro.locals.starlightRoute.dir
+const lang = Astro.props.lang ?? Astro.locals.starlightRoute.lang
 const isRtl = dir === 'rtl'
 const { prev, next } = getPagination(
-  getSidebarConfig(Astro.props.lang, (key: string) => {
+  getSidebarConfig(lang, (key: string) => {
     try {
       return Astro.locals?.t?.(key as any) || key
     } catch {
@@ -16,7 +17,6 @@ const { prev, next } = getPagination(
   }),
   Astro.url.pathname
 )
-const { locale } = Astro.props
 ---
 
 <div class="pagination-links" dir={dir}>

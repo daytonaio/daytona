@@ -9,13 +9,20 @@ const { fallbackLocale = 'en' } = Astro.props
 
 const allDocs = await getCollection('docs')
 const docCandidates = allDocs
-  .filter(entry => !entry.slug.endsWith('/404') && entry.slug !== '404')
   .map(entry => {
-    const href = `/docs/${entry.slug}/`
+    const maybeSlug = (entry as { slug?: unknown }).slug
+    const slug =
+      (typeof maybeSlug === 'string' ? maybeSlug : undefined) ?? entry.id ?? ''
+    return { entry, slug }
+  })
+  .filter(({ slug }) => slug && !slug.endsWith('/404') && slug !== '404')
+  .map(({ entry, slug }) => {
+    const normalizedSlug = slug.replace(/^\/+|\/+$/g, '')
+    const href = `/docs/${normalizedSlug}/`
     const title =
       typeof entry.data?.title === 'string' && entry.data.title.trim()
         ? entry.data.title.trim()
-        : entry.slug
+        : normalizedSlug
     return { href, title }
   })
 

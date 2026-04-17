@@ -11,6 +11,8 @@ const release = `${maj}.${min}`
 // TODO: switch to SDK
 
 const releaseLink = `https://github.com/daytonaio/daytona/releases/tag/v${release}.0`
+
+const lang = Astro.props.lang ?? Astro.locals.starlightRoute.lang
 ---
 
 <Default {...Astro.props as any}>
@@ -56,7 +58,7 @@ const releaseLink = `https://github.com/daytonaio/daytona/releases/tag/v${releas
     </div>
 
     <div class="footer-selects">
-      <LocaleSelect client:load locale={Astro.props.lang} />
+      <LocaleSelect client:load locale={lang} />
       <ThemeSelect />
     </div>
     <div class="menu-list">
