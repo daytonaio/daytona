@@ -455,7 +455,8 @@ public class SandboxApiTest {
     public void recoverSandboxTest() throws ApiException {
         String sandboxIdOrName = null;
         String xDaytonaOrganizationID = null;
-        Sandbox response = api.recoverSandbox(sandboxIdOrName, xDaytonaOrganizationID);
+        Boolean skipStart = null;
+        Sandbox response = api.recoverSandbox(sandboxIdOrName, xDaytonaOrganizationID, skipStart);
         // TODO: test validations
     }
 

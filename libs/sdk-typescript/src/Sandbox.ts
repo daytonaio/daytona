@@ -289,7 +289,7 @@ export class Sandbox implements SandboxDto {
     }
 
     const startTime = Date.now()
-    const response = await this.sandboxApi.recoverSandbox(this.id, undefined, { timeout: timeout * 1000 })
+    const response = await this.sandboxApi.recoverSandbox(this.id, undefined, undefined, { timeout: timeout * 1000 })
     this.processSandboxDto(response.data)
     const timeElapsed = Date.now() - startTime
     await this.waitUntilStarted(timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout)

@@ -1992,6 +1992,15 @@ paths:
         schema:
           type: string
         style: simple
+      - description: "If true, the sandbox is left in STOPPED after recovery instead\
+          \ of being started."
+        explode: true
+        in: query
+        name: skipStart
+        required: false
+        schema:
+          type: boolean
+        style: form
       responses:
         "200":
           content:

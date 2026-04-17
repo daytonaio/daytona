@@ -1930,6 +1930,7 @@ module DaytonaApiClient
     # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [Boolean] :skip_start If true, the sandbox is left in STOPPED after recovery instead of being started.
     # @return [Sandbox]
     def recover_sandbox(sandbox_id_or_name, opts = {})
       data, _status_code, _headers = recover_sandbox_with_http_info(sandbox_id_or_name, opts)
@@ -1940,6 +1941,7 @@ module DaytonaApiClient
     # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [Boolean] :skip_start If true, the sandbox is left in STOPPED after recovery instead of being started.
     # @return [Array<(Sandbox, Integer, Hash)>] Sandbox data, response status code and response headers
     def recover_sandbox_with_http_info(sandbox_id_or_name, opts = {})
       if @api_client.config.debugging
@@ -1954,6 +1956,7 @@ module DaytonaApiClient
 
       # query parameters
       query_params = opts[:query_params] || {}
+      query_params[:'skipStart'] = opts[:'skip_start'] if !opts[:'skip_start'].nil?
 
       # header parameters
       header_params = opts[:header_params] || {}
