@@ -8,4 +8,4 @@
  * Re-exports the workspace adaptor plugin.
  */
 
-export { default, DaytonaWorkspacePlugin } from './daytona/index.js'
+export { default, DaytonaWorkspacePlugin } from './daytona/index'
