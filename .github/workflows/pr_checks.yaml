@@ -230,8 +230,8 @@ jobs:
 
           yarnrc = Path(".yarnrc.yml")
           if not yarnrc.exists():
-              print("OK -- .yarnrc.yml not present")
-              sys.exit(0)
+              print("::error::.yarnrc.yml is required and must not be removed -- it carries supply chain hardening (npmMinimalAgeGate, etc.)")
+              sys.exit(1)
 
           trusted_hosts = {"registry.npmjs.org", "registry.yarnpkg.com"}
           errors = []
