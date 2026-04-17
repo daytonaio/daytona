@@ -41,10 +41,16 @@ class JobType(str, Enum):
     UPDATE_SANDBOX_NETWORK_SETTINGS = 'UPDATE_SANDBOX_NETWORK_SETTINGS'
     SNAPSHOT_SANDBOX = 'SNAPSHOT_SANDBOX'
     FORK_SANDBOX = 'FORK_SANDBOX'
+    UNKNOWN_DEFAULT_OPEN_API = 'unknown_default_open_api'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
         """Create an instance of JobType from a JSON string"""
         return cls(json.loads(json_str))
 
+
+    @classmethod
+    def _missing_(cls, value):
+        """Handle unknown enum values by returning the unknown default case."""
+        return cls.UNKNOWN_DEFAULT_OPEN_API
 

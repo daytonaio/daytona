@@ -26,6 +26,7 @@ export const VolumeState = {
     DELETING: 'deleting',
     DELETED: 'deleted',
     ERROR: 'error',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type VolumeState = typeof VolumeState[keyof typeof VolumeState];

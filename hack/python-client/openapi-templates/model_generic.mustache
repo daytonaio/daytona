@@ -60,6 +60,7 @@ class {{classname}}({{#parent}}{{{.}}}{{/parent}}{{^parent}}BaseModel{{/parent}}
         return value
     {{/vendorExtensions.x-regex}}
     {{#isEnum}}
+    {{^enumUnknownDefaultCase}}
 
     @field_validator('{{{name}}}')
     def {{{name}}}_validate_enum(cls, value):
@@ -93,6 +94,7 @@ class {{classname}}({{#parent}}{{{.}}}{{/parent}}{{^parent}}BaseModel{{/parent}}
             raise ValueError("must be one of enum values ({{#allowableValues}}{{#enumVars}}{{{value}}}{{^-last}}, {{/-last}}{{/enumVars}}{{/allowableValues}})")
         {{/isContainer}}
         return value
+    {{/enumUnknownDefaultCase}}
     {{/isEnum}}
 {{/vars}}
 

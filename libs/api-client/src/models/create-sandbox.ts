@@ -103,6 +103,7 @@ export const CreateSandboxClassEnum = {
     SMALL: 'small',
     MEDIUM: 'medium',
     LARGE: 'large',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type CreateSandboxClassEnum = typeof CreateSandboxClassEnum[keyof typeof CreateSandboxClassEnum];

@@ -34,10 +34,16 @@ class Status(str, Enum):
     Renamed = 'Renamed'
     Copied = 'Copied'
     UpdatedButUnmerged = 'Updated but unmerged'
+    'unknown_default_open_api' = 'unknown_default_open_api'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
         """Create an instance of Status from a JSON string"""
         return cls(json.loads(json_str))
 
+
+    @classmethod
+    def _missing_(cls, value):
+        """Handle unknown enum values by returning the unknown default case."""
+        return cls.'unknown_default_open_api'
 

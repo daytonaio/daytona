@@ -30,6 +30,7 @@ export interface CreateUser {
 export const CreateUserRoleEnum = {
     ADMIN: 'admin',
     USER: 'user',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type CreateUserRoleEnum = typeof CreateUserRoleEnum[keyof typeof CreateUserRoleEnum];

@@ -26,6 +26,7 @@ const (
 	SANDBOXDESIREDSTATE_STOPPED SandboxDesiredState = "stopped"
 	SANDBOXDESIREDSTATE_RESIZED SandboxDesiredState = "resized"
 	SANDBOXDESIREDSTATE_ARCHIVED SandboxDesiredState = "archived"
+	SANDBOXDESIREDSTATE_UNKNOWN_DEFAULT_OPEN_API SandboxDesiredState = "11184809"
 )
 
 // All allowed values of SandboxDesiredState enum
@@ -35,6 +36,7 @@ var AllowedSandboxDesiredStateEnumValues = []SandboxDesiredState{
 	"stopped",
 	"resized",
 	"archived",
+	"11184809",
 }
 
 func (v *SandboxDesiredState) UnmarshalJSON(src []byte) error {
@@ -51,7 +53,8 @@ func (v *SandboxDesiredState) UnmarshalJSON(src []byte) error {
 		}
 	}
 
-	return fmt.Errorf("%+v is not a valid SandboxDesiredState", value)
+	*v = SANDBOXDESIREDSTATE_UNKNOWN_DEFAULT_OPEN_API
+	return nil
 }
 
 // NewSandboxDesiredStateFromValue returns a pointer to a valid SandboxDesiredState
@@ -61,7 +64,8 @@ func NewSandboxDesiredStateFromValue(v string) (*SandboxDesiredState, error) {
 	if ev.IsValid() {
 		return &ev, nil
 	} else {
-		return nil, fmt.Errorf("invalid value '%v' for SandboxDesiredState: valid values are %v", v, AllowedSandboxDesiredStateEnumValues)
+		enumValue := SANDBOXDESIREDSTATE_UNKNOWN_DEFAULT_OPEN_API
+		return &enumValue, nil
 	}
 }
 

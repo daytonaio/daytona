@@ -26,6 +26,7 @@ const (
 	RUNNERSTATE_DISABLED RunnerState = "disabled"
 	RUNNERSTATE_DECOMMISSIONED RunnerState = "decommissioned"
 	RUNNERSTATE_UNRESPONSIVE RunnerState = "unresponsive"
+	RUNNERSTATE_UNKNOWN_DEFAULT_OPEN_API RunnerState = "11184809"
 )
 
 // All allowed values of RunnerState enum
@@ -35,6 +36,7 @@ var AllowedRunnerStateEnumValues = []RunnerState{
 	"disabled",
 	"decommissioned",
 	"unresponsive",
+	"11184809",
 }
 
 func (v *RunnerState) UnmarshalJSON(src []byte) error {
@@ -51,7 +53,8 @@ func (v *RunnerState) UnmarshalJSON(src []byte) error {
 		}
 	}
 
-	return fmt.Errorf("%+v is not a valid RunnerState", value)
+	*v = RUNNERSTATE_UNKNOWN_DEFAULT_OPEN_API
+	return nil
 }
 
 // NewRunnerStateFromValue returns a pointer to a valid RunnerState
@@ -61,7 +64,8 @@ func NewRunnerStateFromValue(v string) (*RunnerState, error) {
 	if ev.IsValid() {
 		return &ev, nil
 	} else {
-		return nil, fmt.Errorf("invalid value '%v' for RunnerState: valid values are %v", v, AllowedRunnerStateEnumValues)
+		enumValue := RUNNERSTATE_UNKNOWN_DEFAULT_OPEN_API
+		return &enumValue, nil
 	}
 }
 

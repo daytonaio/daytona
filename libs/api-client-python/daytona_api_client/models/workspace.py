@@ -74,36 +74,6 @@ class Workspace(BaseModel):
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "recoverable", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion", "runnerId", "toolboxProxyUrl", "image", "snapshotState", "snapshotCreatedAt", "info"]
 
-    @field_validator('backup_state')
-    def backup_state_validate_enum(cls, value):
-        """Validates the enum"""
-        if value is None:
-            return value
-
-        if value not in set(['None', 'Pending', 'InProgress', 'Completed', 'Error']):
-            raise ValueError("must be one of enum values ('None', 'Pending', 'InProgress', 'Completed', 'Error')")
-        return value
-
-    @field_validator('var_class')
-    def var_class_validate_enum(cls, value):
-        """Validates the enum"""
-        if value is None:
-            return value
-
-        if value not in set(['small', 'medium', 'large']):
-            raise ValueError("must be one of enum values ('small', 'medium', 'large')")
-        return value
-
-    @field_validator('snapshot_state')
-    def snapshot_state_validate_enum(cls, value):
-        """Validates the enum"""
-        if value is None:
-            return value
-
-        if value not in set(['None', 'Pending', 'InProgress', 'Completed', 'Error']):
-            raise ValueError("must be one of enum values ('None', 'Pending', 'InProgress', 'Completed', 'Error')")
-        return value
-
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,

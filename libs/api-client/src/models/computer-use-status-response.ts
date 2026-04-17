@@ -26,6 +26,7 @@ export const ComputerUseStatusResponseStatusEnum = {
     PARTIAL: 'partial',
     INACTIVE: 'inactive',
     ERROR: 'error',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type ComputerUseStatusResponseStatusEnum = typeof ComputerUseStatusResponseStatusEnum[keyof typeof ComputerUseStatusResponseStatusEnum];

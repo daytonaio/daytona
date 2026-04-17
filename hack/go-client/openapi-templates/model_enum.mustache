@@ -1,0 +1,113 @@
+// {{{classname}}} {{{description}}}{{^description}}the model '{{{classname}}}'{{/description}}
+type {{{classname}}} {{{format}}}{{^format}}{{dataType}}{{/format}}
+
+// List of {{{name}}}
+const (
+	{{#allowableValues}}
+	{{#enumVars}}
+	{{^-first}}
+	{{/-first}}
+	{{#enumClassPrefix}}{{{classname.toUpperCase}}}_{{/enumClassPrefix}}{{name}} {{{classname}}} = {{{value}}}
+	{{/enumVars}}
+	{{/allowableValues}}
+)
+
+// All allowed values of {{{classname}}} enum
+var Allowed{{{classname}}}EnumValues = []{{{classname}}}{
+	{{#allowableValues}}
+	{{#enumVars}}
+	{{{value}}},
+	{{/enumVars}}
+	{{/allowableValues}}
+}
+
+func (v *{{{classname}}}) UnmarshalJSON(src []byte) error {
+	var value {{{format}}}{{^format}}{{dataType}}{{/format}}
+	err := json.Unmarshal(src, &value)
+	if err != nil {
+		return err
+	}
+	enumTypeValue := {{{classname}}}(value)
+	for _, existing := range Allowed{{{classname}}}EnumValues {
+		if existing == enumTypeValue {
+			*v = enumTypeValue
+			return nil
+		}
+	}
+
+{{#enumUnknownDefaultCase}}
+	*v = {{#allowableValues}}{{#enumVars}}{{#-last}}{{#enumClassPrefix}}{{{classname.toUpperCase}}}_{{/enumClassPrefix}}{{name}}{{/-last}}{{/enumVars}}{{/allowableValues}}
+	return nil
+{{/enumUnknownDefaultCase}}
+{{^enumUnknownDefaultCase}}
+	return fmt.Errorf("%+v is not a valid {{classname}}", value)
+{{/enumUnknownDefaultCase}}
+}
+
+// New{{{classname}}}FromValue returns a pointer to a valid {{{classname}}}
+// for the value passed as argument, or an error if the value passed is not allowed by the enum
+func New{{{classname}}}FromValue(v {{{format}}}{{^format}}{{dataType}}{{/format}}) (*{{{classname}}}, error) {
+	ev := {{{classname}}}(v)
+	if ev.IsValid() {
+		return &ev, nil
+	} else {
+{{#enumUnknownDefaultCase}}
+		enumValue := {{#allowableValues}}{{#enumVars}}{{#-last}}{{#enumClassPrefix}}{{{classname.toUpperCase}}}_{{/enumClassPrefix}}{{name}}{{/-last}}{{/enumVars}}{{/allowableValues}}
+		return &enumValue, nil
+{{/enumUnknownDefaultCase}}
+{{^enumUnknownDefaultCase}}
+		return nil, fmt.Errorf("invalid value '%v' for {{{classname}}}: valid values are %v", v, Allowed{{{classname}}}EnumValues)
+{{/enumUnknownDefaultCase}}
+	}
+}
+
+// IsValid return true if the value is valid for the enum, false otherwise
+func (v {{{classname}}}) IsValid() bool {
+	for _, existing := range Allowed{{{classname}}}EnumValues {
+		if existing == v {
+			return true
+		}
+	}
+	return false
+}
+
+// Ptr returns reference to {{{name}}} value
+func (v {{{classname}}}) Ptr() *{{{classname}}} {
+	return &v
+}
+
+type Nullable{{{classname}}} struct {
+	value *{{{classname}}}
+	isSet bool
+}
+
+func (v Nullable{{classname}}) Get() *{{classname}} {
+	return v.value
+}
+
+func (v *Nullable{{classname}}) Set(val *{{classname}}) {
+	v.value = val
+	v.isSet = true
+}
+
+func (v Nullable{{classname}}) IsSet() bool {
+	return v.isSet
+}
+
+func (v *Nullable{{classname}}) Unset() {
+	v.value = nil
+	v.isSet = false
+}
+
+func NewNullable{{classname}}(val *{{classname}}) *Nullable{{classname}} {
+	return &Nullable{{classname}}{value: val, isSet: true}
+}
+
+func (v Nullable{{{classname}}}) MarshalJSON() ([]byte, error) {
+	return json.Marshal(v.value)
+}
+
+func (v *Nullable{{{classname}}}) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}

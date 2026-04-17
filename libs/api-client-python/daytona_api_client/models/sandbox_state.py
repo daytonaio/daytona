@@ -46,10 +46,16 @@ class SandboxState(str, Enum):
     RESIZING = 'resizing'
     SNAPSHOTTING = 'snapshotting'
     FORKING = 'forking'
+    UNKNOWN_DEFAULT_OPEN_API = 'unknown_default_open_api'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
         """Create an instance of SandboxState from a JSON string"""
         return cls(json.loads(json_str))
 
+
+    @classmethod
+    def _missing_(cls, value):
+        """Handle unknown enum values by returning the unknown default case."""
+        return cls.UNKNOWN_DEFAULT_OPEN_API
 

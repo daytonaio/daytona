@@ -38,6 +38,7 @@ export const SandboxState = {
     RESIZING: 'resizing',
     SNAPSHOTTING: 'snapshotting',
     FORKING: 'forking',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type SandboxState = typeof SandboxState[keyof typeof SandboxState];

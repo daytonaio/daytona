@@ -43,7 +43,9 @@ public enum Status {
   
   Copied("Copied"),
   
-  UpdatedButUnmerged("Updated but unmerged");
+  UpdatedButUnmerged("Updated but unmerged"),
+  
+  UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 
   private String value;
 
@@ -66,7 +68,7 @@ public enum Status {
         return b;
       }
     }
-    throw new IllegalArgumentException("Unexpected value '" + value + "'");
+    return UNKNOWN_DEFAULT_OPEN_API;
   }
 
   public static class Adapter extends TypeAdapter<Status> {

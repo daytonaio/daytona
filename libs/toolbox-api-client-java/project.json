@@ -13,7 +13,7 @@
       "options": {
         "commands": [
           "rm -rf {projectRoot}/src {projectRoot}/docs {projectRoot}/api",
-          "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i apps/daemon/pkg/toolbox/docs/swagger.json -g java --additional-properties=groupId=io.daytona,artifactId=toolbox-api-client,artifactVersion=$DEFAULT_PACKAGE_VERSION,apiPackage=io.daytona.toolbox.client.api,modelPackage=io.daytona.toolbox.client.model,invokerPackage=io.daytona.toolbox.client,library=okhttp-gson,java8=true,hideGenerationTimestamp=true,useRuntimeException=true,disallowAdditionalPropertiesIfNotPresent=false -o {projectRoot}",
+          "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i apps/daemon/pkg/toolbox/docs/swagger.json -g java --additional-properties=groupId=io.daytona,artifactId=toolbox-api-client,artifactVersion=$DEFAULT_PACKAGE_VERSION,apiPackage=io.daytona.toolbox.client.api,modelPackage=io.daytona.toolbox.client.model,invokerPackage=io.daytona.toolbox.client,library=okhttp-gson,java8=true,hideGenerationTimestamp=true,useRuntimeException=true,disallowAdditionalPropertiesIfNotPresent=false,enumUnknownDefaultCase=true -o {projectRoot}",
           "bash hack/java-client/postprocess.sh {projectRoot} toolbox-api-client-java",
           "chmod +x {projectRoot}/gradlew && {projectRoot}/gradlew -p {projectRoot} publishToMavenLocal -q || true"
         ],

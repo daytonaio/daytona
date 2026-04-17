@@ -30,4 +30,11 @@ EOF
 grep -q 'UserAgent:.*"[^"]*"' "$PROJECT_ROOT/configuration.go" || { echo "ERROR: UserAgent string not found in configuration.go" >&2; exit 1; }
 sed -i "s|UserAgent: *\"[^\"]*\"|UserAgent:        \"${CLIENT_NAME}/\" + ClientVersion|" "$PROJECT_ROOT/configuration.go"
 
+# Fix unused imports from custom enum templates (enumUnknownDefaultCase removes fmt usage)
+if command -v goimports &> /dev/null; then
+  goimports -w "$PROJECT_ROOT"
+else
+  echo "WARNING: goimports not found, skipping import cleanup. Install with: go install golang.org/x/tools/cmd/goimports@latest" >&2
+fi
+
 echo "Postprocessed Go client at $PROJECT_ROOT"

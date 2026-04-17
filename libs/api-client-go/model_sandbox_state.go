@@ -40,6 +40,7 @@ const (
 	SANDBOXSTATE_RESIZING SandboxState = "resizing"
 	SANDBOXSTATE_SNAPSHOTTING SandboxState = "snapshotting"
 	SANDBOXSTATE_FORKING SandboxState = "forking"
+	SANDBOXSTATE_UNKNOWN_DEFAULT_OPEN_API SandboxState = "11184809"
 )
 
 // All allowed values of SandboxState enum
@@ -63,6 +64,7 @@ var AllowedSandboxStateEnumValues = []SandboxState{
 	"resizing",
 	"snapshotting",
 	"forking",
+	"11184809",
 }
 
 func (v *SandboxState) UnmarshalJSON(src []byte) error {
@@ -79,7 +81,8 @@ func (v *SandboxState) UnmarshalJSON(src []byte) error {
 		}
 	}
 
-	return fmt.Errorf("%+v is not a valid SandboxState", value)
+	*v = SANDBOXSTATE_UNKNOWN_DEFAULT_OPEN_API
+	return nil
 }
 
 // NewSandboxStateFromValue returns a pointer to a valid SandboxState
@@ -89,7 +92,8 @@ func NewSandboxStateFromValue(v string) (*SandboxState, error) {
 	if ev.IsValid() {
 		return &ev, nil
 	} else {
-		return nil, fmt.Errorf("invalid value '%v' for SandboxState: valid values are %v", v, AllowedSandboxStateEnumValues)
+		enumValue := SANDBOXSTATE_UNKNOWN_DEFAULT_OPEN_API
+		return &enumValue, nil
 	}
 }
 

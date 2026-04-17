@@ -41,7 +41,9 @@ public enum WebhookEvent {
   
   VOLUME_CREATED("volume.created"),
   
-  VOLUME_STATE_UPDATED("volume.state.updated");
+  VOLUME_STATE_UPDATED("volume.state.updated"),
+  
+  UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 
   private String value;
 
@@ -64,7 +66,7 @@ public enum WebhookEvent {
         return b;
       }
     }
-    throw new IllegalArgumentException("Unexpected value '" + value + "'");
+    return UNKNOWN_DEFAULT_OPEN_API;
   }
 
   public static class Adapter extends TypeAdapter<WebhookEvent> {

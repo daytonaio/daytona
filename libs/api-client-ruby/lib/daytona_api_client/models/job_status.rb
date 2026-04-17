@@ -19,9 +19,10 @@ module DaytonaApiClient
     IN_PROGRESS = "IN_PROGRESS".freeze
     COMPLETED = "COMPLETED".freeze
     FAILED = "FAILED".freeze
+    UNKNOWN_DEFAULT_OPEN_API = "unknown_default_open_api".freeze
 
     def self.all_vars
-      @all_vars ||= [PENDING, IN_PROGRESS, COMPLETED, FAILED].freeze
+      @all_vars ||= [PENDING, IN_PROGRESS, COMPLETED, FAILED, UNKNOWN_DEFAULT_OPEN_API].freeze
     end
 
     # Builds the enum from string
@@ -36,7 +37,7 @@ module DaytonaApiClient
     # @return [String] The enum value
     def build_from_hash(value)
       return value if JobStatus.all_vars.include?(value)
-      raise "Invalid ENUM value #{value} for class #JobStatus"
+      UNKNOWN_DEFAULT_OPEN_API
     end
   end
 end

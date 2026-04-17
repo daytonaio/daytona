@@ -28,6 +28,7 @@ export const EnumsSandboxState = {
     SandboxStateError: 'error',
     SandboxStateUnknown: 'unknown',
     SandboxStatePullingSnapshot: 'pulling_snapshot',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type EnumsSandboxState = typeof EnumsSandboxState[keyof typeof EnumsSandboxState];

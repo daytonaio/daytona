@@ -87,6 +87,7 @@ export const CreateWorkspaceClassEnum = {
     SMALL: 'small',
     MEDIUM: 'medium',
     LARGE: 'large',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type CreateWorkspaceClassEnum = typeof CreateWorkspaceClassEnum[keyof typeof CreateWorkspaceClassEnum];
@@ -94,6 +95,7 @@ export const CreateWorkspaceTargetEnum = {
     EU: 'eu',
     US: 'us',
     ASIA: 'asia',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type CreateWorkspaceTargetEnum = typeof CreateWorkspaceTargetEnum[keyof typeof CreateWorkspaceTargetEnum];

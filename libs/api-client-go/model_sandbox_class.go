@@ -24,6 +24,7 @@ const (
 	SANDBOXCLASS_SMALL SandboxClass = "small"
 	SANDBOXCLASS_MEDIUM SandboxClass = "medium"
 	SANDBOXCLASS_LARGE SandboxClass = "large"
+	SANDBOXCLASS_UNKNOWN_DEFAULT_OPEN_API SandboxClass = "11184809"
 )
 
 // All allowed values of SandboxClass enum
@@ -31,6 +32,7 @@ var AllowedSandboxClassEnumValues = []SandboxClass{
 	"small",
 	"medium",
 	"large",
+	"11184809",
 }
 
 func (v *SandboxClass) UnmarshalJSON(src []byte) error {
@@ -47,7 +49,8 @@ func (v *SandboxClass) UnmarshalJSON(src []byte) error {
 		}
 	}
 
-	return fmt.Errorf("%+v is not a valid SandboxClass", value)
+	*v = SANDBOXCLASS_UNKNOWN_DEFAULT_OPEN_API
+	return nil
 }
 
 // NewSandboxClassFromValue returns a pointer to a valid SandboxClass
@@ -57,7 +60,8 @@ func NewSandboxClassFromValue(v string) (*SandboxClass, error) {
 	if ev.IsValid() {
 		return &ev, nil
 	} else {
-		return nil, fmt.Errorf("invalid value '%v' for SandboxClass: valid values are %v", v, AllowedSandboxClassEnumValues)
+		enumValue := SANDBOXCLASS_UNKNOWN_DEFAULT_OPEN_API
+		return &enumValue, nil
 	}
 }
 

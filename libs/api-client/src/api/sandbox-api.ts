@@ -3736,6 +3736,7 @@ export const ListSandboxesPaginatedStatesEnum = {
     RESIZING: 'resizing',
     SNAPSHOTTING: 'snapshotting',
     FORKING: 'forking',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 export type ListSandboxesPaginatedStatesEnum = typeof ListSandboxesPaginatedStatesEnum[keyof typeof ListSandboxesPaginatedStatesEnum];
 export const ListSandboxesPaginatedSortEnum = {
@@ -3746,10 +3747,12 @@ export const ListSandboxesPaginatedSortEnum = {
     REGION: 'region',
     UPDATED_AT: 'updatedAt',
     CREATED_AT: 'createdAt',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 export type ListSandboxesPaginatedSortEnum = typeof ListSandboxesPaginatedSortEnum[keyof typeof ListSandboxesPaginatedSortEnum];
 export const ListSandboxesPaginatedOrderEnum = {
     ASC: 'asc',
     DESC: 'desc',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 export type ListSandboxesPaginatedOrderEnum = typeof ListSandboxesPaginatedOrderEnum[keyof typeof ListSandboxesPaginatedOrderEnum];

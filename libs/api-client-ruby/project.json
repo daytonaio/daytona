@@ -32,7 +32,7 @@
       "options": {
         "commands": [
           "rm -rf libs/api-client-ruby/lib",
-          "yarn run openapi-generator-cli generate -i dist/apps/api/openapi.json -g ruby --additional-properties=gemAuthor=daytonaio,gemAuthorEmail=support@daytona.io,gemDescription=\\\"Daytona API Client\\\",gemHomepage=\\\"https://github.com/daytonaio/daytona\\\",gemVersion=$DEFAULT_GEM_VERSION,gemName=daytona_api_client -o libs/api-client-ruby",
+          "yarn run openapi-generator-cli generate -i dist/apps/api/openapi.json -g ruby -t hack/ruby-client/openapi-templates --additional-properties=gemAuthor=daytonaio,gemAuthorEmail=support@daytona.io,gemDescription=\\\"Daytona API Client\\\",gemHomepage=\\\"https://github.com/daytonaio/daytona\\\",gemVersion=$DEFAULT_GEM_VERSION,gemName=daytona_api_client,enumUnknownDefaultCase=true -o libs/api-client-ruby",
           "bash libs/api-client-ruby/fix-gemspec.sh",
           "sed -i 's|OpenAPI-Generator/#{VERSION}/ruby|api-client-ruby/#{VERSION}|' libs/api-client-ruby/lib/daytona_api_client/api_client.rb",
           "cd libs/api-client-ruby && bundle install"

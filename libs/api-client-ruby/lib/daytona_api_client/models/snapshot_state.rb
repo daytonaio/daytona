@@ -23,9 +23,10 @@ module DaytonaApiClient
     ERROR = "error".freeze
     BUILD_FAILED = "build_failed".freeze
     REMOVING = "removing".freeze
+    UNKNOWN_DEFAULT_OPEN_API = "unknown_default_open_api".freeze
 
     def self.all_vars
-      @all_vars ||= [BUILDING, PENDING, PULLING, ACTIVE, INACTIVE, ERROR, BUILD_FAILED, REMOVING].freeze
+      @all_vars ||= [BUILDING, PENDING, PULLING, ACTIVE, INACTIVE, ERROR, BUILD_FAILED, REMOVING, UNKNOWN_DEFAULT_OPEN_API].freeze
     end
 
     # Builds the enum from string
@@ -40,7 +41,7 @@ module DaytonaApiClient
     # @return [String] The enum value
     def build_from_hash(value)
       return value if SnapshotState.all_vars.include?(value)
-      raise "Invalid ENUM value #{value} for class #SnapshotState"
+      UNKNOWN_DEFAULT_OPEN_API
     end
   end
 end

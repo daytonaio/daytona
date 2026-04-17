@@ -152,7 +152,7 @@ module DaytonaApiClient
       warn '[DEPRECATED] the `valid?` method is obsolete'
       return false if @email.nil?
       return false if @role.nil?
-      role_validator = EnumAttributeValidator.new('String', ["owner", "member"])
+      role_validator = EnumAttributeValidator.new('String', ["owner", "member", "unknown_default_open_api"])
       return false unless role_validator.valid?(@role)
       return false if @assigned_role_ids.nil?
       true
@@ -171,7 +171,7 @@ module DaytonaApiClient
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] role Object to be assigned
     def role=(role)
-      validator = EnumAttributeValidator.new('String', ["owner", "member"])
+      validator = EnumAttributeValidator.new('String', ["owner", "member", "unknown_default_open_api"])
       unless validator.valid?(role)
         fail ArgumentError, "invalid value for \"role\", must be one of #{validator.allowable_values}."
       end

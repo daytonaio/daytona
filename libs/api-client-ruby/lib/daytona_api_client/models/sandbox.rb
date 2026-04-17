@@ -485,9 +485,9 @@ module DaytonaApiClient
       return false if @gpu.nil?
       return false if @memory.nil?
       return false if @disk.nil?
-      backup_state_validator = EnumAttributeValidator.new('String', ["None", "Pending", "InProgress", "Completed", "Error"])
+      backup_state_validator = EnumAttributeValidator.new('String', ["None", "Pending", "InProgress", "Completed", "Error", "unknown_default_open_api"])
       return false unless backup_state_validator.valid?(@backup_state)
-      _class_validator = EnumAttributeValidator.new('String', ["small", "medium", "large"])
+      _class_validator = EnumAttributeValidator.new('String', ["small", "medium", "large", "unknown_default_open_api"])
       return false unless _class_validator.valid?(@_class)
       return false if @toolbox_proxy_url.nil?
       true
@@ -626,7 +626,7 @@ module DaytonaApiClient
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] backup_state Object to be assigned
     def backup_state=(backup_state)
-      validator = EnumAttributeValidator.new('String', ["None", "Pending", "InProgress", "Completed", "Error"])
+      validator = EnumAttributeValidator.new('String', ["None", "Pending", "InProgress", "Completed", "Error", "unknown_default_open_api"])
       unless validator.valid?(backup_state)
         fail ArgumentError, "invalid value for \"backup_state\", must be one of #{validator.allowable_values}."
       end
@@ -636,7 +636,7 @@ module DaytonaApiClient
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] _class Object to be assigned
     def _class=(_class)
-      validator = EnumAttributeValidator.new('String', ["small", "medium", "large"])
+      validator = EnumAttributeValidator.new('String', ["small", "medium", "large", "unknown_default_open_api"])
       unless validator.valid?(_class)
         fail ArgumentError, "invalid value for \"_class\", must be one of #{validator.allowable_values}."
       end

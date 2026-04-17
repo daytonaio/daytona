@@ -32,7 +32,7 @@
       "options": {
         "commands": [
           "rm -f {projectRoot}/*.go",
-          "yarn run openapi-generator-cli generate --git-repo-id=daytona/libs/api-client-go --git-user-id=daytonaio -i dist/apps/api/openapi.json -g go --additional-properties=disallowAdditionalPropertiesIfNotPresent=false,packageName=apiclient,moduleVersion=$DEFAULT_PACKAGE_VERSION,generateInterfaces=true,enumClassPrefix=true,structPrefix=true -o libs/api-client-go",
+          "yarn run openapi-generator-cli generate --git-repo-id=daytona/libs/api-client-go --git-user-id=daytonaio -i dist/apps/api/openapi.json -g go -t hack/go-client/openapi-templates --additional-properties=disallowAdditionalPropertiesIfNotPresent=false,packageName=apiclient,moduleVersion=$DEFAULT_PACKAGE_VERSION,generateInterfaces=true,enumClassPrefix=true,structPrefix=true,enumUnknownDefaultCase=true -o libs/api-client-go",
           "bash hack/go-client/postprocess.sh libs/api-client-go apiclient api-client-go"
         ],
         "parallel": false

@@ -69,12 +69,14 @@ export const OrganizationInvitationStatusEnum = {
     ACCEPTED: 'accepted',
     DECLINED: 'declined',
     CANCELLED: 'cancelled',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type OrganizationInvitationStatusEnum = typeof OrganizationInvitationStatusEnum[keyof typeof OrganizationInvitationStatusEnum];
 export const OrganizationInvitationRoleEnum = {
     OWNER: 'owner',
     MEMBER: 'member',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type OrganizationInvitationRoleEnum = typeof OrganizationInvitationRoleEnum[keyof typeof OrganizationInvitationRoleEnum];

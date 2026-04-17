@@ -35,6 +35,7 @@ const (
 	JOBTYPE_UPDATE_SANDBOX_NETWORK_SETTINGS JobType = "UPDATE_SANDBOX_NETWORK_SETTINGS"
 	JOBTYPE_SNAPSHOT_SANDBOX JobType = "SNAPSHOT_SANDBOX"
 	JOBTYPE_FORK_SANDBOX JobType = "FORK_SANDBOX"
+	JOBTYPE_UNKNOWN_DEFAULT_OPEN_API JobType = "11184809"
 )
 
 // All allowed values of JobType enum
@@ -53,6 +54,7 @@ var AllowedJobTypeEnumValues = []JobType{
 	"UPDATE_SANDBOX_NETWORK_SETTINGS",
 	"SNAPSHOT_SANDBOX",
 	"FORK_SANDBOX",
+	"11184809",
 }
 
 func (v *JobType) UnmarshalJSON(src []byte) error {
@@ -69,7 +71,8 @@ func (v *JobType) UnmarshalJSON(src []byte) error {
 		}
 	}
 
-	return fmt.Errorf("%+v is not a valid JobType", value)
+	*v = JOBTYPE_UNKNOWN_DEFAULT_OPEN_API
+	return nil
 }
 
 // NewJobTypeFromValue returns a pointer to a valid JobType
@@ -79,7 +82,8 @@ func NewJobTypeFromValue(v string) (*JobType, error) {
 	if ev.IsValid() {
 		return &ev, nil
 	} else {
-		return nil, fmt.Errorf("invalid value '%v' for JobType: valid values are %v", v, AllowedJobTypeEnumValues)
+		enumValue := JOBTYPE_UNKNOWN_DEFAULT_OPEN_API
+		return &enumValue, nil
 	}
 }
 

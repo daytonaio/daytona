@@ -271,7 +271,7 @@ module DaytonaApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      _class_validator = EnumAttributeValidator.new('String', ["small", "medium", "large"])
+      _class_validator = EnumAttributeValidator.new('String', ["small", "medium", "large", "unknown_default_open_api"])
       return false unless _class_validator.valid?(@_class)
       true
     end
@@ -279,7 +279,7 @@ module DaytonaApiClient
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] _class Object to be assigned
     def _class=(_class)
-      validator = EnumAttributeValidator.new('String', ["small", "medium", "large"])
+      validator = EnumAttributeValidator.new('String', ["small", "medium", "large", "unknown_default_open_api"])
       unless validator.valid?(_class)
         fail ArgumentError, "invalid value for \"_class\", must be one of #{validator.allowable_values}."
       end

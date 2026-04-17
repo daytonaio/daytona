@@ -28,6 +28,7 @@ const (
 	WEBHOOKEVENT_SNAPSHOT_REMOVED WebhookEvent = "snapshot.removed"
 	WEBHOOKEVENT_VOLUME_CREATED WebhookEvent = "volume.created"
 	WEBHOOKEVENT_VOLUME_STATE_UPDATED WebhookEvent = "volume.state.updated"
+	WEBHOOKEVENT_UNKNOWN_DEFAULT_OPEN_API WebhookEvent = "11184809"
 )
 
 // All allowed values of WebhookEvent enum
@@ -39,6 +40,7 @@ var AllowedWebhookEventEnumValues = []WebhookEvent{
 	"snapshot.removed",
 	"volume.created",
 	"volume.state.updated",
+	"11184809",
 }
 
 func (v *WebhookEvent) UnmarshalJSON(src []byte) error {
@@ -55,7 +57,8 @@ func (v *WebhookEvent) UnmarshalJSON(src []byte) error {
 		}
 	}
 
-	return fmt.Errorf("%+v is not a valid WebhookEvent", value)
+	*v = WEBHOOKEVENT_UNKNOWN_DEFAULT_OPEN_API
+	return nil
 }
 
 // NewWebhookEventFromValue returns a pointer to a valid WebhookEvent
@@ -65,7 +68,8 @@ func NewWebhookEventFromValue(v string) (*WebhookEvent, error) {
 	if ev.IsValid() {
 		return &ev, nil
 	} else {
-		return nil, fmt.Errorf("invalid value '%v' for WebhookEvent: valid values are %v", v, AllowedWebhookEventEnumValues)
+		enumValue := WEBHOOKEVENT_UNKNOWN_DEFAULT_OPEN_API
+		return &enumValue, nil
 	}
 }
 

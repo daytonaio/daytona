@@ -45,13 +45,6 @@ class Job(BaseModel):
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "type", "status", "resourceType", "resourceId", "payload", "traceContext", "errorMessage", "createdAt", "updatedAt"]
 
-    @field_validator('resource_type')
-    def resource_type_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['SANDBOX', 'SNAPSHOT', 'BACKUP']):
-            raise ValueError("must be one of enum values ('SANDBOX', 'SNAPSHOT', 'BACKUP')")
-        return value
-
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,

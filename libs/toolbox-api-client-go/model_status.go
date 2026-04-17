@@ -28,6 +28,7 @@ const (
 	STATUS_Renamed Status = "Renamed"
 	STATUS_Copied Status = "Copied"
 	STATUS_UpdatedButUnmerged Status = "Updated but unmerged"
+	STATUS_UNKNOWN_DEFAULT_OPEN_API Status = "11184809"
 )
 
 // All allowed values of Status enum
@@ -40,6 +41,7 @@ var AllowedStatusEnumValues = []Status{
 	"Renamed",
 	"Copied",
 	"Updated but unmerged",
+	"11184809",
 }
 
 func (v *Status) UnmarshalJSON(src []byte) error {
@@ -56,7 +58,8 @@ func (v *Status) UnmarshalJSON(src []byte) error {
 		}
 	}
 
-	return fmt.Errorf("%+v is not a valid Status", value)
+	*v = STATUS_UNKNOWN_DEFAULT_OPEN_API
+	return nil
 }
 
 // NewStatusFromValue returns a pointer to a valid Status
@@ -66,7 +69,8 @@ func NewStatusFromValue(v string) (*Status, error) {
 	if ev.IsValid() {
 		return &ev, nil
 	} else {
-		return nil, fmt.Errorf("invalid value '%v' for Status: valid values are %v", v, AllowedStatusEnumValues)
+		enumValue := STATUS_UNKNOWN_DEFAULT_OPEN_API
+		return &enumValue, nil
 	}
 }
 

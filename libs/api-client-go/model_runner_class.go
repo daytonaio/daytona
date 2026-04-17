@@ -23,12 +23,14 @@ type RunnerClass string
 const (
 	RUNNERCLASS_CONTAINER RunnerClass = "container"
 	RUNNERCLASS_VM RunnerClass = "vm"
+	RUNNERCLASS_UNKNOWN_DEFAULT_OPEN_API RunnerClass = "11184809"
 )
 
 // All allowed values of RunnerClass enum
 var AllowedRunnerClassEnumValues = []RunnerClass{
 	"container",
 	"vm",
+	"11184809",
 }
 
 func (v *RunnerClass) UnmarshalJSON(src []byte) error {
@@ -45,7 +47,8 @@ func (v *RunnerClass) UnmarshalJSON(src []byte) error {
 		}
 	}
 
-	return fmt.Errorf("%+v is not a valid RunnerClass", value)
+	*v = RUNNERCLASS_UNKNOWN_DEFAULT_OPEN_API
+	return nil
 }
 
 // NewRunnerClassFromValue returns a pointer to a valid RunnerClass
@@ -55,7 +58,8 @@ func NewRunnerClassFromValue(v string) (*RunnerClass, error) {
 	if ev.IsValid() {
 		return &ev, nil
 	} else {
-		return nil, fmt.Errorf("invalid value '%v' for RunnerClass: valid values are %v", v, AllowedRunnerClassEnumValues)
+		enumValue := RUNNERCLASS_UNKNOWN_DEFAULT_OPEN_API
+		return &enumValue, nil
 	}
 }
 

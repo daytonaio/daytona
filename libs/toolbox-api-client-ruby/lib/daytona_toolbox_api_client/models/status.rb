@@ -23,9 +23,10 @@ module DaytonaToolboxApiClient
     Renamed = "Renamed".freeze
     Copied = "Copied".freeze
     UpdatedButUnmerged = "Updated but unmerged".freeze
+    UNKNOWN_DEFAULT_OPEN_API = "unknown_default_open_api".freeze
 
     def self.all_vars
-      @all_vars ||= [Unmodified, Untracked, Modified, Added, Deleted, Renamed, Copied, UpdatedButUnmerged].freeze
+      @all_vars ||= [Unmodified, Untracked, Modified, Added, Deleted, Renamed, Copied, UpdatedButUnmerged, UNKNOWN_DEFAULT_OPEN_API].freeze
     end
 
     # Builds the enum from string
@@ -40,7 +41,7 @@ module DaytonaToolboxApiClient
     # @return [String] The enum value
     def build_from_hash(value)
       return value if Status.all_vars.include?(value)
-      raise "Invalid ENUM value #{value} for class #Status"
+      UNKNOWN_DEFAULT_OPEN_API
     end
   end
 end

@@ -25,6 +25,7 @@ const (
 	JOBSTATUS_IN_PROGRESS JobStatus = "IN_PROGRESS"
 	JOBSTATUS_COMPLETED JobStatus = "COMPLETED"
 	JOBSTATUS_FAILED JobStatus = "FAILED"
+	JOBSTATUS_UNKNOWN_DEFAULT_OPEN_API JobStatus = "11184809"
 )
 
 // All allowed values of JobStatus enum
@@ -33,6 +34,7 @@ var AllowedJobStatusEnumValues = []JobStatus{
 	"IN_PROGRESS",
 	"COMPLETED",
 	"FAILED",
+	"11184809",
 }
 
 func (v *JobStatus) UnmarshalJSON(src []byte) error {
@@ -49,7 +51,8 @@ func (v *JobStatus) UnmarshalJSON(src []byte) error {
 		}
 	}
 
-	return fmt.Errorf("%+v is not a valid JobStatus", value)
+	*v = JOBSTATUS_UNKNOWN_DEFAULT_OPEN_API
+	return nil
 }
 
 // NewJobStatusFromValue returns a pointer to a valid JobStatus
@@ -59,7 +62,8 @@ func NewJobStatusFromValue(v string) (*JobStatus, error) {
 	if ev.IsValid() {
 		return &ev, nil
 	} else {
-		return nil, fmt.Errorf("invalid value '%v' for JobStatus: valid values are %v", v, AllowedJobStatusEnumValues)
+		enumValue := JOBSTATUS_UNKNOWN_DEFAULT_OPEN_API
+		return &enumValue, nil
 	}
 }
 

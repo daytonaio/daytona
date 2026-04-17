@@ -1830,7 +1830,7 @@ module DaytonaApiClient
         fail ArgumentError, 'invalid value for "opts[:"limit"]" when calling SandboxApi.list_sandboxes_paginated, must be greater than or equal to 1.'
       end
 
-      allowable_values = ["creating", "restoring", "destroying", "started", "stopped", "starting", "stopping", "error", "build_failed", "pending_build", "building_snapshot", "unknown", "pulling_snapshot", "archived", "archiving", "resizing", "snapshotting", "forking"]
+      allowable_values = ["creating", "restoring", "destroying", "started", "stopped", "starting", "stopping", "error", "build_failed", "pending_build", "building_snapshot", "unknown", "pulling_snapshot", "archived", "archiving", "resizing", "snapshotting", "forking", "unknown_default_open_api"]
       if @api_client.config.client_side_validation && opts[:'states'] && !opts[:'states'].all? { |item| allowable_values.include?(item) }
         fail ArgumentError, "invalid value for \"states\", must include one of #{allowable_values}"
       end
@@ -1858,11 +1858,11 @@ module DaytonaApiClient
         fail ArgumentError, 'invalid value for "opts[:"max_disk_gi_b"]" when calling SandboxApi.list_sandboxes_paginated, must be greater than or equal to 1.'
       end
 
-      allowable_values = ["id", "name", "state", "snapshot", "region", "updatedAt", "createdAt"]
+      allowable_values = ["id", "name", "state", "snapshot", "region", "updatedAt", "createdAt", "unknown_default_open_api"]
       if @api_client.config.client_side_validation && opts[:'sort'] && !allowable_values.include?(opts[:'sort'])
         fail ArgumentError, "invalid value for \"sort\", must be one of #{allowable_values}"
       end
-      allowable_values = ["asc", "desc"]
+      allowable_values = ["asc", "desc", "unknown_default_open_api"]
       if @api_client.config.client_side_validation && opts[:'order'] && !allowable_values.include?(opts[:'order'])
         fail ArgumentError, "invalid value for \"order\", must be one of #{allowable_values}"
       end

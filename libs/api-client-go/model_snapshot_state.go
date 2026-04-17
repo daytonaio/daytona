@@ -29,6 +29,7 @@ const (
 	SNAPSHOTSTATE_ERROR SnapshotState = "error"
 	SNAPSHOTSTATE_BUILD_FAILED SnapshotState = "build_failed"
 	SNAPSHOTSTATE_REMOVING SnapshotState = "removing"
+	SNAPSHOTSTATE_UNKNOWN_DEFAULT_OPEN_API SnapshotState = "11184809"
 )
 
 // All allowed values of SnapshotState enum
@@ -41,6 +42,7 @@ var AllowedSnapshotStateEnumValues = []SnapshotState{
 	"error",
 	"build_failed",
 	"removing",
+	"11184809",
 }
 
 func (v *SnapshotState) UnmarshalJSON(src []byte) error {
@@ -57,7 +59,8 @@ func (v *SnapshotState) UnmarshalJSON(src []byte) error {
 		}
 	}
 
-	return fmt.Errorf("%+v is not a valid SnapshotState", value)
+	*v = SNAPSHOTSTATE_UNKNOWN_DEFAULT_OPEN_API
+	return nil
 }
 
 // NewSnapshotStateFromValue returns a pointer to a valid SnapshotState
@@ -67,7 +70,8 @@ func NewSnapshotStateFromValue(v string) (*SnapshotState, error) {
 	if ev.IsValid() {
 		return &ev, nil
 	} else {
-		return nil, fmt.Errorf("invalid value '%v' for SnapshotState: valid values are %v", v, AllowedSnapshotStateEnumValues)
+		enumValue := SNAPSHOTSTATE_UNKNOWN_DEFAULT_OPEN_API
+		return &enumValue, nil
 	}
 }
 

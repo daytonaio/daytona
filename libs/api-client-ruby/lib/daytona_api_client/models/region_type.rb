@@ -18,9 +18,10 @@ module DaytonaApiClient
     SHARED = "shared".freeze
     DEDICATED = "dedicated".freeze
     CUSTOM = "custom".freeze
+    UNKNOWN_DEFAULT_OPEN_API = "unknown_default_open_api".freeze
 
     def self.all_vars
-      @all_vars ||= [SHARED, DEDICATED, CUSTOM].freeze
+      @all_vars ||= [SHARED, DEDICATED, CUSTOM, UNKNOWN_DEFAULT_OPEN_API].freeze
     end
 
     # Builds the enum from string
@@ -35,7 +36,7 @@ module DaytonaApiClient
     # @return [String] The enum value
     def build_from_hash(value)
       return value if RegionType.all_vars.include?(value)
-      raise "Invalid ENUM value #{value} for class #RegionType"
+      UNKNOWN_DEFAULT_OPEN_API
     end
   end
 end
