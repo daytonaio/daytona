@@ -220,10 +220,11 @@ jobs:
       - name: Validate .yarnrc.yml
         run: |
           python3 <<'PY'
-          import re
           import sys
           from pathlib import Path
           from urllib.parse import urlparse
+
+          import yaml
 
           yarnrc = Path(".yarnrc.yml")
           if not yarnrc.exists():
@@ -233,21 +234,36 @@ jobs:
           trusted_hosts = {"registry.npmjs.org", "registry.yarnpkg.com"}
           errors = []
 
-          for lineno, line in enumerate(yarnrc.read_text(encoding="utf-8").splitlines(), 1):
-              without_comment = line.split("#", 1)[0]
+          try:
+              config = yaml.safe_load(yarnrc.read_text(encoding="utf-8")) or {}
+          except yaml.YAMLError as e:
+              print(f"::error::Failed to parse .yarnrc.yml: {e}")
+              sys.exit(1)
 
-              # Any URL-bearing registry key (top-level or under npmScopes) must use HTTPS and point to a trusted host
-              # Allow optional whitespace before the colon (YAML permits "key : value")
-              match = re.match(r"^\s*(npmRegistryServer|npmPublishRegistry)\s*:\s*(\S+)\s*$", without_comment)
-              if match:
-                  key, value = match.group(1), match.group(2).strip("'\"")
-                  parsed = urlparse(value)
-                  if parsed.scheme != "https" or parsed.hostname not in trusted_hosts:
-                      errors.append(f"Line {lineno}: {key} must use https and a trusted host, got: {value}")
+          def check_registry(key, value, location):
+              if not isinstance(value, str):
+                  errors.append(f"{location}.{key} is not a string: {value!r}")
+                  return
+              parsed = urlparse(value)
+              if parsed.scheme != "https" or parsed.hostname not in trusted_hosts:
+                  errors.append(f"{location}.{key} must use https and a trusted host, got: {value}")
 
-              # enableScripts at any indent with any common YAML truthy value opens postinstall attack vector
-              if re.match(r"^\s*enableScripts\s*:\s*(true|yes|on|1)\s*$", without_comment, re.IGNORECASE):
-                  errors.append(f"Line {lineno}: enableScripts enabled is a supply chain risk")
+          # Top-level registry overrides
+          for key in ("npmRegistryServer", "npmPublishRegistry"):
+              if key in config:
+                  check_registry(key, config[key], "root")
+
+          # Per-scope registry overrides
+          for scope, scope_config in (config.get("npmScopes") or {}).items():
+              if not isinstance(scope_config, dict):
+                  continue
+              for key in ("npmRegistryServer", "npmPublishRegistry"):
+                  if key in scope_config:
+                      check_registry(key, scope_config[key], f"npmScopes.{scope}")
+
+          # enableScripts (PyYAML returns proper Python bool for any YAML truthy form)
+          if config.get("enableScripts") is True:
+              errors.append("enableScripts: true is a supply chain risk -- postinstall scripts can execute arbitrary code")
 
           if errors:
               for e in errors:
