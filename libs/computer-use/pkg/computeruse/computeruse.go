@@ -99,7 +99,7 @@ func (c *ComputerUse) Start() (*computeruse.Empty, error) {
 	}
 
 	// Check if all required processes are running
-	required := []string{"xvfb", "xfce4", "x11vnc", "novnc"}
+	required := []string{"xvfb", "xfce4", "atspi", "x11vnc", "novnc"}
 	var failed []string
 	for _, name := range required {
 		if s, ok := status[name]; !ok || !s.Running {
@@ -181,6 +181,34 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 		ErrFile: filepath.Join(c.configDir, "xfce4.err"),
 	}
 
+	// Process 2.5: at-spi-bus-launcher (AT-SPI daemon for the accessibility API)
+	// Launches the org.a11y.Bus service so GTK/Qt/Electron apps can publish
+	// their widget trees. Runs after xfce4 so the session D-Bus is up.
+	// Path lives in /usr/libexec on Debian/Ubuntu.
+	atspiCommand := "/usr/libexec/at-spi-bus-launcher"
+	if _, err := os.Stat(atspiCommand); err != nil {
+		// Some distros ship it under /usr/lib/at-spi2-core/
+		if _, err2 := os.Stat("/usr/lib/at-spi2-core/at-spi-bus-launcher"); err2 == nil {
+			atspiCommand = "/usr/lib/at-spi2-core/at-spi-bus-launcher"
+		}
+	}
+	c.processes["atspi"] = &Process{
+		Name:        "atspi",
+		Command:     atspiCommand,
+		Args:        []string{"--launch-immediately"},
+		User:        user,
+		Priority:    250,
+		AutoRestart: true,
+		Env: map[string]string{
+			"DISPLAY":                  display,
+			"HOME":                     homeDir,
+			"USER":                     user,
+			"DBUS_SESSION_BUS_ADDRESS": dbusAddress,
+		},
+		LogFile: filepath.Join(c.configDir, "atspi.log"),
+		ErrFile: filepath.Join(c.configDir, "atspi.err"),
+	}
+
 	// Process 3: x11vnc (VNC Server)
 	c.processes["x11vnc"] = &Process{
 		Name:        "x11vnc",
@@ -195,8 +223,6 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 		LogFile: filepath.Join(c.configDir, "x11vnc.log"),
 		ErrFile: filepath.Join(c.configDir, "x11vnc.err"),
 	}
-
-	// Process 4: novnc (Web-based VNC client)
 	// Determine the best available NoVNC command with fallback options
 	var novncCommand string
 	var novncArgs []string
