@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
 // AT-SPI is spoken directly over D-Bus via godbus/dbus/v5. AT-SPI's public
@@ -170,7 +170,13 @@ func (c *ComputerUse) connectA11y() (*dbus.Conn, error) {
 	if c.atspiConn != nil && c.atspiConn.Connected() {
 		return c.atspiConn, nil
 	}
-	// Drop a stale reference so we don't accidentally hand it out again.
+	// Close the stale connection before dropping the reference. godbus spawns
+	// internal goroutines that only get reaped by Close(); dropping the ref
+	// without closing leaks them on every reconnect. Close is idempotent via
+	// sync.Once, so it's safe even if the conn is already dead.
+	if c.atspiConn != nil {
+		_ = c.atspiConn.Close()
+	}
 	c.atspiConn = nil
 
 	sess, err := dbus.SessionBus()
