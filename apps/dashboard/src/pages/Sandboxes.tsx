@@ -769,7 +769,7 @@ const Sandboxes: React.FC = () => {
               </Button>
             </>
           )}
-          {canCreateSandbox && <CreateSandboxSheet />}
+          {canCreateSandbox && <CreateSandboxSheet ref={createSandboxSheetRef} />}
         </div>
       </PageHeader>
       <PageContent size="full" className="flex-1 max-h-[calc(100vh-65px)]">
