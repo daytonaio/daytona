@@ -17,10 +17,8 @@ import {
   SshAccessValidationDto,
   SignedPortPreviewUrl,
   ResizeSandbox,
-  CreateSandboxSnapshot,
 } from '@daytona/api-client'
-import { Resources, Daytona } from './Daytona'
-import type { CodeLanguage } from './Daytona'
+import { Resources } from './Daytona'
 import {
   FileSystemApi,
   GitApi,
@@ -32,14 +30,22 @@ import {
 } from '@daytona/toolbox-api-client'
 import { FileSystem } from './FileSystem'
 import { Git } from './Git'
-import { Process } from './Process'
+import { CodeRunParams, Process } from './Process'
 import { LspLanguageId, LspServer } from './LspServer'
 import { DaytonaError, DaytonaNotFoundError, DaytonaTimeoutError, DaytonaValidationError } from './errors/DaytonaError'
-import { CODE_TOOLBOX_LANGUAGE_LABEL } from './Daytona'
 import { ComputerUse } from './ComputerUse'
 import { AxiosInstance } from 'axios'
 import { CodeInterpreter } from './CodeInterpreter'
 import { WithInstrumentation } from './utils/otel.decorator'
+
+/**
+ * Interface defining methods that a code toolbox must implement
+ * @interface
+ */
+export interface SandboxCodeToolbox {
+  /** Generates a command to run the provided code */
+  getRunCommand(code: string, params?: CodeRunParams): string
+}
 
 /**
  * Represents a Daytona Sandbox.
@@ -121,12 +127,16 @@ export class Sandbox implements SandboxDto {
    * Creates a new Sandbox instance
    *
    * @param {SandboxDto} sandboxDto - The API Sandbox instance
+   * @param {SandboxApi} sandboxApi - API client for Sandbox operations
+   * @param {InfoApi} infoApi - API client for info operations
+   * @param {SandboxCodeToolbox} codeToolbox - Language-specific toolbox implementation
    */
   constructor(
     sandboxDto: SandboxDto,
     private readonly clientConfig: Configuration,
     private readonly axiosInstance: AxiosInstance,
     private readonly sandboxApi: SandboxApi,
+    private readonly codeToolbox: SandboxCodeToolbox,
   ) {
     this.processSandboxDto(sandboxDto)
 
@@ -143,12 +153,11 @@ export class Sandbox implements SandboxDto {
 
     this.fs = new FileSystem(this.clientConfig, new FileSystemApi(this.clientConfig, '', this.axiosInstance))
     this.git = new Git(new GitApi(this.clientConfig, '', this.axiosInstance))
-    const language = sandboxDto.labels?.[CODE_TOOLBOX_LANGUAGE_LABEL]
     this.process = new Process(
       this.clientConfig,
+      this.codeToolbox,
       new ProcessApi(this.clientConfig, '', this.axiosInstance),
       getPreviewToken,
-      language,
     )
     this.codeInterpreter = new CodeInterpreter(
       this.clientConfig,
@@ -320,117 +329,6 @@ export class Sandbox implements SandboxDto {
     await this.refreshDataSafe()
     const timeElapsed = Date.now() - startTime
     await this.waitUntilStopped(timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout)
-  }
-
-  /**
-   * Forks the Sandbox, creating a new Sandbox with an identical filesystem.
-   *
-   * The forked Sandbox is a copy-on-write clone of the original. It starts
-   * with the same disk contents but operates independently from that point on.
-   *
-   * @param {object} [params] - Fork parameters
-   * @param {string} [params.name] - Optional name for the forked Sandbox. If not provided, a unique name will be generated.
-   * @param {number} [timeout] - Maximum time to wait in seconds. 0 means no timeout.
-   *                            Defaults to 60-second timeout.
-   * @returns {Promise<Sandbox>} The forked Sandbox.
-   * @throws {DaytonaValidationError} - If timeout is a negative number
-   * @throws {DaytonaError} - If the fork operation fails or times out
-   *
-   * @example
-   * const sandbox = await daytona.get('my-sandbox');
-   * const forked = await sandbox._experimental_fork({ name: 'my-fork' });
-   * console.log(`Forked sandbox: ${forked.id}`);
-   */
-  @WithInstrumentation()
-  public async _experimental_fork(params?: { name?: string }, timeout = 60): Promise<Sandbox> {
-    if (timeout < 0) {
-      throw new DaytonaValidationError('Timeout must be a non-negative number')
-    }
-
-    const startTime = Date.now()
-    const response = await this.sandboxApi.forkSandbox(this.id, { name: params?.name }, undefined, {
-      timeout: timeout * 1000,
-    })
-    const sandboxDto = response.data
-
-    const forkedSandbox = new Sandbox(
-      sandboxDto,
-      structuredClone(this.clientConfig),
-      Daytona.createAxiosInstance(),
-      this.sandboxApi,
-    )
-
-    const timeElapsed = Date.now() - startTime
-    await forkedSandbox.waitUntilStarted(timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout)
-
-    return forkedSandbox
-  }
-
-  /**
-   * Creates a snapshot from the current state of the Sandbox.
-   *
-   * This captures the Sandbox's filesystem into a reusable snapshot that can be
-   * used to create new Sandboxes. The Sandbox will temporarily enter a
-   * 'snapshotting' state and return to its previous state when complete.
-   *
-   * @param {string} name - Name for the new snapshot
-   * @param {number} [timeout] - Maximum time to wait in seconds. 0 means no timeout.
-   *                            Defaults to 60-second timeout.
-   * @returns {Promise<void>}
-   * @throws {DaytonaValidationError} - If timeout is a negative number
-   * @throws {DaytonaError} - If the snapshot operation fails or times out
-   *
-   * @example
-   * const sandbox = await daytona.get('my-sandbox');
-   * await sandbox._experimental_createSnapshot('my-snapshot');
-   * console.log('Snapshot created successfully');
-   */
-  @WithInstrumentation()
-  public async _experimental_createSnapshot(name: string, timeout = 60): Promise<void> {
-    if (timeout < 0) {
-      throw new DaytonaValidationError('Timeout must be a non-negative number')
-    }
-
-    const startTime = Date.now()
-    const req: CreateSandboxSnapshot = { name }
-    await this.sandboxApi.createSandboxSnapshot(this.id, req, undefined, {
-      timeout: timeout * 1000,
-    })
-
-    await this.refreshData()
-
-    const timeElapsed = Date.now() - startTime
-    const remainingTimeout = timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout
-    await this.waitForSnapshotComplete(remainingTimeout)
-  }
-
-  private async waitForSnapshotComplete(timeout: number) {
-    let checkInterval = 100
-    const startTime = Date.now()
-
-    while (this.state === SandboxState.SNAPSHOTTING) {
-      await this.refreshData()
-
-      // @ts-expect-error this.refreshData() can modify this.state so this check is fine
-      if (this.state === SandboxState.ERROR || this.state === SandboxState.BUILD_FAILED) {
-        throw new DaytonaError(
-          `Sandbox ${this.id} snapshot failed with state: ${this.state}, error reason: ${this.errorReason}`,
-        )
-      }
-
-      if (this.state !== SandboxState.SNAPSHOTTING) {
-        return
-      }
-
-      if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
-        throw new DaytonaTimeoutError('Sandbox snapshot did not complete within the timeout period')
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, checkInterval))
-      if (Date.now() - startTime > 5000) {
-        checkInterval = Math.min(checkInterval * 1.1, 1000)
-      }
-    }
   }
 
   /**

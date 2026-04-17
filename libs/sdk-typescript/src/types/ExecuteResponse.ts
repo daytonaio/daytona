@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Chart } from './Charts'
+import { Chart } from './Charts'
 
 /**
  * Artifacts from the command execution.

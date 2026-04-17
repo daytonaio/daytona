@@ -14,12 +14,15 @@ export type {
 } from './Daytona'
 export { FileSystem } from './FileSystem'
 export type {
+  DownloadFileOptions,
   DownloadMetadata,
   FileDownloadErrorDetails,
   FileDownloadRequest,
   FileDownloadResponse,
   FilePermissionsParams,
   FileUpload,
+  TransferProgressCallback,
+  UploadFileOptions,
 } from './FileSystem'
 export { Git } from './Git'
 export { LspLanguageId } from './LspServer'
@@ -36,6 +39,8 @@ export {
   DaytonaRateLimitError,
   DaytonaTimeoutError,
   DaytonaValidationError,
+  DownloadAbortedError,
+  UploadAbortedError,
 } from './errors/DaytonaError'
 export { Image } from './Image'
 export { Sandbox } from './Sandbox'
@@ -48,7 +53,6 @@ export type {
   BoxAndWhiskerData,
   Chart,
   Chart2D,
-  ChartElement,
   CompositeChart,
   LineChart,
   PieChart,

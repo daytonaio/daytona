@@ -10,13 +10,15 @@ import {
   Session,
   SessionExecuteRequest,
   SessionExecuteResponse as ApiSessionExecuteResponse,
-  CodeRunRequest,
   PtyCreateRequest,
   PtySessionInfo,
+  SessionSendInputRequest,
 } from '@daytona/toolbox-api-client'
+import { SandboxCodeToolbox } from './Sandbox'
 import { ExecuteResponse } from './types/ExecuteResponse'
-import { parseChart } from './types/Charts'
+import { ArtifactParser } from './utils/ArtifactParser'
 import { stdDemuxStream } from './utils/Stream'
+import { Buffer } from 'buffer'
 import { PtyHandle } from './PtyHandle'
 import { PtyCreateOptions, PtyConnectOptions } from './types/Pty'
 import { createSandboxWebSocket } from './utils/WebSocket'
@@ -60,9 +62,9 @@ export interface SessionCommandLogsResponse {
 export class Process {
   constructor(
     private readonly clientConfig: Configuration,
+    private readonly codeToolbox: SandboxCodeToolbox,
     private readonly apiClient: ProcessApi,
     private readonly getPreviewToken: () => Promise<string>,
-    private readonly language?: string,
   ) {}
 
   /**
@@ -97,20 +99,37 @@ export class Process {
     env?: Record<string, string>,
     timeout?: number,
   ): Promise<ExecuteResponse> {
+    if (env && Object.keys(env).length) {
+      const validKeyPattern = /^[A-Za-z_][A-Za-z0-9_]*$/
+      for (const key of Object.keys(env)) {
+        if (!validKeyPattern.test(key)) {
+          throw new Error(`Invalid environment variable name: '${key}'`)
+        }
+      }
+      const safeEnvExports =
+        Object.entries(env)
+          .map(([key, value]) => {
+            const encodedValue = Buffer.from(value).toString('base64')
+            return `export ${key}="$(printf '%s' '${encodedValue}' | base64 -d)"`
+          })
+          .join('; ') + '; '
+      command = `${safeEnvExports}${command}`
+    }
+
     const response = await this.apiClient.executeCommand({
       command,
       timeout,
       cwd: cwd,
-      envs: env && Object.keys(env).length ? env : undefined,
     })
 
-    const result = response.data.result ?? ''
+    // Parse artifacts from the output
+    const artifacts = ArtifactParser.parseArtifacts(response.data.result)
+
+    // Return enhanced response with parsed artifacts
     return {
       exitCode: response.data.exitCode ?? (response.data as any).code,
-      result,
-      artifacts: {
-        stdout: result,
-      },
+      result: artifacts.stdout,
+      artifacts,
     }
   }
 
@@ -174,30 +193,8 @@ export class Process {
    */
   @WithInstrumentation()
   public async codeRun(code: string, params?: CodeRunParams, timeout?: number): Promise<ExecuteResponse> {
-    if (!this.language) {
-      throw new Error('Code language is required for codeRun')
-    }
-
-    const request: CodeRunRequest = {
-      code,
-      language: this.language,
-      argv: params?.argv,
-      envs: params?.env,
-      timeout,
-    }
-    const response = await this.apiClient.codeRun(request)
-    const data = response.data
-
-    const charts = data.artifacts?.charts?.map(parseChart) ?? []
-
-    return {
-      exitCode: data.exitCode ?? 0,
-      result: data.result ?? '',
-      artifacts: {
-        stdout: data.result ?? '',
-        charts,
-      },
-    }
+    const runCommand = this.codeToolbox.getRunCommand(code, params)
+    return this.executeCommand(runCommand, undefined, params?.env, timeout)
   }
 
   /**
@@ -328,11 +325,19 @@ export class Process {
       timeout ? { timeout: timeout * 1000 } : {},
     )
 
-    return {
-      ...response.data,
-      stdout: response.data.stdout ?? '',
-      stderr: response.data.stderr ?? '',
+    // Demux the output if it exists
+    if (response.data.output) {
+      // Convert string to bytes for demuxing
+      const outputBytes = new TextEncoder().encode(response.data.output)
+      const demuxedCommandLogs = parseSessionCommandLogs(outputBytes)
+      return {
+        ...response.data,
+        stdout: demuxedCommandLogs.stdout,
+        stderr: demuxedCommandLogs.stderr,
+      }
     }
+
+    return response.data
   }
 
   /**
@@ -381,10 +386,21 @@ export class Process {
     if (!onStdout && !onStderr) {
       const response = await this.apiClient.getSessionCommandLogs(sessionId, commandId)
 
+      // Parse the response data if it's available
+      if (response.data) {
+        // Convert string to bytes for demuxing
+        const outputBytes = new TextEncoder().encode(response.data || '')
+        const demuxedCommandLogs = parseSessionCommandLogs(outputBytes)
+
+        return {
+          output: response.data,
+          stdout: demuxedCommandLogs.stdout,
+          stderr: demuxedCommandLogs.stderr,
+        }
+      }
+
       return {
-        output: response.data.output ?? '',
-        stdout: response.data.stdout ?? '',
-        stderr: response.data.stderr ?? '',
+        output: response.data,
       }
     }
 
@@ -430,10 +446,21 @@ export class Process {
     if (!onStdout && !onStderr) {
       const response = await this.apiClient.getEntrypointLogs()
 
+      // Parse the response data if it's available
+      if (response.data) {
+        // Convert string to bytes for demuxing
+        const outputBytes = new TextEncoder().encode(response.data || '')
+        const demuxedCommandLogs = parseSessionCommandLogs(outputBytes)
+
+        return {
+          output: response.data,
+          stdout: demuxedCommandLogs.stdout,
+          stderr: demuxedCommandLogs.stderr,
+        }
+      }
+
       return {
-        output: response.data.output ?? '',
-        stdout: response.data.stdout ?? '',
-        stderr: response.data.stderr ?? '',
+        output: response.data,
       }
     }
 
@@ -711,4 +738,140 @@ export class Process {
   public async resizePtySession(sessionId: string, cols: number, rows: number): Promise<PtySessionInfo> {
     return (await this.apiClient.resizePtySession(sessionId, { cols, rows })).data
   }
+}
+
+/**
+ * Parse combined stdout/stderr output into separate streams.
+ *
+ * @param data - Combined log bytes with STDOUT_PREFIX_BYTES and STDERR_PREFIX_BYTES markers
+ * @returns Object with separated stdout and stderr strings
+ */
+function parseSessionCommandLogs(data: Uint8Array): SessionCommandLogsResponse {
+  const [stdoutBytes, stderrBytes] = demuxLog(data)
+
+  // Convert bytes to strings, ignoring potential encoding issues
+  const stdoutStr = new TextDecoder('utf-8', { fatal: false }).decode(stdoutBytes)
+  const stderrStr = new TextDecoder('utf-8', { fatal: false }).decode(stderrBytes)
+
+  // For backwards compatibility, output field contains the original combined data
+  const outputStr = new TextDecoder('utf-8', { fatal: false }).decode(data)
+
+  return {
+    output: outputStr,
+    stdout: stdoutStr,
+    stderr: stderrStr,
+  }
+}
+
+/**
+ * Demultiplex combined stdout/stderr log data.
+ *
+ * @param data - Combined log bytes with STDOUT_PREFIX_BYTES and STDERR_PREFIX_BYTES markers
+ * @returns Tuple of [stdout_bytes, stderr_bytes]
+ */
+function demuxLog(data: Uint8Array): [Uint8Array, Uint8Array] {
+  const outChunks: Uint8Array[] = []
+  const errChunks: Uint8Array[] = []
+  let state: 'none' | 'stdout' | 'stderr' = 'none'
+
+  // Forward index (no per-loop re-slicing)
+  let i = 0
+
+  while (i < data.length) {
+    // Find the nearest forward marker (stdout or stderr) from current index
+    const stdoutIndex = findSubarray(data, STDOUT_PREFIX_BYTES, i)
+    const stderrIndex = findSubarray(data, STDERR_PREFIX_BYTES, i)
+
+    // Pick the closest marker index and type
+    let nextIdx = -1
+    let nextMarker: 'stdout' | 'stderr' | null = null
+    let nextLen = 0
+
+    if (stdoutIndex !== -1 && (stderrIndex === -1 || stdoutIndex < stderrIndex)) {
+      nextIdx = stdoutIndex
+      nextMarker = 'stdout'
+      nextLen = STDOUT_PREFIX_BYTES.length
+    } else if (stderrIndex !== -1) {
+      nextIdx = stderrIndex
+      nextMarker = 'stderr'
+      nextLen = STDERR_PREFIX_BYTES.length
+    }
+
+    if (nextIdx === -1) {
+      // No more markers → dump remainder into current state
+      if (state === 'stdout') {
+        outChunks.push(data.subarray(i))
+      } else if (state === 'stderr') {
+        errChunks.push(data.subarray(i))
+      }
+      break
+    }
+
+    // Write everything before the marker into current state
+    if (state === 'stdout' && nextIdx > i) {
+      outChunks.push(data.subarray(i, nextIdx))
+    } else if (state === 'stderr' && nextIdx > i) {
+      errChunks.push(data.subarray(i, nextIdx))
+    }
+
+    // Advance past marker and switch state
+    i = nextIdx + nextLen
+    if (nextMarker) {
+      state = nextMarker
+    }
+  }
+
+  // Concatenate all chunks
+  return [concatenateUint8Arrays(outChunks), concatenateUint8Arrays(errChunks)]
+}
+
+/**
+ * Efficiently concatenate multiple Uint8Array chunks into a single Uint8Array.
+ *
+ * @param chunks - Array of Uint8Array chunks to concatenate
+ * @returns A single Uint8Array containing all chunks
+ */
+function concatenateUint8Arrays(chunks: Uint8Array[]): Uint8Array {
+  if (chunks.length === 0) {
+    return new Uint8Array(0)
+  }
+
+  if (chunks.length === 1) {
+    return chunks[0]
+  }
+
+  const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0)
+
+  const result = new Uint8Array(totalLength)
+
+  let offset = 0
+  for (const chunk of chunks) {
+    result.set(chunk, offset)
+    offset += chunk.length
+  }
+
+  return result
+}
+
+/**
+ * Helper function to find a subarray within a larger array.
+ *
+ * @param haystack - The array to search in
+ * @param needle - The subarray to find
+ * @param fromIndex - starting index
+ * @returns The index of the first occurrence, or -1 if not found
+ */
+function findSubarray(haystack: Uint8Array, needle: Uint8Array, fromIndex = 0): number {
+  if (needle.length === 0) return 0
+  if (haystack.length < needle.length || fromIndex < 0 || fromIndex > haystack.length - needle.length) return -1
+
+  const limit = haystack.length - needle.length
+  for (let i = fromIndex; i <= limit; i++) {
+    let j = 0
+    for (; j < needle.length; j++) {
+      if (haystack[i + j] !== needle[j]) break
+    }
+    if (j === needle.length) return i
+  }
+  return -1
 }

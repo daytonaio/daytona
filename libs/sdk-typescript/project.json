@@ -30,6 +30,14 @@
         "set-version"
       ]
     },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/libs/sdk-typescript"],
+      "options": {
+        "jestConfig": "{projectRoot}/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
     "set-version": {
       "executor": "nx:run-commands",
       "options": {

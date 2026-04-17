@@ -13,10 +13,19 @@ import {
   SearchFilesResponse,
 } from '@daytona/toolbox-api-client'
 import { FileSystemApi } from '@daytona/toolbox-api-client'
+import busboy from 'busboy'
+import type { Readable, Writable } from 'stream'
 import { dynamicImport } from './utils/Import'
 import { RUNTIME, Runtime } from './utils/Runtime'
-import { createDaytonaError, DaytonaError } from './errors/DaytonaError'
 import {
+  createDaytonaError,
+  DaytonaError,
+  DaytonaValidationError,
+  DownloadAbortedError,
+  UploadAbortedError,
+} from './errors/DaytonaError'
+import {
+  feedStreamToBusboy,
   normalizeResponseStream,
   processDownloadFilesResponseWithBusboy,
   processDownloadFilesResponseWithBuffered,
@@ -122,12 +131,141 @@ export interface DownloadMetadata {
   result?: Buffer | string | Uint8Array
 }
 
+/**
+ * Progress callback invoked with the cumulative number of bytes transferred.
+ *
+ * @example
+ * const onProgress: TransferProgressCallback = (bytes) => {
+ *   console.log(`${Math.round(bytes / 1024 / 1024)} MB transferred`);
+ * };
+ */
+export type TransferProgressCallback = (bytesTransferred: number) => void
+
+/**
+ * Options for uploading a file to the Sandbox via the options-bag overload.
+ * Enables streaming uploads, abort support, and progress reporting.
+ *
+ * @example
+ * ```ts
+ * const controller = new AbortController();
+ * await sandbox.fs.uploadFile({
+ *   source: fs.createReadStream('large.bin'),
+ *   destination: '/workspace/large.bin',
+ *   signal: controller.signal,
+ *   onProgress: (bytes) => console.log(`${bytes} bytes uploaded`),
+ *   cleanupOnAbort: true,
+ * });
+ * ```
+ */
+export interface UploadFileOptions {
+  /** File to upload. Buffer/string delegates to the existing buffered path. Readable/ReadableStream streams without loading into memory. */
+  source: string | Buffer | Readable | ReadableStream
+  /** Absolute destination path in the Sandbox. */
+  destination: string
+  /** AbortSignal to cancel the upload mid-stream. Note: abort is cooperative — up to one in-flight chunk (~64KB) may be written after signal fires. */
+  signal?: AbortSignal
+  /** Progress callback called with cumulative bytes uploaded. Only valid with stream sources; throws DaytonaValidationError for Buffer/string sources. */
+  onProgress?: TransferProgressCallback
+  /** Timeout in seconds. 0 means no timeout. Defaults to 30 minutes. */
+  timeout?: number
+  /** Content length in bytes for stream sources. When provided, form-data can set Content-Length; omit to use chunked transfer encoding. */
+  contentLength?: number
+  /** When true, attempt best-effort deleteFile on abort. Default false. Cleanup failures are surfaced via console.warn. */
+  cleanupOnAbort?: boolean
+}
+
+/**
+ * Options for downloading a file from the Sandbox via the options-bag overload.
+ * Enables streaming downloads, abort support, and progress reporting.
+ *
+ * @example
+ * ```ts
+ * const controller = new AbortController();
+ * await sandbox.fs.downloadFile({
+ *   remotePath: '/workspace/large.bin',
+ *   destination: fs.createWriteStream('local.bin'),
+ *   signal: controller.signal,
+ *   onProgress: (bytes) => console.log(`${bytes} bytes downloaded`),
+ * });
+ * ```
+ */
+export interface DownloadFileOptions {
+  /** Path to the file in the Sandbox. */
+  remotePath: string
+  /** Omit to get a Buffer return. Pass a string for a local file path. Pass a Writable/WritableStream for streaming without buffering. */
+  destination?: string | Writable | WritableStream
+  /** AbortSignal to cancel the download mid-stream. Note: abort is cooperative — up to one in-flight chunk (~64KB) may be written after signal fires. */
+  signal?: AbortSignal
+  /** Progress callback called with cumulative bytes downloaded. Only valid with Writable/WritableStream destinations; throws DaytonaValidationError otherwise. */
+  onProgress?: TransferProgressCallback
+  /** Timeout in seconds. 0 means no timeout. Defaults to 30 minutes. */
+  timeout?: number
+}
+
 function createFileDownloadError(error: string, errorDetails?: FileDownloadErrorDetails): DaytonaError {
   if (!errorDetails) {
     return new DaytonaError(error)
   }
 
   return createDaytonaError(errorDetails.message, errorDetails.statusCode, undefined, errorDetails.errorCode)
+}
+
+function isNodeReadable(value: unknown): boolean {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as any).pipe === 'function' &&
+    typeof (value as any).read === 'function' &&
+    typeof (value as any).on === 'function'
+  )
+}
+
+function isWhatwgReadableStream(value: unknown): boolean {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as any).getReader === 'function' &&
+    typeof (value as any).pipeTo === 'function'
+  )
+}
+
+function isNodeWritable(value: unknown): boolean {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as any).write === 'function' &&
+    typeof (value as any).end === 'function' &&
+    typeof (value as any).on === 'function'
+  )
+}
+
+function isWhatwgWritableStream(value: unknown): boolean {
+  return typeof value === 'object' && value !== null && typeof (value as any).getWriter === 'function'
+}
+
+function isStreamSource(value: unknown): boolean {
+  return isNodeReadable(value) || isWhatwgReadableStream(value)
+}
+
+function isStreamDestination(value: unknown): boolean {
+  return isNodeWritable(value) || isWhatwgWritableStream(value)
+}
+
+function validateStreamRuntime(value: unknown, streamType: 'Readable' | 'Writable'): void {
+  const isNodeOnly =
+    streamType === 'Readable'
+      ? isNodeReadable(value) && !isWhatwgReadableStream(value)
+      : isNodeWritable(value) && !isWhatwgWritableStream(value)
+  if (isNodeOnly && RUNTIME !== Runtime.NODE && RUNTIME !== Runtime.BUN) {
+    const alt = streamType === 'Readable' ? 'ReadableStream' : 'WritableStream'
+    throw new DaytonaValidationError(
+      `Node ${streamType} streams are not supported in ${RUNTIME} runtime; use ${alt} instead`,
+    )
+  }
+}
+
+function isAxiosCanceledError(error: unknown): boolean {
+  return error instanceof Error && (error.name === 'CanceledError' || (error as any).code === 'ERR_CANCELED')
 }
 
 /**
@@ -176,6 +314,12 @@ export class FileSystem {
   }
 
   /**
+   * Downloads a file from the Sandbox using an options bag with optional streaming, abort, and progress support.
+   * @throws {DownloadAbortedError} If aborted via signal.
+   * @throws {DaytonaValidationError} If onProgress is used without a stream destination.
+   */
+  public async downloadFile(options: DownloadFileOptions): Promise<Buffer | void>
+  /**
    * Downloads a file from the Sandbox. This method loads the entire file into memory, so it is not recommended
    * for downloading large files.
    *
@@ -195,7 +339,7 @@ export class FileSystem {
    * so it is recommended for downloading larger files.
    *
    * @param {string} remotePath - Path to the file to download in the Sandbox. Relative paths are resolved based on the sandbox working directory.
-   * @param {string} localPath - Path to save the downloaded file.
+   * @param {string} localPath - Path to save the downloaded file. Note: localPath is opened as-is; validate path traversal in caller code if remotePath is user-controlled.
    * @param {number} [timeout] - Timeout for the download operation in seconds. 0 means no timeout.
    * Default is 30 minutes.
    * @returns {Promise<void>}
@@ -206,8 +350,16 @@ export class FileSystem {
    */
   public async downloadFile(remotePath: string, localPath: string, timeout?: number): Promise<void>
   @WithInstrumentation()
-  public async downloadFile(src: string, dst?: string | number, timeout: number = 30 * 60): Promise<Buffer | void> {
-    const remotePath = src
+  public async downloadFile(
+    srcOrOptions: string | DownloadFileOptions,
+    dst?: string | number,
+    timeout: number = 30 * 60,
+  ): Promise<Buffer | void> {
+    if (typeof srcOrOptions === 'object' && srcOrOptions !== null && 'remotePath' in srcOrOptions) {
+      return this._downloadFileWithOptions(srcOrOptions as DownloadFileOptions)
+    }
+
+    const remotePath = srcOrOptions as string
 
     if (typeof dst !== 'string') {
       if (dst) {
@@ -452,6 +604,12 @@ export class FileSystem {
   }
 
   /**
+   * Uploads a file to the Sandbox using an options bag with optional streaming, abort, and progress support.
+   * @throws {UploadAbortedError} If aborted via signal.
+   * @throws {DaytonaValidationError} If onProgress is used with a non-stream source.
+   */
+  public async uploadFile(options: UploadFileOptions): Promise<void>
+  /**
    * Uploads a file to the Sandbox. This method loads the entire file into memory, so it is not recommended
    * for uploading large files.
    *
@@ -470,7 +628,7 @@ export class FileSystem {
    * Uploads a file from the local file system to the Sandbox. This method uses streaming to upload the file,
    * so it is recommended for uploading larger files.
    *
-   * @param {string} localPath - Path to the local file to upload.
+   * @param {string} localPath - Path to the local file to upload. Note: localPath is opened as-is; validate path traversal in caller code if remotePath is user-controlled.
    * @param {string} remotePath - Destination path in the Sandbox. Relative paths are resolved based on the sandbox working directory.
    * @param {number} [timeout] - Timeout for the upload operation in seconds. 0 means no timeout.
    * Default is 30 minutes.
@@ -482,8 +640,20 @@ export class FileSystem {
    */
   public async uploadFile(localPath: string, remotePath: string, timeout?: number): Promise<void>
   @WithInstrumentation()
-  public async uploadFile(src: string | Buffer, dst: string, timeout: number = 30 * 60): Promise<void> {
-    await this.uploadFiles([{ source: src, destination: dst }], timeout)
+  public async uploadFile(
+    srcOrOptions: string | Buffer | UploadFileOptions,
+    dst?: string,
+    timeout: number = 30 * 60,
+  ): Promise<void> {
+    if (
+      typeof srcOrOptions === 'object' &&
+      srcOrOptions !== null &&
+      !Buffer.isBuffer(srcOrOptions) &&
+      'source' in srcOrOptions
+    ) {
+      return this._uploadFileWithOptions(srcOrOptions as UploadFileOptions)
+    }
+    await this.uploadFiles([{ source: srcOrOptions as string | Buffer, destination: dst! }], timeout)
   }
 
   /**
@@ -543,6 +713,305 @@ export class FileSystem {
         timeout: timeout * 1000,
       })
     }
+  }
+
+  private async _uploadFileWithOptions(options: UploadFileOptions): Promise<void> {
+    const {
+      source,
+      destination,
+      signal,
+      onProgress,
+      timeout = 30 * 60,
+      contentLength,
+      cleanupOnAbort = false,
+    } = options
+
+    if (onProgress && !isStreamSource(source)) {
+      throw new DaytonaValidationError(
+        'onProgress is not supported for Buffer/string upload sources; use a Readable or ReadableStream source instead',
+      )
+    }
+
+    if (signal?.aborted) {
+      throw new UploadAbortedError()
+    }
+
+    // Non-stream sources: delegate to the existing buffered path
+    if (!isStreamSource(source)) {
+      await this.uploadFiles([{ source: source as string | Buffer, destination }], timeout)
+      return
+    }
+
+    validateStreamRuntime(source, 'Readable')
+
+    const isNonStreamingRuntime =
+      RUNTIME === Runtime.DENO || RUNTIME === Runtime.BROWSER || RUNTIME === Runtime.SERVERLESS
+
+    try {
+      if (isNonStreamingRuntime) {
+        if (!isWhatwgReadableStream(source)) {
+          throw new DaytonaValidationError(
+            `Node Readable streams are not supported in ${RUNTIME} runtime; use ReadableStream instead`,
+          )
+        }
+        let streamBody = source as ReadableStream
+        if (onProgress || signal) {
+          let bytesTransferred = 0
+          streamBody = streamBody.pipeThrough(
+            new TransformStream({
+              transform(chunk, controller) {
+                if (signal?.aborted) {
+                  controller.error(new UploadAbortedError())
+                  return
+                }
+                bytesTransferred += chunk.byteLength
+                if (onProgress) onProgress(bytesTransferred)
+                controller.enqueue(chunk)
+              },
+            }),
+          )
+        }
+        const url = `${this.clientConfig.basePath}/files/bulk-upload`
+        const form = new FormData()
+        form.append(`files[0].path`, destination)
+        form.append(`files[0].file`, new Response(streamBody).body as any, destination)
+        await fetch(url, {
+          method: 'POST',
+          headers: this.clientConfig.baseOptions.headers,
+          body: form,
+          signal,
+        })
+      } else {
+        // Node.js / Bun: use axios + form-data
+        const FormDataClass = (await dynamicImport('form-data', 'Uploading files is not supported: ')) as any
+        const form = new FormDataClass()
+        form.append(`files[0].path`, destination)
+
+        let readable: any
+        if (isNodeReadable(source)) {
+          readable = source
+        } else {
+          // Convert WHATWG ReadableStream → Node Readable
+          const streamMod = await dynamicImport('stream', 'Uploading files is not supported: ')
+          readable = streamMod.Readable.fromWeb(source as any)
+        }
+
+        if (onProgress || signal) {
+          const streamMod = await dynamicImport('stream', 'Uploading files is not supported: ')
+          let bytesTransferred = 0
+          const transform = new streamMod.Transform({
+            transform(chunk: Buffer, _encoding: string, callback: (err?: Error | null, data?: any) => void) {
+              if (signal?.aborted) {
+                callback(new UploadAbortedError())
+                return
+              }
+              bytesTransferred += chunk.length
+              if (onProgress) onProgress(bytesTransferred)
+              callback(null, chunk)
+            },
+          })
+          readable = readable.pipe(transform)
+        }
+
+        const appendOptions: Record<string, any> = { filename: destination }
+        if (contentLength !== undefined) appendOptions.knownLength = contentLength
+
+        form.append(`files[0].file`, readable, appendOptions)
+
+        await this.apiClient.uploadFiles({
+          data: form,
+          maxRedirects: 0,
+          timeout: timeout * 1000,
+          signal,
+        })
+      }
+    } catch (error) {
+      if (error instanceof UploadAbortedError) {
+        if (cleanupOnAbort) {
+          try {
+            await this.deleteFile(destination)
+          } catch (ce) {
+            console.warn('Upload abort cleanup failed: ' + ce)
+          }
+        }
+        throw error
+      }
+      if (isAxiosCanceledError(error)) {
+        if (cleanupOnAbort) {
+          try {
+            await this.deleteFile(destination)
+          } catch (ce) {
+            console.warn('Upload abort cleanup failed: ' + ce)
+          }
+        }
+        throw new UploadAbortedError()
+      }
+      throw error
+    }
+  }
+
+  private async _downloadFileWithOptions(options: DownloadFileOptions): Promise<Buffer | void> {
+    const { remotePath, destination, signal, onProgress, timeout = 30 * 60 } = options
+
+    if (onProgress && !isStreamDestination(destination)) {
+      throw new DaytonaValidationError(
+        'onProgress is not supported for buffer-return or file-path downloads; use a Writable or WritableStream destination instead',
+      )
+    }
+
+    if (signal?.aborted) {
+      throw new DownloadAbortedError()
+    }
+
+    if (isStreamDestination(destination)) {
+      validateStreamRuntime(destination, 'Writable')
+      return this._downloadFileToStreamDirect(options)
+    }
+
+    // Buffer return (no destination)
+    if (typeof destination !== 'string') {
+      const response = await this.downloadFiles([{ source: remotePath }], timeout)
+      if (response[0].error) {
+        throw createFileDownloadError(response[0].error, response[0].errorDetails)
+      }
+      return response[0].result as Buffer
+    }
+
+    // File path destination
+    const response = await this.downloadFiles([{ source: remotePath, destination }], timeout)
+    if (response[0].error) {
+      throw createFileDownloadError(response[0].error, response[0].errorDetails)
+    }
+  }
+
+  private async _downloadFileToStreamDirect(options: DownloadFileOptions): Promise<void> {
+    const { remotePath, destination, signal, onProgress, timeout = 30 * 60 } = options
+
+    if (RUNTIME !== Runtime.NODE && RUNTIME !== Runtime.BUN) {
+      throw new DaytonaValidationError(
+        `Streaming downloads to Writable destinations are not supported in ${RUNTIME} runtime`,
+      )
+    }
+
+    let axiosResponse: any
+    try {
+      axiosResponse = await this.apiClient.downloadFiles(
+        { paths: [remotePath] },
+        {
+          responseType: 'stream',
+          timeout: timeout * 1000,
+          signal,
+        },
+      )
+    } catch (error) {
+      if (isAxiosCanceledError(error)) throw new DownloadAbortedError()
+      throw error
+    }
+
+    const responseStream = normalizeResponseStream(axiosResponse.data)
+    const headers = axiosResponse.headers as Record<string, string>
+
+    await new Promise<void>((resolve, reject) => {
+      const bb = busboy({ headers, preservePath: true })
+      let pipeTask: Promise<void> | null = null
+
+      bb.on('file', (fieldName: string, fileStream: any) => {
+        if (fieldName !== 'file') {
+          fileStream.resume()
+          return
+        }
+
+        if (isNodeWritable(destination)) {
+          pipeTask = new Promise<void>((resolveTask, rejectTask) => {
+            if (onProgress || signal) {
+              dynamicImport('stream', 'Downloading files is not supported: ')
+                .then(({ Transform }) => {
+                  let bytesTransferred = 0
+                  const counter = new Transform({
+                    transform(chunk: Buffer, _: string, cb: (err?: Error | null, data?: any) => void) {
+                      if (signal?.aborted) {
+                        cb(new DownloadAbortedError())
+                        return
+                      }
+                      bytesTransferred += chunk.length
+                      if (onProgress) onProgress(bytesTransferred)
+                      cb(null, chunk)
+                    },
+                  })
+                  const rejectWithCleanup = (err: Error) => {
+                    ;(destination as any).destroy?.()
+                    rejectTask(err)
+                  }
+                  fileStream.on('error', rejectWithCleanup)
+                  counter.on('error', rejectWithCleanup)
+                  ;(destination as any).on('error', rejectTask)
+                  ;(destination as any).on('finish', resolveTask)
+                  fileStream.pipe(counter).pipe(destination as any)
+                })
+                .catch(rejectTask)
+            } else {
+              fileStream.on('error', (err: Error) => {
+                ;(destination as any).destroy?.()
+                rejectTask(err)
+              })
+              ;(destination as any).on('error', rejectTask)
+              ;(destination as any).on('finish', resolveTask)
+              fileStream.pipe(destination as any)
+            }
+          })
+        } else if (isWhatwgWritableStream(destination)) {
+          pipeTask = (async () => {
+            const writer = (destination as WritableStream).getWriter()
+            let bytesTransferred = 0
+            try {
+              for await (const chunk of fileStream) {
+                if (signal?.aborted) {
+                  try {
+                    writer.abort(new DownloadAbortedError())
+                  } catch {
+                    /* best-effort abort */
+                  }
+                  throw new DownloadAbortedError()
+                }
+                await writer.ready
+                await writer.write(chunk)
+                if (onProgress) {
+                  bytesTransferred += chunk.byteLength ?? chunk.length ?? 0
+                  onProgress(bytesTransferred)
+                }
+              }
+              await writer.close()
+            } catch (e) {
+              try {
+                writer.abort(e)
+              } catch {
+                /* best-effort abort */
+              }
+              throw e
+            } finally {
+              try {
+                writer.releaseLock()
+              } catch {
+                /* best-effort — writer may already be released */
+              }
+            }
+          })()
+        } else {
+          fileStream.resume()
+        }
+      })
+
+      bb.on('error', reject)
+      bb.on('finish', () => {
+        if (pipeTask) {
+          pipeTask.then(resolve).catch(reject)
+        } else {
+          resolve()
+        }
+      })
+
+      feedStreamToBusboy(responseStream, bb).catch((err: Error) => bb.destroy(err))
+    })
   }
 
   private async makeFilePayload(source: Uint8Array | string) {

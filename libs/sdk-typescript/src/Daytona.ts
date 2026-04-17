@@ -14,6 +14,9 @@ import {
   ConfigApi,
 } from '@daytona/api-client'
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios'
+import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
+import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
+import { SandboxJsCodeToolbox } from './code-toolbox/SandboxJsCodeToolbox'
 import {
   DaytonaAuthenticationError,
   createAxiosDaytonaError,
@@ -38,8 +41,6 @@ import { CompressionAlgorithm } from '@opentelemetry/otlp-exporter-base'
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
 import { resourceFromAttributes } from '@opentelemetry/resources'
 import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api'
-
-export const CODE_TOOLBOX_LANGUAGE_LABEL = 'code-toolbox-language'
 
 /**
  * Represents a volume mount for a Sandbox.
@@ -306,7 +307,7 @@ export class Daytona implements AsyncDisposable {
       },
     })
 
-    const axiosInstance = Daytona.createAxiosInstance()
+    const axiosInstance = this.createAxiosInstance()
 
     this.sandboxApi = new SandboxApi(configuration, '', axiosInstance)
     this.objectStorageApi = new ObjectStorageApi(configuration, '', axiosInstance)
@@ -442,19 +443,10 @@ export class Daytona implements AsyncDisposable {
     if (params == null) {
       params = { language: 'python' }
     }
-    if (!params.language) {
-      params.language = 'python'
-    }
 
     const labels = params.labels || {}
     if (params.language) {
-      const validLanguages = Object.values(CodeLanguage) as string[]
-      if (!validLanguages.includes(params.language)) {
-        throw new DaytonaValidationError(
-          `Invalid ${CODE_TOOLBOX_LANGUAGE_LABEL}: ${params.language}. Supported languages: ${validLanguages.join(', ')}`,
-        )
-      }
-      labels[CODE_TOOLBOX_LANGUAGE_LABEL] = params.language
+      labels['code-toolbox-language'] = params.language
     }
 
     if (options.timeout < 0) {
@@ -483,6 +475,8 @@ export class Daytona implements AsyncDisposable {
     ) {
       throw new DaytonaValidationError('autoArchiveInterval must be a non-negative integer')
     }
+
+    const codeToolbox = this.getCodeToolbox(params.language as CodeLanguage)
 
     try {
       let buildInfo: any | undefined
@@ -580,8 +574,9 @@ export class Daytona implements AsyncDisposable {
       const sandbox = new Sandbox(
         sandboxInstance,
         new Configuration(structuredClone(this.clientConfig)),
-        Daytona.createAxiosInstance(),
+        this.createAxiosInstance(),
         this.sandboxApi,
+        codeToolbox,
       )
 
       if (sandbox.state !== 'started') {
@@ -616,8 +611,16 @@ export class Daytona implements AsyncDisposable {
   public async get(sandboxIdOrName: string): Promise<Sandbox> {
     const response = await this.sandboxApi.getSandbox(sandboxIdOrName)
     const sandboxInstance = response.data
+    const language = sandboxInstance.labels && sandboxInstance.labels['code-toolbox-language']
+    const codeToolbox = this.getCodeToolbox(language as CodeLanguage)
 
-    return new Sandbox(sandboxInstance, structuredClone(this.clientConfig), Daytona.createAxiosInstance(), this.sandboxApi)
+    return new Sandbox(
+      sandboxInstance,
+      structuredClone(this.clientConfig),
+      this.createAxiosInstance(),
+      this.sandboxApi,
+      codeToolbox,
+    )
   }
 
   /**
@@ -647,7 +650,14 @@ export class Daytona implements AsyncDisposable {
 
     return {
       items: response.data.items.map((sandbox) => {
-        return new Sandbox(sandbox, structuredClone(this.clientConfig), Daytona.createAxiosInstance(), this.sandboxApi)
+        const language = sandbox.labels?.['code-toolbox-language'] as CodeLanguage
+        return new Sandbox(
+          sandbox,
+          structuredClone(this.clientConfig),
+          this.createAxiosInstance(),
+          this.sandboxApi,
+          this.getCodeToolbox(language),
+        )
       }),
       total: response.data.total,
       page: response.data.page,
@@ -688,25 +698,6 @@ export class Daytona implements AsyncDisposable {
   }
 
   /**
-   * Forks a Sandbox, creating a new Sandbox with an identical filesystem.
-   *
-   * @param {Sandbox} sandbox - The Sandbox to fork
-   * @param {object} [params] - Fork parameters
-   * @param {string} [params.name] - Optional name for the forked Sandbox
-   * @param {number} [timeout] - Timeout in seconds (0 means no timeout, default is 60)
-   * @returns {Promise<Sandbox>} The forked Sandbox
-   *
-   * @example
-   * const sandbox = await daytona.get('my-sandbox-id');
-   * const forked = await daytona._experimental_fork(sandbox, { name: 'my-fork' });
-   * console.log(`Forked sandbox: ${forked.id}`);
-   */
-  @WithInstrumentation()
-  public async _experimental_fork(sandbox: Sandbox, params?: { name?: string }, timeout = 60): Promise<Sandbox> {
-    return await sandbox._experimental_fork(params, timeout)
-  }
-
-  /**
    * Deletes a Sandbox.
    *
    * @param {Sandbox} sandbox - The Sandbox to delete
@@ -723,9 +714,30 @@ export class Daytona implements AsyncDisposable {
   }
 
   /**
-   * @hidden
+   * Gets the appropriate code toolbox based on language.
+   *
+   * @private
+   * @param {CodeLanguage} [language] - Programming language for the toolbox
+   * @returns {SandboxCodeToolbox} The appropriate code toolbox instance
+   * @throws {DaytonaValidationError} - `DaytonaValidationError` - When an unsupported language is specified
    */
-  public static createAxiosInstance(): AxiosInstance {
+  private getCodeToolbox(language?: CodeLanguage) {
+    switch (language) {
+      case CodeLanguage.JAVASCRIPT:
+        return new SandboxJsCodeToolbox()
+      case CodeLanguage.TYPESCRIPT:
+        return new SandboxTsCodeToolbox()
+      case CodeLanguage.PYTHON:
+      case undefined:
+        return new SandboxPythonCodeToolbox()
+      default: {
+        const errMsg = `Unsupported language: ${language}, supported languages: ${Object.values(CodeLanguage).join(', ')}`
+        throw new DaytonaValidationError(errMsg)
+      }
+    }
+  }
+
+  private createAxiosInstance(): AxiosInstance {
     const axiosInstance = axios.create({
       timeout: 24 * 60 * 60 * 1000, // 24 hours
     })

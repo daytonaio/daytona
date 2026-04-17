@@ -194,7 +194,7 @@ export async function processDownloadFilesResponseWithBusboy(
 /**
  * Feeds various stream types into busboy
  */
-async function feedStreamToBusboy(stream: any, bb: any): Promise<void> {
+export async function feedStreamToBusboy(stream: any, bb: any): Promise<void> {
   // Node.js stream (piping)
   if (typeof stream?.pipe === 'function') {
     stream.pipe(bb)
