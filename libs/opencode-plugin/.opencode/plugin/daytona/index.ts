@@ -3,8 +3,37 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Plugin } from '@opencode-ai/plugin'
+import type { Plugin, PluginInput } from '@opencode-ai/plugin'
 import { join } from 'node:path'
+
+type WorkspaceInfo = {
+  id: string
+  type: string
+  name: string
+  branch: string | null
+  directory: string | null
+  extra: unknown | null
+  projectID: string
+}
+
+type WorkspaceTarget =
+  | { type: 'local'; directory: string }
+  | { type: 'remote'; url: string | URL; headers?: HeadersInit }
+
+type WorkspaceAdaptor = {
+  name: string
+  description: string
+  configure(config: WorkspaceInfo): WorkspaceInfo | Promise<WorkspaceInfo>
+  create(config: WorkspaceInfo, env: Record<string, unknown>): Promise<void>
+  remove(config: WorkspaceInfo): Promise<void>
+  target(config: WorkspaceInfo): WorkspaceTarget | Promise<WorkspaceTarget>
+}
+
+type PluginInputWithWorkspace = PluginInput & {
+  experimental_workspace: {
+    register(type: string, adaptor: WorkspaceAdaptor): void
+  }
+}
 import { tmpdir } from 'node:os'
 import { mkdir, rm } from 'node:fs/promises'
 import { spawn as nodeSpawn } from 'node:child_process'
@@ -81,7 +110,8 @@ function toEnvVars(env: Record<string, unknown>): Record<string, string> {
   return result
 }
 
-export const DaytonaWorkspacePlugin: Plugin = async ({ experimental_workspace, worktree, project }) => {
+export const DaytonaWorkspacePlugin = async (input: PluginInputWithWorkspace) => {
+  const { experimental_workspace, worktree, project } = input
   experimental_workspace.register('daytona', {
     name: 'Daytona',
     description: 'Create a remote Daytona sandbox workspace',
