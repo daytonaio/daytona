@@ -440,7 +440,7 @@ export class Sandbox implements SandboxDto {
   @WithInstrumentation()
   public async delete(timeout = 60): Promise<void> {
     await this.sandboxApi.deleteSandbox(this.id, undefined, { timeout: timeout * 1000 })
-    this.refreshDataSafe()
+    await this.refreshDataSafe()
   }
 
   /**
@@ -509,7 +509,7 @@ export class Sandbox implements SandboxDto {
 
     // Treat destroyed as stopped to cover ephemeral sandboxes that are automatically deleted after stopping
     while (this.state !== 'stopped' && this.state !== 'destroyed') {
-      this.refreshDataSafe()
+      await this.refreshDataSafe()
 
       // @ts-expect-error this.refreshData() can modify this.state so this check is fine
       if (this.state === 'stopped' || this.state === 'destroyed') {
