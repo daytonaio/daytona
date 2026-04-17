@@ -1,6 +1,26 @@
-# CODEOWNERS — Daytona
+# CODEOWNERS -- Daytona
 # These owners are automatically requested for review on PRs that modify the listed files.
+# Multiple owners = OR semantics (any one can approve).
+# Enforcement: the "Security baseline" Ruleset requires CODEOWNERS review on main,
+# so listed owners must approve before merge.
 
-# Security and compliance policies
-SECURITY.md          @aprojic
-CODE_OF_CONDUCT.md   @aprojic
+# Security and compliance policies (CISO-owned)
+SECURITY.md                @daytonaio/security
+CODE_OF_CONDUCT.md         @daytonaio/security
+
+# CI/CD pipelines and composite actions
+.github/workflows/         @daytonaio/security @Tpuljak
+.github/actions/           @daytonaio/security @Tpuljak
+
+# Dependency and supply chain configuration
+.github/dependabot.yml     @daytonaio/security @Tpuljak
+.yarnrc.yml                @daytonaio/security @Tpuljak
+.npmrc                     @daytonaio/security @Tpuljak
+
+# Linting and license enforcement (security-relevant)
+.github/actionlint.yaml    @daytonaio/security @Tpuljak
+.licenserc.yaml            @daytonaio/security @Tpuljak
+.licenserc-clients.yaml    @daytonaio/security @Tpuljak
+
+# CODEOWNERS itself (must protect itself)
+.github/CODEOWNERS         @daytonaio/security @Tpuljak
