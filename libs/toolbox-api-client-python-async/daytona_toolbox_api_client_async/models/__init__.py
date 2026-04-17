@@ -20,6 +20,12 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     # import models into model package
+    from daytona_toolbox_api_client_async.models.accessibility_bounds import AccessibilityBounds
+    from daytona_toolbox_api_client_async.models.accessibility_invoke_request import AccessibilityInvokeRequest
+    from daytona_toolbox_api_client_async.models.accessibility_node_request import AccessibilityNodeRequest
+    from daytona_toolbox_api_client_async.models.accessibility_nodes_response import AccessibilityNodesResponse
+    from daytona_toolbox_api_client_async.models.accessibility_set_value_request import AccessibilitySetValueRequest
+    from daytona_toolbox_api_client_async.models.accessibility_tree_response import AccessibilityTreeResponse
     from daytona_toolbox_api_client_async.models.chart import Chart
     from daytona_toolbox_api_client_async.models.chart_element import ChartElement
     from daytona_toolbox_api_client_async.models.code_run_artifacts import CodeRunArtifacts
@@ -32,6 +38,7 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client_async.models.computer_use_start_response import ComputerUseStartResponse
     from daytona_toolbox_api_client_async.models.computer_use_status_response import ComputerUseStatusResponse
     from daytona_toolbox_api_client_async.models.computer_use_stop_response import ComputerUseStopResponse
+    from daytona_toolbox_api_client_async.models.computeruse_accessibility_node import ComputeruseAccessibilityNode
     from daytona_toolbox_api_client_async.models.create_context_request import CreateContextRequest
     from daytona_toolbox_api_client_async.models.create_session_request import CreateSessionRequest
     from daytona_toolbox_api_client_async.models.display_info import DisplayInfo
@@ -41,6 +48,7 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client_async.models.file_info import FileInfo
     from daytona_toolbox_api_client_async.models.file_status import FileStatus
     from daytona_toolbox_api_client_async.models.files_download_request import FilesDownloadRequest
+    from daytona_toolbox_api_client_async.models.find_accessibility_nodes_request import FindAccessibilityNodesRequest
     from daytona_toolbox_api_client_async.models.git_add_request import GitAddRequest
     from daytona_toolbox_api_client_async.models.git_branch_request import GitBranchRequest
     from daytona_toolbox_api_client_async.models.git_checkout_request import GitCheckoutRequest
@@ -107,6 +115,12 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client_async.models.work_dir_response import WorkDirResponse
 
 _DYNAMIC_IMPORTS: dict[str, str] = {
+    "AccessibilityBounds": "daytona_toolbox_api_client_async.models.accessibility_bounds",
+    "AccessibilityInvokeRequest": "daytona_toolbox_api_client_async.models.accessibility_invoke_request",
+    "AccessibilityNodeRequest": "daytona_toolbox_api_client_async.models.accessibility_node_request",
+    "AccessibilityNodesResponse": "daytona_toolbox_api_client_async.models.accessibility_nodes_response",
+    "AccessibilitySetValueRequest": "daytona_toolbox_api_client_async.models.accessibility_set_value_request",
+    "AccessibilityTreeResponse": "daytona_toolbox_api_client_async.models.accessibility_tree_response",
     "Chart": "daytona_toolbox_api_client_async.models.chart",
     "ChartElement": "daytona_toolbox_api_client_async.models.chart_element",
     "CodeRunArtifacts": "daytona_toolbox_api_client_async.models.code_run_artifacts",
@@ -119,6 +133,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "ComputerUseStartResponse": "daytona_toolbox_api_client_async.models.computer_use_start_response",
     "ComputerUseStatusResponse": "daytona_toolbox_api_client_async.models.computer_use_status_response",
     "ComputerUseStopResponse": "daytona_toolbox_api_client_async.models.computer_use_stop_response",
+    "ComputeruseAccessibilityNode": "daytona_toolbox_api_client_async.models.computeruse_accessibility_node",
     "CreateContextRequest": "daytona_toolbox_api_client_async.models.create_context_request",
     "CreateSessionRequest": "daytona_toolbox_api_client_async.models.create_session_request",
     "DisplayInfo": "daytona_toolbox_api_client_async.models.display_info",
@@ -128,6 +143,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "FileInfo": "daytona_toolbox_api_client_async.models.file_info",
     "FileStatus": "daytona_toolbox_api_client_async.models.file_status",
     "FilesDownloadRequest": "daytona_toolbox_api_client_async.models.files_download_request",
+    "FindAccessibilityNodesRequest": "daytona_toolbox_api_client_async.models.find_accessibility_nodes_request",
     "GitAddRequest": "daytona_toolbox_api_client_async.models.git_add_request",
     "GitBranchRequest": "daytona_toolbox_api_client_async.models.git_branch_request",
     "GitCheckoutRequest": "daytona_toolbox_api_client_async.models.git_checkout_request",

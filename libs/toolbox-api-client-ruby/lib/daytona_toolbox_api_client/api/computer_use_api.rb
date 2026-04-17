@@ -281,6 +281,208 @@ module DaytonaToolboxApiClient
       return data, status_code, headers
     end
 
+    # Find accessibility nodes
+    # Search the AT-SPI tree for nodes matching a role/name/state filter and return a flat list.
+    # @param request [FindAccessibilityNodesRequest] Find request
+    # @param [Hash] opts the optional parameters
+    # @return [AccessibilityNodesResponse]
+    def find_accessibility_nodes(request, opts = {})
+      data, _status_code, _headers = find_accessibility_nodes_with_http_info(request, opts)
+      data
+    end
+
+    # Find accessibility nodes
+    # Search the AT-SPI tree for nodes matching a role/name/state filter and return a flat list.
+    # @param request [FindAccessibilityNodesRequest] Find request
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(AccessibilityNodesResponse, Integer, Hash)>] AccessibilityNodesResponse data, response status code and response headers
+    def find_accessibility_nodes_with_http_info(request, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ComputerUseApi.find_accessibility_nodes ...'
+      end
+      # verify the required parameter 'request' is set
+      if @api_client.config.client_side_validation && request.nil?
+        fail ArgumentError, "Missing the required parameter 'request' when calling ComputerUseApi.find_accessibility_nodes"
+      end
+      # resource path
+      local_var_path = '/computeruse/a11y/find'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(request)
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'AccessibilityNodesResponse'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ComputerUseApi.find_accessibility_nodes",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ComputerUseApi#find_accessibility_nodes\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Focus an accessibility node
+    # Move keyboard focus to the AT-SPI node identified by id (bus-name:object-path).
+    # @param request [AccessibilityNodeRequest] Node focus request
+    # @param [Hash] opts the optional parameters
+    # @return [Object]
+    def focus_accessibility_node(request, opts = {})
+      data, _status_code, _headers = focus_accessibility_node_with_http_info(request, opts)
+      data
+    end
+
+    # Focus an accessibility node
+    # Move keyboard focus to the AT-SPI node identified by id (bus-name:object-path).
+    # @param request [AccessibilityNodeRequest] Node focus request
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(Object, Integer, Hash)>] Object data, response status code and response headers
+    def focus_accessibility_node_with_http_info(request, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ComputerUseApi.focus_accessibility_node ...'
+      end
+      # verify the required parameter 'request' is set
+      if @api_client.config.client_side_validation && request.nil?
+        fail ArgumentError, "Missing the required parameter 'request' when calling ComputerUseApi.focus_accessibility_node"
+      end
+      # resource path
+      local_var_path = '/computeruse/a11y/node/focus'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(request)
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Object'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ComputerUseApi.focus_accessibility_node",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ComputerUseApi#focus_accessibility_node\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Get accessibility tree
+    # Fetch the AT-SPI accessibility tree for the focused application, a specific PID, or all registered applications.
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :scope Scope: focused | pid | all (default: focused)
+    # @option opts [Integer] :pid Process ID when scope&#x3D;pid
+    # @option opts [Integer] :max_depth Max tree depth (-1 unbounded, 0 root only; default -1)
+    # @return [AccessibilityTreeResponse]
+    def get_accessibility_tree(opts = {})
+      data, _status_code, _headers = get_accessibility_tree_with_http_info(opts)
+      data
+    end
+
+    # Get accessibility tree
+    # Fetch the AT-SPI accessibility tree for the focused application, a specific PID, or all registered applications.
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :scope Scope: focused | pid | all (default: focused)
+    # @option opts [Integer] :pid Process ID when scope&#x3D;pid
+    # @option opts [Integer] :max_depth Max tree depth (-1 unbounded, 0 root only; default -1)
+    # @return [Array<(AccessibilityTreeResponse, Integer, Hash)>] AccessibilityTreeResponse data, response status code and response headers
+    def get_accessibility_tree_with_http_info(opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ComputerUseApi.get_accessibility_tree ...'
+      end
+      # resource path
+      local_var_path = '/computeruse/a11y/tree'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+      query_params[:'scope'] = opts[:'scope'] if !opts[:'scope'].nil?
+      query_params[:'pid'] = opts[:'pid'] if !opts[:'pid'].nil?
+      query_params[:'maxDepth'] = opts[:'max_depth'] if !opts[:'max_depth'].nil?
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'AccessibilityTreeResponse'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ComputerUseApi.get_accessibility_tree",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ComputerUseApi#get_accessibility_tree\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Get computer use process status
     # Get the status of all computer use processes
     # @param [Hash] opts the optional parameters
@@ -818,6 +1020,74 @@ module DaytonaToolboxApiClient
       return data, status_code, headers
     end
 
+    # Invoke an action on an accessibility node
+    # Call an AT-SPI Action on the node. Leave action empty to invoke the node's primary (first) action.
+    # @param request [AccessibilityInvokeRequest] Invoke request
+    # @param [Hash] opts the optional parameters
+    # @return [Object]
+    def invoke_accessibility_node(request, opts = {})
+      data, _status_code, _headers = invoke_accessibility_node_with_http_info(request, opts)
+      data
+    end
+
+    # Invoke an action on an accessibility node
+    # Call an AT-SPI Action on the node. Leave action empty to invoke the node&#39;s primary (first) action.
+    # @param request [AccessibilityInvokeRequest] Invoke request
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(Object, Integer, Hash)>] Object data, response status code and response headers
+    def invoke_accessibility_node_with_http_info(request, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ComputerUseApi.invoke_accessibility_node ...'
+      end
+      # verify the required parameter 'request' is set
+      if @api_client.config.client_side_validation && request.nil?
+        fail ArgumentError, "Missing the required parameter 'request' when calling ComputerUseApi.invoke_accessibility_node"
+      end
+      # resource path
+      local_var_path = '/computeruse/a11y/node/invoke'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(request)
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Object'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ComputerUseApi.invoke_accessibility_node",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ComputerUseApi#invoke_accessibility_node\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # List all recordings
     # Get a list of all recordings (active and completed)
     # @param [Hash] opts the optional parameters
@@ -1206,6 +1476,74 @@ module DaytonaToolboxApiClient
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: ComputerUseApi#scroll\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Set the value of an accessibility node
+    # Write the given value to the node via EditableText.SetTextContents or, for numeric controls, Value.CurrentValue.
+    # @param request [AccessibilitySetValueRequest] Set value request
+    # @param [Hash] opts the optional parameters
+    # @return [Object]
+    def set_accessibility_node_value(request, opts = {})
+      data, _status_code, _headers = set_accessibility_node_value_with_http_info(request, opts)
+      data
+    end
+
+    # Set the value of an accessibility node
+    # Write the given value to the node via EditableText.SetTextContents or, for numeric controls, Value.CurrentValue.
+    # @param request [AccessibilitySetValueRequest] Set value request
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(Object, Integer, Hash)>] Object data, response status code and response headers
+    def set_accessibility_node_value_with_http_info(request, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ComputerUseApi.set_accessibility_node_value ...'
+      end
+      # verify the required parameter 'request' is set
+      if @api_client.config.client_side_validation && request.nil?
+        fail ArgumentError, "Missing the required parameter 'request' when calling ComputerUseApi.set_accessibility_node_value"
+      end
+      # resource path
+      local_var_path = '/computeruse/a11y/node/value'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(request)
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Object'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ComputerUseApi.set_accessibility_node_value",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ComputerUseApi#set_accessibility_node_value\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end

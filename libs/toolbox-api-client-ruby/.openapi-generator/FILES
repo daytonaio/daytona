@@ -16,6 +16,12 @@ lib/daytona_toolbox_api_client/api/server_api.rb
 lib/daytona_toolbox_api_client/api_client.rb
 lib/daytona_toolbox_api_client/api_error.rb
 lib/daytona_toolbox_api_client/configuration.rb
+lib/daytona_toolbox_api_client/models/accessibility_bounds.rb
+lib/daytona_toolbox_api_client/models/accessibility_invoke_request.rb
+lib/daytona_toolbox_api_client/models/accessibility_node_request.rb
+lib/daytona_toolbox_api_client/models/accessibility_nodes_response.rb
+lib/daytona_toolbox_api_client/models/accessibility_set_value_request.rb
+lib/daytona_toolbox_api_client/models/accessibility_tree_response.rb
 lib/daytona_toolbox_api_client/models/chart.rb
 lib/daytona_toolbox_api_client/models/chart_element.rb
 lib/daytona_toolbox_api_client/models/code_run_artifacts.rb
@@ -28,6 +34,7 @@ lib/daytona_toolbox_api_client/models/completion_list.rb
 lib/daytona_toolbox_api_client/models/computer_use_start_response.rb
 lib/daytona_toolbox_api_client/models/computer_use_status_response.rb
 lib/daytona_toolbox_api_client/models/computer_use_stop_response.rb
+lib/daytona_toolbox_api_client/models/computeruse_accessibility_node.rb
 lib/daytona_toolbox_api_client/models/create_context_request.rb
 lib/daytona_toolbox_api_client/models/create_session_request.rb
 lib/daytona_toolbox_api_client/models/display_info.rb
@@ -37,6 +44,7 @@ lib/daytona_toolbox_api_client/models/execute_response.rb
 lib/daytona_toolbox_api_client/models/file_info.rb
 lib/daytona_toolbox_api_client/models/file_status.rb
 lib/daytona_toolbox_api_client/models/files_download_request.rb
+lib/daytona_toolbox_api_client/models/find_accessibility_nodes_request.rb
 lib/daytona_toolbox_api_client/models/git_add_request.rb
 lib/daytona_toolbox_api_client/models/git_branch_request.rb
 lib/daytona_toolbox_api_client/models/git_checkout_request.rb

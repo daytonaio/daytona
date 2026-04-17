@@ -81,6 +81,48 @@ type ComputerUseAPI interface {
 	DragExecute(r ComputerUseAPIDragRequest) (*MouseDragResponse, *http.Response, error)
 
 	/*
+	FindAccessibilityNodes Find accessibility nodes
+
+	Search the AT-SPI tree for nodes matching a role/name/state filter and return a flat list.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ComputerUseAPIFindAccessibilityNodesRequest
+	*/
+	FindAccessibilityNodes(ctx context.Context) ComputerUseAPIFindAccessibilityNodesRequest
+
+	// FindAccessibilityNodesExecute executes the request
+	//  @return AccessibilityNodesResponse
+	FindAccessibilityNodesExecute(r ComputerUseAPIFindAccessibilityNodesRequest) (*AccessibilityNodesResponse, *http.Response, error)
+
+	/*
+	FocusAccessibilityNode Focus an accessibility node
+
+	Move keyboard focus to the AT-SPI node identified by id (bus-name:object-path).
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ComputerUseAPIFocusAccessibilityNodeRequest
+	*/
+	FocusAccessibilityNode(ctx context.Context) ComputerUseAPIFocusAccessibilityNodeRequest
+
+	// FocusAccessibilityNodeExecute executes the request
+	//  @return map[string]interface{}
+	FocusAccessibilityNodeExecute(r ComputerUseAPIFocusAccessibilityNodeRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	GetAccessibilityTree Get accessibility tree
+
+	Fetch the AT-SPI accessibility tree for the focused application, a specific PID, or all registered applications.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ComputerUseAPIGetAccessibilityTreeRequest
+	*/
+	GetAccessibilityTree(ctx context.Context) ComputerUseAPIGetAccessibilityTreeRequest
+
+	// GetAccessibilityTreeExecute executes the request
+	//  @return AccessibilityTreeResponse
+	GetAccessibilityTreeExecute(r ComputerUseAPIGetAccessibilityTreeRequest) (*AccessibilityTreeResponse, *http.Response, error)
+
+	/*
 	GetComputerUseStatus Get computer use process status
 
 	Get the status of all computer use processes
@@ -211,6 +253,20 @@ type ComputerUseAPI interface {
 	GetWindowsExecute(r ComputerUseAPIGetWindowsRequest) (*WindowsResponse, *http.Response, error)
 
 	/*
+	InvokeAccessibilityNode Invoke an action on an accessibility node
+
+	Call an AT-SPI Action on the node. Leave action empty to invoke the node's primary (first) action.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ComputerUseAPIInvokeAccessibilityNodeRequest
+	*/
+	InvokeAccessibilityNode(ctx context.Context) ComputerUseAPIInvokeAccessibilityNodeRequest
+
+	// InvokeAccessibilityNodeExecute executes the request
+	//  @return map[string]interface{}
+	InvokeAccessibilityNodeExecute(r ComputerUseAPIInvokeAccessibilityNodeRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
 	ListRecordings List all recordings
 
 	Get a list of all recordings (active and completed)
@@ -294,6 +350,20 @@ type ComputerUseAPI interface {
 	// ScrollExecute executes the request
 	//  @return ScrollResponse
 	ScrollExecute(r ComputerUseAPIScrollRequest) (*ScrollResponse, *http.Response, error)
+
+	/*
+	SetAccessibilityNodeValue Set the value of an accessibility node
+
+	Write the given value to the node via EditableText.SetTextContents or, for numeric controls, Value.CurrentValue.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ComputerUseAPISetAccessibilityNodeValueRequest
+	*/
+	SetAccessibilityNodeValue(ctx context.Context) ComputerUseAPISetAccessibilityNodeValueRequest
+
+	// SetAccessibilityNodeValueExecute executes the request
+	//  @return map[string]interface{}
+	SetAccessibilityNodeValueExecute(r ComputerUseAPISetAccessibilityNodeValueRequest) (map[string]interface{}, *http.Response, error)
 
 	/*
 	StartComputerUse Start computer use processes
@@ -879,6 +949,453 @@ func (a *ComputerUseAPIService) DragExecute(r ComputerUseAPIDragRequest) (*Mouse
 		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ComputerUseAPIFindAccessibilityNodesRequest struct {
+	ctx context.Context
+	ApiService ComputerUseAPI
+	request *FindAccessibilityNodesRequest
+}
+
+// Find request
+func (r ComputerUseAPIFindAccessibilityNodesRequest) Request(request FindAccessibilityNodesRequest) ComputerUseAPIFindAccessibilityNodesRequest {
+	r.request = &request
+	return r
+}
+
+func (r ComputerUseAPIFindAccessibilityNodesRequest) Execute() (*AccessibilityNodesResponse, *http.Response, error) {
+	return r.ApiService.FindAccessibilityNodesExecute(r)
+}
+
+/*
+FindAccessibilityNodes Find accessibility nodes
+
+Search the AT-SPI tree for nodes matching a role/name/state filter and return a flat list.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ComputerUseAPIFindAccessibilityNodesRequest
+*/
+func (a *ComputerUseAPIService) FindAccessibilityNodes(ctx context.Context) ComputerUseAPIFindAccessibilityNodesRequest {
+	return ComputerUseAPIFindAccessibilityNodesRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return AccessibilityNodesResponse
+func (a *ComputerUseAPIService) FindAccessibilityNodesExecute(r ComputerUseAPIFindAccessibilityNodesRequest) (*AccessibilityNodesResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *AccessibilityNodesResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputerUseAPIService.FindAccessibilityNodes")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/computeruse/a11y/find"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.request == nil {
+		return localVarReturnValue, nil, reportError("request is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.request
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ComputerUseAPIFocusAccessibilityNodeRequest struct {
+	ctx context.Context
+	ApiService ComputerUseAPI
+	request *AccessibilityNodeRequest
+}
+
+// Node focus request
+func (r ComputerUseAPIFocusAccessibilityNodeRequest) Request(request AccessibilityNodeRequest) ComputerUseAPIFocusAccessibilityNodeRequest {
+	r.request = &request
+	return r
+}
+
+func (r ComputerUseAPIFocusAccessibilityNodeRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.FocusAccessibilityNodeExecute(r)
+}
+
+/*
+FocusAccessibilityNode Focus an accessibility node
+
+Move keyboard focus to the AT-SPI node identified by id (bus-name:object-path).
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ComputerUseAPIFocusAccessibilityNodeRequest
+*/
+func (a *ComputerUseAPIService) FocusAccessibilityNode(ctx context.Context) ComputerUseAPIFocusAccessibilityNodeRequest {
+	return ComputerUseAPIFocusAccessibilityNodeRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *ComputerUseAPIService) FocusAccessibilityNodeExecute(r ComputerUseAPIFocusAccessibilityNodeRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputerUseAPIService.FocusAccessibilityNode")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/computeruse/a11y/node/focus"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.request == nil {
+		return localVarReturnValue, nil, reportError("request is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.request
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ComputerUseAPIGetAccessibilityTreeRequest struct {
+	ctx context.Context
+	ApiService ComputerUseAPI
+	scope *string
+	pid *int32
+	maxDepth *int32
+}
+
+// Scope: focused | pid | all (default: focused)
+func (r ComputerUseAPIGetAccessibilityTreeRequest) Scope(scope string) ComputerUseAPIGetAccessibilityTreeRequest {
+	r.scope = &scope
+	return r
+}
+
+// Process ID when scope&#x3D;pid
+func (r ComputerUseAPIGetAccessibilityTreeRequest) Pid(pid int32) ComputerUseAPIGetAccessibilityTreeRequest {
+	r.pid = &pid
+	return r
+}
+
+// Max tree depth (-1 unbounded, 0 root only; default -1)
+func (r ComputerUseAPIGetAccessibilityTreeRequest) MaxDepth(maxDepth int32) ComputerUseAPIGetAccessibilityTreeRequest {
+	r.maxDepth = &maxDepth
+	return r
+}
+
+func (r ComputerUseAPIGetAccessibilityTreeRequest) Execute() (*AccessibilityTreeResponse, *http.Response, error) {
+	return r.ApiService.GetAccessibilityTreeExecute(r)
+}
+
+/*
+GetAccessibilityTree Get accessibility tree
+
+Fetch the AT-SPI accessibility tree for the focused application, a specific PID, or all registered applications.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ComputerUseAPIGetAccessibilityTreeRequest
+*/
+func (a *ComputerUseAPIService) GetAccessibilityTree(ctx context.Context) ComputerUseAPIGetAccessibilityTreeRequest {
+	return ComputerUseAPIGetAccessibilityTreeRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return AccessibilityTreeResponse
+func (a *ComputerUseAPIService) GetAccessibilityTreeExecute(r ComputerUseAPIGetAccessibilityTreeRequest) (*AccessibilityTreeResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *AccessibilityTreeResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputerUseAPIService.GetAccessibilityTree")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/computeruse/a11y/tree"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.scope != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "scope", r.scope, "", "")
+	}
+	if r.pid != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "pid", r.pid, "", "")
+	}
+	if r.maxDepth != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "maxDepth", r.maxDepth, "", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -1823,6 +2340,149 @@ func (a *ComputerUseAPIService) GetWindowsExecute(r ComputerUseAPIGetWindowsRequ
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ComputerUseAPIInvokeAccessibilityNodeRequest struct {
+	ctx context.Context
+	ApiService ComputerUseAPI
+	request *AccessibilityInvokeRequest
+}
+
+// Invoke request
+func (r ComputerUseAPIInvokeAccessibilityNodeRequest) Request(request AccessibilityInvokeRequest) ComputerUseAPIInvokeAccessibilityNodeRequest {
+	r.request = &request
+	return r
+}
+
+func (r ComputerUseAPIInvokeAccessibilityNodeRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.InvokeAccessibilityNodeExecute(r)
+}
+
+/*
+InvokeAccessibilityNode Invoke an action on an accessibility node
+
+Call an AT-SPI Action on the node. Leave action empty to invoke the node's primary (first) action.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ComputerUseAPIInvokeAccessibilityNodeRequest
+*/
+func (a *ComputerUseAPIService) InvokeAccessibilityNode(ctx context.Context) ComputerUseAPIInvokeAccessibilityNodeRequest {
+	return ComputerUseAPIInvokeAccessibilityNodeRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *ComputerUseAPIService) InvokeAccessibilityNodeExecute(r ComputerUseAPIInvokeAccessibilityNodeRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputerUseAPIService.InvokeAccessibilityNode")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/computeruse/a11y/node/invoke"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.request == nil {
+		return localVarReturnValue, nil, reportError("request is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.request
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ComputerUseAPIListRecordingsRequest struct {
 	ctx context.Context
 	ApiService ComputerUseAPI
@@ -2463,6 +3123,149 @@ func (a *ComputerUseAPIService) ScrollExecute(r ComputerUseAPIScrollRequest) (*S
 		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ComputerUseAPISetAccessibilityNodeValueRequest struct {
+	ctx context.Context
+	ApiService ComputerUseAPI
+	request *AccessibilitySetValueRequest
+}
+
+// Set value request
+func (r ComputerUseAPISetAccessibilityNodeValueRequest) Request(request AccessibilitySetValueRequest) ComputerUseAPISetAccessibilityNodeValueRequest {
+	r.request = &request
+	return r
+}
+
+func (r ComputerUseAPISetAccessibilityNodeValueRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.SetAccessibilityNodeValueExecute(r)
+}
+
+/*
+SetAccessibilityNodeValue Set the value of an accessibility node
+
+Write the given value to the node via EditableText.SetTextContents or, for numeric controls, Value.CurrentValue.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ComputerUseAPISetAccessibilityNodeValueRequest
+*/
+func (a *ComputerUseAPIService) SetAccessibilityNodeValue(ctx context.Context) ComputerUseAPISetAccessibilityNodeValueRequest {
+	return ComputerUseAPISetAccessibilityNodeValueRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *ComputerUseAPIService) SetAccessibilityNodeValueExecute(r ComputerUseAPISetAccessibilityNodeValueRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputerUseAPIService.SetAccessibilityNodeValue")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/computeruse/a11y/node/value"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.request == nil {
+		return localVarReturnValue, nil, reportError("request is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.request
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
