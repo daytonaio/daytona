@@ -7,12 +7,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
 )
 
 // RecoverFromStorageLimit attempts to recover a sandbox from storage limit issues
 // by expanding its storage quota by creating new ones with 100MB increments up to 10% of original.
-func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId string, originalStorageQuota float64) error {
+func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId string, originalStorageQuota float64, recoverDto dto.RecoverSandboxDTO) error {
 	originalContainer, err := d.ContainerInspect(ctx, sandboxId)
 	if err != nil {
 		return fmt.Errorf("failed to inspect container: %w", err)
@@ -59,5 +60,5 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 		}
 	}
 
-	return d.ContainerDiskResize(ctx, sandboxId, newStorageQuota, 0, 0, "recovery")
+	return d.ContainerDiskResize(ctx, sandboxId, newStorageQuota, 0, 0, "recovery", recoverDto.Registry)
 }

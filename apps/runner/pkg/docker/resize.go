@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/containerd/errdefs"
 	"github.com/daytonaio/common-go/pkg/utils"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
@@ -29,7 +30,7 @@ func (d *DockerClient) Resize(ctx context.Context, sandboxId string, sandboxDto 
 			return fmt.Errorf("disk resize requires stopped container")
 		}
 
-		err = d.ContainerDiskResize(ctx, sandboxId, float64(sandboxDto.Disk), sandboxDto.Cpu, sandboxDto.Memory, "resize")
+		err = d.ContainerDiskResize(ctx, sandboxId, float64(sandboxDto.Disk), sandboxDto.Cpu, sandboxDto.Memory, "resize", nil)
 		if err != nil {
 			return err
 		}
@@ -67,7 +68,7 @@ func (d *DockerClient) Resize(ctx context.Context, sandboxId string, sandboxDto 
 // Optionally updates CPU/memory at the same time (0 = don't change).
 // Used by both storage recovery and disk resize.
 // Container must be stopped before calling this function.
-func (d *DockerClient) ContainerDiskResize(ctx context.Context, sandboxId string, newStorageGB float64, cpu int64, memory int64, operationName string) error {
+func (d *DockerClient) ContainerDiskResize(ctx context.Context, sandboxId string, newStorageGB float64, cpu int64, memory int64, operationName string, registry *dto.RegistryDTO) error {
 	if d.filesystem != "xfs" {
 		return fmt.Errorf("%s requires XFS filesystem, current filesystem: %s", operationName, d.filesystem)
 	}
@@ -88,6 +89,12 @@ func (d *DockerClient) ContainerDiskResize(ctx context.Context, sandboxId string
 		}
 	}
 
+	resolvedImage, err := d.resolveContainerImage(ctx, originalContainer, registry)
+	if err != nil {
+		return err
+	}
+	originalContainer.Config.Image = resolvedImage
+
 	// Rename container after validation checks to reduce error handling complexity
 	timestamp := time.Now().Unix()
 	oldName := fmt.Sprintf("%s-%s-%d", sandboxId, operationName, timestamp)
@@ -96,16 +103,6 @@ func (d *DockerClient) ContainerDiskResize(ctx context.Context, sandboxId string
 	err = d.apiClient.ContainerRename(ctx, sandboxId, oldName)
 	if err != nil {
 		return fmt.Errorf("failed to rename container: %w", err)
-	}
-
-	// Ensure the image is available for container recreation.
-	// If the image tag was pruned (e.g., declarative-build or backup snapshot),
-	// fall back to the image ID — Docker retains layers while the container exists.
-	imageRef := originalContainer.Config.Image
-	imageExists, _ := d.ImageExists(ctx, imageRef, true)
-	if !imageExists {
-		d.logger.Warn("Image is not found by tag, falling back to image ID", "imageRef", imageRef, "imageID", originalContainer.Image)
-		originalContainer.Config.Image = originalContainer.Image
 	}
 
 	// Create new container with new storage
@@ -211,4 +208,36 @@ func (d *DockerClient) copyContainerOverlayData(ctx context.Context, oldContaine
 	defer cancel()
 
 	return common.RsyncCopy(copyCtx, d.logger, oldContainerOverlayPath, newUpperDir)
+}
+
+func (d *DockerClient) resolveContainerImage(ctx context.Context, originalContainer *container.InspectResponse, registry *dto.RegistryDTO) (string, error) {
+	imageRef := originalContainer.Config.Image
+
+	_, err := d.apiClient.ImageInspect(ctx, imageRef)
+	if err == nil {
+		return imageRef, nil
+	}
+	if !errdefs.IsNotFound(err) {
+		return "", fmt.Errorf("failed to inspect image %s: %w", imageRef, err)
+	}
+
+	_, idErr := d.apiClient.ImageInspect(ctx, originalContainer.Image)
+	if idErr == nil {
+		d.logger.WarnContext(ctx, "Image not found by tag, falling back to image ID",
+			"imageRef", imageRef, "imageID", originalContainer.Image)
+		return originalContainer.Image, nil
+	}
+	if !errdefs.IsNotFound(idErr) {
+		return "", fmt.Errorf("failed to inspect image by ID %s: %w", originalContainer.Image, idErr)
+	}
+
+	if registry == nil {
+		return "", fmt.Errorf("image %s not available locally and no registry provided", imageRef)
+	}
+	d.logger.WarnContext(ctx, "Image not found locally, pulling from registry before resize",
+		"containerName", originalContainer.Name, "imageRef", imageRef)
+	if _, pullErr := d.PullImage(ctx, imageRef, registry, nil); pullErr != nil {
+		return "", fmt.Errorf("image %s not available locally and pull failed: %w", imageRef, pullErr)
+	}
+	return imageRef, nil
 }

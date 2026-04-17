@@ -57,6 +57,7 @@ type RecoverSandboxDTO struct {
 	NetworkAllowList  *string           `json:"networkAllowList,omitempty"`
 	ErrorReason       string            `json:"errorReason" validate:"required"`
 	BackupErrorReason string            `json:"backupErrorReason,omitempty"`
+	Registry          *RegistryDTO      `json:"registry,omitempty"`
 } //	@name	RecoverSandboxDTO
 
 type IsRecoverableDTO struct {
