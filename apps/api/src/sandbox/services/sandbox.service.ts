@@ -1929,8 +1929,12 @@ export class SandboxService {
 
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
+      const backupRegistry = sandbox.backupRegistryId
+        ? ((await this.dockerRegistryService.findOne(sandbox.backupRegistryId)) ?? undefined)
+        : undefined
+
       try {
-        await runnerAdapter.recoverSandbox(sandbox, skipStart)
+        await runnerAdapter.recoverSandbox(sandbox, backupRegistry, skipStart)
       } catch (error) {
         if (error instanceof Error && error.message.includes('storage cannot be further expanded')) {
           throw new ForbiddenException(

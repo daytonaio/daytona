@@ -223,7 +223,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     this.logger.debug(`Created DESTROY_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }
 
-  async recoverSandbox(sandbox: Sandbox, skipStart = false): Promise<void> {
+  async recoverSandbox(sandbox: Sandbox, registry?: DockerRegistry, skipStart = false): Promise<void> {
     const recoverSandboxDTO: RecoverSandboxDTO = {
       userId: sandbox.organizationId,
       snapshot: sandbox.snapshot,
@@ -242,6 +242,14 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       networkAllowList: sandbox.networkAllowList,
       errorReason: sandbox.errorReason,
       backupErrorReason: sandbox.backupErrorReason,
+      registry: registry
+        ? {
+            project: registry.project,
+            url: registry.url.replace(/^(https?:\/\/)/, ''),
+            username: registry.username,
+            password: registry.password,
+          }
+        : undefined,
     }
     // skipStart is API-side metadata for the job-completion handler; the runner ignores extra fields.
     await this.jobService.createJob(null, JobType.RECOVER_SANDBOX, this.runner.id, ResourceType.SANDBOX, sandbox.id, {
