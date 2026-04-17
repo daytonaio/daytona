@@ -46,6 +46,8 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     await this.dataSource.transaction(async (entityManager) => {
       await entityManager.insert(Sandbox, sandbox)
       await this.upsertLastActivity(entityManager, sandbox.id, sandbox.createdAt)
+      sandbox.lastActivityAt = { sandboxId: sandbox.id, lastActivityAt: sandbox.createdAt }
+
       if (parentId) {
         await entityManager.insert(SandboxFork, {
           parentId,
@@ -116,6 +118,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
 
       if (previousSandbox.state !== sandbox.state || previousSandbox.organizationId !== sandbox.organizationId) {
         await this.upsertLastActivity(entityManager, id, sandbox.updatedAt)
+        sandbox.lastActivityAt = { sandboxId: id, lastActivityAt: sandbox.updatedAt }
       }
     })
 
@@ -173,6 +176,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
 
       if (previousSandbox.state !== sandbox.state || previousSandbox.organizationId !== sandbox.organizationId) {
         await this.upsertLastActivity(entityManager, id, sandbox.updatedAt)
+        sandbox.lastActivityAt = { sandboxId: id, lastActivityAt: sandbox.updatedAt }
       }
 
       this.emitUpdateEvents(sandbox, previousSandbox)
