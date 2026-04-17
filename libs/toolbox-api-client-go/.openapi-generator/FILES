@@ -13,6 +13,12 @@ client.go
 configuration.go
 go.mod
 go.sum
+model_accessibility_bounds.go
+model_accessibility_invoke_request.go
+model_accessibility_node_request.go
+model_accessibility_nodes_response.go
+model_accessibility_set_value_request.go
+model_accessibility_tree_response.go
 model_chart.go
 model_chart_element.go
 model_code_run_artifacts.go
@@ -25,6 +31,7 @@ model_completion_list.go
 model_computer_use_start_response.go
 model_computer_use_status_response.go
 model_computer_use_stop_response.go
+model_computeruse_accessibility_node.go
 model_create_context_request.go
 model_create_session_request.go
 model_display_info.go
@@ -34,6 +41,7 @@ model_execute_response.go
 model_file_info.go
 model_file_status.go
 model_files_download_request.go
+model_find_accessibility_nodes_request.go
 model_git_add_request.go
 model_git_branch_request.go
 model_git_checkout_request.go

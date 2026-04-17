@@ -14,12 +14,18 @@
 package io.daytona.toolbox.client.api;
 
 import io.daytona.toolbox.client.ApiException;
+import io.daytona.toolbox.client.model.AccessibilityInvokeRequest;
+import io.daytona.toolbox.client.model.AccessibilityNodeRequest;
+import io.daytona.toolbox.client.model.AccessibilityNodesResponse;
+import io.daytona.toolbox.client.model.AccessibilitySetValueRequest;
+import io.daytona.toolbox.client.model.AccessibilityTreeResponse;
 import java.math.BigDecimal;
 import io.daytona.toolbox.client.model.ComputerUseStartResponse;
 import io.daytona.toolbox.client.model.ComputerUseStatusResponse;
 import io.daytona.toolbox.client.model.ComputerUseStopResponse;
 import io.daytona.toolbox.client.model.DisplayInfoResponse;
 import java.io.File;
+import io.daytona.toolbox.client.model.FindAccessibilityNodesRequest;
 import io.daytona.toolbox.client.model.KeyboardHotkeyRequest;
 import io.daytona.toolbox.client.model.KeyboardPressRequest;
 import io.daytona.toolbox.client.model.KeyboardTypeRequest;
@@ -110,6 +116,50 @@ public class ComputerUseApiTest {
     public void dragTest() throws ApiException {
         MouseDragRequest request = null;
         MouseDragResponse response = api.drag(request);
+        // TODO: test validations
+    }
+
+    /**
+     * Find accessibility nodes
+     *
+     * Search the AT-SPI tree for nodes matching a role/name/state filter and return a flat list.
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void findAccessibilityNodesTest() throws ApiException {
+        FindAccessibilityNodesRequest request = null;
+        AccessibilityNodesResponse response = api.findAccessibilityNodes(request);
+        // TODO: test validations
+    }
+
+    /**
+     * Focus an accessibility node
+     *
+     * Move keyboard focus to the AT-SPI node identified by id (bus-name:object-path).
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void focusAccessibilityNodeTest() throws ApiException {
+        AccessibilityNodeRequest request = null;
+        Object response = api.focusAccessibilityNode(request);
+        // TODO: test validations
+    }
+
+    /**
+     * Get accessibility tree
+     *
+     * Fetch the AT-SPI accessibility tree for the focused application, a specific PID, or all registered applications.
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void getAccessibilityTreeTest() throws ApiException {
+        String scope = null;
+        Integer pid = null;
+        Integer maxDepth = null;
+        AccessibilityTreeResponse response = api.getAccessibilityTree(scope, pid, maxDepth);
         // TODO: test validations
     }
 
@@ -235,6 +285,20 @@ public class ComputerUseApiTest {
     }
 
     /**
+     * Invoke an action on an accessibility node
+     *
+     * Call an AT-SPI Action on the node. Leave action empty to invoke the node&#39;s primary (first) action.
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void invokeAccessibilityNodeTest() throws ApiException {
+        AccessibilityInvokeRequest request = null;
+        Object response = api.invokeAccessibilityNode(request);
+        // TODO: test validations
+    }
+
+    /**
      * List all recordings
      *
      * Get a list of all recordings (active and completed)
@@ -314,6 +378,20 @@ public class ComputerUseApiTest {
     public void scrollTest() throws ApiException {
         MouseScrollRequest request = null;
         ScrollResponse response = api.scroll(request);
+        // TODO: test validations
+    }
+
+    /**
+     * Set the value of an accessibility node
+     *
+     * Write the given value to the node via EditableText.SetTextContents or, for numeric controls, Value.CurrentValue.
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void setAccessibilityNodeValueTest() throws ApiException {
+        AccessibilitySetValueRequest request = null;
+        Object response = api.setAccessibilityNodeValue(request);
         // TODO: test validations
     }
 

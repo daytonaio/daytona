@@ -15,6 +15,12 @@ daytona_toolbox_api_client/api_response.py
 daytona_toolbox_api_client/configuration.py
 daytona_toolbox_api_client/exceptions.py
 daytona_toolbox_api_client/models/__init__.py
+daytona_toolbox_api_client/models/accessibility_bounds.py
+daytona_toolbox_api_client/models/accessibility_invoke_request.py
+daytona_toolbox_api_client/models/accessibility_node_request.py
+daytona_toolbox_api_client/models/accessibility_nodes_response.py
+daytona_toolbox_api_client/models/accessibility_set_value_request.py
+daytona_toolbox_api_client/models/accessibility_tree_response.py
 daytona_toolbox_api_client/models/chart.py
 daytona_toolbox_api_client/models/chart_element.py
 daytona_toolbox_api_client/models/code_run_artifacts.py
@@ -27,6 +33,7 @@ daytona_toolbox_api_client/models/completion_list.py
 daytona_toolbox_api_client/models/computer_use_start_response.py
 daytona_toolbox_api_client/models/computer_use_status_response.py
 daytona_toolbox_api_client/models/computer_use_stop_response.py
+daytona_toolbox_api_client/models/computeruse_accessibility_node.py
 daytona_toolbox_api_client/models/create_context_request.py
 daytona_toolbox_api_client/models/create_session_request.py
 daytona_toolbox_api_client/models/display_info.py
@@ -36,6 +43,7 @@ daytona_toolbox_api_client/models/execute_response.py
 daytona_toolbox_api_client/models/file_info.py
 daytona_toolbox_api_client/models/file_status.py
 daytona_toolbox_api_client/models/files_download_request.py
+daytona_toolbox_api_client/models/find_accessibility_nodes_request.py
 daytona_toolbox_api_client/models/git_add_request.py
 daytona_toolbox_api_client/models/git_branch_request.py
 daytona_toolbox_api_client/models/git_checkout_request.py
