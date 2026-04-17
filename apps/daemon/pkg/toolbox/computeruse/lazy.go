@@ -237,6 +237,48 @@ func (l *LazyComputerUse) GetStatus() (*ComputerUseStatusResponse, error) {
 	return impl.GetStatus()
 }
 
+// --- Accessibility (AT-SPI) proxy methods ---
+
+func (l *LazyComputerUse) GetAccessibilityTree(req *GetAccessibilityTreeRequest) (*AccessibilityTreeResponse, error) {
+	impl, err := l.get()
+	if err != nil {
+		return nil, err
+	}
+	return impl.GetAccessibilityTree(req)
+}
+
+func (l *LazyComputerUse) FindAccessibilityNodes(req *FindAccessibilityNodesRequest) (*AccessibilityNodesResponse, error) {
+	impl, err := l.get()
+	if err != nil {
+		return nil, err
+	}
+	return impl.FindAccessibilityNodes(req)
+}
+
+func (l *LazyComputerUse) FocusAccessibilityNode(req *AccessibilityNodeRequest) (*Empty, error) {
+	impl, err := l.get()
+	if err != nil {
+		return nil, err
+	}
+	return impl.FocusAccessibilityNode(req)
+}
+
+func (l *LazyComputerUse) InvokeAccessibilityNode(req *AccessibilityInvokeRequest) (*Empty, error) {
+	impl, err := l.get()
+	if err != nil {
+		return nil, err
+	}
+	return impl.InvokeAccessibilityNode(req)
+}
+
+func (l *LazyComputerUse) SetAccessibilityNodeValue(req *AccessibilitySetValueRequest) (*Empty, error) {
+	impl, err := l.get()
+	if err != nil {
+		return nil, err
+	}
+	return impl.SetAccessibilityNodeValue(req)
+}
+
 // LazyCheckMiddleware returns 503 if the computer-use plugin has not loaded yet.
 func LazyCheckMiddleware(lazy *LazyComputerUse) gin.HandlerFunc {
 	return func(c *gin.Context) {

@@ -150,3 +150,31 @@ func (m *ComputerUseRPCClient) GetStatus() (*ComputerUseStatusResponse, error) {
 	err := m.client.Call("Plugin.GetStatus", new(any), &resp)
 	return &resp, err
 }
+
+// Accessibility (AT-SPI) methods
+func (m *ComputerUseRPCClient) GetAccessibilityTree(request *GetAccessibilityTreeRequest) (*AccessibilityTreeResponse, error) {
+	var resp AccessibilityTreeResponse
+	err := m.client.Call("Plugin.GetAccessibilityTree", request, &resp)
+	return &resp, err
+}
+
+func (m *ComputerUseRPCClient) FindAccessibilityNodes(request *FindAccessibilityNodesRequest) (*AccessibilityNodesResponse, error) {
+	var resp AccessibilityNodesResponse
+	err := m.client.Call("Plugin.FindAccessibilityNodes", request, &resp)
+	return &resp, err
+}
+
+func (m *ComputerUseRPCClient) FocusAccessibilityNode(request *AccessibilityNodeRequest) (*Empty, error) {
+	err := m.client.Call("Plugin.FocusAccessibilityNode", request, new(Empty))
+	return new(Empty), err
+}
+
+func (m *ComputerUseRPCClient) InvokeAccessibilityNode(request *AccessibilityInvokeRequest) (*Empty, error) {
+	err := m.client.Call("Plugin.InvokeAccessibilityNode", request, new(Empty))
+	return new(Empty), err
+}
+
+func (m *ComputerUseRPCClient) SetAccessibilityNodeValue(request *AccessibilitySetValueRequest) (*Empty, error) {
+	err := m.client.Call("Plugin.SetAccessibilityNodeValue", request, new(Empty))
+	return new(Empty), err
+}
