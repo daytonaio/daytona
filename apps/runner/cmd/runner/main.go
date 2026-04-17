@@ -159,6 +159,9 @@ func run() int {
 		VolumeCleanupExclusionPeriod: cfg.VolumeCleanupExclusionPeriod,
 		BackupTimeoutMin:             cfg.BackupTimeoutMin,
 		SnapshotPullTimeout:          cfg.SnapshotPullTimeout,
+		BuildTimeoutMin:              cfg.BuildTimeoutMin,
+		BuildCPUCores:                cfg.BuildCPUCores,
+		BuildMemoryGB:                cfg.BuildMemoryGB,
 		InitializeDaemonTelemetry:    cfg.InitializeDaemonTelemetry,
 		InterSandboxNetworkEnabled:   cfg.InterSandboxNetworkEnabled,
 	})

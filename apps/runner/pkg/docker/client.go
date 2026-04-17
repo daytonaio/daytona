@@ -39,6 +39,9 @@ type DockerClientConfig struct {
 	VolumeCleanupExclusionPeriod time.Duration
 	BackupTimeoutMin             int
 	SnapshotPullTimeout          time.Duration
+	BuildTimeoutMin              int
+	BuildCPUCores                int64
+	BuildMemoryGB                int64
 	InitializeDaemonTelemetry    bool
 	InterSandboxNetworkEnabled   bool
 }
@@ -133,6 +136,9 @@ func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerCli
 		volumeCleanupExclusionPeriod: config.VolumeCleanupExclusionPeriod,
 		backupTimeoutMin:             config.BackupTimeoutMin,
 		snapshotPullTimeout:          config.SnapshotPullTimeout,
+		buildTimeoutMin:              config.BuildTimeoutMin,
+		buildCPUCores:                config.BuildCPUCores,
+		buildMemoryGB:                config.BuildMemoryGB,
 		initializeDaemonTelemetry:    config.InitializeDaemonTelemetry,
 		interSandboxNetworkEnabled:   config.InterSandboxNetworkEnabled,
 		filesystem:                   filesystem,
@@ -168,6 +174,9 @@ type DockerClient struct {
 	volumeCleanupExclusionPeriod time.Duration
 	backupTimeoutMin             int
 	snapshotPullTimeout          time.Duration
+	buildTimeoutMin              int
+	buildCPUCores                int64
+	buildMemoryGB                int64
 	volumeCleanupMutex           sync.Mutex
 	lastVolumeCleanup            time.Time
 	initializeDaemonTelemetry    bool

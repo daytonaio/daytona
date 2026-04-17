@@ -168,6 +168,13 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 		AuthConfigs: authConfigs,
 	}
 
+	if !d.resourceLimitsDisabled {
+		buildOpts.CPUPeriod = 100000
+		buildOpts.CPUQuota = d.buildCPUCores * 100000
+		buildOpts.Memory = d.buildMemoryGB * 1024 * 1024 * 1024
+		buildOpts.MemorySwap = buildOpts.Memory
+	}
+
 	logFilePath, err := config.GetBuildLogFilePath(buildImageDto.Snapshot)
 	if err != nil {
 		return err
