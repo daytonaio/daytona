@@ -219,14 +219,39 @@ jobs:
           persist-credentials: false
       - name: Validate .yarnrc.yml
         run: |
-          # Fail if any registry override points outside trusted hosts
-          if grep -E "npmRegistryServer|npmScopes" .yarnrc.yml 2>/dev/null | grep -vE "registry\.(npmjs|yarnpkg)\.(org|com)"; then
-            echo "::error::Suspicious registry override detected in .yarnrc.yml"
-            exit 1
-          fi
-          # Fail if enableScripts is explicitly enabled (opens postinstall attack vector)
-          if grep -qE "^enableScripts:\s*true" .yarnrc.yml 2>/dev/null; then
-            echo "::error::enableScripts: true is a supply chain risk -- remove or add exception with review"
-            exit 1
-          fi
-          echo "OK -- .yarnrc.yml passes integrity check"
+          python3 <<'PY'
+          import re
+          import sys
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          yarnrc = Path(".yarnrc.yml")
+          if not yarnrc.exists():
+              print("OK -- .yarnrc.yml not present")
+              sys.exit(0)
+
+          trusted_hosts = {"registry.npmjs.org", "registry.yarnpkg.com"}
+          errors = []
+
+          for lineno, line in enumerate(yarnrc.read_text(encoding="utf-8").splitlines(), 1):
+              without_comment = line.split("#", 1)[0]
+
+              # Any URL-bearing registry key (top-level or under npmScopes) must point to a trusted host
+              match = re.match(r"^\s*(npmRegistryServer|npmPublishRegistry):\s*(\S+)\s*$", without_comment)
+              if match:
+                  key, value = match.group(1), match.group(2).strip("'\"")
+                  parsed = urlparse(value)
+                  if parsed.scheme not in {"http", "https"} or parsed.hostname not in trusted_hosts:
+                      errors.append(f"Line {lineno}: {key} points to untrusted host: {value}")
+
+              # enableScripts: true at any indent level opens postinstall attack vector
+              if re.match(r"^\s*enableScripts:\s*true\s*$", without_comment):
+                  errors.append(f"Line {lineno}: enableScripts: true is a supply chain risk")
+
+          if errors:
+              for e in errors:
+                  print(f"::error::{e}")
+              sys.exit(1)
+
+          print("OK -- .yarnrc.yml passes integrity check")
+          PY
