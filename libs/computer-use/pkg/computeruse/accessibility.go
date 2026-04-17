@@ -1,9 +1,9 @@
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
-// AT-SPI is spoken directly over D-Bus via godbus/dbus/v5 — no cgo, no
-// libatspi wrapper. AT-SPI's public API is already a D-Bus protocol; the C
-// library is a thin convenience layer over the same calls godbus would make.
+// AT-SPI is spoken directly over D-Bus via godbus/dbus/v5. AT-SPI's public
+// API is a D-Bus protocol; this file walks the registry, reads node state,
+// and invokes actions through the same bus the desktop uses for a11y.
 
 package computeruse
 
@@ -95,11 +95,13 @@ const (
 	stateActive = 1 // used for focus-scoped root resolution
 )
 
-// atspiStateNames is the AT-SPI StateType enum ordered by bit index. The
-// ordering comes from at-spi2-core's Registry.xml and is stable ABI; new
-// states are appended at the end. Names use underscored lowercase form
-// matching the underlying C enum (e.g. MULTI_LINE → "multi_line") for
-// predictable filtering.
+// atspiStateNames is the AT-SPI StateType enum ordered by bit index. Names
+// use the underscored lowercase form matching the underlying C enum (e.g.
+// MULTI_LINE → "multi_line") for predictable filtering. The ordering is
+// stable ABI; new states are only ever appended at the end.
+//
+// Source: at-spi2-core/xml/Registry.xml
+// https://gitlab.gnome.org/GNOME/at-spi2-core/-/blob/master/xml/Registry.xml
 var atspiStateNames = []string{
 	"invalid",                 // 0
 	"active",                  // 1
