@@ -5,7 +5,7 @@ services:
       context: ../
       dockerfile: apps/api/Dockerfile
       target: daytona
-  
+
   proxy:
     build:
       context: ../
@@ -23,3 +23,8 @@ services:
       context: ../
       dockerfile: apps/ssh-gateway/Dockerfile
       target: ssh-gateway
+
+  otel-collector:
+    build:
+      context: ../
+      dockerfile: apps/otel-collector/Dockerfile
