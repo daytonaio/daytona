@@ -3,7 +3,7 @@ title: Process and Code Execution
 description: Execute code in your sandboxes using stateless and stateful execution.
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from '@astrojs/starlight/components'
 
 Daytona provides process and code execution capabilities through the `process` module in sandboxes.
 
@@ -121,6 +121,40 @@ fmt.Println(result.Result)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.model.ExecuteResponse;
+import java.util.Map;
+
+// Run code (stateless; language matches the sandbox image)
+ExecuteResponse response = sandbox.process.codeRun(
+    """
+    def greet(name):
+        return f"Hello, {name}!"
+
+    print(greet("Daytona"))
+    """
+);
+System.out.println(response.getResult());
+
+// Run code with environment variables and timeout (seconds)
+response = sandbox.process.codeRun(
+    "import os; print('FOO:', os.environ.get('FOO'))",
+    Map.of("FOO", "BAR"),
+    null
+);
+System.out.println(response.getResult());
+
+response = sandbox.process.codeRun(
+    "import time; time.sleep(2); print(\"Done\")",
+    null,
+    5
+);
+System.out.println(response.getResult());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -138,18 +172,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/code-run' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
-
-> [**code_run (Python SDK)**](/docs/en/python-sdk/sync/process/#processcode_run)
->
-> [**codeRun (TypeScript SDK)**](/docs/en/typescript-sdk/process/#coderun)
->
-> [**code_run (Ruby SDK)**](/docs/en/ruby-sdk/process/#code_run)
->
-> [**ExecuteCommand (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.ExecuteCommand)
->
-> [**execute command (API)**](/docs/en/tools/api/#daytona-toolbox/tag/process/POST/process/execute)
 
 ### Run code (stateful)
 
@@ -279,6 +301,22 @@ if err != nil {
 }
 ```
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.RunCodeOptions;
+
+// Default interpreter context (Python)
+sandbox.codeInterpreter.runCode(
+    """
+    counter = 1
+    print(f'Counter initialized at {counter}')
+    """,
+    new RunCodeOptions().setOnStdout(chunk -> System.out.print("[STDOUT] " + chunk))
+);
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -304,30 +342,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/interpreter/conte
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
-
-> [**run_code (Python SDK)**](/docs/en/python-sdk/sync/code-interpreter/#codeinterpreterrun_code)
->
-> [**create_context (Python SDK)**](/docs/en/python-sdk/sync/code-interpreter/#codeinterpretercreate_context)
->
-> [**delete_context (Python SDK)**](/docs/en/python-sdk/sync/code-interpreter/#codeinterpreterdelete_context)
->
-> [**runCode (TypeScript SDK)**](/docs/en/typescript-sdk/code-interpreter/#runcode)
->
-> [**createContext (TypeScript SDK)**](/docs/en/typescript-sdk/code-interpreter/#createcontext)
->
-> [**deleteContext (TypeScript SDK)**](/docs/en/typescript-sdk/code-interpreter/#deletecontext)
->
-> [**code_run (Ruby SDK)**](/docs/en/ruby-sdk/process/#code_run)
->
-> [**RunCode (Go SDK)**](/docs/en/go-sdk/daytona/#CodeInterpreterService.RunCode)
->
-> [**CreateContext (Go SDK)**](/docs/en/go-sdk/daytona/#CodeInterpreterService.CreateContext)
->
-> [**DeleteContext (Go SDK)**](/docs/en/go-sdk/daytona/#CodeInterpreterService.DeleteContext)
->
-> [**code interpreter (API)**](/docs/en/tools/api/#daytona-toolbox/tag/interpreter)
 
 ## Command execution
 
@@ -434,6 +448,31 @@ fmt.Println(response.Result)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.model.ExecuteResponse;
+import java.util.Map;
+
+// Execute any shell command
+ExecuteResponse response = sandbox.process.executeCommand("ls -la");
+System.out.println(response.getResult());
+
+// Working directory and timeout (seconds)
+response = sandbox.process.executeCommand("sleep 3", "workspace/src", null, 5);
+System.out.println(response.getResult());
+
+// Environment variables
+response = sandbox.process.executeCommand(
+    "echo $CUSTOM_SECRET",
+    ".",
+    Map.of("CUSTOM_SECRET", "DAYTONA"),
+    null
+);
+System.out.println(response.getResult());
+```
+
+</TabItem>
 <TabItem label="CLI" icon="seti:shell">
 
 ```bash
@@ -463,20 +502,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/execute' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/) references:
-
-> [**exec (Python SDK)**](/docs/en/python-sdk/sync/process/#processexec)
->
-> [**executeCommand (TypeScript SDK)**](/docs/en/typescript-sdk/process/#executecommand)
->
-> [**exec (Ruby SDK)**](/docs/en/ruby-sdk/process/#exec)
->
-> [**ExecuteCommand (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.ExecuteCommand)
->
-> [**daytona exec (CLI)**](/docs/en/tools/cli/#daytona-exec)
->
-> [**execute command (API)**](/docs/en/tools/api/#daytona-toolbox/tag/process/POST/process/execute)
 
 ## Session operations
 
@@ -567,6 +592,26 @@ for _, sess := range sessions {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.model.Command;
+import io.daytona.sdk.model.Session;
+
+// Check session's executed commands
+Session session = sandbox.process.getSession(sessionId);
+System.out.println("Session " + sessionId + ":");
+for (Command command : session.getCommands()) {
+    System.out.println("Command: " + command.getCommand() + ", Exit Code: " + command.getExitCode());
+}
+
+// List all running sessions
+for (Session s : sandbox.process.listSessions()) {
+    System.out.println("Session: " + s.getSessionId() + ", Commands: " + s.getCommands());
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -579,28 +624,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session'
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
-
-> [**get_session (Python SDK)**](/docs/en/python-sdk/sync/process/#processget_session)
->
-> [**list_sessions (Python SDK)**](/docs/en/python-sdk/sync/process/#processlist_sessions)
->
-> [**getSession (TypeScript SDK)**](/docs/en/typescript-sdk/process/#getsession)
->
-> [**listSessions (TypeScript SDK)**](/docs/en/typescript-sdk/process/#listsessions)
->
-> [**get_session (Ruby SDK)**](/docs/en/ruby-sdk/process/#get_session)
->
-> [**list_sessions (Ruby SDK)**](/docs/en/ruby-sdk/process/#list_sessions)
->
-> [**GetSession (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.GetSession)
->
-> [**ListSessions (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.ListSessions)
->
-> [**get session (API)**](/docs/en/tools/api/#daytona-toolbox/tag/process/GET/process/session/{sessionId})
->
-> [**list sessions (API)**](/docs/en/tools/api/#daytona-toolbox/tag/process/GET/process/session)
 
 ### Entrypoint session
 
@@ -720,6 +743,33 @@ for msg := range stdout {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.model.Command;
+import io.daytona.sdk.model.Session;
+import io.daytona.sdk.model.SessionCommandLogsResponse;
+
+// Entrypoint session details
+Session session = sandbox.process.getEntrypointSession();
+System.out.println("Entrypoint session: " + session.getSessionId());
+Command cmd = session.getCommands().get(0);
+System.out.println("Entrypoint command id: " + cmd.getId());
+System.out.println("Command: " + cmd.getCommand());
+
+// Entrypoint logs (HTTP)
+SessionCommandLogsResponse logs = sandbox.process.getEntrypointLogs();
+System.out.println("[STDOUT]: " + logs.getStdout());
+System.out.println("[STDERR]: " + logs.getStderr());
+
+// Stream entrypoint logs (WebSocket)
+sandbox.process.getEntrypointLogs(
+    chunk -> System.out.println("[STDOUT]: " + chunk),
+    chunk -> System.out.println("[STDERR]: " + chunk)
+);
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -735,34 +785,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session/entrypoin
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
-
-> [**get_entrypoint_session (Python SDK)**](/docs/en/python-sdk/sync/process/#processget_entrypoint_session)
->
-> [**get_entrypoint_logs (Python SDK)**](/docs/en/python-sdk/sync/process/#processget_entrypoint_logs)
->
-> [**get_entrypoint_logs_async (Python SDK)**](/docs/en/python-sdk/sync/process/#processget_entrypoint_logs_async)
->
-> [**getEntrypointSession (TypeScript SDK)**](/docs/en/typescript-sdk/process/#getentrypointsession)
->
-> [**getEntrypointLogs (TypeScript SDK)**](/docs/en/typescript-sdk/process/#getentrypointlogs)
->
-> [**get_entrypoint_session (Ruby SDK)**](/docs/en/ruby-sdk/process/#get_entrypoint_session)
->
-> [**get_entrypoint_logs (Ruby SDK)**](/docs/en/ruby-sdk/process/#get_entrypoint_logs)
->
-> [**get_entrypoint_logs_async (Ruby SDK)**](/docs/en/ruby-sdk/process/#get_entrypoint_logs_async)
->
-> [**GetEntrypointSession (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.GetEntrypointSession)
->
-> [**GetEntrypointLogs (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.GetEntrypointLogs)
->
-> [**GetEntrypointLogsStream (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.GetEntrypointLogsStream)
->
-> [**GetEntrypointSession (API)**](/docs/en/tools/api/#daytona-toolbox/tag/process/GET/process/session/entrypoint)
->
-> [**GetEntrypointLogs (API)**](/docs/en/tools/api/#daytona-toolbox/tag/process/GET/process/session/entrypoint/logs)
 
 ### Execute interactive commands
 
@@ -906,6 +928,35 @@ for msg := range stdout {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.model.SessionExecuteRequest;
+import io.daytona.sdk.model.SessionExecuteResponse;
+
+String sessionId = "interactive-session";
+sandbox.process.createSession(sessionId);
+
+SessionExecuteResponse command = sandbox.process.executeSessionCommand(
+    sessionId,
+    new SessionExecuteRequest("pip uninstall requests", true)
+);
+String cmdId = command.getCmdId();
+
+Thread logThread = new Thread(() -> sandbox.process.getSessionCommandLogs(
+    sessionId,
+    cmdId,
+    log -> System.out.println("[STDOUT]: " + log),
+    log -> System.out.println("[STDERR]: " + log)
+));
+logThread.start();
+
+Thread.sleep(1000);
+sandbox.process.sendSessionCommandInput(sessionId, cmdId, "y");
+logThread.join();
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -938,40 +989,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session/{sessionI
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
-
-> [**create_session (Python SDK)**](/docs/en/python-sdk/sync/process/#processcreate_session)
->
-> [**execute_session_command (Python SDK)**](/docs/en/python-sdk/sync/process/#processexecute_session_command)
->
-> [**send_session_command_input (Python SDK)**](/docs/en/python-sdk/sync/process/#processsend_session_command_input)
->
-> [**get_session_command_logs_async (Python SDK)**](/docs/en/python-sdk/sync/process/#processget_session_command_logs_async)
->
-> [**createSession (TypeScript SDK)**](/docs/en/typescript-sdk/process/#createsession)
->
-> [**executeSessionCommand (TypeScript SDK)**](/docs/en/typescript-sdk/process/#executesessioncommand)
->
-> [**sendSessionCommandInput (TypeScript SDK)**](/docs/en/typescript-sdk/process/#sendsessioncommandinput)
->
-> [**getSessionCommandLogs (TypeScript SDK)**](/docs/en/typescript-sdk/process/#getsessioncommandlogs)
->
-> [**create_session (Ruby SDK)**](/docs/en/ruby-sdk/process/#create_session)
->
-> [**execute_session_command (Ruby SDK)**](/docs/en/ruby-sdk/process/#execute_session_command)
->
-> [**send_session_command_input (Ruby SDK)**](/docs/en/ruby-sdk/process/#send_session_command_input)
->
-> [**CreateSession (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.CreateSession)
->
-> [**ExecuteSessionCommand (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.ExecuteSessionCommand)
->
-> [**GetSessionCommandLogsStream (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.GetSessionCommandLogsStream)
->
-> [**create session (API)**](/docs/en/tools/api/#daytona-toolbox/tag/process/POST/process/session)
->
-> [**execute session command (API)**](/docs/en/tools/api/#daytona-toolbox/tag/process/POST/process/session/{sessionId}/exec)
 
 ## Resource management
 
@@ -1034,6 +1051,21 @@ Daytona provides methods to manage session resources. You should use sessions fo
    // Do work...
    ```
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+   ```java
+   import io.daytona.sdk.model.Session;
+
+   // Clean up session
+   String sessionId = "long-running-cmd";
+   try {
+       sandbox.process.createSession(sessionId);
+       Session session = sandbox.process.getSession(sessionId);
+       // Do work...
+   } finally {
+       sandbox.process.deleteSession(sessionId);
+   }
+   ```
+</TabItem>
 <TabItem label="API" icon="seti:json">
    ```bash
    # Create session
@@ -1048,28 +1080,6 @@ Daytona provides methods to manage session resources. You should use sessions fo
    ```
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
-
-> [**create_session (Python SDK)**](/docs/en/python-sdk/sync/process/#processcreate_session)
->
-> [**delete_session (Python SDK)**](/docs/en/python-sdk/sync/process/#processdelete_session)
->
-> [**createSession (TypeScript SDK)**](/docs/en/typescript-sdk/process/#createsession)
->
-> [**deleteSession (TypeScript SDK)**](/docs/en/typescript-sdk/process/#deletesession)
->
-> [**create_session (Ruby SDK)**](/docs/en/ruby-sdk/process/#create_session)
->
-> [**delete_session (Ruby SDK)**](/docs/en/ruby-sdk/process/#delete_session)
->
-> [**CreateSession (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.CreateSession)
->
-> [**DeleteSession (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.DeleteSession)
->
-> [**create session (API)**](/docs/en/tools/api/#daytona-toolbox/tag/process/POST/process/session)
->
-> [**delete session (API)**](/docs/en/tools/api/#daytona-toolbox/tag/process/DELETE/process/session/{sessionId})
 
 ## Error handling
 
@@ -1132,6 +1142,22 @@ if result != nil && result.ExitCode != 0 {
 }
 ```
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+```java
+import io.daytona.sdk.exception.DaytonaException;
+import io.daytona.sdk.model.ExecuteResponse;
+
+try {
+    ExecuteResponse response = sandbox.process.codeRun("invalid python code");
+    if (response.getExitCode() != null && response.getExitCode() != 0) {
+        System.out.println("Exit code: " + response.getExitCode());
+        System.out.println("Error output: " + response.getResult());
+    }
+} catch (DaytonaException e) {
+    System.out.println("Execution failed: " + e.getMessage());
+}
+```
+</TabItem>
 <TabItem label="API" icon="seti:json">
 ```bash
 # API responses include exitCode field for error handling
@@ -1151,8 +1177,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/execute' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references.
-
 ## Common issues
 
 Daytona provides solutions for troubleshooting common issues related to process and code execution.
@@ -1162,3 +1186,4 @@ Daytona provides solutions for troubleshooting common issues related to process 
 | Process execution failed | • Check command syntax<br/>• Verify required dependencies<br/>• Ensure sufficient permissions                   |
 | Process timeout          | • Adjust timeout settings<br/>• Optimize long-running operations<br/>• Consider using background processes      |
 | Resource limits          | • Monitor process memory usage<br/>• Handle process cleanup properly<br/>• Use appropriate resource constraints |
+

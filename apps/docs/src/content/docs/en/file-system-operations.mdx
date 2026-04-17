@@ -82,6 +82,22 @@ for _, file := range files {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.model.FileInfo;
+import java.util.List;
+
+List<FileInfo> files = sandbox.fs.listFiles("workspace");
+for (FileInfo file : files) {
+    System.out.println("Name: " + file.getName());
+    System.out.println("Is directory: " + file.getIsDir());
+    System.out.println("Size: " + file.getSize());
+    System.out.println("Modified: " + file.getModTime());
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -90,18 +106,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files'
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox) references:
-
-> [**list_files (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemlist_files)
->
-> [**listFiles (TypeScript SDK)**](/docs/en/typescript-sdk/file-system/#listfiles)
->
-> [**list_files (Ruby SDK)**](/docs/en/ruby-sdk/file-system/#list_files)
->
-> [**ListFiles (Go SDK)**](/docs/en/go-sdk/daytona/#FileSystemService.ListFiles)
->
-> [**list files and directories (API)**](/docs/en/tools/api/#daytona-toolbox/tag/file-system/GET/files)
 
 ### Get directory or file information
 
@@ -171,6 +175,23 @@ if info.IsDirectory {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.model.FileInfo;
+
+FileInfo info = sandbox.fs.getFileDetails("workspace/data/file.txt");
+System.out.println("Size: " + info.getSize() + " bytes");
+System.out.println("Modified: " + info.getModTime());
+System.out.println("Mode: " + info.getMode());
+
+info = sandbox.fs.getFileDetails("workspace/data");
+if (Boolean.TRUE.equals(info.getIsDir())) {
+    System.out.println("Path is a directory");
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -179,18 +200,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/info?path='
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
-
-> [**get_file_info (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemget_file_info)
->
-> [**getFileDetails (TypeScript SDK)**](/docs/en/typescript-sdk/file-system/#getfiledetails)
->
-> [**get_file_info (Ruby SDK)**](/docs/en/ruby-sdk/file-system/#get_file_info)
->
-> [**GetFileInfo (Go SDK)**](/docs/en/go-sdk/daytona/#FileSystemService.GetFileInfo)
->
-> [**get file information (API)**](/docs/en/tools/api/#daytona-toolbox/tag/file-system/GET/files/info)
 
 ### Create directories
 
@@ -237,6 +246,13 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+sandbox.fs.createFolder("workspace/new-dir", "755");
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -246,18 +262,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/folder?path=&mode='
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
-
-> [**create_folder (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemcreate_folder)
->
-> [**createFolder (TypeScript SDK)**](/docs/en/typescript-sdk/file-system/#createfolder)
->
-> [**create_folder (Ruby SDK)**](/docs/en/ruby-sdk/file-system/#create_folder)
->
-> [**CreateFolder (Go SDK)**](/docs/en/go-sdk/daytona/#FileSystemService.CreateFolder)
->
-> [**create folder (API)**](/docs/en/tools/api/#daytona-toolbox/tag/file-system/POST/files/folder)
 
 ### Upload files
 
@@ -321,6 +325,16 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import java.nio.charset.StandardCharsets;
+
+byte[] fileContent = "Hello, World!".getBytes(StandardCharsets.UTF_8);
+sandbox.fs.uploadFile(fileContent, "data.txt");
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -332,18 +346,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/upload?path=' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
-
-> [**upload_file (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemupload_file)
->
-> [**uploadFile (TypeScript SDK)**](/docs/en/typescript-sdk/file-system/#uploadfile)
->
-> [**upload_file (Ruby SDK)**](/docs/en/ruby-sdk/file-system/#upload_file)
->
-> [**UploadFile (Go SDK)**](/docs/en/go-sdk/daytona/#FileSystemService.UploadFile)
->
-> [**upload file (API)**](/docs/en/tools/api/#daytona-toolbox/tag/file-system/POST/files/upload)
 
 #### Upload multiple files
 
@@ -447,16 +449,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/bulk-upload' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
-
-> [**upload_files (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemupload_files)
->
-> [**uploadFiles (TypeScript SDK)**](/docs/en/typescript-sdk/file-system/#uploadfiles)
->
-> [**upload_files (Ruby SDK)**](/docs/en/ruby-sdk/file-system/#upload_files)
->
-> [**upload multiple files (API)**](/docs/en/tools/api/#daytona-toolbox/tag/file-system/POST/files/bulk-upload)
-
 ### Download files
 
 Daytona provides methods to download files from sandboxes.
@@ -534,6 +526,20 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+byte[] content = sandbox.fs.downloadFile("file1.txt");
+System.out.println(new String(content, StandardCharsets.UTF_8));
+
+Files.write(Path.of("local_file.txt"), content);
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -544,18 +550,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/download?path='
 </Tabs>
 
 In the Python and TypeScript SDKs, `download_file` and `downloadFile` raise typed Daytona exceptions when the daemon returns structured per-file error metadata. Missing files map to not-found errors, invalid paths such as directories map to validation errors, and permission failures map to authorization errors.
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
-
-> [**download_file (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemdownload_file)
->
-> [**downloadFile (TypeScript SDK)**](/docs/en/typescript-sdk/file-system/#downloadfile)
->
-> [**download_file (Ruby SDK)**](/docs/en/ruby-sdk/file-system/#download_file)
->
-> [**DownloadFile (Go SDK)**](/docs/en/go-sdk/daytona/#FileSystemService.DownloadFile)
->
-> [**download file (API)**](/docs/en/tools/api#daytona-toolbox/tag/file-system/GET/files/download)
 
 #### Download multiple files
 
@@ -683,16 +677,6 @@ Bulk downloads keep the existing `error` string for compatibility and now also i
 
 The toolbox bulk-download API returns successful files as multipart `file` parts and per-file failures as multipart `error` parts with JSON payloads containing `message`, `statusCode`, and `code`.
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
-
-> [**download_files (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemdownload_files)
->
-> [**downloadFiles (TypeScript SDK)**](/docs/en/typescript-sdk/file-system/#downloadfiles)
->
-> [**download_file (Ruby SDK)**](/docs/en/ruby-sdk/file-system/#download_file)
->
-> [**download multiple files (API)**](/docs/en/tools/api#daytona-toolbox/tag/file-system/POST/files/bulk-download)
-
 ### Delete files
 
 Daytona provides methods to delete files or directories from sandboxes by providing the path to the file or directory to delete.
@@ -740,6 +724,13 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+sandbox.fs.deleteFile("workspace/file.txt");
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -749,18 +740,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files?path=' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
-
-> [**delete_file (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemdelete_file)
->
-> [**deleteFile (TypeScript SDK)**](/docs/en/typescript-sdk/file-system/#deletefile)
->
-> [**delete_file (Ruby SDK)**](/docs/en/ruby-sdk/file-system/#delete_file)
->
-> [**DeleteFile (Go SDK)**](/docs/en/go-sdk/daytona/#FileSystemService.DeleteFile)
->
-> [**delete file or directory (API)**](/docs/en/tools/api#daytona-toolbox/tag/file-system/DELETE/files)
 
 ## Advanced operations
 
@@ -851,18 +830,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/permissions?path=' 
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
-
-> [**set_file_permissions (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemset_file_permissions)
->
-> [**setFilePermissions (TypeScript SDK)**](/docs/en/typescript-sdk/file-system/#setfilepermissions)
->
-> [**set_file_permissions (Ruby SDK)**](/docs/en/ruby-sdk/file-system/#set_file_permissions)
->
-> [**SetFilePermissions (Go SDK)**](/docs/en/go-sdk/daytona/#FileSystemService.SetFilePermissions)
->
-> [**set file permissions (API)**](/docs/en/tools/api#daytona-toolbox/tag/file-system/POST/files/permissions)
 
 ### Find and replace text in files
 
@@ -969,6 +936,29 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+List<Map<String, Object>> results = sandbox.fs.findFiles("workspace/src", "text-of-interest");
+for (Map<String, Object> match : results) {
+    System.out.println("Absolute file path: " + match.get("file"));
+    System.out.println("Line number: " + match.get("line"));
+    System.out.println("Line content: " + match.get("content"));
+    System.out.println();
+}
+
+sandbox.fs.replaceInFiles(
+    Arrays.asList("workspace/file1.txt", "workspace/file2.txt"),
+    "old_text",
+    "new_text"
+);
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 Find text in files:
@@ -994,28 +984,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/replace' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
-
-> [**find_files (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemfind_files)
->
-> [**replace_in_files (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemreplace_in_files)
->
-> [**findFiles (TypeScript SDK)**](/docs/en/typescript-sdk/file-system/#findfiles)
->
-> [**replaceInFiles (TypeScript SDK)**](/docs/en/typescript-sdk/file-system/#replaceinfiles)
->
-> [**find_files (Ruby SDK)**](/docs/en/ruby-sdk/file-system/#find_files)
->
-> [**replace_in_files (Ruby SDK)**](/docs/en/ruby-sdk/file-system/#replace_in_files)
->
-> [**FindFiles (Go SDK)**](/docs/en/go-sdk/daytona/#FileSystemService.FindFiles)
->
-> [**ReplaceInFiles (Go SDK)**](/docs/en/go-sdk/daytona/#FileSystemService.ReplaceInFiles)
->
-> [**find text in files (API)**](/docs/en/tools/api#daytona-toolbox/tag/file-system/GET/files/find)
->
-> [**replace text in files (API)**](/docs/en/tools/api#daytona-toolbox/tag/file-system/POST/files/replace)
 
 ### Move or rename directory or file
 
@@ -1099,6 +1067,17 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+sandbox.fs.moveFiles("workspace/data/old_name.txt", "workspace/data/new_name.txt");
+
+sandbox.fs.moveFiles("workspace/data/file.txt", "workspace/archive/file.txt");
+
+sandbox.fs.moveFiles("workspace/old_dir", "workspace/new_dir");
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1109,14 +1088,3 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/move?source=&destin
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox) references:
-
-> [**move_files (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemmove_files)
->
-> [**moveFiles (TypeScript SDK)**](/docs/en/typescript-sdk/file-system/#movefiles)
->
-> [**move_files (Ruby SDK)**](/docs/en/ruby-sdk/file-system/#move_files)
->
-> [**MoveFiles (Go SDK)**](/docs/en/go-sdk/daytona/#FileSystemService.MoveFiles)
->
-> [**move or rename file or directory (API)**](/docs/en/tools/api/#daytona-toolbox/tag/file-system/POST/files/move)

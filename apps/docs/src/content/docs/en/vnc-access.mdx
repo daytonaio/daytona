@@ -84,6 +84,14 @@ fmt.Println("VNC processes started")
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var result = sandbox.computerUse.start();
+System.out.println("VNC processes started: " + result.getMessage());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -93,18 +101,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/start' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Computer Use](/docs/en/computer-use#start-computer-use) reference.
-
-> [**start (Python SDK)**](/docs/en/python-sdk/sync/computer-use#computerusestart)
->
-> [**start (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#start)
->
-> [**start (Ruby SDK)**](/docs/en/ruby-sdk/computer-use#start)
->
-> [**Start (Go SDK)**](/docs/en/go-sdk/daytona#ComputerUseService.Start)
->
-> [**Start Computer Use Processes (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/start)
 
 ### Stop VNC
 
@@ -147,6 +143,14 @@ fmt.Println("VNC processes stopped")
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var result = sandbox.computerUse.stop();
+System.out.println("VNC processes stopped: " + result.getMessage());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -156,18 +160,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/stop' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Computer Use](/docs/en/computer-use#stop-computer-use) reference.
-
-> [**stop (Python SDK)**](/docs/en/python-sdk/sync/computer-use#computerusestop)
->
-> [**stop (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#stop)
->
-> [**stop (Ruby SDK)**](/docs/en/ruby-sdk/computer-use#stop)
->
-> [**Stop (Go SDK)**](/docs/en/go-sdk/daytona#ComputerUseService.Stop)
->
-> [**Stop Computer Use Processes (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/stop)
 
 ### Get VNC status
 
@@ -210,6 +202,14 @@ fmt.Printf("VNC status: %v\n", status["status"])
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var response = sandbox.computerUse.getStatus();
+System.out.println("VNC status: " + response.getStatus());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -218,18 +218,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/status'
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Computer Use](/docs/en/computer-use#get-status) reference.
-
-> [**get_status (Python SDK)**](/docs/en/python-sdk/sync/computer-use#computeruseget_status)
->
-> [**getStatus (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#getstatus)
->
-> [**status (Ruby SDK)**](/docs/en/ruby-sdk/computer-use#status)
->
-> [**GetStatus (Go SDK)**](/docs/en/go-sdk/daytona#ComputerUseService.GetStatus)
->
-> [**Get Computer Use Status (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/status)
 
 For additional process management operations including restarting individual processes and viewing logs, see the [Computer Use](/docs/en/computer-use) reference.
 
@@ -282,6 +270,24 @@ await sandbox.computerUse.keyboard.press('Return');
 
 // Take a screenshot
 const screenshot = await sandbox.computerUse.screenshot.takeFullScreen();
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Start VNC processes
+sandbox.computerUse.start();
+
+// Click to open browser
+sandbox.computerUse.click(50, 50);
+
+// Type a URL
+sandbox.computerUse.typeText("https://www.daytona.io/docs/");
+sandbox.computerUse.pressKey("Return");
+
+// Take a screenshot
+var screenshot = sandbox.computerUse.takeScreenshot();
 ```
 
 </TabItem>

@@ -1,10 +1,35 @@
 ---
-const { title, link } = Astro.props
+import { Icon } from '@astrojs/starlight/components'
+
+interface Props {
+  title: string
+  link: string
+  icon?: string
+}
+
+const { title, link, icon } = Astro.props
 ---
 
 <a class="link-card" href={link}>
-  <span class="title">{title}</span>
+  <span class="title">
+    {icon && <Icon name={icon as any} class="link-card-icon" />}
+    {title}
+  </span>
   <span class="description">
     <slot />
   </span>
 </a>
+
+<style>
+  .title {
+    display: flex !important;
+    align-items: center;
+    gap: 0.4em;
+  }
+
+  .link-card-icon {
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+  }
+</style>

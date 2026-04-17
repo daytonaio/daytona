@@ -127,6 +127,34 @@ fmt.Printf("PTY session completed with exit code: %d\n", *result.ExitCode)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.PtyCreateOptions;
+import io.daytona.sdk.PtyHandle;
+import io.daytona.sdk.PtyResult;
+import java.nio.charset.StandardCharsets;
+
+PtyCreateOptions options = new PtyCreateOptions()
+    .setId("my-interactive-session")
+    .setCols(120)
+    .setRows(30)
+    .setOnData(chunk -> System.out.print(new String(chunk, StandardCharsets.UTF_8)));
+
+PtyHandle ptyHandle = sandbox.process.createPty(options);
+ptyHandle.waitForConnection(30);
+
+ptyHandle.sendInput("ls -la\n");
+ptyHandle.sendInput("echo \"Hello, PTY!\"\n");
+ptyHandle.sendInput("exit\n");
+
+PtyResult result = ptyHandle.waitForExit();
+System.out.println("PTY session completed with exit code: " + result.getExitCode());
+
+ptyHandle.disconnect();
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -148,18 +176,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/pty' \
 </TabItem>
 
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/), [TypeScript SDK](/docs/en/typescript-sdk/process/#createpty), [Ruby SDK](/docs/en/ruby-sdk/process/), [Go SDK](/docs/en/go-sdk/daytona/#type-processservice), and [API](/docs/en/tools/api#daytona-toolbox/tag/process) references:
-
-> [**create_pty_session (Python SDK)**](/docs/en/python-sdk/sync/process/#processcreate_pty_session)
->
-> [**createPty (TypeScript SDK)**](/docs/en/typescript-sdk/process/#createpty)
->
-> [**create_pty_session (Ruby SDK)**](/docs/en/ruby-sdk/process/#create_pty_session)
->
-> [**CreatePty (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.CreatePty)
->
-> [**Create PTY session (API)**](/docs/en/tools/api#daytona-toolbox/tag/process/POST/process/pty)
 
 ## Connect to PTY session
 
@@ -251,6 +267,29 @@ fmt.Printf("Session exited with code: %d\n", *result.ExitCode)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.PtyCreateOptions;
+import io.daytona.sdk.PtyHandle;
+import io.daytona.sdk.PtyResult;
+import java.nio.charset.StandardCharsets;
+
+PtyCreateOptions options = new PtyCreateOptions()
+    .setOnData(chunk -> System.out.print(new String(chunk, StandardCharsets.UTF_8)));
+PtyHandle handle = sandbox.process.connectPty("my-session", options);
+handle.waitForConnection(30);
+
+handle.sendInput("pwd\n");
+handle.sendInput("ls -la\n");
+handle.sendInput("exit\n");
+
+PtyResult result = handle.waitForExit();
+System.out.println("Session exited with code: " + result.getExitCode());
+handle.disconnect();
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -259,18 +298,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/pty/{sessionId}/c
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/), [TypeScript SDK](/docs/en/typescript-sdk/process/), [Ruby SDK](/docs/en/ruby-sdk/process/), [Go SDK](/docs/en/go-sdk/daytona/#type-processservice), and [API](/docs/en/tools/api#daytona-toolbox/tag/process) references:
-
-> [**connect_pty_session (Python SDK)**](/docs/en/python-sdk/sync/process/#processconnect_pty_session)
->
-> [**connectPty (TypeScript SDK)**](/docs/en/typescript-sdk/process/#connectpty)
->
-> [**connect_pty_session (Ruby SDK)**](/docs/en/ruby-sdk/process/#connect_pty_session)
->
-> [**ConnectPty (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.ConnectPty)
->
-> [**Connect to PTY session (API)**](/docs/en/tools/api#daytona-toolbox/tag/process/GET/process/pty/{sessionId}/connect)
 
 ## List PTY sessions
 
@@ -338,6 +365,22 @@ for _, session := range sessions {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.toolbox.client.model.PtySessionInfo;
+import java.util.List;
+
+List<PtySessionInfo> sessions = sandbox.process.listPtySessions();
+for (PtySessionInfo session : sessions) {
+    System.out.println("Session ID: " + session.getId());
+    System.out.println("Active: " + session.getActive());
+    System.out.println("Created: " + session.getCreatedAt());
+    System.out.println("---");
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -346,18 +389,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/pty'
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/), [TypeScript SDK](/docs/en/typescript-sdk/process/), [Ruby SDK](/docs/en/ruby-sdk/process/), [Go SDK](/docs/en/go-sdk/daytona/#type-processservice), and [API](/docs/en/tools/api#daytona-toolbox/tag/process) references:
-
-> [**list_pty_sessions (Python SDK)**](/docs/en/python-sdk/sync/process/#processlist_pty_sessions)
->
-> [**listPtySessions (TypeScript SDK)**](/docs/en/typescript-sdk/process/#listptysessions)
->
-> [**list_pty_sessions (Ruby SDK)**](/docs/en/ruby-sdk/process/#list_pty_sessions)
->
-> [**ListPtySessions (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.ListPtySessions)
->
-> [**List PTY sessions (API)**](/docs/en/tools/api#daytona-toolbox/tag/process/GET/process/pty)
 
 ## Get PTY session info
 
@@ -427,6 +458,19 @@ if session.ProcessId != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.toolbox.client.model.PtySessionInfo;
+
+PtySessionInfo session = sandbox.process.getPtySessionInfo("my-session");
+System.out.println("Session ID: " + session.getId());
+System.out.println("Active: " + session.getActive());
+System.out.println("Working Directory: " + session.getCwd());
+System.out.println("Terminal Size: " + session.getCols() + "x" + session.getRows());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -435,18 +479,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session/{sessionI
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/), [TypeScript SDK](/docs/en/typescript-sdk/process/), [Ruby SDK](/docs/en/ruby-sdk/process/), [Go SDK](/docs/en/go-sdk/daytona/#type-processservice), and [API](/docs/en/tools/api#daytona-toolbox/tag/process) references:
-
-> [**get_pty_session_info (Python SDK)**](/docs/en/python-sdk/sync/process/#processget_pty_session_info)
->
-> [**getPtySessionInfo (TypeScript SDK)**](/docs/en/typescript-sdk/process/#getptysessioninfo)
->
-> [**get_pty_session_info (Ruby SDK)**](/docs/en/ruby-sdk/process/#get_pty_session_info)
->
-> [**GetPtySessionInfo (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.GetPtySessionInfo)
->
-> [**Get PTY session info (API)**](/docs/en/tools/api#daytona-toolbox/tag/process/GET/process/session/{sessionId})
 
 ## Kill PTY session
 
@@ -517,6 +549,21 @@ for _, session := range sessions {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.toolbox.client.model.PtySessionInfo;
+import java.util.List;
+
+sandbox.process.killPtySession("my-session");
+
+List<PtySessionInfo> sessions = sandbox.process.listPtySessions();
+for (PtySessionInfo session : sessions) {
+    System.out.println("PTY session: " + session.getId());
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -526,18 +573,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session/{sessionI
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/), [TypeScript SDK](/docs/en/typescript-sdk/process/), [Ruby SDK](/docs/en/ruby-sdk/process/#delete_pty_session), [Go SDK](/docs/en/go-sdk/daytona/#type-processservice), and [API](/docs/en/tools/api#daytona-toolbox/tag/process) references:
-
-> [**kill_pty_session (Python SDK)**](/docs/en/python-sdk/sync/process/#processkill_pty_session)
->
-> [**killPtySession (TypeScript SDK)**](/docs/en/typescript-sdk/process/#killptysession)
->
-> [**delete_pty_session (Ruby SDK)**](/docs/en/ruby-sdk/process/#delete_pty_session)
->
-> [**KillPtySession (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.KillPtySession)
->
-> [**Kill PTY session (API)**](/docs/en/tools/api#daytona-toolbox/tag/process/DELETE/process/session/{sessionId})
 
 ## Resize PTY session
 
@@ -606,6 +641,16 @@ fmt.Printf("Terminal resized to %dx%d\n", info.Cols, info.Rows)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+sandbox.process.resizePtySession("my-session", 150, 40);
+
+// Or resize using the handle (after createPty or connectPty)
+handle.resize(150, 40);
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -620,18 +665,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/pty/{sessionId}/r
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/), [TypeScript SDK](/docs/en/typescript-sdk/process/#resizeptysession), [Ruby SDK](/docs/en/ruby-sdk/process/), [Go SDK](/docs/en/go-sdk/daytona/#type-processservice), and [API](/docs/en/tools/api#daytona-toolbox/tag/process) references:
-
-> [**resize_pty_session (Python SDK)**](/docs/en/python-sdk/sync/process/#processresize_pty_session)
->
-> [**resizePtySession (TypeScript SDK)**](/docs/en/typescript-sdk/process/#resizeptysession)
->
-> [**resize_pty_session (Ruby SDK)**](/docs/en/ruby-sdk/process/#resize_pty_session)
->
-> [**ResizePtySession (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.ResizePtySession)
->
-> [**Resize PTY session (API)**](/docs/en/tools/api#daytona-toolbox/tag/process/POST/process/pty/{sessionId}/resize)
 
 ## Interactive commands
 
@@ -801,6 +834,38 @@ fmt.Printf("Session completed with exit code: %d\n", *result.ExitCode)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.PtyCreateOptions;
+import io.daytona.sdk.PtyHandle;
+import io.daytona.sdk.PtyResult;
+import java.nio.charset.StandardCharsets;
+
+PtyCreateOptions options = new PtyCreateOptions()
+    .setId("interactive-session")
+    .setCols(300)
+    .setRows(100)
+    .setOnData(chunk -> System.out.print(new String(chunk, StandardCharsets.UTF_8)));
+
+PtyHandle handle = sandbox.process.createPty(options);
+handle.waitForConnection(30);
+
+handle.sendInput(
+    "printf \"Are you accepting the terms and conditions? (y/n): \" && read confirm && if [ \"$confirm\" = \"y\" ]; then echo \"You accepted\"; else echo \"You did not accept\"; fi\n");
+Thread.sleep(1000);
+handle.sendInput("y\n");
+
+sandbox.process.resizePtySession("interactive-session", 210, 110);
+System.out.println("\nPTY session resized");
+
+handle.sendInput("exit\n");
+
+PtyResult result = handle.waitForExit();
+System.out.println("Session completed with exit code: " + result.getExitCode());
+```
+
+</TabItem>
 </Tabs>
 
 ## Long-running processes
@@ -954,6 +1019,37 @@ if result.Error != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.PtyCreateOptions;
+import io.daytona.sdk.PtyHandle;
+import io.daytona.sdk.PtyResult;
+import java.nio.charset.StandardCharsets;
+
+PtyCreateOptions options = new PtyCreateOptions()
+    .setId("long-running-session")
+    .setCols(120)
+    .setRows(30)
+    .setOnData(chunk -> System.out.print(new String(chunk, StandardCharsets.UTF_8)));
+
+PtyHandle handle = sandbox.process.createPty(options);
+handle.waitForConnection(30);
+
+handle.sendInput("while true; do echo \"Running... $(date)\"; sleep 1; done\n");
+Thread.sleep(3000);
+
+System.out.println("Killing long-running process...");
+handle.kill();
+
+PtyResult result = handle.waitForExit();
+System.out.println("\nProcess terminated with exit code: " + result.getExitCode());
+if (result.getError() != null) {
+    System.out.println("Termination reason: " + result.getError());
+}
+```
+
+</TabItem>
 </Tabs>
 
 ## Resource management
@@ -1005,6 +1101,7 @@ ensure
   pty_handle&.kill
 end
 ```
+
 </TabItem>
 <TabItem label="Go" icon="seti:go">
 
@@ -1022,6 +1119,27 @@ defer handle.Disconnect()
 
 // Or use Kill to terminate the process
 defer handle.Kill(ctx)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.PtyCreateOptions;
+import io.daytona.sdk.PtyHandle;
+
+PtyHandle handle = null;
+try {
+    handle = sandbox.process.createPty(
+        new PtyCreateOptions().setId("session").setCols(120).setRows(30));
+    handle.waitForConnection(30);
+    // Do work...
+} finally {
+    if (handle != null) {
+        handle.kill();
+        handle.disconnect();
+    }
+}
 ```
 
 </TabItem>
@@ -1080,13 +1198,18 @@ handle.SendInput([]byte{0x03})
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Send a command
+ptyHandle.sendInput("ls -la\n");
+
+// Send raw bytes (Ctrl+C)
+ptyHandle.sendInput(new byte[] { 0x03 });
+```
+
+</TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/daytona/#type-processservice) references:
-
-> [**sendInput (TypeScript SDK)**](/docs/en/typescript-sdk/pty-handle/#sendinput)
->
-> [**SendInput (Go SDK)**](/docs/en/go-sdk/daytona/#PtyHandle.SendInput)
 
 ### Wait for completion
 
@@ -1157,13 +1280,25 @@ if result.ExitCode != nil && *result.ExitCode == 0 {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.PtyResult;
+
+PtyResult result = ptyHandle.waitForExit();
+
+if (result.getExitCode() == 0) {
+    System.out.println("Process completed successfully");
+} else {
+    System.out.println("Process failed with code: " + result.getExitCode());
+    if (result.getError() != null) {
+        System.out.println("Error: " + result.getError());
+    }
+}
+```
+
+</TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/daytona/#type-processservice) references:
-
-> [**wait (TypeScript SDK)**](/docs/en/typescript-sdk/pty-handle/#wait)
->
-> [**Wait (Go SDK)**](/docs/en/go-sdk/daytona/#PtyHandle.Wait)
 
 ### Wait for connection
 
@@ -1211,13 +1346,17 @@ handle.SendInput([]byte("echo 'Connected!'\n"))
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Wait for connection (timeout in seconds)
+ptyHandle.waitForConnection(30);
+
+ptyHandle.sendInput("echo \"Connected!\"\n");
+```
+
+</TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/daytona/#type-processservice) references:
-
-> [**waitForConnection (TypeScript SDK)**](/docs/en/typescript-sdk/pty-handle/#waitforconnection)
->
-> [**WaitForConnection (Go SDK)**](/docs/en/go-sdk/daytona/#PtyHandle.WaitForConnection)
 
 ### Kill PTY process
 
@@ -1270,13 +1409,19 @@ fmt.Printf("Process terminated with exit code: %d\n", *result.ExitCode)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.PtyResult;
+
+ptyHandle.kill();
+
+PtyResult result = ptyHandle.waitForExit();
+System.out.println("Process terminated with exit code: " + result.getExitCode());
+```
+
+</TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/daytona/#type-processservice) references:
-
-> [**kill (TypeScript SDK)**](/docs/en/typescript-sdk/pty-handle/#kill)
->
-> [**Kill (Go SDK)**](/docs/en/go-sdk/daytona/#PtyHandle.Kill)
 
 ### Resize from handle
 
@@ -1320,13 +1465,15 @@ fmt.Printf("Resized to %dx%d\n", info.Cols, info.Rows)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Resize to 120x30
+ptyHandle.resize(120, 30);
+```
+
+</TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/daytona/#type-processservice) references:
-
-> [**resize (TypeScript SDK)**](/docs/en/typescript-sdk/pty-handle/#resize)
->
-> [**Resize (Go SDK)**](/docs/en/go-sdk/daytona/#PtyHandle.Resize)
 
 ### Disconnect
 
@@ -1378,13 +1525,18 @@ defer handle.Disconnect()
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+try {
+    // ... use PTY session
+} finally {
+    ptyHandle.disconnect();
+}
+```
+
+</TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/daytona/#type-processservice) references:
-
-> [**disconnect (TypeScript SDK)**](/docs/en/typescript-sdk/pty-handle/#disconnect)
->
-> [**Disconnect (Go SDK)**](/docs/en/go-sdk/daytona/#PtyHandle.Disconnect)
 
 ### Check connection status
 
@@ -1427,13 +1579,16 @@ if handle.IsConnected() {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+if (ptyHandle.isConnected()) {
+    System.out.println("PTY session is active");
+}
+```
+
+</TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/daytona/#type-processservice) references:
-
-> [**isConnected (TypeScript SDK)**](/docs/en/typescript-sdk/pty-handle/#isconnected)
->
-> [**IsConnected (Go SDK)**](/docs/en/go-sdk/daytona/#PtyHandle.IsConnected)
 
 ### Exit code and error
 
@@ -1483,17 +1638,20 @@ if errMsg := handle.Error(); errMsg != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.PtyResult;
+
+PtyResult result = ptyHandle.waitForExit();
+System.out.println("Exit code: " + result.getExitCode());
+if (result.getError() != null) {
+    System.out.println("Error: " + result.getError());
+}
+```
+
+</TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/daytona/#type-processservice) references:
-
-> [**exitCode (TypeScript SDK)**](/docs/en/typescript-sdk/pty-handle/#exitcode)
->
-> [**error (TypeScript SDK)**](/docs/en/typescript-sdk/pty-handle/#error)
->
-> [**ExitCode (Go SDK)**](/docs/en/go-sdk/daytona/#PtyHandle.ExitCode)
->
-> [**Error (Go SDK)**](/docs/en/go-sdk/daytona/#PtyHandle.Error)
 
 ### Iterate over output (Python)
 
@@ -1553,6 +1711,19 @@ fmt.Printf("Session ended with exit code: %d\n", *handle.ExitCode())
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.PtyCreateOptions;
+import java.nio.charset.StandardCharsets;
+
+PtyHandle ptyHandle = sandbox.process.createPty(
+    new PtyCreateOptions()
+        .setId("my-session")
+        .setOnData(chunk -> System.out.print(new String(chunk, StandardCharsets.UTF_8))));
+```
+
+</TabItem>
 </Tabs>
 
 ## Error handling
@@ -1569,6 +1740,7 @@ if result.exit_code != 0:
     print(f"Command failed: {result.exit_code}")
     print(f"Error: {result.error}")
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -1611,6 +1783,21 @@ if result.ExitCode != nil && *result.ExitCode != 0 {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.PtyResult;
+
+PtyResult result = ptyHandle.waitForExit();
+if (result.getExitCode() != 0) {
+    System.out.println("Command failed: " + result.getExitCode());
+    if (result.getError() != null) {
+        System.out.println("Error: " + result.getError());
+    }
+}
+```
+
+</TabItem>
 </Tabs>
 
 ## Troubleshooting
@@ -1618,3 +1805,4 @@ if result.ExitCode != nil && *result.ExitCode != 0 {
 - **Connection issues**: verify sandbox status, network connectivity, and proper session IDs
 - **Performance issues**: use appropriate terminal dimensions and efficient data handlers
 - **Process management**: use explicit `kill()` calls and proper timeout handling for long-running processes
+

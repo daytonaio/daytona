@@ -27,8 +27,8 @@ To configure your environment in code, use the `DaytonaConfig` class. The `Dayto
 from daytona import DaytonaConfig
 
 config = DaytonaConfig(
-    api_key="your-api-key",
-    api_url="your-api-url",
+    api_key="YOUR_API_KEY",
+    api_url="YOUR_API_URL",
     target="us"
 )
 ```
@@ -40,8 +40,8 @@ config = DaytonaConfig(
 import { DaytonaConfig } from '@daytona/sdk'
 
 const config: DaytonaConfig = {
-  apiKey: 'your-api-key',
-  apiUrl: 'your-api-url',
+  apiKey: 'YOUR_API_KEY',
+  apiUrl: 'YOUR_API_URL',
   target: 'us',
 }
 ```
@@ -54,8 +54,8 @@ const config: DaytonaConfig = {
 require 'daytona'
 
 config = Daytona::Config.new(
-  api_key: 'your-api-key',
-  api_url: 'your-api-url',
+  api_key: 'YOUR_API_KEY',
+  api_url: 'YOUR_API_URL',
   target: 'us'
 )
 ```
@@ -72,14 +72,35 @@ import (
 
 func main() {
     config := daytona.Config{
-        APIKey: "your-api-key",
-        APIURL: "your-api-url",
+        APIKey: "YOUR_API_KEY",
+        APIURL: "YOUR_API_URL",
         Target: "us",
     }
 
     client := daytona.NewClient(&config)
-
     _ = client
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.DaytonaConfig;
+
+public class App {
+    public static void main(String[] args) {
+        DaytonaConfig config = new DaytonaConfig.Builder()
+            .apiKey("YOUR_API_KEY")
+            .apiUrl("YOUR_API_URL")
+            .target("us")
+            .build();
+
+        try (Daytona daytona = new Daytona(config)) {
+            // Application code
+        }
+    }
 }
 ```
 
@@ -103,18 +124,6 @@ curl https://app.daytona.io/api/api-keys \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/daytona), [TypeScript SDK](/docs/en/typescript-sdk/daytona), [Ruby SDK](/docs/en/ruby-sdk/daytona), [Go SDK](/docs/en/go-sdk/daytona), and [API](/docs/en/tools/api/#daytona/tag/api-keys) references:
-
-> [**DaytonaConfig (Python SDK)**](/docs/en/python-sdk/sync/daytona#daytonaconfig)
->
-> [**DaytonaConfig (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#daytonaconfig)
->
-> [**Config (Ruby SDK)**](/docs/en/ruby-sdk/config#config)
->
-> [**DaytonaConfig (Go SDK)**](/docs/en/go-sdk/types#DaytonaConfig)
->
-> [**Config (API)**](/docs/en/tools/api/#daytona/tag/api-keys/POST/api-keys)
-
 ## Environment variables
 
 Daytona supports environment variables for configuration. The SDK automatically looks for these environment variables:
@@ -130,24 +139,24 @@ Daytona supports environment variables for configuration. The SDK automatically 
 Set environment variables in your shell using the following methods:
 
 <Tabs syncKey="shell">
-  <TabItem label="Bash/Zsh" icon="seti:shell">
+<TabItem label="Bash/Zsh" icon="seti:shell">
 
-    ```bash
-    export DAYTONA_API_KEY=your-api-key
-    export DAYTONA_API_URL=https://your-api-url
-    export DAYTONA_TARGET=us
-    ```
+```bash
+export DAYTONA_API_KEY=your-api-key
+export DAYTONA_API_URL=https://your-api-url
+export DAYTONA_TARGET=us
+```
 
-  </TabItem>
-  <TabItem label="Windows PowerShell" icon="seti:powershell">
+</TabItem>
+<TabItem label="Windows PowerShell" icon="seti:powershell">
 
-    ```bash
-    $env:DAYTONA_API_KEY="your-api-key"
-    $env:DAYTONA_API_URL="https://your-api-url"
-    $env:DAYTONA_TARGET="us"
-    ```
+```bash
+$env:DAYTONA_API_KEY="your-api-key"
+$env:DAYTONA_API_URL="https://your-api-url"
+$env:DAYTONA_TARGET="us"
+```
 
-  </TabItem>
+</TabItem>
 </Tabs>
 
 ### .env file

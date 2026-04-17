@@ -18,7 +18,7 @@ A detailed overview of the Daytona platform is available in the [architecture](/
 
 ## Sandbox lifecycle
 
-Throughout its lifecycle, a sandbox can have several different states. Each state reflects the current status of your sandbox:
+A sandbox can have several different states. Each state reflects the current status of your sandbox.
 
 - [**Creating**](#create-sandboxes): the sandbox is provisioning and will be ready to use
 - [**Starting**](#start-sandboxes): the sandbox is starting and will be ready to use
@@ -54,86 +54,44 @@ Daytona sandboxes support Python, TypeScript, and JavaScript programming languag
 
 If omitted, the Daytona SDK will default to `python`. To override this, explicitly set the `language` value when creating the sandbox.
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona/) references:
-
-> [**CreateSandboxBaseParams.language (Python SDK)**](/docs/en/python-sdk/sync/daytona#createsandboxbaseparams)
->
-> [**CreateSandboxBaseParams.language (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#createsandboxbaseparams)
->
-> [**create (Ruby SDK)**](/docs/en/ruby-sdk/daytona#create)
->
-> [**SandboxBaseParams.Language (Go SDK)**](/docs/en/go-sdk/types#SandboxBaseParams)
->
-> [**create sandbox (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox)
-
 ## Create Sandboxes
 
-Daytona provides methods to create sandboxes using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the Daytona [Python](/docs/en/python-sdk/sync/sandbox), [TypeScript](/docs/en/typescript-sdk/sandbox), [Ruby](/docs/en/ruby-sdk/sandbox), [Go](/docs/en/go-sdk/daytona#type-sandbox) **SDKs**, [CLI](/docs/en/tools/cli#daytona-create), or [API](/docs/en/tools/api#daytona/tag/sandbox).
+Daytona provides methods to create sandboxes using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the Daytona [Python](/docs/en/python-sdk/sync/sandbox), [TypeScript](/docs/en/typescript-sdk/sandbox), [Ruby](/docs/en/ruby-sdk/sandbox), [Go](/docs/en/go-sdk/daytona#type-sandbox), [Java](/docs/en/java-sdk/sandbox) **SDKs**, [CLI](/docs/en/tools/cli#daytona-create), or [API](/docs/en/tools/api#daytona/tag/sandbox).
 
-You can specify [programming language runtime](/docs/en/sandboxes#multiple-runtime-support), [snapshots](/docs/en/snapshots), [resources](/docs/en/sandboxes#resources), [regions](/docs/en/regions), [environment variables](/docs/en/configuration#environment-variables), and [volumes](/docs/en/volumes) for each sandbox. Running sandboxes utilize CPU, memory, and disk storage. Every resource is charged per second of usage.
+You can specify [programming language runtime](/docs/en/sandboxes#multiple-runtime-support), [snapshots](/docs/en/snapshots), [resources](/docs/en/sandboxes#resources), [regions](/docs/en/regions), [environment variables](/docs/en/configuration), and [volumes](/docs/en/volumes) for each sandbox.
 
 1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
-2. Click the **Create Sandbox** button
-3. Enter the name of the sandbox (optional)
-4. Select a source for the sandbox (optional):
+2. Click **Create Sandbox**
+3. Click **Create** to create a sandbox
 
-- [Snapshot](/docs/en/snapshots): a pre-configured sandbox template
-- **Image**: OCI-compliant container image ([public](/docs/en/snapshots#using-public-images), [local](/docs/en/snapshots#using-local-images), [private registries](/docs/en/snapshots#using-images-from-private-registries)). Images require setting [sandbox resources](/docs/en/sandboxes#resources). Default: **1 vCPU**, **1GB RAM**, **3GiB disk**.
+Optionally, specify more parameters when creating a sandbox:
 
-5. Select a [region](/docs/en/regions) (optional): if not specified, your organization's default region will be used
-6. Define [sandbox lifecycle management](#automated-lifecycle-management) options (optional) or set as an [ephemeral sandbox](#ephemeral-sandboxes)
-7. Add environment variables in key-value pairs or import them from a **`.env`** file (optional)
-8. Add labels in key-value pairs (optional)
-9. Select network settings (optional):
-
-- **Public HTTP preview**: allow public access to HTTP [preview URLs](/docs/en/preview)
-- **Block all network access**: block all outbound network access
-
-10. Click the **Create** button to create a sandbox
+- **Name**: enter the name of the sandbox
+- **Source**: select the source of the sandbox; [snapshot](/docs/en/snapshots) (a pre-configured sandbox template) or image (an OCI-compliant container image: [public](/docs/en/snapshots#using-public-images), [local](/docs/en/snapshots#using-local-images), [private registries](/docs/en/snapshots#using-images-from-private-registries)).
+- **Region**: select the region for the sandbox
+- **Lifecycle**: define [sandbox lifecycle management](#automated-lifecycle-management) or set as an [ephemeral sandbox](#ephemeral-sandboxes)
+- **Environment variables**: set in key-value pairs or import them from a **`.env`** file
+- **Labels**: set in key-value pairs to categorize and organize sandboxes
+- **Network settings**: [public HTTP preview](/docs/en/preview) or [block all network access](/docs/en/network-limits)
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 
 ```python
-from daytona import Daytona, CreateSandboxFromSnapshotParams
+from daytona import Daytona
 
 daytona = Daytona()
-
-# Create a sandbox
 sandbox = daytona.create()
-
-# Create a sandbox with python
-params = CreateSandboxFromSnapshotParams(language="python")
-sandbox = daytona.create(params)
-
-# Create a sandbox with a custom name
-params = CreateSandboxFromSnapshotParams(name="my_awesome_sandbox")
-sandbox = daytona.create(params)
-
-# Create a sandbox with custom labels
-params = CreateSandboxFromSnapshotParams(labels={"LABEL": "label"})
-sandbox = daytona.create(params)
 ```
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-import { Daytona } from '@daytona/sdk';
+import { Daytona } from '@daytona/sdk'
 
-const daytona = new Daytona();
-
-// Create a sandbox
-const sandbox = await daytona.create();
-
-// Create a sandbox with typescript
-const sandbox = await daytona.create({ language: 'typescript' });
-
-// Create a sandbox with a custom name
-const sandbox = await daytona.create({ name: 'my_awesome_sandbox' });
-
-// Create a sandbox with custom labels
-const sandbox = await daytona.create({ labels: { LABEL: 'label' } });
+const daytona = new Daytona()
+const sandbox = await daytona.create()
 ```
 
 </TabItem>
@@ -143,30 +101,41 @@ const sandbox = await daytona.create({ labels: { LABEL: 'label' } });
 require 'daytona'
 
 daytona = Daytona::Daytona.new
-
-# Create a sandbox
 sandbox = daytona.create
-
-# Create a sandbox with python
-params = Daytona::CreateSandboxFromSnapshotParams.new(language: Daytona::CodeLanguage::PYTHON)
-sandbox = daytona.create(params)
-
-# Create a sandbox with custom labels
-params = Daytona::CreateSandboxFromSnapshotParams.new(labels: { 'LABEL' => 'label' })
-sandbox = daytona.create(params)
 ```
 
 </TabItem>
 <TabItem label="Go" icon="seti:go">
 
 ```go
-// Create a sandbox
-params := types.SnapshotParams{
-    SandboxBaseParams: types.SandboxBaseParams{
-        Language: types.CodeLanguagePython,
-    },
+package main
+
+import (
+	"context"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+)
+
+func main() {
+	client, _ := daytona.NewClient()
+	ctx := context.Background()
+	_, _ = client.Create(ctx, nil)
 }
-sandbox, err := client.Create(ctx, params)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            Sandbox sandbox = daytona.create();
+        }
+    }
+}
 ```
 
 </TabItem>
@@ -190,47 +159,31 @@ curl 'https://app.daytona.io/api/sandbox' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), [API](/docs/en/tools/api/#daytona/), and [CLI](/docs/en/tools/cli/) references:
-
-> [**create (Python SDK)**](/docs/en/python-sdk/sync/daytona#daytonacreate)
->
-> [**create (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#create)
->
-> [**create (Ruby SDK)**](/docs/en/ruby-sdk/daytona#create)
->
-> [**Create (Go SDK)**](/docs/en/go-sdk/daytona/#Client.Create)
->
-> [**create (CLI)**](/docs/en/tools/cli/#daytona-create)
->
-> [**create (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox)
-
 ### Resources
 
 Sandboxes have **1 vCPU**, **1GB RAM**, and **3GiB disk** by default. Organizations get a maximum sandbox resource limit of **4 vCPUs**, **8GB RAM**, and **10GB disk**.
 
-To set custom sandbox resources (CPU, memory, and disk space), use the `Resources` class:
+| **Resource** | **Unit** | **Default** | **Minimum** | **Maximum** |
+| ------------ | -------- | ----------- | ----------- | ----------- |
+| CPU          | vCPU     | **`1`**     | **`1`**     | **`4`**     |
+| Memory       | GiB      | **`1`**     | **`1`**     | **`8`**     |
+| Disk         | GiB      | **`3`**     | **`1`**     | **`10`**    |
+
+To set custom sandbox resources, use the `Resources` class. All resource parameters are optional and must be integers. If not specified, Daytona will use the default values. Maximum values are per-sandbox limits set at the organization level. Contact [support@daytona.io](mailto:support@daytona.io) to increase limits.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 
 ```python
-from daytona import Daytona, Resources, CreateSandboxFromImageParams, Image
+from daytona import Daytona, CreateSandboxFromImageParams, Image, Resources
 
 daytona = Daytona()
-
-# Create a sandbox with custom resources
-resources = Resources(
-    cpu=2,    # 2 CPU cores
-    memory=4, # 4GB RAM
-    disk=8,   # 8GB disk space
+sandbox = daytona.create(
+    CreateSandboxFromImageParams(
+        image=Image.debian_slim("3.12"),
+        resources=Resources(cpu=2, memory=4, disk=8),
+    )
 )
-
-params = CreateSandboxFromImageParams(
-    image=Image.debian_slim("3.12"),
-    resources=resources
-)
-
-sandbox = daytona.create(params)
 ```
 
 </TabItem>
@@ -239,21 +192,11 @@ sandbox = daytona.create(params)
 ```typescript
 import { Daytona, Image } from "@daytona/sdk";
 
-async function main() {
-  const daytona = new Daytona();
-
-  // Create a sandbox with custom resources
-  const sandbox = await daytona.create({
-    image: Image.debianSlim("3.12"),
-    resources: {
-      cpu: 2,     // 2 CPU cores
-      memory: 4,  // 4GB RAM
-      disk: 8,    // 8GB disk space
-    },
-  });
-}
-
-main();
+const daytona = new Daytona();
+const sandbox = await daytona.create({
+  image: Image.debianSlim("3.12"),
+  resources: { cpu: 2, memory: 4, disk: 8 },
+});
 ```
 
 </TabItem>
@@ -263,15 +206,13 @@ main();
 require 'daytona'
 
 daytona = Daytona::Daytona.new
-
-# Create a sandbox with custom resources
 sandbox = daytona.create(
   Daytona::CreateSandboxFromImageParams.new(
     image: Daytona::Image.debian_slim('3.12'),
     resources: Daytona::Resources.new(
-      cpu: 2,     # 2 CPU cores
-      memory: 4,  # 4GB RAM
-      disk: 8     # 8GB disk space
+      cpu: 2,
+      memory: 4,
+      disk: 8
     )
   )
 )
@@ -281,15 +222,51 @@ sandbox = daytona.create(
 <TabItem label="Go" icon="seti:go">
 
 ```go
-// Create a sandbox with custom resources
-sandbox, err := client.Create(ctx, types.ImageParams{
-    Image: "python:3.11",
-    Resources: &types.Resources{
-        CPU:    2,   // 2 CPU cores
-        Memory: 4,   // 4GiB RAM
-        Disk:   8,   // 8GiB disk space
-    },
-})
+package main
+
+import (
+	"context"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+	client, _ := daytona.NewClient()
+	ctx := context.Background()
+	_, _ = client.Create(ctx, types.ImageParams{
+		Image: "python:3.12",
+		Resources: &types.Resources{
+			CPU:    2,
+			Memory: 4,
+			Disk:   8,
+		},
+	})
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromImageParams;
+import io.daytona.sdk.model.Resources;
+
+final class CreateSandboxResources {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            CreateSandboxFromImageParams params = new CreateSandboxFromImageParams();
+            params.setImage("python:3.12");
+            Resources resources = new Resources();
+            resources.setCpu(2);
+            resources.setMemory(4);
+            resources.setDisk(8);
+            params.setResources(resources);
+            Sandbox sandbox = daytona.create(params);
+        }
+    }
+}
 ```
 
 </TabItem>
@@ -318,33 +295,11 @@ curl 'https://app.daytona.io/api/sandbox' \
 </TabItem>
 </Tabs>
 
-All resource parameters are optional and must be integers. If not specified, Daytona will use the default values listed below.
-
-| **Resource** | **Unit** | **Default** | **Minimum** | **Maximum** |
-| ------------ | -------- | ----------- | ----------- | ----------- |
-| CPU          | vCPU     | **`1`**     | **`1`**     | **`4`**     |
-| Memory       | GiB      | **`1`**     | **`1`**     | **`8`**     |
-| Disk         | GiB      | **`3`**     | **`1`**     | **`10`**    |
-
-Maximum values are per-sandbox limits set at the [organization](/docs/en/organizations) level. Contact [support@daytona.io](mailto:support@daytona.io) to increase limits.
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/daytona#resources), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/) references:
-
-> [**Resources (Python SDK)**](/docs/en/python-sdk/sync/sandbox#resources)
->
-> [**Resources (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#resources)
->
-> [**Resources (Ruby SDK)**](/docs/en/ruby-sdk/daytona)
->
-> [**Resources (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox)
->
-> [**Resources (CLI)**](/docs/en/tools/cli/#daytona-create)
-
 ### Ephemeral Sandboxes
 
-Ephemeral Sandboxes are automatically deleted once they are stopped. They are useful for short-lived tasks or for testing purposes.
+Ephemeral sandboxes are automatically deleted once they are stopped. They are useful for short-lived tasks or testing purposes.
 
-To create an ephemeral Sandbox, set the `ephemeral` parameter to `True` when creating a sandbox:
+To create an ephemeral sandbox, set the `ephemeral` parameter to `True` when creating a sandbox. Setting [**`autoDeleteInterval: 0`**](#auto-delete-interval) has the same effect as setting `ephemeral` to `True`.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -353,11 +308,9 @@ To create an ephemeral Sandbox, set the `ephemeral` parameter to `True` when cre
 from daytona import Daytona, CreateSandboxFromSnapshotParams
 
 daytona = Daytona()
-
-# Create an ephemeral sandbox
 params = CreateSandboxFromSnapshotParams(
-  ephemeral=True,
-  auto_stop_interval=5 # The ephemeral sandbox will be deleted after 5 minutes of inactivity
+    ephemeral=True,
+    auto_stop_interval=5,  # delete after 5 minutes of inactivity
 )
 sandbox = daytona.create(params)
 ```
@@ -366,14 +319,12 @@ sandbox = daytona.create(params)
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-import { Daytona } from '@daytona/sdk';
+import { Daytona } from "@daytona/sdk";
 
 const daytona = new Daytona();
-
-// Create an ephemeral sandbox
 const sandbox = await daytona.create({
   ephemeral: true,
-  autoStopInterval: 5 // The ephemeral sandbox will be deleted after 5 minutes of inactivity
+  autoStopInterval: 5, // delete after 5 minutes of inactivity
 });
 ```
 
@@ -384,11 +335,9 @@ const sandbox = await daytona.create({
 require 'daytona'
 
 daytona = Daytona::Daytona.new
-
-# Create an ephemeral Sandbox
 params = Daytona::CreateSandboxFromSnapshotParams.new(
   ephemeral: true,
-  auto_stop_interval: 5 # The ephemeral sandbox will be deleted after 5 minutes of inactivity
+  auto_stop_interval: 5 # delete after 5 minutes of inactivity
 )
 sandbox = daytona.create(params)
 ```
@@ -397,36 +346,59 @@ sandbox = daytona.create(params)
 <TabItem label="Go" icon="seti:go">
 
 ```go
-// Create an ephemeral sandbox
-autoStopInterval := 5
-params := types.SnapshotParams{
-    SandboxBaseParams: types.SandboxBaseParams{
-        Language:         types.CodeLanguagePython,
-        Ephemeral:        true,
-        AutoStopInterval: &autoStopInterval,
-    },
+package main
+
+import (
+	"context"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+	client, _ := daytona.NewClient()
+	ctx := context.Background()
+
+	autoStopInterval := 5 // delete after 5 minutes of inactivity
+	params := types.SnapshotParams{
+		SandboxBaseParams: types.SandboxBaseParams{
+			Language:         types.CodeLanguagePython,
+			Ephemeral:        true,
+			AutoStopInterval: &autoStopInterval,
+		},
+	}
+	_, _ = client.Create(ctx, params)
 }
-sandbox, err := client.Create(ctx, params)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
+            params.setAutoDeleteInterval(0); // same effect as ephemeral: true
+            params.setAutoStopInterval(5); // delete after 5 minutes of inactivity
+            Sandbox sandbox = daytona.create(params);
+        }
+    }
+}
 ```
 
 </TabItem>
 </Tabs>
 
-:::note
-Setting ["autoDeleteInterval: 0"](#auto-delete-interval) has the same effect as setting "ephemeral" to `true`.
-:::
-
-### Network settings (Firewall)
-
-Daytona Sandboxes provide configurable network firewall controls to enhance security and manage connectivity.
-By default, network access follows standard security policies, but you can [customize network settings](/docs/en/network-limits) when creating a sandbox.
-
 ## Start Sandboxes
 
-Daytona provides options to start sandboxes in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona/) references.
+Daytona provides methods to start sandboxes in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [Python](/docs/en/python-sdk/), [TypeScript](/docs/en/typescript-sdk/), [Ruby](/docs/en/ruby-sdk/), [Go](/docs/en/go-sdk/daytona#type-sandbox), [Java](/docs/en/java-sdk/sandbox) **SDKs**, [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona/).
 
 1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
-2. Click the start icon (**▶**) next to the sandbox you want to start.
+2. Click the start icon (**▶**) next to the sandbox you want to start
 
 ```text
 Starting sandbox with ID: <sandbox-id>
@@ -436,8 +408,6 @@ Starting sandbox with ID: <sandbox-id>
 <TabItem label="Python" icon="seti:python">
 
 ```python
-sandbox = daytona.create(CreateSandboxFromSnapshotParams(language="python"))
-# Start Sandbox
 sandbox.start()
 ```
 
@@ -445,17 +415,13 @@ sandbox.start()
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-const sandbox = await daytona.create({ language: 'typescript' });
-// Start Sandbox
-await sandbox.start();
+await sandbox.start()
 ```
 
 </TabItem>
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
-sandbox = daytona.create(Daytona::CreateSandboxFromSnapshotParams.new(language: Daytona::CodeLanguage::PYTHON))
-# Start Sandbox
 sandbox.start
 ```
 
@@ -463,8 +429,14 @@ sandbox.start
 <TabItem label="Go" icon="seti:go">
 
 ```go
-// Start sandbox
-err = sandbox.Start(ctx)
+sandbox.Start(ctx)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+sandbox.start();
 ```
 
 </TabItem>
@@ -486,82 +458,43 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/start' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona) references:
-
-> [**start (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxstart)
->
-> [**start (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#start)
->
-> [**start (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#start)
->
-> [**Start (Go SDK)**](/docs/en/go-sdk/daytona/#Sandbox.Start)
->
-> [**start (CLI)**](/docs/en/tools/cli/#daytona-start)
->
-> [**start (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/start)
-
 ## List Sandboxes
 
-Daytona provides options to view information about sandboxes in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) via the [sandbox details page](#sandbox-details-page) or programmatically using the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/daytona/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona) references.
+Daytona provides methods to list sandboxes and view their details in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) via the [sandbox details page](#sandbox-details-page) or programmatically using the [Python](/docs/en/python-sdk/), [TypeScript](/docs/en/typescript-sdk/), [Ruby](/docs/en/ruby-sdk/), [Go](/docs/en/go-sdk/daytona/), [Java](/docs/en/java-sdk/daytona) **SDKs**, [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona).
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 
 ```python
-# List all sandboxes
-result = daytona.list()
-
-# Iterate through results
-for sandbox in result.items:
-    print(f"Sandbox: {sandbox.id} (state: {sandbox.state})")
-
-# List sandboxes with labels filter
-result = daytona.list(labels={"env": "dev"})
+daytona.list()
 ```
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-// List all sandboxes
-const result = await daytona.list();
-
-// Iterate through results
-for (const sandbox of result.items) {
-    console.log(`Sandbox: ${sandbox.id} (state: ${sandbox.state})`);
-}
-
-// List sandboxes with labels filter
-const filtered = await daytona.list({ 'env': 'dev' });
+await daytona.list()
 ```
 
 </TabItem>
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
-# List all sandboxes
-result = daytona.list
-
-# Iterate through results
-result.items.each do |sandbox|
-  puts "Sandbox: #{sandbox.id} (state: #{sandbox.state})"
-end
-
-# List sandboxes with labels filter
-result = daytona.list({ 'env' => 'dev' })
+daytona.list
 ```
 
 </TabItem>
 <TabItem label="Go" icon="seti:go">
 
 ```go
-// List all sandboxes
 result, err := client.List(ctx, nil, nil, nil)
+```
 
-// Iterate through results
-for _, sandbox := range result.Items {
-    fmt.Printf("Sandbox: %s (state: %s)\n", sandbox.Name, sandbox.State)
-}
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+daytona.list();
 ```
 
 </TabItem>
@@ -581,20 +514,6 @@ curl 'https://app.daytona.io/api/sandbox' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona) references:
-
-> [**list (Python SDK)**](/docs/en/python-sdk/sync/daytona#daytonalist)
->
-> [**list (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#list)
->
-> [**list (Ruby SDK)**](/docs/en/ruby-sdk/daytona#list)
->
-> [**List (Go SDK)**](/docs/en/go-sdk/daytona/#Client.List)
->
-> [**list (CLI)**](/docs/en/tools/cli/#daytona-list)
->
-> [**list (API)**](/docs/en/tools/api/#daytona/tag/sandbox/GET/sandbox)
 
 ### Sandbox details page
 
@@ -624,87 +543,50 @@ The sandbox details page provides a summary of the sandbox information and actio
 
 ## Stop Sandboxes
 
-Daytona provides methods to stop sandboxes in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/).
+Daytona provides methods to stop sandboxes in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [Python](/docs/en/python-sdk/), [TypeScript](/docs/en/typescript-sdk/), [Ruby](/docs/en/ruby-sdk/), [Go](/docs/en/go-sdk/daytona/), [Java](/docs/en/java-sdk/daytona) **SDKs**, [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona).
+
+Stopped sandboxes maintain filesystem persistence while their memory state is cleared. They incur only disk usage costs and can be started again when needed. The stopped state should be used when a sandbox is expected to be started again. Otherwise, it is recommended to stop and then archive the sandbox to eliminate disk usage costs.
 
 1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
-2. Click the stop icon (**⏹**) next to the sandbox you want to stop.
+2. Click the stop icon (**⏹**) next to the sandbox you want to stop
 
 ```text
 Stopping sandbox with ID: <sandbox-id>
 ```
 
-Stopped sandboxes maintain filesystem persistence while their memory state is cleared. They incur only disk usage costs and can be started again when needed.
-
-The stopped state should be used when a sandbox is expected to be started again soon. Otherwise, it is recommended to stop and then archive the sandbox to eliminate disk usage costs.
-
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 
 ```python
-sandbox = daytona.create(CreateSandboxFromSnapshotParams(language="python"))
-
-# Stop sandbox
 sandbox.stop()
-
-print(sandbox.id) # 7cd11133-96c1-4cc8-9baa-c757b8f8c916
-
-# The sandbox ID can later be used to get the sandbox and start it
-sandbox = daytona.get("7cd11133-96c1-4cc8-9baa-c757b8f8c916")
-
-# Start sandbox
-sandbox.start()
 ```
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-const sandbox = await daytona.create({ language: 'typescript' });
-
-// Stop sandbox
-await sandbox.stop();
-
-console.log(sandbox.id) // 7cd11133-96c1-4cc8-9baa-c757b8f8c916
-
-// The sandbox ID can later be used to get the sandbox and start it
-const found = await daytona.get('7cd11133-96c1-4cc8-9baa-c757b8f8c916');
-
-// Start sandbox
-await found.start();
+await sandbox.stop()
 ```
 
 </TabItem>
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
-sandbox = daytona.create(Daytona::CreateSandboxFromSnapshotParams.new(language: Daytona::CodeLanguage::PYTHON))
-
-# Stop sandbox
 sandbox.stop
-
-puts sandbox.id # 7cd11133-96c1-4cc8-9baa-c757b8f8c916
-
-# The sandbox ID can later be used to find the sandbox and start it
-sandbox = daytona.get('7cd11133-96c1-4cc8-9baa-c757b8f8c916')
-
-# Start sandbox
-sandbox.start
 ```
 
 </TabItem>
 <TabItem label="Go" icon="seti:go">
 
 ```go
-// Stop sandbox
-err = sandbox.Stop(ctx)
+sandbox.Stop(ctx)
+```
 
-fmt.Println(sandbox.ID) // 7cd11133-96c1-4cc8-9baa-c757b8f8c916
+</TabItem>
+<TabItem label="Java" icon="seti:java">
 
-// The sandbox ID can later be used to find the sandbox and start it
-sandbox, err = client.Get(ctx, sandbox.ID)
-
-// Start sandbox
-err = sandbox.Start(ctx)
+```java
+sandbox.stop();
 ```
 
 </TabItem>
@@ -726,28 +608,12 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/stop' \
 </TabItem>
 </Tabs>
 
-If you need a faster shutdown, use force stop (`force=true` / `--force`) to terminate it immediately. Force stop is ungraceful and should be used when quick termination is more important than process cleanup.
+If you need a faster shutdown, use force stop (`force=true` / `--force`) to terminate the sandbox immediately. Force stop is ungraceful and should be used when quick termination is more important than process cleanup. Avoid force stop for normal shutdowns where the process should flush buffers, write final state, or run cleanup hooks.
 
 Common use cases for force stop include:
 
 - you need to reduce stop time and can accept immediate termination
 - the entrypoint ignores termination signals or hangs during shutdown
-
-Avoid force stop for normal shutdowns where the process should flush buffers, write final state, or run cleanup hooks.
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/daytona/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona) references:
-
-> [**stop (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxstop)
->
-> [**stop (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#stop)
->
-> [**stop (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#stop)
->
-> [**Stop (Go SDK)**](/docs/en/go-sdk/daytona/#Sandbox.Stop)
->
-> [**stop (CLI)**](/docs/en/tools/cli/#daytona-stop)
->
-> [**stop (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/stop)
 
 ## Pause Sandboxes
 
@@ -761,18 +627,14 @@ Daytona supports pause functionality through VM-based runners. Pause is handled 
 
 ## Archive Sandboxes
 
-Daytona provides methods to archive sandboxes in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/).
+Daytona provides methods to archive sandboxes in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [Python](/docs/en/python-sdk/), [TypeScript](/docs/en/typescript-sdk/), [Ruby](/docs/en/ruby-sdk/), [Go](/docs/en/go-sdk/daytona/) **SDKs**, [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona).
 
-When sandboxes are archived, the entire filesystem state is moved to a cost-effective object storage, making it possible to keep sandboxes available for an extended period.
-Starting an archived sandbox takes more time than starting a stopped sandbox, depending on its size.
-
-A sandbox must be stopped before it can be archived and can be started again in the same way as a stopped sandbox.
+A sandbox must be stopped before it can be archived. When a sandbox is archived, the entire filesystem state is moved to a cost-effective object storage, making it available for an extended period. Starting an archived sandbox takes more time than starting a stopped sandbox, depending on its size. It can be started again in the same way as a stopped sandbox.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 
 ```python
-# Archive Sandbox
 sandbox.archive()
 ```
 
@@ -780,15 +642,13 @@ sandbox.archive()
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-// Archive Sandbox
-await sandbox.archive();
+await sandbox.archive()
 ```
 
 </TabItem>
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
-# Archive Sandbox
 sandbox.archive
 ```
 
@@ -796,8 +656,7 @@ sandbox.archive
 <TabItem label="Go" icon="seti:go">
 
 ```go
-// Archive sandbox
-err = sandbox.Archive(ctx)
+sandbox.Archive(ctx)
 ```
 
 </TabItem>
@@ -819,29 +678,14 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/archive' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
-
-> [**archive (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxarchive)
->
-> [**archive (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#archive)
->
-> [**archive (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#archive)
->
-> [**Archive (Go SDK)**](/docs/en/go-sdk/daytona/#Sandbox.Archive)
->
-> [**archive (CLI)**](/docs/en/tools/cli/#daytona-archive)
->
-> [**archive (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/archive)
-
 ## Recover Sandboxes
 
-Daytona provides methods to recover sandboxes in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/).
+Daytona provides methods to recover sandboxes in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [Python](/docs/en/python-sdk/), [TypeScript](/docs/en/typescript-sdk/), [Ruby](/docs/en/ruby-sdk/), [Go](/docs/en/go-sdk/daytona/) **SDKs**, and [API](/docs/en/tools/api/#daytona).
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 
 ```python
-# Recover sandbox
 sandbox.recover()
 ```
 
@@ -849,15 +693,13 @@ sandbox.recover()
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-// Recover sandbox
-await sandbox.recover();
+await sandbox.recover()
 ```
 
 </TabItem>
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
-# Recover sandbox
 sandbox.recover
 ```
 
@@ -873,42 +715,28 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/recover' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
-
-> [**recover (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxrecover)
->
-> [**recover (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#recover)
->
-> [**recover (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#recover)
->
-> [**recover (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/recover)
-
 ### Recover from error state
 
 When a sandbox enters an error state, it can sometimes be recovered using the `recover` method, depending on the underlying error reason. The `recoverable` flag indicates whether the error state can be resolved through an automated recovery procedure.
 
-:::note
 Recovery actions are not performed automatically because they address errors that require **further user intervention**, such as freeing up storage space.
-:::
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 
 ```python
-# Check if the Sandbox is recoverable
+# Check if the sandbox is recoverable
 if sandbox.recoverable:
     sandbox.recover()
-    print("Sandbox recovered successfully")
 ```
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-// Check if the Sandbox is recoverable
+// Check if the sandbox is recoverable
 if (sandbox.recoverable) {
-    await sandbox.recover();
-    console.log('Sandbox recovered successfully');
+  await sandbox.recover()
 }
 ```
 
@@ -916,10 +744,9 @@ if (sandbox.recoverable) {
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
-# Check if the Sandbox is in an error state before recovering
+# Check if the sandbox is in an error state before recovering
 if sandbox.state == 'error'
   sandbox.recover
-  puts 'Sandbox recovered successfully'
 end
 ```
 
@@ -935,16 +762,6 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/recover' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
-
-> [**recover (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxrecover)
->
-> [**recover (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#recover)
->
-> [**recover (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#recover)
->
-> [**recover (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/recover)
-
 ## Resize Sandboxes
 
 :::caution[Experimental]
@@ -954,70 +771,59 @@ This feature is experimental. To request access, contact [support@daytona.io](ma
 Daytona provides methods to resize [sandbox resources](#resources) after creation. On a running sandbox, you can increase CPU and memory without interruption. To decrease CPU or memory, or to increase disk capacity, stop the sandbox first. Disk size can only be increased and cannot be decreased.
 
 <Tabs syncKey="language">
-  <TabItem label="Python" icon="seti:python">
-    ```python
-    from daytona import Daytona, Resources
+<TabItem label="Python" icon="seti:python">
 
-    daytona = Daytona()
-    sandbox = daytona.create()
+```python
+# Resize a started sandbox (CPU and memory can be increased)
+sandbox.resize(Resources(cpu=2, memory=4))
 
-    # Resize a started sandbox (CPU and memory can be increased)
-    sandbox.resize(Resources(cpu=2, memory=4))
+# Resize a stopped sandbox (CPU and memory can change, disk can only increase)
+sandbox.stop()
+sandbox.resize(Resources(cpu=4, memory=8, disk=20))
+sandbox.start()
+```
 
-    # Resize a stopped sandbox (CPU and memory can change, disk can only increase)
-    sandbox.stop()
-    sandbox.resize(Resources(cpu=4, memory=8, disk=20))
-    sandbox.start()
-    ```
-  </TabItem>
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
 
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    import { Daytona } from '@daytona/sdk';
+```typescript
+// Resize a started sandbox (CPU and memory can be increased)
+await sandbox.resize({ cpu: 2, memory: 4 })
 
-    const daytona = new Daytona();
-    const sandbox = await daytona.create();
+// Resize a stopped sandbox (CPU and memory can change, disk can only increase)
+await sandbox.stop()
+await sandbox.resize({ cpu: 4, memory: 8, disk: 20 })
+await sandbox.start()
+```
 
-    // Resize a started sandbox (CPU and memory can be increased)
-    await sandbox.resize({ cpu: 2, memory: 4 });
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
 
-    // Resize a stopped sandbox (CPU and memory can change, disk can only increase)
-    await sandbox.stop();
-    await sandbox.resize({ cpu: 4, memory: 8, disk: 20 });
-    await sandbox.start();
-    ```
-  </TabItem>
+```ruby
+# Resize a started sandbox (CPU and memory can be increased)
+sandbox.resize(Daytona::Resources.new(cpu: 2, memory: 4))
 
-  <TabItem label="Ruby" icon="seti:ruby">
-    ```ruby
-    require 'daytona'
+# Resize a stopped sandbox (CPU and memory can change, disk can only increase)
+sandbox.stop
+sandbox.resize(Daytona::Resources.new(cpu: 4, memory: 8, disk: 20))
+sandbox.start
+```
 
-    daytona = Daytona::Daytona.new
-    sandbox = daytona.create
+</TabItem>
+<TabItem label="Go" icon="seti:go">
 
-    # Resize a started sandbox (CPU and memory can be increased)
-    sandbox.resize(Daytona::Resources.new(cpu: 2, memory: 4))
+```go
+// Resize a started sandbox (CPU and memory can be increased)
+err := sandbox.Resize(ctx, &types.Resources{CPU: 2, Memory: 4})
 
-    # Resize a stopped sandbox (CPU and memory can change, disk can only increase)
-    sandbox.stop
-    sandbox.resize(Daytona::Resources.new(cpu: 4, memory: 8, disk: 20))
-    sandbox.start
-    ```
-  </TabItem>
+// Resize a stopped sandbox (CPU and memory can change, disk can only increase)
+err = sandbox.Stop(ctx)
+err = sandbox.Resize(ctx, &types.Resources{CPU: 4, Memory: 8, Disk: 20})
+err = sandbox.Start(ctx)
+```
 
-  <TabItem label="Go" icon="seti:go">
-    ```go
-    // Resize a started sandbox (CPU and memory can be increased)
-    err := sandbox.Resize(ctx, &types.Resources{CPU: 2, Memory: 4})
-
-    // Resize a stopped sandbox (CPU and memory can change, disk can only increase)
-    err = sandbox.Stop(ctx)
-    err = sandbox.Resize(ctx, &types.Resources{CPU: 4, Memory: 8, Disk: 20})
-    err = sandbox.Start(ctx)
-    ```
-  </TabItem>
-
-  <TabItem label="API" icon="seti:json">
+</TabItem>
+<TabItem label="API" icon="seti:json">
 
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/resize' \
@@ -1031,20 +837,8 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/resize' \
 }'
 ```
 
-  </TabItem>
+</TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxresize), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#resize), [Go SDK](/docs/en/go-sdk/daytona/#Sandbox.Resize), [Ruby SDK](/docs/en/ruby-sdk/sandbox#resize) and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/resize) references:
-
-> [**resize (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxresize)
->
-> [**resize (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#resize)
->
-> [**Resize (Go SDK)**](/docs/en/go-sdk/daytona/#Sandbox.Resize)
->
-> [**resize (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#resize)
->
-> [**resize (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/resize)
 
 ## Fork Sandboxes
 
@@ -1204,7 +998,7 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/snapshot' \
 
 ## Delete Sandboxes
 
-Daytona provides methods to delete sandboxes in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/).
+Daytona provides methods to delete sandboxes in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [Python](/docs/en/python-sdk/), [TypeScript](/docs/en/typescript-sdk/), [Ruby](/docs/en/ruby-sdk/), [Go](/docs/en/go-sdk/daytona/), [Java](/docs/en/java-sdk/daytona) **SDKs**, [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona).
 
 1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
 2. Click the **Delete** button next to the sandbox you want to delete.
@@ -1217,23 +1011,20 @@ Deleting sandbox with ID: <sandbox-id>
 <TabItem label="Python" icon="seti:python">
 
 ```python
-# Delete sandbox
 sandbox.delete()
 ```
 
-</TabItem>
+</TabItem> 
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-// Delete sandbox
-await sandbox.delete();
+await sandbox.delete()
 ```
 
 </TabItem>
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
-# Delete sandbox
 sandbox.delete
 ```
 
@@ -1241,8 +1032,14 @@ sandbox.delete
 <TabItem label="Go" icon="seti:go">
 
 ```go
-// Delete sandbox
 err = sandbox.Delete(ctx)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+sandbox.delete();
 ```
 
 </TabItem>
@@ -1260,26 +1057,13 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}' \
   --request DELETE \
   --header 'Authorization: Bearer YOUR_API_KEY'
 ```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), [Go SDK](/docs/en/go-sdk/daytona/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
-
-> [**delete (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxdelete)
->
-> [**delete (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#delete)
->
-> [**delete (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#delete)
->
-> [**Delete (Go SDK)**](/docs/en/go-sdk/daytona/#Sandbox.Delete)
->
-> [**delete (CLI)**](/docs/en/tools/cli/#daytona-delete)
->
-> [**delete (API)**](/docs/en/tools/api/#daytona/tag/sandbox/DELETE/sandbox/{sandboxIdOrName})
-
 ## Automated lifecycle management
 
-Daytona Sandboxes can be automatically stopped, archived, and deleted based on user-defined intervals.
+Daytona sandboxes can be automatically stopped, archived, and deleted based on user-defined intervals.
 
 ### Auto-stop interval
 
@@ -1313,10 +1097,10 @@ sandbox = daytona.create(CreateSandboxFromSnapshotParams(
 
 ```typescript
 const sandbox = await daytona.create({
-    snapshot: "my-snapshot-name",
-      // Disables the auto-stop feature - default is 15 minutes
-    autoStopInterval: 0,
-});
+  snapshot: 'my-snapshot-name',
+  // Disables the auto-stop feature - default is 15 minutes
+  autoStopInterval: 0,
+})
 ```
 
 </TabItem>
@@ -1348,6 +1132,27 @@ sandbox, err := client.Create(ctx, params)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
+            params.setSnapshot("my-snapshot-name");
+            // Disables the auto-stop feature - default is 15 minutes
+            params.setAutoStopInterval(0);
+            Sandbox sandbox = daytona.create(params);
+        }
+    }
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1358,16 +1163,6 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autostop/{interval}' 
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), [Go SDK](/docs/en/go-sdk/daytona/), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
-
-> [**set_autostop_interval (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxset_autostop_interval)
->
-> [**setAutostopInterval (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#setautostopinterval)
->
-> [**auto_stop_interval (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#auto_stop_interval)
->
-> [**set_auto_stop_interval (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/autostop/1)
 
 #### What resets the timer
 
@@ -1391,11 +1186,9 @@ If you run a long-running task like LLM inference that takes more than 15 minute
 
 ### Auto-archive interval
 
-Daytona provides methods to set the auto-archive interval using the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/).
+Daytona provides methods to set the auto-archive interval using the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Java SDK](/docs/en/java-sdk/sandbox).
 
-The auto-archive interval parameter sets the amount of time after which a continuously stopped sandbox will be automatically archived.
-
-The parameter can either be set to:
+The auto-archive interval parameter sets the amount of time after which a continuously stopped sandbox will be automatically archived. The parameter can either be set to:
 
 - a time interval in minutes
 - `0`: the maximum interval of `30 days` will be used
@@ -1418,10 +1211,10 @@ sandbox = daytona.create(CreateSandboxFromSnapshotParams(
 
 ```typescript
 const sandbox = await daytona.create({
-    snapshot: "my-snapshot-name",
-    // Auto-archive after a sandbox has been stopped for 1 hour
-    autoArchiveInterval: 60,
-});
+  snapshot: 'my-snapshot-name',
+  // Auto-archive after a sandbox has been stopped for 1 hour
+  autoArchiveInterval: 60,
+})
 ```
 
 </TabItem>
@@ -1453,6 +1246,27 @@ sandbox, err := client.Create(ctx, params)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
+            params.setSnapshot("my-snapshot-name");
+            // Auto-archive after a sandbox has been stopped for 1 hour
+            params.setAutoArchiveInterval(60);
+            Sandbox sandbox = daytona.create(params);
+        }
+    }
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1464,25 +1278,11 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autoarchive/{interval
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), [Go SDK](/docs/en/go-sdk/daytona/), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
-
-> [**set_auto_archive_interval (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxset_auto_archive_interval)
->
-> [**setAutoArchiveInterval (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#setautoarchiveinterval)
->
-> [**auto_archive_interval (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#auto_archive_interval)
->
-> [**SetAutoArchiveInterval (Go SDK)**](/docs/en/go-sdk/daytona/#Sandbox.SetAutoArchiveInterval)
->
-> [**set_auto_archive_interval (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/autoarchive/{interval})
-
 ### Auto-delete interval
 
-Daytona provides methods to set the auto-delete interval using the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/).
+Daytona provides methods to set the auto-delete interval using the [Python](/docs/en/python-sdk/), [TypeScript](/docs/en/typescript-sdk/), [Ruby](/docs/en/ruby-sdk/), [Go](/docs/en/go-sdk/daytona/), [Java](/docs/en/java-sdk/daytona) **SDKs**, and [API](/docs/en/tools/api/#daytona).
 
-The auto-delete interval parameter sets the amount of time after which a continuously stopped sandbox will be automatically deleted. By default, sandboxes will never be automatically deleted.
-
-The parameter can either be set to:
+The auto-delete interval parameter sets the amount of time after which a continuously stopped sandbox will be automatically deleted. By default, sandboxes will never be automatically deleted. The parameter can either be set to:
 
 - a time interval in minutes
 - `-1`: disables the auto-delete functionality
@@ -1512,10 +1312,10 @@ sandbox.set_auto_delete_interval(-1)
 
 ```typescript
 const sandbox = await daytona.create({
-    snapshot: "my-snapshot-name",
-    // Auto-delete after a sandbox has been stopped for 1 hour
-    autoDeleteInterval: 60,
-});
+  snapshot: 'my-snapshot-name',
+  // Auto-delete after a sandbox has been stopped for 1 hour
+  autoDeleteInterval: 60,
+})
 
 // Delete the sandbox immediately after it has been stopped
 await sandbox.setAutoDeleteInterval(0)
@@ -1567,6 +1367,33 @@ err = sandbox.SetAutoDeleteInterval(ctx, &disableInterval)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
+            params.setSnapshot("my-snapshot-name");
+            // Auto-delete after a sandbox has been stopped for 1 hour
+            params.setAutoDeleteInterval(60);
+            Sandbox sandbox = daytona.create(params);
+
+            // Delete the sandbox immediately after it has been stopped
+            sandbox.setAutoDeleteInterval(0);
+
+            // Disable auto-deletion
+            sandbox.setAutoDeleteInterval(-1);
+        }
+    }
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1578,21 +1405,9 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autodelete/{interval}
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), [Go SDK](/docs/en/go-sdk/daytona/), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
-
-> [**set_auto_delete_interval (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxset_auto_delete_interval)
->
-> [**setAutoDeleteInterval (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#setautodeleteinterval)
->
-> [**auto_delete_interval (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#auto_delete_interval)
->
-> [**SetAutoDeleteInterval (Go SDK)**](/docs/en/go-sdk/daytona/#Sandbox.SetAutoDeleteInterval)
->
-> [**set_auto_delete_interval (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/autodelete/{interval})
-
 ### Running indefinitely
 
-Daytona provides methods to run sandboxes indefinitely using the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/).
+Daytona provides methods to run sandboxes indefinitely using the [Python](/docs/en/python-sdk/), [TypeScript](/docs/en/typescript-sdk/), [Ruby](/docs/en/ruby-sdk/), [Go](/docs/en/go-sdk/daytona/), and [Java](/docs/en/java-sdk/daytona) **SDKs**.
 
 By default, Daytona Sandboxes auto-stop after 15 minutes of inactivity. To keep a sandbox running without interruption, set the auto-stop interval to `0` when creating a new sandbox:
 
@@ -1612,10 +1427,10 @@ sandbox = daytona.create(CreateSandboxFromSnapshotParams(
 
 ```typescript
 const sandbox = await daytona.create({
-    snapshot: "my_awesome_snapshot",
-    // Disables the auto-stop feature - default is 15 minutes
-    autoStopInterval: 0,
-});
+  snapshot: 'my_awesome_snapshot',
+  // Disables the auto-stop feature - default is 15 minutes
+  autoStopInterval: 0,
+})
 ```
 
 </TabItem>
@@ -1647,5 +1462,25 @@ sandbox, err := client.Create(ctx, params)
 ```
 
 </TabItem>
-</Tabs>
+<TabItem label="Java" icon="seti:java">
 
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
+            params.setSnapshot("my_awesome_snapshot");
+            // Disables the auto-stop feature - default is 15 minutes
+            params.setAutoStopInterval(0);
+            Sandbox sandbox = daytona.create(params);
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>

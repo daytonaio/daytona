@@ -85,15 +85,27 @@ lsp := sandbox.Lsp(types.LspLanguagePython, "workspace/project")
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.LspServer;
+import io.daytona.sdk.Sandbox;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            Sandbox sandbox = daytona.create();
+            LspServer lspServer = sandbox.createLspServer(
+                    LspServer.LspLanguageId.PYTHON.getValue(),
+                    "workspace/project");
+        }
+    }
+}
+```
+
+</TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), and [Go SDK](/docs/en/go-sdk/) references:
-
-> [**create_lsp_server (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxcreate_lsp_server)
->
-> [**createLspServer (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#createlspserver)
->
-> [**create_lsp_server (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#create_lsp_server)
 
 ### Supported languages
 
@@ -103,12 +115,6 @@ The supported languages for creating LSP servers with Daytona are defined by the
 | ------------------------------ | -------------------------------------- |
 | **`LspLanguageId.PYTHON`**     | Python language server                 |
 | **`LspLanguageId.TYPESCRIPT`** | TypeScript/JavaScript language server  |
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/#lsplanguageid) and [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/#lsplanguageid) references:
-
-> [**LspLanguageId (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lsplanguageid)
->
-> [**LspLanguageId (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#lsplanguageid)
 
 ## Start LSP servers
 
@@ -157,6 +163,15 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+LspServer lsp = sandbox.createLspServer("typescript", "workspace/project");
+lsp.start("typescript", "workspace/project");
+// Now ready for LSP operations
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -171,18 +186,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/start' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
-
-> [**start (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverstart)
->
-> [**start (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#start)
->
-> [**start (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#start)
->
-> [**Start (Go SDK)**](/docs/en/go-sdk/daytona#LspServerService.Start)
->
-> [**start (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/start)
 
 ## Stop LSP servers
 
@@ -224,6 +227,14 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// When done with LSP features
+lsp.stop("typescript", "workspace/project"); // Clean up resources
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -238,18 +249,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/stop' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
-
-> [**stop (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverstop)
->
-> [**stop (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#stop)
->
-> [**stop (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#stop)
->
-> [**Stop (Go SDK)**](/docs/en/go-sdk/daytona#LspServerService.Stop)
->
-> [**stop (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/stop)
 
 ## Code completions
 
@@ -302,6 +301,19 @@ fmt.Printf("Completions: %v\n", completions)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var completions = lsp.completions(
+    "typescript",
+    "workspace/project",
+    "workspace/project/Main.java",
+    10,
+    15);
+System.out.println("Completions: " + completions);
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -325,18 +337,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/completions' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
-
-> [**completions (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspservercompletions)
->
-> [**completions (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#completions)
->
-> [**completions (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#completions)
->
-> [**Completions (Go SDK)**](/docs/en/go-sdk/daytona#LspServerService.Completions)
->
-> [**completions (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/completions)
 
 ## File notifications
 
@@ -382,6 +382,14 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Notify server that a file is open
+lsp.didOpen("typescript", "workspace/project", "workspace/project/Main.java");
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -397,18 +405,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/did-open' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
-
-> [**did_open (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverdid_open)
->
-> [**didOpen (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#didopen)
->
-> [**did_open (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#did_open)
->
-> [**DidOpen (Go SDK)**](/docs/en/go-sdk/daytona#LspServerService.DidOpen)
->
-> [**did_open (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/did-open)
 
 ### Close file
 
@@ -450,6 +446,14 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Notify server that a file is closed
+lsp.didClose("typescript", "workspace/project", "workspace/project/Main.java");
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -465,18 +469,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/did-close' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
-
-> [**did_close (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverdid_close)
->
-> [**didClose (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#didclose)
->
-> [**did_close (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#did_close)
->
-> [**DidClose (Go SDK)**](/docs/en/go-sdk/daytona#LspServerService.DidClose)
->
-> [**did_close (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/did-close)
 
 ## Document symbols
 
@@ -525,6 +517,19 @@ for _, symbol := range symbols {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var symbols = lsp.documentSymbols(
+    "typescript",
+    "workspace/project",
+    "workspace/project/Main.java");
+for (var symbol : symbols) {
+    System.out.println("Symbol: " + symbol.getName() + ", Kind: " + symbol.getKind());
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -533,18 +538,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/document-symbols?lang
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
-
-> [**document_symbols (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverdocument_symbols)
->
-> [**documentSymbols (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#documentsymbols)
->
-> [**document_symbols (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#document_symbols)
->
-> [**DocumentSymbols (Go SDK)**](/docs/en/go-sdk/daytona#LspServerService.DocumentSymbols)
->
-> [**document_symbols (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/GET/lsp/document-symbols)
 
 ## Sandbox symbols
 
@@ -593,6 +586,16 @@ for _, symbol := range symbols {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var symbols = lsp.workspaceSymbols("MyClass", "typescript", "workspace/project");
+for (var symbol : symbols) {
+    System.out.println("Found: " + symbol.getName() + " at " + symbol.getLocation());
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -602,14 +605,3 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/workspacesymbols?quer
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp) references:
-
-> [**sandbox_symbols (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserversandbox_symbols)
->
-> [**sandboxSymbols (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#sandboxsymbols)
->
-> [**sandbox_symbols (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#sandbox_symbols)
->
-> [**SandboxSymbols (Go SDK)**](/docs/en/go-sdk/daytona#LspServerService.SandboxSymbols)
->
-> [**sandbox_symbols (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/GET/lsp/workspacesymbols)

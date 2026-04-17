@@ -61,6 +61,14 @@ fmt.Println("Computer use processes started")
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var result = sandbox.computerUse.start();
+System.out.println("Computer use processes started: " + result.getMessage());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -70,16 +78,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/start' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**start (Python SDK)**](/docs/en/python-sdk/sync/computer-use#computerusestart)
->
-> [**start (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#start)
->
-> [**start (Ruby SDK)**](/docs/en/ruby-sdk/computer-use#start)
->
-> [**Start Computer Use Processes (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/start)
 
 ## Stop Computer Use
 
@@ -122,6 +120,14 @@ fmt.Println("Computer use processes stopped")
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var result = sandbox.computerUse.stop();
+System.out.println("Computer use processes stopped: " + result.getMessage());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -131,16 +137,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/stop' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**stop (Python SDK)**](/docs/en/python-sdk/sync/computer-use#computerusestop)
->
-> [**stop (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#stop)
->
-> [**stop (Ruby SDK)**](/docs/en/ruby-sdk/computer-use#stop)
->
-> [**Stop Computer Use Processes (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/stop)
 
 ## Get status
 
@@ -183,6 +179,14 @@ fmt.Printf("Computer use status: %v\n", status["status"])
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var response = sandbox.computerUse.getStatus();
+System.out.println("Computer use status: " + response.getStatus());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -191,16 +195,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/status'
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**get_status (Python SDK)**](/docs/en/python-sdk/sync/computer-use#computeruseget_status)
->
-> [**getStatus (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#getstatus)
->
-> [**status (Ruby SDK)**](/docs/en/ruby-sdk/computer-use#status)
->
-> [**Get Computer Use status (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/status)
 
 ## Get process status
 
@@ -239,16 +233,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/process/{proc
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**get_process_status (Python SDK)**](/docs/en/python-sdk/sync/computer-use#computeruseget_process_status)
->
-> [**getProcessStatus (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#getprocessstatus)
->
-> [**get_process_status (Ruby SDK)**](/docs/en/ruby-sdk/computer-use#get_process_status)
->
-> [**Get Process Status (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/process/{processName}/status)
 
 ## Restart process
 
@@ -289,16 +273,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/process/{proc
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**restart_process (Python SDK)**](/docs/en/python-sdk/sync/computer-use#computeruserestart_process)
->
-> [**restartProcess (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#restartprocess)
->
-> [**restart_process (Ruby SDK)**](/docs/en/ruby-sdk/computer-use#restart_process)
->
-> [**Restart process (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/process/{processName}/restart)
-
 ## Get process logs
 
 Get logs for a specific VNC process.
@@ -337,16 +311,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/process/{proc
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**get_process_logs (Python SDK)**](/docs/en/python-sdk/sync/computer-use#computeruseget_process_logs)
->
-> [**getProcessLogs (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#getprocesslogs)
->
-> [**get_process_logs (Ruby SDK)**](/docs/en/ruby-sdk/computer-use#get_process_logs)
->
-> [**Get process logs (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/process/{processName}/logs)
-
 ## Get process errors
 
 Get error logs for a specific VNC process.
@@ -384,16 +348,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/process/{proc
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**get_process_errors (Python SDK)**](/docs/en/python-sdk/sync/computer-use#computeruseget_process_errors)
->
-> [**getProcessErrors (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#getprocesserrors)
->
-> [**get_process_errors (Ruby SDK)**](/docs/en/ruby-sdk/computer-use#get_process_errors)
->
-> [**Get process errors (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/process/{processName}/errors)
 
 ## Mouse operations
 
@@ -463,6 +417,20 @@ result, err = sandbox.ComputerUse.Mouse().Click(ctx, 100, 200, &rightButton, nil
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Single left click
+sandbox.computerUse.click(100, 200);
+
+// Double click
+sandbox.computerUse.doubleClick(100, 200);
+
+// Right click
+sandbox.computerUse.click(100, 200, "right");
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -479,16 +447,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/mouse/click' 
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**click (Python SDK)**](/docs/en/python-sdk/sync/computer-use#mouseclick)
->
-> [**click (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#click)
->
-> [**Click (Go SDK)**](/docs/en/go-sdk/daytona/#MouseService.Click)
->
-> [**Mouse click (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/mouse/click)
 
 ### Move
 
@@ -531,6 +489,14 @@ fmt.Printf("Mouse moved to: %v, %v\n", result["x"], result["y"])
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var result = sandbox.computerUse.moveMouse(100, 200);
+System.out.println("Mouse moved to: " + result.getX() + ", " + result.getY());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -545,16 +511,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/mouse/move' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**move (Python SDK)**](/docs/en/python-sdk/sync/computer-use#mousemove)
->
-> [**move (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#move)
->
-> [**Move (Go SDK)**](/docs/en/go-sdk/daytona/#MouseService.Move)
->
-> [**Mouse move (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/mouse/move)
 
 ### Drag
 
@@ -597,6 +553,14 @@ fmt.Printf("Dragged to %v, %v\n", result["x"], result["y"])
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var result = sandbox.computerUse.drag(50, 50, 150, 150);
+System.out.println("Drag ended at: " + result.getX() + ", " + result.getY());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -614,16 +578,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/mouse/drag' \
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**drag (Python SDK)**](/docs/en/python-sdk/sync/computer-use#mousedrag)
->
-> [**drag (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#drag)
->
-> [**Drag (Go SDK)**](/docs/en/go-sdk/daytona/#MouseService.Drag)
->
-> [**Mouse drag (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/mouse/drag)
 
 ### Scroll
 
@@ -679,6 +633,17 @@ success, err = sandbox.ComputerUse.Mouse().Scroll(ctx, 100, 200, "down", &amount
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Scroll up (negative vertical delta maps to "up")
+sandbox.computerUse.scroll(100, 200, 0, -3);
+
+// Scroll down
+sandbox.computerUse.scroll(100, 200, 0, 5);
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -695,16 +660,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/mouse/scroll'
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**scroll (Python SDK)**](/docs/en/python-sdk/sync/computer-use#mousescroll)
->
-> [**scroll (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#scroll)
->
-> [**Scroll (Go SDK)**](/docs/en/go-sdk/daytona/#MouseService.Scroll)
->
-> [**Mouse scroll (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/mouse/scroll)
 
 ### Get position
 
@@ -747,6 +702,14 @@ fmt.Printf("Mouse is at: %v, %v\n", position["x"], position["y"])
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var position = sandbox.computerUse.getMousePosition();
+System.out.println("Mouse is at: " + position.getX() + ", " + position.getY());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -755,16 +718,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/mouse/positio
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**get_position (Python SDK)**](/docs/en/python-sdk/sync/computer-use#mouseget_position)
->
-> [**getPosition (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#getposition)
->
-> [**GetPosition (Go SDK)**](/docs/en/go-sdk/daytona/#MouseService.GetPosition)
->
-> [**Get mouse position (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/mouse/position)
 
 ## Keyboard operations
 
@@ -817,6 +770,13 @@ err = sandbox.ComputerUse.Keyboard().Type(ctx, "Slow typing", &delay)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+sandbox.computerUse.typeText("Hello, World!");
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -831,16 +791,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/keyboard/type
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**type (Python SDK)**](/docs/en/python-sdk/sync/computer-use#keyboardtype)
->
-> [**type (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#type)
->
-> [**Type (Go SDK)**](/docs/en/go-sdk/daytona/#KeyboardService.Type)
->
-> [**Keyboard type (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/keyboard/type)
 
 ### Press
 
@@ -906,6 +856,20 @@ err = sandbox.ComputerUse.Keyboard().Press(ctx, "t", []string{"ctrl", "shift"})
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Press Enter
+sandbox.computerUse.pressKey("Return");
+
+// Press Ctrl+C
+sandbox.computerUse.pressHotkey("ctrl", "c");
+
+// Press Ctrl+Shift+T
+sandbox.computerUse.pressHotkey("ctrl", "shift", "t");
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -922,16 +886,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/keyboard/key'
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**press (Python SDK)**](/docs/en/python-sdk/sync/computer-use#keyboardpress)
->
-> [**press (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#press)
->
-> [**Press (Go SDK)**](/docs/en/go-sdk/daytona/#KeyboardService.Press)
->
-> [**Keyboard press (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/keyboard/press)
 
 ### Hotkey
 
@@ -996,6 +950,20 @@ err = sandbox.ComputerUse.Keyboard().Hotkey(ctx, "alt+tab")
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Copy
+sandbox.computerUse.pressHotkey("ctrl", "c");
+
+// Paste
+sandbox.computerUse.pressHotkey("ctrl", "v");
+
+// Alt+Tab
+sandbox.computerUse.pressHotkey("alt", "tab");
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1009,16 +977,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/keyboard/hotk
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**hotkey (Python SDK)**](/docs/en/python-sdk/sync/computer-use#keyboardhotkey)
->
-> [**hotkey (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#hotkey)
->
-> [**Hotkey (Go SDK)**](/docs/en/go-sdk/daytona/#KeyboardService.Hotkey)
->
-> [**Keyboard hotkey (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/keyboard/hotkey)
 
 ## Screenshot operations
 
@@ -1076,6 +1034,18 @@ withCursor, err := sandbox.ComputerUse.Screenshot().TakeFullScreen(ctx, &showCur
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var screenshot = sandbox.computerUse.takeScreenshot();
+Integer sizeBytes = screenshot.getSizeBytes();
+System.out.println("Screenshot payload size: " + (sizeBytes != null ? sizeBytes + " bytes" : "n/a"));
+
+// With cursor visible
+var withCursor = sandbox.computerUse.takeScreenshot(true);
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1084,16 +1054,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/screenshot'
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**take_full_screen (Python SDK)**](/docs/en/python-sdk/sync/computer-use#screenshottake_full_screen)
->
-> [**takeFullScreen (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#takefullscreen)
->
-> [**TakeFullScreen (Go SDK)**](/docs/en/go-sdk/daytona/#ScreenshotService.TakeFullScreen)
->
-> [**Take screenshot (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/screenshot)
 
 ### Take region
 
@@ -1142,6 +1102,15 @@ fmt.Printf("Captured region: %dx%d\n", screenshot.Width, screenshot.Height)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var screenshot = sandbox.computerUse.takeRegionScreenshot(100, 100, 300, 200);
+Integer sizeBytes = screenshot.getSizeBytes();
+System.out.println("Captured region, payload size: " + (sizeBytes != null ? sizeBytes + " bytes" : "n/a"));
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1150,16 +1119,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/screenshot/re
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**take_region (Python SDK)**](/docs/en/python-sdk/sync/computer-use#screenshottake_region)
->
-> [**takeRegion (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#takeregion)
->
-> [**TakeRegion (Go SDK)**](/docs/en/go-sdk/daytona/#ScreenshotService.TakeRegion)
->
-> [**Take Screenshot Region (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/screenshot/region)
 
 ### Take compressed
 
@@ -1225,6 +1184,20 @@ scaled = sandbox.computer_use.screenshot.take_compressed(
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Compressed full screen (format, quality 1-100, scale factor)
+var screenshot = sandbox.computerUse.takeCompressedScreenshot("png", 80, 1.0);
+
+// High quality JPEG at full scale
+var jpeg = sandbox.computerUse.takeCompressedScreenshot("jpeg", 95, 1.0);
+
+// Scaled down PNG
+var scaled = sandbox.computerUse.takeCompressedScreenshot("png", 80, 0.5);
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1233,14 +1206,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/screenshot/co
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**take_compressed (Python SDK)**](/docs/en/python-sdk/sync/computer-use#screenshottake_compressed)
->
-> [**takeCompressed (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#takecompressed)
->
-> [**Take compressed screenshot (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/screenshot/compressed)
 
 ### Take compressed region
 
@@ -1294,14 +1259,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/screenshot/re
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**take_compressed_region (Python SDK)**](/docs/en/python-sdk/sync/computer-use#screenshottake_compressed_region)
->
-> [**takeCompressedRegion (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#takecompressedregion)
->
-> [**Take compressed screenshot region (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/screenshot/region/compressed)
 
 ## Screen Recording
 
@@ -1380,6 +1337,25 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+
+import java.util.Map;
+
+try (Daytona daytona = new Daytona()) {
+    CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
+    params.setSnapshot("daytonaio/sandbox:0.6.0");
+    params.setName("my-sandbox");
+    params.setEnvVars(Map.of("DAYTONA_RECORDINGS_DIR", "/home/daytona/my-recordings"));
+    Sandbox sandbox = daytona.create(params);
+}
+```
+
+</TabItem>
 </Tabs>
 
 ### Start Recording
@@ -1432,6 +1408,16 @@ fmt.Printf("File path: %s\n", *recording.FilePath)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Start recording with a custom label
+var recording = sandbox.computerUse.startRecording("test-1");
+System.out.println("Recording started: " + recording.getId());
+System.out.println("File path: " + recording.getFilePath());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1445,18 +1431,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recordings/st
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**start (Python SDK)**](/docs/en/python-sdk/sync/computer-use#recordingstart)
->
-> [**start (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#start-1)
->
-> [**start (Ruby SDK)**](/docs/en/ruby-sdk/computer-use)
->
-> [**Start (Go SDK)**](/docs/en/go-sdk/daytona/#RecordingService.Start)
->
-> [**Start Recording (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/recordings/start)
 
 ### Stop Recording
 
@@ -1507,6 +1481,16 @@ fmt.Printf("Saved to: %s\n", *stoppedRecording.FilePath)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Stop the recording
+var stoppedRecording = sandbox.computerUse.stopRecording(recording.getId());
+System.out.println("Recording stopped: " + stoppedRecording.getDurationSeconds() + " seconds");
+System.out.println("Saved to: " + stoppedRecording.getFilePath());
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1520,18 +1504,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recordings/st
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**stop (Python SDK)**](/docs/en/python-sdk/sync/computer-use#recordingstop)
->
-> [**stop (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#stop-1)
->
-> [**stop (Ruby SDK)**](/docs/en/ruby-sdk/computer-use)
->
-> [**Stop (Go SDK)**](/docs/en/go-sdk/daytona/#RecordingService.Stop)
->
-> [**Stop Recording (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/recordings/stop)
 
 ### List Recordings
 
@@ -1585,6 +1557,19 @@ for _, rec := range recordingsList.Recordings {
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var recordingsList = sandbox.computerUse.listRecordings();
+System.out.println("Total recordings: " + recordingsList.getRecordings().size());
+for (var rec : recordingsList.getRecordings()) {
+    System.out.println(
+        "- " + rec.getFileName() + ": " + rec.getDurationSeconds() + "s (" + rec.getSizeBytes() + " bytes)"
+    );
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1593,18 +1578,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recordings'
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**list (Python SDK)**](/docs/en/python-sdk/sync/computer-use#recordinglist)
->
-> [**list (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#list)
->
-> [**list (Ruby SDK)**](/docs/en/ruby-sdk/computer-use)
->
-> [**List (Go SDK)**](/docs/en/go-sdk/daytona/#RecordingService.List)
->
-> [**List Recordings (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/recordings)
 
 ### Get Recording
 
@@ -1655,6 +1628,16 @@ fmt.Printf("Duration: %.2fs\n", *recordingDetail.DurationSeconds)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var recordingDetail = sandbox.computerUse.getRecording("recording-id");
+System.out.println("Recording: " + recordingDetail.getFileName());
+System.out.println("Status: " + recordingDetail.getStatus());
+System.out.println("Duration: " + recordingDetail.getDurationSeconds() + "s");
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1663,18 +1646,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recordings/{i
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**get (Python SDK)**](/docs/en/python-sdk/sync/computer-use#recordingget)
->
-> [**get (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#get)
->
-> [**get (Ruby SDK)**](/docs/en/ruby-sdk/computer-use)
->
-> [**Get (Go SDK)**](/docs/en/go-sdk/daytona/#RecordingService.Get)
->
-> [**Get Recording (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/recordings/{id})
 
 ### Delete Recording
 
@@ -1717,6 +1688,14 @@ fmt.Println("Recording deleted successfully")
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+sandbox.computerUse.deleteRecording("recording-id");
+System.out.println("Recording deleted successfully");
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1726,18 +1705,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recordings/{i
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**delete (Python SDK)**](/docs/en/python-sdk/sync/computer-use#recordingdelete)
->
-> [**delete (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#delete)
->
-> [**delete (Ruby SDK)**](/docs/en/ruby-sdk/computer-use)
->
-> [**Delete (Go SDK)**](/docs/en/go-sdk/daytona/#RecordingService.Delete)
->
-> [**Delete Recording (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/DELETE/computeruse/recordings/{id})
 
 ### Download Recording
 
@@ -1800,6 +1767,24 @@ err = sandbox.ComputerUse.Recording().Download(ctx, recording.GetId(), downloadP
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+
+// Download returns a temp file from the API client; copy it to a stable path
+var tempFile = sandbox.computerUse.downloadRecording(recording.getId());
+Files.copy(tempFile.toPath(), Path.of("local_recording.mp4"), StandardCopyOption.REPLACE_EXISTING);
+System.out.println("Recording saved to local_recording.mp4");
+
+var downloadPath = Path.of("recordings", "recording_" + recording.getId() + ".mp4");
+Files.createDirectories(downloadPath.getParent());
+Files.copy(tempFile.toPath(), downloadPath, StandardCopyOption.REPLACE_EXISTING);
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1817,19 +1802,8 @@ All SDK implementations stream the recording file directly to disk without loadi
 - **TypeScript**: Uses Node.js `pipeline()` with backpressure handling
 - **Ruby**: Uses Typhoeus streaming with `on_body` callbacks
 - **Go**: Uses `io.Copy()` with 32KB internal buffer
+- **Java**: The OpenAPI client streams the response body into a temporary file via OkHttp
 :::
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**download (Python SDK)**](/docs/en/python-sdk/sync/computer-use#recordingdownload)
->
-> [**download (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#download)
->
-> [**download (Ruby SDK)**](/docs/en/ruby-sdk/computer-use)
->
-> [**Download (Go SDK)**](/docs/en/go-sdk/daytona/#RecordingService.Download)
->
-> [**Download Recording (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/recordings/{id}/download)
 
 ### Recording Dashboard
 
@@ -1905,6 +1879,21 @@ fmt.Printf("Displays: %v\n", info["displays"])
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var info = sandbox.computerUse.getDisplayInfo();
+if (info.getDisplays() != null) {
+    for (var display : info.getDisplays()) {
+        System.out.println(
+            "Display " + display.getId() + ": " + display.getWidth() + "x" + display.getHeight()
+                + " at " + display.getX() + "," + display.getY()
+        );
+    }
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1913,16 +1902,6 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/display/info'
 
 </TabItem>
 </Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**get_info (Python SDK)**](/docs/en/python-sdk/sync/computer-use#displayget_info)
->
-> [**getInfo (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#getinfo)
->
-> [**GetInfo (Go SDK)**](/docs/en/go-sdk/daytona/#DisplayService.GetInfo)
->
-> [**Get display info (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/display/info)
 
 ### Get windows
 
@@ -1973,6 +1952,20 @@ fmt.Printf("Open windows: %v\n", result["windows"])
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+var windows = sandbox.computerUse.getWindows();
+var list = windows.getWindows();
+if (list != null) {
+    System.out.println("Found " + list.size() + " open windows:");
+    for (var window : list) {
+        System.out.println("- " + window.getTitle() + " (ID: " + window.getId() + ")");
+    }
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1982,12 +1975,3 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/display/windo
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
-
-> [**get_windows (Python SDK)**](/docs/en/python-sdk/sync/computer-use#displayget_windows)
->
-> [**getWindows (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#getwindows)
->
-> [**GetWindows (Go SDK)**](/docs/en/go-sdk/daytona/#DisplayService.GetWindows)
->
-> [**Get Windows (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/display/windows)

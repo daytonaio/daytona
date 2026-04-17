@@ -76,6 +76,22 @@ daytona = Daytona::Daytona.new(config)
 ```
 
 </TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.DaytonaConfig;
+
+// Configure Daytona to use the US region
+DaytonaConfig config = new DaytonaConfig.Builder()
+        .apiKey(System.getenv("DAYTONA_API_KEY"))
+        .target("us")
+        .build();
+
+Daytona daytona = new Daytona(config);
+```
+
+</TabItem>
 </Tabs>
 
 ### Shared regions
