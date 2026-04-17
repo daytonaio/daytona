@@ -52,6 +52,8 @@ const TOOLBOX_API_PATH = path.join(
   'apps/daemon/pkg/toolbox/docs/swagger.json'
 )
 
+const MAX_CONTENT_LENGTH = 5000
+
 function processContent(content) {
   return content
     .split('\n')
@@ -63,17 +65,31 @@ function processContent(content) {
     .trim()
 }
 
+function cleanMarkdown(text) {
+  return text
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/[*_~`]/g, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\{[^}]*\}/g, '')
+    .replace(/\|/g, '')
+    .replace(/^[\s\-:]+$/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
+function extractSearchableContent(text) {
+  return cleanMarkdown(text).slice(0, MAX_CONTENT_LENGTH)
+}
+
 function extractSentences(text) {
-  // Return text
   const match = text.match(/[^.!?]*[.!?]/g)
   const sentences = match ? match.map(m => m.trim()) : text.trim().split('\n')
   return sentences.length > 0
     ? sentences.filter(s => s.endsWith('.')).join(' ')
     : ''
-}
-
-function extractHyperlinks(text) {
-  return text.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '$1')
 }
 
 function isSentence(sentence) {
@@ -112,7 +128,10 @@ function extractCodeSnippets(content) {
   const codeRegexes = [
     /```(?:python|py)\n([\s\S]*?)```/g,
     /```(?:typescript|ts|tsx)\n([\s\S]*?)```/g,
+    /```(?:ruby|rb)\n([\s\S]*?)```/g,
+    /```(?:go|golang)\n([\s\S]*?)```/g,
     /```(?:bash|shell|sh)\n([\s\S]*?)```/g,
+    /```json\n([\s\S]*?)```/g,
   ]
   const codeSnippets = []
 
@@ -128,7 +147,6 @@ function extractCodeSnippets(content) {
 }
 
 function extractHeadings(content, tag, slug) {
-  // First, temporarily replace code blocks with placeholders to avoid matching # inside code
   const codeBlockRegex = /```[\s\S]*?```/g
   const codeBlocks = []
   let codeBlockIndex = 0
@@ -139,13 +157,11 @@ function extractHeadings(content, tag, slug) {
     return placeholder
   })
 
-  // Extract headings from content without code blocks
   const headingRegex = /^(#{1,6})\s+(.+)$/gm
   const headings = []
   const headingMatches = []
   let match
 
-  // Collect all heading positions from content WITHOUT code blocks -> we use them later to restore code blocks
   while ((match = headingRegex.exec(contentWithoutCode)) !== null) {
     headingMatches.push({
       title: match[2].trim().replace(/\\_/g, '_'),
@@ -154,17 +170,14 @@ function extractHeadings(content, tag, slug) {
     })
   }
 
-  // Process each heading content
   for (let i = 0; i < headingMatches.length; i++) {
     const current = headingMatches[i]
     const next = headingMatches[i + 1]
 
-    // Content below current heading and the next heading (or end)
     const startIndex = current.index + current.length
     const endIndex = next ? next.index : contentWithoutCode.length
     let currentTextBelow = contentWithoutCode.substring(startIndex, endIndex)
 
-    // Restore code blocks
     currentTextBelow = currentTextBelow.replace(
       /___CODE_BLOCK_(\d+)___/g,
       (match, index) => {
@@ -175,7 +188,8 @@ function extractHeadings(content, tag, slug) {
     currentTextBelow = currentTextBelow.trim()
 
     const heading = current.title
-    const description = extractHyperlinks(extractRealSentence(currentTextBelow))
+    const description = extractRealSentence(cleanMarkdown(currentTextBelow))
+    const content = extractSearchableContent(currentTextBelow)
     const codeSnippets = extractCodeSnippets(currentTextBelow)
     const headingSlug = `${slug}#${heading
       .toLowerCase()
@@ -185,6 +199,7 @@ function extractHeadings(content, tag, slug) {
     headings.push({
       title: heading,
       description,
+      content,
       codeSnippets,
       tag,
       url: `/docs${headingSlug}`,
@@ -203,16 +218,23 @@ function parseMarkdownFile(filePath, tag) {
 
   const title = data.title || cleanContent.match(/^#\s+(.*)/)?.[1] || 'Untitled'
   const description =
-    data.description || extractHyperlinks(extractRealSentence(cleanContent))
+    data.description || extractRealSentence(cleanMarkdown(cleanContent))
   const slug = filePath
     .replace(DOCS_PATH, '')
     .replace(/\\/g, '/')
     .replace(/\.mdx?$/, '')
   const headings = extractHeadings(cleanContent, tag, slug)
 
+  const firstHeadingMatch = cleanContent.match(/^#{2,6}\s+/m)
+  const introContent = firstHeadingMatch
+    ? cleanContent.slice(0, firstHeadingMatch.index)
+    : cleanContent
+  const searchableContent = extractSearchableContent(introContent)
+
   const mainData = {
     title,
     description,
+    content: searchableContent,
     tag,
     url: `/docs${slug}`,
     slug,
@@ -439,6 +461,14 @@ function main() {
       'utf8'
     )
   )
+
+  const allRecords = fileRecords.flatMap(({ records }) => records)
+  fs.writeFileSync(
+    path.join(outputDir, 'ai.json'),
+    JSON.stringify(allRecords, null, 2),
+    'utf8'
+  )
+
   console.log('search index updated')
 }
 
