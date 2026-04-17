@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	commonproxy "github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,8 +24,10 @@ func GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 	// Build the target URL
 	targetURL := fmt.Sprintf("http://localhost:%s", targetPort)
 
-	// Get the wildcard path and normalize it
-	path := ctx.Param("path")
+	// Get the wildcard path preserving original percent-encoding.
+	// ctx.Param() decodes the path, which causes mutations when the decoded
+	// form is re-encoded by Go's url package (e.g. "(" → "%28", "%40" → "@").
+	path := commonproxy.RawParam(ctx, "path")
 
 	// Ensure path always has a leading slash but not duplicate slashes
 	if path == "" {

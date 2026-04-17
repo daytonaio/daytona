@@ -27,7 +27,7 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 	if ctx.GetBool(IS_TOOLBOX_REQUEST_KEY) {
 		// Expected format: /toolbox/<sandboxID>/<targetPath>
 		var err error
-		targetPort, sandboxIdOrSignedToken, targetPath, err = p.parseToolboxSubpath(ctx.Param("path"))
+		targetPort, sandboxIdOrSignedToken, targetPath, err = p.parseToolboxSubpath(ctx.Request.URL.EscapedPath())
 		if err != nil {
 			ctx.Error(common_errors.NewBadRequestError(err))
 			return nil, nil, err
@@ -42,7 +42,7 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 			return nil, nil, err
 		}
 
-		targetPath = ctx.Param("path")
+		targetPath = ctx.Request.URL.EscapedPath()
 	}
 
 	if targetPort == "" {
