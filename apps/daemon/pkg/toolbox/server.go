@@ -349,7 +349,7 @@ func (s *server) Start() error {
 
 	proxyController := noTelemetryRouter.Group("/proxy")
 	{
-		proxyController.Any("/:port/*path", common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, nil))
+		proxyController.Any("/:port/*path", common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, nil, nil))
 	}
 
 	go portDetector.Start(context.Background())

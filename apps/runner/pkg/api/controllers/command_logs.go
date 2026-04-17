@@ -28,7 +28,7 @@ func ProxyCommandLogsStream(ctx *gin.Context, logger *slog.Logger) {
 	if ctx.Query("follow") != "true" {
 		proxy.NewProxyRequestHandler(func(ctx *gin.Context) (*url.URL, map[string]string, error) {
 			return targetURL, extraHeaders, nil
-		}, nil)(ctx)
+		}, nil, nil)(ctx)
 		return
 	}
 
