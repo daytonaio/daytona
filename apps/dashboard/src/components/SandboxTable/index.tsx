@@ -37,9 +37,7 @@ export function SandboxTable({
   sandboxStateIsTransitioning,
   loading,
   snapshots,
-  snapshotsDataIsLoading,
-  snapshotsDataHasMore,
-  onChangeSnapshotSearchValue,
+  loadingSnapshots,
   regionsData,
   regionsDataIsLoading,
   getRegionName,
@@ -56,17 +54,7 @@ export function SandboxTable({
   handleCreateSshAccess,
   handleRevokeSshAccess,
   handleScreenRecordings,
-  handleRefresh,
-  isRefreshing,
   onRowClick,
-  pagination,
-  pageCount,
-  totalItems,
-  onPaginationChange,
-  sorting,
-  onSortingChange,
-  filters,
-  onFiltersChange,
   handleRecover,
   handleCreateSnapshot,
   handleFork,
@@ -77,11 +65,12 @@ export function SandboxTable({
   const writePermitted = authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SANDBOXES)
   const deletePermitted = authenticatedUserHasPermission(OrganizationRolePermissionsEnum.DELETE_SANDBOXES)
 
-  const { table, regionOptions } = useSandboxTable({
+  const { table, labelOptions, regionOptions } = useSandboxTable({
     data,
     sandboxIsLoading,
     writePermitted,
     deletePermitted,
+    regionsData,
     handleStart,
     handleStop,
     handleDelete,
@@ -91,14 +80,6 @@ export function SandboxTable({
     handleCreateSshAccess,
     handleRevokeSshAccess,
     handleScreenRecordings,
-    pagination,
-    pageCount,
-    onPaginationChange,
-    sorting,
-    onSortingChange,
-    filters,
-    onFiltersChange,
-    regionsData,
     handleRecover,
     getRegionName,
     handleCreateSnapshot,
@@ -176,14 +157,11 @@ export function SandboxTable({
     <>
       <SandboxTableHeader
         table={table}
+        labelOptions={labelOptions}
         regionOptions={regionOptions}
         regionsDataIsLoading={regionsDataIsLoading}
         snapshots={snapshots}
-        snapshotsDataIsLoading={snapshotsDataIsLoading}
-        snapshotsDataHasMore={snapshotsDataHasMore}
-        onChangeSnapshotSearchValue={onChangeSnapshotSearchValue}
-        onRefresh={handleRefresh}
-        isRefreshing={isRefreshing}
+        loadingSnapshots={loadingSnapshots}
       />
 
       <Table className="border-separate border-spacing-0" style={{ tableLayout: 'fixed', width: '100%' }}>
@@ -280,7 +258,7 @@ export function SandboxTable({
       </Table>
 
       <div className="flex items-center justify-end relative">
-        <Pagination className="pb-2 pt-6" table={table} entityName="Sandboxes" totalItems={totalItems} />
+        <Pagination className="pb-2 pt-6" table={table} selectionEnabled={deletePermitted} entityName="Sandboxes" />
 
         <AnimatePresence>
           {hasSelection && (
