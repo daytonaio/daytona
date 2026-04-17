@@ -623,12 +623,12 @@ class Sandbox(SandboxDto):
         while self.state == "resizing":
             self.refresh_data()
 
-            if self.state != "resizing":
-                return
-
             if self.state in ["error", "build_failed"]:
                 err_msg = f"Sandbox {self.id} resize failed with state: {self.state}, error reason: {self.error_reason}"
                 raise DaytonaError(err_msg)
+
+            if self.state != "resizing":
+                return
 
             time.sleep(check_interval)
             if time.monotonic() - start_time > 5:
@@ -756,13 +756,13 @@ class Sandbox(SandboxDto):
         while self.state == "snapshotting":
             self.refresh_data()
 
-            if self.state != "snapshotting":
-                return
-
             if self.state in ["error", "build_failed"]:
                 raise DaytonaError(
                     f"Sandbox {self.id} snapshot failed with state: {self.state}, error reason: {self.error_reason}"
                 )
+
+            if self.state != "snapshotting":
+                return
 
             time.sleep(check_interval)
             if time.monotonic() - start_time > 5:

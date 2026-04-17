@@ -628,12 +628,12 @@ class AsyncSandbox(SandboxDto):
         while self.state == "resizing":
             await self.refresh_data()
 
-            if self.state != "resizing":
-                return
-
             if self.state in ["error", "build_failed"]:
                 err_msg = f"Sandbox {self.id} resize failed with state: {self.state}, error reason: {self.error_reason}"
                 raise DaytonaError(err_msg)
+
+            if self.state != "resizing":
+                return
 
             await asyncio.sleep(check_interval)
             if asyncio.get_event_loop().time() - start_time > 5:
@@ -761,13 +761,13 @@ class AsyncSandbox(SandboxDto):
         while self.state == "snapshotting":
             await self.refresh_data()
 
-            if self.state != "snapshotting":
-                return
-
             if self.state in ["error", "build_failed"]:
                 raise DaytonaError(
                     f"Sandbox {self.id} snapshot failed with state: {self.state}, error reason: {self.error_reason}"
                 )
+
+            if self.state != "snapshotting":
+                return
 
             await asyncio.sleep(check_interval)
             if asyncio.get_event_loop().time() - start_time > 5:
