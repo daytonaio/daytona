@@ -67,6 +67,7 @@ func Create(ctx *gin.Context) {
 //	@Description	Destroy sandbox
 //	@Produce		json
 //	@Param			sandboxId	path		string	true	"Sandbox ID"
+//	@Param			snapshot	query		string	false	"Snapshot reference to cancel image processing for"
 //	@Success		200			{string}	string	"Sandbox destroyed"
 //	@Failure		400			{object}	common_errors.ErrorResponse
 //	@Failure		401			{object}	common_errors.ErrorResponse
@@ -83,6 +84,10 @@ func Destroy(ctx *gin.Context) {
 	if err != nil {
 		ctx.Error(err)
 		return
+	}
+
+	if snapshot := ctx.Query("snapshot"); snapshot != "" {
+		runner.Docker.CancelImageProcessing(snapshot)
 	}
 
 	err = runner.Docker.Destroy(ctx.Request.Context(), sandboxId)

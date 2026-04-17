@@ -65,7 +65,18 @@ func (e *Executor) stopSandbox(ctx context.Context, job *apiclient.Job) (any, er
 	return nil, nil
 }
 
+type DestroySandboxPayload struct {
+	SnapshotRef string `json:"snapshotRef,omitempty"`
+}
+
 func (e *Executor) destroySandbox(ctx context.Context, job *apiclient.Job) (any, error) {
+	if job.Payload != nil && *job.Payload != "" {
+		var payload DestroySandboxPayload
+		if err := e.parsePayload(job.Payload, &payload); err == nil && payload.SnapshotRef != "" {
+			e.docker.CancelImageProcessing(payload.SnapshotRef)
+		}
+	}
+
 	err := e.docker.Destroy(ctx, job.ResourceId)
 	if err != nil {
 		common.ContainerOperationCount.WithLabelValues("destroy", string(common.PrometheusOperationStatusFailure)).Inc()
