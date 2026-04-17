@@ -15,6 +15,322 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/computeruse/a11y/find": {
+            "post": {
+                "description": "Search the AT-SPI tree for nodes matching a role/name/state filter and return a flat list.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "computer-use"
+                ],
+                "summary": "Find accessibility nodes",
+                "operationId": "FindAccessibilityNodes",
+                "parameters": [
+                    {
+                        "description": "Find request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/FindAccessibilityNodesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/AccessibilityNodesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/computeruse/a11y/node/focus": {
+            "post": {
+                "description": "Move keyboard focus to the AT-SPI node identified by id (bus-name:object-path).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "computer-use"
+                ],
+                "summary": "Focus an accessibility node",
+                "operationId": "FocusAccessibilityNode",
+                "parameters": [
+                    {
+                        "description": "Node focus request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AccessibilityNodeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Empty"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/computeruse/a11y/node/invoke": {
+            "post": {
+                "description": "Call an AT-SPI Action on the node. Leave action empty to invoke the node's primary (first) action.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "computer-use"
+                ],
+                "summary": "Invoke an action on an accessibility node",
+                "operationId": "InvokeAccessibilityNode",
+                "parameters": [
+                    {
+                        "description": "Invoke request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AccessibilityInvokeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Empty"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/computeruse/a11y/node/value": {
+            "post": {
+                "description": "Write the given value to the node via EditableText.SetTextContents or, for numeric controls, Value.CurrentValue.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "computer-use"
+                ],
+                "summary": "Set the value of an accessibility node",
+                "operationId": "SetAccessibilityNodeValue",
+                "parameters": [
+                    {
+                        "description": "Set value request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AccessibilitySetValueRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Empty"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/computeruse/a11y/tree": {
+            "get": {
+                "description": "Fetch the AT-SPI accessibility tree for the focused application, a specific PID, or all registered applications.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "computer-use"
+                ],
+                "summary": "Get accessibility tree",
+                "operationId": "GetAccessibilityTree",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Scope: focused | pid | all (default: focused)",
+                        "name": "scope",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Process ID when scope=pid",
+                        "name": "pid",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Max tree depth (-1 unbounded, 0 root only; default -1)",
+                        "name": "maxDepth",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/AccessibilityTreeResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/computeruse/display/info": {
             "get": {
                 "description": "Get information about all available displays",
@@ -2940,6 +3256,87 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "AccessibilityBounds": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "integer"
+                },
+                "width": {
+                    "type": "integer"
+                },
+                "x": {
+                    "type": "integer"
+                },
+                "y": {
+                    "type": "integer"
+                }
+            }
+        },
+        "AccessibilityInvokeRequest": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "AccessibilityNodeRequest": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "AccessibilityNodesResponse": {
+            "type": "object",
+            "properties": {
+                "matches": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/computeruse.AccessibilityNode"
+                    }
+                },
+                "truncated": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "AccessibilitySetValueRequest": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "AccessibilityTreeResponse": {
+            "type": "object",
+            "properties": {
+                "root": {
+                    "$ref": "#/definitions/computeruse.AccessibilityNode"
+                },
+                "truncated": {
+                    "type": "boolean"
+                }
+            }
+        },
         "Chart": {
             "type": "object",
             "properties": {
@@ -3398,6 +3795,36 @@ const docTemplate = `{
             ],
             "properties": {
                 "paths": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "FindAccessibilityNodesRequest": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "nameMatch": {
+                    "description": "\"exact\" | \"substring\" | \"regex\"",
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "scope": {
+                    "type": "string"
+                },
+                "states": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4465,6 +4892,44 @@ const docTemplate = `{
             "properties": {
                 "dir": {
                     "type": "string"
+                }
+            }
+        },
+        "computeruse.AccessibilityNode": {
+            "type": "object",
+            "properties": {
+                "actions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "bounds": {
+                    "$ref": "#/definitions/AccessibilityBounds"
+                },
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/computeruse.AccessibilityNode"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "states": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

@@ -46,6 +46,13 @@ type IComputerUse interface {
 	GetDisplayInfo() (*DisplayInfoResponse, error)
 	GetWindows() (*WindowsResponse, error)
 
+	// Accessibility (AT-SPI) methods
+	GetAccessibilityTree(*GetAccessibilityTreeRequest) (*AccessibilityTreeResponse, error)
+	FindAccessibilityNodes(*FindAccessibilityNodesRequest) (*AccessibilityNodesResponse, error)
+	FocusAccessibilityNode(*AccessibilityNodeRequest) (*Empty, error)
+	InvokeAccessibilityNode(*AccessibilityInvokeRequest) (*Empty, error)
+	SetAccessibilityNodeValue(*AccessibilitySetValueRequest) (*Empty, error)
+
 	// Status method
 	GetStatus() (*ComputerUseStatusResponse, error)
 }
@@ -226,6 +233,73 @@ type ProcessRequest struct {
 } //	@name	ProcessRequest
 
 type Empty struct{} //	@name	Empty
+
+// Accessibility (AT-SPI) wire types. The plugin-side A11yNode/A11yBounds in
+// libs/computer-use are translated to these before crossing the RPC boundary.
+
+type AccessibilityBounds struct {
+	X      int `json:"x"`
+	Y      int `json:"y"`
+	Width  int `json:"width"`
+	Height int `json:"height"`
+} //	@name	AccessibilityBounds
+
+type AccessibilityNode struct {
+	ID          string               `json:"id"`
+	Role        string               `json:"role"`
+	Name        string               `json:"name"`
+	Description string               `json:"description,omitempty"`
+	Bounds      AccessibilityBounds  `json:"bounds"`
+	States      []string             `json:"states"`
+	Actions     []string             `json:"actions,omitempty"`
+	Children    []*AccessibilityNode `json:"children,omitempty"`
+}
+
+// Note: no `@name AccessibilityNode` on the struct above. Swag v1.16.4 emits
+// two disjoint definitions for self-referencing types that use @name (one
+// under the @name alias for parent refs, one under the package-qualified name
+// for the self-reference), which breaks the generated schema. Omitting @name
+// makes swag use "computeruse.AccessibilityNode" consistently everywhere.
+
+type GetAccessibilityTreeRequest struct {
+	Scope    string `json:"scope" form:"scope"`       // "focused" | "pid" | "all" — default "focused"
+	PID      int    `json:"pid" form:"pid"`           // required when scope=pid
+	MaxDepth int    `json:"maxDepth" form:"maxDepth"` // -1 = unbounded, 0 = root only, default -1
+} //	@name	GetAccessibilityTreeRequest
+
+type AccessibilityTreeResponse struct {
+	Root      AccessibilityNode `json:"root"`
+	Truncated bool              `json:"truncated"`
+} //	@name	AccessibilityTreeResponse
+
+type FindAccessibilityNodesRequest struct {
+	Scope     string   `json:"scope"`
+	PID       int      `json:"pid,omitempty"`
+	Role      string   `json:"role,omitempty"`
+	Name      string   `json:"name,omitempty"`
+	NameMatch string   `json:"nameMatch,omitempty"` // "exact" | "substring" | "regex"
+	States    []string `json:"states,omitempty"`
+	Limit     int      `json:"limit,omitempty"`
+} //	@name	FindAccessibilityNodesRequest
+
+type AccessibilityNodesResponse struct {
+	Matches   []AccessibilityNode `json:"matches"`
+	Truncated bool                `json:"truncated"`
+} //	@name	AccessibilityNodesResponse
+
+type AccessibilityNodeRequest struct {
+	ID string `json:"id" binding:"required"`
+} //	@name	AccessibilityNodeRequest
+
+type AccessibilityInvokeRequest struct {
+	ID     string `json:"id" binding:"required"`
+	Action string `json:"action,omitempty"`
+} //	@name	AccessibilityInvokeRequest
+
+type AccessibilitySetValueRequest struct {
+	ID    string `json:"id" binding:"required"`
+	Value string `json:"value"`
+} //	@name	AccessibilitySetValueRequest
 
 func (p *ComputerUsePlugin) Server(*plugin.MuxBroker) (any, error) {
 	return &ComputerUseRPCServer{Impl: p.Impl}, nil

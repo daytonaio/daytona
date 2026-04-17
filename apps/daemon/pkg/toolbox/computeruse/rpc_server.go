@@ -191,3 +191,37 @@ func (m *ComputerUseRPCServer) GetStatus(arg any, resp *ComputerUseStatusRespons
 	*resp = *response
 	return nil
 }
+
+// Accessibility (AT-SPI) methods
+func (m *ComputerUseRPCServer) GetAccessibilityTree(arg *GetAccessibilityTreeRequest, resp *AccessibilityTreeResponse) error {
+	response, err := m.Impl.GetAccessibilityTree(arg)
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
+}
+
+func (m *ComputerUseRPCServer) FindAccessibilityNodes(arg *FindAccessibilityNodesRequest, resp *AccessibilityNodesResponse) error {
+	response, err := m.Impl.FindAccessibilityNodes(arg)
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
+}
+
+func (m *ComputerUseRPCServer) FocusAccessibilityNode(arg *AccessibilityNodeRequest, resp *Empty) error {
+	_, err := m.Impl.FocusAccessibilityNode(arg)
+	return err
+}
+
+func (m *ComputerUseRPCServer) InvokeAccessibilityNode(arg *AccessibilityInvokeRequest, resp *Empty) error {
+	_, err := m.Impl.InvokeAccessibilityNode(arg)
+	return err
+}
+
+func (m *ComputerUseRPCServer) SetAccessibilityNodeValue(arg *AccessibilitySetValueRequest, resp *Empty) error {
+	_, err := m.Impl.SetAccessibilityNodeValue(arg)
+	return err
+}

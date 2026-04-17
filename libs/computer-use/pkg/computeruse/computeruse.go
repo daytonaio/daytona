@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
+	"github.com/godbus/dbus/v5"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -39,6 +40,11 @@ type ComputerUse struct {
 	processes map[string]*Process
 	mu        sync.RWMutex
 	configDir string
+
+	// AT-SPI accessibility bus connection. Lazily established on first call to
+	// connectA11y(); protected by atspiMu. Implementation lives in accessibility.go.
+	atspiMu   sync.Mutex
+	atspiConn *dbus.Conn
 }
 
 var _ computeruse.IComputerUse = &ComputerUse{}
