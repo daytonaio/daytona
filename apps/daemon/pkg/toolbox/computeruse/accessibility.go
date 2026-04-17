@@ -44,6 +44,9 @@ const (
 // errors fall through to 500. The translation is kept here (not baked into
 // the plugin) so the plugin package stays transport-agnostic.
 //
+// Every response carries a stable "code" field so SDKs can branch on machine-
+// readable identifiers instead of parsing error text.
+//
 // We intentionally write responses directly via c.JSON instead of emitting
 // typed common_errors through c.Error + the shared middleware — matching the
 // inline style used by every other WrapXHandler in this package. Direct JSON
@@ -57,14 +60,31 @@ func writeA11yError(c *gin.Context, err error) {
 			"error": msg,
 			"code":  "A11Y_UNAVAILABLE",
 		})
-	case strings.Contains(msg, a11yMsgNodeNotFound),
-		strings.Contains(msg, a11yMsgNoAccessibleRoot):
-		c.JSON(http.StatusNotFound, gin.H{"error": msg})
-	case strings.Contains(msg, a11yMsgActionNotSupported),
-		strings.Contains(msg, a11yMsgInvalidScope):
-		c.JSON(http.StatusBadRequest, gin.H{"error": msg})
+	case strings.Contains(msg, a11yMsgNodeNotFound):
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": msg,
+			"code":  "A11Y_NODE_NOT_FOUND",
+		})
+	case strings.Contains(msg, a11yMsgNoAccessibleRoot):
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": msg,
+			"code":  "A11Y_NO_ACCESSIBLE_ROOT",
+		})
+	case strings.Contains(msg, a11yMsgActionNotSupported):
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": msg,
+			"code":  "A11Y_ACTION_NOT_SUPPORTED",
+		})
+	case strings.Contains(msg, a11yMsgInvalidScope):
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": msg,
+			"code":  "A11Y_INVALID_SCOPE",
+		})
 	default:
-		c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": msg,
+			"code":  "A11Y_INTERNAL",
+		})
 	}
 }
 
