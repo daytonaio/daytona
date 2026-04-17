@@ -14,16 +14,9 @@
 
 
 
-/**
- * 
- * @export
- * @interface CreateSandboxSnapshot
- */
 export interface CreateSandboxSnapshot {
     /**
      * Name for the new snapshot
-     * @type {string}
-     * @memberof CreateSandboxSnapshot
      */
     'name': string;
 }

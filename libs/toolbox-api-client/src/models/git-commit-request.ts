@@ -14,41 +14,11 @@
 
 
 
-/**
- * 
- * @export
- * @interface GitCommitRequest
- */
 export interface GitCommitRequest {
-    /**
-     * 
-     * @type {boolean}
-     * @memberof GitCommitRequest
-     */
     'allow_empty'?: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof GitCommitRequest
-     */
     'author': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GitCommitRequest
-     */
     'email': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GitCommitRequest
-     */
     'message': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GitCommitRequest
-     */
     'path': string;
 }
 

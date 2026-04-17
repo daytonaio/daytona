@@ -55,7 +55,7 @@ import io.daytona.api.client.JSON;
 /**
  * DaytonaConfiguration
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class DaytonaConfiguration {
   public static final String SERIALIZED_NAME_VERSION = "version";
   @SerializedName(SERIALIZED_NAME_VERSION)
@@ -612,10 +612,7 @@ public class DaytonaConfiguration {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -624,39 +621,10 @@ public class DaytonaConfiguration {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("version");
-    openapiFields.add("posthog");
-    openapiFields.add("oidc");
-    openapiFields.add("linkedAccountsEnabled");
-    openapiFields.add("announcements");
-    openapiFields.add("pylonAppId");
-    openapiFields.add("proxyTemplateUrl");
-    openapiFields.add("proxyToolboxUrl");
-    openapiFields.add("defaultSnapshot");
-    openapiFields.add("dashboardUrl");
-    openapiFields.add("maxAutoArchiveInterval");
-    openapiFields.add("maintananceMode");
-    openapiFields.add("environment");
-    openapiFields.add("billingApiUrl");
-    openapiFields.add("analyticsApiUrl");
-    openapiFields.add("sshGatewayCommand");
-    openapiFields.add("sshGatewayPublicKey");
-    openapiFields.add("rateLimit");
+    openapiFields = new HashSet<String>(Arrays.asList("version", "posthog", "oidc", "linkedAccountsEnabled", "announcements", "pylonAppId", "proxyTemplateUrl", "proxyToolboxUrl", "defaultSnapshot", "dashboardUrl", "maxAutoArchiveInterval", "maintananceMode", "environment", "billingApiUrl", "analyticsApiUrl", "sshGatewayCommand", "sshGatewayPublicKey", "rateLimit"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("version");
-    openapiRequiredFields.add("oidc");
-    openapiRequiredFields.add("linkedAccountsEnabled");
-    openapiRequiredFields.add("announcements");
-    openapiRequiredFields.add("proxyTemplateUrl");
-    openapiRequiredFields.add("proxyToolboxUrl");
-    openapiRequiredFields.add("defaultSnapshot");
-    openapiRequiredFields.add("dashboardUrl");
-    openapiRequiredFields.add("maxAutoArchiveInterval");
-    openapiRequiredFields.add("maintananceMode");
-    openapiRequiredFields.add("environment");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("version", "oidc", "linkedAccountsEnabled", "announcements", "proxyTemplateUrl", "proxyToolboxUrl", "defaultSnapshot", "dashboardUrl", "maxAutoArchiveInterval", "maintananceMode", "environment"));
   }
 
   /**
@@ -668,19 +636,19 @@ public class DaytonaConfiguration {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!DaytonaConfiguration.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in DaytonaConfiguration is not found in the empty JSON string", DaytonaConfiguration.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in DaytonaConfiguration is not found in the empty JSON string", DaytonaConfiguration.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : DaytonaConfiguration.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("version").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `version` to be a primitive type in the JSON string but got `%s`", jsonObj.get("version").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `version` to be a primitive type in the JSON string but got `%s`", jsonObj.get("version").toString()));
       }
       // validate the optional field `posthog`
       if (jsonObj.get("posthog") != null && !jsonObj.get("posthog").isJsonNull()) {
@@ -689,34 +657,34 @@ public class DaytonaConfiguration {
       // validate the required field `oidc`
       OidcConfig.validateJsonElement(jsonObj.get("oidc"));
       if ((jsonObj.get("pylonAppId") != null && !jsonObj.get("pylonAppId").isJsonNull()) && !jsonObj.get("pylonAppId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `pylonAppId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("pylonAppId").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `pylonAppId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("pylonAppId").toString()));
       }
       if (!jsonObj.get("proxyTemplateUrl").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `proxyTemplateUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("proxyTemplateUrl").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `proxyTemplateUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("proxyTemplateUrl").toString()));
       }
       if (!jsonObj.get("proxyToolboxUrl").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `proxyToolboxUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("proxyToolboxUrl").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `proxyToolboxUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("proxyToolboxUrl").toString()));
       }
       if (!jsonObj.get("defaultSnapshot").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `defaultSnapshot` to be a primitive type in the JSON string but got `%s`", jsonObj.get("defaultSnapshot").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `defaultSnapshot` to be a primitive type in the JSON string but got `%s`", jsonObj.get("defaultSnapshot").toString()));
       }
       if (!jsonObj.get("dashboardUrl").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `dashboardUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("dashboardUrl").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `dashboardUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("dashboardUrl").toString()));
       }
       if (!jsonObj.get("environment").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `environment` to be a primitive type in the JSON string but got `%s`", jsonObj.get("environment").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `environment` to be a primitive type in the JSON string but got `%s`", jsonObj.get("environment").toString()));
       }
       if ((jsonObj.get("billingApiUrl") != null && !jsonObj.get("billingApiUrl").isJsonNull()) && !jsonObj.get("billingApiUrl").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `billingApiUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("billingApiUrl").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `billingApiUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("billingApiUrl").toString()));
       }
       if ((jsonObj.get("analyticsApiUrl") != null && !jsonObj.get("analyticsApiUrl").isJsonNull()) && !jsonObj.get("analyticsApiUrl").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `analyticsApiUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("analyticsApiUrl").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `analyticsApiUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("analyticsApiUrl").toString()));
       }
       if ((jsonObj.get("sshGatewayCommand") != null && !jsonObj.get("sshGatewayCommand").isJsonNull()) && !jsonObj.get("sshGatewayCommand").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `sshGatewayCommand` to be a primitive type in the JSON string but got `%s`", jsonObj.get("sshGatewayCommand").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `sshGatewayCommand` to be a primitive type in the JSON string but got `%s`", jsonObj.get("sshGatewayCommand").toString()));
       }
       if ((jsonObj.get("sshGatewayPublicKey") != null && !jsonObj.get("sshGatewayPublicKey").isJsonNull()) && !jsonObj.get("sshGatewayPublicKey").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `sshGatewayPublicKey` to be a primitive type in the JSON string but got `%s`", jsonObj.get("sshGatewayPublicKey").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `sshGatewayPublicKey` to be a primitive type in the JSON string but got `%s`", jsonObj.get("sshGatewayPublicKey").toString()));
       }
       // validate the optional field `rateLimit`
       if (jsonObj.get("rateLimit") != null && !jsonObj.get("rateLimit").isJsonNull()) {
@@ -781,7 +749,7 @@ public class DaytonaConfiguration {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

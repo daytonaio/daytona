@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -39,7 +39,6 @@ import type { SnapshotInfoResponse } from '../models';
 import type { TagImageRequestDTO } from '../models';
 /**
  * SnapshotsApi - axios parameter creator
- * @export
  */
 export const SnapshotsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -68,9 +67,8 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
             // authentication Bearer required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = '*/*';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -116,8 +114,8 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
                 localVarQueryParameter['follow'] = follow;
             }
 
+            localVarHeaderParameter['Accept'] = '*/*';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -156,8 +154,8 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
                 localVarQueryParameter['snapshot'] = snapshot;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -192,9 +190,8 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
             // authentication Bearer required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -231,9 +228,8 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
             // authentication Bearer required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = '*/*';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -274,8 +270,8 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
                 localVarQueryParameter['snapshot'] = snapshot;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -314,8 +310,8 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
                 localVarQueryParameter['snapshot'] = snapshot;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -351,9 +347,8 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
             // authentication Bearer required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = '*/*';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -370,7 +365,6 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
 
 /**
  * SnapshotsApi - functional programming interface
- * @export
  */
 export const SnapshotsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = SnapshotsApiAxiosParamCreator(configuration)
@@ -486,7 +480,6 @@ export const SnapshotsApiFp = function(configuration?: Configuration) {
 
 /**
  * SnapshotsApi - factory interface
- * @export
  */
 export const SnapshotsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = SnapshotsApiFp(configuration)
@@ -578,9 +571,6 @@ export const SnapshotsApiFactory = function (configuration?: Configuration, base
 
 /**
  * SnapshotsApi - object-oriented interface
- * @export
- * @class SnapshotsApi
- * @extends {BaseAPI}
  */
 export class SnapshotsApi extends BaseAPI {
     /**
@@ -589,7 +579,6 @@ export class SnapshotsApi extends BaseAPI {
      * @param {BuildSnapshotRequestDTO} request Build snapshot request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SnapshotsApi
      */
     public buildSnapshot(request: BuildSnapshotRequestDTO, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).buildSnapshot(request, options).then((request) => request(this.axios, this.basePath));
@@ -602,7 +591,6 @@ export class SnapshotsApi extends BaseAPI {
      * @param {boolean} [follow] Whether to follow the log output
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SnapshotsApi
      */
     public getBuildLogs(snapshotRef: string, follow?: boolean, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).getBuildLogs(snapshotRef, follow, options).then((request) => request(this.axios, this.basePath));
@@ -614,7 +602,6 @@ export class SnapshotsApi extends BaseAPI {
      * @param {string} snapshot Snapshot name and tag
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SnapshotsApi
      */
     public getSnapshotInfo(snapshot: string, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).getSnapshotInfo(snapshot, options).then((request) => request(this.axios, this.basePath));
@@ -626,7 +613,6 @@ export class SnapshotsApi extends BaseAPI {
      * @param {InspectSnapshotInRegistryRequest} request Inspect snapshot in registry request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SnapshotsApi
      */
     public inspectSnapshotInRegistry(request: InspectSnapshotInRegistryRequest, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).inspectSnapshotInRegistry(request, options).then((request) => request(this.axios, this.basePath));
@@ -638,7 +624,6 @@ export class SnapshotsApi extends BaseAPI {
      * @param {PullSnapshotRequestDTO} request Pull snapshot
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SnapshotsApi
      */
     public pullSnapshot(request: PullSnapshotRequestDTO, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).pullSnapshot(request, options).then((request) => request(this.axios, this.basePath));
@@ -650,7 +635,6 @@ export class SnapshotsApi extends BaseAPI {
      * @param {string} snapshot Snapshot name and tag
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SnapshotsApi
      */
     public removeSnapshot(snapshot: string, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).removeSnapshot(snapshot, options).then((request) => request(this.axios, this.basePath));
@@ -662,7 +646,6 @@ export class SnapshotsApi extends BaseAPI {
      * @param {string} snapshot Snapshot name and tag
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SnapshotsApi
      */
     public snapshotExists(snapshot: string, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).snapshotExists(snapshot, options).then((request) => request(this.axios, this.basePath));
@@ -675,7 +658,6 @@ export class SnapshotsApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof SnapshotsApi
      */
     public tagImage(request: TagImageRequestDTO, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).tagImage(request, options).then((request) => request(this.axios, this.basePath));

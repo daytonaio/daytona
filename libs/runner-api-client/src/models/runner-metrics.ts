@@ -14,65 +14,15 @@
 
 
 
-/**
- * 
- * @export
- * @interface RunnerMetrics
- */
 export interface RunnerMetrics {
-    /**
-     * 
-     * @type {number}
-     * @memberof RunnerMetrics
-     */
     'currentAllocatedCpu'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RunnerMetrics
-     */
     'currentAllocatedDiskGiB'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RunnerMetrics
-     */
     'currentAllocatedMemoryGiB'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RunnerMetrics
-     */
     'currentCpuLoadAverage'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RunnerMetrics
-     */
     'currentCpuUsagePercentage'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RunnerMetrics
-     */
     'currentDiskUsagePercentage'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RunnerMetrics
-     */
     'currentMemoryUsagePercentage'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RunnerMetrics
-     */
     'currentSnapshotCount'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RunnerMetrics
-     */
     'currentStartedSandboxes'?: number;
 }
 

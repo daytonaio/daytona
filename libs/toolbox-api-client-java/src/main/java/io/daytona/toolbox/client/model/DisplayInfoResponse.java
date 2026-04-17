@@ -51,7 +51,7 @@ import io.daytona.toolbox.client.JSON;
 /**
  * DisplayInfoResponse
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class DisplayInfoResponse {
   public static final String SERIALIZED_NAME_DISPLAYS = "displays";
   @SerializedName(SERIALIZED_NAME_DISPLAYS)
@@ -166,10 +166,7 @@ public class DisplayInfoResponse {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -178,11 +175,10 @@ public class DisplayInfoResponse {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("displays");
+    openapiFields = new HashSet<String>(Arrays.asList("displays"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
+    openapiRequiredFields = new HashSet<String>(0);
   }
 
   /**
@@ -194,7 +190,7 @@ public class DisplayInfoResponse {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!DisplayInfoResponse.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in DisplayInfoResponse is not found in the empty JSON string", DisplayInfoResponse.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in DisplayInfoResponse is not found in the empty JSON string", DisplayInfoResponse.openapiRequiredFields.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
@@ -203,7 +199,7 @@ public class DisplayInfoResponse {
         if (jsonArraydisplays != null) {
           // ensure the json data is an array
           if (!jsonObj.get("displays").isJsonArray()) {
-            throw new IllegalArgumentException(String.format("Expected the field `displays` to be an array in the JSON string but got `%s`", jsonObj.get("displays").toString()));
+            throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `displays` to be an array in the JSON string but got `%s`", jsonObj.get("displays").toString()));
           }
 
           // validate the optional field `displays` (array)
@@ -271,7 +267,7 @@ public class DisplayInfoResponse {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

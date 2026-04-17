@@ -14,16 +14,9 @@
 
 
 
-/**
- * 
- * @export
- * @interface Url
- */
 export interface Url {
     /**
      * URL response
-     * @type {string}
-     * @memberof Url
      */
     'url': string;
 }

@@ -20,137 +20,30 @@ import type { DtoVolumeDTO } from './dto-volume-dto';
 // @ts-ignore
 import type { RegistryDTO } from './registry-dto';
 
-/**
- * 
- * @export
- * @interface CreateSandboxDTO
- */
 export interface CreateSandboxDTO {
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateSandboxDTO
-     */
     'authToken'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof CreateSandboxDTO
-     */
     'cpuQuota'?: number;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof CreateSandboxDTO
-     */
     'entrypoint'?: Array<string>;
-    /**
-     * 
-     * @type {{ [key: string]: string; }}
-     * @memberof CreateSandboxDTO
-     */
     'env'?: { [key: string]: string; };
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateSandboxDTO
-     */
     'fromVolumeId'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof CreateSandboxDTO
-     */
     'gpuQuota'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateSandboxDTO
-     */
     'id': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof CreateSandboxDTO
-     */
     'memoryQuota'?: number;
-    /**
-     * 
-     * @type {{ [key: string]: string; }}
-     * @memberof CreateSandboxDTO
-     */
     'metadata'?: { [key: string]: string; };
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateSandboxDTO
-     */
     'networkAllowList'?: string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof CreateSandboxDTO
-     */
     'networkBlockAll'?: boolean;
     /**
      * Nullable for backward compatibility
-     * @type {string}
-     * @memberof CreateSandboxDTO
      */
     'organizationId'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateSandboxDTO
-     */
     'osUser': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateSandboxDTO
-     */
     'otelEndpoint'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateSandboxDTO
-     */
     'regionId'?: string;
-    /**
-     * 
-     * @type {RegistryDTO}
-     * @memberof CreateSandboxDTO
-     */
     'registry'?: RegistryDTO;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof CreateSandboxDTO
-     */
     'skipStart'?: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateSandboxDTO
-     */
     'snapshot': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof CreateSandboxDTO
-     */
     'storageQuota'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateSandboxDTO
-     */
     'userId': string;
-    /**
-     * 
-     * @type {Array<DtoVolumeDTO>}
-     * @memberof CreateSandboxDTO
-     */
     'volumes'?: Array<DtoVolumeDTO>;
 }
 

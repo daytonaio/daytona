@@ -14,17 +14,7 @@
 
 
 
-/**
- * 
- * @export
- * @interface IsRecoverableResponse
- */
 export interface IsRecoverableResponse {
-    /**
-     * 
-     * @type {boolean}
-     * @memberof IsRecoverableResponse
-     */
     'recoverable'?: boolean;
 }
 

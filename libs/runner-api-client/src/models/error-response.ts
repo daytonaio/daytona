@@ -16,45 +16,13 @@
 
 /**
  * Error response
- * @export
- * @interface ErrorResponse
  */
 export interface ErrorResponse {
-    /**
-     * 
-     * @type {string}
-     * @memberof ErrorResponse
-     */
     'code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ErrorResponse
-     */
     'message': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ErrorResponse
-     */
     'method'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ErrorResponse
-     */
     'path': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ErrorResponse
-     */
     'statusCode': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof ErrorResponse
-     */
     'timestamp': string;
 }
 

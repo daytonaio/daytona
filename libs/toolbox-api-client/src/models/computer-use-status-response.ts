@@ -14,17 +14,7 @@
 
 
 
-/**
- * 
- * @export
- * @interface ComputerUseStatusResponse
- */
 export interface ComputerUseStatusResponse {
-    /**
-     * 
-     * @type {string}
-     * @memberof ComputerUseStatusResponse
-     */
     'status'?: string;
 }
 

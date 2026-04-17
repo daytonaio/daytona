@@ -14,18 +14,13 @@
 
 
 
-/**
- * 
- * @export
- * @enum {string}
- */
 
 export const EnumsBackupState = {
     BackupStateNone: 'NONE',
     BackupStatePending: 'PENDING',
     BackupStateInProgress: 'IN_PROGRESS',
     BackupStateCompleted: 'COMPLETED',
-    BackupStateFailed: 'FAILED'
+    BackupStateFailed: 'FAILED',
 } as const;
 
 export type EnumsBackupState = typeof EnumsBackupState[keyof typeof EnumsBackupState];

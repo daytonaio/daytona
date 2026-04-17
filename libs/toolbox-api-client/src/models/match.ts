@@ -14,29 +14,9 @@
 
 
 
-/**
- * 
- * @export
- * @interface Match
- */
 export interface Match {
-    /**
-     * 
-     * @type {string}
-     * @memberof Match
-     */
     'content': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Match
-     */
     'file': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Match
-     */
     'line': number;
 }
 

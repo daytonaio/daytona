@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -55,7 +55,6 @@ import type { SessionExecuteResponse } from '../models';
 import type { SessionSendInputRequest } from '../models';
 /**
  * ProcessApi - axios parameter creator
- * @export
  */
 export const ProcessApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -81,9 +80,8 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -119,7 +117,6 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -151,9 +148,8 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -187,8 +183,6 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -224,8 +218,8 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -259,7 +253,6 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -291,9 +284,8 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -329,8 +321,8 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['follow'] = follow;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json,text/plain';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -359,8 +351,8 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -393,8 +385,8 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -427,8 +419,8 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -465,8 +457,8 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -508,8 +500,8 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['follow'] = follow;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json,text/plain';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -538,8 +530,8 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -568,8 +560,8 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -605,9 +597,8 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -649,8 +640,6 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -689,9 +678,8 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -708,7 +696,6 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
 
 /**
  * ProcessApi - functional programming interface
- * @export
  */
 export const ProcessApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ProcessApiAxiosParamCreator(configuration)
@@ -956,7 +943,6 @@ export const ProcessApiFp = function(configuration?: Configuration) {
 
 /**
  * ProcessApi - factory interface
- * @export
  */
 export const ProcessApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = ProcessApiFp(configuration)
@@ -1150,9 +1136,6 @@ export const ProcessApiFactory = function (configuration?: Configuration, basePa
 
 /**
  * ProcessApi - object-oriented interface
- * @export
- * @class ProcessApi
- * @extends {BaseAPI}
  */
 export class ProcessApi extends BaseAPI {
     /**
@@ -1161,7 +1144,6 @@ export class ProcessApi extends BaseAPI {
      * @param {CodeRunRequest} request Code execution request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ProcessApi
      */
     public codeRun(request: CodeRunRequest, options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).codeRun(request, options).then((request) => request(this.axios, this.basePath));
@@ -1173,7 +1155,6 @@ export class ProcessApi extends BaseAPI {
      * @param {string} sessionId PTY session ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ProcessApi
      */
     public connectPtySession(sessionId: string, options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).connectPtySession(sessionId, options).then((request) => request(this.axios, this.basePath));
@@ -1185,7 +1166,6 @@ export class ProcessApi extends BaseAPI {
      * @param {PtyCreateRequest} request PTY session creation request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ProcessApi
      */
     public createPtySession(request: PtyCreateRequest, options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).createPtySession(request, options).then((request) => request(this.axios, this.basePath));
@@ -1197,7 +1177,6 @@ export class ProcessApi extends BaseAPI {
      * @param {CreateSessionRequest} request Session creation request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ProcessApi
      */
     public createSession(request: CreateSessionRequest, options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).createSession(request, options).then((request) => request(this.axios, this.basePath));
@@ -1209,7 +1188,6 @@ export class ProcessApi extends BaseAPI {
      * @param {string} sessionId PTY session ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ProcessApi
      */
     public deletePtySession(sessionId: string, options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).deletePtySession(sessionId, options).then((request) => request(this.axios, this.basePath));
@@ -1221,7 +1199,6 @@ export class ProcessApi extends BaseAPI {
      * @param {string} sessionId Session ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ProcessApi
      */
     public deleteSession(sessionId: string, options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).deleteSession(sessionId, options).then((request) => request(this.axios, this.basePath));
@@ -1233,7 +1210,6 @@ export class ProcessApi extends BaseAPI {
      * @param {ExecuteRequest} request Command execution request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ProcessApi
      */
     public executeCommand(request: ExecuteRequest, options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).executeCommand(request, options).then((request) => request(this.axios, this.basePath));
@@ -1245,7 +1221,6 @@ export class ProcessApi extends BaseAPI {
      * @param {boolean} [follow] Follow logs in real-time (WebSocket only)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ProcessApi
      */
     public getEntrypointLogs(follow?: boolean, options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).getEntrypointLogs(follow, options).then((request) => request(this.axios, this.basePath));
@@ -1256,7 +1231,6 @@ export class ProcessApi extends BaseAPI {
      * @summary Get entrypoint session details
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ProcessApi
      */
     public getEntrypointSession(options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).getEntrypointSession(options).then((request) => request(this.axios, this.basePath));
@@ -1268,7 +1242,6 @@ export class ProcessApi extends BaseAPI {
      * @param {string} sessionId PTY session ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ProcessApi
      */
     public getPtySession(sessionId: string, options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).getPtySession(sessionId, options).then((request) => request(this.axios, this.basePath));
@@ -1280,7 +1253,6 @@ export class ProcessApi extends BaseAPI {
      * @param {string} sessionId Session ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ProcessApi
      */
     public getSession(sessionId: string, options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).getSession(sessionId, options).then((request) => request(this.axios, this.basePath));
@@ -1293,7 +1265,6 @@ export class ProcessApi extends BaseAPI {
      * @param {string} commandId Command ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ProcessApi
      */
     public getSessionCommand(sessionId: string, commandId: string, options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).getSessionCommand(sessionId, commandId, options).then((request) => request(this.axios, this.basePath));
@@ -1307,7 +1278,6 @@ export class ProcessApi extends BaseAPI {
      * @param {boolean} [follow] Follow logs in real-time (WebSocket only)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ProcessApi
      */
     public getSessionCommandLogs(sessionId: string, commandId: string, follow?: boolean, options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).getSessionCommandLogs(sessionId, commandId, follow, options).then((request) => request(this.axios, this.basePath));
@@ -1318,7 +1288,6 @@ export class ProcessApi extends BaseAPI {
      * @summary List all PTY sessions
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ProcessApi
      */
     public listPtySessions(options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).listPtySessions(options).then((request) => request(this.axios, this.basePath));
@@ -1329,7 +1298,6 @@ export class ProcessApi extends BaseAPI {
      * @summary List all sessions
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ProcessApi
      */
     public listSessions(options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).listSessions(options).then((request) => request(this.axios, this.basePath));
@@ -1342,7 +1310,6 @@ export class ProcessApi extends BaseAPI {
      * @param {PtyResizeRequest} request Resize request with new dimensions
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ProcessApi
      */
     public resizePtySession(sessionId: string, request: PtyResizeRequest, options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).resizePtySession(sessionId, request, options).then((request) => request(this.axios, this.basePath));
@@ -1356,7 +1323,6 @@ export class ProcessApi extends BaseAPI {
      * @param {SessionSendInputRequest} request Input send request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ProcessApi
      */
     public sendInput(sessionId: string, commandId: string, request: SessionSendInputRequest, options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).sendInput(sessionId, commandId, request, options).then((request) => request(this.axios, this.basePath));
@@ -1369,7 +1335,6 @@ export class ProcessApi extends BaseAPI {
      * @param {SessionExecuteRequest} request Command execution request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ProcessApi
      */
     public sessionExecuteCommand(sessionId: string, request: SessionExecuteRequest, options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).sessionExecuteCommand(sessionId, request, options).then((request) => request(this.axios, this.basePath));

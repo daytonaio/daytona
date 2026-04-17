@@ -16,8 +16,6 @@
 
 /**
  * The desired state of the sandbox
- * @export
- * @enum {string}
  */
 
 export const SandboxDesiredState = {
@@ -25,7 +23,7 @@ export const SandboxDesiredState = {
     STARTED: 'started',
     STOPPED: 'stopped',
     RESIZED: 'resized',
-    ARCHIVED: 'archived'
+    ARCHIVED: 'archived',
 } as const;
 
 export type SandboxDesiredState = typeof SandboxDesiredState[keyof typeof SandboxDesiredState];

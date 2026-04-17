@@ -14,22 +14,13 @@
 
 
 
-/**
- * 
- * @export
- * @interface UserPublicKey
- */
 export interface UserPublicKey {
     /**
      * Public key
-     * @type {string}
-     * @memberof UserPublicKey
      */
     'key': string;
     /**
      * Key name
-     * @type {string}
-     * @memberof UserPublicKey
      */
     'name': string;
 }

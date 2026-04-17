@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -69,7 +69,6 @@ import type { UpdateOrganizationRole } from '../models';
 import type { UpdateRegion } from '../models';
 /**
  * OrganizationsApi - axios parameter creator
- * @export
  */
 export const OrganizationsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -102,8 +101,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -147,7 +146,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
             // authentication oauth2 required
 
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -185,9 +183,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -231,9 +228,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -277,9 +273,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -320,9 +315,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -367,7 +361,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
             // authentication oauth2 required
 
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -407,7 +400,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
             // authentication oauth2 required
 
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -451,7 +443,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
             // authentication oauth2 required
 
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -495,7 +486,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
             // authentication oauth2 required
 
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -536,7 +526,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
             // authentication oauth2 required
 
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -578,8 +567,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -614,8 +603,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -654,8 +643,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -694,8 +683,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -734,8 +723,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -775,8 +764,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -819,7 +808,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
             // authentication oauth2 required
 
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -855,8 +843,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -898,8 +886,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -934,8 +922,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -974,8 +962,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1014,8 +1002,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1050,8 +1038,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1091,8 +1079,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1135,8 +1123,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1179,8 +1167,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1225,8 +1213,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -1269,8 +1255,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -1313,7 +1297,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
             // authentication oauth2 required
 
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1359,9 +1342,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -1403,8 +1385,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -1453,9 +1433,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -1499,8 +1478,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -1549,8 +1526,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -1599,9 +1574,8 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -1646,8 +1620,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
@@ -1695,8 +1667,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -1714,7 +1684,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
 /**
  * OrganizationsApi - functional programming interface
- * @export
  */
 export const OrganizationsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = OrganizationsApiAxiosParamCreator(configuration)
@@ -2241,7 +2210,6 @@ export const OrganizationsApiFp = function(configuration?: Configuration) {
 
 /**
  * OrganizationsApi - factory interface
- * @export
  */
 export const OrganizationsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = OrganizationsApiFp(configuration)
@@ -2654,9 +2622,6 @@ export const OrganizationsApiFactory = function (configuration?: Configuration, 
 
 /**
  * OrganizationsApi - object-oriented interface
- * @export
- * @class OrganizationsApi
- * @extends {BaseAPI}
  */
 export class OrganizationsApi extends BaseAPI {
     /**
@@ -2665,7 +2630,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} invitationId Invitation ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public acceptOrganizationInvitation(invitationId: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).acceptOrganizationInvitation(invitationId, options).then((request) => request(this.axios, this.basePath));
@@ -2678,7 +2642,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} invitationId Invitation ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public cancelOrganizationInvitation(organizationId: string, invitationId: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).cancelOrganizationInvitation(organizationId, invitationId, options).then((request) => request(this.axios, this.basePath));
@@ -2690,7 +2653,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {CreateOrganization} createOrganization 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public createOrganization(createOrganization: CreateOrganization, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).createOrganization(createOrganization, options).then((request) => request(this.axios, this.basePath));
@@ -2703,7 +2665,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {CreateOrganizationInvitation} createOrganizationInvitation 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public createOrganizationInvitation(organizationId: string, createOrganizationInvitation: CreateOrganizationInvitation, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).createOrganizationInvitation(organizationId, createOrganizationInvitation, options).then((request) => request(this.axios, this.basePath));
@@ -2716,7 +2677,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {CreateOrganizationRole} createOrganizationRole 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public createOrganizationRole(organizationId: string, createOrganizationRole: CreateOrganizationRole, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).createOrganizationRole(organizationId, createOrganizationRole, options).then((request) => request(this.axios, this.basePath));
@@ -2729,7 +2689,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public createRegion(createRegion: CreateRegion, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).createRegion(createRegion, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -2741,7 +2700,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} invitationId Invitation ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public declineOrganizationInvitation(invitationId: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).declineOrganizationInvitation(invitationId, options).then((request) => request(this.axios, this.basePath));
@@ -2753,7 +2711,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} organizationId Organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public deleteOrganization(organizationId: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).deleteOrganization(organizationId, options).then((request) => request(this.axios, this.basePath));
@@ -2766,7 +2723,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} userId User ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public deleteOrganizationMember(organizationId: string, userId: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).deleteOrganizationMember(organizationId, userId, options).then((request) => request(this.axios, this.basePath));
@@ -2779,7 +2735,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} roleId Role ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public deleteOrganizationRole(organizationId: string, roleId: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).deleteOrganizationRole(organizationId, roleId, options).then((request) => request(this.axios, this.basePath));
@@ -2792,7 +2747,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public deleteRegion(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).deleteRegion(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -2804,7 +2758,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} organizationId Organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public getOrganization(organizationId: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).getOrganization(organizationId, options).then((request) => request(this.axios, this.basePath));
@@ -2815,7 +2768,6 @@ export class OrganizationsApi extends BaseAPI {
      * @summary Get count of organization invitations for authenticated user
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public getOrganizationInvitationsCountForAuthenticatedUser(options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).getOrganizationInvitationsCountForAuthenticatedUser(options).then((request) => request(this.axios, this.basePath));
@@ -2827,7 +2779,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} organizationId Organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public getOrganizationOtelConfig(organizationId: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).getOrganizationOtelConfig(organizationId, options).then((request) => request(this.axios, this.basePath));
@@ -2839,7 +2790,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} authToken Sandbox Auth Token
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public getOrganizationOtelConfigBySandboxAuthToken(authToken: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).getOrganizationOtelConfigBySandboxAuthToken(authToken, options).then((request) => request(this.axios, this.basePath));
@@ -2851,7 +2801,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} organizationId Organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public getOrganizationUsageOverview(organizationId: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).getOrganizationUsageOverview(organizationId, options).then((request) => request(this.axios, this.basePath));
@@ -2864,7 +2813,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public getRegionById(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).getRegionById(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -2876,7 +2824,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} organizationId Organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public leaveOrganization(organizationId: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).leaveOrganization(organizationId, options).then((request) => request(this.axios, this.basePath));
@@ -2888,7 +2835,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public listAvailableRegions(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).listAvailableRegions(xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -2900,7 +2846,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} organizationId Organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public listOrganizationInvitations(organizationId: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).listOrganizationInvitations(organizationId, options).then((request) => request(this.axios, this.basePath));
@@ -2911,7 +2856,6 @@ export class OrganizationsApi extends BaseAPI {
      * @summary List organization invitations for authenticated user
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public listOrganizationInvitationsForAuthenticatedUser(options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).listOrganizationInvitationsForAuthenticatedUser(options).then((request) => request(this.axios, this.basePath));
@@ -2923,7 +2867,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} organizationId Organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public listOrganizationMembers(organizationId: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).listOrganizationMembers(organizationId, options).then((request) => request(this.axios, this.basePath));
@@ -2935,7 +2878,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} organizationId Organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public listOrganizationRoles(organizationId: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).listOrganizationRoles(organizationId, options).then((request) => request(this.axios, this.basePath));
@@ -2946,7 +2888,6 @@ export class OrganizationsApi extends BaseAPI {
      * @summary List organizations
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public listOrganizations(options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).listOrganizations(options).then((request) => request(this.axios, this.basePath));
@@ -2959,7 +2900,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public regenerateProxyApiKey(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).regenerateProxyApiKey(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -2972,7 +2912,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public regenerateSnapshotManagerCredentials(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).regenerateSnapshotManagerCredentials(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -2985,7 +2924,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public regenerateSshGatewayApiKey(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).regenerateSshGatewayApiKey(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -2998,7 +2936,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public setOrganizationDefaultRegion(organizationId: string, updateOrganizationDefaultRegion: UpdateOrganizationDefaultRegion, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).setOrganizationDefaultRegion(organizationId, updateOrganizationDefaultRegion, options).then((request) => request(this.axios, this.basePath));
@@ -3011,7 +2948,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {OrganizationSuspension} [organizationSuspension] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public suspendOrganization(organizationId: string, organizationSuspension?: OrganizationSuspension, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).suspendOrganization(organizationId, organizationSuspension, options).then((request) => request(this.axios, this.basePath));
@@ -3023,7 +2959,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} organizationId Organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public unsuspendOrganization(organizationId: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).unsuspendOrganization(organizationId, options).then((request) => request(this.axios, this.basePath));
@@ -3037,7 +2972,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {UpdateOrganizationMemberAccess} updateOrganizationMemberAccess 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public updateAccessForOrganizationMember(organizationId: string, userId: string, updateOrganizationMemberAccess: UpdateOrganizationMemberAccess, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).updateAccessForOrganizationMember(organizationId, userId, updateOrganizationMemberAccess, options).then((request) => request(this.axios, this.basePath));
@@ -3050,7 +2984,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {{ [key: string]: any; }} [requestBody] Experimental configuration as a JSON object. Set to null to clear the configuration.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public updateExperimentalConfig(organizationId: string, requestBody?: { [key: string]: any; }, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).updateExperimentalConfig(organizationId, requestBody, options).then((request) => request(this.axios, this.basePath));
@@ -3064,7 +2997,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {UpdateOrganizationInvitation} updateOrganizationInvitation 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public updateOrganizationInvitation(organizationId: string, invitationId: string, updateOrganizationInvitation: UpdateOrganizationInvitation, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).updateOrganizationInvitation(organizationId, invitationId, updateOrganizationInvitation, options).then((request) => request(this.axios, this.basePath));
@@ -3077,7 +3009,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {UpdateOrganizationQuota} updateOrganizationQuota 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public updateOrganizationQuota(organizationId: string, updateOrganizationQuota: UpdateOrganizationQuota, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).updateOrganizationQuota(organizationId, updateOrganizationQuota, options).then((request) => request(this.axios, this.basePath));
@@ -3091,7 +3022,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {UpdateOrganizationRegionQuota} updateOrganizationRegionQuota 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public updateOrganizationRegionQuota(organizationId: string, regionId: string, updateOrganizationRegionQuota: UpdateOrganizationRegionQuota, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).updateOrganizationRegionQuota(organizationId, regionId, updateOrganizationRegionQuota, options).then((request) => request(this.axios, this.basePath));
@@ -3105,7 +3035,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {UpdateOrganizationRole} updateOrganizationRole 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public updateOrganizationRole(organizationId: string, roleId: string, updateOrganizationRole: UpdateOrganizationRole, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).updateOrganizationRole(organizationId, roleId, updateOrganizationRole, options).then((request) => request(this.axios, this.basePath));
@@ -3119,7 +3048,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public updateRegion(id: string, updateRegion: UpdateRegion, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).updateRegion(id, updateRegion, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3132,7 +3060,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {OrganizationSandboxDefaultLimitedNetworkEgress} organizationSandboxDefaultLimitedNetworkEgress 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public updateSandboxDefaultLimitedNetworkEgress(organizationId: string, organizationSandboxDefaultLimitedNetworkEgress: OrganizationSandboxDefaultLimitedNetworkEgress, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).updateSandboxDefaultLimitedNetworkEgress(organizationId, organizationSandboxDefaultLimitedNetworkEgress, options).then((request) => request(this.axios, this.basePath));

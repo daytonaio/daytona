@@ -89,7 +89,7 @@ public class DockerRegistryApi {
         <tr><td> 201 </td><td> The docker registry has been successfully created. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createRegistryCall(CreateDockerRegistry createDockerRegistry, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createRegistryCall(@javax.annotation.Nonnull CreateDockerRegistry createDockerRegistry, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -140,7 +140,7 @@ public class DockerRegistryApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createRegistryValidateBeforeCall(CreateDockerRegistry createDockerRegistry, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createRegistryValidateBeforeCall(@javax.annotation.Nonnull CreateDockerRegistry createDockerRegistry, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'createDockerRegistry' is set
         if (createDockerRegistry == null) {
             throw new ApiException("Missing the required parameter 'createDockerRegistry' when calling createRegistry(Async)");
@@ -164,7 +164,7 @@ public class DockerRegistryApi {
         <tr><td> 201 </td><td> The docker registry has been successfully created. </td><td>  -  </td></tr>
      </table>
      */
-    public DockerRegistry createRegistry(CreateDockerRegistry createDockerRegistry, String xDaytonaOrganizationID) throws ApiException {
+    public DockerRegistry createRegistry(@javax.annotation.Nonnull CreateDockerRegistry createDockerRegistry, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<DockerRegistry> localVarResp = createRegistryWithHttpInfo(createDockerRegistry, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -183,7 +183,7 @@ public class DockerRegistryApi {
         <tr><td> 201 </td><td> The docker registry has been successfully created. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<DockerRegistry> createRegistryWithHttpInfo(CreateDockerRegistry createDockerRegistry, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<DockerRegistry> createRegistryWithHttpInfo(@javax.annotation.Nonnull CreateDockerRegistry createDockerRegistry, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = createRegistryValidateBeforeCall(createDockerRegistry, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<DockerRegistry>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -204,7 +204,7 @@ public class DockerRegistryApi {
         <tr><td> 201 </td><td> The docker registry has been successfully created. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createRegistryAsync(CreateDockerRegistry createDockerRegistry, String xDaytonaOrganizationID, final ApiCallback<DockerRegistry> _callback) throws ApiException {
+    public okhttp3.Call createRegistryAsync(@javax.annotation.Nonnull CreateDockerRegistry createDockerRegistry, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<DockerRegistry> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createRegistryValidateBeforeCall(createDockerRegistry, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<DockerRegistry>(){}.getType();
@@ -225,7 +225,7 @@ public class DockerRegistryApi {
         <tr><td> 204 </td><td> The docker registry has been successfully deleted. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteRegistryCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deleteRegistryCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -275,7 +275,7 @@ public class DockerRegistryApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deleteRegistryValidateBeforeCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deleteRegistryValidateBeforeCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling deleteRegistry(Async)");
@@ -298,7 +298,7 @@ public class DockerRegistryApi {
         <tr><td> 204 </td><td> The docker registry has been successfully deleted. </td><td>  -  </td></tr>
      </table>
      */
-    public void deleteRegistry(String id, String xDaytonaOrganizationID) throws ApiException {
+    public void deleteRegistry(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         deleteRegistryWithHttpInfo(id, xDaytonaOrganizationID);
     }
 
@@ -316,7 +316,7 @@ public class DockerRegistryApi {
         <tr><td> 204 </td><td> The docker registry has been successfully deleted. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> deleteRegistryWithHttpInfo(String id, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> deleteRegistryWithHttpInfo(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = deleteRegistryValidateBeforeCall(id, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -336,7 +336,7 @@ public class DockerRegistryApi {
         <tr><td> 204 </td><td> The docker registry has been successfully deleted. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteRegistryAsync(String id, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call deleteRegistryAsync(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deleteRegistryValidateBeforeCall(id, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -356,7 +356,7 @@ public class DockerRegistryApi {
         <tr><td> 200 </td><td> The docker registry </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getRegistryCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getRegistryCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -407,7 +407,7 @@ public class DockerRegistryApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getRegistryValidateBeforeCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getRegistryValidateBeforeCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling getRegistry(Async)");
@@ -431,7 +431,7 @@ public class DockerRegistryApi {
         <tr><td> 200 </td><td> The docker registry </td><td>  -  </td></tr>
      </table>
      */
-    public DockerRegistry getRegistry(String id, String xDaytonaOrganizationID) throws ApiException {
+    public DockerRegistry getRegistry(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<DockerRegistry> localVarResp = getRegistryWithHttpInfo(id, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -450,7 +450,7 @@ public class DockerRegistryApi {
         <tr><td> 200 </td><td> The docker registry </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<DockerRegistry> getRegistryWithHttpInfo(String id, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<DockerRegistry> getRegistryWithHttpInfo(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getRegistryValidateBeforeCall(id, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<DockerRegistry>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -471,7 +471,7 @@ public class DockerRegistryApi {
         <tr><td> 200 </td><td> The docker registry </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getRegistryAsync(String id, String xDaytonaOrganizationID, final ApiCallback<DockerRegistry> _callback) throws ApiException {
+    public okhttp3.Call getRegistryAsync(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<DockerRegistry> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getRegistryValidateBeforeCall(id, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<DockerRegistry>(){}.getType();
@@ -492,7 +492,7 @@ public class DockerRegistryApi {
         <tr><td> 200 </td><td> Temporary registry access has been generated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getTransientPushAccessCall(String xDaytonaOrganizationID, String regionId, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getTransientPushAccessCall(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String regionId, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -546,7 +546,7 @@ public class DockerRegistryApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getTransientPushAccessValidateBeforeCall(String xDaytonaOrganizationID, String regionId, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getTransientPushAccessValidateBeforeCall(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String regionId, final ApiCallback _callback) throws ApiException {
         return getTransientPushAccessCall(xDaytonaOrganizationID, regionId, _callback);
 
     }
@@ -565,7 +565,7 @@ public class DockerRegistryApi {
         <tr><td> 200 </td><td> Temporary registry access has been generated </td><td>  -  </td></tr>
      </table>
      */
-    public RegistryPushAccessDto getTransientPushAccess(String xDaytonaOrganizationID, String regionId) throws ApiException {
+    public RegistryPushAccessDto getTransientPushAccess(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String regionId) throws ApiException {
         ApiResponse<RegistryPushAccessDto> localVarResp = getTransientPushAccessWithHttpInfo(xDaytonaOrganizationID, regionId);
         return localVarResp.getData();
     }
@@ -584,7 +584,7 @@ public class DockerRegistryApi {
         <tr><td> 200 </td><td> Temporary registry access has been generated </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<RegistryPushAccessDto> getTransientPushAccessWithHttpInfo(String xDaytonaOrganizationID, String regionId) throws ApiException {
+    public ApiResponse<RegistryPushAccessDto> getTransientPushAccessWithHttpInfo(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String regionId) throws ApiException {
         okhttp3.Call localVarCall = getTransientPushAccessValidateBeforeCall(xDaytonaOrganizationID, regionId, null);
         Type localVarReturnType = new TypeToken<RegistryPushAccessDto>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -605,7 +605,7 @@ public class DockerRegistryApi {
         <tr><td> 200 </td><td> Temporary registry access has been generated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getTransientPushAccessAsync(String xDaytonaOrganizationID, String regionId, final ApiCallback<RegistryPushAccessDto> _callback) throws ApiException {
+    public okhttp3.Call getTransientPushAccessAsync(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String regionId, final ApiCallback<RegistryPushAccessDto> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getTransientPushAccessValidateBeforeCall(xDaytonaOrganizationID, regionId, _callback);
         Type localVarReturnType = new TypeToken<RegistryPushAccessDto>(){}.getType();
@@ -625,7 +625,7 @@ public class DockerRegistryApi {
         <tr><td> 200 </td><td> List of all docker registries </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listRegistriesCall(String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listRegistriesCall(@javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -675,7 +675,7 @@ public class DockerRegistryApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listRegistriesValidateBeforeCall(String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call listRegistriesValidateBeforeCall(@javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         return listRegistriesCall(xDaytonaOrganizationID, _callback);
 
     }
@@ -693,7 +693,7 @@ public class DockerRegistryApi {
         <tr><td> 200 </td><td> List of all docker registries </td><td>  -  </td></tr>
      </table>
      */
-    public List<DockerRegistry> listRegistries(String xDaytonaOrganizationID) throws ApiException {
+    public List<DockerRegistry> listRegistries(@javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<List<DockerRegistry>> localVarResp = listRegistriesWithHttpInfo(xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -711,7 +711,7 @@ public class DockerRegistryApi {
         <tr><td> 200 </td><td> List of all docker registries </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<DockerRegistry>> listRegistriesWithHttpInfo(String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<List<DockerRegistry>> listRegistriesWithHttpInfo(@javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = listRegistriesValidateBeforeCall(xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<List<DockerRegistry>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -731,7 +731,7 @@ public class DockerRegistryApi {
         <tr><td> 200 </td><td> List of all docker registries </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listRegistriesAsync(String xDaytonaOrganizationID, final ApiCallback<List<DockerRegistry>> _callback) throws ApiException {
+    public okhttp3.Call listRegistriesAsync(@javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<List<DockerRegistry>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = listRegistriesValidateBeforeCall(xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<List<DockerRegistry>>(){}.getType();
@@ -753,7 +753,7 @@ public class DockerRegistryApi {
         <tr><td> 200 </td><td> The docker registry has been successfully updated. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call updateRegistryCall(String id, UpdateDockerRegistry updateDockerRegistry, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call updateRegistryCall(@javax.annotation.Nonnull String id, @javax.annotation.Nonnull UpdateDockerRegistry updateDockerRegistry, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -805,7 +805,7 @@ public class DockerRegistryApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call updateRegistryValidateBeforeCall(String id, UpdateDockerRegistry updateDockerRegistry, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call updateRegistryValidateBeforeCall(@javax.annotation.Nonnull String id, @javax.annotation.Nonnull UpdateDockerRegistry updateDockerRegistry, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling updateRegistry(Async)");
@@ -835,7 +835,7 @@ public class DockerRegistryApi {
         <tr><td> 200 </td><td> The docker registry has been successfully updated. </td><td>  -  </td></tr>
      </table>
      */
-    public DockerRegistry updateRegistry(String id, UpdateDockerRegistry updateDockerRegistry, String xDaytonaOrganizationID) throws ApiException {
+    public DockerRegistry updateRegistry(@javax.annotation.Nonnull String id, @javax.annotation.Nonnull UpdateDockerRegistry updateDockerRegistry, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<DockerRegistry> localVarResp = updateRegistryWithHttpInfo(id, updateDockerRegistry, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -855,7 +855,7 @@ public class DockerRegistryApi {
         <tr><td> 200 </td><td> The docker registry has been successfully updated. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<DockerRegistry> updateRegistryWithHttpInfo(String id, UpdateDockerRegistry updateDockerRegistry, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<DockerRegistry> updateRegistryWithHttpInfo(@javax.annotation.Nonnull String id, @javax.annotation.Nonnull UpdateDockerRegistry updateDockerRegistry, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = updateRegistryValidateBeforeCall(id, updateDockerRegistry, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<DockerRegistry>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -877,7 +877,7 @@ public class DockerRegistryApi {
         <tr><td> 200 </td><td> The docker registry has been successfully updated. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call updateRegistryAsync(String id, UpdateDockerRegistry updateDockerRegistry, String xDaytonaOrganizationID, final ApiCallback<DockerRegistry> _callback) throws ApiException {
+    public okhttp3.Call updateRegistryAsync(@javax.annotation.Nonnull String id, @javax.annotation.Nonnull UpdateDockerRegistry updateDockerRegistry, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<DockerRegistry> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = updateRegistryValidateBeforeCall(id, updateDockerRegistry, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<DockerRegistry>(){}.getType();

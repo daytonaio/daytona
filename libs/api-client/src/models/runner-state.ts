@@ -16,8 +16,6 @@
 
 /**
  * The state of the runner
- * @export
- * @enum {string}
  */
 
 export const RunnerState = {
@@ -25,7 +23,7 @@ export const RunnerState = {
     READY: 'ready',
     DISABLED: 'disabled',
     DECOMMISSIONED: 'decommissioned',
-    UNRESPONSIVE: 'unresponsive'
+    UNRESPONSIVE: 'unresponsive',
 } as const;
 
 export type RunnerState = typeof RunnerState[keyof typeof RunnerState];

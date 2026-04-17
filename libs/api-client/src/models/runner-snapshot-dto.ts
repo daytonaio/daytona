@@ -14,28 +14,17 @@
 
 
 
-/**
- * 
- * @export
- * @interface RunnerSnapshotDto
- */
 export interface RunnerSnapshotDto {
     /**
      * Runner snapshot ID
-     * @type {string}
-     * @memberof RunnerSnapshotDto
      */
     'runnerSnapshotId': string;
     /**
      * Runner ID
-     * @type {string}
-     * @memberof RunnerSnapshotDto
      */
     'runnerId': string;
     /**
      * Runner domain
-     * @type {string}
-     * @memberof RunnerSnapshotDto
      */
     'runnerDomain'?: string;
 }

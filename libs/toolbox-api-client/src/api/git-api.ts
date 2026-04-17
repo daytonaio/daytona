@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -45,7 +45,6 @@ import type { GitStatus } from '../models';
 import type { ListBranchResponse } from '../models';
 /**
  * GitApi - axios parameter creator
- * @export
  */
 export const GitApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -71,8 +70,6 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -107,8 +104,6 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -143,8 +138,6 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -179,9 +172,8 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -215,8 +207,6 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -251,8 +241,6 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -291,8 +279,8 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
                 localVarQueryParameter['path'] = path;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -328,8 +316,8 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
                 localVarQueryParameter['path'] = path;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -365,8 +353,8 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
                 localVarQueryParameter['path'] = path;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -398,8 +386,6 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -434,8 +420,6 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -453,7 +437,6 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
 
 /**
  * GitApi - functional programming interface
- * @export
  */
 export const GitApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = GitApiAxiosParamCreator(configuration)
@@ -606,7 +589,6 @@ export const GitApiFp = function(configuration?: Configuration) {
 
 /**
  * GitApi - factory interface
- * @export
  */
 export const GitApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = GitApiFp(configuration)
@@ -726,9 +708,6 @@ export const GitApiFactory = function (configuration?: Configuration, basePath?:
 
 /**
  * GitApi - object-oriented interface
- * @export
- * @class GitApi
- * @extends {BaseAPI}
  */
 export class GitApi extends BaseAPI {
     /**
@@ -737,7 +716,6 @@ export class GitApi extends BaseAPI {
      * @param {GitAddRequest} request Add files request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof GitApi
      */
     public addFiles(request: GitAddRequest, options?: RawAxiosRequestConfig) {
         return GitApiFp(this.configuration).addFiles(request, options).then((request) => request(this.axios, this.basePath));
@@ -749,7 +727,6 @@ export class GitApi extends BaseAPI {
      * @param {GitCheckoutRequest} request Checkout request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof GitApi
      */
     public checkoutBranch(request: GitCheckoutRequest, options?: RawAxiosRequestConfig) {
         return GitApiFp(this.configuration).checkoutBranch(request, options).then((request) => request(this.axios, this.basePath));
@@ -761,7 +738,6 @@ export class GitApi extends BaseAPI {
      * @param {GitCloneRequest} request Clone repository request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof GitApi
      */
     public cloneRepository(request: GitCloneRequest, options?: RawAxiosRequestConfig) {
         return GitApiFp(this.configuration).cloneRepository(request, options).then((request) => request(this.axios, this.basePath));
@@ -773,7 +749,6 @@ export class GitApi extends BaseAPI {
      * @param {GitCommitRequest} request Commit request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof GitApi
      */
     public commitChanges(request: GitCommitRequest, options?: RawAxiosRequestConfig) {
         return GitApiFp(this.configuration).commitChanges(request, options).then((request) => request(this.axios, this.basePath));
@@ -785,7 +760,6 @@ export class GitApi extends BaseAPI {
      * @param {GitBranchRequest} request Create branch request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof GitApi
      */
     public createBranch(request: GitBranchRequest, options?: RawAxiosRequestConfig) {
         return GitApiFp(this.configuration).createBranch(request, options).then((request) => request(this.axios, this.basePath));
@@ -797,7 +771,6 @@ export class GitApi extends BaseAPI {
      * @param {GitDeleteBranchRequest} request Delete branch request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof GitApi
      */
     public deleteBranch(request: GitDeleteBranchRequest, options?: RawAxiosRequestConfig) {
         return GitApiFp(this.configuration).deleteBranch(request, options).then((request) => request(this.axios, this.basePath));
@@ -809,7 +782,6 @@ export class GitApi extends BaseAPI {
      * @param {string} path Repository path
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof GitApi
      */
     public getCommitHistory(path: string, options?: RawAxiosRequestConfig) {
         return GitApiFp(this.configuration).getCommitHistory(path, options).then((request) => request(this.axios, this.basePath));
@@ -821,7 +793,6 @@ export class GitApi extends BaseAPI {
      * @param {string} path Repository path
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof GitApi
      */
     public getStatus(path: string, options?: RawAxiosRequestConfig) {
         return GitApiFp(this.configuration).getStatus(path, options).then((request) => request(this.axios, this.basePath));
@@ -833,7 +804,6 @@ export class GitApi extends BaseAPI {
      * @param {string} path Repository path
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof GitApi
      */
     public listBranches(path: string, options?: RawAxiosRequestConfig) {
         return GitApiFp(this.configuration).listBranches(path, options).then((request) => request(this.axios, this.basePath));
@@ -845,7 +815,6 @@ export class GitApi extends BaseAPI {
      * @param {GitRepoRequest} request Pull request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof GitApi
      */
     public pullChanges(request: GitRepoRequest, options?: RawAxiosRequestConfig) {
         return GitApiFp(this.configuration).pullChanges(request, options).then((request) => request(this.axios, this.basePath));
@@ -857,7 +826,6 @@ export class GitApi extends BaseAPI {
      * @param {GitRepoRequest} request Push request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof GitApi
      */
     public pushChanges(request: GitRepoRequest, options?: RawAxiosRequestConfig) {
         return GitApiFp(this.configuration).pushChanges(request, options).then((request) => request(this.axios, this.basePath));

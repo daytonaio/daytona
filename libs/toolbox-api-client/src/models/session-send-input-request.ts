@@ -14,17 +14,7 @@
 
 
 
-/**
- * 
- * @export
- * @interface SessionSendInputRequest
- */
 export interface SessionSendInputRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof SessionSendInputRequest
-     */
     'data': string;
 }
 

@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """
     Daytona
 
@@ -23,13 +21,12 @@ from setuptools import setup, find_packages  # noqa: H301
 # http://pypi.python.org/pypi/setuptools
 NAME = "daytona_api_client_async"
 VERSION = "0.0.0-dev"
-PYTHON_REQUIRES = ">= 3.8"
+PYTHON_REQUIRES = ">= 3.9"
 REQUIRES = [
-    "urllib3 >= 2.1.0, < 3.0.0",
     "python-dateutil >= 2.8.2",
     "aiohttp >= 3.8.4",
     "aiohttp-retry >= 2.8.3",
-    "pydantic >= 2",
+    "pydantic >= 2.11",
     "typing-extensions >= 4.7.1",
 ]
 
@@ -44,6 +41,7 @@ setup(
     install_requires=REQUIRES,
     packages=find_packages(exclude=["test", "tests"]),
     include_package_data=True,
+    license="Apache-2.0",
     long_description_content_type='text/markdown',
     long_description="""\
     Daytona AI platform API Docs

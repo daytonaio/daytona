@@ -14,17 +14,7 @@
 
 
 
-/**
- * 
- * @export
- * @interface ListBranchResponse
- */
 export interface ListBranchResponse {
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ListBranchResponse
-     */
     'branches': Array<string>;
 }
 

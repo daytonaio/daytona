@@ -14,53 +14,13 @@
 
 
 
-/**
- * 
- * @export
- * @interface UpdateOrganizationRegionQuota
- */
 export interface UpdateOrganizationRegionQuota {
-    /**
-     * 
-     * @type {number}
-     * @memberof UpdateOrganizationRegionQuota
-     */
     'totalCpuQuota': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof UpdateOrganizationRegionQuota
-     */
     'totalMemoryQuota': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof UpdateOrganizationRegionQuota
-     */
     'totalDiskQuota': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof UpdateOrganizationRegionQuota
-     */
     'maxCpuPerSandbox'?: number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof UpdateOrganizationRegionQuota
-     */
     'maxMemoryPerSandbox'?: number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof UpdateOrganizationRegionQuota
-     */
     'maxDiskPerSandbox'?: number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof UpdateOrganizationRegionQuota
-     */
     'maxDiskPerNonEphemeralSandbox'?: number | null;
 }
 

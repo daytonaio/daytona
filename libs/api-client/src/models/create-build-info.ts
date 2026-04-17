@@ -14,22 +14,13 @@
 
 
 
-/**
- * 
- * @export
- * @interface CreateBuildInfo
- */
 export interface CreateBuildInfo {
     /**
      * The Dockerfile content used for the build
-     * @type {string}
-     * @memberof CreateBuildInfo
      */
     'dockerfileContent': string;
     /**
      * The context hashes used for the build
-     * @type {Array<string>}
-     * @memberof CreateBuildInfo
      */
     'contextHashes'?: Array<string>;
 }

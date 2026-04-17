@@ -49,7 +49,7 @@ import io.daytona.api.client.JSON;
 /**
  * RegionQuota
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class RegionQuota {
   public static final String SERIALIZED_NAME_ORGANIZATION_ID = "organizationId";
   @SerializedName(SERIALIZED_NAME_ORGANIZATION_ID)
@@ -364,10 +364,7 @@ public class RegionQuota {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -376,28 +373,10 @@ public class RegionQuota {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("organizationId");
-    openapiFields.add("regionId");
-    openapiFields.add("totalCpuQuota");
-    openapiFields.add("totalMemoryQuota");
-    openapiFields.add("totalDiskQuota");
-    openapiFields.add("maxCpuPerSandbox");
-    openapiFields.add("maxMemoryPerSandbox");
-    openapiFields.add("maxDiskPerSandbox");
-    openapiFields.add("maxDiskPerNonEphemeralSandbox");
+    openapiFields = new HashSet<String>(Arrays.asList("organizationId", "regionId", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("organizationId");
-    openapiRequiredFields.add("regionId");
-    openapiRequiredFields.add("totalCpuQuota");
-    openapiRequiredFields.add("totalMemoryQuota");
-    openapiRequiredFields.add("totalDiskQuota");
-    openapiRequiredFields.add("maxCpuPerSandbox");
-    openapiRequiredFields.add("maxMemoryPerSandbox");
-    openapiRequiredFields.add("maxDiskPerSandbox");
-    openapiRequiredFields.add("maxDiskPerNonEphemeralSandbox");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("organizationId", "regionId", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
   }
 
   /**
@@ -409,22 +388,22 @@ public class RegionQuota {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!RegionQuota.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in RegionQuota is not found in the empty JSON string", RegionQuota.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in RegionQuota is not found in the empty JSON string", RegionQuota.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : RegionQuota.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("organizationId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `organizationId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("organizationId").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `organizationId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("organizationId").toString()));
       }
       if (!jsonObj.get("regionId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `regionId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("regionId").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `regionId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("regionId").toString()));
       }
   }
 
@@ -485,7 +464,7 @@ public class RegionQuota {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

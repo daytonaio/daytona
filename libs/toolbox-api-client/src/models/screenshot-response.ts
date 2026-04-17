@@ -17,29 +17,9 @@
 // @ts-ignore
 import type { Position } from './position';
 
-/**
- * 
- * @export
- * @interface ScreenshotResponse
- */
 export interface ScreenshotResponse {
-    /**
-     * 
-     * @type {Position}
-     * @memberof ScreenshotResponse
-     */
     'cursorPosition'?: Position;
-    /**
-     * 
-     * @type {string}
-     * @memberof ScreenshotResponse
-     */
     'screenshot'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ScreenshotResponse
-     */
     'sizeBytes'?: number;
 }
 

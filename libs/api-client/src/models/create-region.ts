@@ -14,34 +14,21 @@
 
 
 
-/**
- * 
- * @export
- * @interface CreateRegion
- */
 export interface CreateRegion {
     /**
      * Region name
-     * @type {string}
-     * @memberof CreateRegion
      */
     'name': string;
     /**
      * Proxy URL for the region
-     * @type {string}
-     * @memberof CreateRegion
      */
     'proxyUrl'?: string | null;
     /**
      * SSH Gateway URL for the region
-     * @type {string}
-     * @memberof CreateRegion
      */
     'sshGatewayUrl'?: string | null;
     /**
      * Snapshot Manager URL for the region
-     * @type {string}
-     * @memberof CreateRegion
      */
     'snapshotManagerUrl'?: string | null;
 }

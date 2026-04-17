@@ -16,14 +16,12 @@
 
 /**
  * The class of the runner
- * @export
- * @enum {string}
  */
 
 export const SandboxClass = {
     SMALL: 'small',
     MEDIUM: 'medium',
-    LARGE: 'large'
+    LARGE: 'large',
 } as const;
 
 export type SandboxClass = typeof SandboxClass[keyof typeof SandboxClass];

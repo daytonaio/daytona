@@ -16,8 +16,6 @@
 
 /**
  * The state of the sandbox
- * @export
- * @enum {string}
  */
 
 export const SandboxState = {
@@ -39,7 +37,7 @@ export const SandboxState = {
     ARCHIVING: 'archiving',
     RESIZING: 'resizing',
     SNAPSHOTTING: 'snapshotting',
-    FORKING: 'forking'
+    FORKING: 'forking',
 } as const;
 
 export type SandboxState = typeof SandboxState[keyof typeof SandboxState];

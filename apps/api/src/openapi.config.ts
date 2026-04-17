@@ -12,6 +12,7 @@ const getOpenApiConfig = (oidcIssuer: string) =>
     .setDescription('Daytona AI platform API Docs')
     .setContact('Daytona Platforms Inc.', 'https://www.daytona.io', 'support@daytona.com')
     .setVersion('1.0')
+    .setLicense('Apache-2.0', 'https://www.apache.org/licenses/LICENSE-2.0')
     .addBearerAuth({
       type: 'http',
       scheme: 'bearer',

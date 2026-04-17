@@ -100,7 +100,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call codeRunCall(CodeRunRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call codeRunCall(@javax.annotation.Nonnull CodeRunRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -146,7 +146,7 @@ public class ProcessApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call codeRunValidateBeforeCall(CodeRunRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call codeRunValidateBeforeCall(@javax.annotation.Nonnull CodeRunRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling codeRun(Async)");
@@ -169,7 +169,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public CodeRunResponse codeRun(CodeRunRequest request) throws ApiException {
+    public CodeRunResponse codeRun(@javax.annotation.Nonnull CodeRunRequest request) throws ApiException {
         ApiResponse<CodeRunResponse> localVarResp = codeRunWithHttpInfo(request);
         return localVarResp.getData();
     }
@@ -187,7 +187,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<CodeRunResponse> codeRunWithHttpInfo(CodeRunRequest request) throws ApiException {
+    public ApiResponse<CodeRunResponse> codeRunWithHttpInfo(@javax.annotation.Nonnull CodeRunRequest request) throws ApiException {
         okhttp3.Call localVarCall = codeRunValidateBeforeCall(request, null);
         Type localVarReturnType = new TypeToken<CodeRunResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -207,7 +207,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call codeRunAsync(CodeRunRequest request, final ApiCallback<CodeRunResponse> _callback) throws ApiException {
+    public okhttp3.Call codeRunAsync(@javax.annotation.Nonnull CodeRunRequest request, final ApiCallback<CodeRunResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = codeRunValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<CodeRunResponse>(){}.getType();
@@ -227,7 +227,7 @@ public class ProcessApi {
         <tr><td> 101 </td><td> Switching Protocols - WebSocket connection established </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call connectPtySessionCall(String sessionId, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call connectPtySessionCall(@javax.annotation.Nonnull String sessionId, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -272,7 +272,7 @@ public class ProcessApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call connectPtySessionValidateBeforeCall(String sessionId, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call connectPtySessionValidateBeforeCall(@javax.annotation.Nonnull String sessionId, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sessionId' is set
         if (sessionId == null) {
             throw new ApiException("Missing the required parameter 'sessionId' when calling connectPtySession(Async)");
@@ -294,7 +294,7 @@ public class ProcessApi {
         <tr><td> 101 </td><td> Switching Protocols - WebSocket connection established </td><td>  -  </td></tr>
      </table>
      */
-    public void connectPtySession(String sessionId) throws ApiException {
+    public void connectPtySession(@javax.annotation.Nonnull String sessionId) throws ApiException {
         connectPtySessionWithHttpInfo(sessionId);
     }
 
@@ -311,7 +311,7 @@ public class ProcessApi {
         <tr><td> 101 </td><td> Switching Protocols - WebSocket connection established </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> connectPtySessionWithHttpInfo(String sessionId) throws ApiException {
+    public ApiResponse<Void> connectPtySessionWithHttpInfo(@javax.annotation.Nonnull String sessionId) throws ApiException {
         okhttp3.Call localVarCall = connectPtySessionValidateBeforeCall(sessionId, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -330,7 +330,7 @@ public class ProcessApi {
         <tr><td> 101 </td><td> Switching Protocols - WebSocket connection established </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call connectPtySessionAsync(String sessionId, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call connectPtySessionAsync(@javax.annotation.Nonnull String sessionId, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = connectPtySessionValidateBeforeCall(sessionId, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -349,7 +349,7 @@ public class ProcessApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createPtySessionCall(PtyCreateRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createPtySessionCall(@javax.annotation.Nonnull PtyCreateRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -395,7 +395,7 @@ public class ProcessApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createPtySessionValidateBeforeCall(PtyCreateRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createPtySessionValidateBeforeCall(@javax.annotation.Nonnull PtyCreateRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling createPtySession(Async)");
@@ -418,7 +418,7 @@ public class ProcessApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
      </table>
      */
-    public PtyCreateResponse createPtySession(PtyCreateRequest request) throws ApiException {
+    public PtyCreateResponse createPtySession(@javax.annotation.Nonnull PtyCreateRequest request) throws ApiException {
         ApiResponse<PtyCreateResponse> localVarResp = createPtySessionWithHttpInfo(request);
         return localVarResp.getData();
     }
@@ -436,7 +436,7 @@ public class ProcessApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<PtyCreateResponse> createPtySessionWithHttpInfo(PtyCreateRequest request) throws ApiException {
+    public ApiResponse<PtyCreateResponse> createPtySessionWithHttpInfo(@javax.annotation.Nonnull PtyCreateRequest request) throws ApiException {
         okhttp3.Call localVarCall = createPtySessionValidateBeforeCall(request, null);
         Type localVarReturnType = new TypeToken<PtyCreateResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -456,7 +456,7 @@ public class ProcessApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createPtySessionAsync(PtyCreateRequest request, final ApiCallback<PtyCreateResponse> _callback) throws ApiException {
+    public okhttp3.Call createPtySessionAsync(@javax.annotation.Nonnull PtyCreateRequest request, final ApiCallback<PtyCreateResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createPtySessionValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<PtyCreateResponse>(){}.getType();
@@ -476,7 +476,7 @@ public class ProcessApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createSessionCall(CreateSessionRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createSessionCall(@javax.annotation.Nonnull CreateSessionRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -521,7 +521,7 @@ public class ProcessApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createSessionValidateBeforeCall(CreateSessionRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createSessionValidateBeforeCall(@javax.annotation.Nonnull CreateSessionRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling createSession(Async)");
@@ -543,7 +543,7 @@ public class ProcessApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
      </table>
      */
-    public void createSession(CreateSessionRequest request) throws ApiException {
+    public void createSession(@javax.annotation.Nonnull CreateSessionRequest request) throws ApiException {
         createSessionWithHttpInfo(request);
     }
 
@@ -560,7 +560,7 @@ public class ProcessApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> createSessionWithHttpInfo(CreateSessionRequest request) throws ApiException {
+    public ApiResponse<Void> createSessionWithHttpInfo(@javax.annotation.Nonnull CreateSessionRequest request) throws ApiException {
         okhttp3.Call localVarCall = createSessionValidateBeforeCall(request, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -579,7 +579,7 @@ public class ProcessApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createSessionAsync(CreateSessionRequest request, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call createSessionAsync(@javax.annotation.Nonnull CreateSessionRequest request, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createSessionValidateBeforeCall(request, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -598,7 +598,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deletePtySessionCall(String sessionId, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deletePtySessionCall(@javax.annotation.Nonnull String sessionId, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -644,7 +644,7 @@ public class ProcessApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deletePtySessionValidateBeforeCall(String sessionId, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deletePtySessionValidateBeforeCall(@javax.annotation.Nonnull String sessionId, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sessionId' is set
         if (sessionId == null) {
             throw new ApiException("Missing the required parameter 'sessionId' when calling deletePtySession(Async)");
@@ -667,7 +667,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public Map<String, Object> deletePtySession(String sessionId) throws ApiException {
+    public Map<String, Object> deletePtySession(@javax.annotation.Nonnull String sessionId) throws ApiException {
         ApiResponse<Map<String, Object>> localVarResp = deletePtySessionWithHttpInfo(sessionId);
         return localVarResp.getData();
     }
@@ -685,7 +685,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Map<String, Object>> deletePtySessionWithHttpInfo(String sessionId) throws ApiException {
+    public ApiResponse<Map<String, Object>> deletePtySessionWithHttpInfo(@javax.annotation.Nonnull String sessionId) throws ApiException {
         okhttp3.Call localVarCall = deletePtySessionValidateBeforeCall(sessionId, null);
         Type localVarReturnType = new TypeToken<Map<String, Object>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -705,7 +705,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deletePtySessionAsync(String sessionId, final ApiCallback<Map<String, Object>> _callback) throws ApiException {
+    public okhttp3.Call deletePtySessionAsync(@javax.annotation.Nonnull String sessionId, final ApiCallback<Map<String, Object>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deletePtySessionValidateBeforeCall(sessionId, _callback);
         Type localVarReturnType = new TypeToken<Map<String, Object>>(){}.getType();
@@ -725,7 +725,7 @@ public class ProcessApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteSessionCall(String sessionId, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deleteSessionCall(@javax.annotation.Nonnull String sessionId, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -770,7 +770,7 @@ public class ProcessApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deleteSessionValidateBeforeCall(String sessionId, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deleteSessionValidateBeforeCall(@javax.annotation.Nonnull String sessionId, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sessionId' is set
         if (sessionId == null) {
             throw new ApiException("Missing the required parameter 'sessionId' when calling deleteSession(Async)");
@@ -792,7 +792,7 @@ public class ProcessApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public void deleteSession(String sessionId) throws ApiException {
+    public void deleteSession(@javax.annotation.Nonnull String sessionId) throws ApiException {
         deleteSessionWithHttpInfo(sessionId);
     }
 
@@ -809,7 +809,7 @@ public class ProcessApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> deleteSessionWithHttpInfo(String sessionId) throws ApiException {
+    public ApiResponse<Void> deleteSessionWithHttpInfo(@javax.annotation.Nonnull String sessionId) throws ApiException {
         okhttp3.Call localVarCall = deleteSessionValidateBeforeCall(sessionId, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -828,7 +828,7 @@ public class ProcessApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteSessionAsync(String sessionId, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call deleteSessionAsync(@javax.annotation.Nonnull String sessionId, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deleteSessionValidateBeforeCall(sessionId, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -847,7 +847,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call executeCommandCall(ExecuteRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call executeCommandCall(@javax.annotation.Nonnull ExecuteRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -893,7 +893,7 @@ public class ProcessApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call executeCommandValidateBeforeCall(ExecuteRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call executeCommandValidateBeforeCall(@javax.annotation.Nonnull ExecuteRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling executeCommand(Async)");
@@ -916,7 +916,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ExecuteResponse executeCommand(ExecuteRequest request) throws ApiException {
+    public ExecuteResponse executeCommand(@javax.annotation.Nonnull ExecuteRequest request) throws ApiException {
         ApiResponse<ExecuteResponse> localVarResp = executeCommandWithHttpInfo(request);
         return localVarResp.getData();
     }
@@ -934,7 +934,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ExecuteResponse> executeCommandWithHttpInfo(ExecuteRequest request) throws ApiException {
+    public ApiResponse<ExecuteResponse> executeCommandWithHttpInfo(@javax.annotation.Nonnull ExecuteRequest request) throws ApiException {
         okhttp3.Call localVarCall = executeCommandValidateBeforeCall(request, null);
         Type localVarReturnType = new TypeToken<ExecuteResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -954,7 +954,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call executeCommandAsync(ExecuteRequest request, final ApiCallback<ExecuteResponse> _callback) throws ApiException {
+    public okhttp3.Call executeCommandAsync(@javax.annotation.Nonnull ExecuteRequest request, final ApiCallback<ExecuteResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = executeCommandValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<ExecuteResponse>(){}.getType();
@@ -974,7 +974,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> Entrypoint log content </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getEntrypointLogsCall(Boolean follow, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getEntrypointLogsCall(@javax.annotation.Nullable Boolean follow, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1024,7 +1024,7 @@ public class ProcessApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getEntrypointLogsValidateBeforeCall(Boolean follow, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getEntrypointLogsValidateBeforeCall(@javax.annotation.Nullable Boolean follow, final ApiCallback _callback) throws ApiException {
         return getEntrypointLogsCall(follow, _callback);
 
     }
@@ -1042,7 +1042,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> Entrypoint log content </td><td>  -  </td></tr>
      </table>
      */
-    public SessionCommandLogsResponse getEntrypointLogs(Boolean follow) throws ApiException {
+    public SessionCommandLogsResponse getEntrypointLogs(@javax.annotation.Nullable Boolean follow) throws ApiException {
         ApiResponse<SessionCommandLogsResponse> localVarResp = getEntrypointLogsWithHttpInfo(follow);
         return localVarResp.getData();
     }
@@ -1060,7 +1060,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> Entrypoint log content </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<SessionCommandLogsResponse> getEntrypointLogsWithHttpInfo(Boolean follow) throws ApiException {
+    public ApiResponse<SessionCommandLogsResponse> getEntrypointLogsWithHttpInfo(@javax.annotation.Nullable Boolean follow) throws ApiException {
         okhttp3.Call localVarCall = getEntrypointLogsValidateBeforeCall(follow, null);
         Type localVarReturnType = new TypeToken<SessionCommandLogsResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1080,7 +1080,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> Entrypoint log content </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getEntrypointLogsAsync(Boolean follow, final ApiCallback<SessionCommandLogsResponse> _callback) throws ApiException {
+    public okhttp3.Call getEntrypointLogsAsync(@javax.annotation.Nullable Boolean follow, final ApiCallback<SessionCommandLogsResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getEntrypointLogsValidateBeforeCall(follow, _callback);
         Type localVarReturnType = new TypeToken<SessionCommandLogsResponse>(){}.getType();
@@ -1217,7 +1217,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getPtySessionCall(String sessionId, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getPtySessionCall(@javax.annotation.Nonnull String sessionId, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1263,7 +1263,7 @@ public class ProcessApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getPtySessionValidateBeforeCall(String sessionId, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getPtySessionValidateBeforeCall(@javax.annotation.Nonnull String sessionId, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sessionId' is set
         if (sessionId == null) {
             throw new ApiException("Missing the required parameter 'sessionId' when calling getPtySession(Async)");
@@ -1286,7 +1286,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public PtySessionInfo getPtySession(String sessionId) throws ApiException {
+    public PtySessionInfo getPtySession(@javax.annotation.Nonnull String sessionId) throws ApiException {
         ApiResponse<PtySessionInfo> localVarResp = getPtySessionWithHttpInfo(sessionId);
         return localVarResp.getData();
     }
@@ -1304,7 +1304,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<PtySessionInfo> getPtySessionWithHttpInfo(String sessionId) throws ApiException {
+    public ApiResponse<PtySessionInfo> getPtySessionWithHttpInfo(@javax.annotation.Nonnull String sessionId) throws ApiException {
         okhttp3.Call localVarCall = getPtySessionValidateBeforeCall(sessionId, null);
         Type localVarReturnType = new TypeToken<PtySessionInfo>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1324,7 +1324,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getPtySessionAsync(String sessionId, final ApiCallback<PtySessionInfo> _callback) throws ApiException {
+    public okhttp3.Call getPtySessionAsync(@javax.annotation.Nonnull String sessionId, final ApiCallback<PtySessionInfo> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getPtySessionValidateBeforeCall(sessionId, _callback);
         Type localVarReturnType = new TypeToken<PtySessionInfo>(){}.getType();
@@ -1344,7 +1344,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSessionCall(String sessionId, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSessionCall(@javax.annotation.Nonnull String sessionId, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1390,7 +1390,7 @@ public class ProcessApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSessionValidateBeforeCall(String sessionId, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSessionValidateBeforeCall(@javax.annotation.Nonnull String sessionId, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sessionId' is set
         if (sessionId == null) {
             throw new ApiException("Missing the required parameter 'sessionId' when calling getSession(Async)");
@@ -1413,7 +1413,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public Session getSession(String sessionId) throws ApiException {
+    public Session getSession(@javax.annotation.Nonnull String sessionId) throws ApiException {
         ApiResponse<Session> localVarResp = getSessionWithHttpInfo(sessionId);
         return localVarResp.getData();
     }
@@ -1431,7 +1431,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Session> getSessionWithHttpInfo(String sessionId) throws ApiException {
+    public ApiResponse<Session> getSessionWithHttpInfo(@javax.annotation.Nonnull String sessionId) throws ApiException {
         okhttp3.Call localVarCall = getSessionValidateBeforeCall(sessionId, null);
         Type localVarReturnType = new TypeToken<Session>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1451,7 +1451,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSessionAsync(String sessionId, final ApiCallback<Session> _callback) throws ApiException {
+    public okhttp3.Call getSessionAsync(@javax.annotation.Nonnull String sessionId, final ApiCallback<Session> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSessionValidateBeforeCall(sessionId, _callback);
         Type localVarReturnType = new TypeToken<Session>(){}.getType();
@@ -1472,7 +1472,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSessionCommandCall(String sessionId, String commandId, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSessionCommandCall(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1519,7 +1519,7 @@ public class ProcessApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSessionCommandValidateBeforeCall(String sessionId, String commandId, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSessionCommandValidateBeforeCall(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sessionId' is set
         if (sessionId == null) {
             throw new ApiException("Missing the required parameter 'sessionId' when calling getSessionCommand(Async)");
@@ -1548,7 +1548,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public Command getSessionCommand(String sessionId, String commandId) throws ApiException {
+    public Command getSessionCommand(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId) throws ApiException {
         ApiResponse<Command> localVarResp = getSessionCommandWithHttpInfo(sessionId, commandId);
         return localVarResp.getData();
     }
@@ -1567,7 +1567,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Command> getSessionCommandWithHttpInfo(String sessionId, String commandId) throws ApiException {
+    public ApiResponse<Command> getSessionCommandWithHttpInfo(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId) throws ApiException {
         okhttp3.Call localVarCall = getSessionCommandValidateBeforeCall(sessionId, commandId, null);
         Type localVarReturnType = new TypeToken<Command>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1588,7 +1588,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSessionCommandAsync(String sessionId, String commandId, final ApiCallback<Command> _callback) throws ApiException {
+    public okhttp3.Call getSessionCommandAsync(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, final ApiCallback<Command> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSessionCommandValidateBeforeCall(sessionId, commandId, _callback);
         Type localVarReturnType = new TypeToken<Command>(){}.getType();
@@ -1610,7 +1610,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> Log content (JSON for new SDKs, plain text for old SDKs) </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSessionCommandLogsCall(String sessionId, String commandId, Boolean follow, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSessionCommandLogsCall(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable Boolean follow, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1662,7 +1662,7 @@ public class ProcessApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSessionCommandLogsValidateBeforeCall(String sessionId, String commandId, Boolean follow, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSessionCommandLogsValidateBeforeCall(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable Boolean follow, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sessionId' is set
         if (sessionId == null) {
             throw new ApiException("Missing the required parameter 'sessionId' when calling getSessionCommandLogs(Async)");
@@ -1692,7 +1692,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> Log content (JSON for new SDKs, plain text for old SDKs) </td><td>  -  </td></tr>
      </table>
      */
-    public SessionCommandLogsResponse getSessionCommandLogs(String sessionId, String commandId, Boolean follow) throws ApiException {
+    public SessionCommandLogsResponse getSessionCommandLogs(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable Boolean follow) throws ApiException {
         ApiResponse<SessionCommandLogsResponse> localVarResp = getSessionCommandLogsWithHttpInfo(sessionId, commandId, follow);
         return localVarResp.getData();
     }
@@ -1712,7 +1712,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> Log content (JSON for new SDKs, plain text for old SDKs) </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<SessionCommandLogsResponse> getSessionCommandLogsWithHttpInfo(String sessionId, String commandId, Boolean follow) throws ApiException {
+    public ApiResponse<SessionCommandLogsResponse> getSessionCommandLogsWithHttpInfo(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable Boolean follow) throws ApiException {
         okhttp3.Call localVarCall = getSessionCommandLogsValidateBeforeCall(sessionId, commandId, follow, null);
         Type localVarReturnType = new TypeToken<SessionCommandLogsResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1734,7 +1734,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> Log content (JSON for new SDKs, plain text for old SDKs) </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSessionCommandLogsAsync(String sessionId, String commandId, Boolean follow, final ApiCallback<SessionCommandLogsResponse> _callback) throws ApiException {
+    public okhttp3.Call getSessionCommandLogsAsync(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable Boolean follow, final ApiCallback<SessionCommandLogsResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSessionCommandLogsValidateBeforeCall(sessionId, commandId, follow, _callback);
         Type localVarReturnType = new TypeToken<SessionCommandLogsResponse>(){}.getType();
@@ -1989,7 +1989,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call resizePtySessionCall(String sessionId, PtyResizeRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call resizePtySessionCall(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull PtyResizeRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2036,7 +2036,7 @@ public class ProcessApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call resizePtySessionValidateBeforeCall(String sessionId, PtyResizeRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call resizePtySessionValidateBeforeCall(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull PtyResizeRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sessionId' is set
         if (sessionId == null) {
             throw new ApiException("Missing the required parameter 'sessionId' when calling resizePtySession(Async)");
@@ -2065,7 +2065,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public PtySessionInfo resizePtySession(String sessionId, PtyResizeRequest request) throws ApiException {
+    public PtySessionInfo resizePtySession(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull PtyResizeRequest request) throws ApiException {
         ApiResponse<PtySessionInfo> localVarResp = resizePtySessionWithHttpInfo(sessionId, request);
         return localVarResp.getData();
     }
@@ -2084,7 +2084,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<PtySessionInfo> resizePtySessionWithHttpInfo(String sessionId, PtyResizeRequest request) throws ApiException {
+    public ApiResponse<PtySessionInfo> resizePtySessionWithHttpInfo(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull PtyResizeRequest request) throws ApiException {
         okhttp3.Call localVarCall = resizePtySessionValidateBeforeCall(sessionId, request, null);
         Type localVarReturnType = new TypeToken<PtySessionInfo>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2105,7 +2105,7 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call resizePtySessionAsync(String sessionId, PtyResizeRequest request, final ApiCallback<PtySessionInfo> _callback) throws ApiException {
+    public okhttp3.Call resizePtySessionAsync(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull PtyResizeRequest request, final ApiCallback<PtySessionInfo> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = resizePtySessionValidateBeforeCall(sessionId, request, _callback);
         Type localVarReturnType = new TypeToken<PtySessionInfo>(){}.getType();
@@ -2127,7 +2127,7 @@ public class ProcessApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call sendInputCall(String sessionId, String commandId, SessionSendInputRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call sendInputCall(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nonnull SessionSendInputRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2174,7 +2174,7 @@ public class ProcessApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call sendInputValidateBeforeCall(String sessionId, String commandId, SessionSendInputRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call sendInputValidateBeforeCall(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nonnull SessionSendInputRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sessionId' is set
         if (sessionId == null) {
             throw new ApiException("Missing the required parameter 'sessionId' when calling sendInput(Async)");
@@ -2208,7 +2208,7 @@ public class ProcessApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public void sendInput(String sessionId, String commandId, SessionSendInputRequest request) throws ApiException {
+    public void sendInput(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nonnull SessionSendInputRequest request) throws ApiException {
         sendInputWithHttpInfo(sessionId, commandId, request);
     }
 
@@ -2227,7 +2227,7 @@ public class ProcessApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> sendInputWithHttpInfo(String sessionId, String commandId, SessionSendInputRequest request) throws ApiException {
+    public ApiResponse<Void> sendInputWithHttpInfo(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nonnull SessionSendInputRequest request) throws ApiException {
         okhttp3.Call localVarCall = sendInputValidateBeforeCall(sessionId, commandId, request, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -2248,7 +2248,7 @@ public class ProcessApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call sendInputAsync(String sessionId, String commandId, SessionSendInputRequest request, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call sendInputAsync(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nonnull SessionSendInputRequest request, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = sendInputValidateBeforeCall(sessionId, commandId, request, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -2269,7 +2269,7 @@ public class ProcessApi {
         <tr><td> 202 </td><td> Accepted </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call sessionExecuteCommandCall(String sessionId, SessionExecuteRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call sessionExecuteCommandCall(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull SessionExecuteRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2316,7 +2316,7 @@ public class ProcessApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call sessionExecuteCommandValidateBeforeCall(String sessionId, SessionExecuteRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call sessionExecuteCommandValidateBeforeCall(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull SessionExecuteRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sessionId' is set
         if (sessionId == null) {
             throw new ApiException("Missing the required parameter 'sessionId' when calling sessionExecuteCommand(Async)");
@@ -2346,7 +2346,7 @@ public class ProcessApi {
         <tr><td> 202 </td><td> Accepted </td><td>  -  </td></tr>
      </table>
      */
-    public SessionExecuteResponse sessionExecuteCommand(String sessionId, SessionExecuteRequest request) throws ApiException {
+    public SessionExecuteResponse sessionExecuteCommand(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull SessionExecuteRequest request) throws ApiException {
         ApiResponse<SessionExecuteResponse> localVarResp = sessionExecuteCommandWithHttpInfo(sessionId, request);
         return localVarResp.getData();
     }
@@ -2366,7 +2366,7 @@ public class ProcessApi {
         <tr><td> 202 </td><td> Accepted </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<SessionExecuteResponse> sessionExecuteCommandWithHttpInfo(String sessionId, SessionExecuteRequest request) throws ApiException {
+    public ApiResponse<SessionExecuteResponse> sessionExecuteCommandWithHttpInfo(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull SessionExecuteRequest request) throws ApiException {
         okhttp3.Call localVarCall = sessionExecuteCommandValidateBeforeCall(sessionId, request, null);
         Type localVarReturnType = new TypeToken<SessionExecuteResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2388,7 +2388,7 @@ public class ProcessApi {
         <tr><td> 202 </td><td> Accepted </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call sessionExecuteCommandAsync(String sessionId, SessionExecuteRequest request, final ApiCallback<SessionExecuteResponse> _callback) throws ApiException {
+    public okhttp3.Call sessionExecuteCommandAsync(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull SessionExecuteRequest request, final ApiCallback<SessionExecuteResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = sessionExecuteCommandValidateBeforeCall(sessionId, request, _callback);
         Type localVarReturnType = new TypeToken<SessionExecuteResponse>(){}.getType();

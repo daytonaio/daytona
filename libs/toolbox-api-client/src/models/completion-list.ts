@@ -17,23 +17,8 @@
 // @ts-ignore
 import type { CompletionItem } from './completion-item';
 
-/**
- * 
- * @export
- * @interface CompletionList
- */
 export interface CompletionList {
-    /**
-     * 
-     * @type {boolean}
-     * @memberof CompletionList
-     */
     'isIncomplete': boolean;
-    /**
-     * 
-     * @type {Array<CompletionItem>}
-     * @memberof CompletionList
-     */
     'items': Array<CompletionItem>;
 }
 

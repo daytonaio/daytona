@@ -50,7 +50,7 @@ import io.daytona.api.client.JSON;
 /**
  * Organization
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class Organization {
   public static final String SERIALIZED_NAME_ID = "id";
   @SerializedName(SERIALIZED_NAME_ID)
@@ -755,10 +755,7 @@ public class Organization {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -767,57 +764,10 @@ public class Organization {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("id");
-    openapiFields.add("name");
-    openapiFields.add("createdBy");
-    openapiFields.add("personal");
-    openapiFields.add("createdAt");
-    openapiFields.add("updatedAt");
-    openapiFields.add("suspended");
-    openapiFields.add("suspendedAt");
-    openapiFields.add("suspensionReason");
-    openapiFields.add("suspendedUntil");
-    openapiFields.add("suspensionCleanupGracePeriodHours");
-    openapiFields.add("maxCpuPerSandbox");
-    openapiFields.add("maxMemoryPerSandbox");
-    openapiFields.add("maxDiskPerSandbox");
-    openapiFields.add("snapshotDeactivationTimeoutMinutes");
-    openapiFields.add("sandboxLimitedNetworkEgress");
-    openapiFields.add("defaultRegionId");
-    openapiFields.add("authenticatedRateLimit");
-    openapiFields.add("sandboxCreateRateLimit");
-    openapiFields.add("sandboxLifecycleRateLimit");
-    openapiFields.add("experimentalConfig");
-    openapiFields.add("authenticatedRateLimitTtlSeconds");
-    openapiFields.add("sandboxCreateRateLimitTtlSeconds");
-    openapiFields.add("sandboxLifecycleRateLimitTtlSeconds");
+    openapiFields = new HashSet<String>(Arrays.asList("id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "defaultRegionId", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("id");
-    openapiRequiredFields.add("name");
-    openapiRequiredFields.add("createdBy");
-    openapiRequiredFields.add("personal");
-    openapiRequiredFields.add("createdAt");
-    openapiRequiredFields.add("updatedAt");
-    openapiRequiredFields.add("suspended");
-    openapiRequiredFields.add("suspendedAt");
-    openapiRequiredFields.add("suspensionReason");
-    openapiRequiredFields.add("suspendedUntil");
-    openapiRequiredFields.add("suspensionCleanupGracePeriodHours");
-    openapiRequiredFields.add("maxCpuPerSandbox");
-    openapiRequiredFields.add("maxMemoryPerSandbox");
-    openapiRequiredFields.add("maxDiskPerSandbox");
-    openapiRequiredFields.add("snapshotDeactivationTimeoutMinutes");
-    openapiRequiredFields.add("sandboxLimitedNetworkEgress");
-    openapiRequiredFields.add("authenticatedRateLimit");
-    openapiRequiredFields.add("sandboxCreateRateLimit");
-    openapiRequiredFields.add("sandboxLifecycleRateLimit");
-    openapiRequiredFields.add("experimentalConfig");
-    openapiRequiredFields.add("authenticatedRateLimitTtlSeconds");
-    openapiRequiredFields.add("sandboxCreateRateLimitTtlSeconds");
-    openapiRequiredFields.add("sandboxLifecycleRateLimitTtlSeconds");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"));
   }
 
   /**
@@ -829,31 +779,31 @@ public class Organization {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!Organization.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in Organization is not found in the empty JSON string", Organization.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in Organization is not found in the empty JSON string", Organization.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : Organization.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("id").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("id").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("id").toString()));
       }
       if (!jsonObj.get("name").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("name").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("name").toString()));
       }
       if (!jsonObj.get("createdBy").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `createdBy` to be a primitive type in the JSON string but got `%s`", jsonObj.get("createdBy").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `createdBy` to be a primitive type in the JSON string but got `%s`", jsonObj.get("createdBy").toString()));
       }
       if (!jsonObj.get("suspensionReason").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `suspensionReason` to be a primitive type in the JSON string but got `%s`", jsonObj.get("suspensionReason").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `suspensionReason` to be a primitive type in the JSON string but got `%s`", jsonObj.get("suspensionReason").toString()));
       }
       if ((jsonObj.get("defaultRegionId") != null && !jsonObj.get("defaultRegionId").isJsonNull()) && !jsonObj.get("defaultRegionId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `defaultRegionId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("defaultRegionId").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `defaultRegionId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("defaultRegionId").toString()));
       }
   }
 
@@ -914,7 +864,7 @@ public class Organization {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

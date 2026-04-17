@@ -49,7 +49,7 @@ import io.daytona.api.client.JSON;
 /**
  * RunnerHealthMetrics
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class RunnerHealthMetrics {
   public static final String SERIALIZED_NAME_CURRENT_CPU_LOAD_AVERAGE = "currentCpuLoadAverage";
   @SerializedName(SERIALIZED_NAME_CURRENT_CPU_LOAD_AVERAGE)
@@ -442,10 +442,7 @@ public class RunnerHealthMetrics {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -454,34 +451,10 @@ public class RunnerHealthMetrics {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("currentCpuLoadAverage");
-    openapiFields.add("currentCpuUsagePercentage");
-    openapiFields.add("currentMemoryUsagePercentage");
-    openapiFields.add("currentDiskUsagePercentage");
-    openapiFields.add("currentAllocatedCpu");
-    openapiFields.add("currentAllocatedMemoryGiB");
-    openapiFields.add("currentAllocatedDiskGiB");
-    openapiFields.add("currentSnapshotCount");
-    openapiFields.add("currentStartedSandboxes");
-    openapiFields.add("cpu");
-    openapiFields.add("memoryGiB");
-    openapiFields.add("diskGiB");
+    openapiFields = new HashSet<String>(Arrays.asList("currentCpuLoadAverage", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "cpu", "memoryGiB", "diskGiB"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("currentCpuLoadAverage");
-    openapiRequiredFields.add("currentCpuUsagePercentage");
-    openapiRequiredFields.add("currentMemoryUsagePercentage");
-    openapiRequiredFields.add("currentDiskUsagePercentage");
-    openapiRequiredFields.add("currentAllocatedCpu");
-    openapiRequiredFields.add("currentAllocatedMemoryGiB");
-    openapiRequiredFields.add("currentAllocatedDiskGiB");
-    openapiRequiredFields.add("currentSnapshotCount");
-    openapiRequiredFields.add("currentStartedSandboxes");
-    openapiRequiredFields.add("cpu");
-    openapiRequiredFields.add("memoryGiB");
-    openapiRequiredFields.add("diskGiB");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("currentCpuLoadAverage", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "cpu", "memoryGiB", "diskGiB"));
   }
 
   /**
@@ -493,14 +466,14 @@ public class RunnerHealthMetrics {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!RunnerHealthMetrics.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in RunnerHealthMetrics is not found in the empty JSON string", RunnerHealthMetrics.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in RunnerHealthMetrics is not found in the empty JSON string", RunnerHealthMetrics.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : RunnerHealthMetrics.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
@@ -563,7 +536,7 @@ public class RunnerHealthMetrics {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

@@ -85,7 +85,7 @@ public class ObjectStorageApi {
         <tr><td> 200 </td><td> Temporary storage access has been generated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getPushAccessCall(String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getPushAccessCall(@javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -135,7 +135,7 @@ public class ObjectStorageApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getPushAccessValidateBeforeCall(String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getPushAccessValidateBeforeCall(@javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         return getPushAccessCall(xDaytonaOrganizationID, _callback);
 
     }
@@ -153,7 +153,7 @@ public class ObjectStorageApi {
         <tr><td> 200 </td><td> Temporary storage access has been generated </td><td>  -  </td></tr>
      </table>
      */
-    public StorageAccessDto getPushAccess(String xDaytonaOrganizationID) throws ApiException {
+    public StorageAccessDto getPushAccess(@javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<StorageAccessDto> localVarResp = getPushAccessWithHttpInfo(xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -171,7 +171,7 @@ public class ObjectStorageApi {
         <tr><td> 200 </td><td> Temporary storage access has been generated </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<StorageAccessDto> getPushAccessWithHttpInfo(String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<StorageAccessDto> getPushAccessWithHttpInfo(@javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getPushAccessValidateBeforeCall(xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<StorageAccessDto>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -191,7 +191,7 @@ public class ObjectStorageApi {
         <tr><td> 200 </td><td> Temporary storage access has been generated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getPushAccessAsync(String xDaytonaOrganizationID, final ApiCallback<StorageAccessDto> _callback) throws ApiException {
+    public okhttp3.Call getPushAccessAsync(@javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<StorageAccessDto> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getPushAccessValidateBeforeCall(xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<StorageAccessDto>(){}.getType();

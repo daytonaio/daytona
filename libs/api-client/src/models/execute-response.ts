@@ -14,22 +14,13 @@
 
 
 
-/**
- * 
- * @export
- * @interface ExecuteResponse
- */
 export interface ExecuteResponse {
     /**
      * Exit code
-     * @type {number}
-     * @memberof ExecuteResponse
      */
     'exitCode': number;
     /**
      * Command output
-     * @type {string}
-     * @memberof ExecuteResponse
      */
     'result': string;
 }

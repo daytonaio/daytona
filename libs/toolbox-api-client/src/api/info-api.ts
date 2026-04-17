@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -27,7 +27,6 @@ import type { UserHomeDirResponse } from '../models';
 import type { WorkDirResponse } from '../models';
 /**
  * InfoApi - axios parameter creator
- * @export
  */
 export const InfoApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -50,8 +49,8 @@ export const InfoApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -80,8 +79,8 @@ export const InfoApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -110,8 +109,8 @@ export const InfoApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -126,7 +125,6 @@ export const InfoApiAxiosParamCreator = function (configuration?: Configuration)
 
 /**
  * InfoApi - functional programming interface
- * @export
  */
 export const InfoApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = InfoApiAxiosParamCreator(configuration)
@@ -172,7 +170,6 @@ export const InfoApiFp = function(configuration?: Configuration) {
 
 /**
  * InfoApi - factory interface
- * @export
  */
 export const InfoApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = InfoApiFp(configuration)
@@ -209,9 +206,6 @@ export const InfoApiFactory = function (configuration?: Configuration, basePath?
 
 /**
  * InfoApi - object-oriented interface
- * @export
- * @class InfoApi
- * @extends {BaseAPI}
  */
 export class InfoApi extends BaseAPI {
     /**
@@ -219,7 +213,6 @@ export class InfoApi extends BaseAPI {
      * @summary Get user home directory
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof InfoApi
      */
     public getUserHomeDir(options?: RawAxiosRequestConfig) {
         return InfoApiFp(this.configuration).getUserHomeDir(options).then((request) => request(this.axios, this.basePath));
@@ -230,7 +223,6 @@ export class InfoApi extends BaseAPI {
      * @summary Get version
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof InfoApi
      */
     public getVersion(options?: RawAxiosRequestConfig) {
         return InfoApiFp(this.configuration).getVersion(options).then((request) => request(this.axios, this.basePath));
@@ -241,7 +233,6 @@ export class InfoApi extends BaseAPI {
      * @summary Get working directory
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof InfoApi
      */
     public getWorkDir(options?: RawAxiosRequestConfig) {
         return InfoApiFp(this.configuration).getWorkDir(options).then((request) => request(this.axios, this.basePath));

@@ -14,22 +14,13 @@
 
 
 
-/**
- * 
- * @export
- * @interface WindowsResponse
- */
 export interface WindowsResponse {
     /**
      * Array of window information for all visible windows
-     * @type {Array<object>}
-     * @memberof WindowsResponse
      */
     'windows': Array<object>;
     /**
      * The total number of windows found
-     * @type {number}
-     * @memberof WindowsResponse
      */
     'count': number;
 }

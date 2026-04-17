@@ -14,23 +14,8 @@
 
 
 
-/**
- * 
- * @export
- * @interface CreateContextRequest
- */
 export interface CreateContextRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateContextRequest
-     */
     'cwd'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateContextRequest
-     */
     'language'?: string;
 }
 

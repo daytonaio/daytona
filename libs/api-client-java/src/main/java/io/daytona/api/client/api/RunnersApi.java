@@ -91,7 +91,7 @@ public class RunnersApi {
         <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createRunnerCall(CreateRunner createRunner, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createRunnerCall(@javax.annotation.Nonnull CreateRunner createRunner, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -142,7 +142,7 @@ public class RunnersApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createRunnerValidateBeforeCall(CreateRunner createRunner, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createRunnerValidateBeforeCall(@javax.annotation.Nonnull CreateRunner createRunner, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'createRunner' is set
         if (createRunner == null) {
             throw new ApiException("Missing the required parameter 'createRunner' when calling createRunner(Async)");
@@ -166,7 +166,7 @@ public class RunnersApi {
         <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public CreateRunnerResponse createRunner(CreateRunner createRunner, String xDaytonaOrganizationID) throws ApiException {
+    public CreateRunnerResponse createRunner(@javax.annotation.Nonnull CreateRunner createRunner, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<CreateRunnerResponse> localVarResp = createRunnerWithHttpInfo(createRunner, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -185,7 +185,7 @@ public class RunnersApi {
         <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<CreateRunnerResponse> createRunnerWithHttpInfo(CreateRunner createRunner, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<CreateRunnerResponse> createRunnerWithHttpInfo(@javax.annotation.Nonnull CreateRunner createRunner, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = createRunnerValidateBeforeCall(createRunner, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<CreateRunnerResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -206,7 +206,7 @@ public class RunnersApi {
         <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createRunnerAsync(CreateRunner createRunner, String xDaytonaOrganizationID, final ApiCallback<CreateRunnerResponse> _callback) throws ApiException {
+    public okhttp3.Call createRunnerAsync(@javax.annotation.Nonnull CreateRunner createRunner, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<CreateRunnerResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createRunnerValidateBeforeCall(createRunner, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<CreateRunnerResponse>(){}.getType();
@@ -227,7 +227,7 @@ public class RunnersApi {
         <tr><td> 204 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteRunnerCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deleteRunnerCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -277,7 +277,7 @@ public class RunnersApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deleteRunnerValidateBeforeCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deleteRunnerValidateBeforeCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling deleteRunner(Async)");
@@ -300,7 +300,7 @@ public class RunnersApi {
         <tr><td> 204 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public void deleteRunner(String id, String xDaytonaOrganizationID) throws ApiException {
+    public void deleteRunner(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         deleteRunnerWithHttpInfo(id, xDaytonaOrganizationID);
     }
 
@@ -318,7 +318,7 @@ public class RunnersApi {
         <tr><td> 204 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> deleteRunnerWithHttpInfo(String id, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> deleteRunnerWithHttpInfo(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = deleteRunnerValidateBeforeCall(id, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -338,7 +338,7 @@ public class RunnersApi {
         <tr><td> 204 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteRunnerAsync(String id, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call deleteRunnerAsync(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deleteRunnerValidateBeforeCall(id, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -475,7 +475,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getRunnerByIdCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getRunnerByIdCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -526,7 +526,7 @@ public class RunnersApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getRunnerByIdValidateBeforeCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getRunnerByIdValidateBeforeCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling getRunnerById(Async)");
@@ -550,7 +550,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public Runner getRunnerById(String id, String xDaytonaOrganizationID) throws ApiException {
+    public Runner getRunnerById(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Runner> localVarResp = getRunnerByIdWithHttpInfo(id, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -569,7 +569,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Runner> getRunnerByIdWithHttpInfo(String id, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Runner> getRunnerByIdWithHttpInfo(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getRunnerByIdValidateBeforeCall(id, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Runner>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -590,7 +590,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getRunnerByIdAsync(String id, String xDaytonaOrganizationID, final ApiCallback<Runner> _callback) throws ApiException {
+    public okhttp3.Call getRunnerByIdAsync(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Runner> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getRunnerByIdValidateBeforeCall(id, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Runner>(){}.getType();
@@ -610,7 +610,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getRunnerBySandboxIdCall(String sandboxId, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getRunnerBySandboxIdCall(@javax.annotation.Nonnull String sandboxId, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -656,7 +656,7 @@ public class RunnersApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getRunnerBySandboxIdValidateBeforeCall(String sandboxId, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getRunnerBySandboxIdValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getRunnerBySandboxId(Async)");
@@ -679,7 +679,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public RunnerFull getRunnerBySandboxId(String sandboxId) throws ApiException {
+    public RunnerFull getRunnerBySandboxId(@javax.annotation.Nonnull String sandboxId) throws ApiException {
         ApiResponse<RunnerFull> localVarResp = getRunnerBySandboxIdWithHttpInfo(sandboxId);
         return localVarResp.getData();
     }
@@ -697,7 +697,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<RunnerFull> getRunnerBySandboxIdWithHttpInfo(String sandboxId) throws ApiException {
+    public ApiResponse<RunnerFull> getRunnerBySandboxIdWithHttpInfo(@javax.annotation.Nonnull String sandboxId) throws ApiException {
         okhttp3.Call localVarCall = getRunnerBySandboxIdValidateBeforeCall(sandboxId, null);
         Type localVarReturnType = new TypeToken<RunnerFull>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -717,7 +717,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getRunnerBySandboxIdAsync(String sandboxId, final ApiCallback<RunnerFull> _callback) throws ApiException {
+    public okhttp3.Call getRunnerBySandboxIdAsync(@javax.annotation.Nonnull String sandboxId, final ApiCallback<RunnerFull> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getRunnerBySandboxIdValidateBeforeCall(sandboxId, _callback);
         Type localVarReturnType = new TypeToken<RunnerFull>(){}.getType();
@@ -737,7 +737,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getRunnerFullByIdCall(String id, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getRunnerFullByIdCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -783,7 +783,7 @@ public class RunnersApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getRunnerFullByIdValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getRunnerFullByIdValidateBeforeCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling getRunnerFullById(Async)");
@@ -806,7 +806,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public RunnerFull getRunnerFullById(String id) throws ApiException {
+    public RunnerFull getRunnerFullById(@javax.annotation.Nonnull String id) throws ApiException {
         ApiResponse<RunnerFull> localVarResp = getRunnerFullByIdWithHttpInfo(id);
         return localVarResp.getData();
     }
@@ -824,7 +824,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<RunnerFull> getRunnerFullByIdWithHttpInfo(String id) throws ApiException {
+    public ApiResponse<RunnerFull> getRunnerFullByIdWithHttpInfo(@javax.annotation.Nonnull String id) throws ApiException {
         okhttp3.Call localVarCall = getRunnerFullByIdValidateBeforeCall(id, null);
         Type localVarReturnType = new TypeToken<RunnerFull>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -844,7 +844,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getRunnerFullByIdAsync(String id, final ApiCallback<RunnerFull> _callback) throws ApiException {
+    public okhttp3.Call getRunnerFullByIdAsync(@javax.annotation.Nonnull String id, final ApiCallback<RunnerFull> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getRunnerFullByIdValidateBeforeCall(id, _callback);
         Type localVarReturnType = new TypeToken<RunnerFull>(){}.getType();
@@ -864,7 +864,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getRunnersBySnapshotRefCall(String ref, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getRunnersBySnapshotRefCall(@javax.annotation.Nonnull String ref, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -913,7 +913,7 @@ public class RunnersApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getRunnersBySnapshotRefValidateBeforeCall(String ref, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getRunnersBySnapshotRefValidateBeforeCall(@javax.annotation.Nonnull String ref, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'ref' is set
         if (ref == null) {
             throw new ApiException("Missing the required parameter 'ref' when calling getRunnersBySnapshotRef(Async)");
@@ -936,7 +936,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public List<RunnerSnapshotDto> getRunnersBySnapshotRef(String ref) throws ApiException {
+    public List<RunnerSnapshotDto> getRunnersBySnapshotRef(@javax.annotation.Nonnull String ref) throws ApiException {
         ApiResponse<List<RunnerSnapshotDto>> localVarResp = getRunnersBySnapshotRefWithHttpInfo(ref);
         return localVarResp.getData();
     }
@@ -954,7 +954,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<RunnerSnapshotDto>> getRunnersBySnapshotRefWithHttpInfo(String ref) throws ApiException {
+    public ApiResponse<List<RunnerSnapshotDto>> getRunnersBySnapshotRefWithHttpInfo(@javax.annotation.Nonnull String ref) throws ApiException {
         okhttp3.Call localVarCall = getRunnersBySnapshotRefValidateBeforeCall(ref, null);
         Type localVarReturnType = new TypeToken<List<RunnerSnapshotDto>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -974,7 +974,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getRunnersBySnapshotRefAsync(String ref, final ApiCallback<List<RunnerSnapshotDto>> _callback) throws ApiException {
+    public okhttp3.Call getRunnersBySnapshotRefAsync(@javax.annotation.Nonnull String ref, final ApiCallback<List<RunnerSnapshotDto>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getRunnersBySnapshotRefValidateBeforeCall(ref, _callback);
         Type localVarReturnType = new TypeToken<List<RunnerSnapshotDto>>(){}.getType();
@@ -994,7 +994,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listRunnersCall(String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listRunnersCall(@javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1044,7 +1044,7 @@ public class RunnersApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listRunnersValidateBeforeCall(String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call listRunnersValidateBeforeCall(@javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         return listRunnersCall(xDaytonaOrganizationID, _callback);
 
     }
@@ -1062,7 +1062,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public List<Runner> listRunners(String xDaytonaOrganizationID) throws ApiException {
+    public List<Runner> listRunners(@javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<List<Runner>> localVarResp = listRunnersWithHttpInfo(xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -1080,7 +1080,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<Runner>> listRunnersWithHttpInfo(String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<List<Runner>> listRunnersWithHttpInfo(@javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = listRunnersValidateBeforeCall(xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<List<Runner>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1100,7 +1100,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listRunnersAsync(String xDaytonaOrganizationID, final ApiCallback<List<Runner>> _callback) throws ApiException {
+    public okhttp3.Call listRunnersAsync(@javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<List<Runner>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = listRunnersValidateBeforeCall(xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<List<Runner>>(){}.getType();
@@ -1120,7 +1120,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td> Healthcheck received </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call runnerHealthcheckCall(RunnerHealthcheck runnerHealthcheck, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call runnerHealthcheckCall(@javax.annotation.Nonnull RunnerHealthcheck runnerHealthcheck, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1165,7 +1165,7 @@ public class RunnersApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call runnerHealthcheckValidateBeforeCall(RunnerHealthcheck runnerHealthcheck, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call runnerHealthcheckValidateBeforeCall(@javax.annotation.Nonnull RunnerHealthcheck runnerHealthcheck, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'runnerHealthcheck' is set
         if (runnerHealthcheck == null) {
             throw new ApiException("Missing the required parameter 'runnerHealthcheck' when calling runnerHealthcheck(Async)");
@@ -1187,7 +1187,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td> Healthcheck received </td><td>  -  </td></tr>
      </table>
      */
-    public void runnerHealthcheck(RunnerHealthcheck runnerHealthcheck) throws ApiException {
+    public void runnerHealthcheck(@javax.annotation.Nonnull RunnerHealthcheck runnerHealthcheck) throws ApiException {
         runnerHealthcheckWithHttpInfo(runnerHealthcheck);
     }
 
@@ -1204,7 +1204,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td> Healthcheck received </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> runnerHealthcheckWithHttpInfo(RunnerHealthcheck runnerHealthcheck) throws ApiException {
+    public ApiResponse<Void> runnerHealthcheckWithHttpInfo(@javax.annotation.Nonnull RunnerHealthcheck runnerHealthcheck) throws ApiException {
         okhttp3.Call localVarCall = runnerHealthcheckValidateBeforeCall(runnerHealthcheck, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1223,7 +1223,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td> Healthcheck received </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call runnerHealthcheckAsync(RunnerHealthcheck runnerHealthcheck, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call runnerHealthcheckAsync(@javax.annotation.Nonnull RunnerHealthcheck runnerHealthcheck, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = runnerHealthcheckValidateBeforeCall(runnerHealthcheck, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -1243,7 +1243,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call updateRunnerDrainingCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call updateRunnerDrainingCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1294,7 +1294,7 @@ public class RunnersApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call updateRunnerDrainingValidateBeforeCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call updateRunnerDrainingValidateBeforeCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling updateRunnerDraining(Async)");
@@ -1318,7 +1318,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public Runner updateRunnerDraining(String id, String xDaytonaOrganizationID) throws ApiException {
+    public Runner updateRunnerDraining(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Runner> localVarResp = updateRunnerDrainingWithHttpInfo(id, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -1337,7 +1337,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Runner> updateRunnerDrainingWithHttpInfo(String id, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Runner> updateRunnerDrainingWithHttpInfo(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = updateRunnerDrainingValidateBeforeCall(id, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Runner>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1358,7 +1358,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call updateRunnerDrainingAsync(String id, String xDaytonaOrganizationID, final ApiCallback<Runner> _callback) throws ApiException {
+    public okhttp3.Call updateRunnerDrainingAsync(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Runner> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = updateRunnerDrainingValidateBeforeCall(id, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Runner>(){}.getType();
@@ -1379,7 +1379,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call updateRunnerSchedulingCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call updateRunnerSchedulingCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1430,7 +1430,7 @@ public class RunnersApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call updateRunnerSchedulingValidateBeforeCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call updateRunnerSchedulingValidateBeforeCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling updateRunnerScheduling(Async)");
@@ -1454,7 +1454,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public Runner updateRunnerScheduling(String id, String xDaytonaOrganizationID) throws ApiException {
+    public Runner updateRunnerScheduling(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Runner> localVarResp = updateRunnerSchedulingWithHttpInfo(id, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -1473,7 +1473,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Runner> updateRunnerSchedulingWithHttpInfo(String id, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Runner> updateRunnerSchedulingWithHttpInfo(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = updateRunnerSchedulingValidateBeforeCall(id, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Runner>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1494,7 +1494,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call updateRunnerSchedulingAsync(String id, String xDaytonaOrganizationID, final ApiCallback<Runner> _callback) throws ApiException {
+    public okhttp3.Call updateRunnerSchedulingAsync(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Runner> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = updateRunnerSchedulingValidateBeforeCall(id, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Runner>(){}.getType();

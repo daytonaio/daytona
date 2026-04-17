@@ -17,29 +17,9 @@
 // @ts-ignore
 import type { CodeRunArtifacts } from './code-run-artifacts';
 
-/**
- * 
- * @export
- * @interface CodeRunResponse
- */
 export interface CodeRunResponse {
-    /**
-     * 
-     * @type {CodeRunArtifacts}
-     * @memberof CodeRunResponse
-     */
     'artifacts'?: CodeRunArtifacts;
-    /**
-     * 
-     * @type {number}
-     * @memberof CodeRunResponse
-     */
     'exitCode'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof CodeRunResponse
-     */
     'result'?: string;
 }
 

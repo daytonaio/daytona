@@ -48,7 +48,7 @@ import io.daytona.api.client.JSON;
 /**
  * RunnerServiceHealth
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class RunnerServiceHealth {
   public static final String SERIALIZED_NAME_SERVICE_NAME = "serviceName";
   @SerializedName(SERIALIZED_NAME_SERVICE_NAME)
@@ -207,10 +207,7 @@ public class RunnerServiceHealth {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -219,15 +216,10 @@ public class RunnerServiceHealth {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("serviceName");
-    openapiFields.add("healthy");
-    openapiFields.add("errorReason");
+    openapiFields = new HashSet<String>(Arrays.asList("serviceName", "healthy", "errorReason"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("serviceName");
-    openapiRequiredFields.add("healthy");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("serviceName", "healthy"));
   }
 
   /**
@@ -239,22 +231,22 @@ public class RunnerServiceHealth {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!RunnerServiceHealth.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in RunnerServiceHealth is not found in the empty JSON string", RunnerServiceHealth.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in RunnerServiceHealth is not found in the empty JSON string", RunnerServiceHealth.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : RunnerServiceHealth.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("serviceName").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `serviceName` to be a primitive type in the JSON string but got `%s`", jsonObj.get("serviceName").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `serviceName` to be a primitive type in the JSON string but got `%s`", jsonObj.get("serviceName").toString()));
       }
       if ((jsonObj.get("errorReason") != null && !jsonObj.get("errorReason").isJsonNull()) && !jsonObj.get("errorReason").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `errorReason` to be a primitive type in the JSON string but got `%s`", jsonObj.get("errorReason").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `errorReason` to be a primitive type in the JSON string but got `%s`", jsonObj.get("errorReason").toString()));
       }
   }
 
@@ -315,7 +307,7 @@ public class RunnerServiceHealth {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

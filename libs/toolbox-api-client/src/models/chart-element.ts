@@ -14,113 +14,23 @@
 
 
 
-/**
- * 
- * @export
- * @interface ChartElement
- */
 export interface ChartElement {
-    /**
-     * 
-     * @type {number}
-     * @memberof ChartElement
-     */
     'angle'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ChartElement
-     */
     'first_quartile'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof ChartElement
-     */
     'group'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ChartElement
-     */
     'label'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof ChartElement
-     */
     'max'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ChartElement
-     */
     'median'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ChartElement
-     */
     'min'?: number;
-    /**
-     * 
-     * @type {Array<number>}
-     * @memberof ChartElement
-     */
     'outliers'?: Array<number>;
-    /**
-     * 
-     * @type {string}
-     * @memberof ChartElement
-     */
     'png'?: string;
-    /**
-     * 
-     * @type {Array<Array<number>>}
-     * @memberof ChartElement
-     */
     'points'?: Array<Array<number>>;
-    /**
-     * 
-     * @type {number}
-     * @memberof ChartElement
-     */
     'radius'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ChartElement
-     */
     'third_quartile'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof ChartElement
-     */
     'title'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ChartElement
-     */
     'type'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ChartElement
-     */
     'value'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ChartElement
-     */
     'x_label'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ChartElement
-     */
     'y_label'?: string;
 }
 

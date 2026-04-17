@@ -4,6 +4,8 @@
 //	@title			Daytona Runner API
 //	@version		v0.0.0-dev
 //	@description	Daytona Runner API
+//	@license.name	Apache-2.0
+//	@license.url	https://www.apache.org/licenses/LICENSE-2.0
 
 //	@securityDefinitions.apikey	Bearer
 //	@in							header

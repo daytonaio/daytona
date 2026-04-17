@@ -14,17 +14,7 @@
 
 
 
-/**
- * 
- * @export
- * @interface SearchFilesResponse
- */
 export interface SearchFilesResponse {
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof SearchFilesResponse
-     */
     'files': Array<string>;
 }
 

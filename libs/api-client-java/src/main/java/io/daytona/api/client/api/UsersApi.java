@@ -438,7 +438,7 @@ public class UsersApi {
         <tr><td> 204 </td><td> Account linked successfully </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call linkAccountCall(CreateLinkedAccount createLinkedAccount, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call linkAccountCall(@javax.annotation.Nonnull CreateLinkedAccount createLinkedAccount, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -483,7 +483,7 @@ public class UsersApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call linkAccountValidateBeforeCall(CreateLinkedAccount createLinkedAccount, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call linkAccountValidateBeforeCall(@javax.annotation.Nonnull CreateLinkedAccount createLinkedAccount, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'createLinkedAccount' is set
         if (createLinkedAccount == null) {
             throw new ApiException("Missing the required parameter 'createLinkedAccount' when calling linkAccount(Async)");
@@ -505,7 +505,7 @@ public class UsersApi {
         <tr><td> 204 </td><td> Account linked successfully </td><td>  -  </td></tr>
      </table>
      */
-    public void linkAccount(CreateLinkedAccount createLinkedAccount) throws ApiException {
+    public void linkAccount(@javax.annotation.Nonnull CreateLinkedAccount createLinkedAccount) throws ApiException {
         linkAccountWithHttpInfo(createLinkedAccount);
     }
 
@@ -522,7 +522,7 @@ public class UsersApi {
         <tr><td> 204 </td><td> Account linked successfully </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> linkAccountWithHttpInfo(CreateLinkedAccount createLinkedAccount) throws ApiException {
+    public ApiResponse<Void> linkAccountWithHttpInfo(@javax.annotation.Nonnull CreateLinkedAccount createLinkedAccount) throws ApiException {
         okhttp3.Call localVarCall = linkAccountValidateBeforeCall(createLinkedAccount, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -541,7 +541,7 @@ public class UsersApi {
         <tr><td> 204 </td><td> Account linked successfully </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call linkAccountAsync(CreateLinkedAccount createLinkedAccount, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call linkAccountAsync(@javax.annotation.Nonnull CreateLinkedAccount createLinkedAccount, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = linkAccountValidateBeforeCall(createLinkedAccount, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -561,7 +561,7 @@ public class UsersApi {
         <tr><td> 204 </td><td> Account unlinked successfully </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call unlinkAccountCall(String provider, String providerUserId, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call unlinkAccountCall(@javax.annotation.Nonnull String provider, @javax.annotation.Nonnull String providerUserId, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -607,7 +607,7 @@ public class UsersApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call unlinkAccountValidateBeforeCall(String provider, String providerUserId, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call unlinkAccountValidateBeforeCall(@javax.annotation.Nonnull String provider, @javax.annotation.Nonnull String providerUserId, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'provider' is set
         if (provider == null) {
             throw new ApiException("Missing the required parameter 'provider' when calling unlinkAccount(Async)");
@@ -635,7 +635,7 @@ public class UsersApi {
         <tr><td> 204 </td><td> Account unlinked successfully </td><td>  -  </td></tr>
      </table>
      */
-    public void unlinkAccount(String provider, String providerUserId) throws ApiException {
+    public void unlinkAccount(@javax.annotation.Nonnull String provider, @javax.annotation.Nonnull String providerUserId) throws ApiException {
         unlinkAccountWithHttpInfo(provider, providerUserId);
     }
 
@@ -653,7 +653,7 @@ public class UsersApi {
         <tr><td> 204 </td><td> Account unlinked successfully </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> unlinkAccountWithHttpInfo(String provider, String providerUserId) throws ApiException {
+    public ApiResponse<Void> unlinkAccountWithHttpInfo(@javax.annotation.Nonnull String provider, @javax.annotation.Nonnull String providerUserId) throws ApiException {
         okhttp3.Call localVarCall = unlinkAccountValidateBeforeCall(provider, providerUserId, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -673,7 +673,7 @@ public class UsersApi {
         <tr><td> 204 </td><td> Account unlinked successfully </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call unlinkAccountAsync(String provider, String providerUserId, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call unlinkAccountAsync(@javax.annotation.Nonnull String provider, @javax.annotation.Nonnull String providerUserId, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = unlinkAccountValidateBeforeCall(provider, providerUserId, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);

@@ -14,22 +14,13 @@
 
 
 
-/**
- * 
- * @export
- * @interface PosthogConfig
- */
 export interface PosthogConfig {
     /**
      * PostHog API key
-     * @type {string}
-     * @memberof PosthogConfig
      */
     'apiKey': string;
     /**
      * PostHog host URL
-     * @type {string}
-     * @memberof PosthogConfig
      */
     'host': string;
 }

@@ -51,7 +51,7 @@ import io.daytona.toolbox.client.JSON;
 /**
  * PtyListResponse
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class PtyListResponse {
   public static final String SERIALIZED_NAME_SESSIONS = "sessions";
   @SerializedName(SERIALIZED_NAME_SESSIONS)
@@ -166,10 +166,7 @@ public class PtyListResponse {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -178,12 +175,10 @@ public class PtyListResponse {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("sessions");
+    openapiFields = new HashSet<String>(Arrays.asList("sessions"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("sessions");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("sessions"));
   }
 
   /**
@@ -195,27 +190,27 @@ public class PtyListResponse {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!PtyListResponse.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in PtyListResponse is not found in the empty JSON string", PtyListResponse.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in PtyListResponse is not found in the empty JSON string", PtyListResponse.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : PtyListResponse.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
-      // ensure the json data is an array
-      if (!jsonObj.get("sessions").isJsonArray()) {
-        throw new IllegalArgumentException(String.format("Expected the field `sessions` to be an array in the JSON string but got `%s`", jsonObj.get("sessions").toString()));
+      if (jsonObj.get("sessions") != null) {
+        if (!jsonObj.get("sessions").isJsonArray()) {
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `sessions` to be an array in the JSON string but got `%s`", jsonObj.get("sessions").toString()));
+        }
+        JsonArray jsonArraysessions = jsonObj.getAsJsonArray("sessions");
+        // validate the required field `sessions` (array)
+        for (int i = 0; i < jsonArraysessions.size(); i++) {
+          PtySessionInfo.validateJsonElement(jsonArraysessions.get(i));
+        }
       }
-
-      JsonArray jsonArraysessions = jsonObj.getAsJsonArray("sessions");
-      // validate the required field `sessions` (array)
-      for (int i = 0; i < jsonArraysessions.size(); i++) {
-        PtySessionInfo.validateJsonElement(jsonArraysessions.get(i));
-      };
   }
 
   public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
@@ -275,7 +270,7 @@ public class PtyListResponse {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

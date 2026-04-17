@@ -51,7 +51,7 @@ import io.daytona.api.client.JSON;
 /**
  * TraceSpan
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class TraceSpan {
   public static final String SERIALIZED_NAME_TRACE_ID = "traceId";
   @SerializedName(SERIALIZED_NAME_TRACE_ID)
@@ -374,10 +374,7 @@ public class TraceSpan {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -386,25 +383,10 @@ public class TraceSpan {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("traceId");
-    openapiFields.add("spanId");
-    openapiFields.add("parentSpanId");
-    openapiFields.add("spanName");
-    openapiFields.add("timestamp");
-    openapiFields.add("durationNs");
-    openapiFields.add("spanAttributes");
-    openapiFields.add("statusCode");
-    openapiFields.add("statusMessage");
+    openapiFields = new HashSet<String>(Arrays.asList("traceId", "spanId", "parentSpanId", "spanName", "timestamp", "durationNs", "spanAttributes", "statusCode", "statusMessage"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("traceId");
-    openapiRequiredFields.add("spanId");
-    openapiRequiredFields.add("spanName");
-    openapiRequiredFields.add("timestamp");
-    openapiRequiredFields.add("durationNs");
-    openapiRequiredFields.add("spanAttributes");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("traceId", "spanId", "spanName", "timestamp", "durationNs", "spanAttributes"));
   }
 
   /**
@@ -416,37 +398,37 @@ public class TraceSpan {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!TraceSpan.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in TraceSpan is not found in the empty JSON string", TraceSpan.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in TraceSpan is not found in the empty JSON string", TraceSpan.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : TraceSpan.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("traceId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `traceId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("traceId").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `traceId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("traceId").toString()));
       }
       if (!jsonObj.get("spanId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `spanId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("spanId").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `spanId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("spanId").toString()));
       }
       if ((jsonObj.get("parentSpanId") != null && !jsonObj.get("parentSpanId").isJsonNull()) && !jsonObj.get("parentSpanId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `parentSpanId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("parentSpanId").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `parentSpanId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("parentSpanId").toString()));
       }
       if (!jsonObj.get("spanName").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `spanName` to be a primitive type in the JSON string but got `%s`", jsonObj.get("spanName").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `spanName` to be a primitive type in the JSON string but got `%s`", jsonObj.get("spanName").toString()));
       }
       if (!jsonObj.get("timestamp").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `timestamp` to be a primitive type in the JSON string but got `%s`", jsonObj.get("timestamp").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `timestamp` to be a primitive type in the JSON string but got `%s`", jsonObj.get("timestamp").toString()));
       }
       if ((jsonObj.get("statusCode") != null && !jsonObj.get("statusCode").isJsonNull()) && !jsonObj.get("statusCode").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `statusCode` to be a primitive type in the JSON string but got `%s`", jsonObj.get("statusCode").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `statusCode` to be a primitive type in the JSON string but got `%s`", jsonObj.get("statusCode").toString()));
       }
       if ((jsonObj.get("statusMessage") != null && !jsonObj.get("statusMessage").isJsonNull()) && !jsonObj.get("statusMessage").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `statusMessage` to be a primitive type in the JSON string but got `%s`", jsonObj.get("statusMessage").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `statusMessage` to be a primitive type in the JSON string but got `%s`", jsonObj.get("statusMessage").toString()));
       }
   }
 
@@ -507,7 +489,7 @@ public class TraceSpan {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

@@ -17,83 +17,18 @@
 // @ts-ignore
 import type { ChartElement } from './chart-element';
 
-/**
- * 
- * @export
- * @interface Chart
- */
 export interface Chart {
-    /**
-     * 
-     * @type {Array<ChartElement>}
-     * @memberof Chart
-     */
     'elements'?: Array<ChartElement>;
-    /**
-     * 
-     * @type {string}
-     * @memberof Chart
-     */
     'png'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Chart
-     */
     'title'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Chart
-     */
     'type'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Chart
-     */
     'x_label'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Chart
-     */
     'x_scale'?: string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof Chart
-     */
     'x_tick_labels'?: Array<string>;
-    /**
-     * 
-     * @type {Array<number>}
-     * @memberof Chart
-     */
     'x_ticks'?: Array<number>;
-    /**
-     * 
-     * @type {string}
-     * @memberof Chart
-     */
     'y_label'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Chart
-     */
     'y_scale'?: string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof Chart
-     */
     'y_tick_labels'?: Array<string>;
-    /**
-     * 
-     * @type {Array<number>}
-     * @memberof Chart
-     */
     'y_ticks'?: Array<number>;
 }
 

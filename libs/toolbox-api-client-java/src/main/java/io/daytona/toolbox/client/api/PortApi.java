@@ -203,7 +203,7 @@ public class PortApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call isPortInUseCall(Integer port, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call isPortInUseCall(@javax.annotation.Nonnull Integer port, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -249,7 +249,7 @@ public class PortApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call isPortInUseValidateBeforeCall(Integer port, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call isPortInUseValidateBeforeCall(@javax.annotation.Nonnull Integer port, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'port' is set
         if (port == null) {
             throw new ApiException("Missing the required parameter 'port' when calling isPortInUse(Async)");
@@ -272,7 +272,7 @@ public class PortApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public IsPortInUseResponse isPortInUse(Integer port) throws ApiException {
+    public IsPortInUseResponse isPortInUse(@javax.annotation.Nonnull Integer port) throws ApiException {
         ApiResponse<IsPortInUseResponse> localVarResp = isPortInUseWithHttpInfo(port);
         return localVarResp.getData();
     }
@@ -290,7 +290,7 @@ public class PortApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<IsPortInUseResponse> isPortInUseWithHttpInfo(Integer port) throws ApiException {
+    public ApiResponse<IsPortInUseResponse> isPortInUseWithHttpInfo(@javax.annotation.Nonnull Integer port) throws ApiException {
         okhttp3.Call localVarCall = isPortInUseValidateBeforeCall(port, null);
         Type localVarReturnType = new TypeToken<IsPortInUseResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -310,7 +310,7 @@ public class PortApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call isPortInUseAsync(Integer port, final ApiCallback<IsPortInUseResponse> _callback) throws ApiException {
+    public okhttp3.Call isPortInUseAsync(@javax.annotation.Nonnull Integer port, final ApiCallback<IsPortInUseResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = isPortInUseValidateBeforeCall(port, _callback);
         Type localVarReturnType = new TypeToken<IsPortInUseResponse>(){}.getType();

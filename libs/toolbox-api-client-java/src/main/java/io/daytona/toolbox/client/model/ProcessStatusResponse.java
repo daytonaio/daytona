@@ -48,7 +48,7 @@ import io.daytona.toolbox.client.JSON;
 /**
  * ProcessStatusResponse
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class ProcessStatusResponse {
   public static final String SERIALIZED_NAME_PROCESS_NAME = "processName";
   @SerializedName(SERIALIZED_NAME_PROCESS_NAME)
@@ -181,10 +181,7 @@ public class ProcessStatusResponse {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -193,12 +190,10 @@ public class ProcessStatusResponse {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("processName");
-    openapiFields.add("running");
+    openapiFields = new HashSet<String>(Arrays.asList("processName", "running"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
+    openapiRequiredFields = new HashSet<String>(0);
   }
 
   /**
@@ -210,12 +205,12 @@ public class ProcessStatusResponse {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!ProcessStatusResponse.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in ProcessStatusResponse is not found in the empty JSON string", ProcessStatusResponse.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in ProcessStatusResponse is not found in the empty JSON string", ProcessStatusResponse.openapiRequiredFields.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if ((jsonObj.get("processName") != null && !jsonObj.get("processName").isJsonNull()) && !jsonObj.get("processName").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `processName` to be a primitive type in the JSON string but got `%s`", jsonObj.get("processName").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `processName` to be a primitive type in the JSON string but got `%s`", jsonObj.get("processName").toString()));
       }
   }
 
@@ -276,7 +271,7 @@ public class ProcessStatusResponse {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

@@ -14,41 +14,11 @@
 
 
 
-/**
- * 
- * @export
- * @interface InterpreterContext
- */
 export interface InterpreterContext {
-    /**
-     * 
-     * @type {boolean}
-     * @memberof InterpreterContext
-     */
     'active': boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof InterpreterContext
-     */
     'createdAt': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InterpreterContext
-     */
     'cwd': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InterpreterContext
-     */
     'id': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InterpreterContext
-     */
     'language': string;
 }
 

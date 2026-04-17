@@ -49,7 +49,7 @@ import io.daytona.api.client.JSON;
 /**
  * WebhookInitializationStatus
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class WebhookInitializationStatus {
   public static final String SERIALIZED_NAME_ORGANIZATION_ID = "organizationId";
   @SerializedName(SERIALIZED_NAME_ORGANIZATION_ID)
@@ -286,10 +286,7 @@ public class WebhookInitializationStatus {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -298,22 +295,10 @@ public class WebhookInitializationStatus {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("organizationId");
-    openapiFields.add("svixApplicationId");
-    openapiFields.add("lastError");
-    openapiFields.add("retryCount");
-    openapiFields.add("createdAt");
-    openapiFields.add("updatedAt");
+    openapiFields = new HashSet<String>(Arrays.asList("organizationId", "svixApplicationId", "lastError", "retryCount", "createdAt", "updatedAt"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("organizationId");
-    openapiRequiredFields.add("svixApplicationId");
-    openapiRequiredFields.add("lastError");
-    openapiRequiredFields.add("retryCount");
-    openapiRequiredFields.add("createdAt");
-    openapiRequiredFields.add("updatedAt");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("organizationId", "svixApplicationId", "lastError", "retryCount", "createdAt", "updatedAt"));
   }
 
   /**
@@ -325,31 +310,31 @@ public class WebhookInitializationStatus {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!WebhookInitializationStatus.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in WebhookInitializationStatus is not found in the empty JSON string", WebhookInitializationStatus.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in WebhookInitializationStatus is not found in the empty JSON string", WebhookInitializationStatus.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : WebhookInitializationStatus.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("organizationId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `organizationId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("organizationId").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `organizationId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("organizationId").toString()));
       }
       if ((jsonObj.get("svixApplicationId") != null && !jsonObj.get("svixApplicationId").isJsonNull()) && !jsonObj.get("svixApplicationId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `svixApplicationId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("svixApplicationId").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `svixApplicationId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("svixApplicationId").toString()));
       }
       if ((jsonObj.get("lastError") != null && !jsonObj.get("lastError").isJsonNull()) && !jsonObj.get("lastError").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `lastError` to be a primitive type in the JSON string but got `%s`", jsonObj.get("lastError").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `lastError` to be a primitive type in the JSON string but got `%s`", jsonObj.get("lastError").toString()));
       }
       if (!jsonObj.get("createdAt").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `createdAt` to be a primitive type in the JSON string but got `%s`", jsonObj.get("createdAt").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `createdAt` to be a primitive type in the JSON string but got `%s`", jsonObj.get("createdAt").toString()));
       }
       if (!jsonObj.get("updatedAt").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `updatedAt` to be a primitive type in the JSON string but got `%s`", jsonObj.get("updatedAt").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `updatedAt` to be a primitive type in the JSON string but got `%s`", jsonObj.get("updatedAt").toString()));
       }
   }
 
@@ -410,7 +395,7 @@ public class WebhookInitializationStatus {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

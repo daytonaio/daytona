@@ -14,17 +14,7 @@
 
 
 
-/**
- * 
- * @export
- * @interface InitializeRequest
- */
 export interface InitializeRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof InitializeRequest
-     */
     'token': string;
 }
 

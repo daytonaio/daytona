@@ -50,7 +50,7 @@ import io.daytona.api.client.JSON;
 /**
  * UpdateOrganizationRegionQuota
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class UpdateOrganizationRegionQuota {
   public static final String SERIALIZED_NAME_TOTAL_CPU_QUOTA = "totalCpuQuota";
   @SerializedName(SERIALIZED_NAME_TOTAL_CPU_QUOTA)
@@ -324,10 +324,7 @@ public class UpdateOrganizationRegionQuota {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -336,20 +333,10 @@ public class UpdateOrganizationRegionQuota {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("totalCpuQuota");
-    openapiFields.add("totalMemoryQuota");
-    openapiFields.add("totalDiskQuota");
-    openapiFields.add("maxCpuPerSandbox");
-    openapiFields.add("maxMemoryPerSandbox");
-    openapiFields.add("maxDiskPerSandbox");
-    openapiFields.add("maxDiskPerNonEphemeralSandbox");
+    openapiFields = new HashSet<String>(Arrays.asList("totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("totalCpuQuota");
-    openapiRequiredFields.add("totalMemoryQuota");
-    openapiRequiredFields.add("totalDiskQuota");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("totalCpuQuota", "totalMemoryQuota", "totalDiskQuota"));
   }
 
   /**
@@ -361,14 +348,14 @@ public class UpdateOrganizationRegionQuota {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!UpdateOrganizationRegionQuota.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in UpdateOrganizationRegionQuota is not found in the empty JSON string", UpdateOrganizationRegionQuota.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in UpdateOrganizationRegionQuota is not found in the empty JSON string", UpdateOrganizationRegionQuota.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : UpdateOrganizationRegionQuota.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
@@ -431,7 +418,7 @@ public class UpdateOrganizationRegionQuota {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

@@ -92,7 +92,7 @@ public class FileSystemApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createFolderCall(String path, String mode, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createFolderCall(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull String mode, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -144,7 +144,7 @@ public class FileSystemApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createFolderValidateBeforeCall(String path, String mode, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createFolderValidateBeforeCall(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull String mode, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'path' is set
         if (path == null) {
             throw new ApiException("Missing the required parameter 'path' when calling createFolder(Async)");
@@ -172,7 +172,7 @@ public class FileSystemApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
      </table>
      */
-    public void createFolder(String path, String mode) throws ApiException {
+    public void createFolder(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull String mode) throws ApiException {
         createFolderWithHttpInfo(path, mode);
     }
 
@@ -190,7 +190,7 @@ public class FileSystemApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> createFolderWithHttpInfo(String path, String mode) throws ApiException {
+    public ApiResponse<Void> createFolderWithHttpInfo(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull String mode) throws ApiException {
         okhttp3.Call localVarCall = createFolderValidateBeforeCall(path, mode, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -210,7 +210,7 @@ public class FileSystemApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createFolderAsync(String path, String mode, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call createFolderAsync(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull String mode, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createFolderValidateBeforeCall(path, mode, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -230,7 +230,7 @@ public class FileSystemApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteFileCall(String path, Boolean recursive, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deleteFileCall(@javax.annotation.Nonnull String path, @javax.annotation.Nullable Boolean recursive, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -282,7 +282,7 @@ public class FileSystemApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deleteFileValidateBeforeCall(String path, Boolean recursive, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deleteFileValidateBeforeCall(@javax.annotation.Nonnull String path, @javax.annotation.Nullable Boolean recursive, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'path' is set
         if (path == null) {
             throw new ApiException("Missing the required parameter 'path' when calling deleteFile(Async)");
@@ -305,7 +305,7 @@ public class FileSystemApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public void deleteFile(String path, Boolean recursive) throws ApiException {
+    public void deleteFile(@javax.annotation.Nonnull String path, @javax.annotation.Nullable Boolean recursive) throws ApiException {
         deleteFileWithHttpInfo(path, recursive);
     }
 
@@ -323,7 +323,7 @@ public class FileSystemApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> deleteFileWithHttpInfo(String path, Boolean recursive) throws ApiException {
+    public ApiResponse<Void> deleteFileWithHttpInfo(@javax.annotation.Nonnull String path, @javax.annotation.Nullable Boolean recursive) throws ApiException {
         okhttp3.Call localVarCall = deleteFileValidateBeforeCall(path, recursive, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -343,7 +343,7 @@ public class FileSystemApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteFileAsync(String path, Boolean recursive, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call deleteFileAsync(@javax.annotation.Nonnull String path, @javax.annotation.Nullable Boolean recursive, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deleteFileValidateBeforeCall(path, recursive, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -362,7 +362,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call downloadFileCall(String path, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call downloadFileCall(@javax.annotation.Nonnull String path, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -411,7 +411,7 @@ public class FileSystemApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call downloadFileValidateBeforeCall(String path, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call downloadFileValidateBeforeCall(@javax.annotation.Nonnull String path, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'path' is set
         if (path == null) {
             throw new ApiException("Missing the required parameter 'path' when calling downloadFile(Async)");
@@ -434,7 +434,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public File downloadFile(String path) throws ApiException {
+    public File downloadFile(@javax.annotation.Nonnull String path) throws ApiException {
         ApiResponse<File> localVarResp = downloadFileWithHttpInfo(path);
         return localVarResp.getData();
     }
@@ -452,7 +452,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<File> downloadFileWithHttpInfo(String path) throws ApiException {
+    public ApiResponse<File> downloadFileWithHttpInfo(@javax.annotation.Nonnull String path) throws ApiException {
         okhttp3.Call localVarCall = downloadFileValidateBeforeCall(path, null);
         Type localVarReturnType = new TypeToken<File>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -472,7 +472,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call downloadFileAsync(String path, final ApiCallback<File> _callback) throws ApiException {
+    public okhttp3.Call downloadFileAsync(@javax.annotation.Nonnull String path, final ApiCallback<File> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = downloadFileValidateBeforeCall(path, _callback);
         Type localVarReturnType = new TypeToken<File>(){}.getType();
@@ -492,7 +492,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> Multipart response with file parts and JSON error parts </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call downloadFilesCall(FilesDownloadRequest downloadFiles, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call downloadFilesCall(@javax.annotation.Nonnull FilesDownloadRequest downloadFiles, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -538,7 +538,7 @@ public class FileSystemApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call downloadFilesValidateBeforeCall(FilesDownloadRequest downloadFiles, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call downloadFilesValidateBeforeCall(@javax.annotation.Nonnull FilesDownloadRequest downloadFiles, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'downloadFiles' is set
         if (downloadFiles == null) {
             throw new ApiException("Missing the required parameter 'downloadFiles' when calling downloadFiles(Async)");
@@ -561,7 +561,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> Multipart response with file parts and JSON error parts </td><td>  -  </td></tr>
      </table>
      */
-    public Map<String, Object> downloadFiles(FilesDownloadRequest downloadFiles) throws ApiException {
+    public Map<String, Object> downloadFiles(@javax.annotation.Nonnull FilesDownloadRequest downloadFiles) throws ApiException {
         ApiResponse<Map<String, Object>> localVarResp = downloadFilesWithHttpInfo(downloadFiles);
         return localVarResp.getData();
     }
@@ -579,7 +579,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> Multipart response with file parts and JSON error parts </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Map<String, Object>> downloadFilesWithHttpInfo(FilesDownloadRequest downloadFiles) throws ApiException {
+    public ApiResponse<Map<String, Object>> downloadFilesWithHttpInfo(@javax.annotation.Nonnull FilesDownloadRequest downloadFiles) throws ApiException {
         okhttp3.Call localVarCall = downloadFilesValidateBeforeCall(downloadFiles, null);
         Type localVarReturnType = new TypeToken<Map<String, Object>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -599,7 +599,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> Multipart response with file parts and JSON error parts </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call downloadFilesAsync(FilesDownloadRequest downloadFiles, final ApiCallback<Map<String, Object>> _callback) throws ApiException {
+    public okhttp3.Call downloadFilesAsync(@javax.annotation.Nonnull FilesDownloadRequest downloadFiles, final ApiCallback<Map<String, Object>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = downloadFilesValidateBeforeCall(downloadFiles, _callback);
         Type localVarReturnType = new TypeToken<Map<String, Object>>(){}.getType();
@@ -620,7 +620,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call findInFilesCall(String path, String pattern, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call findInFilesCall(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -673,7 +673,7 @@ public class FileSystemApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call findInFilesValidateBeforeCall(String path, String pattern, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call findInFilesValidateBeforeCall(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'path' is set
         if (path == null) {
             throw new ApiException("Missing the required parameter 'path' when calling findInFiles(Async)");
@@ -702,7 +702,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public List<Match> findInFiles(String path, String pattern) throws ApiException {
+    public List<Match> findInFiles(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern) throws ApiException {
         ApiResponse<List<Match>> localVarResp = findInFilesWithHttpInfo(path, pattern);
         return localVarResp.getData();
     }
@@ -721,7 +721,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<Match>> findInFilesWithHttpInfo(String path, String pattern) throws ApiException {
+    public ApiResponse<List<Match>> findInFilesWithHttpInfo(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern) throws ApiException {
         okhttp3.Call localVarCall = findInFilesValidateBeforeCall(path, pattern, null);
         Type localVarReturnType = new TypeToken<List<Match>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -742,7 +742,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call findInFilesAsync(String path, String pattern, final ApiCallback<List<Match>> _callback) throws ApiException {
+    public okhttp3.Call findInFilesAsync(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern, final ApiCallback<List<Match>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = findInFilesValidateBeforeCall(path, pattern, _callback);
         Type localVarReturnType = new TypeToken<List<Match>>(){}.getType();
@@ -762,7 +762,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getFileInfoCall(String path, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getFileInfoCall(@javax.annotation.Nonnull String path, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -811,7 +811,7 @@ public class FileSystemApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getFileInfoValidateBeforeCall(String path, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getFileInfoValidateBeforeCall(@javax.annotation.Nonnull String path, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'path' is set
         if (path == null) {
             throw new ApiException("Missing the required parameter 'path' when calling getFileInfo(Async)");
@@ -834,7 +834,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public FileInfo getFileInfo(String path) throws ApiException {
+    public FileInfo getFileInfo(@javax.annotation.Nonnull String path) throws ApiException {
         ApiResponse<FileInfo> localVarResp = getFileInfoWithHttpInfo(path);
         return localVarResp.getData();
     }
@@ -852,7 +852,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<FileInfo> getFileInfoWithHttpInfo(String path) throws ApiException {
+    public ApiResponse<FileInfo> getFileInfoWithHttpInfo(@javax.annotation.Nonnull String path) throws ApiException {
         okhttp3.Call localVarCall = getFileInfoValidateBeforeCall(path, null);
         Type localVarReturnType = new TypeToken<FileInfo>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -872,7 +872,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getFileInfoAsync(String path, final ApiCallback<FileInfo> _callback) throws ApiException {
+    public okhttp3.Call getFileInfoAsync(@javax.annotation.Nonnull String path, final ApiCallback<FileInfo> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getFileInfoValidateBeforeCall(path, _callback);
         Type localVarReturnType = new TypeToken<FileInfo>(){}.getType();
@@ -892,7 +892,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listFilesCall(String path, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listFilesCall(@javax.annotation.Nullable String path, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -941,7 +941,7 @@ public class FileSystemApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listFilesValidateBeforeCall(String path, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call listFilesValidateBeforeCall(@javax.annotation.Nullable String path, final ApiCallback _callback) throws ApiException {
         return listFilesCall(path, _callback);
 
     }
@@ -959,7 +959,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public List<FileInfo> listFiles(String path) throws ApiException {
+    public List<FileInfo> listFiles(@javax.annotation.Nullable String path) throws ApiException {
         ApiResponse<List<FileInfo>> localVarResp = listFilesWithHttpInfo(path);
         return localVarResp.getData();
     }
@@ -977,7 +977,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<FileInfo>> listFilesWithHttpInfo(String path) throws ApiException {
+    public ApiResponse<List<FileInfo>> listFilesWithHttpInfo(@javax.annotation.Nullable String path) throws ApiException {
         okhttp3.Call localVarCall = listFilesValidateBeforeCall(path, null);
         Type localVarReturnType = new TypeToken<List<FileInfo>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -997,7 +997,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listFilesAsync(String path, final ApiCallback<List<FileInfo>> _callback) throws ApiException {
+    public okhttp3.Call listFilesAsync(@javax.annotation.Nullable String path, final ApiCallback<List<FileInfo>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = listFilesValidateBeforeCall(path, _callback);
         Type localVarReturnType = new TypeToken<List<FileInfo>>(){}.getType();
@@ -1018,7 +1018,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call moveFileCall(String source, String destination, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call moveFileCall(@javax.annotation.Nonnull String source, @javax.annotation.Nonnull String destination, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1070,7 +1070,7 @@ public class FileSystemApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call moveFileValidateBeforeCall(String source, String destination, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call moveFileValidateBeforeCall(@javax.annotation.Nonnull String source, @javax.annotation.Nonnull String destination, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'source' is set
         if (source == null) {
             throw new ApiException("Missing the required parameter 'source' when calling moveFile(Async)");
@@ -1098,7 +1098,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public void moveFile(String source, String destination) throws ApiException {
+    public void moveFile(@javax.annotation.Nonnull String source, @javax.annotation.Nonnull String destination) throws ApiException {
         moveFileWithHttpInfo(source, destination);
     }
 
@@ -1116,7 +1116,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> moveFileWithHttpInfo(String source, String destination) throws ApiException {
+    public ApiResponse<Void> moveFileWithHttpInfo(@javax.annotation.Nonnull String source, @javax.annotation.Nonnull String destination) throws ApiException {
         okhttp3.Call localVarCall = moveFileValidateBeforeCall(source, destination, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1136,7 +1136,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call moveFileAsync(String source, String destination, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call moveFileAsync(@javax.annotation.Nonnull String source, @javax.annotation.Nonnull String destination, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = moveFileValidateBeforeCall(source, destination, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -1155,7 +1155,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call replaceInFilesCall(ReplaceRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call replaceInFilesCall(@javax.annotation.Nonnull ReplaceRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1201,7 +1201,7 @@ public class FileSystemApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call replaceInFilesValidateBeforeCall(ReplaceRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call replaceInFilesValidateBeforeCall(@javax.annotation.Nonnull ReplaceRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling replaceInFiles(Async)");
@@ -1224,7 +1224,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public List<ReplaceResult> replaceInFiles(ReplaceRequest request) throws ApiException {
+    public List<ReplaceResult> replaceInFiles(@javax.annotation.Nonnull ReplaceRequest request) throws ApiException {
         ApiResponse<List<ReplaceResult>> localVarResp = replaceInFilesWithHttpInfo(request);
         return localVarResp.getData();
     }
@@ -1242,7 +1242,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<ReplaceResult>> replaceInFilesWithHttpInfo(ReplaceRequest request) throws ApiException {
+    public ApiResponse<List<ReplaceResult>> replaceInFilesWithHttpInfo(@javax.annotation.Nonnull ReplaceRequest request) throws ApiException {
         okhttp3.Call localVarCall = replaceInFilesValidateBeforeCall(request, null);
         Type localVarReturnType = new TypeToken<List<ReplaceResult>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1262,7 +1262,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call replaceInFilesAsync(ReplaceRequest request, final ApiCallback<List<ReplaceResult>> _callback) throws ApiException {
+    public okhttp3.Call replaceInFilesAsync(@javax.annotation.Nonnull ReplaceRequest request, final ApiCallback<List<ReplaceResult>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = replaceInFilesValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<List<ReplaceResult>>(){}.getType();
@@ -1283,7 +1283,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call searchFilesCall(String path, String pattern, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call searchFilesCall(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1336,7 +1336,7 @@ public class FileSystemApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call searchFilesValidateBeforeCall(String path, String pattern, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call searchFilesValidateBeforeCall(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'path' is set
         if (path == null) {
             throw new ApiException("Missing the required parameter 'path' when calling searchFiles(Async)");
@@ -1365,7 +1365,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public SearchFilesResponse searchFiles(String path, String pattern) throws ApiException {
+    public SearchFilesResponse searchFiles(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern) throws ApiException {
         ApiResponse<SearchFilesResponse> localVarResp = searchFilesWithHttpInfo(path, pattern);
         return localVarResp.getData();
     }
@@ -1384,7 +1384,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<SearchFilesResponse> searchFilesWithHttpInfo(String path, String pattern) throws ApiException {
+    public ApiResponse<SearchFilesResponse> searchFilesWithHttpInfo(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern) throws ApiException {
         okhttp3.Call localVarCall = searchFilesValidateBeforeCall(path, pattern, null);
         Type localVarReturnType = new TypeToken<SearchFilesResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1405,7 +1405,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call searchFilesAsync(String path, String pattern, final ApiCallback<SearchFilesResponse> _callback) throws ApiException {
+    public okhttp3.Call searchFilesAsync(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern, final ApiCallback<SearchFilesResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = searchFilesValidateBeforeCall(path, pattern, _callback);
         Type localVarReturnType = new TypeToken<SearchFilesResponse>(){}.getType();
@@ -1428,7 +1428,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call setFilePermissionsCall(String path, String owner, String group, String mode, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call setFilePermissionsCall(@javax.annotation.Nonnull String path, @javax.annotation.Nullable String owner, @javax.annotation.Nullable String group, @javax.annotation.Nullable String mode, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1488,7 +1488,7 @@ public class FileSystemApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call setFilePermissionsValidateBeforeCall(String path, String owner, String group, String mode, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call setFilePermissionsValidateBeforeCall(@javax.annotation.Nonnull String path, @javax.annotation.Nullable String owner, @javax.annotation.Nullable String group, @javax.annotation.Nullable String mode, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'path' is set
         if (path == null) {
             throw new ApiException("Missing the required parameter 'path' when calling setFilePermissions(Async)");
@@ -1513,7 +1513,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public void setFilePermissions(String path, String owner, String group, String mode) throws ApiException {
+    public void setFilePermissions(@javax.annotation.Nonnull String path, @javax.annotation.Nullable String owner, @javax.annotation.Nullable String group, @javax.annotation.Nullable String mode) throws ApiException {
         setFilePermissionsWithHttpInfo(path, owner, group, mode);
     }
 
@@ -1533,7 +1533,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> setFilePermissionsWithHttpInfo(String path, String owner, String group, String mode) throws ApiException {
+    public ApiResponse<Void> setFilePermissionsWithHttpInfo(@javax.annotation.Nonnull String path, @javax.annotation.Nullable String owner, @javax.annotation.Nullable String group, @javax.annotation.Nullable String mode) throws ApiException {
         okhttp3.Call localVarCall = setFilePermissionsValidateBeforeCall(path, owner, group, mode, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1555,7 +1555,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call setFilePermissionsAsync(String path, String owner, String group, String mode, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call setFilePermissionsAsync(@javax.annotation.Nonnull String path, @javax.annotation.Nullable String owner, @javax.annotation.Nullable String group, @javax.annotation.Nullable String mode, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = setFilePermissionsValidateBeforeCall(path, owner, group, mode, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -1575,7 +1575,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call uploadFileCall(String path, File _file, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call uploadFileCall(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull File _file, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1629,7 +1629,7 @@ public class FileSystemApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call uploadFileValidateBeforeCall(String path, File _file, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call uploadFileValidateBeforeCall(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull File _file, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'path' is set
         if (path == null) {
             throw new ApiException("Missing the required parameter 'path' when calling uploadFile(Async)");
@@ -1658,7 +1658,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public Map<String, Object> uploadFile(String path, File _file) throws ApiException {
+    public Map<String, Object> uploadFile(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull File _file) throws ApiException {
         ApiResponse<Map<String, Object>> localVarResp = uploadFileWithHttpInfo(path, _file);
         return localVarResp.getData();
     }
@@ -1677,7 +1677,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Map<String, Object>> uploadFileWithHttpInfo(String path, File _file) throws ApiException {
+    public ApiResponse<Map<String, Object>> uploadFileWithHttpInfo(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull File _file) throws ApiException {
         okhttp3.Call localVarCall = uploadFileValidateBeforeCall(path, _file, null);
         Type localVarReturnType = new TypeToken<Map<String, Object>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1698,7 +1698,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call uploadFileAsync(String path, File _file, final ApiCallback<Map<String, Object>> _callback) throws ApiException {
+    public okhttp3.Call uploadFileAsync(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull File _file, final ApiCallback<Map<String, Object>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = uploadFileValidateBeforeCall(path, _file, _callback);
         Type localVarReturnType = new TypeToken<Map<String, Object>>(){}.getType();

@@ -26,14 +26,14 @@ class Status(str, Enum):
     """
     allowed enum values
     """
-    UNMODIFIED = 'Unmodified'
-    UNTRACKED = 'Untracked'
-    MODIFIED = 'Modified'
-    ADDED = 'Added'
-    DELETED = 'Deleted'
-    RENAMED = 'Renamed'
-    COPIED = 'Copied'
-    UPDATED_BUT_UNMERGED = 'Updated but unmerged'
+    Unmodified = 'Unmodified'
+    Untracked = 'Untracked'
+    Modified = 'Modified'
+    Added = 'Added'
+    Deleted = 'Deleted'
+    Renamed = 'Renamed'
+    Copied = 'Copied'
+    UpdatedButUnmerged = 'Updated but unmerged'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

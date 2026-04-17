@@ -20,29 +20,9 @@ import type { RunnerMetrics } from './runner-metrics';
 // @ts-ignore
 import type { RunnerServiceInfo } from './runner-service-info';
 
-/**
- * 
- * @export
- * @interface RunnerInfoResponseDTO
- */
 export interface RunnerInfoResponseDTO {
-    /**
-     * 
-     * @type {string}
-     * @memberof RunnerInfoResponseDTO
-     */
     'appVersion'?: string;
-    /**
-     * 
-     * @type {RunnerMetrics}
-     * @memberof RunnerInfoResponseDTO
-     */
     'metrics'?: RunnerMetrics;
-    /**
-     * 
-     * @type {Array<RunnerServiceInfo>}
-     * @memberof RunnerInfoResponseDTO
-     */
     'serviceHealth'?: Array<RunnerServiceInfo>;
 }
 

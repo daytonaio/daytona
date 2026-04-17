@@ -14,16 +14,9 @@
 
 
 
-/**
- * 
- * @export
- * @interface ComputerUseStatusResponse
- */
 export interface ComputerUseStatusResponse {
     /**
      * Status of computer use services (active, partial, inactive, error)
-     * @type {string}
-     * @memberof ComputerUseStatusResponse
      */
     'status': ComputerUseStatusResponseStatusEnum;
 }
@@ -32,7 +25,7 @@ export const ComputerUseStatusResponseStatusEnum = {
     ACTIVE: 'active',
     PARTIAL: 'partial',
     INACTIVE: 'inactive',
-    ERROR: 'error'
+    ERROR: 'error',
 } as const;
 
 export type ComputerUseStatusResponseStatusEnum = typeof ComputerUseStatusResponseStatusEnum[keyof typeof ComputerUseStatusResponseStatusEnum];

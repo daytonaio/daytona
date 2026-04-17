@@ -52,7 +52,7 @@ import io.daytona.toolbox.client.JSON;
 /**
  * Chart
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class Chart {
   public static final String SERIALIZED_NAME_ELEMENTS = "elements";
   @SerializedName(SERIALIZED_NAME_ELEMENTS)
@@ -485,10 +485,7 @@ public class Chart {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -497,22 +494,10 @@ public class Chart {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("elements");
-    openapiFields.add("png");
-    openapiFields.add("title");
-    openapiFields.add("type");
-    openapiFields.add("x_label");
-    openapiFields.add("x_scale");
-    openapiFields.add("x_tick_labels");
-    openapiFields.add("x_ticks");
-    openapiFields.add("y_label");
-    openapiFields.add("y_scale");
-    openapiFields.add("y_tick_labels");
-    openapiFields.add("y_ticks");
+    openapiFields = new HashSet<String>(Arrays.asList("elements", "png", "title", "type", "x_label", "x_scale", "x_tick_labels", "x_ticks", "y_label", "y_scale", "y_tick_labels", "y_ticks"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
+    openapiRequiredFields = new HashSet<String>(0);
   }
 
   /**
@@ -524,7 +509,7 @@ public class Chart {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!Chart.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in Chart is not found in the empty JSON string", Chart.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in Chart is not found in the empty JSON string", Chart.openapiRequiredFields.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
@@ -533,7 +518,7 @@ public class Chart {
         if (jsonArrayelements != null) {
           // ensure the json data is an array
           if (!jsonObj.get("elements").isJsonArray()) {
-            throw new IllegalArgumentException(String.format("Expected the field `elements` to be an array in the JSON string but got `%s`", jsonObj.get("elements").toString()));
+            throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `elements` to be an array in the JSON string but got `%s`", jsonObj.get("elements").toString()));
           }
 
           // validate the optional field `elements` (array)
@@ -543,41 +528,41 @@ public class Chart {
         }
       }
       if ((jsonObj.get("png") != null && !jsonObj.get("png").isJsonNull()) && !jsonObj.get("png").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `png` to be a primitive type in the JSON string but got `%s`", jsonObj.get("png").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `png` to be a primitive type in the JSON string but got `%s`", jsonObj.get("png").toString()));
       }
       if ((jsonObj.get("title") != null && !jsonObj.get("title").isJsonNull()) && !jsonObj.get("title").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `title` to be a primitive type in the JSON string but got `%s`", jsonObj.get("title").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `title` to be a primitive type in the JSON string but got `%s`", jsonObj.get("title").toString()));
       }
       if ((jsonObj.get("type") != null && !jsonObj.get("type").isJsonNull()) && !jsonObj.get("type").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `type` to be a primitive type in the JSON string but got `%s`", jsonObj.get("type").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `type` to be a primitive type in the JSON string but got `%s`", jsonObj.get("type").toString()));
       }
       if ((jsonObj.get("x_label") != null && !jsonObj.get("x_label").isJsonNull()) && !jsonObj.get("x_label").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `x_label` to be a primitive type in the JSON string but got `%s`", jsonObj.get("x_label").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `x_label` to be a primitive type in the JSON string but got `%s`", jsonObj.get("x_label").toString()));
       }
       if ((jsonObj.get("x_scale") != null && !jsonObj.get("x_scale").isJsonNull()) && !jsonObj.get("x_scale").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `x_scale` to be a primitive type in the JSON string but got `%s`", jsonObj.get("x_scale").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `x_scale` to be a primitive type in the JSON string but got `%s`", jsonObj.get("x_scale").toString()));
       }
       // ensure the optional json data is an array if present
       if (jsonObj.get("x_tick_labels") != null && !jsonObj.get("x_tick_labels").isJsonNull() && !jsonObj.get("x_tick_labels").isJsonArray()) {
-        throw new IllegalArgumentException(String.format("Expected the field `x_tick_labels` to be an array in the JSON string but got `%s`", jsonObj.get("x_tick_labels").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `x_tick_labels` to be an array in the JSON string but got `%s`", jsonObj.get("x_tick_labels").toString()));
       }
       // ensure the optional json data is an array if present
       if (jsonObj.get("x_ticks") != null && !jsonObj.get("x_ticks").isJsonNull() && !jsonObj.get("x_ticks").isJsonArray()) {
-        throw new IllegalArgumentException(String.format("Expected the field `x_ticks` to be an array in the JSON string but got `%s`", jsonObj.get("x_ticks").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `x_ticks` to be an array in the JSON string but got `%s`", jsonObj.get("x_ticks").toString()));
       }
       if ((jsonObj.get("y_label") != null && !jsonObj.get("y_label").isJsonNull()) && !jsonObj.get("y_label").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `y_label` to be a primitive type in the JSON string but got `%s`", jsonObj.get("y_label").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `y_label` to be a primitive type in the JSON string but got `%s`", jsonObj.get("y_label").toString()));
       }
       if ((jsonObj.get("y_scale") != null && !jsonObj.get("y_scale").isJsonNull()) && !jsonObj.get("y_scale").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `y_scale` to be a primitive type in the JSON string but got `%s`", jsonObj.get("y_scale").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `y_scale` to be a primitive type in the JSON string but got `%s`", jsonObj.get("y_scale").toString()));
       }
       // ensure the optional json data is an array if present
       if (jsonObj.get("y_tick_labels") != null && !jsonObj.get("y_tick_labels").isJsonNull() && !jsonObj.get("y_tick_labels").isJsonArray()) {
-        throw new IllegalArgumentException(String.format("Expected the field `y_tick_labels` to be an array in the JSON string but got `%s`", jsonObj.get("y_tick_labels").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `y_tick_labels` to be an array in the JSON string but got `%s`", jsonObj.get("y_tick_labels").toString()));
       }
       // ensure the optional json data is an array if present
       if (jsonObj.get("y_ticks") != null && !jsonObj.get("y_ticks").isJsonNull() && !jsonObj.get("y_ticks").isJsonArray()) {
-        throw new IllegalArgumentException(String.format("Expected the field `y_ticks` to be an array in the JSON string but got `%s`", jsonObj.get("y_ticks").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `y_ticks` to be an array in the JSON string but got `%s`", jsonObj.get("y_ticks").toString()));
       }
   }
 
@@ -638,7 +623,7 @@ public class Chart {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

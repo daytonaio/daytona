@@ -48,7 +48,7 @@ import io.daytona.toolbox.client.JSON;
 /**
  * SessionExecuteResponse
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class SessionExecuteResponse {
   public static final String SERIALIZED_NAME_CMD_ID = "cmdId";
   @SerializedName(SERIALIZED_NAME_CMD_ID)
@@ -259,10 +259,7 @@ public class SessionExecuteResponse {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -271,16 +268,10 @@ public class SessionExecuteResponse {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("cmdId");
-    openapiFields.add("exitCode");
-    openapiFields.add("output");
-    openapiFields.add("stderr");
-    openapiFields.add("stdout");
+    openapiFields = new HashSet<String>(Arrays.asList("cmdId", "exitCode", "output", "stderr", "stdout"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("cmdId");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("cmdId"));
   }
 
   /**
@@ -292,28 +283,28 @@ public class SessionExecuteResponse {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!SessionExecuteResponse.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in SessionExecuteResponse is not found in the empty JSON string", SessionExecuteResponse.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in SessionExecuteResponse is not found in the empty JSON string", SessionExecuteResponse.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : SessionExecuteResponse.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("cmdId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `cmdId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("cmdId").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `cmdId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("cmdId").toString()));
       }
       if ((jsonObj.get("output") != null && !jsonObj.get("output").isJsonNull()) && !jsonObj.get("output").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `output` to be a primitive type in the JSON string but got `%s`", jsonObj.get("output").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `output` to be a primitive type in the JSON string but got `%s`", jsonObj.get("output").toString()));
       }
       if ((jsonObj.get("stderr") != null && !jsonObj.get("stderr").isJsonNull()) && !jsonObj.get("stderr").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `stderr` to be a primitive type in the JSON string but got `%s`", jsonObj.get("stderr").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `stderr` to be a primitive type in the JSON string but got `%s`", jsonObj.get("stderr").toString()));
       }
       if ((jsonObj.get("stdout") != null && !jsonObj.get("stdout").isJsonNull()) && !jsonObj.get("stdout").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `stdout` to be a primitive type in the JSON string but got `%s`", jsonObj.get("stdout").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `stdout` to be a primitive type in the JSON string but got `%s`", jsonObj.get("stdout").toString()));
       }
   }
 
@@ -374,7 +365,7 @@ public class SessionExecuteResponse {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

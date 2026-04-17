@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -27,7 +27,6 @@ import type { HealthControllerCheck200Response } from '../models';
 import type { HealthControllerCheck503Response } from '../models';
 /**
  * HealthApi - axios parameter creator
- * @export
  */
 export const HealthApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -53,8 +52,8 @@ export const HealthApiAxiosParamCreator = function (configuration?: Configuratio
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -83,7 +82,6 @@ export const HealthApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarQueryParameter = {} as any;
 
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -98,7 +96,6 @@ export const HealthApiAxiosParamCreator = function (configuration?: Configuratio
 
 /**
  * HealthApi - functional programming interface
- * @export
  */
 export const HealthApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = HealthApiAxiosParamCreator(configuration)
@@ -130,7 +127,6 @@ export const HealthApiFp = function(configuration?: Configuration) {
 
 /**
  * HealthApi - factory interface
- * @export
  */
 export const HealthApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = HealthApiFp(configuration)
@@ -156,16 +152,12 @@ export const HealthApiFactory = function (configuration?: Configuration, basePat
 
 /**
  * HealthApi - object-oriented interface
- * @export
- * @class HealthApi
- * @extends {BaseAPI}
  */
 export class HealthApi extends BaseAPI {
     /**
      * 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof HealthApi
      */
     public healthControllerCheck(options?: RawAxiosRequestConfig) {
         return HealthApiFp(this.configuration).healthControllerCheck(options).then((request) => request(this.axios, this.basePath));
@@ -175,7 +167,6 @@ export class HealthApi extends BaseAPI {
      * 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof HealthApi
      */
     public healthControllerLive(options?: RawAxiosRequestConfig) {
         return HealthApiFp(this.configuration).healthControllerLive(options).then((request) => request(this.axios, this.basePath));

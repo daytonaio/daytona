@@ -51,7 +51,7 @@ import io.daytona.api.client.JSON;
 /**
  * MetricsResponse
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class MetricsResponse {
   public static final String SERIALIZED_NAME_SERIES = "series";
   @SerializedName(SERIALIZED_NAME_SERIES)
@@ -166,10 +166,7 @@ public class MetricsResponse {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -178,12 +175,10 @@ public class MetricsResponse {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("series");
+    openapiFields = new HashSet<String>(Arrays.asList("series"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("series");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("series"));
   }
 
   /**
@@ -195,27 +190,27 @@ public class MetricsResponse {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!MetricsResponse.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in MetricsResponse is not found in the empty JSON string", MetricsResponse.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in MetricsResponse is not found in the empty JSON string", MetricsResponse.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : MetricsResponse.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
-      // ensure the json data is an array
-      if (!jsonObj.get("series").isJsonArray()) {
-        throw new IllegalArgumentException(String.format("Expected the field `series` to be an array in the JSON string but got `%s`", jsonObj.get("series").toString()));
+      if (jsonObj.get("series") != null) {
+        if (!jsonObj.get("series").isJsonArray()) {
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `series` to be an array in the JSON string but got `%s`", jsonObj.get("series").toString()));
+        }
+        JsonArray jsonArrayseries = jsonObj.getAsJsonArray("series");
+        // validate the required field `series` (array)
+        for (int i = 0; i < jsonArrayseries.size(); i++) {
+          MetricSeries.validateJsonElement(jsonArrayseries.get(i));
+        }
       }
-
-      JsonArray jsonArrayseries = jsonObj.getAsJsonArray("series");
-      // validate the required field `series` (array)
-      for (int i = 0; i < jsonArrayseries.size(); i++) {
-        MetricSeries.validateJsonElement(jsonArrayseries.get(i));
-      };
   }
 
   public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
@@ -275,7 +270,7 @@ public class MetricsResponse {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

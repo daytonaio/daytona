@@ -48,7 +48,7 @@ import io.daytona.api.client.JSON;
 /**
  * StorageAccessDto
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class StorageAccessDto {
   public static final String SERIALIZED_NAME_ACCESS_KEY = "accessKey";
   @SerializedName(SERIALIZED_NAME_ACCESS_KEY)
@@ -285,10 +285,7 @@ public class StorageAccessDto {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -297,22 +294,10 @@ public class StorageAccessDto {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("accessKey");
-    openapiFields.add("secret");
-    openapiFields.add("sessionToken");
-    openapiFields.add("storageUrl");
-    openapiFields.add("organizationId");
-    openapiFields.add("bucket");
+    openapiFields = new HashSet<String>(Arrays.asList("accessKey", "secret", "sessionToken", "storageUrl", "organizationId", "bucket"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("accessKey");
-    openapiRequiredFields.add("secret");
-    openapiRequiredFields.add("sessionToken");
-    openapiRequiredFields.add("storageUrl");
-    openapiRequiredFields.add("organizationId");
-    openapiRequiredFields.add("bucket");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("accessKey", "secret", "sessionToken", "storageUrl", "organizationId", "bucket"));
   }
 
   /**
@@ -324,34 +309,34 @@ public class StorageAccessDto {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!StorageAccessDto.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in StorageAccessDto is not found in the empty JSON string", StorageAccessDto.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in StorageAccessDto is not found in the empty JSON string", StorageAccessDto.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : StorageAccessDto.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("accessKey").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `accessKey` to be a primitive type in the JSON string but got `%s`", jsonObj.get("accessKey").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `accessKey` to be a primitive type in the JSON string but got `%s`", jsonObj.get("accessKey").toString()));
       }
       if (!jsonObj.get("secret").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `secret` to be a primitive type in the JSON string but got `%s`", jsonObj.get("secret").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `secret` to be a primitive type in the JSON string but got `%s`", jsonObj.get("secret").toString()));
       }
       if (!jsonObj.get("sessionToken").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `sessionToken` to be a primitive type in the JSON string but got `%s`", jsonObj.get("sessionToken").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `sessionToken` to be a primitive type in the JSON string but got `%s`", jsonObj.get("sessionToken").toString()));
       }
       if (!jsonObj.get("storageUrl").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `storageUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("storageUrl").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `storageUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("storageUrl").toString()));
       }
       if (!jsonObj.get("organizationId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `organizationId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("organizationId").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `organizationId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("organizationId").toString()));
       }
       if (!jsonObj.get("bucket").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `bucket` to be a primitive type in the JSON string but got `%s`", jsonObj.get("bucket").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `bucket` to be a primitive type in the JSON string but got `%s`", jsonObj.get("bucket").toString()));
       }
   }
 
@@ -412,7 +397,7 @@ public class StorageAccessDto {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

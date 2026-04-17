@@ -14,22 +14,13 @@
 
 
 
-/**
- * 
- * @export
- * @interface CreateOrganization
- */
 export interface CreateOrganization {
     /**
      * The name of organization
-     * @type {string}
-     * @memberof CreateOrganization
      */
     'name': string;
     /**
      * The ID of the default region for the organization
-     * @type {string}
-     * @memberof CreateOrganization
      */
     'defaultRegionId': string;
 }

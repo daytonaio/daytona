@@ -14,28 +14,17 @@
 
 
 
-/**
- * 
- * @export
- * @interface ResizeSandbox
- */
 export interface ResizeSandbox {
     /**
      * CPU cores to allocate to the sandbox (minimum: 1)
-     * @type {number}
-     * @memberof ResizeSandbox
      */
     'cpu'?: number;
     /**
      * Memory in GB to allocate to the sandbox (minimum: 1)
-     * @type {number}
-     * @memberof ResizeSandbox
      */
     'memory'?: number;
     /**
      * Disk space in GB to allocate to the sandbox (can only be increased)
-     * @type {number}
-     * @memberof ResizeSandbox
      */
     'disk'?: number;
 }

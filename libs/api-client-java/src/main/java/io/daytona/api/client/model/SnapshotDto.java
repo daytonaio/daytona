@@ -54,7 +54,7 @@ import io.daytona.api.client.JSON;
 /**
  * SnapshotDto
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class SnapshotDto {
   public static final String SERIALIZED_NAME_ID = "id";
   @SerializedName(SERIALIZED_NAME_ID)
@@ -671,10 +671,7 @@ public class SnapshotDto {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -683,44 +680,10 @@ public class SnapshotDto {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("id");
-    openapiFields.add("organizationId");
-    openapiFields.add("general");
-    openapiFields.add("name");
-    openapiFields.add("imageName");
-    openapiFields.add("state");
-    openapiFields.add("size");
-    openapiFields.add("entrypoint");
-    openapiFields.add("cpu");
-    openapiFields.add("gpu");
-    openapiFields.add("mem");
-    openapiFields.add("disk");
-    openapiFields.add("errorReason");
-    openapiFields.add("createdAt");
-    openapiFields.add("updatedAt");
-    openapiFields.add("lastUsedAt");
-    openapiFields.add("buildInfo");
-    openapiFields.add("regionIds");
-    openapiFields.add("initialRunnerId");
-    openapiFields.add("ref");
+    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "regionIds", "initialRunnerId", "ref"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("id");
-    openapiRequiredFields.add("general");
-    openapiRequiredFields.add("name");
-    openapiRequiredFields.add("state");
-    openapiRequiredFields.add("size");
-    openapiRequiredFields.add("entrypoint");
-    openapiRequiredFields.add("cpu");
-    openapiRequiredFields.add("gpu");
-    openapiRequiredFields.add("mem");
-    openapiRequiredFields.add("disk");
-    openapiRequiredFields.add("errorReason");
-    openapiRequiredFields.add("createdAt");
-    openapiRequiredFields.add("updatedAt");
-    openapiRequiredFields.add("lastUsedAt");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "general", "name", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt"));
   }
 
   /**
@@ -732,39 +695,39 @@ public class SnapshotDto {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!SnapshotDto.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in SnapshotDto is not found in the empty JSON string", SnapshotDto.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in SnapshotDto is not found in the empty JSON string", SnapshotDto.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : SnapshotDto.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("id").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("id").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("id").toString()));
       }
       if ((jsonObj.get("organizationId") != null && !jsonObj.get("organizationId").isJsonNull()) && !jsonObj.get("organizationId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `organizationId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("organizationId").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `organizationId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("organizationId").toString()));
       }
       if (!jsonObj.get("name").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("name").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("name").toString()));
       }
       if ((jsonObj.get("imageName") != null && !jsonObj.get("imageName").isJsonNull()) && !jsonObj.get("imageName").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `imageName` to be a primitive type in the JSON string but got `%s`", jsonObj.get("imageName").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `imageName` to be a primitive type in the JSON string but got `%s`", jsonObj.get("imageName").toString()));
       }
       // validate the required field `state`
       SnapshotState.validateJsonElement(jsonObj.get("state"));
       // ensure the required json array is present
       if (jsonObj.get("entrypoint") == null) {
         throw new IllegalArgumentException("Expected the field `linkedContent` to be an array in the JSON string but got `null`");
-      } else if (!jsonObj.get("entrypoint").isJsonArray()) {
-        throw new IllegalArgumentException(String.format("Expected the field `entrypoint` to be an array in the JSON string but got `%s`", jsonObj.get("entrypoint").toString()));
+      } else if (!jsonObj.get("entrypoint").isJsonArray() && !jsonObj.get("entrypoint").isJsonNull()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `entrypoint` to be an array in the JSON string but got `%s`", jsonObj.get("entrypoint").toString()));
       }
       if ((jsonObj.get("errorReason") != null && !jsonObj.get("errorReason").isJsonNull()) && !jsonObj.get("errorReason").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `errorReason` to be a primitive type in the JSON string but got `%s`", jsonObj.get("errorReason").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `errorReason` to be a primitive type in the JSON string but got `%s`", jsonObj.get("errorReason").toString()));
       }
       // validate the optional field `buildInfo`
       if (jsonObj.get("buildInfo") != null && !jsonObj.get("buildInfo").isJsonNull()) {
@@ -772,13 +735,13 @@ public class SnapshotDto {
       }
       // ensure the optional json data is an array if present
       if (jsonObj.get("regionIds") != null && !jsonObj.get("regionIds").isJsonNull() && !jsonObj.get("regionIds").isJsonArray()) {
-        throw new IllegalArgumentException(String.format("Expected the field `regionIds` to be an array in the JSON string but got `%s`", jsonObj.get("regionIds").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `regionIds` to be an array in the JSON string but got `%s`", jsonObj.get("regionIds").toString()));
       }
       if ((jsonObj.get("initialRunnerId") != null && !jsonObj.get("initialRunnerId").isJsonNull()) && !jsonObj.get("initialRunnerId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `initialRunnerId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("initialRunnerId").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `initialRunnerId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("initialRunnerId").toString()));
       }
       if ((jsonObj.get("ref") != null && !jsonObj.get("ref").isJsonNull()) && !jsonObj.get("ref").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `ref` to be a primitive type in the JSON string but got `%s`", jsonObj.get("ref").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `ref` to be a primitive type in the JSON string but got `%s`", jsonObj.get("ref").toString()));
       }
   }
 
@@ -839,7 +802,7 @@ public class SnapshotDto {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

@@ -14,35 +14,10 @@
 
 
 
-/**
- * 
- * @export
- * @interface RegistryDTO
- */
 export interface RegistryDTO {
-    /**
-     * 
-     * @type {string}
-     * @memberof RegistryDTO
-     */
     'password'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof RegistryDTO
-     */
     'project'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof RegistryDTO
-     */
     'url': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof RegistryDTO
-     */
     'username'?: string;
 }
 

@@ -51,7 +51,7 @@ import io.daytona.toolbox.client.JSON;
 /**
  * ListRecordingsResponse
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class ListRecordingsResponse {
   public static final String SERIALIZED_NAME_RECORDINGS = "recordings";
   @SerializedName(SERIALIZED_NAME_RECORDINGS)
@@ -166,10 +166,7 @@ public class ListRecordingsResponse {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -178,12 +175,10 @@ public class ListRecordingsResponse {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("recordings");
+    openapiFields = new HashSet<String>(Arrays.asList("recordings"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("recordings");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("recordings"));
   }
 
   /**
@@ -195,27 +190,27 @@ public class ListRecordingsResponse {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!ListRecordingsResponse.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in ListRecordingsResponse is not found in the empty JSON string", ListRecordingsResponse.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in ListRecordingsResponse is not found in the empty JSON string", ListRecordingsResponse.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : ListRecordingsResponse.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
-      // ensure the json data is an array
-      if (!jsonObj.get("recordings").isJsonArray()) {
-        throw new IllegalArgumentException(String.format("Expected the field `recordings` to be an array in the JSON string but got `%s`", jsonObj.get("recordings").toString()));
+      if (jsonObj.get("recordings") != null) {
+        if (!jsonObj.get("recordings").isJsonArray()) {
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `recordings` to be an array in the JSON string but got `%s`", jsonObj.get("recordings").toString()));
+        }
+        JsonArray jsonArrayrecordings = jsonObj.getAsJsonArray("recordings");
+        // validate the required field `recordings` (array)
+        for (int i = 0; i < jsonArrayrecordings.size(); i++) {
+          Recording.validateJsonElement(jsonArrayrecordings.get(i));
+        }
       }
-
-      JsonArray jsonArrayrecordings = jsonObj.getAsJsonArray("recordings");
-      // validate the required field `recordings` (array)
-      for (int i = 0; i < jsonArrayrecordings.size(); i++) {
-        Recording.validateJsonElement(jsonArrayrecordings.get(i));
-      };
   }
 
   public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
@@ -275,7 +270,7 @@ public class ListRecordingsResponse {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

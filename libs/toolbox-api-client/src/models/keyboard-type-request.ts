@@ -14,23 +14,11 @@
 
 
 
-/**
- * 
- * @export
- * @interface KeyboardTypeRequest
- */
 export interface KeyboardTypeRequest {
     /**
      * milliseconds between keystrokes
-     * @type {number}
-     * @memberof KeyboardTypeRequest
      */
     'delay'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof KeyboardTypeRequest
-     */
     'text'?: string;
 }
 

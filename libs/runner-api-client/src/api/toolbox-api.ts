@@ -18,12 +18,11 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 /**
  * ToolboxApi - axios parameter creator
- * @export
  */
 export const ToolboxApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -57,8 +56,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
             // authentication Bearer required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
 
+            localVarHeaderParameter['Accept'] = '*/*';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -98,8 +97,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
             // authentication Bearer required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
 
+            localVarHeaderParameter['Accept'] = '*/*';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -139,8 +138,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
             // authentication Bearer required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
 
+            localVarHeaderParameter['Accept'] = '*/*';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -155,7 +154,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
 /**
  * ToolboxApi - functional programming interface
- * @export
  */
 export const ToolboxApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ToolboxApiAxiosParamCreator(configuration)
@@ -207,7 +205,6 @@ export const ToolboxApiFp = function(configuration?: Configuration) {
 
 /**
  * ToolboxApi - factory interface
- * @export
  */
 export const ToolboxApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = ToolboxApiFp(configuration)
@@ -250,9 +247,6 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
 
 /**
  * ToolboxApi - object-oriented interface
- * @export
- * @class ToolboxApi
- * @extends {BaseAPI}
  */
 export class ToolboxApi extends BaseAPI {
     /**
@@ -262,7 +256,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {string} path Path to forward
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public sandboxesSandboxIdToolboxPathDelete(sandboxId: string, path: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).sandboxesSandboxIdToolboxPathDelete(sandboxId, path, options).then((request) => request(this.axios, this.basePath));
@@ -275,7 +268,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {string} path Path to forward
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public sandboxesSandboxIdToolboxPathGet(sandboxId: string, path: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).sandboxesSandboxIdToolboxPathGet(sandboxId, path, options).then((request) => request(this.axios, this.basePath));
@@ -288,7 +280,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {string} path Path to forward
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public sandboxesSandboxIdToolboxPathPost(sandboxId: string, path: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).sandboxesSandboxIdToolboxPathPost(sandboxId, path, options).then((request) => request(this.axios, this.basePath));

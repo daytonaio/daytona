@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -45,7 +45,6 @@ import type { StopSandboxDTO } from '../models';
 import type { UpdateNetworkSettingsDTO } from '../models';
 /**
  * SandboxApi - axios parameter creator
- * @export
  */
 export const SandboxApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -74,9 +73,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             // authentication Bearer required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -117,9 +115,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             // authentication Bearer required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -157,8 +154,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             // authentication Bearer required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -194,8 +191,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             // authentication Bearer required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -231,8 +228,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             // authentication Bearer required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -271,9 +268,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             // authentication Bearer required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -314,9 +310,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             // authentication Bearer required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -357,9 +352,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             // authentication Bearer required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -403,9 +397,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['token'] = token;
             }
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -444,9 +437,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             // authentication Bearer required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -487,9 +479,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             // authentication Bearer required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -506,7 +497,6 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
 /**
  * SandboxApi - functional programming interface
- * @export
  */
 export const SandboxApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = SandboxApiAxiosParamCreator(configuration)
@@ -667,7 +657,6 @@ export const SandboxApiFp = function(configuration?: Configuration) {
 
 /**
  * SandboxApi - factory interface
- * @export
  */
 export const SandboxApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = SandboxApiFp(configuration)
@@ -795,9 +784,6 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
 
 /**
  * SandboxApi - object-oriented interface
- * @export
- * @class SandboxApi
- * @extends {BaseAPI}
  */
 export class SandboxApi extends BaseAPI {
     /**
@@ -806,7 +792,6 @@ export class SandboxApi extends BaseAPI {
      * @param {CreateSandboxDTO} sandbox Create sandbox
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SandboxApi
      */
     public create(sandbox: CreateSandboxDTO, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).create(sandbox, options).then((request) => request(this.axios, this.basePath));
@@ -819,7 +804,6 @@ export class SandboxApi extends BaseAPI {
      * @param {CreateBackupDTO} sandbox Create backup
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SandboxApi
      */
     public createBackup(sandboxId: string, sandbox: CreateBackupDTO, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).createBackup(sandboxId, sandbox, options).then((request) => request(this.axios, this.basePath));
@@ -831,7 +815,6 @@ export class SandboxApi extends BaseAPI {
      * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SandboxApi
      */
     public destroy(sandboxId: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).destroy(sandboxId, options).then((request) => request(this.axios, this.basePath));
@@ -843,7 +826,6 @@ export class SandboxApi extends BaseAPI {
      * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SandboxApi
      */
     public getNetworkSettings(sandboxId: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getNetworkSettings(sandboxId, options).then((request) => request(this.axios, this.basePath));
@@ -855,7 +837,6 @@ export class SandboxApi extends BaseAPI {
      * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SandboxApi
      */
     public info(sandboxId: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).info(sandboxId, options).then((request) => request(this.axios, this.basePath));
@@ -868,7 +849,6 @@ export class SandboxApi extends BaseAPI {
      * @param {IsRecoverableDTO} request Error reason to check
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SandboxApi
      */
     public isRecoverable(sandboxId: string, request: IsRecoverableDTO, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).isRecoverable(sandboxId, request, options).then((request) => request(this.axios, this.basePath));
@@ -881,7 +861,6 @@ export class SandboxApi extends BaseAPI {
      * @param {RecoverSandboxDTO} recovery Recovery parameters
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SandboxApi
      */
     public recover(sandboxId: string, recovery: RecoverSandboxDTO, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).recover(sandboxId, recovery, options).then((request) => request(this.axios, this.basePath));
@@ -894,7 +873,6 @@ export class SandboxApi extends BaseAPI {
      * @param {ResizeSandboxDTO} sandbox Resize sandbox
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SandboxApi
      */
     public resize(sandboxId: string, sandbox: ResizeSandboxDTO, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).resize(sandboxId, sandbox, options).then((request) => request(this.axios, this.basePath));
@@ -908,7 +886,6 @@ export class SandboxApi extends BaseAPI {
      * @param {object} [metadata] Metadata
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SandboxApi
      */
     public start(sandboxId: string, token?: string, metadata?: object, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).start(sandboxId, token, metadata, options).then((request) => request(this.axios, this.basePath));
@@ -921,7 +898,6 @@ export class SandboxApi extends BaseAPI {
      * @param {StopSandboxDTO} [sandbox] Stop sandbox
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SandboxApi
      */
     public stop(sandboxId: string, sandbox?: StopSandboxDTO, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).stop(sandboxId, sandbox, options).then((request) => request(this.axios, this.basePath));
@@ -934,7 +910,6 @@ export class SandboxApi extends BaseAPI {
      * @param {UpdateNetworkSettingsDTO} sandbox Update network settings
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof SandboxApi
      */
     public updateNetworkSettings(sandboxId: string, sandbox: UpdateNetworkSettingsDTO, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).updateNetworkSettings(sandboxId, sandbox, options).then((request) => request(this.axios, this.basePath));

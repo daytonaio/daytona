@@ -98,7 +98,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Boolean indicating if image can be cleaned up </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminCanCleanupImageCall(String imageName, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call adminCanCleanupImageCall(@javax.annotation.Nonnull String imageName, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -147,7 +147,7 @@ public class AdminApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call adminCanCleanupImageValidateBeforeCall(String imageName, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call adminCanCleanupImageValidateBeforeCall(@javax.annotation.Nonnull String imageName, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'imageName' is set
         if (imageName == null) {
             throw new ApiException("Missing the required parameter 'imageName' when calling adminCanCleanupImage(Async)");
@@ -170,7 +170,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Boolean indicating if image can be cleaned up </td><td>  -  </td></tr>
      </table>
      */
-    public Boolean adminCanCleanupImage(String imageName) throws ApiException {
+    public Boolean adminCanCleanupImage(@javax.annotation.Nonnull String imageName) throws ApiException {
         ApiResponse<Boolean> localVarResp = adminCanCleanupImageWithHttpInfo(imageName);
         return localVarResp.getData();
     }
@@ -188,7 +188,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Boolean indicating if image can be cleaned up </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Boolean> adminCanCleanupImageWithHttpInfo(String imageName) throws ApiException {
+    public ApiResponse<Boolean> adminCanCleanupImageWithHttpInfo(@javax.annotation.Nonnull String imageName) throws ApiException {
         okhttp3.Call localVarCall = adminCanCleanupImageValidateBeforeCall(imageName, null);
         Type localVarReturnType = new TypeToken<Boolean>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -208,7 +208,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Boolean indicating if image can be cleaned up </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminCanCleanupImageAsync(String imageName, final ApiCallback<Boolean> _callback) throws ApiException {
+    public okhttp3.Call adminCanCleanupImageAsync(@javax.annotation.Nonnull String imageName, final ApiCallback<Boolean> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = adminCanCleanupImageValidateBeforeCall(imageName, _callback);
         Type localVarReturnType = new TypeToken<Boolean>(){}.getType();
@@ -228,7 +228,7 @@ public class AdminApi {
         <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminCreateRunnerCall(AdminCreateRunner adminCreateRunner, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call adminCreateRunnerCall(@javax.annotation.Nonnull AdminCreateRunner adminCreateRunner, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -274,7 +274,7 @@ public class AdminApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call adminCreateRunnerValidateBeforeCall(AdminCreateRunner adminCreateRunner, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call adminCreateRunnerValidateBeforeCall(@javax.annotation.Nonnull AdminCreateRunner adminCreateRunner, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'adminCreateRunner' is set
         if (adminCreateRunner == null) {
             throw new ApiException("Missing the required parameter 'adminCreateRunner' when calling adminCreateRunner(Async)");
@@ -297,7 +297,7 @@ public class AdminApi {
         <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public CreateRunnerResponse adminCreateRunner(AdminCreateRunner adminCreateRunner) throws ApiException {
+    public CreateRunnerResponse adminCreateRunner(@javax.annotation.Nonnull AdminCreateRunner adminCreateRunner) throws ApiException {
         ApiResponse<CreateRunnerResponse> localVarResp = adminCreateRunnerWithHttpInfo(adminCreateRunner);
         return localVarResp.getData();
     }
@@ -315,7 +315,7 @@ public class AdminApi {
         <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<CreateRunnerResponse> adminCreateRunnerWithHttpInfo(AdminCreateRunner adminCreateRunner) throws ApiException {
+    public ApiResponse<CreateRunnerResponse> adminCreateRunnerWithHttpInfo(@javax.annotation.Nonnull AdminCreateRunner adminCreateRunner) throws ApiException {
         okhttp3.Call localVarCall = adminCreateRunnerValidateBeforeCall(adminCreateRunner, null);
         Type localVarReturnType = new TypeToken<CreateRunnerResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -335,7 +335,7 @@ public class AdminApi {
         <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminCreateRunnerAsync(AdminCreateRunner adminCreateRunner, final ApiCallback<CreateRunnerResponse> _callback) throws ApiException {
+    public okhttp3.Call adminCreateRunnerAsync(@javax.annotation.Nonnull AdminCreateRunner adminCreateRunner, final ApiCallback<CreateRunnerResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = adminCreateRunnerValidateBeforeCall(adminCreateRunner, _callback);
         Type localVarReturnType = new TypeToken<CreateRunnerResponse>(){}.getType();
@@ -355,7 +355,7 @@ public class AdminApi {
         <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminCreateUserCall(CreateUser createUser, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call adminCreateUserCall(@javax.annotation.Nonnull CreateUser createUser, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -400,7 +400,7 @@ public class AdminApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call adminCreateUserValidateBeforeCall(CreateUser createUser, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call adminCreateUserValidateBeforeCall(@javax.annotation.Nonnull CreateUser createUser, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'createUser' is set
         if (createUser == null) {
             throw new ApiException("Missing the required parameter 'createUser' when calling adminCreateUser(Async)");
@@ -422,7 +422,7 @@ public class AdminApi {
         <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public void adminCreateUser(CreateUser createUser) throws ApiException {
+    public void adminCreateUser(@javax.annotation.Nonnull CreateUser createUser) throws ApiException {
         adminCreateUserWithHttpInfo(createUser);
     }
 
@@ -439,7 +439,7 @@ public class AdminApi {
         <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> adminCreateUserWithHttpInfo(CreateUser createUser) throws ApiException {
+    public ApiResponse<Void> adminCreateUserWithHttpInfo(@javax.annotation.Nonnull CreateUser createUser) throws ApiException {
         okhttp3.Call localVarCall = adminCreateUserValidateBeforeCall(createUser, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -458,7 +458,7 @@ public class AdminApi {
         <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminCreateUserAsync(CreateUser createUser, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call adminCreateUserAsync(@javax.annotation.Nonnull CreateUser createUser, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = adminCreateUserValidateBeforeCall(createUser, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -477,7 +477,7 @@ public class AdminApi {
         <tr><td> 204 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminDeleteRunnerCall(String id, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call adminDeleteRunnerCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -522,7 +522,7 @@ public class AdminApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call adminDeleteRunnerValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call adminDeleteRunnerValidateBeforeCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling adminDeleteRunner(Async)");
@@ -544,7 +544,7 @@ public class AdminApi {
         <tr><td> 204 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public void adminDeleteRunner(String id) throws ApiException {
+    public void adminDeleteRunner(@javax.annotation.Nonnull String id) throws ApiException {
         adminDeleteRunnerWithHttpInfo(id);
     }
 
@@ -561,7 +561,7 @@ public class AdminApi {
         <tr><td> 204 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> adminDeleteRunnerWithHttpInfo(String id) throws ApiException {
+    public ApiResponse<Void> adminDeleteRunnerWithHttpInfo(@javax.annotation.Nonnull String id) throws ApiException {
         okhttp3.Call localVarCall = adminDeleteRunnerValidateBeforeCall(id, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -580,7 +580,7 @@ public class AdminApi {
         <tr><td> 204 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminDeleteRunnerAsync(String id, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call adminDeleteRunnerAsync(@javax.annotation.Nonnull String id, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = adminDeleteRunnerValidateBeforeCall(id, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -603,7 +603,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Paginated list of all audit logs </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminGetAllAuditLogsCall(BigDecimal page, BigDecimal limit, OffsetDateTime from, OffsetDateTime to, String nextToken, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call adminGetAllAuditLogsCall(@javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable OffsetDateTime from, @javax.annotation.Nullable OffsetDateTime to, @javax.annotation.Nullable String nextToken, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -668,7 +668,7 @@ public class AdminApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call adminGetAllAuditLogsValidateBeforeCall(BigDecimal page, BigDecimal limit, OffsetDateTime from, OffsetDateTime to, String nextToken, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call adminGetAllAuditLogsValidateBeforeCall(@javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable OffsetDateTime from, @javax.annotation.Nullable OffsetDateTime to, @javax.annotation.Nullable String nextToken, final ApiCallback _callback) throws ApiException {
         return adminGetAllAuditLogsCall(page, limit, from, to, nextToken, _callback);
 
     }
@@ -690,7 +690,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Paginated list of all audit logs </td><td>  -  </td></tr>
      </table>
      */
-    public PaginatedAuditLogs adminGetAllAuditLogs(BigDecimal page, BigDecimal limit, OffsetDateTime from, OffsetDateTime to, String nextToken) throws ApiException {
+    public PaginatedAuditLogs adminGetAllAuditLogs(@javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable OffsetDateTime from, @javax.annotation.Nullable OffsetDateTime to, @javax.annotation.Nullable String nextToken) throws ApiException {
         ApiResponse<PaginatedAuditLogs> localVarResp = adminGetAllAuditLogsWithHttpInfo(page, limit, from, to, nextToken);
         return localVarResp.getData();
     }
@@ -712,7 +712,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Paginated list of all audit logs </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<PaginatedAuditLogs> adminGetAllAuditLogsWithHttpInfo(BigDecimal page, BigDecimal limit, OffsetDateTime from, OffsetDateTime to, String nextToken) throws ApiException {
+    public ApiResponse<PaginatedAuditLogs> adminGetAllAuditLogsWithHttpInfo(@javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable OffsetDateTime from, @javax.annotation.Nullable OffsetDateTime to, @javax.annotation.Nullable String nextToken) throws ApiException {
         okhttp3.Call localVarCall = adminGetAllAuditLogsValidateBeforeCall(page, limit, from, to, nextToken, null);
         Type localVarReturnType = new TypeToken<PaginatedAuditLogs>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -736,7 +736,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Paginated list of all audit logs </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminGetAllAuditLogsAsync(BigDecimal page, BigDecimal limit, OffsetDateTime from, OffsetDateTime to, String nextToken, final ApiCallback<PaginatedAuditLogs> _callback) throws ApiException {
+    public okhttp3.Call adminGetAllAuditLogsAsync(@javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable OffsetDateTime from, @javax.annotation.Nullable OffsetDateTime to, @javax.annotation.Nullable String nextToken, final ApiCallback<PaginatedAuditLogs> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = adminGetAllAuditLogsValidateBeforeCall(page, limit, from, to, nextToken, _callback);
         Type localVarReturnType = new TypeToken<PaginatedAuditLogs>(){}.getType();
@@ -757,7 +757,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> List of delivery attempts </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminGetMessageAttemptsCall(String organizationId, String messageId, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call adminGetMessageAttemptsCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String messageId, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -804,7 +804,7 @@ public class AdminApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call adminGetMessageAttemptsValidateBeforeCall(String organizationId, String messageId, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call adminGetMessageAttemptsValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String messageId, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'organizationId' is set
         if (organizationId == null) {
             throw new ApiException("Missing the required parameter 'organizationId' when calling adminGetMessageAttempts(Async)");
@@ -833,7 +833,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> List of delivery attempts </td><td>  -  </td></tr>
      </table>
      */
-    public List<Object> adminGetMessageAttempts(String organizationId, String messageId) throws ApiException {
+    public List<Object> adminGetMessageAttempts(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String messageId) throws ApiException {
         ApiResponse<List<Object>> localVarResp = adminGetMessageAttemptsWithHttpInfo(organizationId, messageId);
         return localVarResp.getData();
     }
@@ -852,7 +852,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> List of delivery attempts </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<Object>> adminGetMessageAttemptsWithHttpInfo(String organizationId, String messageId) throws ApiException {
+    public ApiResponse<List<Object>> adminGetMessageAttemptsWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String messageId) throws ApiException {
         okhttp3.Call localVarCall = adminGetMessageAttemptsValidateBeforeCall(organizationId, messageId, null);
         Type localVarReturnType = new TypeToken<List<Object>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -873,7 +873,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> List of delivery attempts </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminGetMessageAttemptsAsync(String organizationId, String messageId, final ApiCallback<List<Object>> _callback) throws ApiException {
+    public okhttp3.Call adminGetMessageAttemptsAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String messageId, final ApiCallback<List<Object>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = adminGetMessageAttemptsValidateBeforeCall(organizationId, messageId, _callback);
         Type localVarReturnType = new TypeToken<List<Object>>(){}.getType();
@@ -893,7 +893,7 @@ public class AdminApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminGetRunnerByIdCall(String id, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call adminGetRunnerByIdCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -939,7 +939,7 @@ public class AdminApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call adminGetRunnerByIdValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call adminGetRunnerByIdValidateBeforeCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling adminGetRunnerById(Async)");
@@ -962,7 +962,7 @@ public class AdminApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public RunnerFull adminGetRunnerById(String id) throws ApiException {
+    public RunnerFull adminGetRunnerById(@javax.annotation.Nonnull String id) throws ApiException {
         ApiResponse<RunnerFull> localVarResp = adminGetRunnerByIdWithHttpInfo(id);
         return localVarResp.getData();
     }
@@ -980,7 +980,7 @@ public class AdminApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<RunnerFull> adminGetRunnerByIdWithHttpInfo(String id) throws ApiException {
+    public ApiResponse<RunnerFull> adminGetRunnerByIdWithHttpInfo(@javax.annotation.Nonnull String id) throws ApiException {
         okhttp3.Call localVarCall = adminGetRunnerByIdValidateBeforeCall(id, null);
         Type localVarReturnType = new TypeToken<RunnerFull>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1000,7 +1000,7 @@ public class AdminApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminGetRunnerByIdAsync(String id, final ApiCallback<RunnerFull> _callback) throws ApiException {
+    public okhttp3.Call adminGetRunnerByIdAsync(@javax.annotation.Nonnull String id, final ApiCallback<RunnerFull> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = adminGetRunnerByIdValidateBeforeCall(id, _callback);
         Type localVarReturnType = new TypeToken<RunnerFull>(){}.getType();
@@ -1020,7 +1020,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> User details </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminGetUserCall(String id, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call adminGetUserCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1066,7 +1066,7 @@ public class AdminApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call adminGetUserValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call adminGetUserValidateBeforeCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling adminGetUser(Async)");
@@ -1089,7 +1089,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> User details </td><td>  -  </td></tr>
      </table>
      */
-    public User adminGetUser(String id) throws ApiException {
+    public User adminGetUser(@javax.annotation.Nonnull String id) throws ApiException {
         ApiResponse<User> localVarResp = adminGetUserWithHttpInfo(id);
         return localVarResp.getData();
     }
@@ -1107,7 +1107,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> User details </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<User> adminGetUserWithHttpInfo(String id) throws ApiException {
+    public ApiResponse<User> adminGetUserWithHttpInfo(@javax.annotation.Nonnull String id) throws ApiException {
         okhttp3.Call localVarCall = adminGetUserValidateBeforeCall(id, null);
         Type localVarReturnType = new TypeToken<User>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1127,7 +1127,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> User details </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminGetUserAsync(String id, final ApiCallback<User> _callback) throws ApiException {
+    public okhttp3.Call adminGetUserAsync(@javax.annotation.Nonnull String id, final ApiCallback<User> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = adminGetUserValidateBeforeCall(id, _callback);
         Type localVarReturnType = new TypeToken<User>(){}.getType();
@@ -1265,7 +1265,7 @@ public class AdminApi {
         <tr><td> 404 </td><td> Organization not found </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminInitializeWebhooksCall(String organizationId, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call adminInitializeWebhooksCall(@javax.annotation.Nonnull String organizationId, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1310,7 +1310,7 @@ public class AdminApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call adminInitializeWebhooksValidateBeforeCall(String organizationId, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call adminInitializeWebhooksValidateBeforeCall(@javax.annotation.Nonnull String organizationId, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'organizationId' is set
         if (organizationId == null) {
             throw new ApiException("Missing the required parameter 'organizationId' when calling adminInitializeWebhooks(Async)");
@@ -1333,7 +1333,7 @@ public class AdminApi {
         <tr><td> 404 </td><td> Organization not found </td><td>  -  </td></tr>
      </table>
      */
-    public void adminInitializeWebhooks(String organizationId) throws ApiException {
+    public void adminInitializeWebhooks(@javax.annotation.Nonnull String organizationId) throws ApiException {
         adminInitializeWebhooksWithHttpInfo(organizationId);
     }
 
@@ -1351,7 +1351,7 @@ public class AdminApi {
         <tr><td> 404 </td><td> Organization not found </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> adminInitializeWebhooksWithHttpInfo(String organizationId) throws ApiException {
+    public ApiResponse<Void> adminInitializeWebhooksWithHttpInfo(@javax.annotation.Nonnull String organizationId) throws ApiException {
         okhttp3.Call localVarCall = adminInitializeWebhooksValidateBeforeCall(organizationId, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1371,7 +1371,7 @@ public class AdminApi {
         <tr><td> 404 </td><td> Organization not found </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminInitializeWebhooksAsync(String organizationId, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call adminInitializeWebhooksAsync(@javax.annotation.Nonnull String organizationId, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = adminInitializeWebhooksValidateBeforeCall(organizationId, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -1390,7 +1390,7 @@ public class AdminApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminListRunnersCall(String regionId, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call adminListRunnersCall(@javax.annotation.Nullable String regionId, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1439,7 +1439,7 @@ public class AdminApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call adminListRunnersValidateBeforeCall(String regionId, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call adminListRunnersValidateBeforeCall(@javax.annotation.Nullable String regionId, final ApiCallback _callback) throws ApiException {
         return adminListRunnersCall(regionId, _callback);
 
     }
@@ -1457,7 +1457,7 @@ public class AdminApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public List<RunnerFull> adminListRunners(String regionId) throws ApiException {
+    public List<RunnerFull> adminListRunners(@javax.annotation.Nullable String regionId) throws ApiException {
         ApiResponse<List<RunnerFull>> localVarResp = adminListRunnersWithHttpInfo(regionId);
         return localVarResp.getData();
     }
@@ -1475,7 +1475,7 @@ public class AdminApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<RunnerFull>> adminListRunnersWithHttpInfo(String regionId) throws ApiException {
+    public ApiResponse<List<RunnerFull>> adminListRunnersWithHttpInfo(@javax.annotation.Nullable String regionId) throws ApiException {
         okhttp3.Call localVarCall = adminListRunnersValidateBeforeCall(regionId, null);
         Type localVarReturnType = new TypeToken<List<RunnerFull>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1495,7 +1495,7 @@ public class AdminApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminListRunnersAsync(String regionId, final ApiCallback<List<RunnerFull>> _callback) throws ApiException {
+    public okhttp3.Call adminListRunnersAsync(@javax.annotation.Nullable String regionId, final ApiCallback<List<RunnerFull>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = adminListRunnersValidateBeforeCall(regionId, _callback);
         Type localVarReturnType = new TypeToken<List<RunnerFull>>(){}.getType();
@@ -1627,7 +1627,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Recovery initiated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminRecoverSandboxCall(String sandboxId, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call adminRecoverSandboxCall(@javax.annotation.Nonnull String sandboxId, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1673,7 +1673,7 @@ public class AdminApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call adminRecoverSandboxValidateBeforeCall(String sandboxId, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call adminRecoverSandboxValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling adminRecoverSandbox(Async)");
@@ -1696,7 +1696,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Recovery initiated </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox adminRecoverSandbox(String sandboxId) throws ApiException {
+    public Sandbox adminRecoverSandbox(@javax.annotation.Nonnull String sandboxId) throws ApiException {
         ApiResponse<Sandbox> localVarResp = adminRecoverSandboxWithHttpInfo(sandboxId);
         return localVarResp.getData();
     }
@@ -1714,7 +1714,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Recovery initiated </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> adminRecoverSandboxWithHttpInfo(String sandboxId) throws ApiException {
+    public ApiResponse<Sandbox> adminRecoverSandboxWithHttpInfo(@javax.annotation.Nonnull String sandboxId) throws ApiException {
         okhttp3.Call localVarCall = adminRecoverSandboxValidateBeforeCall(sandboxId, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1734,7 +1734,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Recovery initiated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminRecoverSandboxAsync(String sandboxId, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call adminRecoverSandboxAsync(@javax.annotation.Nonnull String sandboxId, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = adminRecoverSandboxValidateBeforeCall(sandboxId, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -1754,7 +1754,7 @@ public class AdminApi {
         <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminRegenerateKeyPairCall(String id, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call adminRegenerateKeyPairCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1799,7 +1799,7 @@ public class AdminApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call adminRegenerateKeyPairValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call adminRegenerateKeyPairValidateBeforeCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling adminRegenerateKeyPair(Async)");
@@ -1821,7 +1821,7 @@ public class AdminApi {
         <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public void adminRegenerateKeyPair(String id) throws ApiException {
+    public void adminRegenerateKeyPair(@javax.annotation.Nonnull String id) throws ApiException {
         adminRegenerateKeyPairWithHttpInfo(id);
     }
 
@@ -1838,7 +1838,7 @@ public class AdminApi {
         <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> adminRegenerateKeyPairWithHttpInfo(String id) throws ApiException {
+    public ApiResponse<Void> adminRegenerateKeyPairWithHttpInfo(@javax.annotation.Nonnull String id) throws ApiException {
         okhttp3.Call localVarCall = adminRegenerateKeyPairValidateBeforeCall(id, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1857,7 +1857,7 @@ public class AdminApi {
         <tr><td> 201 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminRegenerateKeyPairAsync(String id, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call adminRegenerateKeyPairAsync(@javax.annotation.Nonnull String id, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = adminRegenerateKeyPairValidateBeforeCall(id, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -1877,7 +1877,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Webhook message sent successfully </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminSendWebhookCall(String organizationId, SendWebhookDto sendWebhookDto, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call adminSendWebhookCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull SendWebhookDto sendWebhookDto, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1923,7 +1923,7 @@ public class AdminApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call adminSendWebhookValidateBeforeCall(String organizationId, SendWebhookDto sendWebhookDto, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call adminSendWebhookValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull SendWebhookDto sendWebhookDto, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'organizationId' is set
         if (organizationId == null) {
             throw new ApiException("Missing the required parameter 'organizationId' when calling adminSendWebhook(Async)");
@@ -1951,7 +1951,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Webhook message sent successfully </td><td>  -  </td></tr>
      </table>
      */
-    public void adminSendWebhook(String organizationId, SendWebhookDto sendWebhookDto) throws ApiException {
+    public void adminSendWebhook(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull SendWebhookDto sendWebhookDto) throws ApiException {
         adminSendWebhookWithHttpInfo(organizationId, sendWebhookDto);
     }
 
@@ -1969,7 +1969,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Webhook message sent successfully </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> adminSendWebhookWithHttpInfo(String organizationId, SendWebhookDto sendWebhookDto) throws ApiException {
+    public ApiResponse<Void> adminSendWebhookWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull SendWebhookDto sendWebhookDto) throws ApiException {
         okhttp3.Call localVarCall = adminSendWebhookValidateBeforeCall(organizationId, sendWebhookDto, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1989,7 +1989,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Webhook message sent successfully </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminSendWebhookAsync(String organizationId, SendWebhookDto sendWebhookDto, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call adminSendWebhookAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull SendWebhookDto sendWebhookDto, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = adminSendWebhookValidateBeforeCall(organizationId, sendWebhookDto, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -2008,7 +2008,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> The docker registry has been set as default. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminSetDefaultRegistryCall(String id, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call adminSetDefaultRegistryCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2054,7 +2054,7 @@ public class AdminApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call adminSetDefaultRegistryValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call adminSetDefaultRegistryValidateBeforeCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling adminSetDefaultRegistry(Async)");
@@ -2077,7 +2077,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> The docker registry has been set as default. </td><td>  -  </td></tr>
      </table>
      */
-    public DockerRegistry adminSetDefaultRegistry(String id) throws ApiException {
+    public DockerRegistry adminSetDefaultRegistry(@javax.annotation.Nonnull String id) throws ApiException {
         ApiResponse<DockerRegistry> localVarResp = adminSetDefaultRegistryWithHttpInfo(id);
         return localVarResp.getData();
     }
@@ -2095,7 +2095,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> The docker registry has been set as default. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<DockerRegistry> adminSetDefaultRegistryWithHttpInfo(String id) throws ApiException {
+    public ApiResponse<DockerRegistry> adminSetDefaultRegistryWithHttpInfo(@javax.annotation.Nonnull String id) throws ApiException {
         okhttp3.Call localVarCall = adminSetDefaultRegistryValidateBeforeCall(id, null);
         Type localVarReturnType = new TypeToken<DockerRegistry>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2115,7 +2115,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> The docker registry has been set as default. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminSetDefaultRegistryAsync(String id, final ApiCallback<DockerRegistry> _callback) throws ApiException {
+    public okhttp3.Call adminSetDefaultRegistryAsync(@javax.annotation.Nonnull String id, final ApiCallback<DockerRegistry> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = adminSetDefaultRegistryValidateBeforeCall(id, _callback);
         Type localVarReturnType = new TypeToken<DockerRegistry>(){}.getType();
@@ -2136,7 +2136,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Snapshot general status has been set </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminSetSnapshotGeneralStatusCall(String id, SetSnapshotGeneralStatusDto setSnapshotGeneralStatusDto, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call adminSetSnapshotGeneralStatusCall(@javax.annotation.Nonnull String id, @javax.annotation.Nonnull SetSnapshotGeneralStatusDto setSnapshotGeneralStatusDto, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2183,7 +2183,7 @@ public class AdminApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call adminSetSnapshotGeneralStatusValidateBeforeCall(String id, SetSnapshotGeneralStatusDto setSnapshotGeneralStatusDto, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call adminSetSnapshotGeneralStatusValidateBeforeCall(@javax.annotation.Nonnull String id, @javax.annotation.Nonnull SetSnapshotGeneralStatusDto setSnapshotGeneralStatusDto, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling adminSetSnapshotGeneralStatus(Async)");
@@ -2212,7 +2212,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Snapshot general status has been set </td><td>  -  </td></tr>
      </table>
      */
-    public SnapshotDto adminSetSnapshotGeneralStatus(String id, SetSnapshotGeneralStatusDto setSnapshotGeneralStatusDto) throws ApiException {
+    public SnapshotDto adminSetSnapshotGeneralStatus(@javax.annotation.Nonnull String id, @javax.annotation.Nonnull SetSnapshotGeneralStatusDto setSnapshotGeneralStatusDto) throws ApiException {
         ApiResponse<SnapshotDto> localVarResp = adminSetSnapshotGeneralStatusWithHttpInfo(id, setSnapshotGeneralStatusDto);
         return localVarResp.getData();
     }
@@ -2231,7 +2231,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Snapshot general status has been set </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<SnapshotDto> adminSetSnapshotGeneralStatusWithHttpInfo(String id, SetSnapshotGeneralStatusDto setSnapshotGeneralStatusDto) throws ApiException {
+    public ApiResponse<SnapshotDto> adminSetSnapshotGeneralStatusWithHttpInfo(@javax.annotation.Nonnull String id, @javax.annotation.Nonnull SetSnapshotGeneralStatusDto setSnapshotGeneralStatusDto) throws ApiException {
         okhttp3.Call localVarCall = adminSetSnapshotGeneralStatusValidateBeforeCall(id, setSnapshotGeneralStatusDto, null);
         Type localVarReturnType = new TypeToken<SnapshotDto>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2252,7 +2252,7 @@ public class AdminApi {
         <tr><td> 200 </td><td> Snapshot general status has been set </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminSetSnapshotGeneralStatusAsync(String id, SetSnapshotGeneralStatusDto setSnapshotGeneralStatusDto, final ApiCallback<SnapshotDto> _callback) throws ApiException {
+    public okhttp3.Call adminSetSnapshotGeneralStatusAsync(@javax.annotation.Nonnull String id, @javax.annotation.Nonnull SetSnapshotGeneralStatusDto setSnapshotGeneralStatusDto, final ApiCallback<SnapshotDto> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = adminSetSnapshotGeneralStatusValidateBeforeCall(id, setSnapshotGeneralStatusDto, _callback);
         Type localVarReturnType = new TypeToken<SnapshotDto>(){}.getType();
@@ -2272,7 +2272,7 @@ public class AdminApi {
         <tr><td> 204 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminUpdateRunnerSchedulingCall(String id, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call adminUpdateRunnerSchedulingCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2317,7 +2317,7 @@ public class AdminApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call adminUpdateRunnerSchedulingValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call adminUpdateRunnerSchedulingValidateBeforeCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling adminUpdateRunnerScheduling(Async)");
@@ -2339,7 +2339,7 @@ public class AdminApi {
         <tr><td> 204 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public void adminUpdateRunnerScheduling(String id) throws ApiException {
+    public void adminUpdateRunnerScheduling(@javax.annotation.Nonnull String id) throws ApiException {
         adminUpdateRunnerSchedulingWithHttpInfo(id);
     }
 
@@ -2356,7 +2356,7 @@ public class AdminApi {
         <tr><td> 204 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> adminUpdateRunnerSchedulingWithHttpInfo(String id) throws ApiException {
+    public ApiResponse<Void> adminUpdateRunnerSchedulingWithHttpInfo(@javax.annotation.Nonnull String id) throws ApiException {
         okhttp3.Call localVarCall = adminUpdateRunnerSchedulingValidateBeforeCall(id, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -2375,7 +2375,7 @@ public class AdminApi {
         <tr><td> 204 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call adminUpdateRunnerSchedulingAsync(String id, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call adminUpdateRunnerSchedulingAsync(@javax.annotation.Nonnull String id, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = adminUpdateRunnerSchedulingValidateBeforeCall(id, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);

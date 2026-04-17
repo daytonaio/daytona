@@ -14,47 +14,12 @@
 
 
 
-/**
- * 
- * @export
- * @interface DisplayInfo
- */
 export interface DisplayInfo {
-    /**
-     * 
-     * @type {number}
-     * @memberof DisplayInfo
-     */
     'height'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof DisplayInfo
-     */
     'id'?: number;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof DisplayInfo
-     */
     'isActive'?: boolean;
-    /**
-     * 
-     * @type {number}
-     * @memberof DisplayInfo
-     */
     'width'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof DisplayInfo
-     */
     'x'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof DisplayInfo
-     */
     'y'?: number;
 }
 

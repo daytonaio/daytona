@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -33,7 +33,6 @@ import type { LspServerRequest } from '../models';
 import type { LspSymbol } from '../models';
 /**
  * LspApi - axios parameter creator
- * @export
  */
 export const LspApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -59,9 +58,8 @@ export const LspApiAxiosParamCreator = function (configuration?: Configuration) 
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -95,8 +93,6 @@ export const LspApiAxiosParamCreator = function (configuration?: Configuration) 
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -131,8 +127,6 @@ export const LspApiAxiosParamCreator = function (configuration?: Configuration) 
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -185,8 +179,8 @@ export const LspApiAxiosParamCreator = function (configuration?: Configuration) 
                 localVarQueryParameter['uri'] = uri;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -218,8 +212,6 @@ export const LspApiAxiosParamCreator = function (configuration?: Configuration) 
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -254,8 +246,6 @@ export const LspApiAxiosParamCreator = function (configuration?: Configuration) 
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -308,8 +298,8 @@ export const LspApiAxiosParamCreator = function (configuration?: Configuration) 
                 localVarQueryParameter['pathToProject'] = pathToProject;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -324,7 +314,6 @@ export const LspApiAxiosParamCreator = function (configuration?: Configuration) 
 
 /**
  * LspApi - functional programming interface
- * @export
  */
 export const LspApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = LspApiAxiosParamCreator(configuration)
@@ -429,7 +418,6 @@ export const LspApiFp = function(configuration?: Configuration) {
 
 /**
  * LspApi - factory interface
- * @export
  */
 export const LspApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = LspApiFp(configuration)
@@ -513,9 +501,6 @@ export const LspApiFactory = function (configuration?: Configuration, basePath?:
 
 /**
  * LspApi - object-oriented interface
- * @export
- * @class LspApi
- * @extends {BaseAPI}
  */
 export class LspApi extends BaseAPI {
     /**
@@ -524,7 +509,6 @@ export class LspApi extends BaseAPI {
      * @param {LspCompletionParams} request Completion request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof LspApi
      */
     public completions(request: LspCompletionParams, options?: RawAxiosRequestConfig) {
         return LspApiFp(this.configuration).completions(request, options).then((request) => request(this.axios, this.basePath));
@@ -536,7 +520,6 @@ export class LspApi extends BaseAPI {
      * @param {LspDocumentRequest} request Document request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof LspApi
      */
     public didClose(request: LspDocumentRequest, options?: RawAxiosRequestConfig) {
         return LspApiFp(this.configuration).didClose(request, options).then((request) => request(this.axios, this.basePath));
@@ -548,7 +531,6 @@ export class LspApi extends BaseAPI {
      * @param {LspDocumentRequest} request Document request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof LspApi
      */
     public didOpen(request: LspDocumentRequest, options?: RawAxiosRequestConfig) {
         return LspApiFp(this.configuration).didOpen(request, options).then((request) => request(this.axios, this.basePath));
@@ -562,7 +544,6 @@ export class LspApi extends BaseAPI {
      * @param {string} uri Document URI
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof LspApi
      */
     public documentSymbols(languageId: string, pathToProject: string, uri: string, options?: RawAxiosRequestConfig) {
         return LspApiFp(this.configuration).documentSymbols(languageId, pathToProject, uri, options).then((request) => request(this.axios, this.basePath));
@@ -574,7 +555,6 @@ export class LspApi extends BaseAPI {
      * @param {LspServerRequest} request LSP server request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof LspApi
      */
     public start(request: LspServerRequest, options?: RawAxiosRequestConfig) {
         return LspApiFp(this.configuration).start(request, options).then((request) => request(this.axios, this.basePath));
@@ -586,7 +566,6 @@ export class LspApi extends BaseAPI {
      * @param {LspServerRequest} request LSP server request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof LspApi
      */
     public stop(request: LspServerRequest, options?: RawAxiosRequestConfig) {
         return LspApiFp(this.configuration).stop(request, options).then((request) => request(this.axios, this.basePath));
@@ -600,7 +579,6 @@ export class LspApi extends BaseAPI {
      * @param {string} pathToProject Path to project
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof LspApi
      */
     public workspaceSymbols(query: string, languageId: string, pathToProject: string, options?: RawAxiosRequestConfig) {
         return LspApiFp(this.configuration).workspaceSymbols(query, languageId, pathToProject, options).then((request) => request(this.axios, this.basePath));

@@ -111,7 +111,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call clickCall(MouseClickRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call clickCall(@javax.annotation.Nonnull MouseClickRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -157,7 +157,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call clickValidateBeforeCall(MouseClickRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call clickValidateBeforeCall(@javax.annotation.Nonnull MouseClickRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling click(Async)");
@@ -180,7 +180,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public MouseClickResponse click(MouseClickRequest request) throws ApiException {
+    public MouseClickResponse click(@javax.annotation.Nonnull MouseClickRequest request) throws ApiException {
         ApiResponse<MouseClickResponse> localVarResp = clickWithHttpInfo(request);
         return localVarResp.getData();
     }
@@ -198,7 +198,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<MouseClickResponse> clickWithHttpInfo(MouseClickRequest request) throws ApiException {
+    public ApiResponse<MouseClickResponse> clickWithHttpInfo(@javax.annotation.Nonnull MouseClickRequest request) throws ApiException {
         okhttp3.Call localVarCall = clickValidateBeforeCall(request, null);
         Type localVarReturnType = new TypeToken<MouseClickResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -218,7 +218,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call clickAsync(MouseClickRequest request, final ApiCallback<MouseClickResponse> _callback) throws ApiException {
+    public okhttp3.Call clickAsync(@javax.annotation.Nonnull MouseClickRequest request, final ApiCallback<MouseClickResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = clickValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<MouseClickResponse>(){}.getType();
@@ -241,7 +241,7 @@ public class ComputerUseApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteRecordingCall(String id, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deleteRecordingCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -287,7 +287,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deleteRecordingValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deleteRecordingValidateBeforeCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling deleteRecording(Async)");
@@ -312,7 +312,7 @@ public class ComputerUseApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public void deleteRecording(String id) throws ApiException {
+    public void deleteRecording(@javax.annotation.Nonnull String id) throws ApiException {
         deleteRecordingWithHttpInfo(id);
     }
 
@@ -332,7 +332,7 @@ public class ComputerUseApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> deleteRecordingWithHttpInfo(String id) throws ApiException {
+    public ApiResponse<Void> deleteRecordingWithHttpInfo(@javax.annotation.Nonnull String id) throws ApiException {
         okhttp3.Call localVarCall = deleteRecordingValidateBeforeCall(id, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -354,7 +354,7 @@ public class ComputerUseApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteRecordingAsync(String id, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call deleteRecordingAsync(@javax.annotation.Nonnull String id, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deleteRecordingValidateBeforeCall(id, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -375,7 +375,7 @@ public class ComputerUseApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call downloadRecordingCall(String id, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call downloadRecordingCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -421,7 +421,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call downloadRecordingValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call downloadRecordingValidateBeforeCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling downloadRecording(Async)");
@@ -446,7 +446,7 @@ public class ComputerUseApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public File downloadRecording(String id) throws ApiException {
+    public File downloadRecording(@javax.annotation.Nonnull String id) throws ApiException {
         ApiResponse<File> localVarResp = downloadRecordingWithHttpInfo(id);
         return localVarResp.getData();
     }
@@ -466,7 +466,7 @@ public class ComputerUseApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<File> downloadRecordingWithHttpInfo(String id) throws ApiException {
+    public ApiResponse<File> downloadRecordingWithHttpInfo(@javax.annotation.Nonnull String id) throws ApiException {
         okhttp3.Call localVarCall = downloadRecordingValidateBeforeCall(id, null);
         Type localVarReturnType = new TypeToken<File>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -488,7 +488,7 @@ public class ComputerUseApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call downloadRecordingAsync(String id, final ApiCallback<File> _callback) throws ApiException {
+    public okhttp3.Call downloadRecordingAsync(@javax.annotation.Nonnull String id, final ApiCallback<File> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = downloadRecordingValidateBeforeCall(id, _callback);
         Type localVarReturnType = new TypeToken<File>(){}.getType();
@@ -508,7 +508,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call dragCall(MouseDragRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call dragCall(@javax.annotation.Nonnull MouseDragRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -554,7 +554,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call dragValidateBeforeCall(MouseDragRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call dragValidateBeforeCall(@javax.annotation.Nonnull MouseDragRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling drag(Async)");
@@ -577,7 +577,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public MouseDragResponse drag(MouseDragRequest request) throws ApiException {
+    public MouseDragResponse drag(@javax.annotation.Nonnull MouseDragRequest request) throws ApiException {
         ApiResponse<MouseDragResponse> localVarResp = dragWithHttpInfo(request);
         return localVarResp.getData();
     }
@@ -595,7 +595,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<MouseDragResponse> dragWithHttpInfo(MouseDragRequest request) throws ApiException {
+    public ApiResponse<MouseDragResponse> dragWithHttpInfo(@javax.annotation.Nonnull MouseDragRequest request) throws ApiException {
         okhttp3.Call localVarCall = dragValidateBeforeCall(request, null);
         Type localVarReturnType = new TypeToken<MouseDragResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -615,7 +615,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call dragAsync(MouseDragRequest request, final ApiCallback<MouseDragResponse> _callback) throws ApiException {
+    public okhttp3.Call dragAsync(@javax.annotation.Nonnull MouseDragRequest request, final ApiCallback<MouseDragResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = dragValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<MouseDragResponse>(){}.getType();
@@ -1103,7 +1103,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getProcessErrorsCall(String processName, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getProcessErrorsCall(@javax.annotation.Nonnull String processName, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1149,7 +1149,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getProcessErrorsValidateBeforeCall(String processName, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getProcessErrorsValidateBeforeCall(@javax.annotation.Nonnull String processName, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'processName' is set
         if (processName == null) {
             throw new ApiException("Missing the required parameter 'processName' when calling getProcessErrors(Async)");
@@ -1172,7 +1172,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ProcessErrorsResponse getProcessErrors(String processName) throws ApiException {
+    public ProcessErrorsResponse getProcessErrors(@javax.annotation.Nonnull String processName) throws ApiException {
         ApiResponse<ProcessErrorsResponse> localVarResp = getProcessErrorsWithHttpInfo(processName);
         return localVarResp.getData();
     }
@@ -1190,7 +1190,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ProcessErrorsResponse> getProcessErrorsWithHttpInfo(String processName) throws ApiException {
+    public ApiResponse<ProcessErrorsResponse> getProcessErrorsWithHttpInfo(@javax.annotation.Nonnull String processName) throws ApiException {
         okhttp3.Call localVarCall = getProcessErrorsValidateBeforeCall(processName, null);
         Type localVarReturnType = new TypeToken<ProcessErrorsResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1210,7 +1210,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getProcessErrorsAsync(String processName, final ApiCallback<ProcessErrorsResponse> _callback) throws ApiException {
+    public okhttp3.Call getProcessErrorsAsync(@javax.annotation.Nonnull String processName, final ApiCallback<ProcessErrorsResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getProcessErrorsValidateBeforeCall(processName, _callback);
         Type localVarReturnType = new TypeToken<ProcessErrorsResponse>(){}.getType();
@@ -1230,7 +1230,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getProcessLogsCall(String processName, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getProcessLogsCall(@javax.annotation.Nonnull String processName, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1276,7 +1276,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getProcessLogsValidateBeforeCall(String processName, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getProcessLogsValidateBeforeCall(@javax.annotation.Nonnull String processName, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'processName' is set
         if (processName == null) {
             throw new ApiException("Missing the required parameter 'processName' when calling getProcessLogs(Async)");
@@ -1299,7 +1299,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ProcessLogsResponse getProcessLogs(String processName) throws ApiException {
+    public ProcessLogsResponse getProcessLogs(@javax.annotation.Nonnull String processName) throws ApiException {
         ApiResponse<ProcessLogsResponse> localVarResp = getProcessLogsWithHttpInfo(processName);
         return localVarResp.getData();
     }
@@ -1317,7 +1317,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ProcessLogsResponse> getProcessLogsWithHttpInfo(String processName) throws ApiException {
+    public ApiResponse<ProcessLogsResponse> getProcessLogsWithHttpInfo(@javax.annotation.Nonnull String processName) throws ApiException {
         okhttp3.Call localVarCall = getProcessLogsValidateBeforeCall(processName, null);
         Type localVarReturnType = new TypeToken<ProcessLogsResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1337,7 +1337,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getProcessLogsAsync(String processName, final ApiCallback<ProcessLogsResponse> _callback) throws ApiException {
+    public okhttp3.Call getProcessLogsAsync(@javax.annotation.Nonnull String processName, final ApiCallback<ProcessLogsResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getProcessLogsValidateBeforeCall(processName, _callback);
         Type localVarReturnType = new TypeToken<ProcessLogsResponse>(){}.getType();
@@ -1357,7 +1357,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getProcessStatusCall(String processName, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getProcessStatusCall(@javax.annotation.Nonnull String processName, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1403,7 +1403,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getProcessStatusValidateBeforeCall(String processName, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getProcessStatusValidateBeforeCall(@javax.annotation.Nonnull String processName, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'processName' is set
         if (processName == null) {
             throw new ApiException("Missing the required parameter 'processName' when calling getProcessStatus(Async)");
@@ -1426,7 +1426,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ProcessStatusResponse getProcessStatus(String processName) throws ApiException {
+    public ProcessStatusResponse getProcessStatus(@javax.annotation.Nonnull String processName) throws ApiException {
         ApiResponse<ProcessStatusResponse> localVarResp = getProcessStatusWithHttpInfo(processName);
         return localVarResp.getData();
     }
@@ -1444,7 +1444,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ProcessStatusResponse> getProcessStatusWithHttpInfo(String processName) throws ApiException {
+    public ApiResponse<ProcessStatusResponse> getProcessStatusWithHttpInfo(@javax.annotation.Nonnull String processName) throws ApiException {
         okhttp3.Call localVarCall = getProcessStatusValidateBeforeCall(processName, null);
         Type localVarReturnType = new TypeToken<ProcessStatusResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1464,7 +1464,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getProcessStatusAsync(String processName, final ApiCallback<ProcessStatusResponse> _callback) throws ApiException {
+    public okhttp3.Call getProcessStatusAsync(@javax.annotation.Nonnull String processName, final ApiCallback<ProcessStatusResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getProcessStatusValidateBeforeCall(processName, _callback);
         Type localVarReturnType = new TypeToken<ProcessStatusResponse>(){}.getType();
@@ -1486,7 +1486,7 @@ public class ComputerUseApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getRecordingCall(String id, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getRecordingCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1532,7 +1532,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getRecordingValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getRecordingValidateBeforeCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling getRecording(Async)");
@@ -1557,7 +1557,7 @@ public class ComputerUseApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public Recording getRecording(String id) throws ApiException {
+    public Recording getRecording(@javax.annotation.Nonnull String id) throws ApiException {
         ApiResponse<Recording> localVarResp = getRecordingWithHttpInfo(id);
         return localVarResp.getData();
     }
@@ -1577,7 +1577,7 @@ public class ComputerUseApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Recording> getRecordingWithHttpInfo(String id) throws ApiException {
+    public ApiResponse<Recording> getRecordingWithHttpInfo(@javax.annotation.Nonnull String id) throws ApiException {
         okhttp3.Call localVarCall = getRecordingValidateBeforeCall(id, null);
         Type localVarReturnType = new TypeToken<Recording>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1599,7 +1599,7 @@ public class ComputerUseApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getRecordingAsync(String id, final ApiCallback<Recording> _callback) throws ApiException {
+    public okhttp3.Call getRecordingAsync(@javax.annotation.Nonnull String id, final ApiCallback<Recording> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getRecordingValidateBeforeCall(id, _callback);
         Type localVarReturnType = new TypeToken<Recording>(){}.getType();
@@ -1857,7 +1857,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call moveMouseCall(MouseMoveRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call moveMouseCall(@javax.annotation.Nonnull MouseMoveRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1903,7 +1903,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call moveMouseValidateBeforeCall(MouseMoveRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call moveMouseValidateBeforeCall(@javax.annotation.Nonnull MouseMoveRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling moveMouse(Async)");
@@ -1926,7 +1926,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public MousePositionResponse moveMouse(MouseMoveRequest request) throws ApiException {
+    public MousePositionResponse moveMouse(@javax.annotation.Nonnull MouseMoveRequest request) throws ApiException {
         ApiResponse<MousePositionResponse> localVarResp = moveMouseWithHttpInfo(request);
         return localVarResp.getData();
     }
@@ -1944,7 +1944,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<MousePositionResponse> moveMouseWithHttpInfo(MouseMoveRequest request) throws ApiException {
+    public ApiResponse<MousePositionResponse> moveMouseWithHttpInfo(@javax.annotation.Nonnull MouseMoveRequest request) throws ApiException {
         okhttp3.Call localVarCall = moveMouseValidateBeforeCall(request, null);
         Type localVarReturnType = new TypeToken<MousePositionResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1964,7 +1964,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call moveMouseAsync(MouseMoveRequest request, final ApiCallback<MousePositionResponse> _callback) throws ApiException {
+    public okhttp3.Call moveMouseAsync(@javax.annotation.Nonnull MouseMoveRequest request, final ApiCallback<MousePositionResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = moveMouseValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<MousePositionResponse>(){}.getType();
@@ -1984,7 +1984,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call pressHotkeyCall(KeyboardHotkeyRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call pressHotkeyCall(@javax.annotation.Nonnull KeyboardHotkeyRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2030,7 +2030,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call pressHotkeyValidateBeforeCall(KeyboardHotkeyRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call pressHotkeyValidateBeforeCall(@javax.annotation.Nonnull KeyboardHotkeyRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling pressHotkey(Async)");
@@ -2053,7 +2053,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public Object pressHotkey(KeyboardHotkeyRequest request) throws ApiException {
+    public Object pressHotkey(@javax.annotation.Nonnull KeyboardHotkeyRequest request) throws ApiException {
         ApiResponse<Object> localVarResp = pressHotkeyWithHttpInfo(request);
         return localVarResp.getData();
     }
@@ -2071,7 +2071,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Object> pressHotkeyWithHttpInfo(KeyboardHotkeyRequest request) throws ApiException {
+    public ApiResponse<Object> pressHotkeyWithHttpInfo(@javax.annotation.Nonnull KeyboardHotkeyRequest request) throws ApiException {
         okhttp3.Call localVarCall = pressHotkeyValidateBeforeCall(request, null);
         Type localVarReturnType = new TypeToken<Object>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2091,7 +2091,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call pressHotkeyAsync(KeyboardHotkeyRequest request, final ApiCallback<Object> _callback) throws ApiException {
+    public okhttp3.Call pressHotkeyAsync(@javax.annotation.Nonnull KeyboardHotkeyRequest request, final ApiCallback<Object> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = pressHotkeyValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<Object>(){}.getType();
@@ -2111,7 +2111,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call pressKeyCall(KeyboardPressRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call pressKeyCall(@javax.annotation.Nonnull KeyboardPressRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2157,7 +2157,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call pressKeyValidateBeforeCall(KeyboardPressRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call pressKeyValidateBeforeCall(@javax.annotation.Nonnull KeyboardPressRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling pressKey(Async)");
@@ -2180,7 +2180,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public Object pressKey(KeyboardPressRequest request) throws ApiException {
+    public Object pressKey(@javax.annotation.Nonnull KeyboardPressRequest request) throws ApiException {
         ApiResponse<Object> localVarResp = pressKeyWithHttpInfo(request);
         return localVarResp.getData();
     }
@@ -2198,7 +2198,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Object> pressKeyWithHttpInfo(KeyboardPressRequest request) throws ApiException {
+    public ApiResponse<Object> pressKeyWithHttpInfo(@javax.annotation.Nonnull KeyboardPressRequest request) throws ApiException {
         okhttp3.Call localVarCall = pressKeyValidateBeforeCall(request, null);
         Type localVarReturnType = new TypeToken<Object>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2218,7 +2218,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call pressKeyAsync(KeyboardPressRequest request, final ApiCallback<Object> _callback) throws ApiException {
+    public okhttp3.Call pressKeyAsync(@javax.annotation.Nonnull KeyboardPressRequest request, final ApiCallback<Object> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = pressKeyValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<Object>(){}.getType();
@@ -2238,7 +2238,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call restartProcessCall(String processName, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call restartProcessCall(@javax.annotation.Nonnull String processName, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2284,7 +2284,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call restartProcessValidateBeforeCall(String processName, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call restartProcessValidateBeforeCall(@javax.annotation.Nonnull String processName, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'processName' is set
         if (processName == null) {
             throw new ApiException("Missing the required parameter 'processName' when calling restartProcess(Async)");
@@ -2307,7 +2307,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ProcessRestartResponse restartProcess(String processName) throws ApiException {
+    public ProcessRestartResponse restartProcess(@javax.annotation.Nonnull String processName) throws ApiException {
         ApiResponse<ProcessRestartResponse> localVarResp = restartProcessWithHttpInfo(processName);
         return localVarResp.getData();
     }
@@ -2325,7 +2325,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ProcessRestartResponse> restartProcessWithHttpInfo(String processName) throws ApiException {
+    public ApiResponse<ProcessRestartResponse> restartProcessWithHttpInfo(@javax.annotation.Nonnull String processName) throws ApiException {
         okhttp3.Call localVarCall = restartProcessValidateBeforeCall(processName, null);
         Type localVarReturnType = new TypeToken<ProcessRestartResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2345,7 +2345,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call restartProcessAsync(String processName, final ApiCallback<ProcessRestartResponse> _callback) throws ApiException {
+    public okhttp3.Call restartProcessAsync(@javax.annotation.Nonnull String processName, final ApiCallback<ProcessRestartResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = restartProcessValidateBeforeCall(processName, _callback);
         Type localVarReturnType = new TypeToken<ProcessRestartResponse>(){}.getType();
@@ -2365,7 +2365,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call scrollCall(MouseScrollRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call scrollCall(@javax.annotation.Nonnull MouseScrollRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2411,7 +2411,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call scrollValidateBeforeCall(MouseScrollRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call scrollValidateBeforeCall(@javax.annotation.Nonnull MouseScrollRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling scroll(Async)");
@@ -2434,7 +2434,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ScrollResponse scroll(MouseScrollRequest request) throws ApiException {
+    public ScrollResponse scroll(@javax.annotation.Nonnull MouseScrollRequest request) throws ApiException {
         ApiResponse<ScrollResponse> localVarResp = scrollWithHttpInfo(request);
         return localVarResp.getData();
     }
@@ -2452,7 +2452,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ScrollResponse> scrollWithHttpInfo(MouseScrollRequest request) throws ApiException {
+    public ApiResponse<ScrollResponse> scrollWithHttpInfo(@javax.annotation.Nonnull MouseScrollRequest request) throws ApiException {
         okhttp3.Call localVarCall = scrollValidateBeforeCall(request, null);
         Type localVarReturnType = new TypeToken<ScrollResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2472,7 +2472,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call scrollAsync(MouseScrollRequest request, final ApiCallback<ScrollResponse> _callback) throws ApiException {
+    public okhttp3.Call scrollAsync(@javax.annotation.Nonnull MouseScrollRequest request, final ApiCallback<ScrollResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = scrollValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<ScrollResponse>(){}.getType();
@@ -2611,7 +2611,7 @@ public class ComputerUseApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call startRecordingCall(StartRecordingRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call startRecordingCall(@javax.annotation.Nullable StartRecordingRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2657,7 +2657,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call startRecordingValidateBeforeCall(StartRecordingRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call startRecordingValidateBeforeCall(@javax.annotation.Nullable StartRecordingRequest request, final ApiCallback _callback) throws ApiException {
         return startRecordingCall(request, _callback);
 
     }
@@ -2677,7 +2677,7 @@ public class ComputerUseApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public Recording startRecording(StartRecordingRequest request) throws ApiException {
+    public Recording startRecording(@javax.annotation.Nullable StartRecordingRequest request) throws ApiException {
         ApiResponse<Recording> localVarResp = startRecordingWithHttpInfo(request);
         return localVarResp.getData();
     }
@@ -2697,7 +2697,7 @@ public class ComputerUseApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Recording> startRecordingWithHttpInfo(StartRecordingRequest request) throws ApiException {
+    public ApiResponse<Recording> startRecordingWithHttpInfo(@javax.annotation.Nullable StartRecordingRequest request) throws ApiException {
         okhttp3.Call localVarCall = startRecordingValidateBeforeCall(request, null);
         Type localVarReturnType = new TypeToken<Recording>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2719,7 +2719,7 @@ public class ComputerUseApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call startRecordingAsync(StartRecordingRequest request, final ApiCallback<Recording> _callback) throws ApiException {
+    public okhttp3.Call startRecordingAsync(@javax.annotation.Nullable StartRecordingRequest request, final ApiCallback<Recording> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = startRecordingValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<Recording>(){}.getType();
@@ -2858,7 +2858,7 @@ public class ComputerUseApi {
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call stopRecordingCall(StopRecordingRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call stopRecordingCall(@javax.annotation.Nonnull StopRecordingRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2904,7 +2904,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call stopRecordingValidateBeforeCall(StopRecordingRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call stopRecordingValidateBeforeCall(@javax.annotation.Nonnull StopRecordingRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling stopRecording(Async)");
@@ -2929,7 +2929,7 @@ public class ComputerUseApi {
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
      </table>
      */
-    public Recording stopRecording(StopRecordingRequest request) throws ApiException {
+    public Recording stopRecording(@javax.annotation.Nonnull StopRecordingRequest request) throws ApiException {
         ApiResponse<Recording> localVarResp = stopRecordingWithHttpInfo(request);
         return localVarResp.getData();
     }
@@ -2949,7 +2949,7 @@ public class ComputerUseApi {
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Recording> stopRecordingWithHttpInfo(StopRecordingRequest request) throws ApiException {
+    public ApiResponse<Recording> stopRecordingWithHttpInfo(@javax.annotation.Nonnull StopRecordingRequest request) throws ApiException {
         okhttp3.Call localVarCall = stopRecordingValidateBeforeCall(request, null);
         Type localVarReturnType = new TypeToken<Recording>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2971,7 +2971,7 @@ public class ComputerUseApi {
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call stopRecordingAsync(StopRecordingRequest request, final ApiCallback<Recording> _callback) throws ApiException {
+    public okhttp3.Call stopRecordingAsync(@javax.annotation.Nonnull StopRecordingRequest request, final ApiCallback<Recording> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = stopRecordingValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<Recording>(){}.getType();
@@ -2998,7 +2998,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call takeCompressedRegionScreenshotCall(Integer x, Integer y, Integer width, Integer height, Boolean showCursor, String format, Integer quality, BigDecimal scale, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call takeCompressedRegionScreenshotCall(@javax.annotation.Nonnull Integer x, @javax.annotation.Nonnull Integer y, @javax.annotation.Nonnull Integer width, @javax.annotation.Nonnull Integer height, @javax.annotation.Nullable Boolean showCursor, @javax.annotation.Nullable String format, @javax.annotation.Nullable Integer quality, @javax.annotation.Nullable BigDecimal scale, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3075,7 +3075,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call takeCompressedRegionScreenshotValidateBeforeCall(Integer x, Integer y, Integer width, Integer height, Boolean showCursor, String format, Integer quality, BigDecimal scale, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call takeCompressedRegionScreenshotValidateBeforeCall(@javax.annotation.Nonnull Integer x, @javax.annotation.Nonnull Integer y, @javax.annotation.Nonnull Integer width, @javax.annotation.Nonnull Integer height, @javax.annotation.Nullable Boolean showCursor, @javax.annotation.Nullable String format, @javax.annotation.Nullable Integer quality, @javax.annotation.Nullable BigDecimal scale, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'x' is set
         if (x == null) {
             throw new ApiException("Missing the required parameter 'x' when calling takeCompressedRegionScreenshot(Async)");
@@ -3120,7 +3120,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ScreenshotResponse takeCompressedRegionScreenshot(Integer x, Integer y, Integer width, Integer height, Boolean showCursor, String format, Integer quality, BigDecimal scale) throws ApiException {
+    public ScreenshotResponse takeCompressedRegionScreenshot(@javax.annotation.Nonnull Integer x, @javax.annotation.Nonnull Integer y, @javax.annotation.Nonnull Integer width, @javax.annotation.Nonnull Integer height, @javax.annotation.Nullable Boolean showCursor, @javax.annotation.Nullable String format, @javax.annotation.Nullable Integer quality, @javax.annotation.Nullable BigDecimal scale) throws ApiException {
         ApiResponse<ScreenshotResponse> localVarResp = takeCompressedRegionScreenshotWithHttpInfo(x, y, width, height, showCursor, format, quality, scale);
         return localVarResp.getData();
     }
@@ -3145,7 +3145,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ScreenshotResponse> takeCompressedRegionScreenshotWithHttpInfo(Integer x, Integer y, Integer width, Integer height, Boolean showCursor, String format, Integer quality, BigDecimal scale) throws ApiException {
+    public ApiResponse<ScreenshotResponse> takeCompressedRegionScreenshotWithHttpInfo(@javax.annotation.Nonnull Integer x, @javax.annotation.Nonnull Integer y, @javax.annotation.Nonnull Integer width, @javax.annotation.Nonnull Integer height, @javax.annotation.Nullable Boolean showCursor, @javax.annotation.Nullable String format, @javax.annotation.Nullable Integer quality, @javax.annotation.Nullable BigDecimal scale) throws ApiException {
         okhttp3.Call localVarCall = takeCompressedRegionScreenshotValidateBeforeCall(x, y, width, height, showCursor, format, quality, scale, null);
         Type localVarReturnType = new TypeToken<ScreenshotResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -3172,7 +3172,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call takeCompressedRegionScreenshotAsync(Integer x, Integer y, Integer width, Integer height, Boolean showCursor, String format, Integer quality, BigDecimal scale, final ApiCallback<ScreenshotResponse> _callback) throws ApiException {
+    public okhttp3.Call takeCompressedRegionScreenshotAsync(@javax.annotation.Nonnull Integer x, @javax.annotation.Nonnull Integer y, @javax.annotation.Nonnull Integer width, @javax.annotation.Nonnull Integer height, @javax.annotation.Nullable Boolean showCursor, @javax.annotation.Nullable String format, @javax.annotation.Nullable Integer quality, @javax.annotation.Nullable BigDecimal scale, final ApiCallback<ScreenshotResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = takeCompressedRegionScreenshotValidateBeforeCall(x, y, width, height, showCursor, format, quality, scale, _callback);
         Type localVarReturnType = new TypeToken<ScreenshotResponse>(){}.getType();
@@ -3195,7 +3195,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call takeCompressedScreenshotCall(Boolean showCursor, String format, Integer quality, BigDecimal scale, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call takeCompressedScreenshotCall(@javax.annotation.Nullable Boolean showCursor, @javax.annotation.Nullable String format, @javax.annotation.Nullable Integer quality, @javax.annotation.Nullable BigDecimal scale, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3256,7 +3256,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call takeCompressedScreenshotValidateBeforeCall(Boolean showCursor, String format, Integer quality, BigDecimal scale, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call takeCompressedScreenshotValidateBeforeCall(@javax.annotation.Nullable Boolean showCursor, @javax.annotation.Nullable String format, @javax.annotation.Nullable Integer quality, @javax.annotation.Nullable BigDecimal scale, final ApiCallback _callback) throws ApiException {
         return takeCompressedScreenshotCall(showCursor, format, quality, scale, _callback);
 
     }
@@ -3277,7 +3277,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ScreenshotResponse takeCompressedScreenshot(Boolean showCursor, String format, Integer quality, BigDecimal scale) throws ApiException {
+    public ScreenshotResponse takeCompressedScreenshot(@javax.annotation.Nullable Boolean showCursor, @javax.annotation.Nullable String format, @javax.annotation.Nullable Integer quality, @javax.annotation.Nullable BigDecimal scale) throws ApiException {
         ApiResponse<ScreenshotResponse> localVarResp = takeCompressedScreenshotWithHttpInfo(showCursor, format, quality, scale);
         return localVarResp.getData();
     }
@@ -3298,7 +3298,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ScreenshotResponse> takeCompressedScreenshotWithHttpInfo(Boolean showCursor, String format, Integer quality, BigDecimal scale) throws ApiException {
+    public ApiResponse<ScreenshotResponse> takeCompressedScreenshotWithHttpInfo(@javax.annotation.Nullable Boolean showCursor, @javax.annotation.Nullable String format, @javax.annotation.Nullable Integer quality, @javax.annotation.Nullable BigDecimal scale) throws ApiException {
         okhttp3.Call localVarCall = takeCompressedScreenshotValidateBeforeCall(showCursor, format, quality, scale, null);
         Type localVarReturnType = new TypeToken<ScreenshotResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -3321,7 +3321,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call takeCompressedScreenshotAsync(Boolean showCursor, String format, Integer quality, BigDecimal scale, final ApiCallback<ScreenshotResponse> _callback) throws ApiException {
+    public okhttp3.Call takeCompressedScreenshotAsync(@javax.annotation.Nullable Boolean showCursor, @javax.annotation.Nullable String format, @javax.annotation.Nullable Integer quality, @javax.annotation.Nullable BigDecimal scale, final ApiCallback<ScreenshotResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = takeCompressedScreenshotValidateBeforeCall(showCursor, format, quality, scale, _callback);
         Type localVarReturnType = new TypeToken<ScreenshotResponse>(){}.getType();
@@ -3345,7 +3345,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call takeRegionScreenshotCall(Integer x, Integer y, Integer width, Integer height, Boolean showCursor, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call takeRegionScreenshotCall(@javax.annotation.Nonnull Integer x, @javax.annotation.Nonnull Integer y, @javax.annotation.Nonnull Integer width, @javax.annotation.Nonnull Integer height, @javax.annotation.Nullable Boolean showCursor, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3410,7 +3410,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call takeRegionScreenshotValidateBeforeCall(Integer x, Integer y, Integer width, Integer height, Boolean showCursor, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call takeRegionScreenshotValidateBeforeCall(@javax.annotation.Nonnull Integer x, @javax.annotation.Nonnull Integer y, @javax.annotation.Nonnull Integer width, @javax.annotation.Nonnull Integer height, @javax.annotation.Nullable Boolean showCursor, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'x' is set
         if (x == null) {
             throw new ApiException("Missing the required parameter 'x' when calling takeRegionScreenshot(Async)");
@@ -3452,7 +3452,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ScreenshotResponse takeRegionScreenshot(Integer x, Integer y, Integer width, Integer height, Boolean showCursor) throws ApiException {
+    public ScreenshotResponse takeRegionScreenshot(@javax.annotation.Nonnull Integer x, @javax.annotation.Nonnull Integer y, @javax.annotation.Nonnull Integer width, @javax.annotation.Nonnull Integer height, @javax.annotation.Nullable Boolean showCursor) throws ApiException {
         ApiResponse<ScreenshotResponse> localVarResp = takeRegionScreenshotWithHttpInfo(x, y, width, height, showCursor);
         return localVarResp.getData();
     }
@@ -3474,7 +3474,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ScreenshotResponse> takeRegionScreenshotWithHttpInfo(Integer x, Integer y, Integer width, Integer height, Boolean showCursor) throws ApiException {
+    public ApiResponse<ScreenshotResponse> takeRegionScreenshotWithHttpInfo(@javax.annotation.Nonnull Integer x, @javax.annotation.Nonnull Integer y, @javax.annotation.Nonnull Integer width, @javax.annotation.Nonnull Integer height, @javax.annotation.Nullable Boolean showCursor) throws ApiException {
         okhttp3.Call localVarCall = takeRegionScreenshotValidateBeforeCall(x, y, width, height, showCursor, null);
         Type localVarReturnType = new TypeToken<ScreenshotResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -3498,7 +3498,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call takeRegionScreenshotAsync(Integer x, Integer y, Integer width, Integer height, Boolean showCursor, final ApiCallback<ScreenshotResponse> _callback) throws ApiException {
+    public okhttp3.Call takeRegionScreenshotAsync(@javax.annotation.Nonnull Integer x, @javax.annotation.Nonnull Integer y, @javax.annotation.Nonnull Integer width, @javax.annotation.Nonnull Integer height, @javax.annotation.Nullable Boolean showCursor, final ApiCallback<ScreenshotResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = takeRegionScreenshotValidateBeforeCall(x, y, width, height, showCursor, _callback);
         Type localVarReturnType = new TypeToken<ScreenshotResponse>(){}.getType();
@@ -3518,7 +3518,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call takeScreenshotCall(Boolean showCursor, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call takeScreenshotCall(@javax.annotation.Nullable Boolean showCursor, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3567,7 +3567,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call takeScreenshotValidateBeforeCall(Boolean showCursor, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call takeScreenshotValidateBeforeCall(@javax.annotation.Nullable Boolean showCursor, final ApiCallback _callback) throws ApiException {
         return takeScreenshotCall(showCursor, _callback);
 
     }
@@ -3585,7 +3585,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ScreenshotResponse takeScreenshot(Boolean showCursor) throws ApiException {
+    public ScreenshotResponse takeScreenshot(@javax.annotation.Nullable Boolean showCursor) throws ApiException {
         ApiResponse<ScreenshotResponse> localVarResp = takeScreenshotWithHttpInfo(showCursor);
         return localVarResp.getData();
     }
@@ -3603,7 +3603,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ScreenshotResponse> takeScreenshotWithHttpInfo(Boolean showCursor) throws ApiException {
+    public ApiResponse<ScreenshotResponse> takeScreenshotWithHttpInfo(@javax.annotation.Nullable Boolean showCursor) throws ApiException {
         okhttp3.Call localVarCall = takeScreenshotValidateBeforeCall(showCursor, null);
         Type localVarReturnType = new TypeToken<ScreenshotResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -3623,7 +3623,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call takeScreenshotAsync(Boolean showCursor, final ApiCallback<ScreenshotResponse> _callback) throws ApiException {
+    public okhttp3.Call takeScreenshotAsync(@javax.annotation.Nullable Boolean showCursor, final ApiCallback<ScreenshotResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = takeScreenshotValidateBeforeCall(showCursor, _callback);
         Type localVarReturnType = new TypeToken<ScreenshotResponse>(){}.getType();
@@ -3643,7 +3643,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call typeTextCall(KeyboardTypeRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call typeTextCall(@javax.annotation.Nonnull KeyboardTypeRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3689,7 +3689,7 @@ public class ComputerUseApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call typeTextValidateBeforeCall(KeyboardTypeRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call typeTextValidateBeforeCall(@javax.annotation.Nonnull KeyboardTypeRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling typeText(Async)");
@@ -3712,7 +3712,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public Object typeText(KeyboardTypeRequest request) throws ApiException {
+    public Object typeText(@javax.annotation.Nonnull KeyboardTypeRequest request) throws ApiException {
         ApiResponse<Object> localVarResp = typeTextWithHttpInfo(request);
         return localVarResp.getData();
     }
@@ -3730,7 +3730,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Object> typeTextWithHttpInfo(KeyboardTypeRequest request) throws ApiException {
+    public ApiResponse<Object> typeTextWithHttpInfo(@javax.annotation.Nonnull KeyboardTypeRequest request) throws ApiException {
         okhttp3.Call localVarCall = typeTextValidateBeforeCall(request, null);
         Type localVarReturnType = new TypeToken<Object>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -3750,7 +3750,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call typeTextAsync(KeyboardTypeRequest request, final ApiCallback<Object> _callback) throws ApiException {
+    public okhttp3.Call typeTextAsync(@javax.annotation.Nonnull KeyboardTypeRequest request, final ApiCallback<Object> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = typeTextValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<Object>(){}.getType();

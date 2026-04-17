@@ -14,11 +14,6 @@
 
 
 
-/**
- * 
- * @export
- * @enum {string}
- */
 
 export const Status = {
     Unmodified: 'Unmodified',
@@ -28,7 +23,7 @@ export const Status = {
     Deleted: 'Deleted',
     Renamed: 'Renamed',
     Copied: 'Copied',
-    UpdatedButUnmerged: 'Updated but unmerged'
+    UpdatedButUnmerged: 'Updated but unmerged',
 } as const;
 
 export type Status = typeof Status[keyof typeof Status];

@@ -17,17 +17,7 @@
 // @ts-ignore
 import type { Chart } from './chart';
 
-/**
- * 
- * @export
- * @interface CodeRunArtifacts
- */
 export interface CodeRunArtifacts {
-    /**
-     * 
-     * @type {Array<Chart>}
-     * @memberof CodeRunArtifacts
-     */
     'charts'?: Array<Chart>;
 }
 

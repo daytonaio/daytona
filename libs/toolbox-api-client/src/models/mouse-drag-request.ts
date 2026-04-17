@@ -14,41 +14,11 @@
 
 
 
-/**
- * 
- * @export
- * @interface MouseDragRequest
- */
 export interface MouseDragRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof MouseDragRequest
-     */
     'button'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof MouseDragRequest
-     */
     'endX'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof MouseDragRequest
-     */
     'endY'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof MouseDragRequest
-     */
     'startX'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof MouseDragRequest
-     */
     'startY'?: number;
 }
 

@@ -92,7 +92,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call archiveWorkspaceDeprecatedCall(String workspaceId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call archiveWorkspaceDeprecatedCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -143,7 +143,7 @@ public class WorkspaceApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call archiveWorkspaceDeprecatedValidateBeforeCall(String workspaceId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call archiveWorkspaceDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'workspaceId' is set
         if (workspaceId == null) {
             throw new ApiException("Missing the required parameter 'workspaceId' when calling archiveWorkspaceDeprecated(Async)");
@@ -168,7 +168,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public void archiveWorkspaceDeprecated(String workspaceId, String xDaytonaOrganizationID) throws ApiException {
+    public void archiveWorkspaceDeprecated(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         archiveWorkspaceDeprecatedWithHttpInfo(workspaceId, xDaytonaOrganizationID);
     }
 
@@ -188,7 +188,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> archiveWorkspaceDeprecatedWithHttpInfo(String workspaceId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> archiveWorkspaceDeprecatedWithHttpInfo(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = archiveWorkspaceDeprecatedValidateBeforeCall(workspaceId, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -210,7 +210,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call archiveWorkspaceDeprecatedAsync(String workspaceId, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call archiveWorkspaceDeprecatedAsync(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = archiveWorkspaceDeprecatedValidateBeforeCall(workspaceId, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -232,7 +232,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call createBackupWorkspaceDeprecatedCall(String workspaceId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createBackupWorkspaceDeprecatedCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -284,7 +284,7 @@ public class WorkspaceApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createBackupWorkspaceDeprecatedValidateBeforeCall(String workspaceId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createBackupWorkspaceDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'workspaceId' is set
         if (workspaceId == null) {
             throw new ApiException("Missing the required parameter 'workspaceId' when calling createBackupWorkspaceDeprecated(Async)");
@@ -310,7 +310,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public Workspace createBackupWorkspaceDeprecated(String workspaceId, String xDaytonaOrganizationID) throws ApiException {
+    public Workspace createBackupWorkspaceDeprecated(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Workspace> localVarResp = createBackupWorkspaceDeprecatedWithHttpInfo(workspaceId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -331,7 +331,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Workspace> createBackupWorkspaceDeprecatedWithHttpInfo(String workspaceId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Workspace> createBackupWorkspaceDeprecatedWithHttpInfo(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = createBackupWorkspaceDeprecatedValidateBeforeCall(workspaceId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Workspace>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -354,7 +354,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call createBackupWorkspaceDeprecatedAsync(String workspaceId, String xDaytonaOrganizationID, final ApiCallback<Workspace> _callback) throws ApiException {
+    public okhttp3.Call createBackupWorkspaceDeprecatedAsync(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Workspace> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createBackupWorkspaceDeprecatedValidateBeforeCall(workspaceId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Workspace>(){}.getType();
@@ -377,7 +377,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call createWorkspaceDeprecatedCall(CreateWorkspace createWorkspace, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createWorkspaceDeprecatedCall(@javax.annotation.Nonnull CreateWorkspace createWorkspace, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -429,7 +429,7 @@ public class WorkspaceApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createWorkspaceDeprecatedValidateBeforeCall(CreateWorkspace createWorkspace, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createWorkspaceDeprecatedValidateBeforeCall(@javax.annotation.Nonnull CreateWorkspace createWorkspace, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'createWorkspace' is set
         if (createWorkspace == null) {
             throw new ApiException("Missing the required parameter 'createWorkspace' when calling createWorkspaceDeprecated(Async)");
@@ -455,7 +455,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public Workspace createWorkspaceDeprecated(CreateWorkspace createWorkspace, String xDaytonaOrganizationID) throws ApiException {
+    public Workspace createWorkspaceDeprecated(@javax.annotation.Nonnull CreateWorkspace createWorkspace, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Workspace> localVarResp = createWorkspaceDeprecatedWithHttpInfo(createWorkspace, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -476,7 +476,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Workspace> createWorkspaceDeprecatedWithHttpInfo(CreateWorkspace createWorkspace, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Workspace> createWorkspaceDeprecatedWithHttpInfo(@javax.annotation.Nonnull CreateWorkspace createWorkspace, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = createWorkspaceDeprecatedValidateBeforeCall(createWorkspace, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Workspace>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -499,7 +499,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call createWorkspaceDeprecatedAsync(CreateWorkspace createWorkspace, String xDaytonaOrganizationID, final ApiCallback<Workspace> _callback) throws ApiException {
+    public okhttp3.Call createWorkspaceDeprecatedAsync(@javax.annotation.Nonnull CreateWorkspace createWorkspace, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Workspace> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createWorkspaceDeprecatedValidateBeforeCall(createWorkspace, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Workspace>(){}.getType();
@@ -523,7 +523,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call deleteWorkspaceDeprecatedCall(String workspaceId, Boolean force, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deleteWorkspaceDeprecatedCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull Boolean force, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -578,7 +578,7 @@ public class WorkspaceApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deleteWorkspaceDeprecatedValidateBeforeCall(String workspaceId, Boolean force, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deleteWorkspaceDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull Boolean force, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'workspaceId' is set
         if (workspaceId == null) {
             throw new ApiException("Missing the required parameter 'workspaceId' when calling deleteWorkspaceDeprecated(Async)");
@@ -609,7 +609,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public void deleteWorkspaceDeprecated(String workspaceId, Boolean force, String xDaytonaOrganizationID) throws ApiException {
+    public void deleteWorkspaceDeprecated(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull Boolean force, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         deleteWorkspaceDeprecatedWithHttpInfo(workspaceId, force, xDaytonaOrganizationID);
     }
 
@@ -630,7 +630,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> deleteWorkspaceDeprecatedWithHttpInfo(String workspaceId, Boolean force, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> deleteWorkspaceDeprecatedWithHttpInfo(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull Boolean force, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = deleteWorkspaceDeprecatedValidateBeforeCall(workspaceId, force, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -653,7 +653,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call deleteWorkspaceDeprecatedAsync(String workspaceId, Boolean force, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call deleteWorkspaceDeprecatedAsync(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull Boolean force, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deleteWorkspaceDeprecatedValidateBeforeCall(workspaceId, force, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -676,7 +676,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getBuildLogsWorkspaceDeprecatedCall(String workspaceId, String xDaytonaOrganizationID, Boolean follow, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getBuildLogsWorkspaceDeprecatedCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -731,7 +731,7 @@ public class WorkspaceApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getBuildLogsWorkspaceDeprecatedValidateBeforeCall(String workspaceId, String xDaytonaOrganizationID, Boolean follow, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getBuildLogsWorkspaceDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'workspaceId' is set
         if (workspaceId == null) {
             throw new ApiException("Missing the required parameter 'workspaceId' when calling getBuildLogsWorkspaceDeprecated(Async)");
@@ -757,7 +757,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public void getBuildLogsWorkspaceDeprecated(String workspaceId, String xDaytonaOrganizationID, Boolean follow) throws ApiException {
+    public void getBuildLogsWorkspaceDeprecated(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow) throws ApiException {
         getBuildLogsWorkspaceDeprecatedWithHttpInfo(workspaceId, xDaytonaOrganizationID, follow);
     }
 
@@ -778,7 +778,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> getBuildLogsWorkspaceDeprecatedWithHttpInfo(String workspaceId, String xDaytonaOrganizationID, Boolean follow) throws ApiException {
+    public ApiResponse<Void> getBuildLogsWorkspaceDeprecatedWithHttpInfo(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow) throws ApiException {
         okhttp3.Call localVarCall = getBuildLogsWorkspaceDeprecatedValidateBeforeCall(workspaceId, xDaytonaOrganizationID, follow, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -801,7 +801,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getBuildLogsWorkspaceDeprecatedAsync(String workspaceId, String xDaytonaOrganizationID, Boolean follow, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call getBuildLogsWorkspaceDeprecatedAsync(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getBuildLogsWorkspaceDeprecatedValidateBeforeCall(workspaceId, xDaytonaOrganizationID, follow, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -824,7 +824,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getPortPreviewUrlWorkspaceDeprecatedCall(String workspaceId, BigDecimal port, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getPortPreviewUrlWorkspaceDeprecatedCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull BigDecimal port, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -877,7 +877,7 @@ public class WorkspaceApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getPortPreviewUrlWorkspaceDeprecatedValidateBeforeCall(String workspaceId, BigDecimal port, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getPortPreviewUrlWorkspaceDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull BigDecimal port, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'workspaceId' is set
         if (workspaceId == null) {
             throw new ApiException("Missing the required parameter 'workspaceId' when calling getPortPreviewUrlWorkspaceDeprecated(Async)");
@@ -909,7 +909,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public WorkspacePortPreviewUrl getPortPreviewUrlWorkspaceDeprecated(String workspaceId, BigDecimal port, String xDaytonaOrganizationID) throws ApiException {
+    public WorkspacePortPreviewUrl getPortPreviewUrlWorkspaceDeprecated(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull BigDecimal port, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<WorkspacePortPreviewUrl> localVarResp = getPortPreviewUrlWorkspaceDeprecatedWithHttpInfo(workspaceId, port, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -931,7 +931,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<WorkspacePortPreviewUrl> getPortPreviewUrlWorkspaceDeprecatedWithHttpInfo(String workspaceId, BigDecimal port, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<WorkspacePortPreviewUrl> getPortPreviewUrlWorkspaceDeprecatedWithHttpInfo(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull BigDecimal port, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getPortPreviewUrlWorkspaceDeprecatedValidateBeforeCall(workspaceId, port, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<WorkspacePortPreviewUrl>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -955,7 +955,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getPortPreviewUrlWorkspaceDeprecatedAsync(String workspaceId, BigDecimal port, String xDaytonaOrganizationID, final ApiCallback<WorkspacePortPreviewUrl> _callback) throws ApiException {
+    public okhttp3.Call getPortPreviewUrlWorkspaceDeprecatedAsync(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull BigDecimal port, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<WorkspacePortPreviewUrl> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getPortPreviewUrlWorkspaceDeprecatedValidateBeforeCall(workspaceId, port, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<WorkspacePortPreviewUrl>(){}.getType();
@@ -979,7 +979,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getWorkspaceDeprecatedCall(String workspaceId, String xDaytonaOrganizationID, Boolean verbose, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getWorkspaceDeprecatedCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1035,7 +1035,7 @@ public class WorkspaceApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getWorkspaceDeprecatedValidateBeforeCall(String workspaceId, String xDaytonaOrganizationID, Boolean verbose, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getWorkspaceDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'workspaceId' is set
         if (workspaceId == null) {
             throw new ApiException("Missing the required parameter 'workspaceId' when calling getWorkspaceDeprecated(Async)");
@@ -1062,7 +1062,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public Workspace getWorkspaceDeprecated(String workspaceId, String xDaytonaOrganizationID, Boolean verbose) throws ApiException {
+    public Workspace getWorkspaceDeprecated(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose) throws ApiException {
         ApiResponse<Workspace> localVarResp = getWorkspaceDeprecatedWithHttpInfo(workspaceId, xDaytonaOrganizationID, verbose);
         return localVarResp.getData();
     }
@@ -1084,7 +1084,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Workspace> getWorkspaceDeprecatedWithHttpInfo(String workspaceId, String xDaytonaOrganizationID, Boolean verbose) throws ApiException {
+    public ApiResponse<Workspace> getWorkspaceDeprecatedWithHttpInfo(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose) throws ApiException {
         okhttp3.Call localVarCall = getWorkspaceDeprecatedValidateBeforeCall(workspaceId, xDaytonaOrganizationID, verbose, null);
         Type localVarReturnType = new TypeToken<Workspace>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1108,7 +1108,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getWorkspaceDeprecatedAsync(String workspaceId, String xDaytonaOrganizationID, Boolean verbose, final ApiCallback<Workspace> _callback) throws ApiException {
+    public okhttp3.Call getWorkspaceDeprecatedAsync(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose, final ApiCallback<Workspace> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getWorkspaceDeprecatedValidateBeforeCall(workspaceId, xDaytonaOrganizationID, verbose, _callback);
         Type localVarReturnType = new TypeToken<Workspace>(){}.getType();
@@ -1132,7 +1132,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call listWorkspacesDeprecatedCall(String xDaytonaOrganizationID, Boolean verbose, String labels, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listWorkspacesDeprecatedCall(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose, @javax.annotation.Nullable String labels, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1191,7 +1191,7 @@ public class WorkspaceApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listWorkspacesDeprecatedValidateBeforeCall(String xDaytonaOrganizationID, Boolean verbose, String labels, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call listWorkspacesDeprecatedValidateBeforeCall(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose, @javax.annotation.Nullable String labels, final ApiCallback _callback) throws ApiException {
         return listWorkspacesDeprecatedCall(xDaytonaOrganizationID, verbose, labels, _callback);
 
     }
@@ -1213,7 +1213,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public List<Workspace> listWorkspacesDeprecated(String xDaytonaOrganizationID, Boolean verbose, String labels) throws ApiException {
+    public List<Workspace> listWorkspacesDeprecated(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose, @javax.annotation.Nullable String labels) throws ApiException {
         ApiResponse<List<Workspace>> localVarResp = listWorkspacesDeprecatedWithHttpInfo(xDaytonaOrganizationID, verbose, labels);
         return localVarResp.getData();
     }
@@ -1235,7 +1235,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<List<Workspace>> listWorkspacesDeprecatedWithHttpInfo(String xDaytonaOrganizationID, Boolean verbose, String labels) throws ApiException {
+    public ApiResponse<List<Workspace>> listWorkspacesDeprecatedWithHttpInfo(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose, @javax.annotation.Nullable String labels) throws ApiException {
         okhttp3.Call localVarCall = listWorkspacesDeprecatedValidateBeforeCall(xDaytonaOrganizationID, verbose, labels, null);
         Type localVarReturnType = new TypeToken<List<Workspace>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1259,7 +1259,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call listWorkspacesDeprecatedAsync(String xDaytonaOrganizationID, Boolean verbose, String labels, final ApiCallback<List<Workspace>> _callback) throws ApiException {
+    public okhttp3.Call listWorkspacesDeprecatedAsync(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose, @javax.annotation.Nullable String labels, final ApiCallback<List<Workspace>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = listWorkspacesDeprecatedValidateBeforeCall(xDaytonaOrganizationID, verbose, labels, _callback);
         Type localVarReturnType = new TypeToken<List<Workspace>>(){}.getType();
@@ -1283,7 +1283,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call replaceLabelsWorkspaceDeprecatedCall(String workspaceId, SandboxLabels sandboxLabels, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call replaceLabelsWorkspaceDeprecatedCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull SandboxLabels sandboxLabels, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1336,7 +1336,7 @@ public class WorkspaceApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call replaceLabelsWorkspaceDeprecatedValidateBeforeCall(String workspaceId, SandboxLabels sandboxLabels, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call replaceLabelsWorkspaceDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull SandboxLabels sandboxLabels, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'workspaceId' is set
         if (workspaceId == null) {
             throw new ApiException("Missing the required parameter 'workspaceId' when calling replaceLabelsWorkspaceDeprecated(Async)");
@@ -1368,7 +1368,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public SandboxLabels replaceLabelsWorkspaceDeprecated(String workspaceId, SandboxLabels sandboxLabels, String xDaytonaOrganizationID) throws ApiException {
+    public SandboxLabels replaceLabelsWorkspaceDeprecated(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull SandboxLabels sandboxLabels, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<SandboxLabels> localVarResp = replaceLabelsWorkspaceDeprecatedWithHttpInfo(workspaceId, sandboxLabels, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -1390,7 +1390,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<SandboxLabels> replaceLabelsWorkspaceDeprecatedWithHttpInfo(String workspaceId, SandboxLabels sandboxLabels, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<SandboxLabels> replaceLabelsWorkspaceDeprecatedWithHttpInfo(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull SandboxLabels sandboxLabels, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = replaceLabelsWorkspaceDeprecatedValidateBeforeCall(workspaceId, sandboxLabels, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<SandboxLabels>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1414,7 +1414,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call replaceLabelsWorkspaceDeprecatedAsync(String workspaceId, SandboxLabels sandboxLabels, String xDaytonaOrganizationID, final ApiCallback<SandboxLabels> _callback) throws ApiException {
+    public okhttp3.Call replaceLabelsWorkspaceDeprecatedAsync(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull SandboxLabels sandboxLabels, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<SandboxLabels> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = replaceLabelsWorkspaceDeprecatedValidateBeforeCall(workspaceId, sandboxLabels, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<SandboxLabels>(){}.getType();
@@ -1438,7 +1438,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call setAutoArchiveIntervalWorkspaceDeprecatedCall(String workspaceId, BigDecimal interval, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call setAutoArchiveIntervalWorkspaceDeprecatedCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1490,7 +1490,7 @@ public class WorkspaceApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call setAutoArchiveIntervalWorkspaceDeprecatedValidateBeforeCall(String workspaceId, BigDecimal interval, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call setAutoArchiveIntervalWorkspaceDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'workspaceId' is set
         if (workspaceId == null) {
             throw new ApiException("Missing the required parameter 'workspaceId' when calling setAutoArchiveIntervalWorkspaceDeprecated(Async)");
@@ -1521,7 +1521,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public void setAutoArchiveIntervalWorkspaceDeprecated(String workspaceId, BigDecimal interval, String xDaytonaOrganizationID) throws ApiException {
+    public void setAutoArchiveIntervalWorkspaceDeprecated(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         setAutoArchiveIntervalWorkspaceDeprecatedWithHttpInfo(workspaceId, interval, xDaytonaOrganizationID);
     }
 
@@ -1542,7 +1542,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> setAutoArchiveIntervalWorkspaceDeprecatedWithHttpInfo(String workspaceId, BigDecimal interval, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> setAutoArchiveIntervalWorkspaceDeprecatedWithHttpInfo(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = setAutoArchiveIntervalWorkspaceDeprecatedValidateBeforeCall(workspaceId, interval, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1565,7 +1565,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call setAutoArchiveIntervalWorkspaceDeprecatedAsync(String workspaceId, BigDecimal interval, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call setAutoArchiveIntervalWorkspaceDeprecatedAsync(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = setAutoArchiveIntervalWorkspaceDeprecatedValidateBeforeCall(workspaceId, interval, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -1588,7 +1588,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call setAutostopIntervalWorkspaceDeprecatedCall(String workspaceId, BigDecimal interval, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call setAutostopIntervalWorkspaceDeprecatedCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1640,7 +1640,7 @@ public class WorkspaceApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call setAutostopIntervalWorkspaceDeprecatedValidateBeforeCall(String workspaceId, BigDecimal interval, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call setAutostopIntervalWorkspaceDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'workspaceId' is set
         if (workspaceId == null) {
             throw new ApiException("Missing the required parameter 'workspaceId' when calling setAutostopIntervalWorkspaceDeprecated(Async)");
@@ -1671,7 +1671,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public void setAutostopIntervalWorkspaceDeprecated(String workspaceId, BigDecimal interval, String xDaytonaOrganizationID) throws ApiException {
+    public void setAutostopIntervalWorkspaceDeprecated(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         setAutostopIntervalWorkspaceDeprecatedWithHttpInfo(workspaceId, interval, xDaytonaOrganizationID);
     }
 
@@ -1692,7 +1692,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> setAutostopIntervalWorkspaceDeprecatedWithHttpInfo(String workspaceId, BigDecimal interval, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> setAutostopIntervalWorkspaceDeprecatedWithHttpInfo(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = setAutostopIntervalWorkspaceDeprecatedValidateBeforeCall(workspaceId, interval, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1715,7 +1715,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call setAutostopIntervalWorkspaceDeprecatedAsync(String workspaceId, BigDecimal interval, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call setAutostopIntervalWorkspaceDeprecatedAsync(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = setAutostopIntervalWorkspaceDeprecatedValidateBeforeCall(workspaceId, interval, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -1737,7 +1737,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call startWorkspaceDeprecatedCall(String workspaceId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call startWorkspaceDeprecatedCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1788,7 +1788,7 @@ public class WorkspaceApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call startWorkspaceDeprecatedValidateBeforeCall(String workspaceId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call startWorkspaceDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'workspaceId' is set
         if (workspaceId == null) {
             throw new ApiException("Missing the required parameter 'workspaceId' when calling startWorkspaceDeprecated(Async)");
@@ -1813,7 +1813,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public void startWorkspaceDeprecated(String workspaceId, String xDaytonaOrganizationID) throws ApiException {
+    public void startWorkspaceDeprecated(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         startWorkspaceDeprecatedWithHttpInfo(workspaceId, xDaytonaOrganizationID);
     }
 
@@ -1833,7 +1833,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> startWorkspaceDeprecatedWithHttpInfo(String workspaceId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> startWorkspaceDeprecatedWithHttpInfo(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = startWorkspaceDeprecatedValidateBeforeCall(workspaceId, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1855,7 +1855,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call startWorkspaceDeprecatedAsync(String workspaceId, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call startWorkspaceDeprecatedAsync(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = startWorkspaceDeprecatedValidateBeforeCall(workspaceId, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -1877,7 +1877,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call stopWorkspaceDeprecatedCall(String workspaceId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call stopWorkspaceDeprecatedCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1928,7 +1928,7 @@ public class WorkspaceApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call stopWorkspaceDeprecatedValidateBeforeCall(String workspaceId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call stopWorkspaceDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'workspaceId' is set
         if (workspaceId == null) {
             throw new ApiException("Missing the required parameter 'workspaceId' when calling stopWorkspaceDeprecated(Async)");
@@ -1953,7 +1953,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public void stopWorkspaceDeprecated(String workspaceId, String xDaytonaOrganizationID) throws ApiException {
+    public void stopWorkspaceDeprecated(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         stopWorkspaceDeprecatedWithHttpInfo(workspaceId, xDaytonaOrganizationID);
     }
 
@@ -1973,7 +1973,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> stopWorkspaceDeprecatedWithHttpInfo(String workspaceId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> stopWorkspaceDeprecatedWithHttpInfo(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = stopWorkspaceDeprecatedValidateBeforeCall(workspaceId, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1995,7 +1995,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call stopWorkspaceDeprecatedAsync(String workspaceId, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call stopWorkspaceDeprecatedAsync(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = stopWorkspaceDeprecatedValidateBeforeCall(workspaceId, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -2018,7 +2018,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call updatePublicStatusWorkspaceDeprecatedCall(String workspaceId, Boolean isPublic, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call updatePublicStatusWorkspaceDeprecatedCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull Boolean isPublic, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2070,7 +2070,7 @@ public class WorkspaceApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call updatePublicStatusWorkspaceDeprecatedValidateBeforeCall(String workspaceId, Boolean isPublic, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call updatePublicStatusWorkspaceDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull Boolean isPublic, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'workspaceId' is set
         if (workspaceId == null) {
             throw new ApiException("Missing the required parameter 'workspaceId' when calling updatePublicStatusWorkspaceDeprecated(Async)");
@@ -2101,7 +2101,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public void updatePublicStatusWorkspaceDeprecated(String workspaceId, Boolean isPublic, String xDaytonaOrganizationID) throws ApiException {
+    public void updatePublicStatusWorkspaceDeprecated(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull Boolean isPublic, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         updatePublicStatusWorkspaceDeprecatedWithHttpInfo(workspaceId, isPublic, xDaytonaOrganizationID);
     }
 
@@ -2122,7 +2122,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> updatePublicStatusWorkspaceDeprecatedWithHttpInfo(String workspaceId, Boolean isPublic, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> updatePublicStatusWorkspaceDeprecatedWithHttpInfo(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull Boolean isPublic, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = updatePublicStatusWorkspaceDeprecatedValidateBeforeCall(workspaceId, isPublic, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -2145,7 +2145,7 @@ public class WorkspaceApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call updatePublicStatusWorkspaceDeprecatedAsync(String workspaceId, Boolean isPublic, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call updatePublicStatusWorkspaceDeprecatedAsync(@javax.annotation.Nonnull String workspaceId, @javax.annotation.Nonnull Boolean isPublic, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = updatePublicStatusWorkspaceDeprecatedValidateBeforeCall(workspaceId, isPublic, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);

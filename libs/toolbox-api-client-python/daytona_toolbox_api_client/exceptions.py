@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """
     Daytona Toolbox API
 
@@ -10,6 +8,7 @@
 
     Do not edit the class manually.
 """  # noqa: E501
+
 
 from typing import Any, Optional
 from typing_extensions import Self
@@ -128,7 +127,7 @@ class ApiException(OpenApiException):
                     self.body = http_resp.data.decode('utf-8')
                 except Exception:
                     pass
-            self.headers = http_resp.getheaders()
+            self.headers = http_resp.headers
 
     @classmethod
     def from_response(
@@ -169,8 +168,11 @@ class ApiException(OpenApiException):
             error_message += "HTTP response headers: {0}\n".format(
                 self.headers)
 
-        if self.data or self.body:
-            error_message += "HTTP response body: {0}\n".format(self.data or self.body)
+        if self.body:
+            error_message += "HTTP response body: {0}\n".format(self.body)
+
+        if self.data:
+            error_message += "HTTP response data: {0}\n".format(self.data)
 
         return error_message
 

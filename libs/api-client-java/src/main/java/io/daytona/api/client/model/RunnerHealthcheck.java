@@ -52,7 +52,7 @@ import io.daytona.api.client.JSON;
 /**
  * RunnerHealthcheck
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class RunnerHealthcheck {
   public static final String SERIALIZED_NAME_METRICS = "metrics";
   @SerializedName(SERIALIZED_NAME_METRICS)
@@ -297,10 +297,7 @@ public class RunnerHealthcheck {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -309,17 +306,10 @@ public class RunnerHealthcheck {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("metrics");
-    openapiFields.add("serviceHealth");
-    openapiFields.add("domain");
-    openapiFields.add("proxyUrl");
-    openapiFields.add("apiUrl");
-    openapiFields.add("appVersion");
+    openapiFields = new HashSet<String>(Arrays.asList("metrics", "serviceHealth", "domain", "proxyUrl", "apiUrl", "appVersion"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("appVersion");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("appVersion"));
   }
 
   /**
@@ -331,14 +321,14 @@ public class RunnerHealthcheck {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!RunnerHealthcheck.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in RunnerHealthcheck is not found in the empty JSON string", RunnerHealthcheck.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in RunnerHealthcheck is not found in the empty JSON string", RunnerHealthcheck.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : RunnerHealthcheck.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
@@ -351,7 +341,7 @@ public class RunnerHealthcheck {
         if (jsonArrayserviceHealth != null) {
           // ensure the json data is an array
           if (!jsonObj.get("serviceHealth").isJsonArray()) {
-            throw new IllegalArgumentException(String.format("Expected the field `serviceHealth` to be an array in the JSON string but got `%s`", jsonObj.get("serviceHealth").toString()));
+            throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `serviceHealth` to be an array in the JSON string but got `%s`", jsonObj.get("serviceHealth").toString()));
           }
 
           // validate the optional field `serviceHealth` (array)
@@ -361,16 +351,16 @@ public class RunnerHealthcheck {
         }
       }
       if ((jsonObj.get("domain") != null && !jsonObj.get("domain").isJsonNull()) && !jsonObj.get("domain").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `domain` to be a primitive type in the JSON string but got `%s`", jsonObj.get("domain").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `domain` to be a primitive type in the JSON string but got `%s`", jsonObj.get("domain").toString()));
       }
       if ((jsonObj.get("proxyUrl") != null && !jsonObj.get("proxyUrl").isJsonNull()) && !jsonObj.get("proxyUrl").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `proxyUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("proxyUrl").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `proxyUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("proxyUrl").toString()));
       }
       if ((jsonObj.get("apiUrl") != null && !jsonObj.get("apiUrl").isJsonNull()) && !jsonObj.get("apiUrl").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `apiUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("apiUrl").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `apiUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("apiUrl").toString()));
       }
       if (!jsonObj.get("appVersion").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `appVersion` to be a primitive type in the JSON string but got `%s`", jsonObj.get("appVersion").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `appVersion` to be a primitive type in the JSON string but got `%s`", jsonObj.get("appVersion").toString()));
       }
   }
 
@@ -431,7 +421,7 @@ public class RunnerHealthcheck {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

@@ -14,53 +14,13 @@
 
 
 
-/**
- * 
- * @export
- * @interface CompletionItem
- */
 export interface CompletionItem {
-    /**
-     * 
-     * @type {string}
-     * @memberof CompletionItem
-     */
     'label': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof CompletionItem
-     */
     'kind'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof CompletionItem
-     */
     'detail'?: string;
-    /**
-     * 
-     * @type {object}
-     * @memberof CompletionItem
-     */
     'documentation'?: object;
-    /**
-     * 
-     * @type {string}
-     * @memberof CompletionItem
-     */
     'sortText'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CompletionItem
-     */
     'filterText'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CompletionItem
-     */
     'insertText'?: string;
 }
 

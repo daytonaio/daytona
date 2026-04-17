@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -145,7 +145,6 @@ import type { WindowsResponse } from '../models';
 import type { WorkDirResponse } from '../models';
 /**
  * ToolboxApi - axios parameter creator
- * @export
  */
 export const ToolboxApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -183,9 +182,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -246,7 +244,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -293,9 +290,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -344,8 +340,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
@@ -405,7 +399,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -454,7 +447,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
             // authentication oauth2 required
 
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -503,7 +495,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
             // authentication oauth2 required
 
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -554,8 +545,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['path'] = path;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -602,9 +593,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -653,9 +643,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -704,9 +693,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -759,9 +747,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -821,8 +808,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['pattern'] = pattern;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -866,8 +853,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -911,8 +898,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -963,8 +950,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['path'] = path;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1008,8 +995,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1057,8 +1044,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1106,8 +1093,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1155,8 +1142,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1204,8 +1191,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1249,8 +1236,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1302,8 +1289,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1360,8 +1347,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['follow'] = follow;
             }
 
+            localVarHeaderParameter['Accept'] = 'text/plain';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1409,8 +1396,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1454,8 +1441,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1499,8 +1486,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1544,8 +1531,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1592,8 +1579,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
@@ -1643,8 +1628,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
@@ -1694,8 +1677,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
@@ -1745,9 +1726,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -1796,8 +1776,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
@@ -1847,8 +1825,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
@@ -1902,8 +1878,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['path'] = path;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1954,8 +1930,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['path'] = path;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -2006,8 +1982,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['path'] = path;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -2054,8 +2030,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
@@ -2105,8 +2079,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
@@ -2158,8 +2130,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['path'] = path;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -2203,8 +2175,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -2248,8 +2220,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -2296,9 +2268,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -2347,8 +2318,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
@@ -2398,8 +2367,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
@@ -2467,8 +2434,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['uri'] = uri;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -2515,8 +2482,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
@@ -2566,8 +2531,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
@@ -2635,8 +2598,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['query'] = query;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -2695,7 +2658,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -2742,9 +2704,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -2793,8 +2754,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
@@ -2844,8 +2803,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
@@ -2895,9 +2852,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -2950,9 +2906,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -3002,8 +2957,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -3050,9 +3005,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -3112,8 +3066,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['pattern'] = pattern;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -3180,7 +3134,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -3224,8 +3177,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -3269,8 +3222,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -3362,8 +3315,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['x'] = x;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -3427,8 +3380,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['show_cursor'] = showCursor;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -3505,8 +3458,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['x'] = x;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -3555,8 +3508,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['show_cursor'] = showCursor;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -3603,8 +3556,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
@@ -3664,10 +3615,8 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
             if (file !== undefined) { 
                 localVarFormParams.append('file', file as any);
             }
-    
-    
             localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
-    
+
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -3713,7 +3662,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
             // authentication oauth2 required
 
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -3731,7 +3679,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 
 /**
  * ToolboxApi - functional programming interface
- * @export
  */
 export const ToolboxApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ToolboxApiAxiosParamCreator(configuration)
@@ -4849,7 +4796,6 @@ export const ToolboxApiFp = function(configuration?: Configuration) {
 
 /**
  * ToolboxApi - factory interface
- * @export
  */
 export const ToolboxApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = ToolboxApiFp(configuration)
@@ -5763,9 +5709,6 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
 
 /**
  * ToolboxApi - object-oriented interface
- * @export
- * @class ToolboxApi
- * @extends {BaseAPI}
  */
 export class ToolboxApi extends BaseAPI {
     /**
@@ -5777,7 +5720,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public clickMouseDeprecated(sandboxId: string, mouseClickRequest: MouseClickRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).clickMouseDeprecated(sandboxId, mouseClickRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -5793,7 +5735,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public createFolderDeprecated(sandboxId: string, path: string, mode: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).createFolderDeprecated(sandboxId, path, mode, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -5808,7 +5749,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public createPTYSessionDeprecated(sandboxId: string, ptyCreateRequest: PtyCreateRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).createPTYSessionDeprecated(sandboxId, ptyCreateRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -5823,7 +5763,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public createSessionDeprecated(sandboxId: string, createSessionRequest: CreateSessionRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).createSessionDeprecated(sandboxId, createSessionRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -5839,7 +5778,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public deleteFileDeprecated(sandboxId: string, path: string, xDaytonaOrganizationID?: string, recursive?: boolean, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).deleteFileDeprecated(sandboxId, path, xDaytonaOrganizationID, recursive, options).then((request) => request(this.axios, this.basePath));
@@ -5854,7 +5792,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public deletePTYSessionDeprecated(sandboxId: string, sessionId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).deletePTYSessionDeprecated(sandboxId, sessionId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -5869,7 +5806,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public deleteSessionDeprecated(sandboxId: string, sessionId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).deleteSessionDeprecated(sandboxId, sessionId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -5884,7 +5820,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public downloadFileDeprecated(sandboxId: string, path: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).downloadFileDeprecated(sandboxId, path, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -5899,7 +5834,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public downloadFilesDeprecated(sandboxId: string, downloadFiles: DownloadFiles, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).downloadFilesDeprecated(sandboxId, downloadFiles, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -5914,7 +5848,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public dragMouseDeprecated(sandboxId: string, mouseDragRequest: MouseDragRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).dragMouseDeprecated(sandboxId, mouseDragRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -5929,7 +5862,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public executeCommandDeprecated(sandboxId: string, executeRequest: ExecuteRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).executeCommandDeprecated(sandboxId, executeRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -5945,7 +5877,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public executeSessionCommandDeprecated(sandboxId: string, sessionId: string, sessionExecuteRequest: SessionExecuteRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).executeSessionCommandDeprecated(sandboxId, sessionId, sessionExecuteRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -5961,7 +5892,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public findInFilesDeprecated(sandboxId: string, path: string, pattern: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).findInFilesDeprecated(sandboxId, path, pattern, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -5975,7 +5905,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public getComputerUseStatusDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).getComputerUseStatusDeprecated(sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -5989,7 +5918,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public getDisplayInfoDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).getDisplayInfoDeprecated(sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6004,7 +5932,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public getFileInfoDeprecated(sandboxId: string, path: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).getFileInfoDeprecated(sandboxId, path, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6018,7 +5945,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public getMousePositionDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).getMousePositionDeprecated(sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6033,7 +5959,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public getPTYSessionDeprecated(sandboxId: string, sessionId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).getPTYSessionDeprecated(sandboxId, sessionId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6048,7 +5973,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public getProcessErrorsDeprecated(processName: string, sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).getProcessErrorsDeprecated(processName, sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6063,7 +5987,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public getProcessLogsDeprecated(processName: string, sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).getProcessLogsDeprecated(processName, sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6078,7 +6001,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public getProcessStatusDeprecated(processName: string, sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).getProcessStatusDeprecated(processName, sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6092,7 +6014,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public getProjectDirDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).getProjectDirDeprecated(sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6108,7 +6029,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public getSessionCommandDeprecated(sandboxId: string, sessionId: string, commandId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).getSessionCommandDeprecated(sandboxId, sessionId, commandId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6125,7 +6045,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public getSessionCommandLogsDeprecated(sandboxId: string, sessionId: string, commandId: string, xDaytonaOrganizationID?: string, follow?: boolean, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).getSessionCommandLogsDeprecated(sandboxId, sessionId, commandId, xDaytonaOrganizationID, follow, options).then((request) => request(this.axios, this.basePath));
@@ -6140,7 +6059,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public getSessionDeprecated(sandboxId: string, sessionId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).getSessionDeprecated(sandboxId, sessionId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6154,7 +6072,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public getUserHomeDirDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).getUserHomeDirDeprecated(sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6168,7 +6085,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public getWindowsDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).getWindowsDeprecated(sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6182,7 +6098,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public getWorkDirDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).getWorkDirDeprecated(sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6197,7 +6112,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public gitAddFilesDeprecated(sandboxId: string, gitAddRequest: GitAddRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).gitAddFilesDeprecated(sandboxId, gitAddRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6212,7 +6126,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public gitCheckoutBranchDeprecated(sandboxId: string, gitCheckoutRequest: GitCheckoutRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).gitCheckoutBranchDeprecated(sandboxId, gitCheckoutRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6227,7 +6140,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public gitCloneRepositoryDeprecated(sandboxId: string, gitCloneRequest: GitCloneRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).gitCloneRepositoryDeprecated(sandboxId, gitCloneRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6242,7 +6154,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public gitCommitChangesDeprecated(sandboxId: string, gitCommitRequest: GitCommitRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).gitCommitChangesDeprecated(sandboxId, gitCommitRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6257,7 +6168,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public gitCreateBranchDeprecated(sandboxId: string, gitBranchRequest: GitBranchRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).gitCreateBranchDeprecated(sandboxId, gitBranchRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6272,7 +6182,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public gitDeleteBranchDeprecated(sandboxId: string, gitDeleteBranchRequest: GitDeleteBranchRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).gitDeleteBranchDeprecated(sandboxId, gitDeleteBranchRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6287,7 +6196,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public gitGetHistoryDeprecated(sandboxId: string, path: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).gitGetHistoryDeprecated(sandboxId, path, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6302,7 +6210,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public gitGetStatusDeprecated(sandboxId: string, path: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).gitGetStatusDeprecated(sandboxId, path, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6317,7 +6224,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public gitListBranchesDeprecated(sandboxId: string, path: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).gitListBranchesDeprecated(sandboxId, path, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6332,7 +6238,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public gitPullChangesDeprecated(sandboxId: string, gitRepoRequest: GitRepoRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).gitPullChangesDeprecated(sandboxId, gitRepoRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6347,7 +6252,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public gitPushChangesDeprecated(sandboxId: string, gitRepoRequest: GitRepoRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).gitPushChangesDeprecated(sandboxId, gitRepoRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6362,7 +6266,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public listFilesDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, path?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).listFilesDeprecated(sandboxId, xDaytonaOrganizationID, path, options).then((request) => request(this.axios, this.basePath));
@@ -6376,7 +6279,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public listPTYSessionsDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).listPTYSessionsDeprecated(sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6390,7 +6292,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public listSessionsDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).listSessionsDeprecated(sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6405,7 +6306,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public lspCompletionsDeprecated(sandboxId: string, lspCompletionParams: LspCompletionParams, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).lspCompletionsDeprecated(sandboxId, lspCompletionParams, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6420,7 +6320,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public lspDidCloseDeprecated(sandboxId: string, lspDocumentRequest: LspDocumentRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).lspDidCloseDeprecated(sandboxId, lspDocumentRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6435,7 +6334,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public lspDidOpenDeprecated(sandboxId: string, lspDocumentRequest: LspDocumentRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).lspDidOpenDeprecated(sandboxId, lspDocumentRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6452,7 +6350,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public lspDocumentSymbolsDeprecated(sandboxId: string, languageId: string, pathToProject: string, uri: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).lspDocumentSymbolsDeprecated(sandboxId, languageId, pathToProject, uri, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6467,7 +6364,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public lspStartDeprecated(sandboxId: string, lspServerRequest: LspServerRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).lspStartDeprecated(sandboxId, lspServerRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6482,7 +6378,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public lspStopDeprecated(sandboxId: string, lspServerRequest: LspServerRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).lspStopDeprecated(sandboxId, lspServerRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6499,7 +6394,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public lspWorkspaceSymbolsDeprecated(sandboxId: string, languageId: string, pathToProject: string, query: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).lspWorkspaceSymbolsDeprecated(sandboxId, languageId, pathToProject, query, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6515,7 +6409,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public moveFileDeprecated(sandboxId: string, source: string, destination: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).moveFileDeprecated(sandboxId, source, destination, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6530,7 +6423,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public moveMouseDeprecated(sandboxId: string, mouseMoveRequest: MouseMoveRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).moveMouseDeprecated(sandboxId, mouseMoveRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6545,7 +6437,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public pressHotkeyDeprecated(sandboxId: string, keyboardHotkeyRequest: KeyboardHotkeyRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).pressHotkeyDeprecated(sandboxId, keyboardHotkeyRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6560,7 +6451,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public pressKeyDeprecated(sandboxId: string, keyboardPressRequest: KeyboardPressRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).pressKeyDeprecated(sandboxId, keyboardPressRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6575,7 +6465,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public replaceInFilesDeprecated(sandboxId: string, replaceRequest: ReplaceRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).replaceInFilesDeprecated(sandboxId, replaceRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6591,7 +6480,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public resizePTYSessionDeprecated(sandboxId: string, sessionId: string, ptyResizeRequest: PtyResizeRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).resizePTYSessionDeprecated(sandboxId, sessionId, ptyResizeRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6606,7 +6494,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public restartProcessDeprecated(processName: string, sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).restartProcessDeprecated(processName, sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6621,7 +6508,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public scrollMouseDeprecated(sandboxId: string, mouseScrollRequest: MouseScrollRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).scrollMouseDeprecated(sandboxId, mouseScrollRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6637,7 +6523,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public searchFilesDeprecated(sandboxId: string, path: string, pattern: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).searchFilesDeprecated(sandboxId, path, pattern, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6655,7 +6540,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public setFilePermissionsDeprecated(sandboxId: string, path: string, xDaytonaOrganizationID?: string, owner?: string, group?: string, mode?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).setFilePermissionsDeprecated(sandboxId, path, xDaytonaOrganizationID, owner, group, mode, options).then((request) => request(this.axios, this.basePath));
@@ -6669,7 +6553,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public startComputerUseDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).startComputerUseDeprecated(sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6683,7 +6566,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public stopComputerUseDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).stopComputerUseDeprecated(sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6705,7 +6587,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public takeCompressedRegionScreenshotDeprecated(sandboxId: string, height: number, width: number, y: number, x: number, xDaytonaOrganizationID?: string, scale?: number, quality?: number, format?: string, showCursor?: boolean, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).takeCompressedRegionScreenshotDeprecated(sandboxId, height, width, y, x, xDaytonaOrganizationID, scale, quality, format, showCursor, options).then((request) => request(this.axios, this.basePath));
@@ -6723,7 +6604,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public takeCompressedScreenshotDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, scale?: number, quality?: number, format?: string, showCursor?: boolean, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).takeCompressedScreenshotDeprecated(sandboxId, xDaytonaOrganizationID, scale, quality, format, showCursor, options).then((request) => request(this.axios, this.basePath));
@@ -6742,7 +6622,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public takeRegionScreenshotDeprecated(sandboxId: string, height: number, width: number, y: number, x: number, xDaytonaOrganizationID?: string, showCursor?: boolean, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).takeRegionScreenshotDeprecated(sandboxId, height, width, y, x, xDaytonaOrganizationID, showCursor, options).then((request) => request(this.axios, this.basePath));
@@ -6757,7 +6636,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public takeScreenshotDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, showCursor?: boolean, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).takeScreenshotDeprecated(sandboxId, xDaytonaOrganizationID, showCursor, options).then((request) => request(this.axios, this.basePath));
@@ -6772,7 +6650,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public typeTextDeprecated(sandboxId: string, keyboardTypeRequest: KeyboardTypeRequest, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).typeTextDeprecated(sandboxId, keyboardTypeRequest, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -6788,7 +6665,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public uploadFileDeprecated(sandboxId: string, path: string, xDaytonaOrganizationID?: string, file?: File, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).uploadFileDeprecated(sandboxId, path, xDaytonaOrganizationID, file, options).then((request) => request(this.axios, this.basePath));
@@ -6802,7 +6678,6 @@ export class ToolboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
-     * @memberof ToolboxApi
      */
     public uploadFilesDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ToolboxApiFp(this.configuration).uploadFilesDeprecated(sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));

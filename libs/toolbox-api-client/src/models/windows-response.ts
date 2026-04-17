@@ -17,17 +17,7 @@
 // @ts-ignore
 import type { WindowInfo } from './window-info';
 
-/**
- * 
- * @export
- * @interface WindowsResponse
- */
 export interface WindowsResponse {
-    /**
-     * 
-     * @type {Array<WindowInfo>}
-     * @memberof WindowsResponse
-     */
     'windows'?: Array<WindowInfo>;
 }
 

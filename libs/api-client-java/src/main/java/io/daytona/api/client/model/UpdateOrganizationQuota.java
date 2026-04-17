@@ -49,7 +49,7 @@ import io.daytona.api.client.JSON;
 /**
  * UpdateOrganizationQuota
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class UpdateOrganizationQuota {
   public static final String SERIALIZED_NAME_MAX_CPU_PER_SANDBOX = "maxCpuPerSandbox";
   @SerializedName(SERIALIZED_NAME_MAX_CPU_PER_SANDBOX)
@@ -468,10 +468,7 @@ public class UpdateOrganizationQuota {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -480,36 +477,10 @@ public class UpdateOrganizationQuota {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("maxCpuPerSandbox");
-    openapiFields.add("maxMemoryPerSandbox");
-    openapiFields.add("maxDiskPerSandbox");
-    openapiFields.add("snapshotQuota");
-    openapiFields.add("maxSnapshotSize");
-    openapiFields.add("volumeQuota");
-    openapiFields.add("authenticatedRateLimit");
-    openapiFields.add("sandboxCreateRateLimit");
-    openapiFields.add("sandboxLifecycleRateLimit");
-    openapiFields.add("authenticatedRateLimitTtlSeconds");
-    openapiFields.add("sandboxCreateRateLimitTtlSeconds");
-    openapiFields.add("sandboxLifecycleRateLimitTtlSeconds");
-    openapiFields.add("snapshotDeactivationTimeoutMinutes");
+    openapiFields = new HashSet<String>(Arrays.asList("maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotQuota", "maxSnapshotSize", "volumeQuota", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds", "snapshotDeactivationTimeoutMinutes"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("maxCpuPerSandbox");
-    openapiRequiredFields.add("maxMemoryPerSandbox");
-    openapiRequiredFields.add("maxDiskPerSandbox");
-    openapiRequiredFields.add("snapshotQuota");
-    openapiRequiredFields.add("maxSnapshotSize");
-    openapiRequiredFields.add("volumeQuota");
-    openapiRequiredFields.add("authenticatedRateLimit");
-    openapiRequiredFields.add("sandboxCreateRateLimit");
-    openapiRequiredFields.add("sandboxLifecycleRateLimit");
-    openapiRequiredFields.add("authenticatedRateLimitTtlSeconds");
-    openapiRequiredFields.add("sandboxCreateRateLimitTtlSeconds");
-    openapiRequiredFields.add("sandboxLifecycleRateLimitTtlSeconds");
-    openapiRequiredFields.add("snapshotDeactivationTimeoutMinutes");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotQuota", "maxSnapshotSize", "volumeQuota", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds", "snapshotDeactivationTimeoutMinutes"));
   }
 
   /**
@@ -521,14 +492,14 @@ public class UpdateOrganizationQuota {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!UpdateOrganizationQuota.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in UpdateOrganizationQuota is not found in the empty JSON string", UpdateOrganizationQuota.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in UpdateOrganizationQuota is not found in the empty JSON string", UpdateOrganizationQuota.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : UpdateOrganizationQuota.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
@@ -591,7 +562,7 @@ public class UpdateOrganizationQuota {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

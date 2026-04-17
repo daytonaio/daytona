@@ -17,41 +17,11 @@
 // @ts-ignore
 import type { FileStatus } from './file-status';
 
-/**
- * 
- * @export
- * @interface GitStatus
- */
 export interface GitStatus {
-    /**
-     * 
-     * @type {number}
-     * @memberof GitStatus
-     */
     'ahead'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof GitStatus
-     */
     'behind'?: number;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof GitStatus
-     */
     'branchPublished'?: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof GitStatus
-     */
     'currentBranch': string;
-    /**
-     * 
-     * @type {Array<FileStatus>}
-     * @memberof GitStatus
-     */
     'fileStatus': Array<FileStatus>;
 }
 

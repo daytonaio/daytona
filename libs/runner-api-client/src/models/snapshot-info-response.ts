@@ -14,41 +14,11 @@
 
 
 
-/**
- * 
- * @export
- * @interface SnapshotInfoResponse
- */
 export interface SnapshotInfoResponse {
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof SnapshotInfoResponse
-     */
     'cmd'?: Array<string>;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof SnapshotInfoResponse
-     */
     'entrypoint'?: Array<string>;
-    /**
-     * 
-     * @type {string}
-     * @memberof SnapshotInfoResponse
-     */
     'hash'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof SnapshotInfoResponse
-     */
     'name'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof SnapshotInfoResponse
-     */
     'sizeGB'?: number;
 }
 

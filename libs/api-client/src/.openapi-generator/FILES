@@ -1,6 +1,5 @@
 .gitignore
 .npmignore
-.openapi-generator-ignore
 api.ts
 api/admin-api.ts
 api/api-keys-api.ts
@@ -24,7 +23,6 @@ api/workspace-api.ts
 base.ts
 common.ts
 configuration.ts
-git_push.sh
 index.ts
 models/account-provider.ts
 models/admin-create-runner.ts

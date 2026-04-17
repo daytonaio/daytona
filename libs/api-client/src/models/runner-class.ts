@@ -16,13 +16,11 @@
 
 /**
  * The class of the runner
- * @export
- * @enum {string}
  */
 
 export const RunnerClass = {
     CONTAINER: 'container',
-    VM: 'vm'
+    VM: 'vm',
 } as const;
 
 export type RunnerClass = typeof RunnerClass[keyof typeof RunnerClass];
