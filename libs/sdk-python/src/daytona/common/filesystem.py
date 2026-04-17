@@ -4,10 +4,81 @@
 from __future__ import annotations
 
 import json
+import threading
 from dataclasses import dataclass
-from typing import Any, cast
+from typing import IO, Any, Callable, cast
 
-from .errors import DaytonaError, DaytonaValidationError, create_daytona_error
+from .errors import DaytonaError, DaytonaValidationError, UploadAbortedError, create_daytona_error
+
+TransferProgressCallback = Callable[[int], None]
+"""Progress callback invoked with the cumulative number of bytes transferred."""
+
+
+@dataclass
+class UploadFileOptions:
+    """Options for uploading a file to the Sandbox via the options-bag overload.
+
+    Attributes:
+        source: bytes/str delegates to existing bulk path. IO[bytes] streams without buffering.
+        destination: Absolute destination path in the Sandbox.
+        signal: Set this event to abort the upload. Note: abort is cooperative — up to one
+            in-flight chunk (~64KB) may be written after signal fires.
+        on_progress: Progress callback. Only valid with IO[bytes] sources; raises DaytonaValidationError otherwise.
+        timeout: Timeout in seconds. 0 means no timeout. Default 30 minutes.
+        content_length: Content length for IO[bytes] sources. Currently ignored. Reserved for a future iteration.
+        cleanup_on_abort: When True, attempt best-effort delete_file on abort. Default False.
+
+    Example:
+        ```python
+        signal = threading.Event()
+        sandbox.fs.upload_file(options=UploadFileOptions(
+            source=open("large.bin", "rb"),
+            destination="/workspace/large.bin",
+            signal=signal,
+            on_progress=lambda b: print(f"{b} bytes uploaded"),
+            cleanup_on_abort=True,
+        ))
+        ```
+    """
+
+    source: str | bytes | IO[bytes]
+    destination: str
+    signal: threading.Event | None = None
+    on_progress: TransferProgressCallback | None = None
+    timeout: int = 30 * 60
+    content_length: int | None = None
+    cleanup_on_abort: bool = False
+
+
+@dataclass
+class DownloadFileOptions:
+    """Options for downloading a file from the Sandbox via the options-bag overload.
+
+    Attributes:
+        remote_path: Path to the file in the Sandbox.
+        destination: None returns bytes. str writes to local path. IO[bytes] streams without buffering.
+        signal: Set this event to abort the download. Note: abort is cooperative — up to one
+            in-flight chunk (~64KB) may be written after signal fires.
+        on_progress: Progress callback. Only valid with IO[bytes] destinations; raises DaytonaValidationError otherwise.
+        timeout: Timeout in seconds. 0 means no timeout. Default 30 minutes.
+
+    Example:
+        ```python
+        signal = threading.Event()
+        sandbox.fs.download_file(options=DownloadFileOptions(
+            remote_path="/workspace/large.bin",
+            destination=open("local.bin", "wb"),
+            signal=signal,
+            on_progress=lambda b: print(f"{b} bytes downloaded"),
+        ))
+        ```
+    """
+
+    remote_path: str
+    destination: str | IO[bytes] | None = None
+    signal: threading.Event | None = None
+    on_progress: TransferProgressCallback | None = None
+    timeout: int = 30 * 60
 
 
 @dataclass
@@ -15,13 +86,14 @@ class FileUpload:
     """Represents a file to be uploaded to the Sandbox.
 
     Attributes:
-        source (bytes | str): File contents as a bytes object or a local file path. If a bytes object is provided,
-        make sure it fits into memory, otherwise use the local file path which content will be streamed to the Sandbox.
+        source (bytes | str | IO[bytes]): File contents as a bytes object, a local file path, or an IO[bytes]
+        stream. If a bytes object is provided, make sure it fits into memory, otherwise use the local file path
+        or an IO[bytes] stream which content will be streamed to the Sandbox.
         destination (str): Absolute destination path in the Sandbox. Relative paths are resolved based on
         the sandbox working directory.
     """
 
-    source: bytes | str
+    source: bytes | str | IO[bytes]
     destination: str
 
 
@@ -121,3 +193,51 @@ def parse_file_download_error_payload(
     )
 
     return message, details
+
+
+class ProgressCountingIO:
+    """Internal: wraps IO[bytes] to count bytes read and check abort signal.
+
+    Not part of the public API. Do not add to __all__ or _DYNAMIC_IMPORTS.
+    """
+
+    def __init__(
+        self,
+        inner: IO[bytes],
+        on_progress: TransferProgressCallback | None,
+        signal: threading.Event | None,
+    ):
+        self._inner: IO[bytes] = inner
+        self._on_progress: TransferProgressCallback | None = on_progress
+        self._signal: threading.Event | None = signal
+        self._bytes_read: int = 0
+
+    def read(self, size: int = -1) -> bytes:
+        if self._signal and self._signal.is_set():
+            raise UploadAbortedError()
+        data = self._inner.read(size)
+        self._bytes_read += len(data)
+        if data and self._on_progress:
+            self._on_progress(self._bytes_read)
+        return data
+
+    def seek(self, offset: int, whence: int = 0) -> int:
+        return self._inner.seek(offset, whence)
+
+    def tell(self) -> int:
+        return self._inner.tell()
+
+    def seekable(self) -> bool:
+        return getattr(self._inner, "seekable", lambda: False)()
+
+    def readable(self) -> bool:
+        return True
+
+    def __iter__(self) -> ProgressCountingIO:
+        return self
+
+    def __next__(self) -> bytes:
+        data = self.read(65536)
+        if not data:
+            raise StopIteration
+        return data

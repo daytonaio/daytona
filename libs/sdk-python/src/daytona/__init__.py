@@ -44,8 +44,18 @@ if TYPE_CHECKING:
         DaytonaRateLimitError,
         DaytonaTimeoutError,
         DaytonaValidationError,
+        DownloadAbortedError,
+        UploadAbortedError,
     )
-    from .common.filesystem import FileDownloadErrorDetails, FileDownloadRequest, FileDownloadResponse, FileUpload
+    from .common.filesystem import (
+        DownloadFileOptions,
+        FileDownloadErrorDetails,
+        FileDownloadRequest,
+        FileDownloadResponse,
+        FileUpload,
+        TransferProgressCallback,
+        UploadFileOptions,
+    )
     from .common.image import Image
     from .common.lsp_server import LspCompletionPosition, LspLanguageId
     from .common.process import CodeRunParams, ExecuteResponse, ExecutionArtifacts, OutputHandler, SessionExecuteRequest
@@ -110,12 +120,20 @@ __all__ = [
     "DaytonaConflictError",
     "DaytonaValidationError",
     "DaytonaConnectionError",
+    "DownloadAbortedError",
+    "DownloadFileOptions",
+    "TransferProgressCallback",
+    "UploadAbortedError",
+    "UploadFileOptions",
 ]
 
 # Mapping of symbol name -> (absolute module path, attribute name) for external packages
 _EXTERNAL_IMPORTS: dict[str, tuple[str, str]] = {
     "SandboxState": ("daytona_api_client.models.sandbox_state", "SandboxState"),
-    "SessionExecuteResponse": ("daytona_toolbox_api_client.models.session_execute_response", "SessionExecuteResponse"),
+    "SessionExecuteResponse": (
+        "daytona_toolbox_api_client.models.session_execute_response",
+        "SessionExecuteResponse",
+    ),
 }
 
 # Mapping of symbol name -> relative submodule path (within the daytona package)
@@ -164,11 +182,16 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "DaytonaConflictError": "common.errors",
     "DaytonaValidationError": "common.errors",
     "DaytonaConnectionError": "common.errors",
+    "DownloadAbortedError": "common.errors",
+    "UploadAbortedError": "common.errors",
     # common.filesystem
     "FileDownloadErrorDetails": "common.filesystem",
     "FileDownloadRequest": "common.filesystem",
     "FileDownloadResponse": "common.filesystem",
     "FileUpload": "common.filesystem",
+    "DownloadFileOptions": "common.filesystem",
+    "TransferProgressCallback": "common.filesystem",
+    "UploadFileOptions": "common.filesystem",
     # common.image
     "Image": "common.image",
     # common.lsp_server

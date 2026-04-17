@@ -5,8 +5,9 @@ from __future__ import annotations
 
 import io
 import os
+import warnings
 from contextlib import ExitStack
-from typing import overload
+from typing import IO, cast, overload
 
 import httpx
 from python_multipart.multipart import MultipartParser, parse_options_header
@@ -23,12 +24,15 @@ from daytona_toolbox_api_client import (
 
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
-from ..common.errors import DaytonaError
+from ..common.errors import DaytonaError, DaytonaValidationError, DownloadAbortedError, UploadAbortedError
 from ..common.filesystem import (
+    DownloadFileOptions,
     FileDownloadErrorDetails,
     FileDownloadRequest,
     FileDownloadResponse,
     FileUpload,
+    ProgressCountingIO,
+    UploadFileOptions,
     create_file_download_error,
     parse_file_download_error_payload,
 )
@@ -95,6 +99,10 @@ class FileSystem:
         self._api_client.delete_file(path=path, recursive=recursive)
 
     @overload
+    def download_file(self, *, options: DownloadFileOptions) -> bytes | None:
+        """Download via options bag with streaming, abort, and progress. See DownloadFileOptions."""
+
+    @overload
     def download_file(self, remote_path: str, timeout: int = 30 * 60) -> bytes:
         """Downloads a file from the Sandbox. Returns the file contents as a bytes object.
         This method is useful when you want to load the file into memory without saving it to disk.
@@ -129,7 +137,8 @@ class FileSystem:
         Args:
             remote_path (str): Path to the file in the Sandbox. Relative paths are resolved based
             on the sandbox working directory.
-            local_path (str): Path to save the file locally.
+            local_path (str): Path to save the file locally. Note: local_path is opened as-is;
+            validate path traversal in caller code if remote_path is user-controlled.
             timeout (int): Timeout for the download operation in seconds. 0 means no timeout. Default is 30 minutes.
 
         Example:
@@ -143,10 +152,12 @@ class FileSystem:
 
     @intercept_errors(message_prefix="Failed to download file: ")
     @with_instrumentation()
-    def download_file(self, *args: str) -> bytes | None:  # pyright: ignore[reportInconsistentOverload]
+    def download_file(self, *args: object, **kwargs: object) -> bytes | None:  # type: ignore[override]
+        if "options" in kwargs and isinstance(kwargs["options"], DownloadFileOptions):
+            return self._download_file_with_options(kwargs["options"])
         if len(args) == 1 or (len(args) == 2 and isinstance(args[1], int)):
-            remote_path = args[0]
-            timeout = int(args[1]) if len(args) == 2 else 30 * 60
+            remote_path = str(args[0])
+            timeout = cast(int, args[1]) if len(args) == 2 else 30 * 60
             response = (self.download_files([FileDownloadRequest(source=remote_path)], timeout=timeout))[0]
             if response.error:
                 raise create_file_download_error(response)
@@ -155,11 +166,14 @@ class FileSystem:
                 result = result.encode("utf-8")
             return result
 
-        remote_path = args[0]
-        local_path = args[1]
-        timeout = int(args[2]) if len(args) == 3 else 30 * 60
+        remote_path = str(args[0])
+        local_path = str(args[1])
+        timeout = cast(int, args[2]) if len(args) == 3 else 30 * 60
         response = (
-            self.download_files([FileDownloadRequest(source=remote_path, destination=local_path)], timeout=timeout)
+            self.download_files(
+                [FileDownloadRequest(source=remote_path, destination=local_path)],
+                timeout=timeout,
+            )
         )[0]
         if response.error:
             raise create_file_download_error(response)
@@ -586,7 +600,11 @@ class FileSystem:
     @intercept_errors(message_prefix="Failed to set file permissions: ")
     @with_instrumentation()
     def set_file_permissions(
-        self, path: str, mode: str | None = None, owner: str | None = None, group: str | None = None
+        self,
+        path: str,
+        mode: str | None = None,
+        owner: str | None = None,
+        group: str | None = None,
     ) -> None:
         """Sets permissions and ownership for a file or directory. Any of the parameters can be None
         to leave that attribute unchanged.
@@ -621,6 +639,10 @@ class FileSystem:
             owner=owner,
             group=group,
         )
+
+    @overload
+    def upload_file(self, *, options: UploadFileOptions) -> None:
+        """Upload via options bag with streaming, abort, and progress. See UploadFileOptions."""
 
     @overload
     def upload_file(self, file: bytes, remote_path: str, timeout: int = 30 * 60) -> None:
@@ -661,7 +683,8 @@ class FileSystem:
         not fit into memory.
 
         Args:
-            local_path (str): Path to the local file to upload.
+            local_path (str): Path to the local file to upload. Note: local_path is opened as-is;
+            validate path traversal in caller code if remote_path is user-controlled.
             remote_path (str): Path to the destination file in the Sandbox. Relative paths are
             resolved based on the sandbox working directory.
             timeout (int): Timeout for the upload operation in seconds. 0 means no timeout. Default is 30 minutes.
@@ -673,10 +696,109 @@ class FileSystem:
         """
 
     @with_instrumentation()
-    def upload_file(  # pyright: ignore[reportInconsistentOverload]
-        self, src: str | bytes, dst: str, timeout: int = 30 * 60
-    ) -> None:
+    def upload_file(self, *args: object, **kwargs: object) -> None:  # type: ignore[override]
+        if "options" in kwargs and isinstance(kwargs["options"], UploadFileOptions):
+            self._upload_file_with_options(kwargs["options"])
+            return
+        src = cast(bytes | str, args[0])
+        dst = str(args[1])
+        timeout = cast(int, args[2]) if len(args) >= 3 else 30 * 60
         self.upload_files([FileUpload(src, dst)], timeout)
+
+    def _is_io_source(self, source: object) -> bool:
+        return hasattr(source, "read") and not isinstance(source, (str, bytes, bytearray))
+
+    def _is_io_destination(self, destination: object) -> bool:
+        return destination is not None and hasattr(destination, "write") and not isinstance(destination, str)
+
+    def _upload_file_with_options(self, options: UploadFileOptions) -> None:
+        if options.on_progress and not self._is_io_source(options.source):
+            raise DaytonaValidationError(
+                "on_progress is not supported for bytes/string upload sources; use an IO[bytes] source"
+            )
+        if options.signal and options.signal.is_set():
+            raise UploadAbortedError()
+        if not self._is_io_source(options.source):
+            self.upload_files(
+                [FileUpload(cast(bytes | str, options.source), options.destination)],
+                options.timeout,
+            )
+            return
+        # IO[bytes] source: wrap with ProgressCountingIO
+        wrapped = ProgressCountingIO(cast(IO[bytes], options.source), options.on_progress, options.signal)
+        try:
+            self.upload_files(
+                [FileUpload(cast(bytes | str, cast(object, wrapped)), options.destination)], options.timeout
+            )
+        except UploadAbortedError:
+            if options.cleanup_on_abort:
+                try:
+                    self.delete_file(options.destination)
+                except Exception as e:
+                    warnings.warn(f"Upload abort cleanup failed: {e}", stacklevel=2)
+            raise
+
+    def _download_file_with_options(self, options: DownloadFileOptions) -> bytes | None:
+        if options.on_progress and not self._is_io_destination(options.destination):
+            raise DaytonaValidationError(
+                "on_progress is not supported for buffer-return or file-path downloads; use an IO[bytes] destination"
+            )
+        if options.signal and options.signal.is_set():
+            raise DownloadAbortedError()
+        if self._is_io_destination(options.destination):
+            self._download_file_to_stream_direct(options)
+            return None
+        if isinstance(options.destination, str):
+            response = self.download_files(
+                [FileDownloadRequest(source=options.remote_path, destination=options.destination)],
+                timeout=options.timeout,
+            )[0]
+            if response.error:
+                raise create_file_download_error(response)
+            return None
+        # Buffer return (destination is None)
+        response = self.download_files(
+            [FileDownloadRequest(source=options.remote_path)],
+            timeout=options.timeout,
+        )[0]
+        if response.error:
+            raise create_file_download_error(response)
+        result = response.result
+        if isinstance(result, str):
+            result = result.encode("utf-8")
+        return result  # type: ignore[return-value]
+
+    def _download_file_to_stream_direct(self, options: DownloadFileOptions) -> None:
+        """Stream download to IO[bytes] destination with progress and abort support.
+
+        Uses pragmatic approach: download to buffer first then write to destination in chunks
+        with signal checking. True streaming would require direct httpx usage.
+        """
+        if options.signal and options.signal.is_set():
+            raise DownloadAbortedError()
+        response = self.download_files(
+            [FileDownloadRequest(source=options.remote_path)],
+            timeout=options.timeout,
+        )[0]
+        if response.error:
+            raise create_file_download_error(response)
+        data = response.result
+        if isinstance(data, str):
+            data = data.encode("utf-8")
+        if data:
+            dest = cast(IO[bytes], options.destination)
+            chunk_size = 65536
+            offset = 0
+            total = 0
+            while offset < len(data):
+                if options.signal and options.signal.is_set():
+                    raise DownloadAbortedError()
+                chunk = data[offset : offset + chunk_size]
+                _ = dest.write(chunk)
+                offset += len(chunk)
+                total += len(chunk)
+                if options.on_progress:
+                    options.on_progress(total)
 
     @intercept_errors(message_prefix="Failed to upload files: ")
     @with_instrumentation()
@@ -708,7 +830,7 @@ class FileSystem:
             ```
         """
         data_fields: dict[str, str] = {}
-        file_fields: dict[str, tuple[str, io.BytesIO | io.BufferedReader]] = {}
+        file_fields: dict[str, tuple[str, io.BytesIO | io.BufferedReader | IO[bytes]]] = {}
 
         with ExitStack() as stack:
             for i, f in enumerate(files):
@@ -717,8 +839,12 @@ class FileSystem:
                 if isinstance(f.source, (bytes, bytearray)):
                     stream = io.BytesIO(f.source)
                     filename = f.destination
-                else:
+                elif isinstance(f.source, str):
                     stream = stack.enter_context(open(f.source, "rb"))
+                    filename = f.destination
+                else:
+                    # IO[bytes]-like object (e.g., ProgressCountingIO or open file handle)
+                    stream = f.source
                     filename = f.destination
 
                 # HTTPX will stream this file object in 64 KiB chunks :contentReference[oaicite:1]{index=1}
@@ -730,7 +856,10 @@ class FileSystem:
 
             with httpx.Client(timeout=timeout or None) as client:
                 response = client.post(
-                    url, data=data_fields, files=file_fields, headers=headers  # any non-file form fields
+                    url,
+                    data=data_fields,
+                    files=file_fields,
+                    headers=headers,  # any non-file form fields
                 )
 
                 if not response.is_success:

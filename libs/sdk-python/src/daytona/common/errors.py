@@ -154,6 +154,62 @@ class DaytonaConnectionError(DaytonaError):
     """
 
 
+class UploadAbortedError(DaytonaError):
+    """Error raised when a file upload is aborted via a signal.
+
+    Example:
+        ```python
+        try:
+            signal = threading.Event()
+            signal.set()
+            sandbox.fs.upload_file(options=UploadFileOptions(
+                source=open("file.bin", "rb"),
+                destination="/workspace/file.bin",
+                signal=signal,
+            ))
+        except UploadAbortedError:
+            print("Upload was cancelled")
+        ```
+    """
+
+    def __init__(
+        self,
+        message: str = "Upload aborted",
+        status_code: int | None = None,
+        headers: Mapping[str, Any] | None = None,
+        error_code: str | None = None,
+    ):
+        super().__init__(message, status_code=status_code, headers=headers, error_code=error_code)
+
+
+class DownloadAbortedError(DaytonaError):
+    """Error raised when a file download is aborted via a signal.
+
+    Example:
+        ```python
+        try:
+            signal = threading.Event()
+            signal.set()
+            sandbox.fs.download_file(options=DownloadFileOptions(
+                remote_path="/workspace/file.bin",
+                destination=open("out.bin", "wb"),
+                signal=signal,
+            ))
+        except DownloadAbortedError:
+            print("Download was cancelled")
+        ```
+    """
+
+    def __init__(
+        self,
+        message: str = "Download aborted",
+        status_code: int | None = None,
+        headers: Mapping[str, Any] | None = None,
+        error_code: str | None = None,
+    ):
+        super().__init__(message, status_code=status_code, headers=headers, error_code=error_code)
+
+
 STATUS_CODE_TO_ERROR: dict[int, type[DaytonaError]] = {
     400: DaytonaValidationError,
     401: DaytonaAuthenticationError,
