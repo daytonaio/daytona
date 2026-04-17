@@ -255,11 +255,13 @@ type AccessibilityNode struct {
 	Children    []*AccessibilityNode `json:"children,omitempty"`
 }
 
-// Note: no `@name AccessibilityNode` on the struct above. Swag v1.16.4 emits
-// two disjoint definitions for self-referencing types that use @name (one
-// under the @name alias for parent refs, one under the package-qualified name
-// for the self-reference), which breaks the generated schema. Omitting @name
-// makes swag use "computeruse.AccessibilityNode" consistently everywhere.
+// Note: no `@name AccessibilityNode` annotation on the struct above.
+// AccessibilityNode is self-referencing (its Children field contains more
+// AccessibilityNodes). Swag v1.16.4 has a bug where self-referencing types
+// with @name get emitted twice in the schema — once under the @name alias
+// for parent references and once under the package-qualified name for the
+// self-reference — which breaks SDK generation. Omitting @name here forces
+// swag to use "computeruse.AccessibilityNode" everywhere consistently.
 
 type GetAccessibilityTreeRequest struct {
 	Scope    string `json:"scope" form:"scope"`       // "focused" | "pid" | "all" — default "focused"

@@ -1,6 +1,6 @@
 # ComputerUse - Process Management for VNC Desktop Environment
 
-This package provides a Computer Use plugin used by the Daytona Daemon to allow agents to control VNC desktop environments, and to read/manipulate the accessibility tree of running apps.
+This package provides a Computer Use plugin used by the Daytona Daemon to allow agents to control VNC desktop environments.
 
 ## Overview
 
