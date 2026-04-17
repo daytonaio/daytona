@@ -62,12 +62,13 @@ class Sandbox(BaseModel):
     build_info: Optional[BuildInfo] = Field(default=None, description="Build information for the sandbox", serialization_alias="buildInfo")
     created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the sandbox", serialization_alias="createdAt")
     updated_at: Optional[StrictStr] = Field(default=None, description="The last update timestamp of the sandbox", serialization_alias="updatedAt")
+    last_activity_at: Optional[StrictStr] = Field(default=None, description="The last activity timestamp of the sandbox", serialization_alias="lastActivityAt")
     var_class: Optional[StrictStr] = Field(default=None, description="The class of the sandbox", serialization_alias="class")
     daemon_version: Optional[StrictStr] = Field(default=None, description="The version of the daemon running in the sandbox", serialization_alias="daemonVersion")
     runner_id: Optional[StrictStr] = Field(default=None, description="The runner ID of the sandbox", serialization_alias="runnerId")
     toolbox_proxy_url: StrictStr = Field(description="The toolbox proxy URL for the sandbox", serialization_alias="toolboxProxyUrl")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "recoverable", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion", "runnerId", "toolboxProxyUrl"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "recoverable", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "lastActivityAt", "class", "daemonVersion", "runnerId", "toolboxProxyUrl"]
 
     @field_validator('backup_state')
     def backup_state_validate_enum(cls, value):
@@ -184,6 +185,7 @@ class Sandbox(BaseModel):
             "build_info": BuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
             "created_at": obj.get("createdAt"),
             "updated_at": obj.get("updatedAt"),
+            "last_activity_at": obj.get("lastActivityAt"),
             "var_class": obj.get("class"),
             "daemon_version": obj.get("daemonVersion"),
             "runner_id": obj.get("runnerId"),

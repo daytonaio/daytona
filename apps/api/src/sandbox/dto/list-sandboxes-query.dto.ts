@@ -19,6 +19,7 @@ export enum SandboxSortField {
   REGION = 'region',
   UPDATED_AT = 'updatedAt',
   CREATED_AT = 'createdAt',
+  LAST_ACTIVITY_AT = 'lastActivityAt',
 }
 
 export enum SandboxSortDirection {
