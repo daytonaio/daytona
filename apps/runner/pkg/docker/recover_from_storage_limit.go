@@ -11,7 +11,7 @@ import (
 )
 
 // RecoverFromStorageLimit attempts to recover a sandbox from storage limit issues
-// by expanding its storage quota by creating new ones with 100MB increments up to 10% of original.
+// by expanding its storage quota by 5% of the original quota per attempt, up to 10% total.
 func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId string, originalStorageQuota float64) error {
 	originalContainer, err := d.ContainerInspect(ctx, sandboxId)
 	if err != nil {
@@ -30,7 +30,7 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 
 	maxExpansion := originalStorageQuota * 0.1 // 10% of original
 	currentExpansion := currentStorage - originalStorageQuota
-	increment := 0.1 // ~107MB
+	increment := originalStorageQuota * 0.05 // 5% of original per recovery attempt
 	newExpansion := currentExpansion + increment
 	newStorageQuota := originalStorageQuota + newExpansion
 
