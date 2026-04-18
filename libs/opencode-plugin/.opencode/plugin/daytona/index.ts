@@ -61,7 +61,7 @@ function getDaytona(): Daytona {
 
 const previewCache = new Map<string, { url: string; token: string }>()
 
-// Namespace sandboxes so they don't collide with non-opencode sandboxes
+// Namespace sandboxes to distinguish them from non-opencode sandboxes
 // in the same Daytona account.
 function sandboxName(name: string): string {
   return `opencode-${name}`
