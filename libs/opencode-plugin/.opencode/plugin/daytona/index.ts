@@ -18,6 +18,8 @@ import { join } from 'node:path'
 import { Daytona } from '@daytona/sdk'
 import type { Sandbox } from '@daytona/sdk'
 
+import { buildSandboxInstructions } from './instructions'
+
 // Lazy so DAYTONA_API_KEY is read at use-time, not module-load time.
 let client: Daytona | undefined
 
@@ -143,33 +145,7 @@ export const DaytonaWorkspacePlugin = async (input: PluginInput) => {
 
         await sandbox.fs.uploadFile(Buffer.from(`${project.id}\n`), `${REPO_PATH}/.git/opencode`)
 
-        // Create instructions file for Daytona sandbox context
-        const sandboxId = sandbox.id
-        const instructions = `## Daytona Sandbox Integration
-This session is integrated with a Daytona sandbox.
-The main project repository is located at: ${REPO_PATH}
-
-### Running Servers
-When starting long-running processes like servers, use \`nohup\` to prevent them from being killed when the bash command times out:
-\`\`\`bash
-nohup <command> > /tmp/server.log 2>&1 &
-\`\`\`
-For example:
-\`\`\`bash
-nohup python3 -m http.server 8000 > /tmp/http-server.log 2>&1 &
-\`\`\`
-
-### Preview URLs
-Before showing a preview URL, ensure the server is running in the sandbox on that port.
-To access a running server from a browser, use the Daytona proxy URL format:
-\`\`\`
-https://<port>-${sandboxId}.daytonaproxy01.net/
-\`\`\`
-For example, if a server is running on port 8000:
-\`\`\`
-https://8000-${sandboxId}.daytonaproxy01.net/
-\`\`\`
-`
+        const instructions = buildSandboxInstructions({ repoPath: REPO_PATH, sandboxId: sandbox.id })
         await sandbox.fs.uploadFile(Buffer.from(instructions), `${REPO_PATH}/.opencode/instructions/daytona.md`)
 
         // Create opencode.json to load the instructions
