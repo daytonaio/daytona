@@ -10,7 +10,13 @@
  */
 
 import type { PluginInput } from '@opencode-ai/plugin'
+import { spawn as nodeSpawn } from 'node:child_process'
+import { mkdir, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+
+import { Daytona } from '@daytona/sdk'
+import type { Sandbox } from '@daytona/sdk'
 
 // Types for experimental_workspace are not yet exported from @opencode-ai/plugin.
 type WorkspaceInfo = {
@@ -41,12 +47,6 @@ type PluginInputWithWorkspace = PluginInput & {
     register(type: string, adaptor: WorkspaceAdaptor): void
   }
 }
-import { tmpdir } from 'node:os'
-import { mkdir, rm } from 'node:fs/promises'
-import { spawn as nodeSpawn } from 'node:child_process'
-
-import { Daytona } from '@daytona/sdk'
-import type { Sandbox } from '@daytona/sdk'
 
 let client: Daytona | undefined
 
