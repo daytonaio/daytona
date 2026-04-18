@@ -3,7 +3,7 @@ services:
   api:
     image: daytonaio/daytona-api
     ports:
-      - 3000:3000
+      - ${DAYTONA_PUBLIC_PORT:-3000}:3000
     environment:
       - OTEL_ENABLED=true
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
@@ -22,14 +22,14 @@ services:
       - REDIS_PORT=6379
       - OIDC_CLIENT_ID=daytona
       - OIDC_ISSUER_BASE_URL=http://dex:5556/dex
-      - PUBLIC_OIDC_DOMAIN=http://localhost:5556/dex
+      - PUBLIC_OIDC_DOMAIN=${DAYTONA_PUBLIC_PROTOCOL:-http}://${DAYTONA_PUBLIC_HOST:-localhost}:${DAYTONA_OIDC_PORT:-5556}/dex
       - OIDC_AUDIENCE=daytona
       - OIDC_MANAGEMENT_API_ENABLED=
       - OIDC_MANAGEMENT_API_CLIENT_ID=
       - OIDC_MANAGEMENT_API_CLIENT_SECRET=
       - OIDC_MANAGEMENT_API_AUDIENCE=
-      - DASHBOARD_URL=http://localhost:3000/dashboard
-      - DASHBOARD_BASE_API_URL=http://localhost:3000
+      - DASHBOARD_URL=${DAYTONA_PUBLIC_PROTOCOL:-http}://${DAYTONA_PUBLIC_HOST:-localhost}:${DAYTONA_PUBLIC_PORT:-3000}/dashboard
+      - DASHBOARD_BASE_API_URL=${DAYTONA_DASHBOARD_BASE_API_URL:-}
       - POSTHOG_API_KEY=phc_bYtEsdMDrNLydXPD4tufkBrHKgfO2zbycM30LOowYNv
       - POSTHOG_HOST=https://d18ag4dodbta3l.cloudfront.net
       - POSTHOG_ENVIRONMENT=local
@@ -58,10 +58,10 @@ services:
       - ENVIRONMENT=docker-compose
       - MAX_AUTO_ARCHIVE_INTERVAL=43200
       - MAINTENANCE_MODE=false
-      - PROXY_DOMAIN=proxy.localhost:4000
-      - PROXY_PROTOCOL=http
+      - PROXY_DOMAIN=${DAYTONA_PROXY_HOST:-proxy.localhost}:${DAYTONA_PROXY_PORT:-4000}
+      - PROXY_PROTOCOL=${DAYTONA_PROXY_PROTOCOL:-http}
       - PROXY_API_KEY=super_secret_key
-      - PROXY_TEMPLATE_URL=http://{{PORT}}-{{sandboxId}}.proxy.localhost:4000
+      - PROXY_TEMPLATE_URL=${DAYTONA_PROXY_PROTOCOL:-http}://{{PORT}}-{{sandboxId}}.${DAYTONA_PROXY_HOST:-proxy.localhost}:${DAYTONA_PROXY_PORT:-4000}
       - DEFAULT_RUNNER_DOMAIN=runner:3003
       - DEFAULT_RUNNER_API_URL=http://runner:3003
       - DEFAULT_RUNNER_PROXY_URL=http://runner:3003
@@ -83,9 +83,9 @@ services:
       - DEFAULT_ORG_QUOTA_MAX_SNAPSHOT_SIZE=1000
       - DEFAULT_ORG_QUOTA_VOLUME_QUOTA=10000
       - SSH_GATEWAY_API_KEY=ssh_secret_api_token
-      - SSH_GATEWAY_COMMAND=ssh -p 2222 {{TOKEN}}@localhost
+      - SSH_GATEWAY_COMMAND=ssh -p ${DAYTONA_SSH_PORT:-2222} {{TOKEN}}@${DAYTONA_PUBLIC_HOST:-localhost}
       - SSH_GATEWAY_PUBLIC_KEY=c3NoLXJzYSBBQUFBQjNOemFDMXljMkVBQUFBREFRQUJBQUFCZ1FEZUtocFdOYVhVNkpSMnJXekc1NlZJeksrcmsrdForcCtVUmwyeWF5cWRnZGg2bnVOL1NtVnJsYmV4MGlrRVZZemdRWUIwWno5M2dqOVhxSkd4WjJiMHVoSDFzNkp2bnhKZVdIK05rbjBNMzRiRjZkeVloZ3o4M0JaTitWcElJdnVDT1pxYWE4VnlRWjhPdjVLMU00enlmQnFCMld3ejcwZEVWUnFaMnVZckd5U0RqUUIrU3hRQ3phY0djb2JRQTFUd2QxdEJvSk5BaVpPWXFSU3d6TmNoTk5hZHlxSHRGdkZRQ0hhNjZWaVBmQ0FVUGt2cEN6ZGh3TmJGdVhGVWkxbnZOWkx4M056RU41M05LWUhZcWU3Y3dXZkI4QjBoRDhDd3hmSDd6T0o1b1RCMnBMVVlsUWpZRDNsN3k4SkFTbDZpYkpuR1A1SWczVXpZWlRIdUdkNzVXWktnNTRJTVROQlFPMWpJdE9HL0orUm1XbzB0YTdpRkF6ZExyL1BmbDdXTVMwbEZhSm9scTdUVmJLUG1JODFTOU04VEgrbXhLbGZ5b2NqZzhwSUdlQUllcEo3dXl1Vk1xT2wxeVVuSFNycDRlVEVlR0k3NlpCOFRoUzhkYnBLUTIvb2RYMHkwc3FSZDI0Y2lGdnM0dnZVaW80NFdYNlNWRG54dXpWRHc1Rzg9IGRheXRvbmFAMDQwNjZiZDIwY2Vi
-      - SSH_GATEWAY_URL=localhost:2222
+      - SSH_GATEWAY_URL=${DAYTONA_PUBLIC_HOST:-localhost}:${DAYTONA_SSH_PORT:-2222}
       - RUNNER_DECLARATIVE_BUILD_SCORE_THRESHOLD=10
       - RUNNER_AVAILABILITY_SCORE_THRESHOLD=10
       - RUNNER_START_SCORE_THRESHOLD=3
@@ -110,11 +110,12 @@ services:
       - DAYTONA_API_URL=http://api:3000/api
       - PROXY_PORT=4000
       - PROXY_API_KEY=super_secret_key
-      - PROXY_PROTOCOL=http
+      - PROXY_PROTOCOL=${DAYTONA_PROXY_PROTOCOL:-http}
+      - COOKIE_DOMAIN=${DAYTONA_PROXY_HOST:-proxy.localhost}
       - OIDC_CLIENT_ID=daytona
       - OIDC_CLIENT_SECRET=
       - OIDC_DOMAIN=http://dex:5556/dex
-      - OIDC_PUBLIC_DOMAIN=http://localhost:5556/dex
+      - OIDC_PUBLIC_DOMAIN=${DAYTONA_PUBLIC_PROTOCOL:-http}://${DAYTONA_PUBLIC_HOST:-localhost}:${DAYTONA_OIDC_PORT:-5556}/dex
       - OIDC_AUDIENCE=daytona
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -123,7 +124,7 @@ services:
     networks:
       - daytona-network
     ports:
-      - 4000:4000
+      - ${DAYTONA_PROXY_PORT:-4000}:4000
     restart: always
 
   runner:
@@ -162,19 +163,29 @@ services:
     networks:
       - daytona-network
     ports:
-      - 2222:2222
+      - ${DAYTONA_SSH_PORT:-2222}:2222
     restart: always
 
   dex:
     image: dexidp/dex:v2.42.0
+    environment:
+      - DAYTONA_DASHBOARD_BASE_URL=${DAYTONA_PUBLIC_PROTOCOL:-http}://${DAYTONA_PUBLIC_HOST:-localhost}:${DAYTONA_PUBLIC_PORT:-3000}
+      - DAYTONA_PROXY_BASE_URL=${DAYTONA_PROXY_PROTOCOL:-http}://${DAYTONA_PROXY_HOST:-proxy.localhost}:${DAYTONA_PROXY_PORT:-4000}
+      - DAYTONA_OIDC_ISSUER=${DAYTONA_PUBLIC_PROTOCOL:-http}://${DAYTONA_PUBLIC_HOST:-localhost}:${DAYTONA_OIDC_PORT:-5556}/dex
     volumes:
-      - ./dex/config.yaml:/etc/dex/config.yaml
+      - ./dex/config.yaml:/etc/dex/config.yaml.tmpl:ro
+      - ./dex/render-config.sh:/usr/local/bin/render-dex-config.sh:ro
       - dex_db:/var/dex
-    entrypoint: ['sh', '-c', 'touch /var/dex/dex.db && exec dex serve /etc/dex/config.yaml']
+    entrypoint:
+      [
+        'sh',
+        '-c',
+        'touch /var/dex/dex.db && /usr/local/bin/render-dex-config.sh /etc/dex/config.yaml.tmpl /tmp/dex-config.yaml && exec dex serve /tmp/dex-config.yaml',
+      ]
     networks:
       - daytona-network
     ports:
-      - 5556:5556
+      - ${DAYTONA_OIDC_PORT:-5556}:5556
     healthcheck:
       test: ["CMD", "wget", "--spider", "--quiet", "http://localhost:5556/dex/.well-known/openid-configuration"]
 

@@ -1,5 +1,5 @@
-# config.yaml
-issuer: http://localhost:5556/dex
+# Dex config template. Rendered by docker/dex/render-config.sh.
+issuer: __DAYTONA_OIDC_ISSUER__
 storage:
   type: sqlite3
   config:
@@ -12,10 +12,10 @@ web:
 staticClients:
   - id: daytona
     redirectURIs:
-      - 'http://localhost:3000'
-      - 'http://localhost:3000/api/oauth2-redirect.html'
+      - '__DAYTONA_DASHBOARD_BASE_URL__'
+      - '__DAYTONA_DASHBOARD_BASE_URL__/api/oauth2-redirect.html'
       - 'http://localhost:3009/callback'
-      - 'http://proxy.localhost:4000/callback'
+      - '__DAYTONA_PROXY_BASE_URL__/callback'
     name: 'Daytona'
     public: true
 enablePasswordDB: true
