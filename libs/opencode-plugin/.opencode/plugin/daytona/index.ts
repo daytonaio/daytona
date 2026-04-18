@@ -53,7 +53,6 @@ function getDaytona(): Daytona {
 }
 
 const previewCache = new Map<string, { url: string; token: string }>()
-const activeWorkspaces = new Set<string>()
 
 function sandboxName(name: string): string {
   return `opencode-${name}`
@@ -169,37 +168,51 @@ export const DaytonaWorkspacePlugin = async (input: PluginInputWithWorkspace) =>
 
         await run(`printf "%s\\n" ${sh(project.id)} > ${sh(`${REPO_PATH}/.git/opencode`)}`)
 
-        // Create the Daytona system prompt plugin inside the sandbox
-        const sandboxPluginDir = `${REPO_PATH}/.opencode/plugin/daytona-sandbox`
-        const sandboxPluginCode = `
-export default async () => {
-  return {
-    'experimental.chat.system.transform': async (_input, output) => {
-      const sandboxId = process.env.DAYTONA_SANDBOX_ID
-      if (!sandboxId) return
-
-      output.system.push(\`## Daytona Sandbox Integration
+        // Create instructions file for Daytona sandbox context
+        const instructionsDir = `${REPO_PATH}/.opencode/instructions`
+        const sandboxId = sandbox.id
+        const instructions = `## Daytona Sandbox Integration
 This session is integrated with a Daytona sandbox.
 The main project repository is located at: ${REPO_PATH}
+
 ### Running Servers
-When starting long-running processes like servers, use \\\`nohup\\\` to prevent them from being killed when the bash command times out:
+When starting long-running processes like servers, use \`nohup\` to prevent them from being killed when the bash command times out:
+\`\`\`bash
 nohup <command> > /tmp/server.log 2>&1 &
+\`\`\`
 For example:
+\`\`\`bash
 nohup python3 -m http.server 8000 > /tmp/http-server.log 2>&1 &
+\`\`\`
+
 ### Preview URLs
 Before showing a preview URL, ensure the server is running in the sandbox on that port.
 To access a running server from a browser, use the Daytona proxy URL format:
-https://<port>-\${sandboxId}.daytonaproxy01.net/
+\`\`\`
+https://<port>-${sandboxId}.daytonaproxy01.net/
+\`\`\`
 For example, if a server is running on port 8000:
-https://8000-\${sandboxId}.daytonaproxy01.net/\`)
-    },
-  }
-}
+\`\`\`
+https://8000-${sandboxId}.daytonaproxy01.net/
+\`\`\`
 `
-        await run(`mkdir -p ${sh(sandboxPluginDir)}`)
-        await run(`cat > ${sh(sandboxPluginDir + '/index.ts')} << 'OPENCODE_PLUGIN_EOF'
-${sandboxPluginCode}
-OPENCODE_PLUGIN_EOF`)
+        await run(`mkdir -p ${sh(instructionsDir)}`)
+        await run(`cat > ${sh(instructionsDir + '/daytona.md')} << 'OPENCODE_INSTRUCTIONS_EOF'
+${instructions}
+OPENCODE_INSTRUCTIONS_EOF`)
+
+        // Create opencode.json to load the instructions
+        const opencodeConfig = JSON.stringify(
+          {
+            $schema: 'https://opencode.ai/config.json',
+            instructions: ['.opencode/instructions/daytona.md'],
+          },
+          null,
+          2,
+        )
+        await run(`cat > ${sh(REPO_PATH + '/opencode.json')} << 'OPENCODE_CONFIG_EOF'
+${opencodeConfig}
+OPENCODE_CONFIG_EOF`)
 
         await run(
           `cd ${sh(REPO_PATH)} && exe=${sh(LOCAL_BIN)} && if [ ! -x "$exe" ]; then exe=${sh(INSTALL_BIN)}; fi && nohup env "$exe" serve --hostname 0.0.0.0 --port ${SERVER_PORT} >/tmp/opencode.log 2>&1 </dev/null &`,
@@ -211,7 +224,6 @@ OPENCODE_PLUGIN_EOF`)
             if (result.result) {
               process.stdout.write(result.result)
             }
-            activeWorkspaces.add(config.name)
             return
           }
           await sleep(1000)
@@ -230,7 +242,6 @@ OPENCODE_PLUGIN_EOF`)
       if (!sandbox) return
       await d.delete(sandbox)
       previewCache.delete(config.name)
-      activeWorkspaces.delete(config.name)
     },
 
     async target(config) {
@@ -251,52 +262,7 @@ OPENCODE_PLUGIN_EOF`)
     },
   })
 
-  return {
-    'experimental.chat.system.transform': async (
-      _input: { sessionID?: string; workspaceID?: string },
-      output: { system: string[] },
-    ) => {
-      // Check if running inside a Daytona sandbox (sandbox-side)
-      const sandboxId = process.env.DAYTONA_SANDBOX_ID
-      if (sandboxId) {
-        output.system.push(`## Daytona Sandbox Integration
-This session is integrated with a Daytona sandbox.
-The main project repository is located at: ${REPO_PATH}
-### Running Servers
-When starting long-running processes like servers, use \`nohup\` to prevent them from being killed when the bash command times out:
-nohup <command> > /tmp/server.log 2>&1 &
-For example:
-nohup python3 -m http.server 8000 > /tmp/http-server.log 2>&1 &
-### Preview URLs
-Before showing a preview URL, ensure the server is running in the sandbox on that port.
-To access a running server from a browser, use the Daytona proxy URL format:
-https://<port>-${sandboxId}.daytonaproxy01.net/
-For example, if a server is running on port 8000:
-https://8000-${sandboxId}.daytonaproxy01.net/`)
-        return
-      }
-
-      // Check if this is a Daytona workspace session (host-side)
-      // activeWorkspaces tracks workspaces created by this plugin
-      if (activeWorkspaces.size > 0) {
-        // We have active Daytona workspaces - add generic system prompt
-        // Note: sandbox ID isn't available on host, so we use a placeholder
-        output.system.push(`## Daytona Sandbox Integration
-This session is running in a remote Daytona sandbox.
-The main project repository is located at: ${REPO_PATH}
-### Running Servers
-When starting long-running processes like servers, use \`nohup\` to prevent them from being killed when the bash command times out:
-nohup <command> > /tmp/server.log 2>&1 &
-For example:
-nohup python3 -m http.server 8000 > /tmp/http-server.log 2>&1 &
-### Preview URLs
-Before showing a preview URL, ensure the server is running in the sandbox on that port.
-To access a running server from a browser, use the Daytona proxy URL format:
-https://<port>-<sandbox-id>.daytonaproxy01.net/
-The sandbox ID is available in the DAYTONA_SANDBOX_ID environment variable inside the sandbox.`)
-      }
-    },
-  }
+  return {}
 }
 
 export default DaytonaWorkspacePlugin
