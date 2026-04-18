@@ -1,13 +1,3 @@
-<div align="center">
-
-[![Documentation](https://img.shields.io/github/v/release/daytonaio/docs?label=Docs&color=23cc71)](https://www.daytona.io/docs)
-![License](https://img.shields.io/badge/License-AGPL--3-blue)
-[![Go Report Card](https://goreportcard.com/badge/github.com/daytonaio/daytona)](https://goreportcard.com/report/github.com/daytonaio/daytona)
-[![Issues - daytona](https://img.shields.io/github/issues/daytonaio/daytona)](https://github.com/daytonaio/daytona/issues)
-![GitHub Release](https://img.shields.io/github/v/release/daytonaio/daytona)
-
-</div>
-
 &nbsp;
 
 <div align="center">
@@ -19,21 +9,10 @@
 </div>
 
 <h3 align="center">
-  Run AI Code.
-  <br/>
-  Secure and Elastic Infrastructure for
-  Running Your AI-Generated Code.
+  Daytona Documentation
 </h3>
 
-<p align="center">
-    <a href="https://www.daytona.io/docs"> Documentation </a>·
-    <a href="https://github.com/daytonaio/daytona/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=%F0%9F%90%9B+Bug+Report%3A+"> Report Bug </a>·
-    <a href="https://github.com/daytonaio/daytona/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.md&title=%F0%9F%9A%80+Feature%3A+"> Request Feature </a>·
-    <a href="https://go.daytona.io/slack"> Join our Slack </a>·
-    <a href="https://x.com/daytonaio"> Connect on X </a>
-</p>
-
----
+&nbsp;
 
 ## Documentation
 
