@@ -248,14 +248,14 @@ OPENCODE_PLUGIN_EOF`)
   })
 
   return {
-    'experimental.chat.system.transform': async (_input: { sessionID?: string }, output: { system: string[] }) => {
-      // Only add the system prompt when running inside a Daytona sandbox
+    'experimental.chat.system.transform': async (
+      _input: { sessionID?: string; workspaceID?: string },
+      output: { system: string[] },
+    ) => {
+      // Check if running inside a Daytona sandbox (sandbox-side)
       const sandboxId = process.env.DAYTONA_SANDBOX_ID
-      if (!sandboxId) {
-        return
-      }
-
-      output.system.push(`## Daytona Sandbox Integration
+      if (sandboxId) {
+        output.system.push(`## Daytona Sandbox Integration
 This session is integrated with a Daytona sandbox.
 The main project repository is located at: ${REPO_PATH}
 ### Running Servers
@@ -269,6 +269,28 @@ To access a running server from a browser, use the Daytona proxy URL format:
 https://<port>-${sandboxId}.daytonaproxy01.net/
 For example, if a server is running on port 8000:
 https://8000-${sandboxId}.daytonaproxy01.net/`)
+        return
+      }
+
+      // Check if this is a Daytona workspace session (host-side)
+      // activeWorkspaces tracks workspaces created by this plugin
+      if (activeWorkspaces.size > 0) {
+        // We have active Daytona workspaces - add generic system prompt
+        // Note: sandbox ID isn't available on host, so we use a placeholder
+        output.system.push(`## Daytona Sandbox Integration
+This session is running in a remote Daytona sandbox.
+The main project repository is located at: ${REPO_PATH}
+### Running Servers
+When starting long-running processes like servers, use \`nohup\` to prevent them from being killed when the bash command times out:
+nohup <command> > /tmp/server.log 2>&1 &
+For example:
+nohup python3 -m http.server 8000 > /tmp/http-server.log 2>&1 &
+### Preview URLs
+Before showing a preview URL, ensure the server is running in the sandbox on that port.
+To access a running server from a browser, use the Daytona proxy URL format:
+https://<port>-<sandbox-id>.daytonaproxy01.net/
+The sandbox ID is available in the DAYTONA_SANDBOX_ID environment variable inside the sandbox.`)
+      }
     },
   }
 }
