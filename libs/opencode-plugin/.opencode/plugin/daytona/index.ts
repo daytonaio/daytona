@@ -55,6 +55,10 @@ function getDaytona(): Daytona {
 const previewCache = new Map<string, { url: string; token: string }>()
 const activeWorkspaces = new Set<string>()
 
+function sandboxName(name: string): string {
+  return `opencode-${name}`
+}
+
 const REPO_PATH = '/home/daytona/workspace/repo'
 const ROOT_PATH = '/home/daytona/workspace'
 const LOCAL_BIN = '/home/daytona/opencode'
@@ -95,7 +99,7 @@ async function spawnAsync(cmd: string[], options: { cwd?: string } = {}): Promis
 }
 
 async function withSandbox<T>(name: string, fn: (sandbox: Sandbox) => Promise<T>): Promise<T> {
-  const sandbox = await getDaytona().get(name)
+  const sandbox = await getDaytona().get(sandboxName(name))
   return fn(sandbox)
 }
 
@@ -126,7 +130,7 @@ export const DaytonaWorkspacePlugin = async (input: PluginInputWithWorkspace) =>
 
       try {
         const sandbox = await getDaytona().create({
-          name: config.name,
+          name: sandboxName(config.name),
           envVars: toEnvVars(env as Record<string, unknown>),
         })
 
@@ -222,7 +226,7 @@ OPENCODE_PLUGIN_EOF`)
 
     async remove(config) {
       const d = getDaytona()
-      const sandbox = await d.get(config.name).catch(() => undefined)
+      const sandbox = await d.get(sandboxName(config.name)).catch(() => undefined)
       if (!sandbox) return
       await d.delete(sandbox)
       previewCache.delete(config.name)
