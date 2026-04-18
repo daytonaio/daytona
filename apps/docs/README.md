@@ -47,33 +47,37 @@ Documentation content is authored in Markdown (`.md`) and Markdown Extended (`.m
 
 ```
 apps/docs/
-├── astro.config.mjs                 # Astro + Starlight configuration
-├── tools/                           # Automation tools
-│   ├── update-api-reference.js      # Generate API docs from OpenAPI spec
-│   ├── update-cli-reference.js      # Generate CLI docs from CLI source
-│   ├── update-llms.js               # Generate llms.txt and llms-full.txt
-│   └── update-search.js             # Generate search indexes
-├── public/                          # Static assets
-├── server/                          # Express middleware and utilities
+├── astro.config.mjs                    # Astro + Starlight configuration
+├── tools/                              # Automation tools
+│   ├── update-api-reference.js         # Generate API docs from OpenAPI spec
+│   ├── update-cli-reference.js         # Generate CLI docs from CLI source
+│   ├── update-llms.js                  # Generate llms.txt and llms-full.txt
+│   └── update-search.js                # Generate search indexes
+├── public/                             # Static assets
+├── server/                             # Express middleware and utilities
 └── src/
-    ├── components/                  # Custom Astro/React components
+    ├── components/                     # Custom Astro/React components
     ├── content/
-    │   ├── config.ts                # Content and sidebar configuration
+    │   ├── config.ts                   # Content and sidebar configuration
     │   ├── docs/
-    │   │   ├── en/                  # Documentation content
-    │   │   │   ├── <filename>.mdx   # Documentation pages
-    │   │   │   ├── guides/          # Integration guides
-    │   │   │   ├── tools/           # CLI and API reference pages
-    │   │   │   ├── typescript-sdk/  # TypeScript SDK reference
-    │   │   │   ├── python-sdk/      # Python SDK reference
-    │   │   │   ├── ruby-sdk/        # Ruby SDK reference
-    │   │   │   └── go-sdk/          # Go SDK reference
-    ├── assets/                      # Images, icons, and themes
-    ├── styles/                      # Global SCSS stylesheets
-    ├── pages/                       # Astro routing pages
-    │   ├── index.astro              # Homepage
-    │   └── [...slug].astro          # Dynamic documentation pages
-    └── utils/                       # Shared utilities
+    │   │   ├── en/                     # Documentation content
+    │   │   │   ├── <filename>.mdx      # Documentation pages
+    │   │   │   ├── guides/             # Integration guides
+    │   │   │   ├── tools/
+    │   │   │   │   ├── api.mdx         # API reference
+    │   │   │   │   └── cli.mdx         # CLI reference
+    │   │   │   ├── typescript-sdk/     # TypeScript SDK reference
+    │   │   │   ├── python-sdk/         # Python SDK reference
+    │   │   │   ├── ruby-sdk/           # Ruby SDK reference
+    │   │   │   ├── go-sdk/             # Go SDK reference
+    │   │   │   ├── java-sdk/           # Java SDK reference
+    │   │   │   └── experimental.md     # Experimental features
+    ├── assets/                         # Images, icons, and themes
+    ├── styles/                         # Global SCSS stylesheets
+    ├── pages/                          # Astro routing pages
+    │   ├── index.astro                 # Homepage
+    │   └── [...slug].astro             # Dynamic documentation pages
+    └── utils/                          # Shared utilities
 ```
 
 ### Development
