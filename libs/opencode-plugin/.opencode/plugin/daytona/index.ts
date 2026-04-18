@@ -82,18 +82,6 @@ async function withSandbox<T>(name: string, fn: (sandbox: Sandbox) => Promise<T>
   return fn(sandbox)
 }
 
-function toEnvVars(env: Record<string, unknown>): Record<string, string> {
-  const result: Record<string, string> = {}
-  for (const [key, value] of Object.entries(env)) {
-    if (typeof value === 'string') {
-      result[key] = value
-    } else if (value != null) {
-      result[key] = String(value)
-    }
-  }
-  return result
-}
-
 export const DaytonaWorkspacePlugin = async (input: PluginInput) => {
   const { experimental_workspace, worktree, project } = input
   experimental_workspace.register('daytona', {
@@ -104,13 +92,12 @@ export const DaytonaWorkspacePlugin = async (input: PluginInput) => {
       return config
     },
 
-    async create(config, env) {
+    async create(config) {
       const temp = join(tmpdir(), `opencode-daytona-${Date.now()}`)
 
       try {
         const sandbox = await getDaytona().create({
           name: sandboxName(config.name),
-          envVars: toEnvVars(env),
         })
 
         const run = async (command: string): Promise<void> => {
