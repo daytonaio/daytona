@@ -227,9 +227,6 @@ https://8000-${sandboxId}.daytonaproxy01.net/
         for (let i = 0; i < 60; i++) {
           const result = await sandbox.process.executeCommand(`curl -fsS ${sh(HEALTH_URL)}`)
           if (result.exitCode === 0) {
-            if (result.result) {
-              process.stdout.write(result.result)
-            }
             return
           }
           await sleep(1000)
