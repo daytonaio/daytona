@@ -21,6 +21,7 @@ import type { Sandbox } from '@daytona/sdk'
 // Lazy so DAYTONA_API_KEY is read at use-time, not module-load time.
 let client: Daytona | undefined
 
+// Accessor for the shared Daytona client; instantiates it on first call.
 function getDaytona(): Daytona {
   if (client == null) {
     client = new Daytona({
@@ -55,6 +56,7 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+// Runs a host-side command (not in the sandbox); rejects with aggregated stderr on non-zero exit.
 async function spawnAsync(cmd: string[], options: { cwd?: string } = {}): Promise<void> {
   return new Promise((resolve, reject) => {
     const proc = nodeSpawn(cmd[0], cmd.slice(1), {
@@ -79,6 +81,7 @@ async function spawnAsync(cmd: string[], options: { cwd?: string } = {}): Promis
   })
 }
 
+// Looks up a sandbox by its plugin-side name and passes the handle to `fn`.
 async function withSandbox<T>(name: string, fn: (sandbox: Sandbox) => Promise<T>): Promise<T> {
   const sandbox = await getDaytona().get(sandboxName(name))
   return fn(sandbox)
