@@ -210,7 +210,27 @@ export const DaytonaWorkspacePlugin = async (input: PluginInputWithWorkspace) =>
     },
   })
 
-  return {}
+  return {
+    'experimental.chat.system.transform': async (
+      _input: { sessionID?: string },
+      output: { system: string[] },
+    ) => {
+      output.system.push(`## Daytona Sandbox Integration
+This session is integrated with a Daytona sandbox.
+The main project repository is located at: ${REPO_PATH}
+### Running Servers
+When starting long-running processes like servers, use \`nohup\` to prevent them from being killed when the bash command times out:
+nohup <command> > /tmp/server.log 2>&1 &
+For example:
+nohup python3 -m http.server 8000 > /tmp/http-server.log 2>&1 &
+### Preview URLs
+Before showing a preview URL, ensure the server is running in the sandbox on that port.
+To access a running server from a browser, use the Daytona proxy URL format:
+https://<port>-<sandbox-id>.daytonaproxy01.net/
+The sandbox ID is available in the \`DAYTONA_SANDBOX_ID\` environment variable. For example, if a server is running on port 8000:
+https://8000-\${DAYTONA_SANDBOX_ID}.daytonaproxy01.net/`)
+    },
+  }
 }
 
 export default DaytonaWorkspacePlugin
