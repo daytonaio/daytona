@@ -37,7 +37,7 @@
 
 ## Documentation
 
-Daytona provides a website with comprehensive documentation for [SDK](https://www.daytona.io/docs/en/getting-started#sdk), [API](https://www.daytona.io/docs/en/tools/api), and [CLI](https://www.daytona.io/docs/en/tools/cli) references, [guides](https://www.daytona.io/docs/en/guides), and [examples](https://www.daytona.io/docs/en/getting-started#examples).
+Daytona provides a documentation website covering [SDK](https://www.daytona.io/docs/en/getting-started#sdk), [API](https://www.daytona.io/docs/en/tools/api), and [CLI](https://www.daytona.io/docs/en/tools/cli) references, integration [guides](https://www.daytona.io/docs/en/guides), and [examples](https://www.daytona.io/docs/en/getting-started#examples).
 
 ### Structure
 
