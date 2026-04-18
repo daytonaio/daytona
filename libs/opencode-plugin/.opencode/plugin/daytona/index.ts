@@ -3,9 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/**
+ * OpenCode plugin that registers Daytona sandboxes as a workspace adaptor.
+ * Each session spawns a remote sandbox running `opencode serve`; tool calls
+ * are proxied over the preview URL rather than invoked locally.
+ */
+
 import type { PluginInput } from '@opencode-ai/plugin'
 import { join } from 'node:path'
 
+// Types for experimental_workspace are not yet exported from @opencode-ai/plugin.
 type WorkspaceInfo = {
   id: string
   type: string
@@ -54,6 +61,8 @@ function getDaytona(): Daytona {
 
 const previewCache = new Map<string, { url: string; token: string }>()
 
+// Namespace sandboxes so they don't collide with non-opencode sandboxes
+// in the same Daytona account.
 function sandboxName(name: string): string {
   return `opencode-${name}`
 }
@@ -65,6 +74,7 @@ const INSTALL_BIN = '/home/daytona/.opencode/bin/opencode'
 const HEALTH_URL = 'http://127.0.0.1:3096/global/health'
 const SERVER_PORT = 3096
 
+// POSIX-safe single-quote escape: close quote, emit literal ', reopen quote.
 function sh(value: string): string {
   return `'${value.replace(/'/g, "'\"'\"'")}'`
 }
@@ -214,6 +224,8 @@ OPENCODE_INSTRUCTIONS_EOF`)
 ${opencodeConfig}
 OPENCODE_CONFIG_EOF`)
 
+        // Prefer a pre-baked opencode binary if the snapshot ships one;
+        // otherwise fall back to the version installed above.
         await run(
           `cd ${sh(REPO_PATH)} && exe=${sh(LOCAL_BIN)} && if [ ! -x "$exe" ]; then exe=${sh(INSTALL_BIN)}; fi && nohup env "$exe" serve --hostname 0.0.0.0 --port ${SERVER_PORT} >/tmp/opencode.log 2>&1 </dev/null &`,
         )
