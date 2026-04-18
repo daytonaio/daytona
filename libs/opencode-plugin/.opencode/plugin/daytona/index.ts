@@ -18,6 +18,7 @@ import { join } from 'node:path'
 import { Daytona } from '@daytona/sdk'
 import type { Sandbox } from '@daytona/sdk'
 
+// Lazy so DAYTONA_API_KEY is read at use-time, not module-load time.
 let client: Daytona | undefined
 
 function getDaytona(): Daytona {
@@ -29,6 +30,7 @@ function getDaytona(): Daytona {
   return client
 }
 
+// Cache preview links so we don't refetch on every target() call.
 const previewCache = new Map<string, { url: string; token: string }>()
 
 // Namespace sandboxes to distinguish them from non-opencode sandboxes
@@ -88,10 +90,12 @@ export const DaytonaWorkspacePlugin = async (input: PluginInput) => {
     name: 'Daytona',
     description: 'Create a remote Daytona sandbox workspace',
 
+    // No-op: opencode's default config is fine as-is.
     configure(config) {
       return config
     },
 
+    // Provision a fresh sandbox: upload the repo, install opencode, start `opencode serve`.
     async create(config) {
       const temp = join(tmpdir(), `opencode-daytona-${Date.now()}`)
 
@@ -100,6 +104,7 @@ export const DaytonaWorkspacePlugin = async (input: PluginInput) => {
           name: sandboxName(config.name),
         })
 
+        // Stream sandbox command output to host stdout; throw on non-zero exit.
         const run = async (command: string): Promise<void> => {
           const result = await sandbox.process.executeCommand(command)
           if (result.result) {
@@ -196,6 +201,7 @@ https://8000-${sandboxId}.daytonaproxy01.net/
       }
     },
 
+    // Tear down the sandbox and drop its cached preview link.
     async remove(config) {
       const d = getDaytona()
       const sandbox = await d.get(sandboxName(config.name)).catch(() => undefined)
@@ -204,6 +210,7 @@ https://8000-${sandboxId}.daytonaproxy01.net/
       previewCache.delete(config.name)
     },
 
+    // Remote endpoint opencode proxies tool calls to.
     async target(config) {
       let link = previewCache.get(config.name)
       if (!link) {
