@@ -38,13 +38,14 @@ import { tmpdir } from 'node:os'
 import { mkdir, rm } from 'node:fs/promises'
 import { spawn as nodeSpawn } from 'node:child_process'
 
-import { Daytona } from '@daytona/sdk'
-import type { Sandbox } from '@daytona/sdk'
+type Daytona = import('@daytona/sdk').Daytona
+type Sandbox = import('@daytona/sdk').Sandbox
 
 let client: Daytona | undefined
 
-function getDaytona(): Daytona {
+async function getDaytona(): Promise<Daytona> {
   if (client == null) {
+    const { Daytona } = await import('@daytona/sdk')
     client = new Daytona({
       apiKey: process.env.DAYTONA_API_KEY,
     })
@@ -94,7 +95,8 @@ async function spawnAsync(cmd: string[], options: { cwd?: string } = {}): Promis
 }
 
 async function withSandbox<T>(name: string, fn: (sandbox: Sandbox) => Promise<T>): Promise<T> {
-  const sandbox = await getDaytona().get(name)
+  const daytona = await getDaytona()
+  const sandbox = await daytona.get(name)
   return fn(sandbox)
 }
 
@@ -124,7 +126,8 @@ export const DaytonaWorkspacePlugin = async (input: PluginInputWithWorkspace) =>
       const temp = join(tmpdir(), `opencode-daytona-${Date.now()}`)
 
       try {
-        const sandbox = await getDaytona().create({
+        const daytona = await getDaytona()
+        const sandbox = await daytona.create({
           name: config.name,
           envVars: toEnvVars(env as Record<string, unknown>),
         })
@@ -185,7 +188,7 @@ export const DaytonaWorkspacePlugin = async (input: PluginInputWithWorkspace) =>
     },
 
     async remove(config) {
-      const d = getDaytona()
+      const d = await getDaytona()
       const sandbox = await d.get(config.name).catch(() => undefined)
       if (!sandbox) return
       await d.delete(sandbox)
