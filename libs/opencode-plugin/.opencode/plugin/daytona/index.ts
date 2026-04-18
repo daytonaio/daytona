@@ -140,7 +140,7 @@ export const DaytonaWorkspacePlugin = async (input: PluginInputWithWorkspace) =>
       try {
         const sandbox = await getDaytona().create({
           name: sandboxName(config.name),
-          envVars: toEnvVars(env as Record<string, unknown>),
+          envVars: toEnvVars(env),
         })
 
         const run = async (command: string): Promise<void> => {
