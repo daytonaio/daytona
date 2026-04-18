@@ -71,8 +71,8 @@ const REPO_PATH = '/home/daytona/workspace/repo'
 const ROOT_PATH = '/home/daytona/workspace'
 const LOCAL_BIN = '/home/daytona/opencode'
 const INSTALL_BIN = '/home/daytona/.opencode/bin/opencode'
-const HEALTH_URL = 'http://127.0.0.1:3096/global/health'
 const SERVER_PORT = 3096
+const HEALTH_URL = `http://127.0.0.1:${SERVER_PORT}/global/health`
 
 // POSIX-safe single-quote escape: close quote, emit literal ', reopen quote.
 function sh(value: string): string {
