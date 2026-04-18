@@ -176,10 +176,9 @@ export const DaytonaWorkspacePlugin = async (input: PluginInputWithWorkspace) =>
           `mkdir -p "$HOME/.opencode/bin" && OPENCODE_INSTALL_DIR="$HOME/.opencode/bin" curl -fsSL https://opencode.ai/install | bash`,
         )
 
-        await run(`printf "%s\\n" ${sh(project.id)} > ${sh(`${REPO_PATH}/.git/opencode`)}`)
+        await sandbox.fs.uploadFile(Buffer.from(`${project.id}\n`), `${REPO_PATH}/.git/opencode`)
 
         // Create instructions file for Daytona sandbox context
-        const instructionsDir = `${REPO_PATH}/.opencode/instructions`
         const sandboxId = sandbox.id
         const instructions = `## Daytona Sandbox Integration
 This session is integrated with a Daytona sandbox.
@@ -206,10 +205,7 @@ For example, if a server is running on port 8000:
 https://8000-${sandboxId}.daytonaproxy01.net/
 \`\`\`
 `
-        await run(`mkdir -p ${sh(instructionsDir)}`)
-        await run(`cat > ${sh(instructionsDir + '/daytona.md')} << 'OPENCODE_INSTRUCTIONS_EOF'
-${instructions}
-OPENCODE_INSTRUCTIONS_EOF`)
+        await sandbox.fs.uploadFile(Buffer.from(instructions), `${REPO_PATH}/.opencode/instructions/daytona.md`)
 
         // Create opencode.json to load the instructions
         const opencodeConfig = JSON.stringify(
@@ -220,9 +216,7 @@ OPENCODE_INSTRUCTIONS_EOF`)
           null,
           2,
         )
-        await run(`cat > ${sh(REPO_PATH + '/opencode.json')} << 'OPENCODE_CONFIG_EOF'
-${opencodeConfig}
-OPENCODE_CONFIG_EOF`)
+        await sandbox.fs.uploadFile(Buffer.from(opencodeConfig), `${REPO_PATH}/opencode.json`)
 
         // Prefer a pre-baked opencode binary if the snapshot ships one;
         // otherwise fall back to the version installed above.
