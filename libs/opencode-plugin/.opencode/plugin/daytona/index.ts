@@ -18,36 +18,6 @@ import { join } from 'node:path'
 import { Daytona } from '@daytona/sdk'
 import type { Sandbox } from '@daytona/sdk'
 
-// Types for experimental_workspace are not yet exported from @opencode-ai/plugin.
-type WorkspaceInfo = {
-  id: string
-  type: string
-  name: string
-  branch: string | null
-  directory: string | null
-  extra: unknown | null
-  projectID: string
-}
-
-type WorkspaceTarget =
-  | { type: 'local'; directory: string }
-  | { type: 'remote'; url: string | URL; headers?: HeadersInit }
-
-type WorkspaceAdaptor = {
-  name: string
-  description: string
-  configure(config: WorkspaceInfo): WorkspaceInfo | Promise<WorkspaceInfo>
-  create(config: WorkspaceInfo, env: Record<string, unknown>): Promise<void>
-  remove(config: WorkspaceInfo): Promise<void>
-  target(config: WorkspaceInfo): WorkspaceTarget | Promise<WorkspaceTarget>
-}
-
-type PluginInputWithWorkspace = PluginInput & {
-  experimental_workspace: {
-    register(type: string, adaptor: WorkspaceAdaptor): void
-  }
-}
-
 let client: Daytona | undefined
 
 function getDaytona(): Daytona {
@@ -124,7 +94,7 @@ function toEnvVars(env: Record<string, unknown>): Record<string, string> {
   return result
 }
 
-export const DaytonaWorkspacePlugin = async (input: PluginInputWithWorkspace) => {
+export const DaytonaWorkspacePlugin = async (input: PluginInput) => {
   const { experimental_workspace, worktree, project } = input
   experimental_workspace.register('daytona', {
     name: 'Daytona',
