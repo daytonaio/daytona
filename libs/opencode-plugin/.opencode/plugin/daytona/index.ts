@@ -9,7 +9,7 @@
  * are proxied over the preview URL rather than invoked locally.
  */
 
-import type { PluginInput } from '@opencode-ai/plugin'
+import type { PluginInput, WorkspaceAdaptor, WorkspaceInfo } from '@opencode-ai/plugin'
 import { spawn as nodeSpawn } from 'node:child_process'
 import { mkdir, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -19,6 +19,13 @@ import { Daytona } from '@daytona/sdk'
 import type { Sandbox } from '@daytona/sdk'
 
 import { buildSandboxInstructions } from './instructions'
+
+// The published @opencode-ai/plugin WorkspaceAdaptor omits the `env` param that
+// opencode's control plane actually passes to create(). Tracked in
+// anomalyco/opencode#23233; delete this override once upstream republishes.
+type WorkspaceAdaptorWithEnv = Omit<WorkspaceAdaptor, 'create'> & {
+  create(config: WorkspaceInfo, env: Record<string, string | undefined>, from?: WorkspaceInfo): Promise<void>
+}
 
 // Lazy so DAYTONA_API_KEY is read at use-time, not module-load time.
 let client: Daytona | undefined
@@ -89,9 +96,19 @@ async function withSandbox<T>(name: string, fn: (sandbox: Sandbox) => Promise<T>
   return fn(sandbox)
 }
 
+// Drop undefined values so Daytona (whose envVars wants Record<string, string>) accepts the map.
+function toEnvVars(env: Record<string, string | undefined>): Record<string, string> {
+  const result: Record<string, string> = {}
+  for (const [key, value] of Object.entries(env)) {
+    if (value !== undefined) result[key] = value
+  }
+  return result
+}
+
 export const DaytonaWorkspacePlugin = async (input: PluginInput) => {
   const { experimental_workspace, worktree, project } = input
-  experimental_workspace.register('daytona', {
+
+  const adaptor: WorkspaceAdaptorWithEnv = {
     name: 'Daytona',
     description: 'Create a remote Daytona sandbox workspace',
 
@@ -101,12 +118,13 @@ export const DaytonaWorkspacePlugin = async (input: PluginInput) => {
     },
 
     // Provision a fresh sandbox: upload the repo, install opencode, start `opencode serve`.
-    async create(config) {
+    async create(config, env) {
       const temp = join(tmpdir(), `opencode-daytona-${Date.now()}`)
 
       try {
         const sandbox = await getDaytona().create({
           name: sandboxName(config.name),
+          envVars: toEnvVars(env),
         })
 
         // Stream sandbox command output to host stdout; throw on non-zero exit.
@@ -206,7 +224,10 @@ export const DaytonaWorkspacePlugin = async (input: PluginInput) => {
         },
       }
     },
-  })
+  }
+
+  // Cast because the published WorkspaceAdaptor.create lacks the env param (see type decl above).
+  experimental_workspace.register('daytona', adaptor as unknown as WorkspaceAdaptor)
 
   return {}
 }
