@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Plugin, PluginInput } from '@opencode-ai/plugin'
+import type { PluginInput } from '@opencode-ai/plugin'
 import { join } from 'node:path'
 
 type WorkspaceInfo = {
@@ -53,6 +53,7 @@ function getDaytona(): Daytona {
 }
 
 const previewCache = new Map<string, { url: string; token: string }>()
+const activeWorkspaces = new Set<string>()
 
 const REPO_PATH = '/home/daytona/workspace/repo'
 const ROOT_PATH = '/home/daytona/workspace'
@@ -62,7 +63,7 @@ const HEALTH_URL = 'http://127.0.0.1:3096/global/health'
 const SERVER_PORT = 3096
 
 function sh(value: string): string {
-  return `'${value.replace(/'/g, `'\"'\"'`)}'`
+  return `'${value.replace(/'/g, "'\"'\"'")}'`
 }
 
 function sleep(ms: number): Promise<void> {
@@ -154,7 +155,9 @@ export const DaytonaWorkspacePlugin = async (input: PluginInputWithWorkspace) =>
         await spawnAsync(['tar', '-czf', tar, '-C', temp, 'repo'])
 
         await sandbox.fs.uploadFile(tar, 'repo.tgz')
-        await run(`rm -rf ${sh(REPO_PATH)} && mkdir -p ${sh(ROOT_PATH)} && tar -xzf "$HOME/repo.tgz" -C "$HOME/workspace"`)
+        await run(
+          `rm -rf ${sh(REPO_PATH)} && mkdir -p ${sh(ROOT_PATH)} && tar -xzf "$HOME/repo.tgz" -C "$HOME/workspace"`,
+        )
 
         await run(
           `mkdir -p "$HOME/.opencode/bin" && OPENCODE_INSTALL_DIR="$HOME/.opencode/bin" curl -fsSL https://opencode.ai/install | bash`,
@@ -172,6 +175,7 @@ export const DaytonaWorkspacePlugin = async (input: PluginInputWithWorkspace) =>
             if (result.result) {
               process.stdout.write(result.result)
             }
+            activeWorkspaces.add(config.name)
             return
           }
           await sleep(1000)
@@ -180,7 +184,7 @@ export const DaytonaWorkspacePlugin = async (input: PluginInputWithWorkspace) =>
         const log = await sandbox.process.executeCommand('test -f /tmp/opencode.log && cat /tmp/opencode.log || true')
         throw new Error(log.result || 'Daytona workspace server did not become ready in time')
       } finally {
-        await rm(temp, { recursive: true, force: true }).catch(() => {})
+        await rm(temp, { recursive: true, force: true }).catch(() => undefined)
       }
     },
 
@@ -190,6 +194,7 @@ export const DaytonaWorkspacePlugin = async (input: PluginInputWithWorkspace) =>
       if (!sandbox) return
       await d.delete(sandbox)
       previewCache.delete(config.name)
+      activeWorkspaces.delete(config.name)
     },
 
     async target(config) {
@@ -211,10 +216,13 @@ export const DaytonaWorkspacePlugin = async (input: PluginInputWithWorkspace) =>
   })
 
   return {
-    'experimental.chat.system.transform': async (
-      _input: { sessionID?: string },
-      output: { system: string[] },
-    ) => {
+    'experimental.chat.system.transform': async (_input: { sessionID?: string }, output: { system: string[] }) => {
+      // Only add the system prompt when running inside a Daytona sandbox
+      const sandboxId = process.env.DAYTONA_SANDBOX_ID
+      if (!sandboxId) {
+        return
+      }
+
       output.system.push(`## Daytona Sandbox Integration
 This session is integrated with a Daytona sandbox.
 The main project repository is located at: ${REPO_PATH}
@@ -226,9 +234,9 @@ nohup python3 -m http.server 8000 > /tmp/http-server.log 2>&1 &
 ### Preview URLs
 Before showing a preview URL, ensure the server is running in the sandbox on that port.
 To access a running server from a browser, use the Daytona proxy URL format:
-https://<port>-<sandbox-id>.daytonaproxy01.net/
-The sandbox ID is available in the \`DAYTONA_SANDBOX_ID\` environment variable. For example, if a server is running on port 8000:
-https://8000-\${DAYTONA_SANDBOX_ID}.daytonaproxy01.net/`)
+https://<port>-${sandboxId}.daytonaproxy01.net/
+For example, if a server is running on port 8000:
+https://8000-${sandboxId}.daytonaproxy01.net/`)
     },
   }
 }
