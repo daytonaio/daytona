@@ -165,6 +165,38 @@ export const DaytonaWorkspacePlugin = async (input: PluginInputWithWorkspace) =>
 
         await run(`printf "%s\\n" ${sh(project.id)} > ${sh(`${REPO_PATH}/.git/opencode`)}`)
 
+        // Create the Daytona system prompt plugin inside the sandbox
+        const sandboxPluginDir = `${REPO_PATH}/.opencode/plugin/daytona-sandbox`
+        const sandboxPluginCode = `
+export default async () => {
+  return {
+    'experimental.chat.system.transform': async (_input, output) => {
+      const sandboxId = process.env.DAYTONA_SANDBOX_ID
+      if (!sandboxId) return
+
+      output.system.push(\`## Daytona Sandbox Integration
+This session is integrated with a Daytona sandbox.
+The main project repository is located at: ${REPO_PATH}
+### Running Servers
+When starting long-running processes like servers, use \\\`nohup\\\` to prevent them from being killed when the bash command times out:
+nohup <command> > /tmp/server.log 2>&1 &
+For example:
+nohup python3 -m http.server 8000 > /tmp/http-server.log 2>&1 &
+### Preview URLs
+Before showing a preview URL, ensure the server is running in the sandbox on that port.
+To access a running server from a browser, use the Daytona proxy URL format:
+https://<port>-\${sandboxId}.daytonaproxy01.net/
+For example, if a server is running on port 8000:
+https://8000-\${sandboxId}.daytonaproxy01.net/\`)
+    },
+  }
+}
+`
+        await run(`mkdir -p ${sh(sandboxPluginDir)}`)
+        await run(`cat > ${sh(sandboxPluginDir + '/index.ts')} << 'OPENCODE_PLUGIN_EOF'
+${sandboxPluginCode}
+OPENCODE_PLUGIN_EOF`)
+
         await run(
           `cd ${sh(REPO_PATH)} && exe=${sh(LOCAL_BIN)} && if [ ! -x "$exe" ]; then exe=${sh(INSTALL_BIN)}; fi && nohup env "$exe" serve --hostname 0.0.0.0 --port ${SERVER_PORT} >/tmp/opencode.log 2>&1 </dev/null &`,
         )
