@@ -62,5 +62,9 @@ func HandleErrorResponse(res *http.Response, requestErr error) error {
 		errMessage += " - run 'daytona login' to reauthenticate"
 	}
 
+	if res.StatusCode == http.StatusForbidden {
+		errMessage += " - check that your API key has sufficient permissions for this action"
+	}
+
 	return errors.New(errMessage)
 }
