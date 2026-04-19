@@ -233,6 +233,8 @@ definitions:
       memory:
         minimum: 1
         type: integer
+      registry:
+        $ref: '#/definitions/RegistryDTO'
     type: object
   RunnerInfoResponseDTO:
     properties:

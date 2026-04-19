@@ -1744,6 +1744,12 @@ export class SandboxService {
       ? ((await this.dockerRegistryService.findOne(sandbox.backupRegistryId)) ?? undefined)
       : undefined
 
+    if (sandbox.backupRegistryId && !backupRegistry) {
+      this.logger.warn(
+        `Backup registry ${sandbox.backupRegistryId} not found for sandbox ${sandbox.id}; proceeding without registry credentials`,
+      )
+    }
+
     try {
       await runnerAdapter.recoverSandbox(sandbox, backupRegistry)
     } catch (error) {
@@ -1932,7 +1938,17 @@ export class SandboxService {
       try {
         const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-        await runnerAdapter.resizeSandbox(sandbox.id, resizeDto.cpu, resizeDto.memory, resizeDto.disk)
+        const backupRegistry = sandbox.backupRegistryId
+          ? ((await this.dockerRegistryService.findOne(sandbox.backupRegistryId)) ?? undefined)
+          : undefined
+
+        if (sandbox.backupRegistryId && !backupRegistry) {
+          this.logger.warn(
+            `Backup registry ${sandbox.backupRegistryId} not found for sandbox ${sandbox.id}; proceeding without registry credentials`,
+          )
+        }
+
+        await runnerAdapter.resizeSandbox(sandbox.id, resizeDto.cpu, resizeDto.memory, resizeDto.disk, backupRegistry)
 
         // For V0 runners, update resources immediately (subscriber emits STATE_UPDATED)
         // For V2 runners, job handler will update resources on completion

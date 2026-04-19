@@ -30,7 +30,7 @@ func (d *DockerClient) Resize(ctx context.Context, sandboxId string, sandboxDto 
 			return fmt.Errorf("disk resize requires stopped container")
 		}
 
-		err = d.ContainerDiskResize(ctx, sandboxId, float64(sandboxDto.Disk), sandboxDto.Cpu, sandboxDto.Memory, "resize", nil)
+		err = d.ContainerDiskResize(ctx, sandboxId, float64(sandboxDto.Disk), sandboxDto.Cpu, sandboxDto.Memory, "resize", sandboxDto.Registry)
 		if err != nil {
 			return err
 		}
@@ -89,7 +89,7 @@ func (d *DockerClient) ContainerDiskResize(ctx context.Context, sandboxId string
 		}
 	}
 
-	resolvedImage, err := d.resolveContainerImage(ctx, originalContainer, registry)
+	resolvedImage, err := d.resolveContainerImage(ctx, sandboxId, originalContainer, registry)
 	if err != nil {
 		return err
 	}
@@ -210,7 +210,7 @@ func (d *DockerClient) copyContainerOverlayData(ctx context.Context, oldContaine
 	return common.RsyncCopy(copyCtx, d.logger, oldContainerOverlayPath, newUpperDir)
 }
 
-func (d *DockerClient) resolveContainerImage(ctx context.Context, originalContainer *container.InspectResponse, registry *dto.RegistryDTO) (string, error) {
+func (d *DockerClient) resolveContainerImage(ctx context.Context, sandboxId string, originalContainer *container.InspectResponse, registry *dto.RegistryDTO) (string, error) {
 	imageRef := originalContainer.Config.Image
 
 	_, err := d.apiClient.ImageInspect(ctx, imageRef)
@@ -232,12 +232,12 @@ func (d *DockerClient) resolveContainerImage(ctx context.Context, originalContai
 	}
 
 	if registry == nil {
-		return "", fmt.Errorf("image %s not available locally and no registry provided", imageRef)
+		return "", fmt.Errorf("image %s is not available locally", imageRef)
 	}
 	d.logger.WarnContext(ctx, "Image not found locally, pulling from registry before resize",
 		"containerName", originalContainer.Name, "imageRef", imageRef)
-	if _, pullErr := d.PullImage(ctx, imageRef, registry, nil); pullErr != nil {
-		return "", fmt.Errorf("image %s not available locally and pull failed: %w", imageRef, pullErr)
+	if _, pullErr := d.PullImage(ctx, imageRef, registry, &sandboxId); pullErr != nil {
+		return "", fmt.Errorf("image %s not available locally and pull from registry failed: %w", imageRef, pullErr)
 	}
 	return imageRef, nil
 }

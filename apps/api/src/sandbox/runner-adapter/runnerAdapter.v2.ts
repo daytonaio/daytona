@@ -594,11 +594,25 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     this.logger.debug(`Created SNAPSHOT_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }
 
-  async resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void> {
+  async resizeSandbox(
+    sandboxId: string,
+    cpu?: number,
+    memory?: number,
+    disk?: number,
+    registry?: DockerRegistry,
+  ): Promise<void> {
     await this.jobService.createJob(null, JobType.RESIZE_SANDBOX, this.runner.id, ResourceType.SANDBOX, sandboxId, {
       cpu,
       memory,
       disk,
+      registry: registry
+        ? {
+            project: registry.project,
+            url: registry.url.replace(/^(https?:\/\/)/, ''),
+            username: registry.username,
+            password: registry.password,
+          }
+        : undefined,
     })
 
     this.logger.debug(`Created RESIZE_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)

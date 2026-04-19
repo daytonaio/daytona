@@ -1754,6 +1754,9 @@ const docTemplate = `{
                 "memory": {
                     "type": "integer",
                     "minimum": 1
+                },
+                "registry": {
+                    "$ref": "#/definitions/RegistryDTO"
                 }
             }
         },
