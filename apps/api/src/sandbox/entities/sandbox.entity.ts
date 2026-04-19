@@ -45,6 +45,9 @@ import { SandboxLastActivity } from './sandbox-last-activity.entity'
 @Index('sandbox_pending_idx', ['id'], {
   where: `"pending" = true`,
 })
+@Index('idx_sandbox_recoverable', ['id'], {
+  where: '"recoverable" = true',
+})
 @Index('idx_sandbox_authtoken', ['authToken'])
 @Index('sandbox_labels_gin_full_idx', { synchronize: false })
 @Index('idx_sandbox_volumes_gin', { synchronize: false })
