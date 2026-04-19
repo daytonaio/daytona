@@ -8,19 +8,15 @@
   </picture>
 </div>
 
-<h3 align="center">
-  Daytona Documentation
-</h3>
-
 &nbsp;
 
-## Documentation
+## Daytona Documentation
 
-Daytona provides a documentation website covering [SDK](https://www.daytona.io/docs/en/getting-started#sdk), [API](https://www.daytona.io/docs/en/tools/api), and [CLI](https://www.daytona.io/docs/en/tools/cli) references, integration [guides](https://www.daytona.io/docs/en/guides), and [examples](https://www.daytona.io/docs/en/getting-started#examples).
+Daytona provides a documentation website covering [SDK](https://www.daytona.io/docs/en/getting-started#sdk), [API](https://www.daytona.io/docs/en/tools/api), and [CLI](https://www.daytona.io/docs/en/tools/cli) references, [integration guides](https://www.daytona.io/docs/en/guides), and [examples](https://www.daytona.io/docs/en/getting-started#examples).
 
 ### Structure
 
-Documentation resides in the `apps/docs` directory, built with Astro and Starlight. The documentation website is deployed in server-rendered (SSR) mode using an Express adapter, with custom middleware handling redirects and routing.
+Documentation resides in the `apps/docs` directory, built with Astro and Starlight. The documentation website is deployed at [daytona.io/docs](https://www.daytona.io/docs) in server-rendered (SSR) mode using an Express adapter, with custom middleware handling redirects and routing.
 
 Documentation content is authored in Markdown (`.md`) and Markdown Extended (`.mdx`) files, organized into the following directory structure:
 
