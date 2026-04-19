@@ -1740,8 +1740,18 @@ export class SandboxService {
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
+    const backupRegistry = sandbox.backupRegistryId
+      ? ((await this.dockerRegistryService.findOne(sandbox.backupRegistryId)) ?? undefined)
+      : undefined
+
+    if (sandbox.backupRegistryId && !backupRegistry) {
+      this.logger.warn(
+        `Backup registry ${sandbox.backupRegistryId} not found for sandbox ${sandbox.id}; proceeding without registry credentials`,
+      )
+    }
+
     try {
-      await runnerAdapter.recoverSandbox(sandbox)
+      await runnerAdapter.recoverSandbox(sandbox, backupRegistry)
     } catch (error) {
       if (error instanceof Error && error.message.includes('storage cannot be further expanded')) {
         const errorMsg = `Sandbox storage cannot be further expanded. Maximum expansion of ${(sandbox.disk * 0.1).toFixed(2)}GB (10% of original ${sandbox.disk.toFixed(2)}GB) has been reached. Please contact support for further assistance.`
@@ -1928,7 +1938,17 @@ export class SandboxService {
       try {
         const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-        await runnerAdapter.resizeSandbox(sandbox.id, resizeDto.cpu, resizeDto.memory, resizeDto.disk)
+        const backupRegistry = sandbox.backupRegistryId
+          ? ((await this.dockerRegistryService.findOne(sandbox.backupRegistryId)) ?? undefined)
+          : undefined
+
+        if (sandbox.backupRegistryId && !backupRegistry) {
+          this.logger.warn(
+            `Backup registry ${sandbox.backupRegistryId} not found for sandbox ${sandbox.id}; proceeding without registry credentials`,
+          )
+        }
+
+        await runnerAdapter.resizeSandbox(sandbox.id, resizeDto.cpu, resizeDto.memory, resizeDto.disk, backupRegistry)
 
         // For V0 runners, update resources immediately (subscriber emits STATE_UPDATED)
         // For V2 runners, job handler will update resources on completion

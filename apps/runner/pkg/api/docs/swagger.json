@@ -1579,6 +1579,9 @@
         "osUser": {
           "type": "string"
         },
+        "registry": {
+          "$ref": "#/definitions/RegistryDTO"
+        },
         "snapshot": {
           "type": "string"
         },
@@ -1633,6 +1636,9 @@
         "memory": {
           "type": "integer",
           "minimum": 1
+        },
+        "registry": {
+          "$ref": "#/definitions/RegistryDTO"
         }
       }
     },
