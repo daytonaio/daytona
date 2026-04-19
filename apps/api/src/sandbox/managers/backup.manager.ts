@@ -13,6 +13,7 @@ import { RunnerState } from '../enums/runner-state.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { BackupState } from '../enums/backup-state.enum'
+import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/sandbox.constants'
@@ -435,12 +436,15 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
             )
             break
           }
+          // Only surface recoverable=true for user-initiated backups (archive).
+          const isUserInitiated = sandbox.desiredState === SandboxDesiredState.ARCHIVED
           await this.sandboxService.updateSandboxBackupState(
             sandbox.id,
             BackupState.ERROR,
             undefined,
             undefined,
             sandboxInfo.backupErrorReason,
+            (sandboxInfo.recoverable ?? false) && isUserInitiated,
           )
           break
         }

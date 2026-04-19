@@ -68,6 +68,13 @@ export class SandboxArchiveAction extends SandboxAction {
             lockCode,
             undefined,
             'Failed to archive sandbox after 3 retries',
+            undefined,
+            undefined,
+            // Preserve the recoverable flag set by backup.manager.ts on recoverable backup errors
+            // (e.g. "no space left on device"). Otherwise updateSandboxState defaults it to false
+            // when errorReason is provided, and the new flag-based /recover gate would reject
+            // a sandbox that is in fact recoverable via backupErrorReason.
+            sandbox.recoverable,
           )
         }
         await this.redis.del(archiveErrorRetryKey)
@@ -97,7 +104,16 @@ export class SandboxArchiveAction extends SandboxAction {
           this.logger.warn(`Transitioning sandbox ${sandbox.id} from ERROR to ARCHIVED state (runner draining)`)
         }
 
-        await this.updateSandboxState(sandbox, SandboxState.ARCHIVED, lockCode, null)
+        await this.updateSandboxState(
+          sandbox,
+          SandboxState.ARCHIVED,
+          lockCode,
+          null,
+          undefined,
+          undefined,
+          undefined,
+          false,
+        )
         return DONT_SYNC_AGAIN
       }
 
@@ -119,7 +135,19 @@ export class SandboxArchiveAction extends SandboxAction {
           this.logger.warn(`Transitioning sandbox ${sandbox.id} from ERROR to ARCHIVED state (runner draining)`)
         }
 
-        await this.updateSandboxState(sandbox, SandboxState.ARCHIVED, lockCode, null)
+        // Clear recoverable here: this is the only exit path for an archive flow that
+        // may have set recoverable=true on a backup failure (backup.manager.ts:447).
+        // Scheduled/ad-hoc backup completions must not touch the flag.
+        await this.updateSandboxState(
+          sandbox,
+          SandboxState.ARCHIVED,
+          lockCode,
+          null,
+          undefined,
+          undefined,
+          undefined,
+          false,
+        )
         return DONT_SYNC_AGAIN
       }
 

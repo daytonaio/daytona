@@ -1717,8 +1717,8 @@ export class SandboxService {
   async recover(sandboxIdOrName: string, organization: Organization): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
-    if (sandbox.state !== SandboxState.ERROR) {
-      throw new BadRequestError('Sandbox must be in error state to recover')
+    if (!sandbox.recoverable) {
+      throw new BadRequestError('Sandbox is not in a recoverable state')
     }
 
     if (sandbox.pending) {
@@ -1755,11 +1755,18 @@ export class SandboxService {
       desiredState: SandboxDesiredState.STOPPED,
       errorReason: null,
       recoverable: false,
+      // Clear transient backup state so the poller won't resume a retry post-recover.
+      backupState: BackupState.NONE,
+      backupErrorReason: null,
+    }
+    // Only wipe the snapshot pointer on a failed backup — a COMPLETED one is still valid.
+    if (sandbox.backupState === BackupState.ERROR) {
+      updateData.backupSnapshot = null
     }
 
     await this.sandboxRepository.updateWhere(sandbox.id, {
       updateData,
-      whereCondition: { state: SandboxState.ERROR },
+      whereCondition: { recoverable: true, pending: false, state: sandbox.state },
     })
 
     // Now that sandbox is in STOPPED state, use the normal start flow
@@ -2537,6 +2544,7 @@ export class SandboxService {
     backupSnapshot?: string | null,
     backupRegistryId?: string | null,
     backupErrorReason?: string | null,
+    recoverable?: boolean,
   ): Promise<void> {
     const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
       id: sandboxId,
@@ -2548,6 +2556,7 @@ export class SandboxService {
       backupSnapshot,
       backupRegistryId,
       backupErrorReason,
+      recoverable,
     )
 
     await this.sandboxRepository.update(sandboxId, { updateData, entity: sandboxToUpdate })

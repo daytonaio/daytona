@@ -1654,7 +1654,6 @@ const docTemplate = `{
         "RecoverSandboxDTO": {
             "type": "object",
             "required": [
-                "errorReason",
                 "osUser",
                 "userId"
             ],
@@ -1673,6 +1672,7 @@ const docTemplate = `{
                     }
                 },
                 "errorReason": {
+                    "description": "At least one of ErrorReason or BackupErrorReason must deduce a recovery type in\napps/runner/pkg/docker/recover.go; both are optional at the DTO level so that the\ncaller can send only whichever one is populated (archive-backup failures leave\nerrorReason null on the API side).",
                     "type": "string"
                 },
                 "fromVolumeId": {
@@ -1835,6 +1835,9 @@ const docTemplate = `{
                 },
                 "daemonVersion": {
                     "type": "string"
+                },
+                "recoverable": {
+                    "type": "boolean"
                 },
                 "state": {
                     "$ref": "#/definitions/enums.SandboxState"

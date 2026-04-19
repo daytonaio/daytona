@@ -173,6 +173,11 @@ definitions:
           type: string
         type: object
       errorReason:
+        description: |-
+          At least one of ErrorReason or BackupErrorReason must deduce a recovery type in
+          apps/runner/pkg/docker/recover.go; both are optional at the DTO level so that the
+          caller can send only whichever one is populated (archive-backup failures leave
+          errorReason null on the API side).
         type: string
       fromVolumeId:
         type: string
@@ -200,7 +205,6 @@ definitions:
           $ref: '#/definitions/dto.VolumeDTO'
         type: array
     required:
-      - errorReason
       - osUser
       - userId
     type: object
@@ -286,6 +290,8 @@ definitions:
         $ref: '#/definitions/enums.BackupState'
       daemonVersion:
         type: string
+      recoverable:
+        type: boolean
       state:
         $ref: '#/definitions/enums.SandboxState'
     type: object
