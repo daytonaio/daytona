@@ -43,20 +43,24 @@ type UpdateNetworkSettingsDTO struct {
 } //	@name	UpdateNetworkSettingsDTO
 
 type RecoverSandboxDTO struct {
-	FromVolumeId      string            `json:"fromVolumeId,omitempty"`
-	UserId            string            `json:"userId" validate:"required"`
-	Snapshot          *string           `json:"snapshot,omitempty"`
-	OsUser            string            `json:"osUser" validate:"required"`
-	CpuQuota          int64             `json:"cpuQuota" validate:"min=1"`
-	GpuQuota          int64             `json:"gpuQuota" validate:"min=0"`
-	MemoryQuota       int64             `json:"memoryQuota" validate:"min=1"`
-	StorageQuota      int64             `json:"storageQuota" validate:"min=1"`
-	Env               map[string]string `json:"env,omitempty"`
-	Volumes           []VolumeDTO       `json:"volumes,omitempty"`
-	NetworkBlockAll   *bool             `json:"networkBlockAll,omitempty"`
-	NetworkAllowList  *string           `json:"networkAllowList,omitempty"`
-	ErrorReason       string            `json:"errorReason" validate:"required"`
-	BackupErrorReason string            `json:"backupErrorReason,omitempty"`
+	FromVolumeId     string            `json:"fromVolumeId,omitempty"`
+	UserId           string            `json:"userId" validate:"required"`
+	Snapshot         *string           `json:"snapshot,omitempty"`
+	OsUser           string            `json:"osUser" validate:"required"`
+	CpuQuota         int64             `json:"cpuQuota" validate:"min=1"`
+	GpuQuota         int64             `json:"gpuQuota" validate:"min=0"`
+	MemoryQuota      int64             `json:"memoryQuota" validate:"min=1"`
+	StorageQuota     int64             `json:"storageQuota" validate:"min=1"`
+	Env              map[string]string `json:"env,omitempty"`
+	Volumes          []VolumeDTO       `json:"volumes,omitempty"`
+	NetworkBlockAll  *bool             `json:"networkBlockAll,omitempty"`
+	NetworkAllowList *string           `json:"networkAllowList,omitempty"`
+	// At least one of ErrorReason or BackupErrorReason must deduce a recovery type in
+	// apps/runner/pkg/docker/recover.go; both are optional at the DTO level so that the
+	// caller can send only whichever one is populated (archive-backup failures leave
+	// errorReason null on the API side).
+	ErrorReason       string `json:"errorReason,omitempty"`
+	BackupErrorReason string `json:"backupErrorReason,omitempty"`
 } //	@name	RecoverSandboxDTO
 
 type IsRecoverableDTO struct {

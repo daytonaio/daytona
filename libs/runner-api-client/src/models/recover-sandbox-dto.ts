@@ -42,11 +42,11 @@ export interface RecoverSandboxDTO {
      */
     'env'?: { [key: string]: string; };
     /**
-     * 
+     * At least one of ErrorReason or BackupErrorReason must deduce a recovery type in apps/runner/pkg/docker/recover.go; both are optional at the DTO level so that the caller can send only whichever one is populated (archive-backup failures leave errorReason null on the API side).
      * @type {string}
      * @memberof RecoverSandboxDTO
      */
-    'errorReason': string;
+    'errorReason'?: string;
     /**
      * 
      * @type {string}

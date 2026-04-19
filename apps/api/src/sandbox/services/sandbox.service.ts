@@ -1755,11 +1755,12 @@ export class SandboxService {
       desiredState: SandboxDesiredState.STOPPED,
       errorReason: null,
       recoverable: false,
+      // Clear transient backup state so the poller won't resume a retry post-recover.
+      backupState: BackupState.NONE,
+      backupErrorReason: null,
     }
-
+    // Only wipe the snapshot pointer on a failed backup — a COMPLETED one is still valid.
     if (sandbox.backupState === BackupState.ERROR) {
-      updateData.backupState = BackupState.NONE
-      updateData.backupErrorReason = null
       updateData.backupSnapshot = null
     }
 
