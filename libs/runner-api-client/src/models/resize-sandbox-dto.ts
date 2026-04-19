@@ -13,11 +13,20 @@
  */
 
 
+// May contain unused imports in some cases
+// @ts-ignore
+import type { RegistryDTO } from './registry-dto';
 
 export interface ResizeSandboxDTO {
     'cpu'?: number;
     'disk'?: number;
     'gpu'?: number;
     'memory'?: number;
+    /**
+     * 
+     * @type {RegistryDTO}
+     * @memberof ResizeSandboxDTO
+     */
+    'registry'?: RegistryDTO;
 }
 
