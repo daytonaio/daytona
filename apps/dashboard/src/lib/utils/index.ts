@@ -153,3 +153,22 @@ export function getRegionFullDisplayName(region: { id: string; name: string; org
 export function getMetaKey(): string {
   return window.navigator.userAgent.includes('Mac') ? '⌘' : 'Ctrl'
 }
+
+export function downloadUrl(url: string, filename: string) {
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+}
+
+export function downloadBlob(blob: Blob, filename: string) {
+  const objectUrl = window.URL.createObjectURL(blob)
+
+  try {
+    downloadUrl(objectUrl, filename)
+  } finally {
+    window.URL.revokeObjectURL(objectUrl)
+  }
+}

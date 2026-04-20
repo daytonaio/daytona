@@ -3567,6 +3567,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@chenglou/pretext@npm:^0.0.5":
+  version: 0.0.5
+  resolution: "@chenglou/pretext@npm:0.0.5"
+  checksum: 10c0/5139b39a166fbe7d1e0cf31c95f83125cc0658d8951b19dff3ac14b94d08c2bb53e954801c0325dac79c5b2b21157fa7763e0c561d46773baa37253f1a526242
+  languageName: node
+  linkType: hard
+
 "@clack/core@npm:1.0.0-alpha.6":
   version: 1.0.0-alpha.6
   resolution: "@clack/core@npm:1.0.0-alpha.6"
@@ -5235,6 +5242,24 @@ __metadata:
   dependencies:
     "@hapi/hoek": "npm:^9.0.0"
   checksum: 10c0/b16b06d9357947149e032bdf10151eb71aea8057c79c4046bf32393cb89d0d0f7ca501c40c0f7534a5ceca078de0700d2257ac855c15e59fe4e00bba2f25c86f
+  languageName: node
+  linkType: hard
+
+"@headless-tree/core@npm:^1.6.3":
+  version: 1.6.3
+  resolution: "@headless-tree/core@npm:1.6.3"
+  checksum: 10c0/e03708049297ddf51cee9e2fe3c3918bd1779288329866d7b11d9783eaaf67c9ef3bc36a82fd0f7c2196aef1ef3f989c39fffed7d8dca95bf3e0d4bd3c57dd5d
+  languageName: node
+  linkType: hard
+
+"@headless-tree/react@npm:^1.6.3":
+  version: 1.6.3
+  resolution: "@headless-tree/react@npm:1.6.3"
+  peerDependencies:
+    "@headless-tree/core": "*"
+    react: "*"
+    react-dom: "*"
+  checksum: 10c0/44f453114ca3c63bb103f21b0b1d8db8a5197275553eac477004caaf0b24d02ff659ae1b2b727162049820655958d4ea7537a9c48f0cf7b8260fb1a1eba094c2
   languageName: node
   linkType: hard
 
@@ -13714,6 +13739,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/react-virtual@npm:^3.13.23":
+  version: 3.13.23
+  resolution: "@tanstack/react-virtual@npm:3.13.23"
+  dependencies:
+    "@tanstack/virtual-core": "npm:3.13.23"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/a3e33463eb471067f9539858655bbefb99778f930156165afb0218fe5ffa181bc2e3dacfe3b6f655f1716d9994064f58ef009370975f801b4c83826aa33a5791
+  languageName: node
+  linkType: hard
+
 "@tanstack/store@npm:0.8.0":
   version: 0.8.0
   resolution: "@tanstack/store@npm:0.8.0"
@@ -13732,6 +13769,13 @@ __metadata:
   version: 8.21.3
   resolution: "@tanstack/table-core@npm:8.21.3"
   checksum: 10c0/40e3560e6d55e07cc047024aa7f83bd47a9323d21920d4adabba8071fd2d21230c48460b26cedf392588f8265b9edc133abb1b0d6d0adf4dae0970032900a8c9
+  languageName: node
+  linkType: hard
+
+"@tanstack/virtual-core@npm:3.13.23":
+  version: 3.13.23
+  resolution: "@tanstack/virtual-core@npm:3.13.23"
+  checksum: 10c0/3487089ea4e1dcbb01836f51a1b35b709f9ba03312fe600ddb97c893c16be213e1690af735717b1d6b2e22dfec691c338bc96b5965228c195840249699d5273a
   languageName: node
   linkType: hard
 
@@ -19809,12 +19853,15 @@ __metadata:
     "@babel/preset-typescript": "npm:^7.22.0"
     "@bufbuild/protobuf": "npm:^2.11.0"
     "@bufbuild/protoc-gen-es": "npm:^2.11.0"
+    "@chenglou/pretext": "npm:^0.0.5"
     "@clickhouse/client": "npm:^1.16.0"
     "@dotenvx/dotenvx": "npm:^1.25.1"
     "@esbuild-plugins/node-globals-polyfill": "npm:^0.2.3"
     "@esbuild-plugins/node-modules-polyfill": "npm:^0.2.2"
     "@eslint/js": "npm:^9.8.0"
     "@esm2cjs/cacheable-lookup": "npm:^7.0.0"
+    "@headless-tree/core": "npm:^1.6.3"
+    "@headless-tree/react": "npm:^1.6.3"
     "@iarna/toml": "npm:^2.2.5"
     "@nest-lab/throttler-storage-redis": "npm:^1.1.0"
     "@nestjs-modules/ioredis": "npm:^2.0.2"
@@ -19912,6 +19959,7 @@ __metadata:
     "@tanstack/react-query": "npm:^5.90.1"
     "@tanstack/react-query-devtools": "npm:^5.90.1"
     "@tanstack/react-table": "npm:^8.21.2"
+    "@tanstack/react-virtual": "npm:^3.13.23"
     "@trivago/prettier-plugin-sort-imports": "npm:^5.2.2"
     "@types/busboy": "npm:^1.0.0"
     "@types/dockerode": "npm:^3.3.34"
@@ -20015,12 +20063,14 @@ __metadata:
     react-error-boundary: "npm:^6.0.0"
     react-instantsearch: "npm:^7.16.0"
     react-instantsearch-dom: "npm:^6.40.4"
+    react-markdown: "npm:^10.1.0"
     react-number-format: "npm:^5.4.4"
     react-oidc-context: "npm:^3.3.0"
     react-resizable-panels: "npm:^4.4.1"
     react-router-dom: "npm:6.29.0"
     recharts: "npm:^2.15.3"
     reflect-metadata: "npm:^0.1.13"
+    remark-gfm: "npm:^4.0.1"
     run-script-webpack-plugin: "npm:^0.2.2"
     rxjs: "npm:^7.8.0"
     sass: "npm:^1.89.2"
@@ -24525,6 +24575,13 @@ __metadata:
   version: 2.0.2
   resolution: "html-escaper@npm:2.0.2"
   checksum: 10c0/208e8a12de1a6569edbb14544f4567e6ce8ecc30b9394fcaa4e7bb1e60c12a7c9a1ed27e31290817157e8626f3a4f29e76c8747030822eb84a6abb15c255f0a0
+  languageName: node
+  linkType: hard
+
+"html-url-attributes@npm:^3.0.0":
+  version: 3.0.1
+  resolution: "html-url-attributes@npm:3.0.1"
+  checksum: 10c0/496e4908aa8b77665f348b4b03521901794f648b8ac34a581022cd6f2c97934d5c910cd91bc6593bbf2994687549037bc2520fcdc769b31484f29ffdd402acd0
   languageName: node
   linkType: hard
 
@@ -33359,6 +33416,28 @@ __metadata:
   version: 18.3.1
   resolution: "react-is@npm:18.3.1"
   checksum: 10c0/f2f1e60010c683479e74c63f96b09fb41603527cd131a9959e2aee1e5a8b0caf270b365e5ca77d4a6b18aae659b60a86150bb3979073528877029b35aecd2072
+  languageName: node
+  linkType: hard
+
+"react-markdown@npm:^10.1.0":
+  version: 10.1.0
+  resolution: "react-markdown@npm:10.1.0"
+  dependencies:
+    "@types/hast": "npm:^3.0.0"
+    "@types/mdast": "npm:^4.0.0"
+    devlop: "npm:^1.0.0"
+    hast-util-to-jsx-runtime: "npm:^2.0.0"
+    html-url-attributes: "npm:^3.0.0"
+    mdast-util-to-hast: "npm:^13.0.0"
+    remark-parse: "npm:^11.0.0"
+    remark-rehype: "npm:^11.0.0"
+    unified: "npm:^11.0.0"
+    unist-util-visit: "npm:^5.0.0"
+    vfile: "npm:^6.0.0"
+  peerDependencies:
+    "@types/react": ">=18"
+    react: ">=18"
+  checksum: 10c0/4a5dc7d15ca6d05e9ee95318c1904f83b111a76f7588c44f50f1d54d4c97193b84e4f64c4b592057c989228238a2590306cedd0c4d398e75da49262b2b5ae1bf
   languageName: node
   linkType: hard
 
