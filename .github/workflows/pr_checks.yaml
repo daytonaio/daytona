@@ -222,6 +222,7 @@ jobs:
       - name: Validate .yarnrc.yml
         run: |
           python3 <<'PY'
+          import posixpath
           import sys
           from pathlib import Path
           from urllib.parse import urlparse
@@ -296,21 +297,28 @@ jobs:
           if is_truthy(config.get("enableScripts")):
               errors.append("enableScripts is enabled -- postinstall scripts can execute arbitrary code")
 
-          # unsafeHttpWhitelist undermines the HTTPS enforcement -- block entirely
-          unsafe_whitelist = config.get("unsafeHttpWhitelist")
-          if unsafe_whitelist:
-              errors.append(f"unsafeHttpWhitelist must be unset or empty, got: {unsafe_whitelist!r} -- bypasses HTTPS enforcement")
+          # unsafeHttpWhitelist undermines the HTTPS enforcement -- only allow absent/null or exactly []
+          if "unsafeHttpWhitelist" in config:
+              unsafe_whitelist = config["unsafeHttpWhitelist"]
+              if unsafe_whitelist is not None and unsafe_whitelist != []:
+                  errors.append(f"unsafeHttpWhitelist must be absent or an empty list, got: {unsafe_whitelist!r} -- bypasses HTTPS enforcement")
 
-          # yarnPath must be absent (Corepack) or vendored under .yarn/releases/
-          yarn_path = config.get("yarnPath")
-          if yarn_path is not None:
-              if not isinstance(yarn_path, str) or not yarn_path.startswith(".yarn/releases/"):
-                  errors.append(f"yarnPath must start with '.yarn/releases/' (or be absent to use Corepack), got: {yarn_path!r}")
+          # yarnPath must be absent (Corepack) or a normalized path under .yarn/releases/
+          if "yarnPath" in config:
+              yarn_path = config["yarnPath"]
+              if not isinstance(yarn_path, str):
+                  errors.append(f"yarnPath must be a string, got: {yarn_path!r}")
+              else:
+                  # Normalize to resolve any .. segments, then confirm it's under .yarn/releases/
+                  normalized = posixpath.normpath(yarn_path)
+                  if ".." in yarn_path.split("/") or not normalized.startswith(".yarn/releases/"):
+                      errors.append(f"yarnPath must resolve to a path under '.yarn/releases/' (no traversal, no absolute paths), got: {yarn_path!r}")
 
-          # plugins execute arbitrary code on every yarn invocation -- block entirely
-          plugins = config.get("plugins")
-          if plugins:
-              errors.append(f"plugins must be unset or empty, got: {plugins!r} -- plugins execute arbitrary code. Add explicit allowlist to this check if needed.")
+          # plugins execute arbitrary code on every yarn invocation -- only allow absent/null or exactly []
+          if "plugins" in config:
+              plugins = config["plugins"]
+              if plugins is not None and plugins != []:
+                  errors.append(f"plugins must be absent or an empty list, got: {plugins!r} -- plugins execute arbitrary code. Add explicit allowlist to this check if needed.")
 
           if errors:
               for e in errors:
