@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Sitemap: https://www.daytona.io/docs/sitemap-index.xml
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
