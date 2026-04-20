@@ -41,6 +41,7 @@ import { memo, startTransition, useCallback, useEffect, useMemo, useRef, useStat
 import { useAuth } from 'react-oidc-context'
 import { toast } from 'sonner'
 
+import { useConfig } from '@/hooks/useConfig'
 import { CONTENTS_OVERLAY_MIN_WIDTH, FILES_COLUMN_MAX_WIDTH, MAX_PREVIEW_BYTES, ROOT_PATH } from './constants'
 import { FileContentsPanel } from './FileContentsPanel'
 import { FileNodeActions } from './FileNodeActions'
@@ -59,6 +60,7 @@ const MemoizedContentsActions = memo(FileNodeActions)
 
 function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
   const { user } = useAuth()
+  const { apiUrl } = useConfig()
   const { selectedOrganization } = useSelectedOrganization()
   const [copiedContents, copyContents] = useCopyToClipboard()
   const [canNavigateNext, setCanNavigateNext] = useState(false)
@@ -98,10 +100,10 @@ function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
 
     return new Daytona({
       jwtToken: user.access_token,
-      apiUrl: import.meta.env.VITE_API_URL,
+      apiUrl,
       organizationId: selectedOrganization.id,
     })
-  }, [selectedOrganization?.id, user?.access_token])
+  }, [selectedOrganization?.id, user?.access_token, apiUrl])
 
   const sandboxInstanceQuery = useSandboxInstanceQuery({
     client,
