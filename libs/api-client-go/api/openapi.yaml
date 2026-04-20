@@ -9754,10 +9754,14 @@ components:
     RegionUsageOverview:
       example:
         totalCpuQuota: 0.8008281904610115
+        maxCpuPerSandbox: 7.061401241503109
+        maxDiskPerSandbox: 3.616076749251911
+        maxDiskPerNonEphemeralSandbox: 2.027123023002322
         regionId: regionId
         currentDiskUsage: 2.3021358869347655
         currentMemoryUsage: 5.962133916683182
         currentCpuUsage: 6.027456183070403
+        maxMemoryPerSandbox: 9.301444243932576
         totalMemoryQuota: 1.4658129805029452
         totalDiskQuota: 5.637376656633329
       properties:
@@ -9775,10 +9779,26 @@ components:
           type: number
         currentDiskUsage:
           type: number
+        maxCpuPerSandbox:
+          nullable: true
+          type: number
+        maxMemoryPerSandbox:
+          nullable: true
+          type: number
+        maxDiskPerSandbox:
+          nullable: true
+          type: number
+        maxDiskPerNonEphemeralSandbox:
+          nullable: true
+          type: number
       required:
       - currentCpuUsage
       - currentDiskUsage
       - currentMemoryUsage
+      - maxCpuPerSandbox
+      - maxDiskPerNonEphemeralSandbox
+      - maxDiskPerSandbox
+      - maxMemoryPerSandbox
       - regionId
       - totalCpuQuota
       - totalDiskQuota
@@ -9786,23 +9806,31 @@ components:
       type: object
     OrganizationUsageOverview:
       example:
-        totalSnapshotQuota: 7.061401241503109
-        currentVolumeUsage: 2.027123023002322
-        totalVolumeQuota: 3.616076749251911
-        currentSnapshotUsage: 9.301444243932576
+        totalSnapshotQuota: 4.145608029883936
+        currentVolumeUsage: 1.0246457001441578
+        totalVolumeQuota: 1.2315135367772556
+        currentSnapshotUsage: 7.386281948385884
         regionUsage:
         - totalCpuQuota: 0.8008281904610115
+          maxCpuPerSandbox: 7.061401241503109
+          maxDiskPerSandbox: 3.616076749251911
+          maxDiskPerNonEphemeralSandbox: 2.027123023002322
           regionId: regionId
           currentDiskUsage: 2.3021358869347655
           currentMemoryUsage: 5.962133916683182
           currentCpuUsage: 6.027456183070403
+          maxMemoryPerSandbox: 9.301444243932576
           totalMemoryQuota: 1.4658129805029452
           totalDiskQuota: 5.637376656633329
         - totalCpuQuota: 0.8008281904610115
+          maxCpuPerSandbox: 7.061401241503109
+          maxDiskPerSandbox: 3.616076749251911
+          maxDiskPerNonEphemeralSandbox: 2.027123023002322
           regionId: regionId
           currentDiskUsage: 2.3021358869347655
           currentMemoryUsage: 5.962133916683182
           currentCpuUsage: 6.027456183070403
+          maxMemoryPerSandbox: 9.301444243932576
           totalMemoryQuota: 1.4658129805029452
           totalDiskQuota: 5.637376656633329
       properties:

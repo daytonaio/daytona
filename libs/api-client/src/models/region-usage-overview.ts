@@ -62,5 +62,29 @@ export interface RegionUsageOverview {
      * @memberof RegionUsageOverview
      */
     'currentDiskUsage': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof RegionUsageOverview
+     */
+    'maxCpuPerSandbox': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof RegionUsageOverview
+     */
+    'maxMemoryPerSandbox': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof RegionUsageOverview
+     */
+    'maxDiskPerSandbox': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof RegionUsageOverview
+     */
+    'maxDiskPerNonEphemeralSandbox': number | null;
 }
 

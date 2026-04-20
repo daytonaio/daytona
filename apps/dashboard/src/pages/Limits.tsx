@@ -173,9 +173,22 @@ export default function Limits() {
                   description="Resources limit per sandbox."
                   className="border-t border-border"
                   rateLimits={[
-                    { label: 'Compute', value: selectedOrganization?.maxCpuPerSandbox, unit: 'vCPU' },
-                    { label: 'Memory', value: selectedOrganization?.maxMemoryPerSandbox, unit: 'GiB' },
-                    { label: 'Storage', value: selectedOrganization?.maxDiskPerSandbox, unit: 'GiB' },
+                    {
+                      label: 'Compute',
+                      value: currentRegionUsageOverview?.maxCpuPerSandbox ?? selectedOrganization?.maxCpuPerSandbox,
+                      unit: 'vCPU',
+                    },
+                    {
+                      label: 'Memory',
+                      value:
+                        currentRegionUsageOverview?.maxMemoryPerSandbox ?? selectedOrganization?.maxMemoryPerSandbox,
+                      unit: 'GiB',
+                    },
+                    {
+                      label: 'Storage',
+                      value: currentRegionUsageOverview?.maxDiskPerSandbox ?? selectedOrganization?.maxDiskPerSandbox,
+                      unit: 'GiB',
+                    },
                   ]}
                 />
 

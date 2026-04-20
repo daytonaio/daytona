@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Union
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
@@ -37,8 +37,12 @@ class RegionUsageOverview(BaseModel):
     current_memory_usage: Union[StrictFloat, StrictInt] = Field(serialization_alias="currentMemoryUsage")
     total_disk_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalDiskQuota")
     current_disk_usage: Union[StrictFloat, StrictInt] = Field(serialization_alias="currentDiskUsage")
+    max_cpu_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxCpuPerSandbox")
+    max_memory_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxMemoryPerSandbox")
+    max_disk_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxDiskPerSandbox")
+    max_disk_per_non_ephemeral_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxDiskPerNonEphemeralSandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["regionId", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage"]
+    __properties: ClassVar[List[str]] = ["regionId", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -85,6 +89,26 @@ class RegionUsageOverview(BaseModel):
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
 
+        # set to None if max_cpu_per_sandbox (nullable) is None
+        # and model_fields_set contains the field
+        if self.max_cpu_per_sandbox is None and "max_cpu_per_sandbox" in self.model_fields_set:
+            _dict['maxCpuPerSandbox'] = None
+
+        # set to None if max_memory_per_sandbox (nullable) is None
+        # and model_fields_set contains the field
+        if self.max_memory_per_sandbox is None and "max_memory_per_sandbox" in self.model_fields_set:
+            _dict['maxMemoryPerSandbox'] = None
+
+        # set to None if max_disk_per_sandbox (nullable) is None
+        # and model_fields_set contains the field
+        if self.max_disk_per_sandbox is None and "max_disk_per_sandbox" in self.model_fields_set:
+            _dict['maxDiskPerSandbox'] = None
+
+        # set to None if max_disk_per_non_ephemeral_sandbox (nullable) is None
+        # and model_fields_set contains the field
+        if self.max_disk_per_non_ephemeral_sandbox is None and "max_disk_per_non_ephemeral_sandbox" in self.model_fields_set:
+            _dict['maxDiskPerNonEphemeralSandbox'] = None
+
         return _dict
 
     @classmethod
@@ -103,7 +127,11 @@ class RegionUsageOverview(BaseModel):
             "total_memory_quota": obj.get("totalMemoryQuota"),
             "current_memory_usage": obj.get("currentMemoryUsage"),
             "total_disk_quota": obj.get("totalDiskQuota"),
-            "current_disk_usage": obj.get("currentDiskUsage")
+            "current_disk_usage": obj.get("currentDiskUsage"),
+            "max_cpu_per_sandbox": obj.get("maxCpuPerSandbox"),
+            "max_memory_per_sandbox": obj.get("maxMemoryPerSandbox"),
+            "max_disk_per_sandbox": obj.get("maxDiskPerSandbox"),
+            "max_disk_per_non_ephemeral_sandbox": obj.get("maxDiskPerNonEphemeralSandbox")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

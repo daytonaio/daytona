@@ -86,6 +86,26 @@ public class RegionUsageOverview {
   @javax.annotation.Nonnull
   private BigDecimal currentDiskUsage;
 
+  public static final String SERIALIZED_NAME_MAX_CPU_PER_SANDBOX = "maxCpuPerSandbox";
+  @SerializedName(SERIALIZED_NAME_MAX_CPU_PER_SANDBOX)
+  @javax.annotation.Nullable
+  private BigDecimal maxCpuPerSandbox;
+
+  public static final String SERIALIZED_NAME_MAX_MEMORY_PER_SANDBOX = "maxMemoryPerSandbox";
+  @SerializedName(SERIALIZED_NAME_MAX_MEMORY_PER_SANDBOX)
+  @javax.annotation.Nullable
+  private BigDecimal maxMemoryPerSandbox;
+
+  public static final String SERIALIZED_NAME_MAX_DISK_PER_SANDBOX = "maxDiskPerSandbox";
+  @SerializedName(SERIALIZED_NAME_MAX_DISK_PER_SANDBOX)
+  @javax.annotation.Nullable
+  private BigDecimal maxDiskPerSandbox;
+
+  public static final String SERIALIZED_NAME_MAX_DISK_PER_NON_EPHEMERAL_SANDBOX = "maxDiskPerNonEphemeralSandbox";
+  @SerializedName(SERIALIZED_NAME_MAX_DISK_PER_NON_EPHEMERAL_SANDBOX)
+  @javax.annotation.Nullable
+  private BigDecimal maxDiskPerNonEphemeralSandbox;
+
   public RegionUsageOverview() {
   }
 
@@ -221,6 +241,82 @@ public class RegionUsageOverview {
     this.currentDiskUsage = currentDiskUsage;
   }
 
+
+  public RegionUsageOverview maxCpuPerSandbox(@javax.annotation.Nullable BigDecimal maxCpuPerSandbox) {
+    this.maxCpuPerSandbox = maxCpuPerSandbox;
+    return this;
+  }
+
+  /**
+   * Get maxCpuPerSandbox
+   * @return maxCpuPerSandbox
+   */
+  @javax.annotation.Nullable
+  public BigDecimal getMaxCpuPerSandbox() {
+    return maxCpuPerSandbox;
+  }
+
+  public void setMaxCpuPerSandbox(@javax.annotation.Nullable BigDecimal maxCpuPerSandbox) {
+    this.maxCpuPerSandbox = maxCpuPerSandbox;
+  }
+
+
+  public RegionUsageOverview maxMemoryPerSandbox(@javax.annotation.Nullable BigDecimal maxMemoryPerSandbox) {
+    this.maxMemoryPerSandbox = maxMemoryPerSandbox;
+    return this;
+  }
+
+  /**
+   * Get maxMemoryPerSandbox
+   * @return maxMemoryPerSandbox
+   */
+  @javax.annotation.Nullable
+  public BigDecimal getMaxMemoryPerSandbox() {
+    return maxMemoryPerSandbox;
+  }
+
+  public void setMaxMemoryPerSandbox(@javax.annotation.Nullable BigDecimal maxMemoryPerSandbox) {
+    this.maxMemoryPerSandbox = maxMemoryPerSandbox;
+  }
+
+
+  public RegionUsageOverview maxDiskPerSandbox(@javax.annotation.Nullable BigDecimal maxDiskPerSandbox) {
+    this.maxDiskPerSandbox = maxDiskPerSandbox;
+    return this;
+  }
+
+  /**
+   * Get maxDiskPerSandbox
+   * @return maxDiskPerSandbox
+   */
+  @javax.annotation.Nullable
+  public BigDecimal getMaxDiskPerSandbox() {
+    return maxDiskPerSandbox;
+  }
+
+  public void setMaxDiskPerSandbox(@javax.annotation.Nullable BigDecimal maxDiskPerSandbox) {
+    this.maxDiskPerSandbox = maxDiskPerSandbox;
+  }
+
+
+  public RegionUsageOverview maxDiskPerNonEphemeralSandbox(@javax.annotation.Nullable BigDecimal maxDiskPerNonEphemeralSandbox) {
+    this.maxDiskPerNonEphemeralSandbox = maxDiskPerNonEphemeralSandbox;
+    return this;
+  }
+
+  /**
+   * Get maxDiskPerNonEphemeralSandbox
+   * @return maxDiskPerNonEphemeralSandbox
+   */
+  @javax.annotation.Nullable
+  public BigDecimal getMaxDiskPerNonEphemeralSandbox() {
+    return maxDiskPerNonEphemeralSandbox;
+  }
+
+  public void setMaxDiskPerNonEphemeralSandbox(@javax.annotation.Nullable BigDecimal maxDiskPerNonEphemeralSandbox) {
+    this.maxDiskPerNonEphemeralSandbox = maxDiskPerNonEphemeralSandbox;
+  }
+
   /**
    * A container for additional, undeclared properties.
    * This is a holder for any undeclared properties as specified with
@@ -282,13 +378,17 @@ public class RegionUsageOverview {
         Objects.equals(this.totalMemoryQuota, regionUsageOverview.totalMemoryQuota) &&
         Objects.equals(this.currentMemoryUsage, regionUsageOverview.currentMemoryUsage) &&
         Objects.equals(this.totalDiskQuota, regionUsageOverview.totalDiskQuota) &&
-        Objects.equals(this.currentDiskUsage, regionUsageOverview.currentDiskUsage)&&
+        Objects.equals(this.currentDiskUsage, regionUsageOverview.currentDiskUsage) &&
+        Objects.equals(this.maxCpuPerSandbox, regionUsageOverview.maxCpuPerSandbox) &&
+        Objects.equals(this.maxMemoryPerSandbox, regionUsageOverview.maxMemoryPerSandbox) &&
+        Objects.equals(this.maxDiskPerSandbox, regionUsageOverview.maxDiskPerSandbox) &&
+        Objects.equals(this.maxDiskPerNonEphemeralSandbox, regionUsageOverview.maxDiskPerNonEphemeralSandbox)&&
         Objects.equals(this.additionalProperties, regionUsageOverview.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(regionId, totalCpuQuota, currentCpuUsage, totalMemoryQuota, currentMemoryUsage, totalDiskQuota, currentDiskUsage, additionalProperties);
+    return Objects.hash(regionId, totalCpuQuota, currentCpuUsage, totalMemoryQuota, currentMemoryUsage, totalDiskQuota, currentDiskUsage, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, additionalProperties);
   }
 
   @Override
@@ -302,6 +402,10 @@ public class RegionUsageOverview {
     sb.append("    currentMemoryUsage: ").append(toIndentedString(currentMemoryUsage)).append("\n");
     sb.append("    totalDiskQuota: ").append(toIndentedString(totalDiskQuota)).append("\n");
     sb.append("    currentDiskUsage: ").append(toIndentedString(currentDiskUsage)).append("\n");
+    sb.append("    maxCpuPerSandbox: ").append(toIndentedString(maxCpuPerSandbox)).append("\n");
+    sb.append("    maxMemoryPerSandbox: ").append(toIndentedString(maxMemoryPerSandbox)).append("\n");
+    sb.append("    maxDiskPerSandbox: ").append(toIndentedString(maxDiskPerSandbox)).append("\n");
+    sb.append("    maxDiskPerNonEphemeralSandbox: ").append(toIndentedString(maxDiskPerNonEphemeralSandbox)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -332,6 +436,10 @@ public class RegionUsageOverview {
     openapiFields.add("currentMemoryUsage");
     openapiFields.add("totalDiskQuota");
     openapiFields.add("currentDiskUsage");
+    openapiFields.add("maxCpuPerSandbox");
+    openapiFields.add("maxMemoryPerSandbox");
+    openapiFields.add("maxDiskPerSandbox");
+    openapiFields.add("maxDiskPerNonEphemeralSandbox");
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>();
@@ -342,6 +450,10 @@ public class RegionUsageOverview {
     openapiRequiredFields.add("currentMemoryUsage");
     openapiRequiredFields.add("totalDiskQuota");
     openapiRequiredFields.add("currentDiskUsage");
+    openapiRequiredFields.add("maxCpuPerSandbox");
+    openapiRequiredFields.add("maxMemoryPerSandbox");
+    openapiRequiredFields.add("maxDiskPerSandbox");
+    openapiRequiredFields.add("maxDiskPerNonEphemeralSandbox");
   }
 
   /**

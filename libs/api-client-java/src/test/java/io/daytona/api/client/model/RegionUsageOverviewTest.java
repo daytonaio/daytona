@@ -94,4 +94,36 @@ public class RegionUsageOverviewTest {
         // TODO: test currentDiskUsage
     }
 
+    /**
+     * Test the property 'maxCpuPerSandbox'
+     */
+    @Test
+    public void maxCpuPerSandboxTest() {
+        // TODO: test maxCpuPerSandbox
+    }
+
+    /**
+     * Test the property 'maxMemoryPerSandbox'
+     */
+    @Test
+    public void maxMemoryPerSandboxTest() {
+        // TODO: test maxMemoryPerSandbox
+    }
+
+    /**
+     * Test the property 'maxDiskPerSandbox'
+     */
+    @Test
+    public void maxDiskPerSandboxTest() {
+        // TODO: test maxDiskPerSandbox
+    }
+
+    /**
+     * Test the property 'maxDiskPerNonEphemeralSandbox'
+     */
+    @Test
+    public void maxDiskPerNonEphemeralSandboxTest() {
+        // TODO: test maxDiskPerNonEphemeralSandbox
+    }
+
 }

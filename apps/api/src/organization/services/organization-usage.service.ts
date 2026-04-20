@@ -110,6 +110,10 @@ export class OrganizationUsageService {
           currentCpuUsage: sandboxUsage.currentCpuUsage,
           currentMemoryUsage: sandboxUsage.currentMemoryUsage,
           currentDiskUsage: sandboxUsage.currentDiskUsage,
+          maxCpuPerSandbox: rq.maxCpuPerSandbox,
+          maxMemoryPerSandbox: rq.maxMemoryPerSandbox,
+          maxDiskPerSandbox: rq.maxDiskPerSandbox,
+          maxDiskPerNonEphemeralSandbox: rq.maxDiskPerNonEphemeralSandbox,
         }
 
         return usage

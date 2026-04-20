@@ -24,6 +24,18 @@ export class RegionUsageOverviewDto {
   totalDiskQuota: number
   @ApiProperty()
   currentDiskUsage: number
+
+  @ApiProperty({ nullable: true })
+  maxCpuPerSandbox: number | null
+
+  @ApiProperty({ nullable: true })
+  maxMemoryPerSandbox: number | null
+
+  @ApiProperty({ nullable: true })
+  maxDiskPerSandbox: number | null
+
+  @ApiProperty({ nullable: true })
+  maxDiskPerNonEphemeralSandbox: number | null
 }
 
 @ApiSchema({ name: 'OrganizationUsageOverview' })
