@@ -53,7 +53,7 @@ export const RUNTIME =
             : Runtime.UNKNOWN
 
 export function getEnvVar(name: string): string | undefined {
-  if (RUNTIME === Runtime.NODE || RUNTIME === Runtime.BUN || RUNTIME === Runtime.SERVERLESS) {
+  if (typeof process !== 'undefined' && process.env) {
     return process.env[name]
   }
   if (RUNTIME === Runtime.DENO) {
