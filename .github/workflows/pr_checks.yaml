@@ -288,10 +288,29 @@ jobs:
               for key in ("npmRegistryServer", "npmPublishRegistry"):
                   if key in scope_config:
                       check_registry(key, scope_config[key], f"npmScopes.{scope}")
+              # Per-scope enableScripts (defense in depth for future Yarn versions)
+              if is_truthy(scope_config.get("enableScripts")):
+                  errors.append(f"npmScopes.{scope}.enableScripts is enabled -- postinstall scripts execute arbitrary code")
 
           # enableScripts (catches Python True, int 1, and YAML truthy strings)
           if is_truthy(config.get("enableScripts")):
               errors.append("enableScripts is enabled -- postinstall scripts can execute arbitrary code")
+
+          # unsafeHttpWhitelist undermines the HTTPS enforcement -- block entirely
+          unsafe_whitelist = config.get("unsafeHttpWhitelist")
+          if unsafe_whitelist:
+              errors.append(f"unsafeHttpWhitelist must be unset or empty, got: {unsafe_whitelist!r} -- bypasses HTTPS enforcement")
+
+          # yarnPath must be absent (Corepack) or vendored under .yarn/releases/
+          yarn_path = config.get("yarnPath")
+          if yarn_path is not None:
+              if not isinstance(yarn_path, str) or not yarn_path.startswith(".yarn/releases/"):
+                  errors.append(f"yarnPath must start with '.yarn/releases/' (or be absent to use Corepack), got: {yarn_path!r}")
+
+          # plugins execute arbitrary code on every yarn invocation -- block entirely
+          plugins = config.get("plugins")
+          if plugins:
+              errors.append(f"plugins must be unset or empty, got: {plugins!r} -- plugins execute arbitrary code. Add explicit allowlist to this check if needed.")
 
           if errors:
               for e in errors:
