@@ -89,6 +89,7 @@ daytona_api_client_async/models/keyboard_hotkey_request.py
 daytona_api_client_async/models/keyboard_press_request.py
 daytona_api_client_async/models/keyboard_type_request.py
 daytona_api_client_async/models/list_branch_response.py
+daytona_api_client_async/models/list_sandboxes_response.py
 daytona_api_client_async/models/log_entry.py
 daytona_api_client_async/models/lsp_completion_params.py
 daytona_api_client_async/models/lsp_document_request.py
@@ -120,7 +121,7 @@ daytona_api_client_async/models/otel_config.py
 daytona_api_client_async/models/paginated_audit_logs.py
 daytona_api_client_async/models/paginated_jobs.py
 daytona_api_client_async/models/paginated_logs.py
-daytona_api_client_async/models/paginated_sandboxes.py
+daytona_api_client_async/models/paginated_sandboxes_deprecated.py
 daytona_api_client_async/models/paginated_snapshots.py
 daytona_api_client_async/models/paginated_traces.py
 daytona_api_client_async/models/poll_jobs_response.py

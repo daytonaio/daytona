@@ -1,6 +1,6 @@
 import asyncio
 
-from daytona import AsyncDaytona
+from daytona import AsyncDaytona, ListSandboxesQuery
 
 
 async def main():
@@ -33,10 +33,16 @@ async def main():
         else:
             print(response.result)
 
-        result = await daytona.list()
-        print("Total sandboxes count:", result.total)
-
-        print(f"Printing first sandbox -> id: {result.items[0].id} state: {result.items[0].state}")
+        async for sb in daytona.list(
+            ListSandboxesQuery(
+                limit=10,
+                labels={"env": "dev"},
+                states=["started"],
+                sort="createdAt",
+                order="desc",
+            )
+        ):
+            print(sb.id)
 
         print("Removing sandbox")
         await daytona.delete(sandbox)

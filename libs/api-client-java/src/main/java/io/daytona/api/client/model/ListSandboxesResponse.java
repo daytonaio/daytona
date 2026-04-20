@@ -21,7 +21,6 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.daytona.api.client.model.Sandbox;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,39 +49,29 @@ import java.util.Set;
 import io.daytona.api.client.JSON;
 
 /**
- * PaginatedSandboxes
+ * ListSandboxesResponse
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
-public class PaginatedSandboxes {
+public class ListSandboxesResponse {
   public static final String SERIALIZED_NAME_ITEMS = "items";
   @SerializedName(SERIALIZED_NAME_ITEMS)
   @javax.annotation.Nonnull
   private List<Sandbox> items = new ArrayList<>();
 
-  public static final String SERIALIZED_NAME_TOTAL = "total";
-  @SerializedName(SERIALIZED_NAME_TOTAL)
-  @javax.annotation.Nonnull
-  private BigDecimal total;
+  public static final String SERIALIZED_NAME_NEXT_CURSOR = "nextCursor";
+  @SerializedName(SERIALIZED_NAME_NEXT_CURSOR)
+  @javax.annotation.Nullable
+  private String nextCursor;
 
-  public static final String SERIALIZED_NAME_PAGE = "page";
-  @SerializedName(SERIALIZED_NAME_PAGE)
-  @javax.annotation.Nonnull
-  private BigDecimal page;
-
-  public static final String SERIALIZED_NAME_TOTAL_PAGES = "totalPages";
-  @SerializedName(SERIALIZED_NAME_TOTAL_PAGES)
-  @javax.annotation.Nonnull
-  private BigDecimal totalPages;
-
-  public PaginatedSandboxes() {
+  public ListSandboxesResponse() {
   }
 
-  public PaginatedSandboxes items(@javax.annotation.Nonnull List<Sandbox> items) {
+  public ListSandboxesResponse items(@javax.annotation.Nonnull List<Sandbox> items) {
     this.items = items;
     return this;
   }
 
-  public PaginatedSandboxes addItemsItem(Sandbox itemsItem) {
+  public ListSandboxesResponse addItemsItem(Sandbox itemsItem) {
     if (this.items == null) {
       this.items = new ArrayList<>();
     }
@@ -91,7 +80,7 @@ public class PaginatedSandboxes {
   }
 
   /**
-   * Get items
+   * List of results for the current page
    * @return items
    */
   @javax.annotation.Nonnull
@@ -104,60 +93,22 @@ public class PaginatedSandboxes {
   }
 
 
-  public PaginatedSandboxes total(@javax.annotation.Nonnull BigDecimal total) {
-    this.total = total;
+  public ListSandboxesResponse nextCursor(@javax.annotation.Nullable String nextCursor) {
+    this.nextCursor = nextCursor;
     return this;
   }
 
   /**
-   * Get total
-   * @return total
+   * Cursor for the next page of results
+   * @return nextCursor
    */
-  @javax.annotation.Nonnull
-  public BigDecimal getTotal() {
-    return total;
+  @javax.annotation.Nullable
+  public String getNextCursor() {
+    return nextCursor;
   }
 
-  public void setTotal(@javax.annotation.Nonnull BigDecimal total) {
-    this.total = total;
-  }
-
-
-  public PaginatedSandboxes page(@javax.annotation.Nonnull BigDecimal page) {
-    this.page = page;
-    return this;
-  }
-
-  /**
-   * Get page
-   * @return page
-   */
-  @javax.annotation.Nonnull
-  public BigDecimal getPage() {
-    return page;
-  }
-
-  public void setPage(@javax.annotation.Nonnull BigDecimal page) {
-    this.page = page;
-  }
-
-
-  public PaginatedSandboxes totalPages(@javax.annotation.Nonnull BigDecimal totalPages) {
-    this.totalPages = totalPages;
-    return this;
-  }
-
-  /**
-   * Get totalPages
-   * @return totalPages
-   */
-  @javax.annotation.Nonnull
-  public BigDecimal getTotalPages() {
-    return totalPages;
-  }
-
-  public void setTotalPages(@javax.annotation.Nonnull BigDecimal totalPages) {
-    this.totalPages = totalPages;
+  public void setNextCursor(@javax.annotation.Nullable String nextCursor) {
+    this.nextCursor = nextCursor;
   }
 
   /**
@@ -173,9 +124,9 @@ public class PaginatedSandboxes {
    *
    * @param key name of the property
    * @param value value of the property
-   * @return the PaginatedSandboxes instance itself
+   * @return the ListSandboxesResponse instance itself
    */
-  public PaginatedSandboxes putAdditionalProperty(String key, Object value) {
+  public ListSandboxesResponse putAdditionalProperty(String key, Object value) {
     if (this.additionalProperties == null) {
         this.additionalProperties = new HashMap<String, Object>();
     }
@@ -214,27 +165,23 @@ public class PaginatedSandboxes {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PaginatedSandboxes paginatedSandboxes = (PaginatedSandboxes) o;
-    return Objects.equals(this.items, paginatedSandboxes.items) &&
-        Objects.equals(this.total, paginatedSandboxes.total) &&
-        Objects.equals(this.page, paginatedSandboxes.page) &&
-        Objects.equals(this.totalPages, paginatedSandboxes.totalPages)&&
-        Objects.equals(this.additionalProperties, paginatedSandboxes.additionalProperties);
+    ListSandboxesResponse listSandboxesResponse = (ListSandboxesResponse) o;
+    return Objects.equals(this.items, listSandboxesResponse.items) &&
+        Objects.equals(this.nextCursor, listSandboxesResponse.nextCursor)&&
+        Objects.equals(this.additionalProperties, listSandboxesResponse.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(items, total, page, totalPages, additionalProperties);
+    return Objects.hash(items, nextCursor, additionalProperties);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class PaginatedSandboxes {\n");
+    sb.append("class ListSandboxesResponse {\n");
     sb.append("    items: ").append(toIndentedString(items)).append("\n");
-    sb.append("    total: ").append(toIndentedString(total)).append("\n");
-    sb.append("    page: ").append(toIndentedString(page)).append("\n");
-    sb.append("    totalPages: ").append(toIndentedString(totalPages)).append("\n");
+    sb.append("    nextCursor: ").append(toIndentedString(nextCursor)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -254,27 +201,27 @@ public class PaginatedSandboxes {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("items", "total", "page", "totalPages"));
+    openapiFields = new HashSet<String>(Arrays.asList("items", "nextCursor"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>(Arrays.asList("items", "total", "page", "totalPages"));
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("items", "nextCursor"));
   }
 
   /**
    * Validates the JSON Element and throws an exception if issues found
    *
    * @param jsonElement JSON Element
-   * @throws IOException if the JSON Element is invalid with respect to PaginatedSandboxes
+   * @throws IOException if the JSON Element is invalid with respect to ListSandboxesResponse
    */
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
-        if (!PaginatedSandboxes.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in PaginatedSandboxes is not found in the empty JSON string", PaginatedSandboxes.openapiRequiredFields.toString()));
+        if (!ListSandboxesResponse.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in ListSandboxesResponse is not found in the empty JSON string", ListSandboxesResponse.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
-      for (String requiredField : PaginatedSandboxes.openapiRequiredFields) {
+      for (String requiredField : ListSandboxesResponse.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
           throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
@@ -290,22 +237,25 @@ public class PaginatedSandboxes {
           Sandbox.validateJsonElement(jsonArrayitems.get(i));
         }
       }
+      if ((jsonObj.get("nextCursor") != null && !jsonObj.get("nextCursor").isJsonNull()) && !jsonObj.get("nextCursor").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `nextCursor` to be a primitive type in the JSON string but got `%s`", jsonObj.get("nextCursor").toString()));
+      }
   }
 
   public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
     @SuppressWarnings("unchecked")
     @Override
     public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-       if (!PaginatedSandboxes.class.isAssignableFrom(type.getRawType())) {
-         return null; // this class only serializes 'PaginatedSandboxes' and its subtypes
+       if (!ListSandboxesResponse.class.isAssignableFrom(type.getRawType())) {
+         return null; // this class only serializes 'ListSandboxesResponse' and its subtypes
        }
        final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
-       final TypeAdapter<PaginatedSandboxes> thisAdapter
-                        = gson.getDelegateAdapter(this, TypeToken.get(PaginatedSandboxes.class));
+       final TypeAdapter<ListSandboxesResponse> thisAdapter
+                        = gson.getDelegateAdapter(this, TypeToken.get(ListSandboxesResponse.class));
 
-       return (TypeAdapter<T>) new TypeAdapter<PaginatedSandboxes>() {
+       return (TypeAdapter<T>) new TypeAdapter<ListSandboxesResponse>() {
            @Override
-           public void write(JsonWriter out, PaginatedSandboxes value) throws IOException {
+           public void write(JsonWriter out, ListSandboxesResponse value) throws IOException {
              JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
              obj.remove("additionalProperties");
              // serialize additional properties
@@ -333,12 +283,12 @@ public class PaginatedSandboxes {
            }
 
            @Override
-           public PaginatedSandboxes read(JsonReader in) throws IOException {
+           public ListSandboxesResponse read(JsonReader in) throws IOException {
              JsonElement jsonElement = elementAdapter.read(in);
              validateJsonElement(jsonElement);
              JsonObject jsonObj = jsonElement.getAsJsonObject();
              // store additional fields in the deserialized instance
-             PaginatedSandboxes instance = thisAdapter.fromJsonTree(jsonObj);
+             ListSandboxesResponse instance = thisAdapter.fromJsonTree(jsonObj);
              for (Map.Entry<String, JsonElement> entry : jsonObj.entrySet()) {
                if (!openapiFields.contains(entry.getKey())) {
                  if (entry.getValue().isJsonPrimitive()) { // primitive type
@@ -365,18 +315,18 @@ public class PaginatedSandboxes {
   }
 
   /**
-   * Create an instance of PaginatedSandboxes given an JSON string
+   * Create an instance of ListSandboxesResponse given an JSON string
    *
    * @param jsonString JSON string
-   * @return An instance of PaginatedSandboxes
-   * @throws IOException if the JSON string is invalid with respect to PaginatedSandboxes
+   * @return An instance of ListSandboxesResponse
+   * @throws IOException if the JSON string is invalid with respect to ListSandboxesResponse
    */
-  public static PaginatedSandboxes fromJson(String jsonString) throws IOException {
-    return JSON.getGson().fromJson(jsonString, PaginatedSandboxes.class);
+  public static ListSandboxesResponse fromJson(String jsonString) throws IOException {
+    return JSON.getGson().fromJson(jsonString, ListSandboxesResponse.class);
   }
 
   /**
-   * Convert an instance of PaginatedSandboxes to an JSON string
+   * Convert an instance of ListSandboxesResponse to an JSON string
    *
    * @return JSON string
    */

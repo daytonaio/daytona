@@ -23,8 +23,8 @@ import { AnimatePresence } from 'motion/react'
 import { useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCommandPaletteActions } from '../CommandPalette'
+import { CursorPagination } from '../CursorPagination'
 import { PageFooterPortal } from '../PageLayout'
-import { Pagination } from '../Pagination'
 import { SelectionToast } from '../SelectionToast'
 import { Button } from '../ui/button'
 import { Skeleton } from '../ui/skeleton'
@@ -50,7 +50,9 @@ export function SandboxTable({
   sandboxStateIsTransitioning,
   loading,
   snapshots,
-  loadingSnapshots,
+  snapshotsDataIsLoading,
+  snapshotsDataHasMore,
+  onChangeSnapshotSearchValue,
   regionsData,
   regionsDataIsLoading,
   getRegionName,
@@ -72,13 +74,25 @@ export function SandboxTable({
   handleCreateSnapshot,
   handleFork,
   handleViewForks,
+  handleRefresh,
+  isRefreshing,
+  pageSize,
+  hasNextPage,
+  hasPreviousPage,
+  onNextPage,
+  onPreviousPage,
+  onPageSizeChange,
+  sorting,
+  onSortingChange,
+  filters,
+  onFiltersChange,
 }: SandboxTableProps) {
   const navigate = useNavigate()
   const { authenticatedUserHasPermission } = useSelectedOrganization()
   const writePermitted = authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SANDBOXES)
   const deletePermitted = authenticatedUserHasPermission(OrganizationRolePermissionsEnum.DELETE_SANDBOXES)
 
-  const { table, labelOptions, regionOptions } = useSandboxTable({
+  const { table, regionOptions } = useSandboxTable({
     data,
     sandboxIsLoading,
     writePermitted,
@@ -98,6 +112,11 @@ export function SandboxTable({
     handleCreateSnapshot,
     handleFork,
     handleViewForks,
+    pageSize,
+    sorting,
+    onSortingChange,
+    filters,
+    onFiltersChange,
   })
 
   const [pendingBulkAction, setPendingBulkAction] = useState<BulkAction | null>(null)
@@ -173,11 +192,14 @@ export function SandboxTable({
     <div className="flex min-h-0 flex-1 flex-col gap-3">
       <SandboxTableHeader
         table={table}
-        labelOptions={labelOptions}
         regionOptions={regionOptions}
         regionsDataIsLoading={regionsDataIsLoading}
         snapshots={snapshots}
-        loadingSnapshots={loadingSnapshots}
+        snapshotsDataIsLoading={snapshotsDataIsLoading}
+        snapshotsDataHasMore={snapshotsDataHasMore}
+        onChangeSnapshotSearchValue={onChangeSnapshotSearchValue}
+        onRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
       />
 
       <TableContainer
@@ -291,12 +313,20 @@ export function SandboxTable({
       </TableContainer>
 
       <PageFooterPortal>
-        <Pagination table={table} selectionEnabled={deletePermitted} entityName="Sandboxes" totalItems={data.length} />
+        <CursorPagination
+          pageSize={pageSize}
+          onPageSizeChange={onPageSizeChange}
+          hasNextPage={hasNextPage}
+          hasPreviousPage={hasPreviousPage}
+          onNextPage={onNextPage}
+          onPreviousPage={onPreviousPage}
+        />
       </PageFooterPortal>
+
       <AnimatePresence>
         {hasSelection && (
           <SelectionToast
-            className="absolute bottom-[120px] sm:bottom-20 left-1/2 -translate-x-1/2 z-50"
+            className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
             selectedCount={selectedRows.length}
             onClearSelection={() => table.resetRowSelection()}
             onActionClick={handleOpenCommandPalette}

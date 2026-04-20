@@ -18,8 +18,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
-from typing import Any, ClassVar, Dict, List, Union
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
 from daytona_api_client_async.models.sandbox import Sandbox
 from pydantic import TypeAdapter
 from typing import Optional, Set
@@ -27,16 +27,14 @@ from typing_extensions import Self
 
 _JSON_ADAPTER = TypeAdapter(Dict[str, Any])
 
-class PaginatedSandboxes(BaseModel):
+class ListSandboxesResponse(BaseModel):
     """
-    PaginatedSandboxes
+    ListSandboxesResponse
     """ # noqa: E501
-    items: List[Sandbox]
-    total: Union[StrictFloat, StrictInt]
-    page: Union[StrictFloat, StrictInt]
-    total_pages: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalPages")
+    items: List[Sandbox] = Field(description="List of results for the current page")
+    next_cursor: Optional[StrictStr] = Field(description="Cursor for the next page of results", serialization_alias="nextCursor")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["items", "total", "page", "totalPages"]
+    __properties: ClassVar[List[str]] = ["items", "nextCursor"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -55,7 +53,7 @@ class PaginatedSandboxes(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of PaginatedSandboxes from a JSON string"""
+        """Create an instance of ListSandboxesResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -90,11 +88,16 @@ class PaginatedSandboxes(BaseModel):
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
 
+        # set to None if next_cursor (nullable) is None
+        # and model_fields_set contains the field
+        if self.next_cursor is None and "next_cursor" in self.model_fields_set:
+            _dict['nextCursor'] = None
+
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of PaginatedSandboxes from a dict"""
+        """Create an instance of ListSandboxesResponse from a dict"""
         if obj is None:
             return None
 
@@ -103,9 +106,7 @@ class PaginatedSandboxes(BaseModel):
 
         _obj = cls.model_validate({
             "items": [Sandbox.from_dict(_item) for _item in obj["items"]] if obj.get("items") is not None else None,
-            "total": obj.get("total"),
-            "page": obj.get("page"),
-            "total_pages": obj.get("totalPages")
+            "next_cursor": obj.get("nextCursor")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

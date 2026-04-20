@@ -3,9 +3,14 @@ import { Daytona } from '@daytona/sdk'
 async function main() {
   const daytona = new Daytona()
 
-  const result = await daytona.list({ 'my-label': 'my-value' }, 2, 10)
-  for (const sandbox of result.items) {
-    console.log(`${sandbox.id}: ${sandbox.state}`)
+  for await (const sandbox of daytona.list({
+    limit: 10,
+    labels: { env: 'dev' },
+    states: ['started'],
+    sort: 'createdAt',
+    order: 'desc',
+  })) {
+    console.log(sandbox.id)
   }
 }
 

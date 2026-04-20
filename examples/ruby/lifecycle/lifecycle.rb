@@ -31,10 +31,10 @@ else
   puts "Error: #{response.exit_code} #{response.result}"
 end
 
-result = daytona.list
-puts "Total sandboxes count: #{result.total.to_i}"
+sandboxes = daytona.list.to_a
+puts "Total sandboxes count: #{sandboxes.size}"
 
-puts "Printing sandboxes[0] -> id: #{result.items.first.id} state: #{result.items.first.state}"
+puts "Printing sandboxes[0] -> id: #{sandboxes.first.id} state: #{sandboxes.first.state}" unless sandboxes.empty?
 
 puts 'Removing sandbox'
 daytona.delete(sandbox)

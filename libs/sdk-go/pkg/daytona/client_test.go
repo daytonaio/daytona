@@ -375,54 +375,21 @@ func TestGet(t *testing.T) {
 	})
 }
 
-// TestList tests the List method
+// TestList tests the List method's iterator behavior at the API call layer.
+// Per-call validation no longer applies (cursor is internal), so the test
+// surfaces network errors that occur when the iterator first advances.
 func TestList(t *testing.T) {
 	tests := []struct {
-		name          string
-		page          *int
-		limit         *int
-		expectedError bool
-		errorContains string
+		name  string
+		query *ListSandboxesQuery
 	}{
 		{
-			name:          "valid pagination",
-			page:          intPtr(1),
-			limit:         intPtr(10),
-			expectedError: false,
+			name:  "nil query",
+			query: nil,
 		},
 		{
-			name:          "nil pagination parameters",
-			page:          nil,
-			limit:         nil,
-			expectedError: false,
-		},
-		{
-			name:          "invalid page - zero",
-			page:          intPtr(0),
-			limit:         intPtr(10),
-			expectedError: true,
-			errorContains: "page must be a positive integer",
-		},
-		{
-			name:          "invalid page - negative",
-			page:          intPtr(-1),
-			limit:         intPtr(10),
-			expectedError: true,
-			errorContains: "page must be a positive integer",
-		},
-		{
-			name:          "invalid limit - zero",
-			page:          intPtr(1),
-			limit:         intPtr(0),
-			expectedError: true,
-			errorContains: "limit must be a positive integer",
-		},
-		{
-			name:          "invalid limit - negative",
-			page:          intPtr(1),
-			limit:         intPtr(-1),
-			expectedError: true,
-			errorContains: "limit must be a positive integer",
+			name:  "with limit",
+			query: &ListSandboxesQuery{Limit: intPtr(10)},
 		},
 	}
 
@@ -437,16 +404,15 @@ func TestList(t *testing.T) {
 			require.NoError(t, err)
 
 			ctx := context.Background()
-			result, err := client.List(ctx, nil, tt.page, tt.limit)
+			iter := client.List(ctx, tt.query)
+			require.NotNil(t, iter)
+			defer iter.Close()
 
-			if tt.expectedError {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tt.errorContains)
-				assert.Nil(t, result)
-			} else {
-				// Will fail on API call, but validation should pass
-				assert.Error(t, err) // API call will fail in test
-			}
+			// Iter.Next will trigger the (failing) API call. We expect false +
+			// a non-nil error since no real server is reachable here.
+			advanced := iter.Next()
+			assert.False(t, advanced)
+			assert.Error(t, iter.Err())
 		})
 	}
 }
@@ -977,26 +943,31 @@ func TestClientGetAndListSuccess(t *testing.T) {
 		assert.NotNil(t, sandbox.Git)
 	})
 
-	t.Run("list maps pagination and labels query", func(t *testing.T) {
+	t.Run("list maps query and yields sandboxes via iterator", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, "1", r.URL.Query().Get("page"))
 			assert.Equal(t, "2", r.URL.Query().Get("limit"))
 			assert.Contains(t, r.URL.Query().Get("labels"), `"env":"test"`)
 			writeJSONResponse(t, w, http.StatusOK, map[string]any{
 				"items":      []any{testSandboxPayload("sb-list", "listed-sandbox", apiclient.SANDBOXSTATE_STARTED)},
-				"total":      1,
-				"page":       1,
-				"totalPages": 1,
+				"nextCursor": nil,
 			})
 		}))
 		defer server.Close()
 
 		client := createTestClientWithServer(t, server)
-		page, limit := 1, 2
-		result, err := client.List(context.Background(), map[string]string{"env": "test"}, &page, &limit)
-		require.NoError(t, err)
-		require.Len(t, result.Items, 1)
-		assert.Equal(t, 1, result.Total)
-		assert.Equal(t, "listed-sandbox", result.Items[0].Name)
+		limit := 2
+		iter := client.List(context.Background(), &ListSandboxesQuery{
+			Labels: map[string]string{"env": "test"},
+			Limit:  &limit,
+		})
+		defer iter.Close()
+
+		var collected []*Sandbox
+		for iter.Next() {
+			collected = append(collected, iter.Value())
+		}
+		require.NoError(t, iter.Err())
+		require.Len(t, collected, 1)
+		assert.Equal(t, "listed-sandbox", collected[0].Name)
 	})
 }

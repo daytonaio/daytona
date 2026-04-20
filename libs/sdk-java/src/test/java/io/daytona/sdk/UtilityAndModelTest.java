@@ -10,7 +10,7 @@ import io.daytona.sdk.model.ExecuteResponse;
 import io.daytona.sdk.model.FileInfo;
 import io.daytona.sdk.model.GitCommitResponse;
 import io.daytona.sdk.model.GitStatus;
-import io.daytona.sdk.model.PaginatedSandboxes;
+import io.daytona.sdk.model.ListSandboxesQuery;
 import io.daytona.sdk.model.PaginatedSnapshots;
 import io.daytona.sdk.model.Resources;
 import io.daytona.sdk.model.Session;
@@ -165,15 +165,55 @@ class UtilityAndModelTest {
     }
 
     @Test
-    void paginatedModelsExposeAssignedCollections() {
-        PaginatedSandboxes sandboxes = new PaginatedSandboxes();
-        Map<String, Object> item = new HashMap<String, Object>();
-        item.put("id", "sb-1");
-        sandboxes.setItems(Collections.singletonList(item));
-        sandboxes.setTotal(1);
-        sandboxes.setPage(2);
-        sandboxes.setTotalPages(3);
+    void listSandboxesQueryRoundTripsAllAccessors() {
+        ListSandboxesQuery query = new ListSandboxesQuery();
+        query.setLimit(25);
+        query.setId("sb-prefix");
+        query.setName("name-prefix");
+        query.setLabels(Collections.singletonMap("env", "prod"));
+        query.setStates(Arrays.asList("started", "stopped"));
+        query.setSnapshots(Collections.singletonList("ubuntu:22.04"));
+        query.setTargets(Collections.singletonList("us"));
+        query.setMinCpu(1);
+        query.setMaxCpu(8);
+        query.setMinMemoryGiB(2);
+        query.setMaxMemoryGiB(16);
+        query.setMinDiskGiB(3);
+        query.setMaxDiskGiB(100);
+        query.setIsPublic(true);
+        query.setIsRecoverable(false);
+        query.setCreatedAtAfter("2026-01-01T00:00:00Z");
+        query.setCreatedAtBefore("2026-12-31T23:59:59Z");
+        query.setLastActivityAfter("2026-04-01T00:00:00Z");
+        query.setLastActivityBefore("2026-04-30T23:59:59Z");
+        query.setSort("createdAt");
+        query.setOrder("desc");
 
+        assertThat(query.getLimit()).isEqualTo(25);
+        assertThat(query.getId()).isEqualTo("sb-prefix");
+        assertThat(query.getName()).isEqualTo("name-prefix");
+        assertThat(query.getLabels()).containsEntry("env", "prod");
+        assertThat(query.getStates()).containsExactly("started", "stopped");
+        assertThat(query.getSnapshots()).containsExactly("ubuntu:22.04");
+        assertThat(query.getTargets()).containsExactly("us");
+        assertThat(query.getMinCpu()).isEqualTo(1);
+        assertThat(query.getMaxCpu()).isEqualTo(8);
+        assertThat(query.getMinMemoryGiB()).isEqualTo(2);
+        assertThat(query.getMaxMemoryGiB()).isEqualTo(16);
+        assertThat(query.getMinDiskGiB()).isEqualTo(3);
+        assertThat(query.getMaxDiskGiB()).isEqualTo(100);
+        assertThat(query.getIsPublic()).isTrue();
+        assertThat(query.getIsRecoverable()).isFalse();
+        assertThat(query.getCreatedAtAfter()).isEqualTo("2026-01-01T00:00:00Z");
+        assertThat(query.getCreatedAtBefore()).isEqualTo("2026-12-31T23:59:59Z");
+        assertThat(query.getLastActivityAfter()).isEqualTo("2026-04-01T00:00:00Z");
+        assertThat(query.getLastActivityBefore()).isEqualTo("2026-04-30T23:59:59Z");
+        assertThat(query.getSort()).isEqualTo("createdAt");
+        assertThat(query.getOrder()).isEqualTo("desc");
+    }
+
+    @Test
+    void paginatedSnapshotsExposesAssignedCollections() {
         PaginatedSnapshots snapshots = new PaginatedSnapshots();
         Snapshot snapshot = new Snapshot();
         snapshot.setId("snap-1");
@@ -182,10 +222,6 @@ class UtilityAndModelTest {
         snapshots.setPage(4);
         snapshots.setTotalPages(5);
 
-        assertThat(sandboxes.getItems()).containsExactly(item);
-        assertThat(sandboxes.getTotal()).isEqualTo(1);
-        assertThat(sandboxes.getPage()).isEqualTo(2);
-        assertThat(sandboxes.getTotalPages()).isEqualTo(3);
         assertThat(snapshots.getItems()).containsExactly(snapshot);
         assertThat(snapshots.getTotal()).isEqualTo(1);
         assertThat(snapshots.getPage()).isEqualTo(4);
@@ -193,13 +229,10 @@ class UtilityAndModelTest {
     }
 
     @Test
-    void paginatedModelsReturnEmptyDefaults() {
-        PaginatedSandboxes sandboxes = new PaginatedSandboxes();
+    void paginatedSnapshotsReturnsEmptyDefaults() {
         PaginatedSnapshots snapshots = new PaginatedSnapshots();
         GitStatus status = new GitStatus();
 
-        assertThat(sandboxes.getItems()).isEmpty();
-        assertThat(sandboxes.getTotal()).isZero();
         assertThat(snapshots.getItems()).isEmpty();
         assertThat(snapshots.getTotalPages()).isZero();
         assertThat(status.getFileStatus()).isEmpty();

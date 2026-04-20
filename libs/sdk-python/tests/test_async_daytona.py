@@ -199,29 +199,62 @@ class TestAsyncDaytonaGetAndList:
         assert isinstance(sandbox, AsyncSandbox)
         assert sandbox.id == "test-sandbox-id"
 
-    @pytest.mark.asyncio
-    async def test_list_invalid_page_raises(self, env_with_api_key):
-        daytona = _make_async_daytona()
-        with pytest.raises(DaytonaValidationError, match="page must be a positive integer"):
-            await daytona.list(page=0)
+    def test_list_returns_async_iterator(self, env_with_api_key):
+        import inspect
 
-    @pytest.mark.asyncio
-    async def test_list_invalid_limit_raises(self, env_with_api_key):
-        daytona = _make_async_daytona()
-        with pytest.raises(DaytonaValidationError, match="limit must be a positive integer"):
-            await daytona.list(limit=0)
+        from daytona._async.daytona import AsyncDaytona
+
+        # ``list`` is an async generator function — calling it returns an
+        # async iterator without performing any network I/O.
+        assert inspect.isasyncgenfunction(AsyncDaytona.list)
 
     @pytest.mark.asyncio
     async def test_list_serializes_labels(self, env_with_api_key, sandbox_dto):
-        response = MagicMock(items=[sandbox_dto], total=1, page=1, total_pages=1)
+        from daytona import ListSandboxesQuery
+
+        response = MagicMock(items=[sandbox_dto], next_cursor=None)
         daytona = _make_async_daytona()
-        daytona._sandbox_api.list_sandboxes_paginated = AsyncMock(return_value=response)
-        result = await daytona.list(labels={"project": "test"}, page=1, limit=10)
-        assert result.total == 1
-        kwargs = daytona._sandbox_api.list_sandboxes_paginated.call_args.kwargs
+        daytona._sandbox_api.list_sandboxes = AsyncMock(return_value=response)
+
+        sandboxes = []
+        async for sb in daytona.list(ListSandboxesQuery(labels={"project": "test"}, limit=10)):
+            sandboxes.append(sb)
+
+        assert len(sandboxes) == 1
+        kwargs = daytona._sandbox_api.list_sandboxes.call_args.kwargs
         assert json.loads(kwargs["labels"]) == {"project": "test"}
-        assert kwargs["page"] == 1
         assert kwargs["limit"] == 10
+        assert kwargs["cursor"] is None
+
+    @pytest.mark.asyncio
+    async def test_list_paginates_via_cursor(self, env_with_api_key, sandbox_dto):
+        page1 = MagicMock(items=[sandbox_dto, sandbox_dto], next_cursor="cursor-2")
+        page2 = MagicMock(items=[sandbox_dto], next_cursor=None)
+
+        daytona = _make_async_daytona()
+        daytona._sandbox_api.list_sandboxes = AsyncMock(side_effect=[page1, page2])
+
+        collected = []
+        async for sb in daytona.list():
+            collected.append(sb)
+
+        assert len(collected) == 3
+        assert daytona._sandbox_api.list_sandboxes.call_count == 2
+        second_call_kwargs = daytona._sandbox_api.list_sandboxes.call_args_list[1].kwargs
+        assert second_call_kwargs["cursor"] == "cursor-2"
+
+    @pytest.mark.asyncio
+    async def test_list_early_termination_stops_fetching(self, env_with_api_key, sandbox_dto):
+        page1 = MagicMock(items=[sandbox_dto, sandbox_dto], next_cursor="cursor-2")
+        page2 = MagicMock(items=[sandbox_dto], next_cursor=None)
+
+        daytona = _make_async_daytona()
+        daytona._sandbox_api.list_sandboxes = AsyncMock(side_effect=[page1, page2])
+
+        async for _ in daytona.list():
+            break
+
+        assert daytona._sandbox_api.list_sandboxes.call_count == 1
 
 
 class TestAsyncDaytonaValidateLanguageLabel:

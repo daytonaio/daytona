@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import warnings
+from collections.abc import AsyncIterator
 from copy import deepcopy
 from importlib.metadata import version
 from types import TracebackType
@@ -49,7 +50,7 @@ from ..common.daytona import (
 from ..common.errors import DaytonaAuthenticationError, DaytonaValidationError
 from ..common.image import Image
 from ..internal.pool_tracker import AsyncPoolSaturationTracker
-from .sandbox import AsyncPaginatedSandboxes, AsyncSandbox
+from .sandbox import AsyncSandbox, ListSandboxesQuery
 from .snapshot import AsyncSnapshotService
 from .volume import AsyncVolumeService
 
@@ -616,41 +617,36 @@ class AsyncDaytona:
             ws_handshake_semaphore=self._ws_handshake_semaphore,
         )
 
-    @intercept_errors(message_prefix="Failed to list sandboxes: ")
-    @with_instrumentation()
     async def list(
-        self, labels: dict[str, str] | None = None, page: int | None = None, limit: int | None = None
-    ) -> AsyncPaginatedSandboxes:
-        """Returns paginated list of Sandboxes filtered by labels.
+        self,
+        query: ListSandboxesQuery | None = None,
+    ) -> AsyncIterator[AsyncSandbox]:
+        """Iterates over Sandboxes matching the given query.
 
         Args:
-            labels (dict[str, str] | None): Labels to filter Sandboxes.
-            page (int | None): Page number for pagination (starting from 1).
-            limit (int | None): Maximum number of items per page.
+            query: Optional filters, sorting, and per-page size.
 
-        Returns:
-            AsyncPaginatedSandboxes: Paginated list of Sandbox instances that match the labels.
+        Yields:
+            AsyncSandbox: Each Sandbox matching the query.
 
         Example:
             ```python
-            result = await daytona.list(labels={"my-label": "my-value"}, page=2, limit=10)
-            for sandbox in result.items:
-                print(f"{sandbox.id}: {sandbox.state}")
+            from daytona import ListSandboxesQuery
+
+            async for sandbox in daytona.list(ListSandboxesQuery(labels={"env": "dev"})):
+                print(sandbox.id)
             ```
         """
-        if page is not None and page < 1:
-            raise DaytonaValidationError("page must be a positive integer")
+        q = query or ListSandboxesQuery()
+        cursor: str | None = None
+        first_page = True
 
-        if limit is not None and limit < 1:
-            raise DaytonaValidationError("limit must be a positive integer")
-
-        response = await self._sandbox_api.list_sandboxes_paginated(labels=json.dumps(labels), page=page, limit=limit)
-
-        items: list[AsyncSandbox] = []
-        for sandbox in response.items:
-            language = self._validate_language_label(sandbox.labels.get(CODE_TOOLBOX_LANGUAGE_LABEL)).value
-            items.append(
-                AsyncSandbox(
+        while first_page or cursor:
+            first_page = False
+            response = await self._fetch_sandbox_page(q, cursor)
+            for sandbox in response.items:
+                language = self._validate_language_label(sandbox.labels.get(CODE_TOOLBOX_LANGUAGE_LABEL)).value
+                yield AsyncSandbox(
                     sandbox,
                     self._toolbox_api_client,
                     self._sandbox_api,
@@ -658,13 +654,35 @@ class AsyncDaytona:
                     self._pool_tracker,
                     ws_handshake_semaphore=self._ws_handshake_semaphore,
                 )
-            )
+            cursor = response.next_cursor or None
 
-        return AsyncPaginatedSandboxes(
-            items=items,
-            total=response.total,
-            page=response.page,
-            total_pages=response.total_pages,
+    @intercept_errors(message_prefix="Failed to list sandboxes: ")
+    @with_instrumentation(name="AsyncDaytona.list.fetch_page")
+    async def _fetch_sandbox_page(self, q: ListSandboxesQuery, cursor: str | None):
+        """Fetches a single page of sandboxes. Each call is one OTEL span."""
+        return await self._sandbox_api.list_sandboxes(
+            labels=json.dumps(q.labels) if q.labels else None,
+            cursor=cursor,
+            limit=q.limit,
+            id=q.id,
+            name=q.name,
+            states=q.states,
+            snapshots=q.snapshots,
+            region_ids=q.targets,
+            min_cpu=q.min_cpu,
+            max_cpu=q.max_cpu,
+            min_memory_gi_b=q.min_memory_gi_b,
+            max_memory_gi_b=q.max_memory_gi_b,
+            min_disk_gi_b=q.min_disk_gi_b,
+            max_disk_gi_b=q.max_disk_gi_b,
+            is_public=q.is_public,
+            is_recoverable=q.is_recoverable,
+            created_at_after=q.created_at_after,
+            created_at_before=q.created_at_before,
+            last_event_after=q.last_activity_after,
+            last_event_before=q.last_activity_before,
+            sort=q.sort,
+            order=q.order,
         )
 
     def _validate_language_label(self, language: str | None = None) -> CodeLanguage:

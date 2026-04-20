@@ -39,6 +39,7 @@ export {
 } from './errors/DaytonaError'
 export { Image } from './Image'
 export { Sandbox } from './Sandbox'
+export type { ListSandboxesQuery } from './Sandbox'
 export type { CreateSnapshotParams } from './Snapshot'
 export { ComputerUse, Mouse, Keyboard, Screenshot, Display } from './ComputerUse'
 export type {

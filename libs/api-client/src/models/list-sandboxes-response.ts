@@ -17,10 +17,14 @@
 // @ts-ignore
 import type { Sandbox } from './sandbox';
 
-export interface PaginatedSandboxes {
+export interface ListSandboxesResponse {
+    /**
+     * List of results for the current page
+     */
     'items': Array<Sandbox>;
-    'total': number;
-    'page': number;
-    'totalPages': number;
+    /**
+     * Cursor for the next page of results
+     */
+    'nextCursor': string | null;
 }
 

@@ -3,26 +3,27 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
 import { getRegionFullDisplayName } from '@/lib/utils'
 import { Region, Sandbox } from '@daytona/api-client'
 import {
-  ColumnFiltersState,
+  useReactTable,
   getCoreRowModel,
   getFacetedRowModel,
   getFacetedUniqueValues,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  SortingState,
-  useReactTable,
   VisibilityState,
 } from '@tanstack/react-table'
-import { useEffect, useMemo, useState } from 'react'
-import { getColumns } from './columns'
+import { useMemo, useState, useEffect } from 'react'
 import { FacetedFilterOption } from './types'
+import { getColumns } from './columns'
+import {
+  convertApiSortingToTableSorting,
+  convertApiFiltersToTableFilters,
+  convertTableSortingToApiSorting,
+  convertTableFiltersToApiFilters,
+} from './types'
+import { SandboxFilters, SandboxSorting } from '@/hooks/useSandboxes'
 
 interface UseSandboxTableProps {
   data: Sandbox[]
@@ -38,6 +39,11 @@ interface UseSandboxTableProps {
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
   handleScreenRecordings: (id: string) => void
+  pageSize: number
+  sorting: SandboxSorting
+  onSortingChange: (sorting: SandboxSorting) => void
+  filters: SandboxFilters
+  onFiltersChange: (filters: SandboxFilters) => void
   regionsData: Region[]
   handleRecover: (id: string) => void
   getRegionName: (regionId: string) => string | undefined
@@ -60,6 +66,11 @@ export function useSandboxTable({
   handleCreateSshAccess,
   handleRevokeSshAccess,
   handleScreenRecordings,
+  pageSize,
+  sorting,
+  onSortingChange,
+  filters,
+  onFiltersChange,
   regionsData,
   handleRecover,
   getRegionName,
@@ -67,7 +78,6 @@ export function useSandboxTable({
   handleFork,
   handleViewForks,
 }: UseSandboxTableProps) {
-  // Column visibility state management with persistence
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
     const saved = getLocalStorageItem(LocalStorageKey.SandboxTableColumnVisibility)
     if (saved) {
@@ -84,24 +94,8 @@ export function useSandboxTable({
     setLocalStorageItem(LocalStorageKey.SandboxTableColumnVisibility, JSON.stringify(columnVisibility))
   }, [columnVisibility])
 
-  const [sorting, setSorting] = useState<SortingState>([
-    {
-      id: 'lastEvent',
-      desc: true,
-    },
-  ])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [globalFilter, setGlobalFilter] = useState('')
-
-  const labelOptions: FacetedFilterOption[] = useMemo(() => {
-    const labels = new Set<string>()
-    data.forEach((sandbox) => {
-      Object.entries(sandbox.labels ?? {}).forEach(([key, value]) => {
-        labels.add(`${key}: ${value}`)
-      })
-    })
-    return Array.from(labels).map((label) => ({ label, value: label }))
-  }, [data])
+  const tableSorting = useMemo(() => convertApiSortingToTableSorting(sorting), [sorting])
+  const tableFilters = useMemo(() => convertApiFiltersToTableFilters(filters), [filters])
 
   const regionOptions: FacetedFilterOption[] = useMemo(() => {
     return regionsData.map((region) => ({
@@ -155,36 +149,24 @@ export function useSandboxTable({
   const table = useReactTable({
     data,
     columns,
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
+    manualFiltering: true,
+    onColumnFiltersChange: (updater) => {
+      const newTableFilters = typeof updater === 'function' ? updater(table.getState().columnFilters) : updater
+      const newApiFilters = convertTableFiltersToApiFilters(newTableFilters)
+      onFiltersChange(newApiFilters)
+    },
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
+    manualSorting: true,
+    onSortingChange: (updater) => {
+      const newTableSorting = typeof updater === 'function' ? updater(table.getState().sorting) : updater
+      const newApiSorting = convertTableSortingToApiSorting(newTableSorting)
+      onSortingChange(newApiSorting)
+    },
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFilteredRowModel: getFilteredRowModel(),
-    globalFilterFn: (row, _columnId, filterValue) => {
-      const sandbox = row.original
-      const searchValue = String(filterValue).trim().toLowerCase()
-
-      if (!searchValue) {
-        return true
-      }
-
-      const regionName = getRegionName(sandbox.target) ?? sandbox.target
-      const labels = Object.entries(sandbox.labels ?? {})
-        .map(([key, value]) => `${key}: ${value}`)
-        .join(' ')
-
-      return [sandbox.name, sandbox.id, sandbox.state, sandbox.snapshot ?? '', regionName, labels].some((value) =>
-        String(value).toLowerCase().includes(searchValue),
-      )
-    },
     state: {
-      globalFilter,
-      sorting,
-      columnFilters,
+      sorting: tableSorting,
+      columnFilters: tableFilters,
       columnVisibility,
       columnPinning: {
         left: ['select', 'name'],
@@ -197,19 +179,10 @@ export function useSandboxTable({
     },
     enableRowSelection: deletePermitted,
     getRowId: (row) => row.id,
-    initialState: {
-      pagination: {
-        pageSize: DEFAULT_PAGE_SIZE,
-      },
-    },
   })
 
   return {
     table,
-    globalFilter,
-    labelOptions,
     regionOptions,
-    sorting,
-    columnFilters,
   }
 }

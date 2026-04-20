@@ -6,7 +6,7 @@ package io.daytona.sdk;
 import io.daytona.api.client.api.SandboxApi;
 import io.daytona.api.client.model.CreateBuildInfo;
 import io.daytona.api.client.model.CreateSandbox;
-import io.daytona.api.client.model.PaginatedSandboxes;
+import io.daytona.api.client.model.ListSandboxesResponse;
 import io.daytona.api.client.model.SandboxState;
 import io.daytona.api.client.model.Url;
 import io.daytona.sdk.exception.DaytonaAuthenticationException;
@@ -20,6 +20,7 @@ import io.daytona.sdk.exception.DaytonaServerException;
 import io.daytona.sdk.exception.DaytonaValidationException;
 import io.daytona.sdk.model.CreateSandboxFromImageParams;
 import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+import io.daytona.sdk.model.ListSandboxesQuery;
 import io.daytona.sdk.model.Resources;
 import io.daytona.sdk.model.VolumeMount;
 import okhttp3.mockwebserver.MockResponse;
@@ -38,6 +39,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -237,52 +239,112 @@ class DaytonaTest {
     }
 
     @Test
-    void listMapsPagination() {
-        PaginatedSandboxes response = new PaginatedSandboxes();
+    void listIteratorYieldsSandboxesAndForwardsLabelFilter() {
+        ListSandboxesResponse response = new ListSandboxesResponse();
         response.setItems(Collections.singletonList(TestSupport.mainSandbox("sb-1", SandboxState.STARTED)));
-        response.setTotal(BigDecimal.ONE);
-        response.setPage(BigDecimal.valueOf(2));
-        response.setTotalPages(BigDecimal.valueOf(3));
-        doReturn(response).when(sandboxApi).listSandboxesPaginated(
+        response.setNextCursor(null);
+        doReturn(response).when(sandboxApi).listSandboxes(
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any());
 
-        io.daytona.sdk.model.PaginatedSandboxes sandboxes = daytona.list(Collections.singletonMap("team", "sdk"), 2, 5);
+        ListSandboxesQuery query = new ListSandboxesQuery();
+        query.setLabels(Collections.singletonMap("team", "sdk"));
+        query.setLimit(5);
 
-        assertThat(sandboxes.getItems()).singleElement().satisfies(item -> assertThat(item).containsEntry("id", "sb-1"));
-        assertThat(sandboxes.getTotal()).isEqualTo(1);
-        assertThat(sandboxes.getPage()).isEqualTo(2);
-        assertThat(sandboxes.getTotalPages()).isEqualTo(3);
+        Iterator<Map<String, Object>> iter = daytona.list(query);
+
+        List<Map<String, Object>> collected = new ArrayList<>();
+        while (iter.hasNext()) {
+            collected.add(iter.next());
+        }
+
+        assertThat(collected).singleElement().satisfies(item -> assertThat(item).containsEntry("id", "sb-1"));
+
+        org.mockito.Mockito.verify(sandboxApi).listSandboxes(
+                isNull(),                                  // org header
+                isNull(),                                  // cursor (first page)
+                eq(BigDecimal.valueOf(5)),                 // limit
+                isNull(),                                  // id
+                isNull(),                                  // name
+                eq("{\"team\":\"sdk\"}"),                  // labels JSON
+                isNull(),                                  // includeErroredDeleted
+                isNull(), isNull(), isNull(),              // states, snapshots, regionIds
+                isNull(), isNull(),                        // minCpu, maxCpu
+                isNull(), isNull(),                        // minMemoryGiB, maxMemoryGiB
+                isNull(), isNull(),                        // minDiskGiB, maxDiskGiB
+                isNull(), isNull(),                        // isPublic, isRecoverable
+                isNull(), isNull(),                        // createdAtAfter, createdAtBefore
+                isNull(), isNull(),                        // lastEventAfter, lastEventBefore
+                isNull(), isNull());                       // sort, order
     }
 
     @Test
-    void listUsesDefaultPagingWhenArgumentsAreNull() {
-        doReturn(new PaginatedSandboxes()).when(sandboxApi).listSandboxesPaginated(
+    void listWithNoQueryUsesAllNullFilters() {
+        ListSandboxesResponse response = new ListSandboxesResponse();
+        response.setItems(Collections.<io.daytona.api.client.model.Sandbox>emptyList());
+        response.setNextCursor(null);
+        doReturn(response).when(sandboxApi).listSandboxes(
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any());
 
-        daytona.list();
+        Iterator<Map<String, Object>> iter = daytona.list();
+        // Drive the iterator so the API call actually happens.
+        assertThat(iter.hasNext()).isFalse();
 
-        org.mockito.Mockito.verify(sandboxApi).listSandboxesPaginated(
-                isNull(),
-                eq(BigDecimal.ONE),
-                eq(BigDecimal.TEN),
+        org.mockito.Mockito.verify(sandboxApi).listSandboxes(
                 isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-                isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+                isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+                isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+                isNull(), isNull(), isNull(), isNull());
     }
 
     @Test
-    void listReturnsEmptyPaginationWhenApiReturnsNull() {
-        doReturn(null).when(sandboxApi).listSandboxesPaginated(
+    void listReturnsEmptyIteratorWhenApiReturnsNullItems() {
+        ListSandboxesResponse response = new ListSandboxesResponse();
+        // items is null on the wire — SDK must treat it as empty.
+        response.setItems(null);
+        response.setNextCursor(null);
+        doReturn(response).when(sandboxApi).listSandboxes(
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any());
 
-        io.daytona.sdk.model.PaginatedSandboxes sandboxes = daytona.list(Collections.<String, String>emptyMap(), null, null);
+        Iterator<Map<String, Object>> iter = daytona.list(new ListSandboxesQuery());
 
-        assertThat(sandboxes.getItems()).isEmpty();
-        assertThat(sandboxes.getTotal()).isZero();
-        assertThat(sandboxes.getPage()).isZero();
-        assertThat(sandboxes.getTotalPages()).isZero();
+        assertThat(iter.hasNext()).isFalse();
+    }
+
+    @Test
+    void listPaginatesAcrossMultiplePages() {
+        ListSandboxesResponse page1 = new ListSandboxesResponse();
+        page1.setItems(java.util.Arrays.asList(
+                TestSupport.mainSandbox("sb-1", SandboxState.STARTED),
+                TestSupport.mainSandbox("sb-2", SandboxState.STARTED)
+        ));
+        page1.setNextCursor("cursor-2");
+
+        ListSandboxesResponse page2 = new ListSandboxesResponse();
+        page2.setItems(Collections.singletonList(TestSupport.mainSandbox("sb-3", SandboxState.STARTED)));
+        page2.setNextCursor(null);
+
+        doReturn(page1, page2).when(sandboxApi).listSandboxes(
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any());
+
+        Iterator<Map<String, Object>> iter = daytona.list();
+        List<Object> ids = new ArrayList<>();
+        while (iter.hasNext()) {
+            ids.add(iter.next().get("id"));
+        }
+
+        assertThat(ids).containsExactly("sb-1", "sb-2", "sb-3");
+        org.mockito.Mockito.verify(sandboxApi, org.mockito.Mockito.times(2)).listSandboxes(
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any());
     }
 
     @ParameterizedTest

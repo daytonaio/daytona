@@ -5,9 +5,11 @@ package io.daytona.examples;
 
 import io.daytona.sdk.Daytona;
 import io.daytona.sdk.Sandbox;
-import io.daytona.sdk.model.PaginatedSandboxes;
+import io.daytona.sdk.model.ListSandboxesQuery;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class Lifecycle {
@@ -35,8 +37,17 @@ public class Lifecycle {
                 Sandbox fetched = daytona.get(sandbox.getId());
                 System.out.println("Got sandbox: " + fetched.getId() + " (state: " + fetched.getState() + ")");
 
-                PaginatedSandboxes sandboxes = daytona.list();
-                System.out.println("Total sandboxes: " + sandboxes.getTotal());
+                ListSandboxesQuery query = new ListSandboxesQuery();
+                query.setLimit(10);
+                query.setLabels(Map.of("env", "dev"));
+                query.setStates(List.of("started"));
+                query.setSort("createdAt");
+                query.setOrder("desc");
+                Iterator<Map<String, Object>> iter = daytona.list(query);
+                while (iter.hasNext()) {
+                    Map<String, Object> sb = iter.next();
+                    System.out.println(sb.get("id"));
+                }
             } finally {
                 System.out.println("Deleting sandbox");
                 sandbox.delete();

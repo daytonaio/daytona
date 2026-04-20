@@ -264,42 +264,77 @@ RSpec.describe Daytona::Daytona do
   end
 
   describe '#list' do
-    let(:paginated_response) do
+    let(:single_page_response) do
       instance_double(
-        DaytonaApiClient::PaginatedSandboxes,
-        total: 1,
-        page: 1,
-        total_pages: 1,
-        items: [sandbox_dto]
+        DaytonaApiClient::ListSandboxesResponse,
+        items: [sandbox_dto],
+        next_cursor: nil
       )
     end
 
-    it 'returns a PaginatedResource' do
-      allow(sandbox_api).to receive(:list_sandboxes_paginated).and_return(paginated_response)
-
+    it 'returns a lazy Enumerator without performing the API call' do
+      # No stub on sandbox_api — if list eagerly fetched, this would raise.
       result = described_class.new(config).list
 
-      expect(result).to be_a(Daytona::PaginatedResource)
-      expect(result.total).to eq(1)
-      expect(result.items).to eq([sandbox])
+      expect(result).to be_a(Enumerator)
     end
 
-    it 'passes labels and pagination params' do
-      allow(sandbox_api).to receive(:list_sandboxes_paginated)
-        .with(labels: '{"env":"test"}', page: 2, limit: 10)
-        .and_return(paginated_response)
+    it 'yields sandboxes from a single page' do
+      allow(sandbox_api).to receive(:list_sandboxes).and_return(single_page_response)
 
-      described_class.new(config).list({ 'env' => 'test' }, page: 2, limit: 10)
+      collected = described_class.new(config).list.to_a
+
+      expect(collected).to eq([sandbox])
+      expect(sandbox_api).to have_received(:list_sandboxes).once
     end
 
-    it 'raises error on invalid page' do
-      expect { described_class.new(config).list({}, page: 0) }
-        .to raise_error(Daytona::Sdk::Error, /page must be positive integer/)
+    it 'passes label filters and limit hint to the API client' do
+      query = Daytona::ListSandboxesQuery.new(labels: { 'env' => 'test' }, limit: 10)
+      allow(sandbox_api).to receive(:list_sandboxes)
+        .and_return(single_page_response)
+
+      described_class.new(config).list(query).to_a
+
+      expect(sandbox_api).to have_received(:list_sandboxes) do |opts|
+        expect(opts[:labels]).to eq('{"env":"test"}')
+        expect(opts[:limit]).to eq(10)
+        # cursor is internal: first page fetch must omit it (or pass nil).
+        expect(opts[:cursor]).to be_nil
+      end
     end
 
-    it 'raises error on invalid limit' do
-      expect { described_class.new(config).list({}, limit: -1) }
-        .to raise_error(Daytona::Sdk::Error, /limit must be positive integer/)
+    it 'paginates across multiple pages using next_cursor' do
+      page1 = instance_double(
+        DaytonaApiClient::ListSandboxesResponse,
+        items: [sandbox_dto, sandbox_dto],
+        next_cursor: 'cursor-2'
+      )
+      page2 = instance_double(
+        DaytonaApiClient::ListSandboxesResponse,
+        items: [sandbox_dto],
+        next_cursor: nil
+      )
+      allow(sandbox_api).to receive(:list_sandboxes).and_return(page1, page2)
+
+      collected = described_class.new(config).list.to_a
+
+      expect(collected.size).to eq(3)
+      expect(sandbox_api).to have_received(:list_sandboxes).twice
+    end
+
+    it 'stops fetching when iteration terminates early' do
+      page1 = instance_double(
+        DaytonaApiClient::ListSandboxesResponse,
+        items: [sandbox_dto, sandbox_dto],
+        next_cursor: 'cursor-2'
+      )
+      allow(sandbox_api).to receive(:list_sandboxes).and_return(page1)
+
+      first = described_class.new(config).list.first
+
+      expect(first).to eq(sandbox)
+      # Only page 1 was fetched; we never advanced past the first item.
+      expect(sandbox_api).to have_received(:list_sandboxes).once
     end
   end
 

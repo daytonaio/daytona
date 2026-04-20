@@ -72,12 +72,143 @@ type Sandbox struct {
 	ComputerUse     *ComputerUseService     // Desktop automation
 }
 
-// PaginatedSandboxes represents a paginated list of sandboxes.
-type PaginatedSandboxes struct {
-	Items      []*Sandbox // Sandboxes in this page
-	Total      int        // Total number of sandboxes
-	Page       int        // Current page number
-	TotalPages int        // Total number of pages
+// ListSandboxesQuery contains query parameters for filtering and sorting when listing sandboxes.
+type ListSandboxesQuery struct {
+	// Per-page fetch size. Does NOT limit the total number of Sandboxes returned.
+	Limit *int
+	// Filter by ID prefix (case-insensitive)
+	ID *string
+	// Filter by name prefix (case-insensitive)
+	Name *string
+	// Filter by labels
+	Labels map[string]string
+	// Filter by states
+	States []string
+	// Filter by snapshot names
+	Snapshots []string
+	// Filter by targets
+	Targets []string
+	// Filter by minimum CPU
+	MinCpu *int
+	// Filter by maximum CPU
+	MaxCpu *int
+	// Filter by minimum memory in GiB
+	MinMemoryGiB *int
+	// Filter by maximum memory in GiB
+	MaxMemoryGiB *int
+	// Filter by minimum disk space in GiB
+	MinDiskGiB *int
+	// Filter by maximum disk space in GiB
+	MaxDiskGiB *int
+	// Filter by public status
+	IsPublic *bool
+	// Filter by recoverable status
+	IsRecoverable *bool
+	// Include sandboxes created after this timestamp
+	CreatedAtAfter *time.Time
+	// Include sandboxes created before this timestamp
+	CreatedAtBefore *time.Time
+	// Include sandboxes with last activity after this timestamp
+	LastActivityAfter *time.Time
+	// Include sandboxes with last activity before this timestamp
+	LastActivityBefore *time.Time
+	// Sort by field (name, cpu, memoryGiB, diskGiB, lastActivityAt, createdAt)
+	Sort *string
+	// Sort direction (asc, desc)
+	Order *string
+}
+
+// SandboxIterator iterates over Sandboxes returned by [Client.List], following
+// the standard Go iterator pattern used by [database/sql.Rows] and [bufio.Scanner].
+//
+// Callers MUST invoke [SandboxIterator.Close] (typically via defer) to release
+// resources held by the iterator.
+type SandboxIterator struct {
+	client *Client
+	ctx    context.Context
+	query  *ListSandboxesQuery
+
+	// Pagination state
+	cursor    *string
+	page      []*Sandbox
+	pageIndex int
+	firstPage bool // false until the first page has been fetched
+	exhausted bool // true once the API signaled no more pages
+
+	// Current item / terminal error
+	current *Sandbox
+	err     error
+	closed  bool
+}
+
+// Next advances the iterator to the next sandbox. It returns true if a sandbox
+// is available (accessible via [SandboxIterator.Value]), or false if iteration
+// has finished or an error occurred. After Next returns false, callers should
+// inspect [SandboxIterator.Err].
+func (it *SandboxIterator) Next() bool {
+	if it.closed || it.err != nil {
+		return false
+	}
+
+	for {
+		// Yield from the current page if available.
+		if it.pageIndex < len(it.page) {
+			it.current = it.page[it.pageIndex]
+			it.pageIndex++
+			return true
+		}
+
+		// Page exhausted. Stop if the API said there's no more.
+		if it.firstPage && it.exhausted {
+			return false
+		}
+
+		// Fetch the next page.
+		items, nextCursor, err := it.client.fetchPage(it.ctx, it.query, it.cursor)
+		it.firstPage = true
+		if err != nil {
+			it.err = err
+			return false
+		}
+
+		it.page = items
+		it.pageIndex = 0
+		it.cursor = nextCursor
+		if nextCursor == nil {
+			it.exhausted = true
+		}
+
+		if len(items) == 0 {
+			// Empty page: either no results at all, or the API returned an
+			// empty page with a cursor (rare). Loop to re-check exhausted.
+			if it.exhausted {
+				return false
+			}
+			continue
+		}
+	}
+}
+
+// Value returns the current sandbox. Only valid after [SandboxIterator.Next]
+// has returned true.
+func (it *SandboxIterator) Value() *Sandbox {
+	return it.current
+}
+
+// Err returns the first error encountered during iteration, if any. Callers
+// should check Err after [SandboxIterator.Next] returns false.
+func (it *SandboxIterator) Err() error {
+	return it.err
+}
+
+// Close releases resources held by the iterator. It is idempotent and safe
+// to call multiple times. After Close, [SandboxIterator.Next] always returns
+// false.
+func (it *SandboxIterator) Close() error {
+	it.closed = true
+	it.page = nil
+	it.current = nil
+	return nil
 }
 
 // NewSandbox creates a new Sandbox instance.

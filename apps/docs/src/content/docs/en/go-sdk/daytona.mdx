@@ -83,7 +83,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(c \*Client\) Close\(ctx context.Context\) error](<#Client.Close>)
   - [func \(c \*Client\) Create\(ctx context.Context, params any, opts ...func\(\*options.CreateSandbox\)\) \(\*Sandbox, error\)](<#Client.Create>)
   - [func \(c \*Client\) Get\(ctx context.Context, sandboxIDOrName string\) \(\*Sandbox, error\)](<#Client.Get>)
-  - [func \(c \*Client\) List\(ctx context.Context, labels map\[string\]string, page \*int, limit \*int\) \(\*PaginatedSandboxes, error\)](<#Client.List>)
+  - [func \(c \*Client\) List\(ctx context.Context, query \*ListSandboxesQuery\) \*SandboxIterator](<#Client.List>)
 - [type CodeInterpreterService](<#CodeInterpreterService>)
   - [func NewCodeInterpreterService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*CodeInterpreterService](<#NewCodeInterpreterService>)
   - [func \(c \*CodeInterpreterService\) CreateContext\(ctx context.Context, cwd \*string\) \(map\[string\]any, error\)](<#CodeInterpreterService.CreateContext>)
@@ -157,6 +157,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(k \*KeyboardService\) Hotkey\(ctx context.Context, keys string\) error](<#KeyboardService.Hotkey>)
   - [func \(k \*KeyboardService\) Press\(ctx context.Context, key string, modifiers \[\]string\) error](<#KeyboardService.Press>)
   - [func \(k \*KeyboardService\) Type\(ctx context.Context, text string, delay \*int\) error](<#KeyboardService.Type>)
+- [type ListSandboxesQuery](<#ListSandboxesQuery>)
 - [type LspServerService](<#LspServerService>)
   - [func NewLspServerService\(toolboxClient \*toolbox.APIClient, languageID types.LspLanguageID, projectPath string, otel \*otelState\) \*LspServerService](<#NewLspServerService>)
   - [func \(l \*LspServerService\) Completions\(ctx context.Context, path string, position types.Position\) \(any, error\)](<#LspServerService.Completions>)
@@ -174,7 +175,6 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(m \*MouseService\) Move\(ctx context.Context, x, y int\) \(map\[string\]any, error\)](<#MouseService.Move>)
   - [func \(m \*MouseService\) Scroll\(ctx context.Context, x, y int, direction string, amount \*int\) \(bool, error\)](<#MouseService.Scroll>)
 - [type OutputChannels](<#OutputChannels>)
-- [type PaginatedSandboxes](<#PaginatedSandboxes>)
 - [type ProcessService](<#ProcessService>)
   - [func NewProcessService\(toolboxClient \*toolbox.APIClient, otel \*otelState, language types.CodeLanguage\) \*ProcessService](<#NewProcessService>)
   - [func \(p \*ProcessService\) CodeRun\(ctx context.Context, code string, opts ...func\(\*options.CodeRun\)\) \(\*types.ExecuteResponse, error\)](<#ProcessService.CodeRun>)
@@ -248,6 +248,11 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) WaitForResize\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForResize>)
   - [func \(s \*Sandbox\) WaitForStart\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForStart>)
   - [func \(s \*Sandbox\) WaitForStop\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForStop>)
+- [type SandboxIterator](<#SandboxIterator>)
+  - [func \(it \*SandboxIterator\) Close\(\) error](<#SandboxIterator.Close>)
+  - [func \(it \*SandboxIterator\) Err\(\) error](<#SandboxIterator.Err>)
+  - [func \(it \*SandboxIterator\) Next\(\) bool](<#SandboxIterator.Next>)
+  - [func \(it \*SandboxIterator\) Value\(\) \*Sandbox](<#SandboxIterator.Value>)
 - [type ScreenshotService](<#ScreenshotService>)
   - [func NewScreenshotService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*ScreenshotService](<#NewScreenshotService>)
   - [func \(s \*ScreenshotService\) TakeFullScreen\(ctx context.Context, showCursor \*bool\) \(\*types.ScreenshotResponse, error\)](<#ScreenshotService.TakeFullScreen>)
@@ -437,37 +442,25 @@ if err != nil {
 ### func \(\*Client\) List
 
 ```go
-func (c *Client) List(ctx context.Context, labels map[string]string, page *int, limit *int) (*PaginatedSandboxes, error)
+func (c *Client) List(ctx context.Context, query *ListSandboxesQuery) *SandboxIterator
 ```
 
-List retrieves sandboxes with optional label filtering and pagination.
+List returns an iterator over Sandboxes matching the given query.
 
-Parameters:
-
-- labels: Optional map of labels to filter sandboxes. Pass nil for no filtering.
-- page: Optional page number \(1\-indexed\). Pass nil for the first page.
-- limit: Optional number of results per page. Pass nil for the default limit.
+Callers MUST invoke [SandboxIterator.Close](<#SandboxIterator.Close>) \(typically via defer\) to release resources held by the iterator.
 
 Example:
 
 ```
-// List all sandboxes
-result, err := client.List(ctx, nil, nil, nil)
-
-// List sandboxes with pagination
-page, limit := 1, 10
-result, err := client.List(ctx, nil, &page, &limit)
-
-// Filter by labels
-result, err := client.List(ctx, map[string]string{"env": "dev"}, nil, nil)
-
-// Iterate through results
-for _, sandbox := range result.Items {
-    fmt.Printf("Sandbox: %s (state: %s)\n", sandbox.Name, sandbox.State)
+iter := client.List(ctx, &ListSandboxesQuery{Labels: map[string]string{"env": "dev"}})
+defer iter.Close()
+for iter.Next() {
+    fmt.Println(iter.Value().ID)
+}
+if err := iter.Err(); err != nil {
+    log.Fatal(err)
 }
 ```
-
-Returns a [PaginatedSandboxes](<#PaginatedSandboxes>) containing the matching sandboxes and pagination metadata.
 
 <a name="CodeInterpreterService"></a>
 ## type CodeInterpreterService
@@ -2165,6 +2158,58 @@ err := keyboard.Type(ctx, "Slow typing", &delay)
 
 Returns an error if typing fails.
 
+<a name="ListSandboxesQuery"></a>
+## type ListSandboxesQuery
+
+ListSandboxesQuery contains query parameters for filtering and sorting when listing sandboxes.
+
+```go
+type ListSandboxesQuery struct {
+    // Per-page fetch size. Does NOT limit the total number of Sandboxes returned.
+    Limit *int
+    // Filter by ID prefix (case-insensitive)
+    ID  *string
+    // Filter by name prefix (case-insensitive)
+    Name *string
+    // Filter by labels
+    Labels map[string]string
+    // Filter by states
+    States []string
+    // Filter by snapshot names
+    Snapshots []string
+    // Filter by targets
+    Targets []string
+    // Filter by minimum CPU
+    MinCpu *int
+    // Filter by maximum CPU
+    MaxCpu *int
+    // Filter by minimum memory in GiB
+    MinMemoryGiB *int
+    // Filter by maximum memory in GiB
+    MaxMemoryGiB *int
+    // Filter by minimum disk space in GiB
+    MinDiskGiB *int
+    // Filter by maximum disk space in GiB
+    MaxDiskGiB *int
+    // Filter by public status
+    IsPublic *bool
+    // Filter by recoverable status
+    IsRecoverable *bool
+    // Include sandboxes created after this timestamp
+    CreatedAtAfter *time.Time
+    // Include sandboxes created before this timestamp
+    CreatedAtBefore *time.Time
+    // Include sandboxes with last activity after this timestamp
+    LastActivityAfter *time.Time
+    // Include sandboxes with last activity before this timestamp
+    LastActivityBefore *time.Time
+    // Sort by field (name, cpu, memoryGiB, diskGiB, lastActivityAt, createdAt)
+    Sort *string
+    // Sort direction (asc, desc)
+    Order *string
+}
+```
+
 <a name="LspServerService"></a>
 ## type LspServerService
 
@@ -2551,20 +2596,6 @@ type OutputChannels struct {
     Stderr <-chan *types.OutputMessage   // Receives stderr messages as they occur
     Errors <-chan *types.ExecutionError  // Receives execution errors
     Done   <-chan *types.ExecutionResult // Receives final result when execution completes
-}
-```
-
-<a name="PaginatedSandboxes"></a>
-## type PaginatedSandboxes
-
-PaginatedSandboxes represents a paginated list of sandboxes.
-
-```go
-type PaginatedSandboxes struct {
-    Items      []*Sandbox // Sandboxes in this page
-    Total      int        // Total number of sandboxes
-    Page       int        // Current page number
-    TotalPages int        // Total number of pages
 }
 ```
 
@@ -4306,6 +4337,55 @@ Example:
 ```
 err := sandbox.WaitForStop(ctx, 2*time.Minute)
 ```
+
+<a name="SandboxIterator"></a>
+## type SandboxIterator
+
+SandboxIterator iterates over Sandboxes returned by [Client.List](<#Client.List>), following the standard Go iterator pattern used by [database/sql.Rows](<https://pkg.go.dev/database/sql/#Rows>) and [bufio.Scanner](<https://pkg.go.dev/bufio/#Scanner>).
+
+Callers MUST invoke [SandboxIterator.Close](<#SandboxIterator.Close>) \(typically via defer\) to release resources held by the iterator.
+
+```go
+type SandboxIterator struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="SandboxIterator.Close"></a>
+### func \(\*SandboxIterator\) Close
+
+```go
+func (it *SandboxIterator) Close() error
+```
+
+Close releases resources held by the iterator. It is idempotent and safe to call multiple times. After Close, [SandboxIterator.Next](<#SandboxIterator.Next>) always returns false.
+
+<a name="SandboxIterator.Err"></a>
+### func \(\*SandboxIterator\) Err
+
+```go
+func (it *SandboxIterator) Err() error
+```
+
+Err returns the first error encountered during iteration, if any. Callers should check Err after [SandboxIterator.Next](<#SandboxIterator.Next>) returns false.
+
+<a name="SandboxIterator.Next"></a>
+### func \(\*SandboxIterator\) Next
+
+```go
+func (it *SandboxIterator) Next() bool
+```
+
+Next advances the iterator to the next sandbox. It returns true if a sandbox is available \(accessible via [SandboxIterator.Value](<#SandboxIterator.Value>)\), or false if iteration has finished or an error occurred. After Next returns false, callers should inspect [SandboxIterator.Err](<#SandboxIterator.Err>).
+
+<a name="SandboxIterator.Value"></a>
+### func \(\*SandboxIterator\) Value
+
+```go
+func (it *SandboxIterator) Value() *Sandbox
+```
+
+Value returns the current sandbox. Only valid after [SandboxIterator.Next](<#SandboxIterator.Next>) has returned true.
 
 <a name="ScreenshotService"></a>
 ## type ScreenshotService

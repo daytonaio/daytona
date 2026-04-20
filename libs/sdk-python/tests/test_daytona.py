@@ -173,27 +173,62 @@ class TestDaytonaGetAndList:
         assert isinstance(sandbox, Sandbox)
         assert sandbox.id == "test-sandbox-id"
 
-    def test_list_invalid_page_raises(self, env_with_api_key):
-        daytona = _make_daytona()
-        with pytest.raises(DaytonaValidationError, match="page must be a positive integer"):
-            daytona.list(page=0)
+    def test_list_returns_iterator(self, env_with_api_key):
+        import inspect
 
-    def test_list_invalid_limit_raises(self, env_with_api_key):
-        daytona = _make_daytona()
-        with pytest.raises(DaytonaValidationError, match="limit must be a positive integer"):
-            daytona.list(limit=0)
+        from daytona._sync.daytona import Daytona
+
+        # ``list`` is a generator function — calling it returns an iterator
+        # without performing the API request.
+        assert inspect.isgeneratorfunction(Daytona.list)
 
     def test_list_serializes_labels(self, env_with_api_key, sandbox_dto):
-        response = MagicMock(items=[sandbox_dto], total=1, page=1, total_pages=1)
+        from daytona import ListSandboxesQuery
+
+        response = MagicMock(items=[sandbox_dto], next_cursor=None)
         daytona = _make_daytona()
         daytona._sandbox_api = MagicMock()
-        daytona._sandbox_api.list_sandboxes_paginated.return_value = response
-        result = daytona.list(labels={"project": "test"}, page=1, limit=10)
-        assert result.total == 1
-        kwargs = daytona._sandbox_api.list_sandboxes_paginated.call_args.kwargs
+        daytona._sandbox_api.list_sandboxes.return_value = response
+
+        sandboxes = list(daytona.list(ListSandboxesQuery(labels={"project": "test"}, limit=10)))
+
+        assert len(sandboxes) == 1
+        kwargs = daytona._sandbox_api.list_sandboxes.call_args.kwargs
         assert json.loads(kwargs["labels"]) == {"project": "test"}
-        assert kwargs["page"] == 1
         assert kwargs["limit"] == 10
+        # cursor is internal; first page fetch passes None
+        assert kwargs["cursor"] is None
+
+    def test_list_paginates_via_cursor(self, env_with_api_key, sandbox_dto):
+        page1 = MagicMock(items=[sandbox_dto, sandbox_dto], next_cursor="cursor-2")
+        page2 = MagicMock(items=[sandbox_dto], next_cursor=None)
+
+        daytona = _make_daytona()
+        daytona._sandbox_api = MagicMock()
+        daytona._sandbox_api.list_sandboxes.side_effect = [page1, page2]
+
+        sandboxes = list(daytona.list())
+
+        assert len(sandboxes) == 3
+        assert daytona._sandbox_api.list_sandboxes.call_count == 2
+        # Second call must carry the cursor returned by page 1.
+        second_call_kwargs = daytona._sandbox_api.list_sandboxes.call_args_list[1].kwargs
+        assert second_call_kwargs["cursor"] == "cursor-2"
+
+    def test_list_early_termination_stops_fetching(self, env_with_api_key, sandbox_dto):
+        page1 = MagicMock(items=[sandbox_dto, sandbox_dto], next_cursor="cursor-2")
+        # If the iterator advanced past page 1, the mock would yield page2;
+        # we assert that does NOT happen.
+        page2 = MagicMock(items=[sandbox_dto], next_cursor=None)
+
+        daytona = _make_daytona()
+        daytona._sandbox_api = MagicMock()
+        daytona._sandbox_api.list_sandboxes.side_effect = [page1, page2]
+
+        first = next(iter(daytona.list()))
+        assert first is not None
+        # Only page 1 was fetched.
+        assert daytona._sandbox_api.list_sandboxes.call_count == 1
 
 
 class TestDaytonaValidateLanguageLabel:

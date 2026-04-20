@@ -4,7 +4,12 @@ require 'daytona'
 
 daytona = Daytona::Daytona.new
 
-result = daytona.list({ 'my-label' => 'my-value' }, page: 2, limit: 10)
-result.items.each do |sandbox|
-  puts "#{sandbox.id} (#{sandbox.state})"
+daytona.list(Daytona::ListSandboxesQuery.new(
+               limit: 10,
+               labels: { 'env' => 'dev' },
+               states: ['started'],
+               sort: 'createdAt',
+               order: 'desc'
+             )).each do |sandbox|
+  puts sandbox.id
 end

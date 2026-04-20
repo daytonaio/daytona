@@ -4,29 +4,26 @@
 package io.daytona.examples;
 
 import io.daytona.sdk.Daytona;
-import io.daytona.sdk.model.PaginatedSandboxes;
-import io.daytona.sdk.model.PaginatedSnapshots;
-import io.daytona.sdk.model.Snapshot;
+import io.daytona.sdk.model.ListSandboxesQuery;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class Pagination {
     public static void main(String[] args) {
         try (Daytona daytona = new Daytona()) {
-            PaginatedSandboxes sandboxes = daytona.list(null, 1, 5);
-            System.out.println("Found " + sandboxes.getTotal() + " sandboxes");
-            for (Map<String, Object> sb : sandboxes.getItems()) {
-                System.out.println("  " + sb.get("id") + ": " + sb.get("state"));
-            }
+            ListSandboxesQuery query = new ListSandboxesQuery();
+            query.setLimit(10);
+            query.setLabels(Map.of("env", "dev"));
+            query.setStates(List.of("started"));
+            query.setSort("createdAt");
+            query.setOrder("desc");
 
-            try {
-                PaginatedSnapshots snapshots = daytona.snapshot().list(1, 5);
-                System.out.println("Found " + snapshots.getTotal() + " snapshots");
-                for (Snapshot snap : snapshots.getItems()) {
-                    System.out.println("  " + snap.getName() + " (" + snap.getImageName() + ")");
-                }
-            } catch (Exception e) {
-                System.out.println("Snapshot listing: " + e.getMessage());
+            Iterator<Map<String, Object>> iter = daytona.list(query);
+            while (iter.hasNext()) {
+                Map<String, Object> sandbox = iter.next();
+                System.out.println(sandbox.get("id"));
             }
         }
     }

@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
     from ._async.computer_use import AsyncComputerUse, AsyncDisplay, AsyncKeyboard, AsyncMouse, AsyncScreenshot
     from ._async.daytona import AsyncDaytona
-    from ._async.sandbox import AsyncPaginatedSandboxes, AsyncSandbox
+    from ._async.sandbox import AsyncSandbox, ListSandboxesQuery
     from ._sync.daytona import Daytona
     from ._sync.sandbox import Sandbox
     from .common.charts import (
@@ -83,7 +83,7 @@ __all__ = [
     "VolumeMount",
     "AsyncDaytona",
     "AsyncSandbox",
-    "AsyncPaginatedSandboxes",
+    "ListSandboxesQuery",
     "AsyncComputerUse",
     "AsyncMouse",
     "AsyncKeyboard",
@@ -126,7 +126,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     # _async
     "AsyncDaytona": "_async.daytona",
     "AsyncSandbox": "_async.sandbox",
-    "AsyncPaginatedSandboxes": "_async.sandbox",
+    "ListSandboxesQuery": "_async.sandbox",
     "AsyncComputerUse": "_async.computer_use",
     "AsyncMouse": "_async.computer_use",
     "AsyncKeyboard": "_async.computer_use",

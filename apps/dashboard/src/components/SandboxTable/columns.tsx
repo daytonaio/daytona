@@ -17,9 +17,6 @@ import { Separator } from '../ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { SandboxState as SandboxStateComponent } from './SandboxState'
 import { SandboxTableActions } from './SandboxTableActions'
-import { STATE_PRIORITY_ORDER } from './constants'
-import { ResourceFilterValue } from './filters/ResourceFilter'
-import { arrayIncludesFilter, arrayIntersectionFilter, dateRangeFilter, resourceRangeFilter } from './filters/utils'
 
 interface SortableHeaderProps {
   column: any
@@ -172,11 +169,10 @@ export function getColumns({
     {
       id: 'state',
       size: 120,
-      maxSize: 120,
-      enableSorting: true,
+      enableSorting: false,
       enableHiding: false,
-      header: ({ column }) => {
-        return <SortableHeader column={column} label="State" />
+      header: () => {
+        return <span>State</span>
       },
       cell: ({ row }) => (
         <div className="w-full truncate">
@@ -188,25 +184,14 @@ export function getColumns({
         </div>
       ),
       accessorKey: 'state',
-      sortingFn: (rowA, rowB) => {
-        const stateA = rowA.original.state || SandboxState.UNKNOWN
-        const stateB = rowB.original.state || SandboxState.UNKNOWN
-
-        if (stateA === stateB) {
-          return 0
-        }
-
-        return STATE_PRIORITY_ORDER[stateA] - STATE_PRIORITY_ORDER[stateB]
-      },
-      filterFn: (row, id, value) => arrayIncludesFilter(row, id, value),
     },
     {
       id: 'snapshot',
       size: 150,
-      enableSorting: true,
+      enableSorting: false,
       enableHiding: false,
-      header: ({ column }) => {
-        return <SortableHeader column={column} label="Snapshot" />
+      header: () => {
+        return <span>Snapshot</span>
       },
       cell: ({ row }) => {
         return (
@@ -220,16 +205,14 @@ export function getColumns({
         )
       },
       accessorKey: 'snapshot',
-      filterFn: (row, id, value) => arrayIncludesFilter(row, id, value),
     },
     {
       id: 'region',
       size: 120,
-      maxSize: 120,
-      enableSorting: true,
+      enableSorting: false,
       enableHiding: false,
-      header: ({ column }) => {
-        return <SortableHeader column={column} label="Region" dataState="sortable" />
+      header: () => {
+        return <span>Region</span>
       },
       cell: ({ row }) => {
         return (
@@ -239,7 +222,6 @@ export function getColumns({
         )
       },
       accessorKey: 'target',
-      filterFn: (row, id, value) => arrayIncludesFilter(row, id, value),
     },
     {
       id: 'resources',
@@ -266,7 +248,6 @@ export function getColumns({
           </div>
         )
       },
-      filterFn: (row, id, value: ResourceFilterValue) => resourceRangeFilter(row, value),
     },
     {
       id: 'labels',
@@ -307,7 +288,6 @@ export function getColumns({
         )
       },
       accessorFn: (row) => Object.entries(row.labels ?? {}).map(([key, value]) => `${key}: ${value}`),
-      filterFn: (row, id, value) => arrayIntersectionFilter(row, id, value),
     },
     {
       id: 'lastEvent',
@@ -318,7 +298,6 @@ export function getColumns({
       header: ({ column }) => {
         return <SortableHeader column={column} label="Last Event" />
       },
-      filterFn: (row, id, value) => dateRangeFilter(row, id, value),
       accessorFn: (row) => getLastEvent(row).date,
       cell: ({ row }) => {
         const lastEvent = getLastEvent(row.original)
@@ -338,7 +317,7 @@ export function getColumns({
       enableSorting: true,
       enableHiding: false,
       header: ({ column }) => {
-        return <SortableHeader column={column} label="Created At" />
+        return <SortableHeader column={column} label="Created" />
       },
       accessorFn: (row) => (row.createdAt ? new Date(row.createdAt) : new Date()),
       cell: ({ row }) => {
@@ -382,6 +361,16 @@ export function getColumns({
         </div>
       ),
     },
+    {
+      id: 'isPublic',
+      enableHiding: false,
+      enableSorting: false,
+    },
+    {
+      id: 'isRecoverable',
+      enableHiding: false,
+      enableSorting: false,
+    },
   ]
 
   return columns
@@ -402,5 +391,5 @@ function getDisplayName(sandbox: Sandbox): string {
 }
 
 function getLastEvent(sandbox: Sandbox): { date: Date; relativeTimeString: string } {
-  return getRelativeTimeString(sandbox.lastActivityAt ?? sandbox.updatedAt)
+  return getRelativeTimeString(sandbox.lastActivityAt)
 }

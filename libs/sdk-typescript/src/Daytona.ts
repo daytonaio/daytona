@@ -12,6 +12,7 @@ import {
   VolumesApi,
   SandboxVolume,
   ConfigApi,
+  ListSandboxesStatesEnum,
 } from '@daytona/api-client'
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios'
 import {
@@ -22,7 +23,7 @@ import {
   DaytonaValidationError,
 } from './errors/DaytonaError'
 import { Image } from './Image'
-import { Sandbox, PaginatedSandboxes } from './Sandbox'
+import { Sandbox, ListSandboxesQuery } from './Sandbox'
 import { SnapshotService } from './Snapshot'
 import { VolumeService } from './Volume'
 import * as packageJson from '../package.json'
@@ -646,38 +647,97 @@ export class Daytona implements AsyncDisposable {
   }
 
   /**
-   * Returns paginated list of Sandboxes filtered by labels.
+   * Iterates over Sandboxes matching the given query.
    *
-   * @param {Record<string, string>} [labels] - Labels to filter Sandboxes
-   * @param {number} [page] - Page number for pagination (starting from 1)
-   * @param {number} [limit] - Maximum number of items per page
-   * @returns {Promise<PaginatedSandboxes>} Paginated list of Sandboxes that match the labels.
+   * @param {ListSandboxesQuery} [query] - Optional filters, sorting, and per-page size.
+   * @returns {AsyncIterableIterator<Sandbox>}
    *
    * @example
-   * const result = await daytona.list({ 'my-label': 'my-value' }, 2, 10);
-   * for (const sandbox of result.items) {
-   *     console.log(`${sandbox.id}: ${sandbox.state}`);
+   * for await (const sandbox of daytona.list({ labels: { env: 'dev' } })) {
+   *   console.log(sandbox.id)
    * }
    */
-  @WithInstrumentation()
-  public async list(labels?: Record<string, string>, page?: number, limit?: number): Promise<PaginatedSandboxes> {
-    const response = await this.sandboxApi.listSandboxesPaginated(
-      undefined,
-      page,
-      limit,
-      undefined,
-      undefined,
-      labels ? JSON.stringify(labels) : undefined,
-    )
+  public list(query?: ListSandboxesQuery): AsyncIterableIterator<Sandbox> {
+    const { sandboxApi, clientConfig } = this
+    const tracer = trace.getTracer('')
 
-    return {
-      items: response.data.items.map((sandbox) => {
-        return new Sandbox(sandbox, structuredClone(this.clientConfig), Daytona.createAxiosInstance(), this.sandboxApi)
-      }),
-      total: response.data.total,
-      page: response.data.page,
-      totalPages: response.data.totalPages,
+    async function* generator(): AsyncGenerator<Sandbox> {
+      let cursor: string | undefined = undefined
+      let firstPage = true
+
+      while (true) {
+        // Stop only when we've fetched at least one page and there's no further cursor.
+        if (!firstPage && !cursor) {
+          break
+        }
+
+        const span = tracer.startSpan(
+          'Daytona.list.fetchPage',
+          {
+            attributes: {
+              component: 'Daytona',
+              method: 'list',
+            },
+          },
+          context.active(),
+        )
+
+        let response
+        try {
+          response = await context.with(trace.setSpan(context.active(), span), () =>
+            sandboxApi.listSandboxes(
+              undefined,
+              cursor,
+              query?.limit,
+              query?.id,
+              query?.name,
+              query?.labels ? JSON.stringify(query.labels) : undefined,
+              undefined,
+              query?.states as unknown as Array<ListSandboxesStatesEnum>,
+              query?.snapshots,
+              query?.targets,
+              query?.minCpu,
+              query?.maxCpu,
+              query?.minMemoryGiB,
+              query?.maxMemoryGiB,
+              query?.minDiskGiB,
+              query?.maxDiskGiB,
+              query?.isPublic,
+              query?.isRecoverable,
+              query?.createdAtAfter,
+              query?.createdAtBefore,
+              query?.lastActivityAfter,
+              query?.lastActivityBefore,
+              query?.sort,
+              query?.order,
+            ),
+          )
+          span.setStatus({ code: SpanStatusCode.OK })
+        } catch (error) {
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: error instanceof Error ? error.message : String(error),
+          })
+          span.recordException(error instanceof Error ? error : new Error(String(error)))
+          throw error
+        } finally {
+          span.end()
+        }
+
+        firstPage = false
+
+        for (const sandbox of response.data.items) {
+          yield new Sandbox(sandbox, structuredClone(clientConfig), Daytona.createAxiosInstance(), sandboxApi)
+        }
+
+        cursor = response.data.nextCursor ?? undefined
+        if (!cursor) {
+          break
+        }
+      }
     }
+
+    return generator()
   }
 
   /**

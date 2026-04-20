@@ -9,9 +9,7 @@ import time
 from deprecated import deprecated
 from pydantic import ConfigDict, PrivateAttr
 
-from daytona_api_client import BuildInfo, CreateSandboxSnapshot, ForkSandbox
-from daytona_api_client import PaginatedSandboxes as PaginatedSandboxesDto
-from daytona_api_client import PortPreviewUrl, ResizeSandbox
+from daytona_api_client import BuildInfo, CreateSandboxSnapshot, ForkSandbox, PortPreviewUrl, ResizeSandbox
 from daytona_api_client import Sandbox as SandboxDto
 from daytona_api_client import (
     SandboxApi,
@@ -847,18 +845,3 @@ class Sandbox(SandboxDto):
             self.refresh_data()
         except DaytonaNotFoundError:
             self.state = SandboxState.DESTROYED
-
-
-class PaginatedSandboxes(PaginatedSandboxesDto):
-    """Represents a paginated list of Daytona Sandboxes.
-
-    Attributes:
-        items (list[Sandbox]): List of Sandbox instances in the current page.
-        total (int): Total number of Sandboxes across all pages.
-        page (int): Current page number.
-        total_pages (int): Total number of pages available.
-    """
-
-    items: list[Sandbox]  # pyright: ignore[reportIncompatibleVariableOverride]
-
-    model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)

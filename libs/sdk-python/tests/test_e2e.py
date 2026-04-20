@@ -139,16 +139,21 @@ def test_refresh_data_updates_sandbox(sandbox):
 
 
 def test_list_sandboxes(daytona_client, sandbox):
-    result = daytona_client.list()
-    assert result.total > 0, f"Expected total > 0, got {result.total}"
-    assert len(result.items) > 0, "Expected at least one sandbox in items"
+    sandboxes = list(daytona_client.list())
+    assert len(sandboxes) > 0, "Expected at least one sandbox"
 
 
-def test_list_with_pagination(daytona_client, sandbox):
-    result = daytona_client.list(page=1, limit=1)
-    assert result.total >= 1, "Expected total >= 1"
-    assert len(result.items) <= 1, f"Expected at most 1 item, got {len(result.items)}"
-    assert result.page == 1, f"Expected page 1, got {result.page}"
+def test_list_with_limit_hint(daytona_client, sandbox):
+    from daytona import ListSandboxesQuery
+
+    # ``limit`` controls the per-page fetch size, not a total cap. We exercise
+    # iteration and early termination here.
+    yielded = 0
+    for _ in daytona_client.list(ListSandboxesQuery(limit=1)):
+        yielded += 1
+        if yielded >= 1:
+            break
+    assert yielded >= 1
 
 
 def test_get_sandbox_by_id(daytona_client, sandbox):
