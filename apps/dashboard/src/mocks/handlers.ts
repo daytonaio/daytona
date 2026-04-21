@@ -3,9 +3,15 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { OrganizationEmail, OrganizationTier, OrganizationWallet } from '@/billing-api'
-import { Invoice, PaginatedInvoices, PaymentUrl } from '@/billing-api/types/Invoice'
-import { Tier } from '@/billing-api/types/tier'
+import {
+  Invoice,
+  OrganizationEmail,
+  OrganizationTier,
+  OrganizationWallet,
+  PaginatedTInvoice,
+  PaymentUrl,
+  Tier,
+} from '@daytona/billing-api-client'
 import { DaytonaConfiguration } from '@daytona/api-client/src'
 import { bypass, http, HttpResponse } from 'msw'
 
@@ -81,9 +87,9 @@ export const handlers = [
   http.get(`${BILLING_API_URL}/organization/:organizationId/tier`, async () => {
     return HttpResponse.json<OrganizationTier>({
       tier: 2,
-      largestSuccessfulPaymentDate: new Date(),
+      largestSuccessfulPaymentDate: new Date().toISOString(),
       largestSuccessfulPaymentCents: 1000,
-      expiresAt: new Date(),
+      expiresAt: new Date().toISOString(),
       hasVerifiedBusinessEmail: true,
     })
   }),
@@ -94,7 +100,7 @@ export const handlers = [
         verified: true,
         owner: true,
         business: false,
-        verifiedAt: new Date(),
+        verifiedAt: new Date().toISOString(),
       },
     ])
   }),
@@ -172,7 +178,7 @@ export const handlers = [
     const totalItems = mockInvoices.length
     const totalPages = Math.ceil(totalItems / perPage)
 
-    return HttpResponse.json<PaginatedInvoices>({
+    return HttpResponse.json<PaginatedTInvoice>({
       items: paginatedItems,
       totalItems,
       totalPages,

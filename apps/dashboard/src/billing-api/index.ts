@@ -4,4 +4,3 @@
  */
 
 export * from './billingApiClient'
-export * from './types'

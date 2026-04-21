@@ -21,6 +21,7 @@ COPY libs/api-client/ libs/api-client/
 COPY libs/analytics-api-client/ libs/analytics-api-client/
 COPY libs/toolbox-api-client/ libs/toolbox-api-client/
 COPY libs/sdk-typescript/ libs/sdk-typescript/
+COPY libs/billing-api-client/ libs/billing-api-client/
 
 ENV NX_DAEMON=false
 

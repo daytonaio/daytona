@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import type { OrganizationWallet } from '@/billing-api/types/OrganizationWallet'
+import type { OrganizationWallet } from '@daytona/billing-api-client'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { OrganizationUserRoleEnum } from '@daytona/api-client'
 import { UseQueryOptions } from '@tanstack/react-query'

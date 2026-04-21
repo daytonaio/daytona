@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { BillableMetricCode, OrganizationUsage } from '@/billing-api/types/OrganizationUsage'
 import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { AggregatedUsageChart, ResourceUsageBreakdown, UsageSummary } from '@/components/spending/AggregatedUsageChart'
 import { CostBreakdown } from '@/components/spending/CostBreakdown'
@@ -21,6 +20,7 @@ import { useOrganizationUsageQuery } from '@/hooks/queries/useOrganizationUsageQ
 import { usePastOrganizationUsageQuery } from '@/hooks/queries/usePastOrganizationUsageQuery'
 import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { BillableMetricCode, OrganizationUsage } from '@daytona/billing-api-client/src/models'
 import { addDays, differenceInCalendarDays, subDays } from 'date-fns'
 import { AlertCircle, BarChart3, RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -117,7 +117,10 @@ const Spending = () => {
   })
 
   const sortedPastUsage = useMemo(
-    () => [...(pastOrganizationUsage ?? [])].sort((a, b) => new Date(a.from).getTime() - new Date(b.from).getTime()),
+    () =>
+      [...(pastOrganizationUsage ?? [])].sort(
+        (a, b) => new Date(a.from ?? '').getTime() - new Date(b.from ?? '').getTime(),
+      ),
     [pastOrganizationUsage],
   )
 
@@ -263,25 +266,25 @@ function convertUsageToChartData(usage: OrganizationUsage): UsageChartData {
   let diskGB = 0
   // let gpu = 0
 
-  for (const charge of usage.usageCharges) {
+  for (const charge of usage.usageCharges ?? []) {
     switch (charge.billableMetric) {
-      case BillableMetricCode.RAM_USAGE:
+      case BillableMetricCode.RAM_USAGE_BILLABLE_METRIC_CODE:
         ramGB += Number(charge.amountCents) / 100
         break
-      case BillableMetricCode.CPU_USAGE:
+      case BillableMetricCode.CPU_USAGE_BILLABLE_METRIC_CODE:
         cpu += Number(charge.amountCents) / 100
         break
-      case BillableMetricCode.DISK_USAGE:
+      case BillableMetricCode.DISK_USAGE_BILLABLE_METRIC_CODE:
         diskGB += Number(charge.amountCents) / 100
         break
-      // case BillableMetricCode.GPU_USAGE:
+      // case BillableMetricCode.GPU_USAGE_BILLABLE_METRIC_CODE:
       //   gpu += Number(charge.amountCents) / 100
       //   break
     }
   }
 
   return {
-    date: new Date(usage.from).toISOString(),
+    date: new Date(usage.from ?? '').toISOString(),
     diskGB,
     ramGB,
     cpu,

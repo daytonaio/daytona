@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Invoice } from '@/billing-api/types/Invoice'
+import { Invoice } from '@daytona/billing-api-client'
 import { formatAmount } from '@/lib/utils'
 import { ColumnDef, RowData, Table } from '@tanstack/react-table'
 import React from 'react'
@@ -64,7 +64,7 @@ export const invoiceColumns: ColumnDef<Invoice>[] = [
       )
     },
     sortingFn: (rowA, rowB) => {
-      return rowA.original.number.localeCompare(rowB.original.number)
+      return (rowA.original.number ?? '').localeCompare(rowB.original.number ?? '')
     },
   },
   {
@@ -74,16 +74,16 @@ export const invoiceColumns: ColumnDef<Invoice>[] = [
       return <SortableHeader column={column} label="Date" />
     },
     cell: ({ row }) => {
-      const date = new Date(row.original.issuingDate)
+      const date = new Date(row.original.issuingDate ?? '')
       return (
         <div className="w-full truncate">
           <span>{date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
         </div>
       )
     },
-    accessorFn: (row) => new Date(row.issuingDate).getTime(),
+    accessorFn: (row) => new Date(row.issuingDate ?? '').getTime(),
     sortingFn: (rowA, rowB) => {
-      return new Date(rowA.original.issuingDate).getTime() - new Date(rowB.original.issuingDate).getTime()
+      return new Date(rowA.original.issuingDate ?? '').getTime() - new Date(rowB.original.issuingDate ?? '').getTime()
     },
   },
   {
@@ -93,16 +93,18 @@ export const invoiceColumns: ColumnDef<Invoice>[] = [
       return <SortableHeader column={column} label="Due Date" />
     },
     cell: ({ row }) => {
-      const date = new Date(row.original.paymentDueDate)
+      const date = new Date(row.original.paymentDueDate ?? '')
       return (
         <div className="w-full truncate">
           <span>{date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
         </div>
       )
     },
-    accessorFn: (row) => new Date(row.paymentDueDate).getTime(),
+    accessorFn: (row) => new Date(row.paymentDueDate ?? '').getTime(),
     sortingFn: (rowA, rowB) => {
-      return new Date(rowA.original.paymentDueDate).getTime() - new Date(rowB.original.paymentDueDate).getTime()
+      return (
+        new Date(rowA.original.paymentDueDate ?? '').getTime() - new Date(rowB.original.paymentDueDate ?? '').getTime()
+      )
     },
   },
   {
@@ -114,13 +116,13 @@ export const invoiceColumns: ColumnDef<Invoice>[] = [
     cell: ({ row }) => {
       return (
         <div className="w-full truncate">
-          <span>{formatAmount(row.original.totalAmountCents)}</span>
+          <span>{formatAmount(row.original.totalAmountCents ?? 0)}</span>
         </div>
       )
     },
     accessorKey: 'totalAmountCents',
     sortingFn: (rowA, rowB) => {
-      return rowA.original.totalAmountCents - rowB.original.totalAmountCents
+      return (rowA.original.totalAmountCents ?? 0) - (rowB.original.totalAmountCents ?? 0)
     },
   },
   {
@@ -159,7 +161,9 @@ export const invoiceColumns: ColumnDef<Invoice>[] = [
     accessorKey: 'paymentStatus',
     sortingFn: (rowA, rowB) => {
       const statusOrder: Record<string, number> = { succeeded: 0, pending: 1, failed: 2 }
-      return (statusOrder[rowA.original.paymentStatus] ?? 3) - (statusOrder[rowB.original.paymentStatus] ?? 3)
+      return (
+        (statusOrder[rowA.original.paymentStatus ?? ''] ?? 3) - (statusOrder[rowB.original.paymentStatus ?? ''] ?? 3)
+      )
     },
   },
   {
@@ -179,7 +183,7 @@ export const invoiceColumns: ColumnDef<Invoice>[] = [
     },
     accessorKey: 'type',
     sortingFn: (rowA, rowB) => {
-      return rowA.original.type.localeCompare(rowB.original.type)
+      return (rowA.original.type ?? '').localeCompare(rowB.original.type ?? '')
     },
   },
   {
@@ -194,10 +198,10 @@ export const invoiceColumns: ColumnDef<Invoice>[] = [
       const isViewable = Boolean(row.original.fileUrl)
       const isVoidable =
         row.original.status === 'finalized' &&
-        ['pending', 'failed'].includes(row.original.paymentStatus) &&
+        ['pending', 'failed'].includes(row.original.paymentStatus ?? '') &&
         row.original.type === 'one_off'
       const isPayable =
-        row.original.status === 'finalized' && ['pending', 'failed'].includes(row.original.paymentStatus)
+        row.original.status === 'finalized' && ['pending', 'failed'].includes(row.original.paymentStatus ?? '')
 
       return (
         <div className="flex justify-center">

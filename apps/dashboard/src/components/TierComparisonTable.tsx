@@ -5,7 +5,7 @@
 
 import { ComparisonSection, ComparisonTable } from './ComparisonTable'
 
-import { OrganizationTier, Tier } from '@/billing-api'
+import { OrganizationTier, Tier } from '@daytona/billing-api-client'
 import { TIER_RATE_LIMITS } from '@/constants/limits'
 import { Skeleton } from './ui/skeleton'
 
@@ -53,15 +53,16 @@ function buildTierComparisonTableData(tiers: Tier[]): ComparisonSection[] {
       title: 'Tiers',
       rows: tiers
         .map((tier) => {
+          const tierNumber = tier.tier ?? 0
           return {
-            label: <span className="whitespace-nowrap">{tier.tier}</span>,
+            label: <span className="whitespace-nowrap">{tierNumber}</span>,
             values: [
-              `${tier.tierLimit.concurrentCPU}`,
-              `${tier.tierLimit.concurrentRAMGiB}`,
-              `${tier.tierLimit.concurrentDiskGiB}`,
-              `${TIER_RATE_LIMITS[tier.tier]?.authenticatedRateLimit.toLocaleString() || '-'}`,
-              `${TIER_RATE_LIMITS[tier.tier]?.sandboxCreateRateLimit.toLocaleString() || '-'}`,
-              `${TIER_RATE_LIMITS[tier.tier]?.sandboxLifecycleRateLimit.toLocaleString() || '-'}`,
+              `${tier.tierLimit?.concurrentCPU ?? '-'}`,
+              `${tier.tierLimit?.concurrentRAMGiB ?? '-'}`,
+              `${tier.tierLimit?.concurrentDiskGiB ?? '-'}`,
+              `${TIER_RATE_LIMITS[tierNumber]?.authenticatedRateLimit.toLocaleString() || '-'}`,
+              `${TIER_RATE_LIMITS[tierNumber]?.sandboxCreateRateLimit.toLocaleString() || '-'}`,
+              `${TIER_RATE_LIMITS[tierNumber]?.sandboxLifecycleRateLimit.toLocaleString() || '-'}`,
             ],
           }
         })

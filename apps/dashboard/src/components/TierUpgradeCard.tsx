@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { OrganizationTier, Tier } from '@/billing-api'
+import { OrganizationTier, Tier } from '@daytona/billing-api-client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { RoutePath } from '@/enums/RoutePath'
@@ -31,13 +31,14 @@ export function TierUpgradeCard({ tiers, organizationTier, requirementsState, or
   const { currentTier, previousTier, nextTier } = useMemo(() => {
     const targetTiers: { currentTier?: Tier; previousTier?: Tier; nextTier?: Tier } = {}
     for (const tier of tiers) {
-      if (tier.tier === organizationTier?.tier) {
+      const tierNumber = tier.tier ?? 0
+      if (tierNumber === organizationTier?.tier) {
         targetTiers.currentTier = tier
       }
-      if (tier.tier < (organizationTier?.tier || 0)) {
+      if (tierNumber < (organizationTier?.tier ?? 0)) {
         targetTiers.previousTier = tier
       }
-      if (tier.tier > (organizationTier?.tier || 0) && !targetTiers.nextTier) {
+      if (tierNumber > (organizationTier?.tier ?? 0) && !targetTiers.nextTier) {
         targetTiers.nextTier = tier
       }
     }
@@ -106,7 +107,7 @@ export function TierUpgradeCard({ tiers, organizationTier, requirementsState, or
               )}
               <Button
                 className="w-full mt-4"
-                onClick={() => handleUpgradeTier(nextTier.tier)}
+                onClick={() => handleUpgradeTier(nextTier.tier ?? 0)}
                 disabled={!canUpgrade || upgradeTier.isPending}
               >
                 {upgradeTier.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
@@ -141,16 +142,16 @@ export function TierUpgradeCard({ tiers, organizationTier, requirementsState, or
                 {organizationTier.expiresAt && (
                   <div>
                     Tier expires on{' '}
-                    {organizationTier.expiresAt.toLocaleDateString('en-US', {
+                    {new Date(organizationTier.expiresAt).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
                     })}
                     .
                   </div>
                 )}
-                {currentTier && currentTier?.topUpIntervalDays > 0 && (
+                {currentTier && (currentTier.topUpIntervalDays ?? 0) > 0 && (
                   <div>
-                    Automatically charged {getDollarAmount(currentTier.minTopUpAmountCents)} every{' '}
+                    Automatically charged {getDollarAmount(currentTier.minTopUpAmountCents ?? 0)} every{' '}
                     {currentTier.topUpIntervalDays} days.
                   </div>
                 )}
@@ -159,7 +160,7 @@ export function TierUpgradeCard({ tiers, organizationTier, requirementsState, or
             {previousTier && (
               <Button
                 variant="outline"
-                onClick={() => handleDowngradeTier(previousTier.tier)}
+                onClick={() => handleDowngradeTier(previousTier.tier ?? 0)}
                 disabled={downgradeTier.isPending}
               >
                 {downgradeTier.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
@@ -187,12 +188,13 @@ function checkTopUpRequirementStatus(currentTier: OrganizationTier, nextTier: Ti
     return false
   }
 
-  if (currentTier.largestSuccessfulPaymentCents < nextTier.minTopUpAmountCents) {
+  if ((currentTier.largestSuccessfulPaymentCents ?? 0) < (nextTier.minTopUpAmountCents ?? 0)) {
     return false
   }
 
   if (nextTier.topUpIntervalDays && currentTier.largestSuccessfulPaymentDate) {
-    const diffTime = Math.abs(Date.now() - (currentTier.largestSuccessfulPaymentDate?.getTime() || 0))
+    const lastPaymentTime = new Date(currentTier.largestSuccessfulPaymentDate).getTime() || 0
+    const diffTime = Math.abs(Date.now() - lastPaymentTime)
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
     return diffDays < nextTier.topUpIntervalDays
@@ -212,20 +214,21 @@ function getTierRequirementItems(
   if (!tier || !currentTier) {
     return []
   }
-  if (tier.tier < 1 || tier.tier > 4) {
+  const tierNumber = tier.tier ?? 0
+  if (tierNumber < 1 || tierNumber > 4) {
     return []
   }
 
   const items = []
 
-  if (tier.tier === 1) {
+  if (tierNumber === 1) {
     items.push({
       label: 'Email verification',
       isChecked: requirementsState.emailVerified,
       link: RoutePath.ACCOUNT_SETTINGS,
     })
   }
-  if (tier.tier === 2) {
+  if (tierNumber === 2) {
     items.push({
       label: 'Credit card linked',
       isChecked: requirementsState.creditCardLinked,
@@ -235,7 +238,9 @@ function getTierRequirementItems(
 
   if (tier.minTopUpAmountCents) {
     items.push({
-      label: `Top up ${getDollarAmount(tier.minTopUpAmountCents)} (${tier.topUpIntervalDays ? `every ${tier.topUpIntervalDays} days` : 'one time'})`,
+      label: `Top up ${getDollarAmount(tier.minTopUpAmountCents)} (${
+        tier.topUpIntervalDays ? `every ${tier.topUpIntervalDays} days` : 'one time'
+      })`,
       isChecked: checkTopUpRequirementStatus(currentTier, tier),
       link: RoutePath.BILLING_WALLET,
     })
