@@ -129,8 +129,9 @@ public class RunnersApiTest {
      */
     @Test
     public void listRunnersTest() throws ApiException {
+        String regionId = null;
         String xDaytonaOrganizationID = null;
-        List<Runner> response = api.listRunners(xDaytonaOrganizationID);
+        List<Runner> response = api.listRunners(regionId, xDaytonaOrganizationID);
         // TODO: test validations
     }
 

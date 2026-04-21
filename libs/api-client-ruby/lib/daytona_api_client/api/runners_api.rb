@@ -455,6 +455,7 @@ module DaytonaApiClient
 
     # List all runners
     # @param [Hash] opts the optional parameters
+    # @option opts [String] :region_id Filter runners by region ID
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<Runner>]
     def list_runners(opts = {})
@@ -464,6 +465,7 @@ module DaytonaApiClient
 
     # List all runners
     # @param [Hash] opts the optional parameters
+    # @option opts [String] :region_id Filter runners by region ID
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(Array<Runner>, Integer, Hash)>] Array<Runner> data, response status code and response headers
     def list_runners_with_http_info(opts = {})
@@ -475,6 +477,7 @@ module DaytonaApiClient
 
       # query parameters
       query_params = opts[:query_params] || {}
+      query_params[:'regionId'] = opts[:'region_id'] if !opts[:'region_id'].nil?
 
       # header parameters
       header_params = opts[:header_params] || {}

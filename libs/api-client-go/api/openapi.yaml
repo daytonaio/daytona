@@ -3196,6 +3196,14 @@ paths:
     get:
       operationId: listRunners
       parameters:
+      - description: Filter runners by region ID
+        explode: true
+        in: query
+        name: regionId
+        required: false
+        schema:
+          type: string
+        style: form
       - description: Use with JWT to specify the organization ID
         explode: false
         in: header

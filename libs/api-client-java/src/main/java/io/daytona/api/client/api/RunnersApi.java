@@ -983,6 +983,7 @@ public class RunnersApi {
     }
     /**
      * Build call for listRunners
+     * @param regionId Filter runners by region ID (optional)
      * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
      * @param _callback Callback for upload/download progress
      * @return Call to execute
@@ -994,7 +995,7 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listRunnersCall(@javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listRunnersCall(@javax.annotation.Nullable String regionId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1018,6 +1019,10 @@ public class RunnersApi {
         Map<String, String> localVarHeaderParams = new HashMap<String, String>();
         Map<String, String> localVarCookieParams = new HashMap<String, String>();
         Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        if (regionId != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("regionId", regionId));
+        }
 
         final String[] localVarAccepts = {
             "application/json"
@@ -1044,14 +1049,15 @@ public class RunnersApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listRunnersValidateBeforeCall(@javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
-        return listRunnersCall(xDaytonaOrganizationID, _callback);
+    private okhttp3.Call listRunnersValidateBeforeCall(@javax.annotation.Nullable String regionId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        return listRunnersCall(regionId, xDaytonaOrganizationID, _callback);
 
     }
 
     /**
      * List all runners
      * 
+     * @param regionId Filter runners by region ID (optional)
      * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
      * @return List&lt;Runner&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -1062,14 +1068,15 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public List<Runner> listRunners(@javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
-        ApiResponse<List<Runner>> localVarResp = listRunnersWithHttpInfo(xDaytonaOrganizationID);
+    public List<Runner> listRunners(@javax.annotation.Nullable String regionId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
+        ApiResponse<List<Runner>> localVarResp = listRunnersWithHttpInfo(regionId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
 
     /**
      * List all runners
      * 
+     * @param regionId Filter runners by region ID (optional)
      * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
      * @return ApiResponse&lt;List&lt;Runner&gt;&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -1080,8 +1087,8 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<Runner>> listRunnersWithHttpInfo(@javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
-        okhttp3.Call localVarCall = listRunnersValidateBeforeCall(xDaytonaOrganizationID, null);
+    public ApiResponse<List<Runner>> listRunnersWithHttpInfo(@javax.annotation.Nullable String regionId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
+        okhttp3.Call localVarCall = listRunnersValidateBeforeCall(regionId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<List<Runner>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
     }
@@ -1089,6 +1096,7 @@ public class RunnersApi {
     /**
      * List all runners (asynchronously)
      * 
+     * @param regionId Filter runners by region ID (optional)
      * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
@@ -1100,9 +1108,9 @@ public class RunnersApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listRunnersAsync(@javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<List<Runner>> _callback) throws ApiException {
+    public okhttp3.Call listRunnersAsync(@javax.annotation.Nullable String regionId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<List<Runner>> _callback) throws ApiException {
 
-        okhttp3.Call localVarCall = listRunnersValidateBeforeCall(xDaytonaOrganizationID, _callback);
+        okhttp3.Call localVarCall = listRunnersValidateBeforeCall(regionId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<List<Runner>>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;

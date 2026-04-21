@@ -332,11 +332,12 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * 
          * @summary List all runners
+         * @param {string} [regionId] Filter runners by region ID
          * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listRunners: async (xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listRunners: async (regionId?: string, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/runners`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -354,6 +355,10 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
             // authentication oauth2 required
+
+            if (regionId !== undefined) {
+                localVarQueryParameter['regionId'] = regionId;
+            }
 
             localVarHeaderParameter['Accept'] = 'application/json';
 
@@ -602,12 +607,13 @@ export const RunnersApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary List all runners
+         * @param {string} [regionId] Filter runners by region ID
          * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listRunners(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Runner>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listRunners(xDaytonaOrganizationID, options);
+        async listRunners(regionId?: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Runner>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listRunners(regionId, xDaytonaOrganizationID, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['RunnersApi.listRunners']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -737,12 +743,13 @@ export const RunnersApiFactory = function (configuration?: Configuration, basePa
         /**
          * 
          * @summary List all runners
+         * @param {string} [regionId] Filter runners by region ID
          * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listRunners(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<Runner>> {
-            return localVarFp.listRunners(xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        listRunners(regionId?: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<Runner>> {
+            return localVarFp.listRunners(regionId, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
         },
         /**
          * Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
@@ -865,12 +872,13 @@ export class RunnersApi extends BaseAPI {
     /**
      * 
      * @summary List all runners
+     * @param {string} [regionId] Filter runners by region ID
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public listRunners(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-        return RunnersApiFp(this.configuration).listRunners(xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    public listRunners(regionId?: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return RunnersApiFp(this.configuration).listRunners(regionId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
