@@ -79,6 +79,10 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 		}
 	}
 
+	// Store the resolved sandbox ID so wake handlers can use the real ID
+	// even when the URL contained a signed preview token.
+	ctx.Set(RESOLVED_SANDBOX_ID_KEY, sandboxId)
+
 	runnerInfo, err := p.getSandboxRunnerInfo(ctx, sandboxId)
 	if err != nil {
 		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to get runner info: %w", err)))
@@ -148,8 +152,9 @@ func (p *Proxy) getSandboxRunnerInfo(ctx context.Context, sandboxId string) (*Ru
 	}
 
 	info := RunnerInfo{
-		ApiUrl: *runner.ProxyUrl,
-		ApiKey: runner.ApiKey,
+		ApiUrl:      *runner.ProxyUrl,
+		ApiKey:      runner.ApiKey,
+		RunnerClass: string(runner.RunnerClass),
 	}
 
 	err = p.sandboxRunnerCache.Set(ctx, sandboxId, info, 2*time.Minute)

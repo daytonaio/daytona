@@ -117,8 +117,9 @@ func (p *Proxy) getRunnerInfo(ctx context.Context, runnerId string) (*RunnerInfo
 	}
 
 	info := RunnerInfo{
-		ApiUrl: *runner.ApiUrl,
-		ApiKey: runner.ApiKey,
+		ApiUrl:      *runner.ApiUrl,
+		ApiKey:      runner.ApiKey,
+		RunnerClass: string(runner.RunnerClass),
 	}
 
 	err = p.runnerCache.Set(ctx, runnerId, info, 2*time.Minute)

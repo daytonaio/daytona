@@ -490,7 +490,7 @@ export class SandboxController {
     description: 'Sandbox has been started or is being restored from archived state',
     type: SandboxDto,
   })
-  @UseGuards(OrganizationAuthContextGuard, SandboxAccessGuard)
+  @UseGuards(OrGuard([OrganizationAuthContextGuard, ProxyAuthContextGuard]), SandboxAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @Audit({
     action: AuditAction.START,
@@ -499,10 +499,18 @@ export class SandboxController {
     targetIdFromResult: (result: SandboxDto) => result?.id,
   })
   async startSandbox(
-    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
+    @IsBaseAuthContext() authContext: BaseAuthContext,
     @Param('sandboxIdOrName') sandboxIdOrName: string,
   ): Promise<SandboxDto> {
-    const sbx = await this.sandboxService.start(sandboxIdOrName, authContext.organization)
+    const organization = isOrganizationAuthContext(authContext)
+      ? authContext.organization
+      : await this.organizationService.findBySandboxId(sandboxIdOrName)
+
+    if (!organization) {
+      throw new NotFoundException(`Organization for sandbox ${sandboxIdOrName} not found`)
+    }
+
+    const sbx = await this.sandboxService.start(sandboxIdOrName, organization)
     let sandbox = await this.sandboxService.toSandboxDto(sbx)
 
     if (![SandboxState.ARCHIVED, SandboxState.RESTORING, SandboxState.STARTED].includes(sandbox.state)) {
