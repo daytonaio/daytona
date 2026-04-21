@@ -156,6 +156,45 @@ func TestExecuteSyncHeredoc(t *testing.T) {
 	}
 }
 
+func TestExecuteOnDeadSessionReturnsError(t *testing.T) {
+	svc := newTestSessionService(t)
+	const sessionID = "dead-session"
+
+	if err := svc.Create(sessionID, false); err != nil {
+		t.Fatalf("create session: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = svc.Delete(context.Background(), sessionID)
+	})
+
+	session, ok := svc.sessions.Get(sessionID)
+	if !ok {
+		t.Fatalf("session %s not found in map", sessionID)
+	}
+
+	// Kill the shell process and wait for the liveness goroutine to mark it dead.
+	if err := session.cmd.Process.Kill(); err != nil {
+		t.Fatalf("kill shell process: %v", err)
+	}
+
+	deadline := time.Now().Add(2 * time.Second)
+	for time.Now().Before(deadline) {
+		if session.dead.Load() {
+			break
+		}
+		time.Sleep(25 * time.Millisecond)
+	}
+
+	if !session.dead.Load() {
+		t.Fatal("session was not marked dead within 2s after process kill")
+	}
+
+	_, err := svc.Execute(sessionID, "", "echo hello", false, true, false, false)
+	if err == nil {
+		t.Fatal("expected error executing on dead session, got nil")
+	}
+}
+
 func TestExecuteAsyncCommandStillAcceptsInput(t *testing.T) {
 	svc := newTestSessionService(t)
 	const sessionID = "async-stdin"

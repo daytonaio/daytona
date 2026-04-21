@@ -8,6 +8,7 @@ import (
 	"io"
 	"os/exec"
 	"path/filepath"
+	"sync/atomic"
 
 	cmap "github.com/orcaman/concurrent-map/v2"
 )
@@ -19,6 +20,7 @@ type session struct {
 	commands    cmap.ConcurrentMap[string, *Command]
 	ctx         context.Context
 	cancel      context.CancelFunc
+	dead        atomic.Bool
 }
 
 func (s *session) Dir(configDir string) string {
