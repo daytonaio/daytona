@@ -17,6 +17,7 @@ from daytona_api_client import (
     SandboxLabels,
     SandboxState,
     SandboxVolume,
+    SignedFileDownloadUrl,
     SignedPortPreviewUrl,
     SshAccessDto,
     SshAccessValidationDto,
@@ -546,6 +547,40 @@ class Sandbox(SandboxDto):
             token (str): The token to expire the signed preview url on.
         """
         self._sandbox_api.expire_signed_port_preview_url(self.id, port, token)
+
+    @intercept_errors(message_prefix="Failed to create signed file download url: ")
+    def create_signed_download_url(self, path: str, expires_in_seconds: int | None = None) -> SignedFileDownloadUrl:
+        """Creates a signed download URL for a file in the sandbox.
+
+        The URL can be shared with anyone and does not require authentication.
+        It expires after the specified duration.
+
+        Args:
+            path (str): Path to the file in the sandbox filesystem.
+            expires_in_seconds (int | None): URL validity in seconds.
+                Defaults to 900 seconds (15 minutes). Maximum 86400 (24 hours).
+
+        Returns:
+            SignedFileDownloadUrl: The signed download URL details including
+                url, token, sandboxId, path, and expiresAt.
+
+        Example:
+            ```python
+            download = sandbox.create_signed_download_url("/home/daytona/report.pdf")
+            print(f"Download URL: {download.url}")
+            # Share download.url - no authentication needed
+            ```
+        """
+        return self._sandbox_api.get_signed_file_download_url(self.id, path=path, expires_in_seconds=expires_in_seconds)
+
+    @intercept_errors(message_prefix="Failed to expire signed file download url: ")
+    def expire_signed_download_url(self, token: str) -> None:
+        """Expires a signed file download URL, making it immediately invalid.
+
+        Args:
+            token (str): The token of the signed download URL to expire.
+        """
+        self._sandbox_api.expire_signed_file_download_url(self.id, token)
 
     @intercept_errors(message_prefix="Failed to archive sandbox: ")
     @with_instrumentation()

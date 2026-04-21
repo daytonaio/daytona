@@ -16,6 +16,7 @@ import {
   SshAccessDto,
   SshAccessValidationDto,
   SignedPortPreviewUrl,
+  SignedFileDownloadUrl,
   ResizeSandbox,
   CreateSandboxSnapshot,
 } from '@daytona/api-client'
@@ -683,6 +684,34 @@ export class Sandbox implements SandboxDto {
    */
   public async expireSignedPreviewUrl(port: number, token: string): Promise<void> {
     await this.sandboxApi.expireSignedPortPreviewUrl(this.id, port, token)
+  }
+
+  /**
+   * Creates a signed download URL for a file in the sandbox.
+   * The URL can be shared with anyone and does not require authentication.
+   * It expires after the specified duration.
+   *
+   * @param {string} path - Path to the file in the sandbox filesystem.
+   * @param {number} [expiresInSeconds] - URL validity in seconds (default 900, max 86400).
+   * @returns {Promise<SignedFileDownloadUrl>} The signed download URL details.
+   *
+   * @example
+   * const download = await sandbox.createSignedDownloadUrl('/home/daytona/report.pdf');
+   * console.log(`Download URL: ${download.url}`);
+   * // Share download.url — no authentication needed
+   */
+  public async createSignedDownloadUrl(path: string, expiresInSeconds?: number): Promise<SignedFileDownloadUrl> {
+    return (await this.sandboxApi.getSignedFileDownloadUrl(this.id, path, undefined, expiresInSeconds)).data
+  }
+
+  /**
+   * Expires a signed file download URL, making it immediately invalid.
+   *
+   * @param {string} token - The token of the signed download URL to expire.
+   * @returns {Promise<void>}
+   */
+  public async expireSignedDownloadUrl(token: string): Promise<void> {
+    await this.sandboxApi.expireSignedFileDownloadUrl(this.id, token)
   }
 
   /**
