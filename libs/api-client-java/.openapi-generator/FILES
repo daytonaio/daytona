@@ -188,6 +188,8 @@ src/main/java/io/daytona/api/client/model/Session.java
 src/main/java/io/daytona/api/client/model/SessionExecuteRequest.java
 src/main/java/io/daytona/api/client/model/SessionExecuteResponse.java
 src/main/java/io/daytona/api/client/model/SetSnapshotGeneralStatusDto.java
+src/main/java/io/daytona/api/client/model/SignedFileDownloadInfo.java
+src/main/java/io/daytona/api/client/model/SignedFileDownloadUrl.java
 src/main/java/io/daytona/api/client/model/SignedPortPreviewUrl.java
 src/main/java/io/daytona/api/client/model/SnapshotDto.java
 src/main/java/io/daytona/api/client/model/SnapshotManagerCredentials.java
@@ -387,6 +389,8 @@ src/test/java/io/daytona/api/client/model/SessionExecuteRequestTest.java
 src/test/java/io/daytona/api/client/model/SessionExecuteResponseTest.java
 src/test/java/io/daytona/api/client/model/SessionTest.java
 src/test/java/io/daytona/api/client/model/SetSnapshotGeneralStatusDtoTest.java
+src/test/java/io/daytona/api/client/model/SignedFileDownloadInfoTest.java
+src/test/java/io/daytona/api/client/model/SignedFileDownloadUrlTest.java
 src/test/java/io/daytona/api/client/model/SignedPortPreviewUrlTest.java
 src/test/java/io/daytona/api/client/model/SnapshotDtoTest.java
 src/test/java/io/daytona/api/client/model/SnapshotManagerCredentialsTest.java

@@ -15,6 +15,7 @@ package io.daytona.api.client.api;
 
 import io.daytona.api.client.ApiException;
 import java.math.BigDecimal;
+import io.daytona.api.client.model.SignedFileDownloadInfo;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -41,6 +42,18 @@ public class PreviewApiTest {
         String signedPreviewToken = null;
         BigDecimal port = null;
         String response = api.getSandboxIdFromSignedPreviewUrlToken(signedPreviewToken, port);
+        // TODO: test validations
+    }
+
+    /**
+     * Get sandbox info from signed file download token
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void getSandboxInfoFromSignedFileDownloadTokenTest() throws ApiException {
+        String signedFileDownloadToken = null;
+        SignedFileDownloadInfo response = api.getSandboxInfoFromSignedFileDownloadToken(signedFileDownloadToken);
         // TODO: test validations
     }
 

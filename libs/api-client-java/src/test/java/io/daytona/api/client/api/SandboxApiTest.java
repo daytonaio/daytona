@@ -29,6 +29,7 @@ import io.daytona.api.client.model.RegionQuota;
 import io.daytona.api.client.model.ResizeSandbox;
 import io.daytona.api.client.model.Sandbox;
 import io.daytona.api.client.model.SandboxLabels;
+import io.daytona.api.client.model.SignedFileDownloadUrl;
 import io.daytona.api.client.model.SignedPortPreviewUrl;
 import io.daytona.api.client.model.SshAccessDto;
 import io.daytona.api.client.model.SshAccessValidationDto;
@@ -129,6 +130,20 @@ public class SandboxApiTest {
         String sandboxIdOrName = null;
         String xDaytonaOrganizationID = null;
         Sandbox response = api.deleteSandbox(sandboxIdOrName, xDaytonaOrganizationID);
+        // TODO: test validations
+    }
+
+    /**
+     * Expire signed file download URL
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void expireSignedFileDownloadUrlTest() throws ApiException {
+        String sandboxIdOrName = null;
+        String token = null;
+        String xDaytonaOrganizationID = null;
+        api.expireSignedFileDownloadUrl(sandboxIdOrName, token, xDaytonaOrganizationID);
         // TODO: test validations
     }
 
@@ -369,6 +384,21 @@ public class SandboxApiTest {
         String states = null;
         Boolean skipReconcilingSandboxes = null;
         List<Sandbox> response = api.getSandboxesForRunner(xDaytonaOrganizationID, states, skipReconcilingSandboxes);
+        // TODO: test validations
+    }
+
+    /**
+     * Get signed file download URL
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void getSignedFileDownloadUrlTest() throws ApiException {
+        String sandboxIdOrName = null;
+        String path = null;
+        String xDaytonaOrganizationID = null;
+        Integer expiresInSeconds = null;
+        SignedFileDownloadUrl response = api.getSignedFileDownloadUrl(sandboxIdOrName, path, xDaytonaOrganizationID, expiresInSeconds);
         // TODO: test validations
     }
 

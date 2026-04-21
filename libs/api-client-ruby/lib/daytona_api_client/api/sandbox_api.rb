@@ -422,6 +422,74 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Expire signed file download URL
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param token [String] Token of the signed file download URL to expire
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [nil]
+    def expire_signed_file_download_url(sandbox_id_or_name, token, opts = {})
+      expire_signed_file_download_url_with_http_info(sandbox_id_or_name, token, opts)
+      nil
+    end
+
+    # Expire signed file download URL
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param token [String] Token of the signed file download URL to expire
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def expire_signed_file_download_url_with_http_info(sandbox_id_or_name, token, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.expire_signed_file_download_url ...'
+      end
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.expire_signed_file_download_url"
+      end
+      # verify the required parameter 'token' is set
+      if @api_client.config.client_side_validation && token.nil?
+        fail ArgumentError, "Missing the required parameter 'token' when calling SandboxApi.expire_signed_file_download_url"
+      end
+      # resource path
+      local_var_path = '/sandbox/{sandboxIdOrName}/files/signed-download-url/{token}/expire'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s)).sub('{' + 'token' + '}', CGI.escape(token.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.expire_signed_file_download_url",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#expire_signed_file_download_url\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Expire signed preview URL for a sandbox port
     # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param port [Integer] Port number to expire signed preview URL for
@@ -1555,6 +1623,80 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: SandboxApi#get_sandboxes_for_runner\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Get signed file download URL
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param path [String] File path to download from the sandbox
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [Integer] :expires_in_seconds Expiration time in seconds (default: 900 seconds)
+    # @return [SignedFileDownloadUrl]
+    def get_signed_file_download_url(sandbox_id_or_name, path, opts = {})
+      data, _status_code, _headers = get_signed_file_download_url_with_http_info(sandbox_id_or_name, path, opts)
+      data
+    end
+
+    # Get signed file download URL
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param path [String] File path to download from the sandbox
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [Integer] :expires_in_seconds Expiration time in seconds (default: 900 seconds)
+    # @return [Array<(SignedFileDownloadUrl, Integer, Hash)>] SignedFileDownloadUrl data, response status code and response headers
+    def get_signed_file_download_url_with_http_info(sandbox_id_or_name, path, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.get_signed_file_download_url ...'
+      end
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.get_signed_file_download_url"
+      end
+      # verify the required parameter 'path' is set
+      if @api_client.config.client_side_validation && path.nil?
+        fail ArgumentError, "Missing the required parameter 'path' when calling SandboxApi.get_signed_file_download_url"
+      end
+      # resource path
+      local_var_path = '/sandbox/{sandboxIdOrName}/files/signed-download-url'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+      query_params[:'path'] = path
+      query_params[:'expiresInSeconds'] = opts[:'expires_in_seconds'] if !opts[:'expires_in_seconds'].nil?
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'SignedFileDownloadUrl'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.get_signed_file_download_url",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#get_signed_file_download_url\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end

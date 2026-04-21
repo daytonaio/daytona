@@ -42,6 +42,7 @@ import io.daytona.api.client.model.RegionQuota;
 import io.daytona.api.client.model.ResizeSandbox;
 import io.daytona.api.client.model.Sandbox;
 import io.daytona.api.client.model.SandboxLabels;
+import io.daytona.api.client.model.SignedFileDownloadUrl;
 import io.daytona.api.client.model.SignedPortPreviewUrl;
 import io.daytona.api.client.model.SshAccessDto;
 import io.daytona.api.client.model.SshAccessValidationDto;
@@ -925,6 +926,147 @@ public class SandboxApi {
         okhttp3.Call localVarCall = deleteSandboxValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for expireSignedFileDownloadUrl
+     * @param sandboxIdOrName ID or name of the sandbox (required)
+     * @param token Token of the signed file download URL to expire (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Signed file download URL has been expired </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call expireSignedFileDownloadUrlCall(String sandboxIdOrName, String token, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/sandbox/{sandboxIdOrName}/files/signed-download-url/{token}/expire"
+            .replace("{" + "sandboxIdOrName" + "}", localVarApiClient.escapeString(sandboxIdOrName.toString()))
+            .replace("{" + "token" + "}", localVarApiClient.escapeString(token.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (xDaytonaOrganizationID != null) {
+            localVarHeaderParams.put("X-Daytona-Organization-ID", localVarApiClient.parameterToString(xDaytonaOrganizationID));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call expireSignedFileDownloadUrlValidateBeforeCall(String sandboxIdOrName, String token, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'sandboxIdOrName' is set
+        if (sandboxIdOrName == null) {
+            throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling expireSignedFileDownloadUrl(Async)");
+        }
+
+        // verify the required parameter 'token' is set
+        if (token == null) {
+            throw new ApiException("Missing the required parameter 'token' when calling expireSignedFileDownloadUrl(Async)");
+        }
+
+        return expireSignedFileDownloadUrlCall(sandboxIdOrName, token, xDaytonaOrganizationID, _callback);
+
+    }
+
+    /**
+     * Expire signed file download URL
+     * 
+     * @param sandboxIdOrName ID or name of the sandbox (required)
+     * @param token Token of the signed file download URL to expire (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Signed file download URL has been expired </td><td>  -  </td></tr>
+     </table>
+     */
+    public void expireSignedFileDownloadUrl(String sandboxIdOrName, String token, String xDaytonaOrganizationID) throws ApiException {
+        expireSignedFileDownloadUrlWithHttpInfo(sandboxIdOrName, token, xDaytonaOrganizationID);
+    }
+
+    /**
+     * Expire signed file download URL
+     * 
+     * @param sandboxIdOrName ID or name of the sandbox (required)
+     * @param token Token of the signed file download URL to expire (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Signed file download URL has been expired </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> expireSignedFileDownloadUrlWithHttpInfo(String sandboxIdOrName, String token, String xDaytonaOrganizationID) throws ApiException {
+        okhttp3.Call localVarCall = expireSignedFileDownloadUrlValidateBeforeCall(sandboxIdOrName, token, xDaytonaOrganizationID, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Expire signed file download URL (asynchronously)
+     * 
+     * @param sandboxIdOrName ID or name of the sandbox (required)
+     * @param token Token of the signed file download URL to expire (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Signed file download URL has been expired </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call expireSignedFileDownloadUrlAsync(String sandboxIdOrName, String token, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = expireSignedFileDownloadUrlValidateBeforeCall(sandboxIdOrName, token, xDaytonaOrganizationID, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
         return localVarCall;
     }
     /**
@@ -3313,6 +3455,163 @@ public class SandboxApi {
 
         okhttp3.Call localVarCall = getSandboxesForRunnerValidateBeforeCall(xDaytonaOrganizationID, states, skipReconcilingSandboxes, _callback);
         Type localVarReturnType = new TypeToken<List<Sandbox>>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for getSignedFileDownloadUrl
+     * @param sandboxIdOrName ID or name of the sandbox (required)
+     * @param path File path to download from the sandbox (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param expiresInSeconds Expiration time in seconds (default: 900 seconds) (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Signed file download URL </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getSignedFileDownloadUrlCall(String sandboxIdOrName, String path, String xDaytonaOrganizationID, Integer expiresInSeconds, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/sandbox/{sandboxIdOrName}/files/signed-download-url"
+            .replace("{" + "sandboxIdOrName" + "}", localVarApiClient.escapeString(sandboxIdOrName.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        if (path != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("path", path));
+        }
+
+        if (expiresInSeconds != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("expiresInSeconds", expiresInSeconds));
+        }
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (xDaytonaOrganizationID != null) {
+            localVarHeaderParams.put("X-Daytona-Organization-ID", localVarApiClient.parameterToString(xDaytonaOrganizationID));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call getSignedFileDownloadUrlValidateBeforeCall(String sandboxIdOrName, String path, String xDaytonaOrganizationID, Integer expiresInSeconds, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'sandboxIdOrName' is set
+        if (sandboxIdOrName == null) {
+            throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling getSignedFileDownloadUrl(Async)");
+        }
+
+        // verify the required parameter 'path' is set
+        if (path == null) {
+            throw new ApiException("Missing the required parameter 'path' when calling getSignedFileDownloadUrl(Async)");
+        }
+
+        return getSignedFileDownloadUrlCall(sandboxIdOrName, path, xDaytonaOrganizationID, expiresInSeconds, _callback);
+
+    }
+
+    /**
+     * Get signed file download URL
+     * 
+     * @param sandboxIdOrName ID or name of the sandbox (required)
+     * @param path File path to download from the sandbox (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param expiresInSeconds Expiration time in seconds (default: 900 seconds) (optional)
+     * @return SignedFileDownloadUrl
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Signed file download URL </td><td>  -  </td></tr>
+     </table>
+     */
+    public SignedFileDownloadUrl getSignedFileDownloadUrl(String sandboxIdOrName, String path, String xDaytonaOrganizationID, Integer expiresInSeconds) throws ApiException {
+        ApiResponse<SignedFileDownloadUrl> localVarResp = getSignedFileDownloadUrlWithHttpInfo(sandboxIdOrName, path, xDaytonaOrganizationID, expiresInSeconds);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Get signed file download URL
+     * 
+     * @param sandboxIdOrName ID or name of the sandbox (required)
+     * @param path File path to download from the sandbox (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param expiresInSeconds Expiration time in seconds (default: 900 seconds) (optional)
+     * @return ApiResponse&lt;SignedFileDownloadUrl&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Signed file download URL </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<SignedFileDownloadUrl> getSignedFileDownloadUrlWithHttpInfo(String sandboxIdOrName, String path, String xDaytonaOrganizationID, Integer expiresInSeconds) throws ApiException {
+        okhttp3.Call localVarCall = getSignedFileDownloadUrlValidateBeforeCall(sandboxIdOrName, path, xDaytonaOrganizationID, expiresInSeconds, null);
+        Type localVarReturnType = new TypeToken<SignedFileDownloadUrl>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Get signed file download URL (asynchronously)
+     * 
+     * @param sandboxIdOrName ID or name of the sandbox (required)
+     * @param path File path to download from the sandbox (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param expiresInSeconds Expiration time in seconds (default: 900 seconds) (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Signed file download URL </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getSignedFileDownloadUrlAsync(String sandboxIdOrName, String path, String xDaytonaOrganizationID, Integer expiresInSeconds, final ApiCallback<SignedFileDownloadUrl> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = getSignedFileDownloadUrlValidateBeforeCall(sandboxIdOrName, path, xDaytonaOrganizationID, expiresInSeconds, _callback);
+        Type localVarReturnType = new TypeToken<SignedFileDownloadUrl>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }
