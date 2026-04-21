@@ -4,7 +4,17 @@
  */
 
 import { Buffer } from 'buffer'
-import { memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+  type FocusEvent,
+  type KeyboardEvent,
+} from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -25,7 +35,7 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import { EllipsisIcon, RefreshCwIcon } from 'lucide-react'
 
 import { toast } from 'sonner'
-import { ROOT_NODE, ROOT_PATH } from './constants'
+import { FILE_SEARCH_MIN_CHARS, ROOT_NODE, ROOT_PATH } from './constants'
 import { FileSearchHeader, type FileSearchHeaderHandle } from './FileSearchHeader'
 import { FileTreeRow } from './FileTreeRow'
 import { useFileSystemStore } from './fileSystemStore'
@@ -59,7 +69,6 @@ export type FileTreePaneHandle = {
 
 const MemoizedFileSearchHeader = memo(FileSearchHeader)
 const FILE_TREE_EDGE_PADDING = 8
-const FILE_SEARCH_MIN_CHARS = 3
 const FILE_SEARCH_RESULT_LABEL_RESERVED_WIDTH = 40
 
 function FileTreeSkeleton() {
@@ -113,6 +122,7 @@ export function FileTreePane({
   const queryClient = useQueryClient()
   const [rootLoadFailed, setRootLoadFailed] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [isTreeFocusWithin, setIsTreeFocusWithin] = useState(false)
   const itemDataRef = useRef<Record<string, SandboxFileSystemNode>>({ [ROOT_PATH]: ROOT_NODE })
   const fileTreeScrollAreaRef = useRef<HTMLDivElement>(null)
   const searchHeaderRef = useRef<FileSearchHeaderHandle>(null)
@@ -388,6 +398,36 @@ export function FileTreePane({
     await refreshPath(ROOT_PATH)
   }, [refreshPath])
 
+  const handleTreeContainerFocus = useCallback(
+    (event: FocusEvent<HTMLDivElement>) => {
+      if (event.target !== event.currentTarget) {
+        return
+      }
+
+      if (searchEnabled) {
+        const firstSearchResultButton =
+          fileTreeScrollAreaRef.current?.querySelector<HTMLButtonElement>('[data-file-tree-row-button]')
+        firstSearchResultButton?.focus()
+        return
+      }
+
+      const focusedItem = tree.getItems().find((item) => item.isFocused()) ?? tree.getItems()[0]
+      focusedItem?.setFocused()
+      tree.updateDomFocus()
+    },
+    [searchEnabled, tree],
+  )
+
+  const handleTreeFocusCapture = useCallback(() => {
+    setIsTreeFocusWithin(true)
+  }, [])
+
+  const handleTreeBlurCapture = useCallback((event: FocusEvent<HTMLDivElement>) => {
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+      setIsTreeFocusWithin(false)
+    }
+  }, [])
+
   useImperativeHandle(
     ref,
     () => ({
@@ -517,157 +557,167 @@ export function FileTreePane({
           : null}
       </div>
 
-      <ScrollArea fade="mask" className="min-h-0 flex-1">
-        {isInitialTreeLoading || (searchEnabled && isSearchLoading && searchResults.length === 0) ? (
-          <FileTreeSkeleton />
-        ) : searchEnabled && searchResults.length === 0 && !isSearchLoading && !searchFailed ? (
-          <Empty className="border-0">
-            <EmptyHeader>
-              <EmptyTitle>0 results</EmptyTitle>
-              <EmptyDescription>No files matched "{searchQuery}". Try another search or clear search.</EmptyDescription>
-            </EmptyHeader>
-            <Button variant="outline" size="sm" onClick={resetSearch}>
-              Clear search
-            </Button>
-          </Empty>
-        ) : (
-          <div
-            {...(!searchEnabled ? tree.getContainerProps('Sandbox filesystem') : {})}
-            className={cn('relative min-h-full px-2 transition-opacity', {
-              'opacity-60': isTreeRefreshing,
-            })}
-            style={{ height: `${fileTreeVirtualizer.getTotalSize() + FILE_TREE_EDGE_PADDING * 2}px` }}
-          >
-            {fileTreeVirtualizer.getVirtualItems().map((virtualItem) => {
-              const item = searchEnabled ? null : visibleItems[virtualItem.index]
-              const node = searchEnabled
-                ? searchResults[virtualItem.index]
-                : (item?.getItemData() ?? itemDataRef.current[item?.getId() ?? ''] ?? ROOT_NODE)
+      <div
+        className="min-h-0 flex-1 focus-visible:outline-none"
+        tabIndex={isTreeFocusWithin ? -1 : 0}
+        onBlurCapture={handleTreeBlurCapture}
+        onFocus={handleTreeContainerFocus}
+        onFocusCapture={handleTreeFocusCapture}
+      >
+        <ScrollArea fade="mask" className="min-h-0 h-full">
+          {isInitialTreeLoading || (searchEnabled && isSearchLoading && searchResults.length === 0) ? (
+            <FileTreeSkeleton />
+          ) : searchEnabled && searchResults.length === 0 && !isSearchLoading && !searchFailed ? (
+            <Empty className="border-0">
+              <EmptyHeader>
+                <EmptyTitle>0 results</EmptyTitle>
+                <EmptyDescription>
+                  No files matched "{searchQuery}". Try another search or clear search.
+                </EmptyDescription>
+              </EmptyHeader>
+              <Button variant="outline" size="sm" onClick={resetSearch}>
+                Clear search
+              </Button>
+            </Empty>
+          ) : (
+            <div
+              {...(!searchEnabled ? tree.getContainerProps('Sandbox filesystem') : {})}
+              className={cn('relative min-h-full px-2 transition-opacity', {
+                'opacity-60': isTreeRefreshing,
+              })}
+              style={{ height: `${fileTreeVirtualizer.getTotalSize() + FILE_TREE_EDGE_PADDING * 2}px` }}
+            >
+              {fileTreeVirtualizer.getVirtualItems().map((virtualItem) => {
+                const item = searchEnabled ? null : visibleItems[virtualItem.index]
+                const node = searchEnabled
+                  ? searchResults[virtualItem.index]
+                  : (item?.getItemData() ?? itemDataRef.current[item?.getId() ?? ''] ?? ROOT_NODE)
 
-              if (!node) {
-                return null
-              }
+                if (!node) {
+                  return null
+                }
 
-              const isDirectory = searchEnabled ? node.isDir : (item?.isFolder() ?? node.isDir)
-              const isSelected = selectedPath === node.path
-              const isPreviewLoading = previewLoadingPath === node.path
-              const isFocused = searchEnabled ? false : (item?.isFocused() ?? false)
-              const isLoading = (item?.isLoading() ?? false) || isPreviewLoading
-              const itemButtonProps = !searchEnabled ? (item?.getProps() ?? {}) : {}
-              return (
-                <FileTreeRow
-                  key={searchEnabled ? node.path : item?.getId()}
-                  actions={
-                    !searchEnabled ? (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          asChild
-                          onClick={(event) => event.stopPropagation()}
-                          onPointerDown={(event) => event.stopPropagation()}
-                        >
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            tabIndex={isFocused || isSelected ? 0 : -1}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                const isDirectory = searchEnabled ? node.isDir : (item?.isFolder() ?? node.isDir)
+                const isSelected = selectedPath === node.path
+                const isPreviewLoading = previewLoadingPath === node.path
+                const isFocused = searchEnabled ? false : (item?.isFocused() ?? false)
+                const isLoading = (item?.isLoading() ?? false) || isPreviewLoading
+                const itemButtonProps = searchEnabled ? { tabIndex: -1 } : (item?.getProps() ?? {})
+                return (
+                  <FileTreeRow
+                    key={searchEnabled ? node.path : item?.getId()}
+                    actions={
+                      !searchEnabled ? (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            asChild
+                            onClick={(event) => event.stopPropagation()}
+                            onPointerDown={(event) => event.stopPropagation()}
                           >
-                            <EllipsisIcon className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          side="right"
-                          className={cn({
-                            'w-44': node.isDir,
-                            'w-48': !node.isDir,
-                          })}
-                          onCloseAutoFocus={(event) => event.preventDefault()}
-                        >
-                          <DropdownMenuItem
-                            onClick={() => refreshPath(node.isDir ? node.path : getParentPath(node.path))}
-                            disabled={
-                              item?.isLoading() || (!node.isDir && selectedPath === node.path && isPreviewLoading)
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              tabIndex={isFocused || isSelected ? 0 : -1}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                            >
+                              <EllipsisIcon className="size-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            side="right"
+                            className={cn({
+                              'w-44': node.isDir,
+                              'w-48': !node.isDir,
+                            })}
+                            onCloseAutoFocus={(event) => event.preventDefault()}
+                          >
+                            <DropdownMenuItem
+                              onClick={() => refreshPath(node.isDir ? node.path : getParentPath(node.path))}
+                              disabled={
+                                item?.isLoading() || (!node.isDir && selectedPath === node.path && isPreviewLoading)
+                              }
+                            >
+                              Refresh
+                            </DropdownMenuItem>
+                            {!node.isDir ? (
+                              <DropdownMenuItem onClick={() => handleDownloadNode(node)}>Download</DropdownMenuItem>
+                            ) : null}
+                            {!node.isDir && !getImageMimeType(node.path) ? (
+                              <DropdownMenuItem onClick={() => handleCopyNode(node)}>Copy contents</DropdownMenuItem>
+                            ) : null}
+                            {node.isDir ? (
+                              <DropdownMenuItem onSelect={() => onRequestCreateFolder(node.path)}>
+                                Create folder
+                              </DropdownMenuItem>
+                            ) : null}
+                            {node.path !== ROOT_PATH ? <DropdownMenuSeparator /> : null}
+                            {node.path !== ROOT_PATH ? (
+                              <DropdownMenuItem variant="destructive" onClick={() => onRequestDelete(node)}>
+                                Delete
+                              </DropdownMenuItem>
+                            ) : null}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      ) : undefined
+                    }
+                    buttonProps={itemButtonProps}
+                    depth={item?.getItemMeta().level ?? 0}
+                    isExpanded={item?.isExpanded() ?? false}
+                    isFocused={isFocused}
+                    isLoading={isLoading}
+                    isSearchResult={searchEnabled}
+                    isSelected={isSelected}
+                    node={node}
+                    onActivate={async (event) => {
+                      itemButtonProps.onClick?.(event)
+
+                      if (event.defaultPrevented) {
+                        return
+                      }
+
+                      if (!searchEnabled && item && node.isDir && !item.isExpanded()) {
+                        item.expand()
+                      }
+
+                      const resolvedNode = searchEnabled ? await resolveNode(node.path) : node
+                      if (sandboxInstance) {
+                        queryClient.setQueryData(
+                          fileSystemQueryKeys.details(sandboxInstance.id, resolvedNode.path),
+                          resolvedNode,
+                        )
+                      }
+                      openNode(resolvedNode.path)
+                    }}
+                    onItemKeyDown={!searchEnabled && item ? (event) => handleItemKeyDown(item, event) : undefined}
+                    onToggleExpand={
+                      !searchEnabled && isDirectory && item
+                        ? () => {
+                            if (item.isExpanded()) {
+                              item.collapse()
+                            } else {
+                              item.expand()
                             }
-                          >
-                            Refresh
-                          </DropdownMenuItem>
-                          {!node.isDir ? (
-                            <DropdownMenuItem onClick={() => handleDownloadNode(node)}>Download</DropdownMenuItem>
-                          ) : null}
-                          {!node.isDir && !getImageMimeType(node.path) ? (
-                            <DropdownMenuItem onClick={() => handleCopyNode(node)}>Copy contents</DropdownMenuItem>
-                          ) : null}
-                          {node.isDir ? (
-                            <DropdownMenuItem onSelect={() => onRequestCreateFolder(node.path)}>
-                              Create folder
-                            </DropdownMenuItem>
-                          ) : null}
-                          {node.path !== ROOT_PATH ? <DropdownMenuSeparator /> : null}
-                          {node.path !== ROOT_PATH ? (
-                            <DropdownMenuItem variant="destructive" onClick={() => onRequestDelete(node)}>
-                              Delete
-                            </DropdownMenuItem>
-                          ) : null}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    ) : undefined
-                  }
-                  buttonProps={itemButtonProps}
-                  depth={item?.getItemMeta().level ?? 0}
-                  isExpanded={item?.isExpanded() ?? false}
-                  isFocused={isFocused}
-                  isLoading={isLoading}
-                  isSearchResult={searchEnabled}
-                  isSelected={isSelected}
-                  node={node}
-                  onActivate={async (event) => {
-                    itemButtonProps.onClick?.(event)
-
-                    if (event.defaultPrevented) {
-                      return
-                    }
-
-                    if (!searchEnabled && item && node.isDir && !item.isExpanded()) {
-                      item.expand()
-                    }
-
-                    const resolvedNode = searchEnabled ? await resolveNode(node.path) : node
-                    if (sandboxInstance) {
-                      queryClient.setQueryData(
-                        fileSystemQueryKeys.details(sandboxInstance.id, resolvedNode.path),
-                        resolvedNode,
-                      )
-                    }
-                    openNode(resolvedNode.path)
-                  }}
-                  onItemKeyDown={!searchEnabled && item ? (event) => handleItemKeyDown(item, event) : undefined}
-                  onToggleExpand={
-                    !searchEnabled && isDirectory && item
-                      ? () => {
-                          if (item.isExpanded()) {
-                            item.collapse()
-                          } else {
-                            item.expand()
                           }
-                        }
-                      : undefined
-                  }
-                  searchLabel={
-                    searchEnabled
-                      ? {
-                          availableWidth: searchLabelAvailableWidth,
-                          font: searchLabelFont,
-                          query: searchQuery,
-                        }
-                      : undefined
-                  }
-                  top={virtualItem.start + FILE_TREE_EDGE_PADDING}
-                />
-              )
-            })}
-          </div>
-        )}
-      </ScrollArea>
+                        : undefined
+                    }
+                    searchLabel={
+                      searchEnabled
+                        ? {
+                            availableWidth: searchLabelAvailableWidth,
+                            font: searchLabelFont,
+                            query: searchQuery,
+                          }
+                        : undefined
+                    }
+                    top={virtualItem.start + FILE_TREE_EDGE_PADDING}
+                  />
+                )
+              })}
+            </div>
+          )}
+        </ScrollArea>
+      </div>
     </div>
   )
 }

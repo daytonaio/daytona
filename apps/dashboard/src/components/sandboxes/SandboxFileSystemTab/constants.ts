@@ -6,6 +6,7 @@
 import type { SandboxFileSystemNode } from './types'
 
 export const ROOT_PATH = '/'
+export const FILE_SEARCH_MIN_CHARS = 3
 
 export const ROOT_NODE: SandboxFileSystemNode = {
   group: 'root',

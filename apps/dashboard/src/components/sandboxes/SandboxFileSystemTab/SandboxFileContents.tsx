@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useIsFetching } from '@tanstack/react-query'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
@@ -37,12 +36,13 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/
 import { FileUpload, FileUploadDropzone } from '@/components/ui/file-upload'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Toggle } from '@/components/ui/toggle'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { cn } from '@/lib/utils'
 
 import { ROOT_PATH } from './constants'
 import { useFileSystemStore } from './fileSystemStore'
-import { fileSystemQueryKeys } from './queries'
+import { useIsDirectoryRefreshing, useIsFilePreviewRefreshing } from './queries'
 import { PathHeaderLabel } from './searchLabels'
 import type { PreviewKind, PreviewState, SandboxFileSystemNode, SandboxInstance } from './types'
 import { usePreviewState } from './usePreviewState'
@@ -168,13 +168,15 @@ function SandboxFileContentsBody({
     return (
       <Empty className="h-full min-h-[220px] rounded-md border border-dashed">
         <EmptyHeader>
-          <EmptyTitle>Failed to read file</EmptyTitle>
-          <EmptyDescription>Something went wrong while reading this file from the sandbox.</EmptyDescription>
+          <EmptyTitle>{previewState.title}</EmptyTitle>
+          <EmptyDescription>{previewState.description}</EmptyDescription>
         </EmptyHeader>
-        <Button variant="outline" size="sm" onClick={onRetry}>
-          <RefreshCwIcon className="size-4" />
-          Retry
-        </Button>
+        {previewState.canRetry ? (
+          <Button variant="outline" size="sm" onClick={onRetry}>
+            <RefreshCwIcon className="size-4" />
+            Retry
+          </Button>
+        ) : null}
       </Empty>
     )
   }
@@ -304,6 +306,7 @@ export function SandboxFileContents({
   preservePreviousPreview,
   sandboxInstance,
   selectedNode,
+  selectedNodeError,
   selectedNodePath,
 }: {
   onClose: () => void
@@ -317,33 +320,31 @@ export function SandboxFileContents({
   preservePreviousPreview: boolean
   sandboxInstance: SandboxInstance | undefined
   selectedNode: SandboxFileSystemNode | null
+  selectedNodeError?: unknown
   selectedNodePath: string | null
 }) {
   const nextFilePath = useFileSystemStore((state) => state.nextFilePath)
   const previousFilePath = useFileSystemStore((state) => state.previousFilePath)
-  const selectedDirectoryFetchCount = useIsFetching({
-    queryKey:
-      sandboxInstance && selectedNode?.isDir
-        ? fileSystemQueryKeys.directory(sandboxInstance.id, selectedNode.path)
-        : undefined,
+  const isSelectedDirectoryRefreshing = useIsDirectoryRefreshing({
+    path: selectedNode?.isDir ? selectedNode.path : null,
+    sandboxInstance,
   })
-  const selectedPreviewFetchCount = useIsFetching({
-    queryKey:
-      sandboxInstance && selectedNode && !selectedNode.isDir
-        ? fileSystemQueryKeys.preview(sandboxInstance.id, selectedNode.path)
-        : undefined,
+  const isSelectedFileRefreshing = useIsFilePreviewRefreshing({
+    path: selectedNode && !selectedNode.isDir ? selectedNode.path : null,
+    sandboxInstance,
   })
   const { previewQuery, previewState } = usePreviewState({
     preservePreviousPreview,
     sandboxInstance,
     selectedNode,
+    selectedNodeError,
     selectedNodePath,
   })
   const [copiedText, copyToClipboard] = useCopyToClipboard()
-  const isContentsRefreshing =
-    (Boolean(selectedNode?.isDir) && selectedDirectoryFetchCount > 0) ||
-    (Boolean(selectedNode && !selectedNode.isDir) && selectedPreviewFetchCount > 0)
+  const isContentsRefreshing = isSelectedDirectoryRefreshing || isSelectedFileRefreshing
   const nodePath = selectedNode?.path
+  const canCreateFolderInSelectedDirectory =
+    Boolean(selectedNode?.isDir) && !(previewState.status === 'error' && !previewState.canRetry)
   const selectedCodeLanguage = nodePath ? getCodeLanguage(nodePath) : null
   const headerText = selectedNode?.path ?? 'Contents'
   const [isWrapEnabled, setIsWrapEnabled] = useState(true)
@@ -391,15 +392,24 @@ export function SandboxFileContents({
         <span>{selectedNode ? getNodeMetaLine(selectedNode) : ''}</span>
         <div className="ml-auto flex items-center gap-1">
           {showWrapToggle ? (
-            <Toggle
-              size="sm"
-              variant="outline"
-              pressed={isWrapEnabled}
-              onPressedChange={setIsWrapEnabled}
-              aria-label="Toggle wrapped lines"
-            >
-              <TextWrapIcon className="size-4" />
-            </Toggle>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <span className="inline-flex">
+                  <Toggle
+                    size="sm"
+                    variant="outline"
+                    pressed={isWrapEnabled}
+                    onPressedChange={setIsWrapEnabled}
+                    aria-label="Toggle wrapped lines"
+                  >
+                    <TextWrapIcon className="size-4" />
+                  </Toggle>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <div>{isWrapEnabled ? 'Disable wrapped lines' : 'Enable wrapped lines'}</div>
+              </TooltipContent>
+            </Tooltip>
           ) : null}
           {selectedNode ? (
             <ButtonGroup>
@@ -458,7 +468,7 @@ export function SandboxFileContents({
                       Copy contents
                     </DropdownMenuItem>
                   ) : null}
-                  {selectedNode.isDir ? (
+                  {canCreateFolderInSelectedDirectory ? (
                     <DropdownMenuItem onSelect={() => onStartCreateFolder(selectedNode.path)}>
                       Create folder
                     </DropdownMenuItem>

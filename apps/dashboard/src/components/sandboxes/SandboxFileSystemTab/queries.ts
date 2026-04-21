@@ -4,7 +4,13 @@
  */
 
 import { Buffer } from 'buffer'
-import { keepPreviousData, useQuery, type QueryClient, type UseQueryOptions } from '@tanstack/react-query'
+import {
+  keepPreviousData,
+  useIsFetching,
+  useQuery,
+  type QueryClient,
+  type UseQueryOptions,
+} from '@tanstack/react-query'
 
 import type { PreviewKind, SandboxFileSystemNode, SandboxInstance } from './types'
 import { ROOT_NODE, ROOT_PATH } from './constants'
@@ -56,9 +62,11 @@ export function useSandboxInstanceQuery({
 }
 
 export function getDirectoryChildrenQueryOptions({
+  notifyOnError = false,
   path,
   sandboxInstance,
 }: {
+  notifyOnError?: boolean
   path: string
   sandboxInstance: SandboxInstance
 }) {
@@ -69,9 +77,11 @@ export function getDirectoryChildrenQueryOptions({
         const files = sortEntries(await sandboxInstance.fs.listFiles(path))
         return files.map((file) => toNode(path, file))
       } catch (error) {
-        handleFileSystemApiError(error, `Failed to list ${path}`, {
-          toastId: `filesystem-list-${sandboxInstance.id}-${path}`,
-        })
+        if (notifyOnError) {
+          handleFileSystemApiError(error, `Failed to list ${path}`, {
+            toastId: `filesystem-list-${sandboxInstance.id}-${path}`,
+          })
+        }
         throw error
       }
     },
@@ -95,9 +105,11 @@ export async function invalidateDirectoryQuery({
 }
 
 export function getFileDetailsQueryOptions({
+  notifyOnError = false,
   path,
   sandboxInstance,
 }: {
+  notifyOnError?: boolean
   path: string
   sandboxInstance: SandboxInstance
 }) {
@@ -116,9 +128,11 @@ export function getFileDetailsQueryOptions({
           path,
         }
       } catch (error) {
-        handleFileSystemApiError(error, `Failed to load details for ${path}`, {
-          toastId: `filesystem-details-${sandboxInstance.id}-${path}`,
-        })
+        if (notifyOnError) {
+          handleFileSystemApiError(error, `Failed to load details for ${path}`, {
+            toastId: `filesystem-details-${sandboxInstance.id}-${path}`,
+          })
+        }
         throw error
       }
     },
@@ -180,12 +194,28 @@ export function useFileDetailsQuery({
   })
 }
 
+export function useIsDirectoryRefreshing({
+  path,
+  sandboxInstance,
+}: {
+  path: string | null
+  sandboxInstance: SandboxInstance | undefined
+}) {
+  const fetchCount = useIsFetching({
+    queryKey: sandboxInstance && path ? fileSystemQueryKeys.directory(sandboxInstance.id, path) : undefined,
+  })
+
+  return fetchCount > 0
+}
+
 export function useFilePreviewQuery({
   enabled,
+  notifyOnError = false,
   path,
   sandboxInstance,
 }: {
   enabled: boolean
+  notifyOnError?: boolean
   path: string
   sandboxInstance: SandboxInstance | undefined
 }) {
@@ -216,9 +246,11 @@ export function useFilePreviewQuery({
           kind: 'text',
         }
       } catch (error) {
-        handleFileSystemApiError(error, `Failed to read ${path}`, {
-          toastId: `filesystem-preview-${sandboxInstance?.id ?? 'unknown'}-${path}`,
-        })
+        if (notifyOnError) {
+          handleFileSystemApiError(error, `Failed to read ${path}`, {
+            toastId: `filesystem-preview-${sandboxInstance?.id ?? 'unknown'}-${path}`,
+          })
+        }
         throw error
       }
     },
@@ -226,6 +258,20 @@ export function useFilePreviewQuery({
     placeholderData: keepPreviousData,
     staleTime: 0,
   })
+}
+
+export function useIsFilePreviewRefreshing({
+  path,
+  sandboxInstance,
+}: {
+  path: string | null
+  sandboxInstance: SandboxInstance | undefined
+}) {
+  const fetchCount = useIsFetching({
+    queryKey: sandboxInstance && path ? fileSystemQueryKeys.preview(sandboxInstance.id, path) : undefined,
+  })
+
+  return fetchCount > 0
 }
 
 export function useFileSearchQuery({

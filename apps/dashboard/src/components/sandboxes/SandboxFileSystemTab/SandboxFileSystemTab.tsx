@@ -10,7 +10,7 @@ import { handleApiError } from '@/lib/error-handling'
 import { cn } from '@/lib/utils'
 import { isStoppable } from '@/lib/utils/sandbox'
 import { Sandbox } from '@daytona/api-client'
-import { useIsFetching, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { HardDriveIcon } from 'lucide-react'
 import { memo, startTransition, useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -20,7 +20,7 @@ import { DeleteNodeDialog, type DeleteNodeDialogHandle } from './DeleteNodeDialo
 import { FileSystemStoreProvider, useFileSystemStore } from './fileSystemStore'
 import { FileTreePane, type FileTreePaneHandle } from './FileTreePane'
 import { useCreateFolderMutation, useDeleteNodeMutation, useUploadFilesMutation } from './mutations'
-import { fileSystemQueryKeys, invalidateFileDetailsQuery, invalidateFilePreviewQuery } from './queries'
+import { invalidateFileDetailsQuery, invalidateFilePreviewQuery, useIsFilePreviewRefreshing } from './queries'
 import { SandboxFileContents } from './SandboxFileContents'
 import type { SandboxFileSystemNode } from './types'
 import { useSandboxInstance } from './useSandboxInstance'
@@ -52,18 +52,15 @@ function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
 
   const sandboxInstanceQuery = useSandboxInstance(sandbox.id)
   const sandboxInstance = sandboxInstanceQuery.data
-  const { selectedNode, selectedNodePath } = useSelectedNode({ sandboxInstance })
-  const selectedPreviewFetchCount = useIsFetching({
-    queryKey:
-      sandboxInstance && selectedNode && !selectedNode.isDir
-        ? fileSystemQueryKeys.preview(sandboxInstance.id, selectedNode.path)
-        : undefined,
+  const { selectedNode, selectedNodePath, selectedNodeQuery } = useSelectedNode({ sandboxInstance })
+  const isSelectedFileRefreshing = useIsFilePreviewRefreshing({
+    path: selectedNode && !selectedNode.isDir ? selectedNode.path : null,
+    sandboxInstance,
   })
 
   const createFolderMutation = useCreateFolderMutation({ sandboxInstance })
   const deleteNodeMutation = useDeleteNodeMutation({ sandboxInstance })
   const uploadFilesMutation = useUploadFilesMutation({ sandboxInstance })
-  const isSelectedFileRefreshing = Boolean(selectedNode && !selectedNode.isDir && selectedPreviewFetchCount > 0)
 
   const handleDownloadNode = useCallback(
     async (node: SandboxFileSystemNode) => {
@@ -166,6 +163,7 @@ function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
 
       try {
         await deleteNodeMutation.mutateAsync(node)
+        await fileTreePaneRef.current?.refreshPath(parentPath)
 
         if (selectedNode?.path === node.path) {
           openNode((fileTreePaneRef.current?.getNode(parentPath) ?? createFallbackNode(parentPath)).path)
@@ -308,6 +306,7 @@ function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
       preservePreviousPreview={!isContentsOverlayMode}
       sandboxInstance={sandboxInstance}
       selectedNode={selectedNode}
+      selectedNodeError={selectedNodeQuery.error}
       selectedNodePath={selectedNodePath}
     />
   )

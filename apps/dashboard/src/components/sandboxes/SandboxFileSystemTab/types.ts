@@ -24,7 +24,7 @@ export type SandboxFileSystemNode = {
 
 export type PreviewState =
   | { status: 'directory' }
-  | { status: 'error'; path: string }
+  | { status: 'error'; path: string; title: string; description: string; canRetry?: boolean }
   | { status: 'idle' }
   | {
       status: 'loading'

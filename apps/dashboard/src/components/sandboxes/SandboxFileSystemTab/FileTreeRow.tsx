@@ -107,6 +107,7 @@ export function FileTreeRow({
             <button
               type="button"
               aria-label={isExpanded ? `Collapse ${node.name || node.path}` : `Expand ${node.name || node.path}`}
+              tabIndex={-1}
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted/80 hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border"
               onClick={(event) => {
                 event.preventDefault()
@@ -125,6 +126,7 @@ export function FileTreeRow({
           <button
             type="button"
             {...buttonProps}
+            data-file-tree-row-button
             onClick={onActivate}
             onKeyDown={onItemKeyDown}
             className="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-1 text-left focus-visible:outline-none"

@@ -4,11 +4,12 @@
  */
 
 import { RefreshCwIcon, SearchIcon, XIcon } from 'lucide-react'
-import { Ref, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { Ref, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
 import TooltipButton from '@/components/TooltipButton'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/components/ui/input-group'
 import { cn } from '@/lib/utils'
+import { FILE_SEARCH_MIN_CHARS } from './constants'
 
 export type FileSearchHeaderHandle = {
   clear: () => void
@@ -28,17 +29,24 @@ export function FileSearchHeader({
   const inputRef = useRef<HTMLInputElement>(null)
   const [inputValue, setInputValue] = useState('')
   const [isOpen, setIsOpen] = useState(false)
+  const isSearchActive = inputValue.trim().length >= FILE_SEARCH_MIN_CHARS
+
+  const clearSearch = useCallback(() => {
+    setInputValue('')
+    onSearchQueryChange('')
+  }, [onSearchQueryChange])
+
+  const closeSearch = useCallback(() => {
+    setIsOpen(false)
+    clearSearch()
+  }, [clearSearch])
 
   useImperativeHandle(
     ref,
     () => ({
-      clear: () => {
-        setInputValue('')
-        setIsOpen(false)
-        onSearchQueryChange('')
-      },
+      clear: clearSearch,
     }),
-    [onSearchQueryChange],
+    [clearSearch],
   )
 
   useEffect(() => {
@@ -64,9 +72,11 @@ export function FileSearchHeader({
   return (
     <div className="relative h-11 shrink-0 overflow-hidden border-b border-border">
       <div
+        aria-hidden={isOpen}
+        inert={isOpen}
         className={cn('absolute inset-0 flex items-center gap-2 px-3 transition-all duration-200', {
-          'pointer-events-auto z-10 translate-x-0 opacity-100': !isOpen,
-          'pointer-events-none z-0 -translate-x-6 opacity-0': isOpen,
+          'z-10 translate-x-0 opacity-100': !isOpen,
+          'z-0 -translate-x-6 opacity-0': isOpen,
         })}
       >
         <span className="text-sm font-medium">Files</span>
@@ -90,9 +100,11 @@ export function FileSearchHeader({
       </div>
 
       <div
+        aria-hidden={!isOpen}
+        inert={!isOpen}
         className={cn('absolute inset-0 flex items-center gap-2 px-2 transition-all duration-200', {
-          'pointer-events-auto z-10 translate-x-0 opacity-100': isOpen,
-          'pointer-events-none z-0 translate-x-6 opacity-0': !isOpen,
+          'z-10 translate-x-0 opacity-100': isOpen,
+          'z-0 translate-x-6 opacity-0': !isOpen,
         })}
       >
         <InputGroup className="h-8 min-w-0 flex-1 overflow-hidden border-0 bg-transparent shadow-none has-[[data-slot=input-group-control]:focus-visible]:border-transparent has-[[data-slot=input-group-control]:focus-visible]:ring-0">
@@ -113,11 +125,10 @@ export function FileSearchHeader({
               <span className="shrink-0">
                 <button
                   type="button"
-                  className="shrink-0 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none"
-                  onClick={() => {
-                    setInputValue('')
-                    onSearchQueryChange('')
-                  }}
+                  className="shrink-0 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none"
+                  disabled={!isSearchActive}
+                  tabIndex={isSearchActive ? 0 : -1}
+                  onClick={clearSearch}
                 >
                   Clear
                 </button>
@@ -129,11 +140,7 @@ export function FileSearchHeader({
           tooltipText="Close search"
           variant="ghost"
           size="icon-sm"
-          onClick={() => {
-            setIsOpen(false)
-            setInputValue('')
-            onSearchQueryChange('')
-          }}
+          onClick={closeSearch}
           className="shrink-0"
         >
           <XIcon className="size-4" />

@@ -13,18 +13,18 @@ import { toast } from 'sonner'
 import { ROOT_NODE, ROOT_PATH } from './constants'
 import type { SandboxFileSystemNode, SandboxInstance } from './types'
 
-type FileSystemError = {
+export type FileSystemError = {
   errorCode?: string
   message?: string
   path?: string
   statusCode?: number
 }
 
-function getFileSystemError(error: unknown): FileSystemError | null {
+export function getFileSystemError(error: unknown): FileSystemError | null {
   return error && typeof error === 'object' ? (error as FileSystemError) : null
 }
 
-function isFileReadFailedError(error: unknown) {
+export function isFileReadFailedError(error: unknown) {
   return getFileSystemError(error)?.errorCode === 'FILE_READ_FAILED'
 }
 
