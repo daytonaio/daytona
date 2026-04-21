@@ -44,6 +44,7 @@ const TERMINAL_PORT = "22222"
 const TOOLBOX_PORT = "2280"
 const RECORDING_DASHBOARD_PORT = "33333"
 const IS_TOOLBOX_REQUEST_KEY = "is-toolbox-request"
+const SIGNED_FILE_DOWNLOAD_PATH_KEY = "signed-file-download-path"
 
 // stopActivityPoll retrieves and calls the activity poll stop function from the gin context.
 // This ensures the polling goroutine is stopped when the request (including WebSocket) finishes.

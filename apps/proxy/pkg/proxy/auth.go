@@ -84,6 +84,18 @@ func (p *Proxy) Authenticate(ctx *gin.Context, sandboxIdOrSignedToken string, po
 			authErrors = append(authErrors, err.Error())
 		}
 
+		// Try signed file download token (fdl-prefixed tokens only, no OAuth fallback)
+		// fdl prefix cannot collide with UUID sandbox IDs (UUIDs are 36-char hex with hyphens)
+		if strings.HasPrefix(sandboxIdOrSignedToken, "fdl") {
+			sandboxId, filePath, fileErr := p.getFileDownloadInfo(ctx, sandboxIdOrSignedToken)
+			if fileErr == nil {
+				ctx.Set(SIGNED_FILE_DOWNLOAD_PATH_KEY, filePath)
+				return sandboxId, false, nil
+			}
+			// fdl tokens must never fall through to OAuth redirect — return 401 immediately
+			return "", false, common_errors.NewUnauthorizedError(fmt.Errorf("invalid or expired file download token"))
+		}
+
 		// All authentication methods failed, redirect to auth URL
 		authUrl, err := p.getAuthUrl(ctx, sandboxIdOrSignedToken)
 		if err != nil {
@@ -110,6 +122,25 @@ func (p *Proxy) getBearerToken(ctx *gin.Context) string {
 		return strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
 	}
 	return ""
+}
+
+func (p *Proxy) getFileDownloadInfo(ctx *gin.Context, token string) (sandboxId string, filePath string, err error) {
+	err = utils.RetryWithExponentialBackoff(ctx.Request.Context(), "getFileDownloadInfo", proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
+		info, _, e := p.apiclient.PreviewAPI.GetSandboxInfoFromSignedFileDownloadToken(ctx.Request.Context(), token).Execute()
+		openapiErr := common_errors.ConvertOpenAPIError(e)
+
+		if openapiErr != nil && !common_errors.IsRetryableOpenAPIError(openapiErr) {
+			return &utils.NonRetryableError{Err: openapiErr}
+		}
+
+		if openapiErr == nil && info != nil {
+			sandboxId = info.SandboxId
+			filePath = info.Path
+		}
+
+		return openapiErr
+	})
+	return sandboxId, filePath, err
 }
 
 func (p *Proxy) getSandboxIdFromSignedPreviewUrlToken(ctx *gin.Context, sandboxIdOrSignedToken string, port float32, cookieDomain string) (string, error) {

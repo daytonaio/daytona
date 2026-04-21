@@ -95,6 +95,13 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 		})
 	}
 
+	// Signed file download: override path and query string to prevent tampering
+	if signedFilePath, exists := ctx.Get(SIGNED_FILE_DOWNLOAD_PATH_KEY); exists {
+		targetPath = "/files/download"
+		// Override query string entirely — user-supplied params are NOT forwarded
+		ctx.Request.URL.RawQuery = "path=" + url.QueryEscape(signedFilePath.(string))
+	}
+
 	// Build the target URL
 	targetURL := fmt.Sprintf("%s/sandboxes/%s/toolbox/proxy/%s", runnerInfo.ApiUrl, sandboxId, targetPort)
 	if ctx.GetBool(IS_TOOLBOX_REQUEST_KEY) {
