@@ -588,6 +588,15 @@ step_firewall() {
 }
 
 step_caddy_install() {
+    # Skip re-download when the Caddy binary on disk already has the requested DNS provider.
+    # Makes re-runs resilient to caddyserver.com build-API outages and supports Caddy binaries
+    # built locally via xcaddy. When the selected DNS provider differs from what's compiled in,
+    # fall through below and overwrite the binary with a fresh build containing the new module.
+    local requested_module="${DNS_CADDY_MODULE##*/}"
+    if [ -x "$CADDY_BIN" ] && "$CADDY_BIN" list-modules 2>/dev/null | grep -qF "dns.providers.${requested_module}"; then
+        return 0
+    fi
+
     if [ "$OS" = "macos" ]; then
         launchctl bootout "gui/$(id -u)/com.caddyserver.caddy" 2>/dev/null || true
     else
@@ -596,10 +605,10 @@ step_caddy_install() {
     local url="https://caddyserver.com/api/download?os=${CADDY_OS}&arch=${ARCH}&p=${DNS_CADDY_MODULE}"
     if [ "$OS" = "macos" ]; then
         sudo mkdir -p "$(dirname "$CADDY_BIN")"
-        sudo curl -fsSL "$url" -o "$CADDY_BIN"
+        sudo curl -fsSL --max-time 600 "$url" -o "$CADDY_BIN"
         sudo chmod +x "$CADDY_BIN"
     else
-        curl -fsSL "$url" -o "$CADDY_BIN"
+        curl -fsSL --max-time 600 "$url" -o "$CADDY_BIN"
         chmod +x "$CADDY_BIN"
     fi
 }
