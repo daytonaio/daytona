@@ -10,7 +10,7 @@
 
 import { Daytona, type Sandbox } from '@daytona/sdk'
 import { logger } from './logger'
-import type { SessionSandboxMap, SandboxInfo } from './types'
+import type { SessionSandboxMap, SandboxCreationParams, SandboxInfo } from './types'
 import { SessionGitManager } from '../git/session-git-manager'
 import { DaytonaSandboxGitManager } from '../git/sandbox-git-manager'
 import { ProjectDataStorage } from './project-data-storage'
@@ -23,11 +23,13 @@ export class DaytonaSessionManager {
   private sessionSandboxes: SessionSandboxMap
   private currentProjectId?: string
   public readonly repoPath: string
+  private readonly sandboxCreationParams?: SandboxCreationParams
 
-  constructor(apiKey: string, storageDir: string, repoPath: string) {
+  constructor(apiKey: string, storageDir: string, repoPath: string, sandboxCreationParams?: SandboxCreationParams) {
     this.apiKey = apiKey
     this.dataStorage = new ProjectDataStorage(storageDir)
     this.repoPath = repoPath
+    this.sandboxCreationParams = sandboxCreationParams
     this.sessionSandboxes = new Map()
   }
 
@@ -170,7 +172,12 @@ export class DaytonaSessionManager {
     const waitingLog = setTimeout(() => {
       logger.warn(`Daytona create still waiting after ${Date.now() - createStart}ms (sessionId=${sessionId})`)
     }, 15_000)
-    const sandbox = await daytona.create().finally(() => clearTimeout(waitingLog))
+    const createPromise = this.sandboxCreationParams
+      ? 'image' in this.sandboxCreationParams
+        ? daytona.create({ image: this.sandboxCreationParams.image })
+        : daytona.create({ snapshot: this.sandboxCreationParams.snapshot })
+      : daytona.create()
+    const sandbox = await createPromise.finally(() => clearTimeout(waitingLog))
     logger.info(`Daytona create done sessionId=${sessionId} sandboxId=${sandbox.id} in ${Date.now() - createStart}ms`)
     this.sessionSandboxes.set(sessionId, sandbox)
 
