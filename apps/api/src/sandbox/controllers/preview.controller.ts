@@ -5,6 +5,7 @@
 
 import Redis from 'ioredis'
 import { Controller, Get, Param, Logger, NotFoundException, Req, UseGuards } from '@nestjs/common'
+import { SignedFileDownloadInfoDto } from '../dto/signed-file-download-url.dto'
 import { SandboxService } from '../services/sandbox.service'
 import { ApiResponse, ApiOperation, ApiParam, ApiTags, ApiOAuth2, ApiBearerAuth } from '@nestjs/swagger'
 import { InjectRedis } from '@nestjs-modules/ioredis'
@@ -186,5 +187,28 @@ export class PreviewController {
     @Param('port') port: number,
   ): Promise<string> {
     return this.sandboxService.getSandboxIdFromSignedPreviewUrlToken(signedPreviewToken, port)
+  }
+
+  @Get('file-download/:signedFileDownloadToken/sandbox-info')
+  @ApiOperation({
+    summary: 'Get sandbox info from signed file download token',
+    operationId: 'getSandboxInfoFromSignedFileDownloadToken',
+  })
+  @ApiParam({
+    name: 'signedFileDownloadToken',
+    description: 'Signed file download URL token',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Sandbox ID and file path from signed file download token',
+    type: SignedFileDownloadInfoDto,
+  })
+  @AuthStrategy(AuthStrategyType.API_KEY)
+  @UseGuards(ProxyAuthContextGuard)
+  async getSandboxInfoFromSignedFileDownloadToken(
+    @Param('signedFileDownloadToken') signedFileDownloadToken: string,
+  ): Promise<SignedFileDownloadInfoDto> {
+    return this.sandboxService.getSandboxInfoFromSignedFileDownloadToken(signedFileDownloadToken)
   }
 }

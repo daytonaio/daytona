@@ -59,6 +59,7 @@ import { RequiredOrganizationResourcePermissions } from '../../organization/deco
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationAuthContextGuard } from '../../organization/guards/organization-auth-context.guard'
 import { PortPreviewUrlDto, SignedPortPreviewUrlDto } from '../dto/port-preview-url.dto'
+import { SignedFileDownloadUrlDto } from '../dto/signed-file-download-url.dto'
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
@@ -1205,6 +1206,76 @@ export class SandboxController {
     @Param('token') token: string,
   ): Promise<void> {
     await this.sandboxService.expireSignedPreviewUrlToken(sandboxIdOrName, authContext.organizationId, token, port)
+  }
+
+  @Get(':sandboxIdOrName/files/signed-download-url')
+  @ApiOperation({
+    summary: 'Get signed file download URL',
+    operationId: 'getSignedFileDownloadUrl',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiQuery({
+    name: 'path',
+    required: true,
+    type: 'string',
+    description: 'File path to download from the sandbox',
+  })
+  @ApiQuery({
+    name: 'expiresInSeconds',
+    required: false,
+    type: 'integer',
+    description: 'Expiration time in seconds (default: 900 seconds)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Signed file download URL',
+    type: SignedFileDownloadUrlDto,
+  })
+  @UseGuards(OrganizationAuthContextGuard, SandboxAccessGuard)
+  async getSignedFileDownloadUrl(
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Query('path') path: string,
+    @Query('expiresInSeconds') expiresInSeconds?: number,
+  ): Promise<SignedFileDownloadUrlDto> {
+    return this.sandboxService.getSignedFileDownloadUrl(
+      sandboxIdOrName,
+      authContext.organizationId,
+      path,
+      expiresInSeconds,
+    )
+  }
+
+  @Post(':sandboxIdOrName/files/signed-download-url/:token/expire')
+  @ApiOperation({
+    summary: 'Expire signed file download URL',
+    operationId: 'expireSignedFileDownloadUrl',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiParam({
+    name: 'token',
+    description: 'Token of the signed file download URL to expire',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Signed file download URL has been expired',
+  })
+  @UseGuards(OrganizationAuthContextGuard, SandboxAccessGuard)
+  async expireSignedFileDownloadUrl(
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Param('token') token: string,
+  ): Promise<void> {
+    return this.sandboxService.expireSignedFileDownloadToken(sandboxIdOrName, authContext.organizationId, token)
   }
 
   @Get(':sandboxIdOrName/build-logs')

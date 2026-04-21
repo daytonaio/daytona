@@ -491,4 +491,30 @@ describe('[AUTH] SandboxController', () => {
     expect(getRequiredOrganizationMemberRole(SandboxController, methodName)).toBeUndefined()
     expect(getRequiredOrganizationResourcePermissions(SandboxController, methodName)).toBeUndefined()
   })
+
+  it('getSignedFileDownloadUrl', () => {
+    const methodName = trackMethod('getSignedFileDownloadUrl')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
+    expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
+      AuthStrategyType.API_KEY,
+      AuthStrategyType.JWT,
+    ])
+    expectArrayMatch(getAuthContextGuards(SandboxController, methodName), [OrganizationAuthContextGuard])
+    expectArrayMatch(getResourceAccessGuards(SandboxController, methodName), [SandboxAccessGuard])
+    expect(getRequiredOrganizationMemberRole(SandboxController, methodName)).toBeUndefined()
+    expect(getRequiredOrganizationResourcePermissions(SandboxController, methodName)).toBeUndefined()
+  })
+
+  it('expireSignedFileDownloadUrl', () => {
+    const methodName = trackMethod('expireSignedFileDownloadUrl')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
+    expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
+      AuthStrategyType.API_KEY,
+      AuthStrategyType.JWT,
+    ])
+    expectArrayMatch(getAuthContextGuards(SandboxController, methodName), [OrganizationAuthContextGuard])
+    expectArrayMatch(getResourceAccessGuards(SandboxController, methodName), [SandboxAccessGuard])
+    expect(getRequiredOrganizationMemberRole(SandboxController, methodName)).toBeUndefined()
+    expect(getRequiredOrganizationResourcePermissions(SandboxController, methodName)).toBeUndefined()
+  })
 })

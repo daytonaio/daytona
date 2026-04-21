@@ -77,12 +77,14 @@ import {
 } from '../../common/constants/error-messages'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { customAlphabet as customNanoid, nanoid, urlAlphabet } from 'nanoid'
+import axios from 'axios'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { validateMountPaths, validateSubpaths } from '../utils/volume-mount-path-validation.util'
 import { isEphemeral } from '../utils/ephemeral.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { PortPreviewUrlDto, SignedPortPreviewUrlDto } from '../dto/port-preview-url.dto'
+import { SignedFileDownloadUrlDto, SignedFileDownloadInfoDto } from '../dto/signed-file-download-url.dto'
 import { RegionService } from '../../region/services/region.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
 import { SnapshotService } from './snapshot.service'
@@ -1570,6 +1572,110 @@ export class SandboxService {
 
     const lockKey = `sandbox:signed-preview-url-token:${port}:${token}`
     await this.redis.del(lockKey)
+  }
+
+  async getSignedFileDownloadUrl(
+    sandboxIdOrName: string,
+    organizationId: string,
+    path: string,
+    expiresInSeconds = 900,
+  ): Promise<SignedFileDownloadUrlDto> {
+    if (!path || path.trim() === '') {
+      throw new BadRequestError('path is required')
+    }
+
+    if (expiresInSeconds < 1 || expiresInSeconds > 60 * 60 * 24) {
+      throw new BadRequestError('expiresInSeconds must be between 1 second and 24 hours')
+    }
+
+    const proxyDomain = this.configService.getOrThrow('proxy.domain')
+    const proxyProtocol = this.configService.getOrThrow('proxy.protocol')
+
+    const where: FindOptionsWhere<Sandbox> = {
+      organizationId: organizationId,
+      state: Not(SandboxState.DESTROYED),
+    }
+
+    const sandbox = await this.sandboxRepository.findOne({
+      where: [
+        { id: sandboxIdOrName, ...where },
+        { name: sandboxIdOrName, ...where },
+      ],
+      cache: {
+        id: `sandbox:${sandboxIdOrName}:organization:${organizationId}`,
+        milliseconds: 1000,
+      },
+    })
+
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
+    }
+
+    if (sandbox.state !== SandboxState.STARTED) {
+      throw new HttpException('Sandbox must be started to generate a file download URL', HttpStatus.CONFLICT)
+    }
+
+    if (!sandbox.runnerId) {
+      throw new NotFoundException(`Sandbox with ID ${sandbox.id} does not have a runner`)
+    }
+    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
+    if (!runner.proxyUrl) {
+      throw new NotFoundException(`Runner for sandbox ${sandbox.id} has no proxy URL`)
+    }
+
+    try {
+      await axios.get(`${runner.proxyUrl}/sandboxes/${sandbox.id}/toolbox/proxy/2280/files/info`, {
+        params: { path },
+        headers: { 'X-Daytona-Authorization': `Bearer ${runner.apiKey}` },
+        timeout: 10000,
+      })
+    } catch (error) {
+      if (error.response?.status === 404) {
+        throw new NotFoundException(`File not found: ${path}`)
+      }
+      throw new BadRequestError(`Failed to verify file exists: ${error.message}`)
+    }
+
+    // Generate fdl-prefixed token (16 chars total, no _ or - so it is safe in a DNS subdomain label)
+    const token = 'fdl' + customNanoid(urlAlphabet.replace('_', '').replace('-', ''))(13).toLocaleLowerCase()
+
+    const redisKey = `sandbox:signed-file-download-token:${token}`
+    await this.redis.setex(redisKey, expiresInSeconds, JSON.stringify({ sandboxId: sandbox.id, path }))
+
+    // TODO: Add rate-limiting for signed file download URL creation
+    let url = `${proxyProtocol}://2280-${token}.${proxyDomain}/files/download`
+
+    const region = await this.regionService.findOne(sandbox.region, true)
+    if (region && region.proxyUrl) {
+      url = region.proxyUrl.replace(/(https?:\/)(\/)/, `$1/2280-${token}.`)
+      url = url.replace(/\/?$/, '/files/download')
+    }
+
+    return {
+      sandboxId: sandbox.id,
+      path,
+      token,
+      url,
+      expiresAt: new Date(Date.now() + expiresInSeconds * 1000).toISOString(),
+    }
+  }
+
+  async getSandboxInfoFromSignedFileDownloadToken(token: string): Promise<SignedFileDownloadInfoDto> {
+    const redisKey = `sandbox:signed-file-download-token:${token}`
+    const raw = await this.redis.get(redisKey)
+    if (!raw) {
+      throw new ForbiddenException('Invalid or expired token')
+    }
+    return JSON.parse(raw) as SignedFileDownloadInfoDto
+  }
+
+  async expireSignedFileDownloadToken(sandboxIdOrName: string, organizationId: string, token: string): Promise<void> {
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
+    }
+    const redisKey = `sandbox:signed-file-download-token:${token}`
+    await this.redis.del(redisKey)
   }
 
   async destroy(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
