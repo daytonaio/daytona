@@ -3,9 +3,17 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { Buffer } from 'buffer'
 import { memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -14,28 +22,12 @@ import { asyncDataLoaderFeature } from '@headless-tree/core'
 import { useTree } from '@headless-tree/react'
 import { useIsFetching, useQueryClient } from '@tanstack/react-query'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import {
-  ChevronDownIcon,
-  ChevronRightIcon,
-  FileTextIcon,
-  FolderIcon,
-  FolderOpenIcon,
-  RefreshCwIcon,
-} from 'lucide-react'
+import { EllipsisIcon, RefreshCwIcon } from 'lucide-react'
 
-import {
-  FILE_SEARCH_MIN_CHARS,
-  FILE_SEARCH_RESULT_LABEL_RESERVED_WIDTH,
-  FILE_TREE_BASE_PADDING,
-  FILE_TREE_EDGE_PADDING,
-  FILE_TREE_INDENT,
-  FILE_TREE_ROW_PADDING_X,
-  FILE_TREE_TOGGLE_CENTER,
-  ROOT_NODE,
-  ROOT_PATH,
-} from './constants'
-import { FileNodeActions } from './FileNodeActions'
-import { FileSearchHeader } from './FileSearchHeader'
+import { toast } from 'sonner'
+import { ROOT_NODE, ROOT_PATH } from './constants'
+import { FileSearchHeader, type FileSearchHeaderHandle } from './FileSearchHeader'
+import { FileTreeRow } from './FileTreeRow'
 import { useFileSystemStore } from './fileSystemStore'
 import {
   fileSystemQueryKeys,
@@ -43,28 +35,32 @@ import {
   invalidateDirectoryQuery,
   useFileSearchQuery,
 } from './queries'
-import { SearchResultLabel } from './searchLabels'
-import type { PreviewState, SandboxFileSystemNode, SandboxInstance } from './types'
+import type { SandboxFileSystemNode } from './types'
+import { useSandboxInstance } from './useSandboxInstance'
 import {
   createFallbackNode,
-  formatBytes,
+  downloadSandboxFile,
   getAncestorPaths,
   getCanvasFont,
   getImageMimeType,
   getParentPath,
+  handleFileSystemApiError,
+  isProbablyBinary,
   toNode,
 } from './utils'
 
 export type FileTreePaneHandle = {
   expandPathAncestors: (path: string) => Promise<void>
-  getAdjacentFileNode: (currentPath: string, direction: -1 | 1) => SandboxFileSystemNode | null
   getNode: (path: string) => SandboxFileSystemNode
   refreshPath: (path: string) => Promise<void>
+  revealPath: (path: string) => void
   restoreFocus: (path: string) => void
 }
 
-const MemoizedSearchResultLabel = memo(SearchResultLabel)
 const MemoizedFileSearchHeader = memo(FileSearchHeader)
+const FILE_TREE_EDGE_PADDING = 8
+const FILE_SEARCH_MIN_CHARS = 3
+const FILE_SEARCH_RESULT_LABEL_RESERVED_WIDTH = 40
 
 function FileTreeSkeleton() {
   return (
@@ -102,42 +98,36 @@ function isFallbackNode(node: SandboxFileSystemNode) {
 }
 
 export function FileTreePane({
-  onCopyNodeContents,
-  onDownloadNode,
-  onSelectedDirectoryRefreshingChange,
-  onVisibleFileNavigationChange,
-  previewState,
+  onRequestCreateFolder,
+  onRequestDelete,
   ref,
-  sandboxInstance,
+  previewLoadingPath,
+  sandboxId,
 }: {
-  onCopyNodeContents: (node: SandboxFileSystemNode) => void | Promise<void>
-  onDownloadNode: (node: SandboxFileSystemNode) => void | Promise<void>
-  onSelectedDirectoryRefreshingChange: (value: boolean) => void
-  onVisibleFileNavigationChange: (value: { canNavigateNext: boolean; canNavigatePrevious: boolean }) => void
-  previewState: PreviewState
+  onRequestCreateFolder: (parentPath: string) => void
+  onRequestDelete: (node: SandboxFileSystemNode) => void
   ref?: React.Ref<FileTreePaneHandle>
-  sandboxInstance: SandboxInstance | undefined
+  previewLoadingPath?: string
+  sandboxId: string
 }) {
   const queryClient = useQueryClient()
   const [rootLoadFailed, setRootLoadFailed] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const itemDataRef = useRef<Record<string, SandboxFileSystemNode>>({ [ROOT_PATH]: ROOT_NODE })
   const fileTreeScrollAreaRef = useRef<HTMLDivElement>(null)
+  const searchHeaderRef = useRef<FileSearchHeaderHandle>(null)
+  const sandboxInstanceQuery = useSandboxInstance(sandboxId)
+  const sandboxInstance = sandboxInstanceQuery.data
 
-  const selectedNode = useFileSystemStore((state) => state.selectedNode)
-  const isSearchOpen = useFileSystemStore((state) => state.isSearchOpen)
-  const openDropdownPath = useFileSystemStore((state) => state.openDropdownPath)
-  const searchLabelAvailableWidth = useFileSystemStore((state) => state.searchLabelAvailableWidth)
-  const searchLabelFont = useFileSystemStore((state) => state.searchLabelFont)
-  const searchQuery = useFileSystemStore((state) => state.searchQuery)
-  const {
-    openNode,
-    resetSearch,
-    setDeleteTarget,
-    setFolderCreationParentPath,
-    setNewFolderName,
-    setOpenDropdownPath,
-    setSearchLabelMeasurements,
-  } = useFileSystemStore((state) => state.actions)
+  const selectedNodePath = useFileSystemStore((state) => state.selectedNodePath)
+  const [searchLabelAvailableWidth, setSearchLabelAvailableWidth] = useState(0)
+  const [searchLabelFont, setSearchLabelFont] = useState('')
+  const { openNode, setAdjacentFilePaths } = useFileSystemStore((state) => state.actions)
+
+  const resetSearch = useCallback(() => {
+    searchHeaderRef.current?.clear()
+    setSearchQuery('')
+  }, [])
 
   async function loadDirectory(path: string) {
     if (!sandboxInstance) {
@@ -154,6 +144,7 @@ export function FileTreePane({
 
       children.forEach((node) => {
         itemDataRef.current[node.id] = node
+        queryClient.setQueryData(fileSystemQueryKeys.details(sandboxInstance.id, node.path), node)
       })
 
       if (path === ROOT_PATH) {
@@ -192,15 +183,16 @@ export function FileTreePane({
           path,
         }
         itemDataRef.current[path] = resolvedNode
+        queryClient.setQueryData(fileSystemQueryKeys.details(sandboxInstance.id, path), resolvedNode)
         return resolvedNode
       } catch {
         return existingNode ?? createFallbackNode(path)
       }
     },
-    [sandboxInstance],
+    [queryClient, sandboxInstance],
   )
 
-  const searchEnabled = isSearchOpen && searchQuery.trim().length >= FILE_SEARCH_MIN_CHARS
+  const searchEnabled = searchQuery.trim().length >= FILE_SEARCH_MIN_CHARS
   const searchQueryResult = useFileSearchQuery({
     enabled: Boolean(sandboxInstance) && searchEnabled,
     query: searchQuery,
@@ -224,7 +216,7 @@ export function FileTreePane({
     isItemFolder: (item) => Boolean(item.getItemData()?.isDir ?? itemDataRef.current[item.getId()]?.isDir),
     onPrimaryAction: (item) => {
       const node = item.getItemData() ?? itemDataRef.current[item.getId()] ?? createFallbackNode(item.getId())
-      openNode(node)
+      openNode(node.path)
     },
     dataLoader: {
       getItem: async (itemId) => itemDataRef.current[itemId] ?? createFallbackNode(itemId),
@@ -234,15 +226,16 @@ export function FileTreePane({
   })
 
   const visibleItems = tree.getItems()
-  const selectedPath = selectedNode?.path ?? ''
+  const selectedPath = selectedNodePath ?? ''
+  const selectedNode = selectedPath
+    ? (itemDataRef.current[selectedPath] ?? (selectedPath === ROOT_PATH ? ROOT_NODE : createFallbackNode(selectedPath)))
+    : null
   const rootItem = tree.getItemInstance(ROOT_PATH)
   const rootDirectoryFetchCount = useIsFetching({
     queryKey: sandboxInstance ? fileSystemQueryKeys.directory(sandboxInstance.id, ROOT_PATH) : undefined,
   })
   const isInitialTreeLoading = (!sandboxInstance || rootItem.isLoading()) && visibleItems.length <= 1 && !rootLoadFailed
   const isTreeRefreshing = !isInitialTreeLoading && (rootItem.isLoading() || rootDirectoryFetchCount > 0)
-  const selectedItem = selectedPath ? tree.getItemInstance(selectedPath) : null
-  const isSelectedDirectoryRefreshing = Boolean(selectedNode?.isDir && selectedItem?.isLoading())
   const visibleFileItems = useMemo(() => {
     return visibleItems.filter((item) => {
       const node = item.getItemData() ?? itemDataRef.current[item.getId()] ?? createFallbackNode(item.getId())
@@ -269,15 +262,14 @@ export function FileTreePane({
   }, [activeFileNodes, selectedNode, selectedPath])
 
   useEffect(() => {
-    onSelectedDirectoryRefreshingChange(isSelectedDirectoryRefreshing)
-  }, [isSelectedDirectoryRefreshing, onSelectedDirectoryRefreshingChange])
-
-  useEffect(() => {
-    onVisibleFileNavigationChange({
-      canNavigatePrevious: selectedFileIndex > 0,
-      canNavigateNext: selectedFileIndex >= 0 && selectedFileIndex < activeFileNodes.length - 1,
+    setAdjacentFilePaths({
+      previousFilePath: selectedFileIndex > 0 ? (activeFileNodes[selectedFileIndex - 1]?.path ?? null) : null,
+      nextFilePath:
+        selectedFileIndex >= 0 && selectedFileIndex < activeFileNodes.length - 1
+          ? (activeFileNodes[selectedFileIndex + 1]?.path ?? null)
+          : null,
     })
-  }, [activeFileNodes.length, onVisibleFileNavigationChange, selectedFileIndex])
+  }, [activeFileNodes, selectedFileIndex, setAdjacentFilePaths])
 
   const fileTreeVirtualizer = useVirtualizer({
     count: searchEnabled ? searchResults.length : visibleItems.length,
@@ -304,10 +296,10 @@ export function FileTreePane({
     }
 
     const updateMeasurements = () => {
-      setSearchLabelMeasurements({
-        availableWidth: Math.max(0, viewport.getBoundingClientRect().width - FILE_SEARCH_RESULT_LABEL_RESERVED_WIDTH),
-        font: getCanvasFont(viewport),
-      })
+      setSearchLabelAvailableWidth(
+        Math.max(0, viewport.getBoundingClientRect().width - FILE_SEARCH_RESULT_LABEL_RESERVED_WIDTH),
+      )
+      setSearchLabelFont(getCanvasFont(viewport))
     }
 
     updateMeasurements()
@@ -318,7 +310,7 @@ export function FileTreePane({
 
     resizeObserver.observe(viewport)
     return () => resizeObserver.disconnect()
-  }, [setSearchLabelMeasurements])
+  }, [])
 
   useEffect(() => {
     const frameId = window.requestAnimationFrame(() => {
@@ -373,25 +365,19 @@ export function FileTreePane({
     [tree],
   )
 
-  const getAdjacentFileNode = useCallback(
-    (currentPath: string, direction: -1 | 1) => {
-      const currentIndex = activeFileNodes.findIndex((node) => node.path === currentPath)
-      const nextNode = currentIndex >= 0 ? activeFileNodes[currentIndex + direction] : null
-
-      if (!nextNode) {
-        return null
-      }
-
+  const revealPath = useCallback(
+    (path: string) => {
       if (searchEnabled) {
-        fileTreeVirtualizer.scrollToIndex(currentIndex + direction, { align: 'auto' })
-        return nextNode
+        const itemIndex = activeFileNodes.findIndex((node) => node.path === path)
+        if (itemIndex >= 0) {
+          fileTreeVirtualizer.scrollToIndex(itemIndex, { align: 'auto' })
+        }
+        return
       }
 
-      const nextItem = visibleFileItems.find((item) => item.getId() === nextNode.path)
-      nextItem?.setFocused()
+      const item = visibleFileItems.find((visibleItem) => visibleItem.getId() === path)
+      item?.setFocused()
       tree.updateDomFocus()
-
-      return nextNode
     },
     [activeFileNodes, fileTreeVirtualizer, searchEnabled, tree, visibleFileItems],
   )
@@ -406,12 +392,12 @@ export function FileTreePane({
     ref,
     () => ({
       expandPathAncestors,
-      getAdjacentFileNode,
       getNode,
       refreshPath,
+      revealPath,
       restoreFocus,
     }),
-    [expandPathAncestors, getAdjacentFileNode, getNode, refreshPath, restoreFocus],
+    [expandPathAncestors, getNode, refreshPath, restoreFocus, revealPath],
   )
 
   const handleItemKeyDown = useCallback(
@@ -464,6 +450,40 @@ export function FileTreePane({
     [tree],
   )
 
+  async function handleRetryRoot() {
+    await refreshPath(ROOT_PATH)
+  }
+
+  async function handleDownloadNode(node: SandboxFileSystemNode) {
+    if (!sandboxInstance || node.isDir) {
+      return
+    }
+
+    await downloadSandboxFile({
+      node,
+      sandboxInstance,
+    })
+  }
+
+  async function handleCopyNode(node: SandboxFileSystemNode) {
+    if (!sandboxInstance || node.isDir) {
+      return
+    }
+
+    try {
+      const fileContents = Buffer.from(await sandboxInstance.fs.downloadFile(node.path))
+      if (isProbablyBinary(fileContents)) {
+        toast.error('Binary file contents cannot be copied as text')
+        return
+      }
+
+      await navigator.clipboard.writeText(fileContents.toString('utf-8'))
+      toast.success(`Copied contents of ${node.name || node.path}`)
+    } catch (error) {
+      handleFileSystemApiError(error, `Failed to copy ${node.path}`)
+    }
+  }
+
   if (rootLoadFailed) {
     return (
       <div className="flex flex-1 min-h-0">
@@ -472,7 +492,7 @@ export function FileTreePane({
             <EmptyTitle>Failed to load filesystem</EmptyTitle>
             <EmptyDescription>Something went wrong while listing the sandbox root directory.</EmptyDescription>
           </EmptyHeader>
-          <Button variant="outline" size="sm" onClick={() => void refreshPath(ROOT_PATH)}>
+          <Button variant="outline" size="sm" onClick={handleRetryRoot}>
             <RefreshCwIcon className="size-4" />
             Retry
           </Button>
@@ -483,7 +503,19 @@ export function FileTreePane({
 
   return (
     <div ref={fileTreeScrollAreaRef} className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <MemoizedFileSearchHeader isRefreshing={isTreeRefreshing} onRefresh={handleRefreshRoot} />
+      <MemoizedFileSearchHeader
+        isRefreshing={isTreeRefreshing}
+        onRefresh={handleRefreshRoot}
+        onSearchQueryChange={setSearchQuery}
+        ref={searchHeaderRef}
+      />
+      <div role="status" aria-live="polite" className="sr-only">
+        {searchEnabled && !isSearchLoading && !searchFailed
+          ? searchResults.length === 0
+            ? 'No files found'
+            : `${searchResults.length} files found`
+          : null}
+      </div>
 
       <ScrollArea fade="mask" className="min-h-0 flex-1">
         {isInitialTreeLoading || (searchEnabled && isSearchLoading && searchResults.length === 0) ? (
@@ -518,169 +550,119 @@ export function FileTreePane({
 
               const isDirectory = searchEnabled ? node.isDir : (item?.isFolder() ?? node.isDir)
               const isSelected = selectedPath === node.path
-              const isPreviewLoading = previewState.status === 'loading' && previewState.path === node.path
+              const isPreviewLoading = previewLoadingPath === node.path
               const isFocused = searchEnabled ? false : (item?.isFocused() ?? false)
               const isLoading = (item?.isLoading() ?? false) || isPreviewLoading
               const itemButtonProps = !searchEnabled ? (item?.getProps() ?? {}) : {}
-              const itemLabel = searchEnabled ? node.path : node.name || node.path
-
               return (
-                <div
+                <FileTreeRow
                   key={searchEnabled ? node.path : item?.getId()}
-                  className="group absolute left-0 top-0 flex h-8 w-full items-center px-2"
-                  style={{ transform: `translateY(${virtualItem.start + FILE_TREE_EDGE_PADDING}px)` }}
-                >
-                  {!searchEnabled && item && item.getItemMeta().level > 0 ? (
-                    <div className="pointer-events-none absolute inset-y-0 left-0">
-                      {Array.from({ length: item.getItemMeta().level }).map((_, levelIndex) => (
-                        <span
-                          key={levelIndex}
-                          className="absolute inset-y-0 w-px bg-border/45"
-                          style={{
-                            left: `${FILE_TREE_ROW_PADDING_X + FILE_TREE_BASE_PADDING + levelIndex * FILE_TREE_INDENT + FILE_TREE_TOGGLE_CENTER}px`,
-                          }}
-                        />
-                      ))}
-                    </div>
-                  ) : null}
-
-                  <div
-                    className={cn('flex h-8 w-full items-center gap-1 rounded-md pr-1 text-sm hover:bg-muted', {
-                      'bg-muted': isSelected,
-                      'bg-muted/60': isFocused,
-                      'opacity-60': isSearchLoading && searchEnabled,
-                    })}
-                  >
-                    <div
-                      className="flex h-8 min-w-0 flex-1 items-center gap-1"
-                      style={{
-                        paddingLeft: `${searchEnabled ? FILE_TREE_BASE_PADDING : (item?.getItemMeta().level ?? 0) * FILE_TREE_INDENT + FILE_TREE_BASE_PADDING}px`,
-                      }}
-                    >
-                      {!searchEnabled && isDirectory ? (
-                        <button
-                          type="button"
-                          aria-label={
-                            item?.isExpanded()
-                              ? `Collapse ${node.name || node.path}`
-                              : `Expand ${node.name || node.path}`
-                          }
-                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted/80 hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border"
-                          onClick={(event) => {
-                            event.preventDefault()
-                            event.stopPropagation()
-
-                            if (item?.isExpanded()) {
-                              item.collapse()
-                            } else {
-                              item?.expand()
-                            }
-                          }}
+                  actions={
+                    !searchEnabled ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          asChild
+                          onClick={(event) => event.stopPropagation()}
+                          onPointerDown={(event) => event.stopPropagation()}
                         >
-                          {item?.isExpanded() ? (
-                            <ChevronDownIcon className="size-4 text-muted-foreground" />
-                          ) : (
-                            <ChevronRightIcon className="size-4 text-muted-foreground" />
-                          )}
-                        </button>
-                      ) : null}
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            tabIndex={isFocused || isSelected ? 0 : -1}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                          >
+                            <EllipsisIcon className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="end"
+                          side="right"
+                          className={cn({
+                            'w-44': node.isDir,
+                            'w-48': !node.isDir,
+                          })}
+                          onCloseAutoFocus={(event) => event.preventDefault()}
+                        >
+                          <DropdownMenuItem
+                            onClick={() => refreshPath(node.isDir ? node.path : getParentPath(node.path))}
+                            disabled={
+                              item?.isLoading() || (!node.isDir && selectedPath === node.path && isPreviewLoading)
+                            }
+                          >
+                            Refresh
+                          </DropdownMenuItem>
+                          {!node.isDir ? (
+                            <DropdownMenuItem onClick={() => handleDownloadNode(node)}>Download</DropdownMenuItem>
+                          ) : null}
+                          {!node.isDir && !getImageMimeType(node.path) ? (
+                            <DropdownMenuItem onClick={() => handleCopyNode(node)}>Copy contents</DropdownMenuItem>
+                          ) : null}
+                          {node.isDir ? (
+                            <DropdownMenuItem onSelect={() => onRequestCreateFolder(node.path)}>
+                              Create folder
+                            </DropdownMenuItem>
+                          ) : null}
+                          {node.path !== ROOT_PATH ? <DropdownMenuSeparator /> : null}
+                          {node.path !== ROOT_PATH ? (
+                            <DropdownMenuItem variant="destructive" onClick={() => onRequestDelete(node)}>
+                              Delete
+                            </DropdownMenuItem>
+                          ) : null}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : undefined
+                  }
+                  buttonProps={itemButtonProps}
+                  depth={item?.getItemMeta().level ?? 0}
+                  isExpanded={item?.isExpanded() ?? false}
+                  isFocused={isFocused}
+                  isLoading={isLoading}
+                  isSearchResult={searchEnabled}
+                  isSelected={isSelected}
+                  node={node}
+                  onActivate={async (event) => {
+                    itemButtonProps.onClick?.(event)
 
-                      <button
-                        type="button"
-                        {...itemButtonProps}
-                        onClick={async (event) => {
-                          itemButtonProps.onClick?.(event)
+                    if (event.defaultPrevented) {
+                      return
+                    }
 
-                          if (event.defaultPrevented) {
-                            return
-                          }
+                    if (!searchEnabled && item && node.isDir && !item.isExpanded()) {
+                      item.expand()
+                    }
 
-                          if (!searchEnabled && item && node.isDir && !item.isExpanded()) {
+                    const resolvedNode = searchEnabled ? await resolveNode(node.path) : node
+                    if (sandboxInstance) {
+                      queryClient.setQueryData(
+                        fileSystemQueryKeys.details(sandboxInstance.id, resolvedNode.path),
+                        resolvedNode,
+                      )
+                    }
+                    openNode(resolvedNode.path)
+                  }}
+                  onItemKeyDown={!searchEnabled && item ? (event) => handleItemKeyDown(item, event) : undefined}
+                  onToggleExpand={
+                    !searchEnabled && isDirectory && item
+                      ? () => {
+                          if (item.isExpanded()) {
+                            item.collapse()
+                          } else {
                             item.expand()
                           }
-
-                          const resolvedNode = searchEnabled ? await resolveNode(node.path) : node
-                          openNode(resolvedNode)
-                        }}
-                        onKeyDown={!searchEnabled && item ? (event) => handleItemKeyDown(item, event) : undefined}
-                        className="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-1 text-left focus-visible:outline-none"
-                      >
-                        {isDirectory ? (
-                          !searchEnabled && item?.isExpanded() ? (
-                            <FolderOpenIcon className="size-4 shrink-0 text-muted-foreground" />
-                          ) : (
-                            <FolderIcon className="size-4 shrink-0 text-muted-foreground" />
-                          )
-                        ) : (
-                          <FileTextIcon className="size-4 shrink-0 text-muted-foreground" />
-                        )}
-
-                        {searchEnabled ? (
-                          <MemoizedSearchResultLabel
-                            availableWidth={searchLabelAvailableWidth}
-                            font={searchLabelFont}
-                            text={itemLabel}
-                            query={searchQuery}
-                            className={cn('flex-1', {
-                              'animate-shimmer-text': isLoading,
-                            })}
-                          />
-                        ) : (
-                          <span
-                            className={cn('truncate', {
-                              'animate-shimmer-text': isLoading,
-                            })}
-                          >
-                            {itemLabel}
-                          </span>
-                        )}
-
-                        {!searchEnabled && !isDirectory ? (
-                          <span
-                            className={cn('ml-auto shrink-0 text-xs text-muted-foreground', {
-                              'animate-shimmer-text': isLoading,
-                            })}
-                          >
-                            {formatBytes(node.size)}
-                          </span>
-                        ) : null}
-                      </button>
-                    </div>
-
-                    {!searchEnabled ? (
-                      <FileNodeActions
-                        variant="compact"
-                        node={node}
-                        isDropdownOpen={openDropdownPath === node.path}
-                        triggerTabIndex={isFocused || isSelected ? 0 : -1}
-                        isRefreshing={
-                          item?.isLoading() || (!node.isDir && selectedPath === node.path && isPreviewLoading)
                         }
-                        onRefresh={() => void refreshPath(node.isDir ? node.path : getParentPath(node.path))}
-                        onDownload={!node.isDir ? () => void onDownloadNode(node) : undefined}
-                        onCopy={
-                          !node.isDir && !getImageMimeType(node.path) ? () => void onCopyNodeContents(node) : undefined
+                      : undefined
+                  }
+                  searchLabel={
+                    searchEnabled
+                      ? {
+                          availableWidth: searchLabelAvailableWidth,
+                          font: searchLabelFont,
+                          query: searchQuery,
                         }
-                        onDelete={() => {
-                          setOpenDropdownPath(null)
-                          setDeleteTarget(node)
-                        }}
-                        onDropdownOpenChange={(open) => {
-                          setOpenDropdownPath(open ? node.path : null)
-                        }}
-                        onStartCreateFolder={
-                          node.isDir
-                            ? () => {
-                                setOpenDropdownPath(null)
-                                setFolderCreationParentPath(node.path)
-                                setNewFolderName('')
-                              }
-                            : undefined
-                        }
-                      />
-                    ) : null}
-                  </div>
-                </div>
+                      : undefined
+                  }
+                  top={virtualItem.start + FILE_TREE_EDGE_PADDING}
+                />
               )
             })}
           </div>

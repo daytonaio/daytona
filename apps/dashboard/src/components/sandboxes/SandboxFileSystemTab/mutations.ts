@@ -9,7 +9,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { SandboxFileSystemNode, SandboxInstance } from './types'
 import { ROOT_PATH } from './constants'
 import { getParentPath } from './utils'
-import { fileSystemQueryKeys, invalidateDirectoryQuery } from './queries'
+import { fileSystemQueryKeys, invalidateDirectoryQuery, invalidateFileDetailsQuery } from './queries'
 
 export function useCreateFolderMutation({ sandboxInstance }: { sandboxInstance: SandboxInstance | undefined }) {
   const queryClient = useQueryClient()
@@ -30,6 +30,12 @@ export function useCreateFolderMutation({ sandboxInstance }: { sandboxInstance: 
 
       await invalidateDirectoryQuery({
         path: getParentPath(path),
+        queryClient,
+        sandboxInstance,
+      })
+
+      await invalidateFileDetailsQuery({
+        path,
         queryClient,
         sandboxInstance,
       })
@@ -61,14 +67,18 @@ export function useDeleteNodeMutation({ sandboxInstance }: { sandboxInstance: Sa
       })
 
       queryClient.removeQueries({
+        queryKey: fileSystemQueryKeys.details(sandboxInstance.id, node.path),
+      })
+
+      queryClient.removeQueries({
         queryKey: fileSystemQueryKeys.preview(sandboxInstance.id, node.path),
       })
 
-      queryClient.setQueriesData<SandboxFileSystemNode[]>(
+      queryClient.setQueriesData<string[]>(
         {
           queryKey: fileSystemQueryKeys.searchPrefix(sandboxInstance.id),
         },
-        (currentResults) => currentResults?.filter((result) => result.path !== node.path),
+        (currentResults) => currentResults?.filter((result) => result !== node.path),
       )
     },
   })

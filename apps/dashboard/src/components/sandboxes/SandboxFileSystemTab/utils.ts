@@ -3,12 +3,82 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { handleApiError } from '@/lib/error-handling'
+import { downloadBlob } from '@/lib/utils'
 import { FileInfo } from '@daytona/toolbox-api-client'
 import { Buffer } from 'buffer'
 import { format } from 'date-fns'
+import { toast } from 'sonner'
 
 import { ROOT_NODE, ROOT_PATH } from './constants'
-import type { SandboxFileSystemNode } from './types'
+import type { SandboxFileSystemNode, SandboxInstance } from './types'
+
+type FileSystemError = {
+  errorCode?: string
+  message?: string
+  path?: string
+  statusCode?: number
+}
+
+function getFileSystemError(error: unknown): FileSystemError | null {
+  return error && typeof error === 'object' ? (error as FileSystemError) : null
+}
+
+function isFileReadFailedError(error: unknown) {
+  return getFileSystemError(error)?.errorCode === 'FILE_READ_FAILED'
+}
+
+export function isForbiddenFileSystemError(error: unknown) {
+  return getFileSystemError(error)?.statusCode === 403
+}
+
+export function shouldRetryFileSystemQuery(failureCount: number, error: unknown) {
+  return !isForbiddenFileSystemError(error) && !isFileReadFailedError(error) && failureCount < 3
+}
+
+export async function downloadSandboxFile({
+  node,
+  sandboxInstance,
+}: {
+  node: SandboxFileSystemNode
+  sandboxInstance: SandboxInstance
+}) {
+  if (node.isDir) {
+    return
+  }
+
+  try {
+    const fileContents = Buffer.from(await sandboxInstance.fs.downloadFile(node.path))
+    downloadBlob(new Blob([fileContents]), node.name || 'download')
+    toast.success(`Downloaded ${node.name || node.path}`)
+  } catch (error) {
+    handleFileSystemApiError(error, `Failed to download ${node.path}`)
+  }
+}
+
+export function handleFileSystemApiError(error: unknown, fallbackMessage: string, options?: { toastId?: string }) {
+  const fileSystemError = getFileSystemError(error)
+
+  if (isForbiddenFileSystemError(error)) {
+    toast.error(fileSystemError?.path ? `Access denied to ${fileSystemError.path}` : 'Access denied', {
+      ...(options?.toastId ? { id: options.toastId } : {}),
+      description: fileSystemError?.message ?? 'You do not have permission to access this location in the sandbox.',
+    })
+    return
+  }
+
+  if (isFileReadFailedError(error)) {
+    toast.error(fileSystemError?.path ? `Failed to read ${fileSystemError.path}` : fallbackMessage, {
+      ...(options?.toastId ? { id: options.toastId } : {}),
+      description:
+        fileSystemError?.message ??
+        'The file could not be opened in the sandbox. It may no longer exist or be unreadable.',
+    })
+    return
+  }
+
+  handleApiError(error, fallbackMessage, options)
+}
 
 export function createFallbackNode(path: string): SandboxFileSystemNode {
   if (path === ROOT_PATH) {

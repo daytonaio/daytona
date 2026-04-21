@@ -4,12 +4,11 @@
  */
 
 import { RefreshCwIcon, SearchIcon, XIcon } from 'lucide-react'
-import { useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { Ref, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
 import TooltipButton from '@/components/TooltipButton'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/components/ui/input-group'
 import { cn } from '@/lib/utils'
-import { useFileSystemStore } from './fileSystemStore'
 
 export type FileSearchHeaderHandle = {
   clear: () => void
@@ -18,31 +17,32 @@ export type FileSearchHeaderHandle = {
 export function FileSearchHeader({
   isRefreshing,
   onRefresh,
+  onSearchQueryChange,
   ref,
 }: {
   isRefreshing: boolean
   onRefresh: () => void | Promise<void>
-  ref?: React.Ref<FileSearchHeaderHandle>
+  onSearchQueryChange: (value: string) => void
+  ref?: Ref<FileSearchHeaderHandle>
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [inputValue, setInputValue] = useState('')
-  const isOpen = useFileSystemStore((state) => state.isSearchOpen)
-  const { resetSearch, setSearchOpen, setSearchQuery } = useFileSystemStore((state) => state.actions)
+  const [isOpen, setIsOpen] = useState(false)
 
   useImperativeHandle(
     ref,
     () => ({
       clear: () => {
         setInputValue('')
-        setSearchQuery('')
+        setIsOpen(false)
+        onSearchQueryChange('')
       },
     }),
-    [setSearchQuery],
+    [onSearchQueryChange],
   )
 
   useEffect(() => {
     if (!isOpen) {
-      setInputValue('')
       return
     }
 
@@ -55,11 +55,11 @@ export function FileSearchHeader({
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
-      setSearchQuery(inputValue.trim())
+      onSearchQueryChange(inputValue.trim())
     }, 200)
 
     return () => window.clearTimeout(timeout)
-  }, [inputValue, setSearchQuery])
+  }, [inputValue, onSearchQueryChange])
 
   return (
     <div className="relative h-11 shrink-0 overflow-hidden border-b border-border">
@@ -84,7 +84,7 @@ export function FileSearchHeader({
             })}
           />
         </TooltipButton>
-        <TooltipButton tooltipText="Search files" variant="ghost" size="icon-sm" onClick={() => setSearchOpen(true)}>
+        <TooltipButton tooltipText="Search files" variant="ghost" size="icon-sm" onClick={() => setIsOpen(true)}>
           <SearchIcon className="size-4" />
         </TooltipButton>
       </div>
@@ -116,7 +116,7 @@ export function FileSearchHeader({
                   className="shrink-0 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none"
                   onClick={() => {
                     setInputValue('')
-                    setSearchQuery('')
+                    onSearchQueryChange('')
                   }}
                 >
                   Clear
@@ -130,8 +130,9 @@ export function FileSearchHeader({
           variant="ghost"
           size="icon-sm"
           onClick={() => {
-            setSearchOpen(false)
-            resetSearch()
+            setIsOpen(false)
+            setInputValue('')
+            onSearchQueryChange('')
           }}
           className="shrink-0"
         >

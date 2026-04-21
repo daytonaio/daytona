@@ -6,100 +6,56 @@
 import { createContext, type ReactNode, useContext, useRef } from 'react'
 import { createStore, useStore, type StoreApi } from 'zustand'
 
-import type { SandboxFileSystemNode } from './types'
 import { ROOT_NODE } from './constants'
 
 type FileSystemStoreState = {
-  deleteTarget: SandboxFileSystemNode | null
-  folderCreationParentPath: string | null
-  isContentsOverlayMode: boolean
-  isContentsOverlayOpen: boolean
-  isSearchOpen: boolean
   lastOpenedNodePath: string
-  newFolderName: string
-  openDropdownPath: string | null
-  searchLabelAvailableWidth: number
-  searchLabelFont: string
-  searchQuery: string
-  selectedNode: SandboxFileSystemNode | null
+  nextFilePath: string | null
+  previousFilePath: string | null
+  selectedNodePath: string | null
 }
 
 type FileSystemStoreActions = {
-  closeCreateFolder: () => void
-  closeDeleteDialog: () => void
+  clearAdjacentFilePaths: () => void
   clearSelectedNode: () => void
-  openNode: (value: SandboxFileSystemNode) => void
-  resetSearch: () => void
+  openNode: (path: string) => void
+  setAdjacentFilePaths: (value: { nextFilePath: string | null; previousFilePath: string | null }) => void
   setLastOpenedNodePath: (value: string) => void
-  setDeleteTarget: (value: SandboxFileSystemNode | null) => void
-  setFolderCreationParentPath: (value: string | null) => void
-  setContentsOverlayMode: (value: boolean) => void
-  setContentsOverlayOpen: (value: boolean) => void
-  setNewFolderName: (value: string) => void
-  setOpenDropdownPath: (value: string | null) => void
-  setSearchLabelMeasurements: (payload: { availableWidth: number; font: string }) => void
-  setSearchOpen: (value: boolean) => void
-  setSearchQuery: (value: string) => void
-  setSelectedNode: (value: SandboxFileSystemNode | null) => void
+  setSelectedNodePath: (value: string | null) => void
 }
 
 export type FileSystemStore = FileSystemStoreState & { actions: FileSystemStoreActions }
 
 const createFileSystemStore = () =>
-  createStore<FileSystemStore>((set, get) => ({
-    deleteTarget: null,
-    folderCreationParentPath: null,
-    isContentsOverlayMode: false,
-    isContentsOverlayOpen: false,
-    isSearchOpen: false,
+  createStore<FileSystemStore>((set) => ({
     lastOpenedNodePath: ROOT_NODE.path,
-    newFolderName: '',
-    openDropdownPath: null,
-    searchLabelAvailableWidth: 0,
-    searchLabelFont: '',
-    searchQuery: '',
-    selectedNode: null,
+    nextFilePath: null,
+    previousFilePath: null,
+    selectedNodePath: null,
     actions: {
-      closeCreateFolder: () =>
+      clearAdjacentFilePaths: () =>
         set({
-          folderCreationParentPath: null,
-          newFolderName: '',
-        }),
-      closeDeleteDialog: () =>
-        set({
-          deleteTarget: null,
+          nextFilePath: null,
+          previousFilePath: null,
         }),
       clearSelectedNode: () =>
         set({
-          selectedNode: null,
-          isContentsOverlayOpen: false,
-          openDropdownPath: null,
+          nextFilePath: null,
+          previousFilePath: null,
+          selectedNodePath: null,
         }),
-      openNode: (selectedNode) =>
+      openNode: (selectedNodePath) =>
         set({
-          selectedNode,
-          lastOpenedNodePath: selectedNode.path,
-          isContentsOverlayOpen: get().isContentsOverlayMode ? true : get().isContentsOverlayOpen,
+          selectedNodePath,
+          lastOpenedNodePath: selectedNodePath,
         }),
-      resetSearch: () =>
+      setAdjacentFilePaths: ({ nextFilePath, previousFilePath }) =>
         set({
-          searchQuery: '',
+          nextFilePath,
+          previousFilePath,
         }),
       setLastOpenedNodePath: (lastOpenedNodePath) => set({ lastOpenedNodePath }),
-      setDeleteTarget: (deleteTarget) => set({ deleteTarget }),
-      setFolderCreationParentPath: (folderCreationParentPath) => set({ folderCreationParentPath }),
-      setContentsOverlayMode: (isContentsOverlayMode) => set({ isContentsOverlayMode }),
-      setContentsOverlayOpen: (isContentsOverlayOpen) => set({ isContentsOverlayOpen }),
-      setNewFolderName: (newFolderName) => set({ newFolderName }),
-      setOpenDropdownPath: (openDropdownPath) => set({ openDropdownPath }),
-      setSearchLabelMeasurements: ({ availableWidth, font }) =>
-        set({
-          searchLabelAvailableWidth: availableWidth,
-          searchLabelFont: font,
-        }),
-      setSearchOpen: (isSearchOpen) => set({ isSearchOpen }),
-      setSearchQuery: (searchQuery) => set({ searchQuery }),
-      setSelectedNode: (selectedNode) => set({ selectedNode }),
+      setSelectedNodePath: (selectedNodePath) => set({ selectedNodePath }),
     },
   }))
 

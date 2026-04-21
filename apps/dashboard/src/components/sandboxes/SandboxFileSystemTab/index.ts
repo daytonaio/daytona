@@ -4,5 +4,4 @@
  */
 
 export { SandboxFileSystemTab } from './SandboxFileSystemTab'
-export type { FileSearchHeaderHandle } from './FileSearchHeader'
 export type { PreviewKind, PreviewState, SandboxFileSystemNode } from './types'

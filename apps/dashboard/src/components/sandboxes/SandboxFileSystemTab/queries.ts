@@ -6,11 +6,17 @@
 import { Buffer } from 'buffer'
 import { keepPreviousData, useQuery, type QueryClient, type UseQueryOptions } from '@tanstack/react-query'
 
-import { handleApiError } from '@/lib/error-handling'
-
 import type { PreviewKind, SandboxFileSystemNode, SandboxInstance } from './types'
-import { ROOT_PATH } from './constants'
-import { getImageMimeType, isProbablyBinary, sortEntries, toNode } from './utils'
+import { ROOT_NODE, ROOT_PATH } from './constants'
+import {
+  getImageMimeType,
+  getParentPath,
+  handleFileSystemApiError,
+  isProbablyBinary,
+  shouldRetryFileSystemQuery,
+  sortEntries,
+  toNode,
+} from './utils'
 
 export type FilePreviewData = {
   content?: string
@@ -20,6 +26,7 @@ export type FilePreviewData = {
 
 export const fileSystemQueryKeys = {
   all: (sandboxId: string) => ['sandbox-file-system', sandboxId] as const,
+  details: (sandboxId: string, path: string) => [...fileSystemQueryKeys.all(sandboxId), 'details', path] as const,
   directory: (sandboxId: string, path: string) => [...fileSystemQueryKeys.all(sandboxId), 'directory', path] as const,
   preview: (sandboxId: string, path: string) => [...fileSystemQueryKeys.all(sandboxId), 'preview', path] as const,
   search: (sandboxId: string, query: string) => [...fileSystemQueryKeys.all(sandboxId), 'search', query] as const,
@@ -62,10 +69,13 @@ export function getDirectoryChildrenQueryOptions({
         const files = sortEntries(await sandboxInstance.fs.listFiles(path))
         return files.map((file) => toNode(path, file))
       } catch (error) {
-        handleApiError(error, `Failed to list ${path}`)
+        handleFileSystemApiError(error, `Failed to list ${path}`, {
+          toastId: `filesystem-list-${sandboxInstance.id}-${path}`,
+        })
         throw error
       }
     },
+    retry: shouldRetryFileSystemQuery,
     staleTime: 60_000,
   } satisfies UseQueryOptions<SandboxFileSystemNode[]>
 }
@@ -81,6 +91,92 @@ export async function invalidateDirectoryQuery({
 }) {
   await queryClient.invalidateQueries({
     queryKey: fileSystemQueryKeys.directory(sandboxInstance.id, path),
+  })
+}
+
+export function getFileDetailsQueryOptions({
+  path,
+  sandboxInstance,
+}: {
+  path: string
+  sandboxInstance: SandboxInstance
+}) {
+  return {
+    queryKey: fileSystemQueryKeys.details(sandboxInstance.id, path),
+    queryFn: async (): Promise<SandboxFileSystemNode> => {
+      try {
+        if (path === ROOT_PATH) {
+          return ROOT_NODE
+        }
+
+        const file = await sandboxInstance.fs.getFileDetails(path)
+        return {
+          ...toNode(getParentPath(path), file),
+          id: path,
+          path,
+        }
+      } catch (error) {
+        handleFileSystemApiError(error, `Failed to load details for ${path}`, {
+          toastId: `filesystem-details-${sandboxInstance.id}-${path}`,
+        })
+        throw error
+      }
+    },
+    retry: shouldRetryFileSystemQuery,
+    staleTime: 60_000,
+  } satisfies UseQueryOptions<SandboxFileSystemNode>
+}
+
+export async function invalidateFileDetailsQuery({
+  path,
+  queryClient,
+  sandboxInstance,
+}: {
+  path: string
+  queryClient: QueryClient
+  sandboxInstance: SandboxInstance
+}) {
+  await queryClient.invalidateQueries({
+    queryKey: fileSystemQueryKeys.details(sandboxInstance.id, path),
+  })
+}
+
+export async function invalidateFilePreviewQuery({
+  path,
+  queryClient,
+  sandboxInstance,
+}: {
+  path: string
+  queryClient: QueryClient
+  sandboxInstance: SandboxInstance
+}) {
+  await queryClient.invalidateQueries({
+    queryKey: fileSystemQueryKeys.preview(sandboxInstance.id, path),
+  })
+}
+
+export function useFileDetailsQuery({
+  enabled,
+  path,
+  sandboxInstance,
+}: {
+  enabled: boolean
+  path: string
+  sandboxInstance: SandboxInstance | undefined
+}) {
+  return useQuery({
+    ...(sandboxInstance
+      ? getFileDetailsQueryOptions({
+          path,
+          sandboxInstance,
+        })
+      : {
+          queryKey: fileSystemQueryKeys.details('unknown', path),
+          queryFn: async (): Promise<SandboxFileSystemNode> => {
+            throw new Error('Sandbox instance is not available')
+          },
+        }),
+    enabled,
   })
 }
 
@@ -120,7 +216,9 @@ export function useFilePreviewQuery({
           kind: 'text',
         }
       } catch (error) {
-        handleApiError(error, `Failed to read ${path}`)
+        handleFileSystemApiError(error, `Failed to read ${path}`, {
+          toastId: `filesystem-preview-${sandboxInstance?.id ?? 'unknown'}-${path}`,
+        })
         throw error
       }
     },
@@ -150,7 +248,9 @@ export function useFileSearchQuery({
         const response = await sandboxInstance.fs.searchFiles(ROOT_PATH, `*${query}*`)
         return response.files
       } catch (error) {
-        handleApiError(error, `Failed to search ${ROOT_PATH}`)
+        handleFileSystemApiError(error, `Failed to search ${ROOT_PATH}`, {
+          toastId: `filesystem-search-${sandboxInstance?.id ?? 'unknown'}-${query}`,
+        })
         throw error
       }
     },
