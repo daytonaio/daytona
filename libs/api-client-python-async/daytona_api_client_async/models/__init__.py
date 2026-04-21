@@ -168,6 +168,8 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.session_execute_request import SessionExecuteRequest
     from daytona_api_client_async.models.session_execute_response import SessionExecuteResponse
     from daytona_api_client_async.models.set_snapshot_general_status_dto import SetSnapshotGeneralStatusDto
+    from daytona_api_client_async.models.signed_file_download_info import SignedFileDownloadInfo
+    from daytona_api_client_async.models.signed_file_download_url import SignedFileDownloadUrl
     from daytona_api_client_async.models.signed_port_preview_url import SignedPortPreviewUrl
     from daytona_api_client_async.models.snapshot_dto import SnapshotDto
     from daytona_api_client_async.models.snapshot_manager_credentials import SnapshotManagerCredentials
@@ -350,6 +352,8 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "SessionExecuteRequest": "daytona_api_client_async.models.session_execute_request",
     "SessionExecuteResponse": "daytona_api_client_async.models.session_execute_response",
     "SetSnapshotGeneralStatusDto": "daytona_api_client_async.models.set_snapshot_general_status_dto",
+    "SignedFileDownloadInfo": "daytona_api_client_async.models.signed_file_download_info",
+    "SignedFileDownloadUrl": "daytona_api_client_async.models.signed_file_download_url",
     "SignedPortPreviewUrl": "daytona_api_client_async.models.signed_port_preview_url",
     "SnapshotDto": "daytona_api_client_async.models.snapshot_dto",
     "SnapshotManagerCredentials": "daytona_api_client_async.models.snapshot_manager_credentials",
