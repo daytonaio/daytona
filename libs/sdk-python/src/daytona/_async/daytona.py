@@ -112,6 +112,10 @@ class AsyncDaytona:
         - `DAYTONA_API_KEY`: Required API key for authentication
         - `DAYTONA_API_URL`: Required api URL
         - `DAYTONA_TARGET`: Optional target environment (if not provided, default region for the organization is used)
+        - `DAYTONA_WS_MAX_CONCURRENT_HANDSHAKES`: Optional limit on concurrent WebSocket
+          handshakes. Only useful for workloads that open hundreds of WebSocket connections
+          simultaneously (e.g. creating 500+ PTY sessions in a single burst). When set,
+          the SDK queues excess handshakes until a slot is available. Disabled by default.
 
         Args:
             config (DaytonaConfig | None): Object containing api_key, api_url, and target.
@@ -213,6 +217,11 @@ class AsyncDaytona:
             self._api_client.default_headers["X-Daytona-Organization-ID"] = self._organization_id
 
         self._pool_tracker: AsyncPoolSaturationTracker = AsyncPoolSaturationTracker(pool_size)
+
+        ws_concurrency_str = (env_reader or DaytonaEnvReader()).get("DAYTONA_WS_MAX_CONCURRENT_HANDSHAKES")
+        self._ws_handshake_semaphore: asyncio.Semaphore | None = (
+            asyncio.Semaphore(int(ws_concurrency_str)) if ws_concurrency_str is not None else None
+        )
 
         # Initialize API clients with the api_client instance
         self._sandbox_api: SandboxApi = SandboxApi(self._api_client)
@@ -529,6 +538,7 @@ class AsyncDaytona:
             self._sandbox_api,
             validated_language.value,
             self._pool_tracker,
+            ws_handshake_semaphore=self._ws_handshake_semaphore,
         )
 
         if sandbox.state != SandboxState.STARTED:
@@ -591,6 +601,7 @@ class AsyncDaytona:
             self._sandbox_api,
             language,
             self._pool_tracker,
+            ws_handshake_semaphore=self._ws_handshake_semaphore,
         )
 
     @intercept_errors(message_prefix="Failed to list sandboxes: ")
@@ -633,6 +644,7 @@ class AsyncDaytona:
                     self._sandbox_api,
                     language,
                     self._pool_tracker,
+                    ws_handshake_semaphore=self._ws_handshake_semaphore,
                 )
             )
 

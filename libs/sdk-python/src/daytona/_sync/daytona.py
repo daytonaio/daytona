@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import threading
 import time
 import warnings
 from copy import deepcopy
@@ -110,6 +111,10 @@ class Daytona:
         - `DAYTONA_API_KEY`: Required API key for authentication
         - `DAYTONA_API_URL`: Required api URL
         - `DAYTONA_TARGET`: Optional target environment (if not provided, default region for the organization is used)
+        - `DAYTONA_WS_MAX_CONCURRENT_HANDSHAKES`: Optional limit on concurrent WebSocket
+          handshakes. Only useful for workloads that open hundreds of WebSocket connections
+          simultaneously (e.g. creating 500+ PTY sessions in a single burst). When set,
+          the SDK queues excess handshakes until a slot is available. Disabled by default.
 
         Args:
             config (DaytonaConfig | None): Object containing api_key, api_url, and target.
@@ -212,6 +217,11 @@ class Daytona:
             if not self._organization_id:
                 raise DaytonaAuthenticationError("Organization ID is required when using JWT token")
             self._api_client.default_headers["X-Daytona-Organization-ID"] = self._organization_id
+
+        ws_concurrency_str = (env_reader or DaytonaEnvReader()).get("DAYTONA_WS_MAX_CONCURRENT_HANDSHAKES")
+        self._ws_handshake_semaphore: threading.Semaphore | None = (
+            threading.Semaphore(int(ws_concurrency_str)) if ws_concurrency_str is not None else None
+        )
 
         # Initialize API clients with the api_client instance
         self._sandbox_api: SandboxApi = SandboxApi(self._api_client)
@@ -475,6 +485,7 @@ class Daytona:
             self._toolbox_api_client,
             self._sandbox_api,
             validated_language.value,
+            ws_handshake_semaphore=self._ws_handshake_semaphore,
         )
 
         if sandbox.state != SandboxState.STARTED:
@@ -536,6 +547,7 @@ class Daytona:
             self._toolbox_api_client,
             self._sandbox_api,
             language,
+            ws_handshake_semaphore=self._ws_handshake_semaphore,
         )
 
     @intercept_errors(message_prefix="Failed to list sandboxes: ")
@@ -577,6 +589,7 @@ class Daytona:
                     self._toolbox_api_client,
                     self._sandbox_api,
                     language,
+                    ws_handshake_semaphore=self._ws_handshake_semaphore,
                 )
             )
 

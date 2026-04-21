@@ -104,6 +104,7 @@ class AsyncSandbox(SandboxDto):
         sandbox_api: SandboxApi,
         language: str,
         pool_tracker: AsyncPoolSaturationTracker | None = None,
+        ws_handshake_semaphore: asyncio.Semaphore | None = None,
     ):
         """Initialize a new Sandbox instance.
 
@@ -124,9 +125,9 @@ class AsyncSandbox(SandboxDto):
 
         self._fs = AsyncFileSystem(FileSystemApi(self._toolbox_api))
         self._git = AsyncGit(GitApi(self._toolbox_api))
-        self._process = AsyncProcess(language, ProcessApi(self._toolbox_api))
+        self._process = AsyncProcess(language, ProcessApi(self._toolbox_api), ws_handshake_semaphore)
         self._computer_use = AsyncComputerUse(ComputerUseApi(self._toolbox_api))
-        self._code_interpreter = AsyncCodeInterpreter(InterpreterApi(self._toolbox_api))
+        self._code_interpreter = AsyncCodeInterpreter(InterpreterApi(self._toolbox_api), ws_handshake_semaphore)
         self._info_api: InfoApi = InfoApi(self._toolbox_api)
 
     @property
@@ -721,6 +722,7 @@ class AsyncSandbox(SandboxDto):
             self._toolbox_api._api_client,
             self._sandbox_api,
             language,
+            ws_handshake_semaphore=self._process._ws_handshake_semaphore,
         )
         await forked.wait_for_sandbox_start(timeout=0)
         return forked

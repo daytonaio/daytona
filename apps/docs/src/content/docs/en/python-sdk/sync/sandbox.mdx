@@ -51,8 +51,11 @@ Represents a Daytona Sandbox.
 #### Sandbox.\_\_init\_\_
 
 ```python
-def __init__(sandbox_dto: SandboxDto, toolbox_api: ApiClient,
-             sandbox_api: SandboxApi, language: str)
+def __init__(sandbox_dto: SandboxDto,
+             toolbox_api: ApiClient,
+             sandbox_api: SandboxApi,
+             language: str,
+             ws_handshake_semaphore: threading.Semaphore | None = None)
 ```
 
 Initialize a new Sandbox instance.

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 
@@ -34,6 +35,7 @@ class AsyncCodeInterpreter:
     def __init__(
         self,
         api_client: InterpreterApi,
+        ws_handshake_semaphore: asyncio.Semaphore | None = None,
     ):
         """Initialize a new AsyncCodeInterpreter instance.
 
@@ -41,6 +43,7 @@ class AsyncCodeInterpreter:
             api_client: API client for interpreter operations.
         """
         self._api_client: InterpreterApi = api_client
+        self._ws_handshake_semaphore: asyncio.Semaphore | None = ws_handshake_semaphore
 
     @intercept_errors(message_prefix="Failed to run code: ")
     async def run_code(
@@ -116,51 +119,62 @@ class AsyncCodeInterpreter:
         result = ExecutionResult()
 
         try:
-            async with connect(url, additional_headers=headers) as websocket:
-                # Send execution request as first message
-                request: dict[str, str | int | dict[str, str]] = {"code": code}
-                if context is not None:
-                    request["contextId"] = context.id
-                if envs is not None:
-                    request["envs"] = envs
-                if timeout is not None:
-                    request["timeout"] = timeout
+            if self._ws_handshake_semaphore is not None:
+                _ = await self._ws_handshake_semaphore.acquire()
+            _sem_released = False
+            try:
+                async with connect(url, additional_headers=headers) as websocket:
+                    if self._ws_handshake_semaphore is not None:
+                        self._ws_handshake_semaphore.release()
+                        _sem_released = True
 
-                await websocket.send(json.dumps(request))
+                    # Send execution request as first message
+                    request: dict[str, str | int | dict[str, str]] = {"code": code}
+                    if context is not None:
+                        request["contextId"] = context.id
+                    if envs is not None:
+                        request["envs"] = envs
+                    if timeout is not None:
+                        request["timeout"] = timeout
 
-                # Process streaming chunks
-                while True:
-                    try:
-                        message = await websocket.recv()
-                        chunk = json.loads(message)
-                        chunk_type = chunk.get("type")
+                    await websocket.send(json.dumps(request))
 
-                        if chunk_type == "stdout":
-                            stdout = chunk.get("text", "")
-                            if on_stdout:
-                                _ = on_stdout(OutputMessage(output=stdout))
-                            result.stdout += stdout
+                    # Process streaming chunks
+                    while True:
+                        try:
+                            message = await websocket.recv()
+                            chunk = json.loads(message)
+                            chunk_type = chunk.get("type")
 
-                        elif chunk_type == "stderr":
-                            stderr = chunk.get("text", "")
-                            if on_stderr:
-                                _ = on_stderr(OutputMessage(output=stderr))
-                            result.stderr += stderr
+                            if chunk_type == "stdout":
+                                stdout = chunk.get("text", "")
+                                if on_stdout:
+                                    _ = on_stdout(OutputMessage(output=stdout))
+                                result.stdout += stdout
 
-                        elif chunk_type == "error":
-                            error = ExecutionError(
-                                name=chunk.get("name", ""),
-                                value=chunk.get("value", ""),
-                                traceback=chunk.get("traceback", ""),
-                            )
-                            result.error = error
-                            if on_error:
-                                _ = on_error(error)
+                            elif chunk_type == "stderr":
+                                stderr = chunk.get("text", "")
+                                if on_stderr:
+                                    _ = on_stderr(OutputMessage(output=stderr))
+                                result.stderr += stderr
 
-                    except ConnectionClosed as e:
-                        if isinstance(e, ConnectionClosedOK):
-                            break
-                        self._raise_from_ws_close(e)
+                            elif chunk_type == "error":
+                                error = ExecutionError(
+                                    name=chunk.get("name", ""),
+                                    value=chunk.get("value", ""),
+                                    traceback=chunk.get("traceback", ""),
+                                )
+                                result.error = error
+                                if on_error:
+                                    _ = on_error(error)
+
+                        except ConnectionClosed as e:
+                            if isinstance(e, ConnectionClosedOK):
+                                break
+                            self._raise_from_ws_close(e)
+            finally:
+                if self._ws_handshake_semaphore is not None and not _sem_released:
+                    self._ws_handshake_semaphore.release()
 
         except ConnectionClosed as e:
             if isinstance(e, ConnectionClosedOK):

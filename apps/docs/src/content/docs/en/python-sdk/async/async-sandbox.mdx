@@ -55,7 +55,8 @@ def __init__(sandbox_dto: SandboxDto,
              toolbox_api: ApiClient,
              sandbox_api: SandboxApi,
              language: str,
-             pool_tracker: AsyncPoolSaturationTracker | None = None)
+             pool_tracker: AsyncPoolSaturationTracker | None = None,
+             ws_handshake_semaphore: asyncio.Semaphore | None = None)
 ```
 
 Initialize a new Sandbox instance.

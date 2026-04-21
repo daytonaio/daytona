@@ -22,7 +22,8 @@ or execute the appropriate command directly in the sandbox terminal.
 #### AsyncCodeInterpreter.\_\_init\_\_
 
 ```python
-def __init__(api_client: InterpreterApi)
+def __init__(api_client: InterpreterApi,
+             ws_handshake_semaphore: asyncio.Semaphore | None = None)
 ```
 
 Initialize a new AsyncCodeInterpreter instance.

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import threading
 import time
 
 from deprecated import deprecated
@@ -103,6 +104,7 @@ class Sandbox(SandboxDto):
         toolbox_api: ApiClient,
         sandbox_api: SandboxApi,
         language: str,
+        ws_handshake_semaphore: threading.Semaphore | None = None,
     ):
         """Initialize a new Sandbox instance.
 
@@ -121,9 +123,9 @@ class Sandbox(SandboxDto):
 
         self._fs = FileSystem(FileSystemApi(self._toolbox_api))
         self._git = Git(GitApi(self._toolbox_api))
-        self._process = Process(language, ProcessApi(self._toolbox_api))
+        self._process = Process(language, ProcessApi(self._toolbox_api), ws_handshake_semaphore)
         self._computer_use = ComputerUse(ComputerUseApi(self._toolbox_api))
-        self._code_interpreter = CodeInterpreter(InterpreterApi(self._toolbox_api))
+        self._code_interpreter = CodeInterpreter(InterpreterApi(self._toolbox_api), ws_handshake_semaphore)
         self._info_api: InfoApi = InfoApi(self._toolbox_api)
 
     @property
@@ -716,6 +718,7 @@ class Sandbox(SandboxDto):
             self._toolbox_api._api_client,
             self._sandbox_api,
             language,
+            ws_handshake_semaphore=self._process._ws_handshake_semaphore,
         )
         forked.wait_for_sandbox_start(timeout=0)
         return forked

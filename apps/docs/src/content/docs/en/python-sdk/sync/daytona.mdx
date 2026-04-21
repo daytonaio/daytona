@@ -63,6 +63,10 @@ If no config is provided, reads from environment variables:
 - `DAYTONA_API_KEY`: Required API key for authentication
 - `DAYTONA_API_URL`: Required api URL
 - `DAYTONA_TARGET`: Optional target environment (if not provided, default region for the organization is used)
+- `DAYTONA_WS_MAX_CONCURRENT_HANDSHAKES`: Optional limit on concurrent WebSocket
+handshakes. Only useful for workloads that open hundreds of WebSocket connections
+simultaneously (e.g. creating 500+ PTY sessions in a single burst). When set,
+the SDK queues excess handshakes until a slot is available. Disabled by default.
 
 **Arguments**:
 
