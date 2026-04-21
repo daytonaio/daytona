@@ -378,7 +378,13 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
 
     // OrganizationAuthContextGuard caches the org for 10s; clear it so the next request
     // (e.g. sandbox creation immediately after setDefaultRegion) reads fresh state.
-    await this.redis.del(`organization:${organizationId}`)
+    // Best-effort: the DB update is already committed, so don't fail the request if Redis
+    // is unavailable — the cache entry will expire within 10s anyway.
+    try {
+      await this.redis.del(`organization:${organizationId}`)
+    } catch (error) {
+      this.logger.warn(`Failed to invalidate organization cache for ${organizationId}: ${error?.message ?? error}`)
+    }
   }
 
   async updateExperimentalConfig(
