@@ -145,6 +145,8 @@ export * from './session';
 export * from './session-execute-request';
 export * from './session-execute-response';
 export * from './set-snapshot-general-status-dto';
+export * from './signed-file-download-info';
+export * from './signed-file-download-url';
 export * from './signed-port-preview-url';
 export * from './snapshot-dto';
 export * from './snapshot-manager-credentials';

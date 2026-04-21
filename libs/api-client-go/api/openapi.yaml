@@ -2835,6 +2835,98 @@ paths:
       summary: Expire signed preview URL for a sandbox port
       tags:
       - sandbox
+  /sandbox/{sandboxIdOrName}/files/signed-download-url:
+    get:
+      operationId: getSignedFileDownloadUrl
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: ID or name of the sandbox
+        explode: false
+        in: path
+        name: sandboxIdOrName
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: File path to download from the sandbox
+        explode: true
+        in: query
+        name: path
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: "Expiration time in seconds (default: 900 seconds)"
+        explode: true
+        in: query
+        name: expiresInSeconds
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignedFileDownloadUrl'
+          description: Signed file download URL
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Get signed file download URL
+      tags:
+      - sandbox
+  /sandbox/{sandboxIdOrName}/files/signed-download-url/{token}/expire:
+    post:
+      operationId: expireSignedFileDownloadUrl
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: ID or name of the sandbox
+        explode: false
+        in: path
+        name: sandboxIdOrName
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Token of the signed file download URL to expire
+        explode: false
+        in: path
+        name: token
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Signed file download URL has been expired
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Expire signed file download URL
+      tags:
+      - sandbox
   /sandbox/{sandboxIdOrName}/build-logs:
     get:
       deprecated: true
@@ -7532,6 +7624,34 @@ paths:
       summary: Get sandbox ID from signed preview URL token
       tags:
       - preview
+  /preview/file-download/{signedFileDownloadToken}/sandbox-info:
+    get:
+      operationId: getSandboxInfoFromSignedFileDownloadToken
+      parameters:
+      - description: Signed file download URL token
+        explode: false
+        in: path
+        name: signedFileDownloadToken
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignedFileDownloadInfo'
+          description: Sandbox ID and file path from signed file download token
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Get sandbox info from signed file download token
+      tags:
+      - preview
   /volumes:
     get:
       operationId: listVolumes
@@ -11222,6 +11342,41 @@ components:
       - token
       - url
       type: object
+    SignedFileDownloadUrl:
+      example:
+        path: /home/daytona/report.pdf
+        sandboxId: "123456"
+        url: https://2280-fdla7bx3km9qw2np.proxy.example.com/files/download
+        expiresAt: 2026-04-21T12:30:00.000Z
+        token: fdla7bx3km9qw2np
+      properties:
+        sandboxId:
+          description: ID of the sandbox
+          example: "123456"
+          type: string
+        path:
+          description: File path in the sandbox
+          example: /home/daytona/report.pdf
+          type: string
+        token:
+          description: Token of the signed file download URL
+          example: fdla7bx3km9qw2np
+          type: string
+        url:
+          description: Signed file download URL
+          example: https://2280-fdla7bx3km9qw2np.proxy.example.com/files/download
+          type: string
+        expiresAt:
+          description: Expiration time of the signed URL (ISO 8601)
+          example: 2026-04-21T12:30:00.000Z
+          type: string
+      required:
+      - expiresAt
+      - path
+      - sandboxId
+      - token
+      - url
+      type: object
     Url:
       example:
         url: url
@@ -13968,6 +14123,23 @@ components:
       required:
       - token
       - url
+      type: object
+    SignedFileDownloadInfo:
+      example:
+        path: /home/daytona/report.pdf
+        sandboxId: "123456"
+      properties:
+        sandboxId:
+          description: ID of the sandbox
+          example: "123456"
+          type: string
+        path:
+          description: File path in the sandbox
+          example: /home/daytona/report.pdf
+          type: string
+      required:
+      - path
+      - sandboxId
       type: object
     VolumeState:
       description: Volume state

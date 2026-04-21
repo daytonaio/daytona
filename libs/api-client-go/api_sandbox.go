@@ -103,6 +103,19 @@ type SandboxAPI interface {
 	DeleteSandboxExecute(r SandboxAPIDeleteSandboxRequest) (*Sandbox, *http.Response, error)
 
 	/*
+	ExpireSignedFileDownloadUrl Expire signed file download URL
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@param token Token of the signed file download URL to expire
+	@return SandboxAPIExpireSignedFileDownloadUrlRequest
+	*/
+	ExpireSignedFileDownloadUrl(ctx context.Context, sandboxIdOrName string, token string) SandboxAPIExpireSignedFileDownloadUrlRequest
+
+	// ExpireSignedFileDownloadUrlExecute executes the request
+	ExpireSignedFileDownloadUrlExecute(r SandboxAPIExpireSignedFileDownloadUrlRequest) (*http.Response, error)
+
+	/*
 	ExpireSignedPortPreviewUrl Expire signed preview URL for a sandbox port
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -323,6 +336,19 @@ type SandboxAPI interface {
 	// GetSandboxesForRunnerExecute executes the request
 	//  @return []Sandbox
 	GetSandboxesForRunnerExecute(r SandboxAPIGetSandboxesForRunnerRequest) ([]Sandbox, *http.Response, error)
+
+	/*
+	GetSignedFileDownloadUrl Get signed file download URL
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@return SandboxAPIGetSignedFileDownloadUrlRequest
+	*/
+	GetSignedFileDownloadUrl(ctx context.Context, sandboxIdOrName string) SandboxAPIGetSignedFileDownloadUrlRequest
+
+	// GetSignedFileDownloadUrlExecute executes the request
+	//  @return SignedFileDownloadUrl
+	GetSignedFileDownloadUrlExecute(r SandboxAPIGetSignedFileDownloadUrlRequest) (*SignedFileDownloadUrl, *http.Response, error)
 
 	/*
 	GetSignedPortPreviewUrl Get signed preview URL for a sandbox port
@@ -1241,6 +1267,110 @@ func (a *SandboxAPIService) DeleteSandboxExecute(r SandboxAPIDeleteSandboxReques
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SandboxAPIExpireSignedFileDownloadUrlRequest struct {
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxIdOrName string
+	token string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIExpireSignedFileDownloadUrlRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIExpireSignedFileDownloadUrlRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r SandboxAPIExpireSignedFileDownloadUrlRequest) Execute() (*http.Response, error) {
+	return r.ApiService.ExpireSignedFileDownloadUrlExecute(r)
+}
+
+/*
+ExpireSignedFileDownloadUrl Expire signed file download URL
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxIdOrName ID or name of the sandbox
+ @param token Token of the signed file download URL to expire
+ @return SandboxAPIExpireSignedFileDownloadUrlRequest
+*/
+func (a *SandboxAPIService) ExpireSignedFileDownloadUrl(ctx context.Context, sandboxIdOrName string, token string) SandboxAPIExpireSignedFileDownloadUrlRequest {
+	return SandboxAPIExpireSignedFileDownloadUrlRequest{
+		ApiService: a,
+		ctx: ctx,
+		sandboxIdOrName: sandboxIdOrName,
+		token: token,
+	}
+}
+
+// Execute executes the request
+func (a *SandboxAPIService) ExpireSignedFileDownloadUrlExecute(r SandboxAPIExpireSignedFileDownloadUrlRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.ExpireSignedFileDownloadUrl")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/files/signed-download-url/{token}/expire"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"token"+"}", url.PathEscape(parameterValueToString(r.token, "token")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
 }
 
 type SandboxAPIExpireSignedPortPreviewUrlRequest struct {
@@ -3188,6 +3318,138 @@ func (a *SandboxAPIService) GetSandboxesForRunnerExecute(r SandboxAPIGetSandboxe
 	}
 	if r.skipReconcilingSandboxes != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "skipReconcilingSandboxes", r.skipReconcilingSandboxes, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SandboxAPIGetSignedFileDownloadUrlRequest struct {
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxIdOrName string
+	path *string
+	xDaytonaOrganizationID *string
+	expiresInSeconds *int32
+}
+
+// File path to download from the sandbox
+func (r SandboxAPIGetSignedFileDownloadUrlRequest) Path(path string) SandboxAPIGetSignedFileDownloadUrlRequest {
+	r.path = &path
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIGetSignedFileDownloadUrlRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIGetSignedFileDownloadUrlRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// Expiration time in seconds (default: 900 seconds)
+func (r SandboxAPIGetSignedFileDownloadUrlRequest) ExpiresInSeconds(expiresInSeconds int32) SandboxAPIGetSignedFileDownloadUrlRequest {
+	r.expiresInSeconds = &expiresInSeconds
+	return r
+}
+
+func (r SandboxAPIGetSignedFileDownloadUrlRequest) Execute() (*SignedFileDownloadUrl, *http.Response, error) {
+	return r.ApiService.GetSignedFileDownloadUrlExecute(r)
+}
+
+/*
+GetSignedFileDownloadUrl Get signed file download URL
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxIdOrName ID or name of the sandbox
+ @return SandboxAPIGetSignedFileDownloadUrlRequest
+*/
+func (a *SandboxAPIService) GetSignedFileDownloadUrl(ctx context.Context, sandboxIdOrName string) SandboxAPIGetSignedFileDownloadUrlRequest {
+	return SandboxAPIGetSignedFileDownloadUrlRequest{
+		ApiService: a,
+		ctx: ctx,
+		sandboxIdOrName: sandboxIdOrName,
+	}
+}
+
+// Execute executes the request
+//  @return SignedFileDownloadUrl
+func (a *SandboxAPIService) GetSignedFileDownloadUrlExecute(r SandboxAPIGetSignedFileDownloadUrlRequest) (*SignedFileDownloadUrl, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *SignedFileDownloadUrl
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetSignedFileDownloadUrl")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/files/signed-download-url"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.path == nil {
+		return localVarReturnValue, nil, reportError("path is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "path", r.path, "form", "")
+	if r.expiresInSeconds != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "expiresInSeconds", r.expiresInSeconds, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

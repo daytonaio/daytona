@@ -21,6 +21,8 @@ import globalAxios from 'axios';
 import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
+// @ts-ignore
+import type { SignedFileDownloadInfo } from '../models';
 /**
  * PreviewApi - axios parameter creator
  * @export
@@ -43,6 +45,46 @@ export const PreviewApiAxiosParamCreator = function (configuration?: Configurati
             const localVarPath = `/preview/{signedPreviewToken}/{port}/sandbox-id`
                 .replace(`{${"signedPreviewToken"}}`, encodeURIComponent(String(signedPreviewToken)))
                 .replace(`{${"port"}}`, encodeURIComponent(String(port)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get sandbox info from signed file download token
+         * @param {string} signedFileDownloadToken Signed file download URL token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSandboxInfoFromSignedFileDownloadToken: async (signedFileDownloadToken: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'signedFileDownloadToken' is not null or undefined
+            assertParamExists('getSandboxInfoFromSignedFileDownloadToken', 'signedFileDownloadToken', signedFileDownloadToken)
+            const localVarPath = `/preview/file-download/{signedFileDownloadToken}/sandbox-info`
+                .replace(`{${"signedFileDownloadToken"}}`, encodeURIComponent(String(signedFileDownloadToken)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -221,6 +263,19 @@ export const PreviewApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Get sandbox info from signed file download token
+         * @param {string} signedFileDownloadToken Signed file download URL token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSandboxInfoFromSignedFileDownloadToken(signedFileDownloadToken: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SignedFileDownloadInfo>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSandboxInfoFromSignedFileDownloadToken(signedFileDownloadToken, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PreviewApi.getSandboxInfoFromSignedFileDownloadToken']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Check if user has access to the sandbox
          * @param {string} sandboxId 
          * @param {*} [options] Override http request option.
@@ -282,6 +337,16 @@ export const PreviewApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
+         * @summary Get sandbox info from signed file download token
+         * @param {string} signedFileDownloadToken Signed file download URL token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSandboxInfoFromSignedFileDownloadToken(signedFileDownloadToken: string, options?: RawAxiosRequestConfig): AxiosPromise<SignedFileDownloadInfo> {
+            return localVarFp.getSandboxInfoFromSignedFileDownloadToken(signedFileDownloadToken, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Check if user has access to the sandbox
          * @param {string} sandboxId 
          * @param {*} [options] Override http request option.
@@ -332,6 +397,18 @@ export class PreviewApi extends BaseAPI {
      */
     public getSandboxIdFromSignedPreviewUrlToken(signedPreviewToken: string, port: number, options?: RawAxiosRequestConfig) {
         return PreviewApiFp(this.configuration).getSandboxIdFromSignedPreviewUrlToken(signedPreviewToken, port, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get sandbox info from signed file download token
+     * @param {string} signedFileDownloadToken Signed file download URL token
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PreviewApi
+     */
+    public getSandboxInfoFromSignedFileDownloadToken(signedFileDownloadToken: string, options?: RawAxiosRequestConfig) {
+        return PreviewApiFp(this.configuration).getSandboxInfoFromSignedFileDownloadToken(signedFileDownloadToken, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

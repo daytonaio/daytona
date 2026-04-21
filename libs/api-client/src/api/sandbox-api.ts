@@ -48,6 +48,8 @@ import type { Sandbox } from '../models';
 // @ts-ignore
 import type { SandboxLabels } from '../models';
 // @ts-ignore
+import type { SignedFileDownloadUrl } from '../models';
+// @ts-ignore
 import type { SignedPortPreviewUrl } from '../models';
 // @ts-ignore
 import type { SshAccessDto } from '../models';
@@ -321,6 +323,54 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             }
 
             const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Expire signed file download URL
+         * @param {string} sandboxIdOrName ID or name of the sandbox
+         * @param {string} token Token of the signed file download URL to expire
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        expireSignedFileDownloadUrl: async (sandboxIdOrName: string, token: string, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'sandboxIdOrName' is not null or undefined
+            assertParamExists('expireSignedFileDownloadUrl', 'sandboxIdOrName', sandboxIdOrName)
+            // verify required parameter 'token' is not null or undefined
+            assertParamExists('expireSignedFileDownloadUrl', 'token', token)
+            const localVarPath = `/sandbox/{sandboxIdOrName}/files/signed-download-url/{token}/expire`
+                .replace(`{${"sandboxIdOrName"}}`, encodeURIComponent(String(sandboxIdOrName)))
+                .replace(`{${"token"}}`, encodeURIComponent(String(token)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -1165,6 +1215,62 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             if (skipReconcilingSandboxes !== undefined) {
                 localVarQueryParameter['skipReconcilingSandboxes'] = skipReconcilingSandboxes;
+            }
+
+
+    
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get signed file download URL
+         * @param {string} sandboxIdOrName ID or name of the sandbox
+         * @param {string} path File path to download from the sandbox
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {number} [expiresInSeconds] Expiration time in seconds (default: 900 seconds)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSignedFileDownloadUrl: async (sandboxIdOrName: string, path: string, xDaytonaOrganizationID?: string, expiresInSeconds?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'sandboxIdOrName' is not null or undefined
+            assertParamExists('getSignedFileDownloadUrl', 'sandboxIdOrName', sandboxIdOrName)
+            // verify required parameter 'path' is not null or undefined
+            assertParamExists('getSignedFileDownloadUrl', 'path', path)
+            const localVarPath = `/sandbox/{sandboxIdOrName}/files/signed-download-url`
+                .replace(`{${"sandboxIdOrName"}}`, encodeURIComponent(String(sandboxIdOrName)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+            if (path !== undefined) {
+                localVarQueryParameter['path'] = path;
+            }
+
+            if (expiresInSeconds !== undefined) {
+                localVarQueryParameter['expiresInSeconds'] = expiresInSeconds;
             }
 
 
@@ -2189,6 +2295,21 @@ export const SandboxApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Expire signed file download URL
+         * @param {string} sandboxIdOrName ID or name of the sandbox
+         * @param {string} token Token of the signed file download URL to expire
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async expireSignedFileDownloadUrl(sandboxIdOrName: string, token: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.expireSignedFileDownloadUrl(sandboxIdOrName, token, xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SandboxApi.expireSignedFileDownloadUrl']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Expire signed preview URL for a sandbox port
          * @param {string} sandboxIdOrName ID or name of the sandbox
          * @param {number} port Port number to expire signed preview URL for
@@ -2432,6 +2553,22 @@ export const SandboxApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getSandboxesForRunner(xDaytonaOrganizationID, states, skipReconcilingSandboxes, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SandboxApi.getSandboxesForRunner']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get signed file download URL
+         * @param {string} sandboxIdOrName ID or name of the sandbox
+         * @param {string} path File path to download from the sandbox
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {number} [expiresInSeconds] Expiration time in seconds (default: 900 seconds)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSignedFileDownloadUrl(sandboxIdOrName: string, path: string, xDaytonaOrganizationID?: string, expiresInSeconds?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SignedFileDownloadUrl>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSignedFileDownloadUrl(sandboxIdOrName, path, xDaytonaOrganizationID, expiresInSeconds, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SandboxApi.getSignedFileDownloadUrl']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -2783,6 +2920,18 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
+         * @summary Expire signed file download URL
+         * @param {string} sandboxIdOrName ID or name of the sandbox
+         * @param {string} token Token of the signed file download URL to expire
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        expireSignedFileDownloadUrl(sandboxIdOrName: string, token: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.expireSignedFileDownloadUrl(sandboxIdOrName, token, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Expire signed preview URL for a sandbox port
          * @param {string} sandboxIdOrName ID or name of the sandbox
          * @param {number} port Port number to expire signed preview URL for
@@ -2979,6 +3128,19 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
          */
         getSandboxesForRunner(xDaytonaOrganizationID?: string, states?: string, skipReconcilingSandboxes?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<Array<Sandbox>> {
             return localVarFp.getSandboxesForRunner(xDaytonaOrganizationID, states, skipReconcilingSandboxes, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get signed file download URL
+         * @param {string} sandboxIdOrName ID or name of the sandbox
+         * @param {string} path File path to download from the sandbox
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {number} [expiresInSeconds] Expiration time in seconds (default: 900 seconds)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSignedFileDownloadUrl(sandboxIdOrName: string, path: string, xDaytonaOrganizationID?: string, expiresInSeconds?: number, options?: RawAxiosRequestConfig): AxiosPromise<SignedFileDownloadUrl> {
+            return localVarFp.getSignedFileDownloadUrl(sandboxIdOrName, path, xDaytonaOrganizationID, expiresInSeconds, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3290,6 +3452,20 @@ export class SandboxApi extends BaseAPI {
 
     /**
      * 
+     * @summary Expire signed file download URL
+     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {string} token Token of the signed file download URL to expire
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SandboxApi
+     */
+    public expireSignedFileDownloadUrl(sandboxIdOrName: string, token: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return SandboxApiFp(this.configuration).expireSignedFileDownloadUrl(sandboxIdOrName, token, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
      * @summary Expire signed preview URL for a sandbox port
      * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {number} port Port number to expire signed preview URL for
@@ -3517,6 +3693,21 @@ export class SandboxApi extends BaseAPI {
      */
     public getSandboxesForRunner(xDaytonaOrganizationID?: string, states?: string, skipReconcilingSandboxes?: boolean, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getSandboxesForRunner(xDaytonaOrganizationID, states, skipReconcilingSandboxes, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get signed file download URL
+     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {string} path File path to download from the sandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [expiresInSeconds] Expiration time in seconds (default: 900 seconds)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SandboxApi
+     */
+    public getSignedFileDownloadUrl(sandboxIdOrName: string, path: string, xDaytonaOrganizationID?: string, expiresInSeconds?: number, options?: RawAxiosRequestConfig) {
+        return SandboxApiFp(this.configuration).getSignedFileDownloadUrl(sandboxIdOrName, path, xDaytonaOrganizationID, expiresInSeconds, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

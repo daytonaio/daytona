@@ -170,6 +170,8 @@ model_session.go
 model_session_execute_request.go
 model_session_execute_response.go
 model_set_snapshot_general_status_dto.go
+model_signed_file_download_info.go
+model_signed_file_download_url.go
 model_signed_port_preview_url.go
 model_snapshot_dto.go
 model_snapshot_manager_credentials.go
