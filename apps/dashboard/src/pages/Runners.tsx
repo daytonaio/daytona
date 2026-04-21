@@ -65,7 +65,7 @@ const Runners: React.FC = () => {
         setLoadingRunnersData(true)
       }
       try {
-        const response = (await runnersApi.listRunners(selectedOrganization.id)).data
+        const response = (await runnersApi.listRunners(undefined, selectedOrganization.id)).data
         setRunners(response || [])
       } catch (error) {
         handleApiError(error, 'Failed to fetch runners')
