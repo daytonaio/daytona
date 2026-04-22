@@ -11,13 +11,14 @@ import type { QueryKey } from '@tanstack/react-query'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 
-interface UseSandboxWsSyncOptions<TData> {
+interface UseSandboxWsSyncOptions {
+  enabled?: boolean
   sandboxId?: string
   queryKey: QueryKey
-  sync: (oldData: TData | undefined, sandbox: Sandbox) => TData | undefined
+  sync: (oldData: Sandbox | undefined, sandbox: Sandbox) => Sandbox | undefined
 }
 
-export function useSandboxWsSync({ sandboxId, queryKey, sync }: UseSandboxWsSyncOptions<Sandbox>) {
+export function useSandboxWsSync({ enabled = true, sandboxId, queryKey, sync }: UseSandboxWsSyncOptions) {
   const { notificationSocket } = useNotificationSocket()
   const { selectedOrganization } = useSelectedOrganization()
   const queryClient = useQueryClient()
@@ -28,7 +29,7 @@ export function useSandboxWsSync({ sandboxId, queryKey, sync }: UseSandboxWsSync
   syncRef.current = sync
 
   useEffect(() => {
-    if (!notificationSocket || !selectedOrganization?.id) return
+    if (!enabled || !notificationSocket || !selectedOrganization?.id || !sandboxId) return
 
     const cancelSandboxQuery = () => {
       queryClient.cancelQueries({
@@ -69,13 +70,14 @@ export function useSandboxWsSync({ sandboxId, queryKey, sync }: UseSandboxWsSync
       notificationSocket.off('sandbox.state.updated', handleStateUpdated)
       notificationSocket.off('sandbox.desired-state.updated', handleDesiredStateUpdated)
     }
-  }, [notificationSocket, selectedOrganization?.id, sandboxId, queryClient])
+  }, [enabled, notificationSocket, selectedOrganization?.id, sandboxId, queryClient])
 }
 
 export function useSandboxDetailsWsSync(sandboxId?: string) {
   const { selectedOrganization } = useSelectedOrganization()
 
   useSandboxWsSync({
+    enabled: Boolean(selectedOrganization?.id && sandboxId),
     sandboxId,
     queryKey: queryKeys.sandboxes.detail(selectedOrganization?.id ?? '', sandboxId ?? ''),
     sync: (oldData, sandbox) => {
