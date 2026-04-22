@@ -19,7 +19,7 @@ module DaytonaToolboxApiClient
 
     attr_accessor :email
 
-    attr_accessor :hash
+    attr_accessor :_hash
 
     attr_accessor :message
 
@@ -30,7 +30,7 @@ module DaytonaToolboxApiClient
       {
         :'author' => :'author',
         :'email' => :'email',
-        :'hash' => :'hash',
+        :'_hash' => :'hash',
         :'message' => :'message',
         :'timestamp' => :'timestamp'
       }
@@ -51,7 +51,7 @@ module DaytonaToolboxApiClient
       {
         :'author' => :'String',
         :'email' => :'String',
-        :'hash' => :'String',
+        :'_hash' => :'String',
         :'message' => :'String',
         :'timestamp' => :'String'
       }
@@ -91,10 +91,10 @@ module DaytonaToolboxApiClient
         self.email = nil
       end
 
-      if attributes.key?(:'hash')
-        self.hash = attributes[:'hash']
+      if attributes.key?(:'_hash')
+        self._hash = attributes[:'_hash']
       else
-        self.hash = nil
+        self._hash = nil
       end
 
       if attributes.key?(:'message')
@@ -123,8 +123,8 @@ module DaytonaToolboxApiClient
         invalid_properties.push('invalid value for "email", email cannot be nil.')
       end
 
-      if @hash.nil?
-        invalid_properties.push('invalid value for "hash", hash cannot be nil.')
+      if @_hash.nil?
+        invalid_properties.push('invalid value for "_hash", _hash cannot be nil.')
       end
 
       if @message.nil?
@@ -144,7 +144,7 @@ module DaytonaToolboxApiClient
       warn '[DEPRECATED] the `valid?` method is obsolete'
       return false if @author.nil?
       return false if @email.nil?
-      return false if @hash.nil?
+      return false if @_hash.nil?
       return false if @message.nil?
       return false if @timestamp.nil?
       true
@@ -171,13 +171,13 @@ module DaytonaToolboxApiClient
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] hash Value to be assigned
-    def hash=(hash)
-      if hash.nil?
-        fail ArgumentError, 'hash cannot be nil'
+    # @param [Object] _hash Value to be assigned
+    def _hash=(_hash)
+      if _hash.nil?
+        fail ArgumentError, '_hash cannot be nil'
       end
 
-      @hash = hash
+      @_hash = _hash
     end
 
     # Custom attribute writer method with validation
@@ -207,7 +207,7 @@ module DaytonaToolboxApiClient
       self.class == o.class &&
           author == o.author &&
           email == o.email &&
-          hash == o.hash &&
+          _hash == o._hash &&
           message == o.message &&
           timestamp == o.timestamp
     end
@@ -221,7 +221,7 @@ module DaytonaToolboxApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [author, email, hash, message, timestamp].hash
+      [author, email, _hash, message, timestamp].hash
     end
 
     # Builds the object from hash

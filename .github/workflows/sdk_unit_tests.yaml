@@ -1,0 +1,57 @@
+name: '[PR] SDK Unit Tests'
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'libs/sdk-typescript/**'
+      - 'libs/sdk-python/**'
+      - 'libs/sdk-go/**'
+      - 'libs/sdk-ruby/**'
+      - 'libs/sdk-java/**'
+      - 'libs/api-client/**'
+      - 'libs/api-client-go/**'
+      - 'libs/api-client-java/**'
+      - 'libs/api-client-python/**'
+      - 'libs/api-client-python-async/**'
+      - 'libs/api-client-ruby/**'
+      - 'libs/toolbox-api-client/**'
+      - 'libs/toolbox-api-client-go/**'
+      - 'libs/toolbox-api-client-java/**'
+      - 'libs/toolbox-api-client-python/**'
+      - 'libs/toolbox-api-client-python-async/**'
+      - 'libs/toolbox-api-client-ruby/**'
+      - '.github/workflows/sdk_unit_tests.yaml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  POETRY_VIRTUALENVS_IN_PROJECT: true
+
+jobs:
+  test-sdk-unit:
+    name: SDK Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-toolchain
+
+      - name: Install Python test dependencies
+        run: |
+          source "$(poetry env info --path)/bin/activate"
+          pip install pytest pytest-asyncio
+
+      - name: Publish Java API clients to Maven local
+        run: |
+          (cd libs/api-client-java && ./gradlew publishToMavenLocal -x test)
+          (cd libs/toolbox-api-client-java && ./gradlew publishToMavenLocal -x test)
+
+      - name: Run SDK unit tests
+        run: yarn test:unit

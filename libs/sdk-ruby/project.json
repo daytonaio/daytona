@@ -41,6 +41,24 @@
         "command": "bundle exec rubocop"
       }
     },
+    "test:unit": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "bundle exec rspec --format documentation --tag '~e2e'"
+      }
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "bundle exec rspec spec/e2e_spec.rb --format documentation"
+      }
+    },
+    "test": {
+      "executor": "nx:noop",
+      "dependsOn": ["test:unit", "test:e2e"]
+    },
     "format": {
       "executor": "nx:run-commands",
       "options": {

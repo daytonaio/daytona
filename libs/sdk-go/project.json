@@ -14,13 +14,25 @@
         "parallel": false
       }
     },
-    "test": {
+    "test:unit": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "go test -v -race ./..."
+        "command": "go test -v -race -count=1 -run '^Test[^E]|^TestE[^2]|^TestE2[^E]' ./..."
       },
       "dependsOn": ["build"]
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "go test -v -run TestE2E -timeout 180s -count=1 ./pkg/daytona/"
+      },
+      "dependsOn": ["build"]
+    },
+    "test": {
+      "executor": "nx:noop",
+      "dependsOn": ["test:unit", "test:e2e"]
     },
     "test:coverage": {
       "executor": "nx:run-commands",

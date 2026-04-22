@@ -15,12 +15,12 @@ require 'time'
 
 module DaytonaToolboxApiClient
   class GitCommitResponse
-    attr_accessor :hash
+    attr_accessor :_hash
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'hash' => :'hash'
+        :'_hash' => :'hash'
       }
     end
 
@@ -37,7 +37,7 @@ module DaytonaToolboxApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'hash' => :'String'
+        :'_hash' => :'String'
       }
     end
 
@@ -63,10 +63,10 @@ module DaytonaToolboxApiClient
         h[k.to_sym] = v
       }
 
-      if attributes.key?(:'hash')
-        self.hash = attributes[:'hash']
+      if attributes.key?(:'_hash')
+        self._hash = attributes[:'_hash']
       else
-        self.hash = nil
+        self._hash = nil
       end
     end
 
@@ -75,8 +75,8 @@ module DaytonaToolboxApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
-      if @hash.nil?
-        invalid_properties.push('invalid value for "hash", hash cannot be nil.')
+      if @_hash.nil?
+        invalid_properties.push('invalid value for "_hash", _hash cannot be nil.')
       end
 
       invalid_properties
@@ -86,18 +86,18 @@ module DaytonaToolboxApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      return false if @hash.nil?
+      return false if @_hash.nil?
       true
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] hash Value to be assigned
-    def hash=(hash)
-      if hash.nil?
-        fail ArgumentError, 'hash cannot be nil'
+    # @param [Object] _hash Value to be assigned
+    def _hash=(_hash)
+      if _hash.nil?
+        fail ArgumentError, '_hash cannot be nil'
       end
 
-      @hash = hash
+      @_hash = _hash
     end
 
     # Checks equality by comparing each attribute.
@@ -105,7 +105,7 @@ module DaytonaToolboxApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          hash == o.hash
+          _hash == o._hash
     end
 
     # @see the `==` method
@@ -117,7 +117,7 @@ module DaytonaToolboxApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [hash].hash
+      [_hash].hash
     end
 
     # Builds the object from hash

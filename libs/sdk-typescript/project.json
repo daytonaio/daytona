@@ -12,6 +12,36 @@
         "command": "npm run docs"
       }
     },
+    "test:unit": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "npx jest --config jest.config.js --testPathIgnorePatterns='e2e' --passWithNoTests"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": ["api-client", "toolbox-api-client"]
+        }
+      ]
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "npx jest --config jest.config.js --testPathPatterns='e2e' --testTimeout=120000 --passWithNoTests"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": ["api-client", "toolbox-api-client"]
+        }
+      ]
+    },
+    "test": {
+      "executor": "nx:noop",
+      "dependsOn": ["test:unit", "test:e2e"]
+    },
     "build": {
       "executor": "@nx/js:tsc",
       "options": {

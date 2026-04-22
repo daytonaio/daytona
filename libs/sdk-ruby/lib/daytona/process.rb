@@ -500,7 +500,7 @@ module Daytona
     #     puts "PTY Session #{session.id}: #{session.cols}x#{session.rows}"
     #   end
     def list_pty_sessions
-      toolbox_api.list_pty_sessions
+      toolbox_api.list_pty_sessions.sessions || []
     end
 
     # Gets detailed information about a specific PTY session

@@ -65,6 +65,24 @@
         "cwd": "{projectRoot}",
         "command": "./gradlew clean"
       }
+    },
+    "test:unit": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "./gradlew test --info"
+      }
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "./gradlew testE2E --info"
+      }
+    },
+    "test": {
+      "executor": "nx:noop",
+      "dependsOn": ["test:unit", "test:e2e"]
     }
   }
 }

@@ -299,7 +299,7 @@ module Daytona
     module WebSocketControlStatus
       ALL = [
         CONNECTED = 'connected',
-        ERORR = 'error'
+        ERROR = 'error'
       ].freeze
     end
   end

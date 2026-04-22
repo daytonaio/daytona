@@ -12,6 +12,24 @@
         "command": "npm run docs"
       }
     },
+    "test:unit": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "poetry run python -m pytest libs/sdk-python/tests/ -v --tb=short --ignore=libs/sdk-python/tests/test_e2e.py"
+      }
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "poetry run python -m pytest libs/sdk-python/tests/test_e2e.py -v -s --timeout=180"
+      }
+    },
+    "test": {
+      "executor": "nx:noop",
+      "dependsOn": ["test:unit", "test:e2e"]
+    },
     "add-api-clients": {
       "executor": "nx:run-commands",
       "options": {
