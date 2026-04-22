@@ -12,7 +12,11 @@ interface StopSandboxVariables {
   sandboxId: string
 }
 
-export const useStopSandboxMutation = () => {
+interface UseStopSandboxMutationOptions {
+  invalidate?: boolean
+}
+
+export const useStopSandboxMutation = ({ invalidate = true }: UseStopSandboxMutationOptions = {}) => {
   const { sandboxApi } = useApi()
   const { selectedOrganization } = useSelectedOrganization()
   const queryClient = useQueryClient()
@@ -22,6 +26,10 @@ export const useStopSandboxMutation = () => {
       await sandboxApi.stopSandbox(sandboxId, selectedOrganization?.id)
     },
     onSuccess: (_, { sandboxId }) => {
+      if (!invalidate) {
+        return
+      }
+
       queryClient.invalidateQueries({
         queryKey: queryKeys.sandboxes.detail(selectedOrganization?.id ?? '', sandboxId),
       })

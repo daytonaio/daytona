@@ -18,8 +18,8 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
 import { isArchivable, isRecoverable, isStartable, isStoppable } from '@/lib/utils/sandbox'
-import { Sandbox } from '@daytona/api-client'
-import { ArrowLeft, MoreHorizontal, Play, RefreshCw, Square, Wrench } from 'lucide-react'
+import { Sandbox, SandboxDesiredState, SandboxState as SandboxStateType } from '@daytona/api-client'
+import { Archive, ArrowLeft, MoreHorizontal, Play, RefreshCw, Square, Wrench } from 'lucide-react'
 
 interface SandboxHeaderProps {
   sandbox: Sandbox | undefined
@@ -41,6 +41,40 @@ interface SandboxHeaderProps {
   mutations: { start: boolean; stop: boolean; archive: boolean; recover: boolean }
 }
 
+type PrimaryActionKind = 'start' | 'stop' | 'recover' | 'archive' | null
+
+function getPrimaryActionKind(sandbox: Sandbox): PrimaryActionKind {
+  if (sandbox.recoverable && isRecoverable(sandbox)) {
+    return 'recover'
+  }
+
+  if (sandbox.state === SandboxStateType.STARTING || sandbox.state === SandboxStateType.STOPPING) {
+    if (sandbox.desiredState === SandboxDesiredState.STARTED) {
+      return 'start'
+    }
+
+    if (sandbox.desiredState === SandboxDesiredState.STOPPED) {
+      return 'stop'
+    }
+  }
+
+  if (sandbox.state === SandboxStateType.ARCHIVING && sandbox.desiredState === SandboxDesiredState.ARCHIVED) {
+    return 'archive'
+  }
+
+  switch (sandbox.state) {
+    case SandboxStateType.STOPPED:
+    case SandboxStateType.ARCHIVED:
+      return 'start'
+    case SandboxStateType.STARTED:
+      return 'stop'
+    case SandboxStateType.RESTORING:
+      return 'recover'
+    default:
+      return null
+  }
+}
+
 export function SandboxHeader({
   sandbox,
   isLoading,
@@ -60,6 +94,8 @@ export function SandboxHeader({
   onScreenRecordings,
   mutations,
 }: SandboxHeaderProps) {
+  const primaryActionKind = sandbox ? getPrimaryActionKind(sandbox) : null
+
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 min-w-0 px-4 sm:px-5 py-2 border-b border-border shrink-0">
       <div className="flex items-center gap-2 min-w-0">
@@ -97,27 +133,33 @@ export function SandboxHeader({
             <div className="flex items-center gap-2">
               {writePermitted && (
                 <ButtonGroup>
-                  {isStartable(sandbox) && !sandbox.recoverable && (
+                  {primaryActionKind === 'start' && (
                     <Button variant="outline" size="sm" onClick={onStart} disabled={actionsDisabled}>
-                      {mutations.start ? <Spinner className="size-4" /> : <Play className="size-4" />}
+                      <Play className="size-4" />
                       Start
                     </Button>
                   )}
-                  {isStoppable(sandbox) && (
+                  {primaryActionKind === 'stop' && (
                     <Button variant="outline" size="sm" onClick={onStop} disabled={actionsDisabled}>
-                      {mutations.stop ? <Spinner className="size-4" /> : <Square className="size-4" />}
+                      <Square className="size-4" />
                       Stop
                     </Button>
                   )}
-                  {isRecoverable(sandbox) && (
+                  {primaryActionKind === 'recover' && (
                     <Button variant="outline" size="sm" onClick={onRecover} disabled={actionsDisabled}>
-                      {mutations.recover ? <Spinner className="size-4" /> : <Wrench className="size-4" />}
+                      <Wrench className="size-4" />
                       Recover
+                    </Button>
+                  )}
+                  {primaryActionKind === 'archive' && (
+                    <Button variant="outline" size="sm" onClick={onArchive} disabled={actionsDisabled}>
+                      <Archive className="size-4" />
+                      Archive
                     </Button>
                   )}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="icon-sm" aria-label="More actions">
+                      <Button variant="outline" size="icon-sm" aria-label="More actions" disabled={actionsDisabled}>
                         <MoreHorizontal className="size-4" />
                       </Button>
                     </DropdownMenuTrigger>

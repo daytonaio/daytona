@@ -30,7 +30,7 @@ import { useApi } from '@/hooks/useApi'
 import { useConfig } from '@/hooks/useConfig'
 import { useMatchMedia } from '@/hooks/useMatchMedia'
 import { useRegions } from '@/hooks/useRegions'
-import { useSandboxWsSync } from '@/hooks/useSandboxWsSync'
+import { useSandboxDetailsWsSync } from '@/hooks/useSandboxWsSync'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { isStoppable, isTransitioning } from '@/lib/utils/sandbox'
@@ -85,12 +85,12 @@ export default function SandboxDetails() {
   const { data: sandbox, isLoading, isError, error, refetch, isFetching } = useSandboxQuery(sandboxId ?? '')
   const isNotFound = isError && isAxiosError(error.cause) && error.cause?.status === 404
 
-  useSandboxWsSync({ sandboxId })
+  useSandboxDetailsWsSync(sandboxId)
 
-  const startMutation = useStartSandboxMutation()
-  const stopMutation = useStopSandboxMutation()
-  const archiveMutation = useArchiveSandboxMutation()
-  const recoverMutation = useRecoverSandboxMutation()
+  const startMutation = useStartSandboxMutation({ invalidate: false })
+  const stopMutation = useStopSandboxMutation({ invalidate: false })
+  const archiveMutation = useArchiveSandboxMutation({ invalidate: false })
+  const recoverMutation = useRecoverSandboxMutation({ invalidate: false })
   const deleteMutation = useDeleteSandboxMutation()
 
   const writePermitted = authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SANDBOXES)

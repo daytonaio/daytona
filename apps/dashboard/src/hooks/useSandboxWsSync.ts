@@ -4,109 +4,60 @@
  */
 
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { getSandboxesQueryKey } from '@/hooks/useSandboxes'
 import { queryKeys } from '@/hooks/queries/queryKeys'
-import { PaginatedSandboxes, Sandbox, SandboxDesiredState, SandboxState } from '@daytona/api-client'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { Sandbox, SandboxState } from '@daytona/api-client'
+import type { QueryKey } from '@tanstack/react-query'
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
-interface UseSandboxWsSyncOptions {
+interface UseSandboxWsSyncOptions<TData> {
   sandboxId?: string
-  refetchOnCreate?: boolean
+  queryKey: QueryKey
+  sync: (oldData: TData | undefined, sandbox: Sandbox) => TData | undefined
 }
 
-export function useSandboxWsSync({ sandboxId, refetchOnCreate = false }: UseSandboxWsSyncOptions = {}) {
+export function useSandboxWsSync({ sandboxId, queryKey, sync }: UseSandboxWsSyncOptions<Sandbox>) {
   const { notificationSocket } = useNotificationSocket()
   const { selectedOrganization } = useSelectedOrganization()
   const queryClient = useQueryClient()
+  const queryKeyRef = useRef(queryKey)
+  const syncRef = useRef(sync)
+
+  queryKeyRef.current = queryKey
+  syncRef.current = sync
 
   useEffect(() => {
     if (!notificationSocket || !selectedOrganization?.id) return
 
-    const orgId = selectedOrganization.id
-
-    const updateStateInListCache = (targetId: string, state: SandboxState) => {
-      queryClient.setQueriesData<PaginatedSandboxes>({ queryKey: getSandboxesQueryKey(orgId) }, (oldData) => {
-        if (!oldData) return oldData
-        return {
-          ...oldData,
-          items: oldData.items.map((s) => (s.id === targetId ? { ...s, state } : s)),
-        }
+    const cancelSandboxQuery = () => {
+      queryClient.cancelQueries({
+        queryKey: queryKeyRef.current,
       })
     }
 
-    const updateStateInDetailCache = (targetId: string, state: SandboxState) => {
-      queryClient.setQueryData<Sandbox>(queryKeys.sandboxes.detail(orgId, targetId), (oldData) => {
-        if (!oldData) return oldData
-        return { ...oldData, state }
-      })
+    const syncSandboxInCache = (sandbox: Sandbox) => {
+      queryClient.setQueryData<Sandbox>(queryKeyRef.current, (oldData) => syncRef.current(oldData, sandbox))
     }
 
-    const optimisticUpdate = (targetId: string, state: SandboxState) => {
-      updateStateInListCache(targetId, state)
-      if (sandboxId) {
-        updateStateInDetailCache(targetId, state)
-      }
+    const syncSandboxFromEvent = async (sandbox: Sandbox) => {
+      cancelSandboxQuery()
+      syncSandboxInCache(sandbox)
     }
 
-    const invalidate = () => {
-      queryClient.invalidateQueries({
-        queryKey: getSandboxesQueryKey(orgId),
-        refetchType: 'none',
-      })
-
-      if (sandboxId) {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.sandboxes.detail(orgId, sandboxId),
-        })
-      }
+    const handleCreated = async (sandbox: Sandbox) => {
+      if (sandboxId && sandbox.id !== sandboxId) return
+      await syncSandboxFromEvent(sandbox)
     }
 
-    const handleCreated = (_sandbox: Sandbox) => {
-      if (sandboxId) return
-
-      queryClient.invalidateQueries({
-        queryKey: getSandboxesQueryKey(orgId),
-        refetchType: refetchOnCreate ? 'active' : 'none',
-      })
-    }
-
-    const handleStateUpdated = (data: { sandbox: Sandbox; oldState: SandboxState; newState: SandboxState }) => {
+    const handleStateUpdated = async (data: { sandbox: Sandbox; oldState: SandboxState; newState: SandboxState }) => {
       if (sandboxId && data.sandbox.id !== sandboxId) return
-
-      // warm pool sandboxes — treat as created
-      if (data.oldState === data.newState && data.newState === SandboxState.STARTED) {
-        handleCreated(data.sandbox)
-        return
-      }
-
-      let updatedState = data.newState
-
-      // error/build_failed with desiredState=DESTROYED should display as destroyed
-      if (
-        data.sandbox.desiredState === SandboxDesiredState.DESTROYED &&
-        (data.newState === SandboxState.ERROR || data.newState === SandboxState.BUILD_FAILED)
-      ) {
-        updatedState = SandboxState.DESTROYED
-      }
-
-      optimisticUpdate(data.sandbox.id, updatedState)
-      invalidate()
+      await syncSandboxFromEvent(data.sandbox)
     }
 
-    const handleDesiredStateUpdated = (data: {
-      sandbox: Sandbox
-      oldDesiredState: SandboxDesiredState
-      newDesiredState: SandboxDesiredState
-    }) => {
+    const handleDesiredStateUpdated = async (data: { sandbox: Sandbox }) => {
       if (sandboxId && data.sandbox.id !== sandboxId) return
-
-      if (data.newDesiredState !== SandboxDesiredState.DESTROYED) return
-      if (data.sandbox.state !== SandboxState.ERROR && data.sandbox.state !== SandboxState.BUILD_FAILED) return
-
-      optimisticUpdate(data.sandbox.id, SandboxState.DESTROYED)
-      invalidate()
+      await syncSandboxFromEvent(data.sandbox)
     }
 
     notificationSocket.on('sandbox.created', handleCreated)
@@ -118,5 +69,24 @@ export function useSandboxWsSync({ sandboxId, refetchOnCreate = false }: UseSand
       notificationSocket.off('sandbox.state.updated', handleStateUpdated)
       notificationSocket.off('sandbox.desired-state.updated', handleDesiredStateUpdated)
     }
-  }, [notificationSocket, selectedOrganization?.id, sandboxId, refetchOnCreate, queryClient])
+  }, [notificationSocket, selectedOrganization?.id, sandboxId, queryClient])
+}
+
+export function useSandboxDetailsWsSync(sandboxId?: string) {
+  const { selectedOrganization } = useSelectedOrganization()
+
+  useSandboxWsSync({
+    sandboxId,
+    queryKey: queryKeys.sandboxes.detail(selectedOrganization?.id ?? '', sandboxId ?? ''),
+    sync: (oldData, sandbox) => {
+      if (!oldData) {
+        return sandbox
+      }
+
+      return {
+        ...oldData,
+        ...sandbox,
+      }
+    },
+  })
 }
