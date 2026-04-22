@@ -514,7 +514,9 @@ class AsyncSandbox(SandboxDto):
         network_block_all: bool | None = None,
         network_allow_list: str | None = None,
     ) -> None:
-        """Updates outbound network policy on the runner (block all, restore access, or CIDR allow list).
+        """Experimental: updates outbound network policy on the runner (block all, restore access, or CIDR allow list).
+
+        This capability is feature-flagged and may not be available in all environments.
 
         Args:
             network_block_all: When ``True``, blocks all outbound traffic. When ``False``, restores general

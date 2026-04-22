@@ -646,6 +646,8 @@ export class Sandbox implements SandboxDto {
   }
 
   /**
+   * Experimental: this method is feature-flagged and may not be available in all environments.
+   *
    * Updates outbound network policy for this sandbox on the runner (for example block all traffic,
    * restore general internet access, or apply a CIDR allow list) without stopping the sandbox.
    *
