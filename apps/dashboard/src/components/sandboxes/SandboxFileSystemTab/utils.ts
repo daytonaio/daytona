@@ -120,6 +120,10 @@ export function getAncestorPaths(path: string) {
 }
 
 export function isSameOrDescendantPath(path: string, parentPath: string) {
+  if (parentPath === ROOT_PATH) {
+    return path.startsWith(ROOT_PATH)
+  }
+
   return path === parentPath || path.startsWith(`${parentPath}/`)
 }
 

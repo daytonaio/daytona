@@ -42,7 +42,7 @@ export function MarkdownPreview({ content, isLoading }: { content: string; isLoa
           remarkPlugins={[remarkGfm]}
           components={{
             a: ({ children, href }) => (
-              <a href={href} target="_blank" rel="noreferrer" className="underline underline-offset-4">
+              <a href={href} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">
                 {children}
               </a>
             ),
