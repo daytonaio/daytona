@@ -27,9 +27,14 @@ runs:
         # Refresh apt index first (runners may have stale/empty package lists)
         sudo apt-get update
 
-        # Ensure wget is available (needed to fetch the signing key)
-        if ! command -v wget >/dev/null 2>&1; then
-          sudo apt-get install -y wget
+        # Ensure prerequisites are available:
+        # - wget: fetch the signing key
+        # - gpg (from gnupg): verify the key fingerprint below
+        missing_pkgs=()
+        command -v wget >/dev/null 2>&1 || missing_pkgs+=(wget)
+        command -v gpg  >/dev/null 2>&1 || missing_pkgs+=(gnupg)
+        if [ ${#missing_pkgs[@]} -gt 0 ]; then
+          sudo apt-get install -y --no-install-recommends "${missing_pkgs[@]}"
         fi
 
         # Add GitHub's signed apt repository (official install instructions)
