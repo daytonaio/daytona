@@ -45,8 +45,6 @@ jobs:
           go-cache: 'false'
           run-go-work-sync: 'false'
 
-      - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
-
       - name: Configure git
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -132,7 +130,7 @@ jobs:
           persist-credentials: false
 
       - uses: ./.github/actions/setup-toolchain
-      - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
+      - uses: ./.github/actions/install-gh-cli
 
       - name: Install gettext
         run: sudo apt-get install -y gettext
@@ -362,7 +360,7 @@ jobs:
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: 22
-      - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
+      - uses: ./.github/actions/install-gh-cli
 
       - name: Configure git
         env:

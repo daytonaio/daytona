@@ -68,7 +68,6 @@ jobs:
       - uses: ./.github/actions/setup-toolchain
         with:
           install-swag: 'false'
-      - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
 
       - name: Configure git
         run: |

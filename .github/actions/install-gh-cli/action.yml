@@ -1,0 +1,44 @@
+name: 'Install gh CLI'
+description: 'Install GitHub CLI via apt if not already present (idempotent on self-hosted runners).'
+
+runs:
+  using: composite
+  steps:
+    - name: Ensure gh CLI
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if command -v gh >/dev/null 2>&1; then
+          echo "gh already installed: $(gh --version | head -n 1)"
+          exit 0
+        fi
+
+        echo "Installing gh CLI via GitHub's apt repository..."
+
+        # Ensure wget is available (needed to fetch the signing key)
+        if ! command -v wget >/dev/null 2>&1; then
+          sudo apt-get install -y wget
+        fi
+
+        # Add GitHub's signed apt repository (official install instructions)
+        sudo mkdir -p -m 755 /etc/apt/keyrings
+        wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+          | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null
+
+        # Verify the keyring was written successfully (guard against silent pipe failures)
+        if [ ! -s /etc/apt/keyrings/githubcli-archive-keyring.gpg ]; then
+          echo "::error::Failed to fetch GitHub CLI signing key"
+          exit 1
+        fi
+
+        sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+          | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends gh
+
+        # Refresh shell's command lookup cache so freshly-installed gh is found
+        hash -r
+        gh --version
