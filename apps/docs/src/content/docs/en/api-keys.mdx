@@ -7,6 +7,15 @@ import { TabItem, Tabs } from '@astrojs/starlight/components'
 
 Daytona API keys authenticate requests to the [Daytona API](/docs/en/tools/api). They are used by the Daytona [SDKs](/docs/en/getting-started#sdks) and [CLI](/docs/en/getting-started#cli) to access and manage resources in your organization.
 
+## Credentials
+
+The API accepts two types of credentials (API key and JWT token). They are mutually exclusive; only one can be used per request and depends on the operation you are performing.
+
+- **API key**: a secret string tied to your Daytona organization, created via [Dashboard ↗](https://app.daytona.io/dashboard/keys)
+- **JWT token**: an access token issued when you sign in to Daytona with your user account (the same kind of session the dashboard uses in the browser). To obtain a JWT token, run [`daytona login`](/docs/en/tools/cli#daytona-login), select **Login with Browser**, and complete sign-in. The CLI saves the access token in `config.json` on your machine, inside Daytona config directory. The token value is available in the `api.token.accessToken` field of the active profile. Use the token value as `Authorization: Bearer <token>` and include the `X-Daytona-Organization-ID` header with your organization ID on JWT-authenticated API requests.
+
+Each API request uses `Authorization: Bearer` followed by the value.
+
 ## Create an API key
 
 Daytona provides options to create API keys in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys) or programmatically using the [API](/docs/en/tools/api/#daytona/tag/api-keys).
