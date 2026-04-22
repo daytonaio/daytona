@@ -85,6 +85,7 @@ export function getDirectoryChildrenQueryOptions({
         throw error
       }
     },
+    placeholderData: undefined,
     retry: shouldRetryFileSystemQuery,
     staleTime: 60_000,
   } satisfies UseQueryOptions<SandboxFileSystemNode[]>
@@ -136,6 +137,7 @@ export function getFileDetailsQueryOptions({
         throw error
       }
     },
+    placeholderData: undefined,
     retry: shouldRetryFileSystemQuery,
     staleTime: 60_000,
   } satisfies UseQueryOptions<SandboxFileSystemNode>
@@ -255,7 +257,7 @@ export function useFilePreviewQuery({
       }
     },
     enabled,
-    placeholderData: keepPreviousData,
+    placeholderData: undefined,
     staleTime: 0,
   })
 }

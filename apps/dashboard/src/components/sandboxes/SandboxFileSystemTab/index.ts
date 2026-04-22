@@ -4,4 +4,5 @@
  */
 
 export { SandboxFileSystemTab } from './SandboxFileSystemTab'
-export type { PreviewKind, PreviewState, SandboxFileSystemNode } from './types'
+export type { PreviewKind, SandboxFileSystemNode } from './types'
+export type { PreviewState } from './usePreviewState'

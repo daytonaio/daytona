@@ -5,8 +5,8 @@
 
 import {
   memo,
-  type ButtonHTMLAttributes,
   type ComponentProps,
+  type HTMLAttributes,
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent as ReactMouseEvent,
   type ReactNode,
@@ -34,16 +34,21 @@ type SearchLabelProps = {
 
 export type FileTreeRowProps = Omit<ComponentProps<'div'>, 'children'> & {
   actions?: ReactNode
-  buttonProps?: ButtonHTMLAttributes<HTMLButtonElement>
+  buttonProps?: HTMLAttributes<HTMLDivElement>
   depth?: number
+  dragHandleProps?: HTMLAttributes<HTMLDivElement>
+  isDragTarget?: boolean
+  isDragTargetAbove?: boolean
+  isDragTargetBelow?: boolean
+  isDraggingOver?: boolean
   isExpanded?: boolean
   isFocused?: boolean
   isLoading?: boolean
   isSearchResult?: boolean
   isSelected?: boolean
   node: Pick<SandboxFileSystemNode, 'isDir' | 'name' | 'path' | 'size'>
-  onActivate: (event: ReactMouseEvent<HTMLButtonElement>) => Promise<void> | void
-  onItemKeyDown?: (event: ReactKeyboardEvent<HTMLButtonElement>) => void
+  onActivate: (event: ReactMouseEvent<HTMLDivElement>) => Promise<void> | void
+  onItemKeyDown?: (event: ReactKeyboardEvent<HTMLDivElement>) => void
   onToggleExpand?: () => void
   searchLabel?: SearchLabelProps
   top: number
@@ -54,6 +59,11 @@ export function FileTreeRow({
   buttonProps,
   className,
   depth = 0,
+  dragHandleProps,
+  isDragTarget = false,
+  isDragTargetAbove = false,
+  isDragTargetBelow = false,
+  isDraggingOver = false,
   isExpanded = false,
   isFocused = false,
   isLoading = false,
@@ -69,12 +79,15 @@ export function FileTreeRow({
   ...props
 }: FileTreeRowProps) {
   const itemLabel = isSearchResult ? node.path : node.name || node.path
+  const { className: dragHandleClassName, style: dragHandleStyle, ...resolvedDragHandleProps } = dragHandleProps ?? {}
+  const { className: buttonClassName, style: buttonStyle, ...resolvedButtonProps } = buttonProps ?? {}
 
   return (
     <div
       {...props}
-      className={cn('group absolute left-0 top-0 flex h-8 w-full items-center px-2', className)}
-      style={{ ...style, transform: `translateY(${top}px)` }}
+      {...resolvedDragHandleProps}
+      className={cn('group absolute left-0 top-0 flex h-8 w-full items-center px-2', dragHandleClassName, className)}
+      style={{ ...dragHandleStyle, ...style, transform: `translateY(${top}px)` }}
     >
       {!isSearchResult && depth > 0 ? (
         <div className="pointer-events-none absolute inset-y-0 left-0">
@@ -91,12 +104,25 @@ export function FileTreeRow({
       ) : null}
 
       <div
-        className={cn('flex h-8 w-full items-center gap-1 rounded-md pr-1 text-sm hover:bg-muted', {
-          'bg-muted': isSelected,
-          'bg-muted/60': isFocused,
-          'opacity-60': isSearchResult && isLoading,
-        })}
+        {...resolvedButtonProps}
+        data-file-tree-row-button
+        onClick={onActivate}
+        onKeyDown={onItemKeyDown}
+        className={cn(
+          'flex h-8 w-full items-center gap-1 rounded-md pr-1 text-sm hover:bg-muted focus-visible:outline-none',
+          buttonClassName,
+          {
+            'ring-1 ring-primary/20': isDragTarget,
+            'bg-accent/60': isDraggingOver,
+            'bg-muted': isSelected,
+            'bg-muted/60': isFocused,
+            'opacity-60': isSearchResult && isLoading,
+          },
+        )}
+        style={buttonStyle}
       >
+        {isDragTargetAbove ? <div className="pointer-events-none absolute inset-x-2 top-0 h-px bg-primary" /> : null}
+        {isDragTargetBelow ? <div className="pointer-events-none absolute inset-x-2 bottom-0 h-px bg-primary" /> : null}
         <div
           className="flex h-8 min-w-0 flex-1 items-center gap-1"
           style={{
@@ -123,14 +149,7 @@ export function FileTreeRow({
             </button>
           ) : null}
 
-          <button
-            type="button"
-            {...buttonProps}
-            data-file-tree-row-button
-            onClick={onActivate}
-            onKeyDown={onItemKeyDown}
-            className="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-1 text-left focus-visible:outline-none"
-          >
+          <div className="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-1 text-left">
             {node.isDir ? (
               !isSearchResult && isExpanded ? (
                 <FolderOpenIcon className="size-4 shrink-0 text-muted-foreground" />
@@ -170,11 +189,11 @@ export function FileTreeRow({
                 {formatBytes(node.size)}
               </span>
             ) : null}
-          </button>
+          </div>
         </div>
 
         {!isSearchResult && actions ? (
-          <div className="ml-1 flex h-8 shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 has-[[data-state=open]]:opacity-100">
+          <div className="pointer-events-none ml-1 flex h-8 shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 has-[[data-state=open]]:pointer-events-auto has-[[data-state=open]]:opacity-100">
             {actions}
           </div>
         ) : null}

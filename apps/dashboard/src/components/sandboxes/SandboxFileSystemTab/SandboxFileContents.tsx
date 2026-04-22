@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowDownIcon,
   ArrowUpIcon,
+  AlertTriangleIcon,
   CheckIcon,
   CopyIcon,
   DownloadIcon,
@@ -35,6 +36,7 @@ import {
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { FileUpload, FileUploadDropzone } from '@/components/ui/file-upload'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Spinner } from '@/components/ui/spinner'
 import { Toggle } from '@/components/ui/toggle'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
@@ -44,8 +46,8 @@ import { ROOT_PATH } from './constants'
 import { useFileSystemStore } from './fileSystemStore'
 import { useIsDirectoryRefreshing, useIsFilePreviewRefreshing } from './queries'
 import { PathHeaderLabel } from './searchLabels'
-import type { PreviewKind, PreviewState, SandboxFileSystemNode, SandboxInstance } from './types'
-import { usePreviewState } from './usePreviewState'
+import type { PreviewKind, SandboxFileSystemNode, SandboxInstance } from './types'
+import { usePreviewState, type PreviewState } from './usePreviewState'
 import { formatBytes, getCodeLanguage, getImageMimeType, getNodeMetaLine } from './utils'
 
 const LARGE_TEXT_WRAP_THRESHOLD = 256 * 1024
@@ -115,14 +117,29 @@ function FilePreviewSkeleton({ kind }: { kind: PreviewKind | null }) {
   )
 }
 
+function DirectoryContentsSkeleton() {
+  return (
+    <Empty className="h-full min-h-[220px] rounded-md border border-dashed">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <Spinner />
+        </EmptyMedia>
+        <EmptyTitle>Loading directory</EmptyTitle>
+      </EmptyHeader>
+    </Empty>
+  )
+}
+
 function SandboxFileContentsBody({
   isWrapEnabled,
+  isRefreshing,
   onRetry,
   onUploadFiles,
   previewState,
   selectedNode,
 }: {
   isWrapEnabled: boolean
+  isRefreshing: boolean
   onRetry: () => void
   onUploadFiles: (files: File[]) => void
   previewState: PreviewState
@@ -168,6 +185,9 @@ function SandboxFileContentsBody({
     return (
       <Empty className="h-full min-h-[220px] rounded-md border border-dashed">
         <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <AlertTriangleIcon className="size-4" />
+          </EmptyMedia>
           <EmptyTitle>{previewState.title}</EmptyTitle>
           <EmptyDescription>{previewState.description}</EmptyDescription>
         </EmptyHeader>
@@ -194,30 +214,20 @@ function SandboxFileContentsBody({
     )
   }
 
-  const previewPath =
-    previewState.status === 'loading' ? (previewState.previousPath ?? selectedNode.path) : selectedNode.path
-  const previewSize =
-    previewState.status === 'loading' ? (previewState.previousSize ?? selectedNode.size) : selectedNode.size
-  const codeLanguage = getCodeLanguage(previewPath)
-  const imageMimeType = getImageMimeType(previewPath)
-  const loadingPreviewKind =
-    previewState.status === 'loading' ? (previewState.previousKind ?? (imageMimeType ? 'image' : 'text')) : null
+  const codeLanguage = getCodeLanguage(selectedNode.path)
+  const imageMimeType = getImageMimeType(selectedNode.path)
 
-  if (
-    previewState.status === 'loading' &&
-    !previewState.previousContent &&
-    !previewState.previousImageUrl &&
-    !previewState.previousKind
-  ) {
-    return <FilePreviewSkeleton kind={loadingPreviewKind} />
+  if (previewState.status === 'loading') {
+    if (selectedNode.isDir) {
+      return <DirectoryContentsSkeleton />
+    }
+
+    return <FilePreviewSkeleton kind={imageMimeType ? 'image' : 'text'} />
   }
 
-  const activeKind = previewState.status === 'ready' ? previewState.kind : previewState.previousKind
-  const content = previewState.status === 'ready' ? (previewState.content ?? '') : (previewState.previousContent ?? '')
-  const imageUrl = previewState.status === 'ready' ? previewState.imageUrl : previewState.previousImageUrl
-  const isRefreshing = previewState.status === 'loading'
-  const isShowingPreviousLargeText =
-    previewState.status === 'loading' && previewSize >= LARGE_TEXT_VIRTUALIZATION_THRESHOLD
+  const activeKind = previewState.kind
+  const content = previewState.content ?? ''
+  const imageUrl = previewState.imageUrl
 
   if (!activeKind) {
     return null
@@ -271,8 +281,7 @@ function SandboxFileContentsBody({
     )
   }
 
-  const shouldVirtualizeLargeText =
-    previewSize >= LARGE_TEXT_VIRTUALIZATION_THRESHOLD && (isShowingPreviousLargeText || !isWrapEnabled)
+  const shouldVirtualizeLargeText = selectedNode.size >= LARGE_TEXT_VIRTUALIZATION_THRESHOLD && !isWrapEnabled
 
   if (shouldVirtualizeLargeText) {
     return <VirtualizedTextPreview content={content} isRefreshing={isRefreshing} />
@@ -303,7 +312,6 @@ export function SandboxFileContents({
   onRefresh,
   onStartCreateFolder,
   onUploadFiles,
-  preservePreviousPreview,
   sandboxInstance,
   selectedNode,
   selectedNodeError,
@@ -317,7 +325,6 @@ export function SandboxFileContents({
   onRefresh: () => void | Promise<void>
   onStartCreateFolder: (parentPath: string) => void
   onUploadFiles: (files: File[]) => void
-  preservePreviousPreview: boolean
   sandboxInstance: SandboxInstance | undefined
   selectedNode: SandboxFileSystemNode | null
   selectedNodeError?: unknown
@@ -333,8 +340,8 @@ export function SandboxFileContents({
     path: selectedNode && !selectedNode.isDir ? selectedNode.path : null,
     sandboxInstance,
   })
-  const { previewQuery, previewState } = usePreviewState({
-    preservePreviousPreview,
+  const { previewState, retryPreviewState } = usePreviewState({
+    refetchSelectedNode: onRefresh,
     sandboxInstance,
     selectedNode,
     selectedNodeError,
@@ -350,8 +357,8 @@ export function SandboxFileContents({
   const [isWrapEnabled, setIsWrapEnabled] = useState(true)
   const showWrapToggle =
     Boolean(selectedNode && nodePath && !selectedNode.isDir) &&
-    (previewState.status === 'ready' || previewState.status === 'loading') &&
-    (previewState.status === 'ready' ? previewState.kind === 'text' : previewState.previousKind === 'text') &&
+    previewState.status === 'ready' &&
+    previewState.kind === 'text' &&
     !selectedCodeLanguage
 
   useEffect(() => {
@@ -360,7 +367,7 @@ export function SandboxFileContents({
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-background">
-      <div className="flex h-11 shrink-0 items-center gap-1 border-b border-border px-3">
+      <div className="flex h-11 shrink-0 items-center border-b border-border px-3">
         <PathHeaderLabel text={headerText} className="flex-1 text-sm font-medium" />
         {selectedNode ? (
           <>
@@ -494,9 +501,8 @@ export function SandboxFileContents({
         >
           <SandboxFileContentsBody
             isWrapEnabled={isWrapEnabled}
-            onRetry={() => {
-              previewQuery.refetch()
-            }}
+            isRefreshing={isContentsRefreshing}
+            onRetry={retryPreviewState}
             onUploadFiles={onUploadFiles}
             previewState={previewState}
             selectedNode={selectedNode}

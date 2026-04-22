@@ -21,19 +21,3 @@ export type SandboxFileSystemNode = {
   permissions: string
   size: number
 }
-
-export type PreviewState =
-  | { status: 'directory' }
-  | { status: 'error'; path: string; title: string; description: string; canRetry?: boolean }
-  | { status: 'idle' }
-  | {
-      status: 'loading'
-      path: string
-      previousContent?: string
-      previousImageUrl?: string
-      previousKind?: PreviewKind
-      previousPath?: string
-      previousSize?: number
-    }
-  | { status: 'ready'; content?: string; imageUrl?: string; kind: PreviewKind; path: string }
-  | { status: 'too-large'; path: string; size: number }

@@ -27,18 +27,26 @@ import {
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
+import TooltipButton from '@/components/TooltipButton'
 import { cn } from '@/lib/utils'
-import { asyncDataLoaderFeature } from '@headless-tree/core'
+import {
+  asyncDataLoaderFeature,
+  dragAndDropFeature,
+  expandAllFeature,
+  hotkeysCoreFeature,
+  keyboardDragAndDropFeature,
+} from '@headless-tree/core'
 import { useTree } from '@headless-tree/react'
 import { useIsFetching, useQueryClient } from '@tanstack/react-query'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { EllipsisIcon, RefreshCwIcon } from 'lucide-react'
+import { ChevronsUpDownIcon, EllipsisIcon, RefreshCwIcon } from 'lucide-react'
 
 import { toast } from 'sonner'
 import { FILE_SEARCH_MIN_CHARS, ROOT_NODE, ROOT_PATH } from './constants'
 import { FileSearchHeader, type FileSearchHeaderHandle } from './FileSearchHeader'
 import { FileTreeRow } from './FileTreeRow'
 import { useFileSystemStore } from './fileSystemStore'
+import { useMoveNodeMutation } from './mutations'
 import {
   fileSystemQueryKeys,
   getDirectoryChildrenQueryOptions,
@@ -53,6 +61,8 @@ import {
   getAncestorPaths,
   getCanvasFont,
   getImageMimeType,
+  isSameOrDescendantPath,
+  joinSandboxPath,
   getParentPath,
   handleFileSystemApiError,
   isProbablyBinary,
@@ -123,11 +133,13 @@ export function FileTreePane({
   const [rootLoadFailed, setRootLoadFailed] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [isTreeFocusWithin, setIsTreeFocusWithin] = useState(false)
+  const didSetInitialFocusRef = useRef(false)
   const itemDataRef = useRef<Record<string, SandboxFileSystemNode>>({ [ROOT_PATH]: ROOT_NODE })
   const fileTreeScrollAreaRef = useRef<HTMLDivElement>(null)
   const searchHeaderRef = useRef<FileSearchHeaderHandle>(null)
   const sandboxInstanceQuery = useSandboxInstance(sandboxId)
   const sandboxInstance = sandboxInstanceQuery.data
+  const moveNodeMutation = useMoveNodeMutation({ sandboxInstance })
 
   const selectedNodePath = useFileSystemStore((state) => state.selectedNodePath)
   const [searchLabelAvailableWidth, setSearchLabelAvailableWidth] = useState(0)
@@ -218,21 +230,114 @@ export function FileTreePane({
   const tree = useTree<SandboxFileSystemNode | null>({
     rootItemId: ROOT_PATH,
     initialState: { expandedItems: [ROOT_PATH] },
+    canDrop: (items, target) => {
+      const targetPath = target.item.getId()
+
+      return (
+        target.item.isFolder() &&
+        items.every((item) => {
+          const sourcePath = item.getId()
+          return sourcePath !== targetPath && !isSameOrDescendantPath(targetPath, sourcePath)
+        })
+      )
+    },
+    canReorder: false,
     createLoadingItemData: () => null,
     getItemName: (item) => {
       const data = item.getItemData()
       return data?.name ?? itemDataRef.current[item.getId()]?.name ?? item.getId()
     },
     isItemFolder: (item) => Boolean(item.getItemData()?.isDir ?? itemDataRef.current[item.getId()]?.isDir),
+    onDrop: async (items, target) => {
+      const destinationDirectoryPath = target.item.getId()
+
+      const moveResults = await Promise.allSettled(
+        items.map(async (item) => {
+          const node = item.getItemData() ?? itemDataRef.current[item.getId()] ?? createFallbackNode(item.getId())
+          const destinationPath = joinSandboxPath(
+            destinationDirectoryPath,
+            node.name || item.getId().split('/').at(-1) || item.getId(),
+          )
+
+          if (destinationPath === node.path) {
+            return null
+          }
+
+          await moveNodeMutation.mutateAsync({
+            destinationPath,
+            node,
+          })
+
+          delete itemDataRef.current[node.path]
+
+          return {
+            destinationPath,
+            node,
+          }
+        }),
+      )
+
+      const completedMoves = moveResults.flatMap((result) =>
+        result.status === 'fulfilled' && result.value ? [result.value] : [],
+      )
+      const failedMoves = moveResults.flatMap((result) => (result.status === 'rejected' ? [result.reason] : []))
+
+      if (completedMoves.length > 0) {
+        if (target.item.isFolder() && !target.item.isExpanded()) {
+          target.item.expand()
+        }
+
+        const sourceParentPaths = new Set(completedMoves.map(({ node }) => getParentPath(node.path)))
+        const pathsToRefresh = new Set([destinationDirectoryPath, ...sourceParentPaths])
+
+        await Promise.all(
+          Array.from(pathsToRefresh).map(async (path) => {
+            await refreshPath(path)
+          }),
+        )
+
+        for (const { destinationPath } of completedMoves) {
+          await resolveNode(destinationPath)
+        }
+
+        const remappedSelection = completedMoves.find(
+          ({ node }) => selectedPath && isSameOrDescendantPath(selectedPath, node.path),
+        )
+
+        if (remappedSelection && selectedPath) {
+          const remappedSelectedPath =
+            selectedPath === remappedSelection.node.path
+              ? remappedSelection.destinationPath
+              : `${remappedSelection.destinationPath}${selectedPath.slice(remappedSelection.node.path.length)}`
+          openNode(remappedSelectedPath)
+          restoreFocus(remappedSelectedPath)
+        } else {
+          const destinationItem = tree.getItemInstance(destinationDirectoryPath)
+          destinationItem?.setFocused()
+          tree.updateDomFocus()
+        }
+      }
+
+      if (failedMoves.length > 0) {
+        handleFileSystemApiError(failedMoves[0], 'Failed to move item')
+      }
+    },
     onPrimaryAction: (item) => {
       const node = item.getItemData() ?? itemDataRef.current[item.getId()] ?? createFallbackNode(item.getId())
       openNode(node.path)
     },
+    seperateDragHandle: true,
     dataLoader: {
       getItem: async (itemId) => itemDataRef.current[itemId] ?? createFallbackNode(itemId),
       getChildrenWithData: async (itemId) => loadDirectory(itemId),
     },
-    features: [asyncDataLoaderFeature],
+    features: [
+      asyncDataLoaderFeature,
+      expandAllFeature,
+      hotkeysCoreFeature,
+      dragAndDropFeature,
+      keyboardDragAndDropFeature,
+    ],
   })
 
   const visibleItems = tree.getItems()
@@ -323,6 +428,11 @@ export function FileTreePane({
   }, [])
 
   useEffect(() => {
+    if (didSetInitialFocusRef.current) {
+      return
+    }
+
+    didSetInitialFocusRef.current = true
     const frameId = window.requestAnimationFrame(() => {
       tree.getItems()[0]?.setFocused()
       tree.updateDomFocus()
@@ -398,6 +508,11 @@ export function FileTreePane({
     await refreshPath(ROOT_PATH)
   }, [refreshPath])
 
+  const handleCollapseAll = useCallback(() => {
+    tree.collapseAll()
+    rootItem.expand()
+  }, [rootItem, tree])
+
   const handleTreeContainerFocus = useCallback(
     (event: FocusEvent<HTMLDivElement>) => {
       if (event.target !== event.currentTarget) {
@@ -441,7 +556,7 @@ export function FileTreePane({
   )
 
   const handleItemKeyDown = useCallback(
-    (item: ReturnType<typeof tree.getItemInstance>, event: KeyboardEvent<HTMLButtonElement>) => {
+    (item: ReturnType<typeof tree.getItemInstance>, event: KeyboardEvent<HTMLDivElement>) => {
       switch (event.key) {
         case 'ArrowDown':
           event.preventDefault()
@@ -544,6 +659,11 @@ export function FileTreePane({
   return (
     <div ref={fileTreeScrollAreaRef} className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <MemoizedFileSearchHeader
+        extraActions={
+          <TooltipButton tooltipText="Collapse all folders" variant="ghost" size="icon-sm" onClick={handleCollapseAll}>
+            <ChevronsUpDownIcon className="size-4" />
+          </TooltipButton>
+        }
         isRefreshing={isTreeRefreshing}
         onRefresh={handleRefreshRoot}
         onSearchQueryChange={setSearchQuery}
@@ -663,7 +783,12 @@ export function FileTreePane({
                     }
                     buttonProps={itemButtonProps}
                     depth={item?.getItemMeta().level ?? 0}
+                    dragHandleProps={!searchEnabled ? (item?.getDragHandleProps() ?? undefined) : undefined}
                     isExpanded={item?.isExpanded() ?? false}
+                    isDragTarget={item?.isDragTarget() ?? false}
+                    isDragTargetAbove={item?.isDragTargetAbove() ?? false}
+                    isDragTargetBelow={item?.isDragTargetBelow() ?? false}
+                    isDraggingOver={item?.isDraggingOver() ?? false}
                     isFocused={isFocused}
                     isLoading={isLoading}
                     isSearchResult={searchEnabled}
@@ -714,6 +839,9 @@ export function FileTreePane({
                   />
                 )
               })}
+              {!searchEnabled ? (
+                <div className="pointer-events-none border-t-2 border-primary" style={tree.getDragLineStyle()} />
+              ) : null}
             </div>
           )}
         </ScrollArea>

@@ -291,6 +291,7 @@ function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
     setIsContentsOverlayOpen(false)
   }, [isContentsOverlayMode, selectedNodePath])
 
+  const hasActiveContents = Boolean(selectedNodePath)
   const previewLoadingPath = isSelectedFileRefreshing ? (selectedNodePath ?? undefined) : undefined
 
   const contentsView = (
@@ -303,7 +304,6 @@ function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
       onRefresh={handleRefreshSelected}
       onStartCreateFolder={handleRequestCreateFolder}
       onUploadFiles={handleUploadFiles}
-      preservePreviousPreview={!isContentsOverlayMode}
       sandboxInstance={sandboxInstance}
       selectedNode={selectedNode}
       selectedNodeError={selectedNodeQuery.error}
@@ -410,7 +410,7 @@ function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
 
           {isContentsOverlayMode ? (
             <Dialog
-              open={isContentsOverlayOpen}
+              open={isContentsOverlayOpen && hasActiveContents}
               onOpenChange={(open) => {
                 if (!open) {
                   handleCloseContents()
@@ -435,7 +435,7 @@ function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
                 <DialogDescription className="sr-only">
                   Previewing sandbox filesystem contents inside the filesystem tab.
                 </DialogDescription>
-                {contentsView}
+                {hasActiveContents ? contentsView : null}
               </DialogContent>
             </Dialog>
           ) : (

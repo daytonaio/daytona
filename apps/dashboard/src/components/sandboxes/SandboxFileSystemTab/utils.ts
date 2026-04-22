@@ -119,6 +119,10 @@ export function getAncestorPaths(path: string) {
   return segments.map((_, index) => `/${segments.slice(0, index + 1).join('/')}`)
 }
 
+export function isSameOrDescendantPath(path: string, parentPath: string) {
+  return path === parentPath || path.startsWith(`${parentPath}/`)
+}
+
 export function sortEntries(entries: FileInfo[]) {
   return [...entries].sort((a, b) => {
     if (a.isDir !== b.isDir) {

@@ -8,7 +8,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import type { SandboxFileSystemNode, SandboxInstance } from './types'
 import { ROOT_PATH } from './constants'
-import { getParentPath } from './utils'
+import { getParentPath, isSameOrDescendantPath } from './utils'
 import { fileSystemQueryKeys, invalidateDirectoryQuery, invalidateFileDetailsQuery } from './queries'
 
 export function useCreateFolderMutation({ sandboxInstance }: { sandboxInstance: SandboxInstance | undefined }) {
@@ -80,6 +80,70 @@ export function useDeleteNodeMutation({ sandboxInstance }: { sandboxInstance: Sa
         },
         (currentResults) => currentResults?.filter((result) => result !== node.path),
       )
+    },
+  })
+}
+
+export function useMoveNodeMutation({ sandboxInstance }: { sandboxInstance: SandboxInstance | undefined }) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ destinationPath, node }: { destinationPath: string; node: SandboxFileSystemNode }) => {
+      if (!sandboxInstance) {
+        throw new Error('Sandbox instance is not available')
+      }
+
+      await sandboxInstance.fs.moveFiles(node.path, destinationPath)
+
+      return {
+        destinationParentPath: getParentPath(destinationPath),
+        destinationPath,
+        node,
+        sourceParentPath: getParentPath(node.path),
+      }
+    },
+    onSuccess: async ({ destinationParentPath, destinationPath, node, sourceParentPath }) => {
+      if (!sandboxInstance) {
+        return
+      }
+
+      await invalidateDirectoryQuery({
+        path: sourceParentPath,
+        queryClient,
+        sandboxInstance,
+      })
+
+      if (destinationParentPath !== sourceParentPath) {
+        await invalidateDirectoryQuery({
+          path: destinationParentPath,
+          queryClient,
+          sandboxInstance,
+        })
+      }
+
+      queryClient.removeQueries({
+        predicate: (query) => {
+          const [scope, sandboxId, kind, path] = query.queryKey
+
+          return (
+            scope === 'sandbox-file-system' &&
+            sandboxId === sandboxInstance.id &&
+            (kind === 'details' || kind === 'directory' || kind === 'preview') &&
+            typeof path === 'string' &&
+            isSameOrDescendantPath(path, node.path)
+          )
+        },
+      })
+
+      await invalidateFileDetailsQuery({
+        path: destinationPath,
+        queryClient,
+        sandboxInstance,
+      })
+
+      await queryClient.invalidateQueries({
+        queryKey: fileSystemQueryKeys.searchPrefix(sandboxInstance.id),
+      })
     },
   })
 }

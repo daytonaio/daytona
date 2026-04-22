@@ -4,7 +4,7 @@
  */
 
 import { RefreshCwIcon, SearchIcon, XIcon } from 'lucide-react'
-import { Ref, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { Ref, useCallback, useEffect, useImperativeHandle, useRef, useState, type ReactNode } from 'react'
 
 import TooltipButton from '@/components/TooltipButton'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/components/ui/input-group'
@@ -16,11 +16,13 @@ export type FileSearchHeaderHandle = {
 }
 
 export function FileSearchHeader({
+  extraActions,
   isRefreshing,
   onRefresh,
   onSearchQueryChange,
   ref,
 }: {
+  extraActions?: ReactNode
   isRefreshing: boolean
   onRefresh: () => void | Promise<void>
   onSearchQueryChange: (value: string) => void
@@ -74,12 +76,12 @@ export function FileSearchHeader({
       <div
         aria-hidden={isOpen}
         inert={isOpen}
-        className={cn('absolute inset-0 flex items-center gap-2 px-3 transition-all duration-200', {
+        className={cn('absolute inset-0 flex items-center px-2 transition-all duration-200', {
           'z-10 translate-x-0 opacity-100': !isOpen,
           'z-0 -translate-x-6 opacity-0': isOpen,
         })}
       >
-        <span className="text-sm font-medium">Files</span>
+        <span className="mr-2 text-sm font-medium">Files</span>
         <TooltipButton
           tooltipText="Refresh files"
           variant="ghost"
@@ -94,6 +96,7 @@ export function FileSearchHeader({
             })}
           />
         </TooltipButton>
+        {extraActions}
         <TooltipButton tooltipText="Search files" variant="ghost" size="icon-sm" onClick={() => setIsOpen(true)}>
           <SearchIcon className="size-4" />
         </TooltipButton>
