@@ -28,7 +28,7 @@ API keys support optional expiration and can be revoked at any time. After creat
 curl 'https://app.daytona.io/api/api-keys' \
   --request POST \
   --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
   --data '{
   "name": "My API Key",
   "permissions": ["write:sandboxes", "delete:sandboxes"],
@@ -68,7 +68,7 @@ Daytona provides methods to list all API keys for the current user or organizati
 
 ```bash
 curl 'https://app.daytona.io/api/api-keys' \
-  --header 'Authorization: Bearer YOUR_API_KEY'
+  --header 'Authorization: Bearer YOUR_JWT_TOKEN'
 ```
 
 </TabItem>
@@ -98,7 +98,7 @@ Daytona provides methods to get a single API key by name.
 
 ```bash
 curl 'https://app.daytona.io/api/api-keys/my-api-key' \
-  --header 'Authorization: Bearer YOUR_API_KEY'
+  --header 'Authorization: Bearer YOUR_JWT_TOKEN'
 ```
 
 </TabItem>
@@ -118,7 +118,7 @@ Daytona provides options to delete an API key in [Daytona Dashboard ↗](https:/
 ```bash
 curl 'https://app.daytona.io/api/api-keys/my-api-key' \
   --request DELETE \
-  --header 'Authorization: Bearer YOUR_API_KEY'
+  --header 'Authorization: Bearer YOUR_JWT_TOKEN'
 ```
 
 </TabItem>
@@ -134,7 +134,7 @@ Daytona provides options for organization admins to delete an API key for a spec
 ```bash
 curl 'https://app.daytona.io/api/api-keys/{userId}/my-api-key' \
   --request DELETE \
-  --header 'Authorization: Bearer YOUR_API_KEY'
+  --header 'Authorization: Bearer YOUR_JWT_TOKEN'
 ```
 
 </TabItem>
