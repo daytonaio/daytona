@@ -2282,19 +2282,19 @@ export class SandboxService {
     if (networkBlockAll !== undefined) {
       updateData.networkBlockAll = networkBlockAll
       if (networkBlockAll === true) {
-        updateData.networkAllowList = undefined
+        updateData.networkAllowList = null
       }
     }
 
     if (networkAllowList !== undefined) {
       if (networkAllowList.trim() === '') {
-        updateData.networkAllowList = undefined
+        updateData.networkAllowList = null
       } else {
         updateData.networkAllowList = this.resolveNetworkAllowList(networkAllowList)
         updateData.networkBlockAll = false
       }
     } else if (networkBlockAll === false) {
-      updateData.networkAllowList = undefined
+      updateData.networkAllowList = null
     }
 
     const updatedSandbox = await this.sandboxRepository.update(sandbox.id, { updateData, entity: sandbox })

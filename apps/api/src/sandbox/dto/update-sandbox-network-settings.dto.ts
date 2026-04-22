@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { IsOptional, IsString, IsBoolean } from 'class-validator'
+import { IsString, IsBoolean, ValidateIf } from 'class-validator'
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 
 @ApiSchema({ name: 'UpdateSandboxNetworkSettings' })
@@ -12,7 +12,7 @@ export class UpdateSandboxNetworkSettingsDto {
     description: 'Whether to block all network access for the sandbox',
     example: false,
   })
-  @IsOptional()
+  @ValidateIf((_, value) => value !== undefined)
   @IsBoolean()
   networkBlockAll?: boolean
 
@@ -20,7 +20,7 @@ export class UpdateSandboxNetworkSettingsDto {
     description: 'Comma-separated list of allowed CIDR network addresses for the sandbox',
     example: '192.168.1.0/16,10.0.0.0/24',
   })
-  @IsOptional()
+  @ValidateIf((_, value) => value !== undefined)
   @IsString()
   networkAllowList?: string
 }
