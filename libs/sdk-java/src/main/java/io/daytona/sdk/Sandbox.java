@@ -257,8 +257,6 @@ public class Sandbox {
     }
 
     /**
-     * Experimental: this method is feature-flagged and may not be available in all environments.
-     *
      * Updates outbound network policy on the runner (block all, restore access, or CIDR allow list).
      *
      * @param settings request body; at least one of networkBlockAll or networkAllowList must be set

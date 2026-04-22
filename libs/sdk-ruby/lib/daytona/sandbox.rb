@@ -202,8 +202,7 @@ module Daytona
       @auto_delete_interval = interval
     end
 
-    # Experimental: updates outbound network policy on the runner (block all, restore access, or CIDR allow list).
-    # This capability is feature-flagged and may not be available in all environments.
+    # Updates outbound network policy on the runner (block all, restore access, or CIDR allow list).
     #
     # @param network_block_all [Boolean, nil]
     # @param network_allow_list [String, nil]

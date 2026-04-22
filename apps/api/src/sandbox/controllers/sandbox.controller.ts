@@ -1048,7 +1048,6 @@ export class SandboxController {
     description: 'Network settings have been updated',
     type: SandboxDto,
   })
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.SANDBOX_RUNTIME_NETWORK_SETTINGS, defaultValue: false }] })
   @UseGuards(OrganizationAuthContextGuard, SandboxAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @Audit({
@@ -1068,6 +1067,11 @@ export class SandboxController {
     @Param('sandboxIdOrName') sandboxIdOrName: string,
     @Body() networkSettings: UpdateSandboxNetworkSettingsDto,
   ): Promise<SandboxDto> {
+    if (authContext.organization.sandboxLimitedNetworkEgress) {
+      throw new BadRequestError(
+        'Network access is restricted and cannot be overridden at the sandbox level. See https://www.daytona.io/docs/en/network-limits/#tier-based-network-restrictions',
+      )
+    }
     if (networkSettings.networkBlockAll === undefined && networkSettings.networkAllowList === undefined) {
       throw new BadRequestError('At least one of networkBlockAll or networkAllowList must be provided')
     }

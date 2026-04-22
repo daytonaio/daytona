@@ -703,8 +703,7 @@ func (s *Sandbox) doSetAutoDeleteInterval(ctx context.Context, intervalMinutes *
 	return nil
 }
 
-// UpdateNetworkSettings is experimental and may not be available in all environments.
-// It updates outbound network policy for this sandbox on the runner (for example
+// UpdateNetworkSettings updates outbound network policy for this sandbox on the runner (for example
 // block all traffic, restore general internet access, or apply a CIDR allow list) without stopping
 // the sandbox.
 func (s *Sandbox) UpdateNetworkSettings(ctx context.Context, settings apiclient.UpdateSandboxNetworkSettings) error {
