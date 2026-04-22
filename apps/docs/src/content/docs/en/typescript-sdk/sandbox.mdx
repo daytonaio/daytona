@@ -892,6 +892,39 @@ console.log('Sandbox stopped successfully');
 
 ***
 
+#### updateNetworkSettings()
+
+```ts
+updateNetworkSettings(settings: UpdateSandboxNetworkSettings): Promise<void>
+```
+
+Updates outbound network policy for this sandbox on the runner (for example block all traffic,
+restore general internet access, or apply a CIDR allow list) without stopping the sandbox.
+
+This maps to the same mechanism as creating a sandbox with `networkBlockAll` / `networkAllowList`:
+the runner applies iptables rules to the sandbox container.
+
+**Parameters**:
+
+- `settings` _UpdateSandboxNetworkSettings_ - At least one of `networkBlockAll` or `networkAllowList` must be set.
+    Set `networkBlockAll` to `false` to restore outbound access after a block (and clear a stored allow list).
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+// Pause internet (outbound blocked)
+await sandbox.updateNetworkSettings({ networkBlockAll: true });
+// Resume internet
+await sandbox.updateNetworkSettings({ networkBlockAll: false });
+```
+
+***
+
 #### validateSshAccess()
 
 ```ts

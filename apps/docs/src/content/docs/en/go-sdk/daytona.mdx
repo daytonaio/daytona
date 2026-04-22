@@ -243,6 +243,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) StartWithTimeout\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.StartWithTimeout>)
   - [func \(s \*Sandbox\) Stop\(ctx context.Context\) error](<#Sandbox.Stop>)
   - [func \(s \*Sandbox\) StopWithTimeout\(ctx context.Context, timeout time.Duration, force bool\) error](<#Sandbox.StopWithTimeout>)
+  - [func \(s \*Sandbox\) UpdateNetworkSettings\(ctx context.Context, settings apiclient.UpdateSandboxNetworkSettings\) error](<#Sandbox.UpdateNetworkSettings>)
   - [func \(s \*Sandbox\) WaitForResize\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForResize>)
   - [func \(s \*Sandbox\) WaitForStart\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForStart>)
   - [func \(s \*Sandbox\) WaitForStop\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForStop>)
@@ -4201,6 +4202,15 @@ Example:
 ```
 err := sandbox.StopWithTimeout(ctx, 2*time.Minute, false)
 ```
+
+<a name="Sandbox.UpdateNetworkSettings"></a>
+### func \(\*Sandbox\) UpdateNetworkSettings
+
+```go
+func (s *Sandbox) UpdateNetworkSettings(ctx context.Context, settings apiclient.UpdateSandboxNetworkSettings) error
+```
+
+UpdateNetworkSettings updates outbound network policy for this sandbox on the runner \(for example block all traffic, restore general internet access, or apply a CIDR allow list\) without stopping the sandbox.
 
 <a name="Sandbox.WaitForResize"></a>
 ### func \(\*Sandbox\) WaitForResize

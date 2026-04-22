@@ -193,6 +193,21 @@ Sets Sandbox auto-delete interval.
 
 - `DaytonaException` - if the update fails
 
+#### updateNetworkSettings()
+```java
+public void updateNetworkSettings(UpdateSandboxNetworkSettings settings)
+```
+
+Updates outbound network policy on the runner (block all, restore access, or CIDR allow list).
+
+**Parameters**:
+
+- `settings` _UpdateSandboxNetworkSettings_ - request body; at least one of networkBlockAll or networkAllowList must be set
+
+**Throws**:
+
+- `DaytonaException` - if the update fails
+
 #### getUserHomeDir()
 ```java
 public String getUserHomeDir()
@@ -483,6 +498,28 @@ Returns auto-delete interval in minutes.
 **Returns**:
 
 - `Integer` - auto-delete interval
+
+#### getNetworkBlockAll()
+```java
+public Boolean getNetworkBlockAll()
+```
+
+Returns whether all network access is blocked for this Sandbox.
+
+**Returns**:
+
+- `Boolean` - block-all flag, or null if unknown
+
+#### getNetworkAllowList()
+```java
+public String getNetworkAllowList()
+```
+
+Returns the comma-separated CIDR allow list, if any.
+
+**Returns**:
+
+- `String` - allow list or null
 
 #### getProcess()
 ```java

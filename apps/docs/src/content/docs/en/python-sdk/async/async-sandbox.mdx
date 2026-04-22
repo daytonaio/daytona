@@ -441,6 +441,38 @@ sandbox.set_auto_delete_interval(0)
 sandbox.set_auto_delete_interval(-1)
 ```
 
+#### AsyncSandbox.update\_network\_settings
+
+```python
+@intercept_errors(message_prefix="Failed to update network settings: ")
+@with_instrumentation()
+async def update_network_settings(
+        *,
+        network_block_all: bool | None = None,
+        network_allow_list: str | None = None) -> None
+```
+
+Updates outbound network policy on the runner (block all, restore access, or CIDR allow list).
+
+**Arguments**:
+
+- `network_block_all` - When ``True``, blocks all outbound traffic. When ``False``, restores general
+  outbound access (and clears a stored allow list).
+- `network_allow_list` - Comma-separated IPv4 CIDRs to allow; implies not blocking all.
+  
+
+**Raises**:
+
+- `DaytonaValidationError` - If neither argument is set.
+  
+
+**Example**:
+
+```python
+await sandbox.update_network_settings(network_block_all=True)
+await sandbox.update_network_settings(network_block_all=False)
+```
+
 #### AsyncSandbox.get\_preview\_link
 
 ```python

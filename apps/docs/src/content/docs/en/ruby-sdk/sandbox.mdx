@@ -470,6 +470,28 @@ The Sandbox will automatically delete after being continuously stopped for the s
 
 - `Daytona:Sdk:Error` -
 
+#### update_network_settings()
+
+```ruby
+def update_network_settings(network_block_all:, network_allow_list:)
+
+```
+
+Updates outbound network policy on the runner (block all, restore access, or CIDR allow list).
+
+**Parameters**:
+
+- `network_block_all` _Boolean, nil_ -
+- `network_allow_list` _String, nil_ -
+
+**Returns**:
+
+- `void`
+
+**Raises**:
+
+- `Daytona:Sdk:Error` -
+
 #### auto_stop_interval=()
 
 ```ruby
