@@ -2278,26 +2278,33 @@ export class SandboxService {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
     const updateData: Partial<Sandbox> = {}
+    let effectiveNetworkBlockAll = sandbox.networkBlockAll
+    let effectiveNetworkAllowList = sandbox.networkAllowList
 
     if (networkBlockAll !== undefined) {
       updateData.networkBlockAll = networkBlockAll
+      effectiveNetworkBlockAll = networkBlockAll
       if (networkBlockAll === true) {
         updateData.networkAllowList = null
+        effectiveNetworkAllowList = null
       }
     }
 
     if (networkAllowList !== undefined) {
       if (networkAllowList.trim() === '') {
         updateData.networkAllowList = null
+        effectiveNetworkAllowList = null
       } else {
-        updateData.networkAllowList = this.resolveNetworkAllowList(networkAllowList)
+        const resolvedNetworkAllowList = this.resolveNetworkAllowList(networkAllowList)
+        updateData.networkAllowList = resolvedNetworkAllowList
         updateData.networkBlockAll = false
+        effectiveNetworkAllowList = resolvedNetworkAllowList
+        effectiveNetworkBlockAll = false
       }
     } else if (networkBlockAll === false) {
       updateData.networkAllowList = null
+      effectiveNetworkAllowList = null
     }
-
-    const updatedSandbox = await this.sandboxRepository.update(sandbox.id, { updateData, entity: sandbox })
 
     // Update network settings on the runner
     if (sandbox.runnerId) {
@@ -2306,11 +2313,13 @@ export class SandboxService {
         const runnerAdapter = await this.runnerAdapterFactory.create(runner)
         await runnerAdapter.updateNetworkSettings(
           sandbox.id,
-          updatedSandbox.networkBlockAll,
-          updatedSandbox.networkAllowList,
+          effectiveNetworkBlockAll,
+          effectiveNetworkAllowList ?? undefined,
         )
       }
     }
+
+    const updatedSandbox = await this.sandboxRepository.update(sandbox.id, { updateData, entity: sandbox })
 
     return updatedSandbox
   }
