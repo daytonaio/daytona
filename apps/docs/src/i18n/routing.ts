@@ -99,24 +99,11 @@ function getProxyOrigin(request: Request): string {
 
 /**
  * Headers safe to forward when fetching another path on the public site.
- * Drops Host and hop-by-hop headers so the URL's host is used (SNI / routing).
+ * Leave request headers empty to avoid accessing `Astro.request.headers`
+ * when proxying into prerendered static routes.
  */
-function headersForProxyFetch(originalRequest: Request): Headers {
-  const out = new Headers()
-  const skip = new Set([
-    'host',
-    'connection',
-    'keep-alive',
-    'proxy-connection',
-    'transfer-encoding',
-    'upgrade',
-  ])
-  originalRequest.headers.forEach((value, key) => {
-    if (!skip.has(key.toLowerCase())) {
-      out.set(key, value)
-    }
-  })
-  return out
+function headersForProxyFetch(): Headers {
+  return new Headers()
 }
 
 /**
@@ -132,7 +119,7 @@ export async function proxyLocalizedContent(
 
     const response = await fetch(targetUrl.toString(), {
       method: originalRequest.method,
-      headers: headersForProxyFetch(originalRequest),
+      headers: headersForProxyFetch(),
       body:
         originalRequest.method === 'GET' || originalRequest.method === 'HEAD'
           ? undefined
@@ -172,6 +159,8 @@ export async function handleLanguageRouting(
   slug = '',
   redirectFn: (path: string) => Response
 ): Promise<Response> {
+  const normalizedSlug = slug.replace(/^\/+|\/+$/g, '')
+
   const serveCustom404 = async (): Promise<Response> => {
     const response = await proxyLocalizedContent('/docs/404', request)
     return new Response(response.body, {
@@ -181,18 +170,15 @@ export async function handleLanguageRouting(
     })
   }
 
-  if (isLocalizedPath(slug)) return await serveCustom404()
+  if (isLocalizedPath(normalizedSlug)) return await serveCustom404()
 
   const preferredLanguage = getPreferredLanguage(request)
 
-  if (preferredLanguage !== defaultLocale) {
-    return redirectFn(`/docs/${preferredLanguage}/${slug}`)
+  if (normalizedSlug) {
+    // For unprefixed docs paths, use the default locale canonical URL.
+    // This avoids SSR self-fetch loops that can incorrectly produce 404.
+    return redirectFn(`/docs/${defaultLocale}/${normalizedSlug}`)
   }
 
-  const response = await proxyLocalizedContent(
-    `/docs/${defaultLocale}/${slug}`,
-    request
-  )
-  if (response.status === 404) return await serveCustom404()
-  return response
+  return redirectFn(`/docs/${preferredLanguage}`)
 }
