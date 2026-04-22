@@ -7,4 +7,5 @@ export const FeatureFlags = {
   ORGANIZATION_INFRASTRUCTURE: 'organization_infrastructure',
   SANDBOX_RESIZE: 'sandbox_resize',
   SANDBOX_LINUX_VM: 'sandbox_linux_vm',
+  SANDBOX_RUNTIME_NETWORK_SETTINGS: 'sandbox_runtime_network_settings',
 } as const

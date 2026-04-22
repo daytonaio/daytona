@@ -2281,10 +2281,20 @@ export class SandboxService {
 
     if (networkBlockAll !== undefined) {
       updateData.networkBlockAll = networkBlockAll
+      if (networkBlockAll === true) {
+        updateData.networkAllowList = undefined
+      }
     }
 
     if (networkAllowList !== undefined) {
-      updateData.networkAllowList = this.resolveNetworkAllowList(networkAllowList)
+      if (networkAllowList.trim() === '') {
+        updateData.networkAllowList = undefined
+      } else {
+        updateData.networkAllowList = this.resolveNetworkAllowList(networkAllowList)
+        updateData.networkBlockAll = false
+      }
+    } else if (networkBlockAll === false) {
+      updateData.networkAllowList = undefined
     }
 
     const updatedSandbox = await this.sandboxRepository.update(sandbox.id, { updateData, entity: sandbox })
@@ -2294,7 +2304,11 @@ export class SandboxService {
       const runner = await this.runnerService.findOne(sandbox.runnerId)
       if (runner) {
         const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-        await runnerAdapter.updateNetworkSettings(sandbox.id, networkBlockAll, networkAllowList)
+        await runnerAdapter.updateNetworkSettings(
+          sandbox.id,
+          updatedSandbox.networkBlockAll,
+          updatedSandbox.networkAllowList,
+        )
       }
     }
 

@@ -207,6 +207,7 @@ src/main/java/io/daytona/api/client/model/UpdateOrganizationQuota.java
 src/main/java/io/daytona/api/client/model/UpdateOrganizationRegionQuota.java
 src/main/java/io/daytona/api/client/model/UpdateOrganizationRole.java
 src/main/java/io/daytona/api/client/model/UpdateRegion.java
+src/main/java/io/daytona/api/client/model/UpdateSandboxNetworkSettings.java
 src/main/java/io/daytona/api/client/model/UpdateSandboxStateDto.java
 src/main/java/io/daytona/api/client/model/Url.java
 src/main/java/io/daytona/api/client/model/User.java
@@ -406,6 +407,7 @@ src/test/java/io/daytona/api/client/model/UpdateOrganizationQuotaTest.java
 src/test/java/io/daytona/api/client/model/UpdateOrganizationRegionQuotaTest.java
 src/test/java/io/daytona/api/client/model/UpdateOrganizationRoleTest.java
 src/test/java/io/daytona/api/client/model/UpdateRegionTest.java
+src/test/java/io/daytona/api/client/model/UpdateSandboxNetworkSettingsTest.java
 src/test/java/io/daytona/api/client/model/UpdateSandboxStateDtoTest.java
 src/test/java/io/daytona/api/client/model/UrlTest.java
 src/test/java/io/daytona/api/client/model/UserHomeDirResponseTest.java

@@ -18,6 +18,7 @@ import {
   SignedPortPreviewUrl,
   ResizeSandbox,
   CreateSandboxSnapshot,
+  UpdateSandboxNetworkSettings,
 } from '@daytona/api-client'
 import { Resources, Daytona } from './Daytona'
 import type { CodeLanguage } from './Daytona'
@@ -642,6 +643,31 @@ export class Sandbox implements SandboxDto {
   public async setAutoDeleteInterval(interval: number): Promise<void> {
     await this.sandboxApi.setAutoDeleteInterval(this.id, interval)
     this.autoDeleteInterval = interval
+  }
+
+  /**
+   * Updates outbound network policy for this sandbox on the runner (for example block all traffic,
+   * restore general internet access, or apply a CIDR allow list) without stopping the sandbox.
+   *
+   * This maps to the same mechanism as creating a sandbox with `networkBlockAll` / `networkAllowList`:
+   * the runner applies iptables rules to the sandbox container.
+   *
+   * @param {UpdateSandboxNetworkSettings} settings - At least one of `networkBlockAll` or `networkAllowList` must be set.
+   *   Set `networkBlockAll` to `false` to restore outbound access after a block (and clear a stored allow list).
+   *
+   * @example
+   * // Pause internet (outbound blocked)
+   * await sandbox.updateNetworkSettings({ networkBlockAll: true });
+   * // Resume internet
+   * await sandbox.updateNetworkSettings({ networkBlockAll: false });
+   */
+  @WithInstrumentation()
+  public async updateNetworkSettings(settings: UpdateSandboxNetworkSettings): Promise<void> {
+    if (settings.networkBlockAll === undefined && settings.networkAllowList === undefined) {
+      throw new DaytonaValidationError('At least one of networkBlockAll or networkAllowList must be set')
+    }
+    const response = await this.sandboxApi.updateNetworkSettings(this.id, settings)
+    this.processSandboxDto(response.data)
   }
 
   /**

@@ -2656,6 +2656,50 @@ paths:
       summary: Set sandbox auto-delete interval
       tags:
       - sandbox
+  /sandbox/{sandboxIdOrName}/network-settings:
+    post:
+      description: "Changes outbound network policy on the runner for a running sandbox\
+        \ (for example block all traffic, restore access, or set a CIDR allow list)."
+      operationId: updateNetworkSettings
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: ID or name of the sandbox
+        explode: false
+        in: path
+        name: sandboxIdOrName
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSandboxNetworkSettings'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
+          description: Network settings have been updated
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Update sandbox network settings
+      tags:
+      - sandbox
   /sandbox/{sandboxIdOrName}/archive:
     post:
       operationId: archiveSandbox
@@ -11168,6 +11212,21 @@ components:
           description: "The name for the forked sandbox. If not provided, a unique\
             \ name will be generated."
           example: my-forked-sandbox
+          type: string
+      type: object
+    UpdateSandboxNetworkSettings:
+      example:
+        networkBlockAll: false
+        networkAllowList: "192.168.1.0/16,10.0.0.0/24"
+      properties:
+        networkBlockAll:
+          description: Whether to block all network access for the sandbox
+          example: false
+          type: boolean
+        networkAllowList:
+          description: Comma-separated list of allowed CIDR network addresses for
+            the sandbox
+          example: "192.168.1.0/16,10.0.0.0/24"
           type: string
       type: object
     PortPreviewUrl:

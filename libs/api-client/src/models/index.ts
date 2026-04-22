@@ -164,6 +164,7 @@ export * from './update-organization-quota';
 export * from './update-organization-region-quota';
 export * from './update-organization-role';
 export * from './update-region';
+export * from './update-sandbox-network-settings';
 export * from './update-sandbox-state-dto';
 export * from './url';
 export * from './user';

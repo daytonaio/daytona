@@ -67,7 +67,7 @@ import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
-// import { UpdateSandboxNetworkSettingsDto } from '../dto/update-sandbox-network-settings.dto'
+import { UpdateSandboxNetworkSettingsDto } from '../dto/update-sandbox-network-settings.dto'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
 import { CreateSandboxSnapshotDto } from '../dto/create-sandbox-snapshot.dto'
@@ -1030,49 +1030,55 @@ export class SandboxController {
     return this.sandboxService.toSandboxDto(sandbox)
   }
 
-  // TODO: Network settings endpoint will not be enabled for now
-  // @Post(':sandboxIdOrName/network-settings')
-  // @ApiOperation({
-  //   summary: 'Update sandbox network settings',
-  //   operationId: 'updateNetworkSettings',
-  // })
-  // @ApiParam({
-  //   name: 'sandboxIdOrName',
-  //   description: 'ID or name of the sandbox',
-  //   type: 'string',
-  // })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Network settings have been updated',
-  //   type: SandboxDto,
-  // })
-  // @UseGuards(OrganizationAuthContextGuard, SandboxAccessGuard)
-  // @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
-  // @Audit({
-  //   action: AuditAction.UPDATE_NETWORK_SETTINGS,
-  //   targetType: AuditTarget.SANDBOX,
-  //   targetIdFromRequest: (req) => req.params.sandboxIdOrName,
-  //   targetIdFromResult: (result: SandboxDto) => result?.id,
-  //   requestMetadata: {
-  //     body: (req: TypedRequest<UpdateSandboxNetworkSettingsDto>) => ({
-  //       networkBlockAll: req.body?.networkBlockAll,
-  //       networkAllowList: req.body?.networkAllowList,
-  //     }),
-  //   },
-  // })
-  // async updateNetworkSettings(
-  //   @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
-  //   @Param('sandboxIdOrName') sandboxIdOrName: string,
-  //   @Body() networkSettings: UpdateSandboxNetworkSettingsDto,
-  // ): Promise<SandboxDto> {
-  //   const sandbox = await this.sandboxService.updateNetworkSettings(
-  //     sandboxIdOrName,
-  //     networkSettings.networkBlockAll,
-  //     networkSettings.networkAllowList,
-  //     authContext.organizationId,
-  //   )
-  //   return SandboxDto.fromSandbox(sandbox, '')
-  // }
+  @Post(':sandboxIdOrName/network-settings')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Update sandbox network settings',
+    operationId: 'updateNetworkSettings',
+    description:
+      'Changes outbound network policy on the runner for a running sandbox (for example block all traffic, restore access, or set a CIDR allow list).',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Network settings have been updated',
+    type: SandboxDto,
+  })
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.SANDBOX_RUNTIME_NETWORK_SETTINGS, defaultValue: false }] })
+  @UseGuards(OrganizationAuthContextGuard, SandboxAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @Audit({
+    action: AuditAction.UPDATE_NETWORK_SETTINGS,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxIdOrName,
+    targetIdFromResult: (result: SandboxDto) => result?.id,
+    requestMetadata: {
+      body: (req: TypedRequest<UpdateSandboxNetworkSettingsDto>) => ({
+        networkBlockAll: req.body?.networkBlockAll,
+        networkAllowList: req.body?.networkAllowList,
+      }),
+    },
+  })
+  async updateNetworkSettings(
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Body() networkSettings: UpdateSandboxNetworkSettingsDto,
+  ): Promise<SandboxDto> {
+    if (networkSettings.networkBlockAll === undefined && networkSettings.networkAllowList === undefined) {
+      throw new BadRequestError('At least one of networkBlockAll or networkAllowList must be provided')
+    }
+    const sandbox = await this.sandboxService.updateNetworkSettings(
+      sandboxIdOrName,
+      networkSettings.networkBlockAll,
+      networkSettings.networkAllowList,
+      authContext.organizationId,
+    )
+    return this.sandboxService.toSandboxDto(sandbox)
+  }
 
   @Post(':sandboxIdOrName/archive')
   @HttpCode(200)

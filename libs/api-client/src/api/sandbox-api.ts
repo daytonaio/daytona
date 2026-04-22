@@ -58,6 +58,8 @@ import type { ToolboxProxyUrl } from '../models';
 // @ts-ignore
 import type { TraceSpan } from '../models';
 // @ts-ignore
+import type { UpdateSandboxNetworkSettings } from '../models';
+// @ts-ignore
 import type { UpdateSandboxStateDto } from '../models';
 // @ts-ignore
 import type { Url } from '../models';
@@ -1947,6 +1949,56 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
+         * Changes outbound network policy on the runner for a running sandbox (for example block all traffic, restore access, or set a CIDR allow list).
+         * @summary Update sandbox network settings
+         * @param {string} sandboxIdOrName ID or name of the sandbox
+         * @param {UpdateSandboxNetworkSettings} updateSandboxNetworkSettings 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateNetworkSettings: async (sandboxIdOrName: string, updateSandboxNetworkSettings: UpdateSandboxNetworkSettings, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'sandboxIdOrName' is not null or undefined
+            assertParamExists('updateNetworkSettings', 'sandboxIdOrName', sandboxIdOrName)
+            // verify required parameter 'updateSandboxNetworkSettings' is not null or undefined
+            assertParamExists('updateNetworkSettings', 'updateSandboxNetworkSettings', updateSandboxNetworkSettings)
+            const localVarPath = `/sandbox/{sandboxIdOrName}/network-settings`
+                .replace(`{${"sandboxIdOrName"}}`, encodeURIComponent(String(sandboxIdOrName)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateSandboxNetworkSettings, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * 
          * @summary Update public status
          * @param {string} sandboxIdOrName ID or name of the sandbox
@@ -2660,6 +2712,21 @@ export const SandboxApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Changes outbound network policy on the runner for a running sandbox (for example block all traffic, restore access, or set a CIDR allow list).
+         * @summary Update sandbox network settings
+         * @param {string} sandboxIdOrName ID or name of the sandbox
+         * @param {UpdateSandboxNetworkSettings} updateSandboxNetworkSettings 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateNetworkSettings(sandboxIdOrName: string, updateSandboxNetworkSettings: UpdateSandboxNetworkSettings, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateNetworkSettings(sandboxIdOrName, updateSandboxNetworkSettings, xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SandboxApi.updateNetworkSettings']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * 
          * @summary Update public status
          * @param {string} sandboxIdOrName ID or name of the sandbox
@@ -3162,6 +3229,18 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
          */
         updateLastActivity(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.updateLastActivity(sandboxId, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Changes outbound network policy on the runner for a running sandbox (for example block all traffic, restore access, or set a CIDR allow list).
+         * @summary Update sandbox network settings
+         * @param {string} sandboxIdOrName ID or name of the sandbox
+         * @param {UpdateSandboxNetworkSettings} updateSandboxNetworkSettings 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateNetworkSettings(sandboxIdOrName: string, updateSandboxNetworkSettings: UpdateSandboxNetworkSettings, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Sandbox> {
+            return localVarFp.updateNetworkSettings(sandboxIdOrName, updateSandboxNetworkSettings, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3728,6 +3807,20 @@ export class SandboxApi extends BaseAPI {
      */
     public updateLastActivity(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).updateLastActivity(sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Changes outbound network policy on the runner for a running sandbox (for example block all traffic, restore access, or set a CIDR allow list).
+     * @summary Update sandbox network settings
+     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {UpdateSandboxNetworkSettings} updateSandboxNetworkSettings 
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SandboxApi
+     */
+    public updateNetworkSettings(sandboxIdOrName: string, updateSandboxNetworkSettings: UpdateSandboxNetworkSettings, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return SandboxApiFp(this.configuration).updateNetworkSettings(sandboxIdOrName, updateSandboxNetworkSettings, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

@@ -34,6 +34,7 @@ import io.daytona.api.client.model.SshAccessDto;
 import io.daytona.api.client.model.SshAccessValidationDto;
 import io.daytona.api.client.model.ToolboxProxyUrl;
 import io.daytona.api.client.model.TraceSpan;
+import io.daytona.api.client.model.UpdateSandboxNetworkSettings;
 import io.daytona.api.client.model.UpdateSandboxStateDto;
 import io.daytona.api.client.model.Url;
 import org.junit.jupiter.api.Disabled;
@@ -580,6 +581,22 @@ public class SandboxApiTest {
         String sandboxId = null;
         String xDaytonaOrganizationID = null;
         api.updateLastActivity(sandboxId, xDaytonaOrganizationID);
+        // TODO: test validations
+    }
+
+    /**
+     * Update sandbox network settings
+     *
+     * Changes outbound network policy on the runner for a running sandbox (for example block all traffic, restore access, or set a CIDR allow list).
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void updateNetworkSettingsTest() throws ApiException {
+        String sandboxIdOrName = null;
+        UpdateSandboxNetworkSettings updateSandboxNetworkSettings = null;
+        String xDaytonaOrganizationID = null;
+        Sandbox response = api.updateNetworkSettings(sandboxIdOrName, updateSandboxNetworkSettings, xDaytonaOrganizationID);
         // TODO: test validations
     }
 

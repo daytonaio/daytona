@@ -202,6 +202,27 @@ module Daytona
       @auto_delete_interval = interval
     end
 
+    # Updates outbound network policy on the runner (block all, restore access, or CIDR allow list).
+    #
+    # @param network_block_all [Boolean, nil]
+    # @param network_allow_list [String, nil]
+    # @return [void]
+    # @raise [Daytona::Sdk::Error]
+    def update_network_settings(network_block_all: nil, network_allow_list: nil)
+      if network_block_all.nil? && network_allow_list.nil?
+        raise Sdk::Error,
+              'At least one of network_block_all or network_allow_list must be provided'
+      end
+
+      body = DaytonaApiClient::UpdateSandboxNetworkSettings.new(
+        network_block_all:,
+        network_allow_list:
+      )
+      data = sandbox_api.update_network_settings(id, body)
+      @network_block_all = data.network_block_all
+      @network_allow_list = data.network_allow_list
+    end
+
     # Sets the auto-stop interval for the Sandbox.
     # The Sandbox will automatically stop after being idle (no new events) for the specified interval.
     # Events include any state changes or interactions with the Sandbox through the SDK.
@@ -510,6 +531,7 @@ module Daytona
     end
 
     instrument :archive, :auto_archive_interval=, :auto_delete_interval=, :auto_stop_interval=,
+               :update_network_settings,
                :create_ssh_access, :delete, :get_user_home_dir, :get_work_dir, :labels=,
                :preview_url, :create_signed_preview_url, :expire_signed_preview_url,
                :refresh, :refresh_activity, :revoke_ssh_access, :start, :recover, :stop,

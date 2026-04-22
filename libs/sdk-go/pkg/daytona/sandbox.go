@@ -703,6 +703,28 @@ func (s *Sandbox) doSetAutoDeleteInterval(ctx context.Context, intervalMinutes *
 	return nil
 }
 
+// UpdateNetworkSettings updates outbound network policy for this sandbox on the runner (for example
+// block all traffic, restore general internet access, or apply a CIDR allow list) without stopping
+// the sandbox.
+func (s *Sandbox) UpdateNetworkSettings(ctx context.Context, settings apiclient.UpdateSandboxNetworkSettings) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "UpdateNetworkSettings", func(ctx context.Context) error {
+		return s.doUpdateNetworkSettings(ctx, settings)
+	})
+}
+
+func (s *Sandbox) doUpdateNetworkSettings(ctx context.Context, settings apiclient.UpdateSandboxNetworkSettings) error {
+	sandboxResp, httpResp, err := s.client.apiClient.SandboxAPI.UpdateNetworkSettings(s.client.getAuthContext(ctx), s.ID).
+		UpdateSandboxNetworkSettings(settings).
+		Execute()
+	if err != nil {
+		return errors.ConvertAPIError(err, httpResp)
+	}
+
+	s.NetworkBlockAll = sandboxResp.GetNetworkBlockAll()
+	s.NetworkAllowList = sandboxResp.NetworkAllowList
+	return nil
+}
+
 // ExperimentalFork forks the sandbox with a default timeout of 60 seconds,
 // creating a new sandbox with an identical filesystem.
 //

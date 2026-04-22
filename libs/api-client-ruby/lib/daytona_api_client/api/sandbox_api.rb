@@ -2610,6 +2610,83 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Update sandbox network settings
+    # Changes outbound network policy on the runner for a running sandbox (for example block all traffic, restore access, or set a CIDR allow list).
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param update_sandbox_network_settings [UpdateSandboxNetworkSettings] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Sandbox]
+    def update_network_settings(sandbox_id_or_name, update_sandbox_network_settings, opts = {})
+      data, _status_code, _headers = update_network_settings_with_http_info(sandbox_id_or_name, update_sandbox_network_settings, opts)
+      data
+    end
+
+    # Update sandbox network settings
+    # Changes outbound network policy on the runner for a running sandbox (for example block all traffic, restore access, or set a CIDR allow list).
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param update_sandbox_network_settings [UpdateSandboxNetworkSettings] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(Sandbox, Integer, Hash)>] Sandbox data, response status code and response headers
+    def update_network_settings_with_http_info(sandbox_id_or_name, update_sandbox_network_settings, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.update_network_settings ...'
+      end
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.update_network_settings"
+      end
+      # verify the required parameter 'update_sandbox_network_settings' is set
+      if @api_client.config.client_side_validation && update_sandbox_network_settings.nil?
+        fail ArgumentError, "Missing the required parameter 'update_sandbox_network_settings' when calling SandboxApi.update_network_settings"
+      end
+      # resource path
+      local_var_path = '/sandbox/{sandboxIdOrName}/network-settings'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(update_sandbox_network_settings)
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Sandbox'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.update_network_settings",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#update_network_settings\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Update public status
     # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param is_public [Boolean] Public status to set

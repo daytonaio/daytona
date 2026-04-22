@@ -8,6 +8,7 @@ import io.daytona.api.client.model.CreateSandboxSnapshot;
 import io.daytona.api.client.model.ForkSandbox;
 import io.daytona.api.client.model.SandboxLabels;
 import io.daytona.api.client.model.ToolboxProxyUrl;
+import io.daytona.api.client.model.UpdateSandboxNetworkSettings;
 import io.daytona.sdk.exception.DaytonaException;
 
 import java.math.BigDecimal;
@@ -42,6 +43,8 @@ public class Sandbox {
     private Integer autoStopInterval;
     private Integer autoArchiveInterval;
     private Integer autoDeleteInterval;
+    private Boolean networkBlockAll;
+    private String networkAllowList;
 
     /** Process execution interface for this Sandbox. */
     public final Process process;
@@ -254,6 +257,19 @@ public class Sandbox {
     }
 
     /**
+     * Updates outbound network policy on the runner (block all, restore access, or CIDR allow list).
+     *
+     * @param settings request body; at least one of networkBlockAll or networkAllowList must be set
+     * @throws DaytonaException if the update fails
+     */
+    public void updateNetworkSettings(UpdateSandboxNetworkSettings settings) {
+        io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(() -> sandboxApi.updateNetworkSettings(id, settings, null));
+        if (response != null) {
+            updateFromModel(response);
+        }
+    }
+
+    /**
      * Returns home directory path for Sandbox user.
      *
      * @return absolute home directory path
@@ -338,6 +354,8 @@ public class Sandbox {
         this.autoStopInterval = data.getAutoStopInterval() == null ? null : data.getAutoStopInterval().intValue();
         this.autoArchiveInterval = data.getAutoArchiveInterval() == null ? null : data.getAutoArchiveInterval().intValue();
         this.autoDeleteInterval = data.getAutoDeleteInterval() == null ? null : data.getAutoDeleteInterval().intValue();
+        this.networkBlockAll = data.getNetworkBlockAll();
+        this.networkAllowList = data.getNetworkAllowList();
     }
 
     private String asString(Object value) {
@@ -527,6 +545,18 @@ public class Sandbox {
      * @return auto-delete interval
      */
     public Integer getAutoDeleteInterval() { return autoDeleteInterval; }
+    /**
+     * Returns whether all network access is blocked for this Sandbox.
+     *
+     * @return block-all flag, or null if unknown
+     */
+    public Boolean getNetworkBlockAll() { return networkBlockAll; }
+    /**
+     * Returns the comma-separated CIDR allow list, if any.
+     *
+     * @return allow list or null
+     */
+    public String getNetworkAllowList() { return networkAllowList; }
 
     /**
      * Returns process operations facade.
