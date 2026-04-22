@@ -17,6 +17,7 @@ import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/re
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { toast } from 'sonner'
+import { useConfig } from './useConfig'
 
 type CreateSandboxParams = CreateSandboxBaseParams | CreateSandboxFromImageParams | CreateSandboxFromSnapshotParams
 
@@ -90,15 +91,16 @@ export function useSandboxSession(options?: UseSandboxSessionOptions): UseSandbo
   const { selectedOrganization } = useSelectedOrganization()
   const { sandboxApi, toolboxApi } = useApi()
   const queryClient = useQueryClient()
+  const { apiUrl } = useConfig()
 
   const client = useMemo(() => {
     if (!user?.access_token || !selectedOrganization?.id) return null
     return new Daytona({
       jwtToken: user.access_token,
-      apiUrl: import.meta.env.VITE_API_URL,
+      apiUrl,
       organizationId: selectedOrganization.id,
     })
-  }, [user?.access_token, selectedOrganization?.id])
+  }, [user?.access_token, selectedOrganization?.id, apiUrl])
 
   const createMutation = useMutation<Sandbox, Error, CreateSandboxParams | undefined>({
     mutationKey: ['create-sandbox', scope ?? 'default'],
