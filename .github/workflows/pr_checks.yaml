@@ -223,9 +223,9 @@ jobs:
         run: |
           python3 <<'PY'
           import posixpath
+          import re
           import sys
           from pathlib import Path
-          from urllib.parse import urlparse
 
           import yaml
 
@@ -234,7 +234,22 @@ jobs:
               print("::error::.yarnrc.yml is required and must not be removed -- it carries supply chain hardening (npmMinimalAgeGate, etc.)")
               sys.exit(1)
 
-          trusted_hosts = {"registry.npmjs.org", "registry.yarnpkg.com"}
+          # Strict allowlist regex for trusted registry URLs.
+          # Using a regex instead of urlparse() avoids parser-differential bypasses
+          # (Python RFC 3986 vs Node.js WHATWG URL disagree on backslashes in special-scheme URLs,
+          # e.g. 'https://evil.com\@registry.npmjs.org/' -- urlparse sees registry.npmjs.org as host,
+          # Yarn's WHATWG parser sees evil.com as host).
+          TRUSTED_REGISTRY = re.compile(
+              r"^https://(registry\.npmjs\.org|registry\.yarnpkg\.com)(/.*)?$"
+          )
+
+          # Required hardening keys with minimum acceptable values.
+          # These must not be removed or weakened -- a malicious PR that strips them
+          # would pass a file-existence check but silently disable supply chain protection.
+          REQUIRED_KEYS = {
+              "npmMinimalAgeGate": 10080,  # 7 days in minutes
+          }
+
           errors = []
 
           try:
@@ -265,9 +280,23 @@ jobs:
               if not isinstance(value, str):
                   errors.append(f"{location}.{key} is not a string: {value!r}")
                   return
-              parsed = urlparse(value)
-              if parsed.scheme != "https" or parsed.hostname not in trusted_hosts:
-                  errors.append(f"{location}.{key} must use https and a trusted host, got: {value}")
+              # Reject any backslash outright -- Python and Node.js WHATWG URL parsers differ
+              # on backslash handling in special-scheme URLs, which can be exploited.
+              if "\\" in value or "%5c" in value.lower():
+                  errors.append(f"{location}.{key} contains backslash (parser differential bypass): {value!r}")
+                  return
+              if not TRUSTED_REGISTRY.match(value):
+                  errors.append(
+                      f"{location}.{key} must be a trusted registry URL "
+                      f"(https://registry.npmjs.org/ or https://registry.yarnpkg.com/), got: {value}"
+                  )
+
+          # Required hardening keys must be present and not weakened
+          for key, min_value in REQUIRED_KEYS.items():
+              if key not in config:
+                  errors.append(f"{key} is missing -- this supply chain hardening setting must not be removed")
+              elif not isinstance(config[key], int) or isinstance(config[key], bool) or config[key] < min_value:
+                  errors.append(f"{key} must be an integer >= {min_value}, got: {config[key]!r}")
 
           # Top-level registry overrides
           for key in ("npmRegistryServer", "npmPublishRegistry"):
