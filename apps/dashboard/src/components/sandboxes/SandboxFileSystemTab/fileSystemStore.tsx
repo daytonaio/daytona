@@ -16,11 +16,9 @@ type FileSystemStoreState = {
 }
 
 type FileSystemStoreActions = {
-  clearAdjacentFilePaths: () => void
   clearSelectedNode: () => void
   openNode: (path: string) => void
   setAdjacentFilePaths: (value: { nextFilePath: string | null; previousFilePath: string | null }) => void
-  setLastOpenedNodePath: (value: string) => void
   setSelectedNodePath: (value: string | null) => void
 }
 
@@ -33,11 +31,6 @@ const createFileSystemStore = () =>
     previousFilePath: null,
     selectedNodePath: null,
     actions: {
-      clearAdjacentFilePaths: () =>
-        set({
-          nextFilePath: null,
-          previousFilePath: null,
-        }),
       clearSelectedNode: () =>
         set({
           nextFilePath: null,
@@ -54,7 +47,6 @@ const createFileSystemStore = () =>
           nextFilePath,
           previousFilePath,
         }),
-      setLastOpenedNodePath: (lastOpenedNodePath) => set({ lastOpenedNodePath }),
       setSelectedNodePath: (selectedNodePath) => set({ selectedNodePath }),
     },
   }))
