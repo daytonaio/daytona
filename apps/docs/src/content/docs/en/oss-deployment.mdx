@@ -307,7 +307,7 @@ The setup script binds auxiliary service ports (PgAdmin, MinIO Console, Registry
 |---------|-----|----------------|
 | PgAdmin | `https://yourdomain.com:5050` | Caddy Basic Auth (PgAdmin email + password set during setup), then PgAdmin native login |
 | MinIO Console | `https://yourdomain.com:9001` | MinIO native login page (credentials set during setup) |
-| Registry UI | `https://yourdomain.com:5100` | Caddy Basic Auth (username: `admin`, password: Daytona admin password set during setup) |
+| Registry UI | `https://yourdomain.com:5100` | Caddy Basic Auth (registry username and password set during setup) |
 
 PgAdmin and Registry UI are protected by Caddy's HTTP Basic Auth — nothing is visible until you authenticate. MinIO Console uses its own native login page instead of Basic Auth because its SPA architecture (JavaScript API calls, WebSocket connections) is incompatible with HTTP Basic Auth.
 

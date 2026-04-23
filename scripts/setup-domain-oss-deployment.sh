@@ -8,6 +8,10 @@
 # Usage: ./setup.sh
 set -euo pipefail
 
+# Remove transient per-step log on any exit so partial runs don't leave
+# captured stdout/stderr lying around in /tmp.
+trap 'rm -f "/tmp/daytona-step-$$.log"' EXIT INT TERM
+
 # ── Colors ──────────────────────────────────────────────────
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -136,12 +140,18 @@ collect_input() {
     printf "  ═══════════════════════\n\n"
 
     # Domain
+    # Restrict to RFC 1123 hostname syntax. The value is substituted into the
+    # Caddyfile, docker-compose env vars, and Dex config; accepting only
+    # letters/digits/hyphens/dots prevents a typo from corrupting those files.
     while true; do
         printf "  Domain (e.g. daytona.example.com): "; read -r DOMAIN
         DOMAIN="${DOMAIN#https://}"; DOMAIN="${DOMAIN#http://}"
         DOMAIN="$(echo "$DOMAIN" | tr -d '[:space:]')"
         [ -z "$DOMAIN" ] && { fail "Required"; continue; }
-        echo "$DOMAIN" | grep -q '\.' || { fail "Must contain a dot"; continue; }
+        if ! echo "$DOMAIN" | grep -qE '^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$'; then
+            fail "Must be a valid hostname (e.g. daytona.example.com)"
+            continue
+        fi
         break
     done
 
@@ -207,11 +217,13 @@ collect_input() {
         [ -z "$DNS_TOKEN_EXTRA" ] && die "Required"
     fi
 
-    # Email
+    # Email — basic but stricter than just "contains @". Caddy sends this to
+    # Let's Encrypt; an obviously-bogus value gets the ACME account rejected.
+    local _email_re='^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$'
     while true; do
         printf "\n  Email (for Let's Encrypt certificates): "; read -r EMAIL
         EMAIL="$(echo "$EMAIL" | tr -d '[:space:]')"
-        echo "$EMAIL" | grep -q '@.*\.' && break
+        echo "$EMAIL" | grep -qE "$_email_re" && break
         fail "Must be a valid email"
     done
 
@@ -219,14 +231,15 @@ collect_input() {
     while true; do
         printf "  Admin login email: "; read -r ADMIN_EMAIL
         ADMIN_EMAIL="$(echo "$ADMIN_EMAIL" | tr -d '[:space:]')"
-        echo "$ADMIN_EMAIL" | grep -q '@' && break
+        echo "$ADMIN_EMAIL" | grep -qE "$_email_re" && break
         fail "Must be a valid email"
     done
 
-    # Admin password
+    # Admin password — fronts the Daytona dashboard on the public internet,
+    # so require 12 chars minimum rather than the bare-minimum 8.
     while true; do
-        printf "  Admin password (min 8 chars): "; read -rs ADMIN_PASSWORD; echo
-        [ ${#ADMIN_PASSWORD} -lt 8 ] && { fail "Too short"; continue; }
+        printf "  Admin password (min 12 chars): "; read -rs ADMIN_PASSWORD; echo
+        [ ${#ADMIN_PASSWORD} -lt 12 ] && { fail "Too short"; continue; }
         printf "  Confirm password: "; read -rs pw_confirm; echo
         [ "$ADMIN_PASSWORD" = "$pw_confirm" ] && break
         fail "Passwords do not match"
@@ -236,16 +249,21 @@ collect_input() {
     printf "\n${BOLD}  Service Credentials${NC}\n"
     printf "  These replace default placeholder credentials and secure services behind HTTPS.\n\n"
 
+    # Usernames are substituted into docker-compose env vars and, for the
+    # registry user, into the Caddyfile basic_auth directive. Restrict the
+    # charset so a stray quote or brace can't corrupt the config.
+    local _user_re='^[a-zA-Z0-9_-]{1,63}$'
+
     # PostgreSQL
     while true; do
         printf "  PostgreSQL username: "; read -r DB_USER
         DB_USER="$(echo "$DB_USER" | tr -d '[:space:]')"
-        [ -n "$DB_USER" ] && break
-        fail "Required"
+        echo "$DB_USER" | grep -qE "$_user_re" && break
+        fail "Must be alphanumeric (plus _ -), 1-63 chars"
     done
     while true; do
-        printf "  PostgreSQL password (min 8 chars): "; read -rs DB_PASS; echo
-        [ ${#DB_PASS} -lt 8 ] && { fail "Too short"; continue; }
+        printf "  PostgreSQL password (min 12 chars): "; read -rs DB_PASS; echo
+        [ ${#DB_PASS} -lt 12 ] && { fail "Too short"; continue; }
         break
     done
 
@@ -253,12 +271,12 @@ collect_input() {
     while true; do
         printf "  PgAdmin email: "; read -r PGADMIN_EMAIL
         PGADMIN_EMAIL="$(echo "$PGADMIN_EMAIL" | tr -d '[:space:]')"
-        echo "$PGADMIN_EMAIL" | grep -q '@' && break
+        echo "$PGADMIN_EMAIL" | grep -qE "$_email_re" && break
         fail "Must be a valid email"
     done
     while true; do
-        printf "  PgAdmin password (min 8 chars): "; read -rs PGADMIN_PASSWORD; echo
-        [ ${#PGADMIN_PASSWORD} -lt 8 ] && { fail "Too short"; continue; }
+        printf "  PgAdmin password (min 12 chars): "; read -rs PGADMIN_PASSWORD; echo
+        [ ${#PGADMIN_PASSWORD} -lt 12 ] && { fail "Too short"; continue; }
         break
     done
 
@@ -266,12 +284,12 @@ collect_input() {
     while true; do
         printf "  MinIO admin username: "; read -r MINIO_USER
         MINIO_USER="$(echo "$MINIO_USER" | tr -d '[:space:]')"
-        [ -n "$MINIO_USER" ] && break
-        fail "Required"
+        echo "$MINIO_USER" | grep -qE "$_user_re" && break
+        fail "Must be alphanumeric (plus _ -), 1-63 chars"
     done
     while true; do
-        printf "  MinIO admin password (min 8 chars): "; read -rs MINIO_PASSWORD; echo
-        [ ${#MINIO_PASSWORD} -lt 8 ] && { fail "Too short"; continue; }
+        printf "  MinIO admin password (min 12 chars): "; read -rs MINIO_PASSWORD; echo
+        [ ${#MINIO_PASSWORD} -lt 12 ] && { fail "Too short"; continue; }
         break
     done
 
@@ -279,12 +297,12 @@ collect_input() {
     while true; do
         printf "  Registry admin username: "; read -r REGISTRY_USER
         REGISTRY_USER="$(echo "$REGISTRY_USER" | tr -d '[:space:]')"
-        [ -n "$REGISTRY_USER" ] && break
-        fail "Required"
+        echo "$REGISTRY_USER" | grep -qE "$_user_re" && break
+        fail "Must be alphanumeric (plus _ -), 1-63 chars"
     done
     while true; do
-        printf "  Registry admin password (min 8 chars): "; read -rs REGISTRY_PASSWORD; echo
-        [ ${#REGISTRY_PASSWORD} -lt 8 ] && { fail "Too short"; continue; }
+        printf "  Registry admin password (min 12 chars): "; read -rs REGISTRY_PASSWORD; echo
+        [ ${#REGISTRY_PASSWORD} -lt 12 ] && { fail "Too short"; continue; }
         break
     done
 
@@ -682,11 +700,13 @@ CADDYEOF
     # Hash passwords via stdin so they never appear in process arguments.
     # Note: Caddy 2.11+ requires a newline-terminated password on stdin (the trailing \n
     # is significant — without it the reader returns EOF before getting any input).
+    # Use the registry credentials (not the Daytona admin password) to gate the
+    # registry UI — keeping the admin login credential scoped to the dashboard.
     local pgadmin_hash registry_hash
     pgadmin_hash=$(printf '%s\n' "$PGADMIN_PASSWORD" | "$CADDY_BIN" hash-password)
-    registry_hash=$(printf '%s\n' "$ADMIN_PASSWORD" | "$CADDY_BIN" hash-password)
+    registry_hash=$(printf '%s\n' "$REGISTRY_PASSWORD" | "$CADDY_BIN" hash-password)
     _file_replace "$CADDY_CONF_DIR/Caddyfile" "PGADMIN_AUTH_PH" "$PGADMIN_EMAIL $pgadmin_hash"
-    _file_replace "$CADDY_CONF_DIR/Caddyfile" "REGISTRY_AUTH_PH" "admin $registry_hash"
+    _file_replace "$CADDY_CONF_DIR/Caddyfile" "REGISTRY_AUTH_PH" "$REGISTRY_USER $registry_hash"
 
     # Environment file
     printf '%s=%s\n' "$DNS_ENV_NAME" "$DNS_TOKEN" > "$CADDY_CONF_DIR/environment"
@@ -918,7 +938,7 @@ step_verify() {
     printf "  MinIO:       https://%s:9001\n" "$DOMAIN"
     printf "               Login: %s / (password set during setup)\n" "$MINIO_USER"
     printf "  Registry UI: https://%s:5100\n" "$DOMAIN"
-    printf "               Basic Auth: admin / (admin password set during setup)\n"
+    printf "               Basic Auth: %s / (registry password set during setup)\n" "$REGISTRY_USER"
     printf "\n"
 }
 
