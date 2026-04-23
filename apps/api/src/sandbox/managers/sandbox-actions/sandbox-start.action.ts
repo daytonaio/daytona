@@ -279,7 +279,7 @@ export class SandboxStartAction extends SandboxAction {
 
   private async getBuildInfoOverloadedRunnerIds(snapshotRef: string): Promise<string[]> {
     const maxSandboxesPerRunner = this.configService.getOrThrow('buildInfo.maxSandboxesPerRunner')
-    if (!maxSandboxesPerRunner || maxSandboxesPerRunner <= 0 || !snapshotRef) {
+    if (!(maxSandboxesPerRunner > 0) || !snapshotRef) {
       return []
     }
     return this.runnerService.getRunnersWithMaxBuildInfoSnapshotRefSandboxes(snapshotRef, maxSandboxesPerRunner)

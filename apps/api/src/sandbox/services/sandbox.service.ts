@@ -739,7 +739,7 @@ export class SandboxService {
         const declarativeBuildScoreThreshold = this.configService.get('runnerScore.thresholds.declarativeBuild')
         const maxSandboxesPerRunner = this.configService.getOrThrow('buildInfo.maxSandboxesPerRunner')
         const excludedRunnerIds =
-          maxSandboxesPerRunner && maxSandboxesPerRunner > 0
+          maxSandboxesPerRunner > 0
             ? await this.runnerService.getRunnersWithMaxBuildInfoSnapshotRefSandboxes(
                 buildInfoSnapshotRef,
                 maxSandboxesPerRunner,
