@@ -68,6 +68,8 @@ interface GetColumnsProps {
   handleRevokeSshAccess: (id: string) => void
   handleRecover: (id: string) => void
   getRegionName: (regionId: string) => string | undefined
+  handlePause: (id: string) => void
+  handleResume: (id: string) => void
   handleScreenRecordings: (id: string) => void
   handleCreateSnapshot: (id: string) => void
   handleFork: (id: string) => void
@@ -86,6 +88,8 @@ export function getColumns({
   deletePermitted,
   handleCreateSshAccess,
   handleRevokeSshAccess,
+  handlePause,
+  handleResume,
   handleRecover,
   getRegionName,
   handleScreenRecordings,
@@ -368,6 +372,8 @@ export function getColumns({
             onVnc={handleVnc}
             onCreateSshAccess={handleCreateSshAccess}
             onRevokeSshAccess={handleRevokeSshAccess}
+            onPause={handlePause}
+            onResume={handleResume}
             onRecover={handleRecover}
             onScreenRecordings={handleScreenRecordings}
             onCreateSnapshot={() => handleCreateSnapshot(row.original.id)}

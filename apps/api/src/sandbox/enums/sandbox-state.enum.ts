@@ -23,4 +23,7 @@ export enum SandboxState {
   RESIZING = 'resizing',
   SNAPSHOTTING = 'snapshotting',
   FORKING = 'forking',
+  PAUSING = 'pausing',
+  PAUSED = 'paused',
+  RESUMING = 'resuming',
 }

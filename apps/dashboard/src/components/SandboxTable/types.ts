@@ -25,6 +25,8 @@ export interface SandboxTableProps {
   getRegionName: (regionId: string) => string | undefined
   handleStart: (id: string) => void
   handleStop: (id: string) => void
+  handlePause: (id: string) => void
+  handleResume: (id: string) => void
   handleDelete: (id: string) => void
   handleBulkDelete: (ids: string[]) => void
   handleBulkStart: (ids: string[]) => void
@@ -60,6 +62,8 @@ export interface SandboxTableActionsProps {
   onCreateSnapshot?: () => void
   onViewForks?: () => void
   onOpenTerminal?: () => void
+  onPause: (id: string) => void
+  onResume: (id: string) => void
   onRecover: (id: string) => void
   onScreenRecordings: (id: string) => void
 }

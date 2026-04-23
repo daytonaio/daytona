@@ -24,6 +24,8 @@ import { useDeleteSandboxMutation } from '@/hooks/mutations/useDeleteSandboxMuta
 import { useRecoverSandboxMutation } from '@/hooks/mutations/useRecoverSandboxMutation'
 import { useStartSandboxMutation } from '@/hooks/mutations/useStartSandboxMutation'
 import { useStopSandboxMutation } from '@/hooks/mutations/useStopSandboxMutation'
+import { usePauseSandboxMutation } from '@/hooks/mutations/usePauseSandboxMutation'
+import { useResumeSandboxMutation } from '@/hooks/mutations/useResumeSandboxMutation'
 import { useSandboxQuery } from '@/hooks/queries/useSandboxQuery'
 import { useApi } from '@/hooks/useApi'
 import { useConfig } from '@/hooks/useConfig'
@@ -86,6 +88,8 @@ export default function SandboxDetails() {
 
   const startMutation = useStartSandboxMutation({ invalidate: false })
   const stopMutation = useStopSandboxMutation({ invalidate: false })
+  const pauseMutation = usePauseSandboxMutation({ invalidate: false })
+  const resumeMutation = useResumeSandboxMutation({ invalidate: false })
   const archiveMutation = useArchiveSandboxMutation({ invalidate: false })
   const recoverMutation = useRecoverSandboxMutation({ invalidate: false })
   const deleteMutation = useDeleteSandboxMutation()
@@ -96,6 +100,8 @@ export default function SandboxDetails() {
   const anyMutating =
     startMutation.isPending ||
     stopMutation.isPending ||
+    pauseMutation.isPending ||
+    resumeMutation.isPending ||
     archiveMutation.isPending ||
     recoverMutation.isPending ||
     deleteMutation.isPending
@@ -127,6 +133,26 @@ export default function SandboxDetails() {
       toast.success('Sandbox stopped')
     } catch (error) {
       handleApiError(error, 'Failed to stop sandbox')
+    }
+  }
+
+  const handlePause = async () => {
+    if (!sandbox) return
+    try {
+      await pauseMutation.mutateAsync({ sandboxId: sandbox.id })
+      toast.success('Sandbox pause initiated')
+    } catch (error) {
+      handleApiError(error, 'Failed to pause sandbox')
+    }
+  }
+
+  const handleResume = async () => {
+    if (!sandbox) return
+    try {
+      await resumeMutation.mutateAsync({ sandboxId: sandbox.id })
+      toast.success('Sandbox resume initiated')
+    } catch (error) {
+      handleApiError(error, 'Failed to resume sandbox')
     }
   }
 
@@ -192,6 +218,8 @@ export default function SandboxDetails() {
           isFetching={isFetching}
           onStart={handleStart}
           onStop={handleStop}
+          onPause={handlePause}
+          onResume={handleResume}
           onArchive={handleArchive}
           onRecover={handleRecover}
           onDelete={() => setDeleteDialogOpen(true)}

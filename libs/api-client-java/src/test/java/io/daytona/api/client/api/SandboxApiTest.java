@@ -448,6 +448,19 @@ public class SandboxApiTest {
     }
 
     /**
+     * Pause sandbox
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void pauseSandboxTest() throws ApiException {
+        String sandboxIdOrName = null;
+        String xDaytonaOrganizationID = null;
+        Sandbox response = api.pauseSandbox(sandboxIdOrName, xDaytonaOrganizationID);
+        // TODO: test validations
+    }
+
+    /**
      * Recover sandbox from error state
      *
      * @throws ApiException if the Api call fails
@@ -486,6 +499,19 @@ public class SandboxApiTest {
         ResizeSandbox resizeSandbox = null;
         String xDaytonaOrganizationID = null;
         Sandbox response = api.resizeSandbox(sandboxIdOrName, resizeSandbox, xDaytonaOrganizationID);
+        // TODO: test validations
+    }
+
+    /**
+     * Resume sandbox
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void resumeSandboxTest() throws ApiException {
+        String sandboxIdOrName = null;
+        String xDaytonaOrganizationID = null;
+        Sandbox response = api.resumeSandbox(sandboxIdOrName, xDaytonaOrganizationID);
         // TODO: test validations
     }
 

@@ -336,6 +336,82 @@ console.log(`Forked sandbox: ${forked.id}`);
 
 ***
 
+#### \_experimental\_pause()
+
+```ts
+_experimental_pause(timeout?: number): Promise<void>
+```
+
+Pauses the Sandbox, freezing all running processes.
+
+The Sandbox will enter a 'pausing' state and transition to 'paused' when
+complete. While paused, the Sandbox retains its state in memory but does
+not consume CPU cycles.
+
+**Parameters**:
+
+- `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
+    Defaults to 60-second timeout.
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+- If timeout is a negative number
+
+- If the pause operation fails or times out
+
+**Example:**
+
+```ts
+const sandbox = await daytona.get('my-sandbox');
+await sandbox._experimental_pause();
+console.log('Sandbox paused successfully');
+```
+
+***
+
+#### \_experimental\_resume()
+
+```ts
+_experimental_resume(timeout?: number): Promise<void>
+```
+
+Resumes a paused Sandbox, thawing all frozen processes.
+
+The Sandbox will enter a 'resuming' state and transition to 'started' when
+complete. All processes and network connections that were active when the
+Sandbox was paused will continue from where they left off.
+
+**Parameters**:
+
+- `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
+    Defaults to 60-second timeout.
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+- If timeout is a negative number
+
+- If the resume operation fails or times out
+
+**Example:**
+
+```ts
+const sandbox = await daytona.get('my-sandbox');
+await sandbox._experimental_resume();
+console.log('Sandbox resumed successfully');
+```
+
+***
+
 #### archive()
 
 ```ts

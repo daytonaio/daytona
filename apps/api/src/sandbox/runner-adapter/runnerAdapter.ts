@@ -124,6 +124,10 @@ export interface RunnerAdapter {
 
   forkSandbox(sourceSandboxId: string, newSandboxId: string): Promise<void>
 
+  pauseSandbox(sandboxId: string): Promise<void>
+
+  resumeSandbox(sandboxId: string): Promise<void>
+
   createSnapshotFromSandbox(
     sandboxId: string,
     snapshotName: string,

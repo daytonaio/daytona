@@ -39,6 +39,9 @@ const (
 	SANDBOXSTATE_RESIZING SandboxState = "resizing"
 	SANDBOXSTATE_SNAPSHOTTING SandboxState = "snapshotting"
 	SANDBOXSTATE_FORKING SandboxState = "forking"
+	SANDBOXSTATE_PAUSING SandboxState = "pausing"
+	SANDBOXSTATE_PAUSED SandboxState = "paused"
+	SANDBOXSTATE_RESUMING SandboxState = "resuming"
 	SANDBOXSTATE_UNKNOWN_DEFAULT_OPEN_API SandboxState = "11184809"
 )
 
@@ -63,6 +66,9 @@ var AllowedSandboxStateEnumValues = []SandboxState{
 	"resizing",
 	"snapshotting",
 	"forking",
+	"pausing",
+	"paused",
+	"resuming",
 	"11184809",
 }
 

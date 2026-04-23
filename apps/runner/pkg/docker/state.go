@@ -47,7 +47,7 @@ func (d *DockerClient) getSandboxState(ct *container.InspectResponse) (enums.San
 		return enums.SandboxStateStarted, nil
 
 	case container.StatePaused:
-		return enums.SandboxStateStopped, nil
+		return enums.SandboxStatePaused, nil
 
 	case container.StateRestarting:
 		return enums.SandboxStateStarting, nil

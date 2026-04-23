@@ -19,9 +19,10 @@ def _make_daytona(config=None):
     from daytona._sync.daytona import Daytona
     from daytona_api_client import Configuration
 
-    with patch(f"{SYNC_MODULE}.ApiClient") as mock_api_cls, patch(
-        f"{SYNC_MODULE}.ToolboxApiClient"
-    ) as mock_toolbox_cls:
+    with (
+        patch(f"{SYNC_MODULE}.ApiClient") as mock_api_cls,
+        patch(f"{SYNC_MODULE}.ToolboxApiClient") as mock_toolbox_cls,
+    ):
         mock_api_instance = MagicMock()
         mock_api_instance.configuration = Configuration(host="https://test.daytona.io/api")
         mock_api_instance.default_headers = {}

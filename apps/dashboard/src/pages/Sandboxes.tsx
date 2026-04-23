@@ -362,6 +362,66 @@ const Sandboxes: React.FC = () => {
     }
   }
 
+  const handlePause = async (id: string) => {
+    setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
+    setTransitioningSandboxes((prev) => ({ ...prev, [id]: true }))
+
+    const sandboxToPause = sandboxes.find((s) => s.id === id)
+    const previousState = sandboxToPause?.state
+
+    setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.PAUSING } : s)))
+
+    if (selectedSandbox?.id === id) {
+      setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.PAUSING } : null))
+    }
+
+    try {
+      await sandboxApi.pauseSandbox(id, selectedOrganization?.id)
+      toast.success(`Pausing sandbox with ID: ${id}`)
+    } catch (error) {
+      handleApiError(error, 'Failed to pause sandbox')
+      setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
+      if (selectedSandbox?.id === id && previousState) {
+        setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
+      }
+    } finally {
+      setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
+      setTimeout(() => {
+        setTransitioningSandboxes((prev) => ({ ...prev, [id]: false }))
+      }, 2000)
+    }
+  }
+
+  const handleResume = async (id: string) => {
+    setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
+    setTransitioningSandboxes((prev) => ({ ...prev, [id]: true }))
+
+    const sandboxToResume = sandboxes.find((s) => s.id === id)
+    const previousState = sandboxToResume?.state
+
+    setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.RESUMING } : s)))
+
+    if (selectedSandbox?.id === id) {
+      setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.RESUMING } : null))
+    }
+
+    try {
+      await sandboxApi.resumeSandbox(id, selectedOrganization?.id)
+      toast.success(`Resuming sandbox with ID: ${id}`)
+    } catch (error) {
+      handleApiError(error, 'Failed to resume sandbox')
+      setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
+      if (selectedSandbox?.id === id && previousState) {
+        setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
+      }
+    } finally {
+      setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
+      setTimeout(() => {
+        setTransitioningSandboxes((prev) => ({ ...prev, [id]: false }))
+      }, 2000)
+    }
+  }
+
   const handleDelete = async (id: string) => {
     setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
 
@@ -866,6 +926,8 @@ const Sandboxes: React.FC = () => {
           activeSandboxId={showSandboxDetails ? selectedSandbox?.id : undefined}
           handleStart={handleStart}
           handleStop={handleStop}
+          handlePause={handlePause}
+          handleResume={handleResume}
           handleDelete={openDeleteDialog}
           handleBulkDelete={handleBulkDelete}
           handleBulkStart={handleBulkStart}
@@ -1010,6 +1072,8 @@ const Sandboxes: React.FC = () => {
           sandboxIsLoading={loadingSandboxes}
           handleStart={handleStart}
           handleStop={handleStop}
+          handlePause={handlePause}
+          handleResume={handleResume}
           handleDelete={async (id) => {
             await openDeleteDialog(id)
           }}

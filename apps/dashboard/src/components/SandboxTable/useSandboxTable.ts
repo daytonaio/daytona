@@ -38,6 +38,8 @@ interface UseSandboxTableProps {
   handleVnc: (id: string) => void
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
+  handlePause: (id: string) => void
+  handleResume: (id: string) => void
   handleScreenRecordings: (id: string) => void
   regionsData: Region[]
   handleRecover: (id: string) => void
@@ -60,6 +62,8 @@ export function useSandboxTable({
   handleVnc,
   handleCreateSshAccess,
   handleRevokeSshAccess,
+  handlePause,
+  handleResume,
   handleScreenRecordings,
   regionsData,
   handleRecover,
@@ -157,6 +161,8 @@ export function useSandboxTable({
         deletePermitted,
         handleCreateSshAccess,
         handleRevokeSshAccess,
+        handlePause,
+        handleResume,
         handleRecover,
         getRegionName,
         handleScreenRecordings,
@@ -176,6 +182,8 @@ export function useSandboxTable({
       deletePermitted,
       handleCreateSshAccess,
       handleRevokeSshAccess,
+      handlePause,
+      handleResume,
       handleRecover,
       getRegionName,
       handleScreenRecordings,
