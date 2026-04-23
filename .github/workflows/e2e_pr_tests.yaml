@@ -114,6 +114,8 @@ jobs:
       - name: Wait for API to be ready
         if: steps.affected.outputs.affected == 'true'
         run: |
+          echo "Waiting for API at http://localhost:3001/api/health ..."
+          echo "Note: nx serve compiles Go services via gow before starting (~90s)"
           for i in $(seq 1 150); do
             if curl -sf http://localhost:3001/api/health > /dev/null 2>&1; then
               echo "API is ready (attempt $i, elapsed ~$((i*2))s)"
@@ -122,8 +124,10 @@ jobs:
             sleep 2
           done
           echo "API failed to start within 300s"
-          tail -100 /tmp/api.log 2>/dev/null || true
-          tail -50 /tmp/runner.log 2>/dev/null || true
+          echo "=== API logs (last 100 lines) ==="
+          tail -100 /tmp/api.log 2>/dev/null || echo "No API logs found"
+          echo "=== Runner logs (last 50 lines) ==="
+          tail -50 /tmp/runner.log 2>/dev/null || echo "No runner logs found"
           exit 1
 
       - name: Start proxy and dashboard
@@ -142,6 +146,8 @@ jobs:
       - name: Wait for default snapshot to be available
         if: steps.affected.outputs.affected == 'true'
         run: |
+          echo "Waiting for default snapshot (daytonaio/sandbox:0.6.0-slim) to become active..."
+          echo "Runner must boot, API creates snapshot (pending), cron job transitions it to active"
           for i in $(seq 1 150); do
             BODY=$(curl -s \
               -H "Authorization: Bearer e2e_admin_api_key" \
@@ -157,9 +163,14 @@ jobs:
             sleep 2
           done
           echo "Default snapshot not active after 300s"
+          echo "Last snapshot response:"
           echo "$BODY" | jq . 2>/dev/null || echo "$BODY"
-          cat /tmp/runner.log 2>/dev/null || true
-          tail -50 /tmp/api.log 2>/dev/null || true
+          echo ""
+          echo "=== Runner logs (full) ==="
+          cat /tmp/runner.log 2>/dev/null || echo "No runner logs found"
+          echo ""
+          echo "=== API logs (last 50 lines) ==="
+          tail -50 /tmp/api.log 2>/dev/null || echo "No API logs found"
           exit 1
 
       - name: Run daytona-e2e tests
