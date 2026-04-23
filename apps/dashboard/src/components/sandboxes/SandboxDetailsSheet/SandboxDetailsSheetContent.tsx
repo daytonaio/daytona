@@ -28,6 +28,7 @@ interface SandboxDetailsSheetContentProps {
   deletePermitted: boolean
   handleStart: (id: string) => void
   handleStop: (id: string) => void
+  handlePause: (id: string) => void
   handleDelete: (id: string) => void
   handleArchive: (id: string) => void
   handleRecover: (id: string) => void
@@ -81,6 +82,7 @@ function SandboxDetailsSheetContent({
   deletePermitted,
   handleStart,
   handleStop,
+  handlePause,
   handleDelete,
   handleArchive,
   handleRecover,
@@ -99,6 +101,7 @@ function SandboxDetailsSheetContent({
         actionsDisabled={actionDisabled}
         onStart={() => handleStart(sandbox.id)}
         onStop={() => handleStop(sandbox.id)}
+        onPause={() => handlePause(sandbox.id)}
         onArchive={() => handleArchive(sandbox.id)}
         onRecover={() => handleRecover(sandbox.id)}
         onDelete={() => handleDelete(sandbox.id)}

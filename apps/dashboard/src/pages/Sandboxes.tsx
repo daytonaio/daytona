@@ -44,6 +44,7 @@ import { useMutatingSandboxes } from '@/hooks/mutations/useMutatingSandboxes'
 import { useRecoverSandboxMutation } from '@/hooks/mutations/useRecoverSandboxMutation'
 import { useStartSandboxMutation } from '@/hooks/mutations/useStartSandboxMutation'
 import { useStopSandboxMutation } from '@/hooks/mutations/useStopSandboxMutation'
+import { usePauseSandboxMutation } from '@/hooks/mutations/usePauseSandboxMutation'
 import { queryKeys } from '@/hooks/queries/queryKeys'
 import {
   DEFAULT_SANDBOX_SORTING,
@@ -582,6 +583,7 @@ const Sandboxes: React.FC = () => {
 
   const startSandboxMutation = useStartSandboxMutation({ invalidate: false })
   const stopSandboxMutation = useStopSandboxMutation({ invalidate: false })
+  const pauseSandboxMutation = usePauseSandboxMutation({ invalidate: false })
   const archiveSandboxMutation = useArchiveSandboxMutation({ invalidate: false })
   const recoverSandboxMutation = useRecoverSandboxMutation({ invalidate: false })
   const deleteSandboxMutation = useDeleteSandboxMutation({ invalidate: false })
@@ -839,18 +841,23 @@ const Sandboxes: React.FC = () => {
   const handleStart = async (id: string) => {
     const sandboxToStart = getSandboxById(id)
     const previousState = sandboxToStart?.state
+    const wasPaused = previousState === SandboxState.PAUSED
 
     await cancelCurrentSandboxQueryRefetches()
     const optimisticStartState =
-      previousState === SandboxState.ARCHIVED ? SandboxState.RESTORING : SandboxState.STARTING
+      previousState === SandboxState.ARCHIVED
+        ? SandboxState.RESTORING
+        : wasPaused
+          ? SandboxState.RESUMING
+          : SandboxState.STARTING
     performSandboxStateOptimisticUpdate(id, optimisticStartState)
 
     try {
       await startSandboxMutation.mutateAsync({ sandboxId: id })
-      toast.success(`Starting sandbox with ID: ${id}`)
+      toast.success(`${wasPaused ? 'Resuming' : 'Starting'} sandbox with ID: ${id}`)
       await markAllSandboxQueriesAsStale()
     } catch (error) {
-      handleApiError(error, 'Failed to start sandbox', {
+      handleApiError(error, `Failed to ${wasPaused ? 'resume' : 'start'} sandbox`, {
         action:
           error instanceof OrganizationSuspendedError &&
           config.billingApiUrl &&
@@ -901,6 +908,23 @@ const Sandboxes: React.FC = () => {
       await markAllSandboxQueriesAsStale()
     } catch (error) {
       handleApiError(error, 'Failed to stop sandbox')
+      revertSandboxStateOptimisticUpdate(id, previousState)
+    }
+  }
+
+  const handlePause = async (id: string) => {
+    const sandboxToPause = getSandboxById(id)
+    const previousState = sandboxToPause?.state
+
+    await cancelCurrentSandboxQueryRefetches()
+    performSandboxStateOptimisticUpdate(id, SandboxState.PAUSING)
+
+    try {
+      await pauseSandboxMutation.mutateAsync({ sandboxId: id })
+      toast.success(`Pausing sandbox with ID: ${id}`)
+      await markAllSandboxQueriesAsStale()
+    } catch (error) {
+      handleApiError(error, 'Failed to pause sandbox')
       revertSandboxStateOptimisticUpdate(id, previousState)
     }
   }
@@ -1302,6 +1326,7 @@ const Sandboxes: React.FC = () => {
           handleCreateSnapshot={handleCreateSnapshot}
           handleFork={handleFork}
           handleViewForks={handleViewForks}
+          handlePause={handlePause}
           handleOpenTerminal={handleOpenTerminal}
         />
 
@@ -1422,6 +1447,7 @@ const Sandboxes: React.FC = () => {
           sandboxIsLoading={sandboxIsLoading}
           handleStart={handleStart}
           handleStop={handleStop}
+          handlePause={handlePause}
           handleDelete={async (id) => {
             await openDeleteDialog(id)
           }}

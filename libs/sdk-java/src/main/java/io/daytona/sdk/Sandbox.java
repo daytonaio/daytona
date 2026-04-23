@@ -565,6 +565,55 @@ public class Sandbox {
         }
     }
 
+    /**
+     * Pauses the Sandbox, freezing all running processes.
+     * Uses default timeout of 60 seconds.
+     *
+     * @throws DaytonaException if the pause operation fails
+     */
+    public void pause() throws DaytonaException {
+        pause(60);
+    }
+
+    /**
+     * Pauses the Sandbox, freezing all running processes.
+     * The Sandbox will enter a 'pausing' state and transition to 'paused' when complete.
+     *
+     * @param timeoutSeconds maximum time to wait in seconds (0 = no timeout)
+     * @throws DaytonaException if timeout is negative or the operation fails/times out
+     */
+    public void pause(long timeoutSeconds) throws DaytonaException {
+        if (timeoutSeconds < 0) {
+            throw new DaytonaException("Timeout must be a non-negative number");
+        }
+
+        ExceptionMapper.callMain(() -> sandboxApi.pauseSandbox(id, null));
+        refreshData();
+        waitForPauseComplete(timeoutSeconds);
+    }
+
+    private void waitForPauseComplete(long timeoutSeconds) {
+        long startedAt = System.currentTimeMillis();
+        while ("pausing".equalsIgnoreCase(state)) {
+            refreshData();
+            if ("error".equalsIgnoreCase(state) || "build_failed".equalsIgnoreCase(state)) {
+                throw new DaytonaException("Sandbox pause failed with state: " + state);
+            }
+            if (!"pausing".equalsIgnoreCase(state)) {
+                return;
+            }
+            if (timeoutSeconds > 0 && (System.currentTimeMillis() - startedAt) > timeoutSeconds * 1000L) {
+                throw new DaytonaException("Sandbox pause did not complete before timeout");
+            }
+            try {
+                Thread.sleep(250);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new DaytonaException("Interrupted while waiting for pause complete", e);
+            }
+        }
+    }
+
     /** @return Sandbox ID. */
     public String getId() { return id; }
     /** @return Sandbox name. */

@@ -379,6 +379,44 @@ console.log(`Sandbox working directory: ${workDir}`);
 
 ***
 
+#### pause()
+
+```ts
+pause(timeout?: number): Promise<void>
+```
+
+Pauses the Sandbox, freezing all running processes.
+
+The Sandbox will enter a 'pausing' state and transition to 'paused' when
+complete. While paused, the Sandbox retains its state in memory but does
+not consume CPU cycles.
+
+**Parameters**:
+
+- `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
+    Defaults to 60-second timeout.
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+- If timeout is a negative number
+
+- If the pause operation fails or times out
+
+**Example:**
+
+```ts
+const sandbox = await daytona.get('my-sandbox');
+await sandbox.pause();
+console.log('Sandbox paused successfully');
+```
+
+***
+
 #### recover()
 
 ```ts

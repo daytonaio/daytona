@@ -35,7 +35,7 @@ export class SandboxStopAction extends SandboxAction {
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-    if (sandbox.state === SandboxState.STARTED) {
+    if (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.PAUSED) {
       // stop sandbox
       await runnerAdapter.stopSandbox(sandbox.id, force)
       await this.updateSandboxState(sandbox, SandboxState.STOPPING, lockCode)

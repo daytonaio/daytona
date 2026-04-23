@@ -425,6 +425,10 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     throw new Error('forkSandbox is not supported for V0 runners')
   }
 
+  async pauseSandbox(_sandboxId: string): Promise<void> {
+    throw new Error('pauseSandbox is not supported for V0 runners')
+  }
+
   async createSnapshotFromSandbox(
     sandboxId: string,
     snapshotName: string,

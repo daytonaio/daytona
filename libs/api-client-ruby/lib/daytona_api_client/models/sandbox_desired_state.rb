@@ -20,10 +20,11 @@ module DaytonaApiClient
     STOPPED = "stopped".freeze
     RESIZED = "resized".freeze
     ARCHIVED = "archived".freeze
+    PAUSED = "paused".freeze
     UNKNOWN_DEFAULT_OPEN_API = "unknown_default_open_api".freeze
 
     def self.all_vars
-      @all_vars ||= [DESTROYED, STARTED, STOPPED, RESIZED, ARCHIVED, UNKNOWN_DEFAULT_OPEN_API].freeze
+      @all_vars ||= [DESTROYED, STARTED, STOPPED, RESIZED, ARCHIVED, PAUSED, UNKNOWN_DEFAULT_OPEN_API].freeze
     end
 
     # Builds the enum from string

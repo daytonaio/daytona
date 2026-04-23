@@ -84,6 +84,9 @@ export class SandboxStartAction extends SandboxAction {
       case SandboxState.STOPPED: {
         return this.handleRunnerSandboxStoppedOrArchivedStateOnDesiredStateStart(sandbox, lockCode)
       }
+      case SandboxState.PAUSED: {
+        return this.handleRunnerSandboxPausedStateOnDesiredStateStart(sandbox, lockCode)
+      }
       case SandboxState.RESTORING:
       case SandboxState.CREATING:
       case SandboxState.STARTING: {
@@ -579,6 +582,26 @@ export class SandboxStartAction extends SandboxAction {
       return SYNC_AGAIN
     }
 
+    return SYNC_AGAIN
+  }
+
+  private async handleRunnerSandboxPausedStateOnDesiredStateStart(
+    sandbox: Sandbox,
+    lockCode: LockCode,
+  ): Promise<SyncState> {
+    if (!sandbox.runnerId) {
+      this.logger.error(`Sandbox ${sandbox.id} in PAUSED state has no assigned runner`)
+      return DONT_SYNC_AGAIN
+    }
+
+    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
+    if (runner.state !== RunnerState.READY) {
+      return DONT_SYNC_AGAIN
+    }
+
+    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+    await runnerAdapter.startSandbox(sandbox.id, sandbox.authToken)
+    await this.updateSandboxState(sandbox, SandboxState.RESUMING, lockCode)
     return SYNC_AGAIN
   }
 

@@ -74,9 +74,12 @@ function getStateIndicatorKey(state: SandboxStateType, recoverable?: boolean): S
     case SandboxStateType.RESIZING:
     case SandboxStateType.SNAPSHOTTING:
     case SandboxStateType.FORKING:
+    case SandboxStateType.PAUSING:
+    case SandboxStateType.RESUMING:
       return 'loading'
     case SandboxStateType.STARTED:
       return 'success'
+    case SandboxStateType.PAUSED:
     case SandboxStateType.STOPPED:
       return 'muted'
     case SandboxStateType.ERROR:

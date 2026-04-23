@@ -80,11 +80,13 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
           break
         }
         case SandboxState.STOPPING:
+        case SandboxState.PAUSING:
           await this.closeUsagePeriod(event.sandbox.id)
           await this.createUsagePeriod(event, true)
           break
-        // Safeguard if STOPPING state is skipped
-        case SandboxState.STOPPED: {
+        // Safeguards if STOPPING / PAUSING state is skipped
+        case SandboxState.STOPPED:
+        case SandboxState.PAUSED: {
           const cpuUsagePeriod = await this.sandboxUsagePeriodRepository.findOne({
             where: {
               sandboxId: event.sandbox.id,
@@ -198,13 +200,15 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
             sandbox &&
             (sandbox.state === SandboxState.STARTED ||
               sandbox.state === SandboxState.STOPPED ||
-              sandbox.state === SandboxState.STOPPING)
+              sandbox.state === SandboxState.STOPPING ||
+              sandbox.state === SandboxState.PAUSED ||
+              sandbox.state === SandboxState.PAUSING)
           ) {
             // Create new usage period
             const newUsagePeriod = SandboxUsagePeriod.fromUsagePeriod(usagePeriod)
             newUsagePeriod.startAt = closeTime
             newUsagePeriod.endAt = null
-            if (sandbox.state === SandboxState.STOPPED) {
+            if (sandbox.state === SandboxState.STOPPED || sandbox.state === SandboxState.PAUSED) {
               newUsagePeriod.cpu = 0
               newUsagePeriod.gpu = 0
               newUsagePeriod.gpuType = null

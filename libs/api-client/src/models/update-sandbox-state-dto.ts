@@ -49,6 +49,9 @@ export const UpdateSandboxStateDtoStateEnum = {
     RESIZING: 'resizing',
     SNAPSHOTTING: 'snapshotting',
     FORKING: 'forking',
+    PAUSING: 'pausing',
+    PAUSED: 'paused',
+    RESUMING: 'resuming',
     UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 

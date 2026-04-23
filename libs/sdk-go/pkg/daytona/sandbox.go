@@ -1164,6 +1164,91 @@ func (s *Sandbox) waitForSnapshotComplete(ctx context.Context) error {
 	return nil
 }
 
+// Pause pauses the Sandbox, freezing all running processes.
+// Uses a default timeout of 60 seconds.
+//
+// The Sandbox will enter a 'pausing' state and transition to 'paused' when complete.
+//
+// Example:
+//
+//	err := sandbox.Pause(ctx)
+//	if err != nil {
+//	    return err
+//	}
+func (s *Sandbox) Pause(ctx context.Context) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "Pause", func(ctx context.Context) error {
+		return s.PauseWithTimeout(ctx, 60*time.Second)
+	})
+}
+
+// PauseWithTimeout pauses the Sandbox with a custom timeout.
+// 0 means no timeout.
+//
+// Example:
+//
+//	err := sandbox.PauseWithTimeout(ctx, 2*time.Minute)
+func (s *Sandbox) PauseWithTimeout(ctx context.Context, timeout time.Duration) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "PauseWithTimeout", func(ctx context.Context) error {
+		return s.doPauseWithTimeout(ctx, timeout)
+	})
+}
+
+func (s *Sandbox) doPauseWithTimeout(ctx context.Context, timeout time.Duration) error {
+	if timeout < 0 {
+		return errors.NewDaytonaError("Timeout must be a non-negative number", 0, nil)
+	}
+
+	if timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
+
+	authCtx := s.client.getAuthContext(ctx)
+	_, httpResp, err := s.client.apiClient.SandboxAPI.PauseSandbox(authCtx, s.ID).Execute()
+	if err != nil {
+		return errors.ConvertAPIError(err, httpResp)
+	}
+
+	if err := s.RefreshData(ctx); err != nil {
+		return err
+	}
+
+	return s.waitForPauseComplete(ctx)
+}
+
+func (s *Sandbox) waitForPauseComplete(ctx context.Context) error {
+	checkInterval := 100 * time.Millisecond
+	startTime := time.Now()
+
+	for s.State == apiclient.SANDBOXSTATE_PAUSING {
+		if err := s.RefreshData(ctx); err != nil {
+			return err
+		}
+
+		if s.State == apiclient.SANDBOXSTATE_ERROR || s.State == apiclient.SANDBOXSTATE_BUILD_FAILED {
+			return errors.NewDaytonaError(
+				fmt.Sprintf("Sandbox %s pause failed with state: %s", s.ID, s.State), 0, nil,
+			)
+		}
+
+		if s.State != apiclient.SANDBOXSTATE_PAUSING {
+			return nil
+		}
+
+		select {
+		case <-ctx.Done():
+			return errors.NewDaytonaError("Sandbox pause did not complete within the timeout period", 0, nil)
+		case <-time.After(checkInterval):
+		}
+
+		if time.Since(startTime) > 5*time.Second {
+			checkInterval = min(time.Duration(float64(checkInterval)*1.1), 1*time.Second)
+		}
+	}
+	return nil
+}
+
 // Resize resizes the sandbox resources with a default timeout of 60 seconds.
 //
 // Changes the CPU, memory, or disk allocation. Resizing a started sandbox accepts

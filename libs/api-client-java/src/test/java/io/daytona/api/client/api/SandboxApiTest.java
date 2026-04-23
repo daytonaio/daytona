@@ -476,6 +476,19 @@ public class SandboxApiTest {
     }
 
     /**
+     * Pause sandbox
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void pauseSandboxTest() throws ApiException {
+        String sandboxIdOrName = null;
+        String xDaytonaOrganizationID = null;
+        Sandbox response = api.pauseSandbox(sandboxIdOrName, xDaytonaOrganizationID);
+        // TODO: test validations
+    }
+
+    /**
      * Recover sandbox from error state
      *
      * @throws ApiException if the Api call fails
@@ -574,7 +587,9 @@ public class SandboxApiTest {
     }
 
     /**
-     * Start sandbox
+     * Start or resume sandbox
+     *
+     * Starts a stopped or archived sandbox, or resumes a paused sandbox. The transition taken depends on the current sandbox state.
      *
      * @throws ApiException if the Api call fails
      */
