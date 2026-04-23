@@ -250,6 +250,8 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) GetSignedPreviewLink\(ctx context.Context, port int, expiresInSeconds int\) \(\*types.SignedPreviewLink, error\)](<#Sandbox.GetSignedPreviewLink>)
   - [func \(s \*Sandbox\) GetUserHomeDir\(ctx context.Context\) \(string, error\)](<#Sandbox.GetUserHomeDir>)
   - [func \(s \*Sandbox\) GetWorkingDir\(ctx context.Context\) \(string, error\)](<#Sandbox.GetWorkingDir>)
+  - [func \(s \*Sandbox\) Pause\(ctx context.Context\) error](<#Sandbox.Pause>)
+  - [func \(s \*Sandbox\) PauseWithTimeout\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.PauseWithTimeout>)
   - [func \(s \*Sandbox\) RefreshData\(ctx context.Context\) error](<#Sandbox.RefreshData>)
   - [func \(s \*Sandbox\) Resize\(ctx context.Context, resources \*types.Resources\) error](<#Sandbox.Resize>)
   - [func \(s \*Sandbox\) ResizeWithTimeout\(ctx context.Context, resources \*types.Resources, timeout time.Duration\) error](<#Sandbox.ResizeWithTimeout>)
@@ -4354,6 +4356,41 @@ if err != nil {
     return err
 }
 fmt.Printf("Working directory: %s\n", workDir)
+```
+
+<a name="Sandbox.Pause"></a>
+### func \(\*Sandbox\) Pause
+
+```go
+func (s *Sandbox) Pause(ctx context.Context) error
+```
+
+Pause pauses the Sandbox, freezing all running processes. Uses a default timeout of 60 seconds.
+
+The Sandbox will enter a 'pausing' state and transition to 'paused' when complete.
+
+Example:
+
+```
+err := sandbox.Pause(ctx)
+if err != nil {
+    return err
+}
+```
+
+<a name="Sandbox.PauseWithTimeout"></a>
+### func \(\*Sandbox\) PauseWithTimeout
+
+```go
+func (s *Sandbox) PauseWithTimeout(ctx context.Context, timeout time.Duration) error
+```
+
+PauseWithTimeout pauses the Sandbox with a custom timeout. 0 means no timeout.
+
+Example:
+
+```
+err := sandbox.PauseWithTimeout(ctx, 2*time.Minute)
 ```
 
 <a name="Sandbox.RefreshData"></a>

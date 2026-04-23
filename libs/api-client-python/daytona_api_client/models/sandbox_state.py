@@ -46,6 +46,9 @@ class SandboxState(str, Enum):
     RESIZING = 'resizing'
     SNAPSHOTTING = 'snapshotting'
     FORKING = 'forking'
+    PAUSING = 'pausing'
+    PAUSED = 'paused'
+    RESUMING = 'resuming'
     UNKNOWN_DEFAULT_OPEN_API = 'unknown_default_open_api'
 
     @classmethod

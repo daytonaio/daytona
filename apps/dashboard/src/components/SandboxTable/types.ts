@@ -52,6 +52,7 @@ export interface SandboxTableProps {
   handleCreateSnapshot: (id: string) => void
   handleFork: (id: string) => void
   handleViewForks: (id: string) => void
+  handlePause: (id: string) => void
   handleRefresh: () => void
   isRefreshing?: boolean
   sorting: SandboxSorting
@@ -77,6 +78,7 @@ export interface SandboxTableActionsProps {
   onCreateSnapshot?: () => void
   onViewForks?: () => void
   onOpenTerminal?: () => void
+  onPause: (id: string) => void
   onRecover: (id: string) => void
   onScreenRecordings: (id: string) => void
 }

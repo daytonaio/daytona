@@ -11,6 +11,7 @@ enum JobType {
   JOB_TYPE_UNSPECIFIED      = 0;
   JOB_TYPE_SNAPSHOT_SANDBOX = 1;
   JOB_TYPE_FORK_SANDBOX     = 2;
+  JOB_TYPE_PAUSE_SANDBOX    = 3;
 }
 
 message Registry {
@@ -41,3 +42,9 @@ message SnapshotSandboxResult {
 message ForkSandboxResult {
   optional string daemon_version = 1;
 }
+
+message PauseSandboxPayload {
+  string sandbox_id = 1;
+}
+
+message PauseSandboxResult {}

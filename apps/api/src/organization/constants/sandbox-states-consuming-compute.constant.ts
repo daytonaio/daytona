@@ -16,6 +16,8 @@ export const SANDBOX_STATES_CONSUMING_COMPUTE: SandboxState[] = [
   SandboxState.UNKNOWN,
   SandboxState.PULLING_SNAPSHOT,
   SandboxState.FORKING,
+  SandboxState.PAUSING,
+  SandboxState.RESUMING,
 ]
 
 export const SANDBOX_STATES_CONDITIONALLY_CONSUMING_COMPUTE: SandboxState[] = [

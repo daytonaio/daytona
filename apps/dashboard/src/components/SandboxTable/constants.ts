@@ -33,6 +33,9 @@ const STATE_PRIORITY_ORDER_ARRAY = [
   SandboxState.DESTROYING,
   SandboxState.DESTROYED,
   SandboxState.PULLING_SNAPSHOT,
+  SandboxState.PAUSING,
+  SandboxState.PAUSED,
+  SandboxState.RESUMING,
   SandboxState.UNKNOWN,
   SandboxState.UNKNOWN_DEFAULT_OPEN_API,
 ] as const
@@ -57,6 +60,9 @@ const STATE_COLOR_MAPPING = {
   [SandboxState.RESIZING]: 'text-gray-800 dark:text-gray-200',
   [SandboxState.SNAPSHOTTING]: 'text-gray-800 dark:text-gray-200',
   [SandboxState.FORKING]: 'text-gray-800 dark:text-gray-200',
+  [SandboxState.PAUSING]: 'text-gray-800 dark:text-gray-200',
+  [SandboxState.PAUSED]: 'text-yellow-600 dark:text-yellow-400',
+  [SandboxState.RESUMING]: 'text-gray-800 dark:text-gray-200',
   [SandboxState.UNKNOWN_DEFAULT_OPEN_API]: 'text-gray-800 dark:text-gray-200',
 } as const
 
@@ -80,6 +86,9 @@ const STATE_LABEL_MAPPING: Record<SandboxState, string> = {
   [SandboxState.RESIZING]: 'Resizing',
   [SandboxState.SNAPSHOTTING]: 'Snapshotting',
   [SandboxState.FORKING]: 'Forking',
+  [SandboxState.PAUSING]: 'Pausing',
+  [SandboxState.PAUSED]: 'Paused',
+  [SandboxState.RESUMING]: 'Resuming',
   [SandboxState.UNKNOWN_DEFAULT_OPEN_API]: 'Unknown',
 }
 
@@ -103,6 +112,9 @@ export const STATUSES: FacetedFilterOption[] = [
   { label: getStateLabel(SandboxState.DESTROYING), value: SandboxState.DESTROYING, icon: Timer },
   { label: getStateLabel(SandboxState.ARCHIVED), value: SandboxState.ARCHIVED, icon: Archive },
   { label: getStateLabel(SandboxState.ARCHIVING), value: SandboxState.ARCHIVING, icon: Timer },
+  { label: getStateLabel(SandboxState.PAUSED), value: SandboxState.PAUSED, icon: Circle },
+  { label: getStateLabel(SandboxState.PAUSING), value: SandboxState.PAUSING, icon: Timer },
+  { label: getStateLabel(SandboxState.RESUMING), value: SandboxState.RESUMING, icon: Timer },
 ]
 
 export function getStateLabel(state?: SandboxState): string {

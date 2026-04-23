@@ -381,6 +381,19 @@ type SandboxAPI interface {
 	ListSandboxesPaginatedDeprecatedExecute(r SandboxAPIListSandboxesPaginatedDeprecatedRequest) (*PaginatedSandboxesDeprecated, *http.Response, error)
 
 	/*
+	PauseSandbox Pause sandbox
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@return SandboxAPIPauseSandboxRequest
+	*/
+	PauseSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIPauseSandboxRequest
+
+	// PauseSandboxExecute executes the request
+	//  @return Sandbox
+	PauseSandboxExecute(r SandboxAPIPauseSandboxRequest) (*Sandbox, *http.Response, error)
+
+	/*
 	RecoverSandbox Recover sandbox from error state
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -475,7 +488,9 @@ type SandboxAPI interface {
 	SetAutostopIntervalExecute(r SandboxAPISetAutostopIntervalRequest) (*Sandbox, *http.Response, error)
 
 	/*
-	StartSandbox Start sandbox
+	StartSandbox Start or resume sandbox
+
+	Starts a stopped or archived sandbox, or resumes a paused sandbox. The transition taken depends on the current sandbox state.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param sandboxIdOrName ID or name of the sandbox
@@ -4239,6 +4254,117 @@ func (a *SandboxAPIService) ListSandboxesPaginatedDeprecatedExecute(r SandboxAPI
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type SandboxAPIPauseSandboxRequest struct {
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxIdOrName string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIPauseSandboxRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIPauseSandboxRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r SandboxAPIPauseSandboxRequest) Execute() (*Sandbox, *http.Response, error) {
+	return r.ApiService.PauseSandboxExecute(r)
+}
+
+/*
+PauseSandbox Pause sandbox
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxIdOrName ID or name of the sandbox
+ @return SandboxAPIPauseSandboxRequest
+*/
+func (a *SandboxAPIService) PauseSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIPauseSandboxRequest {
+	return SandboxAPIPauseSandboxRequest{
+		ApiService: a,
+		ctx: ctx,
+		sandboxIdOrName: sandboxIdOrName,
+	}
+}
+
+// Execute executes the request
+//  @return Sandbox
+func (a *SandboxAPIService) PauseSandboxExecute(r SandboxAPIPauseSandboxRequest) (*Sandbox, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Sandbox
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.PauseSandbox")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/pause"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type SandboxAPIRecoverSandboxRequest struct {
 	ctx context.Context
 	ApiService SandboxAPI
@@ -5088,7 +5214,9 @@ func (r SandboxAPIStartSandboxRequest) Execute() (*Sandbox, *http.Response, erro
 }
 
 /*
-StartSandbox Start sandbox
+StartSandbox Start or resume sandbox
+
+Starts a stopped or archived sandbox, or resumes a paused sandbox. The transition taken depends on the current sandbox state.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param sandboxIdOrName ID or name of the sandbox

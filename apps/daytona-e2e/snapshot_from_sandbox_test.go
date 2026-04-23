@@ -38,11 +38,9 @@ const snapshotPollTimeout = 10 * time.Minute
 //  6. Create a second sandbox from that snapshot and verify the marker
 //     file is still present, proving the filesystem state was captured.
 //
-// The snapshot endpoint is gated behind the SANDBOX_LINUX_VM feature flag.
-// `@openfeature/nestjs-sdk`'s @RequireFlagsEnabled decorator throws a
-// NotFoundException with the message `Cannot ${method} ${url}` when the
-// flag is off, so a 404 with that body shape from this endpoint is
-// interpreted as a flag-disabled skip rather than a route-missing failure.
+// The snapshot endpoint enforces sandboxClass at the service layer: classes
+// that don't support snapshotting return 422 UNPROCESSABLE_ENTITY, which we
+// treat as an environment skip below.
 func TestDockerFilesystemSnapshot(t *testing.T) {
 	cfg := LoadConfig(t)
 	client := NewAPIClient(cfg)
@@ -90,23 +88,10 @@ func TestDockerFilesystemSnapshot(t *testing.T) {
 	switch snapResp.StatusCode {
 	case http.StatusOK:
 		// continue
-	case http.StatusNotFound:
-		// @openfeature/nestjs-sdk's @RequireFlagsEnabled throws a
-		// NotFoundException("Cannot ${method} ${url}") when a required
-		// flag is disabled, so the SANDBOX_LINUX_VM-gated endpoint
-		// returns this 404 in environments where OpenFeature is not
-		// configured to enable the flag (e.g. the default e2e setup).
-		// Genuine "no such route" 404s share the same body shape, so
-		// treat both as a skip; misregistered routes would still be
-		// caught by API unit tests.
-		t.Skipf("snapshot endpoint not available (likely SANDBOX_LINUX_VM disabled): %s",
-			string(snapBody))
 	case http.StatusForbidden:
 		t.Skipf("snapshot endpoint forbidden: %s", string(snapBody))
 	case http.StatusUnprocessableEntity:
-		// The runner doesn't support snapshotting (non-VM/non-CONTAINER
-		// class). Treated as an environment skip rather than a failure.
-		t.Skipf("snapshot endpoint reported unsupported runner class: %s", string(snapBody))
+		t.Skipf("snapshot endpoint reported unsupported sandbox class: %s", string(snapBody))
 	default:
 		t.Fatalf("POST /sandbox/%s/snapshot returned %d: %s",
 			srcSandboxID, snapResp.StatusCode, string(snapBody))
