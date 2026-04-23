@@ -834,6 +834,47 @@ export class RunnerService {
     return runners.map((item) => item.runnerId)
   }
 
+  /**
+   * Returns the IDs of runners that already host at least `maxCount` sandboxes
+   * with the given `buildInfoSnapshotRef` in an active (non-terminal) state.
+   * Useful to avoid piling up too many sandboxes for the same declarative build
+   * on the same runner.
+   */
+  async getRunnersWithMaxBuildInfoSnapshotRefSandboxes(
+    buildInfoSnapshotRef: string,
+    maxCount: number,
+  ): Promise<string[]> {
+    if (!buildInfoSnapshotRef || maxCount <= 0) {
+      return []
+    }
+
+    const activeStates: SandboxState[] = [
+      SandboxState.CREATING,
+      SandboxState.RESTORING,
+      SandboxState.STARTED,
+      SandboxState.STARTING,
+      SandboxState.STOPPING,
+      SandboxState.BUILDING_SNAPSHOT,
+      SandboxState.PULLING_SNAPSHOT,
+      SandboxState.UNKNOWN,
+      SandboxState.RESIZING,
+      SandboxState.SNAPSHOTTING,
+      SandboxState.FORKING,
+    ]
+
+    const runners = await this.sandboxRepository
+      .createQueryBuilder('sandbox')
+      .select('sandbox.runnerId', 'runnerId')
+      .where('sandbox.buildInfoSnapshotRef = :ref', { ref: buildInfoSnapshotRef })
+      .andWhere('sandbox.runnerId IS NOT NULL')
+      .andWhere('sandbox.state IN (:...states)', { states: activeStates })
+      .groupBy('sandbox.runnerId')
+      .having('COUNT(*) >= :maxCount', { maxCount })
+      .getRawMany()
+
+    return runners.map((item) => item.runnerId).filter((id): id is string => !!id)
+  }
+
   async getRunnersBySnapshotRef(ref: string): Promise<RunnerSnapshotDto[]> {
     const snapshotRunners = await this.snapshotRunnerRepository.find({
       where: {

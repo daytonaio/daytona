@@ -46,6 +46,7 @@ import { SandboxLastActivity } from './sandbox-last-activity.entity'
   where: `"pending" = true`,
 })
 @Index('idx_sandbox_authtoken', ['authToken'])
+@Index('sandbox_buildinfosnapshotref_idx', { synchronize: false })
 @Index('sandbox_labels_gin_full_idx', { synchronize: false })
 @Index('idx_sandbox_volumes_gin', { synchronize: false })
 export class Sandbox {

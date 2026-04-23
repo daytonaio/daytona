@@ -178,12 +178,15 @@ export class SandboxStartAction extends SandboxAction {
 
     const declarativeBuildScoreThreshold = this.configService.get('runnerScore.thresholds.declarativeBuild')
 
+    const buildInfoOverloadedRunnerIds = isBuild ? await this.getBuildInfoOverloadedRunnerIds(snapshotRef) : []
+
     // Try to assign an available runner with the snapshot already available
     try {
       const runner = await this.runnerService.getRandomAvailableRunner({
         regions: [sandbox.region],
         sandboxClass: sandbox.class,
         snapshotRef: snapshotRef,
+        ...(buildInfoOverloadedRunnerIds.length > 0 && { excludedRunnerIds: buildInfoOverloadedRunnerIds }),
         ...(isBuild &&
           declarativeBuildScoreThreshold !== undefined && {
             availabilityScoreThreshold: declarativeBuildScoreThreshold,
@@ -216,6 +219,10 @@ export class SandboxStartAction extends SandboxAction {
         continue
       }
 
+      if (isBuild && buildInfoOverloadedRunnerIds.includes(runner.id)) {
+        continue
+      }
+
       if (declarativeBuildScoreThreshold === undefined || runner.availabilityScore >= declarativeBuildScoreThreshold) {
         if (snapshotRunner.state === targetState) {
           await this.updateSandboxState(sandbox, targetSandboxState, lockCode, runner.id)
@@ -228,6 +235,14 @@ export class SandboxStartAction extends SandboxAction {
     const excludedRunnerIds = await (isBuild
       ? this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
       : this.runnerService.getRunnersWithMultipleSnapshotsPulling())
+
+    if (isBuild && buildInfoOverloadedRunnerIds.length > 0) {
+      for (const id of buildInfoOverloadedRunnerIds) {
+        if (!excludedRunnerIds.includes(id)) {
+          excludedRunnerIds.push(id)
+        }
+      }
+    }
 
     // Try to assign an available runner to start processing the snapshot
     let runner: Runner
@@ -260,6 +275,14 @@ export class SandboxStartAction extends SandboxAction {
     }
 
     return SYNC_AGAIN
+  }
+
+  private async getBuildInfoOverloadedRunnerIds(snapshotRef: string): Promise<string[]> {
+    const maxSandboxesPerRunner = this.configService.getOrThrow('buildInfo.maxSandboxesPerRunner')
+    if (!maxSandboxesPerRunner || maxSandboxesPerRunner <= 0 || !snapshotRef) {
+      return []
+    }
+    return this.runnerService.getRunnersWithMaxBuildInfoSnapshotRefSandboxes(snapshotRef, maxSandboxesPerRunner)
   }
 
   async pullSnapshotToRunner(snapshot: Snapshot, runner: Runner) {

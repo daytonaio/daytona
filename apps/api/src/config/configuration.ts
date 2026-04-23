@@ -172,6 +172,9 @@ const configuration = {
     apiVersion: (process.env.DEFAULT_RUNNER_API_VERSION || '2') as '0' | '2',
     name: process.env.DEFAULT_RUNNER_NAME,
   },
+  buildInfo: {
+    maxSandboxesPerRunner: parseInt(process.env.BUILD_INFO_MAX_SANDBOXES_PER_RUNNER || '30', 10),
+  },
   runnerScore: {
     thresholds: {
       declarativeBuild: parseInt(process.env.RUNNER_DECLARATIVE_BUILD_SCORE_THRESHOLD || '10', 10),
