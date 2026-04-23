@@ -211,6 +211,9 @@ export class Sandbox {
   @Column({ type: 'character varying' })
   authToken = nanoid(32).toLowerCase()
 
+  @Column({ default: false })
+  cleanupCompleted: boolean
+
   @ManyToOne(() => BuildInfo, (buildInfo) => buildInfo.sandboxes, {
     nullable: true,
   })
