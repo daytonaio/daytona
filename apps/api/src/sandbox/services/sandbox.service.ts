@@ -2172,16 +2172,26 @@ export class SandboxService {
   @LogExecution('cleanup-destroyed-sandboxes')
   @WithInstrumentation()
   async cleanupDestroyedSandboxes() {
-    const twentyFourHoursAgo = new Date()
-    twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
+    const lockKey = 'sandbox:cleanup-destroyed-sandboxes'
+    const acquired = await this.redisLockProvider.lock(lockKey, 300)
+    if (!acquired) {
+      return
+    }
 
-    const destroyedSandboxs = await this.sandboxRepository.delete({
-      state: SandboxState.DESTROYED,
-      updatedAt: LessThan(twentyFourHoursAgo),
-    })
+    try {
+      const twentyFourHoursAgo = new Date()
+      twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
 
-    if (destroyedSandboxs.affected > 0) {
-      this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} destroyed sandboxes`)
+      const destroyedSandboxs = await this.sandboxRepository.delete({
+        state: SandboxState.DESTROYED,
+        updatedAt: LessThan(twentyFourHoursAgo),
+      })
+
+      if (destroyedSandboxs.affected > 0) {
+        this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} destroyed sandboxes`)
+      }
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
     }
   }
 
@@ -2189,17 +2199,27 @@ export class SandboxService {
   @LogExecution('cleanup-build-failed-sandboxes')
   @WithInstrumentation()
   async cleanupBuildFailedSandboxes() {
-    const twentyFourHoursAgo = new Date()
-    twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
+    const lockKey = 'sandbox:cleanup-build-failed-sandboxes'
+    const acquired = await this.redisLockProvider.lock(lockKey, 300)
+    if (!acquired) {
+      return
+    }
 
-    const destroyedSandboxs = await this.sandboxRepository.delete({
-      state: SandboxState.BUILD_FAILED,
-      desiredState: SandboxDesiredState.DESTROYED,
-      updatedAt: LessThan(twentyFourHoursAgo),
-    })
+    try {
+      const twentyFourHoursAgo = new Date()
+      twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
 
-    if (destroyedSandboxs.affected > 0) {
-      this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} build failed sandboxes`)
+      const destroyedSandboxs = await this.sandboxRepository.delete({
+        state: SandboxState.BUILD_FAILED,
+        desiredState: SandboxDesiredState.DESTROYED,
+        updatedAt: LessThan(twentyFourHoursAgo),
+      })
+
+      if (destroyedSandboxs.affected > 0) {
+        this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} build failed sandboxes`)
+      }
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
     }
   }
 
@@ -2207,17 +2227,27 @@ export class SandboxService {
   @LogExecution('cleanup-stale-build-failed-sandboxes')
   @WithInstrumentation()
   async cleanupStaleBuildFailedSandboxes() {
-    const sevenDaysAgo = new Date()
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+    const lockKey = 'sandbox:cleanup-stale-build-failed-sandboxes'
+    const acquired = await this.redisLockProvider.lock(lockKey, 300)
+    if (!acquired) {
+      return
+    }
 
-    const result = await this.sandboxRepository.delete({
-      state: SandboxState.BUILD_FAILED,
-      desiredState: SandboxDesiredState.STARTED,
-      updatedAt: LessThan(sevenDaysAgo),
-    })
+    try {
+      const sevenDaysAgo = new Date()
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-    if (result.affected > 0) {
-      this.logger.debug(`Cleaned up ${result.affected} stale build failed sandboxes`)
+      const result = await this.sandboxRepository.delete({
+        state: SandboxState.BUILD_FAILED,
+        desiredState: SandboxDesiredState.STARTED,
+        updatedAt: LessThan(sevenDaysAgo),
+      })
+
+      if (result.affected > 0) {
+        this.logger.debug(`Cleaned up ${result.affected} stale build failed sandboxes`)
+      }
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
     }
   }
 
@@ -2225,17 +2255,27 @@ export class SandboxService {
   @LogExecution('cleanup-stale-error-sandboxes')
   @WithInstrumentation()
   async cleanupStaleErrorSandboxes() {
-    const sevenDaysAgo = new Date()
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+    const lockKey = 'sandbox:cleanup-stale-error-sandboxes'
+    const acquired = await this.redisLockProvider.lock(lockKey, 300)
+    if (!acquired) {
+      return
+    }
 
-    const result = await this.sandboxRepository.delete({
-      state: SandboxState.ERROR,
-      desiredState: SandboxDesiredState.DESTROYED,
-      updatedAt: LessThan(sevenDaysAgo),
-    })
+    try {
+      const sevenDaysAgo = new Date()
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-    if (result.affected > 0) {
-      this.logger.debug(`Cleaned up ${result.affected} stale error sandboxes`)
+      const result = await this.sandboxRepository.delete({
+        state: SandboxState.ERROR,
+        desiredState: SandboxDesiredState.DESTROYED,
+        updatedAt: LessThan(sevenDaysAgo),
+      })
+
+      if (result.affected > 0) {
+        this.logger.debug(`Cleaned up ${result.affected} stale error sandboxes`)
+      }
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
     }
   }
 
