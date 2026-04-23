@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 package daytona
@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -20,23 +19,23 @@ import (
 )
 
 func TestSnapshotServiceCreation(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_URL", "")
+	t.Setenv("DAYTONA_JWT_TOKEN", "")
+	t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 	client, err := NewClient()
 	require.NoError(t, err)
 
 	ss := NewSnapshotService(client)
 	require.NotNil(t, ss)
-
-	os.Clearenv()
 }
 
 func TestSnapshotListError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "internal error"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "internal error"})
 	}))
 	defer server.Close()
 
@@ -45,15 +44,13 @@ func TestSnapshotListError(t *testing.T) {
 	ctx := context.Background()
 	_, err := client.Snapshot.List(ctx, nil, nil)
 	require.Error(t, err)
-
-	os.Clearenv()
 }
 
 func TestSnapshotGetError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]string{"message": "not found"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "not found"})
 	}))
 	defer server.Close()
 
@@ -62,15 +59,13 @@ func TestSnapshotGetError(t *testing.T) {
 	ctx := context.Background()
 	_, err := client.Snapshot.Get(ctx, "nonexistent")
 	require.Error(t, err)
-
-	os.Clearenv()
 }
 
 func TestSnapshotDeleteError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
-		json.NewEncoder(w).Encode(map[string]string{"message": "forbidden"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "forbidden"})
 	}))
 	defer server.Close()
 
@@ -80,15 +75,13 @@ func TestSnapshotDeleteError(t *testing.T) {
 	ctx := context.Background()
 	err := client.Snapshot.Delete(ctx, snap)
 	require.Error(t, err)
-
-	os.Clearenv()
 }
 
 func TestSnapshotErrorHandling(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]string{"message": "snapshot not found"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "snapshot not found"})
 	}))
 	defer server.Close()
 
@@ -97,8 +90,6 @@ func TestSnapshotErrorHandling(t *testing.T) {
 	ctx := context.Background()
 	_, err := client.Snapshot.Get(ctx, "nonexistent")
 	require.Error(t, err)
-
-	os.Clearenv()
 }
 
 func TestMapSnapshotFromAPI(t *testing.T) {

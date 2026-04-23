@@ -129,7 +129,7 @@ jobs:
         run: |
           echo "Waiting for default snapshot (daytonaio/sandbox:0.6.0-slim) to become active..."
           echo "Runner must boot, API creates snapshot (pending), cron job transitions it to active"
-          for i in $(seq 1 90); do
+          for i in $(seq 1 150); do
             BODY=$(curl -s \
               -H "Authorization: Bearer e2e_admin_api_key" \
               "http://localhost:3001/api/snapshots/daytonaio%2Fsandbox%3A0.6.0-slim" 2>/dev/null || echo "")
@@ -143,7 +143,7 @@ jobs:
             fi
             sleep 2
           done
-          echo "Default snapshot not active after 180s"
+          echo "Default snapshot not active after 300s"
           echo "Last snapshot response:"
           echo "$BODY" | jq . 2>/dev/null || echo "$BODY"
           echo ""

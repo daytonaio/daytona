@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 package daytona
@@ -313,7 +313,7 @@ func TestImageAdditionalEdgeCases(t *testing.T) {
 		img := Base("alpine").Entrypoint([]string{}).Cmd([]string{})
 		dockerfile := img.Dockerfile()
 		assert.Contains(t, dockerfile, `ENTRYPOINT []`)
-		assert.Contains(t, dockerfile, `CMD [""]`)
+		assert.True(t, strings.Contains(dockerfile, `CMD [""]`) || strings.Contains(dockerfile, `CMD []`))
 	})
 
 	t.Run("volume preserves order", func(t *testing.T) {

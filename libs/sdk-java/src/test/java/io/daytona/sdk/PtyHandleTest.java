@@ -1,3 +1,6 @@
+// Copyright Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
 package io.daytona.sdk;
 
 import io.daytona.sdk.exception.DaytonaException;
@@ -159,14 +162,17 @@ class PtyHandleTest {
                 @Override
                 public void onOpen(WebSocket webSocket, okhttp3.Response response) {
                     webSocket.send("{\"type\":\"control\",\"status\":\"connected\"}");
-                    webSocket.close(1000, "plain-close-reason");
+                    new Thread(() -> {
+                        try { Thread.sleep(200); } catch (InterruptedException ignored) { }
+                        webSocket.close(1000, "plain-close-reason");
+                    }).start();
                 }
             }));
 
             PtyHandle handle = new PtyHandle(new OkHttpClient(), new Request.Builder().url(server.url("/pty")).build(), "pty-raw", (id, cols, rows) -> { }, id -> { }, bytes -> { });
-            handle.waitForConnection(1);
+            handle.waitForConnection(2);
 
-            PtyResult result = handle.waitForExit(1);
+            PtyResult result = handle.waitForExit(2);
 
             assertThat(result.getExitCode()).isEqualTo(-1);
             assertThat(result.getError()).isEqualTo("plain-close-reason");

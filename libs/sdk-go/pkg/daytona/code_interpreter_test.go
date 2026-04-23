@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 package daytona
@@ -38,9 +38,9 @@ func TestCodeInterpreterRunCode(t *testing.T) {
 
 		assert.Equal(t, "print('hello')", req["code"])
 
-		conn.WriteJSON(types.OutputMessage{Type: "stdout", Text: "hello\n"})
+		_ = conn.WriteJSON(types.OutputMessage{Type: "stdout", Text: "hello\n"})
 
-		conn.WriteMessage(websocket.CloseMessage,
+		_ = conn.WriteMessage(websocket.CloseMessage,
 			websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	}))
 	defer wsServer.Close()
@@ -92,7 +92,7 @@ func TestCodeInterpreterCreateContext(t *testing.T) {
 			"active":    true,
 			"createdAt": "2025-01-01T00:00:00Z",
 		}
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 	defer server.Close()
 
@@ -117,7 +117,7 @@ func TestCodeInterpreterCreateContextWithCwd(t *testing.T) {
 			"active":    true,
 			"createdAt": "2025-01-01T00:00:00Z",
 		}
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 	defer server.Close()
 
@@ -140,7 +140,7 @@ func TestCodeInterpreterListContexts(t *testing.T) {
 				{"id": "ctx-2", "cwd": "/app", "language": "python", "active": false, "createdAt": "2025-01-02T00:00:00Z"},
 			},
 		}
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 	defer server.Close()
 
@@ -159,7 +159,7 @@ func TestCodeInterpreterDeleteContext(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]interface{}{})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{})
 	}))
 	defer server.Close()
 
@@ -234,7 +234,7 @@ func TestCodeInterpreterErrorHandling(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "server error"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "server error"})
 	}))
 	defer server.Close()
 
@@ -250,14 +250,18 @@ func TestCodeInterpreterRunCodeStreamBehaviors(t *testing.T) {
 	t.Run("captures stderr and execution error", func(t *testing.T) {
 		wsServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			conn, err := upgrader.Upgrade(w, r, nil)
-			require.NoError(t, err)
+			if err != nil {
+				return
+			}
 			defer conn.Close()
 			var req map[string]any
-			require.NoError(t, conn.ReadJSON(&req))
-			require.NoError(t, conn.WriteJSON(types.OutputMessage{Type: "stdout", Text: "partial out\n"}))
-			require.NoError(t, conn.WriteJSON(types.OutputMessage{Type: "stderr", Text: "partial err\n"}))
-			require.NoError(t, conn.WriteJSON(types.OutputMessage{Type: "error", Name: "ValueError", Value: "boom", Traceback: "trace"}))
-			require.NoError(t, conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")))
+			if conn.ReadJSON(&req) != nil {
+				return
+			}
+			_ = conn.WriteJSON(types.OutputMessage{Type: "stdout", Text: "partial out\n"})
+			_ = conn.WriteJSON(types.OutputMessage{Type: "stderr", Text: "partial err\n"})
+			_ = conn.WriteJSON(types.OutputMessage{Type: "error", Name: "ValueError", Value: "boom", Traceback: "trace"})
+			_ = conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 		}))
 		defer wsServer.Close()
 
@@ -280,11 +284,15 @@ func TestCodeInterpreterRunCodeStreamBehaviors(t *testing.T) {
 	t.Run("maps websocket timeout close to timeout error", func(t *testing.T) {
 		wsServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			conn, err := upgrader.Upgrade(w, r, nil)
-			require.NoError(t, err)
+			if err != nil {
+				return
+			}
 			defer conn.Close()
 			var req map[string]any
-			require.NoError(t, conn.ReadJSON(&req))
-			require.NoError(t, conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(4001, "timeout"), time.Now().Add(time.Second)))
+			if conn.ReadJSON(&req) != nil {
+				return
+			}
+			_ = conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(4001, "timeout"), time.Now().Add(time.Second))
 		}))
 		defer wsServer.Close()
 

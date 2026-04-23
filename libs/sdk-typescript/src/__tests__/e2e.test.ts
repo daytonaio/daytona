@@ -1,5 +1,10 @@
-import { Daytona, Image, Sandbox } from '@daytona/sdk'
-import type { PtyHandle } from '@daytona/sdk'
+// Copyright Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
+import { Daytona } from '../Daytona'
+import { Image } from '../Image'
+import { Sandbox } from '../Sandbox'
+import { PtyHandle } from '../PtyHandle'
 
 jest.setTimeout(120000)
 

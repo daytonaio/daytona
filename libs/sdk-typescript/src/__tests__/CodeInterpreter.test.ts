@@ -1,3 +1,6 @@
+// Copyright Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
 import type { Configuration } from '@daytona/api-client'
 
 const mockCreateSandboxWebSocket = jest.fn()

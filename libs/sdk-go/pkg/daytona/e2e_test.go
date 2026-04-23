@@ -1,5 +1,7 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
+
+//go:build e2e
 
 package daytona
 
@@ -249,8 +251,11 @@ func TestE2E(t *testing.T) {
 	t.Run("FileSystem/SetFilePermissions", func(t *testing.T) {
 		err := sandbox.FileSystem.SetFilePermissions(ctx, helloPath, options.WithPermissionMode("0644"))
 		if err != nil {
-			t.Logf("SetFilePermissions returned error (may not be supported): %v", err)
-			t.Skip("SetFilePermissions not supported in this environment")
+			errMsg := strings.ToLower(err.Error())
+			if strings.Contains(errMsg, "not supported") || strings.Contains(errMsg, "not implemented") {
+				t.Skipf("SetFilePermissions not supported: %v", err)
+			}
+			require.NoError(t, err)
 		}
 		info, infoErr := sandbox.FileSystem.GetFileInfo(ctx, helloPath)
 		require.NoError(t, infoErr)
@@ -910,26 +915,6 @@ func containsFileName(files []*types.FileInfo, fileName string) bool {
 		}
 	}
 	return false
-}
-
-func toStringSlice(v any) []string {
-	if v == nil {
-		return nil
-	}
-
-	if s, ok := v.([]string); ok {
-		return s
-	}
-
-	if ifaceSlice, ok := v.([]any); ok {
-		out := make([]string, 0, len(ifaceSlice))
-		for _, item := range ifaceSlice {
-			out = append(out, fmt.Sprint(item))
-		}
-		return out
-	}
-
-	return []string{fmt.Sprint(v)}
 }
 
 func containsSessionID(sessions []map[string]any, sessionID string) bool {

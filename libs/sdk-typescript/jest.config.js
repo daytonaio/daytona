@@ -1,3 +1,6 @@
+// Copyright Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
 /** @type {import('jest').Config} */
 module.exports = {
   displayName: 'sdk-typescript',

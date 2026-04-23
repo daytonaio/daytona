@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 package daytona
@@ -96,7 +96,7 @@ func TestLspServerDocumentSymbolsError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "symbols failed"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "symbols failed"})
 	}))
 	defer server.Close()
 
@@ -112,7 +112,7 @@ func TestLspServerSandboxSymbolsError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "workspace symbols failed"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "workspace symbols failed"})
 	}))
 	defer server.Close()
 
@@ -128,7 +128,7 @@ func TestLspServerCompletionsError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "completions failed"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "completions failed"})
 	}))
 	defer server.Close()
 
@@ -145,7 +145,7 @@ func TestLspServerErrorHandling(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "server error"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "server error"})
 	}))
 	defer server.Close()
 

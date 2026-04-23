@@ -1,9 +1,13 @@
+# Copyright Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 # frozen_string_literal: true
 
+require 'logger'
 require 'webmock/rspec'
 require 'daytona'
 
-WebMock.disable_net_connect!
+WebMock.disable_net_connect!(allow_localhost: true)
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|

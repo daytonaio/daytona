@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 package daytona
@@ -251,7 +251,7 @@ func TestSandboxStartAPIError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "start failed"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "start failed"})
 	}))
 	defer server.Close()
 
@@ -270,7 +270,7 @@ func TestSandboxStopAPIError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "stop failed"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "stop failed"})
 	}))
 	defer server.Close()
 
@@ -289,7 +289,7 @@ func TestSandboxDeleteAPIError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
-		json.NewEncoder(w).Encode(map[string]string{"message": "forbidden"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "forbidden"})
 	}))
 	defer server.Close()
 
@@ -308,7 +308,7 @@ func TestSandboxSetLabelsAPIError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "server error"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "server error"})
 	}))
 	defer server.Close()
 
@@ -327,7 +327,7 @@ func TestSandboxArchiveAPIError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "archive failed"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "archive failed"})
 	}))
 	defer server.Close()
 
@@ -454,10 +454,10 @@ func TestSandboxLifecycleSuccessPaths(t *testing.T) {
 
 func TestSandboxPreviewAndLabelOperations(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch {
-		case r.Method == http.MethodPut:
+		switch r.Method {
+		case http.MethodPut:
 			writeJSONResponse(t, w, http.StatusOK, map[string]any{"labels": map[string]string{"env": "test"}})
-		case r.Method == http.MethodGet:
+		case http.MethodGet:
 			writeJSONResponse(t, w, http.StatusOK, testSandboxPayload("sb", "sandbox", apiclient.SANDBOXSTATE_STARTED))
 		default:
 			w.WriteHeader(http.StatusOK)

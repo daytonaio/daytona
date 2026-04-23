@@ -1,3 +1,6 @@
+# Copyright Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 from __future__ import annotations
 
 import json
@@ -608,7 +611,7 @@ def test_lsp_completions(sandbox):
     if len(completions.items) == 0:
         time.sleep(3)
         completions = lsp_server.completions(LSP_FILE_PATH, LspCompletionPosition(line=5, character=8))
-    assert len(completions.items) >= 0, "Completions call should succeed"
+    assert completions.items is not None, "Completions call should return an items list"
 
 
 def test_lsp_did_close(sandbox):

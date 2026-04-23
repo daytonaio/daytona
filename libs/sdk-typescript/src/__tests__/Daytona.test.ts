@@ -1,3 +1,6 @@
+// Copyright Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
 import { createApiResponse } from './helpers'
 
 const mockAxiosCreate = jest.fn()
@@ -17,6 +20,10 @@ const mockVolumeServiceCtor = jest.fn()
 const mockSandboxCtor = jest.fn()
 const mockProcessImageContext = jest.fn()
 const mockProcessStreamingResponse = jest.fn()
+const mockConfigurationCtor = jest.fn().mockImplementation((args: Record<string, unknown>) => ({
+  ...args,
+  baseOptions: (args.baseOptions as Record<string, unknown>) ?? { headers: {} },
+}))
 
 jest.mock('axios', () => {
   class MockAxiosError extends Error {}
@@ -33,29 +40,22 @@ jest.mock('axios', () => {
 
 jest.mock(
   '@daytona/api-client',
-  () => {
-    const configurationCtor = jest.fn().mockImplementation((args: Record<string, unknown>) => ({
-      ...args,
-      baseOptions: (args.baseOptions as Record<string, unknown>) ?? { headers: {} },
-    }))
-
-    return {
-      __esModule: true,
-      Configuration: configurationCtor,
-      SandboxApi: jest.fn(() => mockSandboxApi),
-      SnapshotsApi: jest.fn(() => mockSnapshotsApi),
-      ObjectStorageApi: jest.fn(() => mockObjectStorageApi),
-      ConfigApi: jest.fn(() => mockConfigApi),
-      VolumesApi: jest.fn(() => mockVolumesApi),
-      SandboxState: {
-        PENDING_BUILD: 'pending_build',
-        STARTED: 'started',
-        STARTING: 'starting',
-        ERROR: 'error',
-        BUILD_FAILED: 'build_failed',
-      },
-    }
-  },
+  () => ({
+    __esModule: true,
+    Configuration: mockConfigurationCtor,
+    SandboxApi: jest.fn(() => mockSandboxApi),
+    SnapshotsApi: jest.fn(() => mockSnapshotsApi),
+    ObjectStorageApi: jest.fn(() => mockObjectStorageApi),
+    ConfigApi: jest.fn(() => mockConfigApi),
+    VolumesApi: jest.fn(() => mockVolumesApi),
+    SandboxState: {
+      PENDING_BUILD: 'pending_build',
+      STARTED: 'started',
+      STARTING: 'starting',
+      ERROR: 'error',
+      BUILD_FAILED: 'build_failed',
+    },
+  }),
   { virtual: true },
 )
 
@@ -119,7 +119,6 @@ describe('Daytona', () => {
 
   it('uses explicit api key config and builds dependent services', async () => {
     const { Daytona } = await import('../Daytona')
-    const { Configuration } = await import('@daytona/api-client')
 
     const instance = new Daytona({
       apiKey: 'api-key',
@@ -128,7 +127,7 @@ describe('Daytona', () => {
     })
 
     expect(instance).toBeTruthy()
-    expect(Configuration).toHaveBeenCalled()
+    expect(mockConfigurationCtor).toHaveBeenCalled()
     expect(mockVolumeServiceCtor).toHaveBeenCalledTimes(1)
     expect(mockSnapshotServiceCtor).toHaveBeenCalledTimes(1)
   })
@@ -139,11 +138,10 @@ describe('Daytona', () => {
     process.env.DAYTONA_TARGET = 'us'
 
     const { Daytona } = await import('../Daytona')
-    const { Configuration } = await import('@daytona/api-client')
 
     new Daytona()
 
-    const firstConfigArg = (Configuration as jest.Mock).mock.calls[0][0] as {
+    const firstConfigArg = mockConfigurationCtor.mock.calls[0][0] as {
       basePath: string
       baseOptions: { headers: Record<string, string> }
     }
@@ -157,11 +155,10 @@ describe('Daytona', () => {
     process.env.DAYTONA_TARGET = 'us'
 
     const { Daytona } = await import('../Daytona')
-    const { Configuration } = await import('@daytona/api-client')
 
     new Daytona()
 
-    const firstConfigArg = (Configuration as jest.Mock).mock.calls[0][0] as {
+    const firstConfigArg = mockConfigurationCtor.mock.calls[0][0] as {
       basePath: string
     }
 
@@ -170,11 +167,10 @@ describe('Daytona', () => {
 
   it('supports deprecated serverUrl config', async () => {
     const { Daytona } = await import('../Daytona')
-    const { Configuration } = await import('@daytona/api-client')
 
     new Daytona({ apiKey: 'k', serverUrl: 'https://legacy.daytona/api', target: 'us' })
 
-    const firstConfigArg = (Configuration as jest.Mock).mock.calls[0][0] as {
+    const firstConfigArg = mockConfigurationCtor.mock.calls[0][0] as {
       basePath: string
     }
 
@@ -188,11 +184,10 @@ describe('Daytona', () => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
 
     const { Daytona } = await import('../Daytona')
-    const { Configuration } = await import('@daytona/api-client')
 
     new Daytona()
 
-    const firstConfigArg = (Configuration as jest.Mock).mock.calls[0][0] as {
+    const firstConfigArg = mockConfigurationCtor.mock.calls[0][0] as {
       basePath: string
     }
 
@@ -204,7 +199,6 @@ describe('Daytona', () => {
 
   it('supports jwt auth with organization header', async () => {
     const { Daytona } = await import('../Daytona')
-    const { Configuration } = await import('@daytona/api-client')
 
     new Daytona({
       jwtToken: 'jwt-token',
@@ -213,7 +207,7 @@ describe('Daytona', () => {
       target: 'us',
     })
 
-    const firstConfigArg = (Configuration as jest.Mock).mock.calls[0][0] as {
+    const firstConfigArg = mockConfigurationCtor.mock.calls[0][0] as {
       baseOptions: { headers: Record<string, string> }
     }
     expect(firstConfigArg.baseOptions.headers.Authorization).toBe('Bearer jwt-token')
@@ -240,11 +234,10 @@ describe('Daytona', () => {
     process.env.DAYTONA_TARGET = 'eu'
 
     const { Daytona } = await import('../Daytona')
-    const { Configuration } = await import('@daytona/api-client')
 
     new Daytona()
 
-    const firstConfigArg = (Configuration as jest.Mock).mock.calls[0][0] as {
+    const firstConfigArg = mockConfigurationCtor.mock.calls[0][0] as {
       baseOptions: { headers: Record<string, string> }
     }
 

@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 package daytona
@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"os"
 
 	"testing"
 	"time"
@@ -97,12 +96,12 @@ func TestNewClient(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Clear environment
-			os.Clearenv()
-
-			// Set test environment variables
+			t.Setenv("DAYTONA_API_KEY", "")
+			t.Setenv("DAYTONA_API_URL", "")
+			t.Setenv("DAYTONA_JWT_TOKEN", "")
+			t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 			for key, value := range tt.envVars {
-				os.Setenv(key, value)
+				t.Setenv(key, value)
 			}
 
 			// Create client
@@ -124,9 +123,6 @@ func TestNewClient(t *testing.T) {
 			}
 		})
 	}
-
-	// Cleanup
-	os.Clearenv()
 }
 
 // TestNewClientWithConfig tests the NewClientWithConfig function
@@ -224,12 +220,12 @@ func TestNewClientWithConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Clear environment
-			os.Clearenv()
-
-			// Set test environment variables
+			t.Setenv("DAYTONA_API_KEY", "")
+			t.Setenv("DAYTONA_API_URL", "")
+			t.Setenv("DAYTONA_JWT_TOKEN", "")
+			t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 			for key, value := range tt.envVars {
-				os.Setenv(key, value)
+				t.Setenv(key, value)
 			}
 
 			// Create client
@@ -251,9 +247,6 @@ func TestNewClientWithConfig(t *testing.T) {
 			}
 		})
 	}
-
-	// Cleanup
-	os.Clearenv()
 }
 
 // TestGetAuthContext tests the getAuthContext method
@@ -365,9 +358,10 @@ func TestHandleAPIError(t *testing.T) {
 // TestGet tests the Get method
 func TestGet(t *testing.T) {
 	t.Run("error when sandbox ID is empty", func(t *testing.T) {
-		// Setup test environment
-		os.Clearenv()
-		os.Setenv("DAYTONA_API_KEY", "test-api-key")
+		t.Setenv("DAYTONA_API_KEY", "test-api-key")
+		t.Setenv("DAYTONA_API_URL", "")
+		t.Setenv("DAYTONA_JWT_TOKEN", "")
+		t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 		client, err := NewClient()
 		require.NoError(t, err)
@@ -434,9 +428,10 @@ func TestList(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Setup test environment
-			os.Clearenv()
-			os.Setenv("DAYTONA_API_KEY", "test-api-key")
+			t.Setenv("DAYTONA_API_KEY", "test-api-key")
+			t.Setenv("DAYTONA_API_URL", "")
+			t.Setenv("DAYTONA_JWT_TOKEN", "")
+			t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 			client, err := NewClient()
 			require.NoError(t, err)
@@ -545,9 +540,10 @@ func TestCreateValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Setup test environment
-			os.Clearenv()
-			os.Setenv("DAYTONA_API_KEY", "test-api-key")
+			t.Setenv("DAYTONA_API_KEY", "test-api-key")
+			t.Setenv("DAYTONA_API_URL", "")
+			t.Setenv("DAYTONA_JWT_TOKEN", "")
+			t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 			client, err := NewClient()
 			require.NoError(t, err)
@@ -585,10 +581,10 @@ func TestStreamBuildLogsToChannel(t *testing.T) {
 		}))
 		defer server.Close()
 
-		// Setup client with test server
-		os.Clearenv()
-		os.Setenv("DAYTONA_API_KEY", "test-api-key")
-		os.Setenv("DAYTONA_API_URL", server.URL)
+		t.Setenv("DAYTONA_API_KEY", "test-api-key")
+		t.Setenv("DAYTONA_API_URL", server.URL)
+		t.Setenv("DAYTONA_JWT_TOKEN", "")
+		t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 		client, err := NewClient()
 		require.NoError(t, err)
@@ -635,9 +631,10 @@ func TestStreamBuildLogsToChannel(t *testing.T) {
 		}))
 		defer server.Close()
 
-		// Setup client
-		os.Clearenv()
-		os.Setenv("DAYTONA_API_KEY", "test-api-key")
+		t.Setenv("DAYTONA_API_KEY", "test-api-key")
+		t.Setenv("DAYTONA_API_URL", "")
+		t.Setenv("DAYTONA_JWT_TOKEN", "")
+		t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 		client, err := NewClient()
 		require.NoError(t, err)
@@ -661,8 +658,10 @@ func TestStreamBuildLogsToChannel(t *testing.T) {
 
 // TestDefaultLanguage tests default language setting
 func TestDefaultLanguage(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_URL", "")
+	t.Setenv("DAYTONA_JWT_TOKEN", "")
+	t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 	client, err := NewClient()
 	require.NoError(t, err)
@@ -678,8 +677,10 @@ func intPtr(i int) *int {
 
 // TestClientTimeout tests HTTP client timeout configuration
 func TestClientTimeout(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_URL", "")
+	t.Setenv("DAYTONA_JWT_TOKEN", "")
+	t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 	client, err := NewClient()
 	require.NoError(t, err)
@@ -708,9 +709,10 @@ func TestServerURLConstruction(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			os.Clearenv()
-			os.Setenv("DAYTONA_API_KEY", "test-api-key")
-			os.Setenv("DAYTONA_API_URL", tt.apiURL)
+			t.Setenv("DAYTONA_API_KEY", "test-api-key")
+			t.Setenv("DAYTONA_API_URL", tt.apiURL)
+			t.Setenv("DAYTONA_JWT_TOKEN", "")
+			t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 			client, err := NewClient()
 			require.NoError(t, err)
@@ -723,9 +725,10 @@ func TestServerURLConstruction(t *testing.T) {
 
 // TestJWTAuthentication tests JWT token authentication setup
 func TestJWTAuthentication(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("DAYTONA_JWT_TOKEN", "test-jwt-token")
-	os.Setenv("DAYTONA_ORGANIZATION_ID", "test-org-id")
+	t.Setenv("DAYTONA_API_KEY", "")
+	t.Setenv("DAYTONA_API_URL", "")
+	t.Setenv("DAYTONA_JWT_TOKEN", "test-jwt-token")
+	t.Setenv("DAYTONA_ORGANIZATION_ID", "test-org-id")
 
 	client, err := NewClient()
 	require.NoError(t, err)
@@ -743,8 +746,10 @@ func TestJWTAuthentication(t *testing.T) {
 
 // TestSDKSourceHeader tests that SDK source header is set
 func TestSDKSourceHeader(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_URL", "")
+	t.Setenv("DAYTONA_JWT_TOKEN", "")
+	t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 	client, err := NewClient()
 	require.NoError(t, err)
@@ -758,8 +763,10 @@ func TestSDKSourceHeader(t *testing.T) {
 
 // TestServicesInitialization tests that services are properly initialized
 func TestServicesInitialization(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_URL", "")
+	t.Setenv("DAYTONA_JWT_TOKEN", "")
+	t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 	client, err := NewClient()
 	require.NoError(t, err)
@@ -771,8 +778,10 @@ func TestServicesInitialization(t *testing.T) {
 // TestCreateToolboxClient tests the createToolboxClient method
 func TestCreateToolboxClient(t *testing.T) {
 	t.Run("creates toolbox client with correct configuration", func(t *testing.T) {
-		os.Clearenv()
-		os.Setenv("DAYTONA_API_KEY", "test-api-key")
+		t.Setenv("DAYTONA_API_KEY", "test-api-key")
+		t.Setenv("DAYTONA_API_URL", "")
+		t.Setenv("DAYTONA_JWT_TOKEN", "")
+		t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 		client, err := NewClient()
 		require.NoError(t, err)
@@ -799,9 +808,10 @@ func TestCreateToolboxClient(t *testing.T) {
 	})
 
 	t.Run("creates toolbox client with JWT auth", func(t *testing.T) {
-		os.Clearenv()
-		os.Setenv("DAYTONA_JWT_TOKEN", "test-jwt-token")
-		os.Setenv("DAYTONA_ORGANIZATION_ID", "test-org-id")
+		t.Setenv("DAYTONA_API_KEY", "")
+		t.Setenv("DAYTONA_API_URL", "")
+		t.Setenv("DAYTONA_JWT_TOKEN", "test-jwt-token")
+		t.Setenv("DAYTONA_ORGANIZATION_ID", "test-org-id")
 
 		client, err := NewClient()
 		require.NoError(t, err)
@@ -828,8 +838,10 @@ func TestCreateToolboxClient(t *testing.T) {
 // TestSandboxTargetField tests that Sandbox has Target field properly set
 func TestSandboxTargetField(t *testing.T) {
 	t.Run("NewSandbox sets target field", func(t *testing.T) {
-		os.Clearenv()
-		os.Setenv("DAYTONA_API_KEY", "test-api-key")
+		t.Setenv("DAYTONA_API_KEY", "test-api-key")
+		t.Setenv("DAYTONA_API_URL", "")
+		t.Setenv("DAYTONA_JWT_TOKEN", "")
+		t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 		client, err := NewClient()
 		require.NoError(t, err)
@@ -854,9 +866,11 @@ func TestSandboxTargetField(t *testing.T) {
 }
 
 func TestNewClientServerURLFallback(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("DAYTONA_API_KEY", "test-api-key")
-	os.Setenv("DAYTONA_SERVER_URL", "https://server-url.example/api")
+	t.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_URL", "")
+	t.Setenv("DAYTONA_JWT_TOKEN", "")
+	t.Setenv("DAYTONA_ORGANIZATION_ID", "")
+	t.Setenv("DAYTONA_SERVER_URL", "https://server-url.example/api")
 
 	client, err := NewClient()
 	require.NoError(t, err)

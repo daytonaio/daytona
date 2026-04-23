@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 package daytona
@@ -46,7 +46,7 @@ func TestComputerUseLazyInit(t *testing.T) {
 func TestComputerUseStart(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{})
 	}))
 	defer server.Close()
 
@@ -61,7 +61,7 @@ func TestComputerUseStart(t *testing.T) {
 func TestComputerUseStop(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{})
 	}))
 	defer server.Close()
 
@@ -76,7 +76,7 @@ func TestComputerUseStop(t *testing.T) {
 func TestComputerUseGetStatus(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{"status": "running"})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"status": "running"})
 	}))
 	defer server.Close()
 
@@ -92,7 +92,7 @@ func TestComputerUseGetStatus(t *testing.T) {
 func TestMouseGetPosition(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{"x": float64(100), "y": float64(200)})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"x": float64(100), "y": float64(200)})
 	}))
 	defer server.Close()
 
@@ -109,7 +109,7 @@ func TestMouseGetPosition(t *testing.T) {
 func TestMouseMove(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{"x": float64(500), "y": float64(300)})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"x": float64(500), "y": float64(300)})
 	}))
 	defer server.Close()
 
@@ -125,7 +125,7 @@ func TestMouseMove(t *testing.T) {
 func TestMouseClick(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{"x": float64(100), "y": float64(200)})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"x": float64(100), "y": float64(200)})
 	}))
 	defer server.Close()
 
@@ -141,7 +141,7 @@ func TestMouseClick(t *testing.T) {
 func TestMouseClickWithOptions(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{"x": float64(100), "y": float64(200)})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"x": float64(100), "y": float64(200)})
 	}))
 	defer server.Close()
 
@@ -159,7 +159,7 @@ func TestMouseClickWithOptions(t *testing.T) {
 func TestMouseDrag(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{"x": float64(300), "y": float64(300)})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"x": float64(300), "y": float64(300)})
 	}))
 	defer server.Close()
 
@@ -175,7 +175,7 @@ func TestMouseDrag(t *testing.T) {
 func TestMouseScroll(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
 	}))
 	defer server.Close()
 
@@ -191,7 +191,7 @@ func TestMouseScroll(t *testing.T) {
 func TestMouseScrollWithAmount(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
 	}))
 	defer server.Close()
 
@@ -208,7 +208,7 @@ func TestMouseScrollWithAmount(t *testing.T) {
 func TestKeyboardType(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{})
 	}))
 	defer server.Close()
 
@@ -223,7 +223,7 @@ func TestKeyboardType(t *testing.T) {
 func TestKeyboardTypeWithDelay(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{})
 	}))
 	defer server.Close()
 
@@ -239,7 +239,7 @@ func TestKeyboardTypeWithDelay(t *testing.T) {
 func TestKeyboardPress(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{})
 	}))
 	defer server.Close()
 
@@ -254,7 +254,7 @@ func TestKeyboardPress(t *testing.T) {
 func TestKeyboardPressWithModifiers(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{})
 	}))
 	defer server.Close()
 
@@ -269,7 +269,7 @@ func TestKeyboardPressWithModifiers(t *testing.T) {
 func TestKeyboardHotkey(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{})
 	}))
 	defer server.Close()
 
@@ -284,7 +284,7 @@ func TestKeyboardHotkey(t *testing.T) {
 func TestDisplayGetInfo(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"displays": []map[string]interface{}{
 				{"width": 1920, "height": 1080},
 			},
@@ -305,7 +305,7 @@ func TestDisplayGetWindowsError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "desktop not running"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "desktop not running"})
 	}))
 	defer server.Close()
 
@@ -334,7 +334,7 @@ func TestComputerUseErrorHandling(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "desktop not running"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "desktop not running"})
 	}))
 	defer server.Close()
 

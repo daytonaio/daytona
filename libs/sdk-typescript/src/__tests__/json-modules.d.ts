@@ -1,3 +1,6 @@
+// Copyright Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
 declare module '*.json' {
   const value: Record<string, unknown>
   export = value

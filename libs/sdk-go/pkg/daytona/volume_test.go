@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 package daytona
@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -20,23 +19,24 @@ import (
 )
 
 func TestVolumeServiceCreation(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_URL", "")
+	t.Setenv("DAYTONA_JWT_TOKEN", "")
+	t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 	client, err := NewClient()
 	require.NoError(t, err)
 
 	vs := NewVolumeService(client)
 	require.NotNil(t, vs)
-
-	os.Clearenv()
 }
 
 func createTestClientWithServer(t *testing.T, server *httptest.Server) *Client {
 	t.Helper()
-	os.Clearenv()
-	os.Setenv("DAYTONA_API_KEY", "test-api-key")
-	os.Setenv("DAYTONA_API_URL", server.URL)
+	t.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_URL", server.URL)
+	t.Setenv("DAYTONA_JWT_TOKEN", "")
+	t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 	client, err := NewClient()
 	require.NoError(t, err)
@@ -47,7 +47,7 @@ func TestVolumeListError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "internal error"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "internal error"})
 	}))
 	defer server.Close()
 
@@ -56,15 +56,13 @@ func TestVolumeListError(t *testing.T) {
 	ctx := context.Background()
 	_, err := client.Volume.List(ctx)
 	require.Error(t, err)
-
-	os.Clearenv()
 }
 
 func TestVolumeGetError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]string{"message": "not found"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "not found"})
 	}))
 	defer server.Close()
 
@@ -73,15 +71,13 @@ func TestVolumeGetError(t *testing.T) {
 	ctx := context.Background()
 	_, err := client.Volume.Get(ctx, "nonexistent")
 	require.Error(t, err)
-
-	os.Clearenv()
 }
 
 func TestVolumeDeleteError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
-		json.NewEncoder(w).Encode(map[string]string{"message": "forbidden"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "forbidden"})
 	}))
 	defer server.Close()
 
@@ -91,15 +87,13 @@ func TestVolumeDeleteError(t *testing.T) {
 	ctx := context.Background()
 	err := client.Volume.Delete(ctx, vol)
 	require.Error(t, err)
-
-	os.Clearenv()
 }
 
 func TestVolumeErrorHandling(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]string{"message": "volume not found"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "volume not found"})
 	}))
 	defer server.Close()
 
@@ -108,8 +102,6 @@ func TestVolumeErrorHandling(t *testing.T) {
 	ctx := context.Background()
 	_, err := client.Volume.Get(ctx, "nonexistent")
 	require.Error(t, err)
-
-	os.Clearenv()
 }
 
 func TestVolumeDtoToVolume(t *testing.T) {

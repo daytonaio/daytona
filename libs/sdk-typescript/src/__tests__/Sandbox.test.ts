@@ -1,3 +1,6 @@
+// Copyright Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
 import type { Configuration, Sandbox as SandboxDto } from '@daytona/api-client'
 import { createApiResponse } from './helpers'
 import { DaytonaNotFoundError } from '../errors/DaytonaError'

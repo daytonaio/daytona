@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 package daytona
@@ -73,7 +73,7 @@ func TestGitStatusError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]string{"message": "not a git repo"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "not a git repo"})
 	}))
 	defer server.Close()
 
@@ -103,7 +103,7 @@ func TestGitCommitError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "commit failed"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "commit failed"})
 	}))
 	defer server.Close()
 
@@ -119,7 +119,7 @@ func TestGitBranchesError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "list failed"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "list failed"})
 	}))
 	defer server.Close()
 
@@ -292,7 +292,7 @@ func TestGitErrorHandling(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "internal error"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "internal error"})
 	}))
 	defer server.Close()
 

@@ -18,7 +18,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "go test -v -race -count=1 -run '^Test[^E]|^TestE[^2]|^TestE2[^E]' ./..."
+        "command": "go test -v -race -count=1 ./..."
       },
       "dependsOn": ["build"]
     },
@@ -26,7 +26,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "go test -v -run TestE2E -timeout 180s -count=1 ./pkg/daytona/"
+        "command": "go test -v -tags=e2e -run TestE2E -timeout 180s -count=1 ./pkg/daytona/"
       },
       "dependsOn": ["build"]
     },

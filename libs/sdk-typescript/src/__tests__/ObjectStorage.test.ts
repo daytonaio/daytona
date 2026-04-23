@@ -1,3 +1,6 @@
+// Copyright Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
 import * as fs from 'fs'
 import * as os from 'os'
 import * as pathe from 'pathe'

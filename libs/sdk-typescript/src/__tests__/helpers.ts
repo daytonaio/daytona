@@ -1,3 +1,6 @@
+// Copyright Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
 export const createApiResponse = <T>(data: T): { data: T } => ({ data })
 
 export const flushPromises = async (): Promise<void> => {

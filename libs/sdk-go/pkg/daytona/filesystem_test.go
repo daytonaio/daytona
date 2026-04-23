@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 package daytona
@@ -66,7 +66,7 @@ func TestListFilesError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]string{"message": "path not found"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "path not found"})
 	}))
 	defer server.Close()
 
@@ -82,7 +82,7 @@ func TestGetFileInfoError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]string{"message": "file not found"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "file not found"})
 	}))
 	defer server.Close()
 
@@ -124,7 +124,7 @@ func TestDeleteFile(t *testing.T) {
 func TestDownloadFile(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/octet-stream")
-		w.Write([]byte("file content here"))
+		_, _ = w.Write([]byte("file content here"))
 	}))
 	defer server.Close()
 
@@ -155,7 +155,7 @@ func TestSearchFilesError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "search failed"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "search failed"})
 	}))
 	defer server.Close()
 
@@ -171,7 +171,7 @@ func TestFindFilesError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "find failed"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "find failed"})
 	}))
 	defer server.Close()
 
@@ -187,7 +187,7 @@ func TestReplaceInFilesError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"message": "replace failed"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "replace failed"})
 	}))
 	defer server.Close()
 
@@ -221,7 +221,7 @@ func TestUploadFileFromBytes(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]interface{}{})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{})
 	}))
 	defer server.Close()
 
@@ -252,7 +252,7 @@ func TestFileSystemErrorHandling(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]string{"message": "file not found"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"message": "file not found"})
 	}))
 	defer server.Close()
 

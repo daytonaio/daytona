@@ -1,10 +1,11 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 package daytona
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -80,4 +81,24 @@ func testVolumePayload(id, name string, state apiclient.VolumeState) map[string]
 
 func boolPtr(v bool) *bool {
 	return &v
+}
+
+func toStringSlice(v any) []string {
+	if v == nil {
+		return nil
+	}
+
+	if s, ok := v.([]string); ok {
+		return s
+	}
+
+	if ifaceSlice, ok := v.([]any); ok {
+		out := make([]string, 0, len(ifaceSlice))
+		for _, item := range ifaceSlice {
+			out = append(out, fmt.Sprint(item))
+		}
+		return out
+	}
+
+	return []string{fmt.Sprint(v)}
 }
