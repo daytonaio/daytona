@@ -7,14 +7,7 @@ import { TabItem, Tabs } from '@astrojs/starlight/components'
 
 Daytona API keys authenticate requests to the [Daytona API](/docs/en/tools/api). They are used by the Daytona [SDKs](/docs/en/getting-started#sdks) and [CLI](/docs/en/getting-started#cli) to access and manage resources in your organization.
 
-## Credentials
-
-The API accepts two types of credentials (API key and JWT token). They are mutually exclusive; only one can be used per request and depends on the operation you are performing.
-
-- **API key**: a secret string tied to your Daytona organization, created via [Dashboard ↗](https://app.daytona.io/dashboard/keys)
-- **JWT token**: an access token issued when you sign in to Daytona with your user account (the same kind of session the dashboard uses in the browser). To obtain a JWT token, run [`daytona login`](/docs/en/tools/cli#daytona-login), select **Login with Browser**, and complete sign-in. The CLI saves the access token in `config.json` on your machine, inside Daytona config directory. The token value is available in the `api.token.accessToken` field of the active profile. Use the token value as `Authorization: Bearer <token>` and include the `X-Daytona-Organization-ID` header with your organization ID on JWT-authenticated API requests.
-
-Each API request uses `Authorization: Bearer` followed by the value.
+Daytona uses JWT tokens to authenticate requests and interact with the API keys endpoints programmatically. To obtain a JWT token, use the [Daytona CLI](/docs/en/tools/cli) to login ([**`daytona login`**](/docs/en/tools/cli#daytona-login)) and save the token to your config. The CLI saves the access token in `config.json` on your machine, inside the Daytona config directory. The token value is available in the `api.token.accessToken` field of the active profile. JWT-authenticated requests must include the `X-Daytona-Organization-ID` header with your organization ID.
 
 ## Create an API key
 
@@ -36,6 +29,7 @@ API keys support optional expiration and can be revoked at any time. After creat
 ```bash
 curl 'https://app.daytona.io/api/api-keys' \
   --request POST \
+  --header 'X-Daytona-Organization-ID: YOUR_ORGANIZATION_ID' \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN' \
   --data '{
@@ -77,6 +71,7 @@ Daytona provides methods to list all API keys for the current user or organizati
 
 ```bash
 curl 'https://app.daytona.io/api/api-keys' \
+  --header 'X-Daytona-Organization-ID: YOUR_ORGANIZATION_ID' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN'
 ```
 
@@ -87,11 +82,16 @@ curl 'https://app.daytona.io/api/api-keys' \
 
 Daytona provides methods to get details of the API key used to authenticate the current request.
 
+:::note
+This endpoint does not use a JWT token, instead it requires your organization API key.
+:::
+
 <Tabs syncKey="language">
 <TabItem label="API" icon="seti:json">
 
 ```bash
 curl 'https://app.daytona.io/api/api-keys/current' \
+  --header 'X-Daytona-Organization-ID: YOUR_ORGANIZATION_ID' \
   --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
@@ -107,6 +107,7 @@ Daytona provides methods to get a single API key by name.
 
 ```bash
 curl 'https://app.daytona.io/api/api-keys/my-api-key' \
+  --header 'X-Daytona-Organization-ID: YOUR_ORGANIZATION_ID' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN'
 ```
 
@@ -127,6 +128,7 @@ Daytona provides options to delete an API key in [Daytona Dashboard ↗](https:/
 ```bash
 curl 'https://app.daytona.io/api/api-keys/my-api-key' \
   --request DELETE \
+  --header 'X-Daytona-Organization-ID: YOUR_ORGANIZATION_ID' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN'
 ```
 
@@ -143,6 +145,7 @@ Daytona provides options for organization admins to delete an API key for a spec
 ```bash
 curl 'https://app.daytona.io/api/api-keys/{userId}/my-api-key' \
   --request DELETE \
+  --header 'X-Daytona-Organization-ID: YOUR_ORGANIZATION_ID' \
   --header 'Authorization: Bearer YOUR_JWT_TOKEN'
 ```
 
