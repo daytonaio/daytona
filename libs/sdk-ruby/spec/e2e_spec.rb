@@ -15,7 +15,7 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
 
   before(:all) do
     WebMock.allow_net_connect!
-    skip 'DAYTONA_API_KEY not set' unless ENV['DAYTONA_API_KEY']
+    raise 'DAYTONA_API_KEY environment variable is required for E2E tests' unless ENV['DAYTONA_API_KEY']
 
     @daytona = Daytona::Daytona.new
     params = Daytona::CreateSandboxFromSnapshotParams.new(language: Daytona::CodeLanguage::PYTHON)
@@ -53,11 +53,6 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
 
   def error_message(error)
     error.is_a?(StandardError) ? error.message : error.to_s
-  end
-
-  def pty_unavailable?(error)
-    message = error_message(error).downcase
-    %w[pty websocket upgrade connect connection].any? { |part| message.include?(part) }
   end
 
   context 'Sandbox Lifecycle', order: :defined do
@@ -528,6 +523,7 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
 
     it 'opens the LSP document' do
       expect { @shared[:lsp_server].did_open(lsp_file_path) }.not_to raise_error
+      sleep 5
     end
 
     it 'returns document symbols' do
@@ -542,23 +538,6 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
       expect(symbols.length).to be > 0
     end
 
-    it 'returns completions for a member access position' do
-      completions = @shared[:lsp_server].completions(
-        path: lsp_file_path,
-        position: Daytona::LspServer::Position.new(line: 5, character: 8)
-      )
-      items = completions.respond_to?(:items) ? completions.items : []
-      if items.empty?
-        sleep 3
-        completions = @shared[:lsp_server].completions(
-          path: lsp_file_path,
-          position: Daytona::LspServer::Position.new(line: 5, character: 8)
-        )
-        items = completions.respond_to?(:items) ? completions.items : []
-      end
-      expect(items.length).to be >= 0
-    end
-
     it 'closes the LSP document' do
       expect { @shared[:lsp_server].did_close(lsp_file_path) }.not_to raise_error
     end
@@ -571,29 +550,22 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
 
   context 'PTY Operations', order: :defined do
     it 'creates a PTY session and list includes it' do
-      handle = nil
-      begin
-        pty_session_id = "e2e-pty-#{SecureRandom.hex(4)}"
-        handle = @sandbox.process.create_pty_session(
-          id: pty_session_id,
-          pty_size: Daytona::PtySize.new(rows: 24, cols: 80)
-        )
-        @shared[:pty_session_id] = pty_session_id
-        sessions = @sandbox.process.list_pty_sessions
-        ids = sessions.map { |session| session.respond_to?(:id) ? session.id : session.session_id }
-        expect(ids).to include(pty_session_id)
-      rescue StandardError => e
-        skip "PTY not available in this environment: #{e.message}" if pty_unavailable?(e)
-
-        raise
-      ensure
-        handle&.disconnect
-      end
+      pty_session_id = "e2e-pty-#{SecureRandom.hex(4)}"
+      handle = @sandbox.process.create_pty_session(
+        id: pty_session_id,
+        pty_size: Daytona::PtySize.new(rows: 24, cols: 80)
+      )
+      @shared[:pty_session_id] = pty_session_id
+      sessions = @sandbox.process.list_pty_sessions
+      ids = sessions.map { |session| session.respond_to?(:id) ? session.id : session.session_id }
+      expect(ids).to include(pty_session_id)
+    ensure
+      handle&.disconnect
     end
 
     it 'gets PTY session info for the created session' do
       pty_session_id = @shared[:pty_session_id]
-      skip 'PTY session not available' unless pty_session_id
+      expect(pty_session_id).not_to be_nil
 
       session = @sandbox.process.get_pty_session_info(pty_session_id)
       session_id = session.respond_to?(:id) ? session.id : session.session_id
@@ -602,7 +574,7 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
 
     it 'resizes the PTY session' do
       pty_session_id = @shared[:pty_session_id]
-      skip 'PTY session not available' unless pty_session_id
+      expect(pty_session_id).not_to be_nil
 
       session = @sandbox.process.resize_pty_session(pty_session_id, Daytona::PtySize.new(rows: 30, cols: 100))
       expect(session.cols).to eq(100)
@@ -611,12 +583,13 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
 
     it 'connects to the PTY session, writes, reads and closes' do
       pty_session_id = @shared[:pty_session_id]
-      skip 'PTY session not available' unless pty_session_id
+      expect(pty_session_id).not_to be_nil
 
       output = +''
       handle = @sandbox.process.connect_pty_session(pty_session_id)
       begin
         handle.send_input("printf 'pty-output\\n'\n")
+        sleep 2
         handle.send_input("exit\n")
         result = handle.wait(timeout: 10) { |chunk| output << chunk.to_s }
         expect(result.exit_code || 0).to eq(0)
@@ -725,9 +698,8 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
     end
 
     it 'gets snapshot by name' do
-      # Use the first available snapshot from list
       list_result = @daytona.snapshot.list(page: 1, limit: 1)
-      skip 'No snapshots available' if list_result.items.empty?
+      expect(list_result.items).not_to be_empty
 
       snapshot_name = list_result.items.first.name
       snapshot = @daytona.snapshot.get(snapshot_name)

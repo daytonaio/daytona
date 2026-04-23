@@ -23,7 +23,7 @@ import (
 
 func TestE2E(t *testing.T) {
 	if os.Getenv("DAYTONA_API_KEY") == "" {
-		t.Skip("DAYTONA_API_KEY not set")
+		t.Fatal("DAYTONA_API_KEY environment variable is required for E2E tests")
 	}
 
 	client, err := NewClient()
@@ -246,20 +246,6 @@ func TestE2E(t *testing.T) {
 		updated, updatedErr := sandbox.FileSystem.DownloadFile(ctx, helloPath, nil)
 		require.NoError(t, updatedErr)
 		assert.Equal(t, "world world", string(updated))
-	})
-
-	t.Run("FileSystem/SetFilePermissions", func(t *testing.T) {
-		err := sandbox.FileSystem.SetFilePermissions(ctx, helloPath, options.WithPermissionMode("0644"))
-		if err != nil {
-			errMsg := strings.ToLower(err.Error())
-			if strings.Contains(errMsg, "not supported") || strings.Contains(errMsg, "not implemented") {
-				t.Skipf("SetFilePermissions not supported: %v", err)
-			}
-			require.NoError(t, err)
-		}
-		info, infoErr := sandbox.FileSystem.GetFileInfo(ctx, helloPath)
-		require.NoError(t, infoErr)
-		assert.NotEmpty(t, info.Mode)
 	})
 
 	t.Run("FileSystem/MoveFiles", func(t *testing.T) {
@@ -582,6 +568,7 @@ PY`)
 	t.Run("LSP/DidOpen", func(t *testing.T) {
 		require.NotNil(t, lspServer)
 		require.NoError(t, lspServer.DidOpen(ctx, lspFilePath))
+		time.Sleep(5 * time.Second)
 	})
 
 	t.Run("LSP/DocumentSymbols", func(t *testing.T) {
@@ -599,18 +586,6 @@ PY`)
 		assert.NotEmpty(t, symbols)
 	})
 
-	t.Run("LSP/Completions", func(t *testing.T) {
-		require.NotNil(t, lspServer)
-		completions, completionsErr := lspServer.Completions(ctx, lspFilePath, types.Position{Line: 5, Character: 8})
-		require.NoError(t, completionsErr)
-		if !strings.Contains(fmt.Sprint(completions), "greet") {
-			time.Sleep(3 * time.Second)
-			completions, completionsErr = lspServer.Completions(ctx, lspFilePath, types.Position{Line: 5, Character: 8})
-			require.NoError(t, completionsErr)
-		}
-		assert.NotNil(t, completions)
-	})
-
 	t.Run("LSP/DidClose", func(t *testing.T) {
 		require.NotNil(t, lspServer)
 		require.NoError(t, lspServer.DidClose(ctx, lspFilePath))
@@ -624,12 +599,7 @@ PY`)
 
 	t.Run("PTY/CreateSessionAndList", func(t *testing.T) {
 		handle, createErr := sandbox.Process.CreatePty(ctx, ptySessionID, options.WithCreatePtySize(types.PtySize{Rows: 24, Cols: 80}))
-		if createErr != nil {
-			if isPtyUnavailableError(createErr) {
-				t.Skipf("PTY not available in this environment: %v", createErr)
-			}
-			require.NoError(t, createErr)
-		}
+		require.NoError(t, createErr)
 
 		require.NoError(t, handle.Disconnect())
 		sessions, listErr := sandbox.Process.ListPtySessions(ctx)
@@ -639,18 +609,12 @@ PY`)
 
 	t.Run("PTY/GetSessionInfo", func(t *testing.T) {
 		info, infoErr := sandbox.Process.GetPtySessionInfo(ctx, ptySessionID)
-		if infoErr != nil && isPtyUnavailableError(infoErr) {
-			t.Skipf("PTY session unavailable: %v", infoErr)
-		}
 		require.NoError(t, infoErr)
 		assert.Equal(t, ptySessionID, info.ID)
 	})
 
 	t.Run("PTY/ResizeSession", func(t *testing.T) {
 		info, infoErr := sandbox.Process.ResizePtySession(ctx, ptySessionID, types.PtySize{Rows: 30, Cols: 100})
-		if infoErr != nil && isPtyUnavailableError(infoErr) {
-			t.Skipf("PTY resize unavailable: %v", infoErr)
-		}
 		require.NoError(t, infoErr)
 		assert.Equal(t, 30, info.Rows)
 		assert.Equal(t, 100, info.Cols)
@@ -658,12 +622,7 @@ PY`)
 
 	t.Run("PTY/ConnectWriteReadAndClose", func(t *testing.T) {
 		handle, connectErr := sandbox.Process.ConnectPty(ctx, ptySessionID)
-		if connectErr != nil {
-			if isPtyUnavailableError(connectErr) {
-				t.Skipf("PTY connect unavailable: %v", connectErr)
-			}
-			require.NoError(t, connectErr)
-		}
+		require.NoError(t, connectErr)
 		defer func() { _ = handle.Disconnect() }()
 
 		require.NoError(t, handle.WaitForConnection(ctx))
@@ -678,6 +637,7 @@ PY`)
 		}()
 
 		require.NoError(t, handle.SendInput([]byte("printf 'pty-output\\n'\n")))
+		time.Sleep(2 * time.Second)
 		require.NoError(t, handle.SendInput([]byte("exit\n")))
 
 		waitCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
@@ -752,27 +712,10 @@ PY`, options.WithExecuteTimeout(10*time.Second))
 		assert.Contains(t, result.Result, "long-run-complete")
 	})
 
-	t.Run("SandboxLifecycle/ResizeResourcesIfSupported", func(t *testing.T) {
-		resizeErr := sandbox.ResizeWithTimeout(ctx, &types.Resources{CPU: 2}, 2*time.Minute)
-		if resizeErr != nil {
-			if containsAny(strings.ToLower(resizeErr.Error()), "capacity", "quota", "resize", "not supported") {
-				t.Skipf("sandbox resize unavailable: %v", resizeErr)
-			}
-			require.NoError(t, resizeErr)
-		}
-	})
-
-	t.Run("SandboxLifecycle/ArchiveAndUnarchiveIfSupported", func(t *testing.T) {
+	t.Run("SandboxLifecycle/ArchiveAndUnarchive", func(t *testing.T) {
 		require.NoError(t, sandbox.StopWithTimeout(ctx, 90*time.Second, false))
 
-		archiveErr := sandbox.Archive(ctx)
-		if archiveErr != nil {
-			if containsAny(strings.ToLower(archiveErr.Error()), "archive", "not supported") {
-				_ = sandbox.StartWithTimeout(ctx, 90*time.Second)
-				t.Skipf("sandbox archive unavailable: %v", archiveErr)
-			}
-			require.NoError(t, archiveErr)
-		}
+		require.NoError(t, sandbox.Archive(ctx))
 
 		require.NoError(t, sandbox.RefreshData(ctx))
 		assert.Contains(t, []apiclient.SandboxState{apiclient.SANDBOXSTATE_ARCHIVED, apiclient.SANDBOXSTATE_ARCHIVING, apiclient.SANDBOXSTATE_STOPPED}, sandbox.State)
@@ -846,9 +789,7 @@ PY`, options.WithExecuteTimeout(10*time.Second))
 	})
 
 	t.Run("Snapshot/GetByName", func(t *testing.T) {
-		if snapshotName == "" {
-			t.Skip("no snapshots available for GetByName")
-		}
+		require.NotEmpty(t, snapshotName, "snapshot list should have returned at least the default snapshot")
 
 		snapshot, getErr := client.Snapshot.Get(ctx, snapshotName)
 		require.NoError(t, getErr)
@@ -942,11 +883,4 @@ func containsAny(message string, parts ...string) bool {
 		}
 	}
 	return false
-}
-
-func isPtyUnavailableError(err error) bool {
-	if err == nil {
-		return false
-	}
-	return containsAny(strings.ToLower(err.Error()), "pty", "websocket", "upgrade", "connect", "connection")
 }

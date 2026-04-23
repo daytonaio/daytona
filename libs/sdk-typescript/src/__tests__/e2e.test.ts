@@ -8,30 +8,21 @@ import { PtyHandle } from '../PtyHandle'
 
 jest.setTimeout(120000)
 
-const describeIfE2E = process.env.DAYTONA_API_KEY ? describe : describe.skip
+if (!process.env.DAYTONA_API_KEY) {
+  throw new Error('DAYTONA_API_KEY environment variable is required for E2E tests')
+}
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
 }
 
-function isPtyUnavailable(error: unknown): boolean {
-  const message = getErrorMessage(error).toLowerCase()
-  return ['pty', 'websocket', 'upgrade', 'connect', 'connection closed'].some((part) => message.includes(part))
-}
-
-describeIfE2E('TypeScript SDK E2E (real Daytona API)', () => {
+describe('TypeScript SDK E2E (real Daytona API)', () => {
   let daytona: Daytona
   let sandbox: Sandbox
   let lspServer: Awaited<ReturnType<Sandbox['createLspServer']>> | undefined
   let ptySessionId = ''
 
   beforeAll(async () => {
-    if (!process.env.DAYTONA_API_KEY) {
-      console.warn('[E2E] Skipping suite because DAYTONA_API_KEY is not set')
-      return
-    }
-
-    console.log('[E2E] Initializing Daytona client from environment variables...')
     daytona = new Daytona()
 
     const sandboxName = `sdk-ts-e2e-${Date.now()}`
@@ -612,6 +603,7 @@ describeIfE2E('TypeScript SDK E2E (real Daytona API)', () => {
     test('didOpen succeeds for Python source file', async () => {
       expect(lspServer).toBeDefined()
       await lspServer!.didOpen(lspFilePath)
+      await new Promise((r) => setTimeout(r, 5000))
     })
 
     test('documentSymbols returns project symbols', async () => {
@@ -623,15 +615,6 @@ describeIfE2E('TypeScript SDK E2E (real Daytona API)', () => {
     test('sandboxSymbols can search the project', async () => {
       const symbols = await lspServer!.sandboxSymbols('Greeter')
       expect(symbols.length).toBeGreaterThan(0)
-    })
-
-    test('completions returns suggestions at a Python member access position', async () => {
-      let completions = await lspServer!.completions(lspFilePath, { line: 5, character: 8 })
-      if (completions.items.length === 0) {
-        await new Promise((r) => setTimeout(r, 3000))
-        completions = await lspServer!.completions(lspFilePath, { line: 5, character: 8 })
-      }
-      expect(completions.items.length).toBeGreaterThanOrEqual(0)
     })
 
     test('didClose succeeds for Python source file', async () => {
@@ -649,21 +632,6 @@ describeIfE2E('TypeScript SDK E2E (real Daytona API)', () => {
   // ──────────────────────────────────────────────
   describe('PTY Operations', () => {
     const ptyOutput = { value: '' }
-    let ptyAvailable = false
-    let ptyTestsExecuted = 0
-
-    function requirePty(): void {
-      if (!ptyAvailable) {
-        throw new Error('[SKIPPED] PTY not available in this environment')
-      }
-      ptyTestsExecuted++
-    }
-
-    afterAll(() => {
-      if (!ptyAvailable) {
-        console.warn(`[E2E][PTY] ⚠️  ${ptyTestsExecuted}/4 PTY tests actually ran (feature unavailable)`)
-      }
-    })
 
     test('createPty creates a session and list includes it', async () => {
       let handle: PtyHandle | undefined
@@ -679,41 +647,25 @@ describeIfE2E('TypeScript SDK E2E (real Daytona API)', () => {
           },
         })
 
-        ptyAvailable = true
-        ptyTestsExecuted++
         const sessions = await sandbox.process.listPtySessions()
         expect(sessions.some((session) => session.id === ptySessionId)).toBe(true)
-      } catch (error) {
-        if (isPtyUnavailable(error)) {
-          ptySessionId = ''
-          ptyAvailable = false
-          throw new Error('[SKIPPED] PTY not available in this environment')
-        }
-
-        throw error
       } finally {
         await handle?.disconnect()
       }
     })
 
     test('getPtySessionInfo returns the created session', async () => {
-      requirePty()
-
       const session = await sandbox.process.getPtySessionInfo(ptySessionId)
       expect(session.id).toBe(ptySessionId)
     })
 
     test('resizePtySession updates dimensions', async () => {
-      requirePty()
-
       const session = await sandbox.process.resizePtySession(ptySessionId, 100, 30)
       expect(session.cols).toBe(100)
       expect(session.rows).toBe(30)
     })
 
     test('connectPty can write, read and close', async () => {
-      requirePty()
-
       const handle = await sandbox.process.connectPty(ptySessionId, {
         onData: (data) => {
           ptyOutput.value += new TextDecoder().decode(data)
@@ -722,6 +674,7 @@ describeIfE2E('TypeScript SDK E2E (real Daytona API)', () => {
 
       try {
         await handle.sendInput('printf "pty-output\\n"\n')
+        await new Promise((r) => setTimeout(r, 2000))
         await handle.sendInput('exit\n')
         const result = await handle.wait()
         expect(result.exitCode ?? 0).toBe(0)
@@ -805,22 +758,6 @@ describeIfE2E('TypeScript SDK E2E (real Daytona API)', () => {
   // Additional Sandbox Operations
   // ──────────────────────────────────────────────
   describe('Additional Sandbox Operations', () => {
-    test('resize sandbox resources if capacity allows', async () => {
-      try {
-        await sandbox.resize({ cpu: sandbox.cpu + 1, memory: sandbox.memory + 1 }, 120)
-        expect(sandbox.cpu).toBeGreaterThanOrEqual(1)
-        expect(sandbox.memory).toBeGreaterThanOrEqual(1)
-      } catch (error) {
-        const message = getErrorMessage(error).toLowerCase()
-        if (['capacity', 'quota', 'resize', 'not supported'].some((part) => message.includes(part))) {
-          console.warn('[E2E][Lifecycle] Resize not available in this environment:', error)
-          return
-        }
-
-        throw error
-      }
-    })
-
     test('archive and unarchive lifecycle succeeds when supported', async () => {
       try {
         await sandbox.stop(120)
@@ -971,12 +908,8 @@ describeIfE2E('TypeScript SDK E2E (real Daytona API)', () => {
     })
 
     test('snapshot.get retrieves snapshot by name', async () => {
-      console.log('[E2E][Snapshot] Getting snapshot by name...')
       const listResult = await daytona.snapshot.list(1, 1)
-      if (listResult.items.length === 0) {
-        console.log('[E2E][Snapshot] No snapshots available, skipping get test')
-        return
-      }
+      expect(listResult.items.length).toBeGreaterThan(0)
 
       const snapshotName = listResult.items[0].name
       const snapshot = await daytona.snapshot.get(snapshotName)

@@ -41,10 +41,10 @@
         "command": "bundle exec rubocop"
       }
     },
-    "test:unit": {
+    "test": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": ["default"],
+      "inputs": ["default", { "env": "DAYTONA_API_KEY" }, { "env": "DAYTONA_API_URL" }, { "env": "DAYTONA_JWT_TOKEN" }, { "env": "DAYTONA_ORGANIZATION_ID" }, { "env": "DAYTONA_TARGET" }],
       "outputs": [],
       "options": {
         "cwd": "{projectRoot}",
@@ -57,10 +57,6 @@
         "cwd": "{projectRoot}",
         "command": "bundle exec rspec spec/e2e_spec.rb --format documentation"
       }
-    },
-    "test": {
-      "executor": "nx:noop",
-      "dependsOn": ["test:unit", "test:e2e"]
     },
     "format": {
       "executor": "nx:run-commands",

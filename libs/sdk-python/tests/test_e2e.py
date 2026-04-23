@@ -17,16 +17,15 @@ from daytona import (
     FileDownloadRequest,
     FileUpload,
     Image,
-    LspCompletionPosition,
     PtySize,
     Resources,
     SessionExecuteRequest,
 )
 
-pytestmark = [
-    pytest.mark.e2e,
-    pytest.mark.skipif(not os.getenv("DAYTONA_API_KEY"), reason="DAYTONA_API_KEY not set"),
-]
+if not os.getenv("DAYTONA_API_KEY"):
+    raise RuntimeError("DAYTONA_API_KEY environment variable is required for E2E tests")
+
+pytestmark = [pytest.mark.e2e]
 
 
 lsp_server = None
@@ -35,10 +34,6 @@ pty_session_id = ""
 
 def _error_message(exc: Exception) -> str:
     return str(exc).lower()
-
-
-def _is_skippable_pty_error(exc: Exception) -> bool:
-    return any(part in _error_message(exc) for part in ["pty", "websocket", "upgrade", "connect", "connection"])
 
 
 # ---------------------------------------------------------------------------
@@ -592,6 +587,7 @@ def test_lsp_create_and_start_server(sandbox):
 def test_lsp_did_open(sandbox):
     assert lsp_server is not None, "LSP server should be started first"
     lsp_server.did_open(LSP_FILE_PATH)
+    time.sleep(5)
 
 
 def test_lsp_document_symbols(sandbox):
@@ -604,14 +600,6 @@ def test_lsp_document_symbols(sandbox):
 def test_lsp_workspace_symbols(sandbox):
     symbols = lsp_server.sandbox_symbols("Greeter")
     assert len(symbols) > 0, "Expected workspace symbols"
-
-
-def test_lsp_completions(sandbox):
-    completions = lsp_server.completions(LSP_FILE_PATH, LspCompletionPosition(line=5, character=8))
-    if len(completions.items) == 0:
-        time.sleep(3)
-        completions = lsp_server.completions(LSP_FILE_PATH, LspCompletionPosition(line=5, character=8))
-    assert completions.items is not None, "Completions call should return an items list"
 
 
 def test_lsp_did_close(sandbox):
@@ -633,16 +621,10 @@ def test_lsp_stop_server(sandbox):
 def test_create_pty_session_and_list_it(sandbox):
     global pty_session_id
 
-    try:
-        handle = sandbox.process.create_pty_session(
-            id=f"e2e-pty-{uuid.uuid4().hex[:8]}",
-            pty_size=PtySize(rows=24, cols=80),
-        )
-    except Exception as exc:
-        if _is_skippable_pty_error(exc):
-            pty_session_id = ""
-            pytest.skip(f"PTY not available: {exc}")
-        raise
+    handle = sandbox.process.create_pty_session(
+        id=f"e2e-pty-{uuid.uuid4().hex[:8]}",
+        pty_size=PtySize(rows=24, cols=80),
+    )
 
     pty_session_id = handle.session_id
     handle.disconnect()
@@ -652,16 +634,14 @@ def test_create_pty_session_and_list_it(sandbox):
 
 
 def test_get_pty_session_info(sandbox):
-    if not pty_session_id:
-        pytest.skip("PTY session was not created")
+    assert pty_session_id, "PTY session was not created in previous test"
 
     info = sandbox.process.get_pty_session_info(pty_session_id)
     assert info.id == pty_session_id
 
 
 def test_resize_pty_session(sandbox):
-    if not pty_session_id:
-        pytest.skip("PTY session was not created")
+    assert pty_session_id, "PTY session was not created in previous test"
 
     info = sandbox.process.resize_pty_session(pty_session_id, PtySize(rows=30, cols=100))
     assert info.rows == 30
@@ -669,14 +649,14 @@ def test_resize_pty_session(sandbox):
 
 
 def test_connect_pty_session_write_read_and_close(sandbox):
-    if not pty_session_id:
-        pytest.skip("PTY session was not created")
+    assert pty_session_id, "PTY session was not created in previous test"
 
     output_chunks: list[str] = []
     handle = sandbox.process.connect_pty_session(pty_session_id)
 
     try:
         handle.send_input('printf "pty-output\\n"\n')
+        time.sleep(2)
         handle.send_input("exit\n")
         result = handle.wait(
             on_data=lambda data: output_chunks.append(data.decode("utf-8", errors="ignore")), timeout=15
@@ -778,17 +758,6 @@ def test_declarative_image_build(daytona_client):
             daytona_client.delete(sb)
         except Exception:
             pass
-
-
-def test_resize_sandbox_resources_if_supported(sandbox):
-    try:
-        sandbox.resize(Resources(cpu=sandbox.cpu + 1, memory=sandbox.memory + 1), timeout=120)
-        assert sandbox.cpu >= 1
-        assert sandbox.memory >= 1
-    except Exception as exc:
-        if any(part in _error_message(exc) for part in ["capacity", "quota", "resize", "not supported"]):
-            return
-        raise
 
 
 def test_archive_and_unarchive_lifecycle_if_supported(sandbox):

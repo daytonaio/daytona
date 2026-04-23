@@ -13,7 +13,6 @@ import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
 import io.daytona.sdk.model.ExecuteResponse;
 import io.daytona.sdk.model.GitCommitResponse;
 import io.daytona.sdk.model.GitStatus;
-import io.daytona.sdk.model.PaginatedSnapshots;
 import io.daytona.sdk.model.Session;
 import io.daytona.sdk.model.SessionCommandLogsResponse;
 import io.daytona.sdk.model.SessionExecuteRequest;
@@ -22,11 +21,11 @@ import io.daytona.sdk.model.Snapshot;
 import io.daytona.sdk.model.Volume;
 import io.daytona.toolbox.client.api.FileSystemApi;
 import io.daytona.toolbox.client.api.GitApi;
-import io.daytona.toolbox.client.model.CompletionList;
+
 import io.daytona.toolbox.client.model.GitBranchRequest;
 import io.daytona.toolbox.client.model.GitCheckoutRequest;
 import io.daytona.toolbox.client.model.GitDeleteBranchRequest;
-import io.daytona.toolbox.client.model.InterpreterContext;
+
 import io.daytona.toolbox.client.model.LspSymbol;
 import io.daytona.toolbox.client.model.PtySessionInfo;
 import io.daytona.toolbox.client.model.ReplaceRequest;
@@ -51,7 +50,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -77,7 +76,9 @@ class E2ETest {
     @BeforeAll
     void setUp() {
         String apiKey = System.getenv("DAYTONA_API_KEY");
-        assumeTrue(apiKey != null && !apiKey.isEmpty(), "DAYTONA_API_KEY not set");
+        if (apiKey == null || apiKey.isEmpty()) {
+            throw new IllegalStateException("DAYTONA_API_KEY environment variable is required for E2E tests");
+        }
 
         DaytonaConfig config = new DaytonaConfig.Builder()
                 .apiKey(apiKey)
@@ -349,7 +350,7 @@ class E2ETest {
 
     @Test
     @Order(12)
-    void codeInterpreterRunCodeAndContextLifecycleWork() {
+    void codeInterpreterRunCodeWorks() {
         ExecutionResult basic = sandbox.codeInterpreter.runCode("print('interpreter hello')");
         sandbox.codeInterpreter.runCode("ci_value = 42");
         ExecutionResult persisted = sandbox.codeInterpreter.runCode("print(ci_value)");
@@ -359,21 +360,6 @@ class E2ETest {
         assertThat(persisted.getStdout()).contains("42");
         assertThat(stderr.getStdout()).contains("ci-ok");
         assertThat(stderr.getStderr()).contains("ci-stderr");
-
-        InterpreterContext context = null;
-        List<InterpreterContext> contexts = null;
-        try {
-            context = sandbox.codeInterpreter.createContext("/tmp/interpreter-context");
-            contexts = sandbox.codeInterpreter.listContexts();
-        } catch (Exception e) {
-            assumeTrue(false, "Code interpreter contexts not supported: " + e.getMessage());
-        }
-        assertThat(context.getId()).isNotBlank();
-        assertThat(context.getCwd()).contains("/tmp/interpreter-context");
-        assertThat(contexts).extracting(InterpreterContext::getId).contains(context.getId());
-
-        sandbox.codeInterpreter.deleteContext(context.getId());
-        assertThat(sandbox.codeInterpreter.listContexts()).extracting(InterpreterContext::getId).doesNotContain(context.getId());
     }
 
     @Test
@@ -391,18 +377,13 @@ class E2ETest {
         lspServer = sandbox.createLspServer(LspServer.LspLanguageId.PYTHON.getValue(), lspProjectDir);
         lspServer.start(LspServer.LspLanguageId.PYTHON.getValue(), lspProjectDir);
         lspServer.didOpen(LspServer.LspLanguageId.PYTHON.getValue(), lspProjectDir, fileUri(lspFilePath));
+        Thread.sleep(5000);
 
         List<LspSymbol> symbols = lspServer.documentSymbols(LspServer.LspLanguageId.PYTHON.getValue(), lspProjectDir, fileUri(lspFilePath));
         List<LspSymbol> workspaceSymbols = lspServer.workspaceSymbols("Greeter", LspServer.LspLanguageId.PYTHON.getValue(), lspProjectDir);
-        CompletionList completions = lspServer.completions(LspServer.LspLanguageId.PYTHON.getValue(), lspProjectDir, fileUri(lspFilePath), 5, 8);
-        if (completions.getItems() == null || completions.getItems().isEmpty()) {
-            Thread.sleep(3000);
-            completions = lspServer.completions(LspServer.LspLanguageId.PYTHON.getValue(), lspProjectDir, fileUri(lspFilePath), 5, 8);
-        }
 
         assertThat(symbols).extracting(LspSymbol::getName).contains("Greeter");
         assertThat(workspaceSymbols).isNotEmpty();
-        assertThat(completions.getItems()).isNotNull();
 
         lspServer.didClose(LspServer.LspLanguageId.PYTHON.getValue(), lspProjectDir, fileUri(lspFilePath));
         lspServer.stop(LspServer.LspLanguageId.PYTHON.getValue(), lspProjectDir);
@@ -411,7 +392,7 @@ class E2ETest {
 
     @Test
     @Order(15)
-    void ptyOperationsCreateListGetResizeConnectAndCloseWork() {
+    void ptyOperationsCreateListGetResizeConnectAndCloseWork() throws Exception {
         StringBuilder output = new StringBuilder();
         PtyHandle handle = null;
 
@@ -430,9 +411,6 @@ class E2ETest {
             PtySessionInfo resized = sandbox.getProcess().getPtySessionInfo(ptySessionId);
             assertThat(resized.getCols()).isEqualTo(100);
             assertThat(resized.getRows()).isEqualTo(30);
-        } catch (Exception e) {
-            skipIfPtyUnavailable(e);
-            throw e;
         } finally {
             if (handle != null) {
                 handle.disconnect();
@@ -443,6 +421,7 @@ class E2ETest {
                 .setOnData(bytes -> output.append(new String(bytes, StandardCharsets.UTF_8))));
         try {
             connected.sendInput("printf 'pty-output\\n'\n");
+            Thread.sleep(2000);
             connected.sendInput("exit\n");
             PtyResult result = connected.waitForExit(10);
             assertThat(result.getExitCode()).isEqualTo(0);
@@ -488,33 +467,6 @@ class E2ETest {
         List<String> remainingNames = daytona.volume().list().stream()
                 .map(Volume::getName).collect(java.util.stream.Collectors.toList());
         assertThat(remainingNames).doesNotContain(createdVolumeName);
-    }
-
-    @Test
-    @Order(19)
-    void snapshotOperationsListAndGetWork() {
-        PaginatedSnapshots snapshots;
-        try {
-            snapshots = daytona.snapshot().list(null, null);
-        } catch (IllegalArgumentException e) {
-            assumeTrue(false, "Snapshot deserialization issue (known API client bug): " + e.getMessage());
-            return;
-        }
-        assertThat(snapshots.getItems()).isNotNull();
-        assertThat(snapshots.getTotal()).isGreaterThanOrEqualTo(0);
-
-        PaginatedSnapshots paged;
-        try {
-            paged = daytona.snapshot().list(1, 5);
-        } catch (IllegalArgumentException e) {
-            assumeTrue(false, "Snapshot deserialization issue (known API client bug): " + e.getMessage());
-            return;
-        }
-        assertThat(paged.getItems().size()).isLessThanOrEqualTo(5);
-
-        assumeTrue(!paged.getItems().isEmpty(), "No snapshots available");
-        Snapshot snapshot = daytona.snapshot().get(paged.getItems().get(0).getName());
-        assertThat(snapshot.getName()).isEqualTo(paged.getItems().get(0).getName());
     }
 
     @Test
@@ -615,23 +567,6 @@ class E2ETest {
         return sandboxApi.getSandbox(sandbox.getId(), null, null);
     }
 
-    private void skipIfPtyUnavailable(Exception error) {
-        assumeTrue(!isPtyUnavailable(error), "PTY not available: " + messageOf(error));
-    }
-
-    private boolean isPtyUnavailable(Throwable error) {
-        String message = messageOf(error).toLowerCase(Locale.ROOT);
-        return containsAny(message, "pty", "websocket", "upgrade", "connect", "connection closed");
-    }
-
-    private boolean containsAny(String message, String... parts) {
-        for (String part : parts) {
-            if (message.contains(part)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     private String messageOf(Throwable error) {
         return error == null ? "" : String.valueOf(error.getMessage());

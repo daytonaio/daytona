@@ -12,10 +12,10 @@
         "command": "npm run docs"
       }
     },
-    "test:unit": {
+    "test": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": ["default"],
+      "inputs": ["default", { "env": "DAYTONA_API_KEY" }, { "env": "DAYTONA_API_URL" }, { "env": "DAYTONA_JWT_TOKEN" }, { "env": "DAYTONA_ORGANIZATION_ID" }, { "env": "DAYTONA_TARGET" }],
       "outputs": [],
       "options": {
         "cwd": "{projectRoot}",
@@ -40,10 +40,6 @@
           "projects": ["api-client", "toolbox-api-client"]
         }
       ]
-    },
-    "test": {
-      "executor": "nx:noop",
-      "dependsOn": ["test:unit", "test:e2e"]
     },
     "build": {
       "executor": "@nx/js:tsc",
