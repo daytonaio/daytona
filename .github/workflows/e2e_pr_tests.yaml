@@ -52,7 +52,10 @@ jobs:
       - name: Check if E2E-relevant projects are affected
         id: affected
         run: |
-          AFFECTED=$(npx nx show projects --affected --base=origin/${{ github.event.pull_request.base.ref }} --head=HEAD 2>/dev/null || echo "")
+          if ! AFFECTED=$(npx nx show projects --affected --base=origin/${{ github.event.pull_request.base.ref }} --head=HEAD); then
+            echo "Failed to determine affected projects"
+            exit 1
+          fi
           echo "Affected projects: $AFFECTED"
           if echo "$AFFECTED" | grep -qE 'daytona-e2e|^api$|^runner$|^proxy$|^daemon$|^dashboard$|sdk-typescript|sdk-python|sdk-go|sdk-ruby|sdk-java|api-client|toolbox-api-client'; then
             echo "affected=true" >> $GITHUB_OUTPUT

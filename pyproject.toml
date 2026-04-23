@@ -108,3 +108,6 @@ ignore-paths = [
   "^node_modules/.*$",
   "^.*/\\node_modules/.*$"
 ]
+
+[tool.pytest.ini_options]
+markers = ["e2e: end-to-end tests requiring a live Daytona API"]
