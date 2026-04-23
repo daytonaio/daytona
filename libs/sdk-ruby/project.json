@@ -43,6 +43,9 @@
     },
     "test:unit": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default"],
+      "outputs": [],
       "options": {
         "cwd": "{projectRoot}",
         "command": "bundle exec rspec --format documentation --tag '~e2e'"

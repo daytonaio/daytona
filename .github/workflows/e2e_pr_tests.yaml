@@ -1,13 +1,8 @@
 # E2E Sandbox Lifecycle Tests — PR (Built from Source)
 #
-# Builds the PR code, starts infrastructure + services locally, and runs the
-# daytona-e2e suite plus the E2E test suites for every SDK (TypeScript, Python,
-# Go, Ruby, Java) via `yarn test:e2e`. Gated by the 'run-e2e' label —
-# maintainers add the label to approve the run.
-#
-# Infrastructure: postgres, redis, dex, registry, minio (via Docker Compose)
-# Services: API, runner, proxy, dashboard (started individually via nx serve)
-#
+# Runs automatically when nx affected detects changes to E2E-relevant projects
+# (apps, SDKs, API clients). Builds from source, starts infrastructure + services,
+# and runs daytona-e2e suite plus SDK E2E tests.
 
 name: '[E2E] PR Sandbox Tests'
 
@@ -15,7 +10,6 @@ on:
   pull_request:
     branches:
       - main
-    types: [labeled, synchronize]
 
 permissions:
   contents: read
@@ -27,7 +21,6 @@ concurrency:
 jobs:
   e2e-pr-tests:
     name: E2E sandbox lifecycle (from source)
-    if: contains(github.event.pull_request.labels.*.name, 'run-e2e')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -56,34 +49,54 @@ jobs:
 
       - run: yarn install --immutable
 
+      - name: Check if E2E-relevant projects are affected
+        id: affected
+        run: |
+          AFFECTED=$(npx nx show projects --affected --base=origin/${{ github.event.pull_request.base.ref }} --head=HEAD 2>/dev/null || echo "")
+          echo "Affected projects: $AFFECTED"
+          if echo "$AFFECTED" | grep -qE 'daytona-e2e|^api$|^runner$|^proxy$|^daemon$|^dashboard$|sdk-typescript|sdk-python|sdk-go|sdk-ruby|sdk-java|api-client|toolbox-api-client'; then
+            echo "affected=true" >> $GITHUB_OUTPUT
+          else
+            echo "affected=false" >> $GITHUB_OUTPUT
+            echo "No E2E-relevant projects affected — skipping"
+          fi
+
       - uses: ./.github/actions/setup-toolchain
+        if: steps.affected.outputs.affected == 'true'
 
       - name: Configure Docker daemon for insecure local registry
+        if: steps.affected.outputs.affected == 'true'
         run: |
           echo '{"insecure-registries": ["localhost:5000"]}' | sudo tee /etc/docker/daemon.json
           sudo systemctl restart docker
           sudo systemctl is-active docker
 
       - name: Start infrastructure (postgres, redis, dex, registry)
+        if: steps.affected.outputs.affected == 'true'
         run: |
           docker compose -f apps/daytona-e2e/docker-compose.e2e.yaml up -d --wait
           docker compose -f apps/daytona-e2e/docker-compose.e2e.yaml ps
 
       - name: Build services needed for E2E
+        if: steps.affected.outputs.affected == 'true'
         run: |
           source "$(poetry env info --path)/bin/activate"
           VERSION=v0.0.0-dev yarn nx run-many --target=build --projects=api,runner,proxy,dashboard
 
       - name: Copy E2E env to API
+        if: steps.affected.outputs.affected == 'true'
         run: cp apps/daytona-e2e/.env.e2e apps/api/.env
 
       - name: Run DB migrations
+        if: steps.affected.outputs.affected == 'true'
         run: yarn migration:run:init && yarn migration:run:pre-deploy
 
       - name: Install gow (Go file watcher for serve targets)
+        if: steps.affected.outputs.affected == 'true'
         run: go install github.com/mitranim/gow@v0.0.0-20260225145757-ff0f6779ab4c
 
       - name: Start API and runner
+        if: steps.affected.outputs.affected == 'true'
         run: |
           set -a
           source apps/daytona-e2e/.env.e2e
@@ -96,9 +109,8 @@ jobs:
           echo $! > /tmp/runner.pid
 
       - name: Wait for API to be ready
+        if: steps.affected.outputs.affected == 'true'
         run: |
-          echo "Waiting for API at http://localhost:3001/api/health ..."
-          echo "Note: nx serve compiles Go services via gow before starting (~90s)"
           for i in $(seq 1 150); do
             if curl -sf http://localhost:3001/api/health > /dev/null 2>&1; then
               echo "API is ready (attempt $i, elapsed ~$((i*2))s)"
@@ -107,13 +119,12 @@ jobs:
             sleep 2
           done
           echo "API failed to start within 300s"
-          echo "=== API logs (last 100 lines) ==="
-          tail -100 /tmp/api.log 2>/dev/null || echo "No API logs found"
-          echo "=== Runner logs (last 50 lines) ==="
-          tail -50 /tmp/runner.log 2>/dev/null || echo "No runner logs found"
+          tail -100 /tmp/api.log 2>/dev/null || true
+          tail -50 /tmp/runner.log 2>/dev/null || true
           exit 1
 
       - name: Start proxy and dashboard
+        if: steps.affected.outputs.affected == 'true'
         run: |
           set -a
           source apps/daytona-e2e/.env.e2e
@@ -126,9 +137,8 @@ jobs:
           echo $! > /tmp/dashboard.pid
 
       - name: Wait for default snapshot to be available
+        if: steps.affected.outputs.affected == 'true'
         run: |
-          echo "Waiting for default snapshot (daytonaio/sandbox:0.6.0-slim) to become active..."
-          echo "Runner must boot, API creates snapshot (pending), cron job transitions it to active"
           for i in $(seq 1 150); do
             BODY=$(curl -s \
               -H "Authorization: Bearer e2e_admin_api_key" \
@@ -144,58 +154,54 @@ jobs:
             sleep 2
           done
           echo "Default snapshot not active after 300s"
-          echo "Last snapshot response:"
           echo "$BODY" | jq . 2>/dev/null || echo "$BODY"
-          echo ""
-          echo "=== Runner logs (full) ==="
-          cat /tmp/runner.log 2>/dev/null || echo "No runner logs found"
-          echo ""
-          echo "=== API logs (last 50 lines) ==="
-          tail -50 /tmp/api.log 2>/dev/null || echo "No API logs found"
+          cat /tmp/runner.log 2>/dev/null || true
+          tail -50 /tmp/api.log 2>/dev/null || true
           exit 1
 
       - name: Run daytona-e2e tests
+        if: steps.affected.outputs.affected == 'true'
         env:
           DAYTONA_API_URL: http://localhost:3001/api
           DAYTONA_API_KEY: e2e_admin_api_key
         run: yarn nx e2e daytona-e2e
 
       - name: Install Python test dependencies
+        if: steps.affected.outputs.affected == 'true'
         run: |
           source "$(poetry env info --path)/bin/activate"
           pip install pytest pytest-asyncio pytest-timeout
 
       - name: Publish Java API clients to Maven local
+        if: steps.affected.outputs.affected == 'true'
         run: |
           (cd libs/api-client-java && ./gradlew publishToMavenLocal -x test)
           (cd libs/toolbox-api-client-java && ./gradlew publishToMavenLocal -x test)
 
       - name: Run SDK E2E tests
+        if: steps.affected.outputs.affected == 'true'
         env:
           DAYTONA_API_URL: http://localhost:3001/api
           DAYTONA_API_KEY: e2e_admin_api_key
         run: yarn test:e2e
 
       - name: Cleanup stale E2E sandboxes
-        if: always()
+        if: always() && steps.affected.outputs.affected == 'true'
         env:
           DAYTONA_API_URL: http://localhost:3001/api
           DAYTONA_API_KEY: e2e_admin_api_key
         run: yarn nx e2e:cleanup daytona-e2e
 
       - name: Dump service logs
-        if: always()
+        if: always() && steps.affected.outputs.affected == 'true'
         run: |
           for svc in api runner proxy dashboard; do
-            echo ""
-            echo "============================================"
             echo "=== ${svc} logs (last 200 lines) ==="
-            echo "============================================"
             tail -200 /tmp/${svc}.log 2>/dev/null || echo "No ${svc} logs found"
           done
 
       - name: Stop services
-        if: always()
+        if: always() && steps.affected.outputs.affected == 'true'
         run: |
           for svc in api runner proxy dashboard; do
             if [ -f /tmp/${svc}.pid ]; then
@@ -204,5 +210,5 @@ jobs:
           done
 
       - name: Tear down infrastructure
-        if: always()
+        if: always() && steps.affected.outputs.affected == 'true'
         run: docker compose -f apps/daytona-e2e/docker-compose.e2e.yaml down -v

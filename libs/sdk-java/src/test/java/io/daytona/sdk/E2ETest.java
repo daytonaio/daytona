@@ -477,7 +477,14 @@ class E2ETest {
         waitForVolumeReady(createdVolumeName);
         daytona.volume().delete(createdVolumeId);
         createdVolumeId = null;
-        Thread.sleep(2000);
+        for (int i = 0; i < 15; i++) {
+            Thread.sleep(1000);
+            List<String> names = daytona.volume().list().stream()
+                    .map(Volume::getName).collect(java.util.stream.Collectors.toList());
+            if (!names.contains(createdVolumeName)) {
+                return;
+            }
+        }
         List<String> remainingNames = daytona.volume().list().stream()
                 .map(Volume::getName).collect(java.util.stream.Collectors.toList());
         assertThat(remainingNames).doesNotContain(createdVolumeName);

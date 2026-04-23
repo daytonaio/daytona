@@ -42,6 +42,9 @@ classifiers = [
 keywords = ["daytona", "sdk"]
 license = {text = "Apache-2.0"}
 
+[tool.pytest.ini_options]
+markers = ["e2e: end-to-end tests requiring a live Daytona API"]
+
 [tool.deptry]
 exclude = ["scripts"]
 extend_exclude = [".venv", "dist", "build", ".pytest_cache", "__pycache__"]

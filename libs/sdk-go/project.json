@@ -16,6 +16,9 @@
     },
     "test:unit": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default"],
+      "outputs": [],
       "options": {
         "cwd": "{projectRoot}",
         "command": "go test -v -race -count=1 ./..."

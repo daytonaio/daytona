@@ -4,25 +4,6 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - 'libs/sdk-typescript/**'
-      - 'libs/sdk-python/**'
-      - 'libs/sdk-go/**'
-      - 'libs/sdk-ruby/**'
-      - 'libs/sdk-java/**'
-      - 'libs/api-client/**'
-      - 'libs/api-client-go/**'
-      - 'libs/api-client-java/**'
-      - 'libs/api-client-python/**'
-      - 'libs/api-client-python-async/**'
-      - 'libs/api-client-ruby/**'
-      - 'libs/toolbox-api-client/**'
-      - 'libs/toolbox-api-client-go/**'
-      - 'libs/toolbox-api-client-java/**'
-      - 'libs/toolbox-api-client-python/**'
-      - 'libs/toolbox-api-client-python-async/**'
-      - 'libs/toolbox-api-client-ruby/**'
-      - '.github/workflows/sdk_unit_tests.yaml'
 
 permissions:
   contents: read
@@ -33,6 +14,7 @@ concurrency:
 
 env:
   POETRY_VIRTUALENVS_IN_PROJECT: true
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
 jobs:
   test-sdk-unit:
