@@ -6,6 +6,10 @@
 import { IDockerRegistryProvider } from './docker-registry.provider.interface'
 
 export class MockDockerRegistryProvider implements IDockerRegistryProvider {
+  async validateCredentials(): Promise<void> {
+    return Promise.resolve()
+  }
+
   async createRobotAccount(): Promise<{ name: string; secret: string }> {
     return {
       name: 'mock-robot',
