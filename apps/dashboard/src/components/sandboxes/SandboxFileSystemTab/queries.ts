@@ -207,7 +207,7 @@ export function useIsDirectoryRefreshing({
     queryKey: sandboxInstance && path ? fileSystemQueryKeys.directory(sandboxInstance.id, path) : undefined,
   })
 
-  return fetchCount > 0
+  return Boolean(sandboxInstance && path) && fetchCount > 0
 }
 
 export function useFilePreviewQuery({
@@ -273,7 +273,7 @@ export function useIsFilePreviewRefreshing({
     queryKey: sandboxInstance && path ? fileSystemQueryKeys.preview(sandboxInstance.id, path) : undefined,
   })
 
-  return fetchCount > 0
+  return Boolean(sandboxInstance && path) && fetchCount > 0
 }
 
 export function useFileSearchQuery({

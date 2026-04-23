@@ -100,6 +100,7 @@ function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
         })
         .then(async ({ files: uploadedFiles, targetPath: uploadedTargetPath }) => {
           await fileTreePaneRef.current?.refreshPath(uploadedTargetPath)
+          openNode(firstUploadedPath)
 
           return {
             batchLabel,
@@ -109,10 +110,6 @@ function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
             targetPath: uploadedTargetPath,
           }
         })
-
-      uploadPromise.then(({ firstUploadedNode }) => {
-        openNode(firstUploadedNode.path)
-      })
 
       toast.promise(uploadPromise, {
         loading: `Uploading ${batchLabel}…`,

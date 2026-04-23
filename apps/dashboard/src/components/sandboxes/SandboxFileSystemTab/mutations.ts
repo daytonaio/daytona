@@ -78,7 +78,7 @@ export function useDeleteNodeMutation({ sandboxInstance }: { sandboxInstance: Sa
         {
           queryKey: fileSystemQueryKeys.searchPrefix(sandboxInstance.id),
         },
-        (currentResults) => currentResults?.filter((result) => result !== node.path),
+        (currentResults) => currentResults?.filter((result) => !isSameOrDescendantPath(result, node.path)),
       )
     },
   })
@@ -180,6 +180,10 @@ export function useUploadFilesMutation({ sandboxInstance }: { sandboxInstance: S
         path: targetPath,
         queryClient,
         sandboxInstance,
+      })
+
+      await queryClient.invalidateQueries({
+        queryKey: fileSystemQueryKeys.searchPrefix(sandboxInstance.id),
       })
     },
   })

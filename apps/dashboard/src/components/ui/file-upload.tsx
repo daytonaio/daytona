@@ -181,9 +181,10 @@ function FileUpload({
       const acceptedFiles = new Set<File>()
       const rejectedFiles = new Set<RejectedFile>()
       const hasMaxFiles = typeof maxFiles === 'number' && maxFiles > 0
+      const isSingleFileMode = !multiple || maxFiles === 1
       const effectiveMaxFiles = hasMaxFiles ? maxFiles : multiple ? Number.POSITIVE_INFINITY : 1
 
-      let totalFiles = value.length
+      let totalFiles = isSingleFileMode ? 0 : value.length
 
       for (const file of inputFiles) {
         if (totalFiles >= effectiveMaxFiles) {
@@ -230,7 +231,8 @@ function FileUpload({
       const { acceptedFiles, rejectedFiles } = processFiles(files)
 
       if (acceptedFiles.length > 0) {
-        const nextValue = multiple || maxFiles !== 1 ? [...value, ...acceptedFiles] : acceptedFiles.slice(0, 1)
+        const isSingleFileMode = !multiple || maxFiles === 1
+        const nextValue = isSingleFileMode ? acceptedFiles.slice(0, 1) : [...value, ...acceptedFiles]
         updateValue(nextValue)
         onFilesSelected?.(acceptedFiles)
       }

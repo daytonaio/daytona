@@ -9,7 +9,6 @@ import { Ref, useCallback, useEffect, useImperativeHandle, useRef, useState, typ
 import TooltipButton from '@/components/TooltipButton'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/components/ui/input-group'
 import { cn } from '@/lib/utils'
-import { FILE_SEARCH_MIN_CHARS } from './constants'
 
 export type FileSearchHeaderHandle = {
   clear: () => void
@@ -31,7 +30,6 @@ export function FileSearchHeader({
   const inputRef = useRef<HTMLInputElement>(null)
   const [inputValue, setInputValue] = useState('')
   const [isOpen, setIsOpen] = useState(false)
-  const isSearchActive = inputValue.trim().length >= FILE_SEARCH_MIN_CHARS
 
   const clearSearch = useCallback(() => {
     setInputValue('')
@@ -129,8 +127,6 @@ export function FileSearchHeader({
                 <button
                   type="button"
                   className="shrink-0 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none"
-                  disabled={!isSearchActive}
-                  tabIndex={isSearchActive ? 0 : -1}
                   onClick={clearSearch}
                 >
                   Clear

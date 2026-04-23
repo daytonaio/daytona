@@ -363,7 +363,7 @@ export function SandboxFileContents({
 
   useEffect(() => {
     setIsWrapEnabled((selectedNode?.size ?? 0) <= LARGE_TEXT_WRAP_THRESHOLD)
-  }, [selectedNode?.path, selectedNode?.size, showWrapToggle])
+  }, [selectedNode?.path, selectedNode?.size])
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-background">

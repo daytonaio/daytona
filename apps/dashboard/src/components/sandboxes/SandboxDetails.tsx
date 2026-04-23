@@ -84,7 +84,7 @@ export default function SandboxDetails() {
   }, [experimentsEnabled, tab, setTab])
 
   useEffect(() => {
-    if (!filesystemEnabled && tab === 'filesystem') {
+    if (filesystemEnabled === false && tab === 'filesystem') {
       setTab('terminal')
     }
   }, [filesystemEnabled, tab, setTab])

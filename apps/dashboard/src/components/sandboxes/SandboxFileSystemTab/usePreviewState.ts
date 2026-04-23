@@ -142,7 +142,13 @@ export function usePreviewState({
 
   async function retryPreviewState() {
     if (selectedNodeError) {
-      await refetchSelectedNode()
+      if (sandboxInstance && selectedNodePath) {
+        await queryClient.invalidateQueries({
+          queryKey: fileSystemQueryKeys.details(sandboxInstance.id, selectedNodePath),
+        })
+      } else {
+        await refetchSelectedNode()
+      }
       return
     }
 

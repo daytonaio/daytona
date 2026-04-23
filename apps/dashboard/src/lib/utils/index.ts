@@ -169,6 +169,8 @@ export function downloadBlob(blob: Blob, filename: string) {
   try {
     downloadUrl(objectUrl, filename)
   } finally {
-    window.URL.revokeObjectURL(objectUrl)
+    window.setTimeout(() => {
+      window.URL.revokeObjectURL(objectUrl)
+    }, 1000)
   }
 }
