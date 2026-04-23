@@ -34,7 +34,7 @@ type SearchLabelProps = {
 
 export type FileTreeRowProps = Omit<ComponentProps<'div'>, 'children'> & {
   actions?: ReactNode
-  buttonProps?: HTMLAttributes<HTMLDivElement>
+  itemProps?: HTMLAttributes<HTMLDivElement>
   depth?: number
   dragHandleProps?: HTMLAttributes<HTMLDivElement>
   isDragTarget?: boolean
@@ -56,7 +56,7 @@ export type FileTreeRowProps = Omit<ComponentProps<'div'>, 'children'> & {
 
 export function FileTreeRow({
   actions,
-  buttonProps,
+  itemProps,
   className,
   depth = 0,
   dragHandleProps,
@@ -80,7 +80,7 @@ export function FileTreeRow({
 }: FileTreeRowProps) {
   const itemLabel = isSearchResult ? node.path : node.name || node.path
   const { className: dragHandleClassName, style: dragHandleStyle, ...resolvedDragHandleProps } = dragHandleProps ?? {}
-  const { className: buttonClassName, style: buttonStyle, ...resolvedButtonProps } = buttonProps ?? {}
+  const { className: itemClassName, style: itemStyle, ...resolvedItemProps } = itemProps ?? {}
 
   return (
     <div
@@ -104,13 +104,13 @@ export function FileTreeRow({
       ) : null}
 
       <div
-        {...resolvedButtonProps}
+        {...resolvedItemProps}
         data-file-tree-row-button
         onClick={onActivate}
         onKeyDown={onItemKeyDown}
         className={cn(
           'flex h-8 w-full items-center gap-1 rounded-md pr-1 text-sm hover:bg-muted focus-visible:outline-none',
-          buttonClassName,
+          itemClassName,
           {
             'ring-1 ring-primary/20': isDragTarget,
             'bg-accent/60': isDraggingOver,
@@ -119,7 +119,7 @@ export function FileTreeRow({
             'opacity-60': isSearchResult && isLoading,
           },
         )}
-        style={buttonStyle}
+        style={itemStyle}
       >
         {isDragTargetAbove ? <div className="pointer-events-none absolute inset-x-2 top-0 h-px bg-primary" /> : null}
         {isDragTargetBelow ? <div className="pointer-events-none absolute inset-x-2 bottom-0 h-px bg-primary" /> : null}

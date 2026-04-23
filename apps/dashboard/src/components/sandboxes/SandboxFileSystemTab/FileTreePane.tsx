@@ -722,7 +722,7 @@ export function FileTreePane({
                 const isPreviewLoading = previewLoadingPath === node.path
                 const isFocused = searchEnabled ? false : (item?.isFocused() ?? false)
                 const isLoading = (item?.isLoading() ?? false) || isPreviewLoading
-                const itemButtonProps = searchEnabled ? { tabIndex: -1 } : (item?.getProps() ?? {})
+                const itemProps = searchEnabled ? { tabIndex: -1 } : (item?.getProps() ?? {})
                 return (
                   <FileTreeRow
                     key={searchEnabled ? node.path : item?.getId()}
@@ -781,7 +781,7 @@ export function FileTreePane({
                         </DropdownMenu>
                       ) : undefined
                     }
-                    buttonProps={itemButtonProps}
+                    itemProps={itemProps}
                     depth={item?.getItemMeta().level ?? 0}
                     dragHandleProps={!searchEnabled ? (item?.getDragHandleProps() ?? undefined) : undefined}
                     isExpanded={item?.isExpanded() ?? false}
@@ -795,7 +795,7 @@ export function FileTreePane({
                     isSelected={isSelected}
                     node={node}
                     onActivate={async (event) => {
-                      itemButtonProps.onClick?.(event)
+                      itemProps.onClick?.(event)
 
                       if (event.defaultPrevented) {
                         return
