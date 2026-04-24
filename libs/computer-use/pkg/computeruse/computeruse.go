@@ -191,7 +191,7 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 
 	// Process 2.5: at-spi-bus-launcher (AT-SPI daemon for the accessibility API)
 	// Launches the org.a11y.Bus service so GTK/Qt/Electron apps can publish
-	// their widget trees. Runs after xfce4 so the session D-Bus is up.
+	// their widget trees. It uses the session D-Bus created during Initialize.
 	// Path lives in /usr/libexec on Debian/Ubuntu; some distros ship it under
 	// /usr/lib/at-spi2-core/; as a last resort fall back to $PATH so images
 	// that put the binary somewhere unusual still work. If we can't find the
@@ -208,6 +208,8 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 	}
 	if atspiCommand == "" {
 		log.Warnf("at-spi-bus-launcher not found in any known location; accessibility API will return 503 until the binary is installed")
+	} else if err := waitForSessionBus(dbusAddress, 5*time.Second); err != nil {
+		log.Warnf("session D-Bus is not ready for at-spi-bus-launcher; accessibility API will return 503 until the bus is available: %v", err)
 	} else {
 		c.processes["atspi"] = &Process{
 			Name:        "atspi",
@@ -274,6 +276,28 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 		},
 		LogFile: filepath.Join(c.configDir, "novnc.log"),
 		ErrFile: filepath.Join(c.configDir, "novnc.err"),
+	}
+}
+
+func waitForSessionBus(address string, timeout time.Duration) error {
+	if address == "" {
+		return fmt.Errorf("DBUS_SESSION_BUS_ADDRESS is empty")
+	}
+
+	deadline := time.Now().Add(timeout)
+	var lastErr error
+	for {
+		conn, err := dbus.Connect(address)
+		if err == nil {
+			_ = conn.Close()
+			return nil
+		}
+		lastErr = err
+
+		if time.Now().After(deadline) {
+			return fmt.Errorf("session D-Bus did not become ready: %w", lastErr)
+		}
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 
