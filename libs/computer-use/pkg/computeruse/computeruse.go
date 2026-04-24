@@ -208,9 +208,10 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 	}
 	if atspiCommand == "" {
 		log.Warnf("at-spi-bus-launcher not found in any known location; accessibility API will return 503 until the binary is installed")
-	} else if err := waitForSessionBus(dbusAddress, 5*time.Second); err != nil {
-		log.Warnf("session D-Bus is not ready for at-spi-bus-launcher; accessibility API will return 503 until the bus is available: %v", err)
 	} else {
+		if err := waitForSessionBus(dbusAddress, 5*time.Second); err != nil {
+			log.Warnf("session D-Bus is not ready for at-spi-bus-launcher; starting supervised process anyway so it can restart until the bus is available: %v", err)
+		}
 		c.processes["atspi"] = &Process{
 			Name:        "atspi",
 			Command:     atspiCommand,
