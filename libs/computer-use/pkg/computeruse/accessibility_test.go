@@ -4,6 +4,7 @@
 package computeruse
 
 import (
+	"errors"
 	"strings"
 	"testing"
 
@@ -54,6 +55,8 @@ func TestNodeIDParseErrors(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			if _, _, err := parseNodeID(tc.id); err == nil {
 				t.Errorf("parseNodeID(%q) expected error, got nil", tc.id)
+			} else if !errors.Is(err, ErrInvalidRequest) {
+				t.Errorf("parseNodeID(%q) error = %v, want ErrInvalidRequest", tc.id, err)
 			}
 		})
 	}
@@ -167,6 +170,11 @@ func TestFilterMatcher(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name:    "unknown nameMatch mode without name",
+			filter:  A11yFilter{NameMatch: "fuzzy"},
+			wantErr: true,
+		},
+		{
 			name:   "states AND semantics - all present",
 			filter: A11yFilter{States: []string{"enabled", "focusable"}},
 			node:   button,
@@ -218,6 +226,9 @@ func TestFilterMatcher(t *testing.T) {
 			if tc.wantErr {
 				if err == nil {
 					t.Fatalf("expected error from buildFilterMatcher, got nil")
+				}
+				if !errors.Is(err, ErrInvalidRequest) {
+					t.Fatalf("error = %v, want ErrInvalidRequest", err)
 				}
 				return
 			}
