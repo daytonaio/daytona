@@ -19,14 +19,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// gitCloneRepoURL is a small public repo used to exercise both clone paths.
-// Kept intentionally small: the goal is to prove the endpoint works end-to-end,
-// not to stress memory (covered by the daemon unit tests and the clone design).
+// gitCloneRepoURL is the public repo we clone to exercise both clone paths.
+// Not particularly small — daytonaio/daytona is a real-world-sized repo —
+// the goal is end-to-end coverage, not a micro-benchmark. Memory-envelope
+// behavior is covered by the daemon unit tests.
 const gitCloneRepoURL = "https://github.com/daytonaio/daytona.git"
 
 // cloneHTTPTimeout is the overall budget for the POST /git/clone request.
-// Generous because daytonaio/daytona is a few hundred MB and the sandbox
-// runner only guarantees modest bandwidth.
+// Generous because the repo is a few hundred MB and the sandbox runner
+// only guarantees modest bandwidth.
 const cloneHTTPTimeout = 10 * time.Minute
 
 // TestGitClone covers both clone codepaths in the daemon:
@@ -114,22 +115,30 @@ func runGitCloneCase(t *testing.T, cfg Config, envVars map[string]string) {
 		resp.StatusCode, string(respBody), time.Since(cloneStart))
 	t.Logf("clone succeeded in %s", time.Since(cloneStart))
 
-	// Verify the working tree was materialized: .git present + at least one commit.
+	// Verification below only inspects filesystem state — we can't assume the
+	// `git` binary is in the sandbox's shell PATH (e.g. daytona-slim doesn't
+	// expose it to /process/execute, even when the daemon may have found it).
 	execHTTP := &http.Client{Timeout: 30 * time.Second}
 
-	t.Run("DotGitPresent", func(t *testing.T) {
+	t.Run("DotGitHEADPresent", func(t *testing.T) {
 		out := execSandboxCommand(t, execHTTP, cfg, baseURL,
-			fmt.Sprintf("ls -la %s/.git/HEAD", clonePath))
-		assert.Contains(t, out.result, "HEAD", "%s/.git/HEAD must exist: %s", clonePath, out.result)
-		assert.Equal(t, 0, out.exitCode, "ls must exit 0; got %d: %s", out.exitCode, out.result)
+			fmt.Sprintf("cat %s/.git/HEAD", clonePath))
+		assert.Equal(t, 0, out.exitCode,
+			"cat .git/HEAD must exit 0; got %d: %s", out.exitCode, out.result)
+		// On a fresh clone HEAD is a symbolic ref like "ref: refs/heads/main".
+		assert.Contains(t, out.result, "ref:",
+			".git/HEAD must be a symbolic ref after clone: %q", out.result)
 	})
 
-	t.Run("HasAtLeastOneCommit", func(t *testing.T) {
+	t.Run("WorkingTreeCheckedOut", func(t *testing.T) {
+		// daytonaio/daytona ships a top-level README.md; its presence proves
+		// the checkout step populated the working tree, not just the .git dir.
 		out := execSandboxCommand(t, execHTTP, cfg, baseURL,
-			fmt.Sprintf("git -C %s log --oneline -1", clonePath))
+			fmt.Sprintf("test -f %s/README.md && echo present", clonePath))
 		assert.Equal(t, 0, out.exitCode,
-			"git log must exit 0; got %d: %s", out.exitCode, out.result)
-		assert.NotEmpty(t, strings.TrimSpace(out.result), "git log output must not be empty")
+			"README.md must exist in cloned working tree; got exit %d: %s", out.exitCode, out.result)
+		assert.Contains(t, strings.TrimSpace(out.result), "present",
+			"test -f must have succeeded: %q", out.result)
 	})
 }
 

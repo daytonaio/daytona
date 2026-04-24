@@ -115,6 +115,9 @@ func (s *Service) CloneRepositoryCLI(repo *gitprovider.GitRepository, auth *http
 
 	if repo.Target == gitprovider.CloneTargetCommit {
 		checkout := exec.Command(gitBin, buildCheckoutArgs(s.WorkDir, repo.Sha)...)
+		// Reuse the sanitized clone env so inherited GIT_* vars can't leak
+		// into checkout behavior.
+		checkout.Env = cmd.Env
 		checkoutTail := s.attachCmdOutput(checkout, 16*1024)
 		if err := checkout.Run(); err != nil {
 			return fmt.Errorf("git checkout %s failed: %w\n--- git output (tail) ---\n%s", repo.Sha, err, checkoutTail.String())
@@ -126,6 +129,11 @@ func (s *Service) CloneRepositoryCLI(repo *gitprovider.GitRepository, auth *http
 
 // attachCmdOutput wires cmd.Stdout/Stderr to a bounded tail (returned so
 // failures can include it) plus s.LogWriter when configured.
+//
+// Stdout and Stderr are assigned the same io.Writer value on purpose: per
+// os/exec, when they're `==`-comparable and equal, at most one goroutine
+// writes at a time — so the non-thread-safe tailBuffer / LogWriter stay safe
+// without an explicit mutex.
 func (s *Service) attachCmdOutput(cmd *exec.Cmd, tailSize int) *tailBuffer {
 	tail := newTailBuffer(tailSize)
 	var w io.Writer = tail
