@@ -69,6 +69,8 @@ func (e *Executor) pullSnapshot(ctx context.Context, job *apiclient.Job) (any, e
 }
 
 func (e *Executor) removeSnapshot(ctx context.Context, job *apiclient.Job) (any, error) {
+	e.docker.CancelImageProcessing(job.ResourceId)
+
 	return nil, e.docker.RemoveImage(ctx, job.ResourceId, true)
 }
 

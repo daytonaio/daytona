@@ -135,10 +135,11 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
          * Destroy sandbox
          * @summary Destroy sandbox
          * @param {string} sandboxId Sandbox ID
+         * @param {string} [snapshot] Snapshot reference to cancel image processing for
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        destroy: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        destroy: async (sandboxId: string, snapshot?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'sandboxId' is not null or undefined
             assertParamExists('destroy', 'sandboxId', sandboxId)
             const localVarPath = `/sandboxes/{sandboxId}/destroy`
@@ -156,6 +157,10 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication Bearer required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+            if (snapshot !== undefined) {
+                localVarQueryParameter['snapshot'] = snapshot;
+            }
 
 
     
@@ -542,11 +547,12 @@ export const SandboxApiFp = function(configuration?: Configuration) {
          * Destroy sandbox
          * @summary Destroy sandbox
          * @param {string} sandboxId Sandbox ID
+         * @param {string} [snapshot] Snapshot reference to cancel image processing for
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async destroy(sandboxId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.destroy(sandboxId, options);
+        async destroy(sandboxId: string, snapshot?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.destroy(sandboxId, snapshot, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SandboxApi.destroy']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -697,11 +703,12 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
          * Destroy sandbox
          * @summary Destroy sandbox
          * @param {string} sandboxId Sandbox ID
+         * @param {string} [snapshot] Snapshot reference to cancel image processing for
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        destroy(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
-            return localVarFp.destroy(sandboxId, options).then((request) => request(axios, basePath));
+        destroy(sandboxId: string, snapshot?: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+            return localVarFp.destroy(sandboxId, snapshot, options).then((request) => request(axios, basePath));
         },
         /**
          * Get sandbox network settings
@@ -829,12 +836,13 @@ export class SandboxApi extends BaseAPI {
      * Destroy sandbox
      * @summary Destroy sandbox
      * @param {string} sandboxId Sandbox ID
+     * @param {string} [snapshot] Snapshot reference to cancel image processing for
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SandboxApi
      */
-    public destroy(sandboxId: string, options?: RawAxiosRequestConfig) {
-        return SandboxApiFp(this.configuration).destroy(sandboxId, options).then((request) => request(this.axios, this.basePath));
+    public destroy(sandboxId: string, snapshot?: string, options?: RawAxiosRequestConfig) {
+        return SandboxApiFp(this.configuration).destroy(sandboxId, snapshot, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

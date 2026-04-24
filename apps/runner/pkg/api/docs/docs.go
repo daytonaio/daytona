@@ -263,6 +263,12 @@ const docTemplate = `{
                         "name": "sandboxId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Snapshot reference to cancel image processing for",
+                        "name": "snapshot",
+                        "in": "query"
                     }
                 ],
                 "responses": {

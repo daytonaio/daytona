@@ -26,15 +26,22 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 		return fmt.Errorf("invalid image format: must contain exactly one colon (e.g., 'myimage:1.0')")
 	}
 
-	d.logger.InfoContext(ctx, "Building image")
+	buildCtx, cancel := context.WithCancel(ctx)
+	defer func() {
+		cancel()
+		d.imageProcessingCancels.Delete(buildImageDto.Snapshot)
+	}()
+	d.imageProcessingCancels.Store(buildImageDto.Snapshot, cancel)
+
+	d.logger.InfoContext(buildCtx, "Building image")
 
 	// Check if image already exists
-	exists, err := d.ImageExists(ctx, buildImageDto.Snapshot, true)
+	exists, err := d.ImageExists(buildCtx, buildImageDto.Snapshot, true)
 	if err != nil {
 		return fmt.Errorf("failed to check if image exists: %w", err)
 	}
 	if exists {
-		d.logger.InfoContext(ctx, "Image already built")
+		d.logger.InfoContext(buildCtx, "Image already built")
 		return nil
 	}
 
@@ -66,12 +73,12 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 		// Process each hash and extract the corresponding tar file
 		for _, hash := range buildImageDto.Context {
 			// Get the tar file from object storage
-			tarData, err := storageClient.GetObject(ctx, buildImageDto.OrganizationId, hash)
+			tarData, err := storageClient.GetObject(buildCtx, buildImageDto.OrganizationId, hash)
 			if err != nil {
 				return fmt.Errorf("failed to get tar from storage with hash %s: %w", hash, err)
 			}
 
-			d.logger.InfoContext(ctx, "Processing context file with hash", "hash", hash, "bytes", len(tarData))
+			d.logger.InfoContext(buildCtx, "Processing context file with hash", "hash", hash, "bytes", len(tarData))
 
 			if len(tarData) == 0 {
 				return fmt.Errorf("empty tar file received for hash %s", hash)
@@ -86,8 +93,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 					break // End of tar archive
 				}
 				if err != nil {
-					d.logger.WarnContext(ctx, "Error reading tar with hash", "hash", hash, "error", err)
-					// Skip this tar file and continue with the next one
+					d.logger.WarnContext(buildCtx, "Error reading tar with hash", "hash", hash, "error", err)
 					break
 				}
 
@@ -99,8 +105,8 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 				fileContent := new(bytes.Buffer)
 				_, err = io.Copy(fileContent, tarReader)
 				if err != nil {
-					d.logger.WarnContext(ctx, "Failed to read file from tar", "file", header.Name, "error", err)
-					continue // Skip this file and continue with the next one
+					d.logger.WarnContext(buildCtx, "Failed to read file from tar", "file", header.Name, "error", err)
+					continue
 				}
 
 				buildHeader := &tar.Header{
@@ -110,16 +116,16 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 				}
 
 				if err := tarWriter.WriteHeader(buildHeader); err != nil {
-					d.logger.WarnContext(ctx, "Failed to write tar header", "file", header.Name, "error", err)
+					d.logger.WarnContext(buildCtx, "Failed to write tar header", "file", header.Name, "error", err)
 					continue
 				}
 
 				if _, err := tarWriter.Write(fileContent.Bytes()); err != nil {
-					d.logger.WarnContext(ctx, "Failed to write file to tar", "file", header.Name, "error", err)
+					d.logger.WarnContext(buildCtx, "Failed to write file to tar", "file", header.Name, "error", err)
 					continue
 				}
 
-				d.logger.InfoContext(ctx, "Added file to build context", "file", header.Name)
+				d.logger.InfoContext(buildCtx, "Added file to build context", "file", header.Name)
 			}
 		}
 	}
@@ -128,7 +134,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 		return fmt.Errorf("finalize build context tar: %w", err)
 	}
 
-	buildContext := io.NopCloser(buildContextTar)
+	dockerBuildContext := io.NopCloser(buildContextTar)
 
 	var authConfigs map[string]docker_registry.AuthConfig
 
@@ -184,7 +190,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 
 	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
-		d.logger.ErrorContext(ctx, "Failed to open log file", "error", err)
+		d.logger.ErrorContext(buildCtx, "Failed to open log file", "error", err)
 	} else {
 		defer logFile.Close()
 		writer = io.MultiWriter(&log.DebugLogWriter{}, logFile)
@@ -192,15 +198,15 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 
 	switch config.GetBuildEngine() {
 	case "legacy":
-		err = d.runDockerImageBuildLegacy(ctx, buildContext, buildOpts, writer)
+		err = d.runDockerImageBuildLegacy(buildCtx, dockerBuildContext, buildOpts, writer)
 	default:
-		err = d.runDockerImageBuildWithBuildKitSession(ctx, buildContext, buildOpts, writer)
+		err = d.runDockerImageBuildWithBuildKitSession(buildCtx, dockerBuildContext, buildOpts, writer)
 	}
 	if err != nil {
 		return err
 	}
 
-	d.logger.InfoContext(ctx, "Image built successfully")
+	d.logger.InfoContext(buildCtx, "Image built successfully")
 
 	return nil
 }

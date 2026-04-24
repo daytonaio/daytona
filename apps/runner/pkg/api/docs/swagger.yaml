@@ -581,6 +581,10 @@ paths:
           name: sandboxId
           required: true
           type: string
+        - description: Snapshot reference to cancel image processing for
+          in: query
+          name: snapshot
+          type: string
       produces:
         - application/json
       responses:
