@@ -115,9 +115,10 @@ func (s *Service) CloneRepositoryCLI(repo *gitprovider.GitRepository, auth *http
 
 	if repo.Target == gitprovider.CloneTargetCommit {
 		checkout := exec.Command(gitBin, buildCheckoutArgs(s.WorkDir, repo.Sha)...)
-		// Reuse the sanitized clone env so inherited GIT_* vars can't leak
-		// into checkout behavior.
-		checkout.Env = cmd.Env
+		// Checkout is a purely local op and does not need network credentials.
+		// Pass a sanitized env with auth omitted so rogue checkout hooks cannot
+		// exfiltrate GIT_USERNAME / GIT_PASSWORD.
+		checkout.Env = buildCloneEnv(os.Environ(), askPath, nil)
 		checkoutTail := s.attachCmdOutput(checkout, 16*1024)
 		if err := checkout.Run(); err != nil {
 			return fmt.Errorf("git checkout %s failed: %w\n--- git output (tail) ---\n%s", repo.Sha, err, checkoutTail.String())
