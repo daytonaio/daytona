@@ -4,6 +4,10 @@ import searchIcon from '@assets/icons/search.svg?raw'
 import packageIcon from '@assets/sidebar/package.svg?raw'
 import serverIcon from '@assets/sidebar/server.svg?raw'
 import terminalIcon from '@assets/sidebar/terminal.svg?raw'
+import buildingIcon from '@assets/sidebar/building.svg?raw'
+import securityIcon from '@assets/sidebar/security.svg?raw'
+import telemetryIcon from '@assets/sidebar/telemetry.svg?raw'
+import computerIcon from '@assets/sidebar/computer.svg?raw'
 import Search from '@components/Search'
 import Version from '@components/Version.astro'
 import gtconfig from '../../gt.config.json'
@@ -36,6 +40,13 @@ const {
   isCliActive,
   isReferencesActive,
   isGuidesActive,
+  isManageActive,
+  isPlatformManagementActive,
+  isSecurityComplianceActive,
+  isTelemetryActive,
+  isDeploymentsActive,
+  isDeploymentsOpenSourceActive,
+  isDeploymentsCustomerManagedActive,
 } = getHeaderActiveState(import.meta.env.BASE_URL, Astro.url.pathname)
 ---
 
@@ -51,6 +62,49 @@ const {
       </a>
     </div>
     <div class="navbar-links">
+      <div class="dropdown">
+        <span class:list={['dropdown-trigger', { active: isManageActive }]}>
+          {Astro.locals.t('header.manage' as any)}
+          <svg
+            class="chevron"
+            width="10"
+            height="6"
+            viewBox="0 0 10 6"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M1 1L5 5L9 1"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
+          </svg>
+        </span>
+        <div class="dropdown-menu">
+          <a
+            href={`${import.meta.env.BASE_URL}/en/manage/platform-management`}
+            class:list={[{ active: isPlatformManagementActive }]}
+          >
+            <Fragment set:html={buildingIcon} />
+            {Astro.locals.t('sidebarconfig.platformManagement' as any)}
+          </a>
+          <a
+            href={`${import.meta.env.BASE_URL}/en/manage/security-compliance`}
+            class:list={[{ active: isSecurityComplianceActive }]}
+          >
+            <Fragment set:html={securityIcon} />
+            {Astro.locals.t('header.security' as any)}
+          </a>
+          <a
+            href={`${import.meta.env.BASE_URL}/en/manage/telemetry`}
+            class:list={[{ active: isTelemetryActive }]}
+          >
+            <Fragment set:html={telemetryIcon} />
+            {Astro.locals.t('header.manageTelemetry' as any)}
+          </a>
+        </div>
+      </div>
       <div class="dropdown">
         <span class:list={['dropdown-trigger', { active: isReferencesActive }]}>
           {Astro.locals.t('header.references' as any)}
@@ -119,6 +173,44 @@ const {
           >
             <Fragment set:html={terminalIcon} />
             {Astro.locals.t('sidebarconfig.cliReference' as any)}
+          </a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <span
+          class:list={['dropdown-trigger', { active: isDeploymentsActive }]}
+        >
+          {Astro.locals.t('header.deployments' as any)}
+          <svg
+            class="chevron"
+            width="10"
+            height="6"
+            viewBox="0 0 10 6"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M1 1L5 5L9 1"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
+          </svg>
+        </span>
+        <div class="dropdown-menu">
+          <a
+            href={`${import.meta.env.BASE_URL}/en/deployments/open-source`}
+            class:list={[{ active: isDeploymentsOpenSourceActive }]}
+          >
+            <Fragment set:html={computerIcon} />
+            {Astro.locals.t('sidebarconfig.ossDeployment' as any)}
+          </a>
+          <a
+            href={`${import.meta.env.BASE_URL}/en/deployments/customer-managed-compute`}
+            class:list={[{ active: isDeploymentsCustomerManagedActive }]}
+          >
+            <Fragment set:html={computerIcon} />
+            {Astro.locals.t('sidebarconfig.customerManagedCompute' as any)}
           </a>
         </div>
       </div>
@@ -268,6 +360,17 @@ const {
 
   .dropdown-menu a :global(svg path) {
     fill: currentColor;
+  }
+
+  .dropdown-menu .dropdown-placeholder {
+    display: block;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-family: 'Berkeley Mono', monospace;
+    color: var(--primary-text-color);
+    text-transform: none;
+    cursor: default;
+    line-height: 1.3;
   }
 
   .search-click-desktop {

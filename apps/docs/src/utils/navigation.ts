@@ -372,6 +372,13 @@ export interface HeaderActiveState {
   isCliActive: boolean
   isReferencesActive: boolean
   isGuidesActive: boolean
+  isManageActive: boolean
+  isPlatformManagementActive: boolean
+  isSecurityComplianceActive: boolean
+  isTelemetryActive: boolean
+  isDeploymentsActive: boolean
+  isDeploymentsOpenSourceActive: boolean
+  isDeploymentsCustomerManagedActive: boolean
 }
 
 export function getHeaderActiveState(
@@ -408,6 +415,47 @@ export function getHeaderActiveState(
   const isApiActive = isActiveOrParentPath(referencePaths.api, currentPath)
   const isCliActive = isActiveOrParentPath(referencePaths.cli, currentPath)
 
+  const accountManagementPaths = [
+    `${baseUrl}/en/api-keys`,
+    `${baseUrl}/en/organizations`,
+    `${baseUrl}/en/limits`,
+    `${baseUrl}/en/billing`,
+  ]
+  const isAccountManagementDocActive = accountManagementPaths.some(p =>
+    isActiveOrParentPath(p, currentPath)
+  )
+
+  const isSecurityComplianceSectionActive =
+    isActiveOrParentPath(
+      `${baseUrl}/en/manage/security-compliance`,
+      currentPath
+    ) ||
+    isActiveOrParentPath(`${baseUrl}/en/security-exhibit`, currentPath) ||
+    isActiveOrParentPath(`${baseUrl}/en/audit-logs`, currentPath)
+
+  const isTelemetrySectionActive =
+    isActiveOrParentPath(`${baseUrl}/en/manage/telemetry`, currentPath) ||
+    isActiveOrParentPath(
+      `${baseUrl}/en/experimental/otel-collection`,
+      currentPath
+    )
+
+  const isDeploymentsOpenSourceSectionActive =
+    isActiveOrParentPath(
+      `${baseUrl}/en/deployments/open-source`,
+      currentPath
+    ) || isActiveOrParentPath(`${baseUrl}/en/oss-deployment`, currentPath)
+
+  const isDeploymentsCustomerManagedSectionActive =
+    isActiveOrParentPath(
+      `${baseUrl}/en/deployments/customer-managed-compute`,
+      currentPath
+    ) || isActiveOrParentPath(`${baseUrl}/en/runners`, currentPath)
+
+  const isDeploymentsSectionActive =
+    isDeploymentsOpenSourceSectionActive ||
+    isDeploymentsCustomerManagedSectionActive
+
   return {
     isTypescriptSdkActive,
     isPythonSdkActive,
@@ -424,6 +472,22 @@ export function getHeaderActiveState(
       isJavaSdkActive ||
       isApiActive ||
       isCliActive,
+    isManageActive:
+      isActiveOrParentPath(`${baseUrl}/en/manage`, currentPath) ||
+      isAccountManagementDocActive ||
+      isSecurityComplianceSectionActive ||
+      isTelemetrySectionActive,
+    isPlatformManagementActive:
+      isActiveOrParentPath(
+        `${baseUrl}/en/manage/platform-management`,
+        currentPath
+      ) || isAccountManagementDocActive,
+    isSecurityComplianceActive: isSecurityComplianceSectionActive,
+    isTelemetryActive: isTelemetrySectionActive,
+    isDeploymentsActive: isDeploymentsSectionActive,
+    isDeploymentsOpenSourceActive: isDeploymentsOpenSourceSectionActive,
+    isDeploymentsCustomerManagedActive:
+      isDeploymentsCustomerManagedSectionActive,
     isGuidesActive: isActiveOrParentPath(`${baseUrl}/en/guides`, currentPath),
   }
 }
