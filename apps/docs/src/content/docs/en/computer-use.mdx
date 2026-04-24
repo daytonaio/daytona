@@ -723,7 +723,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/mouse/positio
 
 ### Type
 
-Type the specified text.
+Types arbitrary text, including uppercase letters, symbols, and non-ASCII characters. Newlines (`\n`, `\r`, `\r\n`) are translated into Enter key presses; literal tab and other control characters are rejected.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -976,24 +976,22 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/keyboard/hotk
 </TabItem>
 </Tabs>
 
-### Supported keyboard contract
+### Supported keys
 
-- Use `keyboard.type()` for text intent, including uppercase letters, shifted symbols, whitespace, and non-ASCII characters.
-- Canonical modifier names are `ctrl`, `alt`, `shift`, and `cmd`. Common aliases such as `control`, `option`, `meta`, `win`, and `windows` are accepted and normalized.
-- Canonical named keys include `enter`, `escape`, `tab`, `backspace`, `delete`, `space`, `home`, `end`, `pageup`, `pagedown`, `insert`, `capslock`, `printscreen`, arrow keys, and `f1` through `f24`.
-- Letter keys are accepted case-insensitively in `press()` and `hotkey()`. `A` normalizes to `a`; uppercase is not shorthand for `shift`.
-- Digits and unshifted punctuation shortcut keys are supported directly: `` ` ``, `-`, `=`, `[`, `]`, `\`, `;`, `'`, `,`, `.`, `/`.
-- Use grammar-safe numpad names such as `num0`, `num9`, `num_plus`, `num_minus`, `num_asterisk`, `num_slash`, `num_decimal`, `num_enter`, `num_equal`, and `num_lock`.
-- `press()` and `hotkey()` each send a single atomic chord. A chord may contain any number of modifiers and at most one non-modifier key. Modifier-only chords such as `shift` and `ctrl+shift` are valid.
-- Left and right modifier variants such as `lshift` and `rctrl` are supported only as the main `key`, not inside the `modifiers` array or modifier positions in `hotkey()`.
-- Shifted symbol shorthand such as `!`, literal whitespace/control shorthand such as `" "` or `"\t"`, and non-ASCII key tokens such as `é` are rejected in `press()` and `hotkey()`. Use explicit modifiers or `keyboard.type()` instead.
+`keyboard.press()` and `keyboard.hotkey()` are case-insensitive for named keys. The following are supported:
 
-Common aliases:
+| Category           | Keys                                                                                                                            |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| Modifiers          | `ctrl`, `alt`, `shift`, `cmd`                                                                                                   |
+| Editing            | `enter`, `escape`, `tab`, `backspace`, `delete`, `space`                                                                        |
+| Navigation         | `home`, `end`, `pageup`, `pagedown`, `insert`, arrow keys (`up`, `down`, `left`, `right`)                                       |
+| Function keys      | `f1` through `f24`                                                                                                              |
+| Numpad             | `num0`–`num9`, `num_plus`, `num_minus`, `num_asterisk`, `num_slash`, `num_decimal`, `num_enter`, `num_equal`, `num_lock`        |
+| Letters and digits | `a`–`z` (case-insensitive), `0`–`9`                                                                                             |
+| Punctuation        | `` ` `` `-` `=` `[` `]` `\` `;` `'` `,` `.` `/`                                                                                 |
+| Other              | `capslock`, `menu`                                                                                                              |
 
-- `Return` -> `enter`
-- `Escape` or `ESC` -> `escape`
-- `meta`, `win`, `windows` -> `cmd`
-- `option` -> `alt`
+Common aliases like `Return` → `enter`, `control` → `ctrl`, `command` / `meta` / `win` → `cmd`, and `option` → `alt` are normalized automatically. Unsupported or malformed inputs return an error, sometimes with a suggested alternative.
 
 ## Screenshot operations
 
