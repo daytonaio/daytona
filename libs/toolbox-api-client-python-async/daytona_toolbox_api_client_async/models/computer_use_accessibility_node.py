@@ -19,20 +19,20 @@ import json
 
 from pydantic import BaseModel, ConfigDict, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from daytona_toolbox_api_client.models.accessibility_bounds import AccessibilityBounds
+from daytona_toolbox_api_client_async.models.accessibility_bounds import AccessibilityBounds
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
 
 _JSON_ADAPTER = TypeAdapter(Dict[str, Any])
 
-class ComputeruseAccessibilityNode(BaseModel):
+class ComputerUseAccessibilityNode(BaseModel):
     """
-    ComputeruseAccessibilityNode
+    ComputerUseAccessibilityNode
     """ # noqa: E501
     actions: Optional[List[StrictStr]] = None
     bounds: Optional[AccessibilityBounds] = None
-    children: Optional[List[ComputeruseAccessibilityNode]] = None
+    children: Optional[List[ComputerUseAccessibilityNode]] = None
     description: Optional[StrictStr] = None
     id: Optional[StrictStr] = None
     name: Optional[StrictStr] = None
@@ -58,7 +58,7 @@ class ComputeruseAccessibilityNode(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ComputeruseAccessibilityNode from a JSON string"""
+        """Create an instance of ComputerUseAccessibilityNode from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -100,7 +100,7 @@ class ComputeruseAccessibilityNode(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ComputeruseAccessibilityNode from a dict"""
+        """Create an instance of ComputerUseAccessibilityNode from a dict"""
         if obj is None:
             return None
 
@@ -110,7 +110,7 @@ class ComputeruseAccessibilityNode(BaseModel):
         _obj = cls.model_validate({
             "actions": obj.get("actions"),
             "bounds": AccessibilityBounds.from_dict(obj["bounds"]) if obj.get("bounds") is not None else None,
-            "children": [ComputeruseAccessibilityNode.from_dict(_item) for _item in obj["children"]] if obj.get("children") is not None else None,
+            "children": [ComputerUseAccessibilityNode.from_dict(_item) for _item in obj["children"]] if obj.get("children") is not None else None,
             "description": obj.get("description"),
             "id": obj.get("id"),
             "name": obj.get("name"),
@@ -125,5 +125,5 @@ class ComputeruseAccessibilityNode(BaseModel):
         return _obj
 
 # TODO: Rewrite to not use raise_errors
-ComputeruseAccessibilityNode.model_rebuild(raise_errors=False)
+ComputerUseAccessibilityNode.model_rebuild(raise_errors=False)
 

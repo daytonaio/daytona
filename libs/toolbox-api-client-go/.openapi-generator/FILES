@@ -28,10 +28,10 @@ model_command.go
 model_completion_context.go
 model_completion_item.go
 model_completion_list.go
+model_computer_use_accessibility_node.go
 model_computer_use_start_response.go
 model_computer_use_status_response.go
 model_computer_use_stop_response.go
-model_computeruse_accessibility_node.go
 model_create_context_request.go
 model_create_session_request.go
 model_display_info.go

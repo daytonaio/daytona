@@ -14,7 +14,7 @@ require 'date'
 require 'time'
 
 module DaytonaToolboxApiClient
-  class ComputeruseAccessibilityNode
+  class ComputerUseAccessibilityNode
     attr_accessor :actions
 
     attr_accessor :bounds
@@ -60,7 +60,7 @@ module DaytonaToolboxApiClient
       {
         :'actions' => :'Array<String>',
         :'bounds' => :'AccessibilityBounds',
-        :'children' => :'Array<ComputeruseAccessibilityNode>',
+        :'children' => :'Array<ComputerUseAccessibilityNode>',
         :'description' => :'String',
         :'id' => :'String',
         :'name' => :'String',
@@ -79,14 +79,14 @@ module DaytonaToolboxApiClient
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `DaytonaToolboxApiClient::ComputeruseAccessibilityNode` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `DaytonaToolboxApiClient::ComputerUseAccessibilityNode` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `DaytonaToolboxApiClient::ComputeruseAccessibilityNode`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `DaytonaToolboxApiClient::ComputerUseAccessibilityNode`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }

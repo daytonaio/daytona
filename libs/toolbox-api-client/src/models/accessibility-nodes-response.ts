@@ -15,7 +15,7 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
-import type { ComputeruseAccessibilityNode } from './computeruse-accessibility-node';
+import type { ComputerUseAccessibilityNode } from './computer-use-accessibility-node';
 
 /**
  * 
@@ -25,10 +25,10 @@ import type { ComputeruseAccessibilityNode } from './computeruse-accessibility-n
 export interface AccessibilityNodesResponse {
     /**
      * 
-     * @type {Array<ComputeruseAccessibilityNode>}
+     * @type {Array<ComputerUseAccessibilityNode>}
      * @memberof AccessibilityNodesResponse
      */
-    'matches'?: Array<ComputeruseAccessibilityNode>;
+    'matches'?: Array<ComputerUseAccessibilityNode>;
     /**
      * 
      * @type {boolean}

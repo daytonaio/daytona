@@ -19,7 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, StrictBool
 from typing import Any, ClassVar, Dict, List, Optional
-from daytona_toolbox_api_client_async.models.computeruse_accessibility_node import ComputeruseAccessibilityNode
+from daytona_toolbox_api_client_async.models.computer_use_accessibility_node import ComputerUseAccessibilityNode
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
@@ -30,7 +30,7 @@ class AccessibilityTreeResponse(BaseModel):
     """
     AccessibilityTreeResponse
     """ # noqa: E501
-    root: Optional[ComputeruseAccessibilityNode] = None
+    root: Optional[ComputerUseAccessibilityNode] = None
     truncated: Optional[StrictBool] = None
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["root", "truncated"]
@@ -95,7 +95,7 @@ class AccessibilityTreeResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "root": ComputeruseAccessibilityNode.from_dict(obj["root"]) if obj.get("root") is not None else None,
+            "root": ComputerUseAccessibilityNode.from_dict(obj["root"]) if obj.get("root") is not None else None,
             "truncated": obj.get("truncated")
         })
         # store additional fields in additional_properties

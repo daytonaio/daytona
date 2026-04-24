@@ -19,7 +19,7 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import io.daytona.toolbox.client.model.ComputeruseAccessibilityNode;
+import io.daytona.toolbox.client.model.ComputerUseAccessibilityNode;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -54,7 +54,7 @@ public class AccessibilityTreeResponse {
   public static final String SERIALIZED_NAME_ROOT = "root";
   @SerializedName(SERIALIZED_NAME_ROOT)
   @javax.annotation.Nullable
-  private ComputeruseAccessibilityNode root;
+  private ComputerUseAccessibilityNode root;
 
   public static final String SERIALIZED_NAME_TRUNCATED = "truncated";
   @SerializedName(SERIALIZED_NAME_TRUNCATED)
@@ -64,7 +64,7 @@ public class AccessibilityTreeResponse {
   public AccessibilityTreeResponse() {
   }
 
-  public AccessibilityTreeResponse root(@javax.annotation.Nullable ComputeruseAccessibilityNode root) {
+  public AccessibilityTreeResponse root(@javax.annotation.Nullable ComputerUseAccessibilityNode root) {
     this.root = root;
     return this;
   }
@@ -74,11 +74,11 @@ public class AccessibilityTreeResponse {
    * @return root
    */
   @javax.annotation.Nullable
-  public ComputeruseAccessibilityNode getRoot() {
+  public ComputerUseAccessibilityNode getRoot() {
     return root;
   }
 
-  public void setRoot(@javax.annotation.Nullable ComputeruseAccessibilityNode root) {
+  public void setRoot(@javax.annotation.Nullable ComputerUseAccessibilityNode root) {
     this.root = root;
   }
 
@@ -217,7 +217,7 @@ public class AccessibilityTreeResponse {
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       // validate the optional field `root`
       if (jsonObj.get("root") != null && !jsonObj.get("root").isJsonNull()) {
-        ComputeruseAccessibilityNode.validateJsonElement(jsonObj.get("root"));
+        ComputerUseAccessibilityNode.validateJsonElement(jsonObj.get("root"));
       }
   }
 

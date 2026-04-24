@@ -40,7 +40,7 @@ module DaytonaToolboxApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'root' => :'ComputeruseAccessibilityNode',
+        :'root' => :'ComputerUseAccessibilityNode',
         :'truncated' => :'Boolean'
       }
     end

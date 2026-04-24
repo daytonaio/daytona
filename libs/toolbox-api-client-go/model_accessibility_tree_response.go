@@ -19,7 +19,7 @@ var _ MappedNullable = &AccessibilityTreeResponse{}
 
 // AccessibilityTreeResponse struct for AccessibilityTreeResponse
 type AccessibilityTreeResponse struct {
-	Root *ComputeruseAccessibilityNode `json:"root,omitempty"`
+	Root *ComputerUseAccessibilityNode `json:"root,omitempty"`
 	Truncated *bool `json:"truncated,omitempty"`
 }
 
@@ -41,9 +41,9 @@ func NewAccessibilityTreeResponseWithDefaults() *AccessibilityTreeResponse {
 }
 
 // GetRoot returns the Root field value if set, zero value otherwise.
-func (o *AccessibilityTreeResponse) GetRoot() ComputeruseAccessibilityNode {
+func (o *AccessibilityTreeResponse) GetRoot() ComputerUseAccessibilityNode {
 	if o == nil || IsNil(o.Root) {
-		var ret ComputeruseAccessibilityNode
+		var ret ComputerUseAccessibilityNode
 		return ret
 	}
 	return *o.Root
@@ -51,7 +51,7 @@ func (o *AccessibilityTreeResponse) GetRoot() ComputeruseAccessibilityNode {
 
 // GetRootOk returns a tuple with the Root field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AccessibilityTreeResponse) GetRootOk() (*ComputeruseAccessibilityNode, bool) {
+func (o *AccessibilityTreeResponse) GetRootOk() (*ComputerUseAccessibilityNode, bool) {
 	if o == nil || IsNil(o.Root) {
 		return nil, false
 	}
@@ -67,8 +67,8 @@ func (o *AccessibilityTreeResponse) HasRoot() bool {
 	return false
 }
 
-// SetRoot gets a reference to the given ComputeruseAccessibilityNode and assigns it to the Root field.
-func (o *AccessibilityTreeResponse) SetRoot(v ComputeruseAccessibilityNode) {
+// SetRoot gets a reference to the given ComputerUseAccessibilityNode and assigns it to the Root field.
+func (o *AccessibilityTreeResponse) SetRoot(v ComputerUseAccessibilityNode) {
 	o.Root = &v
 }
 

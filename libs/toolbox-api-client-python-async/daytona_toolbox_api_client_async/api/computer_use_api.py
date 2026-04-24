@@ -1206,6 +1206,7 @@ class ComputerUseApi:
             '200': "AccessibilityNodesResponse",
             '400': "Dict[str, str]",
             '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
             '503': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
@@ -1276,6 +1277,7 @@ class ComputerUseApi:
             '200': "AccessibilityNodesResponse",
             '400': "Dict[str, str]",
             '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
             '503': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
@@ -1346,6 +1348,7 @@ class ComputerUseApi:
             '200': "AccessibilityNodesResponse",
             '400': "Dict[str, str]",
             '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
             '503': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
@@ -1488,6 +1491,7 @@ class ComputerUseApi:
             '200': "object",
             '400': "Dict[str, str]",
             '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
             '503': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
@@ -1558,6 +1562,7 @@ class ComputerUseApi:
             '200': "object",
             '400': "Dict[str, str]",
             '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
             '503': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
@@ -1628,6 +1633,7 @@ class ComputerUseApi:
             '200': "object",
             '400': "Dict[str, str]",
             '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
             '503': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
@@ -1778,6 +1784,7 @@ class ComputerUseApi:
             '200': "AccessibilityTreeResponse",
             '400': "Dict[str, str]",
             '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
             '503': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
@@ -1856,6 +1863,7 @@ class ComputerUseApi:
             '200': "AccessibilityTreeResponse",
             '400': "Dict[str, str]",
             '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
             '503': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
@@ -1934,6 +1942,7 @@ class ComputerUseApi:
             '200': "AccessibilityTreeResponse",
             '400': "Dict[str, str]",
             '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
             '503': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
@@ -4346,6 +4355,7 @@ class ComputerUseApi:
             '200': "object",
             '400': "Dict[str, str]",
             '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
             '503': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
@@ -4416,6 +4426,7 @@ class ComputerUseApi:
             '200': "object",
             '400': "Dict[str, str]",
             '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
             '503': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
@@ -4486,6 +4497,7 @@ class ComputerUseApi:
             '200': "object",
             '400': "Dict[str, str]",
             '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
             '503': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
@@ -6228,6 +6240,7 @@ class ComputerUseApi:
             '200': "object",
             '400': "Dict[str, str]",
             '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
             '503': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
@@ -6298,6 +6311,7 @@ class ComputerUseApi:
             '200': "object",
             '400': "Dict[str, str]",
             '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
             '503': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
@@ -6368,6 +6382,7 @@ class ComputerUseApi:
             '200': "object",
             '400': "Dict[str, str]",
             '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
             '503': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(

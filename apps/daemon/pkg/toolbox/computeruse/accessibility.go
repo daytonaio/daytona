@@ -111,6 +111,7 @@ func writeA11yError(c *gin.Context, err error) {
 //	@Success		200			{object}	AccessibilityTreeResponse
 //	@Failure		400			{object}	map[string]string
 //	@Failure		404			{object}	map[string]string
+//	@Failure		500			{object}	map[string]string
 //	@Failure		503			{object}	map[string]string
 //	@Router			/computeruse/a11y/tree [get]
 //
@@ -155,6 +156,7 @@ func WrapGetAccessibilityTreeHandler(fn func(*GetAccessibilityTreeRequest) (*Acc
 //	@Success		200		{object}	AccessibilityNodesResponse
 //	@Failure		400		{object}	map[string]string
 //	@Failure		404		{object}	map[string]string
+//	@Failure		500		{object}	map[string]string
 //	@Failure		503		{object}	map[string]string
 //	@Router			/computeruse/a11y/find [post]
 //
@@ -186,6 +188,7 @@ func WrapFindAccessibilityNodesHandler(fn func(*FindAccessibilityNodesRequest) (
 //	@Success		200		{object}	Empty
 //	@Failure		400		{object}	map[string]string
 //	@Failure		404		{object}	map[string]string
+//	@Failure		500		{object}	map[string]string
 //	@Failure		503		{object}	map[string]string
 //	@Router			/computeruse/a11y/node/focus [post]
 //
@@ -217,6 +220,7 @@ func WrapFocusAccessibilityNodeHandler(fn func(*AccessibilityNodeRequest) (*Empt
 //	@Success		200		{object}	Empty
 //	@Failure		400		{object}	map[string]string
 //	@Failure		404		{object}	map[string]string
+//	@Failure		500		{object}	map[string]string
 //	@Failure		503		{object}	map[string]string
 //	@Router			/computeruse/a11y/node/invoke [post]
 //
@@ -248,6 +252,7 @@ func WrapInvokeAccessibilityNodeHandler(fn func(*AccessibilityInvokeRequest) (*E
 //	@Success		200		{object}	Empty
 //	@Failure		400		{object}	map[string]string
 //	@Failure		404		{object}	map[string]string
+//	@Failure		500		{object}	map[string]string
 //	@Failure		503		{object}	map[string]string
 //	@Router			/computeruse/a11y/node/value [post]
 //

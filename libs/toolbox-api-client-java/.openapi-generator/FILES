@@ -46,10 +46,10 @@ src/main/java/io/daytona/toolbox/client/model/Command.java
 src/main/java/io/daytona/toolbox/client/model/CompletionContext.java
 src/main/java/io/daytona/toolbox/client/model/CompletionItem.java
 src/main/java/io/daytona/toolbox/client/model/CompletionList.java
+src/main/java/io/daytona/toolbox/client/model/ComputerUseAccessibilityNode.java
 src/main/java/io/daytona/toolbox/client/model/ComputerUseStartResponse.java
 src/main/java/io/daytona/toolbox/client/model/ComputerUseStatusResponse.java
 src/main/java/io/daytona/toolbox/client/model/ComputerUseStopResponse.java
-src/main/java/io/daytona/toolbox/client/model/ComputeruseAccessibilityNode.java
 src/main/java/io/daytona/toolbox/client/model/CreateContextRequest.java
 src/main/java/io/daytona/toolbox/client/model/CreateSessionRequest.java
 src/main/java/io/daytona/toolbox/client/model/DisplayInfo.java
@@ -148,10 +148,10 @@ src/test/java/io/daytona/toolbox/client/model/CommandTest.java
 src/test/java/io/daytona/toolbox/client/model/CompletionContextTest.java
 src/test/java/io/daytona/toolbox/client/model/CompletionItemTest.java
 src/test/java/io/daytona/toolbox/client/model/CompletionListTest.java
+src/test/java/io/daytona/toolbox/client/model/ComputerUseAccessibilityNodeTest.java
 src/test/java/io/daytona/toolbox/client/model/ComputerUseStartResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/ComputerUseStatusResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/ComputerUseStopResponseTest.java
-src/test/java/io/daytona/toolbox/client/model/ComputeruseAccessibilityNodeTest.java
 src/test/java/io/daytona/toolbox/client/model/CreateContextRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/CreateSessionRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/DisplayInfoResponseTest.java

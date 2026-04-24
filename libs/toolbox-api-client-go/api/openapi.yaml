@@ -45,6 +45,14 @@ paths:
                   type: string
                 type: object
           description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Internal Server Error
         "503":
           content:
             application/json:
@@ -91,6 +99,14 @@ paths:
                   type: string
                 type: object
           description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Internal Server Error
         "503":
           content:
             application/json:
@@ -138,6 +154,14 @@ paths:
                   type: string
                 type: object
           description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Internal Server Error
         "503":
           content:
             application/json:
@@ -185,6 +209,14 @@ paths:
                   type: string
                 type: object
           description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Internal Server Error
         "503":
           content:
             application/json:
@@ -241,6 +273,14 @@ paths:
                   type: string
                 type: object
           description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Internal Server Error
         "503":
           content:
             application/json:
