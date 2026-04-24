@@ -34,10 +34,10 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client.models.completion_context import CompletionContext
     from daytona_toolbox_api_client.models.completion_item import CompletionItem
     from daytona_toolbox_api_client.models.completion_list import CompletionList
+    from daytona_toolbox_api_client.models.computer_use_accessibility_node import ComputerUseAccessibilityNode
     from daytona_toolbox_api_client.models.computer_use_start_response import ComputerUseStartResponse
     from daytona_toolbox_api_client.models.computer_use_status_response import ComputerUseStatusResponse
     from daytona_toolbox_api_client.models.computer_use_stop_response import ComputerUseStopResponse
-    from daytona_toolbox_api_client.models.computeruse_accessibility_node import ComputeruseAccessibilityNode
     from daytona_toolbox_api_client.models.create_context_request import CreateContextRequest
     from daytona_toolbox_api_client.models.create_session_request import CreateSessionRequest
     from daytona_toolbox_api_client.models.display_info import DisplayInfo
@@ -129,10 +129,10 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "CompletionContext": "daytona_toolbox_api_client.models.completion_context",
     "CompletionItem": "daytona_toolbox_api_client.models.completion_item",
     "CompletionList": "daytona_toolbox_api_client.models.completion_list",
+    "ComputerUseAccessibilityNode": "daytona_toolbox_api_client.models.computer_use_accessibility_node",
     "ComputerUseStartResponse": "daytona_toolbox_api_client.models.computer_use_start_response",
     "ComputerUseStatusResponse": "daytona_toolbox_api_client.models.computer_use_status_response",
     "ComputerUseStopResponse": "daytona_toolbox_api_client.models.computer_use_stop_response",
-    "ComputeruseAccessibilityNode": "daytona_toolbox_api_client.models.computeruse_accessibility_node",
     "CreateContextRequest": "daytona_toolbox_api_client.models.create_context_request",
     "CreateSessionRequest": "daytona_toolbox_api_client.models.create_session_request",
     "DisplayInfo": "daytona_toolbox_api_client.models.display_info",

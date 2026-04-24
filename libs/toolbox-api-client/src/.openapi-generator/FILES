@@ -29,10 +29,10 @@ models/command.ts
 models/completion-context.ts
 models/completion-item.ts
 models/completion-list.ts
+models/computer-use-accessibility-node.ts
 models/computer-use-start-response.ts
 models/computer-use-status-response.ts
 models/computer-use-stop-response.ts
-models/computeruse-accessibility-node.ts
 models/create-context-request.ts
 models/create-session-request.ts
 models/display-info-response.ts

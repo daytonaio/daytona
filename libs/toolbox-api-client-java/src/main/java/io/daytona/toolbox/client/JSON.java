@@ -111,10 +111,10 @@ public class JSON {
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.CompletionContext.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.CompletionItem.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.CompletionList.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.ComputerUseAccessibilityNode.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.ComputerUseStartResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.ComputerUseStatusResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.ComputerUseStopResponse.CustomTypeAdapterFactory());
-        gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.ComputeruseAccessibilityNode.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.CreateContextRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.CreateSessionRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.DisplayInfo.CustomTypeAdapterFactory());

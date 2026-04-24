@@ -27,17 +27,17 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
- * Model tests for ComputeruseAccessibilityNode
+ * Model tests for ComputerUseAccessibilityNode
  */
-public class ComputeruseAccessibilityNodeTest {
-    private final ComputeruseAccessibilityNode model = new ComputeruseAccessibilityNode();
+public class ComputerUseAccessibilityNodeTest {
+    private final ComputerUseAccessibilityNode model = new ComputerUseAccessibilityNode();
 
     /**
-     * Model tests for ComputeruseAccessibilityNode
+     * Model tests for ComputerUseAccessibilityNode
      */
     @Test
-    public void testComputeruseAccessibilityNode() {
-        // TODO: test ComputeruseAccessibilityNode
+    public void testComputerUseAccessibilityNode() {
+        // TODO: test ComputerUseAccessibilityNode
     }
 
     /**

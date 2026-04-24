@@ -19,7 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, StrictBool
 from typing import Any, ClassVar, Dict, List, Optional
-from daytona_toolbox_api_client.models.computeruse_accessibility_node import ComputeruseAccessibilityNode
+from daytona_toolbox_api_client.models.computer_use_accessibility_node import ComputerUseAccessibilityNode
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
@@ -30,7 +30,7 @@ class AccessibilityNodesResponse(BaseModel):
     """
     AccessibilityNodesResponse
     """ # noqa: E501
-    matches: Optional[List[ComputeruseAccessibilityNode]] = None
+    matches: Optional[List[ComputerUseAccessibilityNode]] = None
     truncated: Optional[StrictBool] = None
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["matches", "truncated"]
@@ -99,7 +99,7 @@ class AccessibilityNodesResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "matches": [ComputeruseAccessibilityNode.from_dict(_item) for _item in obj["matches"]] if obj.get("matches") is not None else None,
+            "matches": [ComputerUseAccessibilityNode.from_dict(_item) for _item in obj["matches"]] if obj.get("matches") is not None else None,
             "truncated": obj.get("truncated")
         })
         # store additional fields in additional_properties

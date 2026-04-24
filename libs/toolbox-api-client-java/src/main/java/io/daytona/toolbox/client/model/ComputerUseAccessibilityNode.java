@@ -49,10 +49,10 @@ import java.util.Set;
 import io.daytona.toolbox.client.JSON;
 
 /**
- * ComputeruseAccessibilityNode
+ * ComputerUseAccessibilityNode
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
-public class ComputeruseAccessibilityNode {
+public class ComputerUseAccessibilityNode {
   public static final String SERIALIZED_NAME_ACTIONS = "actions";
   @SerializedName(SERIALIZED_NAME_ACTIONS)
   @javax.annotation.Nullable
@@ -66,7 +66,7 @@ public class ComputeruseAccessibilityNode {
   public static final String SERIALIZED_NAME_CHILDREN = "children";
   @SerializedName(SERIALIZED_NAME_CHILDREN)
   @javax.annotation.Nullable
-  private List<ComputeruseAccessibilityNode> children = new ArrayList<>();
+  private List<ComputerUseAccessibilityNode> children = new ArrayList<>();
 
   public static final String SERIALIZED_NAME_DESCRIPTION = "description";
   @SerializedName(SERIALIZED_NAME_DESCRIPTION)
@@ -93,15 +93,15 @@ public class ComputeruseAccessibilityNode {
   @javax.annotation.Nullable
   private List<String> states = new ArrayList<>();
 
-  public ComputeruseAccessibilityNode() {
+  public ComputerUseAccessibilityNode() {
   }
 
-  public ComputeruseAccessibilityNode actions(@javax.annotation.Nullable List<String> actions) {
+  public ComputerUseAccessibilityNode actions(@javax.annotation.Nullable List<String> actions) {
     this.actions = actions;
     return this;
   }
 
-  public ComputeruseAccessibilityNode addActionsItem(String actionsItem) {
+  public ComputerUseAccessibilityNode addActionsItem(String actionsItem) {
     if (this.actions == null) {
       this.actions = new ArrayList<>();
     }
@@ -123,7 +123,7 @@ public class ComputeruseAccessibilityNode {
   }
 
 
-  public ComputeruseAccessibilityNode bounds(@javax.annotation.Nullable AccessibilityBounds bounds) {
+  public ComputerUseAccessibilityNode bounds(@javax.annotation.Nullable AccessibilityBounds bounds) {
     this.bounds = bounds;
     return this;
   }
@@ -142,12 +142,12 @@ public class ComputeruseAccessibilityNode {
   }
 
 
-  public ComputeruseAccessibilityNode children(@javax.annotation.Nullable List<ComputeruseAccessibilityNode> children) {
+  public ComputerUseAccessibilityNode children(@javax.annotation.Nullable List<ComputerUseAccessibilityNode> children) {
     this.children = children;
     return this;
   }
 
-  public ComputeruseAccessibilityNode addChildrenItem(ComputeruseAccessibilityNode childrenItem) {
+  public ComputerUseAccessibilityNode addChildrenItem(ComputerUseAccessibilityNode childrenItem) {
     if (this.children == null) {
       this.children = new ArrayList<>();
     }
@@ -160,16 +160,16 @@ public class ComputeruseAccessibilityNode {
    * @return children
    */
   @javax.annotation.Nullable
-  public List<ComputeruseAccessibilityNode> getChildren() {
+  public List<ComputerUseAccessibilityNode> getChildren() {
     return children;
   }
 
-  public void setChildren(@javax.annotation.Nullable List<ComputeruseAccessibilityNode> children) {
+  public void setChildren(@javax.annotation.Nullable List<ComputerUseAccessibilityNode> children) {
     this.children = children;
   }
 
 
-  public ComputeruseAccessibilityNode description(@javax.annotation.Nullable String description) {
+  public ComputerUseAccessibilityNode description(@javax.annotation.Nullable String description) {
     this.description = description;
     return this;
   }
@@ -188,7 +188,7 @@ public class ComputeruseAccessibilityNode {
   }
 
 
-  public ComputeruseAccessibilityNode id(@javax.annotation.Nullable String id) {
+  public ComputerUseAccessibilityNode id(@javax.annotation.Nullable String id) {
     this.id = id;
     return this;
   }
@@ -207,7 +207,7 @@ public class ComputeruseAccessibilityNode {
   }
 
 
-  public ComputeruseAccessibilityNode name(@javax.annotation.Nullable String name) {
+  public ComputerUseAccessibilityNode name(@javax.annotation.Nullable String name) {
     this.name = name;
     return this;
   }
@@ -226,7 +226,7 @@ public class ComputeruseAccessibilityNode {
   }
 
 
-  public ComputeruseAccessibilityNode role(@javax.annotation.Nullable String role) {
+  public ComputerUseAccessibilityNode role(@javax.annotation.Nullable String role) {
     this.role = role;
     return this;
   }
@@ -245,12 +245,12 @@ public class ComputeruseAccessibilityNode {
   }
 
 
-  public ComputeruseAccessibilityNode states(@javax.annotation.Nullable List<String> states) {
+  public ComputerUseAccessibilityNode states(@javax.annotation.Nullable List<String> states) {
     this.states = states;
     return this;
   }
 
-  public ComputeruseAccessibilityNode addStatesItem(String statesItem) {
+  public ComputerUseAccessibilityNode addStatesItem(String statesItem) {
     if (this.states == null) {
       this.states = new ArrayList<>();
     }
@@ -284,9 +284,9 @@ public class ComputeruseAccessibilityNode {
    *
    * @param key name of the property
    * @param value value of the property
-   * @return the ComputeruseAccessibilityNode instance itself
+   * @return the ComputerUseAccessibilityNode instance itself
    */
-  public ComputeruseAccessibilityNode putAdditionalProperty(String key, Object value) {
+  public ComputerUseAccessibilityNode putAdditionalProperty(String key, Object value) {
     if (this.additionalProperties == null) {
         this.additionalProperties = new HashMap<String, Object>();
     }
@@ -325,7 +325,7 @@ public class ComputeruseAccessibilityNode {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ComputeruseAccessibilityNode computeruseAccessibilityNode = (ComputeruseAccessibilityNode) o;
+    ComputerUseAccessibilityNode computeruseAccessibilityNode = (ComputerUseAccessibilityNode) o;
     return Objects.equals(this.actions, computeruseAccessibilityNode.actions) &&
         Objects.equals(this.bounds, computeruseAccessibilityNode.bounds) &&
         Objects.equals(this.children, computeruseAccessibilityNode.children) &&
@@ -345,7 +345,7 @@ public class ComputeruseAccessibilityNode {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ComputeruseAccessibilityNode {\n");
+    sb.append("class ComputerUseAccessibilityNode {\n");
     sb.append("    actions: ").append(toIndentedString(actions)).append("\n");
     sb.append("    bounds: ").append(toIndentedString(bounds)).append("\n");
     sb.append("    children: ").append(toIndentedString(children)).append("\n");
@@ -394,12 +394,12 @@ public class ComputeruseAccessibilityNode {
    * Validates the JSON Element and throws an exception if issues found
    *
    * @param jsonElement JSON Element
-   * @throws IOException if the JSON Element is invalid with respect to ComputeruseAccessibilityNode
+   * @throws IOException if the JSON Element is invalid with respect to ComputerUseAccessibilityNode
    */
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
-        if (!ComputeruseAccessibilityNode.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in ComputeruseAccessibilityNode is not found in the empty JSON string", ComputeruseAccessibilityNode.openapiRequiredFields.toString()));
+        if (!ComputerUseAccessibilityNode.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
+          throw new IllegalArgumentException(String.format("The required field(s) %s in ComputerUseAccessibilityNode is not found in the empty JSON string", ComputerUseAccessibilityNode.openapiRequiredFields.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
@@ -421,7 +421,7 @@ public class ComputeruseAccessibilityNode {
 
           // validate the optional field `children` (array)
           for (int i = 0; i < jsonArraychildren.size(); i++) {
-            ComputeruseAccessibilityNode.validateJsonElement(jsonArraychildren.get(i));
+            ComputerUseAccessibilityNode.validateJsonElement(jsonArraychildren.get(i));
           };
         }
       }
@@ -447,16 +447,16 @@ public class ComputeruseAccessibilityNode {
     @SuppressWarnings("unchecked")
     @Override
     public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-       if (!ComputeruseAccessibilityNode.class.isAssignableFrom(type.getRawType())) {
-         return null; // this class only serializes 'ComputeruseAccessibilityNode' and its subtypes
+       if (!ComputerUseAccessibilityNode.class.isAssignableFrom(type.getRawType())) {
+         return null; // this class only serializes 'ComputerUseAccessibilityNode' and its subtypes
        }
        final TypeAdapter<JsonElement> elementAdapter = gson.getAdapter(JsonElement.class);
-       final TypeAdapter<ComputeruseAccessibilityNode> thisAdapter
-                        = gson.getDelegateAdapter(this, TypeToken.get(ComputeruseAccessibilityNode.class));
+       final TypeAdapter<ComputerUseAccessibilityNode> thisAdapter
+                        = gson.getDelegateAdapter(this, TypeToken.get(ComputerUseAccessibilityNode.class));
 
-       return (TypeAdapter<T>) new TypeAdapter<ComputeruseAccessibilityNode>() {
+       return (TypeAdapter<T>) new TypeAdapter<ComputerUseAccessibilityNode>() {
            @Override
-           public void write(JsonWriter out, ComputeruseAccessibilityNode value) throws IOException {
+           public void write(JsonWriter out, ComputerUseAccessibilityNode value) throws IOException {
              JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
              obj.remove("additionalProperties");
              // serialize additional properties
@@ -484,12 +484,12 @@ public class ComputeruseAccessibilityNode {
            }
 
            @Override
-           public ComputeruseAccessibilityNode read(JsonReader in) throws IOException {
+           public ComputerUseAccessibilityNode read(JsonReader in) throws IOException {
              JsonElement jsonElement = elementAdapter.read(in);
              validateJsonElement(jsonElement);
              JsonObject jsonObj = jsonElement.getAsJsonObject();
              // store additional fields in the deserialized instance
-             ComputeruseAccessibilityNode instance = thisAdapter.fromJsonTree(jsonObj);
+             ComputerUseAccessibilityNode instance = thisAdapter.fromJsonTree(jsonObj);
              for (Map.Entry<String, JsonElement> entry : jsonObj.entrySet()) {
                if (!openapiFields.contains(entry.getKey())) {
                  if (entry.getValue().isJsonPrimitive()) { // primitive type
@@ -516,18 +516,18 @@ public class ComputeruseAccessibilityNode {
   }
 
   /**
-   * Create an instance of ComputeruseAccessibilityNode given an JSON string
+   * Create an instance of ComputerUseAccessibilityNode given an JSON string
    *
    * @param jsonString JSON string
-   * @return An instance of ComputeruseAccessibilityNode
-   * @throws IOException if the JSON string is invalid with respect to ComputeruseAccessibilityNode
+   * @return An instance of ComputerUseAccessibilityNode
+   * @throws IOException if the JSON string is invalid with respect to ComputerUseAccessibilityNode
    */
-  public static ComputeruseAccessibilityNode fromJson(String jsonString) throws IOException {
-    return JSON.getGson().fromJson(jsonString, ComputeruseAccessibilityNode.class);
+  public static ComputerUseAccessibilityNode fromJson(String jsonString) throws IOException {
+    return JSON.getGson().fromJson(jsonString, ComputerUseAccessibilityNode.class);
   }
 
   /**
-   * Convert an instance of ComputeruseAccessibilityNode to an JSON string
+   * Convert an instance of ComputerUseAccessibilityNode to an JSON string
    *
    * @return JSON string
    */

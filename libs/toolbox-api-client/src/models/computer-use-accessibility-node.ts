@@ -20,55 +20,55 @@ import type { AccessibilityBounds } from './accessibility-bounds';
 /**
  * 
  * @export
- * @interface ComputeruseAccessibilityNode
+ * @interface ComputerUseAccessibilityNode
  */
-export interface ComputeruseAccessibilityNode {
+export interface ComputerUseAccessibilityNode {
     /**
      * 
      * @type {Array<string>}
-     * @memberof ComputeruseAccessibilityNode
+     * @memberof ComputerUseAccessibilityNode
      */
     'actions'?: Array<string>;
     /**
      * 
      * @type {AccessibilityBounds}
-     * @memberof ComputeruseAccessibilityNode
+     * @memberof ComputerUseAccessibilityNode
      */
     'bounds'?: AccessibilityBounds;
     /**
      * 
-     * @type {Array<ComputeruseAccessibilityNode>}
-     * @memberof ComputeruseAccessibilityNode
+     * @type {Array<ComputerUseAccessibilityNode>}
+     * @memberof ComputerUseAccessibilityNode
      */
-    'children'?: Array<ComputeruseAccessibilityNode>;
+    'children'?: Array<ComputerUseAccessibilityNode>;
     /**
      * 
      * @type {string}
-     * @memberof ComputeruseAccessibilityNode
+     * @memberof ComputerUseAccessibilityNode
      */
     'description'?: string;
     /**
      * 
      * @type {string}
-     * @memberof ComputeruseAccessibilityNode
+     * @memberof ComputerUseAccessibilityNode
      */
     'id'?: string;
     /**
      * 
      * @type {string}
-     * @memberof ComputeruseAccessibilityNode
+     * @memberof ComputerUseAccessibilityNode
      */
     'name'?: string;
     /**
      * 
      * @type {string}
-     * @memberof ComputeruseAccessibilityNode
+     * @memberof ComputerUseAccessibilityNode
      */
     'role'?: string;
     /**
      * 
      * @type {Array<string>}
-     * @memberof ComputeruseAccessibilityNode
+     * @memberof ComputerUseAccessibilityNode
      */
     'states'?: Array<string>;
 }

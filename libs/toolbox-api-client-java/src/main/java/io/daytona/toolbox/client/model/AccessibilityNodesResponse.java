@@ -19,7 +19,7 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import io.daytona.toolbox.client.model.ComputeruseAccessibilityNode;
+import io.daytona.toolbox.client.model.ComputerUseAccessibilityNode;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,7 +56,7 @@ public class AccessibilityNodesResponse {
   public static final String SERIALIZED_NAME_MATCHES = "matches";
   @SerializedName(SERIALIZED_NAME_MATCHES)
   @javax.annotation.Nullable
-  private List<ComputeruseAccessibilityNode> matches = new ArrayList<>();
+  private List<ComputerUseAccessibilityNode> matches = new ArrayList<>();
 
   public static final String SERIALIZED_NAME_TRUNCATED = "truncated";
   @SerializedName(SERIALIZED_NAME_TRUNCATED)
@@ -66,12 +66,12 @@ public class AccessibilityNodesResponse {
   public AccessibilityNodesResponse() {
   }
 
-  public AccessibilityNodesResponse matches(@javax.annotation.Nullable List<ComputeruseAccessibilityNode> matches) {
+  public AccessibilityNodesResponse matches(@javax.annotation.Nullable List<ComputerUseAccessibilityNode> matches) {
     this.matches = matches;
     return this;
   }
 
-  public AccessibilityNodesResponse addMatchesItem(ComputeruseAccessibilityNode matchesItem) {
+  public AccessibilityNodesResponse addMatchesItem(ComputerUseAccessibilityNode matchesItem) {
     if (this.matches == null) {
       this.matches = new ArrayList<>();
     }
@@ -84,11 +84,11 @@ public class AccessibilityNodesResponse {
    * @return matches
    */
   @javax.annotation.Nullable
-  public List<ComputeruseAccessibilityNode> getMatches() {
+  public List<ComputerUseAccessibilityNode> getMatches() {
     return matches;
   }
 
-  public void setMatches(@javax.annotation.Nullable List<ComputeruseAccessibilityNode> matches) {
+  public void setMatches(@javax.annotation.Nullable List<ComputerUseAccessibilityNode> matches) {
     this.matches = matches;
   }
 
@@ -235,7 +235,7 @@ public class AccessibilityNodesResponse {
 
           // validate the optional field `matches` (array)
           for (int i = 0; i < jsonArraymatches.size(); i++) {
-            ComputeruseAccessibilityNode.validateJsonElement(jsonArraymatches.get(i));
+            ComputerUseAccessibilityNode.validateJsonElement(jsonArraymatches.get(i));
           };
         }
       }

@@ -14,14 +14,14 @@ import (
 	"encoding/json"
 )
 
-// checks if the ComputeruseAccessibilityNode type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &ComputeruseAccessibilityNode{}
+// checks if the ComputerUseAccessibilityNode type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &ComputerUseAccessibilityNode{}
 
-// ComputeruseAccessibilityNode struct for ComputeruseAccessibilityNode
-type ComputeruseAccessibilityNode struct {
+// ComputerUseAccessibilityNode struct for ComputerUseAccessibilityNode
+type ComputerUseAccessibilityNode struct {
 	Actions []string `json:"actions,omitempty"`
 	Bounds *AccessibilityBounds `json:"bounds,omitempty"`
-	Children []ComputeruseAccessibilityNode `json:"children,omitempty"`
+	Children []ComputerUseAccessibilityNode `json:"children,omitempty"`
 	Description *string `json:"description,omitempty"`
 	Id *string `json:"id,omitempty"`
 	Name *string `json:"name,omitempty"`
@@ -29,25 +29,25 @@ type ComputeruseAccessibilityNode struct {
 	States []string `json:"states,omitempty"`
 }
 
-// NewComputeruseAccessibilityNode instantiates a new ComputeruseAccessibilityNode object
+// NewComputerUseAccessibilityNode instantiates a new ComputerUseAccessibilityNode object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewComputeruseAccessibilityNode() *ComputeruseAccessibilityNode {
-	this := ComputeruseAccessibilityNode{}
+func NewComputerUseAccessibilityNode() *ComputerUseAccessibilityNode {
+	this := ComputerUseAccessibilityNode{}
 	return &this
 }
 
-// NewComputeruseAccessibilityNodeWithDefaults instantiates a new ComputeruseAccessibilityNode object
+// NewComputerUseAccessibilityNodeWithDefaults instantiates a new ComputerUseAccessibilityNode object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewComputeruseAccessibilityNodeWithDefaults() *ComputeruseAccessibilityNode {
-	this := ComputeruseAccessibilityNode{}
+func NewComputerUseAccessibilityNodeWithDefaults() *ComputerUseAccessibilityNode {
+	this := ComputerUseAccessibilityNode{}
 	return &this
 }
 
 // GetActions returns the Actions field value if set, zero value otherwise.
-func (o *ComputeruseAccessibilityNode) GetActions() []string {
+func (o *ComputerUseAccessibilityNode) GetActions() []string {
 	if o == nil || IsNil(o.Actions) {
 		var ret []string
 		return ret
@@ -57,7 +57,7 @@ func (o *ComputeruseAccessibilityNode) GetActions() []string {
 
 // GetActionsOk returns a tuple with the Actions field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ComputeruseAccessibilityNode) GetActionsOk() ([]string, bool) {
+func (o *ComputerUseAccessibilityNode) GetActionsOk() ([]string, bool) {
 	if o == nil || IsNil(o.Actions) {
 		return nil, false
 	}
@@ -65,7 +65,7 @@ func (o *ComputeruseAccessibilityNode) GetActionsOk() ([]string, bool) {
 }
 
 // HasActions returns a boolean if a field has been set.
-func (o *ComputeruseAccessibilityNode) HasActions() bool {
+func (o *ComputerUseAccessibilityNode) HasActions() bool {
 	if o != nil && !IsNil(o.Actions) {
 		return true
 	}
@@ -74,12 +74,12 @@ func (o *ComputeruseAccessibilityNode) HasActions() bool {
 }
 
 // SetActions gets a reference to the given []string and assigns it to the Actions field.
-func (o *ComputeruseAccessibilityNode) SetActions(v []string) {
+func (o *ComputerUseAccessibilityNode) SetActions(v []string) {
 	o.Actions = v
 }
 
 // GetBounds returns the Bounds field value if set, zero value otherwise.
-func (o *ComputeruseAccessibilityNode) GetBounds() AccessibilityBounds {
+func (o *ComputerUseAccessibilityNode) GetBounds() AccessibilityBounds {
 	if o == nil || IsNil(o.Bounds) {
 		var ret AccessibilityBounds
 		return ret
@@ -89,7 +89,7 @@ func (o *ComputeruseAccessibilityNode) GetBounds() AccessibilityBounds {
 
 // GetBoundsOk returns a tuple with the Bounds field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ComputeruseAccessibilityNode) GetBoundsOk() (*AccessibilityBounds, bool) {
+func (o *ComputerUseAccessibilityNode) GetBoundsOk() (*AccessibilityBounds, bool) {
 	if o == nil || IsNil(o.Bounds) {
 		return nil, false
 	}
@@ -97,7 +97,7 @@ func (o *ComputeruseAccessibilityNode) GetBoundsOk() (*AccessibilityBounds, bool
 }
 
 // HasBounds returns a boolean if a field has been set.
-func (o *ComputeruseAccessibilityNode) HasBounds() bool {
+func (o *ComputerUseAccessibilityNode) HasBounds() bool {
 	if o != nil && !IsNil(o.Bounds) {
 		return true
 	}
@@ -106,14 +106,14 @@ func (o *ComputeruseAccessibilityNode) HasBounds() bool {
 }
 
 // SetBounds gets a reference to the given AccessibilityBounds and assigns it to the Bounds field.
-func (o *ComputeruseAccessibilityNode) SetBounds(v AccessibilityBounds) {
+func (o *ComputerUseAccessibilityNode) SetBounds(v AccessibilityBounds) {
 	o.Bounds = &v
 }
 
 // GetChildren returns the Children field value if set, zero value otherwise.
-func (o *ComputeruseAccessibilityNode) GetChildren() []ComputeruseAccessibilityNode {
+func (o *ComputerUseAccessibilityNode) GetChildren() []ComputerUseAccessibilityNode {
 	if o == nil || IsNil(o.Children) {
-		var ret []ComputeruseAccessibilityNode
+		var ret []ComputerUseAccessibilityNode
 		return ret
 	}
 	return o.Children
@@ -121,7 +121,7 @@ func (o *ComputeruseAccessibilityNode) GetChildren() []ComputeruseAccessibilityN
 
 // GetChildrenOk returns a tuple with the Children field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ComputeruseAccessibilityNode) GetChildrenOk() ([]ComputeruseAccessibilityNode, bool) {
+func (o *ComputerUseAccessibilityNode) GetChildrenOk() ([]ComputerUseAccessibilityNode, bool) {
 	if o == nil || IsNil(o.Children) {
 		return nil, false
 	}
@@ -129,7 +129,7 @@ func (o *ComputeruseAccessibilityNode) GetChildrenOk() ([]ComputeruseAccessibili
 }
 
 // HasChildren returns a boolean if a field has been set.
-func (o *ComputeruseAccessibilityNode) HasChildren() bool {
+func (o *ComputerUseAccessibilityNode) HasChildren() bool {
 	if o != nil && !IsNil(o.Children) {
 		return true
 	}
@@ -137,13 +137,13 @@ func (o *ComputeruseAccessibilityNode) HasChildren() bool {
 	return false
 }
 
-// SetChildren gets a reference to the given []ComputeruseAccessibilityNode and assigns it to the Children field.
-func (o *ComputeruseAccessibilityNode) SetChildren(v []ComputeruseAccessibilityNode) {
+// SetChildren gets a reference to the given []ComputerUseAccessibilityNode and assigns it to the Children field.
+func (o *ComputerUseAccessibilityNode) SetChildren(v []ComputerUseAccessibilityNode) {
 	o.Children = v
 }
 
 // GetDescription returns the Description field value if set, zero value otherwise.
-func (o *ComputeruseAccessibilityNode) GetDescription() string {
+func (o *ComputerUseAccessibilityNode) GetDescription() string {
 	if o == nil || IsNil(o.Description) {
 		var ret string
 		return ret
@@ -153,7 +153,7 @@ func (o *ComputeruseAccessibilityNode) GetDescription() string {
 
 // GetDescriptionOk returns a tuple with the Description field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ComputeruseAccessibilityNode) GetDescriptionOk() (*string, bool) {
+func (o *ComputerUseAccessibilityNode) GetDescriptionOk() (*string, bool) {
 	if o == nil || IsNil(o.Description) {
 		return nil, false
 	}
@@ -161,7 +161,7 @@ func (o *ComputeruseAccessibilityNode) GetDescriptionOk() (*string, bool) {
 }
 
 // HasDescription returns a boolean if a field has been set.
-func (o *ComputeruseAccessibilityNode) HasDescription() bool {
+func (o *ComputerUseAccessibilityNode) HasDescription() bool {
 	if o != nil && !IsNil(o.Description) {
 		return true
 	}
@@ -170,12 +170,12 @@ func (o *ComputeruseAccessibilityNode) HasDescription() bool {
 }
 
 // SetDescription gets a reference to the given string and assigns it to the Description field.
-func (o *ComputeruseAccessibilityNode) SetDescription(v string) {
+func (o *ComputerUseAccessibilityNode) SetDescription(v string) {
 	o.Description = &v
 }
 
 // GetId returns the Id field value if set, zero value otherwise.
-func (o *ComputeruseAccessibilityNode) GetId() string {
+func (o *ComputerUseAccessibilityNode) GetId() string {
 	if o == nil || IsNil(o.Id) {
 		var ret string
 		return ret
@@ -185,7 +185,7 @@ func (o *ComputeruseAccessibilityNode) GetId() string {
 
 // GetIdOk returns a tuple with the Id field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ComputeruseAccessibilityNode) GetIdOk() (*string, bool) {
+func (o *ComputerUseAccessibilityNode) GetIdOk() (*string, bool) {
 	if o == nil || IsNil(o.Id) {
 		return nil, false
 	}
@@ -193,7 +193,7 @@ func (o *ComputeruseAccessibilityNode) GetIdOk() (*string, bool) {
 }
 
 // HasId returns a boolean if a field has been set.
-func (o *ComputeruseAccessibilityNode) HasId() bool {
+func (o *ComputerUseAccessibilityNode) HasId() bool {
 	if o != nil && !IsNil(o.Id) {
 		return true
 	}
@@ -202,12 +202,12 @@ func (o *ComputeruseAccessibilityNode) HasId() bool {
 }
 
 // SetId gets a reference to the given string and assigns it to the Id field.
-func (o *ComputeruseAccessibilityNode) SetId(v string) {
+func (o *ComputerUseAccessibilityNode) SetId(v string) {
 	o.Id = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
-func (o *ComputeruseAccessibilityNode) GetName() string {
+func (o *ComputerUseAccessibilityNode) GetName() string {
 	if o == nil || IsNil(o.Name) {
 		var ret string
 		return ret
@@ -217,7 +217,7 @@ func (o *ComputeruseAccessibilityNode) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ComputeruseAccessibilityNode) GetNameOk() (*string, bool) {
+func (o *ComputerUseAccessibilityNode) GetNameOk() (*string, bool) {
 	if o == nil || IsNil(o.Name) {
 		return nil, false
 	}
@@ -225,7 +225,7 @@ func (o *ComputeruseAccessibilityNode) GetNameOk() (*string, bool) {
 }
 
 // HasName returns a boolean if a field has been set.
-func (o *ComputeruseAccessibilityNode) HasName() bool {
+func (o *ComputerUseAccessibilityNode) HasName() bool {
 	if o != nil && !IsNil(o.Name) {
 		return true
 	}
@@ -234,12 +234,12 @@ func (o *ComputeruseAccessibilityNode) HasName() bool {
 }
 
 // SetName gets a reference to the given string and assigns it to the Name field.
-func (o *ComputeruseAccessibilityNode) SetName(v string) {
+func (o *ComputerUseAccessibilityNode) SetName(v string) {
 	o.Name = &v
 }
 
 // GetRole returns the Role field value if set, zero value otherwise.
-func (o *ComputeruseAccessibilityNode) GetRole() string {
+func (o *ComputerUseAccessibilityNode) GetRole() string {
 	if o == nil || IsNil(o.Role) {
 		var ret string
 		return ret
@@ -249,7 +249,7 @@ func (o *ComputeruseAccessibilityNode) GetRole() string {
 
 // GetRoleOk returns a tuple with the Role field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ComputeruseAccessibilityNode) GetRoleOk() (*string, bool) {
+func (o *ComputerUseAccessibilityNode) GetRoleOk() (*string, bool) {
 	if o == nil || IsNil(o.Role) {
 		return nil, false
 	}
@@ -257,7 +257,7 @@ func (o *ComputeruseAccessibilityNode) GetRoleOk() (*string, bool) {
 }
 
 // HasRole returns a boolean if a field has been set.
-func (o *ComputeruseAccessibilityNode) HasRole() bool {
+func (o *ComputerUseAccessibilityNode) HasRole() bool {
 	if o != nil && !IsNil(o.Role) {
 		return true
 	}
@@ -266,12 +266,12 @@ func (o *ComputeruseAccessibilityNode) HasRole() bool {
 }
 
 // SetRole gets a reference to the given string and assigns it to the Role field.
-func (o *ComputeruseAccessibilityNode) SetRole(v string) {
+func (o *ComputerUseAccessibilityNode) SetRole(v string) {
 	o.Role = &v
 }
 
 // GetStates returns the States field value if set, zero value otherwise.
-func (o *ComputeruseAccessibilityNode) GetStates() []string {
+func (o *ComputerUseAccessibilityNode) GetStates() []string {
 	if o == nil || IsNil(o.States) {
 		var ret []string
 		return ret
@@ -281,7 +281,7 @@ func (o *ComputeruseAccessibilityNode) GetStates() []string {
 
 // GetStatesOk returns a tuple with the States field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ComputeruseAccessibilityNode) GetStatesOk() ([]string, bool) {
+func (o *ComputerUseAccessibilityNode) GetStatesOk() ([]string, bool) {
 	if o == nil || IsNil(o.States) {
 		return nil, false
 	}
@@ -289,7 +289,7 @@ func (o *ComputeruseAccessibilityNode) GetStatesOk() ([]string, bool) {
 }
 
 // HasStates returns a boolean if a field has been set.
-func (o *ComputeruseAccessibilityNode) HasStates() bool {
+func (o *ComputerUseAccessibilityNode) HasStates() bool {
 	if o != nil && !IsNil(o.States) {
 		return true
 	}
@@ -298,11 +298,11 @@ func (o *ComputeruseAccessibilityNode) HasStates() bool {
 }
 
 // SetStates gets a reference to the given []string and assigns it to the States field.
-func (o *ComputeruseAccessibilityNode) SetStates(v []string) {
+func (o *ComputerUseAccessibilityNode) SetStates(v []string) {
 	o.States = v
 }
 
-func (o ComputeruseAccessibilityNode) MarshalJSON() ([]byte, error) {
+func (o ComputerUseAccessibilityNode) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -310,7 +310,7 @@ func (o ComputeruseAccessibilityNode) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o ComputeruseAccessibilityNode) ToMap() (map[string]interface{}, error) {
+func (o ComputerUseAccessibilityNode) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Actions) {
 		toSerialize["actions"] = o.Actions
@@ -339,38 +339,38 @@ func (o ComputeruseAccessibilityNode) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-type NullableComputeruseAccessibilityNode struct {
-	value *ComputeruseAccessibilityNode
+type NullableComputerUseAccessibilityNode struct {
+	value *ComputerUseAccessibilityNode
 	isSet bool
 }
 
-func (v NullableComputeruseAccessibilityNode) Get() *ComputeruseAccessibilityNode {
+func (v NullableComputerUseAccessibilityNode) Get() *ComputerUseAccessibilityNode {
 	return v.value
 }
 
-func (v *NullableComputeruseAccessibilityNode) Set(val *ComputeruseAccessibilityNode) {
+func (v *NullableComputerUseAccessibilityNode) Set(val *ComputerUseAccessibilityNode) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableComputeruseAccessibilityNode) IsSet() bool {
+func (v NullableComputerUseAccessibilityNode) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableComputeruseAccessibilityNode) Unset() {
+func (v *NullableComputerUseAccessibilityNode) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableComputeruseAccessibilityNode(val *ComputeruseAccessibilityNode) *NullableComputeruseAccessibilityNode {
-	return &NullableComputeruseAccessibilityNode{value: val, isSet: true}
+func NewNullableComputerUseAccessibilityNode(val *ComputerUseAccessibilityNode) *NullableComputerUseAccessibilityNode {
+	return &NullableComputerUseAccessibilityNode{value: val, isSet: true}
 }
 
-func (v NullableComputeruseAccessibilityNode) MarshalJSON() ([]byte, error) {
+func (v NullableComputerUseAccessibilityNode) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableComputeruseAccessibilityNode) UnmarshalJSON(src []byte) error {
+func (v *NullableComputerUseAccessibilityNode) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

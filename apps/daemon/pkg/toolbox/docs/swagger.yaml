@@ -1164,6 +1164,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        '500':
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         '503':
           description: Service Unavailable
           schema:
@@ -1201,6 +1207,12 @@ paths:
             type: object
         '404':
           description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '500':
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -1247,6 +1259,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        '500':
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         '503':
           description: Service Unavailable
           schema:
@@ -1285,6 +1303,12 @@ paths:
             type: object
         '404':
           description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '500':
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -1331,6 +1355,12 @@ paths:
             type: object
         '404':
           description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '500':
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string

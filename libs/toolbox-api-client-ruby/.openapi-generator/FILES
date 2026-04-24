@@ -32,10 +32,10 @@ lib/daytona_toolbox_api_client/models/command.rb
 lib/daytona_toolbox_api_client/models/completion_context.rb
 lib/daytona_toolbox_api_client/models/completion_item.rb
 lib/daytona_toolbox_api_client/models/completion_list.rb
+lib/daytona_toolbox_api_client/models/computer_use_accessibility_node.rb
 lib/daytona_toolbox_api_client/models/computer_use_start_response.rb
 lib/daytona_toolbox_api_client/models/computer_use_status_response.rb
 lib/daytona_toolbox_api_client/models/computer_use_stop_response.rb
-lib/daytona_toolbox_api_client/models/computeruse_accessibility_node.rb
 lib/daytona_toolbox_api_client/models/create_context_request.rb
 lib/daytona_toolbox_api_client/models/create_session_request.rb
 lib/daytona_toolbox_api_client/models/display_info.rb

@@ -19,7 +19,7 @@ var _ MappedNullable = &AccessibilityNodesResponse{}
 
 // AccessibilityNodesResponse struct for AccessibilityNodesResponse
 type AccessibilityNodesResponse struct {
-	Matches []ComputeruseAccessibilityNode `json:"matches,omitempty"`
+	Matches []ComputerUseAccessibilityNode `json:"matches,omitempty"`
 	Truncated *bool `json:"truncated,omitempty"`
 }
 
@@ -41,9 +41,9 @@ func NewAccessibilityNodesResponseWithDefaults() *AccessibilityNodesResponse {
 }
 
 // GetMatches returns the Matches field value if set, zero value otherwise.
-func (o *AccessibilityNodesResponse) GetMatches() []ComputeruseAccessibilityNode {
+func (o *AccessibilityNodesResponse) GetMatches() []ComputerUseAccessibilityNode {
 	if o == nil || IsNil(o.Matches) {
-		var ret []ComputeruseAccessibilityNode
+		var ret []ComputerUseAccessibilityNode
 		return ret
 	}
 	return o.Matches
@@ -51,7 +51,7 @@ func (o *AccessibilityNodesResponse) GetMatches() []ComputeruseAccessibilityNode
 
 // GetMatchesOk returns a tuple with the Matches field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AccessibilityNodesResponse) GetMatchesOk() ([]ComputeruseAccessibilityNode, bool) {
+func (o *AccessibilityNodesResponse) GetMatchesOk() ([]ComputerUseAccessibilityNode, bool) {
 	if o == nil || IsNil(o.Matches) {
 		return nil, false
 	}
@@ -67,8 +67,8 @@ func (o *AccessibilityNodesResponse) HasMatches() bool {
 	return false
 }
 
-// SetMatches gets a reference to the given []ComputeruseAccessibilityNode and assigns it to the Matches field.
-func (o *AccessibilityNodesResponse) SetMatches(v []ComputeruseAccessibilityNode) {
+// SetMatches gets a reference to the given []ComputerUseAccessibilityNode and assigns it to the Matches field.
+func (o *AccessibilityNodesResponse) SetMatches(v []ComputerUseAccessibilityNode) {
 	o.Matches = v
 }
 
