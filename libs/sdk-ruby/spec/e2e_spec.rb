@@ -588,10 +588,14 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
       output = +''
       handle = @sandbox.process.connect_pty_session(pty_session_id)
       begin
+        wait_thread = Thread.new do
+          handle.wait(timeout: 15) { |chunk| output << chunk.to_s }
+        end
+        sleep 1
         handle.send_input("printf 'pty-output\\n'\n")
         sleep 2
         handle.send_input("exit\n")
-        result = handle.wait(timeout: 10) { |chunk| output << chunk.to_s }
+        result = wait_thread.value
         expect(result.exit_code || 0).to eq(0)
         expect(output).to include('pty-output')
       ensure

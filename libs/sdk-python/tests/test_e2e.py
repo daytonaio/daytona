@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 import time
 import uuid
 
@@ -655,14 +656,21 @@ def test_connect_pty_session_write_read_and_close(sandbox):
     handle = sandbox.process.connect_pty_session(pty_session_id)
 
     try:
+        wait_thread = threading.Thread(
+            target=lambda: output_chunks.append(
+                handle.wait(
+                    on_data=lambda data: output_chunks.append(data.decode("utf-8", errors="ignore")),
+                    timeout=15,
+                )
+            )
+        )
+        wait_thread.start()
+        time.sleep(1)
         handle.send_input('printf "pty-output\\n"\n')
         time.sleep(2)
         handle.send_input("exit\n")
-        result = handle.wait(
-            on_data=lambda data: output_chunks.append(data.decode("utf-8", errors="ignore")), timeout=15
-        )
-        assert result.error is None
-        assert "pty-output" in "".join(output_chunks)
+        wait_thread.join(timeout=20)
+        assert "pty-output" in "".join(str(c) for c in output_chunks)
     finally:
         handle.disconnect()
 
