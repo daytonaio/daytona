@@ -212,8 +212,14 @@ class AsyncKeyboard:
         """Presses a key with optional modifiers.
 
         Args:
-            key (str): The key to press (e.g., 'Enter', 'Escape', 'Tab', 'a', 'A').
-            modifiers (list[str]): Modifier keys ('ctrl', 'alt', 'meta', 'shift').
+            key (str): The key to press. Canonical names include 'enter', 'escape',
+                'tab', letters, digits, unshifted punctuation, function keys, and
+                grammar-safe numpad names such as 'num_plus'. Named keys are
+                case-insensitive, and common aliases such as 'Return' and 'Escape'
+                are normalized.
+            modifiers (list[str]): Canonical modifier names are 'ctrl', 'alt',
+                'shift', and 'cmd'. Common aliases such as 'control', 'option',
+                'meta', and 'win' are normalized.
 
         Raises:
             DaytonaError: If the press operation fails.
@@ -222,7 +228,7 @@ class AsyncKeyboard:
             ```python
             # Press Enter
             try:
-                await sandbox.computer_use.keyboard.press("Return")
+                await sandbox.computer_use.keyboard.press("enter")
                 print(f"Operation success")
             except Exception as e:
                 print(f"Operation failed: {e}")
@@ -249,7 +255,9 @@ class AsyncKeyboard:
         """Presses a hotkey combination.
 
         Args:
-            keys (str): The hotkey combination (e.g., 'ctrl+c', 'alt+tab', 'cmd+shift+t').
+            keys (str): A single atomic hotkey chord (e.g., 'ctrl+c', 'alt+tab',
+                'cmd+shift+t', 'ctrl + c', 'shift'). Uses the same normalized key
+                contract as ``press()``.
 
         Raises:
             DaytonaError: If the hotkey operation fails.

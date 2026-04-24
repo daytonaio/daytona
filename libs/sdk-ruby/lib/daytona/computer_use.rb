@@ -170,14 +170,14 @@ module Daytona
 
       # Presses a key with optional modifiers.
       #
-      # @param key [String] The key to press (e.g., 'Enter', 'Escape', 'Tab', 'a', 'A')
-      # @param modifiers [Array<String>, nil] Modifier keys ('ctrl', 'alt', 'meta', 'shift')
+      # @param key [String] The key to press. Canonical names include 'enter', 'escape', 'tab', letters, digits, unshifted punctuation, function keys, and grammar-safe numpad names such as 'num_plus'. Named keys are case-insensitive, and common aliases such as 'Return' and 'Escape' are normalized.
+      # @param modifiers [Array<String>, nil] Canonical modifier names are 'ctrl', 'alt', 'shift', and 'cmd'. Common aliases such as 'control', 'option', 'meta', and 'win' are normalized.
       # @return [void]
       # @raise [Daytona::Sdk::Error] If the operation fails
       #
       # @example
       #   # Press Enter
-      #   sandbox.computer_use.keyboard.press("Return")
+      #   sandbox.computer_use.keyboard.press("enter")
       #
       #   # Press Ctrl+C
       #   sandbox.computer_use.keyboard.press("c", modifiers: ["ctrl"])
@@ -193,7 +193,7 @@ module Daytona
 
       # Presses a hotkey combination.
       #
-      # @param keys [String] The hotkey combination (e.g., 'ctrl+c', 'alt+tab', 'cmd+shift+t')
+      # @param keys [String] A single atomic hotkey chord (e.g., 'ctrl+c', 'alt+tab', 'cmd+shift+t', 'ctrl + c', 'shift'). Uses the same normalized key contract as #press.
       # @return [void]
       # @raise [Daytona::Sdk::Error] If the operation fails
       #

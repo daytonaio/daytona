@@ -239,7 +239,11 @@ public class ComputerUse {
     /**
      * Presses a single key.
      *
-     * @param key key to press (for example: {@code Enter}, {@code Escape}, {@code a})
+     * @param key key to press. Canonical names include {@code enter}, {@code escape},
+     *            {@code tab}, letters, digits, unshifted punctuation, function keys,
+     *            and grammar-safe numpad names such as {@code num_plus}. Named keys are
+     *            case-insensitive, and common aliases such as {@code Return} and
+     *            {@code Escape} are normalized.
      */
     public void pressKey(String key) {
         KeyboardPressRequest request = new KeyboardPressRequest().key(key);
@@ -250,7 +254,9 @@ public class ComputerUse {
      * Presses a key combination as a hotkey sequence.
      *
      * <p>Keys are joined with {@code +} before being sent (for example,
-     * {@code pressHotkey("ctrl", "shift", "t") -> "ctrl+shift+t"}).
+     * {@code pressHotkey("ctrl", "shift", "t") -> "ctrl+shift+t"}). The resulting
+     * value is a single atomic chord and uses the same normalized key contract as
+     * {@link #pressKey(String)}.
      *
      * @param keys hotkey parts to combine
      */

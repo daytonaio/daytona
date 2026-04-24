@@ -93,31 +93,34 @@ func buildTypingActions(text string) ([]typingAction, error) {
 }
 
 func (u *ComputerUse) PressKey(req *computeruse.KeyboardPressRequest) (*computeruse.Empty, error) {
-	if len(req.Modifiers) > 0 {
-		err := robotgo.KeyTap(req.Key, req.Modifiers)
-		if err != nil {
-			return nil, err
-		}
+	chord, err := normalizeKeyboardPress(req.Key, req.Modifiers)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(chord.modifiers) > 0 {
+		err = robotgo.KeyTap(chord.key, chord.modifiers)
 	} else {
-		err := robotgo.KeyTap(req.Key)
-		if err != nil {
-			return nil, err
-		}
+		err = robotgo.KeyTap(chord.key)
+	}
+	if err != nil {
+		return nil, err
 	}
 
 	return new(computeruse.Empty), nil
 }
 
 func (u *ComputerUse) PressHotkey(req *computeruse.KeyboardHotkeyRequest) (*computeruse.Empty, error) {
-	keys := strings.Split(req.Keys, "+")
-	if len(keys) < 2 {
-		return nil, fmt.Errorf("invalid hotkey format")
+	chord, err := normalizeKeyboardHotkey(req.Keys)
+	if err != nil {
+		return nil, err
 	}
 
-	mainKey := keys[len(keys)-1]
-	modifiers := keys[:len(keys)-1]
-
-	err := robotgo.KeyTap(mainKey, modifiers)
+	if len(chord.modifiers) > 0 {
+		err = robotgo.KeyTap(chord.key, chord.modifiers)
+	} else {
+		err = robotgo.KeyTap(chord.key)
+	}
 	if err != nil {
 		return nil, err
 	}
