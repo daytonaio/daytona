@@ -4,7 +4,12 @@
 package git
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/daytonaio/daemon/pkg/gitprovider"
@@ -15,7 +20,14 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
+// Set to "true" to opt into the git-CLI clone path (bounded memory, needs `git` in PATH).
+const experimentalUseGitCloneCLIEnv = "DAYTONA_EXPERIMENTAL_USE_GIT_CLONE_CLI"
+
 func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.BasicAuth) error {
+	if os.Getenv(experimentalUseGitCloneCLIEnv) == "true" {
+		return s.CloneRepositoryCmd(repo, auth)
+	}
+
 	cloneOptions := &git.CloneOptions{
 		URL:             repo.Url,
 		SingleBranch:    true,
@@ -67,31 +79,118 @@ func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.Ba
 	return err
 }
 
-func (s *Service) CloneRepositoryCmd(repo *gitprovider.GitRepository, auth *http.BasicAuth) []string {
-	cloneCmd := []string{"git", "clone", "--single-branch"}
+// GIT_ASKPASS helper: reads creds from env so they never hit argv, URL, or .git/config.
+const askpassScript = `#!/bin/sh
+case "$1" in
+  Username*) printf '%s' "$GIT_USERNAME" ;;
+  Password*) printf '%s' "$GIT_PASSWORD" ;;
+esac
+`
 
-	// Only add branch flag if a specific branch is provided
-	if repo.Branch != "" {
-		cloneCmd = append(cloneCmd, "--branch", fmt.Sprintf("\"%s\"", repo.Branch))
+// CloneRepositoryCmd clones via the `git` CLI. Bounded memory (mmap pack handling).
+// Creds flow through GIT_ASKPASS + env — never via URL or argv.
+func (s *Service) CloneRepositoryCmd(repo *gitprovider.GitRepository, auth *http.BasicAuth) error {
+	gitBin, err := exec.LookPath("git")
+	if err != nil {
+		return fmt.Errorf("git binary not found in PATH: %w", err)
 	}
 
-	cloneUrl := repo.Url
+	askDir, err := os.MkdirTemp("", "daytona-clone-*")
+	if err != nil {
+		return fmt.Errorf("create askpass temp dir: %w", err)
+	}
+	defer os.RemoveAll(askDir)
 
-	// Default to https protocol if not specified
-	if !strings.Contains(cloneUrl, "://") {
-		cloneUrl = fmt.Sprintf("https://%s", cloneUrl)
+	askPath := filepath.Join(askDir, "askpass.sh")
+	if err := os.WriteFile(askPath, []byte(askpassScript), 0o700); err != nil {
+		return fmt.Errorf("write askpass helper: %w", err)
 	}
 
-	if auth != nil {
-		cloneUrl = fmt.Sprintf("%s://%s:%s@%s", strings.Split(cloneUrl, "://")[0], auth.Username, auth.Password, strings.SplitN(cloneUrl, "://", 2)[1])
+	cmd := exec.Command(gitBin, buildCloneArgs(repo, s.WorkDir)...)
+	cmd.Env = buildCloneEnv(os.Environ(), askPath, auth)
+	tail := s.attachCmdOutput(cmd, 64*1024)
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("git clone failed: %w\n--- git output (tail) ---\n%s", err, tail.String())
 	}
-
-	cloneCmd = append(cloneCmd, cloneUrl, s.WorkDir)
 
 	if repo.Target == gitprovider.CloneTargetCommit {
-		cloneCmd = append(cloneCmd, "&&", "cd", s.WorkDir)
-		cloneCmd = append(cloneCmd, "&&", "git", "checkout", repo.Sha)
+		checkout := exec.Command(gitBin, buildCheckoutArgs(s.WorkDir, repo.Sha)...)
+		checkoutTail := s.attachCmdOutput(checkout, 16*1024)
+		if err := checkout.Run(); err != nil {
+			return fmt.Errorf("git checkout %s failed: %w\n--- git output (tail) ---\n%s", repo.Sha, err, checkoutTail.String())
+		}
 	}
 
-	return cloneCmd
+	return nil
 }
+
+// attachCmdOutput wires cmd.Stdout/Stderr to a bounded tail (returned so
+// failures can include it) plus s.LogWriter when configured.
+func (s *Service) attachCmdOutput(cmd *exec.Cmd, tailSize int) *tailBuffer {
+	tail := newTailBuffer(tailSize)
+	var w io.Writer = tail
+	if s.LogWriter != nil {
+		w = io.MultiWriter(tail, s.LogWriter)
+	}
+	cmd.Stdout = w
+	cmd.Stderr = w
+	return tail
+}
+
+// Credentials must NEVER be embedded in the URL — they flow via GIT_ASKPASS (see buildCloneEnv).
+func buildCloneArgs(repo *gitprovider.GitRepository, workDir string) []string {
+	cloneURL := repo.Url
+	if !strings.Contains(cloneURL, "://") {
+		cloneURL = "https://" + cloneURL
+	}
+
+	args := []string{
+		"-c", "credential.helper=", // prevent any inherited helper from persisting the token
+		"-c", "http.sslVerify=false", // parity with go-git InsecureSkipTLS
+		"clone",
+		"--single-branch",
+		"--progress",
+	}
+	if repo.Branch != "" {
+		args = append(args, "--branch", repo.Branch)
+	}
+	args = append(args, "--", cloneURL, workDir)
+	return args
+}
+
+func buildCloneEnv(baseEnv []string, askPath string, auth *http.BasicAuth) []string {
+	env := append(baseEnv,
+		"GIT_ASKPASS="+askPath,
+		"GIT_TERMINAL_PROMPT=0",
+	)
+	if auth != nil {
+		env = append(env,
+			"GIT_USERNAME="+auth.Username,
+			"GIT_PASSWORD="+auth.Password,
+		)
+	}
+	return env
+}
+
+func buildCheckoutArgs(workDir, sha string) []string {
+	return []string{"-C", workDir, "checkout", "--", sha}
+}
+
+// tailBuffer keeps only the last N bytes — lets us include git's final error
+// in wrapped errors without buffering gigabytes of progress output.
+type tailBuffer struct {
+	max int
+	buf bytes.Buffer
+}
+
+func newTailBuffer(max int) *tailBuffer { return &tailBuffer{max: max} }
+
+func (t *tailBuffer) Write(p []byte) (int, error) {
+	n, err := t.buf.Write(p)
+	if over := t.buf.Len() - t.max; over > 0 {
+		t.buf.Next(over)
+	}
+	return n, err
+}
+
+func (t *tailBuffer) String() string { return t.buf.String() }
