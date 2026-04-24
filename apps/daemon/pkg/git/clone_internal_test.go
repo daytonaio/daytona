@@ -1,10 +1,11 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
 package git
 
 import (
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/daytonaio/daemon/pkg/gitprovider"
@@ -126,13 +127,49 @@ func TestBuildCloneEnv_WithoutCreds(t *testing.T) {
 	require.Contains(t, env, "GIT_ASKPASS=/tmp/askpass.sh")
 	require.Contains(t, env, "GIT_TERMINAL_PROMPT=0")
 
-	// Without auth, credential env vars must not leak.
+	// Without auth, credential env vars must not leak — even as empty values.
 	require.False(t, slices.ContainsFunc(env, func(s string) bool {
-		return len(s) > len("GIT_USERNAME=") && s[:len("GIT_USERNAME=")] == "GIT_USERNAME="
+		return strings.HasPrefix(s, "GIT_USERNAME=")
 	}), "GIT_USERNAME must not be set when auth is nil")
 	require.False(t, slices.ContainsFunc(env, func(s string) bool {
-		return len(s) > len("GIT_PASSWORD=") && s[:len("GIT_PASSWORD=")] == "GIT_PASSWORD="
+		return strings.HasPrefix(s, "GIT_PASSWORD=")
 	}), "GIT_PASSWORD must not be set when auth is nil")
+}
+
+// TestBuildCloneEnv_OverridesBaseEnv covers the glibc getenv-first-match
+// quirk: if baseEnv already has any of our managed keys, buildCloneEnv must
+// strip them so our values take effect inside the subprocess.
+func TestBuildCloneEnv_OverridesBaseEnv(t *testing.T) {
+	base := []string{
+		"PATH=/usr/bin",
+		"GIT_ASKPASS=/wrong/path",
+		"GIT_USERNAME=inherited-user",
+		"GIT_PASSWORD=inherited-pass",
+		"HOME=/home/daytona",
+	}
+	env := buildCloneEnv(base, "/tmp/askpass.sh", testCreds)
+
+	// Base env unrelated to git is preserved.
+	require.Contains(t, env, "PATH=/usr/bin")
+	require.Contains(t, env, "HOME=/home/daytona")
+
+	// Managed keys from baseEnv are dropped; our values are the only ones.
+	countPrefix := func(prefix string) int {
+		n := 0
+		for _, kv := range env {
+			if strings.HasPrefix(kv, prefix) {
+				n++
+			}
+		}
+		return n
+	}
+	require.Equal(t, 1, countPrefix("GIT_ASKPASS="))
+	require.Equal(t, 1, countPrefix("GIT_USERNAME="))
+	require.Equal(t, 1, countPrefix("GIT_PASSWORD="))
+
+	require.Contains(t, env, "GIT_ASKPASS=/tmp/askpass.sh")
+	require.Contains(t, env, "GIT_USERNAME="+testCreds.Username)
+	require.Contains(t, env, "GIT_PASSWORD="+testCreds.Password)
 }
 
 func TestBuildCloneEnv_PreservesBaseEnv(t *testing.T) {
@@ -145,5 +182,8 @@ func TestBuildCloneEnv_PreservesBaseEnv(t *testing.T) {
 
 func TestBuildCheckoutArgs(t *testing.T) {
 	got := buildCheckoutArgs("/work-dir", "1234567890")
-	require.Equal(t, []string{"-C", "/work-dir", "checkout", "--", "1234567890"}, got)
+	// Must NOT include "--" before the SHA — git would then treat it as a
+	// pathspec and fail with "did not match any file(s) known to git".
+	require.Equal(t, []string{"-C", "/work-dir", "checkout", "1234567890"}, got)
+	require.NotContains(t, got, "--", "checkout args must not include -- before the SHA")
 }

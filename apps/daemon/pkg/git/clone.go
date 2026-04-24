@@ -25,7 +25,7 @@ const experimentalUseGitCloneCLIEnv = "DAYTONA_EXPERIMENTAL_USE_GIT_CLONE_CLI"
 
 func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.BasicAuth) error {
 	if os.Getenv(experimentalUseGitCloneCLIEnv) == "true" {
-		return s.CloneRepositoryCmd(repo, auth)
+		return s.CloneRepositoryCLI(repo, auth)
 	}
 
 	cloneOptions := &git.CloneOptions{
@@ -87,9 +87,9 @@ case "$1" in
 esac
 `
 
-// CloneRepositoryCmd clones via the `git` CLI. Bounded memory (mmap pack handling).
+// CloneRepositoryCLI clones via the `git` CLI. Bounded memory (mmap pack handling).
 // Creds flow through GIT_ASKPASS + env — never via URL or argv.
-func (s *Service) CloneRepositoryCmd(repo *gitprovider.GitRepository, auth *http.BasicAuth) error {
+func (s *Service) CloneRepositoryCLI(repo *gitprovider.GitRepository, auth *http.BasicAuth) error {
 	gitBin, err := exec.LookPath("git")
 	if err != nil {
 		return fmt.Errorf("git binary not found in PATH: %w", err)
@@ -159,7 +159,22 @@ func buildCloneArgs(repo *gitprovider.GitRepository, workDir string) []string {
 }
 
 func buildCloneEnv(baseEnv []string, askPath string, auth *http.BasicAuth) []string {
-	env := append(baseEnv,
+	// glibc's getenv returns the first match, so appending can't override an
+	// existing value. Strip conflicting keys from baseEnv before our values.
+	managed := map[string]bool{
+		"GIT_ASKPASS":         true,
+		"GIT_TERMINAL_PROMPT": true,
+		"GIT_USERNAME":        true,
+		"GIT_PASSWORD":        true,
+	}
+	env := make([]string, 0, len(baseEnv)+4)
+	for _, kv := range baseEnv {
+		if i := strings.IndexByte(kv, '='); i > 0 && managed[kv[:i]] {
+			continue
+		}
+		env = append(env, kv)
+	}
+	env = append(env,
 		"GIT_ASKPASS="+askPath,
 		"GIT_TERMINAL_PROMPT=0",
 	)
@@ -173,7 +188,8 @@ func buildCloneEnv(baseEnv []string, askPath string, auth *http.BasicAuth) []str
 }
 
 func buildCheckoutArgs(workDir, sha string) []string {
-	return []string{"-C", workDir, "checkout", "--", sha}
+	// No `--` separator: that would make git treat the SHA as a pathspec.
+	return []string{"-C", workDir, "checkout", sha}
 }
 
 // tailBuffer keeps only the last N bytes — lets us include git's final error
