@@ -65,6 +65,7 @@ var (
 	ErrNodeNotFound       = errors.New("accessibility node not found")
 	ErrActionNotSupported = errors.New("action not supported by node")
 	ErrInvalidScope       = errors.New("invalid accessibility scope")
+	ErrInvalidRequest     = errors.New("invalid accessibility request")
 )
 
 // ---------------------------------------------------------------------------
@@ -219,18 +220,18 @@ func makeNodeID(sender string, path dbus.ObjectPath) string {
 func parseNodeID(id string) (string, dbus.ObjectPath, error) {
 	slash := strings.Index(id, "/")
 	if slash <= 1 {
-		return "", "", fmt.Errorf("invalid node id %q: missing object path", id)
+		return "", "", fmt.Errorf("%w: invalid node id %q: missing object path", ErrInvalidRequest, id)
 	}
 	if id[slash-1] != ':' {
-		return "", "", fmt.Errorf("invalid node id %q: missing ':' separator before object path", id)
+		return "", "", fmt.Errorf("%w: invalid node id %q: missing ':' separator before object path", ErrInvalidRequest, id)
 	}
 	sender := id[:slash-1]
 	path := dbus.ObjectPath(id[slash:])
 	if sender == "" {
-		return "", "", fmt.Errorf("invalid node id %q: empty bus name", id)
+		return "", "", fmt.Errorf("%w: invalid node id %q: empty bus name", ErrInvalidRequest, id)
 	}
 	if !path.IsValid() {
-		return "", "", fmt.Errorf("invalid node id %q: malformed object path", id)
+		return "", "", fmt.Errorf("%w: invalid node id %q: malformed object path", ErrInvalidRequest, id)
 	}
 	return sender, path, nil
 }
@@ -447,7 +448,7 @@ func (c *ComputerUse) resolveScopeRoot(conn *dbus.Conn, scope A11yScope, pid int
 	case A11yScopePID:
 		return c.getAppRootByPID(conn, pid)
 	default:
-		return accessibleRef{}, fmt.Errorf("unknown scope %q", scope)
+		return accessibleRef{}, fmt.Errorf("%w: unknown scope %q", ErrInvalidScope, scope)
 	}
 }
 
@@ -492,7 +493,7 @@ func appHasActiveWindow(conn *dbus.Conn, app accessibleRef) bool {
 // to the app's OS process id.
 func (c *ComputerUse) getAppRootByPID(conn *dbus.Conn, pid int) (accessibleRef, error) {
 	if pid <= 0 {
-		return accessibleRef{}, fmt.Errorf("%w: pid must be positive", ErrNoAccessibleRoot)
+		return accessibleRef{}, fmt.Errorf("%w: pid must be positive", ErrInvalidRequest)
 	}
 	apps, err := getChildren(conn, atspiRegistryBus, atspiRootPath)
 	if err != nil {
@@ -618,22 +619,27 @@ func (c *ComputerUse) findAccessibilityNodes(scope A11yScope, pid int, filter A1
 
 	budget := walkBudget
 	matches := make([]*A11yNode, 0, 16)
-	truncated := findWalk(conn, root.Sender, root.Path, matcher, &matches, limit, &budget)
+	truncated, err := findWalk(conn, root.Sender, root.Path, matcher, &matches, limit, &budget, false)
+	if err != nil {
+		return nil, false, err
+	}
 	return matches, truncated, nil
 }
 
 // findWalk returns true when the walk was truncated by either the node budget
 // or the result limit.
-func findWalk(conn *dbus.Conn, sender string, path dbus.ObjectPath, match func(*A11yNode) bool, out *[]*A11yNode, limit int, budget *int) bool {
+func findWalk(conn *dbus.Conn, sender string, path dbus.ObjectPath, match func(*A11yNode) bool, out *[]*A11yNode, limit int, budget *int, ignoreMissing bool) (bool, error) {
 	if *budget <= 0 {
-		return true
+		return true, nil
 	}
 	*budget--
 
 	node, _, err := fetchNodeMeta(conn, sender, path)
 	if err != nil {
-		// Can't read this node — treat as invisible rather than failing the walk.
-		return false
+		if ignoreMissing && errors.Is(err, ErrNodeNotFound) {
+			return false, nil
+		}
+		return false, err
 	}
 
 	if match(node) {
@@ -642,23 +648,27 @@ func findWalk(conn *dbus.Conn, sender string, path dbus.ObjectPath, match func(*
 		flat.Children = nil
 		*out = append(*out, &flat)
 		if len(*out) >= limit {
-			return true
+			return true, nil
 		}
 	}
 
 	refs, err := getChildren(conn, sender, path)
 	if err != nil {
-		return false
+		if ignoreMissing && errors.Is(err, ErrNodeNotFound) {
+			return false, nil
+		}
+		return false, err
 	}
 	for _, r := range refs {
 		if *budget <= 0 {
-			return true
+			return true, nil
 		}
-		if findWalk(conn, r.Sender, r.Path, match, out, limit, budget) {
-			return true
+		truncated, err := findWalk(conn, r.Sender, r.Path, match, out, limit, budget, true)
+		if err != nil || truncated {
+			return truncated, err
 		}
 	}
-	return *budget <= 0
+	return *budget <= 0, nil
 }
 
 // ---------------------------------------------------------------------------
@@ -674,15 +684,15 @@ func buildFilterMatcher(f A11yFilter) (func(*A11yNode) bool, error) {
 	if nameMatch == "" {
 		nameMatch = "substring"
 	}
+	if nameMatch != "exact" && nameMatch != "substring" && nameMatch != "regex" {
+		return nil, fmt.Errorf("%w: unknown nameMatch mode %q, want exact|substring|regex", ErrInvalidRequest, nameMatch)
+	}
 	if f.Name != "" && nameMatch == "regex" {
 		re, err := regexp.Compile(f.Name)
 		if err != nil {
-			return nil, fmt.Errorf("invalid regex for name filter: %w", err)
+			return nil, fmt.Errorf("%w: invalid regex for name filter: %v", ErrInvalidRequest, err)
 		}
 		nameRe = re
-	}
-	if f.Name != "" && nameMatch != "exact" && nameMatch != "substring" && nameMatch != "regex" {
-		return nil, fmt.Errorf("unknown nameMatch mode %q: want exact|substring|regex", nameMatch)
 	}
 
 	role := strings.ToLower(f.Role)
@@ -786,7 +796,7 @@ func (c *ComputerUse) invokeAccessibilityNode(id string, action string) error {
 		return classifyDbusError(err)
 	}
 	if !ok {
-		return fmt.Errorf("DoAction(%d) returned false", idx)
+		return fmt.Errorf("%w: DoAction(%d) returned false", ErrActionNotSupported, idx)
 	}
 	return nil
 }
@@ -965,7 +975,7 @@ func (c *ComputerUse) FindAccessibilityNodes(req *computeruse.FindAccessibilityN
 // /computeruse/a11y/node/focus.
 func (c *ComputerUse) FocusAccessibilityNode(req *computeruse.AccessibilityNodeRequest) (*computeruse.Empty, error) {
 	if req == nil {
-		return nil, fmt.Errorf("request is required")
+		return nil, fmt.Errorf("%w: request is required", ErrInvalidRequest)
 	}
 	if err := c.focusAccessibilityNode(req.ID); err != nil {
 		return nil, err
@@ -977,7 +987,7 @@ func (c *ComputerUse) FocusAccessibilityNode(req *computeruse.AccessibilityNodeR
 // /computeruse/a11y/node/invoke.
 func (c *ComputerUse) InvokeAccessibilityNode(req *computeruse.AccessibilityInvokeRequest) (*computeruse.Empty, error) {
 	if req == nil {
-		return nil, fmt.Errorf("request is required")
+		return nil, fmt.Errorf("%w: request is required", ErrInvalidRequest)
 	}
 	if err := c.invokeAccessibilityNode(req.ID, req.Action); err != nil {
 		return nil, err
@@ -989,7 +999,7 @@ func (c *ComputerUse) InvokeAccessibilityNode(req *computeruse.AccessibilityInvo
 // /computeruse/a11y/node/value.
 func (c *ComputerUse) SetAccessibilityNodeValue(req *computeruse.AccessibilitySetValueRequest) (*computeruse.Empty, error) {
 	if req == nil {
-		return nil, fmt.Errorf("request is required")
+		return nil, fmt.Errorf("%w: request is required", ErrInvalidRequest)
 	}
 	if err := c.setAccessibilityNodeValue(req.ID, req.Value); err != nil {
 		return nil, err

@@ -38,7 +38,16 @@ const (
 	a11yMsgNodeNotFound       = "accessibility node not found"
 	a11yMsgActionNotSupported = "action not supported by node"
 	a11yMsgInvalidScope       = "invalid accessibility scope"
+	a11yMsgInvalidRequest     = "invalid accessibility request"
 )
+
+// writeA11yInvalidRequest gives binding errors and plugin validation failures the same response shape.
+func writeA11yInvalidRequest(c *gin.Context, msg string) {
+	c.JSON(http.StatusBadRequest, gin.H{
+		"error": msg,
+		"code":  "A11Y_INVALID_REQUEST",
+	})
+}
 
 // writeA11yError maps the plugin sentinel errors to HTTP responses. Unknown
 // errors fall through to 500. The translation is kept here (not baked into
@@ -80,6 +89,8 @@ func writeA11yError(c *gin.Context, err error) {
 			"error": msg,
 			"code":  "A11Y_INVALID_SCOPE",
 		})
+	case strings.Contains(msg, a11yMsgInvalidRequest):
+		writeA11yInvalidRequest(c, msg)
 	default:
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": msg,
@@ -114,7 +125,7 @@ func WrapGetAccessibilityTreeHandler(fn func(*GetAccessibilityTreeRequest) (*Acc
 		// Bind scope / pid from query first; then explicitly re-parse
 		// maxDepth so the "-1 default when absent" semantic survives binding.
 		if err := c.ShouldBindQuery(req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			writeA11yInvalidRequest(c, err.Error())
 			return
 		}
 		if c.Query("maxDepth") == "" {
@@ -152,7 +163,7 @@ func WrapFindAccessibilityNodesHandler(fn func(*FindAccessibilityNodesRequest) (
 	return func(c *gin.Context) {
 		var req FindAccessibilityNodesRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			writeA11yInvalidRequest(c, err.Error())
 			return
 		}
 		response, err := fn(&req)
@@ -183,7 +194,7 @@ func WrapFocusAccessibilityNodeHandler(fn func(*AccessibilityNodeRequest) (*Empt
 	return func(c *gin.Context) {
 		var req AccessibilityNodeRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			writeA11yInvalidRequest(c, err.Error())
 			return
 		}
 		response, err := fn(&req)
@@ -214,7 +225,7 @@ func WrapInvokeAccessibilityNodeHandler(fn func(*AccessibilityInvokeRequest) (*E
 	return func(c *gin.Context) {
 		var req AccessibilityInvokeRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			writeA11yInvalidRequest(c, err.Error())
 			return
 		}
 		response, err := fn(&req)
@@ -245,7 +256,7 @@ func WrapSetAccessibilityNodeValueHandler(fn func(*AccessibilitySetValueRequest)
 	return func(c *gin.Context) {
 		var req AccessibilitySetValueRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			writeA11yInvalidRequest(c, err.Error())
 			return
 		}
 		response, err := fn(&req)

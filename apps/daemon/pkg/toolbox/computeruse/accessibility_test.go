@@ -74,6 +74,12 @@ func TestWriteA11yError(t *testing.T) {
 			wantCode:   "A11Y_INVALID_SCOPE",
 		},
 		{
+			name:       "invalid request -> 400",
+			err:        fmt.Errorf("%s: invalid node id", a11yMsgInvalidRequest),
+			wantStatus: http.StatusBadRequest,
+			wantCode:   "A11Y_INVALID_REQUEST",
+		},
+		{
 			name:       "unknown error -> 500 with A11Y_INTERNAL",
 			err:        errors.New("something unmapped blew up deep in the plugin"),
 			wantStatus: http.StatusInternalServerError,
