@@ -167,7 +167,22 @@ func execSandboxCommand(t *testing.T, httpCli *http.Client, cfg Config, baseURL,
 	var parsed map[string]interface{}
 	require.NoError(t, json.Unmarshal(respBody, &parsed))
 
-	result, _ := parsed["result"].(string)
-	exitCodeF, _ := parsed["exitCode"].(float64)
+	// exitCode must be present and numeric; a missing/malformed field would
+	// otherwise silently default to 0 and make a broken response look like a
+	// successful command.
+	exitCodeRaw, ok := parsed["exitCode"]
+	require.True(t, ok, "/process/execute response missing exitCode: %s", string(respBody))
+	exitCodeF, ok := exitCodeRaw.(float64)
+	require.True(t, ok, "/process/execute exitCode is not numeric: %v (%s)", exitCodeRaw, string(respBody))
+
+	// result may legitimately be empty (e.g. command produced no stdout), so
+	// tolerate the zero value but still fail on wrong type.
+	result := ""
+	if raw, present := parsed["result"]; present && raw != nil {
+		s, ok := raw.(string)
+		require.True(t, ok, "/process/execute result is not a string: %v (%s)", raw, string(respBody))
+		result = s
+	}
+
 	return sandboxExecResult{result: result, exitCode: int(exitCodeF)}
 }
