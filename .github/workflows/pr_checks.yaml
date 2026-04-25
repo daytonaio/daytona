@@ -159,6 +159,8 @@ jobs:
           go install github.com/princjef/gomarkdoc/cmd/gomarkdoc@v1.1.0
           echo -e 'DEFAULT_PACKAGE_VERSION=0.0.0-dev\nDEFAULT_GEM_VERSION=0.0.0.pre.dev\n\nPYPI_PKG_VERSION=\nNPM_PKG_VERSION=\nNPM_TAG=\nPYPI_TOKEN=\nNPM_TOKEN=' > .env
           mkdir -p dist/apps/api
+          openapi_version="$(node -e "console.log(require('./openapitools.json')['generator-cli'].version)")"
+          yarn openapi-generator-cli version-manager set "$openapi_version"
           yarn generate:api-client
           yarn lint:fix
           yarn format
