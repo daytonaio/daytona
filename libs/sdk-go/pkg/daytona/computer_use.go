@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 package daytona
@@ -351,7 +351,7 @@ func (m *MouseService) Drag(ctx context.Context, startX, startY, endX, endY int,
 //
 // Parameters:
 //   - x, y: Coordinates where the scroll occurs
-//   - direction: Scroll direction ("up", "down", "left", "right")
+//   - direction: Scroll direction ("up", "down")
 //   - amount: Scroll amount, nil for default
 //
 // Example:

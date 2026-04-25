@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Daytona Platforms Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -136,7 +136,7 @@ export class Mouse {
    * @example
    * ```typescript
    * const result = await sandbox.computerUse.mouse.drag(50, 50, 150, 150);
-   * console.log(`Dragged from ${result.from.x},${result.from.y} to ${result.to.x},${result.to.y}`);
+   * console.log(`Drag ended at: ${result.x}, ${result.y}`);
    * ```
    */
   @WithInstrumentation()

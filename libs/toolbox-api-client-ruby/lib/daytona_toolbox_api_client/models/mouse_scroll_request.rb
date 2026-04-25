@@ -98,6 +98,10 @@ module DaytonaToolboxApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
+      if !@amount.nil? && @amount < 0
+        invalid_properties.push('invalid value for "amount", must be greater than or equal to 0.')
+      end
+
       invalid_properties
     end
 
@@ -105,7 +109,22 @@ module DaytonaToolboxApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
+      return false if !@amount.nil? && @amount < 0
       true
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] amount Value to be assigned
+    def amount=(amount)
+      if amount.nil?
+        fail ArgumentError, 'amount cannot be nil'
+      end
+
+      if amount < 0
+        fail ArgumentError, 'invalid value for "amount", must be greater than or equal to 0.'
+      end
+
+      @amount = amount
     end
 
     # Checks equality by comparing each attribute.

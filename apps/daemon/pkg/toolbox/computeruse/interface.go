@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
 package computeruse
@@ -114,7 +114,7 @@ type MouseDragRequest struct {
 type MouseScrollRequest struct {
 	Position
 	Direction string `json:"direction"` // up, down
-	Amount    int    `json:"amount"`
+	Amount    int    `json:"amount" minimum:"0" default:"1"`
 } //	@name	MouseScrollRequest
 
 // Keyboard parameter structs

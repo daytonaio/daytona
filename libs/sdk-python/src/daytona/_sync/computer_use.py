@@ -1,4 +1,4 @@
-# Copyright 2025 Daytona Platforms Inc.
+# Copyright Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
@@ -133,7 +133,7 @@ class Mouse:
         Example:
             ```python
             result = sandbox.computer_use.mouse.drag(50, 50, 150, 150)
-            print(f"Dragged from {result.from_x},{result.from_y} to {result.to_x},{result.to_y}")
+            print(f"Drag ended at {result.x}, {result.y}")
             ```
         """
         request = MouseDragRequest(start_x=start_x, start_y=start_y, end_x=end_x, end_y=end_y, button=button)

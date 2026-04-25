@@ -9,17 +9,17 @@ type CodeRunRequest struct {
 	Argv     []string          `json:"argv,omitempty"`
 	Envs     map[string]string `json:"envs,omitempty"`
 	Timeout  *uint32           `json:"timeout,omitempty"`
-} // @name CodeRunRequest
+} //	@name	CodeRunRequest
 
 type CodeRunResponse struct {
 	ExitCode  int               `json:"exitCode"`
 	Result    string            `json:"result"`
 	Artifacts *CodeRunArtifacts `json:"artifacts,omitempty"`
-} // @name CodeRunResponse
+} //	@name	CodeRunResponse
 
 type CodeRunArtifacts struct {
 	Charts []Chart `json:"charts,omitempty"`
-} // @name CodeRunArtifacts
+} //	@name	CodeRunArtifacts
 
 type Chart struct {
 	Type        string         `json:"type"`
@@ -34,7 +34,7 @@ type Chart struct {
 	XScale      string         `json:"x_scale,omitempty"`
 	YScale      string         `json:"y_scale,omitempty"`
 	Elements    []ChartElement `json:"elements"`
-} // @name Chart
+} //	@name	Chart
 
 type ChartElement struct {
 	Label         string      `json:"label,omitempty"`
@@ -54,4 +54,4 @@ type ChartElement struct {
 	Png           string      `json:"png,omitempty"`
 	XLabel        string      `json:"x_label,omitempty"`
 	YLabel        string      `json:"y_label,omitempty"`
-} // @name ChartElement
+} //	@name	ChartElement

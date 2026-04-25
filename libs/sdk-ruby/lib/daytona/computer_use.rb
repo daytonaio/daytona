@@ -88,7 +88,7 @@ module Daytona
       #
       # @example
       #   result = sandbox.computer_use.mouse.drag(start_x: 50, start_y: 50, end_x: 150, end_y: 150)
-      #   puts "Dragged from #{result.from_x},#{result.from_y} to #{result.to_x},#{result.to_y}"
+      #   puts "Drag ended at #{result.x}, #{result.y}"
       def drag(start_x:, start_y:, end_x:, end_y:, button: 'left')
         request = DaytonaToolboxApiClient::MouseDragRequest.new(start_x:, start_y:, end_x:, end_y:, button:)
         toolbox_api.drag(request)

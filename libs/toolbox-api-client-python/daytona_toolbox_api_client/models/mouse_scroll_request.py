@@ -19,6 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
@@ -29,7 +30,7 @@ class MouseScrollRequest(BaseModel):
     """
     MouseScrollRequest
     """ # noqa: E501
-    amount: Optional[StrictInt] = None
+    amount: Optional[Annotated[int, Field(strict=True, ge=0)]] = None
     direction: Optional[StrictStr] = Field(default=None, description="up, down")
     x: Optional[StrictInt] = None
     y: Optional[StrictInt] = None

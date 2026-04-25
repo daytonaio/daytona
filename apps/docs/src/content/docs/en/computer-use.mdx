@@ -353,7 +353,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/process/{proc
 
 ### Click
 
-Click the mouse at the specified coordinates.
+Click the mouse at the specified coordinates. `button` is one of `left`, `right`, or `middle` (case-insensitive; defaults to `left`); other values return an error.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -438,10 +438,10 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/mouse/click' 
   --request POST \
   --header 'Content-Type: application/json' \
   --data '{
-  "button": "",
+  "button": "left",
   "double": true,
-  "x": 1,
-  "y": 1
+  "x": 100,
+  "y": 200
 }'
 ```
 
@@ -521,7 +521,7 @@ Drag the mouse from start coordinates to end coordinates.
 
 ```python
 result = sandbox.computer_use.mouse.drag(50, 50, 150, 150)
-print(f"Dragged from {result.from_x},{result.from_y} to {result.to_x},{result.to_y}")
+print(f"Drag ended at {result.x}, {result.y}")
 ```
 
 </TabItem>
@@ -529,7 +529,7 @@ print(f"Dragged from {result.from_x},{result.from_y} to {result.to_x},{result.to
 
 ```typescript
 const result = await sandbox.computerUse.mouse.drag(50, 50, 150, 150);
-console.log(`Dragged from ${result.from.x},${result.from.y} to ${result.to.x},${result.to.y}`);
+console.log(`Drag ended at ${result.x}, ${result.y}`);
 ```
 
 </TabItem>
@@ -537,7 +537,7 @@ console.log(`Dragged from ${result.from.x},${result.from.y} to ${result.to.x},${
 
 ```ruby
 result = sandbox.computer_use.mouse.drag(start_x: 50, start_y: 50, end_x: 150, end_y: 150)
-puts "Dragged from #{result.from_x},#{result.from_y} to #{result.to_x},#{result.to_y}"
+puts "Drag ended at #{result.x}, #{result.y}"
 ```
 
 </TabItem>
@@ -568,11 +568,11 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/mouse/drag' \
   --request POST \
   --header 'Content-Type: application/json' \
   --data '{
-  "button": "",
-  "endX": 1,
-  "endY": 1,
-  "startX": 1,
-  "startY": 1
+  "button": "left",
+  "endX": 200,
+  "endY": 300,
+  "startX": 100,
+  "startY": 100
 }'
 ```
 
@@ -581,7 +581,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/mouse/drag' \
 
 ### Scroll
 
-Scroll the mouse wheel at the specified coordinates.
+Scroll the mouse wheel at the specified coordinates. `direction` is `up` or `down` (other values return an error). `amount` is the number of scroll wheel ticks to send — one tick is roughly one notch of a physical mouse wheel, which moves a few lines in most apps. Defaults to 1 if omitted.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -651,10 +651,10 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/mouse/scroll'
   --request POST \
   --header 'Content-Type: application/json' \
   --data '{
-  "amount": 1,
-  "direction": "",
-  "x": 1,
-  "y": 1
+  "amount": 3,
+  "direction": "down",
+  "x": 100,
+  "y": 200
 }'
 ```
 
@@ -1974,4 +1974,3 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/display/windo
 
 </TabItem>
 </Tabs>
-

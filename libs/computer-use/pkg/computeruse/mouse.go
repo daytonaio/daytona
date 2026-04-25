@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
 package computeruse
@@ -45,10 +45,12 @@ func (u *ComputerUse) MoveMouse(req *computeruse.MouseMoveRequest) (*computeruse
 }
 
 func (u *ComputerUse) Click(req *computeruse.MouseClickRequest) (*computeruse.MouseClickResponse, error) {
-	// Default to left button
-	if req.Button == "" {
-		req.Button = "left"
+	button, err := normalizeMouseButton(req.Button)
+	if err != nil {
+		return nil, err
 	}
+	req.Button = button
+	robotgoButton := robotgoMouseButton(button)
 
 	// Move mouse to position first
 	robotgo.Move(req.X, req.Y)
@@ -56,9 +58,9 @@ func (u *ComputerUse) Click(req *computeruse.MouseClickRequest) (*computeruse.Mo
 
 	// Perform the click
 	if req.Double {
-		robotgo.Click(req.Button, true)
+		robotgo.Click(robotgoButton, true)
 	} else {
-		robotgo.Click(req.Button, false)
+		robotgo.Click(robotgoButton, false)
 	}
 
 	// Get position after click
@@ -85,28 +87,30 @@ func moveMouseSmoothly(startX, startY, endX, endY, steps int) {
 }
 
 func (u *ComputerUse) Drag(req *computeruse.MouseDragRequest) (*computeruse.MouseDragResponse, error) {
-	// Default to left button
-	if req.Button == "" {
-		req.Button = "left"
+	button, err := normalizeMouseButton(req.Button)
+	if err != nil {
+		return nil, err
 	}
+	req.Button = button
+	robotgoButton := robotgoMouseButton(button)
 
 	// Move to start position
 	robotgo.Move(req.StartX, req.StartY)
 	time.Sleep(100 * time.Millisecond)
 
 	// Click to focus window before drag
-	robotgo.Click(req.Button, false)
+	robotgo.Click(robotgoButton, false)
 	time.Sleep(100 * time.Millisecond)
 
 	// Ensure mouse button is up before starting
-	err := robotgo.MouseUp(req.Button)
+	err = robotgo.MouseUp(robotgoButton)
 	if err != nil {
 		return nil, err
 	}
 	time.Sleep(50 * time.Millisecond)
 
 	// Press and hold mouse button
-	err = robotgo.MouseDown(req.Button)
+	err = robotgo.MouseDown(robotgoButton)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +121,7 @@ func (u *ComputerUse) Drag(req *computeruse.MouseDragRequest) (*computeruse.Mous
 	time.Sleep(100 * time.Millisecond)
 
 	// Release mouse button
-	err = robotgo.MouseUp(req.Button)
+	err = robotgo.MouseUp(robotgoButton)
 	if err != nil {
 		return nil, err
 	}
@@ -135,10 +139,17 @@ func (u *ComputerUse) Drag(req *computeruse.MouseDragRequest) (*computeruse.Mous
 }
 
 func (u *ComputerUse) Scroll(req *computeruse.MouseScrollRequest) (*computeruse.ScrollResponse, error) {
-	// Default amount if not specified
-	if req.Amount <= 0 {
-		req.Amount = 3
+	direction, err := normalizeScrollDirection(req.Direction)
+	if err != nil {
+		return nil, err
 	}
+	req.Direction = direction
+
+	amount, err := normalizeScrollAmount(req.Amount)
+	if err != nil {
+		return nil, err
+	}
+	req.Amount = amount
 
 	// Move mouse to scroll position
 	robotgo.Move(req.X, req.Y)

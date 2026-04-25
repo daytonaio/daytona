@@ -805,6 +805,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "number",
+                        "format": "float64",
                         "description": "Scale factor (0.1-1.0)",
                         "name": "scale",
                         "in": "query"
@@ -937,6 +938,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "number",
+                        "format": "float64",
                         "description": "Scale factor (0.1-1.0)",
                         "name": "scale",
                         "in": "query"
@@ -3034,7 +3036,8 @@ const docTemplate = `{
                     "items": {
                         "type": "array",
                         "items": {
-                            "type": "number"
+                            "type": "number",
+                            "format": "float64"
                         }
                     }
                 },
@@ -3957,7 +3960,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "amount": {
-                    "type": "integer"
+                    "type": "integer",
+                    "default": 1,
+                    "minimum": 0
                 },
                 "direction": {
                     "description": "up, down",

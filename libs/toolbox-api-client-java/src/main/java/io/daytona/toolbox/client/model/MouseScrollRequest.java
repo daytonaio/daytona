@@ -80,6 +80,7 @@ public class MouseScrollRequest {
 
   /**
    * Get amount
+   * minimum: 0
    * @return amount
    */
   @javax.annotation.Nullable
