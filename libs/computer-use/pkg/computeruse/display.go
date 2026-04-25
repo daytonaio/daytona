@@ -6,6 +6,7 @@ package computeruse
 import (
 	"bytes"
 	"encoding/base64"
+	"fmt"
 	"image"
 	"image/draw"
 	"image/jpeg"
@@ -18,7 +19,7 @@ import (
 
 // ImageCompressionParams holds parameters for image compression
 type ImageCompressionParams struct {
-	Format  string  // "png", "jpeg", "webp"
+	Format  string  // "png" or "jpeg"
 	Quality int     // 1-100 for JPEG quality
 	Scale   float64 // 0.1-1.0 for scaling down
 }
@@ -67,8 +68,18 @@ func scaleImage(img *image.RGBA, scale float64) image.Image {
 
 	// Simple nearest neighbor scaling
 	oldBounds := img.Bounds()
+	if oldBounds.Dx() <= 0 || oldBounds.Dy() <= 0 {
+		return img
+	}
+
 	newWidth := int(float64(oldBounds.Dx()) * scale)
 	newHeight := int(float64(oldBounds.Dy()) * scale)
+	if newWidth < 1 {
+		newWidth = 1
+	}
+	if newHeight < 1 {
+		newHeight = 1
+	}
 
 	scaledImg := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
 
@@ -140,10 +151,14 @@ func (u *ComputerUse) TakeCompressedRegionScreenshot(req *computeruse.Compressed
 		Scale:   req.Scale,
 	}
 
+	if err := validateScreenshotRegion(req.Width, req.Height); err != nil {
+		return nil, err
+	}
+
 	rect := image.Rect(req.X, req.Y, req.X+req.Width, req.Y+req.Height)
 	img, err := screenshot.CaptureRect(rect)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to capture screenshot region x=%d y=%d width=%d height=%d: %w", req.X, req.Y, req.Width, req.Height, err)
 	}
 
 	// Convert to RGBA for drawing
