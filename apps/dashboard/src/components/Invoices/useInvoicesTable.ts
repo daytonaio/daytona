@@ -15,8 +15,8 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { useMemo, useState } from 'react'
-import { getColumns } from './columns'
+import { useState } from 'react'
+import { invoiceColumns } from './columns'
 
 interface UseInvoicesTableProps {
   pagination: {
@@ -48,19 +48,16 @@ export function useInvoicesTable({
   ])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
-  const columns = useMemo(
-    () =>
-      getColumns({
+  const table = useReactTable({
+    data,
+    columns: invoiceColumns,
+    meta: {
+      invoices: {
         onViewInvoice,
         onVoidInvoice,
         onPayInvoice,
-      }),
-    [onViewInvoice, onVoidInvoice, onPayInvoice],
-  )
-
-  const table = useReactTable({
-    data,
-    columns,
+      },
+    },
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -78,6 +75,9 @@ export function useInvoicesTable({
     state: {
       sorting,
       columnFilters,
+      columnPinning: {
+        right: ['actions'],
+      },
       pagination: {
         pageIndex: pagination.pageIndex,
         pageSize: pagination.pageSize,

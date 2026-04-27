@@ -51,7 +51,7 @@ const columns: ColumnDef<MessageOut>[] = [
   },
   {
     accessorKey: 'timestamp',
-    header: 'Timestamp',
+    header: 'Sent',
     size: 200,
     cell: ({ row }) => {
       const timestamp = row.original.timestamp

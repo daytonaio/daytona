@@ -81,7 +81,9 @@ const columns: ColumnDef<EndpointOut>[] = [
   {
     id: 'actions',
     header: () => null,
-    maxSize: 44,
+    size: 48,
+    minSize: 48,
+    maxSize: 48,
     cell: ({ row, table }) => {
       const { onDisable, onDelete, isLoadingEndpoint } = getMeta(table)
       const isLoading = isLoadingEndpoint(row.original)
@@ -90,20 +92,15 @@ const columns: ColumnDef<EndpointOut>[] = [
         <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-xs" disabled={isLoading}>
+              <Button variant="ghost" size="icon-sm" aria-label="Open menu" disabled={isLoading}>
                 <MoreHorizontal className="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onDisable(row.original)} className="cursor-pointer" disabled={isLoading}>
+              <DropdownMenuItem onClick={() => onDisable(row.original)} disabled={isLoading}>
                 {row.original.disabled ? 'Enable' : 'Disable'}
               </DropdownMenuItem>
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => onDelete(row.original)}
-                className="cursor-pointer"
-                disabled={isLoading}
-              >
+              <DropdownMenuItem variant="destructive" onClick={() => onDelete(row.original)} disabled={isLoading}>
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>

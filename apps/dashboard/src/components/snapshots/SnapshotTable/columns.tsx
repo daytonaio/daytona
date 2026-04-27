@@ -56,7 +56,7 @@ const SortableHeader: React.FC<SortableHeaderProps> = ({ column, label }) => {
     <button
       type="button"
       onClick={() => column.toggleSorting(sortDirection === 'asc')}
-      className="group/sort-button flex items-center gap-2 w-full h-full"
+      className="group/sort-header flex h-full w-full items-center gap-2"
     >
       {label}
       <SortOrderIcon sort={sortDirection || null} />
@@ -67,6 +67,9 @@ const SortableHeader: React.FC<SortableHeaderProps> = ({ column, label }) => {
 const columns: ColumnDef<SnapshotDto>[] = [
   {
     id: 'select',
+    size: 44,
+    minSize: 44,
+    maxSize: 44,
     header: ({ table }) => {
       const { deletePermitted, loading, selectableCount } = getMeta(table)
 
@@ -80,25 +83,26 @@ const columns: ColumnDef<SnapshotDto>[] = [
       }
 
       return (
-        <Checkbox
-          checked={allSelected || (partiallySelected && 'indeterminate')}
-          onCheckedChange={() => {
-            if (table)
-              table.getRowModel().rows.forEach((row) => {
-                if (row.original.general) {
-                  return
-                }
-                if (allSelected) {
-                  row.toggleSelected(false)
-                } else {
-                  row.toggleSelected(true)
-                }
-              })
-          }}
-          aria-label="Select all"
-          disabled={!deletePermitted || loading}
-          className="translate-y-[2px]"
-        />
+        <div className="flex justify-center">
+          <Checkbox
+            checked={allSelected || (partiallySelected && 'indeterminate')}
+            onCheckedChange={() => {
+              if (table)
+                table.getRowModel().rows.forEach((row) => {
+                  if (row.original.general) {
+                    return
+                  }
+                  if (allSelected) {
+                    row.toggleSelected(false)
+                  } else {
+                    row.toggleSelected(true)
+                  }
+                })
+            }}
+            aria-label="Select all"
+            disabled={!deletePermitted || loading}
+          />
+        </div>
       )
     },
     cell: ({ row, table }) => {
@@ -109,17 +113,22 @@ const columns: ColumnDef<SnapshotDto>[] = [
       }
 
       if (loadingSnapshots[row.original.id]) {
-        return <Loader2 className="w-4 h-4 animate-spin" />
+        return (
+          <div className="flex justify-center">
+            <Loader2 className="w-4 h-4 animate-spin" />
+          </div>
+        )
       }
 
       return (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          disabled={!deletePermitted || loadingSnapshots[row.original.id] || loading}
-          className="translate-y-[2px]"
-        />
+        <div className="flex justify-center">
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+            disabled={!deletePermitted || loadingSnapshots[row.original.id] || loading}
+          />
+        </div>
       )
     },
     enableSorting: false,
@@ -127,20 +136,27 @@ const columns: ColumnDef<SnapshotDto>[] = [
   },
   {
     accessorKey: 'name',
+    size: 300,
+    minSize: 300,
     enableSorting: true,
     header: ({ column }) => <SortableHeader column={column} label="Name" />,
     cell: ({ row }) => {
       const snapshot = row.original
       return (
-        <div className="flex items-center gap-2">
-          {snapshot.name}
-          {snapshot.general && <Badge variant="secondary">System</Badge>}
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="truncate">{snapshot.name}</span>
+          {snapshot.general && (
+            <Badge variant="secondary" className="shrink-0">
+              System
+            </Badge>
+          )}
         </div>
       )
     },
   },
   {
     accessorKey: 'imageName',
+    size: 180,
     enableSorting: false,
     header: 'Image',
     cell: ({ row }) => {
@@ -152,11 +168,13 @@ const columns: ColumnDef<SnapshotDto>[] = [
           </Badge>
         )
       }
-      return snapshot.imageName
+      return <div className="truncate">{snapshot.imageName}</div>
     },
   },
   {
     accessorKey: 'regionIds',
+    size: 140,
+    maxSize: 140,
     enableSorting: false,
     header: 'Region',
     cell: ({ row, table }) => {
@@ -201,6 +219,8 @@ const columns: ColumnDef<SnapshotDto>[] = [
   },
   {
     id: 'resources',
+    size: 190,
+    maxSize: 190,
     enableSorting: false,
     header: 'Resources',
     cell: ({ row }) => {
@@ -225,6 +245,8 @@ const columns: ColumnDef<SnapshotDto>[] = [
   },
   {
     accessorKey: 'state',
+    size: 120,
+    maxSize: 120,
     enableSorting: true,
     header: ({ column }) => <SortableHeader column={column} label="State" />,
     cell: ({ row }) => {
@@ -252,6 +274,8 @@ const columns: ColumnDef<SnapshotDto>[] = [
   },
   {
     accessorKey: 'createdAt',
+    size: 120,
+    maxSize: 120,
     enableSorting: true,
     header: ({ column }) => <SortableHeader column={column} label="Created" />,
     cell: ({ row }) => {
@@ -269,6 +293,8 @@ const columns: ColumnDef<SnapshotDto>[] = [
   },
   {
     accessorKey: 'lastUsedAt',
+    size: 120,
+    maxSize: 120,
     enableSorting: true,
     header: ({ column }) => <SortableHeader column={column} label="Last Used" />,
     cell: ({ row }) => {
@@ -286,6 +312,10 @@ const columns: ColumnDef<SnapshotDto>[] = [
   },
   {
     id: 'actions',
+    header: () => null,
+    size: 48,
+    minSize: 48,
+    maxSize: 48,
     cell: ({ row, table }) => {
       const { writePermitted, deletePermitted, loadingSnapshots, onActivate, onDeactivate, onDelete } = getMeta(table)
 
@@ -300,36 +330,40 @@ const columns: ColumnDef<SnapshotDto>[] = [
       const showSeparator = (showActivate || showDeactivate) && showDelete
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {showActivate && (
-              <DropdownMenuItem onClick={() => onActivate(row.original)} disabled={loadingSnapshots[row.original.id]}>
-                Activate
-              </DropdownMenuItem>
-            )}
-            {showDeactivate && (
-              <DropdownMenuItem onClick={() => onDeactivate(row.original)} disabled={loadingSnapshots[row.original.id]}>
-                Deactivate
-              </DropdownMenuItem>
-            )}
-            {showSeparator && <DropdownMenuSeparator />}
-            {showDelete && (
-              <DropdownMenuItem
-                onClick={() => onDelete(row.original)}
-                variant="destructive"
-                disabled={loadingSnapshots[row.original.id]}
-              >
-                Delete
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon-sm" aria-label="Open menu">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {showActivate && (
+                <DropdownMenuItem onClick={() => onActivate(row.original)} disabled={loadingSnapshots[row.original.id]}>
+                  Activate
+                </DropdownMenuItem>
+              )}
+              {showDeactivate && (
+                <DropdownMenuItem
+                  onClick={() => onDeactivate(row.original)}
+                  disabled={loadingSnapshots[row.original.id]}
+                >
+                  Deactivate
+                </DropdownMenuItem>
+              )}
+              {showSeparator && <DropdownMenuSeparator />}
+              {showDelete && (
+                <DropdownMenuItem
+                  onClick={() => onDelete(row.original)}
+                  variant="destructive"
+                  disabled={loadingSnapshots[row.original.id]}
+                >
+                  Delete
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       )
     },
   },

@@ -6,8 +6,9 @@
 import { CopyButton } from '@/components/CopyButton'
 import { TimestampTooltip } from '@/components/TimestampTooltip'
 import { Badge } from '@/components/ui/badge'
+import { Empty, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { getRelativeTimeString } from '@/lib/utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronRight, LoaderCircle } from 'lucide-react'
@@ -79,7 +80,7 @@ function AttemptExpandedRow({ attempt }: { attempt: MessageAttemptOut }) {
           <span className="text-sm text-muted-foreground">Response Body</span>
           <CopyButton value={attempt.response || ''} size="icon-xs" tooltipText="Copy Response" />
         </div>
-        <pre className="text-xs font-mono bg-muted/80 p-2.5 rounded-md overflow-auto whitespace-pre-wrap break-all max-h-[200px]">
+        <pre className="scrollbar-sm text-xs font-mono bg-muted/80 p-2.5 rounded-md overflow-auto whitespace-pre-wrap break-all max-h-[200px]">
           {responseBody}
         </pre>
       </div>
@@ -185,7 +186,11 @@ export function MessageAttemptsTable({ messageId, reloadKey }: { messageId: stri
     return (
       <div>
         {header}
-        <div className="text-sm text-muted-foreground">No delivery attempts yet.</div>
+        <Empty className="border-none py-8">
+          <EmptyHeader>
+            <EmptyTitle>No delivery attempts yet.</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       </div>
     )
   }
@@ -193,14 +198,14 @@ export function MessageAttemptsTable({ messageId, reloadKey }: { messageId: stri
   return (
     <div>
       {header}
-      <div className="rounded-md border">
+      <TableContainer>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="px-3 w-[28px]" />
               <TableHead className="px-3">Status</TableHead>
               <TableHead className="px-3">URL</TableHead>
-              <TableHead className="px-3">Timestamp</TableHead>
+              <TableHead className="px-3">Sent</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -247,7 +252,7 @@ export function MessageAttemptsTable({ messageId, reloadKey }: { messageId: stri
             })}
           </TableBody>
         </Table>
-      </div>
+      </TableContainer>
     </div>
   )
 }

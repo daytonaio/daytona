@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { CreateVolumeSheet } from '@/components/CreateVolumeSheet'
+import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Spinner } from '@/components/ui/spinner'
 import { VolumeTable } from '@/components/VolumeTable'
 import { useDeleteVolumeMutation } from '@/hooks/mutations/useDeleteVolumeMutation'
 import { queryKeys } from '@/hooks/queries/queryKeys'
@@ -153,7 +154,7 @@ const Volumes: React.FC = () => {
   )
 
   return (
-    <PageLayout>
+    <PageLayout contained>
       <PageHeader>
         <PageTitle>Volumes</PageTitle>
         {writePermitted && (
@@ -161,7 +162,7 @@ const Volumes: React.FC = () => {
         )}
       </PageHeader>
 
-      <PageContent size="full">
+      <PageContent size="full" className="overflow-hidden">
         <VolumeTable
           data={volumes}
           loading={loadingVolumes}
@@ -208,13 +209,15 @@ const Volumes: React.FC = () => {
                   onClick={() => handleDelete(volumeToDelete)}
                   disabled={processingVolumeAction[volumeToDelete.id]}
                 >
-                  {processingVolumeAction[volumeToDelete.id] ? 'Deleting...' : 'Delete'}
+                  {processingVolumeAction[volumeToDelete.id] && <Spinner />}
+                  Delete
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         )}
       </PageContent>
+      <PageFooter />
     </PageLayout>
   )
 }

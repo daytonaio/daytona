@@ -8,7 +8,7 @@ import { RoutePath } from '@/enums/RoutePath'
 import { useRegions } from '@/hooks/useRegions'
 import { SandboxState } from '@daytona/api-client'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
-import { Terminal, MoreVertical, Play, Square, Loader2, Wrench } from 'lucide-react'
+import { Terminal, MoreHorizontal, Play, Square, Loader2, Wrench } from 'lucide-react'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { Button } from '../ui/button'
 import {
@@ -18,6 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { SandboxTableActionsProps } from './types'
 import { useMemo } from 'react'
 
@@ -193,8 +194,16 @@ export function SandboxTableActions({
   return (
     <div className="flex items-center justify-end gap-2">
       <Button
-        variant="outline"
-        className="h-7 w-7 p-0 text-muted-foreground"
+        variant="ghost"
+        size="icon-sm"
+        className="text-muted-foreground"
+        aria-label={
+          sandbox.state === SandboxState.STARTED
+            ? 'Stop sandbox'
+            : sandbox.state === SandboxState.ERROR && sandbox.recoverable
+              ? 'Recover sandbox'
+              : 'Start sandbox'
+        }
         onClick={(e) => {
           e.stopPropagation()
           if (sandbox.state === SandboxState.STARTED) {
@@ -219,23 +228,37 @@ export function SandboxTableActions({
 
       {sandbox.state === SandboxState.STARTED ? (
         <Button
-          variant="outline"
-          className="h-7 w-7 p-0 text-muted-foreground"
+          variant="ghost"
+          size="icon-sm"
+          className="text-muted-foreground"
+          aria-label="Open terminal"
           onClick={() => onOpenWebTerminal(sandbox.id)}
         >
           <Terminal className="w-4 h-4" />
         </Button>
       ) : (
-        <Button variant="outline" className="h-7 w-7 p-0 text-muted-foreground" disabled>
-          <Terminal className="w-4 h-4" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-flex" onClick={(e) => e.stopPropagation()}>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="text-muted-foreground"
+                aria-label="Open terminal"
+                disabled
+              >
+                <Terminal className="w-4 h-4" />
+              </Button>
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>Start sandbox to use terminal.</TooltipContent>
+        </Tooltip>
       )}
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="h-7 w-7 p-0 text-muted-foreground">
-            <span className="sr-only">Open menu</span>
-            <MoreVertical />
+          <Button variant="ghost" size="icon-sm" className="text-muted-foreground" aria-label="Open menu">
+            <MoreHorizontal className="w-4 h-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">

@@ -5,7 +5,7 @@
 
 import { UpsertRegistrySheet } from '@/components/UpsertRegistrySheet'
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { RegistryTable } from '@/components/RegistryTable'
 import { Button } from '@/components/ui/button'
 import {
@@ -79,13 +79,13 @@ const Registries: React.FC = () => {
   useRegisterCommands(rootCommands, { groupId: 'registry-actions', groupLabel: 'Registry actions', groupOrder: 0 })
 
   return (
-    <PageLayout>
+    <PageLayout contained>
       <PageHeader>
         <PageTitle>Registries</PageTitle>
         {writePermitted && <UpsertRegistrySheet className="ml-auto" disabled={loading} ref={addRegistrySheetRef} />}
       </PageHeader>
 
-      <PageContent size="full">
+      <PageContent size="full" className="overflow-hidden">
         <RegistryTable
           data={registries}
           loading={loading}
@@ -147,6 +147,7 @@ const Registries: React.FC = () => {
           </DialogContent>
         </Dialog>
       </PageContent>
+      <PageFooter />
     </PageLayout>
   )
 }

@@ -31,34 +31,22 @@ export function InvoicesTableActions({ invoice, onView, onVoid, onPay }: Invoice
   }
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center justify-center">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-            <MoreHorizontalIcon className="h-4 w-4" aria-label="Open menu" />
+          <Button variant="ghost" size="icon-sm" aria-label="Open menu">
+            <MoreHorizontalIcon className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {onView && (
-            <DropdownMenuItem className="cursor-pointer" onSelect={() => onView?.(invoice)}>
-              View
-            </DropdownMenuItem>
-          )}
-          {onPay && (
-            <DropdownMenuItem className="cursor-pointer" onSelect={() => onPay?.(invoice)}>
-              Pay
-            </DropdownMenuItem>
-          )}
+          {onView && <DropdownMenuItem onSelect={() => onView?.(invoice)}>View</DropdownMenuItem>}
+          {onPay && <DropdownMenuItem onSelect={() => onPay?.(invoice)}>Pay</DropdownMenuItem>}
           {onVoid && (
             <>
               <DropdownMenuSeparator />
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <DropdownMenuItem
-                    className="cursor-pointer"
-                    onSelect={(e) => e.preventDefault()}
-                    variant="destructive"
-                  >
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()} variant="destructive">
                     Void
                   </DropdownMenuItem>
                 </AlertDialogTrigger>

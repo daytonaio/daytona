@@ -5,25 +5,56 @@
 
 import { DeleteOrganizationRoleDialog } from '@/components/OrganizationRoles/DeleteOrganizationRoleDialog'
 import { UpdateOrganizationRoleDialog } from '@/components/OrganizationRoles/UpdateOrganizationRoleDialog'
+import { PageFooterPortal } from '@/components/PageLayout'
 import { Pagination } from '@/components/Pagination'
+import { SearchInput } from '@/components/SearchInput'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableEmptyState,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { cn } from '@/lib/utils'
+import { getColumnSizeStyles } from '@/lib/utils/table'
 import { OrganizationRole, OrganizationRolePermissionsEnum } from '@daytona/api-client'
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  Table as ReactTable,
+  RowData,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { MoreHorizontal } from 'lucide-react'
+import { MoreHorizontal, Shield } from 'lucide-react'
 import { useState } from 'react'
-import { TableEmptyState } from '../TableEmptyState'
+
+type OrganizationRoleTableMeta = {
+  onDelete: (roleId: string) => void
+  onUpdate: (role: OrganizationRole) => void
+}
+
+declare module '@tanstack/react-table' {
+  interface TableMeta<TData extends RowData> {
+    organizationRole?: TData extends OrganizationRole ? OrganizationRoleTableMeta : never
+  }
+}
+
+const getMeta = (table: ReactTable<OrganizationRole>) => {
+  return table.options.meta?.organizationRole as OrganizationRoleTableMeta
+}
 
 interface DataTableProps {
   data: OrganizationRole[]
@@ -46,38 +77,64 @@ export function OrganizationRoleTable({
   loadingRoleAction,
 }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
+  const [globalFilter, setGlobalFilter] = useState('')
   const [roleToDelete, setRoleToDelete] = useState<string | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [roleToUpdate, setRoleToUpdate] = useState<OrganizationRole | null>(null)
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false)
 
-  const columns = getColumns({
-    onUpdate: (role) => {
-      setRoleToUpdate(role)
-      setIsUpdateDialogOpen(true)
-    },
-    onDelete: (userId: string) => {
-      setRoleToDelete(userId)
-      setIsDeleteDialogOpen(true)
-    },
-  })
-
   const table = useReactTable({
     data,
-    columns,
+    columns: organizationRoleColumns,
+    meta: {
+      organizationRole: {
+        onUpdate: (role) => {
+          setRoleToUpdate(role)
+          setIsUpdateDialogOpen(true)
+        },
+        onDelete: (roleId: string) => {
+          setRoleToDelete(roleId)
+          setIsDeleteDialogOpen(true)
+        },
+      },
+    },
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, _columnId, filterValue) => {
+      const role = row.original
+      const searchValue = String(filterValue).toLowerCase()
+
+      return (
+        role.name.toLowerCase().includes(searchValue) ||
+        role.description.toLowerCase().includes(searchValue) ||
+        role.permissions.some((permission) => permission.toLowerCase().includes(searchValue))
+      )
+    },
     state: {
+      globalFilter,
       sorting,
     },
     initialState: {
       pagination: {
         pageSize: DEFAULT_PAGE_SIZE,
       },
+      columnPinning: {
+        right: ['actions'],
+      },
     },
   })
+
+  const isEmpty = !loadingData && table.getRowModel().rows.length === 0
+  const hasSearch = globalFilter.trim().length > 0
+
+  const handleChangeFilter = (value: string) => {
+    setGlobalFilter(value)
+    table.setPageIndex(0)
+  }
 
   const handleUpdateRole = async (
     name: string,
@@ -109,15 +166,50 @@ export function OrganizationRoleTable({
 
   return (
     <>
-      <div>
-        <div className="rounded-md border">
-          <Table>
+      <div className="flex min-h-0 flex-1 flex-col pt-2">
+        <div className="mb-3">
+          <SearchInput
+            debounced
+            value={globalFilter}
+            onValueChange={handleChangeFilter}
+            placeholder="Search by Name, Description, or Permission"
+            containerClassName="max-w-sm"
+          />
+        </div>
+        <TableContainer
+          className={cn('max-h-[550px]', {
+            'min-h-[26rem]': isEmpty,
+          })}
+          empty={
+            isEmpty ? (
+              <TableEmptyState
+                overlay
+                colSpan={organizationRoleColumns.length}
+                message={hasSearch ? 'No matching Roles found.' : 'No Roles found.'}
+                icon={<Shield />}
+                description={hasSearch ? null : 'Create custom roles to manage permissions in your organization.'}
+                action={
+                  hasSearch ? (
+                    <Button variant="outline" onClick={() => handleChangeFilter('')}>
+                      Clear filters
+                    </Button>
+                  ) : null
+                }
+              />
+            ) : null
+          }
+        >
+          <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     return (
-                      <TableHead key={header.id}>
+                      <TableHead
+                        key={header.id}
+                        sticky={header.column.getIsPinned()}
+                        style={getColumnSizeStyles(header.column)}
+                      >
                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
                     )
@@ -127,11 +219,17 @@ export function OrganizationRoleTable({
             </TableHeader>
             <TableBody>
               {loadingData ? (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    Loading...
-                  </TableCell>
-                </TableRow>
+                <>
+                  {Array.from({ length: DEFAULT_PAGE_SIZE }).map((_, i) => (
+                    <TableRow key={i} className="h-14">
+                      {table.getVisibleLeafColumns().map((column) => (
+                        <TableCell key={column.id} sticky={column.getIsPinned()} style={getColumnSizeStyles(column)}>
+                          <Skeleton className="h-4 w-3/4" />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </>
               ) : table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow
@@ -140,17 +238,23 @@ export function OrganizationRoleTable({
                     className={loadingRoleAction[row.original.id] ? 'opacity-50 pointer-events-none' : ''}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                      <TableCell
+                        key={cell.id}
+                        sticky={cell.column.getIsPinned()}
+                        style={getColumnSizeStyles(cell.column)}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))
-              ) : (
-                <TableEmptyState colSpan={columns.length} message="No Roles found." />
-              )}
+              ) : null}
             </TableBody>
           </Table>
-        </div>
-        <Pagination table={table} className="mt-4" entityName="Roles" />
+        </TableContainer>
+        <PageFooterPortal>
+          <Pagination table={table} entityName="Roles" />
+        </PageFooterPortal>
       </div>
 
       {roleToUpdate && (
@@ -184,91 +288,81 @@ export function OrganizationRoleTable({
   )
 }
 
-const getColumns = ({
-  onUpdate,
-  onDelete,
-}: {
-  onUpdate: (role: OrganizationRole) => void
-  onDelete: (roleId: string) => void
-}): ColumnDef<OrganizationRole>[] => {
-  const columns: ColumnDef<OrganizationRole>[] = [
-    {
-      accessorKey: 'name',
-      header: 'Name',
-      cell: ({ row }) => {
-        return <div className="min-w-48">{row.original.name}</div>
-      },
+const organizationRoleColumns: ColumnDef<OrganizationRole>[] = [
+  {
+    accessorKey: 'name',
+    header: 'Name',
+    cell: ({ row }) => {
+      return <div className="min-w-48">{row.original.name}</div>
     },
-    {
-      accessorKey: 'description',
-      header: 'Description',
-      cell: ({ row }) => {
-        return (
-          <Tooltip>
-            <TooltipTrigger>
-              <div className="truncate max-w-md cursor-text">{row.original.description}</div>
-            </TooltipTrigger>
+  },
+  {
+    accessorKey: 'description',
+    header: 'Description',
+    cell: ({ row }) => {
+      return (
+        <Tooltip>
+          <TooltipTrigger>
+            <div className="truncate max-w-md cursor-text">{row.original.description}</div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="max-w-[300px]">{row.original.description}</p>
+          </TooltipContent>
+        </Tooltip>
+      )
+    },
+  },
+  {
+    accessorKey: 'permissions',
+    header: () => {
+      return <div className="max-w-md px-3">Permissions</div>
+    },
+    cell: ({ row }) => {
+      const permissions = row.original.permissions.join(', ')
+      return (
+        <Tooltip>
+          <TooltipTrigger>
+            <div className="truncate max-w-md px-3 cursor-text">{permissions || '-'}</div>
+          </TooltipTrigger>
+          {permissions && (
             <TooltipContent>
-              <p className="max-w-[300px]">{row.original.description}</p>
+              <p className="max-w-[300px]">{permissions}</p>
             </TooltipContent>
-          </Tooltip>
-        )
-      },
+          )}
+        </Tooltip>
+      )
     },
-    {
-      accessorKey: 'permissions',
-      header: () => {
-        return <div className="max-w-md px-3">Permissions</div>
-      },
-      cell: ({ row }) => {
-        const permissions = row.original.permissions.join(', ')
-        return (
-          <Tooltip>
-            <TooltipTrigger>
-              <div className="truncate max-w-md px-3 cursor-text">{permissions || '-'}</div>
-            </TooltipTrigger>
-            {permissions && (
-              <TooltipContent>
-                <p className="max-w-[300px]">{permissions}</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        )
-      },
-    },
-    {
-      id: 'actions',
-      cell: ({ row }) => {
-        if (row.original.isGlobal) {
-          return null
-        }
-        return (
-          <div className="text-right">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Open menu</span>
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
+  },
+  {
+    id: 'actions',
+    size: 48,
+    minSize: 48,
+    maxSize: 48,
+    cell: ({ row, table }) => {
+      const { onDelete, onUpdate } = getMeta(table)
 
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem className="cursor-pointer" onClick={() => onUpdate(row.original)}>
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer text-red-600 dark:text-red-400"
-                  onClick={() => onDelete(row.original.id)}
-                >
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        )
-      },
-    },
-  ]
+      if (row.original.isGlobal) {
+        return null
+      }
 
-  return columns
-}
+      return (
+        <div className="text-right">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon-sm" aria-label="Open menu">
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onUpdate(row.original)}>Edit</DropdownMenuItem>
+              <DropdownMenuItem variant="destructive" onClick={() => onDelete(row.original.id)}>
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )
+    },
+  },
+]

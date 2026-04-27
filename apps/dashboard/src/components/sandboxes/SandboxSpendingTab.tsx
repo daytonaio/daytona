@@ -140,6 +140,7 @@ export function SandboxSpendingTab({ sandboxId }: { sandboxId: string }) {
       ) : (
         <ScrollArea
           fade="mask"
+          fadeSide="end"
           horizontal
           className="flex-1 min-h-0 border rounded-md [&_[data-slot=scroll-area-viewport]>div]:!overflow-visible [&_[data-slot=scroll-area-viewport]>div>div]:!overflow-visible"
         >

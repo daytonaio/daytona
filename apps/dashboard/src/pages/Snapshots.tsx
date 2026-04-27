@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { CreateSnapshotSheet } from '@/components/snapshots/CreateSnapshotSheet'
 import { SnapshotTable } from '@/components/snapshots/SnapshotTable'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Spinner } from '@/components/ui/spinner'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useActivateSnapshotMutation } from '@/hooks/mutations/useActivateSnapshotMutation'
 import { useDeactivateSnapshotMutation } from '@/hooks/mutations/useDeactivateSnapshotMutation'
@@ -28,8 +29,8 @@ import {
   useSnapshotsQuery,
 } from '@/hooks/queries/useSnapshotsQuery'
 import { useRegions } from '@/hooks/useRegions'
-import { useSnapshotWsSync } from '@/hooks/useSnapshotWsSync'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { useSnapshotWsSync } from '@/hooks/useSnapshotWsSync'
 import { createBulkActionToast } from '@/lib/bulk-action-toast'
 import { handleApiError } from '@/lib/error-handling'
 import { pluralize } from '@/lib/utils'
@@ -57,15 +58,18 @@ const Snapshots: React.FC = () => {
     pageSize: DEFAULT_PAGE_SIZE,
   })
 
+  const [searchQuery, setSearchQuery] = useState('')
   const [sorting, setSorting] = useState<SnapshotSorting>(DEFAULT_SNAPSHOT_SORTING)
+  const [stateFilter, setStateFilter] = useState<Set<string>>(new Set())
 
   const queryParams = useMemo<SnapshotQueryParams>(
     () => ({
       page: paginationParams.pageIndex + 1,
       pageSize: paginationParams.pageSize,
       sorting,
+      filters: searchQuery.trim() ? { name: searchQuery.trim() } : undefined,
     }),
-    [paginationParams, sorting],
+    [paginationParams.pageIndex, paginationParams.pageSize, sorting, searchQuery],
   )
 
   const snapshotListQueryKey = useMemo(
@@ -83,6 +87,14 @@ const Snapshots: React.FC = () => {
     isLoading: snapshotsDataIsLoading,
     error: snapshotsDataError,
   } = useSnapshotsQuery(queryParams)
+
+  const filteredItems = useMemo(() => {
+    const items = snapshotsData?.items ?? []
+    if (stateFilter.size === 0) {
+      return items
+    }
+    return items.filter((snapshot) => stateFilter.has(snapshot.state))
+  }, [snapshotsData?.items, stateFilter])
 
   useEffect(() => {
     if (snapshotsDataError) {
@@ -119,6 +131,11 @@ const Snapshots: React.FC = () => {
 
   const handleSortingChange = useCallback((newSorting: SnapshotSorting) => {
     setSorting(newSorting)
+    setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
+  }, [])
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value)
     setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
   }, [])
 
@@ -327,15 +344,15 @@ const Snapshots: React.FC = () => {
   }
 
   return (
-    <PageLayout>
+    <PageLayout contained>
       <PageHeader>
         <PageTitle>Snapshots</PageTitle>
         {writePermitted && <CreateSnapshotSheet className="ml-auto" ref={dialogRef} />}
       </PageHeader>
 
-      <PageContent size="full">
+      <PageContent size="full" className="flex-1 overflow-hidden">
         <SnapshotTable
-          data={snapshotsData?.items ?? []}
+          data={filteredItems}
           loading={snapshotsDataIsLoading}
           loadingSnapshots={loadingSnapshots}
           getRegionName={getRegionName}
@@ -356,8 +373,12 @@ const Snapshots: React.FC = () => {
             pageIndex: paginationParams.pageIndex,
             pageSize: paginationParams.pageSize,
           }}
+          searchValue={searchQuery}
+          onSearchChange={handleSearchChange}
           sorting={sorting}
           onSortingChange={handleSortingChange}
+          stateFilter={stateFilter}
+          onStateFilterChange={setStateFilter}
         />
 
         {snapshotToDelete && (
@@ -388,13 +409,15 @@ const Snapshots: React.FC = () => {
                   onClick={() => handleDelete(snapshotToDelete)}
                   disabled={loadingSnapshots[snapshotToDelete.id]}
                 >
-                  {loadingSnapshots[snapshotToDelete.id] ? 'Deleting...' : 'Delete'}
+                  {loadingSnapshots[snapshotToDelete.id] && <Spinner />}
+                  Delete
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         )}
       </PageContent>
+      <PageFooter />
     </PageLayout>
   )
 }

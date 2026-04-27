@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { OrganizationInvitationActionDialog } from '@/components/UserOrganizationInvitations/OrganizationInvitationActionDialog'
 import { UserOrganizationInvitationTable } from '@/components/UserOrganizationInvitations/UserOrganizationInvitationTable'
 import { useApi } from '@/hooks/useApi'
@@ -101,12 +101,12 @@ const UserOrganizationInvitations: React.FC = () => {
   }
 
   return (
-    <PageLayout>
+    <PageLayout contained>
       <PageHeader>
         <PageTitle>Invitations</PageTitle>
       </PageHeader>
 
-      <PageContent size="full">
+      <PageContent size="full" className="overflow-hidden">
         <UserOrganizationInvitationTable
           data={invitations}
           loadingData={loadingInvitations}
@@ -125,6 +125,7 @@ const UserOrganizationInvitations: React.FC = () => {
           />
         )}
       </PageContent>
+      <PageFooter />
     </PageLayout>
   )
 }

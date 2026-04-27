@@ -3,26 +3,26 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Sandbox, Region } from '@daytona/api-client'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { LocalStorageKey } from '@/enums/LocalStorageKey'
+import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
+import { getRegionFullDisplayName } from '@/lib/utils'
+import { Region, Sandbox } from '@daytona/api-client'
 import {
   ColumnFiltersState,
-  SortingState,
-  useReactTable,
   getCoreRowModel,
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  SortingState,
+  useReactTable,
   VisibilityState,
 } from '@tanstack/react-table'
-import { useMemo, useState, useEffect } from 'react'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
-import { FacetedFilterOption } from './types'
+import { useEffect, useMemo, useState } from 'react'
 import { getColumns } from './columns'
-import { LocalStorageKey } from '@/enums/LocalStorageKey'
-import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
-import { getRegionFullDisplayName } from '@/lib/utils'
+import { FacetedFilterOption } from './types'
 
 interface UseSandboxTableProps {
   data: Sandbox[]
@@ -91,6 +91,7 @@ export function useSandboxTable({
     },
   ])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [globalFilter, setGlobalFilter] = useState('')
 
   const labelOptions: FacetedFilterOption[] = useMemo(() => {
     const labels = new Set<string>()
@@ -155,6 +156,7 @@ export function useSandboxTable({
     data,
     columns,
     onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
@@ -162,14 +164,36 @@ export function useSandboxTable({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFilteredRowModel: getFilteredRowModel(),
+    globalFilterFn: (row, _columnId, filterValue) => {
+      const sandbox = row.original
+      const searchValue = String(filterValue).trim().toLowerCase()
+
+      if (!searchValue) {
+        return true
+      }
+
+      const regionName = getRegionName(sandbox.target) ?? sandbox.target
+      const labels = Object.entries(sandbox.labels ?? {})
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(' ')
+
+      return [sandbox.name, sandbox.id, sandbox.state, sandbox.snapshot ?? '', regionName, labels].some((value) =>
+        String(value).toLowerCase().includes(searchValue),
+      )
+    },
     state: {
+      globalFilter,
       sorting,
       columnFilters,
       columnVisibility,
+      columnPinning: {
+        left: ['select', 'name'],
+        right: ['actions'],
+      },
     },
     onColumnVisibilityChange: setColumnVisibility,
     defaultColumn: {
-      size: 100,
+      minSize: 0,
     },
     enableRowSelection: deletePermitted,
     getRowId: (row) => row.id,
@@ -182,6 +206,7 @@ export function useSandboxTable({
 
   return {
     table,
+    globalFilter,
     labelOptions,
     regionOptions,
     sorting,

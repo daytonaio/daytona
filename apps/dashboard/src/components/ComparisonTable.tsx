@@ -6,7 +6,7 @@
 import { cn } from '@/lib/utils'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { FC, Fragment, ReactNode, useState } from 'react'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from './ui/table'
 
 interface ComparisonRow {
   label: ReactNode
@@ -32,25 +32,19 @@ interface Props {
 
 export function ComparisonTable({ columns = [], headerLabel, currentColumn, currentRow, data = [], className }: Props) {
   return (
-    <div
-      className={cn(
-        'w-full rounded-lg border border-border bg-card overflow-x-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-background',
-        className,
-      )}
-    >
+    <TableContainer className={cn('rounded-none', className)}>
       <Table>
         <TableHeader>
-          <TableRow className="border-b border-border">
-            <TableHead className="py-2 px-4 text-muted-foreground border-r border-border sticky left-0 bg-background z-10">
+          <TableRow className="rounded-none">
+            <TableHead sticky="left" className="py-2 px-4 text-muted-foreground">
               {headerLabel}
             </TableHead>
             {columns.map((column, index) => (
               <TableHead
                 key={index}
-                className={cn(
-                  'py-2 px-4 text-xs text-nowrap',
-                  index === currentColumn ? 'text-foreground bg-muted/50' : 'text-muted-foreground',
-                )}
+                className={cn('py-2 px-4 text-xs text-nowrap', {
+                  'text-foreground': index === currentColumn,
+                })}
               >
                 {column}
               </TableHead>
@@ -68,7 +62,7 @@ export function ComparisonTable({ columns = [], headerLabel, currentColumn, curr
           ))}
         </TableBody>
       </Table>
-    </div>
+    </TableContainer>
   )
 }
 
@@ -86,10 +80,10 @@ const CollapsibleSection: FC<CollapsibleSectionProps> = ({ section, currentColum
       {section.collapsible && (
         <TableRow
           onClick={() => setIsOpen(!isOpen)}
-          className={cn('cursor-pointer border-b border-border group select-none hover:bg-muted')}
+          className={cn('cursor-pointer group select-none')}
           aria-expanded={isOpen}
         >
-          <TableCell colSpan={10} className="py-2 px-4 bg-muted">
+          <TableCell colSpan={10} className="py-2 px-4">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
               {section.title}
@@ -102,31 +96,31 @@ const CollapsibleSection: FC<CollapsibleSectionProps> = ({ section, currentColum
         section.rows.map((row, rowIdx) => (
           <TableRow
             key={rowIdx}
-            className={cn('border-b border-border group hover:bg-muted transition-none', {
-              'bg-muted': currentRow === rowIdx,
+            className={cn('border-b border-border group transition-none', {
+              'text-foreground': rowIdx === currentRow,
             })}
           >
             <TableCell
-              className={cn(
-                'py-2 px-4 text-muted-foreground text-xs border-r border-border align-top w-40 sticky left-0 bg-background z-10 group-hover:bg-muted',
-                {
-                  'bg-muted': currentRow === rowIdx,
-                },
-              )}
+              sticky="left"
+              className={cn('py-2 px-4 text-xs align-top w-40 text-muted-foreground md:border-r', {
+                'text-foreground': rowIdx === currentRow || currentColumn === 0,
+              })}
             >
               {row.label}
+              {rowIdx === currentRow && (
+                <span className="inline-flex ml-2 text-muted-foreground text-xs">(Current)</span>
+              )}
             </TableCell>
 
             {row.values.map((val, colIdx) => {
-              const isActive = colIdx === currentColumn
+              const isActive = rowIdx === currentRow || colIdx === currentColumn
 
               return (
                 <TableCell
                   key={colIdx}
-                  className={cn(
-                    'py-2 px-4 text-xs align-top text-right tabular-nums',
-                    isActive ? 'bg-muted text-foreground' : 'text-muted-foreground',
-                  )}
+                  className={cn('py-2 px-4 text-xs align-top text-right tabular-nums text-muted-foreground', {
+                    'text-foreground': isActive,
+                  })}
                 >
                   {val}
                 </TableCell>

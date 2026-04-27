@@ -42,6 +42,16 @@ export function UsageOverview({
   )
 }
 
+function formatUsageValue(value: number) {
+  const truncated = Math.trunc(value * 10) / 10
+
+  if (Number.isInteger(truncated)) {
+    return String(truncated)
+  }
+
+  return truncated.toFixed(1)
+}
+
 export function UsageOverviewSkeleton() {
   return (
     <div className="flex flex-col gap-3 p-4 lg:flex-row">
@@ -62,7 +72,7 @@ const UsageLabel = ({ current, total, unit }: { current: number; total: number; 
         'text-destructive': isHighUsage,
       })}
     >
-      {current} <span className="opacity-50">/</span> {total} {unit}
+      {formatUsageValue(current)} <span className="opacity-50">/</span> {formatUsageValue(total)} {unit}
     </span>
   )
 }

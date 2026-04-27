@@ -5,11 +5,23 @@
 
 import { Invoice } from '@/billing-api/types/Invoice'
 import { formatAmount } from '@/lib/utils'
-import { ColumnDef } from '@tanstack/react-table'
-import { ArrowDown, ArrowUp } from 'lucide-react'
+import { ColumnDef, RowData, Table } from '@tanstack/react-table'
 import React from 'react'
+import { SortOrderIcon } from '../SortIcon'
 import { Badge } from '../ui/badge'
 import { InvoicesTableActions } from './InvoicesTableActions'
+
+export type InvoicesTableMeta = {
+  onViewInvoice?: (invoice: Invoice) => void
+  onVoidInvoice?: (invoice: Invoice) => void
+  onPayInvoice?: (invoice: Invoice) => void
+}
+
+declare module '@tanstack/react-table' {
+  interface TableMeta<TData extends RowData> {
+    invoices?: TData extends Invoice ? InvoicesTableMeta : never
+  }
+}
 
 interface SortableHeaderProps {
   column: any
@@ -18,191 +30,185 @@ interface SortableHeaderProps {
 }
 
 const SortableHeader: React.FC<SortableHeaderProps> = ({ column, label, dataState }) => {
+  const sortDirection = column.getIsSorted()
+
   return (
-    <div
-      role="button"
-      onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-      className="flex items-center"
+    <button
+      type="button"
+      onClick={() => column.toggleSorting(sortDirection === 'asc')}
+      className="group/sort-header flex h-full w-full items-center gap-2"
       {...(dataState && { 'data-state': dataState })}
     >
       {label}
-      {column.getIsSorted() === 'asc' ? (
-        <ArrowUp className="ml-2 h-4 w-4" />
-      ) : column.getIsSorted() === 'desc' ? (
-        <ArrowDown className="ml-2 h-4 w-4" />
-      ) : (
-        <div className="ml-2 w-4 h-4" />
-      )}
-    </div>
+      <SortOrderIcon sort={sortDirection || null} />
+    </button>
   )
 }
 
-interface GetColumnsProps {
-  onViewInvoice?: (invoice: Invoice) => void
-  onVoidInvoice?: (invoice: Invoice) => void
-  onPayInvoice?: (invoice: Invoice) => void
+const getMeta = (table: Table<Invoice>) => {
+  return table.options.meta?.invoices as InvoicesTableMeta
 }
 
-export function getColumns({ onViewInvoice, onVoidInvoice, onPayInvoice }: GetColumnsProps): ColumnDef<Invoice>[] {
-  const columns: ColumnDef<Invoice>[] = [
-    {
-      id: 'number',
-      header: ({ column }) => {
-        return <SortableHeader column={column} label="Invoice" />
-      },
-      accessorKey: 'number',
-      cell: ({ row }) => {
-        return (
-          <div className="w-full truncate">
-            <span className="font-medium">{row.original.number}</span>
-          </div>
-        )
-      },
-      sortingFn: (rowA, rowB) => {
-        return rowA.original.number.localeCompare(rowB.original.number)
-      },
+export const invoiceColumns: ColumnDef<Invoice>[] = [
+  {
+    id: 'number',
+    header: ({ column }) => {
+      return <SortableHeader column={column} label="Invoice" />
     },
-    {
-      id: 'issuingDate',
-      size: 140,
-      header: ({ column }) => {
-        return <SortableHeader column={column} label="Date" />
-      },
-      cell: ({ row }) => {
-        const date = new Date(row.original.issuingDate)
-        return (
-          <div className="w-full truncate">
-            <span>{date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-          </div>
-        )
-      },
-      accessorFn: (row) => new Date(row.issuingDate).getTime(),
-      sortingFn: (rowA, rowB) => {
-        return new Date(rowA.original.issuingDate).getTime() - new Date(rowB.original.issuingDate).getTime()
-      },
+    accessorKey: 'number',
+    cell: ({ row }) => {
+      return (
+        <div className="w-full truncate">
+          <span className="font-medium">{row.original.number}</span>
+        </div>
+      )
     },
-    {
-      id: 'paymentDueDate',
-      size: 140,
-      header: ({ column }) => {
-        return <SortableHeader column={column} label="Due Date" />
-      },
-      cell: ({ row }) => {
-        const date = new Date(row.original.paymentDueDate)
-        return (
-          <div className="w-full truncate">
-            <span>{date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-          </div>
-        )
-      },
-      accessorFn: (row) => new Date(row.paymentDueDate).getTime(),
-      sortingFn: (rowA, rowB) => {
-        return new Date(rowA.original.paymentDueDate).getTime() - new Date(rowB.original.paymentDueDate).getTime()
-      },
+    sortingFn: (rowA, rowB) => {
+      return rowA.original.number.localeCompare(rowB.original.number)
     },
-    {
-      id: 'totalAmountCents',
-      size: 120,
-      header: ({ column }) => {
-        return <SortableHeader column={column} label="Amount" />
-      },
-      cell: ({ row }) => {
-        return (
-          <div className="w-full truncate">
-            <span>{formatAmount(row.original.totalAmountCents)}</span>
-          </div>
-        )
-      },
-      accessorKey: 'totalAmountCents',
-      sortingFn: (rowA, rowB) => {
-        return rowA.original.totalAmountCents - rowB.original.totalAmountCents
-      },
+  },
+  {
+    id: 'issuingDate',
+    size: 140,
+    header: ({ column }) => {
+      return <SortableHeader column={column} label="Date" />
     },
-    {
-      id: 'paymentStatus',
-      size: 120,
-      header: ({ column }) => {
-        return <SortableHeader column={column} label="Status" />
-      },
-      cell: ({ row }) => {
-        const invoice = row.original
-        const isSucceeded = invoice.paymentStatus === 'succeeded'
-        const isFailed = invoice.paymentStatus === 'failed'
-        const isOverdue = invoice.paymentOverdue
+    cell: ({ row }) => {
+      const date = new Date(row.original.issuingDate)
+      return (
+        <div className="w-full truncate">
+          <span>{date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+        </div>
+      )
+    },
+    accessorFn: (row) => new Date(row.issuingDate).getTime(),
+    sortingFn: (rowA, rowB) => {
+      return new Date(rowA.original.issuingDate).getTime() - new Date(rowB.original.issuingDate).getTime()
+    },
+  },
+  {
+    id: 'paymentDueDate',
+    size: 140,
+    header: ({ column }) => {
+      return <SortableHeader column={column} label="Due Date" />
+    },
+    cell: ({ row }) => {
+      const date = new Date(row.original.paymentDueDate)
+      return (
+        <div className="w-full truncate">
+          <span>{date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+        </div>
+      )
+    },
+    accessorFn: (row) => new Date(row.paymentDueDate).getTime(),
+    sortingFn: (rowA, rowB) => {
+      return new Date(rowA.original.paymentDueDate).getTime() - new Date(rowB.original.paymentDueDate).getTime()
+    },
+  },
+  {
+    id: 'totalAmountCents',
+    size: 120,
+    header: ({ column }) => {
+      return <SortableHeader column={column} label="Amount" />
+    },
+    cell: ({ row }) => {
+      return (
+        <div className="w-full truncate">
+          <span>{formatAmount(row.original.totalAmountCents)}</span>
+        </div>
+      )
+    },
+    accessorKey: 'totalAmountCents',
+    sortingFn: (rowA, rowB) => {
+      return rowA.original.totalAmountCents - rowB.original.totalAmountCents
+    },
+  },
+  {
+    id: 'paymentStatus',
+    size: 120,
+    header: ({ column }) => {
+      return <SortableHeader column={column} label="Status" />
+    },
+    cell: ({ row }) => {
+      const invoice = row.original
+      const isSucceeded = invoice.paymentStatus === 'succeeded'
+      const isFailed = invoice.paymentStatus === 'failed'
+      const isOverdue = invoice.paymentOverdue
 
-        let variant: 'success' | 'destructive' | 'secondary' = 'secondary'
-        let label = 'Pending'
+      let variant: 'success' | 'destructive' | 'secondary' = 'secondary'
+      let label = 'Pending'
 
-        if (isSucceeded) {
-          variant = 'success'
-          label = 'Paid'
-        } else if (isOverdue || isFailed) {
-          variant = 'destructive'
-          label = isOverdue ? 'Overdue' : 'Failed'
-        }
+      if (isSucceeded) {
+        variant = 'success'
+        label = 'Paid'
+      } else if (isOverdue || isFailed) {
+        variant = 'destructive'
+        label = isOverdue ? 'Overdue' : 'Failed'
+      }
 
-        if (invoice.status === 'voided') {
-          label = 'Voided'
-        }
+      if (invoice.status === 'voided') {
+        label = 'Voided'
+      }
 
-        return (
-          <div className="max-w-[120px] flex">
-            <Badge variant={variant}>{label}</Badge>
-          </div>
-        )
-      },
-      accessorKey: 'paymentStatus',
-      sortingFn: (rowA, rowB) => {
-        const statusOrder = { succeeded: 0, pending: 1, failed: 2 }
-        return (statusOrder[rowA.original.paymentStatus] ?? 3) - (statusOrder[rowB.original.paymentStatus] ?? 3)
-      },
+      return (
+        <div className="max-w-[120px] flex">
+          <Badge variant={variant}>{label}</Badge>
+        </div>
+      )
     },
-    {
-      id: 'type',
-      size: 120,
-      header: ({ column }) => {
-        return <SortableHeader column={column} label="Type" />
-      },
-      cell: ({ row }) => {
-        const type = row.original.type
-        const displayType = type === 'subscription' ? 'Subscription' : 'One Time'
-        return (
-          <div className="w-full truncate">
-            <span>{displayType}</span>
-          </div>
-        )
-      },
-      accessorKey: 'type',
-      sortingFn: (rowA, rowB) => {
-        return rowA.original.type.localeCompare(rowB.original.type)
-      },
+    accessorKey: 'paymentStatus',
+    sortingFn: (rowA, rowB) => {
+      const statusOrder: Record<string, number> = { succeeded: 0, pending: 1, failed: 2 }
+      return (statusOrder[rowA.original.paymentStatus] ?? 3) - (statusOrder[rowB.original.paymentStatus] ?? 3)
     },
-    {
-      id: 'actions',
-      size: 100,
-      enableHiding: false,
-      cell: ({ row }) => {
-        const isViewable = Boolean(row.original.fileUrl)
-        const isVoidable =
-          row.original.status === 'finalized' &&
-          ['pending', 'failed'].includes(row.original.paymentStatus) &&
-          row.original.type === 'one_off'
-        const isPayable =
-          row.original.status === 'finalized' && ['pending', 'failed'].includes(row.original.paymentStatus)
-
-        return (
-          <div>
-            <InvoicesTableActions
-              invoice={row.original}
-              onView={isViewable ? onViewInvoice : undefined}
-              onVoid={isVoidable ? onVoidInvoice : undefined}
-              onPay={isPayable ? onPayInvoice : undefined}
-            />
-          </div>
-        )
-      },
+  },
+  {
+    id: 'type',
+    size: 120,
+    header: ({ column }) => {
+      return <SortableHeader column={column} label="Type" />
     },
-  ]
+    cell: ({ row }) => {
+      const type = row.original.type
+      const displayType = type === 'subscription' ? 'Subscription' : 'One Time'
+      return (
+        <div className="w-full truncate">
+          <span>{displayType}</span>
+        </div>
+      )
+    },
+    accessorKey: 'type',
+    sortingFn: (rowA, rowB) => {
+      return rowA.original.type.localeCompare(rowB.original.type)
+    },
+  },
+  {
+    id: 'actions',
+    header: () => null,
+    size: 48,
+    minSize: 48,
+    maxSize: 48,
+    enableHiding: false,
+    cell: ({ row, table }) => {
+      const { onViewInvoice, onVoidInvoice, onPayInvoice } = getMeta(table)
+      const isViewable = Boolean(row.original.fileUrl)
+      const isVoidable =
+        row.original.status === 'finalized' &&
+        ['pending', 'failed'].includes(row.original.paymentStatus) &&
+        row.original.type === 'one_off'
+      const isPayable =
+        row.original.status === 'finalized' && ['pending', 'failed'].includes(row.original.paymentStatus)
 
-  return columns
-}
+      return (
+        <div className="flex justify-center">
+          <InvoicesTableActions
+            invoice={row.original}
+            onView={isViewable ? onViewInvoice : undefined}
+            onVoid={isVoidable ? onVoidInvoice : undefined}
+            onPay={isPayable ? onPayInvoice : undefined}
+          />
+        </div>
+      )
+    },
+  },
+]

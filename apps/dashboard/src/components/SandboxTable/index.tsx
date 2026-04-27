@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { RoutePath } from '@/enums/RoutePath'
 import { useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
@@ -14,6 +15,7 @@ import {
   filterStoppable,
   getBulkActionCounts,
 } from '@/lib/utils/sandbox'
+import { getColumnSizeStyles } from '@/lib/utils/table'
 import { OrganizationRolePermissionsEnum, Sandbox, SandboxState } from '@daytona/api-client'
 import { flexRender } from '@tanstack/react-table'
 import { Container } from 'lucide-react'
@@ -21,10 +23,21 @@ import { AnimatePresence } from 'motion/react'
 import { useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCommandPaletteActions } from '../CommandPalette'
+import { PageFooterPortal } from '../PageLayout'
 import { Pagination } from '../Pagination'
 import { SelectionToast } from '../SelectionToast'
-import { TableEmptyState } from '../TableEmptyState'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { Button } from '../ui/button'
+import { Skeleton } from '../ui/skeleton'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableEmptyState,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../ui/table'
 import { BulkAction, BulkActionAlertDialog } from './BulkActionAlertDialog'
 import { SandboxTableHeader } from './SandboxTableHeader'
 import { SandboxTableProps } from './types'
@@ -94,6 +107,9 @@ export function SandboxTable({
   const selectedCount = selectedRows.length
   const totalCount = table.getRowModel().rows.length
   const selectedSandboxes: Sandbox[] = selectedRows.map((row) => row.original)
+  const isEmpty = !loading && table.getRowModel().rows.length === 0
+  const hasFilters =
+    table.getState().columnFilters.length > 0 || String(table.getState().globalFilter ?? '').trim().length > 0
 
   const bulkActionCounts = useMemo(() => getBulkActionCounts(selectedSandboxes), [selectedSandboxes])
 
@@ -154,7 +170,7 @@ export function SandboxTable({
   }
 
   return (
-    <>
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
       <SandboxTableHeader
         table={table}
         labelOptions={labelOptions}
@@ -164,113 +180,129 @@ export function SandboxTable({
         loadingSnapshots={loadingSnapshots}
       />
 
-      <Table className="border-separate border-spacing-0" style={{ tableLayout: 'fixed', width: '100%' }}>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
+      <TableContainer
+        className={cn({
+          'min-h-[26rem]': isEmpty,
+        })}
+        empty={
+          isEmpty ? (
+            <TableEmptyState
+              overlay
+              colSpan={table.getAllColumns().length}
+              message={hasFilters ? 'No matching sandboxes found.' : 'No Sandboxes yet.'}
+              icon={<Container />}
+              description={
+                hasFilters ? null : (
+                  <div className="space-y-2">
+                    <p>Spin up a Sandbox to run code in an isolated environment.</p>
+                    <p>Use the Daytona SDK or CLI to create one.</p>
+                    <p>
+                      <button
+                        onClick={() => navigate(RoutePath.ONBOARDING)}
+                        className="text-primary hover:underline font-medium"
+                      >
+                        Check out the Onboarding guide
+                      </button>{' '}
+                      to learn more.
+                    </p>
+                  </div>
+                )
+              }
+              action={
+                hasFilters ? (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      table.resetGlobalFilter()
+                      table.resetColumnFilters()
+                      table.setPageIndex(0)
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                ) : null
+              }
+            />
+          ) : null
+        }
+      >
+        <Table style={{ minWidth: table.getTotalSize() }}>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    data-state={header.column.getCanSort() && 'sortable'}
-                    onClick={() =>
-                      header.column.getCanSort() && header.column.toggleSorting(header.column.getIsSorted() === 'asc')
-                    }
-                    className={cn(
-                      'sticky top-0 z-[3] border-b border-border',
-                      header.column.getCanSort() ? 'hover:bg-muted cursor-pointer' : '',
-                    )}
-                    style={{
-                      width: `${header.column.getSize()}px`,
-                    }}
+                    sticky={header.column.getIsPinned()}
+                    style={getColumnSizeStyles(header.column)}
                   >
                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
-                )
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {loading ? (
-            <TableRow>
-              <TableCell colSpan={table.getAllColumns().length} className="h-10 text-center">
-                Loading...
-              </TableCell>
-            </TableRow>
-          ) : table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && 'selected'}
-                className={cn('group/table-row transition-all', {
-                  'opacity-80 pointer-events-none':
-                    sandboxIsLoading[row.original.id] || row.original.state === SandboxState.DESTROYED,
-                  'bg-muted animate-pulse': sandboxStateIsTransitioning[row.original.id],
-                  'cursor-pointer': onRowClick,
-                })}
-                onClick={() => onRowClick?.(row.original)}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell
-                    key={cell.id}
-                    onClick={(e) => {
-                      if (cell.column.id === 'select' || cell.column.id === 'actions') {
-                        e.stopPropagation()
-                      }
-                    }}
-                    className={cn('border-b border-border', {
-                      'group-hover/table-row:underline': cell.column.id === 'name',
-                    })}
-                    style={{
-                      width: `${cell.column.getSize()}px`,
-                    }}
-                    sticky={cell.column.id === 'actions' ? 'right' : undefined}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
                 ))}
               </TableRow>
-            ))
-          ) : (
-            <TableEmptyState
-              colSpan={table.getAllColumns().length}
-              message="No Sandboxes yet."
-              icon={<Container className="w-8 h-8" />}
-              description={
-                <div className="space-y-2">
-                  <p>Spin up a Sandbox to run code in an isolated environment.</p>
-                  <p>Use the Daytona SDK or CLI to create one.</p>
-                  <p>
-                    <button
-                      onClick={() => navigate(RoutePath.ONBOARDING)}
-                      className="text-primary hover:underline font-medium"
+            ))}
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <>
+                {Array.from({ length: DEFAULT_PAGE_SIZE }).map((_, i) => (
+                  <TableRow key={i}>
+                    {table.getVisibleLeafColumns().map((column) => (
+                      <TableCell key={column.id} sticky={column.getIsPinned()} style={getColumnSizeStyles(column)}>
+                        <Skeleton className="h-4 w-10/12" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </>
+            ) : table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                  className={cn('group/table-row transition-all', {
+                    'opacity-80 pointer-events-none':
+                      sandboxIsLoading[row.original.id] || row.original.state === SandboxState.DESTROYED,
+                    'bg-muted animate-pulse': sandboxStateIsTransitioning[row.original.id],
+                    'cursor-pointer': onRowClick,
+                  })}
+                  onClick={() => onRowClick?.(row.original)}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      onClick={(e) => {
+                        if (cell.column.id === 'select' || cell.column.id === 'actions') {
+                          e.stopPropagation()
+                        }
+                      }}
+                      className={cn({ 'group-hover/table-row:underline': cell.column.id === 'name' })}
+                      sticky={cell.column.getIsPinned()}
+                      style={getColumnSizeStyles(cell.column)}
                     >
-                      Check out the Onboarding guide
-                    </button>{' '}
-                    to learn more.
-                  </p>
-                </div>
-              }
-            />
-          )}
-        </TableBody>
-      </Table>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : null}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-      <div className="flex items-center justify-end relative">
-        <Pagination className="pb-2 pt-6" table={table} selectionEnabled={deletePermitted} entityName="Sandboxes" />
-
-        <AnimatePresence>
-          {hasSelection && (
-            <SelectionToast
-              className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
-              selectedCount={selectedRows.length}
-              onClearSelection={() => table.resetRowSelection()}
-              onActionClick={handleOpenCommandPalette}
-            />
-          )}
-        </AnimatePresence>
-      </div>
+      <PageFooterPortal>
+        <Pagination table={table} selectionEnabled={deletePermitted} entityName="Sandboxes" totalItems={data.length} />
+      </PageFooterPortal>
+      <AnimatePresence>
+        {hasSelection && (
+          <SelectionToast
+            className="absolute bottom-[120px] sm:bottom-20 left-1/2 -translate-x-1/2 z-50"
+            selectedCount={selectedRows.length}
+            onClearSelection={() => table.resetRowSelection()}
+            onActionClick={handleOpenCommandPalette}
+          />
+        )}
+      </AnimatePresence>
 
       <BulkActionAlertDialog
         action={pendingBulkAction}
@@ -287,6 +319,6 @@ export function SandboxTable({
         onConfirm={handleBulkActionConfirm}
         onCancel={() => setPendingBulkAction(null)}
       />
-    </>
+    </div>
   )
 }

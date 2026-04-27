@@ -3,7 +3,10 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Runner, RunnerState, Region } from '@daytona/api-client'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { cn } from '@/lib/utils'
+import { getColumnSizeStyles } from '@/lib/utils/table'
+import { Region, Runner, RunnerState } from '@daytona/api-client'
 import {
   ColumnDef,
   flexRender,
@@ -11,21 +14,52 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  Table as ReactTable,
+  RowData,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
-import { Button } from './ui/button'
-import { Switch } from './ui/switch'
+import { MoreHorizontal, Server } from 'lucide-react'
 import { useState } from 'react'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
+import { CopyButton } from './CopyButton'
+import { PageFooterPortal } from './PageLayout'
 import { Pagination } from './Pagination'
-import { Server, MoreHorizontal, Copy, AlertTriangle, CheckCircle, Timer, Pause } from 'lucide-react'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
-import { TableEmptyState } from './TableEmptyState'
-import { toast } from 'sonner'
-import { DebouncedInput } from './DebouncedInput'
-import { cn } from '@/lib/utils'
+import { RefreshIntervalValue, RefreshSegmentedButton } from './RefreshSegmentedButton'
+import { SearchInput } from './SearchInput'
+import { Badge, BadgeProps } from './ui/badge'
+import { Button } from './ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
+import { Skeleton } from './ui/skeleton'
+import { Switch } from './ui/switch'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableEmptyState,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from './ui/table'
+
+type RunnerTableMeta = {
+  deletePermitted: boolean
+  getRegionName: (regionId: string) => string | undefined
+  isLoadingRunner: (runner: Runner) => boolean
+  onDelete: (runner: Runner) => void
+  onToggleEnabled: (runner: Runner) => void
+  writePermitted: boolean
+}
+
+declare module '@tanstack/react-table' {
+  interface TableMeta<TData extends RowData> {
+    runner?: TData extends Runner ? RunnerTableMeta : never
+  }
+}
+
+const getMeta = (table: ReactTable<Runner>) => {
+  return table.options.meta?.runner as RunnerTableMeta
+}
 
 interface RunnerTableProps {
   data: Runner[]
@@ -38,8 +72,11 @@ interface RunnerTableProps {
   onDelete: (runner: Runner) => void
   getRegionName: (regionId: string) => string | undefined
   onRowClick?: (runner: Runner) => void
-  autoRefresh?: boolean
-  onAutoRefreshChange?: (enabled: boolean) => void
+  refreshInterval?: RefreshIntervalValue
+  onRefreshIntervalChange?: (value: RefreshIntervalValue) => void
+  onRefresh?: () => void
+  isRefreshing?: boolean
+  lastUpdatedAt?: number
 }
 
 export function RunnerTable({
@@ -53,35 +90,28 @@ export function RunnerTable({
   onDelete,
   getRegionName,
   onRowClick,
-  autoRefresh,
-  onAutoRefreshChange,
+  refreshInterval = false,
+  onRefreshIntervalChange,
+  onRefresh,
+  isRefreshing = false,
+  lastUpdatedAt,
 }: RunnerTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
 
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text)
-      toast.success('Copied to clipboard')
-    } catch (err) {
-      console.error('Failed to copy text:', err)
-      toast.error('Failed to copy to clipboard')
-    }
-  }
-
-  const columns = getColumns({
-    onToggleEnabled,
-    onDelete,
-    isLoadingRunner,
-    writePermitted,
-    deletePermitted,
-    copyToClipboard,
-    getRegionName,
-  })
-
   const table = useReactTable({
     data,
-    columns,
+    columns: runnerColumns,
+    meta: {
+      runner: {
+        deletePermitted,
+        getRegionName,
+        isLoadingRunner,
+        onDelete,
+        onToggleEnabled,
+        writePermitted,
+      },
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -106,27 +136,80 @@ export function RunnerTable({
       pagination: {
         pageSize: DEFAULT_PAGE_SIZE,
       },
+      columnPinning: {
+        right: ['actions'],
+      },
     },
   })
 
+  const isEmpty = !loading && table.getRowModel().rows.length === 0
+  const hasSearch = globalFilter.trim().length > 0
+
+  const handleChangeFilter = (value: string) => {
+    setGlobalFilter(value)
+    table.setPageIndex(0)
+  }
+
   return (
-    <div>
-      <div className="flex items-center flex-wrap gap-4 mb-4">
-        <DebouncedInput
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex items-center gap-2">
+        <SearchInput
+          debounced
           value={globalFilter ?? ''}
-          onChange={(value) => setGlobalFilter(String(value))}
+          onValueChange={handleChangeFilter}
           placeholder="Search by ID, Name, or Region"
-          className="max-w-sm"
+          containerClassName="max-w-sm"
         />
-        {onAutoRefreshChange && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Auto-refresh</span>
-            <Switch checked={autoRefresh} onCheckedChange={onAutoRefreshChange} />
-          </div>
+        {onRefreshIntervalChange && onRefresh && (
+          <RefreshSegmentedButton
+            className="ml-auto"
+            value={refreshInterval}
+            onChange={onRefreshIntervalChange}
+            onRefresh={onRefresh}
+            isRefreshing={isRefreshing}
+            lastUpdatedAt={lastUpdatedAt}
+            options={[
+              { label: 'Off', value: false },
+              { label: 'Every 5s', value: 5000 },
+              { label: 'Every 10s', value: 10000 },
+              { label: 'Every 30s', value: 30000 },
+              { label: 'Every 1m', value: 60000 },
+            ]}
+          />
         )}
       </div>
-      <div className="rounded-md border">
-        <Table style={{ tableLayout: 'fixed', width: '100%' }}>
+
+      <TableContainer
+        className={isEmpty ? 'min-h-[26rem]' : undefined}
+        empty={
+          isEmpty ? (
+            <TableEmptyState
+              overlay
+              colSpan={runnerColumns.length}
+              message={hasSearch ? 'No matching runners found.' : 'No runners found.'}
+              icon={<Server />}
+              description={
+                hasSearch ? null : (
+                  <div className="space-y-2">
+                    <p>Runners are the machines that run your sandboxes.</p>
+                    {regions.length === 0 && (
+                      <p>There must be at least one region in your organization before runners can be created.</p>
+                    )}
+                  </div>
+                )
+              }
+              action={
+                hasSearch ? (
+                  <Button variant="outline" onClick={() => handleChangeFilter('')}>
+                    Clear filters
+                  </Button>
+                ) : null
+              }
+            />
+          ) : null
+        }
+      >
+        <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -135,9 +218,8 @@ export function RunnerTable({
                     <TableHead
                       className="px-2"
                       key={header.id}
-                      style={{
-                        width: `${header.column.getSize()}px`,
-                      }}
+                      style={getColumnSizeStyles(header.column)}
+                      sticky={header.column.getIsPinned()}
                     >
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
@@ -148,17 +230,29 @@ export function RunnerTable({
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
+              <>
+                {Array.from({ length: DEFAULT_PAGE_SIZE }).map((_, rowIndex) => (
+                  <TableRow key={rowIndex}>
+                    {table.getVisibleLeafColumns().map((column) => (
+                      <TableCell
+                        className="px-2"
+                        key={`${rowIndex}-${column.id}`}
+                        style={getColumnSizeStyles(column)}
+                        sticky={column.getIsPinned()}
+                      >
+                        <Skeleton className="h-4 w-10/12" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
                   className={cn(
+                    'group/table-row',
                     isLoadingRunner(row.original) ? 'opacity-50 pointer-events-none' : '',
                     onRowClick && 'cursor-pointer hover:bg-muted/50',
                   )}
@@ -166,214 +260,136 @@ export function RunnerTable({
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
-                      className="px-2"
+                      className={cn('px-2', {
+                        'group-hover/table-row:underline': onRowClick && cell.column.id === 'name',
+                      })}
                       key={cell.id}
-                      style={{
-                        width: `${cell.column.getSize()}px`,
-                      }}
+                      style={getColumnSizeStyles(cell.column)}
+                      sticky={cell.column.getIsPinned()}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
-            ) : (
-              <TableEmptyState
-                colSpan={columns.length}
-                message="No runners found."
-                icon={<Server className="w-8 h-8" />}
-                description={
-                  <div className="space-y-2">
-                    <p>Runners are the machines that run your sandboxes.</p>
-                    {regions.length === 0 && (
-                      <p>There must be at least one region in your organization before runners can be created.</p>
-                    )}
-                  </div>
-                }
-              />
-            )}
+            ) : null}
           </TableBody>
         </Table>
-      </div>
-      <Pagination table={table} className="mt-4" entityName="Runners" />
+      </TableContainer>
+
+      <PageFooterPortal>
+        <Pagination table={table} entityName="Runners" />
+      </PageFooterPortal>
     </div>
   )
 }
 
-const getColumns = ({
-  onToggleEnabled,
-  onDelete,
-  isLoadingRunner,
-  writePermitted,
-  deletePermitted,
-  copyToClipboard,
-  getRegionName,
-}: {
-  onToggleEnabled: (runner: Runner) => void
-  onDelete: (runner: Runner) => void
-  isLoadingRunner: (runner: Runner) => boolean
-  writePermitted: boolean
-  deletePermitted: boolean
-  copyToClipboard: (text: string) => Promise<void>
-  getRegionName: (regionId: string) => string | undefined
-}): ColumnDef<Runner>[] => {
-  const getStateIcon = (state: RunnerState) => {
-    switch (state) {
-      case RunnerState.READY:
-        return <CheckCircle className="w-4 h-4 flex-shrink-0" />
-      case RunnerState.DISABLED:
-      case RunnerState.DECOMMISSIONED:
-        return <Pause className="w-4 h-4 flex-shrink-0" />
-      case RunnerState.UNRESPONSIVE:
-        return <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-      default:
-        return <Timer className="w-4 h-4 flex-shrink-0" />
-    }
+const getStateBadgeVariant = (state: RunnerState): BadgeProps['variant'] => {
+  switch (state) {
+    case RunnerState.READY:
+      return 'success'
+    case RunnerState.UNRESPONSIVE:
+      return 'destructive'
+    case RunnerState.INITIALIZING:
+      return 'warning'
+    case RunnerState.DISABLED:
+    case RunnerState.DECOMMISSIONED:
+    default:
+      return 'secondary'
   }
+}
 
-  const getStateColor = (state: RunnerState) => {
-    switch (state) {
-      case RunnerState.READY:
-        return 'text-green-500'
-      case RunnerState.DISABLED:
-      case RunnerState.DECOMMISSIONED:
-        return 'text-gray-500 dark:text-gray-400'
-      case RunnerState.UNRESPONSIVE:
-        return 'text-red-500'
-      default:
-        return 'text-gray-600 dark:text-gray-400'
-    }
-  }
+const getStateLabel = (state: RunnerState) => {
+  return state
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
+}
 
-  const getStateLabel = (state: RunnerState) => {
-    return state
-      .split('_')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ')
-  }
+const isRunnerSchedulable = (runner: Runner) => {
+  return !runner.unschedulable
+}
 
-  const isRunnerSchedulable = (runner: Runner) => {
-    return !runner.unschedulable
-  }
-
-  const columns: ColumnDef<Runner>[] = [
-    {
-      accessorKey: 'id',
-      header: 'ID',
-      size: 240,
-      cell: ({ row }) => (
-        <div className="w-full truncate flex items-center gap-2">
-          <span className="truncate block text-sm">{row.original.id}</span>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              copyToClipboard(row.original.id)
-            }}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Copy ID"
-          >
-            <Copy className="w-3 h-3" />
-          </button>
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'name',
-      header: 'Name',
-      size: 240,
-      cell: ({ row }) => (
-        <div className="w-full truncate flex items-center gap-2">
+const runnerColumns: ColumnDef<Runner>[] = [
+  {
+    accessorKey: 'name',
+    header: 'Name',
+    size: 240,
+    cell: ({ row }) => {
+      return (
+        <div className="w-full truncate flex items-center gap-1 group/copy-button">
           <span className="truncate block text-sm">{row.original.name}</span>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              copyToClipboard(row.original.name)
-            }}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Copy Name"
-          >
-            <Copy className="w-3 h-3" />
-          </button>
+          <CopyButton value={row.original.name} size="icon-xs" autoHide tooltipText="Copy Name" />
         </div>
-      ),
+      )
     },
-    {
-      accessorKey: 'regionId',
-      header: 'Region',
-      size: 180,
-      cell: ({ row }) => (
-        <div className="w-full truncate flex items-center gap-2">
-          <span className="truncate block text-sm">{getRegionName(row.original.region) ?? row.original.region}</span>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              copyToClipboard(getRegionName(row.original.region) ?? row.original.region)
-            }}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Copy Region"
-          >
-            <Copy className="w-3 h-3" />
-          </button>
+  },
+  {
+    accessorKey: 'id',
+    header: 'ID',
+    size: 240,
+    cell: ({ row }) => {
+      return (
+        <div className="w-full truncate flex items-center gap-1 group/copy-button">
+          <span className="truncate block text-sm">{row.original.id}</span>
+          <CopyButton value={row.original.id} size="icon-xs" autoHide tooltipText="Copy ID" />
         </div>
-      ),
+      )
     },
-    // {
-    //   accessorKey: 'domain',
-    //   header: 'Domain',
-    //   size: 180,
-    //   cell: ({ row }) => (
-    //     <div className="w-full truncate flex items-center gap-2">
-    //       <span className="truncate block text-sm">{row.original.domain || '/'}</span>
-    //       {row.original.domain && (
-    //         <button
-    //           onClick={(e) => {
-    //             e.stopPropagation()
-    //             copyToClipboard(row.original.domain!)
-    //           }}
-    //           className="text-muted-foreground hover:text-foreground transition-colors"
-    //           aria-label="Copy Domain"
-    //         >
-    //           <Copy className="w-3 h-3" />
-    //         </button>
-    //       )}
-    //     </div>
-    //   ),
-    // },
-    {
-      accessorKey: 'state',
-      header: 'State',
-      size: 200,
-      cell: ({ row }) => (
-        <div className={`flex items-center gap-2 ${getStateColor(row.original.state)}`}>
-          {getStateIcon(row.original.state)}
-          {getStateLabel(row.original.state)}
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'unschedulable',
-      header: 'Schedulable',
-      size: 60,
-      cell: ({ row }) => {
-        const isLoading = isLoadingRunner(row.original)
-        return (
-          <Switch
-            checked={isRunnerSchedulable(row.original)}
-            onCheckedChange={() => writePermitted && !isLoading && onToggleEnabled(row.original)}
-            disabled={!writePermitted || isLoading}
-            onClick={(e) => e.stopPropagation()}
-          />
-        )
-      },
-    },
-  ]
+  },
+  {
+    accessorKey: 'regionId',
+    header: 'Region',
+    size: 180,
+    cell: ({ row, table }) => {
+      const { getRegionName } = getMeta(table)
+      const regionName = getRegionName(row.original.region) ?? row.original.region
 
-  columns.push({
-    id: 'options',
+      return (
+        <div className="w-full truncate flex items-center gap-1 group/copy-button">
+          <span className="truncate block text-sm">{regionName}</span>
+          <CopyButton value={regionName} size="icon-xs" autoHide tooltipText="Copy Region" />
+        </div>
+      )
+    },
+  },
+  {
+    accessorKey: 'state',
+    header: 'State',
+    size: 200,
+    cell: ({ row }) => (
+      <Badge variant={getStateBadgeVariant(row.original.state)}>{getStateLabel(row.original.state)}</Badge>
+    ),
+  },
+  {
+    accessorKey: 'unschedulable',
+    header: 'Schedulable',
+    size: 60,
+    cell: ({ row, table }) => {
+      const { isLoadingRunner, onToggleEnabled, writePermitted } = getMeta(table)
+      const isLoading = isLoadingRunner(row.original)
+
+      return (
+        <Switch
+          checked={isRunnerSchedulable(row.original)}
+          onCheckedChange={() => writePermitted && !isLoading && onToggleEnabled(row.original)}
+          disabled={!writePermitted || isLoading}
+          onClick={(e) => e.stopPropagation()}
+        />
+      )
+    },
+  },
+  {
+    id: 'actions',
+    size: 48,
+    minSize: 48,
+    maxSize: 48,
     header: () => {
       return null
     },
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
+      const { deletePermitted, isLoadingRunner, onDelete } = getMeta(table)
+
       if (!deletePermitted) {
         return null
       }
@@ -384,8 +400,8 @@ const getColumns = ({
         <div className="flex justify-end">
           <DropdownMenu>
             <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" disabled={isLoading}>
-                <MoreHorizontal className="h-4 w-4" />
+              <Button variant="ghost" size="icon-sm" aria-label="Open menu" disabled={isLoading}>
+                <MoreHorizontal />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -394,7 +410,7 @@ const getColumns = ({
                   e.stopPropagation()
                   onDelete(row.original)
                 }}
-                className="cursor-pointer text-red-600 dark:text-red-400"
+                variant="destructive"
                 disabled={isLoading}
               >
                 Delete
@@ -404,7 +420,5 @@ const getColumns = ({
         </div>
       )
     },
-  })
-
-  return columns
-}
+  },
+]

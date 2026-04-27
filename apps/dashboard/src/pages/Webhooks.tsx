@@ -3,19 +3,19 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
-import { CreateEndpointSheet } from '@/components/Webhooks/CreateEndpointSheet'
+import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { UpsertEndpointSheet } from '@/components/Webhooks/UpsertEndpointSheet'
 import { WebhooksEndpointTable } from '@/components/Webhooks/WebhooksEndpointTable'
 import { WebhooksMessagesTable } from '@/components/Webhooks/WebhooksMessagesTable/WebhooksMessagesTable'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useDeleteWebhookEndpointMutation } from '@/hooks/mutations/useDeleteWebhookEndpointMutation'
 import { useUpdateWebhookEndpointMutation } from '@/hooks/mutations/useUpdateWebhookEndpointMutation'
 import { handleApiError } from '@/lib/error-handling'
-import { PlusIcon, RefreshCcw } from 'lucide-react'
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import { AlertCircle, PlusIcon, RefreshCw } from 'lucide-react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { EndpointOut } from 'svix'
 import { useEndpoints } from 'svix-react'
@@ -102,25 +102,28 @@ const Webhooks: React.FC = () => {
           <PageTitle>Webhooks</PageTitle>
         </PageHeader>
         <PageContent>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-center">Oops, something went wrong</CardTitle>
-            </CardHeader>
-            <CardContent className="flex justify-between items-center flex-col gap-3">
-              <div>There was an error loading your webhook endpoints.</div>
-              <Button variant="outline" onClick={() => endpoints.reload()}>
-                <RefreshCcw className="mr-2 h-4 w-4" />
+          <Empty className="py-12 max-h-64 border" variant="destructive">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <AlertCircle />
+              </EmptyMedia>
+              <EmptyTitle>Failed to load webhook endpoints</EmptyTitle>
+              <EmptyDescription>Something went wrong while fetching your endpoints. Please try again.</EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button variant="secondary" size="sm" onClick={() => endpoints.reload()}>
+                <RefreshCw />
                 Retry
               </Button>
-            </CardContent>
-          </Card>
+            </EmptyContent>
+          </Empty>
         </PageContent>
       </PageLayout>
     )
   }
 
   return (
-    <PageLayout>
+    <PageLayout contained>
       <PageHeader>
         <PageTitle>Webhooks</PageTitle>
         <a
@@ -133,30 +136,30 @@ const Webhooks: React.FC = () => {
             Docs
           </Button>
         </a>
-        <CreateEndpointSheet
+        <UpsertEndpointSheet
           onSuccess={handleSuccess}
           ref={createEndpointSheetRef}
           className={activeTab === 'endpoints' ? '' : 'hidden'}
         />
       </PageHeader>
 
-      <PageContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-6">
-          <TabsList className="shadow-none bg-transparent w-auto p-0 pb-0 justify-start border-b rounded-none">
-            <TabsTrigger
-              value="endpoints"
-              className="data-[state=inactive]:border-b-transparent data-[state=active]:border-b-foreground border-b rounded-none !shadow-none -mb-0.5 pb-1.5"
-            >
+      <PageContent size="full" className="p-0 overflow-hidden">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col gap-0">
+          <TabsList
+            className="shadow-none bg-transparent w-auto p-0 pb-0 justify-start rounded-none"
+            variant="underline"
+          >
+            <TabsTrigger value="endpoints" className="-mb-0.5 pb-1.5">
               Endpoints
             </TabsTrigger>
-            <TabsTrigger
-              value="messages"
-              className="data-[state=inactive]:border-b-transparent data-[state=active]:border-b-foreground border-b rounded-none !shadow-none -mb-0.5 pb-1.5"
-            >
+            <TabsTrigger value="messages" className="-mb-0.5 pb-1.5">
               Messages
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="endpoints">
+          <TabsContent
+            value="endpoints"
+            className="min-h-0 p-4 data-[state=active]:flex data-[state=active]:flex-1 flex-col"
+          >
             <WebhooksEndpointTable
               data={endpoints.data || []}
               loading={endpoints.loading}
@@ -165,11 +168,15 @@ const Webhooks: React.FC = () => {
               onDelete={handleDelete}
             />
           </TabsContent>
-          <TabsContent value="messages">
+          <TabsContent
+            value="messages"
+            className="min-h-0 p-4 data-[state=active]:flex data-[state=active]:flex-1 flex-col"
+          >
             <WebhooksMessagesTable />
           </TabsContent>
         </Tabs>
       </PageContent>
+      <PageFooter />
     </PageLayout>
   )
 }

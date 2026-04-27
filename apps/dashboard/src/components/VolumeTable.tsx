@@ -3,19 +3,33 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { DebouncedInput } from '@/components/DebouncedInput'
+import { useCommandPaletteActions } from '@/components/CommandPalette'
+import { PageFooterPortal } from '@/components/PageLayout'
 import { Pagination } from '@/components/Pagination'
+import { SearchInput } from '@/components/SearchInput'
 import { SelectionToast } from '@/components/SelectionToast'
+import { TimestampTooltip } from '@/components/TimestampTooltip'
+import { Badge, BadgeProps } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableFacetedFilter, FacetedFilterOption } from '@/components/ui/data-table-faceted-filter'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableEmptyState,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useCommandPaletteActions } from '@/components/CommandPalette'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { getRelativeTimeString } from '@/lib/utils'
+import { cn, getRelativeTimeString } from '@/lib/utils'
+import { getColumnSizeStyles } from '@/lib/utils/table'
 import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytona/api-client'
 import {
   ColumnDef,
@@ -27,15 +41,32 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  Table as ReactTable,
+  RowData,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
 import { AlertTriangle, CheckCircle, HardDrive, Loader2, MoreHorizontal, Timer } from 'lucide-react'
 import { AnimatePresence } from 'motion/react'
 import { useCallback, useMemo, useState } from 'react'
-import { TableEmptyState } from './TableEmptyState'
 import { VolumeBulkAction, VolumeBulkActionAlertDialog } from './VolumeTable/BulkActionAlertDialog'
 import { getVolumeBulkActionCounts, isVolumeDeletable, useVolumeCommands } from './VolumeTable/useVolumeCommands'
+
+type VolumeTableMeta = {
+  onDelete: (volume: VolumeDto) => void
+  processingVolumeAction: Record<string, boolean>
+  deletePermitted: boolean
+}
+
+declare module '@tanstack/react-table' {
+  interface TableMeta<TData extends RowData> {
+    volume?: TData extends VolumeDto ? VolumeTableMeta : never
+  }
+}
+
+const getMeta = (table: ReactTable<VolumeDto>) => {
+  return table.options.meta?.volume as VolumeTableMeta
+}
 
 interface VolumeTableProps {
   data: VolumeDto[]
@@ -69,14 +100,15 @@ export function VolumeTable({
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
-  const columns = getColumns({
-    onDelete,
-    processingVolumeAction,
-    deletePermitted,
-  })
   const table = useReactTable({
     data,
     columns,
+    meta: {
+      volume: { onDelete, processingVolumeAction, deletePermitted },
+    },
+    defaultColumn: {
+      minSize: 0,
+    },
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -95,8 +127,14 @@ export function VolumeTable({
       pagination: {
         pageSize: DEFAULT_PAGE_SIZE,
       },
+      columnPinning: {
+        left: ['select'],
+        right: ['actions'],
+      },
     },
   })
+  const isEmpty = !loading && table.getRowModel().rows.length === 0
+  const hasFilters = table.getState().columnFilters.length > 0
   const selectedRows = table.getSelectedRowModel().rows
   const hasSelection = selectedRows.length > 0
   const selectedVolumes = selectedRows.map((row) => row.original)
@@ -152,89 +190,124 @@ export function VolumeTable({
   }
 
   return (
-    <div>
-      <div className="flex items-center mb-4">
-        <DebouncedInput
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex items-center gap-2">
+        <SearchInput
+          debounced
           value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-          onChange={(value) => table.getColumn('name')?.setFilterValue(value)}
-          placeholder="Search..."
-          className="max-w-sm mr-4"
+          onValueChange={(value) => table.getColumn('name')?.setFilterValue(value)}
+          placeholder="Search by Name, ID, or State"
+          containerClassName="max-w-sm"
         />
         {table.getColumn('state') && (
           <DataTableFacetedFilter column={table.getColumn('state')} title="State" options={statuses} />
         )}
       </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead className="px-2" key={header.id}>
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
-            ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                  className={`${processingVolumeAction[row.original.id] || row.original.state === VolumeState.PENDING_DELETE || row.original.state === VolumeState.DELETING ? 'opacity-50 pointer-events-none' : ''}`}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell className="px-2" key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableEmptyState
-                colSpan={columns.length}
-                message="No Volumes yet."
-                icon={<HardDrive className="w-8 h-8" />}
-                description={
+      <TableContainer
+        className={isEmpty ? 'min-h-[26rem]' : undefined}
+        empty={
+          isEmpty ? (
+            <TableEmptyState
+              overlay
+              colSpan={columns.length}
+              message={hasFilters ? 'No matching volumes found.' : 'No Volumes yet.'}
+              icon={<HardDrive />}
+              description={
+                hasFilters ? null : (
                   <div className="space-y-2">
                     <p>
                       Volumes are shared, persistent directories backed by S3-compatible storage, perfect for reusing
                       datasets, caching dependencies, or passing files across sandboxes.
                     </p>
                     <p>
-                      Create one via the SDK or CLI. <br />
+                      Create one via the SDK or CLI.{' '}
                       <a
                         href="https://www.daytona.io/docs/volumes"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary hover:underline font-medium"
+                        className="text-foreground hover:underline"
                       >
                         Read the Volumes guide
                       </a>{' '}
                       to learn more.
                     </p>
                   </div>
-                }
-              />
-            )}
+                )
+              }
+              action={
+                hasFilters ? (
+                  <Button variant="outline" onClick={() => table.resetColumnFilters()}>
+                    Clear filters
+                  </Button>
+                ) : null
+              }
+            />
+          ) : null
+        }
+      >
+        <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    sticky={header.column.getIsPinned()}
+                    style={getColumnSizeStyles(header.column)}
+                  >
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <>
+                {Array.from({ length: DEFAULT_PAGE_SIZE }).map((_, i) => (
+                  <TableRow key={i}>
+                    {table.getVisibleLeafColumns().map((column) => (
+                      <TableCell key={column.id} sticky={column.getIsPinned()} style={getColumnSizeStyles(column)}>
+                        <Skeleton className="h-4 w-10/12" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </>
+            ) : table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                  className={cn({
+                    'opacity-50 pointer-events-none':
+                      processingVolumeAction[row.original.id] ||
+                      row.original.state === VolumeState.PENDING_DELETE ||
+                      row.original.state === VolumeState.DELETING,
+                  })}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      sticky={cell.column.getIsPinned()}
+                      style={getColumnSizeStyles(cell.column)}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : null}
           </TableBody>
         </Table>
-      </div>
-      <Pagination table={table} selectionEnabled={deletePermitted} entityName="Volumes" className="mt-4" />
+      </TableContainer>
+      <PageFooterPortal>
+        <Pagination table={table} selectionEnabled={deletePermitted} entityName="Volumes" />
+      </PageFooterPortal>
       <AnimatePresence>
         {hasSelection && (
           <SelectionToast
-            className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
+            className="absolute bottom-[120px] sm:bottom-20 left-1/2 -translate-x-1/2 z-50"
             selectedCount={selectedRows.length}
             onClearSelection={() => table.resetRowSelection()}
             onActionClick={() => setIsOpen(true)}
@@ -251,25 +324,20 @@ export function VolumeTable({
   )
 }
 
-const getStateIcon = (state: VolumeState) => {
+const getStateBadgeVariant = (state: VolumeState): BadgeProps['variant'] => {
   switch (state) {
     case VolumeState.READY:
-      return <CheckCircle className="w-4 h-4 flex-shrink-0" />
+      return 'success'
     case VolumeState.ERROR:
-      return <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+      return 'destructive'
+    case VolumeState.CREATING:
+    case VolumeState.PENDING_CREATE:
+    case VolumeState.PENDING_DELETE:
+    case VolumeState.DELETING:
+      return 'warning'
+    case VolumeState.DELETED:
     default:
-      return <Timer className="w-4 h-4 flex-shrink-0" />
-  }
-}
-
-const getStateColor = (state: VolumeState) => {
-  switch (state) {
-    case VolumeState.READY:
-      return 'text-green-500'
-    case VolumeState.ERROR:
-      return 'text-red-500'
-    default:
-      return 'text-gray-600 dark:text-gray-400'
+      return 'secondary'
   }
 }
 
@@ -290,135 +358,156 @@ const statuses: FacetedFilterOption[] = [
   { label: getStateLabel(VolumeState.ERROR), value: VolumeState.ERROR, icon: AlertTriangle },
 ]
 
-const getColumns = ({
-  onDelete,
-  processingVolumeAction,
-  deletePermitted,
-}: {
-  onDelete: (volume: VolumeDto) => void
-  processingVolumeAction: Record<string, boolean>
-  deletePermitted: boolean
-}): ColumnDef<VolumeDto>[] => {
-  const columns: ColumnDef<VolumeDto>[] = [
-    {
-      id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ? true : table.getIsSomePageRowsSelected() ? 'indeterminate' : false
-          }
-          onCheckedChange={(value) => {
-            for (const row of table.getRowModel().rows) {
-              const isProcessing = processingVolumeAction[row.original.id]
-              const isDeleting =
-                row.original.state === VolumeState.PENDING_DELETE || row.original.state === VolumeState.DELETING
-              const isDeletable = isVolumeDeletable(row.original)
-
-              if (isProcessing || isDeleting || !isDeletable) {
-                row.toggleSelected(false)
-              } else {
-                row.toggleSelected(!!value)
-              }
+const columns: ColumnDef<VolumeDto>[] = [
+  {
+    id: 'select',
+    size: 44,
+    minSize: 44,
+    maxSize: 44,
+    header: ({ table }) => {
+      const { processingVolumeAction } = getMeta(table)
+      return (
+        <div className="flex justify-center">
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ? true : table.getIsSomePageRowsSelected() ? 'indeterminate' : false
             }
-          }}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-        />
-      ),
-      cell: ({ row }) => {
-        if (processingVolumeAction[row.original.id]) {
-          return <Loader2 className="w-4 h-4 animate-spin" />
-        }
+            onCheckedChange={(value) => {
+              for (const row of table.getRowModel().rows) {
+                const isProcessing = processingVolumeAction[row.original.id]
+                const isDeleting =
+                  row.original.state === VolumeState.PENDING_DELETE || row.original.state === VolumeState.DELETING
+                const isDeletable = isVolumeDeletable(row.original)
+
+                if (isProcessing || isDeleting || !isDeletable) {
+                  row.toggleSelected(false)
+                } else {
+                  row.toggleSelected(!!value)
+                }
+              }
+            }}
+            aria-label="Select all"
+          />
+        </div>
+      )
+    },
+    cell: ({ row, table }) => {
+      const { processingVolumeAction } = getMeta(table)
+      if (processingVolumeAction[row.original.id]) {
         return (
+          <div className="flex justify-center">
+            <Loader2 className="w-4 h-4 animate-spin" />
+          </div>
+        )
+      }
+      return (
+        <div className="flex justify-center">
           <Checkbox
             checked={row.getIsSelected()}
             onCheckedChange={(value) => row.toggleSelected(!!value)}
             aria-label="Select row"
-            className="translate-y-[2px]"
           />
-        )
-      },
-      enableSorting: false,
-      enableHiding: false,
+        </div>
+      )
     },
-    {
-      accessorKey: 'name',
-      header: 'Name',
-      cell: ({ row }) => {
-        return <div className="w-40">{row.original.name}</div>
-      },
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: 'name',
+    size: 200,
+    header: 'Name',
+    filterFn: (row, _id, filterValue) => {
+      const volume = row.original
+      const searchValue = String(filterValue).toLowerCase()
+
+      return (
+        volume.name.toLowerCase().includes(searchValue) ||
+        volume.id.toLowerCase().includes(searchValue) ||
+        volume.state.toLowerCase().includes(searchValue) ||
+        (volume.errorReason?.toLowerCase().includes(searchValue) ?? false)
+      )
     },
-    {
-      id: 'state',
-      header: 'State',
-      cell: ({ row }) => {
-        const volume = row.original
-        const state = row.original.state
-        const color = getStateColor(state)
+    cell: ({ row }) => {
+      return <div className="w-40">{row.original.name}</div>
+    },
+  },
+  {
+    id: 'state',
+    size: 120,
+    header: 'State',
+    cell: ({ row }) => {
+      const volume = row.original
+      const state = row.original.state
+      const variant = getStateBadgeVariant(state)
+      const badge = <Badge variant={variant}>{getStateLabel(state)}</Badge>
 
-        if (state === VolumeState.ERROR && !!volume.errorReason) {
-          return (
-            <Tooltip>
-              <TooltipTrigger>
-                <div className={`flex items-center gap-2 ${color}`}>
-                  {getStateIcon(state)}
-                  {getStateLabel(state)}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-[300px]">{volume.errorReason}</p>
-              </TooltipContent>
-            </Tooltip>
-          )
-        }
-
+      if (state === VolumeState.ERROR && !!volume.errorReason) {
         return (
-          <div className={`flex items-center gap-2 w-40 ${color}`}>
-            {getStateIcon(state)}
-            <span>{getStateLabel(state)}</span>
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>{badge}</TooltipTrigger>
+            <TooltipContent>
+              <p className="max-w-[300px]">{volume.errorReason}</p>
+            </TooltipContent>
+          </Tooltip>
         )
-      },
-      accessorKey: 'state',
-      filterFn: (row, id, value) => {
-        return value.includes(row.getValue(id))
-      },
-    },
-    {
-      accessorKey: 'createdAt',
-      header: 'Created',
-      cell: ({ row }) => {
-        return getRelativeTimeString(row.original.createdAt).relativeTimeString
-      },
-    },
-    {
-      accessorKey: 'lastUsedAt',
-      header: 'Last Used',
-      cell: ({ row }) => {
-        return getRelativeTimeString(row.original.lastUsedAt).relativeTimeString
-      },
-    },
-    {
-      id: 'actions',
-      enableHiding: false,
-      cell: ({ row }) => {
-        if (!deletePermitted) {
-          return null
-        }
+      }
 
-        return (
+      return badge
+    },
+    accessorKey: 'state',
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
+  },
+  {
+    accessorKey: 'createdAt',
+    size: 120,
+    header: 'Created',
+    cell: ({ row }) => {
+      const createdAt = row.original.createdAt
+      const relativeTime = getRelativeTimeString(createdAt).relativeTimeString
+
+      return (
+        <TimestampTooltip timestamp={createdAt?.toString()}>
+          <span className="cursor-default">{relativeTime}</span>
+        </TimestampTooltip>
+      )
+    },
+  },
+  {
+    accessorKey: 'lastUsedAt',
+    size: 120,
+    header: 'Last Used',
+    cell: ({ row }) => {
+      return getRelativeTimeString(row.original.lastUsedAt).relativeTimeString
+    },
+  },
+  {
+    id: 'actions',
+    header: () => null,
+    enableHiding: false,
+    size: 48,
+    minSize: 48,
+    maxSize: 48,
+    cell: ({ row, table }) => {
+      const { deletePermitted, processingVolumeAction, onDelete } = getMeta(table)
+
+      if (!deletePermitted) {
+        return null
+      }
+
+      return (
+        <div className="flex justify-end">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
+              <Button variant="ghost" size="icon-sm" aria-label="Open menu">
                 <MoreHorizontal />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                className={`cursor-pointer text-red-600 dark:text-red-400 ${
-                  processingVolumeAction[row.original.id] ? 'opacity-50 pointer-events-none' : ''
-                }`}
+                variant="destructive"
                 disabled={processingVolumeAction[row.original.id]}
                 onClick={() => onDelete(row.original)}
               >
@@ -426,10 +515,8 @@ const getColumns = ({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        )
-      },
+        </div>
+      )
     },
-  ]
-
-  return columns
-}
+  },
+]

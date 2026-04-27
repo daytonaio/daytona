@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { DebouncedInput } from '@/components/DebouncedInput'
+import { PageFooterPortal } from '@/components/PageLayout'
 import { Pagination } from '@/components/Pagination'
-import { TableEmptyState } from '@/components/TableEmptyState'
+import { SearchInput } from '@/components/SearchInput'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,10 +16,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableEmptyState,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { RoutePath } from '@/enums/RoutePath'
+import { cn } from '@/lib/utils'
+import { getColumnSizeStyles } from '@/lib/utils/table'
 import {
   flexRender,
   getCoreRowModel,
@@ -96,6 +108,9 @@ export function WebhooksEndpointTable({
       pagination: {
         pageSize: DEFAULT_PAGE_SIZE,
       },
+      columnPinning: {
+        right: ['actions'],
+      },
     },
     meta: {
       webhookEndpoints: {
@@ -106,22 +121,70 @@ export function WebhooksEndpointTable({
     },
   })
 
+  const isEmpty = !loading && table.getRowModel().rows.length === 0
+  const hasSearch = globalFilter.trim().length > 0
+
   const handleRowClick = (endpoint: EndpointOut) => {
     navigate(RoutePath.WEBHOOK_ENDPOINT_DETAILS.replace(':endpointId', endpoint.id))
   }
 
+  const handleChangeFilter = (value: string) => {
+    setGlobalFilter(value)
+    table.setPageIndex(0)
+  }
+
   return (
-    <div>
-      <div className="flex items-center mb-4">
-        <DebouncedInput
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex items-center gap-4">
+        <SearchInput
+          debounced
           value={globalFilter ?? ''}
-          onChange={(value) => setGlobalFilter(String(value))}
+          onValueChange={handleChangeFilter}
           placeholder="Search by URL or Description"
-          className="max-w-sm"
+          containerClassName="max-w-sm"
         />
       </div>
-      <div className="rounded-md border">
-        <Table style={{ tableLayout: 'fixed', width: '100%' }}>
+      <TableContainer
+        className={cn({
+          'min-h-[26rem]': isEmpty,
+        })}
+        empty={
+          isEmpty ? (
+            <TableEmptyState
+              overlay
+              colSpan={columns.length}
+              message={hasSearch ? 'No matching webhook endpoints found.' : 'No webhook endpoints found.'}
+              icon={<Mail />}
+              description={
+                hasSearch ? null : (
+                  <div className="space-y-2">
+                    <p>Create an endpoint to start receiving webhook events.</p>
+                    <p>
+                      <a
+                        href="https://www.daytona.io/docs/en/tools/api/#daytona/webhook/undefined/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline font-medium"
+                      >
+                        Check out the Docs
+                      </a>{' '}
+                      to learn more.
+                    </p>
+                  </div>
+                )
+              }
+              action={
+                hasSearch ? (
+                  <Button variant="outline" onClick={() => handleChangeFilter('')}>
+                    Clear filters
+                  </Button>
+                ) : null
+              }
+            />
+          ) : null
+        }
+      >
+        <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -130,9 +193,8 @@ export function WebhooksEndpointTable({
                     <TableHead
                       className="px-2"
                       key={header.id}
-                      style={{
-                        width: `${header.column.getSize()}px`,
-                      }}
+                      style={getColumnSizeStyles(header.column)}
+                      sticky={header.column.getIsPinned()}
                     >
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
@@ -144,11 +206,11 @@ export function WebhooksEndpointTable({
           <TableBody>
             {loading ? (
               <>
-                {Array.from(new Array(5)).map((_, i) => (
+                {Array.from({ length: DEFAULT_PAGE_SIZE }).map((_, i) => (
                   <TableRow key={i}>
                     {table.getVisibleLeafColumns().map((column, colIndex, arr) =>
                       colIndex === arr.length - 1 ? null : (
-                        <TableCell key={column.id} className="px-2">
+                        <TableCell key={column.id} className="px-2" style={getColumnSizeStyles(column)}>
                           <Skeleton className="h-4 w-10/12" />
                         </TableCell>
                       ),
@@ -182,9 +244,8 @@ export function WebhooksEndpointTable({
                       <TableCell
                         className="px-2"
                         key={cell.id}
-                        style={{
-                          width: `${cell.column.getSize()}px`,
-                        }}
+                        style={getColumnSizeStyles(cell.column)}
+                        sticky={cell.column.getIsPinned()}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
@@ -192,33 +253,13 @@ export function WebhooksEndpointTable({
                   </TableRow>
                 )
               })
-            ) : (
-              <TableEmptyState
-                colSpan={columns.length}
-                message="No webhook endpoints found."
-                icon={<Mail className="size-8" />}
-                description={
-                  <div className="space-y-2">
-                    <p>Create an endpoint to start receiving webhook events.</p>
-                    <p>
-                      <a
-                        href="https://www.daytona.io/docs/en/tools/api/#daytona/webhook/undefined/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline font-medium"
-                      >
-                        Check out the Docs
-                      </a>{' '}
-                      to learn more.
-                    </p>
-                  </div>
-                }
-              />
-            )}
+            ) : null}
           </TableBody>
         </Table>
-      </div>
-      <Pagination table={table} className="mt-4" entityName="Endpoints" />
+      </TableContainer>
+      <PageFooterPortal>
+        <Pagination table={table} entityName="Endpoints" />
+      </PageFooterPortal>
 
       <AlertDialog open={!!deleteEndpoint} onOpenChange={(open) => !open && setDeleteEndpoint(null)}>
         <AlertDialogContent>

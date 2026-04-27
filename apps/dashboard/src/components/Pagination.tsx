@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { cn } from '@/lib/utils'
 import { Table } from '@tanstack/react-table'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import { Button } from './ui/button'
 import { PAGE_SIZE_OPTIONS } from '../constants/Pagination'
+import { Button } from './ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 
 interface PaginationProps<TData> {
   table: Table<TData>
@@ -25,7 +26,7 @@ export function Pagination<TData>({
   totalItems,
 }: PaginationProps<TData>) {
   return (
-    <div className={`flex flex-col sm:flex-row gap-2 sm:items-center justify-between w-full ${className}`}>
+    <div className={cn('flex flex-col sm:flex-row gap-4 sm:items-center justify-between w-full', className)}>
       <div className="flex items-center gap-4">
         <Select
           value={`${table.getState().pagination.pageSize}`}
@@ -33,7 +34,7 @@ export function Pagination<TData>({
             table.setPageSize(Number(value))
           }}
         >
-          <SelectTrigger className="h-8 w-[164px]">
+          <SelectTrigger className="h-8 w-[140px]">
             <SelectValue placeholder={table.getState().pagination.pageSize + 'per page'} />
           </SelectTrigger>
           <SelectContent side="top">

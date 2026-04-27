@@ -4,20 +4,33 @@
  */
 
 import { useCommandPaletteActions } from '@/components/CommandPalette'
-import { useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
+import { PageFooterPortal } from '@/components/PageLayout'
+import { SearchInput } from '@/components/SearchInput'
 import { SelectionToast } from '@/components/SelectionToast'
+import { Button } from '@/components/ui/button'
+import { FacetFilter } from '@/components/ui/facet-filter'
 import { Skeleton } from '@/components/ui/skeleton'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { SnapshotSorting } from '@/hooks/queries/useSnapshotsQuery'
+import { useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { cn } from '@/lib/utils'
+import { getColumnSizeStyles } from '@/lib/utils/table'
 import { OrganizationRolePermissionsEnum, SnapshotDto, SnapshotState } from '@daytona/api-client'
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { Box } from 'lucide-react'
 import { AnimatePresence } from 'motion/react'
 import { useCallback, useMemo, useState } from 'react'
 import { Pagination } from '../../Pagination'
-import { TableEmptyState } from '../../TableEmptyState'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableEmptyState,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../../ui/table'
 import { SnapshotBulkAction, SnapshotBulkActionAlertDialog } from './BulkActionAlertDialog'
 import { columns } from './columns'
 import {
@@ -48,9 +61,23 @@ interface DataTableProps {
   pageCount: number
   totalItems: number
   onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
+  searchValue: string
+  onSearchChange: (value: string) => void
   sorting: SnapshotSorting
   onSortingChange: (sorting: SnapshotSorting) => void
+  stateFilter: Set<string>
+  onStateFilterChange: (values: Set<string>) => void
 }
+
+const SNAPSHOT_STATE_OPTIONS = [
+  { label: 'Active', value: SnapshotState.ACTIVE },
+  { label: 'Inactive', value: SnapshotState.INACTIVE },
+  { label: 'Building', value: SnapshotState.BUILDING },
+  { label: 'Pending', value: SnapshotState.PENDING },
+  { label: 'Pulling', value: SnapshotState.PULLING },
+  { label: 'Error', value: SnapshotState.ERROR },
+  { label: 'Build Failed', value: SnapshotState.BUILD_FAILED },
+]
 
 export function SnapshotTable({
   data,
@@ -68,8 +95,12 @@ export function SnapshotTable({
   onBulkActivate,
   onBulkDeactivate,
   onPaginationChange,
+  searchValue,
+  onSearchChange,
   sorting,
   onSortingChange,
+  stateFilter,
+  onStateFilterChange,
 }: DataTableProps) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -94,7 +125,16 @@ export function SnapshotTable({
   const table = useReactTable({
     data,
     columns,
+    defaultColumn: {
+      minSize: 0,
+    },
     getCoreRowModel: getCoreRowModel(),
+    initialState: {
+      columnPinning: {
+        left: ['select'],
+        right: ['actions'],
+      },
+    },
     manualSorting: true,
     onSortingChange: (updater) => {
       const newTableSorting = typeof updater === 'function' ? updater(table.getState().sorting) : updater
@@ -135,9 +175,16 @@ export function SnapshotTable({
 
   const selectedRows = table.getSelectedRowModel().rows
   const hasSelection = selectedRows.length > 0
+  const isEmpty = !loading && table.getRowModel().rows.length === 0
+  const hasFilters = stateFilter.size > 0 || searchValue.trim().length > 0
 
   const [pendingBulkAction, setPendingBulkAction] = useState<SnapshotBulkAction | null>(null)
   const selectedSnapshots = selectedRows.map((row) => row.original)
+
+  const handleClearFilters = () => {
+    onSearchChange('')
+    onStateFilterChange(new Set())
+  }
 
   const bulkActionCounts = useMemo(() => getSnapshotBulkActionCounts(selectedSnapshots), [selectedSnapshots])
 
@@ -202,64 +249,34 @@ export function SnapshotTable({
   }
 
   return (
-    <div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead
-                      key={header.id}
-                      className={cn('px-2', header.column.getCanSort() && 'hover:bg-muted cursor-pointer')}
-                    >
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <>
-                {Array.from(new Array(10)).map((_, i) => (
-                  <TableRow key={i}>
-                    {table.getVisibleLeafColumns().map((column, i, arr) =>
-                      i === arr.length - 1 ? null : (
-                        <TableCell key={column.id}>
-                          <Skeleton className="h-4 w-10/12" />
-                        </TableCell>
-                      ),
-                    )}
-                  </TableRow>
-                ))}
-              </>
-            ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() ? 'selected' : undefined}
-                  className={`${
-                    loadingSnapshots[row.original.id] || row.original.state === SnapshotState.REMOVING
-                      ? 'opacity-50 pointer-events-none'
-                      : ''
-                  } ${row.original.general ? 'pointer-events-none' : ''}`}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell className="px-2" key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableEmptyState
-                colSpan={columns.length}
-                message="No Snapshots yet."
-                icon={<Box className="w-8 h-8" />}
-                description={
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex items-center gap-2">
+        <SearchInput
+          debounced
+          value={searchValue}
+          onValueChange={onSearchChange}
+          placeholder="Search by Name"
+          containerClassName="max-w-sm"
+        />
+        <FacetFilter
+          title="State"
+          className="h-8"
+          options={SNAPSHOT_STATE_OPTIONS}
+          selectedValues={stateFilter}
+          setSelectedValues={onStateFilterChange}
+        />
+      </div>
+      <TableContainer
+        className={isEmpty ? 'min-h-[26rem]' : undefined}
+        empty={
+          isEmpty ? (
+            <TableEmptyState
+              overlay
+              colSpan={columns.length}
+              message={hasFilters ? 'No matching snapshots found.' : 'No Snapshots yet.'}
+              icon={<Box />}
+              description={
+                hasFilters ? null : (
                   <div className="space-y-2">
                     <p>
                       Snapshots are reproducible, pre-configured environments based on any Docker-compatible image. Use
@@ -278,23 +295,81 @@ export function SnapshotTable({
                       to learn more.
                     </p>
                   </div>
-                }
-              />
-            )}
+                )
+              }
+              action={
+                hasFilters ? (
+                  <Button variant="outline" onClick={handleClearFilters}>
+                    Clear filters
+                  </Button>
+                ) : null
+              }
+            />
+          ) : null
+        }
+      >
+        <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    sticky={header.column.getIsPinned()}
+                    style={getColumnSizeStyles(header.column)}
+                  >
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <>
+                {Array.from({ length: DEFAULT_PAGE_SIZE }).map((_, i) => (
+                  <TableRow key={i}>
+                    {table.getVisibleLeafColumns().map((column) => (
+                      <TableCell key={column.id} sticky={column.getIsPinned()} style={getColumnSizeStyles(column)}>
+                        <Skeleton className="h-4 w-10/12" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </>
+            ) : table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() ? 'selected' : undefined}
+                  className={`${
+                    loadingSnapshots[row.original.id] || row.original.state === SnapshotState.REMOVING
+                      ? 'opacity-50 pointer-events-none'
+                      : ''
+                  } ${row.original.general ? 'pointer-events-none' : ''}`}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      sticky={cell.column.getIsPinned()}
+                      style={getColumnSizeStyles(cell.column)}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : null}
           </TableBody>
         </Table>
-      </div>
-      <Pagination
-        table={table}
-        selectionEnabled={deletePermitted}
-        entityName="Snapshots"
-        totalItems={totalItems}
-        className="mt-4"
-      />
+      </TableContainer>
+      <PageFooterPortal>
+        <Pagination table={table} selectionEnabled={deletePermitted} entityName="Snapshots" totalItems={totalItems} />
+      </PageFooterPortal>
       <AnimatePresence>
         {hasSelection && (
           <SelectionToast
-            className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
+            className="absolute bottom-[120px] sm:bottom-20 left-1/2 -translate-x-1/2 z-50"
             selectedCount={selectedRows.length}
             onClearSelection={() => table.resetRowSelection()}
             onActionClick={handleOpenCommandPalette}

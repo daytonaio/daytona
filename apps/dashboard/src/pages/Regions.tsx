@@ -18,6 +18,7 @@ import { type CommandConfig, useRegisterCommands } from '@/components/CommandPal
 import { CreateRegionSheet } from '@/components/CreateRegionSheet'
 import { UpdateRegionDialog } from '@/components/UpdateRegionDialog'
 import RegionDetailsSheet from '@/components/RegionDetailsSheet'
+import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import {
   Dialog,
   DialogClose,
@@ -268,29 +269,34 @@ const Regions: React.FC = () => {
   }
 
   return (
-    <div className="px-6 py-2">
-      <div className="mb-2 h-12 flex items-center justify-between">
-        <h1 className="text-2xl font-medium">Regions</h1>
-        <CreateRegionSheet
-          onCreateRegion={handleCreateRegion}
-          writePermitted={writePermitted}
-          loadingData={loadingRegions}
-          ref={createRegionSheetRef}
-        />
-      </div>
+    <PageLayout contained>
+      <PageHeader>
+        <PageTitle>Regions</PageTitle>
+        <div className="ml-auto">
+          <CreateRegionSheet
+            onCreateRegion={handleCreateRegion}
+            writePermitted={writePermitted}
+            loadingData={loadingRegions}
+            ref={createRegionSheetRef}
+          />
+        </div>
+      </PageHeader>
 
-      <RegionTable
-        data={regions}
-        loading={loadingRegions}
-        isLoadingRegion={(region) => regionIsLoading[region.id] || false}
-        deletePermitted={deletePermitted}
-        writePermitted={writePermitted}
-        onDelete={(region) => {
-          setRegionToDelete(region)
-          setDeleteRegionDialogIsOpen(true)
-        }}
-        onOpenDetails={handleOpenRegionDetails}
-      />
+      <PageContent size="full" className="overflow-hidden">
+        <RegionTable
+          data={regions}
+          loading={loadingRegions}
+          isLoadingRegion={(region) => regionIsLoading[region.id] || false}
+          deletePermitted={deletePermitted}
+          writePermitted={writePermitted}
+          onDelete={(region) => {
+            setRegionToDelete(region)
+            setDeleteRegionDialogIsOpen(true)
+          }}
+          onOpenDetails={handleOpenRegionDetails}
+        />
+      </PageContent>
+      <PageFooter />
 
       <RegionDetailsSheet
         region={selectedRegion}
@@ -606,7 +612,7 @@ const Regions: React.FC = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageLayout>
   )
 }
 

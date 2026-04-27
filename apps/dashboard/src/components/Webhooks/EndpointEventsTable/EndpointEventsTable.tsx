@@ -3,13 +3,25 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { DebouncedInput } from '@/components/DebouncedInput'
+import { PageFooterPortal } from '@/components/PageLayout'
 import { Pagination } from '@/components/Pagination'
-import { TableEmptyState } from '@/components/TableEmptyState'
+import { SearchInput } from '@/components/SearchInput'
+import { Button } from '@/components/ui/button'
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableEmptyState,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { cn } from '@/lib/utils'
+import { getColumnSizeStyles } from '@/lib/utils/table'
 import {
   ColumnFiltersState,
   flexRender,
@@ -71,6 +83,9 @@ export function EndpointEventsTable({ data, loading, onReplay }: EndpointEventsT
       pagination: {
         pageSize: DEFAULT_PAGE_SIZE,
       },
+      columnPinning: {
+        right: ['actions'],
+      },
     },
     meta: {
       endpointEvents: {
@@ -78,6 +93,9 @@ export function EndpointEventsTable({ data, loading, onReplay }: EndpointEventsT
       },
     },
   })
+
+  const isEmpty = !loading && table.getRowModel().rows.length === 0
+  const hasFilters = globalFilter.trim().length > 0 || columnFilters.length > 0
 
   const handleRowClick = useCallback((index: number) => {
     setSelectedEventIndex(index)
@@ -98,29 +116,55 @@ export function EndpointEventsTable({ data, loading, onReplay }: EndpointEventsT
     [rowCount],
   )
 
+  const handleChangeFilter = (value: string) => {
+    setGlobalFilter(value)
+    table.setPageIndex(0)
+  }
+
+  const handleClearFilters = () => {
+    handleChangeFilter('')
+    table.resetColumnFilters()
+  }
+
   return (
-    <div>
-      <div className="flex items-center mb-4">
-        <DebouncedInput
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex items-center gap-2">
+        <SearchInput
+          debounced
           value={globalFilter ?? ''}
-          onChange={(value) => setGlobalFilter(String(value))}
+          onValueChange={handleChangeFilter}
           placeholder="Search by Event Type, Message ID, or Status"
-          className="max-w-sm mr-4"
+          containerClassName="max-w-sm"
         />
         {table.getColumn('eventType') && (
-          <DataTableFacetedFilter
-            column={table.getColumn('eventType')}
-            title="Event Type"
-            options={eventTypeOptions}
-            className="mr-2"
-          />
+          <DataTableFacetedFilter column={table.getColumn('eventType')} title="Event Type" options={eventTypeOptions} />
         )}
         {table.getColumn('status') && (
           <DataTableFacetedFilter column={table.getColumn('status')} title="Status" options={statusOptions} />
         )}
       </div>
-      <div className="rounded-md">
-        <Table style={{ tableLayout: 'fixed', width: '100%' }}>
+      <TableContainer
+        className={cn({ 'min-h-[26rem]': isEmpty })}
+        empty={
+          isEmpty ? (
+            <TableEmptyState
+              overlay
+              colSpan={columns.length}
+              message={hasFilters ? 'No matching events found.' : 'No events found.'}
+              icon={<Mail />}
+              description={hasFilters ? null : <p>Events will appear here when webhooks are triggered.</p>}
+              action={
+                hasFilters ? (
+                  <Button variant="outline" onClick={handleClearFilters}>
+                    Clear filters
+                  </Button>
+                ) : null
+              }
+            />
+          ) : null
+        }
+      >
+        <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -129,9 +173,8 @@ export function EndpointEventsTable({ data, loading, onReplay }: EndpointEventsT
                     <TableHead
                       className="px-2"
                       key={header.id}
-                      style={{
-                        width: `${header.column.getSize()}px`,
-                      }}
+                      style={getColumnSizeStyles(header.column)}
+                      sticky={header.column.getIsPinned()}
                     >
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
@@ -143,10 +186,15 @@ export function EndpointEventsTable({ data, loading, onReplay }: EndpointEventsT
           <TableBody>
             {loading ? (
               <>
-                {Array.from(new Array(5)).map((_, i) => (
+                {Array.from({ length: DEFAULT_PAGE_SIZE }).map((_, i) => (
                   <TableRow key={i}>
                     {table.getVisibleLeafColumns().map((column) => (
-                      <TableCell key={column.id} className="px-2">
+                      <TableCell
+                        key={column.id}
+                        className="px-2"
+                        style={getColumnSizeStyles(column)}
+                        sticky={column.getIsPinned()}
+                      >
                         <Skeleton className="h-4 w-10/12" />
                       </TableCell>
                     ))}
@@ -173,31 +221,21 @@ export function EndpointEventsTable({ data, loading, onReplay }: EndpointEventsT
                     <TableCell
                       className="px-2"
                       key={cell.id}
-                      style={{
-                        width: `${cell.column.getSize()}px`,
-                      }}
+                      style={getColumnSizeStyles(cell.column)}
+                      sticky={cell.column.getIsPinned()}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
-            ) : (
-              <TableEmptyState
-                colSpan={columns.length}
-                message="No events found."
-                icon={<Mail className="size-8" />}
-                description={
-                  <div className="space-y-2">
-                    <p>Events will appear here when webhooks are triggered.</p>
-                  </div>
-                }
-              />
-            )}
+            ) : null}
           </TableBody>
         </Table>
-      </div>
-      <Pagination table={table} className="mt-4" entityName="Events" />
+      </TableContainer>
+      <PageFooterPortal>
+        <Pagination table={table} entityName="Events" />
+      </PageFooterPortal>
       <EventDetailsSheet
         event={selectedEventIndex !== null ? (table.getRowModel().rows[selectedEventIndex]?.original ?? null) : null}
         open={sheetOpen}

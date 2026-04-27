@@ -3,14 +3,25 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { PageFooterPortal } from '@/components/PageLayout'
 import { Pagination } from '@/components/Pagination'
-import { TableEmptyState } from '@/components/TableEmptyState'
+import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableEmptyState,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { getMaskedTokenFromParts, getRelativeTimeString } from '@/lib/utils'
+import { cn, getMaskedTokenFromParts, getRelativeTimeString } from '@/lib/utils'
+import { getColumnSizeStyles } from '@/lib/utils/table'
 import { AuditLog } from '@daytona/api-client'
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { Column, ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { TextSearch } from 'lucide-react'
 
 interface Props {
@@ -24,6 +35,8 @@ interface Props {
   pageCount: number
   totalItems: number
   onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
+  hasFilters?: boolean
+  onClearFilters?: () => void
 }
 
 export function AuditLogTable({
@@ -34,12 +47,12 @@ export function AuditLogTable({
   pageCount,
   onPaginationChange,
   totalItems,
+  hasFilters = false,
+  onClearFilters,
 }: Props) {
-  const columns = getColumns()
-
   const table = useReactTable({
     data,
-    columns,
+    columns: auditLogColumns,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
     pageCount: pageCount || 1,
@@ -58,22 +71,42 @@ export function AuditLogTable({
     getRowId: (row) => row.id,
   })
 
+  const isEmpty = !loading && table.getRowModel().rows.length === 0
+
   return (
-    <div>
-      <div className="rounded-md border">
+    <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
+      <TableContainer
+        className={isEmpty ? 'min-h-[26rem]' : undefined}
+        empty={
+          isEmpty ? (
+            <TableEmptyState
+              overlay
+              colSpan={auditLogColumns.length}
+              message={hasFilters ? 'No matching logs found.' : 'No logs yet.'}
+              icon={<TextSearch />}
+              description={
+                hasFilters ? null : (
+                  <p>Audit logs are detailed records of all actions taken by users in the organization.</p>
+                )
+              }
+              action={
+                hasFilters && onClearFilters ? (
+                  <Button variant="outline" onClick={onClearFilters}>
+                    Clear filters
+                  </Button>
+                ) : null
+              }
+            />
+          ) : null
+        }
+      >
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead
-                      key={header.id}
-                      style={{
-                        minWidth: header.column.columnDef.size,
-                        maxWidth: header.column.columnDef.size,
-                      }}
-                    >
+                    <TableHead key={header.id} style={isEmpty ? undefined : getColumnSizeStyles(header.column)}>
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   )
@@ -83,63 +116,42 @@ export function AuditLogTable({
           </TableHeader>
           <TableBody>
             {loading ? (
-              <AuditLogTableSkeleton columns={columns} />
+              <AuditLogTableSkeleton columns={table.getVisibleLeafColumns()} />
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className={isRefetching ? 'opacity-70 transition-opacity' : undefined}>
+                <TableRow key={row.id} className={cn({ 'opacity-70 transition-opacity': isRefetching })}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      style={{
-                        minWidth: cell.column.columnDef.size,
-                        maxWidth: cell.column.columnDef.size,
-                      }}
-                    >
+                    <TableCell key={cell.id} style={getColumnSizeStyles(cell.column)}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
-            ) : (
-              <TableEmptyState
-                colSpan={columns.length}
-                message="No logs yet."
-                icon={<TextSearch className="w-8 h-8" />}
-                description={
-                  <div className="space-y-2">
-                    <p>Audit logs are detailed records of all actions taken by users in the organization.</p>
-                  </div>
-                }
-              />
-            )}
+            ) : null}
           </TableBody>
         </Table>
-      </div>
-      <Pagination table={table} className="mt-4" entityName="Logs" totalItems={totalItems} />
+      </TableContainer>
+      <PageFooterPortal>
+        <Pagination table={table} entityName="Logs" totalItems={totalItems} />
+      </PageFooterPortal>
     </div>
   )
 }
 
-function AuditLogTableSkeleton({ columns }: { columns: ColumnDef<AuditLog>[] }) {
+function AuditLogTableSkeleton({ columns }: { columns: Column<AuditLog>[] }) {
   return (
     <>
       {Array.from({ length: 25 }).map((_, rowIndex) => (
         <TableRow key={rowIndex}>
           {columns.map((column, columnIndex) => (
-            <TableCell
-              key={`${rowIndex}-${column.id ?? columnIndex}`}
-              style={{
-                minWidth: column.size,
-                maxWidth: column.size,
-              }}
-            >
+            <TableCell key={`${rowIndex}-${column.id}`} style={getColumnSizeStyles(column)}>
               {columnIndex === 0 || columnIndex === 3 || columnIndex === 4 ? (
                 <div className="space-y-1">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-32" />
+                  <Skeleton />
+                  <Skeleton />
                 </div>
               ) : (
-                <Skeleton className="h-4 w-32" />
+                <Skeleton />
               )}
             </TableCell>
           ))}
@@ -149,131 +161,127 @@ function AuditLogTableSkeleton({ columns }: { columns: ColumnDef<AuditLog>[] }) 
   )
 }
 
-const getColumns = (): ColumnDef<AuditLog>[] => {
-  const columns: ColumnDef<AuditLog>[] = [
-    {
-      header: 'Time',
-      size: 200,
-      cell: ({ row }) => {
-        const createdAt = new Date(row.original.createdAt)
-        const localeString = createdAt.toLocaleString()
-        const relativeTimeString = getRelativeTimeString(row.original.createdAt).relativeTimeString
+const auditLogColumns: ColumnDef<AuditLog>[] = [
+  {
+    header: 'Time',
+    size: 200,
+    cell: ({ row }) => {
+      const createdAt = new Date(row.original.createdAt)
+      const localeString = createdAt.toLocaleString()
+      const relativeTimeString = getRelativeTimeString(row.original.createdAt).relativeTimeString
 
-        return (
-          <div className="space-y-1">
-            <div className="font-medium truncate">{relativeTimeString}</div>
-            <div className="text-sm text-muted-foreground truncate">{localeString}</div>
-          </div>
-        )
-      },
+      return (
+        <div className="space-y-1">
+          <div className="font-medium truncate">{relativeTimeString}</div>
+          <div className="text-sm text-muted-foreground truncate">{localeString}</div>
+        </div>
+      )
     },
-    {
-      header: 'User',
-      size: 240,
-      cell: ({ row }) => {
-        const actorEmail = row.original.actorEmail
-        const actorId = row.original.actorId
-        const label = actorEmail || actorId
-        const apiKeyPrefix = row.original.actorApiKeyPrefix
-        const apiKeySuffix = row.original.actorApiKeySuffix
-        const maskedApiKey =
-          apiKeyPrefix && apiKeySuffix ? getMaskedTokenFromParts(apiKeyPrefix, apiKeySuffix) : undefined
+  },
+  {
+    header: 'User',
+    size: 240,
+    cell: ({ row }) => {
+      const actorEmail = row.original.actorEmail
+      const actorId = row.original.actorId
+      const label = actorEmail || actorId
+      const apiKeyPrefix = row.original.actorApiKeyPrefix
+      const apiKeySuffix = row.original.actorApiKeySuffix
+      const maskedApiKey =
+        apiKeyPrefix && apiKeySuffix ? getMaskedTokenFromParts(apiKeyPrefix, apiKeySuffix) : undefined
 
-        return (
-          <div className="space-y-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="font-medium truncate w-fit max-w-full">{label}</div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{label}</p>
-              </TooltipContent>
-            </Tooltip>
-            {maskedApiKey && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="text-sm text-muted-foreground truncate w-fit max-w-full">{maskedApiKey}</div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{maskedApiKey}</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </div>
-        )
-      },
-    },
-    {
-      header: 'Action',
-      size: 240,
-      cell: ({ row }) => {
-        const action = row.original.action
-
-        return (
+      return (
+        <div className="space-y-1">
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="font-medium truncate w-fit max-w-full">{action}</div>
+              <div className="font-medium truncate w-fit max-w-full">{label}</div>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{action}</p>
+              <p>{label}</p>
             </TooltipContent>
           </Tooltip>
-        )
-      },
+          {maskedApiKey && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="text-sm text-muted-foreground truncate w-fit max-w-full">{maskedApiKey}</div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{maskedApiKey}</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+      )
     },
-    {
-      header: 'Target',
-      size: 360,
-      cell: ({ row }) => {
-        const targetType = row.original.targetType
-        const targetId = row.original.targetId
+  },
+  {
+    header: 'Action',
+    size: 240,
+    cell: ({ row }) => {
+      const action = row.original.action
 
-        if (!targetType && !targetId) {
-          return '-'
-        }
-
-        return (
-          <div className="space-y-1">
-            {targetType && <div className="font-medium truncate">{targetType}</div>}
-            {targetId && <div className="text-sm text-muted-foreground truncate">{targetId}</div>}
-          </div>
-        )
-      },
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="font-medium truncate w-fit max-w-full">{action}</div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{action}</p>
+          </TooltipContent>
+        </Tooltip>
+      )
     },
-    {
-      header: 'Outcome',
-      size: 320,
-      cell: ({ row }) => {
-        const statusCode = row.original.statusCode
-        const errorMessage = row.original.errorMessage
-        const outcomeInfo = getOutcomeInfo(statusCode)
+  },
+  {
+    header: 'Target',
+    size: 360,
+    cell: ({ row }) => {
+      const targetType = row.original.targetType
+      const targetId = row.original.targetId
 
-        return (
-          <div className="space-y-1">
-            <div className={`font-medium ${outcomeInfo.colorClass}`}>{outcomeInfo.label}</div>
-            {!errorMessage ? (
-              <div className="text-sm text-muted-foreground truncate">{statusCode || '204'}</div>
-            ) : (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="text-sm text-muted-foreground truncate">
-                    {statusCode || '500'}
-                    {` - ${errorMessage}`}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{errorMessage}</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </div>
-        )
-      },
+      if (!targetType && !targetId) {
+        return '-'
+      }
+
+      return (
+        <div className="space-y-1">
+          {targetType && <div className="font-medium truncate">{targetType}</div>}
+          {targetId && <div className="text-sm text-muted-foreground truncate">{targetId}</div>}
+        </div>
+      )
     },
-  ]
+  },
+  {
+    header: 'Outcome',
+    size: 320,
+    cell: ({ row }) => {
+      const statusCode = row.original.statusCode
+      const errorMessage = row.original.errorMessage
+      const outcomeInfo = getOutcomeInfo(statusCode)
 
-  return columns
-}
+      return (
+        <div className="space-y-1">
+          <div className={`font-medium ${outcomeInfo.colorClass}`}>{outcomeInfo.label}</div>
+          {!errorMessage ? (
+            <div className="text-sm text-muted-foreground truncate">{statusCode || '204'}</div>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="text-sm text-muted-foreground truncate">
+                  {statusCode || '500'}
+                  {` - ${errorMessage}`}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{errorMessage}</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+      )
+    },
+  },
+]
 
 type OutcomeCategory = 'informational' | 'success' | 'redirect' | 'client-error' | 'server-error' | 'unknown'
 

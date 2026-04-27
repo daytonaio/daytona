@@ -8,7 +8,7 @@ import { SortOrderIcon } from '@/components/SortIcon'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { PAGE_SIZE_OPTIONS } from '@/constants/Pagination'
 import { ModelsSandboxUsage } from '@daytona/analytics-api-client'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
@@ -71,79 +71,83 @@ export const SandboxUsageTable: React.FC<SandboxUsageTableProps> = ({ data, isLo
 
   return (
     <div className="px-4">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Sandbox ID</TableHead>
-            <SortableTableHead
-              field="totalPrice"
-              label="Total Price"
-              onSort={handleSort}
-              getSortDirection={getSortDirection}
-            />
-            <SortableTableHead
-              field="totalCPUSeconds"
-              label="CPU (seconds)"
-              onSort={handleSort}
-              getSortDirection={getSortDirection}
-            />
-            <SortableTableHead
-              field="totalRAMGBSeconds"
-              label="RAM (GB-seconds)"
-              onSort={handleSort}
-              getSortDirection={getSortDirection}
-            />
-            <SortableTableHead
-              field="totalDiskGBSeconds"
-              label="Disk (GB-seconds)"
-              onSort={handleSort}
-              getSortDirection={getSortDirection}
-            />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {isLoading
-            ? Array.from({ length: SKELETON_ROWS }).map((_, i) => (
-                <TableRow key={i}>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[200px]" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="h-4 w-12 ml-auto" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="h-4 w-16 ml-auto" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="h-4 w-16 ml-auto" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="h-4 w-16 ml-auto" />
-                  </TableCell>
-                </TableRow>
-              ))
-            : paginatedData.map((sandbox, index) => (
-                <TableRow key={sandbox.sandboxId ?? `row-${index}`}>
-                  <TableCell className="font-mono text-sm">
-                    <div className="flex items-center gap-2 group/copy-button">
-                      <span className="truncate max-w-[200px]">{sandbox.sandboxId}</span>
-                      {sandbox.sandboxId && (
-                        <CopyButton value={sandbox.sandboxId} tooltipText="Copy sandbox ID" size="icon-xs" autoHide />
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">${(sandbox.totalPrice ?? 0).toFixed(2)}</TableCell>
-                  <TableCell className="text-right tabular-nums">{(sandbox.totalCPUSeconds ?? 0).toFixed(1)}</TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {(sandbox.totalRAMGBSeconds ?? 0).toFixed(1)}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {(sandbox.totalDiskGBSeconds ?? 0).toFixed(1)}
-                  </TableCell>
-                </TableRow>
-              ))}
-        </TableBody>
-      </Table>
+      <TableContainer className="max-h-[500px]">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Sandbox ID</TableHead>
+              <SortableTableHead
+                field="totalPrice"
+                label="Total Price"
+                onSort={handleSort}
+                getSortDirection={getSortDirection}
+              />
+              <SortableTableHead
+                field="totalCPUSeconds"
+                label="CPU (seconds)"
+                onSort={handleSort}
+                getSortDirection={getSortDirection}
+              />
+              <SortableTableHead
+                field="totalRAMGBSeconds"
+                label="RAM (GB-seconds)"
+                onSort={handleSort}
+                getSortDirection={getSortDirection}
+              />
+              <SortableTableHead
+                field="totalDiskGBSeconds"
+                label="Disk (GB-seconds)"
+                onSort={handleSort}
+                getSortDirection={getSortDirection}
+              />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading
+              ? Array.from({ length: SKELETON_ROWS }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell>
+                      <Skeleton className="h-4 w-[200px]" />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Skeleton className="h-4 w-12 ml-auto" />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Skeleton className="h-4 w-16 ml-auto" />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Skeleton className="h-4 w-16 ml-auto" />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Skeleton className="h-4 w-16 ml-auto" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              : paginatedData.map((sandbox, index) => (
+                  <TableRow key={sandbox.sandboxId ?? `row-${index}`}>
+                    <TableCell className="font-mono text-sm">
+                      <div className="flex items-center gap-2 group/copy-button">
+                        <span className="truncate max-w-[200px]">{sandbox.sandboxId}</span>
+                        {sandbox.sandboxId && (
+                          <CopyButton value={sandbox.sandboxId} tooltipText="Copy sandbox ID" size="icon-xs" autoHide />
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">${(sandbox.totalPrice ?? 0).toFixed(2)}</TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {(sandbox.totalCPUSeconds ?? 0).toFixed(1)}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {(sandbox.totalRAMGBSeconds ?? 0).toFixed(1)}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {(sandbox.totalDiskGBSeconds ?? 0).toFixed(1)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
       <div className="flex flex-col sm:flex-row gap-2 sm:items-center justify-between w-full pb-2 pt-4">
         <div className="flex items-center gap-4">
@@ -224,10 +228,10 @@ function SortableTableHead({
   const ariaSort = sortDirection === 'asc' ? 'ascending' : sortDirection === 'desc' ? 'descending' : 'none'
 
   return (
-    <TableHead className="hover:bg-muted cursor-pointer" aria-sort={ariaSort}>
+    <TableHead aria-sort={ariaSort}>
       <button
         type="button"
-        className="group/sort-header flex items-center gap-2 w-full h-full justify-end"
+        className="group/sort-header flex h-full w-full items-center justify-end gap-2"
         onClick={() => onSort(field)}
       >
         {label}

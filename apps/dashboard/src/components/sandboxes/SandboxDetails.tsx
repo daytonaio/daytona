@@ -118,7 +118,7 @@ export default function SandboxDetails() {
             <Button variant="secondary" onClick={() => navigate(RoutePath.BILLING_WALLET)}>
               Go to billing
             </Button>
-          ) : undefined,
+          ) : null,
       })
     }
   }

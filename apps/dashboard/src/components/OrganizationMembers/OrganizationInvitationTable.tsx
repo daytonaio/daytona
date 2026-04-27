@@ -3,27 +3,58 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useMemo, useState } from 'react'
-import { MoreHorizontal } from 'lucide-react'
+import { CancelOrganizationInvitationDialog } from '@/components/OrganizationMembers/CancelOrganizationInvitationDialog'
+import { UpsertOrganizationAccessSheet } from '@/components/OrganizationMembers/UpsertOrganizationAccessSheet'
+import { Pagination } from '@/components/Pagination'
+import { SearchInput } from '@/components/SearchInput'
+import { TimestampTooltip } from '@/components/TimestampTooltip'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableEmptyState,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { cn, getRelativeTimeString } from '@/lib/utils'
+import { getColumnSizeStyles } from '@/lib/utils/table'
+import { OrganizationInvitation, UpdateOrganizationInvitationRoleEnum } from '@daytona/api-client'
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  Table as ReactTable,
+  RowData,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { OrganizationInvitation, UpdateOrganizationInvitationRoleEnum } from '@daytona/api-client'
-import { Pagination } from '@/components/Pagination'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
-import { CancelOrganizationInvitationDialog } from '@/components/OrganizationMembers/CancelOrganizationInvitationDialog'
-import { UpsertOrganizationAccessSheet } from '@/components/OrganizationMembers/UpsertOrganizationAccessSheet'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
-import { cn } from '@/lib/utils'
-import { TableEmptyState } from '../TableEmptyState'
+import { MailPlus, MoreHorizontal } from 'lucide-react'
+import { useMemo, useState } from 'react'
+
+type OrganizationInvitationTableMeta = {
+  onCancel: (invitationId: string) => void
+  onUpdate: (invitation: OrganizationInvitation) => void
+}
+
+declare module '@tanstack/react-table' {
+  interface TableMeta<TData extends RowData> {
+    organizationInvitation?: TData extends OrganizationInvitation ? OrganizationInvitationTableMeta : never
+  }
+}
+
+const getMeta = (table: ReactTable<OrganizationInvitation>) => {
+  return table.options.meta?.organizationInvitation as OrganizationInvitationTableMeta
+}
 
 interface DataTableProps {
   data: OrganizationInvitation[]
@@ -45,6 +76,7 @@ export function OrganizationInvitationTable({
   pendingInvitationIds,
 }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
+  const [globalFilter, setGlobalFilter] = useState('')
   const [invitationToCancel, setInvitationToCancel] = useState<string | null>(null)
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false)
   const [invitationToUpdate, setInvitationToUpdate] = useState<OrganizationInvitation | null>(null)
@@ -96,36 +128,98 @@ export function OrganizationInvitationTable({
     [invitationToUpdate],
   )
 
-  const columns = getColumns({ onCancel: handleCancel, onUpdate: handleUpdate })
-
   const table = useReactTable({
     data,
-    columns,
+    columns: organizationInvitationColumns,
+    meta: {
+      organizationInvitation: {
+        onCancel: handleCancel,
+        onUpdate: handleUpdate,
+      },
+    },
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, _columnId, filterValue) => {
+      const invitation = row.original
+      const searchValue = String(filterValue).toLowerCase()
+      const status = new Date(invitation.expiresAt) < new Date() ? 'expired' : 'pending'
+
+      return (
+        invitation.email.toLowerCase().includes(searchValue) ||
+        invitation.invitedBy.toLowerCase().includes(searchValue) ||
+        status.includes(searchValue)
+      )
+    },
     state: {
+      globalFilter,
       sorting,
     },
     initialState: {
       pagination: {
         pageSize: DEFAULT_PAGE_SIZE,
       },
+      columnPinning: {
+        right: ['actions'],
+      },
     },
   })
 
+  const isEmpty = !loadingData && table.getRowModel().rows.length === 0
+  const hasSearch = globalFilter.trim().length > 0
+
+  const handleChangeFilter = (value: string) => {
+    setGlobalFilter(value)
+    table.setPageIndex(0)
+  }
+
   return (
     <>
-      <div>
-        <div className="rounded-md border">
-          <Table>
+      <div className="flex min-h-0 flex-col gap-3">
+        <SearchInput
+          debounced
+          value={globalFilter}
+          onValueChange={handleChangeFilter}
+          placeholder="Search by Email, Inviter, or Status"
+          containerClassName="max-w-sm"
+        />
+        <TableContainer
+          className={cn('max-h-[550px]', {
+            'min-h-[20rem]': isEmpty,
+          })}
+          empty={
+            isEmpty ? (
+              <TableEmptyState
+                overlay
+                colSpan={organizationInvitationColumns.length}
+                message={hasSearch ? 'No matching Invitations found.' : 'No Invitations found.'}
+                icon={<MailPlus />}
+                description={hasSearch ? null : 'No pending invitations for this organization.'}
+                action={
+                  hasSearch ? (
+                    <Button variant="outline" onClick={() => handleChangeFilter('')}>
+                      Clear filters
+                    </Button>
+                  ) : null
+                }
+              />
+            ) : null
+          }
+        >
+          <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     return (
-                      <TableHead key={header.id}>
+                      <TableHead
+                        key={header.id}
+                        sticky={header.column.getIsPinned()}
+                        style={getColumnSizeStyles(header.column)}
+                      >
                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
                     )
@@ -135,11 +229,17 @@ export function OrganizationInvitationTable({
             </TableHeader>
             <TableBody>
               {loadingData ? (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    Loading...
-                  </TableCell>
-                </TableRow>
+                <>
+                  {Array.from({ length: DEFAULT_PAGE_SIZE }).map((_, i) => (
+                    <TableRow key={i} className="h-14">
+                      {table.getVisibleLeafColumns().map((column) => (
+                        <TableCell key={column.id} sticky={column.getIsPinned()} style={getColumnSizeStyles(column)}>
+                          <Skeleton className="h-4 w-3/4" />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </>
               ) : table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow
@@ -150,17 +250,21 @@ export function OrganizationInvitationTable({
                     })}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                      <TableCell
+                        key={cell.id}
+                        sticky={cell.column.getIsPinned()}
+                        style={getColumnSizeStyles(cell.column)}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))
-              ) : (
-                <TableEmptyState colSpan={columns.length} message="No Invitations found." />
-              )}
+              ) : null}
             </TableBody>
           </Table>
-        </div>
-        <Pagination table={table} className="mt-4" entityName="Invitations" />
+        </TableContainer>
+        <Pagination table={table} entityName="Invitations" />
       </div>
 
       {invitationToUpdate && (
@@ -199,71 +303,68 @@ export function OrganizationInvitationTable({
   )
 }
 
-const getColumns = ({
-  onCancel,
-  onUpdate,
-}: {
-  onCancel: (invitationId: string) => void
-  onUpdate: (invitation: OrganizationInvitation) => void
-}): ColumnDef<OrganizationInvitation>[] => {
-  const columns: ColumnDef<OrganizationInvitation>[] = [
-    {
-      accessorKey: 'email',
-      header: 'Email',
-    },
-    {
-      accessorKey: 'invitedBy',
-      header: 'Invited by',
-    },
-    {
-      accessorKey: 'expiresAt',
-      header: 'Expires',
-      cell: ({ row }) => {
-        return new Date(row.original.expiresAt).toLocaleDateString()
-      },
-    },
-    {
-      accessorKey: 'status',
-      header: 'Status',
-      cell: ({ row }) => {
-        const isExpired = new Date(row.original.expiresAt) < new Date()
-        return isExpired ? <span className="text-red-600 dark:text-red-400">Expired</span> : 'Pending'
-      },
-    },
-    {
-      id: 'actions',
-      cell: ({ row }) => {
-        const isExpired = new Date(row.original.expiresAt) < new Date()
-        if (isExpired) {
-          return null
-        }
-        return (
-          <div className="text-right">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Open menu</span>
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
+const organizationInvitationColumns: ColumnDef<OrganizationInvitation>[] = [
+  {
+    accessorKey: 'email',
+    header: 'Email',
+  },
+  {
+    accessorKey: 'invitedBy',
+    header: 'Invited by',
+  },
+  {
+    accessorKey: 'expiresAt',
+    header: 'Expires',
+    cell: ({ row }) => {
+      const expiresAt = row.original.expiresAt.toString()
+      const { relativeTimeString } = getRelativeTimeString(expiresAt)
 
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem className="cursor-pointer" onClick={() => onUpdate(row.original)}>
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer text-red-600 dark:text-red-400"
-                  onClick={() => onCancel(row.original.id)}
-                >
-                  Cancel
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        )
-      },
+      return (
+        <TimestampTooltip timestamp={expiresAt}>
+          <span className="cursor-default">{relativeTimeString}</span>
+        </TimestampTooltip>
+      )
     },
-  ]
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    cell: ({ row }) => {
+      const isExpired = new Date(row.original.expiresAt) < new Date()
+      return <Badge variant={isExpired ? 'destructive' : 'secondary'}>{isExpired ? 'Expired' : 'Pending'}</Badge>
+    },
+  },
+  {
+    id: 'actions',
+    size: 48,
+    minSize: 48,
+    maxSize: 48,
+    cell: ({ row, table }) => {
+      const { onCancel, onUpdate } = getMeta(table)
+      const isExpired = new Date(row.original.expiresAt) < new Date()
 
-  return columns
-}
+      if (isExpired) {
+        return null
+      }
+
+      return (
+        <div className="text-right">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon-sm" aria-label="Open menu">
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onUpdate(row.original)}>Edit</DropdownMenuItem>
+              <DropdownMenuItem variant="destructive" onClick={() => onCancel(row.original.id)}>
+                Cancel
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )
+    },
+  },
+]

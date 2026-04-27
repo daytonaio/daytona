@@ -29,8 +29,8 @@ import {
 import { InputGroup, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
 import { Skeleton } from '@/components/ui/skeleton'
 import DeliveryStatsLine from '@/components/Webhooks/DeliveryStatsLine'
-import { EditEndpointDialog } from '@/components/Webhooks/EditEndpointDialog'
 import { EndpointEventsTable } from '@/components/Webhooks/EndpointEventsTable'
+import { UpsertEndpointSheet } from '@/components/Webhooks/UpsertEndpointSheet'
 import { RoutePath } from '@/enums/RoutePath'
 import { useDeleteWebhookEndpointMutation } from '@/hooks/mutations/useDeleteWebhookEndpointMutation'
 import { useReplayWebhookEventMutation } from '@/hooks/mutations/useReplayWebhookEventMutation'
@@ -48,7 +48,7 @@ const WebhookEndpointDetails: React.FC = () => {
   const { endpointId } = useParams<{ endpointId: string }>()
   const navigate = useNavigate()
   const [isSecretRevealed, setIsSecretRevealed] = useState(false)
-  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [editSheetOpen, setEditSheetOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [disableDialogOpen, setDisableDialogOpen] = useState(false)
   const [rotateSecretDialogOpen, setRotateSecretDialogOpen] = useState(false)
@@ -173,27 +173,19 @@ const WebhookEndpointDetails: React.FC = () => {
               <div className="ml-auto flex items-center gap-2 shrink-0">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon-sm" disabled={isMutating}>
+                    <Button variant="outline" size="icon-sm" aria-label="Open menu" disabled={isMutating}>
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setEditDialogOpen(true)} className="cursor-pointer">
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setDisableDialogOpen(true)} className="cursor-pointer">
+                    <DropdownMenuItem onClick={() => setEditSheetOpen(true)}>Edit</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setDisableDialogOpen(true)}>
                       {endpointData.disabled ? 'Enable' : 'Disable'}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setRotateSecretDialogOpen(true)} className="cursor-pointer">
-                      Rotate Secret
-                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setRotateSecretDialogOpen(true)}>Rotate Secret</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onClick={() => setDeleteDialogOpen(true)}
-                      className="cursor-pointer"
-                    >
+                    <DropdownMenuItem variant="destructive" onClick={() => setDeleteDialogOpen(true)}>
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -360,10 +352,12 @@ const WebhookEndpointDetails: React.FC = () => {
         )}
       </PageContent>
 
-      <EditEndpointDialog
+      <UpsertEndpointSheet
+        mode="edit"
+        trigger={null}
         endpoint={endpoint.data || null}
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
+        open={editSheetOpen}
+        onOpenChange={setEditSheetOpen}
         onSuccess={handleEditSuccess}
       />
 

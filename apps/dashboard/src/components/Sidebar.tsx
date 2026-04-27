@@ -481,21 +481,18 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" align="start" className="w-[--radix-popper-anchor-width] min-w-[12rem]">
-                <DropdownMenuItem asChild className="cursor-pointer">
+                <DropdownMenuItem asChild>
                   <Link to={RoutePath.ACCOUNT_SETTINGS}>
                     <Settings className="size-4" />
                     Account Settings
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                >
+                <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
                   {theme === 'dark' ? <SunIcon className="size-4" /> : <MoonIcon className="size-4" />}
                   {theme === 'dark' ? 'Light mode' : 'Dark mode'}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild className="cursor-pointer">
+                <DropdownMenuItem asChild>
                   <Link to={RoutePath.USER_INVITATIONS}>
                     <Mail className="size-4" />
                     Invitations
@@ -506,14 +503,14 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
                     )}
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer">
+                <DropdownMenuItem asChild>
                   <Link to={RoutePath.ONBOARDING}>
                     <ListChecks className="size-4" />
                     Onboarding
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
+                <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="size-4" />
                   Sign out
                 </DropdownMenuItem>

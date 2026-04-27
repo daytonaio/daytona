@@ -3,27 +3,59 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useMemo, useState } from 'react'
-import { MoreHorizontal } from 'lucide-react'
+import { RemoveOrganizationMemberDialog } from '@/components/OrganizationMembers/RemoveOrganizationMemberDialog'
+import { UpsertOrganizationAccessSheet } from '@/components/OrganizationMembers/UpsertOrganizationAccessSheet'
+import { Pagination } from '@/components/Pagination'
+import { SearchInput } from '@/components/SearchInput'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableEmptyState,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { capitalize, cn } from '@/lib/utils'
+import { getColumnSizeStyles } from '@/lib/utils/table'
+import { OrganizationUser, OrganizationUserRoleEnum } from '@daytona/api-client'
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  Table as ReactTable,
+  RowData,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { OrganizationUser, OrganizationUserRoleEnum } from '@daytona/api-client'
-import { Pagination } from '@/components/Pagination'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
-import { UpsertOrganizationAccessSheet } from '@/components/OrganizationMembers/UpsertOrganizationAccessSheet'
-import { RemoveOrganizationMemberDialog } from '@/components/OrganizationMembers/RemoveOrganizationMemberDialog'
-import { capitalize, cn } from '@/lib/utils'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
-import { TableEmptyState } from '../TableEmptyState'
+import { MoreHorizontal, Users } from 'lucide-react'
+import { useMemo, useState } from 'react'
+
+type MemberTableMeta = {
+  onUpdateMemberRole: (member: OrganizationUser) => void
+  onUpdateAssignedRoles: (member: OrganizationUser) => void
+  onRemove: (userId: string) => void
+  ownerMode: boolean
+  currentUserId?: string
+}
+
+declare module '@tanstack/react-table' {
+  interface TableMeta<TData extends RowData> {
+    member?: TData extends OrganizationUser ? MemberTableMeta : never
+  }
+}
+
+const getMeta = (table: ReactTable<OrganizationUser>) => {
+  return table.options.meta?.member as MemberTableMeta
+}
 
 interface DataTableProps {
   data: OrganizationUser[]
@@ -45,44 +77,74 @@ export function OrganizationMemberTable({
   currentUserId,
 }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
+  const [globalFilter, setGlobalFilter] = useState('')
   const [memberToUpdate, setMemberToUpdate] = useState<OrganizationUser | null>(null)
   const [isUpdateMemberAccessDialogOpen, setIsUpdateMemberAccessDialogOpen] = useState(false)
   const [memberToRemove, setMemberToRemove] = useState<string | null>(null)
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false)
 
-  const columns = getColumns({
-    onUpdateMemberRole: (member) => {
-      setMemberToUpdate(member)
-      setIsUpdateMemberAccessDialogOpen(true)
-    },
-    onUpdateAssignedRoles: (member) => {
-      setMemberToUpdate(member)
-      setIsUpdateMemberAccessDialogOpen(true)
-    },
-    onRemove: (userId: string) => {
-      setMemberToRemove(userId)
-      setIsRemoveDialogOpen(true)
-    },
-    ownerMode,
-    currentUserId,
-  })
-
   const table = useReactTable({
     data,
     columns,
+    meta: {
+      member: {
+        onUpdateMemberRole: (member) => {
+          setMemberToUpdate(member)
+          setIsUpdateMemberAccessDialogOpen(true)
+        },
+        onUpdateAssignedRoles: (member) => {
+          setMemberToUpdate(member)
+          setIsUpdateMemberAccessDialogOpen(true)
+        },
+        onRemove: (userId: string) => {
+          setMemberToRemove(userId)
+          setIsRemoveDialogOpen(true)
+        },
+        ownerMode,
+        currentUserId,
+      },
+    },
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, _columnId, filterValue) => {
+      const member = row.original
+      const searchValue = String(filterValue).toLowerCase()
+
+      return (
+        member.email.toLowerCase().includes(searchValue) ||
+        member.role.toLowerCase().includes(searchValue) ||
+        member.assignedRoles.some((assignment) => assignment.name.toLowerCase().includes(searchValue))
+      )
+    },
     state: {
+      globalFilter,
       sorting,
+      columnVisibility: {
+        assignedRoles: ownerMode,
+        actions: ownerMode,
+      },
     },
     initialState: {
       pagination: {
         pageSize: DEFAULT_PAGE_SIZE,
       },
+      columnPinning: {
+        right: ['actions'],
+      },
     },
   })
+
+  const isEmpty = !loadingData && table.getRowModel().rows.length === 0
+  const hasSearch = globalFilter.trim().length > 0
+
+  const handleChangeFilter = (value: string) => {
+    setGlobalFilter(value)
+    table.setPageIndex(0)
+  }
 
   const handleUpdateMemberAccess = async (role: OrganizationUserRoleEnum, assignedRoleIds: string[]) => {
     if (memberToUpdate) {
@@ -122,29 +184,66 @@ export function OrganizationMemberTable({
 
   return (
     <>
-      <div>
-        <div className="rounded-md border">
-          <Table>
+      <div className="flex min-h-0 flex-col gap-3">
+        <SearchInput
+          debounced
+          value={globalFilter}
+          onValueChange={handleChangeFilter}
+          placeholder="Search by Email, Role, or Assignment"
+          containerClassName="max-w-sm"
+        />
+        <TableContainer
+          className={cn('max-h-[550px]', {
+            'min-h-[20rem]': isEmpty,
+          })}
+          empty={
+            isEmpty ? (
+              <TableEmptyState
+                overlay
+                colSpan={table.getVisibleLeafColumns().length}
+                message={hasSearch ? 'No matching Members found.' : 'No Members found.'}
+                icon={<Users />}
+                description={hasSearch ? null : 'Invite people to collaborate in your organization.'}
+                action={
+                  hasSearch ? (
+                    <Button variant="outline" onClick={() => handleChangeFilter('')}>
+                      Clear filters
+                    </Button>
+                  ) : null
+                }
+              />
+            ) : null
+          }
+        >
+          <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableHead>
-                    )
-                  })}
+                  {headerGroup.headers.map((header) => (
+                    <TableHead
+                      key={header.id}
+                      sticky={header.column.getIsPinned()}
+                      style={getColumnSizeStyles(header.column)}
+                    >
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  ))}
                 </TableRow>
               ))}
             </TableHeader>
             <TableBody>
               {loadingData ? (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    Loading...
-                  </TableCell>
-                </TableRow>
+                <>
+                  {Array.from({ length: DEFAULT_PAGE_SIZE }).map((_, i) => (
+                    <TableRow key={i} className="h-14">
+                      {table.getVisibleLeafColumns().map((column) => (
+                        <TableCell key={column.id} sticky={column.getIsPinned()} style={getColumnSizeStyles(column)}>
+                          <Skeleton className="h-4 w-3/4" />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </>
               ) : table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow
@@ -155,17 +254,21 @@ export function OrganizationMemberTable({
                     })}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                      <TableCell
+                        key={cell.id}
+                        sticky={cell.column.getIsPinned()}
+                        style={getColumnSizeStyles(cell.column)}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))
-              ) : (
-                <TableEmptyState colSpan={columns.length} message="No Members found." />
-              )}
+              ) : null}
             </TableBody>
           </Table>
-        </div>
-        <Pagination table={table} className="mt-4" entityName="Members" />
+        </TableContainer>
+        <Pagination table={table} entityName="Members" />
       </div>
 
       {memberToUpdate && (
@@ -204,115 +307,94 @@ export function OrganizationMemberTable({
   )
 }
 
-const getColumns = ({
-  onUpdateMemberRole,
-  onUpdateAssignedRoles,
-  onRemove,
-  ownerMode,
-  currentUserId,
-}: {
-  onUpdateMemberRole: (member: OrganizationUser) => void
-  onUpdateAssignedRoles: (member: OrganizationUser) => void
-  onRemove: (userId: string) => void
-  ownerMode: boolean
-  currentUserId?: string
-}): ColumnDef<OrganizationUser>[] => {
-  const columns: ColumnDef<OrganizationUser>[] = [
-    {
-      accessorKey: 'email',
-      header: 'Email',
+const columns: ColumnDef<OrganizationUser>[] = [
+  {
+    accessorKey: 'email',
+    header: 'Email',
+  },
+  {
+    accessorKey: 'role',
+    header: () => {
+      return <div className="px-3 w-24">Role</div>
     },
-    {
-      accessorKey: 'role',
-      header: () => {
-        return <div className="px-3 w-24">Role</div>
-      },
-      cell: ({ row }) => {
-        const role = capitalize(row.original.role)
-        const canUpdateAccess = row.original.userId !== currentUserId
+    cell: ({ row, table }) => {
+      const { ownerMode, currentUserId, onUpdateMemberRole } = getMeta(table)
+      const role = capitalize(row.original.role)
+      const canUpdateAccess = row.original.userId !== currentUserId
 
-        if (!ownerMode || !canUpdateAccess) {
-          return <div className="px-3 text-sm">{role}</div>
-        }
+      if (!ownerMode || !canUpdateAccess) {
+        return <div className="px-3 text-sm">{role}</div>
+      }
 
-        return (
-          <Button variant="ghost" className="w-auto px-3" onClick={() => onUpdateMemberRole(row.original)}>
-            {role}
-          </Button>
-        )
-      },
+      return (
+        <Button variant="ghost" className="w-auto px-3" onClick={() => onUpdateMemberRole(row.original)}>
+          {role}
+        </Button>
+      )
     },
-  ]
+  },
+  {
+    id: 'assignedRoles',
+    accessorKey: 'assignedRoles',
+    header: () => {
+      return <div className="px-3 w-32">Assignments</div>
+    },
+    cell: ({ row, table }) => {
+      const { currentUserId, onUpdateAssignedRoles } = getMeta(table)
+      const canUpdateAccess = row.original.userId !== currentUserId
 
-  if (ownerMode) {
-    const extraColumns: ColumnDef<OrganizationUser>[] = [
-      {
-        accessorKey: 'assignedRoles',
-        header: () => {
-          return <div className="px-3 w-32">Assignments</div>
-        },
-        cell: ({ row }) => {
-          const canUpdateAccess = row.original.userId !== currentUserId
+      if (row.original.role === OrganizationUserRoleEnum.OWNER) {
+        return <div className="px-3 text-sm text-muted-foreground">Full Access</div>
+      }
 
-          if (row.original.role === OrganizationUserRoleEnum.OWNER) {
-            return <div className="px-3 text-sm text-muted-foreground">Full Access</div>
-          }
+      const roleCount = row.original.assignedRoles?.length || 0
+      const roleText = roleCount === 1 ? '1 role' : `${roleCount} roles`
 
-          const roleCount = row.original.assignedRoles?.length || 0
-          const roleText = roleCount === 1 ? '1 role' : `${roleCount} roles`
+      if (!canUpdateAccess) {
+        return <div className="px-3 text-sm">{roleText}</div>
+      }
 
-          if (!canUpdateAccess) {
-            return <div className="px-3 text-sm">{roleText}</div>
-          }
+      return (
+        <Button variant="ghost" className="w-auto px-3" onClick={() => onUpdateAssignedRoles(row.original)}>
+          {roleText}
+        </Button>
+      )
+    },
+  },
+  {
+    id: 'actions',
+    size: 48,
+    minSize: 48,
+    maxSize: 48,
+    cell: ({ row, table }) => {
+      const { currentUserId, onUpdateMemberRole, onUpdateAssignedRoles, onRemove } = getMeta(table)
+      const canUpdateAccess = row.original.userId !== currentUserId
 
-          return (
-            <Button variant="ghost" className="w-auto px-3" onClick={() => onUpdateAssignedRoles(row.original)}>
-              {roleText}
-            </Button>
-          )
-        },
-      },
-      {
-        id: 'actions',
-        cell: ({ row }) => {
-          const canUpdateAccess = row.original.userId !== currentUserId
+      return (
+        <div className="text-right">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon-sm" aria-label="Open menu">
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
 
-          return (
-            <div className="text-right">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 w-8 p-0">
-                    <span className="sr-only">Open menu</span>
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent align="end">
-                  {canUpdateAccess && (
-                    <DropdownMenuItem className="cursor-pointer" onClick={() => onUpdateMemberRole(row.original)}>
-                      Change Role
-                    </DropdownMenuItem>
-                  )}
-                  {canUpdateAccess && row.original.role !== OrganizationUserRoleEnum.OWNER && (
-                    <DropdownMenuItem className="cursor-pointer" onClick={() => onUpdateAssignedRoles(row.original)}>
-                      Manage Assignments
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem
-                    className="cursor-pointer text-red-600 dark:text-red-400"
-                    onClick={() => onRemove(row.original.userId)}
-                  >
-                    Remove
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )
-        },
-      },
-    ]
-    columns.push(...extraColumns)
-  }
-
-  return columns
-}
+            <DropdownMenuContent align="end">
+              {canUpdateAccess && (
+                <DropdownMenuItem onClick={() => onUpdateMemberRole(row.original)}>Change Role</DropdownMenuItem>
+              )}
+              {canUpdateAccess && row.original.role !== OrganizationUserRoleEnum.OWNER && (
+                <DropdownMenuItem onClick={() => onUpdateAssignedRoles(row.original)}>
+                  Manage Assignments
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem variant="destructive" onClick={() => onRemove(row.original.userId)}>
+                Remove
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )
+    },
+  },
+]

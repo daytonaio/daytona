@@ -3,21 +3,16 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
-import { OrganizationRolePermissionsEnum } from '@daytona/api-client'
 import { OrganizationSuspendedError } from '@/api/errors'
-import { SandboxTable } from '@/components/SandboxTable'
-import { toast } from 'sonner'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from 'react-oidc-context'
+import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { ForkTreeDialog } from '@/components/ForkTreeDialog'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { RecursiveDeleteDialog } from '@/components/RecursiveDeleteDialog'
 import { CreateSandboxSheet } from '@/components/Sandbox/CreateSandboxSheet'
 import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
-import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { CreateSshAccessSheet } from '@/components/sandboxes/CreateSshAccessSheet'
 import { RevokeSshAccessDialog } from '@/components/sandboxes/RevokeSshAccessDialog'
+import { SandboxTable } from '@/components/SandboxTable'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,8 +37,19 @@ import { createBulkActionToast } from '@/lib/bulk-action-toast'
 import { handleApiError } from '@/lib/error-handling'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
 import { formatDuration, pluralize } from '@/lib/utils'
-import { OrganizationUserRoleEnum, Sandbox, SandboxDesiredState, SandboxState, SnapshotDto } from '@daytona/api-client'
+import {
+  OrganizationRolePermissionsEnum,
+  OrganizationUserRoleEnum,
+  Sandbox,
+  SandboxDesiredState,
+  SandboxState,
+  SnapshotDto,
+} from '@daytona/api-client'
 import { PlusIcon } from 'lucide-react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useAuth } from 'react-oidc-context'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 const Sandboxes: React.FC = () => {
   const { sandboxApi, apiKeyApi, toolboxApi, snapshotApi } = useApi()
@@ -253,7 +259,7 @@ const Sandboxes: React.FC = () => {
             <Button variant="secondary" onClick={() => navigate(RoutePath.BILLING_WALLET)}>
               Go to billing
             </Button>
-          ) : undefined,
+          ) : null,
       })
       setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
       if (selectedSandbox?.id === id && previousState) {
@@ -753,7 +759,7 @@ const Sandboxes: React.FC = () => {
   }, [navigate, user, selectedOrganization, apiKeyApi])
 
   return (
-    <PageLayout>
+    <PageLayout contained>
       <PageHeader>
         <PageTitle>Sandboxes</PageTitle>
         <div className="flex items-center gap-2 ml-auto">
@@ -772,7 +778,7 @@ const Sandboxes: React.FC = () => {
           {canCreateSandbox && <CreateSandboxSheet ref={createSandboxSheetRef} />}
         </div>
       </PageHeader>
-      <PageContent size="full" className="flex-1 max-h-[calc(100vh-65px)]">
+      <PageContent size="full" className="overflow-hidden">
         <SandboxTable
           sandboxIsLoading={loadingSandboxes}
           sandboxStateIsTransitioning={transitioningSandboxes}
@@ -949,6 +955,7 @@ const Sandboxes: React.FC = () => {
           />
         )}
       </PageContent>
+      <PageFooter />
     </PageLayout>
   )
 }

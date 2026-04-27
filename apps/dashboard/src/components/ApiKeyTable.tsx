@@ -5,118 +5,138 @@
 
 import { CREATE_API_KEY_PERMISSIONS_GROUPS } from '@/constants/CreateApiKeyPermissionsGroups'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
-import { getRelativeTimeString } from '@/lib/utils'
+import { cn, getRelativeTimeString } from '@/lib/utils'
+import { getColumnSizeStyles } from '@/lib/utils/table'
 import { ApiKeyList, ApiKeyListPermissionsEnum, CreateApiKeyPermissionsEnum } from '@daytona/api-client'
 
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  Table as ReactTable,
+  RowData,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { KeyRound, Loader2 } from 'lucide-react'
+import { KeyRound, Loader2, MoreHorizontal } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { PageFooterPortal } from './PageLayout'
 import { Pagination } from './Pagination'
-import { TableEmptyState } from './TableEmptyState'
+import { SearchInput } from './SearchInput'
+import { TimestampTooltip } from './TimestampTooltip'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from './ui/dialog'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Skeleton } from './ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableEmptyState,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from './ui/table'
+
+type ApiKeyTableMeta = {
+  isLoadingKey: (key: ApiKeyList) => boolean
+  onRevokeRequest: (key: ApiKeyList) => void
+}
+
+declare module '@tanstack/react-table' {
+  interface TableMeta<TData extends RowData> {
+    apiKey?: TData extends ApiKeyList ? ApiKeyTableMeta : never
+  }
+}
+
+const getMeta = (table: ReactTable<ApiKeyList>) => {
+  return table.options.meta?.apiKey as ApiKeyTableMeta
+}
 
 interface DataTableProps {
   data: ApiKeyList[]
   loading: boolean
   isLoadingKey: (key: ApiKeyList) => boolean
-  onRevoke: (key: ApiKeyList) => void
+  onRevokeRequest: (key: ApiKeyList) => void
 }
 
-export function ApiKeyTable({ data, loading, isLoadingKey, onRevoke }: DataTableProps) {
+export function ApiKeyTable({ data, loading, isLoadingKey, onRevokeRequest }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
-  const columns = getColumns({ onRevoke, isLoadingKey })
+  const [globalFilter, setGlobalFilter] = useState('')
   const table = useReactTable({
     data,
     columns,
+    meta: {
+      apiKey: { isLoadingKey, onRevokeRequest },
+    },
+    defaultColumn: {
+      minSize: 0,
+    },
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, _columnId, filterValue) => {
+      const apiKey = row.original
+      const searchValue = String(filterValue).toLowerCase()
+
+      return (
+        apiKey.name.toLowerCase().includes(searchValue) ||
+        apiKey.permissions.some((permission) => permission.toLowerCase().includes(searchValue))
+      )
+    },
     state: {
+      globalFilter,
       sorting,
     },
     initialState: {
+      columnPinning: {
+        left: ['name'],
+        right: ['actions'],
+      },
       pagination: {
         pageSize: DEFAULT_PAGE_SIZE,
       },
     },
   })
 
+  const isEmpty = !loading && table.getRowModel().rows.length === 0
+  const hasSearch = globalFilter.trim().length > 0
+
+  const handleChangeFilter = (value: string) => {
+    setGlobalFilter(value)
+    table.setPageIndex(0)
+  }
+
   return (
-    <div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead className="px-2" key={header.id}>
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <>
-                {Array.from(new Array(5)).map((_, i) => (
-                  <TableRow key={i}>
-                    {table.getVisibleLeafColumns().map((column, i, arr) =>
-                      i === arr.length - 1 ? null : (
-                        <TableCell key={column.id}>
-                          <Skeleton className="h-4 w-10/12" />
-                        </TableCell>
-                      ),
-                    )}
-                  </TableRow>
-                ))}
-              </>
-            ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                  className={`${isLoadingKey(row.original) ? 'opacity-50 pointer-events-none' : ''}`}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell className="px-2" key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableEmptyState
-                colSpan={columns.length}
-                message="No API Keys yet."
-                icon={<KeyRound className="w-8 h-8" />}
-                description={
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div>
+        <SearchInput
+          debounced
+          value={globalFilter}
+          onValueChange={handleChangeFilter}
+          placeholder="Search by Name or Permission"
+          containerClassName="max-w-sm"
+        />
+      </div>
+      <TableContainer
+        className={isEmpty ? 'min-h-[26rem]' : undefined}
+        empty={
+          isEmpty ? (
+            <TableEmptyState
+              overlay
+              colSpan={columns.length}
+              message={hasSearch ? 'No matching API Keys found.' : 'No API Keys yet.'}
+              icon={<KeyRound />}
+              description={
+                hasSearch ? null : (
                   <div className="space-y-2">
                     <p>API Keys authenticate requests made through the Daytona SDK or CLI.</p>
                     <p>
@@ -125,20 +145,85 @@ export function ApiKeyTable({ data, loading, isLoadingKey, onRevoke }: DataTable
                         href="https://www.daytona.io/docs/api-keys"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary hover:underline font-medium"
+                        className="text-foreground hover:underline"
                       >
                         check out the API Key setup guide
                       </a>
                       .
                     </p>
                   </div>
-                }
-              />
-            )}
+                )
+              }
+              action={
+                hasSearch ? (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      handleChangeFilter('')
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                ) : null
+              }
+            />
+          ) : null
+        }
+      >
+        <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    sticky={header.column.getIsPinned()}
+                    style={getColumnSizeStyles(header.column)}
+                  >
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <>
+                {Array.from({ length: DEFAULT_PAGE_SIZE }).map((_, i) => (
+                  <TableRow key={i}>
+                    {table.getVisibleLeafColumns().map((column) => (
+                      <TableCell key={column.id} sticky={column.getIsPinned()} style={getColumnSizeStyles(column)}>
+                        <Skeleton className="h-4 w-10/12" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </>
+            ) : table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                  className={cn({ 'opacity-50 pointer-events-none': isLoadingKey(row.original) })}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      sticky={cell.column.getIsPinned()}
+                      style={getColumnSizeStyles(cell.column)}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : null}
           </TableBody>
         </Table>
-      </div>
-      <Pagination table={table} className="mt-4" entityName="API Keys" />
+      </TableContainer>
+      <PageFooterPortal>
+        <Pagination table={table} entityName="API Keys" />
+      </PageFooterPortal>
     </div>
   )
 }
@@ -167,143 +252,122 @@ const getExpiresAtColor = (expiresAt: Date | null) => {
   return 'text-foreground'
 }
 
-const getColumns = ({
-  onRevoke,
-  isLoadingKey,
-}: {
-  onRevoke: (key: ApiKeyList) => void
-  isLoadingKey: (key: ApiKeyList) => boolean
-}): ColumnDef<ApiKeyList>[] => {
-  const columns: ColumnDef<ApiKeyList>[] = [
-    {
-      accessorKey: 'name',
-      header: 'Name',
+const columns: ColumnDef<ApiKeyList>[] = [
+  {
+    accessorKey: 'name',
+    header: 'Name',
+    size: 200,
+  },
+  {
+    accessorKey: 'value',
+    header: 'Key',
+    size: 220,
+    cell: ({ row }) => {
+      return <div className="truncate">{row.original.value}</div>
     },
-    {
-      accessorKey: 'value',
-      header: 'Key',
+  },
+  {
+    accessorKey: 'permissions',
+    size: 170,
+    header: () => {
+      return <div className="px-3">Permissions</div>
     },
-    {
-      accessorKey: 'permissions',
-      header: () => {
-        return <div className="max-w-md px-3">Permissions</div>
-      },
-      cell: ({ row }) => {
-        return <PermissionsTooltip permissions={row.original.permissions} availablePermissions={allPermissions} />
-      },
+    cell: ({ row }) => {
+      return (
+        <div className="flex min-w-0">
+          <PermissionsTooltip permissions={row.original.permissions} availablePermissions={allPermissions} />
+        </div>
+      )
     },
-    {
-      accessorKey: 'createdAt',
-      header: 'Created',
-      cell: ({ row }) => {
-        const createdAt = row.original.createdAt
-        const relativeTime = getRelativeTimeString(createdAt).relativeTimeString
-        const fullDate = new Date(createdAt).toLocaleString()
+  },
+  {
+    accessorKey: 'createdAt',
+    header: 'Created',
+    size: 120,
+    cell: ({ row }) => {
+      const createdAt = row.original.createdAt
+      const relativeTime = getRelativeTimeString(createdAt).relativeTimeString
 
-        return (
-          <Tooltip>
-            <TooltipTrigger>
-              <span className="cursor-default">{relativeTime}</span>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{fullDate}</p>
-            </TooltipContent>
-          </Tooltip>
-        )
-      },
+      return (
+        <TimestampTooltip timestamp={createdAt?.toString()}>
+          <span className="cursor-default">{relativeTime}</span>
+        </TimestampTooltip>
+      )
     },
-    {
-      accessorKey: 'lastUsedAt',
-      header: 'Last Used',
-      cell: ({ row }) => {
-        const lastUsedAt = row.original.lastUsedAt
-        const relativeTime = getRelativeTimeString(lastUsedAt).relativeTimeString
+  },
+  {
+    accessorKey: 'lastUsedAt',
+    header: 'Last Used',
+    size: 140,
+    cell: ({ row }) => {
+      const lastUsedAt = row.original.lastUsedAt
+      const relativeTime = getRelativeTimeString(lastUsedAt).relativeTimeString
 
-        if (!lastUsedAt) {
-          return <span className="text-muted-foreground">{relativeTime}</span>
-        }
+      if (!lastUsedAt) {
+        return <span className="text-muted-foreground">{relativeTime}</span>
+      }
 
-        const fullDate = new Date(lastUsedAt).toLocaleString()
-
-        return (
-          <Tooltip>
-            <TooltipTrigger>
-              <span className="cursor-default">{relativeTime}</span>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{fullDate}</p>
-            </TooltipContent>
-          </Tooltip>
-        )
-      },
+      return (
+        <TimestampTooltip timestamp={lastUsedAt?.toString()}>
+          <span className="cursor-default">{relativeTime}</span>
+        </TimestampTooltip>
+      )
     },
-    {
-      accessorKey: 'expiresAt',
-      header: 'Expires',
-      cell: ({ row }) => {
-        const expiresAt = row.original.expiresAt
-        const relativeTime = getRelativeTimeString(expiresAt).relativeTimeString
+  },
+  {
+    accessorKey: 'expiresAt',
+    header: 'Expires',
+    size: 150,
+    cell: ({ row }) => {
+      const expiresAt = row.original.expiresAt
+      const relativeTime = getRelativeTimeString(expiresAt).relativeTimeString
 
-        if (!expiresAt) {
-          return <span className="text-muted-foreground">{relativeTime}</span>
-        }
+      if (!expiresAt) {
+        return <span className="text-muted-foreground">{relativeTime}</span>
+      }
 
-        const fullDate = new Date(expiresAt).toLocaleString()
-        const color = getExpiresAtColor(expiresAt)
+      const color = getExpiresAtColor(expiresAt)
 
-        return (
-          <Tooltip>
-            <TooltipTrigger>
-              <span className={`cursor-default ${color}`}>{relativeTime}</span>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{fullDate}</p>
-            </TooltipContent>
-          </Tooltip>
-        )
-      },
+      return (
+        <TimestampTooltip timestamp={expiresAt?.toString()}>
+          <span className={`cursor-default ${color}`}>{relativeTime}</span>
+        </TimestampTooltip>
+      )
     },
-    {
-      id: 'actions',
-      size: 80,
-      cell: ({ row }) => {
-        const isLoading = isLoadingKey(row.original)
+  },
+  {
+    id: 'actions',
+    header: () => null,
+    size: 48,
+    minSize: 48,
+    maxSize: 48,
+    cell: ({ row, table }) => {
+      const { isLoadingKey, onRevokeRequest } = getMeta(table)
+      const isLoading = isLoadingKey(row.original)
 
-        return (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size={isLoading ? 'icon-sm' : 'sm'} disabled={isLoading} title="Revoke Key">
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Revoke'}
+      return (
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon-sm" aria-label="Open menu" disabled={isLoading}>
+                {isLoading ? <Loader2 className="size-4 animate-spin" /> : <MoreHorizontal />}
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Confirm Key Revocation</DialogTitle>
-                <DialogDescription>
-                  Are you absolutely sure? This action cannot be undone. This will permanently delete this API key.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button type="button" variant="secondary">
-                    Close
-                  </Button>
-                </DialogClose>
-                <DialogClose asChild>
-                  <Button variant="destructive" onClick={() => onRevoke(row.original)}>
-                    Revoke
-                  </Button>
-                </DialogClose>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )
-      },
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => onRevokeRequest(row.original)}
+                disabled={isLoading}
+              >
+                Revoke
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )
     },
-  ]
-
-  return columns
-}
+  },
+]
 
 const allPermissions = Object.values(CreateApiKeyPermissionsEnum)
 

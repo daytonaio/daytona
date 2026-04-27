@@ -210,7 +210,7 @@ const OrganizationMembers: React.FC = () => {
         )}
       </PageHeader>
 
-      <PageContent>
+      <PageContent className="gap-14">
         <OrganizationMemberTable
           data={organizationMembers}
           loadingData={loadingMembers}
@@ -222,10 +222,8 @@ const OrganizationMembers: React.FC = () => {
         />
 
         {authenticatedUserIsOwner && (
-          <>
-            <div className="mb-2 mt-12 h-12 flex items-center justify-between">
-              <h1 className="text-2xl font-medium">Invitations</h1>
-            </div>
+          <div>
+            <h1 className="text-2xl font-medium mb-3">Invitations</h1>
 
             {invitationsError ? (
               <Empty className="py-12 rounded-md border">
@@ -254,7 +252,7 @@ const OrganizationMembers: React.FC = () => {
                 pendingInvitationIds={pendingInvitationIds}
               />
             )}
-          </>
+          </div>
         )}
       </PageContent>
     </PageLayout>
