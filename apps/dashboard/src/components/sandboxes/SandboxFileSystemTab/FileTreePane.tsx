@@ -659,13 +659,31 @@ export function FileTreePane({
   return (
     <div ref={fileTreeScrollAreaRef} className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <MemoizedFileSearchHeader
-        extraActions={
-          <TooltipButton tooltipText="Collapse all folders" variant="ghost" size="icon-sm" onClick={handleCollapseAll}>
-            <ChevronsUpDownIcon className="size-4" />
-          </TooltipButton>
+        actions={
+          <>
+            <TooltipButton
+              tooltipText="Refresh files"
+              variant="ghost"
+              size="icon-sm"
+              onClick={handleRefreshRoot}
+              disabled={isTreeRefreshing}
+            >
+              <RefreshCwIcon
+                className={cn('size-4', {
+                  'animate-spin': isTreeRefreshing,
+                })}
+              />
+            </TooltipButton>
+            <TooltipButton
+              tooltipText="Collapse all folders"
+              variant="ghost"
+              size="icon-sm"
+              onClick={handleCollapseAll}
+            >
+              <ChevronsUpDownIcon className="size-4" />
+            </TooltipButton>
+          </>
         }
-        isRefreshing={isTreeRefreshing}
-        onRefresh={handleRefreshRoot}
         onSearchQueryChange={setSearchQuery}
         ref={searchHeaderRef}
       />

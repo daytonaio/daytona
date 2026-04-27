@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { RefreshCwIcon, SearchIcon, XIcon } from 'lucide-react'
+import { SearchIcon, XIcon } from 'lucide-react'
 import { Ref, useCallback, useEffect, useImperativeHandle, useRef, useState, type ReactNode } from 'react'
 
 import TooltipButton from '@/components/TooltipButton'
@@ -15,15 +15,11 @@ export type FileSearchHeaderHandle = {
 }
 
 export function FileSearchHeader({
-  extraActions,
-  isRefreshing,
-  onRefresh,
+  actions,
   onSearchQueryChange,
   ref,
 }: {
-  extraActions?: ReactNode
-  isRefreshing: boolean
-  onRefresh: () => void | Promise<void>
+  actions?: ReactNode
   onSearchQueryChange: (value: string) => void
   ref?: Ref<FileSearchHeaderHandle>
 }) {
@@ -80,21 +76,7 @@ export function FileSearchHeader({
         })}
       >
         <span className="mr-2 text-sm font-medium">Files</span>
-        <TooltipButton
-          tooltipText="Refresh files"
-          variant="ghost"
-          size="icon-sm"
-          onClick={onRefresh}
-          className="ml-auto"
-          disabled={isRefreshing}
-        >
-          <RefreshCwIcon
-            className={cn('size-4', {
-              'animate-spin': isRefreshing,
-            })}
-          />
-        </TooltipButton>
-        {extraActions}
+        <div className="ml-auto flex items-center">{actions}</div>
         <TooltipButton tooltipText="Search files" variant="ghost" size="icon-sm" onClick={() => setIsOpen(true)}>
           <SearchIcon className="size-4" />
         </TooltipButton>
