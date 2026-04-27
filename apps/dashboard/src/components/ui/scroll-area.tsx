@@ -28,12 +28,14 @@ function ScrollArea({
   className,
   children,
   fade,
+  fadeSide,
   horizontal,
   fadeOffset = 25,
   ...props
 }: React.ComponentProps<typeof ScrollAreaPrimitive.Root> & {
   fade?: 'mask' | 'shadow'
   fadeOffset?: number
+  fadeSide?: 'start' | 'end'
   horizontal?: boolean
 }) {
   const rootRef = useRef<HTMLDivElement>(null)
@@ -62,9 +64,9 @@ function ScrollArea({
         'relative group/scroll-area',
         {
           'before:pointer-events-none before:absolute before:top-0 before:left-0 before:right-0 before:z-10 before:[height:var(--fade-offset)] before:bg-gradient-to-b dark:before:from-black/20 before:from-black/10 before:to-transparent before:transition-opacity before:duration-150 before:opacity-[min(1,calc(var(--offset-y-top)/20))]':
-            fade === 'shadow',
+            fade === 'shadow' && fadeSide !== 'end',
           'after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:[height:var(--fade-offset)] after:bg-gradient-to-t dark:after:from-black/20 after:from-black/10 after:to-transparent after:transition-opacity after:duration-150 after:opacity-[min(1,calc(var(--offset-y-bottom)/20))]':
-            fade === 'shadow',
+            fade === 'shadow' && fadeSide !== 'start',
         },
         className,
       )}
@@ -80,7 +82,11 @@ function ScrollArea({
           'focus-visible:ring-ring/50 size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1 [&>div]:!block',
           {
             '[mask-image:linear-gradient(to_bottom,transparent,black_min(var(--offset-y-top)*1px,var(--fade-offset)),black_calc(100%-min(var(--offset-y-bottom)*1px,var(--fade-offset))),transparent)]':
-              fade === 'mask',
+              fade === 'mask' && fadeSide === undefined,
+            '[mask-image:linear-gradient(to_bottom,transparent,black_min(var(--offset-y-top)*1px,var(--fade-offset)),black_100%)]':
+              fade === 'mask' && fadeSide === 'start',
+            '[mask-image:linear-gradient(to_bottom,black_0,black_calc(100%-min(var(--offset-y-bottom)*1px,var(--fade-offset))),transparent)]':
+              fade === 'mask' && fadeSide === 'end',
           },
         )}
       >
