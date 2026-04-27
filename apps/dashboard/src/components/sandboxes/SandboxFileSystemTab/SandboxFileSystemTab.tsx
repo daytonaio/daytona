@@ -18,14 +18,20 @@ import { toast } from 'sonner'
 import { CreateFolderSheet, type CreateFolderSheetHandle } from './CreateFolderSheet'
 import { DeleteNodeDialog, type DeleteNodeDialogHandle } from './DeleteNodeDialog'
 import { FileSystemStoreProvider, useFileSystemStore } from './fileSystemStore'
-import { FileTreePane, type FileTreePaneHandle } from './FileTreePane'
+import { FileTreePane, type FileTreePaneRef } from './FileTreePane'
 import { useCreateFolderMutation, useDeleteNodeMutation, useUploadFilesMutation } from './mutations'
 import { invalidateFileDetailsQuery, invalidateFilePreviewQuery, useIsFilePreviewRefreshing } from './queries'
 import { SandboxFileContents } from './SandboxFileContents'
 import type { SandboxFileSystemNode } from './types'
 import { useSandboxInstance } from './useSandboxInstance'
 import { useSelectedNode } from './useSelectedNode'
-import { createFallbackNode, downloadSandboxFile, getParentPath, joinSandboxPath } from './utils'
+import {
+  createFallbackNode,
+  downloadSandboxFile,
+  getParentPath,
+  isSameOrDescendantPath,
+  joinSandboxPath,
+} from './utils'
 
 const FILES_COLUMN_MAX_WIDTH = 360
 const CONTENTS_OVERLAY_MIN_WIDTH = 350
@@ -37,13 +43,14 @@ const MemoizedSandboxFileContents = memo(SandboxFileContents)
 function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
   const queryClient = useQueryClient()
   const filesystemRootRef = useRef<HTMLDivElement>(null)
-  const filesPaneRef = useRef<HTMLDivElement>(null)
-  const inlineContentsPaneRef = useRef<HTMLDivElement>(null)
   const createFolderSheetRef = useRef<CreateFolderSheetHandle>(null)
   const deleteNodeDialogRef = useRef<DeleteNodeDialogHandle>(null)
-  const fileTreePaneRef = useRef<FileTreePaneHandle>(null)
+  const fileTreePaneRef = useRef<FileTreePaneRef>(null)
   const [isContentsOverlayMode, setIsContentsOverlayMode] = useState(false)
   const [isContentsOverlayOpen, setIsContentsOverlayOpen] = useState(false)
+  const [filesystemRootElement, setFilesystemRootElement] = useState<HTMLDivElement | null>(null)
+  const [filesPaneElement, setFilesPaneElement] = useState<HTMLDivElement | null>(null)
+  const [inlineContentsPaneElement, setInlineContentsPaneElement] = useState<HTMLDivElement | null>(null)
 
   const nextFilePath = useFileSystemStore((state) => state.nextFilePath)
   const lastOpenedNodePath = useFileSystemStore((state) => state.lastOpenedNodePath)
@@ -105,8 +112,6 @@ function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
           return {
             batchLabel,
             files: uploadedFiles,
-            firstUploadedNode:
-              fileTreePaneRef.current?.getNode(firstUploadedPath) ?? createFallbackNode(firstUploadedPath),
             targetPath: uploadedTargetPath,
           }
         })
@@ -157,17 +162,22 @@ function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
   const handleDeleteNode = useCallback(
     async (node: SandboxFileSystemNode) => {
       const parentPath = getParentPath(node.path)
+      const deletedSelectedNode = selectedNode?.path ? isSameOrDescendantPath(selectedNode.path, node.path) : false
+
+      if (deletedSelectedNode) {
+        openNode((fileTreePaneRef.current?.getNode(parentPath) ?? createFallbackNode(parentPath)).path)
+      }
 
       try {
         await deleteNodeMutation.mutateAsync(node)
         await fileTreePaneRef.current?.refreshPath(parentPath)
 
-        if (selectedNode?.path === node.path) {
-          openNode((fileTreePaneRef.current?.getNode(parentPath) ?? createFallbackNode(parentPath)).path)
-        }
-
         toast.success(`Deleted ${node.path}`)
       } catch (error) {
+        if (deletedSelectedNode) {
+          openNode(selectedNode?.path ?? node.path)
+        }
+
         handleApiError(error, `Failed to delete ${node.path}`)
         throw error
       }
@@ -236,41 +246,57 @@ function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
     })
   }, [nextFilePath, openNode])
 
-  useEffect(() => {
-    const element = filesystemRootRef.current
-    if (!element) {
+  const setFilesystemRootRef = useCallback((element: HTMLDivElement | null) => {
+    filesystemRootRef.current = element
+    setFilesystemRootElement(element)
+  }, [])
+
+  const setFilesPaneRef = useCallback((element: HTMLDivElement | null) => {
+    setFilesPaneElement(element)
+  }, [])
+
+  const setInlineContentsPaneRef = useCallback((element: HTMLDivElement | null) => {
+    setInlineContentsPaneElement(element)
+  }, [])
+
+  const updateContentsOverlayMode = useCallback(() => {
+    if (!filesystemRootElement) {
       return
     }
 
-    const updateOverlayMode = () => {
-      const inlineContentsWidth = inlineContentsPaneRef.current?.getBoundingClientRect().width
-      if (inlineContentsWidth && inlineContentsWidth > 0) {
-        setIsContentsOverlayMode(inlineContentsWidth < CONTENTS_OVERLAY_MIN_WIDTH)
-        return
-      }
-
-      const filesPaneWidth = Math.min(filesPaneRef.current?.getBoundingClientRect().width ?? 0, FILES_COLUMN_MAX_WIDTH)
-      const rootWidth = element.getBoundingClientRect().width
-      const contentsWidth = Math.max(0, rootWidth - filesPaneWidth)
-      setIsContentsOverlayMode(contentsWidth < CONTENTS_OVERLAY_MIN_WIDTH)
+    const inlineContentsWidth = inlineContentsPaneElement?.getBoundingClientRect().width
+    if (inlineContentsWidth && inlineContentsWidth > 0) {
+      setIsContentsOverlayMode(inlineContentsWidth < CONTENTS_OVERLAY_MIN_WIDTH)
+      return
     }
 
-    updateOverlayMode()
+    const filesPaneWidth = Math.min(filesPaneElement?.getBoundingClientRect().width ?? 0, FILES_COLUMN_MAX_WIDTH)
+    const rootWidth = filesystemRootElement.getBoundingClientRect().width
+    const contentsWidth = Math.max(0, rootWidth - filesPaneWidth)
+    setIsContentsOverlayMode(contentsWidth < CONTENTS_OVERLAY_MIN_WIDTH)
+  }, [filesystemRootElement, filesPaneElement, inlineContentsPaneElement])
+
+  useEffect(() => {
+    if (!filesystemRootElement) {
+      return
+    }
+
+    updateContentsOverlayMode()
 
     const observer = new ResizeObserver(() => {
-      updateOverlayMode()
+      updateContentsOverlayMode()
     })
 
-    observer.observe(element)
-    if (filesPaneRef.current) {
-      observer.observe(filesPaneRef.current)
+    observer.observe(filesystemRootElement)
+    if (filesPaneElement) {
+      observer.observe(filesPaneElement)
     }
-    if (inlineContentsPaneRef.current) {
-      observer.observe(inlineContentsPaneRef.current)
+    if (inlineContentsPaneElement) {
+      observer.observe(inlineContentsPaneElement)
     }
 
     return () => observer.disconnect()
-  }, [selectedNodePath])
+  }, [filesystemRootElement, filesPaneElement, inlineContentsPaneElement, updateContentsOverlayMode])
 
   useEffect(() => {
     if (!isContentsOverlayMode) {
@@ -378,7 +404,7 @@ function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
 
       <div className="flex flex-1 min-h-0 flex-col overflow-hidden p-4">
         <div
-          ref={filesystemRootRef}
+          ref={setFilesystemRootRef}
           className={cn('relative grid min-h-0 flex-1 overflow-hidden rounded-md border border-border', {
             'grid-cols-1': isContentsOverlayMode,
           })}
@@ -391,7 +417,7 @@ function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
           }
         >
           <div
-            ref={filesPaneRef}
+            ref={setFilesPaneRef}
             className={cn('flex min-h-0 flex-col overflow-hidden', {
               'border-r border-border': !isContentsOverlayMode,
             })}
@@ -436,7 +462,7 @@ function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
               </DialogContent>
             </Dialog>
           ) : (
-            <div ref={inlineContentsPaneRef} className="flex min-h-0 flex-col overflow-hidden">
+            <div ref={setInlineContentsPaneRef} className="flex min-h-0 flex-col overflow-hidden">
               {contentsView}
             </div>
           )}

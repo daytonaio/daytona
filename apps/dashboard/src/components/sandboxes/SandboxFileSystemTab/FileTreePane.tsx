@@ -37,7 +37,6 @@ import {
   keyboardDragAndDropFeature,
 } from '@headless-tree/core'
 import { useTree } from '@headless-tree/react'
-import { useIsFetching, useQueryClient } from '@tanstack/react-query'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { ChevronsUpDownIcon, EllipsisIcon, RefreshCwIcon } from 'lucide-react'
 
@@ -48,10 +47,13 @@ import { FileTreeRow } from './FileTreeRow'
 import { useFileSystemStore } from './fileSystemStore'
 import { useMoveNodeMutation } from './mutations'
 import {
-  fileSystemQueryKeys,
-  getDirectoryChildrenQueryOptions,
-  invalidateDirectoryQuery,
+  useFileDetailsCache,
+  useFileDetailsQueries,
+  useFetchDirectoryChildrenQuery,
+  useFetchFileDetailsQuery,
   useFileSearchQuery,
+  useIsDirectoryRefreshing,
+  useInvalidateDirectoryQuery,
 } from './queries'
 import type { SandboxFileSystemNode } from './types'
 import { useSandboxInstance } from './useSandboxInstance'
@@ -66,10 +68,9 @@ import {
   getParentPath,
   handleFileSystemApiError,
   isProbablyBinary,
-  toNode,
 } from './utils'
 
-export type FileTreePaneHandle = {
+export type FileTreePaneRef = {
   expandPathAncestors: (path: string) => Promise<void>
   getNode: (path: string) => SandboxFileSystemNode
   refreshPath: (path: string) => Promise<void>
@@ -125,21 +126,24 @@ export function FileTreePane({
 }: {
   onRequestCreateFolder: (parentPath: string) => void
   onRequestDelete: (node: SandboxFileSystemNode) => void
-  ref?: React.Ref<FileTreePaneHandle>
+  ref?: React.Ref<FileTreePaneRef>
   previewLoadingPath?: string
   sandboxId: string
 }) {
-  const queryClient = useQueryClient()
   const [rootLoadFailed, setRootLoadFailed] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [isTreeFocusWithin, setIsTreeFocusWithin] = useState(false)
   const didSetInitialFocusRef = useRef(false)
-  const itemDataRef = useRef<Record<string, SandboxFileSystemNode>>({ [ROOT_PATH]: ROOT_NODE })
   const fileTreeScrollAreaRef = useRef<HTMLDivElement>(null)
+  const fileTreeViewportRef = useRef<HTMLDivElement>(null)
   const searchHeaderRef = useRef<FileSearchHeaderHandle>(null)
   const sandboxInstanceQuery = useSandboxInstance(sandboxId)
   const sandboxInstance = sandboxInstanceQuery.data
   const moveNodeMutation = useMoveNodeMutation({ sandboxInstance })
+  const fetchDirectoryChildren = useFetchDirectoryChildrenQuery({ sandboxInstance })
+  const fetchFileDetails = useFetchFileDetailsQuery({ sandboxInstance })
+  const { getCachedNode } = useFileDetailsCache({ sandboxInstance })
+  const invalidateDirectory = useInvalidateDirectoryQuery({ sandboxInstance })
 
   const selectedNodePath = useFileSystemStore((state) => state.selectedNodePath)
   const [searchLabelAvailableWidth, setSearchLabelAvailableWidth] = useState(0)
@@ -157,17 +161,7 @@ export function FileTreePane({
     }
 
     try {
-      const children = await queryClient.fetchQuery(
-        getDirectoryChildrenQueryOptions({
-          path,
-          sandboxInstance,
-        }),
-      )
-
-      children.forEach((node) => {
-        itemDataRef.current[node.id] = node
-        queryClient.setQueryData(fileSystemQueryKeys.details(sandboxInstance.id, node.path), node)
-      })
+      const children = await fetchDirectoryChildren(path)
 
       if (path === ROOT_PATH) {
         setRootLoadFailed(false)
@@ -188,7 +182,7 @@ export function FileTreePane({
 
   const resolveNode = useCallback(
     async (path: string) => {
-      const existingNode = itemDataRef.current[path]
+      const existingNode = getCachedNode(path)
       if (existingNode && !isFallbackNode(existingNode)) {
         return existingNode
       }
@@ -198,20 +192,12 @@ export function FileTreePane({
       }
 
       try {
-        const fileInfo = await sandboxInstance.fs.getFileDetails(path)
-        const resolvedNode = {
-          ...toNode(getParentPath(path), fileInfo),
-          id: path,
-          path,
-        }
-        itemDataRef.current[path] = resolvedNode
-        queryClient.setQueryData(fileSystemQueryKeys.details(sandboxInstance.id, path), resolvedNode)
-        return resolvedNode
+        return await fetchFileDetails(path)
       } catch {
         return existingNode ?? createFallbackNode(path)
       }
     },
-    [queryClient, sandboxInstance],
+    [fetchFileDetails, getCachedNode, sandboxInstance],
   )
 
   const searchEnabled = searchQuery.trim().length >= FILE_SEARCH_MIN_CHARS
@@ -221,9 +207,13 @@ export function FileTreePane({
     sandboxInstance,
   })
   const searchResultPaths = searchQueryResult.data ?? defaultSearchResults
+  const searchResultNodesByPath = useFileDetailsQueries({
+    paths: searchEnabled ? searchResultPaths : defaultSearchResults,
+    sandboxInstance,
+  })
   const searchResults = useMemo(() => {
-    return searchResultPaths.map((path) => itemDataRef.current[path] ?? createFallbackNode(path))
-  }, [searchResultPaths])
+    return searchResultPaths.map((path) => searchResultNodesByPath.get(path) ?? createFallbackNode(path))
+  }, [searchResultNodesByPath, searchResultPaths])
   const isSearchLoading = searchQueryResult.isFetching
   const searchFailed = searchQueryResult.isError
 
@@ -245,15 +235,15 @@ export function FileTreePane({
     createLoadingItemData: () => null,
     getItemName: (item) => {
       const data = item.getItemData()
-      return data?.name ?? itemDataRef.current[item.getId()]?.name ?? item.getId()
+      return getCachedNode(item.getId())?.name ?? data?.name ?? item.getId()
     },
-    isItemFolder: (item) => Boolean(item.getItemData()?.isDir ?? itemDataRef.current[item.getId()]?.isDir),
+    isItemFolder: (item) => Boolean(getCachedNode(item.getId())?.isDir ?? item.getItemData()?.isDir),
     onDrop: async (items, target) => {
       const destinationDirectoryPath = target.item.getId()
 
       const moveResults = await Promise.allSettled(
         items.map(async (item) => {
-          const node = item.getItemData() ?? itemDataRef.current[item.getId()] ?? createFallbackNode(item.getId())
+          const node = getCachedNode(item.getId()) ?? item.getItemData() ?? createFallbackNode(item.getId())
           const destinationPath = joinSandboxPath(
             destinationDirectoryPath,
             node.name || item.getId().split('/').at(-1) || item.getId(),
@@ -267,8 +257,6 @@ export function FileTreePane({
             destinationPath,
             node,
           })
-
-          delete itemDataRef.current[node.path]
 
           return {
             destinationPath,
@@ -323,12 +311,12 @@ export function FileTreePane({
       }
     },
     onPrimaryAction: (item) => {
-      const node = item.getItemData() ?? itemDataRef.current[item.getId()] ?? createFallbackNode(item.getId())
+      const node = getCachedNode(item.getId()) ?? item.getItemData() ?? createFallbackNode(item.getId())
       openNode(node.path)
     },
     seperateDragHandle: true,
     dataLoader: {
-      getItem: async (itemId) => itemDataRef.current[itemId] ?? createFallbackNode(itemId),
+      getItem: async (itemId) => getCachedNode(itemId) ?? createFallbackNode(itemId),
       getChildrenWithData: async (itemId) => loadDirectory(itemId),
     },
     features: [
@@ -342,21 +330,33 @@ export function FileTreePane({
 
   const visibleItems = tree.getItems()
   const selectedPath = selectedNodePath ?? ''
+  const visibleItemPaths = useMemo(() => visibleItems.map((item) => item.getId()), [visibleItems])
+  const observedDetailPaths = useMemo(
+    () => Array.from(new Set([...visibleItemPaths, ...(selectedPath ? [selectedPath] : [])])),
+    [selectedPath, visibleItemPaths],
+  )
+  const observedNodesByPath = useFileDetailsQueries({
+    paths: observedDetailPaths,
+    sandboxInstance,
+  })
   const selectedNode = selectedPath
-    ? (itemDataRef.current[selectedPath] ?? (selectedPath === ROOT_PATH ? ROOT_NODE : createFallbackNode(selectedPath)))
+    ? (observedNodesByPath.get(selectedPath) ??
+      getCachedNode(selectedPath) ??
+      (selectedPath === ROOT_PATH ? ROOT_NODE : createFallbackNode(selectedPath)))
     : null
   const rootItem = tree.getItemInstance(ROOT_PATH)
-  const rootDirectoryFetchCount = useIsFetching({
-    queryKey: sandboxInstance ? fileSystemQueryKeys.directory(sandboxInstance.id, ROOT_PATH) : undefined,
+  const isRootDirectoryRefreshing = useIsDirectoryRefreshing({
+    path: ROOT_PATH,
+    sandboxInstance,
   })
   const isInitialTreeLoading = (!sandboxInstance || rootItem.isLoading()) && visibleItems.length <= 1 && !rootLoadFailed
-  const isTreeRefreshing = !isInitialTreeLoading && (rootItem.isLoading() || rootDirectoryFetchCount > 0)
+  const isTreeRefreshing = !isInitialTreeLoading && (rootItem.isLoading() || isRootDirectoryRefreshing)
   const visibleFileItems = useMemo(() => {
     return visibleItems.filter((item) => {
-      const node = item.getItemData() ?? itemDataRef.current[item.getId()] ?? createFallbackNode(item.getId())
+      const node = observedNodesByPath.get(item.getId()) ?? item.getItemData() ?? createFallbackNode(item.getId())
       return !node.isDir
     })
-  }, [visibleItems])
+  }, [observedNodesByPath, visibleItems])
 
   const activeFileNodes = useMemo(() => {
     if (searchEnabled) {
@@ -364,9 +364,9 @@ export function FileTreePane({
     }
 
     return visibleFileItems.map(
-      (item) => item.getItemData() ?? itemDataRef.current[item.getId()] ?? createFallbackNode(item.getId()),
+      (item) => observedNodesByPath.get(item.getId()) ?? item.getItemData() ?? createFallbackNode(item.getId()),
     )
-  }, [searchEnabled, searchResults, visibleFileItems])
+  }, [observedNodesByPath, searchEnabled, searchResults, visibleFileItems])
 
   const selectedFileIndex = useMemo(() => {
     if (!selectedNode || selectedNode.isDir) {
@@ -388,8 +388,7 @@ export function FileTreePane({
 
   const fileTreeVirtualizer = useVirtualizer({
     count: searchEnabled ? searchResults.length : visibleItems.length,
-    getScrollElement: () =>
-      fileTreeScrollAreaRef.current?.querySelector<HTMLDivElement>('[data-slot="scroll-area-viewport"]') ?? null,
+    getScrollElement: () => fileTreeViewportRef.current,
     estimateSize: () => 32,
     overscan: 12,
   })
@@ -405,7 +404,7 @@ export function FileTreePane({
   }, [fileTreeVirtualizer, focusedItemIndex, searchEnabled])
 
   useEffect(() => {
-    const viewport = fileTreeScrollAreaRef.current?.querySelector<HTMLDivElement>('[data-slot="scroll-area-viewport"]')
+    const viewport = fileTreeViewportRef.current
     if (!viewport) {
       return
     }
@@ -447,11 +446,7 @@ export function FileTreePane({
         return
       }
 
-      await invalidateDirectoryQuery({
-        path,
-        queryClient,
-        sandboxInstance,
-      })
+      await invalidateDirectory(path)
 
       if (path === ROOT_PATH) {
         await rootItem.invalidateChildrenIds(true)
@@ -460,7 +455,7 @@ export function FileTreePane({
 
       await tree.getItemInstance(path).invalidateChildrenIds(true)
     },
-    [queryClient, rootItem, sandboxInstance, tree],
+    [invalidateDirectory, rootItem, sandboxInstance, tree],
   )
 
   const expandPathAncestors = useCallback(
@@ -502,7 +497,7 @@ export function FileTreePane({
     [activeFileNodes, fileTreeVirtualizer, searchEnabled, tree, visibleFileItems],
   )
 
-  const getNode = useCallback((path: string) => itemDataRef.current[path] ?? createFallbackNode(path), [])
+  const getNode = useCallback((path: string) => getCachedNode(path) ?? createFallbackNode(path), [getCachedNode])
 
   const handleRefreshRoot = useCallback(async () => {
     await refreshPath(ROOT_PATH)
@@ -702,7 +697,7 @@ export function FileTreePane({
         onFocus={handleTreeContainerFocus}
         onFocusCapture={handleTreeFocusCapture}
       >
-        <ScrollArea fade="mask" className="min-h-0 h-full">
+        <ScrollArea fade="mask" className="min-h-0 h-full" viewportRef={fileTreeViewportRef}>
           {isInitialTreeLoading || (searchEnabled && isSearchLoading && searchResults.length === 0) ? (
             <FileTreeSkeleton />
           ) : searchEnabled && searchResults.length === 0 && !isSearchLoading && !searchFailed ? (
@@ -729,7 +724,7 @@ export function FileTreePane({
                 const item = searchEnabled ? null : visibleItems[virtualItem.index]
                 const node = searchEnabled
                   ? searchResults[virtualItem.index]
-                  : (item?.getItemData() ?? itemDataRef.current[item?.getId() ?? ''] ?? ROOT_NODE)
+                  : (observedNodesByPath.get(item?.getId() ?? '') ?? item?.getItemData() ?? ROOT_NODE)
 
                 if (!node) {
                   return null
@@ -824,12 +819,6 @@ export function FileTreePane({
                       }
 
                       const resolvedNode = searchEnabled ? await resolveNode(node.path) : node
-                      if (sandboxInstance) {
-                        queryClient.setQueryData(
-                          fileSystemQueryKeys.details(sandboxInstance.id, resolvedNode.path),
-                          resolvedNode,
-                        )
-                      }
                       openNode(resolvedNode.path)
                     }}
                     onItemKeyDown={!searchEnabled && item ? (event) => handleItemKeyDown(item, event) : undefined}

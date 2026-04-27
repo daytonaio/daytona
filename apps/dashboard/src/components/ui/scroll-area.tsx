@@ -6,7 +6,7 @@
 'use client'
 
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area'
-import { RefObject, useEffect, useRef } from 'react'
+import { RefObject, useCallback, useEffect, useRef } from 'react'
 import { useResizeObserver } from 'usehooks-ts'
 
 import { cn } from '@/lib/utils'
@@ -30,14 +30,31 @@ function ScrollArea({
   fade,
   horizontal,
   fadeOffset = 25,
+  viewportRef: externalViewportRef,
   ...props
 }: React.ComponentProps<typeof ScrollAreaPrimitive.Root> & {
   fade?: 'mask' | 'shadow'
   fadeOffset?: number
   horizontal?: boolean
+  viewportRef?: React.Ref<HTMLDivElement>
 }) {
   const rootRef = useRef<HTMLDivElement>(null)
   const viewportRef = useRef<HTMLDivElement>(null)
+  const setViewportRef = useCallback(
+    (element: HTMLDivElement | null) => {
+      viewportRef.current = element
+
+      if (typeof externalViewportRef === 'function') {
+        externalViewportRef(element)
+        return
+      }
+
+      if (externalViewportRef) {
+        externalViewportRef.current = element
+      }
+    },
+    [externalViewportRef],
+  )
 
   useResizeObserver({
     ref: viewportRef as RefObject<HTMLElement>,
@@ -71,7 +88,7 @@ function ScrollArea({
       {...props}
     >
       <ScrollAreaPrimitive.Viewport
-        ref={viewportRef}
+        ref={setViewportRef}
         onScroll={(e) => {
           updateScrollOffsets(e.currentTarget, rootRef.current)
         }}

@@ -17,7 +17,7 @@ export type PreviewState =
   | { status: 'error'; path: string; title: string; description: string; canRetry?: boolean }
   | { status: 'idle' }
   | { status: 'loading'; path: string }
-  | { status: 'ready'; content?: string; imageUrl?: string; kind: PreviewKind; path: string }
+  | { status: 'ready'; content?: string; imageBlob?: Blob; kind: PreviewKind; path: string }
   | { status: 'too-large'; path: string; size: number }
 
 function createPreviewErrorState({
@@ -132,7 +132,7 @@ export function usePreviewState({
     previewState = {
       status: 'ready',
       content: previewQuery.data.content,
-      imageUrl: previewQuery.data.imageUrl,
+      imageBlob: previewQuery.data.imageBlob,
       kind: previewQuery.data.kind,
       path: selectedNode.path,
     }

@@ -130,6 +130,53 @@ function DirectoryContentsSkeleton() {
   )
 }
 
+function ImagePreview({
+  imageBlob,
+  isRefreshing,
+  selectedNode,
+}: {
+  imageBlob: Blob | undefined
+  isRefreshing: boolean
+  selectedNode: SandboxFileSystemNode
+}) {
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!imageBlob) {
+      setImageUrl(null)
+      return
+    }
+
+    const objectUrl = URL.createObjectURL(imageBlob)
+    setImageUrl(objectUrl)
+
+    return () => {
+      URL.revokeObjectURL(objectUrl)
+    }
+  }, [imageBlob])
+
+  if (!imageUrl) {
+    return <FilePreviewSkeleton kind="image" />
+  }
+
+  return (
+    <div
+      className={cn(
+        'flex h-full min-h-0 items-center justify-center overflow-auto rounded-md border border-border bg-muted/20 p-4 transition-opacity',
+        {
+          'opacity-50': isRefreshing,
+        },
+      )}
+    >
+      <img
+        src={imageUrl}
+        alt={selectedNode.name || selectedNode.path}
+        className="mx-auto max-h-[60vh] max-w-full rounded-md object-contain"
+      />
+    </div>
+  )
+}
+
 function SandboxFileContentsBody({
   isWrapEnabled,
   isRefreshing,
@@ -227,7 +274,7 @@ function SandboxFileContentsBody({
 
   const activeKind = previewState.kind
   const content = previewState.content ?? ''
-  const imageUrl = previewState.imageUrl
+  const imageBlob = previewState.imageBlob
 
   if (!activeKind) {
     return null
@@ -245,22 +292,7 @@ function SandboxFileContentsBody({
   }
 
   if (activeKind === 'image') {
-    return (
-      <div
-        className={cn(
-          'flex h-full min-h-0 items-center justify-center overflow-auto rounded-md border border-border bg-muted/20 p-4 transition-opacity',
-          {
-            'opacity-50': isRefreshing,
-          },
-        )}
-      >
-        <img
-          src={imageUrl}
-          alt={selectedNode.name || selectedNode.path}
-          className="mx-auto max-h-[60vh] max-w-full rounded-md object-contain"
-        />
-      </div>
-    )
+    return <ImagePreview imageBlob={imageBlob} isRefreshing={isRefreshing} selectedNode={selectedNode} />
   }
 
   if (codeLanguage === 'markdown') {

@@ -4,10 +4,13 @@
  */
 
 import { Buffer } from 'buffer'
+import { useCallback, useMemo } from 'react'
 import {
   keepPreviousData,
   useIsFetching,
+  useQueries,
   useQuery,
+  useQueryClient,
   type QueryClient,
   type UseQueryOptions,
 } from '@tanstack/react-query'
@@ -26,9 +29,11 @@ import {
 
 export type FilePreviewData = {
   content?: string
-  imageUrl?: string
+  imageBlob?: Blob
   kind: PreviewKind
 }
+
+const FILE_PREVIEW_STALE_TIME = 60_000
 
 export const fileSystemQueryKeys = {
   all: (sandboxId: string) => ['sandbox-file-system', sandboxId] as const,
@@ -103,6 +108,23 @@ export async function invalidateDirectoryQuery({
   await queryClient.invalidateQueries({
     queryKey: fileSystemQueryKeys.directory(sandboxInstance.id, path),
   })
+}
+
+export function useInvalidateDirectoryQuery({ sandboxInstance }: { sandboxInstance: SandboxInstance | undefined }) {
+  const queryClient = useQueryClient()
+
+  return useCallback(
+    async (path: string) => {
+      if (!sandboxInstance) {
+        return
+      }
+
+      await queryClient.invalidateQueries({
+        queryKey: fileSystemQueryKeys.directory(sandboxInstance.id, path),
+      })
+    },
+    [queryClient, sandboxInstance],
+  )
 }
 
 export function getFileDetailsQueryOptions({
@@ -196,6 +218,106 @@ export function useFileDetailsQuery({
   })
 }
 
+export function useFetchFileDetailsQuery({ sandboxInstance }: { sandboxInstance: SandboxInstance | undefined }) {
+  const queryClient = useQueryClient()
+
+  return useCallback(
+    async (path: string) => {
+      if (!sandboxInstance) {
+        throw new Error('Sandbox instance is not available')
+      }
+
+      return queryClient.fetchQuery(
+        getFileDetailsQueryOptions({
+          path,
+          sandboxInstance,
+        }),
+      )
+    },
+    [queryClient, sandboxInstance],
+  )
+}
+
+export function useFetchDirectoryChildrenQuery({ sandboxInstance }: { sandboxInstance: SandboxInstance | undefined }) {
+  const queryClient = useQueryClient()
+
+  return useCallback(
+    async (path: string) => {
+      if (!sandboxInstance) {
+        throw new Error('Sandbox instance is not available')
+      }
+
+      const children = await queryClient.fetchQuery(
+        getDirectoryChildrenQueryOptions({
+          path,
+          sandboxInstance,
+        }),
+      )
+
+      children.forEach((node) => {
+        queryClient.setQueryData(fileSystemQueryKeys.details(sandboxInstance.id, node.path), node)
+      })
+
+      return children
+    },
+    [queryClient, sandboxInstance],
+  )
+}
+
+export function useFileDetailsCache({ sandboxInstance }: { sandboxInstance: SandboxInstance | undefined }) {
+  const queryClient = useQueryClient()
+
+  const getCachedNode = useCallback(
+    (path: string) => {
+      if (path === ROOT_PATH) {
+        return ROOT_NODE
+      }
+
+      if (!sandboxInstance) {
+        return undefined
+      }
+
+      return queryClient.getQueryData<SandboxFileSystemNode>(fileSystemQueryKeys.details(sandboxInstance.id, path))
+    },
+    [queryClient, sandboxInstance],
+  )
+
+  return {
+    getCachedNode,
+  }
+}
+
+export function useFileDetailsQueries({
+  paths,
+  sandboxInstance,
+}: {
+  paths: string[]
+  sandboxInstance: SandboxInstance | undefined
+}) {
+  const detailQueries = useQueries({
+    queries: sandboxInstance
+      ? paths.map((path) => ({
+          ...getFileDetailsQueryOptions({
+            path,
+            sandboxInstance,
+          }),
+          enabled: false,
+        }))
+      : [],
+  })
+
+  const fileDetailsByPath = useMemo(() => {
+    return new Map(
+      paths.flatMap((path, index) => {
+        const node = detailQueries[index]?.data
+        return node ? [[path, node] as const] : []
+      }),
+    )
+  }, [detailQueries, paths])
+
+  return fileDetailsByPath
+}
+
 export function useIsDirectoryRefreshing({
   path,
   sandboxInstance,
@@ -234,7 +356,7 @@ export function useFilePreviewQuery({
 
         if (imageMimeType) {
           return {
-            imageUrl: `data:${imageMimeType};base64,${fileContents.toString('base64')}`,
+            imageBlob: new Blob([fileContents], { type: imageMimeType }),
             kind: 'image',
           }
         }
@@ -258,7 +380,7 @@ export function useFilePreviewQuery({
     },
     enabled,
     placeholderData: undefined,
-    staleTime: 0,
+    staleTime: FILE_PREVIEW_STALE_TIME,
   })
 }
 
@@ -302,7 +424,7 @@ export function useFileSearchQuery({
         throw error
       }
     },
-    enabled,
+    enabled: enabled && Boolean(sandboxInstance),
     placeholderData: keepPreviousData,
     staleTime: 30_000,
   })
