@@ -46,6 +46,27 @@ The Docker Compose configuration includes all the necessary services to run Dayt
    - Registry UI: http://localhost:5100
    - MinIO Console: http://localhost:9001 (minioadmin / minioadmin)
 
+## Running On A VM
+
+If you want to access Daytona from outside the VM, export the public host of the VM and a wildcard-capable proxy host before starting Compose.
+
+For a VM that only has a public IP, `sslip.io` is the simplest option:
+
+```bash
+export DAYTONA_PUBLIC_HOST=203.0.113.10
+export DAYTONA_PROXY_HOST=203-0-113-10.sslip.io
+docker compose -f docker/docker-compose.yaml up -d
+```
+
+With that configuration:
+
+- Dashboard is served at `http://203.0.113.10:3000`
+- Dex is served at `http://203.0.113.10:5556/dex`
+- Preview URLs are served at `http://<port>-<sandbox-id>.203-0-113-10.sslip.io:4000`
+- SSH access uses `ssh -p 2222 <token>@203.0.113.10`
+
+`DAYTONA_PROXY_HOST` must resolve wildcard subdomains. A raw IP address is not enough for preview URLs because Daytona publishes per-sandbox hosts like `<port>-<sandbox-id>.<proxy-host>`.
+
 ## DNS Setup for Proxy URLs
 
 For local development, you need to resolve `*.proxy.localhost` domains to `127.0.0.1`:
@@ -132,7 +153,7 @@ Below is a full list of environment variables with their default values:
 | `OIDC_MANAGEMENT_API_AUDIENCE`             | string  | (empty)                                              | OIDC management API audience                                                                         |
 | `DEFAULT_SNAPSHOT`                         | string  | `daytonaio/sandbox:0.4.3`                            | Default sandbox snapshot image                                                                       |
 | `DASHBOARD_URL`                            | string  | `http://localhost:3000/dashboard`                    | Dashboard URL                                                                                        |
-| `DASHBOARD_BASE_API_URL`                   | string  | `http://localhost:3000`                              | Dashboard base API URL                                                                               |
+| `DASHBOARD_BASE_API_URL`                   | string  | (empty)                                              | Dashboard base API URL. When empty, the dashboard uses the same origin and calls `/api`.            |
 | `POSTHOG_API_KEY`                          | string  | `phc_bYtEsdMDrNLydXPD4tufkBrHKgfO2zbycM30LOowYNv`    | PostHog API key for analytics                                                                        |
 | `POSTHOG_HOST`                             | string  | `https://d18ag4dodbta3l.cloudfront.net`              | PostHog host URL                                                                                     |
 | `POSTHOG_ENVIRONMENT`                      | string  | `local`                                              | PostHog environment identifier                                                                       |
