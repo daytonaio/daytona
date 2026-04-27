@@ -168,6 +168,7 @@ export const SandboxBackupStateEnum = {
     IN_PROGRESS: 'InProgress',
     COMPLETED: 'Completed',
     ERROR: 'Error',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type SandboxBackupStateEnum = typeof SandboxBackupStateEnum[keyof typeof SandboxBackupStateEnum];
@@ -175,6 +176,7 @@ export const SandboxClassEnum = {
     SMALL: 'small',
     MEDIUM: 'medium',
     LARGE: 'large',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type SandboxClassEnum = typeof SandboxClassEnum[keyof typeof SandboxClassEnum];

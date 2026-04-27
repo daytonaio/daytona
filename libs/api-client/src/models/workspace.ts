@@ -187,6 +187,7 @@ export const WorkspaceBackupStateEnum = {
     IN_PROGRESS: 'InProgress',
     COMPLETED: 'Completed',
     ERROR: 'Error',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type WorkspaceBackupStateEnum = typeof WorkspaceBackupStateEnum[keyof typeof WorkspaceBackupStateEnum];
@@ -194,6 +195,7 @@ export const WorkspaceClassEnum = {
     SMALL: 'small',
     MEDIUM: 'medium',
     LARGE: 'large',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type WorkspaceClassEnum = typeof WorkspaceClassEnum[keyof typeof WorkspaceClassEnum];
@@ -203,6 +205,7 @@ export const WorkspaceSnapshotStateEnum = {
     IN_PROGRESS: 'InProgress',
     COMPLETED: 'Completed',
     ERROR: 'Error',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type WorkspaceSnapshotStateEnum = typeof WorkspaceSnapshotStateEnum[keyof typeof WorkspaceSnapshotStateEnum];

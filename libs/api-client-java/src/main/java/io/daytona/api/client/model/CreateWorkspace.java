@@ -90,7 +90,9 @@ public class CreateWorkspace {
     
     MEDIUM("medium"),
     
-    LARGE("large");
+    LARGE("large"),
+    
+    UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 
     private String value;
 
@@ -113,7 +115,7 @@ public class CreateWorkspace {
           return b;
         }
       }
-      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+      return UNKNOWN_DEFAULT_OPEN_API;
     }
 
     public static class Adapter extends TypeAdapter<PropertyClassEnum> {
@@ -149,7 +151,9 @@ public class CreateWorkspace {
     
     US("us"),
     
-    ASIA("asia");
+    ASIA("asia"),
+    
+    UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 
     private String value;
 
@@ -172,7 +176,7 @@ public class CreateWorkspace {
           return b;
         }
       }
-      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+      return UNKNOWN_DEFAULT_OPEN_API;
     }
 
     public static class Adapter extends TypeAdapter<TargetEnum> {

@@ -756,10 +756,12 @@ export const GetAllSnapshotsSortEnum = {
     STATE: 'state',
     LAST_USED_AT: 'lastUsedAt',
     CREATED_AT: 'createdAt',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 export type GetAllSnapshotsSortEnum = typeof GetAllSnapshotsSortEnum[keyof typeof GetAllSnapshotsSortEnum];
 export const GetAllSnapshotsOrderEnum = {
     ASC: 'asc',
     DESC: 'desc',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 export type GetAllSnapshotsOrderEnum = typeof GetAllSnapshotsOrderEnum[keyof typeof GetAllSnapshotsOrderEnum];

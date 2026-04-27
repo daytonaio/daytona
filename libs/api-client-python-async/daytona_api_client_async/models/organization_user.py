@@ -43,13 +43,6 @@ class OrganizationUser(BaseModel):
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["userId", "organizationId", "name", "email", "role", "assignedRoles", "createdAt", "updatedAt"]
 
-    @field_validator('role')
-    def role_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['owner', 'member']):
-            raise ValueError("must be one of enum values ('owner', 'member')")
-        return value
-
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,

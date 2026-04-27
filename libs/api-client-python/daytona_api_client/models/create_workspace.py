@@ -50,26 +50,6 @@ class CreateWorkspace(BaseModel):
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["image", "user", "env", "labels", "public", "class", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "volumes", "buildInfo"]
 
-    @field_validator('var_class')
-    def var_class_validate_enum(cls, value):
-        """Validates the enum"""
-        if value is None:
-            return value
-
-        if value not in set(['small', 'medium', 'large']):
-            raise ValueError("must be one of enum values ('small', 'medium', 'large')")
-        return value
-
-    @field_validator('target')
-    def target_validate_enum(cls, value):
-        """Validates the enum"""
-        if value is None:
-            return value
-
-        if value not in set(['eu', 'us', 'asia']):
-            raise ValueError("must be one of enum values ('eu', 'us', 'asia')")
-        return value
-
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,

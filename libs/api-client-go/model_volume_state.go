@@ -13,7 +13,6 @@ package apiclient
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
 // VolumeState Volume state
@@ -28,6 +27,7 @@ const (
 	VOLUMESTATE_DELETING VolumeState = "deleting"
 	VOLUMESTATE_DELETED VolumeState = "deleted"
 	VOLUMESTATE_ERROR VolumeState = "error"
+	VOLUMESTATE_UNKNOWN_DEFAULT_OPEN_API VolumeState = "11184809"
 )
 
 // All allowed values of VolumeState enum
@@ -39,6 +39,7 @@ var AllowedVolumeStateEnumValues = []VolumeState{
 	"deleting",
 	"deleted",
 	"error",
+	"11184809",
 }
 
 func (v *VolumeState) UnmarshalJSON(src []byte) error {
@@ -55,7 +56,8 @@ func (v *VolumeState) UnmarshalJSON(src []byte) error {
 		}
 	}
 
-	return fmt.Errorf("%+v is not a valid VolumeState", value)
+	*v = VOLUMESTATE_UNKNOWN_DEFAULT_OPEN_API
+	return nil
 }
 
 // NewVolumeStateFromValue returns a pointer to a valid VolumeState
@@ -65,7 +67,8 @@ func NewVolumeStateFromValue(v string) (*VolumeState, error) {
 	if ev.IsValid() {
 		return &ev, nil
 	} else {
-		return nil, fmt.Errorf("invalid value '%v' for VolumeState: valid values are %v", v, AllowedVolumeStateEnumValues)
+		enumValue := VOLUMESTATE_UNKNOWN_DEFAULT_OPEN_API
+		return &enumValue, nil
 	}
 }
 

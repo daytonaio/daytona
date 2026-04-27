@@ -22,9 +22,10 @@ module DaytonaApiClient
     DELETING = "deleting".freeze
     DELETED = "deleted".freeze
     ERROR = "error".freeze
+    UNKNOWN_DEFAULT_OPEN_API = "unknown_default_open_api".freeze
 
     def self.all_vars
-      @all_vars ||= [CREATING, READY, PENDING_CREATE, PENDING_DELETE, DELETING, DELETED, ERROR].freeze
+      @all_vars ||= [CREATING, READY, PENDING_CREATE, PENDING_DELETE, DELETING, DELETED, ERROR, UNKNOWN_DEFAULT_OPEN_API].freeze
     end
 
     # Builds the enum from string
@@ -39,7 +40,7 @@ module DaytonaApiClient
     # @return [String] The enum value
     def build_from_hash(value)
       return value if VolumeState.all_vars.include?(value)
-      raise "Invalid ENUM value #{value} for class #VolumeState"
+      UNKNOWN_DEFAULT_OPEN_API
     end
   end
 end

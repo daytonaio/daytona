@@ -55,7 +55,9 @@ public enum JobType {
   
   SNAPSHOT_SANDBOX("SNAPSHOT_SANDBOX"),
   
-  FORK_SANDBOX("FORK_SANDBOX");
+  FORK_SANDBOX("FORK_SANDBOX"),
+  
+  UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 
   private String value;
 
@@ -78,7 +80,7 @@ public enum JobType {
         return b;
       }
     }
-    throw new IllegalArgumentException("Unexpected value '" + value + "'");
+    return UNKNOWN_DEFAULT_OPEN_API;
   }
 
   public static class Adapter extends TypeAdapter<JobType> {

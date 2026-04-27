@@ -38,5 +38,6 @@ export const STATE_ICONS: Record<SandboxState | 'RECOVERY', React.ReactNode> = {
   [SandboxState.RESIZING]: <Loader2 className="w-3 h-3 animate-spin" />,
   [SandboxState.SNAPSHOTTING]: <Loader2 className="w-3 h-3 animate-spin" />,
   [SandboxState.FORKING]: <Loader2 className="w-3 h-3 animate-spin" />,
+  [SandboxState.UNKNOWN_DEFAULT_OPEN_API]: <Square color="bg-muted-foreground/20" />,
   RECOVERY: <Square color="bg-yellow-600" />,
 }

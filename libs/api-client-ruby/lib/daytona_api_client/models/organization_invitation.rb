@@ -268,10 +268,10 @@ module DaytonaApiClient
       return false if @organization_name.nil?
       return false if @expires_at.nil?
       return false if @status.nil?
-      status_validator = EnumAttributeValidator.new('String', ["pending", "accepted", "declined", "cancelled"])
+      status_validator = EnumAttributeValidator.new('String', ["pending", "accepted", "declined", "cancelled", "unknown_default_open_api"])
       return false unless status_validator.valid?(@status)
       return false if @role.nil?
-      role_validator = EnumAttributeValidator.new('String', ["owner", "member"])
+      role_validator = EnumAttributeValidator.new('String', ["owner", "member", "unknown_default_open_api"])
       return false unless role_validator.valid?(@role)
       return false if @assigned_roles.nil?
       return false if @created_at.nil?
@@ -342,7 +342,7 @@ module DaytonaApiClient
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] status Object to be assigned
     def status=(status)
-      validator = EnumAttributeValidator.new('String', ["pending", "accepted", "declined", "cancelled"])
+      validator = EnumAttributeValidator.new('String', ["pending", "accepted", "declined", "cancelled", "unknown_default_open_api"])
       unless validator.valid?(status)
         fail ArgumentError, "invalid value for \"status\", must be one of #{validator.allowable_values}."
       end
@@ -352,7 +352,7 @@ module DaytonaApiClient
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] role Object to be assigned
     def role=(role)
-      validator = EnumAttributeValidator.new('String', ["owner", "member"])
+      validator = EnumAttributeValidator.new('String', ["owner", "member", "unknown_default_open_api"])
       unless validator.valid?(role)
         fail ArgumentError, "invalid value for \"role\", must be one of #{validator.allowable_values}."
       end

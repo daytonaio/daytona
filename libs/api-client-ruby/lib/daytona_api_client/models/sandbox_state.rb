@@ -34,9 +34,10 @@ module DaytonaApiClient
     RESIZING = "resizing".freeze
     SNAPSHOTTING = "snapshotting".freeze
     FORKING = "forking".freeze
+    UNKNOWN_DEFAULT_OPEN_API = "unknown_default_open_api".freeze
 
     def self.all_vars
-      @all_vars ||= [CREATING, RESTORING, DESTROYED, DESTROYING, STARTED, STOPPED, STARTING, STOPPING, ERROR, BUILD_FAILED, PENDING_BUILD, BUILDING_SNAPSHOT, UNKNOWN, PULLING_SNAPSHOT, ARCHIVED, ARCHIVING, RESIZING, SNAPSHOTTING, FORKING].freeze
+      @all_vars ||= [CREATING, RESTORING, DESTROYED, DESTROYING, STARTED, STOPPED, STARTING, STOPPING, ERROR, BUILD_FAILED, PENDING_BUILD, BUILDING_SNAPSHOT, UNKNOWN, PULLING_SNAPSHOT, ARCHIVED, ARCHIVING, RESIZING, SNAPSHOTTING, FORKING, UNKNOWN_DEFAULT_OPEN_API].freeze
     end
 
     # Builds the enum from string
@@ -51,7 +52,7 @@ module DaytonaApiClient
     # @return [String] The enum value
     def build_from_hash(value)
       return value if SandboxState.all_vars.include?(value)
-      raise "Invalid ENUM value #{value} for class #SandboxState"
+      UNKNOWN_DEFAULT_OPEN_API
     end
   end
 end

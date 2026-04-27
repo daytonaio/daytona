@@ -20,9 +20,10 @@ module DaytonaApiClient
     STOPPED = "stopped".freeze
     RESIZED = "resized".freeze
     ARCHIVED = "archived".freeze
+    UNKNOWN_DEFAULT_OPEN_API = "unknown_default_open_api".freeze
 
     def self.all_vars
-      @all_vars ||= [DESTROYED, STARTED, STOPPED, RESIZED, ARCHIVED].freeze
+      @all_vars ||= [DESTROYED, STARTED, STOPPED, RESIZED, ARCHIVED, UNKNOWN_DEFAULT_OPEN_API].freeze
     end
 
     # Builds the enum from string
@@ -37,7 +38,7 @@ module DaytonaApiClient
     # @return [String] The enum value
     def build_from_hash(value)
       return value if SandboxDesiredState.all_vars.include?(value)
-      raise "Invalid ENUM value #{value} for class #SandboxDesiredState"
+      UNKNOWN_DEFAULT_OPEN_API
     end
   end
 end

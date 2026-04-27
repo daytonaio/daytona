@@ -24,6 +24,7 @@ export const RunnerState = {
     DISABLED: 'disabled',
     DECOMMISSIONED: 'decommissioned',
     UNRESPONSIVE: 'unresponsive',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type RunnerState = typeof RunnerState[keyof typeof RunnerState];

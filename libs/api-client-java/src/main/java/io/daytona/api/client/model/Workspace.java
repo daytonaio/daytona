@@ -168,7 +168,9 @@ public class Workspace {
     
     COMPLETED("Completed"),
     
-    ERROR("Error");
+    ERROR("Error"),
+    
+    UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 
     private String value;
 
@@ -191,7 +193,7 @@ public class Workspace {
           return b;
         }
       }
-      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+      return UNKNOWN_DEFAULT_OPEN_API;
     }
 
     public static class Adapter extends TypeAdapter<BackupStateEnum> {
@@ -272,7 +274,9 @@ public class Workspace {
     
     MEDIUM("medium"),
     
-    LARGE("large");
+    LARGE("large"),
+    
+    UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 
     private String value;
 
@@ -295,7 +299,7 @@ public class Workspace {
           return b;
         }
       }
-      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+      return UNKNOWN_DEFAULT_OPEN_API;
     }
 
     public static class Adapter extends TypeAdapter<PropertyClassEnum> {
@@ -356,7 +360,9 @@ public class Workspace {
     
     COMPLETED("Completed"),
     
-    ERROR("Error");
+    ERROR("Error"),
+    
+    UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 
     private String value;
 
@@ -379,7 +385,7 @@ public class Workspace {
           return b;
         }
       }
-      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+      return UNKNOWN_DEFAULT_OPEN_API;
     }
 
     public static class Adapter extends TypeAdapter<SnapshotStateEnum> {

@@ -42,13 +42,6 @@ class DockerRegistry(BaseModel):
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "name", "url", "username", "project", "registryType", "createdAt", "updatedAt"]
 
-    @field_validator('registry_type')
-    def registry_type_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['internal', 'organization', 'transient', 'backup']):
-            raise ValueError("must be one of enum values ('internal', 'organization', 'transient', 'backup')")
-        return value
-
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,

@@ -18,9 +18,10 @@ module DaytonaApiClient
     SMALL = "small".freeze
     MEDIUM = "medium".freeze
     LARGE = "large".freeze
+    UNKNOWN_DEFAULT_OPEN_API = "unknown_default_open_api".freeze
 
     def self.all_vars
-      @all_vars ||= [SMALL, MEDIUM, LARGE].freeze
+      @all_vars ||= [SMALL, MEDIUM, LARGE, UNKNOWN_DEFAULT_OPEN_API].freeze
     end
 
     # Builds the enum from string
@@ -35,7 +36,7 @@ module DaytonaApiClient
     # @return [String] The enum value
     def build_from_hash(value)
       return value if SandboxClass.all_vars.include?(value)
-      raise "Invalid ENUM value #{value} for class #SandboxClass"
+      UNKNOWN_DEFAULT_OPEN_API
     end
   end
 end

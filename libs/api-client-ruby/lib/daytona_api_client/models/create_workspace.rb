@@ -235,9 +235,9 @@ module DaytonaApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      _class_validator = EnumAttributeValidator.new('String', ["small", "medium", "large"])
+      _class_validator = EnumAttributeValidator.new('String', ["small", "medium", "large", "unknown_default_open_api"])
       return false unless _class_validator.valid?(@_class)
-      target_validator = EnumAttributeValidator.new('String', ["eu", "us", "asia"])
+      target_validator = EnumAttributeValidator.new('String', ["eu", "us", "asia", "unknown_default_open_api"])
       return false unless target_validator.valid?(@target)
       true
     end
@@ -245,7 +245,7 @@ module DaytonaApiClient
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] _class Object to be assigned
     def _class=(_class)
-      validator = EnumAttributeValidator.new('String', ["small", "medium", "large"])
+      validator = EnumAttributeValidator.new('String', ["small", "medium", "large", "unknown_default_open_api"])
       unless validator.valid?(_class)
         fail ArgumentError, "invalid value for \"_class\", must be one of #{validator.allowable_values}."
       end
@@ -255,7 +255,7 @@ module DaytonaApiClient
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] target Object to be assigned
     def target=(target)
-      validator = EnumAttributeValidator.new('String', ["eu", "us", "asia"])
+      validator = EnumAttributeValidator.new('String', ["eu", "us", "asia", "unknown_default_open_api"])
       unless validator.valid?(target)
         fail ArgumentError, "invalid value for \"target\", must be one of #{validator.allowable_values}."
       end

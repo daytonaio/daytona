@@ -13,7 +13,6 @@ package apiclient
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
 // RegionType The type of the region
@@ -24,6 +23,7 @@ const (
 	REGIONTYPE_SHARED RegionType = "shared"
 	REGIONTYPE_DEDICATED RegionType = "dedicated"
 	REGIONTYPE_CUSTOM RegionType = "custom"
+	REGIONTYPE_UNKNOWN_DEFAULT_OPEN_API RegionType = "11184809"
 )
 
 // All allowed values of RegionType enum
@@ -31,6 +31,7 @@ var AllowedRegionTypeEnumValues = []RegionType{
 	"shared",
 	"dedicated",
 	"custom",
+	"11184809",
 }
 
 func (v *RegionType) UnmarshalJSON(src []byte) error {
@@ -47,7 +48,8 @@ func (v *RegionType) UnmarshalJSON(src []byte) error {
 		}
 	}
 
-	return fmt.Errorf("%+v is not a valid RegionType", value)
+	*v = REGIONTYPE_UNKNOWN_DEFAULT_OPEN_API
+	return nil
 }
 
 // NewRegionTypeFromValue returns a pointer to a valid RegionType
@@ -57,7 +59,8 @@ func NewRegionTypeFromValue(v string) (*RegionType, error) {
 	if ev.IsValid() {
 		return &ev, nil
 	} else {
-		return nil, fmt.Errorf("invalid value '%v' for RegionType: valid values are %v", v, AllowedRegionTypeEnumValues)
+		enumValue := REGIONTYPE_UNKNOWN_DEFAULT_OPEN_API
+		return &enumValue, nil
 	}
 }
 

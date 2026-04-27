@@ -1,0 +1,38 @@
+{{>partial_header}}
+package {{packageName}}
+
+{{#models}}
+{{#model.isEnum}}
+{{#model}}
+{{#enumUnknownDefaultCase}}
+import (
+	"encoding/json"
+)
+{{/enumUnknownDefaultCase}}
+{{^enumUnknownDefaultCase}}
+import (
+	"encoding/json"
+	"fmt"
+)
+{{/enumUnknownDefaultCase}}
+{{/model}}
+{{/model.isEnum}}
+{{^model.isEnum}}
+import (
+	"encoding/json"
+{{#imports}}
+	"{{import}}"
+{{/imports}}
+)
+{{/model.isEnum}}
+
+{{#model}}
+{{#isEnum}}
+{{>model_enum}}
+
+{{/isEnum}}
+{{^isEnum}}
+{{#oneOf}}{{#-first}}{{>model_oneof}}{{/-first}}{{/oneOf}}{{^oneOf}}{{#anyOf}}{{#-first}}{{>model_anyof}}{{/-first}}{{/anyOf}}{{^anyOf}}{{>model_simple}}{{/anyOf}}{{/oneOf}}
+{{/isEnum}}
+{{/model}}
+{{/models}}

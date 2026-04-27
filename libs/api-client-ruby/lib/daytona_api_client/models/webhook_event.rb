@@ -22,9 +22,10 @@ module DaytonaApiClient
     SNAPSHOT_REMOVED = "snapshot.removed".freeze
     VOLUME_CREATED = "volume.created".freeze
     VOLUME_STATE_UPDATED = "volume.state.updated".freeze
+    UNKNOWN_DEFAULT_OPEN_API = "unknown_default_open_api".freeze
 
     def self.all_vars
-      @all_vars ||= [SANDBOX_CREATED, SANDBOX_STATE_UPDATED, SNAPSHOT_CREATED, SNAPSHOT_STATE_UPDATED, SNAPSHOT_REMOVED, VOLUME_CREATED, VOLUME_STATE_UPDATED].freeze
+      @all_vars ||= [SANDBOX_CREATED, SANDBOX_STATE_UPDATED, SNAPSHOT_CREATED, SNAPSHOT_STATE_UPDATED, SNAPSHOT_REMOVED, VOLUME_CREATED, VOLUME_STATE_UPDATED, UNKNOWN_DEFAULT_OPEN_API].freeze
     end
 
     # Builds the enum from string
@@ -39,7 +40,7 @@ module DaytonaApiClient
     # @return [String] The enum value
     def build_from_hash(value)
       return value if WebhookEvent.all_vars.include?(value)
-      raise "Invalid ENUM value #{value} for class #WebhookEvent"
+      UNKNOWN_DEFAULT_OPEN_API
     end
   end
 end

@@ -22,6 +22,7 @@ export const RegionType = {
     SHARED: 'shared',
     DEDICATED: 'dedicated',
     CUSTOM: 'custom',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type RegionType = typeof RegionType[keyof typeof RegionType];

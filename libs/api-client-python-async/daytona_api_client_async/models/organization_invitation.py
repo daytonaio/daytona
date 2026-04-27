@@ -46,20 +46,6 @@ class OrganizationInvitation(BaseModel):
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "email", "invitedBy", "organizationId", "organizationName", "expiresAt", "status", "role", "assignedRoles", "createdAt", "updatedAt"]
 
-    @field_validator('status')
-    def status_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['pending', 'accepted', 'declined', 'cancelled']):
-            raise ValueError("must be one of enum values ('pending', 'accepted', 'declined', 'cancelled')")
-        return value
-
-    @field_validator('role')
-    def role_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['owner', 'member']):
-            raise ValueError("must be one of enum values ('owner', 'member')")
-        return value
-
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,

@@ -34,13 +34,6 @@ class ComputerUseStatusResponse(BaseModel):
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["status"]
 
-    @field_validator('status')
-    def status_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['active', 'partial', 'inactive', 'error']):
-            raise ValueError("must be one of enum values ('active', 'partial', 'inactive', 'error')")
-        return value
-
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,

@@ -30,10 +30,15 @@ class RegionType(str, Enum):
     SHARED = 'shared'
     DEDICATED = 'dedicated'
     CUSTOM = 'custom'
+    UNKNOWN_DEFAULT_OPEN_API = 'unknown_default_open_api'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
         """Create an instance of RegionType from a JSON string"""
         return cls(json.loads(json_str))
 
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.UNKNOWN_DEFAULT_OPEN_API
 

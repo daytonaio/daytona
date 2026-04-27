@@ -67,6 +67,7 @@ export const JobResourceTypeEnum = {
     SANDBOX: 'SANDBOX',
     SNAPSHOT: 'SNAPSHOT',
     BACKUP: 'BACKUP',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type JobResourceTypeEnum = typeof JobResourceTypeEnum[keyof typeof JobResourceTypeEnum];

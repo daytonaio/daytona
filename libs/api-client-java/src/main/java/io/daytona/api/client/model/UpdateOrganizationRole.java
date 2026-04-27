@@ -95,7 +95,9 @@ public class UpdateOrganizationRole {
     
     DELETE_RUNNERS("delete:runners"),
     
-    READ_AUDIT_LOGS("read:audit_logs");
+    READ_AUDIT_LOGS("read:audit_logs"),
+    
+    UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 
     private String value;
 
@@ -118,7 +120,7 @@ public class UpdateOrganizationRole {
           return b;
         }
       }
-      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+      return UNKNOWN_DEFAULT_OPEN_API;
     }
 
     public static class Adapter extends TypeAdapter<PermissionsEnum> {

@@ -37,7 +37,9 @@ public enum SandboxDesiredState {
   
   RESIZED("resized"),
   
-  ARCHIVED("archived");
+  ARCHIVED("archived"),
+  
+  UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 
   private String value;
 
@@ -60,7 +62,7 @@ public enum SandboxDesiredState {
         return b;
       }
     }
-    throw new IllegalArgumentException("Unexpected value '" + value + "'");
+    return UNKNOWN_DEFAULT_OPEN_API;
   }
 
   public static class Adapter extends TypeAdapter<SandboxDesiredState> {

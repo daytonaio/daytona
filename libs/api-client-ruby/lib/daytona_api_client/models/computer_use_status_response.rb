@@ -110,7 +110,7 @@ module DaytonaApiClient
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
       return false if @status.nil?
-      status_validator = EnumAttributeValidator.new('String', ["active", "partial", "inactive", "error"])
+      status_validator = EnumAttributeValidator.new('String', ["active", "partial", "inactive", "error", "unknown_default_open_api"])
       return false unless status_validator.valid?(@status)
       true
     end
@@ -118,7 +118,7 @@ module DaytonaApiClient
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] status Object to be assigned
     def status=(status)
-      validator = EnumAttributeValidator.new('String', ["active", "partial", "inactive", "error"])
+      validator = EnumAttributeValidator.new('String', ["active", "partial", "inactive", "error", "unknown_default_open_api"])
       unless validator.valid?(status)
         fail ArgumentError, "invalid value for \"status\", must be one of #{validator.allowable_values}."
       end
