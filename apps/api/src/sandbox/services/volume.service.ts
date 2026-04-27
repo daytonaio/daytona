@@ -3,14 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import {
-  ConflictException,
-  ForbiddenException,
-  Injectable,
-  Logger,
-  NotFoundException,
-  ServiceUnavailableException,
-} from '@nestjs/common'
+import { ConflictException, Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, Not, In } from 'typeorm'
 import { Volume } from '../entities/volume.entity'
@@ -56,7 +49,7 @@ export class VolumeService {
 
     try {
       if (usageOverview.currentVolumeUsage + usageOverview.pendingVolumeUsage > organization.volumeQuota) {
-        throw new ForbiddenException(`Volume quota exceeded. Maximum allowed: ${organization.volumeQuota}`)
+        throw new BadRequestError(`Volume quota exceeded. Maximum allowed: ${organization.volumeQuota}`)
       }
     } catch (error) {
       await this.rollbackPendingUsage(organization.id, addedVolumeCount)

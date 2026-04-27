@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, FindOptionsWhere, IsNull, Repository } from 'typeorm'
 import { DockerRegistry } from '../entities/docker-registry.entity'
@@ -79,7 +80,7 @@ export class DockerRegistryService {
         where: { organizationId },
       })
       if (registries.length >= 100) {
-        throw new ForbiddenException('You have reached the maximum number of registries')
+        throw new BadRequestError('You have reached the maximum number of registries')
       }
     }
 

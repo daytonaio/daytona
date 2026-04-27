@@ -177,17 +177,17 @@ export class SandboxService {
       getEffectivePerSandboxLimits(organization, regionQuota)
 
     if (cpu > maxCpuPerSandbox) {
-      throw new ForbiddenException(
+      throw new BadRequestError(
         `CPU request ${cpu} exceeds maximum allowed per sandbox (${maxCpuPerSandbox}).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
     if (memory > maxMemoryPerSandbox) {
-      throw new ForbiddenException(
+      throw new BadRequestError(
         `Memory request ${memory}GB exceeds maximum allowed per sandbox (${maxMemoryPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
     if (disk > maxDiskPerSandbox) {
-      throw new ForbiddenException(
+      throw new BadRequestError(
         `Disk request ${disk}GB exceeds maximum allowed per sandbox (${maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
@@ -197,7 +197,7 @@ export class SandboxService {
         throw new BadRequestError('Only ephemeral sandboxes are permitted in this region')
       }
       if (disk > maxDiskPerNonEphemeralSandbox) {
-        throw new ForbiddenException(
+        throw new BadRequestError(
           `Disk request ${disk}GB exceeds maximum allowed per non-ephemeral sandbox (${maxDiskPerNonEphemeralSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
         )
       }
@@ -246,19 +246,19 @@ export class SandboxService {
       const upgradeTierMessage = UPGRADE_TIER_MESSAGE(this.configService.getOrThrow('dashboardUrl'))
 
       if (usageOverview.currentCpuUsage + usageOverview.pendingCpuUsage > regionQuota.totalCpuQuota) {
-        throw new ForbiddenException(
+        throw new BadRequestError(
           `Total CPU limit exceeded. Maximum allowed: ${regionQuota.totalCpuQuota}.\n${upgradeTierMessage}`,
         )
       }
 
       if (usageOverview.currentMemoryUsage + usageOverview.pendingMemoryUsage > regionQuota.totalMemoryQuota) {
-        throw new ForbiddenException(
+        throw new BadRequestError(
           `Total memory limit exceeded. Maximum allowed: ${regionQuota.totalMemoryQuota}GiB.\n${upgradeTierMessage}`,
         )
       }
 
       if (usageOverview.currentDiskUsage + usageOverview.pendingDiskUsage > regionQuota.totalDiskQuota) {
-        throw new ForbiddenException(
+        throw new BadRequestError(
           `Total disk limit exceeded. Maximum allowed: ${regionQuota.totalDiskQuota}GiB.\n${ARCHIVE_SANDBOXES_MESSAGE}\n${upgradeTierMessage}`,
         )
       }
@@ -1594,9 +1594,8 @@ export class SandboxService {
     })
     const activeChildren = forkChildren.filter((f) => f.child && f.child.desiredState !== SandboxDesiredState.DESTROYED)
     if (activeChildren.length > 0) {
-      throw new HttpException(
+      throw new BadRequestError(
         'Cannot delete sandbox which has active fork children. The forks must be deleted first.',
-        HttpStatus.PRECONDITION_REQUIRED,
       )
     }
 
@@ -1858,17 +1857,17 @@ export class SandboxService {
         getEffectivePerSandboxLimits(organization, regionQuota)
 
       if (newCpu > maxCpuPerSandbox) {
-        throw new ForbiddenException(
+        throw new BadRequestError(
           `CPU request ${newCpu} exceeds maximum allowed per sandbox (${maxCpuPerSandbox}).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
         )
       }
       if (newMem > maxMemoryPerSandbox) {
-        throw new ForbiddenException(
+        throw new BadRequestError(
           `Memory request ${newMem}GB exceeds maximum allowed per sandbox (${maxMemoryPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
         )
       }
       if (newDisk > maxDiskPerSandbox) {
-        throw new ForbiddenException(
+        throw new BadRequestError(
           `Disk request ${newDisk}GB exceeds maximum allowed per sandbox (${maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
         )
       }
@@ -1878,7 +1877,7 @@ export class SandboxService {
           throw new BadRequestError('Non-ephemeral sandboxes are not permitted in this region')
         }
         if (newDisk > maxDiskPerNonEphemeralSandbox) {
-          throw new ForbiddenException(
+          throw new BadRequestError(
             `Disk request ${newDisk}GB exceeds maximum allowed per non-ephemeral sandbox (${maxDiskPerNonEphemeralSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
           )
         }

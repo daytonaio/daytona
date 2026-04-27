@@ -3,16 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import {
-  BadRequestException,
-  ConflictException,
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common'
+import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { DataSource, FindOptionsWhere, In, MoreThanOrEqual, Not, Repository, UpdateResult } from 'typeorm'
@@ -350,20 +341,14 @@ export class RunnerService {
     }
 
     if (!runner.unschedulable) {
-      throw new HttpException(
-        'Cannot delete runner which is available for scheduling sandboxes',
-        HttpStatus.PRECONDITION_REQUIRED,
-      )
+      throw new BadRequestError('Cannot delete runner which is available for scheduling sandboxes')
     }
 
     const sandboxCount = await this.sandboxRepository.count({
       where: { runnerId: id, state: Not(In([SandboxState.ARCHIVED, SandboxState.DESTROYED])) },
     })
     if (sandboxCount > 0) {
-      throw new HttpException(
-        'Cannot delete runner which has sandboxes associated with it',
-        HttpStatus.PRECONDITION_REQUIRED,
-      )
+      throw new BadRequestError('Cannot delete runner which has sandboxes associated with it')
     }
 
     await this.dataSource.transaction(async (em) => {

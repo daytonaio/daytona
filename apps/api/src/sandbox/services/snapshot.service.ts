@@ -11,6 +11,7 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common'
+import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, Not, In, Raw, ILike, IsNull, FindOptionsWhere, Like, LessThan } from 'typeorm'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
@@ -537,17 +538,17 @@ export class SnapshotService {
     )
 
     if (cpu && cpu > maxCpuPerSandbox) {
-      throw new ForbiddenException(
+      throw new BadRequestError(
         `CPU request ${cpu} exceeds maximum allowed per sandbox (${maxCpuPerSandbox}).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
     if (memory && memory > maxMemoryPerSandbox) {
-      throw new ForbiddenException(
+      throw new BadRequestError(
         `Memory request ${memory}GB exceeds maximum allowed per sandbox (${maxMemoryPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
     if (disk && disk > maxDiskPerSandbox) {
-      throw new ForbiddenException(
+      throw new BadRequestError(
         `Disk request ${disk}GB exceeds maximum allowed per sandbox (${maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
@@ -559,7 +560,7 @@ export class SnapshotService {
 
     try {
       if (usageOverview.currentSnapshotUsage + usageOverview.pendingSnapshotUsage > organization.snapshotQuota) {
-        throw new ForbiddenException(`Snapshot quota exceeded. Maximum allowed: ${organization.snapshotQuota}`)
+        throw new BadRequestError(`Snapshot quota exceeded. Maximum allowed: ${organization.snapshotQuota}`)
       }
     } catch (error) {
       await this.rollbackPendingUsage(organization.id, addedSnapshotCount)
