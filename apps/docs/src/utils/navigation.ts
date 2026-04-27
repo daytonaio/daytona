@@ -440,17 +440,15 @@ export function getHeaderActiveState(
       currentPath
     )
 
-  const isDeploymentsOpenSourceSectionActive =
-    isActiveOrParentPath(
-      `${baseUrl}/en/deployments/open-source`,
-      currentPath
-    ) || isActiveOrParentPath(`${baseUrl}/en/oss-deployment`, currentPath)
+  const isDeploymentsOpenSourceSectionActive = isActiveOrParentPath(
+    `${baseUrl}/en/oss-deployment`,
+    currentPath
+  )
 
-  const isDeploymentsCustomerManagedSectionActive =
-    isActiveOrParentPath(
-      `${baseUrl}/en/deployments/customer-managed-compute`,
-      currentPath
-    ) || isActiveOrParentPath(`${baseUrl}/en/runners`, currentPath)
+  const isDeploymentsCustomerManagedSectionActive = isActiveOrParentPath(
+    `${baseUrl}/en/runners`,
+    currentPath
+  )
 
   const isDeploymentsSectionActive =
     isDeploymentsOpenSourceSectionActive ||
