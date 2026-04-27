@@ -8,7 +8,7 @@
     "generate:api-client": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": ["apiClient"],
+      "inputs": ["apiClient", "{workspaceRoot}/hack/java-client/postprocess.sh"],
       "outputs": ["{projectRoot}/src"],
       "options": {
         "commands": [
