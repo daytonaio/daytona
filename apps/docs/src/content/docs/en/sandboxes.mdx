@@ -934,7 +934,7 @@ The fork tree displays each sandbox in the hierarchy along with its current stat
 This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
 :::
 
-Daytona provides methods to create [snapshots](/docs/en/snapshots) from sandboxes. Snapshots are immutable copies of a sandbox's filesystem that can be used to create new sandboxes.
+Daytona provides methods to create [snapshots](/docs/en/snapshots) from sandboxes. A snapshot captures an immutable, point-in-time copy of a sandbox's filesystem and memory that you can use as a base to create new sandboxes, effectively templating a known-good environment for reuse. You can think of it as a checkpoint you can restore from whenever you need a clean, identical starting point.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
