@@ -7,6 +7,7 @@ import { PageFooterPortal } from '@/components/PageLayout'
 import { Pagination } from '@/components/Pagination'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import {
   Table,
   TableBody,
@@ -141,17 +142,17 @@ export function AuditLogTable({
 function AuditLogTableSkeleton({ columns }: { columns: Column<AuditLog>[] }) {
   return (
     <>
-      {Array.from({ length: 25 }).map((_, rowIndex) => (
+      {Array.from({ length: DEFAULT_PAGE_SIZE }).map((_, rowIndex) => (
         <TableRow key={rowIndex}>
           {columns.map((column, columnIndex) => (
             <TableCell key={`${rowIndex}-${column.id}`} style={getColumnSizeStyles(column)}>
               {columnIndex === 0 || columnIndex === 3 || columnIndex === 4 ? (
                 <div className="space-y-1">
-                  <Skeleton />
-                  <Skeleton />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
                 </div>
               ) : (
-                <Skeleton />
+                <Skeleton className="h-4 w-10/12" />
               )}
             </TableCell>
           ))}
