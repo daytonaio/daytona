@@ -53,7 +53,7 @@ import io.daytona.api.client.JSON;
 /**
  * RunnerFull
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class RunnerFull {
   public static final String SERIALIZED_NAME_ID = "id";
   @SerializedName(SERIALIZED_NAME_ID)
@@ -981,10 +981,7 @@ public class RunnerFull {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -993,57 +990,10 @@ public class RunnerFull {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("id");
-    openapiFields.add("domain");
-    openapiFields.add("apiUrl");
-    openapiFields.add("proxyUrl");
-    openapiFields.add("cpu");
-    openapiFields.add("memory");
-    openapiFields.add("disk");
-    openapiFields.add("gpu");
-    openapiFields.add("gpuType");
-    openapiFields.add("class");
-    openapiFields.add("currentCpuUsagePercentage");
-    openapiFields.add("currentMemoryUsagePercentage");
-    openapiFields.add("currentDiskUsagePercentage");
-    openapiFields.add("currentAllocatedCpu");
-    openapiFields.add("currentAllocatedMemoryGiB");
-    openapiFields.add("currentAllocatedDiskGiB");
-    openapiFields.add("currentSnapshotCount");
-    openapiFields.add("currentStartedSandboxes");
-    openapiFields.add("availabilityScore");
-    openapiFields.add("region");
-    openapiFields.add("name");
-    openapiFields.add("state");
-    openapiFields.add("lastChecked");
-    openapiFields.add("unschedulable");
-    openapiFields.add("createdAt");
-    openapiFields.add("updatedAt");
-    openapiFields.add("version");
-    openapiFields.add("apiVersion");
-    openapiFields.add("runnerClass");
-    openapiFields.add("appVersion");
-    openapiFields.add("apiKey");
-    openapiFields.add("regionType");
+    openapiFields = new HashSet<String>(Arrays.asList("id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version", "apiVersion", "runnerClass", "appVersion", "apiKey", "regionType"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("id");
-    openapiRequiredFields.add("cpu");
-    openapiRequiredFields.add("memory");
-    openapiRequiredFields.add("disk");
-    openapiRequiredFields.add("class");
-    openapiRequiredFields.add("region");
-    openapiRequiredFields.add("name");
-    openapiRequiredFields.add("state");
-    openapiRequiredFields.add("unschedulable");
-    openapiRequiredFields.add("createdAt");
-    openapiRequiredFields.add("updatedAt");
-    openapiRequiredFields.add("version");
-    openapiRequiredFields.add("apiVersion");
-    openapiRequiredFields.add("runnerClass");
-    openapiRequiredFields.add("apiKey");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "cpu", "memory", "disk", "class", "region", "name", "state", "unschedulable", "createdAt", "updatedAt", "version", "apiVersion", "runnerClass", "apiKey"));
   }
 
   /**
@@ -1055,64 +1005,64 @@ public class RunnerFull {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!RunnerFull.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in RunnerFull is not found in the empty JSON string", RunnerFull.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in RunnerFull is not found in the empty JSON string", RunnerFull.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : RunnerFull.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("id").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("id").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("id").toString()));
       }
       if ((jsonObj.get("domain") != null && !jsonObj.get("domain").isJsonNull()) && !jsonObj.get("domain").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `domain` to be a primitive type in the JSON string but got `%s`", jsonObj.get("domain").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `domain` to be a primitive type in the JSON string but got `%s`", jsonObj.get("domain").toString()));
       }
       if ((jsonObj.get("apiUrl") != null && !jsonObj.get("apiUrl").isJsonNull()) && !jsonObj.get("apiUrl").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `apiUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("apiUrl").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `apiUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("apiUrl").toString()));
       }
       if ((jsonObj.get("proxyUrl") != null && !jsonObj.get("proxyUrl").isJsonNull()) && !jsonObj.get("proxyUrl").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `proxyUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("proxyUrl").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `proxyUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("proxyUrl").toString()));
       }
       if ((jsonObj.get("gpuType") != null && !jsonObj.get("gpuType").isJsonNull()) && !jsonObj.get("gpuType").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `gpuType` to be a primitive type in the JSON string but got `%s`", jsonObj.get("gpuType").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `gpuType` to be a primitive type in the JSON string but got `%s`", jsonObj.get("gpuType").toString()));
       }
       // validate the required field `class`
       SandboxClass.validateJsonElement(jsonObj.get("class"));
       if (!jsonObj.get("region").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `region` to be a primitive type in the JSON string but got `%s`", jsonObj.get("region").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `region` to be a primitive type in the JSON string but got `%s`", jsonObj.get("region").toString()));
       }
       if (!jsonObj.get("name").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("name").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("name").toString()));
       }
       // validate the required field `state`
       RunnerState.validateJsonElement(jsonObj.get("state"));
       if ((jsonObj.get("lastChecked") != null && !jsonObj.get("lastChecked").isJsonNull()) && !jsonObj.get("lastChecked").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `lastChecked` to be a primitive type in the JSON string but got `%s`", jsonObj.get("lastChecked").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `lastChecked` to be a primitive type in the JSON string but got `%s`", jsonObj.get("lastChecked").toString()));
       }
       if (!jsonObj.get("createdAt").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `createdAt` to be a primitive type in the JSON string but got `%s`", jsonObj.get("createdAt").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `createdAt` to be a primitive type in the JSON string but got `%s`", jsonObj.get("createdAt").toString()));
       }
       if (!jsonObj.get("updatedAt").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `updatedAt` to be a primitive type in the JSON string but got `%s`", jsonObj.get("updatedAt").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `updatedAt` to be a primitive type in the JSON string but got `%s`", jsonObj.get("updatedAt").toString()));
       }
       if (!jsonObj.get("version").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `version` to be a primitive type in the JSON string but got `%s`", jsonObj.get("version").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `version` to be a primitive type in the JSON string but got `%s`", jsonObj.get("version").toString()));
       }
       if (!jsonObj.get("apiVersion").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `apiVersion` to be a primitive type in the JSON string but got `%s`", jsonObj.get("apiVersion").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `apiVersion` to be a primitive type in the JSON string but got `%s`", jsonObj.get("apiVersion").toString()));
       }
       // validate the required field `runnerClass`
       RunnerClass.validateJsonElement(jsonObj.get("runnerClass"));
       if ((jsonObj.get("appVersion") != null && !jsonObj.get("appVersion").isJsonNull()) && !jsonObj.get("appVersion").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `appVersion` to be a primitive type in the JSON string but got `%s`", jsonObj.get("appVersion").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `appVersion` to be a primitive type in the JSON string but got `%s`", jsonObj.get("appVersion").toString()));
       }
       if (!jsonObj.get("apiKey").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `apiKey` to be a primitive type in the JSON string but got `%s`", jsonObj.get("apiKey").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `apiKey` to be a primitive type in the JSON string but got `%s`", jsonObj.get("apiKey").toString()));
       }
       // validate the optional field `regionType`
       if (jsonObj.get("regionType") != null && !jsonObj.get("regionType").isJsonNull()) {
@@ -1177,7 +1127,7 @@ public class RunnerFull {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

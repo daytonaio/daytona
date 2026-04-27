@@ -14,22 +14,13 @@
 
 
 
-/**
- * 
- * @export
- * @interface MousePosition
- */
 export interface MousePosition {
     /**
      * The X coordinate of the mouse cursor position
-     * @type {number}
-     * @memberof MousePosition
      */
     'x': number;
     /**
      * The Y coordinate of the mouse cursor position
-     * @type {number}
-     * @memberof MousePosition
      */
     'y': number;
 }

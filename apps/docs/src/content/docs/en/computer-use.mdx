@@ -723,7 +723,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/mouse/positio
 
 ### Type
 
-Type the specified text.
+Types arbitrary text, including uppercase letters, symbols, and non-ASCII characters. Newlines (`\n`, `\r`, `\r\n`) are translated into Enter key presses; literal tab and other control characters are rejected.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -801,7 +801,7 @@ Press a key with optional modifiers.
 
 ```python
 # Press Enter
-sandbox.computer_use.keyboard.press("Return")
+sandbox.computer_use.keyboard.press("enter")
 
 # Press Ctrl+C
 sandbox.computer_use.keyboard.press("c", ["ctrl"])
@@ -815,7 +815,7 @@ sandbox.computer_use.keyboard.press("t", ["ctrl", "shift"])
 
 ```typescript
 // Press Enter
-await sandbox.computerUse.keyboard.press('Return');
+await sandbox.computerUse.keyboard.press('enter');
 
 // Press Ctrl+C
 await sandbox.computerUse.keyboard.press('c', ['ctrl']);
@@ -829,7 +829,7 @@ await sandbox.computerUse.keyboard.press('t', ['ctrl', 'shift']);
 
 ```ruby
 # Press Enter
-sandbox.computer_use.keyboard.press(key: "Return")
+sandbox.computer_use.keyboard.press(key: "enter")
 
 # Press Ctrl+C
 sandbox.computer_use.keyboard.press(key: "c", modifiers: ["ctrl"])
@@ -843,7 +843,7 @@ sandbox.computer_use.keyboard.press(key: "t", modifiers: ["ctrl", "shift"])
 
 ```go
 // Press Enter
-err := sandbox.ComputerUse.Keyboard().Press(ctx, "Return", nil)
+err := sandbox.ComputerUse.Keyboard().Press(ctx, "enter", nil)
 if err != nil {
 	log.Fatal(err)
 }
@@ -860,7 +860,7 @@ err = sandbox.ComputerUse.Keyboard().Press(ctx, "t", []string{"ctrl", "shift"})
 
 ```java
 // Press Enter
-sandbox.computerUse.pressKey("Return");
+sandbox.computerUse.pressKey("enter");
 
 // Press Ctrl+C
 sandbox.computerUse.pressHotkey("ctrl", "c");
@@ -877,10 +877,8 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/keyboard/key'
   --request POST \
   --header 'Content-Type: application/json' \
   --data '{
-  "key": "",
-  "modifiers": [
-    ""
-  ]
+  "key": "enter",
+  "modifiers": []
 }'
 ```
 
@@ -971,12 +969,29 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/keyboard/hotk
   --request POST \
   --header 'Content-Type: application/json' \
   --data '{
-  "keys": ""
+  "keys": "ctrl+c"
 }'
 ```
 
 </TabItem>
 </Tabs>
+
+### Supported keys
+
+`keyboard.press()` and `keyboard.hotkey()` are case-insensitive for named keys. The following are supported:
+
+| Category           | Keys                                                                                                                            |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| Modifiers          | `ctrl`, `alt`, `shift`, `cmd`                                                                                                   |
+| Editing            | `enter`, `escape`, `tab`, `backspace`, `delete`, `space`                                                                        |
+| Navigation         | `home`, `end`, `pageup`, `pagedown`, `insert`, arrow keys (`up`, `down`, `left`, `right`)                                       |
+| Function keys      | `f1` through `f24`                                                                                                              |
+| Numpad             | `num0`–`num9`, `num_plus`, `num_minus`, `num_asterisk`, `num_slash`, `num_decimal`, `num_enter`, `num_equal`, `num_lock`        |
+| Letters and digits | `a`–`z` (case-insensitive), `0`–`9`                                                                                             |
+| Punctuation        | `` ` `` `-` `=` `[` `]` `\` `;` `'` `,` `.` `/`                                                                                 |
+| Other              | `capslock`, `menu`                                                                                                              |
+
+Common aliases like `Return` → `enter`, `control` → `ctrl`, `command` / `meta` / `win` → `cmd`, and `option` → `alt` are normalized automatically. Unsupported or malformed inputs return an error, sometimes with a suggested alternative.
 
 ## Screenshot operations
 

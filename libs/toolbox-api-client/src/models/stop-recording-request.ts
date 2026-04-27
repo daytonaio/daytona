@@ -14,17 +14,7 @@
 
 
 
-/**
- * 
- * @export
- * @interface StopRecordingRequest
- */
 export interface StopRecordingRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof StopRecordingRequest
-     */
     'id': string;
 }
 

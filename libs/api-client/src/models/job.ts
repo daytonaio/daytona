@@ -20,70 +20,45 @@ import type { JobStatus } from './job-status';
 // @ts-ignore
 import type { JobType } from './job-type';
 
-/**
- * 
- * @export
- * @interface Job
- */
 export interface Job {
     /**
      * The ID of the job
-     * @type {string}
-     * @memberof Job
      */
     'id': string;
     /**
      * The type of the job
-     * @type {JobType}
-     * @memberof Job
      */
     'type': JobType;
     /**
      * The status of the job
-     * @type {JobStatus}
-     * @memberof Job
      */
     'status': JobStatus;
     /**
      * The type of resource this job operates on
-     * @type {string}
-     * @memberof Job
      */
     'resourceType': JobResourceTypeEnum;
     /**
      * The ID of the resource this job operates on (sandboxId, snapshotRef, etc.)
-     * @type {string}
-     * @memberof Job
      */
     'resourceId': string;
     /**
      * Job-specific JSON-encoded payload data (operational metadata)
-     * @type {string}
-     * @memberof Job
      */
     'payload'?: string;
     /**
      * OpenTelemetry trace context for distributed tracing (W3C Trace Context format)
-     * @type {{ [key: string]: any; }}
-     * @memberof Job
      */
     'traceContext'?: { [key: string]: any; };
     /**
      * Error message if the job failed
-     * @type {string}
-     * @memberof Job
      */
     'errorMessage'?: string;
     /**
      * The creation timestamp of the job
-     * @type {string}
-     * @memberof Job
      */
     'createdAt': string;
     /**
      * The last update timestamp of the job
-     * @type {string}
-     * @memberof Job
      */
     'updatedAt'?: string;
 }
@@ -91,7 +66,7 @@ export interface Job {
 export const JobResourceTypeEnum = {
     SANDBOX: 'SANDBOX',
     SNAPSHOT: 'SNAPSHOT',
-    BACKUP: 'BACKUP'
+    BACKUP: 'BACKUP',
 } as const;
 
 export type JobResourceTypeEnum = typeof JobResourceTypeEnum[keyof typeof JobResourceTypeEnum];

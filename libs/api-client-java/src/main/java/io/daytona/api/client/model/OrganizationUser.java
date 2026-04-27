@@ -52,7 +52,7 @@ import io.daytona.api.client.JSON;
 /**
  * OrganizationUser
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class OrganizationUser {
   public static final String SERIALIZED_NAME_USER_ID = "userId";
   @SerializedName(SERIALIZED_NAME_USER_ID)
@@ -401,10 +401,7 @@ public class OrganizationUser {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -413,26 +410,10 @@ public class OrganizationUser {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("userId");
-    openapiFields.add("organizationId");
-    openapiFields.add("name");
-    openapiFields.add("email");
-    openapiFields.add("role");
-    openapiFields.add("assignedRoles");
-    openapiFields.add("createdAt");
-    openapiFields.add("updatedAt");
+    openapiFields = new HashSet<String>(Arrays.asList("userId", "organizationId", "name", "email", "role", "assignedRoles", "createdAt", "updatedAt"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("userId");
-    openapiRequiredFields.add("organizationId");
-    openapiRequiredFields.add("name");
-    openapiRequiredFields.add("email");
-    openapiRequiredFields.add("role");
-    openapiRequiredFields.add("assignedRoles");
-    openapiRequiredFields.add("createdAt");
-    openapiRequiredFields.add("updatedAt");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("userId", "organizationId", "name", "email", "role", "assignedRoles", "createdAt", "updatedAt"));
   }
 
   /**
@@ -444,44 +425,44 @@ public class OrganizationUser {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!OrganizationUser.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in OrganizationUser is not found in the empty JSON string", OrganizationUser.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in OrganizationUser is not found in the empty JSON string", OrganizationUser.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : OrganizationUser.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("userId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `userId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("userId").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `userId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("userId").toString()));
       }
       if (!jsonObj.get("organizationId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `organizationId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("organizationId").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `organizationId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("organizationId").toString()));
       }
       if (!jsonObj.get("name").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("name").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("name").toString()));
       }
       if (!jsonObj.get("email").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `email` to be a primitive type in the JSON string but got `%s`", jsonObj.get("email").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `email` to be a primitive type in the JSON string but got `%s`", jsonObj.get("email").toString()));
       }
       if (!jsonObj.get("role").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `role` to be a primitive type in the JSON string but got `%s`", jsonObj.get("role").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `role` to be a primitive type in the JSON string but got `%s`", jsonObj.get("role").toString()));
       }
       // validate the required field `role`
       RoleEnum.validateJsonElement(jsonObj.get("role"));
-      // ensure the json data is an array
-      if (!jsonObj.get("assignedRoles").isJsonArray()) {
-        throw new IllegalArgumentException(String.format("Expected the field `assignedRoles` to be an array in the JSON string but got `%s`", jsonObj.get("assignedRoles").toString()));
+      if (jsonObj.get("assignedRoles") != null) {
+        if (!jsonObj.get("assignedRoles").isJsonArray()) {
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `assignedRoles` to be an array in the JSON string but got `%s`", jsonObj.get("assignedRoles").toString()));
+        }
+        JsonArray jsonArrayassignedRoles = jsonObj.getAsJsonArray("assignedRoles");
+        // validate the required field `assignedRoles` (array)
+        for (int i = 0; i < jsonArrayassignedRoles.size(); i++) {
+          OrganizationRole.validateJsonElement(jsonArrayassignedRoles.get(i));
+        }
       }
-
-      JsonArray jsonArrayassignedRoles = jsonObj.getAsJsonArray("assignedRoles");
-      // validate the required field `assignedRoles` (array)
-      for (int i = 0; i < jsonArrayassignedRoles.size(); i++) {
-        OrganizationRole.validateJsonElement(jsonArrayassignedRoles.get(i));
-      };
   }
 
   public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
@@ -541,7 +522,7 @@ public class OrganizationUser {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

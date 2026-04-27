@@ -1,3 +1,6 @@
+# Copyright Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 # frozen_string_literal: true
 
 require 'digest'
@@ -261,8 +264,9 @@ module Daytona
         raise Sdk::Error, "Context directory #{context_dir} does not exist" unless Dir.exist?(context_dir)
       end
 
-      # Extract copy sources from dockerfile commands
-      extract_copy_sources(dockerfile_commands.join("\n"), context_dir || '').each do |context_path, original_path|
+      # Extract copy sources from dockerfile commands (class-level helper)
+      self.class.send(:extract_copy_sources, dockerfile_commands.join("\n"),
+                      context_dir || '').each do |context_path, original_path|
         archive_base_path = context_path
         if context_dir && !original_path.start_with?(context_dir)
           archive_base_path = context_path.delete_prefix(context_dir)

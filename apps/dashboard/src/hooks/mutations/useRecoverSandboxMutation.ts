@@ -12,7 +12,11 @@ interface RecoverSandboxVariables {
   sandboxId: string
 }
 
-export const useRecoverSandboxMutation = () => {
+interface UseRecoverSandboxMutationOptions {
+  invalidate?: boolean
+}
+
+export const useRecoverSandboxMutation = ({ invalidate = true }: UseRecoverSandboxMutationOptions = {}) => {
   const { sandboxApi } = useApi()
   const { selectedOrganization } = useSelectedOrganization()
   const queryClient = useQueryClient()
@@ -22,6 +26,10 @@ export const useRecoverSandboxMutation = () => {
       await sandboxApi.recoverSandbox(sandboxId, selectedOrganization?.id)
     },
     onSuccess: (_, { sandboxId }) => {
+      if (!invalidate) {
+        return
+      }
+
       queryClient.invalidateQueries({
         queryKey: queryKeys.sandboxes.detail(selectedOrganization?.id ?? '', sandboxId),
       })

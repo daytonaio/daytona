@@ -242,7 +242,7 @@ Presses a single key.
 
 **Parameters**:
 
-- `key` _String_ - key to press (for example: `Enter`, `Escape`, `a`)
+- `key` _String_ - key to press. Canonical names include `enter`, `escape`, `tab`, letters, digits, unshifted punctuation, function keys, and grammar-safe numpad names such as `num_plus`. Named keys are case-insensitive, and common aliases such as `Return` and `Escape` are normalized.
 
 #### pressHotkey()
 ```java
@@ -252,7 +252,9 @@ public void pressHotkey(String... keys)
 Presses a key combination as a hotkey sequence.
 
 Keys are joined with `+` before being sent (for example,
-`pressHotkey("ctrl", "shift", "t") -> "ctrl+shift+t"`).
+`pressHotkey("ctrl", "shift", "t") -> "ctrl+shift+t"`). The resulting
+value is a single atomic chord and uses the same normalized key contract as
+`#pressKey(String)`.
 
 **Parameters**:
 

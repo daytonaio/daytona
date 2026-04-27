@@ -14,23 +14,8 @@
 
 
 
-/**
- * 
- * @export
- * @interface GitBranchRequest
- */
 export interface GitBranchRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof GitBranchRequest
-     */
     'path': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GitBranchRequest
-     */
     'name': string;
 }
 

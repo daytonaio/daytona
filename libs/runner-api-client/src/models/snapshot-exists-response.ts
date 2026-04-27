@@ -14,17 +14,7 @@
 
 
 
-/**
- * 
- * @export
- * @interface SnapshotExistsResponse
- */
 export interface SnapshotExistsResponse {
-    /**
-     * 
-     * @type {boolean}
-     * @memberof SnapshotExistsResponse
-     */
     'exists'?: boolean;
 }
 

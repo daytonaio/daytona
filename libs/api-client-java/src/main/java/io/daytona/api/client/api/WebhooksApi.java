@@ -87,7 +87,7 @@ public class WebhooksApi {
         <tr><td> 200 </td><td> App Portal access generated successfully </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call webhookControllerGetAppPortalAccessCall(String organizationId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call webhookControllerGetAppPortalAccessCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -138,7 +138,7 @@ public class WebhooksApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call webhookControllerGetAppPortalAccessValidateBeforeCall(String organizationId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call webhookControllerGetAppPortalAccessValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'organizationId' is set
         if (organizationId == null) {
             throw new ApiException("Missing the required parameter 'organizationId' when calling webhookControllerGetAppPortalAccess(Async)");
@@ -162,7 +162,7 @@ public class WebhooksApi {
         <tr><td> 200 </td><td> App Portal access generated successfully </td><td>  -  </td></tr>
      </table>
      */
-    public WebhookAppPortalAccess webhookControllerGetAppPortalAccess(String organizationId, String xDaytonaOrganizationID) throws ApiException {
+    public WebhookAppPortalAccess webhookControllerGetAppPortalAccess(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<WebhookAppPortalAccess> localVarResp = webhookControllerGetAppPortalAccessWithHttpInfo(organizationId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -181,7 +181,7 @@ public class WebhooksApi {
         <tr><td> 200 </td><td> App Portal access generated successfully </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<WebhookAppPortalAccess> webhookControllerGetAppPortalAccessWithHttpInfo(String organizationId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<WebhookAppPortalAccess> webhookControllerGetAppPortalAccessWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = webhookControllerGetAppPortalAccessValidateBeforeCall(organizationId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<WebhookAppPortalAccess>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -202,7 +202,7 @@ public class WebhooksApi {
         <tr><td> 200 </td><td> App Portal access generated successfully </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call webhookControllerGetAppPortalAccessAsync(String organizationId, String xDaytonaOrganizationID, final ApiCallback<WebhookAppPortalAccess> _callback) throws ApiException {
+    public okhttp3.Call webhookControllerGetAppPortalAccessAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<WebhookAppPortalAccess> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = webhookControllerGetAppPortalAccessValidateBeforeCall(organizationId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<WebhookAppPortalAccess>(){}.getType();
@@ -224,7 +224,7 @@ public class WebhooksApi {
         <tr><td> 404 </td><td> Webhook initialization status not found </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call webhookControllerGetInitializationStatusCall(String organizationId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call webhookControllerGetInitializationStatusCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -275,7 +275,7 @@ public class WebhooksApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call webhookControllerGetInitializationStatusValidateBeforeCall(String organizationId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call webhookControllerGetInitializationStatusValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'organizationId' is set
         if (organizationId == null) {
             throw new ApiException("Missing the required parameter 'organizationId' when calling webhookControllerGetInitializationStatus(Async)");
@@ -300,7 +300,7 @@ public class WebhooksApi {
         <tr><td> 404 </td><td> Webhook initialization status not found </td><td>  -  </td></tr>
      </table>
      */
-    public WebhookInitializationStatus webhookControllerGetInitializationStatus(String organizationId, String xDaytonaOrganizationID) throws ApiException {
+    public WebhookInitializationStatus webhookControllerGetInitializationStatus(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<WebhookInitializationStatus> localVarResp = webhookControllerGetInitializationStatusWithHttpInfo(organizationId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -320,7 +320,7 @@ public class WebhooksApi {
         <tr><td> 404 </td><td> Webhook initialization status not found </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<WebhookInitializationStatus> webhookControllerGetInitializationStatusWithHttpInfo(String organizationId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<WebhookInitializationStatus> webhookControllerGetInitializationStatusWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = webhookControllerGetInitializationStatusValidateBeforeCall(organizationId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<WebhookInitializationStatus>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -342,7 +342,7 @@ public class WebhooksApi {
         <tr><td> 404 </td><td> Webhook initialization status not found </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call webhookControllerGetInitializationStatusAsync(String organizationId, String xDaytonaOrganizationID, final ApiCallback<WebhookInitializationStatus> _callback) throws ApiException {
+    public okhttp3.Call webhookControllerGetInitializationStatusAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<WebhookInitializationStatus> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = webhookControllerGetInitializationStatusValidateBeforeCall(organizationId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<WebhookInitializationStatus>(){}.getType();

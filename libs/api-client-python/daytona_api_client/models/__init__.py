@@ -15,7 +15,6 @@ from __future__ import annotations
     Do not edit the class manually.
 """  # noqa: E501
 
-
 import importlib
 from typing import TYPE_CHECKING
 

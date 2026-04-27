@@ -92,7 +92,7 @@ public class SnapshotsApi {
         <tr><td> 404 </td><td> Snapshot not found </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call activateSnapshotCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call activateSnapshotCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -143,7 +143,7 @@ public class SnapshotsApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call activateSnapshotValidateBeforeCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call activateSnapshotValidateBeforeCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling activateSnapshot(Async)");
@@ -169,7 +169,7 @@ public class SnapshotsApi {
         <tr><td> 404 </td><td> Snapshot not found </td><td>  -  </td></tr>
      </table>
      */
-    public SnapshotDto activateSnapshot(String id, String xDaytonaOrganizationID) throws ApiException {
+    public SnapshotDto activateSnapshot(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<SnapshotDto> localVarResp = activateSnapshotWithHttpInfo(id, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -190,7 +190,7 @@ public class SnapshotsApi {
         <tr><td> 404 </td><td> Snapshot not found </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<SnapshotDto> activateSnapshotWithHttpInfo(String id, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<SnapshotDto> activateSnapshotWithHttpInfo(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = activateSnapshotValidateBeforeCall(id, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<SnapshotDto>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -213,7 +213,7 @@ public class SnapshotsApi {
         <tr><td> 404 </td><td> Snapshot not found </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call activateSnapshotAsync(String id, String xDaytonaOrganizationID, final ApiCallback<SnapshotDto> _callback) throws ApiException {
+    public okhttp3.Call activateSnapshotAsync(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<SnapshotDto> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = activateSnapshotValidateBeforeCall(id, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<SnapshotDto>(){}.getType();
@@ -235,7 +235,7 @@ public class SnapshotsApi {
         <tr><td> 400 </td><td> Bad request - Snapshots with tag \&quot;:latest\&quot; are not allowed </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createSnapshotCall(CreateSnapshot createSnapshot, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createSnapshotCall(@javax.annotation.Nonnull CreateSnapshot createSnapshot, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -286,7 +286,7 @@ public class SnapshotsApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createSnapshotValidateBeforeCall(CreateSnapshot createSnapshot, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createSnapshotValidateBeforeCall(@javax.annotation.Nonnull CreateSnapshot createSnapshot, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'createSnapshot' is set
         if (createSnapshot == null) {
             throw new ApiException("Missing the required parameter 'createSnapshot' when calling createSnapshot(Async)");
@@ -311,7 +311,7 @@ public class SnapshotsApi {
         <tr><td> 400 </td><td> Bad request - Snapshots with tag \&quot;:latest\&quot; are not allowed </td><td>  -  </td></tr>
      </table>
      */
-    public SnapshotDto createSnapshot(CreateSnapshot createSnapshot, String xDaytonaOrganizationID) throws ApiException {
+    public SnapshotDto createSnapshot(@javax.annotation.Nonnull CreateSnapshot createSnapshot, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<SnapshotDto> localVarResp = createSnapshotWithHttpInfo(createSnapshot, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -331,7 +331,7 @@ public class SnapshotsApi {
         <tr><td> 400 </td><td> Bad request - Snapshots with tag \&quot;:latest\&quot; are not allowed </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<SnapshotDto> createSnapshotWithHttpInfo(CreateSnapshot createSnapshot, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<SnapshotDto> createSnapshotWithHttpInfo(@javax.annotation.Nonnull CreateSnapshot createSnapshot, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = createSnapshotValidateBeforeCall(createSnapshot, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<SnapshotDto>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -353,7 +353,7 @@ public class SnapshotsApi {
         <tr><td> 400 </td><td> Bad request - Snapshots with tag \&quot;:latest\&quot; are not allowed </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createSnapshotAsync(CreateSnapshot createSnapshot, String xDaytonaOrganizationID, final ApiCallback<SnapshotDto> _callback) throws ApiException {
+    public okhttp3.Call createSnapshotAsync(@javax.annotation.Nonnull CreateSnapshot createSnapshot, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<SnapshotDto> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createSnapshotValidateBeforeCall(createSnapshot, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<SnapshotDto>(){}.getType();
@@ -374,7 +374,7 @@ public class SnapshotsApi {
         <tr><td> 204 </td><td> The snapshot has been successfully deactivated. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deactivateSnapshotCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deactivateSnapshotCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -424,7 +424,7 @@ public class SnapshotsApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deactivateSnapshotValidateBeforeCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deactivateSnapshotValidateBeforeCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling deactivateSnapshot(Async)");
@@ -447,7 +447,7 @@ public class SnapshotsApi {
         <tr><td> 204 </td><td> The snapshot has been successfully deactivated. </td><td>  -  </td></tr>
      </table>
      */
-    public void deactivateSnapshot(String id, String xDaytonaOrganizationID) throws ApiException {
+    public void deactivateSnapshot(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         deactivateSnapshotWithHttpInfo(id, xDaytonaOrganizationID);
     }
 
@@ -465,7 +465,7 @@ public class SnapshotsApi {
         <tr><td> 204 </td><td> The snapshot has been successfully deactivated. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> deactivateSnapshotWithHttpInfo(String id, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> deactivateSnapshotWithHttpInfo(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = deactivateSnapshotValidateBeforeCall(id, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -485,7 +485,7 @@ public class SnapshotsApi {
         <tr><td> 204 </td><td> The snapshot has been successfully deactivated. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deactivateSnapshotAsync(String id, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call deactivateSnapshotAsync(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deactivateSnapshotValidateBeforeCall(id, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -509,7 +509,7 @@ public class SnapshotsApi {
         <tr><td> 200 </td><td> Paginated list of all snapshots </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getAllSnapshotsCall(String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit, String name, String sort, String order, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getAllSnapshotsCall(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String name, @javax.annotation.Nullable String sort, @javax.annotation.Nullable String order, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -579,7 +579,7 @@ public class SnapshotsApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getAllSnapshotsValidateBeforeCall(String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit, String name, String sort, String order, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getAllSnapshotsValidateBeforeCall(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String name, @javax.annotation.Nullable String sort, @javax.annotation.Nullable String order, final ApiCallback _callback) throws ApiException {
         return getAllSnapshotsCall(xDaytonaOrganizationID, page, limit, name, sort, order, _callback);
 
     }
@@ -602,7 +602,7 @@ public class SnapshotsApi {
         <tr><td> 200 </td><td> Paginated list of all snapshots </td><td>  -  </td></tr>
      </table>
      */
-    public PaginatedSnapshots getAllSnapshots(String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit, String name, String sort, String order) throws ApiException {
+    public PaginatedSnapshots getAllSnapshots(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String name, @javax.annotation.Nullable String sort, @javax.annotation.Nullable String order) throws ApiException {
         ApiResponse<PaginatedSnapshots> localVarResp = getAllSnapshotsWithHttpInfo(xDaytonaOrganizationID, page, limit, name, sort, order);
         return localVarResp.getData();
     }
@@ -625,7 +625,7 @@ public class SnapshotsApi {
         <tr><td> 200 </td><td> Paginated list of all snapshots </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<PaginatedSnapshots> getAllSnapshotsWithHttpInfo(String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit, String name, String sort, String order) throws ApiException {
+    public ApiResponse<PaginatedSnapshots> getAllSnapshotsWithHttpInfo(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String name, @javax.annotation.Nullable String sort, @javax.annotation.Nullable String order) throws ApiException {
         okhttp3.Call localVarCall = getAllSnapshotsValidateBeforeCall(xDaytonaOrganizationID, page, limit, name, sort, order, null);
         Type localVarReturnType = new TypeToken<PaginatedSnapshots>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -650,7 +650,7 @@ public class SnapshotsApi {
         <tr><td> 200 </td><td> Paginated list of all snapshots </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getAllSnapshotsAsync(String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit, String name, String sort, String order, final ApiCallback<PaginatedSnapshots> _callback) throws ApiException {
+    public okhttp3.Call getAllSnapshotsAsync(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String name, @javax.annotation.Nullable String sort, @javax.annotation.Nullable String order, final ApiCallback<PaginatedSnapshots> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getAllSnapshotsValidateBeforeCall(xDaytonaOrganizationID, page, limit, name, sort, order, _callback);
         Type localVarReturnType = new TypeToken<PaginatedSnapshots>(){}.getType();
@@ -672,7 +672,7 @@ public class SnapshotsApi {
         <tr><td> 404 </td><td> Snapshot not found </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSnapshotCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSnapshotCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -723,7 +723,7 @@ public class SnapshotsApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSnapshotValidateBeforeCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSnapshotValidateBeforeCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling getSnapshot(Async)");
@@ -748,7 +748,7 @@ public class SnapshotsApi {
         <tr><td> 404 </td><td> Snapshot not found </td><td>  -  </td></tr>
      </table>
      */
-    public SnapshotDto getSnapshot(String id, String xDaytonaOrganizationID) throws ApiException {
+    public SnapshotDto getSnapshot(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<SnapshotDto> localVarResp = getSnapshotWithHttpInfo(id, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -768,7 +768,7 @@ public class SnapshotsApi {
         <tr><td> 404 </td><td> Snapshot not found </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<SnapshotDto> getSnapshotWithHttpInfo(String id, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<SnapshotDto> getSnapshotWithHttpInfo(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getSnapshotValidateBeforeCall(id, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<SnapshotDto>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -790,7 +790,7 @@ public class SnapshotsApi {
         <tr><td> 404 </td><td> Snapshot not found </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSnapshotAsync(String id, String xDaytonaOrganizationID, final ApiCallback<SnapshotDto> _callback) throws ApiException {
+    public okhttp3.Call getSnapshotAsync(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<SnapshotDto> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSnapshotValidateBeforeCall(id, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<SnapshotDto>(){}.getType();
@@ -814,7 +814,7 @@ public class SnapshotsApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getSnapshotBuildLogsCall(String id, String xDaytonaOrganizationID, Boolean follow, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSnapshotBuildLogsCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -869,7 +869,7 @@ public class SnapshotsApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSnapshotBuildLogsValidateBeforeCall(String id, String xDaytonaOrganizationID, Boolean follow, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSnapshotBuildLogsValidateBeforeCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling getSnapshotBuildLogs(Async)");
@@ -895,7 +895,7 @@ public class SnapshotsApi {
      * @deprecated
      */
     @Deprecated
-    public void getSnapshotBuildLogs(String id, String xDaytonaOrganizationID, Boolean follow) throws ApiException {
+    public void getSnapshotBuildLogs(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow) throws ApiException {
         getSnapshotBuildLogsWithHttpInfo(id, xDaytonaOrganizationID, follow);
     }
 
@@ -916,7 +916,7 @@ public class SnapshotsApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> getSnapshotBuildLogsWithHttpInfo(String id, String xDaytonaOrganizationID, Boolean follow) throws ApiException {
+    public ApiResponse<Void> getSnapshotBuildLogsWithHttpInfo(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow) throws ApiException {
         okhttp3.Call localVarCall = getSnapshotBuildLogsValidateBeforeCall(id, xDaytonaOrganizationID, follow, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -939,7 +939,7 @@ public class SnapshotsApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getSnapshotBuildLogsAsync(String id, String xDaytonaOrganizationID, Boolean follow, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call getSnapshotBuildLogsAsync(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSnapshotBuildLogsValidateBeforeCall(id, xDaytonaOrganizationID, follow, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -959,7 +959,7 @@ public class SnapshotsApi {
         <tr><td> 200 </td><td> The snapshot build logs URL </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSnapshotBuildLogsUrlCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSnapshotBuildLogsUrlCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1010,7 +1010,7 @@ public class SnapshotsApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSnapshotBuildLogsUrlValidateBeforeCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSnapshotBuildLogsUrlValidateBeforeCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling getSnapshotBuildLogsUrl(Async)");
@@ -1034,7 +1034,7 @@ public class SnapshotsApi {
         <tr><td> 200 </td><td> The snapshot build logs URL </td><td>  -  </td></tr>
      </table>
      */
-    public Url getSnapshotBuildLogsUrl(String id, String xDaytonaOrganizationID) throws ApiException {
+    public Url getSnapshotBuildLogsUrl(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Url> localVarResp = getSnapshotBuildLogsUrlWithHttpInfo(id, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -1053,7 +1053,7 @@ public class SnapshotsApi {
         <tr><td> 200 </td><td> The snapshot build logs URL </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Url> getSnapshotBuildLogsUrlWithHttpInfo(String id, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Url> getSnapshotBuildLogsUrlWithHttpInfo(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getSnapshotBuildLogsUrlValidateBeforeCall(id, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Url>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1074,7 +1074,7 @@ public class SnapshotsApi {
         <tr><td> 200 </td><td> The snapshot build logs URL </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSnapshotBuildLogsUrlAsync(String id, String xDaytonaOrganizationID, final ApiCallback<Url> _callback) throws ApiException {
+    public okhttp3.Call getSnapshotBuildLogsUrlAsync(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Url> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSnapshotBuildLogsUrlValidateBeforeCall(id, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Url>(){}.getType();
@@ -1095,7 +1095,7 @@ public class SnapshotsApi {
         <tr><td> 200 </td><td> Snapshot has been deleted </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call removeSnapshotCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call removeSnapshotCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1145,7 +1145,7 @@ public class SnapshotsApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call removeSnapshotValidateBeforeCall(String id, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call removeSnapshotValidateBeforeCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling removeSnapshot(Async)");
@@ -1168,7 +1168,7 @@ public class SnapshotsApi {
         <tr><td> 200 </td><td> Snapshot has been deleted </td><td>  -  </td></tr>
      </table>
      */
-    public void removeSnapshot(String id, String xDaytonaOrganizationID) throws ApiException {
+    public void removeSnapshot(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         removeSnapshotWithHttpInfo(id, xDaytonaOrganizationID);
     }
 
@@ -1186,7 +1186,7 @@ public class SnapshotsApi {
         <tr><td> 200 </td><td> Snapshot has been deleted </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> removeSnapshotWithHttpInfo(String id, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> removeSnapshotWithHttpInfo(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = removeSnapshotValidateBeforeCall(id, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1206,7 +1206,7 @@ public class SnapshotsApi {
         <tr><td> 200 </td><td> Snapshot has been deleted </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call removeSnapshotAsync(String id, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call removeSnapshotAsync(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = removeSnapshotValidateBeforeCall(id, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);

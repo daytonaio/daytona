@@ -14,28 +14,17 @@
 
 
 
-/**
- * 
- * @export
- * @interface ScreenshotResponse
- */
 export interface ScreenshotResponse {
     /**
      * Base64 encoded screenshot image data
-     * @type {string}
-     * @memberof ScreenshotResponse
      */
     'screenshot': string;
     /**
      * The current cursor position when the screenshot was taken
-     * @type {object}
-     * @memberof ScreenshotResponse
      */
     'cursorPosition'?: object;
     /**
      * The size of the screenshot data in bytes
-     * @type {number}
-     * @memberof ScreenshotResponse
      */
     'sizeBytes'?: number;
 }

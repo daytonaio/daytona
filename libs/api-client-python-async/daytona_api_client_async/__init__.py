@@ -16,7 +16,6 @@ from __future__ import annotations
     Do not edit the class manually.
 """  # noqa: E501
 
-
 __version__ = "0.0.0-dev"
 
 import importlib

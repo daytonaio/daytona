@@ -55,7 +55,7 @@ var MapStatus map[git.StatusCode]Status = map[git.StatusCode]Status{
 
 type IGitService interface {
 	CloneRepository(repo *gitprovider.GitRepository, auth *http.BasicAuth) error
-	CloneRepositoryCmd(repo *gitprovider.GitRepository, auth *http.BasicAuth) []string
+	CloneRepositoryCLI(repo *gitprovider.GitRepository, auth *http.BasicAuth) error
 	RepositoryExists() (bool, error)
 	SetGitConfig(userData *gitprovider.GitUser, providerConfig *gitprovider.GitProviderConfig) error
 	GetGitStatus() (*GitStatus, error)

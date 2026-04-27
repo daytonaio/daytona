@@ -1,14 +1,14 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 package daytona
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"os"
 
 	"testing"
 	"time"
@@ -96,12 +96,12 @@ func TestNewClient(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Clear environment
-			os.Clearenv()
-
-			// Set test environment variables
+			t.Setenv("DAYTONA_API_KEY", "")
+			t.Setenv("DAYTONA_API_URL", "")
+			t.Setenv("DAYTONA_JWT_TOKEN", "")
+			t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 			for key, value := range tt.envVars {
-				os.Setenv(key, value)
+				t.Setenv(key, value)
 			}
 
 			// Create client
@@ -123,9 +123,6 @@ func TestNewClient(t *testing.T) {
 			}
 		})
 	}
-
-	// Cleanup
-	os.Clearenv()
 }
 
 // TestNewClientWithConfig tests the NewClientWithConfig function
@@ -223,12 +220,12 @@ func TestNewClientWithConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Clear environment
-			os.Clearenv()
-
-			// Set test environment variables
+			t.Setenv("DAYTONA_API_KEY", "")
+			t.Setenv("DAYTONA_API_URL", "")
+			t.Setenv("DAYTONA_JWT_TOKEN", "")
+			t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 			for key, value := range tt.envVars {
-				os.Setenv(key, value)
+				t.Setenv(key, value)
 			}
 
 			// Create client
@@ -250,9 +247,6 @@ func TestNewClientWithConfig(t *testing.T) {
 			}
 		})
 	}
-
-	// Cleanup
-	os.Clearenv()
 }
 
 // TestGetAuthContext tests the getAuthContext method
@@ -364,9 +358,10 @@ func TestHandleAPIError(t *testing.T) {
 // TestGet tests the Get method
 func TestGet(t *testing.T) {
 	t.Run("error when sandbox ID is empty", func(t *testing.T) {
-		// Setup test environment
-		os.Clearenv()
-		os.Setenv("DAYTONA_API_KEY", "test-api-key")
+		t.Setenv("DAYTONA_API_KEY", "test-api-key")
+		t.Setenv("DAYTONA_API_URL", "")
+		t.Setenv("DAYTONA_JWT_TOKEN", "")
+		t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 		client, err := NewClient()
 		require.NoError(t, err)
@@ -433,9 +428,10 @@ func TestList(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Setup test environment
-			os.Clearenv()
-			os.Setenv("DAYTONA_API_KEY", "test-api-key")
+			t.Setenv("DAYTONA_API_KEY", "test-api-key")
+			t.Setenv("DAYTONA_API_URL", "")
+			t.Setenv("DAYTONA_JWT_TOKEN", "")
+			t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 			client, err := NewClient()
 			require.NoError(t, err)
@@ -544,9 +540,10 @@ func TestCreateValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Setup test environment
-			os.Clearenv()
-			os.Setenv("DAYTONA_API_KEY", "test-api-key")
+			t.Setenv("DAYTONA_API_KEY", "test-api-key")
+			t.Setenv("DAYTONA_API_URL", "")
+			t.Setenv("DAYTONA_JWT_TOKEN", "")
+			t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 			client, err := NewClient()
 			require.NoError(t, err)
@@ -584,10 +581,10 @@ func TestStreamBuildLogsToChannel(t *testing.T) {
 		}))
 		defer server.Close()
 
-		// Setup client with test server
-		os.Clearenv()
-		os.Setenv("DAYTONA_API_KEY", "test-api-key")
-		os.Setenv("DAYTONA_API_URL", server.URL)
+		t.Setenv("DAYTONA_API_KEY", "test-api-key")
+		t.Setenv("DAYTONA_API_URL", server.URL)
+		t.Setenv("DAYTONA_JWT_TOKEN", "")
+		t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 		client, err := NewClient()
 		require.NoError(t, err)
@@ -634,9 +631,10 @@ func TestStreamBuildLogsToChannel(t *testing.T) {
 		}))
 		defer server.Close()
 
-		// Setup client
-		os.Clearenv()
-		os.Setenv("DAYTONA_API_KEY", "test-api-key")
+		t.Setenv("DAYTONA_API_KEY", "test-api-key")
+		t.Setenv("DAYTONA_API_URL", "")
+		t.Setenv("DAYTONA_JWT_TOKEN", "")
+		t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 		client, err := NewClient()
 		require.NoError(t, err)
@@ -660,8 +658,10 @@ func TestStreamBuildLogsToChannel(t *testing.T) {
 
 // TestDefaultLanguage tests default language setting
 func TestDefaultLanguage(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_URL", "")
+	t.Setenv("DAYTONA_JWT_TOKEN", "")
+	t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 	client, err := NewClient()
 	require.NoError(t, err)
@@ -677,8 +677,10 @@ func intPtr(i int) *int {
 
 // TestClientTimeout tests HTTP client timeout configuration
 func TestClientTimeout(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_URL", "")
+	t.Setenv("DAYTONA_JWT_TOKEN", "")
+	t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 	client, err := NewClient()
 	require.NoError(t, err)
@@ -707,9 +709,10 @@ func TestServerURLConstruction(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			os.Clearenv()
-			os.Setenv("DAYTONA_API_KEY", "test-api-key")
-			os.Setenv("DAYTONA_API_URL", tt.apiURL)
+			t.Setenv("DAYTONA_API_KEY", "test-api-key")
+			t.Setenv("DAYTONA_API_URL", tt.apiURL)
+			t.Setenv("DAYTONA_JWT_TOKEN", "")
+			t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 			client, err := NewClient()
 			require.NoError(t, err)
@@ -722,9 +725,10 @@ func TestServerURLConstruction(t *testing.T) {
 
 // TestJWTAuthentication tests JWT token authentication setup
 func TestJWTAuthentication(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("DAYTONA_JWT_TOKEN", "test-jwt-token")
-	os.Setenv("DAYTONA_ORGANIZATION_ID", "test-org-id")
+	t.Setenv("DAYTONA_API_KEY", "")
+	t.Setenv("DAYTONA_API_URL", "")
+	t.Setenv("DAYTONA_JWT_TOKEN", "test-jwt-token")
+	t.Setenv("DAYTONA_ORGANIZATION_ID", "test-org-id")
 
 	client, err := NewClient()
 	require.NoError(t, err)
@@ -742,8 +746,10 @@ func TestJWTAuthentication(t *testing.T) {
 
 // TestSDKSourceHeader tests that SDK source header is set
 func TestSDKSourceHeader(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_URL", "")
+	t.Setenv("DAYTONA_JWT_TOKEN", "")
+	t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 	client, err := NewClient()
 	require.NoError(t, err)
@@ -757,8 +763,10 @@ func TestSDKSourceHeader(t *testing.T) {
 
 // TestServicesInitialization tests that services are properly initialized
 func TestServicesInitialization(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_URL", "")
+	t.Setenv("DAYTONA_JWT_TOKEN", "")
+	t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 	client, err := NewClient()
 	require.NoError(t, err)
@@ -770,8 +778,10 @@ func TestServicesInitialization(t *testing.T) {
 // TestCreateToolboxClient tests the createToolboxClient method
 func TestCreateToolboxClient(t *testing.T) {
 	t.Run("creates toolbox client with correct configuration", func(t *testing.T) {
-		os.Clearenv()
-		os.Setenv("DAYTONA_API_KEY", "test-api-key")
+		t.Setenv("DAYTONA_API_KEY", "test-api-key")
+		t.Setenv("DAYTONA_API_URL", "")
+		t.Setenv("DAYTONA_JWT_TOKEN", "")
+		t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 		client, err := NewClient()
 		require.NoError(t, err)
@@ -798,9 +808,10 @@ func TestCreateToolboxClient(t *testing.T) {
 	})
 
 	t.Run("creates toolbox client with JWT auth", func(t *testing.T) {
-		os.Clearenv()
-		os.Setenv("DAYTONA_JWT_TOKEN", "test-jwt-token")
-		os.Setenv("DAYTONA_ORGANIZATION_ID", "test-org-id")
+		t.Setenv("DAYTONA_API_KEY", "")
+		t.Setenv("DAYTONA_API_URL", "")
+		t.Setenv("DAYTONA_JWT_TOKEN", "test-jwt-token")
+		t.Setenv("DAYTONA_ORGANIZATION_ID", "test-org-id")
 
 		client, err := NewClient()
 		require.NoError(t, err)
@@ -827,15 +838,16 @@ func TestCreateToolboxClient(t *testing.T) {
 // TestSandboxTargetField tests that Sandbox has Target field properly set
 func TestSandboxTargetField(t *testing.T) {
 	t.Run("NewSandbox sets target field", func(t *testing.T) {
-		os.Clearenv()
-		os.Setenv("DAYTONA_API_KEY", "test-api-key")
+		t.Setenv("DAYTONA_API_KEY", "test-api-key")
+		t.Setenv("DAYTONA_API_URL", "")
+		t.Setenv("DAYTONA_JWT_TOKEN", "")
+		t.Setenv("DAYTONA_ORGANIZATION_ID", "")
 
 		client, err := NewClient()
 		require.NoError(t, err)
 
-		sandbox := NewSandbox(
+		sandbox := newSandboxForTest(
 			client,
-			nil, // toolboxClient
 			"test-id",
 			"test-name",
 			apiclient.SANDBOXSTATE_STARTED,
@@ -844,12 +856,147 @@ func TestSandboxTargetField(t *testing.T) {
 			-1,          // autoDeleteInterval
 			false,       // networkBlockAll
 			nil,         // networkAllowList
-			"",          // language
 		)
 
 		assert.Equal(t, "test-id", sandbox.ID)
 		assert.Equal(t, "test-name", sandbox.Name)
 		assert.Equal(t, "us-east-1", sandbox.Target)
 		assert.Equal(t, apiclient.SANDBOXSTATE_STARTED, sandbox.State)
+	})
+}
+
+func TestNewClientServerURLFallback(t *testing.T) {
+	t.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_URL", "")
+	t.Setenv("DAYTONA_JWT_TOKEN", "")
+	t.Setenv("DAYTONA_ORGANIZATION_ID", "")
+	t.Setenv("DAYTONA_SERVER_URL", "https://server-url.example/api")
+
+	client, err := NewClient()
+	require.NoError(t, err)
+	assert.Equal(t, "https://server-url.example/api", client.apiURL)
+	assert.Equal(t, "https://server-url.example/api", client.apiClient.GetConfig().Servers[0].URL)
+}
+
+func TestHandleAPIErrorUsesOpenAPIBody(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Retry-After", "30")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusTooManyRequests)
+		_, _ = w.Write([]byte(`{"message":"slow down"}`))
+	}))
+	defer server.Close()
+
+	client := createTestClientWithServer(t, server)
+	_, httpResp, apiErr := client.apiClient.SandboxAPI.GetSandbox(client.getAuthContext(context.Background()), "sandbox-id").Execute()
+	require.Error(t, apiErr)
+
+	converted := client.handleAPIError(apiErr, httpResp)
+	require.Error(t, converted)
+	assert.Contains(t, converted.Error(), "Rate limit exceeded")
+	assert.Equal(t, "30", httpResp.Header.Get("Retry-After"))
+	assert.Equal(t, "*errors.DaytonaRateLimitError", fmt.Sprintf("%T", converted))
+}
+
+func TestClientCreateSuccessRequestMapping(t *testing.T) {
+	t.Run("image params use dockerfile build info and default language", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, http.MethodPost, r.Method)
+			var body map[string]any
+			require.NoError(t, json.NewDecoder(r.Body).Decode(&body))
+			labels, ok := body["labels"].(map[string]any)
+			require.True(t, ok)
+			assert.Equal(t, string(types.CodeLanguagePython), labels[types.CodeToolboxLanguageLabel])
+			buildInfo, ok := body["buildInfo"].(map[string]any)
+			require.True(t, ok)
+			assert.Equal(t, "FROM alpine:3.20", buildInfo["dockerfileContent"])
+			assert.Equal(t, "sandbox-from-image", body["name"])
+			writeJSONResponse(t, w, http.StatusOK, testSandboxPayload("sb-1", "sandbox-from-image", apiclient.SANDBOXSTATE_STARTED))
+		}))
+		defer server.Close()
+
+		client := createTestClientWithServer(t, server)
+		sandbox, err := client.Create(context.Background(), types.ImageParams{
+			Image: "alpine:3.20",
+			SandboxBaseParams: types.SandboxBaseParams{
+				Name: "sandbox-from-image",
+			},
+		}, options.WithWaitForStart(false))
+		require.NoError(t, err)
+		require.NotNil(t, sandbox)
+		assert.Equal(t, "sb-1", sandbox.ID)
+		assert.NotNil(t, sandbox.Process)
+	})
+
+	t.Run("snapshot params send snapshot field", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var body map[string]any
+			require.NoError(t, json.NewDecoder(r.Body).Decode(&body))
+			assert.Equal(t, "snap-123", body["snapshot"])
+			assert.Nil(t, body["buildInfo"])
+			writeJSONResponse(t, w, http.StatusOK, testSandboxPayload("sb-2", "sandbox-from-snapshot", apiclient.SANDBOXSTATE_STARTED))
+		}))
+		defer server.Close()
+
+		client := createTestClientWithServer(t, server)
+		sandbox, err := client.Create(context.Background(), types.SnapshotParams{
+			Snapshot:          "snap-123",
+			SandboxBaseParams: types.SandboxBaseParams{Name: "sandbox-from-snapshot"},
+		}, options.WithWaitForStart(false))
+		require.NoError(t, err)
+		assert.Equal(t, "sb-2", sandbox.ID)
+	})
+}
+
+func TestClientCreateValidationInvalidLanguage(t *testing.T) {
+	server := httptest.NewServer(http.NotFoundHandler())
+	defer server.Close()
+	client := createTestClientWithServer(t, server)
+	_, err := client.Create(context.Background(), types.ImageParams{
+		Image: "alpine:3.20",
+		SandboxBaseParams: types.SandboxBaseParams{
+			Language: types.CodeLanguage("ruby"),
+		},
+	}, options.WithWaitForStart(false))
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "Supported languages: python, javascript, typescript")
+}
+
+func TestClientGetAndListSuccess(t *testing.T) {
+	t.Run("get constructs sandbox services", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			writeJSONResponse(t, w, http.StatusOK, testSandboxPayload("sb-get", "named-sandbox", apiclient.SANDBOXSTATE_STARTED))
+		}))
+		defer server.Close()
+
+		client := createTestClientWithServer(t, server)
+		sandbox, err := client.Get(context.Background(), "named-sandbox")
+		require.NoError(t, err)
+		assert.Equal(t, "sb-get", sandbox.ID)
+		assert.NotNil(t, sandbox.FileSystem)
+		assert.NotNil(t, sandbox.Git)
+	})
+
+	t.Run("list maps pagination and labels query", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "1", r.URL.Query().Get("page"))
+			assert.Equal(t, "2", r.URL.Query().Get("limit"))
+			assert.Contains(t, r.URL.Query().Get("labels"), `"env":"test"`)
+			writeJSONResponse(t, w, http.StatusOK, map[string]any{
+				"items":      []any{testSandboxPayload("sb-list", "listed-sandbox", apiclient.SANDBOXSTATE_STARTED)},
+				"total":      1,
+				"page":       1,
+				"totalPages": 1,
+			})
+		}))
+		defer server.Close()
+
+		client := createTestClientWithServer(t, server)
+		page, limit := 1, 2
+		result, err := client.List(context.Background(), map[string]string{"env": "test"}, &page, &limit)
+		require.NoError(t, err)
+		require.Len(t, result.Items, 1)
+		assert.Equal(t, 1, result.Total)
+		assert.Equal(t, "listed-sandbox", result.Items[0].Name)
 	})
 }

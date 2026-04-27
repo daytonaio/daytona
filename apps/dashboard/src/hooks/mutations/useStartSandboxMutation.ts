@@ -12,7 +12,11 @@ interface StartSandboxVariables {
   sandboxId: string
 }
 
-export const useStartSandboxMutation = () => {
+interface UseStartSandboxMutationOptions {
+  invalidate?: boolean
+}
+
+export const useStartSandboxMutation = ({ invalidate = true }: UseStartSandboxMutationOptions = {}) => {
   const { sandboxApi } = useApi()
   const { selectedOrganization } = useSelectedOrganization()
   const queryClient = useQueryClient()
@@ -22,6 +26,10 @@ export const useStartSandboxMutation = () => {
       await sandboxApi.startSandbox(sandboxId, selectedOrganization?.id)
     },
     onSuccess: (_, { sandboxId }) => {
+      if (!invalidate) {
+        return
+      }
+
       queryClient.invalidateQueries({
         queryKey: queryKeys.sandboxes.detail(selectedOrganization?.id ?? '', sandboxId),
       })

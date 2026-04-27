@@ -14,40 +14,13 @@
 
 
 
-/**
- * 
- * @export
- * @interface GitCommitRequest
- */
 export interface GitCommitRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof GitCommitRequest
-     */
     'path': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GitCommitRequest
-     */
     'message': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GitCommitRequest
-     */
     'author': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GitCommitRequest
-     */
     'email': string;
     /**
      * Allow creating an empty commit when no changes are staged
-     * @type {boolean}
-     * @memberof GitCommitRequest
      */
     'allow_empty'?: boolean;
 }

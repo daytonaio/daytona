@@ -14,52 +14,33 @@
 
 
 
-/**
- * 
- * @export
- * @interface OrganizationRole
- */
 export interface OrganizationRole {
     /**
      * Role ID
-     * @type {string}
-     * @memberof OrganizationRole
      */
     'id': string;
     /**
      * Role name
-     * @type {string}
-     * @memberof OrganizationRole
      */
     'name': string;
     /**
      * Role description
-     * @type {string}
-     * @memberof OrganizationRole
      */
     'description': string;
     /**
      * Roles assigned to the user
-     * @type {Array<string>}
-     * @memberof OrganizationRole
      */
     'permissions': Array<OrganizationRolePermissionsEnum>;
     /**
      * Global role flag
-     * @type {boolean}
-     * @memberof OrganizationRole
      */
     'isGlobal': boolean;
     /**
      * Creation timestamp
-     * @type {Date}
-     * @memberof OrganizationRole
      */
     'createdAt': Date;
     /**
      * Last update timestamp
-     * @type {Date}
-     * @memberof OrganizationRole
      */
     'updatedAt': Date;
 }
@@ -79,7 +60,7 @@ export const OrganizationRolePermissionsEnum = {
     READ_RUNNERS: 'read:runners',
     WRITE_RUNNERS: 'write:runners',
     DELETE_RUNNERS: 'delete:runners',
-    READ_AUDIT_LOGS: 'read:audit_logs'
+    READ_AUDIT_LOGS: 'read:audit_logs',
 } as const;
 
 export type OrganizationRolePermissionsEnum = typeof OrganizationRolePermissionsEnum[keyof typeof OrganizationRolePermissionsEnum];

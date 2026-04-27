@@ -14,29 +14,9 @@
 
 
 
-/**
- * 
- * @export
- * @interface ReplaceRequest
- */
 export interface ReplaceRequest {
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ReplaceRequest
-     */
     'files': Array<string>;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReplaceRequest
-     */
     'newValue': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ReplaceRequest
-     */
     'pattern': string;
 }
 

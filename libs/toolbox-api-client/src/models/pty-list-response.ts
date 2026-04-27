@@ -17,17 +17,7 @@
 // @ts-ignore
 import type { PtySessionInfo } from './pty-session-info';
 
-/**
- * 
- * @export
- * @interface PtyListResponse
- */
 export interface PtyListResponse {
-    /**
-     * 
-     * @type {Array<PtySessionInfo>}
-     * @memberof PtyListResponse
-     */
     'sessions': Array<PtySessionInfo>;
 }
 

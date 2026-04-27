@@ -14,17 +14,7 @@
 
 
 
-/**
- * 
- * @export
- * @interface IsPortInUseResponse
- */
 export interface IsPortInUseResponse {
-    /**
-     * 
-     * @type {boolean}
-     * @memberof IsPortInUseResponse
-     */
     'isInUse'?: boolean;
 }
 

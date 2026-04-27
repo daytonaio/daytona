@@ -53,6 +53,8 @@ import { OtelConfigDto } from '../dto/otel-config.dto'
 import { sandboxLookupCacheKeyByAuthToken } from '../../sandbox/utils/sandbox-lookup-cache.util'
 import { SandboxRepository } from '../../sandbox/repositories/sandbox.repository'
 import { SnapshotRepository } from '../../sandbox/repositories/snapshot.repository'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
@@ -75,6 +77,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     private readonly regionRepository: Repository<Region>,
     private readonly regionService: RegionService,
     private readonly encryptionService: EncryptionService,
+    @InjectRedis() private readonly redis: Redis,
   ) {
     this.defaultOrganizationQuota = this.configService.getOrThrow('defaultOrganizationQuota')
     this.defaultSandboxLimitedNetworkEgress = this.configService.getOrThrow(
@@ -372,6 +375,16 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     }
 
     await this.organizationRepository.save(organization)
+
+    // OrganizationAuthContextGuard caches the org for 10s; clear it so the next request
+    // (e.g. sandbox creation immediately after setDefaultRegion) reads fresh state.
+    // Best-effort: the DB update is already committed, so don't fail the request if Redis
+    // is unavailable — the cache entry will expire within 10s anyway.
+    try {
+      await this.redis.del(`organization:${organizationId}`)
+    } catch (error) {
+      this.logger.warn(`Failed to invalidate organization cache for ${organizationId}: ${error?.message ?? error}`)
+    }
   }
 
   async updateExperimentalConfig(

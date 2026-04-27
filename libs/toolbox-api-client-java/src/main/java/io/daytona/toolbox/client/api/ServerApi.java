@@ -85,7 +85,7 @@ public class ServerApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call initializeCall(InitializeRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call initializeCall(@javax.annotation.Nonnull InitializeRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -130,7 +130,7 @@ public class ServerApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call initializeValidateBeforeCall(InitializeRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call initializeValidateBeforeCall(@javax.annotation.Nonnull InitializeRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling initialize(Async)");
@@ -153,7 +153,7 @@ public class ServerApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public Map<String, String> initialize(InitializeRequest request) throws ApiException {
+    public Map<String, String> initialize(@javax.annotation.Nonnull InitializeRequest request) throws ApiException {
         ApiResponse<Map<String, String>> localVarResp = initializeWithHttpInfo(request);
         return localVarResp.getData();
     }
@@ -171,7 +171,7 @@ public class ServerApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Map<String, String>> initializeWithHttpInfo(InitializeRequest request) throws ApiException {
+    public ApiResponse<Map<String, String>> initializeWithHttpInfo(@javax.annotation.Nonnull InitializeRequest request) throws ApiException {
         okhttp3.Call localVarCall = initializeValidateBeforeCall(request, null);
         Type localVarReturnType = new TypeToken<Map<String, String>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -191,7 +191,7 @@ public class ServerApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call initializeAsync(InitializeRequest request, final ApiCallback<Map<String, String>> _callback) throws ApiException {
+    public okhttp3.Call initializeAsync(@javax.annotation.Nonnull InitializeRequest request, final ApiCallback<Map<String, String>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = initializeValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<Map<String, String>>(){}.getType();

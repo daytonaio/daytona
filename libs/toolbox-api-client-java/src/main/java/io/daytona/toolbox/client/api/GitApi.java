@@ -95,7 +95,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call addFilesCall(GitAddRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call addFilesCall(@javax.annotation.Nonnull GitAddRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -140,7 +140,7 @@ public class GitApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call addFilesValidateBeforeCall(GitAddRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call addFilesValidateBeforeCall(@javax.annotation.Nonnull GitAddRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling addFiles(Async)");
@@ -162,7 +162,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public void addFiles(GitAddRequest request) throws ApiException {
+    public void addFiles(@javax.annotation.Nonnull GitAddRequest request) throws ApiException {
         addFilesWithHttpInfo(request);
     }
 
@@ -179,7 +179,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> addFilesWithHttpInfo(GitAddRequest request) throws ApiException {
+    public ApiResponse<Void> addFilesWithHttpInfo(@javax.annotation.Nonnull GitAddRequest request) throws ApiException {
         okhttp3.Call localVarCall = addFilesValidateBeforeCall(request, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -198,7 +198,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call addFilesAsync(GitAddRequest request, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call addFilesAsync(@javax.annotation.Nonnull GitAddRequest request, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = addFilesValidateBeforeCall(request, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -217,7 +217,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call checkoutBranchCall(GitCheckoutRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call checkoutBranchCall(@javax.annotation.Nonnull GitCheckoutRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -262,7 +262,7 @@ public class GitApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call checkoutBranchValidateBeforeCall(GitCheckoutRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call checkoutBranchValidateBeforeCall(@javax.annotation.Nonnull GitCheckoutRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling checkoutBranch(Async)");
@@ -284,7 +284,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public void checkoutBranch(GitCheckoutRequest request) throws ApiException {
+    public void checkoutBranch(@javax.annotation.Nonnull GitCheckoutRequest request) throws ApiException {
         checkoutBranchWithHttpInfo(request);
     }
 
@@ -301,7 +301,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> checkoutBranchWithHttpInfo(GitCheckoutRequest request) throws ApiException {
+    public ApiResponse<Void> checkoutBranchWithHttpInfo(@javax.annotation.Nonnull GitCheckoutRequest request) throws ApiException {
         okhttp3.Call localVarCall = checkoutBranchValidateBeforeCall(request, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -320,7 +320,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call checkoutBranchAsync(GitCheckoutRequest request, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call checkoutBranchAsync(@javax.annotation.Nonnull GitCheckoutRequest request, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = checkoutBranchValidateBeforeCall(request, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -339,7 +339,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call cloneRepositoryCall(GitCloneRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call cloneRepositoryCall(@javax.annotation.Nonnull GitCloneRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -384,7 +384,7 @@ public class GitApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call cloneRepositoryValidateBeforeCall(GitCloneRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call cloneRepositoryValidateBeforeCall(@javax.annotation.Nonnull GitCloneRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling cloneRepository(Async)");
@@ -406,7 +406,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public void cloneRepository(GitCloneRequest request) throws ApiException {
+    public void cloneRepository(@javax.annotation.Nonnull GitCloneRequest request) throws ApiException {
         cloneRepositoryWithHttpInfo(request);
     }
 
@@ -423,7 +423,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> cloneRepositoryWithHttpInfo(GitCloneRequest request) throws ApiException {
+    public ApiResponse<Void> cloneRepositoryWithHttpInfo(@javax.annotation.Nonnull GitCloneRequest request) throws ApiException {
         okhttp3.Call localVarCall = cloneRepositoryValidateBeforeCall(request, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -442,7 +442,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call cloneRepositoryAsync(GitCloneRequest request, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call cloneRepositoryAsync(@javax.annotation.Nonnull GitCloneRequest request, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = cloneRepositoryValidateBeforeCall(request, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -461,7 +461,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call commitChangesCall(GitCommitRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call commitChangesCall(@javax.annotation.Nonnull GitCommitRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -507,7 +507,7 @@ public class GitApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call commitChangesValidateBeforeCall(GitCommitRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call commitChangesValidateBeforeCall(@javax.annotation.Nonnull GitCommitRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling commitChanges(Async)");
@@ -530,7 +530,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public GitCommitResponse commitChanges(GitCommitRequest request) throws ApiException {
+    public GitCommitResponse commitChanges(@javax.annotation.Nonnull GitCommitRequest request) throws ApiException {
         ApiResponse<GitCommitResponse> localVarResp = commitChangesWithHttpInfo(request);
         return localVarResp.getData();
     }
@@ -548,7 +548,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<GitCommitResponse> commitChangesWithHttpInfo(GitCommitRequest request) throws ApiException {
+    public ApiResponse<GitCommitResponse> commitChangesWithHttpInfo(@javax.annotation.Nonnull GitCommitRequest request) throws ApiException {
         okhttp3.Call localVarCall = commitChangesValidateBeforeCall(request, null);
         Type localVarReturnType = new TypeToken<GitCommitResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -568,7 +568,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call commitChangesAsync(GitCommitRequest request, final ApiCallback<GitCommitResponse> _callback) throws ApiException {
+    public okhttp3.Call commitChangesAsync(@javax.annotation.Nonnull GitCommitRequest request, final ApiCallback<GitCommitResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = commitChangesValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<GitCommitResponse>(){}.getType();
@@ -588,7 +588,7 @@ public class GitApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createBranchCall(GitBranchRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createBranchCall(@javax.annotation.Nonnull GitBranchRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -633,7 +633,7 @@ public class GitApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createBranchValidateBeforeCall(GitBranchRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createBranchValidateBeforeCall(@javax.annotation.Nonnull GitBranchRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling createBranch(Async)");
@@ -655,7 +655,7 @@ public class GitApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
      </table>
      */
-    public void createBranch(GitBranchRequest request) throws ApiException {
+    public void createBranch(@javax.annotation.Nonnull GitBranchRequest request) throws ApiException {
         createBranchWithHttpInfo(request);
     }
 
@@ -672,7 +672,7 @@ public class GitApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> createBranchWithHttpInfo(GitBranchRequest request) throws ApiException {
+    public ApiResponse<Void> createBranchWithHttpInfo(@javax.annotation.Nonnull GitBranchRequest request) throws ApiException {
         okhttp3.Call localVarCall = createBranchValidateBeforeCall(request, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -691,7 +691,7 @@ public class GitApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createBranchAsync(GitBranchRequest request, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call createBranchAsync(@javax.annotation.Nonnull GitBranchRequest request, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createBranchValidateBeforeCall(request, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -710,7 +710,7 @@ public class GitApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteBranchCall(GitDeleteBranchRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deleteBranchCall(@javax.annotation.Nonnull GitDeleteBranchRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -755,7 +755,7 @@ public class GitApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deleteBranchValidateBeforeCall(GitDeleteBranchRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deleteBranchValidateBeforeCall(@javax.annotation.Nonnull GitDeleteBranchRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling deleteBranch(Async)");
@@ -777,7 +777,7 @@ public class GitApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public void deleteBranch(GitDeleteBranchRequest request) throws ApiException {
+    public void deleteBranch(@javax.annotation.Nonnull GitDeleteBranchRequest request) throws ApiException {
         deleteBranchWithHttpInfo(request);
     }
 
@@ -794,7 +794,7 @@ public class GitApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> deleteBranchWithHttpInfo(GitDeleteBranchRequest request) throws ApiException {
+    public ApiResponse<Void> deleteBranchWithHttpInfo(@javax.annotation.Nonnull GitDeleteBranchRequest request) throws ApiException {
         okhttp3.Call localVarCall = deleteBranchValidateBeforeCall(request, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -813,7 +813,7 @@ public class GitApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteBranchAsync(GitDeleteBranchRequest request, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call deleteBranchAsync(@javax.annotation.Nonnull GitDeleteBranchRequest request, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deleteBranchValidateBeforeCall(request, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -832,7 +832,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getCommitHistoryCall(String path, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getCommitHistoryCall(@javax.annotation.Nonnull String path, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -881,7 +881,7 @@ public class GitApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getCommitHistoryValidateBeforeCall(String path, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getCommitHistoryValidateBeforeCall(@javax.annotation.Nonnull String path, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'path' is set
         if (path == null) {
             throw new ApiException("Missing the required parameter 'path' when calling getCommitHistory(Async)");
@@ -904,7 +904,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public List<GitCommitInfo> getCommitHistory(String path) throws ApiException {
+    public List<GitCommitInfo> getCommitHistory(@javax.annotation.Nonnull String path) throws ApiException {
         ApiResponse<List<GitCommitInfo>> localVarResp = getCommitHistoryWithHttpInfo(path);
         return localVarResp.getData();
     }
@@ -922,7 +922,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<GitCommitInfo>> getCommitHistoryWithHttpInfo(String path) throws ApiException {
+    public ApiResponse<List<GitCommitInfo>> getCommitHistoryWithHttpInfo(@javax.annotation.Nonnull String path) throws ApiException {
         okhttp3.Call localVarCall = getCommitHistoryValidateBeforeCall(path, null);
         Type localVarReturnType = new TypeToken<List<GitCommitInfo>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -942,7 +942,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getCommitHistoryAsync(String path, final ApiCallback<List<GitCommitInfo>> _callback) throws ApiException {
+    public okhttp3.Call getCommitHistoryAsync(@javax.annotation.Nonnull String path, final ApiCallback<List<GitCommitInfo>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getCommitHistoryValidateBeforeCall(path, _callback);
         Type localVarReturnType = new TypeToken<List<GitCommitInfo>>(){}.getType();
@@ -962,7 +962,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getStatusCall(String path, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getStatusCall(@javax.annotation.Nonnull String path, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1011,7 +1011,7 @@ public class GitApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getStatusValidateBeforeCall(String path, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getStatusValidateBeforeCall(@javax.annotation.Nonnull String path, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'path' is set
         if (path == null) {
             throw new ApiException("Missing the required parameter 'path' when calling getStatus(Async)");
@@ -1034,7 +1034,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public GitStatus getStatus(String path) throws ApiException {
+    public GitStatus getStatus(@javax.annotation.Nonnull String path) throws ApiException {
         ApiResponse<GitStatus> localVarResp = getStatusWithHttpInfo(path);
         return localVarResp.getData();
     }
@@ -1052,7 +1052,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<GitStatus> getStatusWithHttpInfo(String path) throws ApiException {
+    public ApiResponse<GitStatus> getStatusWithHttpInfo(@javax.annotation.Nonnull String path) throws ApiException {
         okhttp3.Call localVarCall = getStatusValidateBeforeCall(path, null);
         Type localVarReturnType = new TypeToken<GitStatus>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1072,7 +1072,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getStatusAsync(String path, final ApiCallback<GitStatus> _callback) throws ApiException {
+    public okhttp3.Call getStatusAsync(@javax.annotation.Nonnull String path, final ApiCallback<GitStatus> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getStatusValidateBeforeCall(path, _callback);
         Type localVarReturnType = new TypeToken<GitStatus>(){}.getType();
@@ -1092,7 +1092,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listBranchesCall(String path, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listBranchesCall(@javax.annotation.Nonnull String path, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1141,7 +1141,7 @@ public class GitApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listBranchesValidateBeforeCall(String path, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call listBranchesValidateBeforeCall(@javax.annotation.Nonnull String path, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'path' is set
         if (path == null) {
             throw new ApiException("Missing the required parameter 'path' when calling listBranches(Async)");
@@ -1164,7 +1164,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ListBranchResponse listBranches(String path) throws ApiException {
+    public ListBranchResponse listBranches(@javax.annotation.Nonnull String path) throws ApiException {
         ApiResponse<ListBranchResponse> localVarResp = listBranchesWithHttpInfo(path);
         return localVarResp.getData();
     }
@@ -1182,7 +1182,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ListBranchResponse> listBranchesWithHttpInfo(String path) throws ApiException {
+    public ApiResponse<ListBranchResponse> listBranchesWithHttpInfo(@javax.annotation.Nonnull String path) throws ApiException {
         okhttp3.Call localVarCall = listBranchesValidateBeforeCall(path, null);
         Type localVarReturnType = new TypeToken<ListBranchResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1202,7 +1202,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listBranchesAsync(String path, final ApiCallback<ListBranchResponse> _callback) throws ApiException {
+    public okhttp3.Call listBranchesAsync(@javax.annotation.Nonnull String path, final ApiCallback<ListBranchResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = listBranchesValidateBeforeCall(path, _callback);
         Type localVarReturnType = new TypeToken<ListBranchResponse>(){}.getType();
@@ -1222,7 +1222,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call pullChangesCall(GitRepoRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call pullChangesCall(@javax.annotation.Nonnull GitRepoRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1267,7 +1267,7 @@ public class GitApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call pullChangesValidateBeforeCall(GitRepoRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call pullChangesValidateBeforeCall(@javax.annotation.Nonnull GitRepoRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling pullChanges(Async)");
@@ -1289,7 +1289,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public void pullChanges(GitRepoRequest request) throws ApiException {
+    public void pullChanges(@javax.annotation.Nonnull GitRepoRequest request) throws ApiException {
         pullChangesWithHttpInfo(request);
     }
 
@@ -1306,7 +1306,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> pullChangesWithHttpInfo(GitRepoRequest request) throws ApiException {
+    public ApiResponse<Void> pullChangesWithHttpInfo(@javax.annotation.Nonnull GitRepoRequest request) throws ApiException {
         okhttp3.Call localVarCall = pullChangesValidateBeforeCall(request, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1325,7 +1325,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call pullChangesAsync(GitRepoRequest request, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call pullChangesAsync(@javax.annotation.Nonnull GitRepoRequest request, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = pullChangesValidateBeforeCall(request, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -1344,7 +1344,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call pushChangesCall(GitRepoRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call pushChangesCall(@javax.annotation.Nonnull GitRepoRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1389,7 +1389,7 @@ public class GitApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call pushChangesValidateBeforeCall(GitRepoRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call pushChangesValidateBeforeCall(@javax.annotation.Nonnull GitRepoRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling pushChanges(Async)");
@@ -1411,7 +1411,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public void pushChanges(GitRepoRequest request) throws ApiException {
+    public void pushChanges(@javax.annotation.Nonnull GitRepoRequest request) throws ApiException {
         pushChangesWithHttpInfo(request);
     }
 
@@ -1428,7 +1428,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> pushChangesWithHttpInfo(GitRepoRequest request) throws ApiException {
+    public ApiResponse<Void> pushChangesWithHttpInfo(@javax.annotation.Nonnull GitRepoRequest request) throws ApiException {
         okhttp3.Call localVarCall = pushChangesValidateBeforeCall(request, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1447,7 +1447,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call pushChangesAsync(GitRepoRequest request, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call pushChangesAsync(@javax.annotation.Nonnull GitRepoRequest request, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = pushChangesValidateBeforeCall(request, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);

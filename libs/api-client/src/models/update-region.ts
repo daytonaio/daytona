@@ -14,28 +14,17 @@
 
 
 
-/**
- * 
- * @export
- * @interface UpdateRegion
- */
 export interface UpdateRegion {
     /**
      * Proxy URL for the region
-     * @type {string}
-     * @memberof UpdateRegion
      */
     'proxyUrl'?: string | null;
     /**
      * SSH Gateway URL for the region
-     * @type {string}
-     * @memberof UpdateRegion
      */
     'sshGatewayUrl'?: string | null;
     /**
      * Snapshot Manager URL for the region
-     * @type {string}
-     * @memberof UpdateRegion
      */
     'snapshotManagerUrl'?: string | null;
 }

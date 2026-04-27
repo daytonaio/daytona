@@ -14,16 +14,9 @@
 
 
 
-/**
- * 
- * @export
- * @interface ForkSandbox
- */
 export interface ForkSandbox {
     /**
      * The name for the forked sandbox. If not provided, a unique name will be generated.
-     * @type {string}
-     * @memberof ForkSandbox
      */
     'name'?: string;
 }

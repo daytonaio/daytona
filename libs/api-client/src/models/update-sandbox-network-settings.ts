@@ -14,22 +14,13 @@
 
 
 
-/**
- * 
- * @export
- * @interface UpdateSandboxNetworkSettings
- */
 export interface UpdateSandboxNetworkSettings {
     /**
      * Whether to block all network access for the sandbox
-     * @type {boolean}
-     * @memberof UpdateSandboxNetworkSettings
      */
     'networkBlockAll'?: boolean;
     /**
      * Comma-separated list of allowed CIDR network addresses for the sandbox
-     * @type {string}
-     * @memberof UpdateSandboxNetworkSettings
      */
     'networkAllowList'?: string;
 }

@@ -108,7 +108,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been archived </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call archiveSandboxCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call archiveSandboxCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -159,7 +159,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call archiveSandboxValidateBeforeCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call archiveSandboxValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling archiveSandbox(Async)");
@@ -183,7 +183,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been archived </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox archiveSandbox(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+    public Sandbox archiveSandbox(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Sandbox> localVarResp = archiveSandboxWithHttpInfo(sandboxIdOrName, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -202,7 +202,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been archived </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> archiveSandboxWithHttpInfo(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Sandbox> archiveSandboxWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = archiveSandboxValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -223,7 +223,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been archived </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call archiveSandboxAsync(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call archiveSandboxAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = archiveSandboxValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -244,7 +244,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox backup has been initiated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createBackupCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createBackupCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -295,7 +295,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createBackupValidateBeforeCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createBackupValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling createBackup(Async)");
@@ -319,7 +319,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox backup has been initiated </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox createBackup(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+    public Sandbox createBackup(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Sandbox> localVarResp = createBackupWithHttpInfo(sandboxIdOrName, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -338,7 +338,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox backup has been initiated </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> createBackupWithHttpInfo(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Sandbox> createBackupWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = createBackupValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -359,7 +359,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox backup has been initiated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createBackupAsync(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call createBackupAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createBackupValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -380,7 +380,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> The sandbox has been successfully created. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createSandboxCall(CreateSandbox createSandbox, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createSandboxCall(@javax.annotation.Nonnull CreateSandbox createSandbox, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -431,7 +431,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createSandboxValidateBeforeCall(CreateSandbox createSandbox, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createSandboxValidateBeforeCall(@javax.annotation.Nonnull CreateSandbox createSandbox, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'createSandbox' is set
         if (createSandbox == null) {
             throw new ApiException("Missing the required parameter 'createSandbox' when calling createSandbox(Async)");
@@ -455,7 +455,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> The sandbox has been successfully created. </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox createSandbox(CreateSandbox createSandbox, String xDaytonaOrganizationID) throws ApiException {
+    public Sandbox createSandbox(@javax.annotation.Nonnull CreateSandbox createSandbox, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Sandbox> localVarResp = createSandboxWithHttpInfo(createSandbox, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -474,7 +474,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> The sandbox has been successfully created. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> createSandboxWithHttpInfo(CreateSandbox createSandbox, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Sandbox> createSandboxWithHttpInfo(@javax.annotation.Nonnull CreateSandbox createSandbox, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = createSandboxValidateBeforeCall(createSandbox, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -495,7 +495,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> The sandbox has been successfully created. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createSandboxAsync(CreateSandbox createSandbox, String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call createSandboxAsync(@javax.annotation.Nonnull CreateSandbox createSandbox, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createSandboxValidateBeforeCall(createSandbox, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -517,7 +517,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Snapshot creation has been initiated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createSandboxSnapshotCall(String sandboxIdOrName, CreateSandboxSnapshot createSandboxSnapshot, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createSandboxSnapshotCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull CreateSandboxSnapshot createSandboxSnapshot, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -569,7 +569,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createSandboxSnapshotValidateBeforeCall(String sandboxIdOrName, CreateSandboxSnapshot createSandboxSnapshot, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createSandboxSnapshotValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull CreateSandboxSnapshot createSandboxSnapshot, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling createSandboxSnapshot(Async)");
@@ -599,7 +599,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Snapshot creation has been initiated </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox createSandboxSnapshot(String sandboxIdOrName, CreateSandboxSnapshot createSandboxSnapshot, String xDaytonaOrganizationID) throws ApiException {
+    public Sandbox createSandboxSnapshot(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull CreateSandboxSnapshot createSandboxSnapshot, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Sandbox> localVarResp = createSandboxSnapshotWithHttpInfo(sandboxIdOrName, createSandboxSnapshot, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -619,7 +619,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Snapshot creation has been initiated </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> createSandboxSnapshotWithHttpInfo(String sandboxIdOrName, CreateSandboxSnapshot createSandboxSnapshot, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Sandbox> createSandboxSnapshotWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull CreateSandboxSnapshot createSandboxSnapshot, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = createSandboxSnapshotValidateBeforeCall(sandboxIdOrName, createSandboxSnapshot, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -641,7 +641,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Snapshot creation has been initiated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createSandboxSnapshotAsync(String sandboxIdOrName, CreateSandboxSnapshot createSandboxSnapshot, String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call createSandboxSnapshotAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull CreateSandboxSnapshot createSandboxSnapshot, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createSandboxSnapshotValidateBeforeCall(sandboxIdOrName, createSandboxSnapshot, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -663,7 +663,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> SSH access has been created </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createSshAccessCall(String sandboxIdOrName, String xDaytonaOrganizationID, BigDecimal expiresInMinutes, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createSshAccessCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal expiresInMinutes, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -718,7 +718,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createSshAccessValidateBeforeCall(String sandboxIdOrName, String xDaytonaOrganizationID, BigDecimal expiresInMinutes, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createSshAccessValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal expiresInMinutes, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling createSshAccess(Async)");
@@ -743,7 +743,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> SSH access has been created </td><td>  -  </td></tr>
      </table>
      */
-    public SshAccessDto createSshAccess(String sandboxIdOrName, String xDaytonaOrganizationID, BigDecimal expiresInMinutes) throws ApiException {
+    public SshAccessDto createSshAccess(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal expiresInMinutes) throws ApiException {
         ApiResponse<SshAccessDto> localVarResp = createSshAccessWithHttpInfo(sandboxIdOrName, xDaytonaOrganizationID, expiresInMinutes);
         return localVarResp.getData();
     }
@@ -763,7 +763,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> SSH access has been created </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<SshAccessDto> createSshAccessWithHttpInfo(String sandboxIdOrName, String xDaytonaOrganizationID, BigDecimal expiresInMinutes) throws ApiException {
+    public ApiResponse<SshAccessDto> createSshAccessWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal expiresInMinutes) throws ApiException {
         okhttp3.Call localVarCall = createSshAccessValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, expiresInMinutes, null);
         Type localVarReturnType = new TypeToken<SshAccessDto>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -785,7 +785,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> SSH access has been created </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createSshAccessAsync(String sandboxIdOrName, String xDaytonaOrganizationID, BigDecimal expiresInMinutes, final ApiCallback<SshAccessDto> _callback) throws ApiException {
+    public okhttp3.Call createSshAccessAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal expiresInMinutes, final ApiCallback<SshAccessDto> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createSshAccessValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, expiresInMinutes, _callback);
         Type localVarReturnType = new TypeToken<SshAccessDto>(){}.getType();
@@ -806,7 +806,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been deleted </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteSandboxCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deleteSandboxCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -857,7 +857,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deleteSandboxValidateBeforeCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deleteSandboxValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling deleteSandbox(Async)");
@@ -881,7 +881,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been deleted </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox deleteSandbox(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+    public Sandbox deleteSandbox(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Sandbox> localVarResp = deleteSandboxWithHttpInfo(sandboxIdOrName, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -900,7 +900,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been deleted </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> deleteSandboxWithHttpInfo(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Sandbox> deleteSandboxWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = deleteSandboxValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -921,7 +921,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been deleted </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteSandboxAsync(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call deleteSandboxAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deleteSandboxValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -944,7 +944,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Signed preview URL has been expired </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call expireSignedPortPreviewUrlCall(String sandboxIdOrName, Integer port, String token, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call expireSignedPortPreviewUrlCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull Integer port, @javax.annotation.Nonnull String token, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -996,7 +996,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call expireSignedPortPreviewUrlValidateBeforeCall(String sandboxIdOrName, Integer port, String token, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call expireSignedPortPreviewUrlValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull Integer port, @javax.annotation.Nonnull String token, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling expireSignedPortPreviewUrl(Async)");
@@ -1031,7 +1031,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Signed preview URL has been expired </td><td>  -  </td></tr>
      </table>
      */
-    public void expireSignedPortPreviewUrl(String sandboxIdOrName, Integer port, String token, String xDaytonaOrganizationID) throws ApiException {
+    public void expireSignedPortPreviewUrl(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull Integer port, @javax.annotation.Nonnull String token, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         expireSignedPortPreviewUrlWithHttpInfo(sandboxIdOrName, port, token, xDaytonaOrganizationID);
     }
 
@@ -1051,7 +1051,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Signed preview URL has been expired </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> expireSignedPortPreviewUrlWithHttpInfo(String sandboxIdOrName, Integer port, String token, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> expireSignedPortPreviewUrlWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull Integer port, @javax.annotation.Nonnull String token, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = expireSignedPortPreviewUrlValidateBeforeCall(sandboxIdOrName, port, token, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1073,7 +1073,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Signed preview URL has been expired </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call expireSignedPortPreviewUrlAsync(String sandboxIdOrName, Integer port, String token, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call expireSignedPortPreviewUrlAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull Integer port, @javax.annotation.Nonnull String token, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = expireSignedPortPreviewUrlValidateBeforeCall(sandboxIdOrName, port, token, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -1094,7 +1094,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Fork operation has been initiated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call forkSandboxCall(String sandboxIdOrName, ForkSandbox forkSandbox, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call forkSandboxCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull ForkSandbox forkSandbox, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1146,7 +1146,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call forkSandboxValidateBeforeCall(String sandboxIdOrName, ForkSandbox forkSandbox, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call forkSandboxValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull ForkSandbox forkSandbox, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling forkSandbox(Async)");
@@ -1176,7 +1176,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Fork operation has been initiated </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox forkSandbox(String sandboxIdOrName, ForkSandbox forkSandbox, String xDaytonaOrganizationID) throws ApiException {
+    public Sandbox forkSandbox(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull ForkSandbox forkSandbox, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Sandbox> localVarResp = forkSandboxWithHttpInfo(sandboxIdOrName, forkSandbox, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -1196,7 +1196,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Fork operation has been initiated </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> forkSandboxWithHttpInfo(String sandboxIdOrName, ForkSandbox forkSandbox, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Sandbox> forkSandboxWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull ForkSandbox forkSandbox, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = forkSandboxValidateBeforeCall(sandboxIdOrName, forkSandbox, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1218,7 +1218,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Fork operation has been initiated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call forkSandboxAsync(String sandboxIdOrName, ForkSandbox forkSandbox, String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call forkSandboxAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull ForkSandbox forkSandbox, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = forkSandboxValidateBeforeCall(sandboxIdOrName, forkSandbox, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -1242,7 +1242,7 @@ public class SandboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getBuildLogsCall(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean follow, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getBuildLogsCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1297,7 +1297,7 @@ public class SandboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getBuildLogsValidateBeforeCall(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean follow, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getBuildLogsValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling getBuildLogs(Async)");
@@ -1323,7 +1323,7 @@ public class SandboxApi {
      * @deprecated
      */
     @Deprecated
-    public void getBuildLogs(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean follow) throws ApiException {
+    public void getBuildLogs(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow) throws ApiException {
         getBuildLogsWithHttpInfo(sandboxIdOrName, xDaytonaOrganizationID, follow);
     }
 
@@ -1344,7 +1344,7 @@ public class SandboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> getBuildLogsWithHttpInfo(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean follow) throws ApiException {
+    public ApiResponse<Void> getBuildLogsWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow) throws ApiException {
         okhttp3.Call localVarCall = getBuildLogsValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, follow, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1367,7 +1367,7 @@ public class SandboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getBuildLogsAsync(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean follow, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call getBuildLogsAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getBuildLogsValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, follow, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -1387,7 +1387,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Build logs URL </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getBuildLogsUrlCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getBuildLogsUrlCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1438,7 +1438,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getBuildLogsUrlValidateBeforeCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getBuildLogsUrlValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling getBuildLogsUrl(Async)");
@@ -1462,7 +1462,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Build logs URL </td><td>  -  </td></tr>
      </table>
      */
-    public Url getBuildLogsUrl(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+    public Url getBuildLogsUrl(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Url> localVarResp = getBuildLogsUrlWithHttpInfo(sandboxIdOrName, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -1481,7 +1481,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Build logs URL </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Url> getBuildLogsUrlWithHttpInfo(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Url> getBuildLogsUrlWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getBuildLogsUrlValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Url>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1502,7 +1502,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Build logs URL </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getBuildLogsUrlAsync(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback<Url> _callback) throws ApiException {
+    public okhttp3.Call getBuildLogsUrlAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Url> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getBuildLogsUrlValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Url>(){}.getType();
@@ -1523,7 +1523,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Organization </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getOrganizationBySandboxIdCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getOrganizationBySandboxIdCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1574,7 +1574,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getOrganizationBySandboxIdValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getOrganizationBySandboxIdValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getOrganizationBySandboxId(Async)");
@@ -1598,7 +1598,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Organization </td><td>  -  </td></tr>
      </table>
      */
-    public Organization getOrganizationBySandboxId(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public Organization getOrganizationBySandboxId(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Organization> localVarResp = getOrganizationBySandboxIdWithHttpInfo(sandboxId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -1617,7 +1617,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Organization </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Organization> getOrganizationBySandboxIdWithHttpInfo(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Organization> getOrganizationBySandboxIdWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getOrganizationBySandboxIdValidateBeforeCall(sandboxId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Organization>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1638,7 +1638,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Organization </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getOrganizationBySandboxIdAsync(String sandboxId, String xDaytonaOrganizationID, final ApiCallback<Organization> _callback) throws ApiException {
+    public okhttp3.Call getOrganizationBySandboxIdAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Organization> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getOrganizationBySandboxIdValidateBeforeCall(sandboxId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Organization>(){}.getType();
@@ -1660,7 +1660,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Preview URL for the specified port </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getPortPreviewUrlCall(String sandboxIdOrName, BigDecimal port, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getPortPreviewUrlCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal port, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1712,7 +1712,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getPortPreviewUrlValidateBeforeCall(String sandboxIdOrName, BigDecimal port, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getPortPreviewUrlValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal port, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling getPortPreviewUrl(Async)");
@@ -1742,7 +1742,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Preview URL for the specified port </td><td>  -  </td></tr>
      </table>
      */
-    public PortPreviewUrl getPortPreviewUrl(String sandboxIdOrName, BigDecimal port, String xDaytonaOrganizationID) throws ApiException {
+    public PortPreviewUrl getPortPreviewUrl(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal port, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<PortPreviewUrl> localVarResp = getPortPreviewUrlWithHttpInfo(sandboxIdOrName, port, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -1762,7 +1762,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Preview URL for the specified port </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<PortPreviewUrl> getPortPreviewUrlWithHttpInfo(String sandboxIdOrName, BigDecimal port, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<PortPreviewUrl> getPortPreviewUrlWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal port, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getPortPreviewUrlValidateBeforeCall(sandboxIdOrName, port, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<PortPreviewUrl>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1784,7 +1784,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Preview URL for the specified port </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getPortPreviewUrlAsync(String sandboxIdOrName, BigDecimal port, String xDaytonaOrganizationID, final ApiCallback<PortPreviewUrl> _callback) throws ApiException {
+    public okhttp3.Call getPortPreviewUrlAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal port, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<PortPreviewUrl> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getPortPreviewUrlValidateBeforeCall(sandboxIdOrName, port, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<PortPreviewUrl>(){}.getType();
@@ -1805,7 +1805,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Region quota </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getRegionQuotaBySandboxIdCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getRegionQuotaBySandboxIdCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1856,7 +1856,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getRegionQuotaBySandboxIdValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getRegionQuotaBySandboxIdValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getRegionQuotaBySandboxId(Async)");
@@ -1880,7 +1880,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Region quota </td><td>  -  </td></tr>
      </table>
      */
-    public RegionQuota getRegionQuotaBySandboxId(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public RegionQuota getRegionQuotaBySandboxId(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<RegionQuota> localVarResp = getRegionQuotaBySandboxIdWithHttpInfo(sandboxId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -1899,7 +1899,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Region quota </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<RegionQuota> getRegionQuotaBySandboxIdWithHttpInfo(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<RegionQuota> getRegionQuotaBySandboxIdWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getRegionQuotaBySandboxIdValidateBeforeCall(sandboxId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<RegionQuota>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1920,7 +1920,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Region quota </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getRegionQuotaBySandboxIdAsync(String sandboxId, String xDaytonaOrganizationID, final ApiCallback<RegionQuota> _callback) throws ApiException {
+    public okhttp3.Call getRegionQuotaBySandboxIdAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<RegionQuota> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getRegionQuotaBySandboxIdValidateBeforeCall(sandboxId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<RegionQuota>(){}.getType();
@@ -1942,7 +1942,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox details </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxCall(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean verbose, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSandboxCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1997,7 +1997,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSandboxValidateBeforeCall(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean verbose, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSandboxValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling getSandbox(Async)");
@@ -2022,7 +2022,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox details </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox getSandbox(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean verbose) throws ApiException {
+    public Sandbox getSandbox(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose) throws ApiException {
         ApiResponse<Sandbox> localVarResp = getSandboxWithHttpInfo(sandboxIdOrName, xDaytonaOrganizationID, verbose);
         return localVarResp.getData();
     }
@@ -2042,7 +2042,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox details </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> getSandboxWithHttpInfo(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean verbose) throws ApiException {
+    public ApiResponse<Sandbox> getSandboxWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose) throws ApiException {
         okhttp3.Call localVarCall = getSandboxValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, verbose, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2064,7 +2064,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox details </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxAsync(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean verbose, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call getSandboxAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSandboxValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, verbose, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -2085,7 +2085,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxAncestorsCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSandboxAncestorsCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2136,7 +2136,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSandboxAncestorsValidateBeforeCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSandboxAncestorsValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling getSandboxAncestors(Async)");
@@ -2160,7 +2160,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public List<Sandbox> getSandboxAncestors(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+    public List<Sandbox> getSandboxAncestors(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<List<Sandbox>> localVarResp = getSandboxAncestorsWithHttpInfo(sandboxIdOrName, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -2179,7 +2179,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<Sandbox>> getSandboxAncestorsWithHttpInfo(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<List<Sandbox>> getSandboxAncestorsWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getSandboxAncestorsValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<List<Sandbox>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2200,7 +2200,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxAncestorsAsync(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback<List<Sandbox>> _callback) throws ApiException {
+    public okhttp3.Call getSandboxAncestorsAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<List<Sandbox>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSandboxAncestorsValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<List<Sandbox>>(){}.getType();
@@ -2222,7 +2222,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxForksCall(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean includeDestroyed, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSandboxForksCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean includeDestroyed, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2277,7 +2277,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSandboxForksValidateBeforeCall(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean includeDestroyed, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSandboxForksValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean includeDestroyed, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling getSandboxForks(Async)");
@@ -2302,7 +2302,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public List<Sandbox> getSandboxForks(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean includeDestroyed) throws ApiException {
+    public List<Sandbox> getSandboxForks(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean includeDestroyed) throws ApiException {
         ApiResponse<List<Sandbox>> localVarResp = getSandboxForksWithHttpInfo(sandboxIdOrName, xDaytonaOrganizationID, includeDestroyed);
         return localVarResp.getData();
     }
@@ -2322,7 +2322,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<Sandbox>> getSandboxForksWithHttpInfo(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean includeDestroyed) throws ApiException {
+    public ApiResponse<List<Sandbox>> getSandboxForksWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean includeDestroyed) throws ApiException {
         okhttp3.Call localVarCall = getSandboxForksValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, includeDestroyed, null);
         Type localVarReturnType = new TypeToken<List<Sandbox>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2344,7 +2344,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxForksAsync(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean includeDestroyed, final ApiCallback<List<Sandbox>> _callback) throws ApiException {
+    public okhttp3.Call getSandboxForksAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean includeDestroyed, final ApiCallback<List<Sandbox>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSandboxForksValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, includeDestroyed, _callback);
         Type localVarReturnType = new TypeToken<List<Sandbox>>(){}.getType();
@@ -2371,7 +2371,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Paginated list of log entries </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxLogsCall(String sandboxId, OffsetDateTime from, OffsetDateTime to, String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit, List<String> severities, String search, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSandboxLogsCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull OffsetDateTime from, @javax.annotation.Nonnull OffsetDateTime to, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable List<String> severities, @javax.annotation.Nullable String search, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2446,7 +2446,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSandboxLogsValidateBeforeCall(String sandboxId, OffsetDateTime from, OffsetDateTime to, String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit, List<String> severities, String search, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSandboxLogsValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull OffsetDateTime from, @javax.annotation.Nonnull OffsetDateTime to, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable List<String> severities, @javax.annotation.Nullable String search, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getSandboxLogs(Async)");
@@ -2486,7 +2486,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Paginated list of log entries </td><td>  -  </td></tr>
      </table>
      */
-    public PaginatedLogs getSandboxLogs(String sandboxId, OffsetDateTime from, OffsetDateTime to, String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit, List<String> severities, String search) throws ApiException {
+    public PaginatedLogs getSandboxLogs(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull OffsetDateTime from, @javax.annotation.Nonnull OffsetDateTime to, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable List<String> severities, @javax.annotation.Nullable String search) throws ApiException {
         ApiResponse<PaginatedLogs> localVarResp = getSandboxLogsWithHttpInfo(sandboxId, from, to, xDaytonaOrganizationID, page, limit, severities, search);
         return localVarResp.getData();
     }
@@ -2511,7 +2511,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Paginated list of log entries </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<PaginatedLogs> getSandboxLogsWithHttpInfo(String sandboxId, OffsetDateTime from, OffsetDateTime to, String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit, List<String> severities, String search) throws ApiException {
+    public ApiResponse<PaginatedLogs> getSandboxLogsWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull OffsetDateTime from, @javax.annotation.Nonnull OffsetDateTime to, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable List<String> severities, @javax.annotation.Nullable String search) throws ApiException {
         okhttp3.Call localVarCall = getSandboxLogsValidateBeforeCall(sandboxId, from, to, xDaytonaOrganizationID, page, limit, severities, search, null);
         Type localVarReturnType = new TypeToken<PaginatedLogs>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2538,7 +2538,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Paginated list of log entries </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxLogsAsync(String sandboxId, OffsetDateTime from, OffsetDateTime to, String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit, List<String> severities, String search, final ApiCallback<PaginatedLogs> _callback) throws ApiException {
+    public okhttp3.Call getSandboxLogsAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull OffsetDateTime from, @javax.annotation.Nonnull OffsetDateTime to, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable List<String> severities, @javax.annotation.Nullable String search, final ApiCallback<PaginatedLogs> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSandboxLogsValidateBeforeCall(sandboxId, from, to, xDaytonaOrganizationID, page, limit, severities, search, _callback);
         Type localVarReturnType = new TypeToken<PaginatedLogs>(){}.getType();
@@ -2562,7 +2562,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Metrics time series data </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxMetricsCall(String sandboxId, OffsetDateTime from, OffsetDateTime to, String xDaytonaOrganizationID, List<String> metricNames, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSandboxMetricsCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull OffsetDateTime from, @javax.annotation.Nonnull OffsetDateTime to, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable List<String> metricNames, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2625,7 +2625,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSandboxMetricsValidateBeforeCall(String sandboxId, OffsetDateTime from, OffsetDateTime to, String xDaytonaOrganizationID, List<String> metricNames, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSandboxMetricsValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull OffsetDateTime from, @javax.annotation.Nonnull OffsetDateTime to, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable List<String> metricNames, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getSandboxMetrics(Async)");
@@ -2662,7 +2662,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Metrics time series data </td><td>  -  </td></tr>
      </table>
      */
-    public MetricsResponse getSandboxMetrics(String sandboxId, OffsetDateTime from, OffsetDateTime to, String xDaytonaOrganizationID, List<String> metricNames) throws ApiException {
+    public MetricsResponse getSandboxMetrics(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull OffsetDateTime from, @javax.annotation.Nonnull OffsetDateTime to, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable List<String> metricNames) throws ApiException {
         ApiResponse<MetricsResponse> localVarResp = getSandboxMetricsWithHttpInfo(sandboxId, from, to, xDaytonaOrganizationID, metricNames);
         return localVarResp.getData();
     }
@@ -2684,7 +2684,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Metrics time series data </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<MetricsResponse> getSandboxMetricsWithHttpInfo(String sandboxId, OffsetDateTime from, OffsetDateTime to, String xDaytonaOrganizationID, List<String> metricNames) throws ApiException {
+    public ApiResponse<MetricsResponse> getSandboxMetricsWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull OffsetDateTime from, @javax.annotation.Nonnull OffsetDateTime to, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable List<String> metricNames) throws ApiException {
         okhttp3.Call localVarCall = getSandboxMetricsValidateBeforeCall(sandboxId, from, to, xDaytonaOrganizationID, metricNames, null);
         Type localVarReturnType = new TypeToken<MetricsResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2708,7 +2708,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Metrics time series data </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxMetricsAsync(String sandboxId, OffsetDateTime from, OffsetDateTime to, String xDaytonaOrganizationID, List<String> metricNames, final ApiCallback<MetricsResponse> _callback) throws ApiException {
+    public okhttp3.Call getSandboxMetricsAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull OffsetDateTime from, @javax.annotation.Nonnull OffsetDateTime to, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable List<String> metricNames, final ApiCallback<MetricsResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSandboxMetricsValidateBeforeCall(sandboxId, from, to, xDaytonaOrganizationID, metricNames, _callback);
         Type localVarReturnType = new TypeToken<MetricsResponse>(){}.getType();
@@ -2729,7 +2729,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxParentCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSandboxParentCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2780,7 +2780,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSandboxParentValidateBeforeCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSandboxParentValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling getSandboxParent(Async)");
@@ -2804,7 +2804,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox getSandboxParent(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+    public Sandbox getSandboxParent(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Sandbox> localVarResp = getSandboxParentWithHttpInfo(sandboxIdOrName, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -2823,7 +2823,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> getSandboxParentWithHttpInfo(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Sandbox> getSandboxParentWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getSandboxParentValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2844,7 +2844,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxParentAsync(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call getSandboxParentAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSandboxParentValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -2866,7 +2866,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> List of spans in the trace </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxTraceSpansCall(String sandboxId, String traceId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSandboxTraceSpansCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String traceId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2918,7 +2918,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSandboxTraceSpansValidateBeforeCall(String sandboxId, String traceId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSandboxTraceSpansValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String traceId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getSandboxTraceSpans(Async)");
@@ -2948,7 +2948,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> List of spans in the trace </td><td>  -  </td></tr>
      </table>
      */
-    public List<TraceSpan> getSandboxTraceSpans(String sandboxId, String traceId, String xDaytonaOrganizationID) throws ApiException {
+    public List<TraceSpan> getSandboxTraceSpans(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String traceId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<List<TraceSpan>> localVarResp = getSandboxTraceSpansWithHttpInfo(sandboxId, traceId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -2968,7 +2968,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> List of spans in the trace </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<TraceSpan>> getSandboxTraceSpansWithHttpInfo(String sandboxId, String traceId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<List<TraceSpan>> getSandboxTraceSpansWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String traceId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getSandboxTraceSpansValidateBeforeCall(sandboxId, traceId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<List<TraceSpan>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2990,7 +2990,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> List of spans in the trace </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxTraceSpansAsync(String sandboxId, String traceId, String xDaytonaOrganizationID, final ApiCallback<List<TraceSpan>> _callback) throws ApiException {
+    public okhttp3.Call getSandboxTraceSpansAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String traceId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<List<TraceSpan>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSandboxTraceSpansValidateBeforeCall(sandboxId, traceId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<List<TraceSpan>>(){}.getType();
@@ -3015,7 +3015,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Paginated list of trace summaries </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxTracesCall(String sandboxId, OffsetDateTime from, OffsetDateTime to, String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSandboxTracesCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull OffsetDateTime from, @javax.annotation.Nonnull OffsetDateTime to, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3082,7 +3082,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSandboxTracesValidateBeforeCall(String sandboxId, OffsetDateTime from, OffsetDateTime to, String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSandboxTracesValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull OffsetDateTime from, @javax.annotation.Nonnull OffsetDateTime to, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getSandboxTraces(Async)");
@@ -3120,7 +3120,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Paginated list of trace summaries </td><td>  -  </td></tr>
      </table>
      */
-    public PaginatedTraces getSandboxTraces(String sandboxId, OffsetDateTime from, OffsetDateTime to, String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit) throws ApiException {
+    public PaginatedTraces getSandboxTraces(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull OffsetDateTime from, @javax.annotation.Nonnull OffsetDateTime to, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit) throws ApiException {
         ApiResponse<PaginatedTraces> localVarResp = getSandboxTracesWithHttpInfo(sandboxId, from, to, xDaytonaOrganizationID, page, limit);
         return localVarResp.getData();
     }
@@ -3143,7 +3143,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Paginated list of trace summaries </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<PaginatedTraces> getSandboxTracesWithHttpInfo(String sandboxId, OffsetDateTime from, OffsetDateTime to, String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit) throws ApiException {
+    public ApiResponse<PaginatedTraces> getSandboxTracesWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull OffsetDateTime from, @javax.annotation.Nonnull OffsetDateTime to, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit) throws ApiException {
         okhttp3.Call localVarCall = getSandboxTracesValidateBeforeCall(sandboxId, from, to, xDaytonaOrganizationID, page, limit, null);
         Type localVarReturnType = new TypeToken<PaginatedTraces>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -3168,7 +3168,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Paginated list of trace summaries </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxTracesAsync(String sandboxId, OffsetDateTime from, OffsetDateTime to, String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit, final ApiCallback<PaginatedTraces> _callback) throws ApiException {
+    public okhttp3.Call getSandboxTracesAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull OffsetDateTime from, @javax.annotation.Nonnull OffsetDateTime to, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, final ApiCallback<PaginatedTraces> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSandboxTracesValidateBeforeCall(sandboxId, from, to, xDaytonaOrganizationID, page, limit, _callback);
         Type localVarReturnType = new TypeToken<PaginatedTraces>(){}.getType();
@@ -3190,7 +3190,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> List of sandboxes for the authenticated runner </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxesForRunnerCall(String xDaytonaOrganizationID, String states, Boolean skipReconcilingSandboxes, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSandboxesForRunnerCall(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String states, @javax.annotation.Nullable Boolean skipReconcilingSandboxes, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3248,7 +3248,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSandboxesForRunnerValidateBeforeCall(String xDaytonaOrganizationID, String states, Boolean skipReconcilingSandboxes, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSandboxesForRunnerValidateBeforeCall(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String states, @javax.annotation.Nullable Boolean skipReconcilingSandboxes, final ApiCallback _callback) throws ApiException {
         return getSandboxesForRunnerCall(xDaytonaOrganizationID, states, skipReconcilingSandboxes, _callback);
 
     }
@@ -3268,7 +3268,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> List of sandboxes for the authenticated runner </td><td>  -  </td></tr>
      </table>
      */
-    public List<Sandbox> getSandboxesForRunner(String xDaytonaOrganizationID, String states, Boolean skipReconcilingSandboxes) throws ApiException {
+    public List<Sandbox> getSandboxesForRunner(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String states, @javax.annotation.Nullable Boolean skipReconcilingSandboxes) throws ApiException {
         ApiResponse<List<Sandbox>> localVarResp = getSandboxesForRunnerWithHttpInfo(xDaytonaOrganizationID, states, skipReconcilingSandboxes);
         return localVarResp.getData();
     }
@@ -3288,7 +3288,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> List of sandboxes for the authenticated runner </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<Sandbox>> getSandboxesForRunnerWithHttpInfo(String xDaytonaOrganizationID, String states, Boolean skipReconcilingSandboxes) throws ApiException {
+    public ApiResponse<List<Sandbox>> getSandboxesForRunnerWithHttpInfo(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String states, @javax.annotation.Nullable Boolean skipReconcilingSandboxes) throws ApiException {
         okhttp3.Call localVarCall = getSandboxesForRunnerValidateBeforeCall(xDaytonaOrganizationID, states, skipReconcilingSandboxes, null);
         Type localVarReturnType = new TypeToken<List<Sandbox>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -3310,7 +3310,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> List of sandboxes for the authenticated runner </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxesForRunnerAsync(String xDaytonaOrganizationID, String states, Boolean skipReconcilingSandboxes, final ApiCallback<List<Sandbox>> _callback) throws ApiException {
+    public okhttp3.Call getSandboxesForRunnerAsync(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String states, @javax.annotation.Nullable Boolean skipReconcilingSandboxes, final ApiCallback<List<Sandbox>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSandboxesForRunnerValidateBeforeCall(xDaytonaOrganizationID, states, skipReconcilingSandboxes, _callback);
         Type localVarReturnType = new TypeToken<List<Sandbox>>(){}.getType();
@@ -3333,7 +3333,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Signed preview URL for the specified port </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSignedPortPreviewUrlCall(String sandboxIdOrName, Integer port, String xDaytonaOrganizationID, Integer expiresInSeconds, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSignedPortPreviewUrlCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull Integer port, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Integer expiresInSeconds, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3389,7 +3389,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSignedPortPreviewUrlValidateBeforeCall(String sandboxIdOrName, Integer port, String xDaytonaOrganizationID, Integer expiresInSeconds, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSignedPortPreviewUrlValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull Integer port, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Integer expiresInSeconds, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling getSignedPortPreviewUrl(Async)");
@@ -3420,7 +3420,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Signed preview URL for the specified port </td><td>  -  </td></tr>
      </table>
      */
-    public SignedPortPreviewUrl getSignedPortPreviewUrl(String sandboxIdOrName, Integer port, String xDaytonaOrganizationID, Integer expiresInSeconds) throws ApiException {
+    public SignedPortPreviewUrl getSignedPortPreviewUrl(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull Integer port, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Integer expiresInSeconds) throws ApiException {
         ApiResponse<SignedPortPreviewUrl> localVarResp = getSignedPortPreviewUrlWithHttpInfo(sandboxIdOrName, port, xDaytonaOrganizationID, expiresInSeconds);
         return localVarResp.getData();
     }
@@ -3441,7 +3441,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Signed preview URL for the specified port </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<SignedPortPreviewUrl> getSignedPortPreviewUrlWithHttpInfo(String sandboxIdOrName, Integer port, String xDaytonaOrganizationID, Integer expiresInSeconds) throws ApiException {
+    public ApiResponse<SignedPortPreviewUrl> getSignedPortPreviewUrlWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull Integer port, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Integer expiresInSeconds) throws ApiException {
         okhttp3.Call localVarCall = getSignedPortPreviewUrlValidateBeforeCall(sandboxIdOrName, port, xDaytonaOrganizationID, expiresInSeconds, null);
         Type localVarReturnType = new TypeToken<SignedPortPreviewUrl>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -3464,7 +3464,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Signed preview URL for the specified port </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSignedPortPreviewUrlAsync(String sandboxIdOrName, Integer port, String xDaytonaOrganizationID, Integer expiresInSeconds, final ApiCallback<SignedPortPreviewUrl> _callback) throws ApiException {
+    public okhttp3.Call getSignedPortPreviewUrlAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull Integer port, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Integer expiresInSeconds, final ApiCallback<SignedPortPreviewUrl> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSignedPortPreviewUrlValidateBeforeCall(sandboxIdOrName, port, xDaytonaOrganizationID, expiresInSeconds, _callback);
         Type localVarReturnType = new TypeToken<SignedPortPreviewUrl>(){}.getType();
@@ -3485,7 +3485,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Toolbox proxy URL for the specified sandbox </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getToolboxProxyUrlCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getToolboxProxyUrlCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3536,7 +3536,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getToolboxProxyUrlValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getToolboxProxyUrlValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getToolboxProxyUrl(Async)");
@@ -3560,7 +3560,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Toolbox proxy URL for the specified sandbox </td><td>  -  </td></tr>
      </table>
      */
-    public ToolboxProxyUrl getToolboxProxyUrl(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ToolboxProxyUrl getToolboxProxyUrl(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<ToolboxProxyUrl> localVarResp = getToolboxProxyUrlWithHttpInfo(sandboxId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -3579,7 +3579,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Toolbox proxy URL for the specified sandbox </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ToolboxProxyUrl> getToolboxProxyUrlWithHttpInfo(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<ToolboxProxyUrl> getToolboxProxyUrlWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getToolboxProxyUrlValidateBeforeCall(sandboxId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<ToolboxProxyUrl>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -3600,7 +3600,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Toolbox proxy URL for the specified sandbox </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getToolboxProxyUrlAsync(String sandboxId, String xDaytonaOrganizationID, final ApiCallback<ToolboxProxyUrl> _callback) throws ApiException {
+    public okhttp3.Call getToolboxProxyUrlAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<ToolboxProxyUrl> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getToolboxProxyUrlValidateBeforeCall(sandboxId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<ToolboxProxyUrl>(){}.getType();
@@ -3623,7 +3623,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> List of all sandboxes </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listSandboxesCall(String xDaytonaOrganizationID, Boolean verbose, String labels, Boolean includeErroredDeleted, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listSandboxesCall(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3685,7 +3685,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listSandboxesValidateBeforeCall(String xDaytonaOrganizationID, Boolean verbose, String labels, Boolean includeErroredDeleted, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call listSandboxesValidateBeforeCall(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted, final ApiCallback _callback) throws ApiException {
         return listSandboxesCall(xDaytonaOrganizationID, verbose, labels, includeErroredDeleted, _callback);
 
     }
@@ -3706,7 +3706,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> List of all sandboxes </td><td>  -  </td></tr>
      </table>
      */
-    public List<Sandbox> listSandboxes(String xDaytonaOrganizationID, Boolean verbose, String labels, Boolean includeErroredDeleted) throws ApiException {
+    public List<Sandbox> listSandboxes(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted) throws ApiException {
         ApiResponse<List<Sandbox>> localVarResp = listSandboxesWithHttpInfo(xDaytonaOrganizationID, verbose, labels, includeErroredDeleted);
         return localVarResp.getData();
     }
@@ -3727,7 +3727,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> List of all sandboxes </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<Sandbox>> listSandboxesWithHttpInfo(String xDaytonaOrganizationID, Boolean verbose, String labels, Boolean includeErroredDeleted) throws ApiException {
+    public ApiResponse<List<Sandbox>> listSandboxesWithHttpInfo(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted) throws ApiException {
         okhttp3.Call localVarCall = listSandboxesValidateBeforeCall(xDaytonaOrganizationID, verbose, labels, includeErroredDeleted, null);
         Type localVarReturnType = new TypeToken<List<Sandbox>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -3750,7 +3750,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> List of all sandboxes </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listSandboxesAsync(String xDaytonaOrganizationID, Boolean verbose, String labels, Boolean includeErroredDeleted, final ApiCallback<List<Sandbox>> _callback) throws ApiException {
+    public okhttp3.Call listSandboxesAsync(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean verbose, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted, final ApiCallback<List<Sandbox>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = listSandboxesValidateBeforeCall(xDaytonaOrganizationID, verbose, labels, includeErroredDeleted, _callback);
         Type localVarReturnType = new TypeToken<List<Sandbox>>(){}.getType();
@@ -3789,7 +3789,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Paginated list of all sandboxes </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listSandboxesPaginatedCall(String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit, String id, String name, String labels, Boolean includeErroredDeleted, List<String> states, List<String> snapshots, List<String> regions, BigDecimal minCpu, BigDecimal maxCpu, BigDecimal minMemoryGiB, BigDecimal maxMemoryGiB, BigDecimal minDiskGiB, BigDecimal maxDiskGiB, OffsetDateTime lastEventAfter, OffsetDateTime lastEventBefore, String sort, String order, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listSandboxesPaginatedCall(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String id, @javax.annotation.Nullable String name, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted, @javax.annotation.Nullable List<String> states, @javax.annotation.Nullable List<String> snapshots, @javax.annotation.Nullable List<String> regions, @javax.annotation.Nullable BigDecimal minCpu, @javax.annotation.Nullable BigDecimal maxCpu, @javax.annotation.Nullable BigDecimal minMemoryGiB, @javax.annotation.Nullable BigDecimal maxMemoryGiB, @javax.annotation.Nullable BigDecimal minDiskGiB, @javax.annotation.Nullable BigDecimal maxDiskGiB, @javax.annotation.Nullable OffsetDateTime lastEventAfter, @javax.annotation.Nullable OffsetDateTime lastEventBefore, @javax.annotation.Nullable String sort, @javax.annotation.Nullable String order, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3915,7 +3915,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listSandboxesPaginatedValidateBeforeCall(String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit, String id, String name, String labels, Boolean includeErroredDeleted, List<String> states, List<String> snapshots, List<String> regions, BigDecimal minCpu, BigDecimal maxCpu, BigDecimal minMemoryGiB, BigDecimal maxMemoryGiB, BigDecimal minDiskGiB, BigDecimal maxDiskGiB, OffsetDateTime lastEventAfter, OffsetDateTime lastEventBefore, String sort, String order, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call listSandboxesPaginatedValidateBeforeCall(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String id, @javax.annotation.Nullable String name, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted, @javax.annotation.Nullable List<String> states, @javax.annotation.Nullable List<String> snapshots, @javax.annotation.Nullable List<String> regions, @javax.annotation.Nullable BigDecimal minCpu, @javax.annotation.Nullable BigDecimal maxCpu, @javax.annotation.Nullable BigDecimal minMemoryGiB, @javax.annotation.Nullable BigDecimal maxMemoryGiB, @javax.annotation.Nullable BigDecimal minDiskGiB, @javax.annotation.Nullable BigDecimal maxDiskGiB, @javax.annotation.Nullable OffsetDateTime lastEventAfter, @javax.annotation.Nullable OffsetDateTime lastEventBefore, @javax.annotation.Nullable String sort, @javax.annotation.Nullable String order, final ApiCallback _callback) throws ApiException {
         return listSandboxesPaginatedCall(xDaytonaOrganizationID, page, limit, id, name, labels, includeErroredDeleted, states, snapshots, regions, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, lastEventAfter, lastEventBefore, sort, order, _callback);
 
     }
@@ -3952,7 +3952,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Paginated list of all sandboxes </td><td>  -  </td></tr>
      </table>
      */
-    public PaginatedSandboxes listSandboxesPaginated(String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit, String id, String name, String labels, Boolean includeErroredDeleted, List<String> states, List<String> snapshots, List<String> regions, BigDecimal minCpu, BigDecimal maxCpu, BigDecimal minMemoryGiB, BigDecimal maxMemoryGiB, BigDecimal minDiskGiB, BigDecimal maxDiskGiB, OffsetDateTime lastEventAfter, OffsetDateTime lastEventBefore, String sort, String order) throws ApiException {
+    public PaginatedSandboxes listSandboxesPaginated(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String id, @javax.annotation.Nullable String name, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted, @javax.annotation.Nullable List<String> states, @javax.annotation.Nullable List<String> snapshots, @javax.annotation.Nullable List<String> regions, @javax.annotation.Nullable BigDecimal minCpu, @javax.annotation.Nullable BigDecimal maxCpu, @javax.annotation.Nullable BigDecimal minMemoryGiB, @javax.annotation.Nullable BigDecimal maxMemoryGiB, @javax.annotation.Nullable BigDecimal minDiskGiB, @javax.annotation.Nullable BigDecimal maxDiskGiB, @javax.annotation.Nullable OffsetDateTime lastEventAfter, @javax.annotation.Nullable OffsetDateTime lastEventBefore, @javax.annotation.Nullable String sort, @javax.annotation.Nullable String order) throws ApiException {
         ApiResponse<PaginatedSandboxes> localVarResp = listSandboxesPaginatedWithHttpInfo(xDaytonaOrganizationID, page, limit, id, name, labels, includeErroredDeleted, states, snapshots, regions, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, lastEventAfter, lastEventBefore, sort, order);
         return localVarResp.getData();
     }
@@ -3989,7 +3989,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Paginated list of all sandboxes </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<PaginatedSandboxes> listSandboxesPaginatedWithHttpInfo(String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit, String id, String name, String labels, Boolean includeErroredDeleted, List<String> states, List<String> snapshots, List<String> regions, BigDecimal minCpu, BigDecimal maxCpu, BigDecimal minMemoryGiB, BigDecimal maxMemoryGiB, BigDecimal minDiskGiB, BigDecimal maxDiskGiB, OffsetDateTime lastEventAfter, OffsetDateTime lastEventBefore, String sort, String order) throws ApiException {
+    public ApiResponse<PaginatedSandboxes> listSandboxesPaginatedWithHttpInfo(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String id, @javax.annotation.Nullable String name, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted, @javax.annotation.Nullable List<String> states, @javax.annotation.Nullable List<String> snapshots, @javax.annotation.Nullable List<String> regions, @javax.annotation.Nullable BigDecimal minCpu, @javax.annotation.Nullable BigDecimal maxCpu, @javax.annotation.Nullable BigDecimal minMemoryGiB, @javax.annotation.Nullable BigDecimal maxMemoryGiB, @javax.annotation.Nullable BigDecimal minDiskGiB, @javax.annotation.Nullable BigDecimal maxDiskGiB, @javax.annotation.Nullable OffsetDateTime lastEventAfter, @javax.annotation.Nullable OffsetDateTime lastEventBefore, @javax.annotation.Nullable String sort, @javax.annotation.Nullable String order) throws ApiException {
         okhttp3.Call localVarCall = listSandboxesPaginatedValidateBeforeCall(xDaytonaOrganizationID, page, limit, id, name, labels, includeErroredDeleted, states, snapshots, regions, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, lastEventAfter, lastEventBefore, sort, order, null);
         Type localVarReturnType = new TypeToken<PaginatedSandboxes>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -4028,7 +4028,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Paginated list of all sandboxes </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listSandboxesPaginatedAsync(String xDaytonaOrganizationID, BigDecimal page, BigDecimal limit, String id, String name, String labels, Boolean includeErroredDeleted, List<String> states, List<String> snapshots, List<String> regions, BigDecimal minCpu, BigDecimal maxCpu, BigDecimal minMemoryGiB, BigDecimal maxMemoryGiB, BigDecimal minDiskGiB, BigDecimal maxDiskGiB, OffsetDateTime lastEventAfter, OffsetDateTime lastEventBefore, String sort, String order, final ApiCallback<PaginatedSandboxes> _callback) throws ApiException {
+    public okhttp3.Call listSandboxesPaginatedAsync(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String id, @javax.annotation.Nullable String name, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted, @javax.annotation.Nullable List<String> states, @javax.annotation.Nullable List<String> snapshots, @javax.annotation.Nullable List<String> regions, @javax.annotation.Nullable BigDecimal minCpu, @javax.annotation.Nullable BigDecimal maxCpu, @javax.annotation.Nullable BigDecimal minMemoryGiB, @javax.annotation.Nullable BigDecimal maxMemoryGiB, @javax.annotation.Nullable BigDecimal minDiskGiB, @javax.annotation.Nullable BigDecimal maxDiskGiB, @javax.annotation.Nullable OffsetDateTime lastEventAfter, @javax.annotation.Nullable OffsetDateTime lastEventBefore, @javax.annotation.Nullable String sort, @javax.annotation.Nullable String order, final ApiCallback<PaginatedSandboxes> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = listSandboxesPaginatedValidateBeforeCall(xDaytonaOrganizationID, page, limit, id, name, labels, includeErroredDeleted, states, snapshots, regions, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, lastEventAfter, lastEventBefore, sort, order, _callback);
         Type localVarReturnType = new TypeToken<PaginatedSandboxes>(){}.getType();
@@ -4049,7 +4049,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Recovery initiated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call recoverSandboxCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call recoverSandboxCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -4100,7 +4100,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call recoverSandboxValidateBeforeCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call recoverSandboxValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling recoverSandbox(Async)");
@@ -4124,7 +4124,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Recovery initiated </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox recoverSandbox(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+    public Sandbox recoverSandbox(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Sandbox> localVarResp = recoverSandboxWithHttpInfo(sandboxIdOrName, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -4143,7 +4143,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Recovery initiated </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> recoverSandboxWithHttpInfo(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Sandbox> recoverSandboxWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = recoverSandboxValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -4164,7 +4164,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Recovery initiated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call recoverSandboxAsync(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call recoverSandboxAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = recoverSandboxValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -4186,7 +4186,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Labels have been successfully replaced </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call replaceLabelsCall(String sandboxIdOrName, SandboxLabels sandboxLabels, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call replaceLabelsCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull SandboxLabels sandboxLabels, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -4238,7 +4238,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call replaceLabelsValidateBeforeCall(String sandboxIdOrName, SandboxLabels sandboxLabels, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call replaceLabelsValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull SandboxLabels sandboxLabels, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling replaceLabels(Async)");
@@ -4268,7 +4268,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Labels have been successfully replaced </td><td>  -  </td></tr>
      </table>
      */
-    public SandboxLabels replaceLabels(String sandboxIdOrName, SandboxLabels sandboxLabels, String xDaytonaOrganizationID) throws ApiException {
+    public SandboxLabels replaceLabels(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull SandboxLabels sandboxLabels, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<SandboxLabels> localVarResp = replaceLabelsWithHttpInfo(sandboxIdOrName, sandboxLabels, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -4288,7 +4288,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Labels have been successfully replaced </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<SandboxLabels> replaceLabelsWithHttpInfo(String sandboxIdOrName, SandboxLabels sandboxLabels, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<SandboxLabels> replaceLabelsWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull SandboxLabels sandboxLabels, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = replaceLabelsValidateBeforeCall(sandboxIdOrName, sandboxLabels, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<SandboxLabels>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -4310,7 +4310,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Labels have been successfully replaced </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call replaceLabelsAsync(String sandboxIdOrName, SandboxLabels sandboxLabels, String xDaytonaOrganizationID, final ApiCallback<SandboxLabels> _callback) throws ApiException {
+    public okhttp3.Call replaceLabelsAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull SandboxLabels sandboxLabels, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<SandboxLabels> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = replaceLabelsValidateBeforeCall(sandboxIdOrName, sandboxLabels, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<SandboxLabels>(){}.getType();
@@ -4332,7 +4332,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been resized </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call resizeSandboxCall(String sandboxIdOrName, ResizeSandbox resizeSandbox, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call resizeSandboxCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull ResizeSandbox resizeSandbox, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -4384,7 +4384,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call resizeSandboxValidateBeforeCall(String sandboxIdOrName, ResizeSandbox resizeSandbox, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call resizeSandboxValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull ResizeSandbox resizeSandbox, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling resizeSandbox(Async)");
@@ -4414,7 +4414,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been resized </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox resizeSandbox(String sandboxIdOrName, ResizeSandbox resizeSandbox, String xDaytonaOrganizationID) throws ApiException {
+    public Sandbox resizeSandbox(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull ResizeSandbox resizeSandbox, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Sandbox> localVarResp = resizeSandboxWithHttpInfo(sandboxIdOrName, resizeSandbox, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -4434,7 +4434,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been resized </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> resizeSandboxWithHttpInfo(String sandboxIdOrName, ResizeSandbox resizeSandbox, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Sandbox> resizeSandboxWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull ResizeSandbox resizeSandbox, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = resizeSandboxValidateBeforeCall(sandboxIdOrName, resizeSandbox, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -4456,7 +4456,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been resized </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call resizeSandboxAsync(String sandboxIdOrName, ResizeSandbox resizeSandbox, String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call resizeSandboxAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull ResizeSandbox resizeSandbox, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = resizeSandboxValidateBeforeCall(sandboxIdOrName, resizeSandbox, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -4478,7 +4478,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> SSH access has been revoked </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call revokeSshAccessCall(String sandboxIdOrName, String xDaytonaOrganizationID, String token, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call revokeSshAccessCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String token, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -4533,7 +4533,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call revokeSshAccessValidateBeforeCall(String sandboxIdOrName, String xDaytonaOrganizationID, String token, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call revokeSshAccessValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String token, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling revokeSshAccess(Async)");
@@ -4558,7 +4558,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> SSH access has been revoked </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox revokeSshAccess(String sandboxIdOrName, String xDaytonaOrganizationID, String token) throws ApiException {
+    public Sandbox revokeSshAccess(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String token) throws ApiException {
         ApiResponse<Sandbox> localVarResp = revokeSshAccessWithHttpInfo(sandboxIdOrName, xDaytonaOrganizationID, token);
         return localVarResp.getData();
     }
@@ -4578,7 +4578,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> SSH access has been revoked </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> revokeSshAccessWithHttpInfo(String sandboxIdOrName, String xDaytonaOrganizationID, String token) throws ApiException {
+    public ApiResponse<Sandbox> revokeSshAccessWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String token) throws ApiException {
         okhttp3.Call localVarCall = revokeSshAccessValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, token, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -4600,7 +4600,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> SSH access has been revoked </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call revokeSshAccessAsync(String sandboxIdOrName, String xDaytonaOrganizationID, String token, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call revokeSshAccessAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String token, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = revokeSshAccessValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, token, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -4622,7 +4622,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Auto-archive interval has been set </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call setAutoArchiveIntervalCall(String sandboxIdOrName, BigDecimal interval, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call setAutoArchiveIntervalCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -4674,7 +4674,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call setAutoArchiveIntervalValidateBeforeCall(String sandboxIdOrName, BigDecimal interval, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call setAutoArchiveIntervalValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling setAutoArchiveInterval(Async)");
@@ -4704,7 +4704,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Auto-archive interval has been set </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox setAutoArchiveInterval(String sandboxIdOrName, BigDecimal interval, String xDaytonaOrganizationID) throws ApiException {
+    public Sandbox setAutoArchiveInterval(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Sandbox> localVarResp = setAutoArchiveIntervalWithHttpInfo(sandboxIdOrName, interval, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -4724,7 +4724,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Auto-archive interval has been set </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> setAutoArchiveIntervalWithHttpInfo(String sandboxIdOrName, BigDecimal interval, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Sandbox> setAutoArchiveIntervalWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = setAutoArchiveIntervalValidateBeforeCall(sandboxIdOrName, interval, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -4746,7 +4746,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Auto-archive interval has been set </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call setAutoArchiveIntervalAsync(String sandboxIdOrName, BigDecimal interval, String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call setAutoArchiveIntervalAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = setAutoArchiveIntervalValidateBeforeCall(sandboxIdOrName, interval, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -4768,7 +4768,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Auto-delete interval has been set </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call setAutoDeleteIntervalCall(String sandboxIdOrName, BigDecimal interval, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call setAutoDeleteIntervalCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -4820,7 +4820,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call setAutoDeleteIntervalValidateBeforeCall(String sandboxIdOrName, BigDecimal interval, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call setAutoDeleteIntervalValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling setAutoDeleteInterval(Async)");
@@ -4850,7 +4850,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Auto-delete interval has been set </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox setAutoDeleteInterval(String sandboxIdOrName, BigDecimal interval, String xDaytonaOrganizationID) throws ApiException {
+    public Sandbox setAutoDeleteInterval(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Sandbox> localVarResp = setAutoDeleteIntervalWithHttpInfo(sandboxIdOrName, interval, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -4870,7 +4870,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Auto-delete interval has been set </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> setAutoDeleteIntervalWithHttpInfo(String sandboxIdOrName, BigDecimal interval, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Sandbox> setAutoDeleteIntervalWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = setAutoDeleteIntervalValidateBeforeCall(sandboxIdOrName, interval, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -4892,7 +4892,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Auto-delete interval has been set </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call setAutoDeleteIntervalAsync(String sandboxIdOrName, BigDecimal interval, String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call setAutoDeleteIntervalAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = setAutoDeleteIntervalValidateBeforeCall(sandboxIdOrName, interval, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -4914,7 +4914,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Auto-stop interval has been set </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call setAutostopIntervalCall(String sandboxIdOrName, BigDecimal interval, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call setAutostopIntervalCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -4966,7 +4966,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call setAutostopIntervalValidateBeforeCall(String sandboxIdOrName, BigDecimal interval, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call setAutostopIntervalValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling setAutostopInterval(Async)");
@@ -4996,7 +4996,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Auto-stop interval has been set </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox setAutostopInterval(String sandboxIdOrName, BigDecimal interval, String xDaytonaOrganizationID) throws ApiException {
+    public Sandbox setAutostopInterval(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Sandbox> localVarResp = setAutostopIntervalWithHttpInfo(sandboxIdOrName, interval, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -5016,7 +5016,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Auto-stop interval has been set </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> setAutostopIntervalWithHttpInfo(String sandboxIdOrName, BigDecimal interval, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Sandbox> setAutostopIntervalWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = setAutostopIntervalValidateBeforeCall(sandboxIdOrName, interval, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -5038,7 +5038,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Auto-stop interval has been set </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call setAutostopIntervalAsync(String sandboxIdOrName, BigDecimal interval, String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call setAutostopIntervalAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull BigDecimal interval, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = setAutostopIntervalValidateBeforeCall(sandboxIdOrName, interval, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -5059,7 +5059,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been started or is being restored from archived state </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call startSandboxCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call startSandboxCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -5110,7 +5110,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call startSandboxValidateBeforeCall(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call startSandboxValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling startSandbox(Async)");
@@ -5134,7 +5134,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been started or is being restored from archived state </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox startSandbox(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+    public Sandbox startSandbox(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Sandbox> localVarResp = startSandboxWithHttpInfo(sandboxIdOrName, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -5153,7 +5153,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been started or is being restored from archived state </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> startSandboxWithHttpInfo(String sandboxIdOrName, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Sandbox> startSandboxWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = startSandboxValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -5174,7 +5174,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been started or is being restored from archived state </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call startSandboxAsync(String sandboxIdOrName, String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call startSandboxAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = startSandboxValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -5196,7 +5196,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been stopped </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call stopSandboxCall(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean force, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call stopSandboxCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean force, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -5251,7 +5251,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call stopSandboxValidateBeforeCall(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean force, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call stopSandboxValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean force, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling stopSandbox(Async)");
@@ -5276,7 +5276,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been stopped </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox stopSandbox(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean force) throws ApiException {
+    public Sandbox stopSandbox(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean force) throws ApiException {
         ApiResponse<Sandbox> localVarResp = stopSandboxWithHttpInfo(sandboxIdOrName, xDaytonaOrganizationID, force);
         return localVarResp.getData();
     }
@@ -5296,7 +5296,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been stopped </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> stopSandboxWithHttpInfo(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean force) throws ApiException {
+    public ApiResponse<Sandbox> stopSandboxWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean force) throws ApiException {
         okhttp3.Call localVarCall = stopSandboxValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, force, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -5318,7 +5318,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox has been stopped </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call stopSandboxAsync(String sandboxIdOrName, String xDaytonaOrganizationID, Boolean force, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call stopSandboxAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean force, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = stopSandboxValidateBeforeCall(sandboxIdOrName, xDaytonaOrganizationID, force, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -5339,7 +5339,7 @@ public class SandboxApi {
         <tr><td> 201 </td><td> Last activity has been updated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call updateLastActivityCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call updateLastActivityCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -5389,7 +5389,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call updateLastActivityValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call updateLastActivityValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling updateLastActivity(Async)");
@@ -5412,7 +5412,7 @@ public class SandboxApi {
         <tr><td> 201 </td><td> Last activity has been updated </td><td>  -  </td></tr>
      </table>
      */
-    public void updateLastActivity(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public void updateLastActivity(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         updateLastActivityWithHttpInfo(sandboxId, xDaytonaOrganizationID);
     }
 
@@ -5430,7 +5430,7 @@ public class SandboxApi {
         <tr><td> 201 </td><td> Last activity has been updated </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> updateLastActivityWithHttpInfo(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> updateLastActivityWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = updateLastActivityValidateBeforeCall(sandboxId, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -5450,7 +5450,7 @@ public class SandboxApi {
         <tr><td> 201 </td><td> Last activity has been updated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call updateLastActivityAsync(String sandboxId, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call updateLastActivityAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = updateLastActivityValidateBeforeCall(sandboxId, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -5471,7 +5471,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Network settings have been updated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call updateNetworkSettingsCall(String sandboxIdOrName, UpdateSandboxNetworkSettings updateSandboxNetworkSettings, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call updateNetworkSettingsCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull UpdateSandboxNetworkSettings updateSandboxNetworkSettings, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -5523,7 +5523,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call updateNetworkSettingsValidateBeforeCall(String sandboxIdOrName, UpdateSandboxNetworkSettings updateSandboxNetworkSettings, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call updateNetworkSettingsValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull UpdateSandboxNetworkSettings updateSandboxNetworkSettings, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling updateNetworkSettings(Async)");
@@ -5553,7 +5553,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Network settings have been updated </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox updateNetworkSettings(String sandboxIdOrName, UpdateSandboxNetworkSettings updateSandboxNetworkSettings, String xDaytonaOrganizationID) throws ApiException {
+    public Sandbox updateNetworkSettings(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull UpdateSandboxNetworkSettings updateSandboxNetworkSettings, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Sandbox> localVarResp = updateNetworkSettingsWithHttpInfo(sandboxIdOrName, updateSandboxNetworkSettings, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -5573,7 +5573,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Network settings have been updated </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> updateNetworkSettingsWithHttpInfo(String sandboxIdOrName, UpdateSandboxNetworkSettings updateSandboxNetworkSettings, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Sandbox> updateNetworkSettingsWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull UpdateSandboxNetworkSettings updateSandboxNetworkSettings, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = updateNetworkSettingsValidateBeforeCall(sandboxIdOrName, updateSandboxNetworkSettings, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -5595,7 +5595,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Network settings have been updated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call updateNetworkSettingsAsync(String sandboxIdOrName, UpdateSandboxNetworkSettings updateSandboxNetworkSettings, String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call updateNetworkSettingsAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull UpdateSandboxNetworkSettings updateSandboxNetworkSettings, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = updateNetworkSettingsValidateBeforeCall(sandboxIdOrName, updateSandboxNetworkSettings, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -5617,7 +5617,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Public status has been successfully updated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call updatePublicStatusCall(String sandboxIdOrName, Boolean isPublic, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call updatePublicStatusCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull Boolean isPublic, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -5669,7 +5669,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call updatePublicStatusValidateBeforeCall(String sandboxIdOrName, Boolean isPublic, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call updatePublicStatusValidateBeforeCall(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull Boolean isPublic, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxIdOrName' is set
         if (sandboxIdOrName == null) {
             throw new ApiException("Missing the required parameter 'sandboxIdOrName' when calling updatePublicStatus(Async)");
@@ -5699,7 +5699,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Public status has been successfully updated </td><td>  -  </td></tr>
      </table>
      */
-    public Sandbox updatePublicStatus(String sandboxIdOrName, Boolean isPublic, String xDaytonaOrganizationID) throws ApiException {
+    public Sandbox updatePublicStatus(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull Boolean isPublic, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Sandbox> localVarResp = updatePublicStatusWithHttpInfo(sandboxIdOrName, isPublic, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -5719,7 +5719,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Public status has been successfully updated </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Sandbox> updatePublicStatusWithHttpInfo(String sandboxIdOrName, Boolean isPublic, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Sandbox> updatePublicStatusWithHttpInfo(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull Boolean isPublic, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = updatePublicStatusValidateBeforeCall(sandboxIdOrName, isPublic, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -5741,7 +5741,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Public status has been successfully updated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call updatePublicStatusAsync(String sandboxIdOrName, Boolean isPublic, String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
+    public okhttp3.Call updatePublicStatusAsync(@javax.annotation.Nonnull String sandboxIdOrName, @javax.annotation.Nonnull Boolean isPublic, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Sandbox> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = updatePublicStatusValidateBeforeCall(sandboxIdOrName, isPublic, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
@@ -5763,7 +5763,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox state has been successfully updated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call updateSandboxStateCall(String sandboxId, UpdateSandboxStateDto updateSandboxStateDto, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call updateSandboxStateCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull UpdateSandboxStateDto updateSandboxStateDto, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -5814,7 +5814,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call updateSandboxStateValidateBeforeCall(String sandboxId, UpdateSandboxStateDto updateSandboxStateDto, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call updateSandboxStateValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull UpdateSandboxStateDto updateSandboxStateDto, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling updateSandboxState(Async)");
@@ -5843,7 +5843,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox state has been successfully updated </td><td>  -  </td></tr>
      </table>
      */
-    public void updateSandboxState(String sandboxId, UpdateSandboxStateDto updateSandboxStateDto, String xDaytonaOrganizationID) throws ApiException {
+    public void updateSandboxState(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull UpdateSandboxStateDto updateSandboxStateDto, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         updateSandboxStateWithHttpInfo(sandboxId, updateSandboxStateDto, xDaytonaOrganizationID);
     }
 
@@ -5862,7 +5862,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox state has been successfully updated </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> updateSandboxStateWithHttpInfo(String sandboxId, UpdateSandboxStateDto updateSandboxStateDto, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> updateSandboxStateWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull UpdateSandboxStateDto updateSandboxStateDto, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = updateSandboxStateValidateBeforeCall(sandboxId, updateSandboxStateDto, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -5883,7 +5883,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> Sandbox state has been successfully updated </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call updateSandboxStateAsync(String sandboxId, UpdateSandboxStateDto updateSandboxStateDto, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call updateSandboxStateAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull UpdateSandboxStateDto updateSandboxStateDto, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = updateSandboxStateValidateBeforeCall(sandboxId, updateSandboxStateDto, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -5903,7 +5903,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> SSH access validation result </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call validateSshAccessCall(String token, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call validateSshAccessCall(@javax.annotation.Nonnull String token, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -5957,7 +5957,7 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call validateSshAccessValidateBeforeCall(String token, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call validateSshAccessValidateBeforeCall(@javax.annotation.Nonnull String token, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'token' is set
         if (token == null) {
             throw new ApiException("Missing the required parameter 'token' when calling validateSshAccess(Async)");
@@ -5981,7 +5981,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> SSH access validation result </td><td>  -  </td></tr>
      </table>
      */
-    public SshAccessValidationDto validateSshAccess(String token, String xDaytonaOrganizationID) throws ApiException {
+    public SshAccessValidationDto validateSshAccess(@javax.annotation.Nonnull String token, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<SshAccessValidationDto> localVarResp = validateSshAccessWithHttpInfo(token, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -6000,7 +6000,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> SSH access validation result </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<SshAccessValidationDto> validateSshAccessWithHttpInfo(String token, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<SshAccessValidationDto> validateSshAccessWithHttpInfo(@javax.annotation.Nonnull String token, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = validateSshAccessValidateBeforeCall(token, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<SshAccessValidationDto>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -6021,7 +6021,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td> SSH access validation result </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call validateSshAccessAsync(String token, String xDaytonaOrganizationID, final ApiCallback<SshAccessValidationDto> _callback) throws ApiException {
+    public okhttp3.Call validateSshAccessAsync(@javax.annotation.Nonnull String token, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<SshAccessValidationDto> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = validateSshAccessValidateBeforeCall(token, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<SshAccessValidationDto>(){}.getType();

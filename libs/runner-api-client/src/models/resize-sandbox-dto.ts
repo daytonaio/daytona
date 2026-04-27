@@ -14,35 +14,10 @@
 
 
 
-/**
- * 
- * @export
- * @interface ResizeSandboxDTO
- */
 export interface ResizeSandboxDTO {
-    /**
-     * 
-     * @type {number}
-     * @memberof ResizeSandboxDTO
-     */
     'cpu'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResizeSandboxDTO
-     */
     'disk'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResizeSandboxDTO
-     */
     'gpu'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ResizeSandboxDTO
-     */
     'memory'?: number;
 }
 

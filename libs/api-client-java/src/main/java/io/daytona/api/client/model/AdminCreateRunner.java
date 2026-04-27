@@ -49,7 +49,7 @@ import io.daytona.api.client.JSON;
 /**
  * AdminCreateRunner
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class AdminCreateRunner {
   public static final String SERIALIZED_NAME_REGION_ID = "regionId";
   @SerializedName(SERIALIZED_NAME_REGION_ID)
@@ -390,10 +390,7 @@ public class AdminCreateRunner {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -402,24 +399,10 @@ public class AdminCreateRunner {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("regionId");
-    openapiFields.add("name");
-    openapiFields.add("apiKey");
-    openapiFields.add("apiVersion");
-    openapiFields.add("domain");
-    openapiFields.add("apiUrl");
-    openapiFields.add("proxyUrl");
-    openapiFields.add("cpu");
-    openapiFields.add("memoryGiB");
-    openapiFields.add("diskGiB");
+    openapiFields = new HashSet<String>(Arrays.asList("regionId", "name", "apiKey", "apiVersion", "domain", "apiUrl", "proxyUrl", "cpu", "memoryGiB", "diskGiB"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("regionId");
-    openapiRequiredFields.add("name");
-    openapiRequiredFields.add("apiKey");
-    openapiRequiredFields.add("apiVersion");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("regionId", "name", "apiKey", "apiVersion"));
   }
 
   /**
@@ -431,37 +414,37 @@ public class AdminCreateRunner {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!AdminCreateRunner.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in AdminCreateRunner is not found in the empty JSON string", AdminCreateRunner.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in AdminCreateRunner is not found in the empty JSON string", AdminCreateRunner.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : AdminCreateRunner.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("regionId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `regionId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("regionId").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `regionId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("regionId").toString()));
       }
       if (!jsonObj.get("name").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("name").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("name").toString()));
       }
       if (!jsonObj.get("apiKey").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `apiKey` to be a primitive type in the JSON string but got `%s`", jsonObj.get("apiKey").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `apiKey` to be a primitive type in the JSON string but got `%s`", jsonObj.get("apiKey").toString()));
       }
       if (!jsonObj.get("apiVersion").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `apiVersion` to be a primitive type in the JSON string but got `%s`", jsonObj.get("apiVersion").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `apiVersion` to be a primitive type in the JSON string but got `%s`", jsonObj.get("apiVersion").toString()));
       }
       if ((jsonObj.get("domain") != null && !jsonObj.get("domain").isJsonNull()) && !jsonObj.get("domain").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `domain` to be a primitive type in the JSON string but got `%s`", jsonObj.get("domain").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `domain` to be a primitive type in the JSON string but got `%s`", jsonObj.get("domain").toString()));
       }
       if ((jsonObj.get("apiUrl") != null && !jsonObj.get("apiUrl").isJsonNull()) && !jsonObj.get("apiUrl").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `apiUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("apiUrl").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `apiUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("apiUrl").toString()));
       }
       if ((jsonObj.get("proxyUrl") != null && !jsonObj.get("proxyUrl").isJsonNull()) && !jsonObj.get("proxyUrl").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `proxyUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("proxyUrl").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `proxyUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("proxyUrl").toString()));
       }
   }
 
@@ -522,7 +505,7 @@ public class AdminCreateRunner {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

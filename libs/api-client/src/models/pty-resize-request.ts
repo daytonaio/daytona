@@ -14,22 +14,13 @@
 
 
 
-/**
- * 
- * @export
- * @interface PtyResizeRequest
- */
 export interface PtyResizeRequest {
     /**
      * Number of terminal columns
-     * @type {number}
-     * @memberof PtyResizeRequest
      */
     'cols': number;
     /**
      * Number of terminal rows
-     * @type {number}
-     * @memberof PtyResizeRequest
      */
     'rows': number;
 }

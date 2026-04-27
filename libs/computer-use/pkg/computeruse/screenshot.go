@@ -6,6 +6,7 @@ package computeruse
 import (
 	"bytes"
 	"encoding/base64"
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -17,6 +18,14 @@ import (
 	"github.com/kbinani/screenshot"
 	log "github.com/sirupsen/logrus"
 )
+
+func validateScreenshotRegion(width, height int) error {
+	if width <= 0 || height <= 0 {
+		return fmt.Errorf("invalid screenshot region: width and height must be greater than zero")
+	}
+
+	return nil
+}
 
 // drawCursor draws a simple cursor at the given position
 func drawCursor(img *image.RGBA, x, y int) {
@@ -128,11 +137,14 @@ func (u *ComputerUse) TakeRegionScreenshot(req *computeruse.RegionScreenshotRequ
 	display := os.Getenv("DISPLAY")
 	log.Infof("TakeRegionScreenshot: DISPLAY=%s", display)
 
+	if err := validateScreenshotRegion(req.Width, req.Height); err != nil {
+		return nil, err
+	}
+
 	rect := image.Rect(req.X, req.Y, req.X+req.Width, req.Y+req.Height)
 	img, err := screenshot.CaptureRect(rect)
 	if err != nil {
-		log.Errorf("TakeRegionScreenshot error: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("failed to capture screenshot region x=%d y=%d width=%d height=%d: %w", req.X, req.Y, req.Width, req.Height, err)
 	}
 
 	// Convert to RGBA for drawing

@@ -18,14 +18,13 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
 import type { StorageAccessDto } from '../models';
 /**
  * ObjectStorageApi - axios parameter creator
- * @export
  */
 export const ObjectStorageApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -55,8 +54,8 @@ export const ObjectStorageApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -74,7 +73,6 @@ export const ObjectStorageApiAxiosParamCreator = function (configuration?: Confi
 
 /**
  * ObjectStorageApi - functional programming interface
- * @export
  */
 export const ObjectStorageApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ObjectStorageApiAxiosParamCreator(configuration)
@@ -97,7 +95,6 @@ export const ObjectStorageApiFp = function(configuration?: Configuration) {
 
 /**
  * ObjectStorageApi - factory interface
- * @export
  */
 export const ObjectStorageApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = ObjectStorageApiFp(configuration)
@@ -117,9 +114,6 @@ export const ObjectStorageApiFactory = function (configuration?: Configuration, 
 
 /**
  * ObjectStorageApi - object-oriented interface
- * @export
- * @class ObjectStorageApi
- * @extends {BaseAPI}
  */
 export class ObjectStorageApi extends BaseAPI {
     /**
@@ -128,7 +122,6 @@ export class ObjectStorageApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ObjectStorageApi
      */
     public getPushAccess(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ObjectStorageApiFp(this.configuration).getPushAccess(xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));

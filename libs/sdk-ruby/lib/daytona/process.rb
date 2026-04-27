@@ -1,3 +1,6 @@
+# Copyright Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 # frozen_string_literal: true
 
 require 'uri'
@@ -500,7 +503,10 @@ module Daytona
     #     puts "PTY Session #{session.id}: #{session.cols}x#{session.rows}"
     #   end
     def list_pty_sessions
-      toolbox_api.list_pty_sessions
+      response = toolbox_api.list_pty_sessions
+      return [] if response.nil?
+
+      response.respond_to?(:sessions) ? (response.sessions || []) : response
     end
 
     # Gets detailed information about a specific PTY session

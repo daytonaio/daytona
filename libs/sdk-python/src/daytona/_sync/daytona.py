@@ -663,9 +663,7 @@ class Daytona:
         # (instead of urllib3.Retry with allowed_methods=None) avoids also retrying
         # IncompleteRead, where the server already started processing and sending a
         # response — retrying that would execute the operation a second time.
-        config.retries = RemoteDisconnectedRetry(  # pyright: ignore[reportAttributeAccessIssue]
-            total=3, raise_on_status=False
-        )
+        config.retries = RemoteDisconnectedRetry(total=3, raise_on_status=False)
         toolbox_api_client = ToolboxApiClient(config)
         toolbox_api_client.default_headers = deepcopy(cast(dict[str, str], self._api_client.default_headers))
 

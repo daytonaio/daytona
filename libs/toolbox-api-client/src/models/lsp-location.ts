@@ -17,23 +17,8 @@
 // @ts-ignore
 import type { LspRange } from './lsp-range';
 
-/**
- * 
- * @export
- * @interface LspLocation
- */
 export interface LspLocation {
-    /**
-     * 
-     * @type {LspRange}
-     * @memberof LspLocation
-     */
     'range': LspRange;
-    /**
-     * 
-     * @type {string}
-     * @memberof LspLocation
-     */
     'uri': string;
 }
 

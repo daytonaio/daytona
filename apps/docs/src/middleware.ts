@@ -22,19 +22,24 @@ export const onRequest = defineMiddleware(
     const path = url.pathname.replace(/\/$/, '')
 
     const proxyRequest = async (targetUrl: URL): Promise<Response> => {
-      const response = await fetch(targetUrl.toString(), {
-        method: request.method,
-        body:
-          request.method === 'GET' || request.method === 'HEAD'
-            ? undefined
-            : request.body,
-      })
+      try {
+        const response = await fetch(targetUrl.toString(), {
+          method: request.method,
+          body:
+            request.method === 'GET' || request.method === 'HEAD'
+              ? undefined
+              : request.body,
+        })
 
-      return new Response(response.body, {
-        status: response.status,
-        statusText: response.statusText,
-        headers: filterProxyHeaders(response.headers),
-      })
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: filterProxyHeaders(response.headers),
+        })
+      } catch {
+        // During prerender the target server doesn't exist yet; fall through
+        return next()
+      }
     }
 
     if (path === '/docs/sitemap.xml') {

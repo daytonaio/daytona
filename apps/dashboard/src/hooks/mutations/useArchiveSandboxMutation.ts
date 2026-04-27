@@ -12,7 +12,11 @@ interface ArchiveSandboxVariables {
   sandboxId: string
 }
 
-export const useArchiveSandboxMutation = () => {
+interface UseArchiveSandboxMutationOptions {
+  invalidate?: boolean
+}
+
+export const useArchiveSandboxMutation = ({ invalidate = true }: UseArchiveSandboxMutationOptions = {}) => {
   const { sandboxApi } = useApi()
   const { selectedOrganization } = useSelectedOrganization()
   const queryClient = useQueryClient()
@@ -22,6 +26,10 @@ export const useArchiveSandboxMutation = () => {
       await sandboxApi.archiveSandbox(sandboxId, selectedOrganization?.id)
     },
     onSuccess: (_, { sandboxId }) => {
+      if (!invalidate) {
+        return
+      }
+
       queryClient.invalidateQueries({
         queryKey: queryKeys.sandboxes.detail(selectedOrganization?.id ?? '', sandboxId),
       })

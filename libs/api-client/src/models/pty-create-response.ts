@@ -14,16 +14,9 @@
 
 
 
-/**
- * 
- * @export
- * @interface PtyCreateResponse
- */
 export interface PtyCreateResponse {
     /**
      * The unique identifier for the created PTY session
-     * @type {string}
-     * @memberof PtyCreateResponse
      */
     'sessionId': string;
 }

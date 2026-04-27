@@ -4,6 +4,7 @@
 package computeruse
 
 import (
+	"fmt"
 	"net/http"
 	"net/rpc"
 	"strconv"
@@ -227,6 +228,167 @@ type ProcessRequest struct {
 
 type Empty struct{} //	@name	Empty
 
+func parseRequiredIntQuery(c *gin.Context, key string) (int, error) {
+	value, ok := c.GetQuery(key)
+	if !ok {
+		return 0, fmt.Errorf("missing required query parameter: %s", key)
+	}
+
+	parsed, err := strconv.Atoi(value)
+	if err != nil {
+		return 0, fmt.Errorf("invalid query parameter %s: must be an integer", key)
+	}
+
+	return parsed, nil
+}
+
+func parseRequiredPositiveIntQuery(c *gin.Context, key string) (int, error) {
+	parsed, err := parseRequiredIntQuery(c, key)
+	if err != nil {
+		return 0, err
+	}
+	if parsed <= 0 {
+		return 0, fmt.Errorf("invalid query parameter %s: must be greater than zero", key)
+	}
+
+	return parsed, nil
+}
+
+func parseBoolQueryValue(key, value string) (bool, error) {
+	parsed, err := strconv.ParseBool(value)
+	if err != nil {
+		return false, fmt.Errorf("invalid query parameter %s: must be a boolean", key)
+	}
+
+	return parsed, nil
+}
+
+func parseShowCursorQuery(c *gin.Context) (bool, error) {
+	if value, ok := c.GetQuery("show_cursor"); ok {
+		return parseBoolQueryValue("show_cursor", value)
+	}
+	if value, ok := c.GetQuery("showCursor"); ok {
+		return parseBoolQueryValue("showCursor", value)
+	}
+
+	return false, nil
+}
+
+func parseOptionalQualityQuery(c *gin.Context) (int, error) {
+	value, ok := c.GetQuery("quality")
+	if !ok {
+		return 85, nil
+	}
+
+	quality, err := strconv.Atoi(value)
+	if err != nil {
+		return 0, fmt.Errorf("invalid query parameter quality: must be an integer")
+	}
+	if quality < 1 || quality > 100 {
+		return 0, fmt.Errorf("invalid query parameter quality: must be between 1 and 100")
+	}
+
+	return quality, nil
+}
+
+func parseOptionalScaleQuery(c *gin.Context) (float64, error) {
+	value, ok := c.GetQuery("scale")
+	if !ok {
+		return 1.0, nil
+	}
+
+	scale, err := strconv.ParseFloat(value, 64)
+	if err != nil {
+		return 0, fmt.Errorf("invalid query parameter scale: must be a number")
+	}
+	if scale < 0.1 || scale > 1.0 {
+		return 0, fmt.Errorf("invalid query parameter scale: must be between 0.1 and 1.0")
+	}
+
+	return scale, nil
+}
+
+func parseRegionScreenshotRequest(c *gin.Context) (*RegionScreenshotRequest, error) {
+	x, err := parseRequiredIntQuery(c, "x")
+	if err != nil {
+		return nil, err
+	}
+	y, err := parseRequiredIntQuery(c, "y")
+	if err != nil {
+		return nil, err
+	}
+	width, err := parseRequiredPositiveIntQuery(c, "width")
+	if err != nil {
+		return nil, err
+	}
+	height, err := parseRequiredPositiveIntQuery(c, "height")
+	if err != nil {
+		return nil, err
+	}
+	showCursor, err := parseShowCursorQuery(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return &RegionScreenshotRequest{
+		Position: Position{
+			X: x,
+			Y: y,
+		},
+		Size: Size{
+			Width:  width,
+			Height: height,
+		},
+		ShowCursor: showCursor,
+	}, nil
+}
+
+func parseCompressedScreenshotRequest(c *gin.Context) (*CompressedScreenshotRequest, error) {
+	showCursor, err := parseShowCursorQuery(c)
+	if err != nil {
+		return nil, err
+	}
+	quality, err := parseOptionalQualityQuery(c)
+	if err != nil {
+		return nil, err
+	}
+	scale, err := parseOptionalScaleQuery(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return &CompressedScreenshotRequest{
+		ShowCursor: showCursor,
+		Format:     c.DefaultQuery("format", "png"),
+		Quality:    quality,
+		Scale:      scale,
+	}, nil
+}
+
+func parseCompressedRegionScreenshotRequest(c *gin.Context) (*CompressedRegionScreenshotRequest, error) {
+	regionReq, err := parseRegionScreenshotRequest(c)
+	if err != nil {
+		return nil, err
+	}
+	quality, err := parseOptionalQualityQuery(c)
+	if err != nil {
+		return nil, err
+	}
+	scale, err := parseOptionalScaleQuery(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return &CompressedRegionScreenshotRequest{
+		Position:   regionReq.Position,
+		Size:       regionReq.Size,
+		ShowCursor: regionReq.ShowCursor,
+		Format:     c.DefaultQuery("format", "png"),
+		Quality:    quality,
+		Scale:      scale,
+	}, nil
+}
+
 func (p *ComputerUsePlugin) Server(*plugin.MuxBroker) (any, error) {
 	return &ComputerUseRPCServer{Impl: p.Impl}, nil
 }
@@ -248,8 +410,14 @@ func (p *ComputerUsePlugin) Client(b *plugin.MuxBroker, c *rpc.Client) (any, err
 //	@id				TakeScreenshot
 func WrapScreenshotHandler(fn func(*ScreenshotRequest) (*ScreenshotResponse, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		showCursor, err := parseShowCursorQuery(c)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
 		req := &ScreenshotRequest{
-			ShowCursor: c.Query("showCursor") == "true",
+			ShowCursor: showCursor,
 		}
 		response, err := fn(req)
 		if err != nil {
@@ -277,14 +445,13 @@ func WrapScreenshotHandler(fn func(*ScreenshotRequest) (*ScreenshotResponse, err
 //	@id				TakeRegionScreenshot
 func WrapRegionScreenshotHandler(fn func(*RegionScreenshotRequest) (*ScreenshotResponse, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var req RegionScreenshotRequest
-		if err := c.ShouldBindQuery(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid parameters"})
+		req, err := parseRegionScreenshotRequest(c)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		req.ShowCursor = c.Query("showCursor") == "true"
 
-		response, err := fn(&req)
+		response, err := fn(req)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -309,25 +476,10 @@ func WrapRegionScreenshotHandler(fn func(*RegionScreenshotRequest) (*ScreenshotR
 //	@id				TakeCompressedScreenshot
 func WrapCompressedScreenshotHandler(fn func(*CompressedScreenshotRequest) (*ScreenshotResponse, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		req := &CompressedScreenshotRequest{
-			ShowCursor: c.Query("showCursor") == "true",
-			Format:     c.Query("format"),
-			Quality:    85,
-			Scale:      1.0,
-		}
-
-		// Parse quality
-		if qualityStr := c.Query("quality"); qualityStr != "" {
-			if quality, err := strconv.Atoi(qualityStr); err == nil && quality >= 1 && quality <= 100 {
-				req.Quality = quality
-			}
-		}
-
-		// Parse scale
-		if scaleStr := c.Query("scale"); scaleStr != "" {
-			if scale, err := strconv.ParseFloat(scaleStr, 64); err == nil && scale >= 0.1 && scale <= 1.0 {
-				req.Scale = scale
-			}
+		req, err := parseCompressedScreenshotRequest(c)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
 		}
 
 		response, err := fn(req)
@@ -359,31 +511,13 @@ func WrapCompressedScreenshotHandler(fn func(*CompressedScreenshotRequest) (*Scr
 //	@id				TakeCompressedRegionScreenshot
 func WrapCompressedRegionScreenshotHandler(fn func(*CompressedRegionScreenshotRequest) (*ScreenshotResponse, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var req CompressedRegionScreenshotRequest
-		if err := c.ShouldBindQuery(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid parameters"})
+		req, err := parseCompressedRegionScreenshotRequest(c)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		req.ShowCursor = c.Query("showCursor") == "true"
-		req.Format = c.Query("format")
-		req.Quality = 85
-		req.Scale = 1.0
 
-		// Parse quality
-		if qualityStr := c.Query("quality"); qualityStr != "" {
-			if quality, err := strconv.Atoi(qualityStr); err == nil && quality >= 1 && quality <= 100 {
-				req.Quality = quality
-			}
-		}
-
-		// Parse scale
-		if scaleStr := c.Query("scale"); scaleStr != "" {
-			if scale, err := strconv.ParseFloat(scaleStr, 64); err == nil && scale >= 0.1 && scale <= 1.0 {
-				req.Scale = scale
-			}
-		}
-
-		response, err := fn(&req)
+		response, err := fn(req)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return

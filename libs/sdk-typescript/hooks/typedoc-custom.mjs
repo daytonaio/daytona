@@ -57,6 +57,7 @@ function transformContent(contents) {
     transformEnumSection,
     transformThrowsSection,
     transformTypeDeclarationSection,
+    substituteOmitInheritance,
     fixFormattingArtifacts,
   ].reduce((acc, fn) => fn(acc), contents)
 }
@@ -488,6 +489,24 @@ function transformThrowsSection(contents) {
 
 function fixFormattingArtifacts(content) {
   return content.replace(/`~~([^`]+?)\?~~`/g, '~~`$1?`~~')
+}
+
+function substituteOmitInheritance(contents) {
+  const parts = contents.split(/^(## [^\n]+)$/m)
+
+  for (let i = 1; i < parts.length; i += 2) {
+    const body = parts[i + 1]
+    if (!body) continue
+
+    const omitMatch = body.match(/`?Omit`?\s*\\?<\s*`([A-Za-z_$][\w$]*)`/)
+    if (!omitMatch) continue
+
+    const typeName = omitMatch[1]
+
+    parts[i + 1] = body.replace(/`Omit\.([A-Za-z_$][\w$]*)`/g, `\`${typeName}.$1\``)
+  }
+
+  return parts.join('')
 }
 
 function transformTypeDeclarationSection(contents) {

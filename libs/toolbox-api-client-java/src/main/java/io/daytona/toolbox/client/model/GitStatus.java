@@ -51,7 +51,7 @@ import io.daytona.toolbox.client.JSON;
 /**
  * GitStatus
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class GitStatus {
   public static final String SERIALIZED_NAME_AHEAD = "ahead";
   @SerializedName(SERIALIZED_NAME_AHEAD)
@@ -270,10 +270,7 @@ public class GitStatus {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -282,17 +279,10 @@ public class GitStatus {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("ahead");
-    openapiFields.add("behind");
-    openapiFields.add("branchPublished");
-    openapiFields.add("currentBranch");
-    openapiFields.add("fileStatus");
+    openapiFields = new HashSet<String>(Arrays.asList("ahead", "behind", "branchPublished", "currentBranch", "fileStatus"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("currentBranch");
-    openapiRequiredFields.add("fileStatus");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("currentBranch", "fileStatus"));
   }
 
   /**
@@ -304,30 +294,30 @@ public class GitStatus {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!GitStatus.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in GitStatus is not found in the empty JSON string", GitStatus.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in GitStatus is not found in the empty JSON string", GitStatus.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : GitStatus.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("currentBranch").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `currentBranch` to be a primitive type in the JSON string but got `%s`", jsonObj.get("currentBranch").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `currentBranch` to be a primitive type in the JSON string but got `%s`", jsonObj.get("currentBranch").toString()));
       }
-      // ensure the json data is an array
-      if (!jsonObj.get("fileStatus").isJsonArray()) {
-        throw new IllegalArgumentException(String.format("Expected the field `fileStatus` to be an array in the JSON string but got `%s`", jsonObj.get("fileStatus").toString()));
+      if (jsonObj.get("fileStatus") != null) {
+        if (!jsonObj.get("fileStatus").isJsonArray()) {
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `fileStatus` to be an array in the JSON string but got `%s`", jsonObj.get("fileStatus").toString()));
+        }
+        JsonArray jsonArrayfileStatus = jsonObj.getAsJsonArray("fileStatus");
+        // validate the required field `fileStatus` (array)
+        for (int i = 0; i < jsonArrayfileStatus.size(); i++) {
+          FileStatus.validateJsonElement(jsonArrayfileStatus.get(i));
+        }
       }
-
-      JsonArray jsonArrayfileStatus = jsonObj.getAsJsonArray("fileStatus");
-      // validate the required field `fileStatus` (array)
-      for (int i = 0; i < jsonArrayfileStatus.size(); i++) {
-        FileStatus.validateJsonElement(jsonArrayfileStatus.get(i));
-      };
   }
 
   public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
@@ -387,7 +377,7 @@ public class GitStatus {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

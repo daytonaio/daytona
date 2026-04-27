@@ -24,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
 import { useCreateSandboxMutation } from '@/hooks/mutations/useCreateSandboxMutation'
+import { useSetOrganizationDefaultRegionMutation } from '@/hooks/mutations/useSetOrganizationDefaultRegionMutation'
 import { useSnapshotsQuery } from '@/hooks/queries/useSnapshotsQuery'
 import { useConfig } from '@/hooks/useConfig'
 import { useRegions } from '@/hooks/useRegions'
@@ -32,8 +33,10 @@ import { parseEnvFile } from '@/lib/env'
 import { handleApiError } from '@/lib/error-handling'
 import { imageNameSchema } from '@/lib/schema'
 import { cn, getRegionFullDisplayName } from '@/lib/utils'
+import { OrganizationUserRoleEnum } from '@daytona/api-client'
 import { Sandbox } from '@daytona/sdk'
 import { useForm } from '@tanstack/react-form'
+import { isAxiosError } from 'axios'
 import { Info, Minus, Plus, Upload } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { ComponentProps, Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
@@ -94,6 +97,7 @@ const buildBaseFormSchema = (maxCpu?: number, maxMemory?: number, maxDisk?: numb
     public: z.boolean().optional(),
     networkBlockAll: z.boolean().optional(),
     ephemeral: z.boolean().optional(),
+    setAsDefaultRegion: z.boolean().optional(),
   })
 
 const buildFormSchema = (maxCpu?: number, maxMemory?: number, maxDisk?: number) => {
@@ -135,6 +139,7 @@ const defaultValues: FormValues = {
   public: false,
   networkBlockAll: false,
   ephemeral: false,
+  setAsDefaultRegion: false,
 }
 
 const InfoTooltipButton = ({ className, ...props }: ComponentProps<'button'>) => {
@@ -152,8 +157,9 @@ export const CreateSandboxSheet = ({ className, ref }: { className?: string; ref
 
   const config = useConfig()
   const { availableRegions: regions, loadingAvailableRegions: loadingRegions } = useRegions()
-  const { selectedOrganization } = useSelectedOrganization()
+  const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
   const { reset: resetCreateSandboxMutation, ...createSandboxMutation } = useCreateSandboxMutation()
+  const setDefaultRegionMutation = useSetOrganizationDefaultRegionMutation()
   const formRef = useRef<HTMLFormElement>(null)
 
   useImperativeHandle(ref, () => ({
@@ -163,6 +169,9 @@ export const CreateSandboxSheet = ({ className, ref }: { className?: string; ref
   const maxCpu = selectedOrganization?.maxCpuPerSandbox
   const maxMemory = selectedOrganization?.maxMemoryPerSandbox
   const maxDisk = selectedOrganization?.maxDiskPerSandbox
+  const canSetDefaultRegion =
+    !selectedOrganization?.defaultRegionId &&
+    authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
 
   const formSchema = useMemo(() => buildFormSchema(maxCpu, maxMemory, maxDisk), [maxCpu, maxMemory, maxDisk])
 
@@ -189,6 +198,25 @@ export const CreateSandboxSheet = ({ className, ref }: { className?: string; ref
       if (!selectedOrganization?.id) {
         toast.error('Select an organization to create a sandbox.')
         return
+      }
+
+      if (value.setAsDefaultRegion && value.regionId) {
+        try {
+          await setDefaultRegionMutation.mutateAsync({
+            organizationId: selectedOrganization.id,
+            defaultRegionId: value.regionId,
+          })
+        } catch (error) {
+          // 409 Conflict = another path (e.g. the auto-triggered SetDefaultRegionDialog on
+          // Dashboard) set the default between sheet-open and submit. The user's intent is
+          // already satisfied; continue to sandbox creation.
+          const cause = error instanceof Error ? error.cause : undefined
+          const status = isAxiosError(cause) ? cause.response?.status : undefined
+          if (status !== 409) {
+            handleApiError(error, 'Failed to set default region')
+            return
+          }
+        }
       }
 
       const envVars: Record<string, string> = {}
@@ -317,6 +345,14 @@ export const CreateSandboxSheet = ({ className, ref }: { className?: string; ref
       resetState()
     }
   }, [open, resetState])
+
+  useEffect(() => {
+    if (!open || loadingRegions) return
+    if (regions.length !== 1) return
+    if (selectedOrganization?.defaultRegionId) return
+    if (form.getFieldValue('regionId')) return
+    form.setFieldValue('regionId', regions[0].id)
+  }, [open, loadingRegions, regions, selectedOrganization?.defaultRegionId, form])
 
   if (!createSandboxEnabled) {
     return null
@@ -591,6 +627,33 @@ export const CreateSandboxSheet = ({ className, ref }: { className?: string; ref
                 </Field>
               )}
             </form.Field>
+            {canSetDefaultRegion && (
+              <form.Field name="setAsDefaultRegion">
+                {(field) => (
+                  <form.Subscribe selector={(state) => state.values.regionId}>
+                    {(regionId) => (
+                      <div className="flex items-start gap-2">
+                        <Checkbox
+                          id={field.name}
+                          className="mt-0.5"
+                          checked={field.state.value ?? false}
+                          disabled={!regionId}
+                          onCheckedChange={(checked) => field.handleChange(checked === true)}
+                        />
+                        <div className="flex flex-col gap-1">
+                          <Label htmlFor={field.name} className="text-sm font-normal">
+                            Set this as the organization's default region
+                          </Label>
+                          <FieldDescription>
+                            Use the selected region by default for future sandboxes in this organization.
+                          </FieldDescription>
+                        </div>
+                      </div>
+                    )}
+                  </form.Subscribe>
+                )}
+              </form.Field>
+            )}
             <div className="flex flex-col gap-2">
               <Label className="text-sm font-medium">Lifecycle</Label>
               <div className="flex flex-col gap-2">

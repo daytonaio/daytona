@@ -4,6 +4,8 @@
 //	@title			Daytona Toolbox API
 //	@version		v0.0.0-dev
 //	@description	Daytona Toolbox API
+//	@license.name	Apache-2.0
+//	@license.url	https://www.apache.org/licenses/LICENSE-2.0
 
 package toolbox
 

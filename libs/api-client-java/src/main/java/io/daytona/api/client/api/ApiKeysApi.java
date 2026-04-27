@@ -88,7 +88,7 @@ public class ApiKeysApi {
         <tr><td> 201 </td><td> API key created successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createApiKeyCall(CreateApiKey createApiKey, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createApiKeyCall(@javax.annotation.Nonnull CreateApiKey createApiKey, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -139,7 +139,7 @@ public class ApiKeysApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createApiKeyValidateBeforeCall(CreateApiKey createApiKey, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createApiKeyValidateBeforeCall(@javax.annotation.Nonnull CreateApiKey createApiKey, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'createApiKey' is set
         if (createApiKey == null) {
             throw new ApiException("Missing the required parameter 'createApiKey' when calling createApiKey(Async)");
@@ -163,7 +163,7 @@ public class ApiKeysApi {
         <tr><td> 201 </td><td> API key created successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiKeyResponse createApiKey(CreateApiKey createApiKey, String xDaytonaOrganizationID) throws ApiException {
+    public ApiKeyResponse createApiKey(@javax.annotation.Nonnull CreateApiKey createApiKey, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<ApiKeyResponse> localVarResp = createApiKeyWithHttpInfo(createApiKey, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -182,7 +182,7 @@ public class ApiKeysApi {
         <tr><td> 201 </td><td> API key created successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ApiKeyResponse> createApiKeyWithHttpInfo(CreateApiKey createApiKey, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<ApiKeyResponse> createApiKeyWithHttpInfo(@javax.annotation.Nonnull CreateApiKey createApiKey, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = createApiKeyValidateBeforeCall(createApiKey, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<ApiKeyResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -203,7 +203,7 @@ public class ApiKeysApi {
         <tr><td> 201 </td><td> API key created successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createApiKeyAsync(CreateApiKey createApiKey, String xDaytonaOrganizationID, final ApiCallback<ApiKeyResponse> _callback) throws ApiException {
+    public okhttp3.Call createApiKeyAsync(@javax.annotation.Nonnull CreateApiKey createApiKey, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<ApiKeyResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createApiKeyValidateBeforeCall(createApiKey, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<ApiKeyResponse>(){}.getType();
@@ -224,7 +224,7 @@ public class ApiKeysApi {
         <tr><td> 204 </td><td> API key deleted successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteApiKeyCall(String name, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deleteApiKeyCall(@javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -274,7 +274,7 @@ public class ApiKeysApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deleteApiKeyValidateBeforeCall(String name, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deleteApiKeyValidateBeforeCall(@javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'name' is set
         if (name == null) {
             throw new ApiException("Missing the required parameter 'name' when calling deleteApiKey(Async)");
@@ -297,7 +297,7 @@ public class ApiKeysApi {
         <tr><td> 204 </td><td> API key deleted successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public void deleteApiKey(String name, String xDaytonaOrganizationID) throws ApiException {
+    public void deleteApiKey(@javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         deleteApiKeyWithHttpInfo(name, xDaytonaOrganizationID);
     }
 
@@ -315,7 +315,7 @@ public class ApiKeysApi {
         <tr><td> 204 </td><td> API key deleted successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> deleteApiKeyWithHttpInfo(String name, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> deleteApiKeyWithHttpInfo(@javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = deleteApiKeyValidateBeforeCall(name, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -335,7 +335,7 @@ public class ApiKeysApi {
         <tr><td> 204 </td><td> API key deleted successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteApiKeyAsync(String name, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call deleteApiKeyAsync(@javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deleteApiKeyValidateBeforeCall(name, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -356,7 +356,7 @@ public class ApiKeysApi {
         <tr><td> 204 </td><td> API key deleted successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteApiKeyForUserCall(String userId, String name, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deleteApiKeyForUserCall(@javax.annotation.Nonnull String userId, @javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -407,7 +407,7 @@ public class ApiKeysApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deleteApiKeyForUserValidateBeforeCall(String userId, String name, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deleteApiKeyForUserValidateBeforeCall(@javax.annotation.Nonnull String userId, @javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'userId' is set
         if (userId == null) {
             throw new ApiException("Missing the required parameter 'userId' when calling deleteApiKeyForUser(Async)");
@@ -436,7 +436,7 @@ public class ApiKeysApi {
         <tr><td> 204 </td><td> API key deleted successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public void deleteApiKeyForUser(String userId, String name, String xDaytonaOrganizationID) throws ApiException {
+    public void deleteApiKeyForUser(@javax.annotation.Nonnull String userId, @javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         deleteApiKeyForUserWithHttpInfo(userId, name, xDaytonaOrganizationID);
     }
 
@@ -455,7 +455,7 @@ public class ApiKeysApi {
         <tr><td> 204 </td><td> API key deleted successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> deleteApiKeyForUserWithHttpInfo(String userId, String name, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> deleteApiKeyForUserWithHttpInfo(@javax.annotation.Nonnull String userId, @javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = deleteApiKeyForUserValidateBeforeCall(userId, name, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -476,7 +476,7 @@ public class ApiKeysApi {
         <tr><td> 204 </td><td> API key deleted successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteApiKeyForUserAsync(String userId, String name, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call deleteApiKeyForUserAsync(@javax.annotation.Nonnull String userId, @javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deleteApiKeyForUserValidateBeforeCall(userId, name, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -496,7 +496,7 @@ public class ApiKeysApi {
         <tr><td> 200 </td><td> API key retrieved successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getApiKeyCall(String name, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getApiKeyCall(@javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -547,7 +547,7 @@ public class ApiKeysApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getApiKeyValidateBeforeCall(String name, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getApiKeyValidateBeforeCall(@javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'name' is set
         if (name == null) {
             throw new ApiException("Missing the required parameter 'name' when calling getApiKey(Async)");
@@ -571,7 +571,7 @@ public class ApiKeysApi {
         <tr><td> 200 </td><td> API key retrieved successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiKeyList getApiKey(String name, String xDaytonaOrganizationID) throws ApiException {
+    public ApiKeyList getApiKey(@javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<ApiKeyList> localVarResp = getApiKeyWithHttpInfo(name, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -590,7 +590,7 @@ public class ApiKeysApi {
         <tr><td> 200 </td><td> API key retrieved successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ApiKeyList> getApiKeyWithHttpInfo(String name, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<ApiKeyList> getApiKeyWithHttpInfo(@javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getApiKeyValidateBeforeCall(name, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<ApiKeyList>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -611,7 +611,7 @@ public class ApiKeysApi {
         <tr><td> 200 </td><td> API key retrieved successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getApiKeyAsync(String name, String xDaytonaOrganizationID, final ApiCallback<ApiKeyList> _callback) throws ApiException {
+    public okhttp3.Call getApiKeyAsync(@javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<ApiKeyList> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getApiKeyValidateBeforeCall(name, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<ApiKeyList>(){}.getType();
@@ -631,7 +631,7 @@ public class ApiKeysApi {
         <tr><td> 200 </td><td> API key retrieved successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getCurrentApiKeyCall(String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getCurrentApiKeyCall(@javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -681,7 +681,7 @@ public class ApiKeysApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getCurrentApiKeyValidateBeforeCall(String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getCurrentApiKeyValidateBeforeCall(@javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         return getCurrentApiKeyCall(xDaytonaOrganizationID, _callback);
 
     }
@@ -699,7 +699,7 @@ public class ApiKeysApi {
         <tr><td> 200 </td><td> API key retrieved successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiKeyList getCurrentApiKey(String xDaytonaOrganizationID) throws ApiException {
+    public ApiKeyList getCurrentApiKey(@javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<ApiKeyList> localVarResp = getCurrentApiKeyWithHttpInfo(xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -717,7 +717,7 @@ public class ApiKeysApi {
         <tr><td> 200 </td><td> API key retrieved successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ApiKeyList> getCurrentApiKeyWithHttpInfo(String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<ApiKeyList> getCurrentApiKeyWithHttpInfo(@javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getCurrentApiKeyValidateBeforeCall(xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<ApiKeyList>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -737,7 +737,7 @@ public class ApiKeysApi {
         <tr><td> 200 </td><td> API key retrieved successfully. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getCurrentApiKeyAsync(String xDaytonaOrganizationID, final ApiCallback<ApiKeyList> _callback) throws ApiException {
+    public okhttp3.Call getCurrentApiKeyAsync(@javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<ApiKeyList> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getCurrentApiKeyValidateBeforeCall(xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<ApiKeyList>(){}.getType();
@@ -758,7 +758,7 @@ public class ApiKeysApi {
         <tr><td> 500 </td><td> Error fetching API keys. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listApiKeysCall(String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listApiKeysCall(@javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -808,7 +808,7 @@ public class ApiKeysApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listApiKeysValidateBeforeCall(String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call listApiKeysValidateBeforeCall(@javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         return listApiKeysCall(xDaytonaOrganizationID, _callback);
 
     }
@@ -827,7 +827,7 @@ public class ApiKeysApi {
         <tr><td> 500 </td><td> Error fetching API keys. </td><td>  -  </td></tr>
      </table>
      */
-    public List<ApiKeyList> listApiKeys(String xDaytonaOrganizationID) throws ApiException {
+    public List<ApiKeyList> listApiKeys(@javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<List<ApiKeyList>> localVarResp = listApiKeysWithHttpInfo(xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -846,7 +846,7 @@ public class ApiKeysApi {
         <tr><td> 500 </td><td> Error fetching API keys. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<ApiKeyList>> listApiKeysWithHttpInfo(String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<List<ApiKeyList>> listApiKeysWithHttpInfo(@javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = listApiKeysValidateBeforeCall(xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<List<ApiKeyList>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -867,7 +867,7 @@ public class ApiKeysApi {
         <tr><td> 500 </td><td> Error fetching API keys. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listApiKeysAsync(String xDaytonaOrganizationID, final ApiCallback<List<ApiKeyList>> _callback) throws ApiException {
+    public okhttp3.Call listApiKeysAsync(@javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<List<ApiKeyList>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = listApiKeysValidateBeforeCall(xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<List<ApiKeyList>>(){}.getType();

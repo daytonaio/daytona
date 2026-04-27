@@ -17,23 +17,8 @@
 // @ts-ignore
 import type { LspPosition } from './lsp-position';
 
-/**
- * 
- * @export
- * @interface LspRange
- */
 export interface LspRange {
-    /**
-     * 
-     * @type {LspPosition}
-     * @memberof LspRange
-     */
     'end': LspPosition;
-    /**
-     * 
-     * @type {LspPosition}
-     * @memberof LspRange
-     */
     'start': LspPosition;
 }
 

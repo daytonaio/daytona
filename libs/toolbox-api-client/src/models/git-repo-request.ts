@@ -14,29 +14,9 @@
 
 
 
-/**
- * 
- * @export
- * @interface GitRepoRequest
- */
 export interface GitRepoRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof GitRepoRequest
-     */
     'password'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GitRepoRequest
-     */
     'path': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GitRepoRequest
-     */
     'username'?: string;
 }
 

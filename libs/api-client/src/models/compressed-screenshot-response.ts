@@ -14,28 +14,17 @@
 
 
 
-/**
- * 
- * @export
- * @interface CompressedScreenshotResponse
- */
 export interface CompressedScreenshotResponse {
     /**
      * Base64 encoded compressed screenshot image data
-     * @type {string}
-     * @memberof CompressedScreenshotResponse
      */
     'screenshot': string;
     /**
      * The current cursor position when the compressed screenshot was taken
-     * @type {object}
-     * @memberof CompressedScreenshotResponse
      */
     'cursorPosition'?: object;
     /**
      * The size of the compressed screenshot data in bytes
-     * @type {number}
-     * @memberof CompressedScreenshotResponse
      */
     'sizeBytes'?: number;
 }

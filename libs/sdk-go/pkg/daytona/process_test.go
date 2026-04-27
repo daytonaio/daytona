@@ -1,10 +1,11 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 package daytona
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -13,6 +14,9 @@ import (
 
 	"bytes"
 
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/options"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+	toolbox "github.com/daytonaio/daytona/libs/toolbox-api-client-go"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -334,4 +338,71 @@ func TestProcessWebsocketStreamNoMarkerAtStart(t *testing.T) {
 	}
 
 	assert.Equal(t, "kept data\n", stdoutBuilder.String())
+}
+
+func TestProcessExecuteCommandRequestMapping(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var body map[string]any
+		require.NoError(t, json.NewDecoder(r.Body).Decode(&body))
+		assert.Equal(t, "echo hello", body["command"])
+		assert.Equal(t, "/workspace", body["cwd"])
+		assert.Equal(t, float64(45), body["timeout"])
+		envs, ok := body["envs"].(map[string]any)
+		require.True(t, ok)
+		assert.Equal(t, "1", envs["DEBUG"])
+		writeJSONResponse(t, w, http.StatusOK, map[string]any{"result": "hello", "exitCode": 2})
+	}))
+	defer server.Close()
+
+	service := NewProcessService(createTestToolboxClient(server), nil, types.CodeLanguagePython)
+	result, err := service.ExecuteCommand(context.Background(), "echo hello",
+		options.WithCwd("/workspace"),
+		options.WithCommandEnv(map[string]string{"DEBUG": "1"}),
+		options.WithExecuteTimeout(45*time.Second),
+	)
+	require.NoError(t, err)
+	assert.Equal(t, 2, result.ExitCode)
+	assert.Equal(t, "hello", result.Result)
+	assert.Equal(t, "hello", result.Artifacts.Stdout)
+}
+
+func TestProcessCodeRunAndSessionOperations(t *testing.T) {
+	t.Run("code run maps charts and explicit language", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var body map[string]any
+			require.NoError(t, json.NewDecoder(r.Body).Decode(&body))
+			assert.Equal(t, "console.log('hi')", body["code"])
+			assert.Equal(t, string(types.CodeLanguageJavaScript), body["language"])
+			writeJSONResponse(t, w, http.StatusOK, map[string]any{
+				"result":   "hi",
+				"exitCode": 0,
+				"artifacts": map[string]any{
+					"charts": []map[string]any{{"type": "bar", "data": map[string]any{"x": []string{"a"}, "y": []int{1}}}},
+				},
+			})
+		}))
+		defer server.Close()
+
+		service := NewProcessService(createTestToolboxClient(server), nil, types.CodeLanguagePython)
+		result, err := service.CodeRun(context.Background(), "console.log('hi')", options.WithCodeRunLanguage(types.CodeLanguageJavaScript))
+		require.NoError(t, err)
+		assert.Equal(t, "hi", result.Result)
+		require.NotNil(t, result.Artifacts)
+		assert.Len(t, result.Artifacts.Charts, 1)
+	})
+}
+
+func TestFlushToChannelAndChartConversion(t *testing.T) {
+	stdout := make(chan string, 1)
+	stderr := make(chan string, 1)
+	flushToChannel([]byte("out"), "stdout", stdout, stderr)
+	flushToChannel([]byte("err"), "stderr", stdout, stderr)
+	assert.Equal(t, "out", <-stdout)
+	assert.Equal(t, "err", <-stderr)
+	flushToChannel(nil, "stdout", stdout, stderr)
+	assert.Empty(t, convertCodeRunCharts(nil))
+	converted := convertCodeRunCharts([]toolbox.Chart{{Type: strPtr("line")}})
+	require.Len(t, converted, 1)
+	require.NotNil(t, converted[0].Type)
+	assert.Equal(t, "line", *converted[0].Type)
 }

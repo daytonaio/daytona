@@ -2052,7 +2052,7 @@ Hotkey executes a keyboard shortcut.
 
 Parameters:
 
-- keys: The hotkey combination as a string \(e.g., "ctrl\+c", "alt\+tab"\)
+- keys: A single atomic hotkey chord as a string \(e.g., "ctrl\+c", "alt\+tab", "cmd\+shift\+t", "ctrl \+ c", "shift"\). Uses the same normalized key contract as Press.
 
 Example:
 
@@ -2080,14 +2080,14 @@ Press simulates pressing a key with optional modifiers.
 
 Parameters:
 
-- key: The key to press \(e.g., "a", "Enter", "Tab", "F1"\)
-- modifiers: Modifier keys to hold \(e.g., "ctrl", "alt", "shift", "meta"\)
+- key: The key to press. Canonical names include "enter", "escape", "tab", letters, digits, unshifted punctuation, function keys, and grammar\-safe numpad names such as "num\_plus". Named keys are case\-insensitive, and common aliases such as "Return" and "Escape" are normalized.
+- modifiers: Canonical modifier names are "ctrl", "alt", "shift", and "cmd". Common aliases such as "control", "option", "meta", and "win" are normalized.
 
 Example:
 
 ```
 // Press Enter
-err := keyboard.Press(ctx, "Enter", nil)
+err := keyboard.Press(ctx, "enter", nil)
 
 // Press Ctrl+S
 err := keyboard.Press(ctx, "s", []string{"ctrl"})

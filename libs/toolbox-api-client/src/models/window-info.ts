@@ -14,53 +14,13 @@
 
 
 
-/**
- * 
- * @export
- * @interface WindowInfo
- */
 export interface WindowInfo {
-    /**
-     * 
-     * @type {number}
-     * @memberof WindowInfo
-     */
     'height'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof WindowInfo
-     */
     'id'?: number;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof WindowInfo
-     */
     'isActive'?: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof WindowInfo
-     */
     'title'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof WindowInfo
-     */
     'width'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof WindowInfo
-     */
     'x'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof WindowInfo
-     */
     'y'?: number;
 }
 

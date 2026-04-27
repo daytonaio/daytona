@@ -12,6 +12,23 @@
         "command": "npm run docs"
       }
     },
+    "test": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", { "env": "DAYTONA_API_KEY" }, { "env": "DAYTONA_API_URL" }, { "env": "DAYTONA_JWT_TOKEN" }, { "env": "DAYTONA_ORGANIZATION_ID" }, { "env": "DAYTONA_TARGET" }],
+      "outputs": [],
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "poetry run python -m pytest libs/sdk-python/tests/ -v --tb=short --ignore=libs/sdk-python/tests/test_e2e.py"
+      }
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "poetry run python -m pytest libs/sdk-python/tests/test_e2e.py -v -s --timeout=180"
+      }
+    },
     "add-api-clients": {
       "executor": "nx:run-commands",
       "options": {

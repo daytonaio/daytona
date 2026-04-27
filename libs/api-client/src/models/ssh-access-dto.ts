@@ -14,52 +14,33 @@
 
 
 
-/**
- * 
- * @export
- * @interface SshAccessDto
- */
 export interface SshAccessDto {
     /**
      * Unique identifier for the SSH access
-     * @type {string}
-     * @memberof SshAccessDto
      */
     'id': string;
     /**
      * ID of the sandbox this SSH access is for
-     * @type {string}
-     * @memberof SshAccessDto
      */
     'sandboxId': string;
     /**
      * SSH access token
-     * @type {string}
-     * @memberof SshAccessDto
      */
     'token': string;
     /**
      * When the SSH access expires
-     * @type {Date}
-     * @memberof SshAccessDto
      */
     'expiresAt': Date;
     /**
      * When the SSH access was created
-     * @type {Date}
-     * @memberof SshAccessDto
      */
     'createdAt': Date;
     /**
      * When the SSH access was last updated
-     * @type {Date}
-     * @memberof SshAccessDto
      */
     'updatedAt': Date;
     /**
      * SSH command to connect to the sandbox
-     * @type {string}
-     * @memberof SshAccessDto
      */
     'sshCommand': string;
 }

@@ -1,15 +1,8 @@
 # E2E Sandbox Lifecycle Tests — PR (Built from Source)
 #
-# Builds the PR code, starts infrastructure + services locally, and runs E2E tests.
-# Gated by the 'run-e2e' label — maintainers add the label to approve the run.
-#
-# Infrastructure: postgres, redis, dex, registry, minio (via Docker Compose)
-# Services: API, runner, proxy, dashboard (started individually via nx serve)
-#
-# Uses `nx affected` to detect whether the E2E project or any of its implicit
-# dependencies (api, runner, proxy, dashboard) changed. If not affected, all
-# infrastructure setup is skipped entirely.
-#
+# Runs automatically when nx affected detects changes to E2E-relevant projects
+# (apps, SDKs, API clients). Builds from source, starts infrastructure + services,
+# and runs daytona-e2e suite plus SDK E2E tests.
 
 name: '[E2E] PR Sandbox Tests'
 
@@ -17,7 +10,6 @@ on:
   pull_request:
     branches:
       - main
-    types: [labeled, synchronize]
 
 permissions:
   contents: read
@@ -29,7 +21,6 @@ concurrency:
 jobs:
   e2e-pr-tests:
     name: E2E sandbox lifecycle (from source)
-    if: contains(github.event.pull_request.labels.*.name, 'run-e2e')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -58,15 +49,19 @@ jobs:
 
       - run: yarn install --immutable
 
-      - name: Check if E2E tests are affected
+      - name: Check if E2E-relevant projects are affected
         id: affected
         run: |
-          if npx nx show projects --affected --base=origin/main --head=HEAD | grep -q "^daytona-e2e$"; then
+          if ! AFFECTED=$(npx nx show projects --affected --base=origin/${{ github.event.pull_request.base.ref }} --head=HEAD); then
+            echo "Failed to determine affected projects"
+            exit 1
+          fi
+          echo "Affected projects: $AFFECTED"
+          if echo "$AFFECTED" | grep -qE 'daytona-e2e|^api$|^runner$|^proxy$|^daemon$|^dashboard$|sdk-typescript|sdk-python|sdk-go|sdk-ruby|sdk-java|api-client|toolbox-api-client'; then
             echo "affected=true" >> $GITHUB_OUTPUT
-            echo "daytona-e2e is affected by this PR — running E2E tests"
           else
             echo "affected=false" >> $GITHUB_OUTPUT
-            echo "daytona-e2e is not affected by this PR — skipping E2E tests"
+            echo "No E2E-relevant projects affected — skipping"
           fi
 
       - uses: ./.github/actions/setup-toolchain
@@ -151,12 +146,12 @@ jobs:
       - name: Wait for default snapshot to be available
         if: steps.affected.outputs.affected == 'true'
         run: |
-          echo "Waiting for default snapshot (python:3.12-slim) to become active..."
+          echo "Waiting for default snapshot (daytonaio/sandbox:0.6.0-slim) to become active..."
           echo "Runner must boot, API creates snapshot (pending), cron job transitions it to active"
-          for i in $(seq 1 90); do
+          for i in $(seq 1 150); do
             BODY=$(curl -s \
               -H "Authorization: Bearer e2e_admin_api_key" \
-              "http://localhost:3001/api/snapshots/python%3A3.12-slim" 2>/dev/null || echo "")
+              "http://localhost:3001/api/snapshots/daytonaio%2Fsandbox%3A0.6.0-slim" 2>/dev/null || echo "")
             STATE=$(echo "$BODY" | jq -r '.state // empty' 2>/dev/null || echo "")
             if [ "$STATE" = "active" ]; then
               echo "Default snapshot is active (attempt $i, elapsed ~$((i*2))s)"
@@ -167,7 +162,7 @@ jobs:
             fi
             sleep 2
           done
-          echo "Default snapshot not active after 180s"
+          echo "Default snapshot not active after 300s"
           echo "Last snapshot response:"
           echo "$BODY" | jq . 2>/dev/null || echo "$BODY"
           echo ""
@@ -178,12 +173,31 @@ jobs:
           tail -50 /tmp/api.log 2>/dev/null || echo "No API logs found"
           exit 1
 
-      - name: Run E2E tests
+      - name: Run daytona-e2e tests
         if: steps.affected.outputs.affected == 'true'
         env:
           DAYTONA_API_URL: http://localhost:3001/api
           DAYTONA_API_KEY: e2e_admin_api_key
         run: yarn nx e2e daytona-e2e
+
+      - name: Install Python test dependencies
+        if: steps.affected.outputs.affected == 'true'
+        run: |
+          source "$(poetry env info --path)/bin/activate"
+          pip install pytest pytest-asyncio pytest-timeout
+
+      - name: Publish Java API clients to Maven local
+        if: steps.affected.outputs.affected == 'true'
+        run: |
+          (cd libs/api-client-java && ./gradlew publishToMavenLocal -x test)
+          (cd libs/toolbox-api-client-java && ./gradlew publishToMavenLocal -x test)
+
+      - name: Run SDK E2E tests
+        if: steps.affected.outputs.affected == 'true'
+        env:
+          DAYTONA_API_URL: http://localhost:3001/api
+          DAYTONA_API_KEY: e2e_admin_api_key
+        run: yarn test:e2e
 
       - name: Cleanup stale E2E sandboxes
         if: always() && steps.affected.outputs.affected == 'true'
@@ -196,10 +210,7 @@ jobs:
         if: always() && steps.affected.outputs.affected == 'true'
         run: |
           for svc in api runner proxy dashboard; do
-            echo ""
-            echo "============================================"
             echo "=== ${svc} logs (last 200 lines) ==="
-            echo "============================================"
             tail -200 /tmp/${svc}.log 2>/dev/null || echo "No ${svc} logs found"
           done
 

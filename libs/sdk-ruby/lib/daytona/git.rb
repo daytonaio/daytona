@@ -1,3 +1,6 @@
+# Copyright Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 # frozen_string_literal: true
 
 module Daytona
@@ -142,7 +145,7 @@ module Daytona
       response = toolbox_api.commit_changes(
         DaytonaToolboxApiClient::GitCommitRequest.new(path:, message:, author:, email:, allow_empty:)
       )
-      GitCommitResponse.new(sha: response.hash)
+      GitCommitResponse.new(sha: response._hash)
     rescue StandardError => e
       raise Sdk::Error, "Failed to commit changes: #{e.message}"
     end

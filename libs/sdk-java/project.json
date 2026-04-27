@@ -65,6 +65,23 @@
         "cwd": "{projectRoot}",
         "command": "./gradlew clean"
       }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", { "env": "DAYTONA_API_KEY" }, { "env": "DAYTONA_API_URL" }, { "env": "DAYTONA_JWT_TOKEN" }, { "env": "DAYTONA_ORGANIZATION_ID" }, { "env": "DAYTONA_TARGET" }],
+      "outputs": [],
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "./gradlew test --info"
+      }
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "./gradlew testE2E --info"
+      }
     }
   }
 }

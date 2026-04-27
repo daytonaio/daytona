@@ -49,7 +49,7 @@ import io.daytona.api.client.JSON;
 /**
  * UpdateRegion
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class UpdateRegion {
   public static final String SERIALIZED_NAME_PROXY_URL = "proxyUrl";
   @SerializedName(SERIALIZED_NAME_PROXY_URL)
@@ -219,10 +219,7 @@ public class UpdateRegion {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -231,13 +228,10 @@ public class UpdateRegion {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("proxyUrl");
-    openapiFields.add("sshGatewayUrl");
-    openapiFields.add("snapshotManagerUrl");
+    openapiFields = new HashSet<String>(Arrays.asList("proxyUrl", "sshGatewayUrl", "snapshotManagerUrl"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
+    openapiRequiredFields = new HashSet<String>(0);
   }
 
   /**
@@ -249,18 +243,18 @@ public class UpdateRegion {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!UpdateRegion.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in UpdateRegion is not found in the empty JSON string", UpdateRegion.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in UpdateRegion is not found in the empty JSON string", UpdateRegion.openapiRequiredFields.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if ((jsonObj.get("proxyUrl") != null && !jsonObj.get("proxyUrl").isJsonNull()) && !jsonObj.get("proxyUrl").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `proxyUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("proxyUrl").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `proxyUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("proxyUrl").toString()));
       }
       if ((jsonObj.get("sshGatewayUrl") != null && !jsonObj.get("sshGatewayUrl").isJsonNull()) && !jsonObj.get("sshGatewayUrl").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `sshGatewayUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("sshGatewayUrl").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `sshGatewayUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("sshGatewayUrl").toString()));
       }
       if ((jsonObj.get("snapshotManagerUrl") != null && !jsonObj.get("snapshotManagerUrl").isJsonNull()) && !jsonObj.get("snapshotManagerUrl").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `snapshotManagerUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("snapshotManagerUrl").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `snapshotManagerUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("snapshotManagerUrl").toString()));
       }
   }
 
@@ -321,7 +315,7 @@ public class UpdateRegion {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

@@ -14,17 +14,7 @@
 
 
 
-/**
- * 
- * @export
- * @interface PtyCreateResponse
- */
 export interface PtyCreateResponse {
-    /**
-     * 
-     * @type {string}
-     * @memberof PtyCreateResponse
-     */
     'sessionId': string;
 }
 

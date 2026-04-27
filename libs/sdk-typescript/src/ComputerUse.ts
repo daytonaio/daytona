@@ -218,15 +218,15 @@ export class Keyboard {
   /**
    * Presses a key with optional modifiers
    *
-   * @param {string} key - The key to press (e.g., 'Enter', 'Escape', 'Tab', 'a', 'A')
-   * @param {string[]} [modifiers=[]] - Modifier keys ('ctrl', 'alt', 'meta', 'shift')
+   * @param {string} key - The key to press. Canonical names include 'enter', 'escape', 'tab', letters, digits, unshifted punctuation, function keys, and grammar-safe numpad names such as 'num_plus'. Named keys are case-insensitive, and common aliases such as 'Return' and 'Escape' are normalized.
+   * @param {string[]} [modifiers=[]] - Canonical modifier names are 'ctrl', 'alt', 'shift', and 'cmd'. Common aliases such as 'control', 'option', 'meta', and 'win' are normalized.
    * @throws {DaytonaError} If the press operation fails
    *
    * @example
    * ```typescript
    * // Press Enter
    * try {
-   *   await sandbox.computerUse.keyboard.press('Return');
+   *   await sandbox.computerUse.keyboard.press('enter');
    *   console.log('Operation success');
    * } catch (e) {
    *   console.log('Operation failed:', e);
@@ -258,7 +258,7 @@ export class Keyboard {
   /**
    * Presses a hotkey combination
    *
-   * @param {string} keys - The hotkey combination (e.g., 'ctrl+c', 'alt+tab', 'cmd+shift+t')
+   * @param {string} keys - A single atomic hotkey chord (e.g., 'ctrl+c', 'alt+tab', 'cmd+shift+t', 'ctrl + c', 'shift'). Uses the same normalized key contract as `press()`.
    * @throws {DaytonaError} If the hotkey operation fails
    *
    * @example

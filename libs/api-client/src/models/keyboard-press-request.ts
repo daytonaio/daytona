@@ -14,22 +14,13 @@
 
 
 
-/**
- * 
- * @export
- * @interface KeyboardPressRequest
- */
 export interface KeyboardPressRequest {
     /**
      * The key to press (e.g., a, b, c, enter, space, etc.)
-     * @type {string}
-     * @memberof KeyboardPressRequest
      */
     'key': string;
     /**
      * Array of modifier keys to press along with the main key (ctrl, alt, shift, cmd)
-     * @type {Array<string>}
-     * @memberof KeyboardPressRequest
      */
     'modifiers'?: Array<string>;
 }

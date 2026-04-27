@@ -16,9 +16,20 @@
     },
     "test": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", { "env": "DAYTONA_API_KEY" }, { "env": "DAYTONA_API_URL" }, { "env": "DAYTONA_JWT_TOKEN" }, { "env": "DAYTONA_ORGANIZATION_ID" }, { "env": "DAYTONA_TARGET" }],
+      "outputs": [],
       "options": {
         "cwd": "{projectRoot}",
-        "command": "go test -v -race ./..."
+        "command": "go test -v -race -count=1 ./..."
+      },
+      "dependsOn": ["build"]
+    },
+    "test:e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "go test -v -tags=e2e -run TestE2E -timeout 180s -count=1 ./pkg/daytona/"
       },
       "dependsOn": ["build"]
     },
