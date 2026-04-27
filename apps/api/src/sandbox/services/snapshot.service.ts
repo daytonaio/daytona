@@ -628,6 +628,13 @@ export class SnapshotService {
         throw new BadRequestException(`Snapshot ${snapshotId} cannot be activated - it is in ${snapshot.state} state`)
       }
 
+      const activationCooldownMs = 10 * 60 * 1000
+      const recentlyDeactivated = Date.now() - snapshot.updatedAt.getTime() < activationCooldownMs
+
+      if (recentlyDeactivated) {
+        throw new BadRequestException('Snapshot deactivation is still in progress. Please try again in a few minutes.')
+      }
+
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
       const regionId = snapshot.snapshotRegions?.[0]?.regionId
