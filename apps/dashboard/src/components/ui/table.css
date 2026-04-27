@@ -1,0 +1,41 @@
+@media (min-width: 768px) {
+  [data-sticky-state='left'] {
+    box-shadow: 6px 0 8px -2px rgba(0, 0, 0, 0);
+    transition: box-shadow 0.2s ease;
+    border-right: 1px solid transparent;
+  }
+
+  [data-sticky-state='right'] {
+    box-shadow: -6px 0 8px -2px rgba(0, 0, 0, 0);
+    transition: box-shadow 0.2s ease;
+    border-left: 1px solid transparent;
+  }
+
+  [data-scrolled-left] [data-sticky-state='left'] {
+    box-shadow: 6px 0 8px -2px rgba(0, 0, 0, 0.05);
+    border-right-color: hsl(var(--border));
+  }
+
+  [data-overflow-right] [data-sticky-state='right'] {
+    box-shadow: -6px 0 8px -2px rgba(0, 0, 0, 0.05);
+    border-left-color: hsl(var(--border));
+  }
+
+  .dark [data-scrolled-left] [data-sticky-state='left'] {
+    box-shadow: 6px 0 8px -2px rgba(0, 0, 0, 0.35);
+  }
+
+  .dark [data-overflow-right] [data-sticky-state='right'] {
+    box-shadow: -6px 0 8px -2px rgba(0, 0, 0, 0.35);
+  }
+}
+
+@media (max-width: 767px) {
+  [data-slot='table-head'][data-sticky-state],
+  [data-slot='table-cell'][data-sticky-state] {
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    box-shadow: none !important;
+  }
+}

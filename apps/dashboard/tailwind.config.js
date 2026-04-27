@@ -75,6 +75,12 @@ module.exports = {
           background: 'hsl(var(--info-background))',
           separator: 'hsl(var(--info-separator))',
         },
+        table: {
+          header: 'hsl(var(--table-header) / <alpha-value>)',
+          cell: 'hsl(var(--table-cell) / <alpha-value>)',
+          'cell-hover': 'hsl(var(--table-cell-hover) / <alpha-value>)',
+          'cell-active': 'hsl(var(--table-cell-active) / <alpha-value>)',
+        },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
