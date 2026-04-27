@@ -78,6 +78,17 @@
     margin: 24px 0;
   }
 
+  > :is(h2[id], h3[id], h4[id], h5[id], .sl-heading-wrapper) + :not(
+      p,
+      h2,
+      h3,
+      h4,
+      h5,
+      .sl-heading-wrapper
+    ) {
+    margin-top: 24px;
+  }
+
   > hr {
     margin: 40px 0;
   }
