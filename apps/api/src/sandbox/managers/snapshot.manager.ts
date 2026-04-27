@@ -1160,7 +1160,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       const queryResult = await this.snapshotRepository
         .createQueryBuilder('snapshot')
         .select('snapshot."ref"')
-        .where('snapshot.state = :snapshotState', { snapshotState: SnapshotState.INACTIVE })
+        .where('snapshot.state = :inactiveState', { inactiveState: SnapshotState.INACTIVE })
         .andWhere('snapshot."ref" IS NOT NULL')
         .andWhereExists(
           this.snapshotRunnerRepository
@@ -1177,11 +1177,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
               .createQueryBuilder('s')
               .select('1')
               .where('s."ref" = snapshot."ref"')
-              .andWhere('s.state = :snapshotState')
+              .andWhere('s.state = :activeState')
             return `NOT EXISTS (${query.getQuery()})`
           },
           {
-            snapshotState: SnapshotState.ACTIVE,
+            activeState: SnapshotState.ACTIVE,
           },
         )
         .take(100)
