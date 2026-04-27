@@ -433,12 +433,10 @@ export function getHeaderActiveState(
     isActiveOrParentPath(`${baseUrl}/en/security-exhibit`, currentPath) ||
     isActiveOrParentPath(`${baseUrl}/en/audit-logs`, currentPath)
 
-  const isTelemetrySectionActive =
-    isActiveOrParentPath(`${baseUrl}/en/manage/telemetry`, currentPath) ||
-    isActiveOrParentPath(
-      `${baseUrl}/en/experimental/otel-collection`,
-      currentPath
-    )
+  const isTelemetrySectionActive = isActiveOrParentPath(
+    `${baseUrl}/en/experimental/otel-collection`,
+    currentPath
+  )
 
   const isDeploymentsOpenSourceSectionActive = isActiveOrParentPath(
     `${baseUrl}/en/oss-deployment`,
