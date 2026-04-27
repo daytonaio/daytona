@@ -4,6 +4,10 @@
     "description": "Daytona Runner API",
     "title": "Daytona Runner API",
     "contact": {},
+    "license": {
+      "name": "Apache-2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0"
+    },
     "version": "v0.0.0-dev"
   },
   "paths": {

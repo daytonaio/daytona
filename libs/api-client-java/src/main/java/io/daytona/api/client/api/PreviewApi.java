@@ -86,7 +86,7 @@ public class PreviewApi {
         <tr><td> 200 </td><td> Sandbox ID from signed preview URL token </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxIdFromSignedPreviewUrlTokenCall(String signedPreviewToken, BigDecimal port, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSandboxIdFromSignedPreviewUrlTokenCall(@javax.annotation.Nonnull String signedPreviewToken, @javax.annotation.Nonnull BigDecimal port, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -133,7 +133,7 @@ public class PreviewApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSandboxIdFromSignedPreviewUrlTokenValidateBeforeCall(String signedPreviewToken, BigDecimal port, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSandboxIdFromSignedPreviewUrlTokenValidateBeforeCall(@javax.annotation.Nonnull String signedPreviewToken, @javax.annotation.Nonnull BigDecimal port, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'signedPreviewToken' is set
         if (signedPreviewToken == null) {
             throw new ApiException("Missing the required parameter 'signedPreviewToken' when calling getSandboxIdFromSignedPreviewUrlToken(Async)");
@@ -162,7 +162,7 @@ public class PreviewApi {
         <tr><td> 200 </td><td> Sandbox ID from signed preview URL token </td><td>  -  </td></tr>
      </table>
      */
-    public String getSandboxIdFromSignedPreviewUrlToken(String signedPreviewToken, BigDecimal port) throws ApiException {
+    public String getSandboxIdFromSignedPreviewUrlToken(@javax.annotation.Nonnull String signedPreviewToken, @javax.annotation.Nonnull BigDecimal port) throws ApiException {
         ApiResponse<String> localVarResp = getSandboxIdFromSignedPreviewUrlTokenWithHttpInfo(signedPreviewToken, port);
         return localVarResp.getData();
     }
@@ -181,7 +181,7 @@ public class PreviewApi {
         <tr><td> 200 </td><td> Sandbox ID from signed preview URL token </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<String> getSandboxIdFromSignedPreviewUrlTokenWithHttpInfo(String signedPreviewToken, BigDecimal port) throws ApiException {
+    public ApiResponse<String> getSandboxIdFromSignedPreviewUrlTokenWithHttpInfo(@javax.annotation.Nonnull String signedPreviewToken, @javax.annotation.Nonnull BigDecimal port) throws ApiException {
         okhttp3.Call localVarCall = getSandboxIdFromSignedPreviewUrlTokenValidateBeforeCall(signedPreviewToken, port, null);
         Type localVarReturnType = new TypeToken<String>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -202,7 +202,7 @@ public class PreviewApi {
         <tr><td> 200 </td><td> Sandbox ID from signed preview URL token </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getSandboxIdFromSignedPreviewUrlTokenAsync(String signedPreviewToken, BigDecimal port, final ApiCallback<String> _callback) throws ApiException {
+    public okhttp3.Call getSandboxIdFromSignedPreviewUrlTokenAsync(@javax.annotation.Nonnull String signedPreviewToken, @javax.annotation.Nonnull BigDecimal port, final ApiCallback<String> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSandboxIdFromSignedPreviewUrlTokenValidateBeforeCall(signedPreviewToken, port, _callback);
         Type localVarReturnType = new TypeToken<String>(){}.getType();
@@ -222,7 +222,7 @@ public class PreviewApi {
         <tr><td> 200 </td><td> User access status to the sandbox </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call hasSandboxAccessCall(String sandboxId, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call hasSandboxAccessCall(@javax.annotation.Nonnull String sandboxId, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -268,7 +268,7 @@ public class PreviewApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call hasSandboxAccessValidateBeforeCall(String sandboxId, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call hasSandboxAccessValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling hasSandboxAccess(Async)");
@@ -291,7 +291,7 @@ public class PreviewApi {
         <tr><td> 200 </td><td> User access status to the sandbox </td><td>  -  </td></tr>
      </table>
      */
-    public Boolean hasSandboxAccess(String sandboxId) throws ApiException {
+    public Boolean hasSandboxAccess(@javax.annotation.Nonnull String sandboxId) throws ApiException {
         ApiResponse<Boolean> localVarResp = hasSandboxAccessWithHttpInfo(sandboxId);
         return localVarResp.getData();
     }
@@ -309,7 +309,7 @@ public class PreviewApi {
         <tr><td> 200 </td><td> User access status to the sandbox </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Boolean> hasSandboxAccessWithHttpInfo(String sandboxId) throws ApiException {
+    public ApiResponse<Boolean> hasSandboxAccessWithHttpInfo(@javax.annotation.Nonnull String sandboxId) throws ApiException {
         okhttp3.Call localVarCall = hasSandboxAccessValidateBeforeCall(sandboxId, null);
         Type localVarReturnType = new TypeToken<Boolean>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -329,7 +329,7 @@ public class PreviewApi {
         <tr><td> 200 </td><td> User access status to the sandbox </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call hasSandboxAccessAsync(String sandboxId, final ApiCallback<Boolean> _callback) throws ApiException {
+    public okhttp3.Call hasSandboxAccessAsync(@javax.annotation.Nonnull String sandboxId, final ApiCallback<Boolean> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = hasSandboxAccessValidateBeforeCall(sandboxId, _callback);
         Type localVarReturnType = new TypeToken<Boolean>(){}.getType();
@@ -349,7 +349,7 @@ public class PreviewApi {
         <tr><td> 200 </td><td> Public status of the sandbox </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call isSandboxPublicCall(String sandboxId, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call isSandboxPublicCall(@javax.annotation.Nonnull String sandboxId, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -395,7 +395,7 @@ public class PreviewApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call isSandboxPublicValidateBeforeCall(String sandboxId, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call isSandboxPublicValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling isSandboxPublic(Async)");
@@ -418,7 +418,7 @@ public class PreviewApi {
         <tr><td> 200 </td><td> Public status of the sandbox </td><td>  -  </td></tr>
      </table>
      */
-    public Boolean isSandboxPublic(String sandboxId) throws ApiException {
+    public Boolean isSandboxPublic(@javax.annotation.Nonnull String sandboxId) throws ApiException {
         ApiResponse<Boolean> localVarResp = isSandboxPublicWithHttpInfo(sandboxId);
         return localVarResp.getData();
     }
@@ -436,7 +436,7 @@ public class PreviewApi {
         <tr><td> 200 </td><td> Public status of the sandbox </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Boolean> isSandboxPublicWithHttpInfo(String sandboxId) throws ApiException {
+    public ApiResponse<Boolean> isSandboxPublicWithHttpInfo(@javax.annotation.Nonnull String sandboxId) throws ApiException {
         okhttp3.Call localVarCall = isSandboxPublicValidateBeforeCall(sandboxId, null);
         Type localVarReturnType = new TypeToken<Boolean>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -456,7 +456,7 @@ public class PreviewApi {
         <tr><td> 200 </td><td> Public status of the sandbox </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call isSandboxPublicAsync(String sandboxId, final ApiCallback<Boolean> _callback) throws ApiException {
+    public okhttp3.Call isSandboxPublicAsync(@javax.annotation.Nonnull String sandboxId, final ApiCallback<Boolean> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = isSandboxPublicValidateBeforeCall(sandboxId, _callback);
         Type localVarReturnType = new TypeToken<Boolean>(){}.getType();
@@ -477,7 +477,7 @@ public class PreviewApi {
         <tr><td> 200 </td><td> Sandbox auth token validation status </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call isValidAuthTokenCall(String sandboxId, String authToken, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call isValidAuthTokenCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String authToken, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -524,7 +524,7 @@ public class PreviewApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call isValidAuthTokenValidateBeforeCall(String sandboxId, String authToken, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call isValidAuthTokenValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String authToken, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling isValidAuthToken(Async)");
@@ -553,7 +553,7 @@ public class PreviewApi {
         <tr><td> 200 </td><td> Sandbox auth token validation status </td><td>  -  </td></tr>
      </table>
      */
-    public Boolean isValidAuthToken(String sandboxId, String authToken) throws ApiException {
+    public Boolean isValidAuthToken(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String authToken) throws ApiException {
         ApiResponse<Boolean> localVarResp = isValidAuthTokenWithHttpInfo(sandboxId, authToken);
         return localVarResp.getData();
     }
@@ -572,7 +572,7 @@ public class PreviewApi {
         <tr><td> 200 </td><td> Sandbox auth token validation status </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Boolean> isValidAuthTokenWithHttpInfo(String sandboxId, String authToken) throws ApiException {
+    public ApiResponse<Boolean> isValidAuthTokenWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String authToken) throws ApiException {
         okhttp3.Call localVarCall = isValidAuthTokenValidateBeforeCall(sandboxId, authToken, null);
         Type localVarReturnType = new TypeToken<Boolean>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -593,7 +593,7 @@ public class PreviewApi {
         <tr><td> 200 </td><td> Sandbox auth token validation status </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call isValidAuthTokenAsync(String sandboxId, String authToken, final ApiCallback<Boolean> _callback) throws ApiException {
+    public okhttp3.Call isValidAuthTokenAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String authToken, final ApiCallback<Boolean> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = isValidAuthTokenValidateBeforeCall(sandboxId, authToken, _callback);
         Type localVarReturnType = new TypeToken<Boolean>(){}.getType();

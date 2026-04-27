@@ -92,7 +92,7 @@ public class AuditApi {
         <tr><td> 200 </td><td> Paginated list of organization audit logs </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getOrganizationAuditLogsCall(String organizationId, BigDecimal page, BigDecimal limit, OffsetDateTime from, OffsetDateTime to, String nextToken, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getOrganizationAuditLogsCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable OffsetDateTime from, @javax.annotation.Nullable OffsetDateTime to, @javax.annotation.Nullable String nextToken, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -158,7 +158,7 @@ public class AuditApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getOrganizationAuditLogsValidateBeforeCall(String organizationId, BigDecimal page, BigDecimal limit, OffsetDateTime from, OffsetDateTime to, String nextToken, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getOrganizationAuditLogsValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable OffsetDateTime from, @javax.annotation.Nullable OffsetDateTime to, @javax.annotation.Nullable String nextToken, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'organizationId' is set
         if (organizationId == null) {
             throw new ApiException("Missing the required parameter 'organizationId' when calling getOrganizationAuditLogs(Async)");
@@ -186,7 +186,7 @@ public class AuditApi {
         <tr><td> 200 </td><td> Paginated list of organization audit logs </td><td>  -  </td></tr>
      </table>
      */
-    public PaginatedAuditLogs getOrganizationAuditLogs(String organizationId, BigDecimal page, BigDecimal limit, OffsetDateTime from, OffsetDateTime to, String nextToken) throws ApiException {
+    public PaginatedAuditLogs getOrganizationAuditLogs(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable OffsetDateTime from, @javax.annotation.Nullable OffsetDateTime to, @javax.annotation.Nullable String nextToken) throws ApiException {
         ApiResponse<PaginatedAuditLogs> localVarResp = getOrganizationAuditLogsWithHttpInfo(organizationId, page, limit, from, to, nextToken);
         return localVarResp.getData();
     }
@@ -209,7 +209,7 @@ public class AuditApi {
         <tr><td> 200 </td><td> Paginated list of organization audit logs </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<PaginatedAuditLogs> getOrganizationAuditLogsWithHttpInfo(String organizationId, BigDecimal page, BigDecimal limit, OffsetDateTime from, OffsetDateTime to, String nextToken) throws ApiException {
+    public ApiResponse<PaginatedAuditLogs> getOrganizationAuditLogsWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable OffsetDateTime from, @javax.annotation.Nullable OffsetDateTime to, @javax.annotation.Nullable String nextToken) throws ApiException {
         okhttp3.Call localVarCall = getOrganizationAuditLogsValidateBeforeCall(organizationId, page, limit, from, to, nextToken, null);
         Type localVarReturnType = new TypeToken<PaginatedAuditLogs>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -234,7 +234,7 @@ public class AuditApi {
         <tr><td> 200 </td><td> Paginated list of organization audit logs </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getOrganizationAuditLogsAsync(String organizationId, BigDecimal page, BigDecimal limit, OffsetDateTime from, OffsetDateTime to, String nextToken, final ApiCallback<PaginatedAuditLogs> _callback) throws ApiException {
+    public okhttp3.Call getOrganizationAuditLogsAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable BigDecimal page, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable OffsetDateTime from, @javax.annotation.Nullable OffsetDateTime to, @javax.annotation.Nullable String nextToken, final ApiCallback<PaginatedAuditLogs> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getOrganizationAuditLogsValidateBeforeCall(organizationId, page, limit, from, to, nextToken, _callback);
         Type localVarReturnType = new TypeToken<PaginatedAuditLogs>(){}.getType();

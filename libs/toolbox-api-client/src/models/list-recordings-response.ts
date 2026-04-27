@@ -17,17 +17,7 @@
 // @ts-ignore
 import type { Recording } from './recording';
 
-/**
- * 
- * @export
- * @interface ListRecordingsResponse
- */
 export interface ListRecordingsResponse {
-    /**
-     * 
-     * @type {Array<Recording>}
-     * @memberof ListRecordingsResponse
-     */
     'recordings': Array<Recording>;
 }
 

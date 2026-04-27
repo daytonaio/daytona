@@ -14,65 +14,15 @@
 
 
 
-/**
- * 
- * @export
- * @interface RegionQuota
- */
 export interface RegionQuota {
-    /**
-     * 
-     * @type {string}
-     * @memberof RegionQuota
-     */
     'organizationId': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof RegionQuota
-     */
     'regionId': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegionQuota
-     */
     'totalCpuQuota': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegionQuota
-     */
     'totalMemoryQuota': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegionQuota
-     */
     'totalDiskQuota': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegionQuota
-     */
     'maxCpuPerSandbox': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegionQuota
-     */
     'maxMemoryPerSandbox': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegionQuota
-     */
     'maxDiskPerSandbox': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegionQuota
-     */
     'maxDiskPerNonEphemeralSandbox': number | null;
 }
 

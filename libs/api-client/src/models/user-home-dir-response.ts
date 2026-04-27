@@ -14,17 +14,7 @@
 
 
 
-/**
- * 
- * @export
- * @interface UserHomeDirResponse
- */
 export interface UserHomeDirResponse {
-    /**
-     * 
-     * @type {string}
-     * @memberof UserHomeDirResponse
-     */
     'dir'?: string;
 }
 

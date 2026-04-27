@@ -17,76 +17,49 @@
 // @ts-ignore
 import type { OrganizationRole } from './organization-role';
 
-/**
- * 
- * @export
- * @interface OrganizationInvitation
- */
 export interface OrganizationInvitation {
     /**
      * Invitation ID
-     * @type {string}
-     * @memberof OrganizationInvitation
      */
     'id': string;
     /**
      * Email address of the invitee
-     * @type {string}
-     * @memberof OrganizationInvitation
      */
     'email': string;
     /**
      * Email address of the inviter
-     * @type {string}
-     * @memberof OrganizationInvitation
      */
     'invitedBy': string;
     /**
      * Organization ID
-     * @type {string}
-     * @memberof OrganizationInvitation
      */
     'organizationId': string;
     /**
      * Organization name
-     * @type {string}
-     * @memberof OrganizationInvitation
      */
     'organizationName': string;
     /**
      * Expiration date of the invitation
-     * @type {Date}
-     * @memberof OrganizationInvitation
      */
     'expiresAt': Date;
     /**
      * Invitation status
-     * @type {string}
-     * @memberof OrganizationInvitation
      */
     'status': OrganizationInvitationStatusEnum;
     /**
      * Member role
-     * @type {string}
-     * @memberof OrganizationInvitation
      */
     'role': OrganizationInvitationRoleEnum;
     /**
      * Assigned roles
-     * @type {Array<OrganizationRole>}
-     * @memberof OrganizationInvitation
      */
     'assignedRoles': Array<OrganizationRole>;
     /**
      * Creation timestamp
-     * @type {Date}
-     * @memberof OrganizationInvitation
      */
     'createdAt': Date;
     /**
      * Last update timestamp
-     * @type {Date}
-     * @memberof OrganizationInvitation
      */
     'updatedAt': Date;
 }
@@ -95,13 +68,13 @@ export const OrganizationInvitationStatusEnum = {
     PENDING: 'pending',
     ACCEPTED: 'accepted',
     DECLINED: 'declined',
-    CANCELLED: 'cancelled'
+    CANCELLED: 'cancelled',
 } as const;
 
 export type OrganizationInvitationStatusEnum = typeof OrganizationInvitationStatusEnum[keyof typeof OrganizationInvitationStatusEnum];
 export const OrganizationInvitationRoleEnum = {
     OWNER: 'owner',
-    MEMBER: 'member'
+    MEMBER: 'member',
 } as const;
 
 export type OrganizationInvitationRoleEnum = typeof OrganizationInvitationRoleEnum[keyof typeof OrganizationInvitationRoleEnum];

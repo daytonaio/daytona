@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -29,7 +29,6 @@ import type { InterpreterContext } from '../models';
 import type { ListContextsResponse } from '../models';
 /**
  * InterpreterApi - axios parameter creator
- * @export
  */
 export const InterpreterApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -55,9 +54,8 @@ export const InterpreterApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -92,8 +90,8 @@ export const InterpreterApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -122,8 +120,8 @@ export const InterpreterApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -152,8 +150,8 @@ export const InterpreterApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -168,7 +166,6 @@ export const InterpreterApiAxiosParamCreator = function (configuration?: Configu
 
 /**
  * InterpreterApi - functional programming interface
- * @export
  */
 export const InterpreterApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = InterpreterApiAxiosParamCreator(configuration)
@@ -228,7 +225,6 @@ export const InterpreterApiFp = function(configuration?: Configuration) {
 
 /**
  * InterpreterApi - factory interface
- * @export
  */
 export const InterpreterApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = InterpreterApiFp(configuration)
@@ -276,9 +272,6 @@ export const InterpreterApiFactory = function (configuration?: Configuration, ba
 
 /**
  * InterpreterApi - object-oriented interface
- * @export
- * @class InterpreterApi
- * @extends {BaseAPI}
  */
 export class InterpreterApi extends BaseAPI {
     /**
@@ -287,7 +280,6 @@ export class InterpreterApi extends BaseAPI {
      * @param {CreateContextRequest} request Context configuration
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof InterpreterApi
      */
     public createInterpreterContext(request: CreateContextRequest, options?: RawAxiosRequestConfig) {
         return InterpreterApiFp(this.configuration).createInterpreterContext(request, options).then((request) => request(this.axios, this.basePath));
@@ -299,7 +291,6 @@ export class InterpreterApi extends BaseAPI {
      * @param {string} id Context ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof InterpreterApi
      */
     public deleteInterpreterContext(id: string, options?: RawAxiosRequestConfig) {
         return InterpreterApiFp(this.configuration).deleteInterpreterContext(id, options).then((request) => request(this.axios, this.basePath));
@@ -310,7 +301,6 @@ export class InterpreterApi extends BaseAPI {
      * @summary Execute code in an interpreter context
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof InterpreterApi
      */
     public executeInterpreterCode(options?: RawAxiosRequestConfig) {
         return InterpreterApiFp(this.configuration).executeInterpreterCode(options).then((request) => request(this.axios, this.basePath));
@@ -321,7 +311,6 @@ export class InterpreterApi extends BaseAPI {
      * @summary List all user-created interpreter contexts
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof InterpreterApi
      */
     public listInterpreterContexts(options?: RawAxiosRequestConfig) {
         return InterpreterApiFp(this.configuration).listInterpreterContexts(options).then((request) => request(this.axios, this.basePath));

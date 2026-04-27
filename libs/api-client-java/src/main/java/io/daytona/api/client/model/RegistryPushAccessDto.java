@@ -48,7 +48,7 @@ import io.daytona.api.client.JSON;
 /**
  * RegistryPushAccessDto
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class RegistryPushAccessDto {
   public static final String SERIALIZED_NAME_USERNAME = "username";
   @SerializedName(SERIALIZED_NAME_USERNAME)
@@ -285,10 +285,7 @@ public class RegistryPushAccessDto {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -297,22 +294,10 @@ public class RegistryPushAccessDto {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("username");
-    openapiFields.add("secret");
-    openapiFields.add("registryUrl");
-    openapiFields.add("registryId");
-    openapiFields.add("project");
-    openapiFields.add("expiresAt");
+    openapiFields = new HashSet<String>(Arrays.asList("username", "secret", "registryUrl", "registryId", "project", "expiresAt"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("username");
-    openapiRequiredFields.add("secret");
-    openapiRequiredFields.add("registryUrl");
-    openapiRequiredFields.add("registryId");
-    openapiRequiredFields.add("project");
-    openapiRequiredFields.add("expiresAt");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("username", "secret", "registryUrl", "registryId", "project", "expiresAt"));
   }
 
   /**
@@ -324,34 +309,34 @@ public class RegistryPushAccessDto {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!RegistryPushAccessDto.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in RegistryPushAccessDto is not found in the empty JSON string", RegistryPushAccessDto.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in RegistryPushAccessDto is not found in the empty JSON string", RegistryPushAccessDto.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : RegistryPushAccessDto.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("username").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `username` to be a primitive type in the JSON string but got `%s`", jsonObj.get("username").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `username` to be a primitive type in the JSON string but got `%s`", jsonObj.get("username").toString()));
       }
       if (!jsonObj.get("secret").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `secret` to be a primitive type in the JSON string but got `%s`", jsonObj.get("secret").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `secret` to be a primitive type in the JSON string but got `%s`", jsonObj.get("secret").toString()));
       }
       if (!jsonObj.get("registryUrl").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `registryUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("registryUrl").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `registryUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("registryUrl").toString()));
       }
       if (!jsonObj.get("registryId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `registryId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("registryId").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `registryId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("registryId").toString()));
       }
       if (!jsonObj.get("project").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `project` to be a primitive type in the JSON string but got `%s`", jsonObj.get("project").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `project` to be a primitive type in the JSON string but got `%s`", jsonObj.get("project").toString()));
       }
       if (!jsonObj.get("expiresAt").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `expiresAt` to be a primitive type in the JSON string but got `%s`", jsonObj.get("expiresAt").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `expiresAt` to be a primitive type in the JSON string but got `%s`", jsonObj.get("expiresAt").toString()));
       }
   }
 
@@ -412,7 +397,7 @@ public class RegistryPushAccessDto {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

@@ -17,23 +17,8 @@
 // @ts-ignore
 import type { RegistryDTO } from './registry-dto';
 
-/**
- * 
- * @export
- * @interface InspectSnapshotInRegistryRequest
- */
 export interface InspectSnapshotInRegistryRequest {
-    /**
-     * 
-     * @type {RegistryDTO}
-     * @memberof InspectSnapshotInRegistryRequest
-     */
     'registry'?: RegistryDTO;
-    /**
-     * 
-     * @type {string}
-     * @memberof InspectSnapshotInRegistryRequest
-     */
     'snapshot': string;
 }
 

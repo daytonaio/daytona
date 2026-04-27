@@ -14,41 +14,28 @@
 
 
 
-/**
- * 
- * @export
- * @interface CreateOrganizationInvitation
- */
 export interface CreateOrganizationInvitation {
     /**
      * Email address of the invitee
-     * @type {string}
-     * @memberof CreateOrganizationInvitation
      */
     'email': string;
     /**
      * Organization member role for the invitee
-     * @type {string}
-     * @memberof CreateOrganizationInvitation
      */
     'role': CreateOrganizationInvitationRoleEnum;
     /**
      * Array of assigned role IDs for the invitee
-     * @type {Array<string>}
-     * @memberof CreateOrganizationInvitation
      */
     'assignedRoleIds': Array<string>;
     /**
      * Expiration date of the invitation
-     * @type {Date}
-     * @memberof CreateOrganizationInvitation
      */
     'expiresAt'?: Date;
 }
 
 export const CreateOrganizationInvitationRoleEnum = {
     OWNER: 'owner',
-    MEMBER: 'member'
+    MEMBER: 'member',
 } as const;
 
 export type CreateOrganizationInvitationRoleEnum = typeof CreateOrganizationInvitationRoleEnum[keyof typeof CreateOrganizationInvitationRoleEnum];

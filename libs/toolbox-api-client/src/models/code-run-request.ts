@@ -14,41 +14,14 @@
 
 
 
-/**
- * 
- * @export
- * @interface CodeRunRequest
- */
 export interface CodeRunRequest {
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof CodeRunRequest
-     */
     'argv'?: Array<string>;
-    /**
-     * 
-     * @type {string}
-     * @memberof CodeRunRequest
-     */
     'code': string;
-    /**
-     * 
-     * @type {{ [key: string]: string; }}
-     * @memberof CodeRunRequest
-     */
     'envs'?: { [key: string]: string; };
     /**
      * python, javascript, typescript
-     * @type {string}
-     * @memberof CodeRunRequest
      */
     'language': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof CodeRunRequest
-     */
     'timeout'?: number;
 }
 

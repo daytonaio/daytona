@@ -14,35 +14,10 @@
 
 
 
-/**
- * 
- * @export
- * @interface SessionExecuteRequest
- */
 export interface SessionExecuteRequest {
-    /**
-     * 
-     * @type {boolean}
-     * @memberof SessionExecuteRequest
-     */
     'async'?: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof SessionExecuteRequest
-     */
     'command': string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof SessionExecuteRequest
-     */
     'runAsync'?: boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof SessionExecuteRequest
-     */
     'suppressInputEcho'?: boolean;
 }
 

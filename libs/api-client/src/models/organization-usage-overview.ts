@@ -17,41 +17,11 @@
 // @ts-ignore
 import type { RegionUsageOverview } from './region-usage-overview';
 
-/**
- * 
- * @export
- * @interface OrganizationUsageOverview
- */
 export interface OrganizationUsageOverview {
-    /**
-     * 
-     * @type {Array<RegionUsageOverview>}
-     * @memberof OrganizationUsageOverview
-     */
     'regionUsage': Array<RegionUsageOverview>;
-    /**
-     * 
-     * @type {number}
-     * @memberof OrganizationUsageOverview
-     */
     'totalSnapshotQuota': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof OrganizationUsageOverview
-     */
     'currentSnapshotUsage': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof OrganizationUsageOverview
-     */
     'totalVolumeQuota': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof OrganizationUsageOverview
-     */
     'currentVolumeUsage': number;
 }
 

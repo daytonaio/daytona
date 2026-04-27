@@ -14,29 +14,9 @@
 
 
 
-/**
- * 
- * @export
- * @interface RunnerServiceInfo
- */
 export interface RunnerServiceInfo {
-    /**
-     * 
-     * @type {string}
-     * @memberof RunnerServiceInfo
-     */
     'errorReason'?: string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof RunnerServiceInfo
-     */
     'healthy': boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof RunnerServiceInfo
-     */
     'serviceName': string;
 }
 

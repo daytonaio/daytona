@@ -14,70 +14,36 @@
 
 
 
-/**
- * 
- * @export
- * @interface AdminCreateRunner
- */
 export interface AdminCreateRunner {
-    /**
-     * 
-     * @type {string}
-     * @memberof AdminCreateRunner
-     */
     'regionId': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AdminCreateRunner
-     */
     'name': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AdminCreateRunner
-     */
     'apiKey': string;
     /**
      * The api version of the runner to create
-     * @type {string}
-     * @memberof AdminCreateRunner
      */
     'apiVersion': string;
     /**
      * The domain of the runner
-     * @type {string}
-     * @memberof AdminCreateRunner
      */
     'domain'?: string;
     /**
      * The API URL of the runner
-     * @type {string}
-     * @memberof AdminCreateRunner
      */
     'apiUrl'?: string;
     /**
      * The proxy URL of the runner
-     * @type {string}
-     * @memberof AdminCreateRunner
      */
     'proxyUrl'?: string;
     /**
      * The CPU capacity of the runner
-     * @type {number}
-     * @memberof AdminCreateRunner
      */
     'cpu'?: number;
     /**
      * The memory capacity of the runner in GiB
-     * @type {number}
-     * @memberof AdminCreateRunner
      */
     'memoryGiB'?: number;
     /**
      * The disk capacity of the runner in GiB
-     * @type {number}
-     * @memberof AdminCreateRunner
      */
     'diskGiB'?: number;
 }

@@ -20,41 +20,11 @@ import type { CompletionContext } from './completion-context';
 // @ts-ignore
 import type { LspPosition } from './lsp-position';
 
-/**
- * 
- * @export
- * @interface LspCompletionParams
- */
 export interface LspCompletionParams {
-    /**
-     * 
-     * @type {CompletionContext}
-     * @memberof LspCompletionParams
-     */
     'context'?: CompletionContext;
-    /**
-     * 
-     * @type {string}
-     * @memberof LspCompletionParams
-     */
     'languageId': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof LspCompletionParams
-     */
     'pathToProject': string;
-    /**
-     * 
-     * @type {LspPosition}
-     * @memberof LspCompletionParams
-     */
     'position': LspPosition;
-    /**
-     * 
-     * @type {string}
-     * @memberof LspCompletionParams
-     */
     'uri': string;
 }
 

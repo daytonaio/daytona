@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -33,7 +33,6 @@ import type { PollJobsResponse } from '../models';
 import type { UpdateJobStatus } from '../models';
 /**
  * JobsApi - axios parameter creator
- * @export
  */
 export const JobsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -66,8 +65,8 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -122,8 +121,8 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
                 localVarQueryParameter['offset'] = offset;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -168,8 +167,8 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
                 localVarQueryParameter['limit'] = limit;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -211,9 +210,8 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -230,7 +228,6 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
 
 /**
  * JobsApi - functional programming interface
- * @export
  */
 export const JobsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = JobsApiAxiosParamCreator(configuration)
@@ -297,7 +294,6 @@ export const JobsApiFp = function(configuration?: Configuration) {
 
 /**
  * JobsApi - factory interface
- * @export
  */
 export const JobsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = JobsApiFp(configuration)
@@ -352,9 +348,6 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
 
 /**
  * JobsApi - object-oriented interface
- * @export
- * @class JobsApi
- * @extends {BaseAPI}
  */
 export class JobsApi extends BaseAPI {
     /**
@@ -363,7 +356,6 @@ export class JobsApi extends BaseAPI {
      * @param {string} jobId ID of the job
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof JobsApi
      */
     public getJob(jobId: string, options?: RawAxiosRequestConfig) {
         return JobsApiFp(this.configuration).getJob(jobId, options).then((request) => request(this.axios, this.basePath));
@@ -378,7 +370,6 @@ export class JobsApi extends BaseAPI {
      * @param {number} [offset] Number of jobs to skip for pagination (default: 0)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof JobsApi
      */
     public listJobs(page?: number, limit?: number, status?: JobStatus, offset?: number, options?: RawAxiosRequestConfig) {
         return JobsApiFp(this.configuration).listJobs(page, limit, status, offset, options).then((request) => request(this.axios, this.basePath));
@@ -391,7 +382,6 @@ export class JobsApi extends BaseAPI {
      * @param {number} [limit] Maximum number of jobs to return (default: 10, max: 100)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof JobsApi
      */
     public pollJobs(timeout?: number, limit?: number, options?: RawAxiosRequestConfig) {
         return JobsApiFp(this.configuration).pollJobs(timeout, limit, options).then((request) => request(this.axios, this.basePath));
@@ -404,7 +394,6 @@ export class JobsApi extends BaseAPI {
      * @param {UpdateJobStatus} updateJobStatus 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof JobsApi
      */
     public updateJobStatus(jobId: string, updateJobStatus: UpdateJobStatus, options?: RawAxiosRequestConfig) {
         return JobsApiFp(this.configuration).updateJobStatus(jobId, updateJobStatus, options).then((request) => request(this.axios, this.basePath));

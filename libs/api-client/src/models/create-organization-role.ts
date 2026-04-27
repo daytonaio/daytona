@@ -14,28 +14,17 @@
 
 
 
-/**
- * 
- * @export
- * @interface CreateOrganizationRole
- */
 export interface CreateOrganizationRole {
     /**
      * The name of the role
-     * @type {string}
-     * @memberof CreateOrganizationRole
      */
     'name': string;
     /**
      * The description of the role
-     * @type {string}
-     * @memberof CreateOrganizationRole
      */
     'description': string;
     /**
      * The list of permissions assigned to the role
-     * @type {Array<string>}
-     * @memberof CreateOrganizationRole
      */
     'permissions': Array<CreateOrganizationRolePermissionsEnum>;
 }
@@ -55,7 +44,7 @@ export const CreateOrganizationRolePermissionsEnum = {
     READ_RUNNERS: 'read:runners',
     WRITE_RUNNERS: 'write:runners',
     DELETE_RUNNERS: 'delete:runners',
-    READ_AUDIT_LOGS: 'read:audit_logs'
+    READ_AUDIT_LOGS: 'read:audit_logs',
 } as const;
 
 export type CreateOrganizationRolePermissionsEnum = typeof CreateOrganizationRolePermissionsEnum[keyof typeof CreateOrganizationRolePermissionsEnum];

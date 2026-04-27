@@ -15,6 +15,7 @@ lib/daytona_toolbox_api_client/api/process_api.rb
 lib/daytona_toolbox_api_client/api/server_api.rb
 lib/daytona_toolbox_api_client/api_client.rb
 lib/daytona_toolbox_api_client/api_error.rb
+lib/daytona_toolbox_api_client/api_model_base.rb
 lib/daytona_toolbox_api_client/configuration.rb
 lib/daytona_toolbox_api_client/models/chart.rb
 lib/daytona_toolbox_api_client/models/chart_element.rb

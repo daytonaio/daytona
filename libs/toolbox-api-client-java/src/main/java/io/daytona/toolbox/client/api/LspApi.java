@@ -89,7 +89,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call completionsCall(LspCompletionParams request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call completionsCall(@javax.annotation.Nonnull LspCompletionParams request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -135,7 +135,7 @@ public class LspApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call completionsValidateBeforeCall(LspCompletionParams request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call completionsValidateBeforeCall(@javax.annotation.Nonnull LspCompletionParams request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling completions(Async)");
@@ -158,7 +158,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public CompletionList completions(LspCompletionParams request) throws ApiException {
+    public CompletionList completions(@javax.annotation.Nonnull LspCompletionParams request) throws ApiException {
         ApiResponse<CompletionList> localVarResp = completionsWithHttpInfo(request);
         return localVarResp.getData();
     }
@@ -176,7 +176,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<CompletionList> completionsWithHttpInfo(LspCompletionParams request) throws ApiException {
+    public ApiResponse<CompletionList> completionsWithHttpInfo(@javax.annotation.Nonnull LspCompletionParams request) throws ApiException {
         okhttp3.Call localVarCall = completionsValidateBeforeCall(request, null);
         Type localVarReturnType = new TypeToken<CompletionList>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -196,7 +196,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call completionsAsync(LspCompletionParams request, final ApiCallback<CompletionList> _callback) throws ApiException {
+    public okhttp3.Call completionsAsync(@javax.annotation.Nonnull LspCompletionParams request, final ApiCallback<CompletionList> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = completionsValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<CompletionList>(){}.getType();
@@ -216,7 +216,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call didCloseCall(LspDocumentRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call didCloseCall(@javax.annotation.Nonnull LspDocumentRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -261,7 +261,7 @@ public class LspApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call didCloseValidateBeforeCall(LspDocumentRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call didCloseValidateBeforeCall(@javax.annotation.Nonnull LspDocumentRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling didClose(Async)");
@@ -283,7 +283,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public void didClose(LspDocumentRequest request) throws ApiException {
+    public void didClose(@javax.annotation.Nonnull LspDocumentRequest request) throws ApiException {
         didCloseWithHttpInfo(request);
     }
 
@@ -300,7 +300,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> didCloseWithHttpInfo(LspDocumentRequest request) throws ApiException {
+    public ApiResponse<Void> didCloseWithHttpInfo(@javax.annotation.Nonnull LspDocumentRequest request) throws ApiException {
         okhttp3.Call localVarCall = didCloseValidateBeforeCall(request, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -319,7 +319,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call didCloseAsync(LspDocumentRequest request, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call didCloseAsync(@javax.annotation.Nonnull LspDocumentRequest request, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = didCloseValidateBeforeCall(request, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -338,7 +338,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call didOpenCall(LspDocumentRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call didOpenCall(@javax.annotation.Nonnull LspDocumentRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -383,7 +383,7 @@ public class LspApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call didOpenValidateBeforeCall(LspDocumentRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call didOpenValidateBeforeCall(@javax.annotation.Nonnull LspDocumentRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling didOpen(Async)");
@@ -405,7 +405,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public void didOpen(LspDocumentRequest request) throws ApiException {
+    public void didOpen(@javax.annotation.Nonnull LspDocumentRequest request) throws ApiException {
         didOpenWithHttpInfo(request);
     }
 
@@ -422,7 +422,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> didOpenWithHttpInfo(LspDocumentRequest request) throws ApiException {
+    public ApiResponse<Void> didOpenWithHttpInfo(@javax.annotation.Nonnull LspDocumentRequest request) throws ApiException {
         okhttp3.Call localVarCall = didOpenValidateBeforeCall(request, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -441,7 +441,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call didOpenAsync(LspDocumentRequest request, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call didOpenAsync(@javax.annotation.Nonnull LspDocumentRequest request, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = didOpenValidateBeforeCall(request, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -462,7 +462,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call documentSymbolsCall(String languageId, String pathToProject, String uri, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call documentSymbolsCall(@javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String uri, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -519,7 +519,7 @@ public class LspApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call documentSymbolsValidateBeforeCall(String languageId, String pathToProject, String uri, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call documentSymbolsValidateBeforeCall(@javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String uri, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'languageId' is set
         if (languageId == null) {
             throw new ApiException("Missing the required parameter 'languageId' when calling documentSymbols(Async)");
@@ -554,7 +554,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public List<LspSymbol> documentSymbols(String languageId, String pathToProject, String uri) throws ApiException {
+    public List<LspSymbol> documentSymbols(@javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String uri) throws ApiException {
         ApiResponse<List<LspSymbol>> localVarResp = documentSymbolsWithHttpInfo(languageId, pathToProject, uri);
         return localVarResp.getData();
     }
@@ -574,7 +574,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<LspSymbol>> documentSymbolsWithHttpInfo(String languageId, String pathToProject, String uri) throws ApiException {
+    public ApiResponse<List<LspSymbol>> documentSymbolsWithHttpInfo(@javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String uri) throws ApiException {
         okhttp3.Call localVarCall = documentSymbolsValidateBeforeCall(languageId, pathToProject, uri, null);
         Type localVarReturnType = new TypeToken<List<LspSymbol>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -596,7 +596,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call documentSymbolsAsync(String languageId, String pathToProject, String uri, final ApiCallback<List<LspSymbol>> _callback) throws ApiException {
+    public okhttp3.Call documentSymbolsAsync(@javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String uri, final ApiCallback<List<LspSymbol>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = documentSymbolsValidateBeforeCall(languageId, pathToProject, uri, _callback);
         Type localVarReturnType = new TypeToken<List<LspSymbol>>(){}.getType();
@@ -616,7 +616,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call startCall(LspServerRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call startCall(@javax.annotation.Nonnull LspServerRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -661,7 +661,7 @@ public class LspApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call startValidateBeforeCall(LspServerRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call startValidateBeforeCall(@javax.annotation.Nonnull LspServerRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling start(Async)");
@@ -683,7 +683,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public void start(LspServerRequest request) throws ApiException {
+    public void start(@javax.annotation.Nonnull LspServerRequest request) throws ApiException {
         startWithHttpInfo(request);
     }
 
@@ -700,7 +700,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> startWithHttpInfo(LspServerRequest request) throws ApiException {
+    public ApiResponse<Void> startWithHttpInfo(@javax.annotation.Nonnull LspServerRequest request) throws ApiException {
         okhttp3.Call localVarCall = startValidateBeforeCall(request, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -719,7 +719,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call startAsync(LspServerRequest request, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call startAsync(@javax.annotation.Nonnull LspServerRequest request, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = startValidateBeforeCall(request, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -738,7 +738,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call stopCall(LspServerRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call stopCall(@javax.annotation.Nonnull LspServerRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -783,7 +783,7 @@ public class LspApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call stopValidateBeforeCall(LspServerRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call stopValidateBeforeCall(@javax.annotation.Nonnull LspServerRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling stop(Async)");
@@ -805,7 +805,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public void stop(LspServerRequest request) throws ApiException {
+    public void stop(@javax.annotation.Nonnull LspServerRequest request) throws ApiException {
         stopWithHttpInfo(request);
     }
 
@@ -822,7 +822,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> stopWithHttpInfo(LspServerRequest request) throws ApiException {
+    public ApiResponse<Void> stopWithHttpInfo(@javax.annotation.Nonnull LspServerRequest request) throws ApiException {
         okhttp3.Call localVarCall = stopValidateBeforeCall(request, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -841,7 +841,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call stopAsync(LspServerRequest request, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call stopAsync(@javax.annotation.Nonnull LspServerRequest request, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = stopValidateBeforeCall(request, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -862,7 +862,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call workspaceSymbolsCall(String query, String languageId, String pathToProject, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call workspaceSymbolsCall(@javax.annotation.Nonnull String query, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -919,7 +919,7 @@ public class LspApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call workspaceSymbolsValidateBeforeCall(String query, String languageId, String pathToProject, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call workspaceSymbolsValidateBeforeCall(@javax.annotation.Nonnull String query, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'query' is set
         if (query == null) {
             throw new ApiException("Missing the required parameter 'query' when calling workspaceSymbols(Async)");
@@ -954,7 +954,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public List<LspSymbol> workspaceSymbols(String query, String languageId, String pathToProject) throws ApiException {
+    public List<LspSymbol> workspaceSymbols(@javax.annotation.Nonnull String query, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject) throws ApiException {
         ApiResponse<List<LspSymbol>> localVarResp = workspaceSymbolsWithHttpInfo(query, languageId, pathToProject);
         return localVarResp.getData();
     }
@@ -974,7 +974,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<LspSymbol>> workspaceSymbolsWithHttpInfo(String query, String languageId, String pathToProject) throws ApiException {
+    public ApiResponse<List<LspSymbol>> workspaceSymbolsWithHttpInfo(@javax.annotation.Nonnull String query, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject) throws ApiException {
         okhttp3.Call localVarCall = workspaceSymbolsValidateBeforeCall(query, languageId, pathToProject, null);
         Type localVarReturnType = new TypeToken<List<LspSymbol>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -996,7 +996,7 @@ public class LspApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call workspaceSymbolsAsync(String query, String languageId, String pathToProject, final ApiCallback<List<LspSymbol>> _callback) throws ApiException {
+    public okhttp3.Call workspaceSymbolsAsync(@javax.annotation.Nonnull String query, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, final ApiCallback<List<LspSymbol>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = workspaceSymbolsValidateBeforeCall(query, languageId, pathToProject, _callback);
         Type localVarReturnType = new TypeToken<List<LspSymbol>>(){}.getType();

@@ -14,64 +14,41 @@
 
 
 
-/**
- * 
- * @export
- * @interface LogEntry
- */
 export interface LogEntry {
     /**
      * Timestamp of the log entry
-     * @type {string}
-     * @memberof LogEntry
      */
     'timestamp': string;
     /**
      * Log message body
-     * @type {string}
-     * @memberof LogEntry
      */
     'body': string;
     /**
      * Severity level text (e.g., INFO, WARN, ERROR)
-     * @type {string}
-     * @memberof LogEntry
      */
     'severityText': string;
     /**
      * Severity level number
-     * @type {number}
-     * @memberof LogEntry
      */
     'severityNumber'?: number;
     /**
      * Service name that generated the log
-     * @type {string}
-     * @memberof LogEntry
      */
     'serviceName': string;
     /**
      * Resource attributes from OTEL
-     * @type {{ [key: string]: string; }}
-     * @memberof LogEntry
      */
     'resourceAttributes': { [key: string]: string; };
     /**
      * Log-specific attributes
-     * @type {{ [key: string]: string; }}
-     * @memberof LogEntry
      */
     'logAttributes': { [key: string]: string; };
     /**
      * Associated trace ID if available
-     * @type {string}
-     * @memberof LogEntry
      */
     'traceId'?: string;
     /**
      * Associated span ID if available
-     * @type {string}
-     * @memberof LogEntry
      */
     'spanId'?: string;
 }

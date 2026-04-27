@@ -87,7 +87,7 @@ public class VolumesApi {
         <tr><td> 200 </td><td> The volume has been successfully created. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createVolumeCall(CreateVolume createVolume, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createVolumeCall(@javax.annotation.Nonnull CreateVolume createVolume, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -138,7 +138,7 @@ public class VolumesApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createVolumeValidateBeforeCall(CreateVolume createVolume, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createVolumeValidateBeforeCall(@javax.annotation.Nonnull CreateVolume createVolume, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'createVolume' is set
         if (createVolume == null) {
             throw new ApiException("Missing the required parameter 'createVolume' when calling createVolume(Async)");
@@ -162,7 +162,7 @@ public class VolumesApi {
         <tr><td> 200 </td><td> The volume has been successfully created. </td><td>  -  </td></tr>
      </table>
      */
-    public VolumeDto createVolume(CreateVolume createVolume, String xDaytonaOrganizationID) throws ApiException {
+    public VolumeDto createVolume(@javax.annotation.Nonnull CreateVolume createVolume, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<VolumeDto> localVarResp = createVolumeWithHttpInfo(createVolume, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -181,7 +181,7 @@ public class VolumesApi {
         <tr><td> 200 </td><td> The volume has been successfully created. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<VolumeDto> createVolumeWithHttpInfo(CreateVolume createVolume, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<VolumeDto> createVolumeWithHttpInfo(@javax.annotation.Nonnull CreateVolume createVolume, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = createVolumeValidateBeforeCall(createVolume, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<VolumeDto>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -202,7 +202,7 @@ public class VolumesApi {
         <tr><td> 200 </td><td> The volume has been successfully created. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createVolumeAsync(CreateVolume createVolume, String xDaytonaOrganizationID, final ApiCallback<VolumeDto> _callback) throws ApiException {
+    public okhttp3.Call createVolumeAsync(@javax.annotation.Nonnull CreateVolume createVolume, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<VolumeDto> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createVolumeValidateBeforeCall(createVolume, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<VolumeDto>(){}.getType();
@@ -224,7 +224,7 @@ public class VolumesApi {
         <tr><td> 409 </td><td> Volume is in use by one or more sandboxes </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteVolumeCall(String volumeId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deleteVolumeCall(@javax.annotation.Nonnull String volumeId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -274,7 +274,7 @@ public class VolumesApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deleteVolumeValidateBeforeCall(String volumeId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deleteVolumeValidateBeforeCall(@javax.annotation.Nonnull String volumeId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'volumeId' is set
         if (volumeId == null) {
             throw new ApiException("Missing the required parameter 'volumeId' when calling deleteVolume(Async)");
@@ -298,7 +298,7 @@ public class VolumesApi {
         <tr><td> 409 </td><td> Volume is in use by one or more sandboxes </td><td>  -  </td></tr>
      </table>
      */
-    public void deleteVolume(String volumeId, String xDaytonaOrganizationID) throws ApiException {
+    public void deleteVolume(@javax.annotation.Nonnull String volumeId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         deleteVolumeWithHttpInfo(volumeId, xDaytonaOrganizationID);
     }
 
@@ -317,7 +317,7 @@ public class VolumesApi {
         <tr><td> 409 </td><td> Volume is in use by one or more sandboxes </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> deleteVolumeWithHttpInfo(String volumeId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> deleteVolumeWithHttpInfo(@javax.annotation.Nonnull String volumeId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = deleteVolumeValidateBeforeCall(volumeId, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -338,7 +338,7 @@ public class VolumesApi {
         <tr><td> 409 </td><td> Volume is in use by one or more sandboxes </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteVolumeAsync(String volumeId, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call deleteVolumeAsync(@javax.annotation.Nonnull String volumeId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deleteVolumeValidateBeforeCall(volumeId, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -358,7 +358,7 @@ public class VolumesApi {
         <tr><td> 200 </td><td> Volume details </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getVolumeCall(String volumeId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getVolumeCall(@javax.annotation.Nonnull String volumeId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -409,7 +409,7 @@ public class VolumesApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getVolumeValidateBeforeCall(String volumeId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getVolumeValidateBeforeCall(@javax.annotation.Nonnull String volumeId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'volumeId' is set
         if (volumeId == null) {
             throw new ApiException("Missing the required parameter 'volumeId' when calling getVolume(Async)");
@@ -433,7 +433,7 @@ public class VolumesApi {
         <tr><td> 200 </td><td> Volume details </td><td>  -  </td></tr>
      </table>
      */
-    public VolumeDto getVolume(String volumeId, String xDaytonaOrganizationID) throws ApiException {
+    public VolumeDto getVolume(@javax.annotation.Nonnull String volumeId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<VolumeDto> localVarResp = getVolumeWithHttpInfo(volumeId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -452,7 +452,7 @@ public class VolumesApi {
         <tr><td> 200 </td><td> Volume details </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<VolumeDto> getVolumeWithHttpInfo(String volumeId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<VolumeDto> getVolumeWithHttpInfo(@javax.annotation.Nonnull String volumeId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getVolumeValidateBeforeCall(volumeId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<VolumeDto>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -473,7 +473,7 @@ public class VolumesApi {
         <tr><td> 200 </td><td> Volume details </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getVolumeAsync(String volumeId, String xDaytonaOrganizationID, final ApiCallback<VolumeDto> _callback) throws ApiException {
+    public okhttp3.Call getVolumeAsync(@javax.annotation.Nonnull String volumeId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<VolumeDto> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getVolumeValidateBeforeCall(volumeId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<VolumeDto>(){}.getType();
@@ -494,7 +494,7 @@ public class VolumesApi {
         <tr><td> 200 </td><td> Volume details </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getVolumeByNameCall(String name, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getVolumeByNameCall(@javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -545,7 +545,7 @@ public class VolumesApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getVolumeByNameValidateBeforeCall(String name, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getVolumeByNameValidateBeforeCall(@javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'name' is set
         if (name == null) {
             throw new ApiException("Missing the required parameter 'name' when calling getVolumeByName(Async)");
@@ -569,7 +569,7 @@ public class VolumesApi {
         <tr><td> 200 </td><td> Volume details </td><td>  -  </td></tr>
      </table>
      */
-    public VolumeDto getVolumeByName(String name, String xDaytonaOrganizationID) throws ApiException {
+    public VolumeDto getVolumeByName(@javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<VolumeDto> localVarResp = getVolumeByNameWithHttpInfo(name, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -588,7 +588,7 @@ public class VolumesApi {
         <tr><td> 200 </td><td> Volume details </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<VolumeDto> getVolumeByNameWithHttpInfo(String name, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<VolumeDto> getVolumeByNameWithHttpInfo(@javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getVolumeByNameValidateBeforeCall(name, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<VolumeDto>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -609,7 +609,7 @@ public class VolumesApi {
         <tr><td> 200 </td><td> Volume details </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call getVolumeByNameAsync(String name, String xDaytonaOrganizationID, final ApiCallback<VolumeDto> _callback) throws ApiException {
+    public okhttp3.Call getVolumeByNameAsync(@javax.annotation.Nonnull String name, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<VolumeDto> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getVolumeByNameValidateBeforeCall(name, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<VolumeDto>(){}.getType();
@@ -630,7 +630,7 @@ public class VolumesApi {
         <tr><td> 200 </td><td> List of all volumes </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listVolumesCall(String xDaytonaOrganizationID, Boolean includeDeleted, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listVolumesCall(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean includeDeleted, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -684,7 +684,7 @@ public class VolumesApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listVolumesValidateBeforeCall(String xDaytonaOrganizationID, Boolean includeDeleted, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call listVolumesValidateBeforeCall(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean includeDeleted, final ApiCallback _callback) throws ApiException {
         return listVolumesCall(xDaytonaOrganizationID, includeDeleted, _callback);
 
     }
@@ -703,7 +703,7 @@ public class VolumesApi {
         <tr><td> 200 </td><td> List of all volumes </td><td>  -  </td></tr>
      </table>
      */
-    public List<VolumeDto> listVolumes(String xDaytonaOrganizationID, Boolean includeDeleted) throws ApiException {
+    public List<VolumeDto> listVolumes(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean includeDeleted) throws ApiException {
         ApiResponse<List<VolumeDto>> localVarResp = listVolumesWithHttpInfo(xDaytonaOrganizationID, includeDeleted);
         return localVarResp.getData();
     }
@@ -722,7 +722,7 @@ public class VolumesApi {
         <tr><td> 200 </td><td> List of all volumes </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<VolumeDto>> listVolumesWithHttpInfo(String xDaytonaOrganizationID, Boolean includeDeleted) throws ApiException {
+    public ApiResponse<List<VolumeDto>> listVolumesWithHttpInfo(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean includeDeleted) throws ApiException {
         okhttp3.Call localVarCall = listVolumesValidateBeforeCall(xDaytonaOrganizationID, includeDeleted, null);
         Type localVarReturnType = new TypeToken<List<VolumeDto>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -743,7 +743,7 @@ public class VolumesApi {
         <tr><td> 200 </td><td> List of all volumes </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listVolumesAsync(String xDaytonaOrganizationID, Boolean includeDeleted, final ApiCallback<List<VolumeDto>> _callback) throws ApiException {
+    public okhttp3.Call listVolumesAsync(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean includeDeleted, final ApiCallback<List<VolumeDto>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = listVolumesValidateBeforeCall(xDaytonaOrganizationID, includeDeleted, _callback);
         Type localVarReturnType = new TypeToken<List<VolumeDto>>(){}.getType();

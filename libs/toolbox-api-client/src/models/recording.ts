@@ -14,59 +14,14 @@
 
 
 
-/**
- * 
- * @export
- * @interface Recording
- */
 export interface Recording {
-    /**
-     * 
-     * @type {number}
-     * @memberof Recording
-     */
     'durationSeconds'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Recording
-     */
     'endTime'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Recording
-     */
     'fileName': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Recording
-     */
     'filePath': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Recording
-     */
     'id': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Recording
-     */
     'sizeBytes'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Recording
-     */
     'startTime': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Recording
-     */
     'status': string;
 }
 

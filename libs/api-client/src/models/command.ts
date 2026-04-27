@@ -14,28 +14,17 @@
 
 
 
-/**
- * 
- * @export
- * @interface Command
- */
 export interface Command {
     /**
      * The ID of the command
-     * @type {string}
-     * @memberof Command
      */
     'id': string;
     /**
      * The command that was executed
-     * @type {string}
-     * @memberof Command
      */
     'command': string;
     /**
      * The exit code of the command
-     * @type {number}
-     * @memberof Command
      */
     'exitCode'?: number;
 }

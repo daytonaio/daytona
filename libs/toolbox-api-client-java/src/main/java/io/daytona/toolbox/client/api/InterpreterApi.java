@@ -89,7 +89,7 @@ public class InterpreterApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createInterpreterContextCall(CreateContextRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createInterpreterContextCall(@javax.annotation.Nonnull CreateContextRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -135,7 +135,7 @@ public class InterpreterApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createInterpreterContextValidateBeforeCall(CreateContextRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createInterpreterContextValidateBeforeCall(@javax.annotation.Nonnull CreateContextRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling createInterpreterContext(Async)");
@@ -160,7 +160,7 @@ public class InterpreterApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public InterpreterContext createInterpreterContext(CreateContextRequest request) throws ApiException {
+    public InterpreterContext createInterpreterContext(@javax.annotation.Nonnull CreateContextRequest request) throws ApiException {
         ApiResponse<InterpreterContext> localVarResp = createInterpreterContextWithHttpInfo(request);
         return localVarResp.getData();
     }
@@ -180,7 +180,7 @@ public class InterpreterApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<InterpreterContext> createInterpreterContextWithHttpInfo(CreateContextRequest request) throws ApiException {
+    public ApiResponse<InterpreterContext> createInterpreterContextWithHttpInfo(@javax.annotation.Nonnull CreateContextRequest request) throws ApiException {
         okhttp3.Call localVarCall = createInterpreterContextValidateBeforeCall(request, null);
         Type localVarReturnType = new TypeToken<InterpreterContext>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -202,7 +202,7 @@ public class InterpreterApi {
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createInterpreterContextAsync(CreateContextRequest request, final ApiCallback<InterpreterContext> _callback) throws ApiException {
+    public okhttp3.Call createInterpreterContextAsync(@javax.annotation.Nonnull CreateContextRequest request, final ApiCallback<InterpreterContext> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createInterpreterContextValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<InterpreterContext>(){}.getType();
@@ -224,7 +224,7 @@ public class InterpreterApi {
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteInterpreterContextCall(String id, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deleteInterpreterContextCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -270,7 +270,7 @@ public class InterpreterApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deleteInterpreterContextValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deleteInterpreterContextValidateBeforeCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'id' is set
         if (id == null) {
             throw new ApiException("Missing the required parameter 'id' when calling deleteInterpreterContext(Async)");
@@ -295,7 +295,7 @@ public class InterpreterApi {
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
      </table>
      */
-    public Map<String, String> deleteInterpreterContext(String id) throws ApiException {
+    public Map<String, String> deleteInterpreterContext(@javax.annotation.Nonnull String id) throws ApiException {
         ApiResponse<Map<String, String>> localVarResp = deleteInterpreterContextWithHttpInfo(id);
         return localVarResp.getData();
     }
@@ -315,7 +315,7 @@ public class InterpreterApi {
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Map<String, String>> deleteInterpreterContextWithHttpInfo(String id) throws ApiException {
+    public ApiResponse<Map<String, String>> deleteInterpreterContextWithHttpInfo(@javax.annotation.Nonnull String id) throws ApiException {
         okhttp3.Call localVarCall = deleteInterpreterContextValidateBeforeCall(id, null);
         Type localVarReturnType = new TypeToken<Map<String, String>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -337,7 +337,7 @@ public class InterpreterApi {
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call deleteInterpreterContextAsync(String id, final ApiCallback<Map<String, String>> _callback) throws ApiException {
+    public okhttp3.Call deleteInterpreterContextAsync(@javax.annotation.Nonnull String id, final ApiCallback<Map<String, String>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deleteInterpreterContextValidateBeforeCall(id, _callback);
         Type localVarReturnType = new TypeToken<Map<String, String>>(){}.getType();
