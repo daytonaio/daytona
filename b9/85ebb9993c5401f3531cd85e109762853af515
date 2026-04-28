@@ -1,0 +1,23 @@
+apps/api/src/sandbox/managers/sandbox.manager.ts
+  c221d38064705bda 58-59,670,673,675,677-678,680-685,687-698,700-704,706,709,711-713,715,717-754,757-778,780-781,828
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "b985ebb9993c5401f3531cd85e109762853af515",
+  "prompts": {
+    "c221d38064705bda": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "feb7c61d-39a5-47c2-bca6-bc5433634a5c",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Toma Puljak",
+      "messages": [],
+      "total_additions": 102,
+      "total_deletions": 71,
+      "accepted_lines": 121,
+      "overriden_lines": 0
+    }
+  }
+}
