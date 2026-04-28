@@ -1,0 +1,23 @@
+apps/api/src/app.service.ts
+  c221d38064705bda 50-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "1023a396d3c503a9406f216ab6359846cbe46570",
+  "prompts": {
+    "c221d38064705bda": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "feb7c61d-39a5-47c2-bca6-bc5433634a5c",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Toma Puljak",
+      "messages": [],
+      "total_additions": 9,
+      "total_deletions": 0,
+      "accepted_lines": 30,
+      "overriden_lines": 0
+    }
+  }
+}
