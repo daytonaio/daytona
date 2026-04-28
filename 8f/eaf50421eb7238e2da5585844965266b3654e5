@@ -1,0 +1,23 @@
+apps/api/src/sandbox/managers/snapshot.manager.ts
+  c221d38064705bda 10,38,114-204,240,399,416,445-491,650-724,1106-1107,1300-1301,1530-1534,1539,1541-1542,1544-1547,1650,1689
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "8feaf50421eb7238e2da5585844965266b3654e5",
+  "prompts": {
+    "c221d38064705bda": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "feb7c61d-39a5-47c2-bca6-bc5433634a5c",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Toma Puljak",
+      "messages": [],
+      "total_additions": 236,
+      "total_deletions": 19,
+      "accepted_lines": 255,
+      "overriden_lines": 0
+    }
+  }
+}
