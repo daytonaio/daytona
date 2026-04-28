@@ -103,15 +103,11 @@ module Daytona
         'Accept' => 'application/json'
       )
 
-      # Use queue for synchronization
       completion_queue = Queue.new
-      interpreter = self # Capture self for use in blocks
-      last_message_time = Time.now
-      message_mutex = Mutex.new
+      interpreter = self
 
       puts "[DEBUG] Connecting to WebSocket: #{ws_url}" if ENV['DEBUG']
 
-      # Connect to WebSocket and execute
       ws = WebSocket::Client::Simple.connect(ws_url, headers:)
 
       ws.on :open do
@@ -120,8 +116,6 @@ module Daytona
       end
 
       ws.on :message do |msg|
-        message_mutex.synchronize { last_message_time = Time.now }
-
         puts "[DEBUG] Received message (length=#{msg.data.length}): #{msg.data.inspect[0..200]}" if ENV['DEBUG']
 
         interpreter.send(:handle_message, msg.data, result, on_stdout, on_stderr, on_error, completion_queue)
@@ -146,72 +140,59 @@ module Daytona
         end
       end
 
-      # Wait for completion signal with idle timeout
-      # If timeout is specified, wait longer to detect actual timeout errors
-      # Otherwise use short idle timeout for normal completion
-      idle_timeout = timeout ? (timeout + 2.0) : 1.0
-      max_wait = (timeout || 300) + 3 # Add buffer to configured timeout
+      no_timeout = timeout.is_a?(Numeric) && timeout <= 0
+      max_wait = no_timeout ? nil : (timeout || 600) + 3
       start_time = Time.now
       completion_reason = nil
 
-      # Wait for completion or close event
       loop do
-        begin
-          completion = completion_queue.pop(true) # non-blocking
-          puts "[DEBUG] Got completion signal: #{completion[:type]}" if ENV['DEBUG']
-
-          # Control message (completed/interrupted) = normal completion
-          if completion[:type] == :completed
-            completion_reason = :completed
-            break
-          # If it's an error from close event (like timeout), raise it
-          elsif completion[:type] == :error_from_close
-            error_msg = completion[:error]
-            # Raise TimeoutError for timeout cases, regular Error for others
-            if error_msg.include?('timed out') || error_msg.include?('Execution timed out')
-              raise Sdk::TimeoutError, error_msg
-            end
-
-            raise Sdk::Error, error_msg
-
-          # Close event during execution (before control message) = likely timeout or error
-          elsif completion[:type] == :close
-            elapsed = Time.now - start_time
-            # If we got close near the timeout, it's likely a timeout
-            if timeout && elapsed >= timeout && elapsed < (timeout + 2)
-              raise Sdk::TimeoutError,
-                    'Execution timed out: operation exceeded the configured `timeout`. Provide a larger value if needed.'
-            end
-            # Otherwise normal close
-            completion_reason = :close
-            break
-          # WebSocket errors
-          elsif completion[:type] == :error && !completion[:error].message.include?('stream closed')
-            raise Sdk::Error, "WebSocket error: #{completion[:error].message}"
+        if max_wait
+          remaining = max_wait - (Time.now - start_time)
+          if remaining <= 0
+            ws.close
+            raise Sdk::TimeoutError,
+                  'Execution timed out: operation exceeded the configured `timeout`. Provide a larger value if needed.'
           end
-        rescue ThreadError
-          # Queue is empty, check idle timeout
         end
 
-        # Check idle timeout (no messages for N seconds = completion)
-        time_since_last_message = message_mutex.synchronize { Time.now - last_message_time }
-        if time_since_last_message > idle_timeout
-          puts "[DEBUG] Idle timeout reached (#{idle_timeout}s), assuming completion" if ENV['DEBUG']
-          completion_reason = :idle_complete
-          break
-        end
+        completion = completion_queue.pop(timeout: max_wait ? remaining : nil)
 
-        # Check for absolute timeout (safety net)
-        if Time.now - start_time > max_wait
+        if completion.nil?
           ws.close
           raise Sdk::TimeoutError,
                 'Execution timed out: operation exceeded the configured `timeout`. Provide a larger value if needed.'
         end
 
-        sleep 0.05 # Check every 50ms
+        puts "[DEBUG] Got completion signal: #{completion[:type]}" if ENV['DEBUG']
+
+        if completion[:type] == :completed
+          completion_reason = :completed
+          break
+        elsif completion[:type] == :error_from_close
+          error_msg = completion[:error]
+          if error_msg.include?('timed out') || error_msg.include?('Execution timed out')
+            raise Sdk::TimeoutError, error_msg
+          end
+
+          raise Sdk::Error, error_msg
+        elsif completion[:type] == :close
+          elapsed = Time.now - start_time
+          if timeout && timeout > 0 && elapsed >= timeout && elapsed < (timeout + 2)
+            raise Sdk::TimeoutError,
+                  'Execution timed out: operation exceeded the configured `timeout`. Provide a larger value if needed.'
+          end
+          completion_reason = :close
+          break
+        elsif completion[:type] == :error
+          unless completion[:error].message.include?('stream closed')
+            raise Sdk::Error, "WebSocket error: #{completion[:error].message}"
+          end
+
+          completion_reason = :close
+          break
+        end
       end
 
-      # Close WebSocket if not already closed
       ws.close if completion_reason != :close
       sleep 0.05
 

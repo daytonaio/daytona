@@ -13,7 +13,9 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// attachWebSocket connects a WebSocket client to the interpreter context
+// attachWebSocket connects a WebSocket client to the interpreter context.
+// The client is ready to receive messages when this function returns.
+// Cleanup runs in a background goroutine after the client disconnects.
 func (c *Context) attachWebSocket(ws *websocket.Conn) {
 	pongCh := util.SetupWSKeepAlive(ws, c.logger)
 
@@ -49,17 +51,19 @@ func (c *Context) attachWebSocket(ws *websocket.Conn) {
 		}
 	}()
 
-	// Wait for clientWriter to exit (signals disconnection)
-	<-cl.done
+	// Clean up after the client disconnects (non-blocking)
+	go func() {
+		<-cl.done
 
-	c.mu.Lock()
-	if c.client != nil && c.client.id == cl.id {
-		c.client = nil
-	}
-	c.mu.Unlock()
+		c.mu.Lock()
+		if c.client != nil && c.client.id == cl.id {
+			c.client = nil
+		}
+		c.mu.Unlock()
 
-	cl.close()
-	c.logger.Debug("Client detached from interpreter context", "clientId", cl.id, "contextId", c.info.ID)
+		cl.close()
+		c.logger.Debug("Client detached from interpreter context", "clientId", cl.id, "contextId", c.info.ID)
+	}()
 }
 
 // clientWriter sends output messages to the WebSocket client

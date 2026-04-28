@@ -47,7 +47,7 @@ func (c *Context) enqueueAndExecute(code string, envs map[string]string, timeout
 func (c *Context) processQueue() {
 	for job := range c.queue {
 		if job.ws != nil {
-			go c.attachWebSocket(job.ws)
+			c.attachWebSocket(job.ws)
 		}
 
 		result, err := c.executeCode(job.code, job.envs, job.timeout)
@@ -344,7 +344,6 @@ func (c *Context) handleChunk(chunk map[string]any) {
 			}
 		}
 		c.commandMu.Unlock()
-		return
 	}
 
 	// Stream to WebSocket client
