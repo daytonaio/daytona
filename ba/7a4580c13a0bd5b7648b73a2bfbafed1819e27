@@ -1,0 +1,23 @@
+runner-poller.ecosystem.config.js
+  c221d38064705bda 1-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "ba7a4580c13a0bd5b7648b73a2bfbafed1819e27",
+  "prompts": {
+    "c221d38064705bda": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "feb7c61d-39a5-47c2-bca6-bc5433634a5c",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Toma Puljak",
+      "messages": [],
+      "total_additions": 25,
+      "total_deletions": 0,
+      "accepted_lines": 26,
+      "overriden_lines": 0
+    }
+  }
+}
