@@ -266,7 +266,12 @@ export function SandboxTable({
                     'bg-muted animate-pulse': sandboxStateIsTransitioning[row.original.id],
                     'cursor-pointer': onRowClick,
                   })}
-                  onClick={() => onRowClick?.(row.original)}
+                  onClick={() =>
+                    onRowClick?.(
+                      row.original,
+                      table.getPrePaginationRowModel().rows.map((row) => row.original),
+                    )
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
