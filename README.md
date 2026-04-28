@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/daytonaio-daytona-badge.png)](https://mseep.ai/app/daytonaio-daytona)
+
 &nbsp;
 
 <div align="center">
