@@ -15,18 +15,33 @@ import "github.com/daytonaio/daytona/libs/sdk-go/pkg/errors"
 - [func ConvertAPIError\(err error, httpResp \*http.Response\) error](<#ConvertAPIError>)
 - [func ConvertToolboxError\(err error, httpResp \*http.Response\) error](<#ConvertToolboxError>)
 - [func NewDaytonaErrorFromBody\(body \[\]byte, statusCode int, headers http.Header\) error](<#NewDaytonaErrorFromBody>)
+- [type DaytonaAuthenticationError](<#DaytonaAuthenticationError>)
+  - [func NewDaytonaAuthenticationError\(message string, headers http.Header\) \*DaytonaAuthenticationError](<#NewDaytonaAuthenticationError>)
+  - [func \(e \*DaytonaAuthenticationError\) Error\(\) string](<#DaytonaAuthenticationError.Error>)
+- [type DaytonaConflictError](<#DaytonaConflictError>)
+  - [func NewDaytonaConflictError\(message string, headers http.Header\) \*DaytonaConflictError](<#NewDaytonaConflictError>)
+  - [func \(e \*DaytonaConflictError\) Error\(\) string](<#DaytonaConflictError.Error>)
 - [type DaytonaError](<#DaytonaError>)
   - [func NewDaytonaError\(message string, statusCode int, headers http.Header\) \*DaytonaError](<#NewDaytonaError>)
   - [func \(e \*DaytonaError\) Error\(\) string](<#DaytonaError.Error>)
+- [type DaytonaForbiddenError](<#DaytonaForbiddenError>)
+  - [func NewDaytonaForbiddenError\(message string, headers http.Header\) \*DaytonaForbiddenError](<#NewDaytonaForbiddenError>)
+  - [func \(e \*DaytonaForbiddenError\) Error\(\) string](<#DaytonaForbiddenError.Error>)
 - [type DaytonaNotFoundError](<#DaytonaNotFoundError>)
   - [func NewDaytonaNotFoundError\(message string, headers http.Header\) \*DaytonaNotFoundError](<#NewDaytonaNotFoundError>)
   - [func \(e \*DaytonaNotFoundError\) Error\(\) string](<#DaytonaNotFoundError.Error>)
 - [type DaytonaRateLimitError](<#DaytonaRateLimitError>)
   - [func NewDaytonaRateLimitError\(message string, headers http.Header\) \*DaytonaRateLimitError](<#NewDaytonaRateLimitError>)
   - [func \(e \*DaytonaRateLimitError\) Error\(\) string](<#DaytonaRateLimitError.Error>)
+- [type DaytonaServerError](<#DaytonaServerError>)
+  - [func NewDaytonaServerError\(message string, statusCode int, headers http.Header\) \*DaytonaServerError](<#NewDaytonaServerError>)
+  - [func \(e \*DaytonaServerError\) Error\(\) string](<#DaytonaServerError.Error>)
 - [type DaytonaTimeoutError](<#DaytonaTimeoutError>)
   - [func NewDaytonaTimeoutError\(message string\) \*DaytonaTimeoutError](<#NewDaytonaTimeoutError>)
   - [func \(e \*DaytonaTimeoutError\) Error\(\) string](<#DaytonaTimeoutError.Error>)
+- [type DaytonaValidationError](<#DaytonaValidationError>)
+  - [func NewDaytonaValidationError\(message string, headers http.Header\) \*DaytonaValidationError](<#NewDaytonaValidationError>)
+  - [func \(e \*DaytonaValidationError\) Error\(\) string](<#DaytonaValidationError.Error>)
 
 
 <a name="ConvertAPIError"></a>
@@ -56,6 +71,64 @@ func NewDaytonaErrorFromBody(body []byte, statusCode int, headers http.Header) e
 
 NewDaytonaErrorFromBody parses a JSON response body and maps the status code to the appropriate SDK error type. Falls back to the raw body as the message.
 
+<a name="DaytonaAuthenticationError"></a>
+## type DaytonaAuthenticationError
+
+DaytonaAuthenticationError represents an authentication error \(401\)
+
+```go
+type DaytonaAuthenticationError struct {
+    *DaytonaError
+}
+```
+
+<a name="NewDaytonaAuthenticationError"></a>
+### func NewDaytonaAuthenticationError
+
+```go
+func NewDaytonaAuthenticationError(message string, headers http.Header) *DaytonaAuthenticationError
+```
+
+
+
+<a name="DaytonaAuthenticationError.Error"></a>
+### func \(\*DaytonaAuthenticationError\) Error
+
+```go
+func (e *DaytonaAuthenticationError) Error() string
+```
+
+
+
+<a name="DaytonaConflictError"></a>
+## type DaytonaConflictError
+
+DaytonaConflictError represents a conflict error \(409\)
+
+```go
+type DaytonaConflictError struct {
+    *DaytonaError
+}
+```
+
+<a name="NewDaytonaConflictError"></a>
+### func NewDaytonaConflictError
+
+```go
+func NewDaytonaConflictError(message string, headers http.Header) *DaytonaConflictError
+```
+
+
+
+<a name="DaytonaConflictError.Error"></a>
+### func \(\*DaytonaConflictError\) Error
+
+```go
+func (e *DaytonaConflictError) Error() string
+```
+
+
+
 <a name="DaytonaError"></a>
 ## type DaytonaError
 
@@ -83,6 +156,35 @@ NewDaytonaError creates a new DaytonaError
 
 ```go
 func (e *DaytonaError) Error() string
+```
+
+
+
+<a name="DaytonaForbiddenError"></a>
+## type DaytonaForbiddenError
+
+DaytonaForbiddenError represents a forbidden/authorization error \(403\)
+
+```go
+type DaytonaForbiddenError struct {
+    *DaytonaError
+}
+```
+
+<a name="NewDaytonaForbiddenError"></a>
+### func NewDaytonaForbiddenError
+
+```go
+func NewDaytonaForbiddenError(message string, headers http.Header) *DaytonaForbiddenError
+```
+
+
+
+<a name="DaytonaForbiddenError.Error"></a>
+### func \(\*DaytonaForbiddenError\) Error
+
+```go
+func (e *DaytonaForbiddenError) Error() string
 ```
 
 
@@ -145,6 +247,35 @@ func (e *DaytonaRateLimitError) Error() string
 
 
 
+<a name="DaytonaServerError"></a>
+## type DaytonaServerError
+
+DaytonaServerError represents a server error \(5xx\)
+
+```go
+type DaytonaServerError struct {
+    *DaytonaError
+}
+```
+
+<a name="NewDaytonaServerError"></a>
+### func NewDaytonaServerError
+
+```go
+func NewDaytonaServerError(message string, statusCode int, headers http.Header) *DaytonaServerError
+```
+
+
+
+<a name="DaytonaServerError.Error"></a>
+### func \(\*DaytonaServerError\) Error
+
+```go
+func (e *DaytonaServerError) Error() string
+```
+
+
+
 <a name="DaytonaTimeoutError"></a>
 ## type DaytonaTimeoutError
 
@@ -163,13 +294,42 @@ type DaytonaTimeoutError struct {
 func NewDaytonaTimeoutError(message string) *DaytonaTimeoutError
 ```
 
-NewDaytonaTimeoutError creates a new DaytonaTimeoutError
+
 
 <a name="DaytonaTimeoutError.Error"></a>
 ### func \(\*DaytonaTimeoutError\) Error
 
 ```go
 func (e *DaytonaTimeoutError) Error() string
+```
+
+
+
+<a name="DaytonaValidationError"></a>
+## type DaytonaValidationError
+
+DaytonaValidationError represents a validation/bad request error \(400\)
+
+```go
+type DaytonaValidationError struct {
+    *DaytonaError
+}
+```
+
+<a name="NewDaytonaValidationError"></a>
+### func NewDaytonaValidationError
+
+```go
+func NewDaytonaValidationError(message string, headers http.Header) *DaytonaValidationError
+```
+
+
+
+<a name="DaytonaValidationError.Error"></a>
+### func \(\*DaytonaValidationError\) Error
+
+```go
+func (e *DaytonaValidationError) Error() string
 ```
 
 

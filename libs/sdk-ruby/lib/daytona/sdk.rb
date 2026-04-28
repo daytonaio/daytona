@@ -43,6 +43,13 @@ module Daytona
   module Sdk
     class Error < StandardError; end
     class TimeoutError < Error; end
+    class AuthenticationError < Error; end
+    class ForbiddenError < Error; end
+    class NotFoundError < Error; end
+    class ConflictError < Error; end
+    class ValidationError < Error; end
+    class RateLimitError < Error; end
+    class ServerError < Error; end
 
     def self.logger = @logger ||= Logger.new($stdout, level: Logger::INFO)
   end
