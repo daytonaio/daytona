@@ -31,7 +31,9 @@ const Keys: React.FC = () => {
       return []
     }
     if (authenticatedUserOrganizationMember.role === OrganizationUserRoleEnum.OWNER) {
-      return Object.values(CreateApiKeyPermissionsEnum)
+      return Object.values(CreateApiKeyPermissionsEnum).filter(
+        (value) => value !== CreateApiKeyPermissionsEnum.UNKNOWN_DEFAULT_OPEN_API,
+      )
     }
     return Array.from(new Set(authenticatedUserOrganizationMember.assignedRoles.flatMap((role) => role.permissions)))
   }, [authenticatedUserOrganizationMember])
