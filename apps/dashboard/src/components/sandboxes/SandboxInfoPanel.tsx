@@ -5,6 +5,7 @@
 
 import { CopyButton } from '@/components/CopyButton'
 import { ResourceChip } from '@/components/ResourceChip'
+import { SandboxLabel } from '@/components/SandboxLabel'
 import { TimestampTooltip } from '@/components/TimestampTooltip'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia } from '@/components/ui/empty'
@@ -12,15 +13,15 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { cn, formatDuration, getRelativeTimeString } from '@/lib/utils'
 import { Sandbox } from '@daytona/api-client'
 import { AlertCircle, Tag } from 'lucide-react'
-import React, { useMemo } from 'react'
+import React, { ReactNode, useMemo } from 'react'
 
 export function InfoSection({
   title,
   children,
   className,
 }: {
-  title: string
-  children: React.ReactNode
+  title: ReactNode
+  children: ReactNode
   className?: string
 }) {
   return (
@@ -129,13 +130,7 @@ export function SandboxInfoPanel({ sandbox, getRegionName }: SandboxInfoPanelPro
           <div className="max-h-[250px] overflow-y-auto scrollbar-sm">
             <div className="flex flex-wrap gap-2 py-1">
               {labelEntries.map(([key, value]) => (
-                <code
-                  key={key}
-                  className="flex items-center gap-1 bg-muted border border-border rounded px-2 py-1 text-xs font-mono"
-                >
-                  <span className="text-muted-foreground">{key}:</span>
-                  <span>{value}</span>
-                </code>
+                <SandboxLabel key={key} labelKey={key} value={value} />
               ))}
             </div>
           </div>

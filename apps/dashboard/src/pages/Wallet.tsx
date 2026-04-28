@@ -315,7 +315,7 @@ const Wallet = () => {
               </Alert>
             )}
 
-            <Card className="h-full">
+            <Card>
               <CardHeader>
                 <CardTitle>Overview</CardTitle>
               </CardHeader>

@@ -704,6 +704,28 @@ const Sandboxes: React.FC = () => {
     setShowRevokeSshDialog(true)
   }
 
+  const sandboxItems = useMemo(() => sandboxes ?? [], [sandboxes])
+  const selectedSandboxIndex = useMemo(
+    () => sandboxItems.findIndex((sandbox) => sandbox.id === selectedSandbox?.id),
+    [sandboxItems, selectedSandbox?.id],
+  )
+
+  const handleSandboxSheetNavigate = useCallback(
+    (direction: 'prev' | 'next') => {
+      if (selectedSandboxIndex < 0) {
+        return
+      }
+
+      const nextIndex = direction === 'prev' ? selectedSandboxIndex - 1 : selectedSandboxIndex + 1
+      const nextSandbox = sandboxItems[nextIndex]
+
+      if (nextSandbox) {
+        setSelectedSandbox(nextSandbox)
+      }
+    },
+    [sandboxItems, selectedSandboxIndex],
+  )
+
   const writePermitted = useMemo(
     () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SANDBOXES),
     [authenticatedUserHasPermission],
@@ -929,11 +951,16 @@ const Sandboxes: React.FC = () => {
             await openDeleteDialog(id)
           }}
           handleArchive={handleArchive}
-          getWebTerminalUrl={getWebTerminalUrl}
           writePermitted={authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER}
           deletePermitted={authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER}
           handleRecover={handleRecover}
           getRegionName={getRegionName}
+          onCreateSshAccess={openCreateSshDialog}
+          onRevokeSshAccess={openRevokeSshDialog}
+          onScreenRecordings={handleScreenRecordings}
+          onNavigate={handleSandboxSheetNavigate}
+          hasPrev={selectedSandboxIndex > 0}
+          hasNext={selectedSandboxIndex >= 0 && selectedSandboxIndex < sandboxItems.length - 1}
         />
 
         {forkTreeSandboxId && (
