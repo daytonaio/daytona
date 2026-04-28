@@ -234,16 +234,14 @@ const AuditLogs: React.FC = () => {
 
       <PageContent size="full" className="overflow-hidden gap-3">
         <div className="shrink-0 flex gap-2 sm:flex-row sm:items-center overflow-auto">
-          <div className="flex gap-2 items-center">
-            <DateRangePicker
-              value={dateRange}
-              onChange={handleDateRangeChange}
-              quickRangesEnabled
-              quickRanges={AUDIT_LOG_QUICK_RANGES}
-              timeSelection
-              disabled={isLoading}
-            />
-          </div>
+          <DateRangePicker
+            value={dateRange}
+            onChange={handleDateRangeChange}
+            quickRangesEnabled
+            quickRanges={AUDIT_LOG_QUICK_RANGES}
+            timeSelection
+            disabled={isLoading}
+          />
           <RefreshSegmentedButton
             className="ml-auto"
             value={refreshInterval}
