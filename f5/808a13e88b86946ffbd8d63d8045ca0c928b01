@@ -1,0 +1,23 @@
+apps/api/src/sandbox/constants/propagation-tiers.constant.ts
+  c221d38064705bda 34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "f5808a13e88b86946ffbd8d63d8045ca0c928b01",
+  "prompts": {
+    "c221d38064705bda": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "feb7c61d-39a5-47c2-bca6-bc5433634a5c",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Toma Puljak",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    }
+  }
+}
