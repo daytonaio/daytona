@@ -172,7 +172,7 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
     await this.redisLockProvider.unlock('close-and-reopen-usage-periods')
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'archive-usage-periods' })
+  @Cron(CronExpression.EVERY_5_SECONDS, { name: 'archive-usage-periods' })
   @TrackJobExecution()
   @LogExecution('archive-usage-periods')
   @WithInstrumentation()
@@ -190,7 +190,7 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
         order: {
           startAt: 'ASC',
         },
-        take: 1000,
+        take: 5000,
       })
 
       if (usagePeriods.length === 0) {
