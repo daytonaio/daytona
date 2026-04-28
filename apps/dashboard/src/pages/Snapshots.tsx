@@ -378,7 +378,10 @@ const Snapshots: React.FC = () => {
           sorting={sorting}
           onSortingChange={handleSortingChange}
           stateFilter={stateFilter}
-          onStateFilterChange={setStateFilter}
+          onStateFilterChange={(values) => {
+            setStateFilter(values)
+            setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
+          }}
         />
 
         {snapshotToDelete && (
