@@ -34,7 +34,17 @@ export function FacetFilter({ title, options, selectedValues, setSelectedValues,
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className={cn('h-10 border-dashed', className)}>
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn(
+            'h-10 border-dashed',
+            {
+              '!pr-1': selectedValues?.size,
+            },
+            className,
+          )}
+        >
           <PlusCircle />
           {title}
           {selectedValues?.size > 0 && (
@@ -43,7 +53,7 @@ export function FacetFilter({ title, options, selectedValues, setSelectedValues,
               <Badge variant="secondary" className="rounded-sm px-1 font-normal lg:hidden">
                 {selectedValues.size}
               </Badge>
-              <div className="hidden space-x-1 lg:flex">
+              <div className="hidden lg:flex gap-1">
                 {selectedValues.size > 2 ? (
                   <Badge variant="secondary" className="rounded-sm px-1 font-normal">
                     {selectedValues.size} selected

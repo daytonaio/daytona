@@ -20,9 +20,9 @@ import { cn } from '@/lib/utils'
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state'
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
-const SIDEBAR_WIDTH = '16rem'
-const SIDEBAR_WIDTH_MOBILE = '18rem'
-const SIDEBAR_WIDTH_ICON = '3rem'
+const SIDEBAR_WIDTH_PX = 256
+const SIDEBAR_WIDTH_MOBILE_PX = 288
+const SIDEBAR_WIDTH_ICON_PX = 48
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b'
 
 type SidebarContext = {
@@ -32,6 +32,7 @@ type SidebarContext = {
   openMobile: boolean
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
+  currentWidth: number
   toggleSidebar: () => void
 }
 
@@ -111,6 +112,7 @@ const SidebarProvider = React.forwardRef<
     // We add a state so that we can do data-state="expanded" or "collapsed".
     // This makes it easier to style the sidebar with Tailwind classes.
     const state = open ? 'expanded' : 'collapsed'
+    const currentWidth = isMobile ? 0 : open ? SIDEBAR_WIDTH_PX : SIDEBAR_WIDTH_ICON_PX
 
     const contextValue = React.useMemo<SidebarContext>(
       () => ({
@@ -120,9 +122,10 @@ const SidebarProvider = React.forwardRef<
         isMobile,
         openMobile,
         setOpenMobile,
+        currentWidth,
         toggleSidebar,
       }),
-      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
+      [state, open, setOpen, isMobile, openMobile, setOpenMobile, currentWidth, toggleSidebar],
     )
 
     return (
@@ -130,8 +133,8 @@ const SidebarProvider = React.forwardRef<
         <div
           style={
             {
-              '--sidebar-width': SIDEBAR_WIDTH,
-              '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
+              '--sidebar-width': `${SIDEBAR_WIDTH_PX}px`,
+              '--sidebar-width-icon': `${SIDEBAR_WIDTH_ICON_PX}px`,
               ...style,
             } as React.CSSProperties
           }
@@ -187,7 +190,7 @@ const Sidebar = React.forwardRef<
             className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
             style={
               {
-                '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
+                '--sidebar-width': `${SIDEBAR_WIDTH_MOBILE_PX}px`,
               } as React.CSSProperties
             }
             side={side}
