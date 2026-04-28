@@ -1,0 +1,23 @@
+apps/api/src/docker-registry/services/docker-registry.service.ts
+  c221d38064705bda 542-550,555-576,585-595
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "50b82cd3ad2c5baac300e9b7fbd51a1ed572c60b",
+  "prompts": {
+    "c221d38064705bda": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "feb7c61d-39a5-47c2-bca6-bc5433634a5c",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Toma Puljak",
+      "messages": [],
+      "total_additions": 42,
+      "total_deletions": 4,
+      "accepted_lines": 63,
+      "overriden_lines": 0
+    }
+  }
+}
