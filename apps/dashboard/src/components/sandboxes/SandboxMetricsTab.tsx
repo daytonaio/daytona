@@ -21,6 +21,13 @@ import { MetricSeries } from '@daytona/api-client'
 import { getMetricDisplayName } from '@/constants/metrics'
 import { timeRangeSearchParams } from './SearchParams'
 
+type TimeRangeState = {
+  from: Date | null
+  to: Date | null
+}
+
+const EMPTY_TIME_RANGE: TimeRangeState = { from: null, to: null }
+
 const CHART_COLORS = [
   'hsl(var(--chart-1))',
   'hsl(var(--chart-2))',
@@ -213,29 +220,59 @@ function MetricsErrorState({ onRetry }: { onRetry: () => void }) {
   )
 }
 
-function MetricsEmptyState() {
+function MetricsEmptyState({ hasFilters, onClearFilters }: { hasFilters: boolean; onClearFilters: () => void }) {
   return (
     <Empty className="flex-1 border-0">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <BarChart3 className="size-4" />
         </EmptyMedia>
-        <EmptyTitle>No metrics available</EmptyTitle>
-        <EmptyDescription>
-          Metrics may take a moment to appear after the sandbox starts.{' '}
-          <a href={`${DAYTONA_DOCS_URL}/en/experimental/otel-collection`} target="_blank" rel="noopener noreferrer">
-            Learn more about observability
-          </a>
-          .
-        </EmptyDescription>
+        <EmptyTitle>{hasFilters ? 'No matching metrics found' : 'No metrics yet'}</EmptyTitle>
+        {hasFilters ? (
+          <EmptyDescription>No metrics matched your current filters.</EmptyDescription>
+        ) : (
+          <EmptyDescription>
+            Metrics may take a moment to appear after the sandbox starts.{' '}
+            <a href={`${DAYTONA_DOCS_URL}/en/experimental/otel-collection`} target="_blank" rel="noopener noreferrer">
+              Learn more about observability
+            </a>
+            .
+          </EmptyDescription>
+        )}
       </EmptyHeader>
+      {hasFilters ? (
+        <Button variant="outline" size="sm" onClick={onClearFilters}>
+          Clear filters
+        </Button>
+      ) : null}
     </Empty>
   )
 }
 
-export function SandboxMetricsTab({ sandboxId }: { sandboxId: string }) {
-  const [timeRange, setTimeRange] = useQueryStates(timeRangeSearchParams)
+export function SandboxMetricsTab({
+  sandboxId,
+  persistFilters = true,
+}: {
+  sandboxId: string
+  persistFilters?: boolean
+}) {
+  const [queryTimeRange, setQueryTimeRange] = useQueryStates(timeRangeSearchParams)
+  const [localTimeRange, setLocalTimeRange] = useState<TimeRangeState>(EMPTY_TIME_RANGE)
   const [viewModes, setViewModes] = useState<Record<string, ViewMode>>({ memory: '%', filesystem: '%' })
+  const [timeRangeSelectorKey, setTimeRangeSelectorKey] = useState(0)
+  const timeRange = persistFilters ? queryTimeRange : localTimeRange
+
+  const setTimeRange = useCallback(
+    (value: TimeRangeState) => {
+      if (persistFilters) {
+        setQueryTimeRange(value)
+        return
+      }
+
+      setLocalTimeRange(value)
+    },
+    [persistFilters, setQueryTimeRange],
+  )
 
   const resolvedFrom = useMemo(() => timeRange.from ?? subHours(new Date(), 1), [timeRange.from])
   const resolvedTo = useMemo(() => timeRange.to ?? new Date(), [timeRange.to])
@@ -250,9 +287,20 @@ export function SandboxMetricsTab({ sandboxId }: { sandboxId: string }) {
     [setTimeRange],
   )
 
+  const handleTimeRangeClear = useCallback(() => {
+    setTimeRange({ from: null, to: null })
+  }, [setTimeRange])
+
   const handleViewModeChange = useCallback((groupKey: string, mode: ViewMode) => {
     setViewModes((prev) => ({ ...prev, [groupKey]: mode }))
   }, [])
+
+  const hasFilters = Boolean(timeRange.from || timeRange.to)
+
+  const handleClearFilters = useCallback(() => {
+    setTimeRange({ from: null, to: null })
+    setTimeRangeSelectorKey((key) => key + 1)
+  }, [setTimeRange])
 
   const groupedSeries = React.useMemo(() => {
     if (!data?.series?.length) return []
@@ -322,7 +370,9 @@ export function SandboxMetricsTab({ sandboxId }: { sandboxId: string }) {
     <div className="flex flex-col h-full gap-4 p-4">
       <div className="flex flex-wrap items-center gap-3 shrink-0">
         <TimeRangeSelector
+          key={timeRangeSelectorKey}
           onChange={handleTimeRangeChange}
+          onClear={handleTimeRangeClear}
           defaultRange={timeRange.from && timeRange.to ? { from: timeRange.from, to: timeRange.to } : undefined}
           className="w-auto"
         />
@@ -341,7 +391,7 @@ export function SandboxMetricsTab({ sandboxId }: { sandboxId: string }) {
         </div>
       ) : !data?.series?.length ? (
         <div className="flex-1 min-h-0 rounded-md border border-border flex">
-          <MetricsEmptyState />
+          <MetricsEmptyState hasFilters={hasFilters} onClearFilters={handleClearFilters} />
         </div>
       ) : (
         <ScrollArea fade="mask" className="flex-1 min-h-0">

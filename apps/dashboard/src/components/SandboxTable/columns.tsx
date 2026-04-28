@@ -9,11 +9,11 @@ import { ColumnDef } from '@tanstack/react-table'
 import React from 'react'
 import { CopyButton } from '../CopyButton'
 import { EllipsisWithTooltip } from '../EllipsisWithTooltip'
+import { SandboxLabel } from '../SandboxLabel'
 import { SortOrderIcon } from '../SortIcon'
 import { TimestampTooltip } from '../TimestampTooltip'
 import { Badge } from '../ui/badge'
 import { Checkbox } from '../ui/checkbox'
-import { Separator } from '../ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { SandboxState as SandboxStateComponent } from './SandboxState'
 import { SandboxTableActions } from './SandboxTableActions'
@@ -292,14 +292,7 @@ export function getColumns({
             <TooltipContent className="max-w-[300px] max-h-[400px] overflow-y-auto scrollbar-sm p-2">
               <div className="flex flex-wrap gap-2">
                 {labelEntries.map(([key, value]) => (
-                  <code
-                    key={key}
-                    className="flex items-center gap-2 bg-muted border border-transparent rounded px-2 text-xs font-mono"
-                  >
-                    <span className="text-muted-foreground">{key}</span>
-                    <Separator orientation="vertical" className="self-stretch -my-px h-[calc(100%+2px)]" />
-                    <span>{value}</span>
-                  </code>
+                  <SandboxLabel key={key} labelKey={key} value={value} />
                 ))}
               </div>
             </TooltipContent>

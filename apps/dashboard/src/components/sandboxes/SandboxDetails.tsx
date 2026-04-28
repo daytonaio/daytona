@@ -210,12 +210,6 @@ export default function SandboxDetails() {
           onCreateSshAccess={() => setCreateSshDialogOpen(true)}
           onRevokeSshAccess={() => setRevokeSshDialogOpen(true)}
           onScreenRecordings={handleScreenRecordings}
-          mutations={{
-            start: startMutation.isPending,
-            stop: stopMutation.isPending,
-            archive: archiveMutation.isPending,
-            recover: recoverMutation.isPending,
-          }}
         />
 
         {isNotFound ? (

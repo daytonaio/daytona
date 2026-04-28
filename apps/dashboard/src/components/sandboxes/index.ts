@@ -4,6 +4,7 @@
  */
 
 export { default as SandboxDetails } from './SandboxDetails'
+export { SandboxActionsSegmented } from './SandboxActionsSegmented'
 export { SandboxLogsTab } from './SandboxLogsTab'
 export { SandboxTracesTab } from './SandboxTracesTab'
 export { SandboxMetricsTab } from './SandboxMetricsTab'

@@ -194,7 +194,7 @@ function SandboxFileContentsBody({
 }) {
   if (previewState.status === 'idle') {
     return (
-      <Empty className="min-h-[280px] border-0">
+      <Empty className="h-full min-h-0 border-0">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <FileTextIcon className="size-4" />
@@ -427,30 +427,30 @@ export function SandboxFileContents({
           </>
         ) : null}
       </div>
-      <div className="flex shrink-0 items-center gap-3 px-3 py-3 text-xs text-muted-foreground">
-        <span>{selectedNode ? getNodeMetaLine(selectedNode) : ''}</span>
-        <div className="ml-auto flex items-center gap-1">
-          {showWrapToggle ? (
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger asChild>
-                <span className="inline-flex">
-                  <Toggle
-                    size="sm"
-                    variant="outline"
-                    pressed={isWrapEnabled}
-                    onPressedChange={setIsWrapEnabled}
-                    aria-label="Toggle wrapped lines"
-                  >
-                    <TextWrapIcon className="size-4" />
-                  </Toggle>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>
-                <div>{isWrapEnabled ? 'Disable wrapped lines' : 'Enable wrapped lines'}</div>
-              </TooltipContent>
-            </Tooltip>
-          ) : null}
-          {selectedNode ? (
+      {selectedNode ? (
+        <div className="flex shrink-0 items-center gap-3 px-3 pt-3 pb-0 text-xs text-muted-foreground">
+          <span>{getNodeMetaLine(selectedNode)}</span>
+          <div className="ml-auto flex items-center gap-1">
+            {showWrapToggle ? (
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex">
+                    <Toggle
+                      size="sm"
+                      variant="outline"
+                      pressed={isWrapEnabled}
+                      onPressedChange={setIsWrapEnabled}
+                      aria-label="Toggle wrapped lines"
+                    >
+                      <TextWrapIcon className="size-4" />
+                    </Toggle>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <div>{isWrapEnabled ? 'Disable wrapped lines' : 'Enable wrapped lines'}</div>
+                </TooltipContent>
+              </Tooltip>
+            ) : null}
             <ButtonGroup>
               {previewState.status === 'ready' && previewState.kind === 'text' ? (
                 <TooltipButton
@@ -521,10 +521,10 @@ export function SandboxFileContents({
                 </DropdownMenuContent>
               </DropdownMenu>
             </ButtonGroup>
-          ) : null}
+          </div>
         </div>
-      </div>
-      <div className="flex-1 min-h-0 overflow-hidden px-3 pb-4">
+      ) : null}
+      <div className="flex-1 min-h-0 overflow-hidden p-3">
         <div
           key={selectedNode?.path ?? 'empty'}
           className={
