@@ -1,0 +1,38 @@
+apps/api/src/sandbox/managers/sandbox-actions/sandbox-start.action.ts
+  c221d38064705bda 27,297-298,301,404-405,411-414
+apps/api/src/sandbox/managers/snapshot.manager.ts
+  c221d38064705bda 38,284-285,288,555-556,559,563,941-943,1005-1006,1009,1102-1104,1107,1113,1134-1136,1233-1235,1249,1259
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "e76f9b2156a42b00f65b73ff75877059d5779737",
+  "prompts": {
+    "c221d38064705bda": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "feb7c61d-39a5-47c2-bca6-bc5433634a5c",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Toma Puljak",
+      "messages": [],
+      "total_additions": 92,
+      "total_deletions": 1284,
+      "accepted_lines": 79,
+      "overriden_lines": 0
+    },
+    "cf82aaa2c735f226": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5c26ee6b-b1da-457e-af39-cebf7b147c6c",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Toma Puljak",
+      "messages": [],
+      "total_additions": 93,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  }
+}
