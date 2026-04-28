@@ -1,0 +1,23 @@
+apps/api/src/sandbox/managers/backup.manager.ts
+  c221d38064705bda 70-89,114,123,158,171-173,181,183,198-206,208,213-216,218,241-319,459,567-568,570-582
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "6810f64eab60dc08be913cb27ea50944c9710c95",
+  "prompts": {
+    "c221d38064705bda": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "feb7c61d-39a5-47c2-bca6-bc5433634a5c",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Toma Puljak",
+      "messages": [],
+      "total_additions": 138,
+      "total_deletions": 14,
+      "accepted_lines": 149,
+      "overriden_lines": 0
+    }
+  }
+}
