@@ -6,8 +6,8 @@
 import { Injectable, Logger, NotFoundException, OnApplicationShutdown } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, IsNull, Not, Repository } from 'typeorm'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
+import { In, IsNull, LessThan, Not, Repository } from 'typeorm'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -45,6 +45,7 @@ import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SnapshotInfoResponse } from '@daytona/runner-api-client'
 import { SnapshotActivatedEvent } from '../events/snapshot-activated.event'
 import { TypedConfigService } from '../../config/typed-config.service'
+import { RegionType } from '../../region/enums/region-type.enum'
 
 /** Fisher-Yates shuffle — uniform random permutation in O(n). */
 function shuffleArray<T>(array: T[]): T[] {
@@ -60,6 +61,7 @@ const SYNC_AGAIN = 'sync-again'
 const DONT_SYNC_AGAIN = 'dont-sync-again'
 const DEFAULT_SNAPSHOT_DEACTIVATION_TIMEOUT_MINUTES = 14 * 24 * 60 // 14 days
 type SyncState = typeof SYNC_AGAIN | typeof DONT_SYNC_AGAIN
+const BASE_PROPAGATION_FACTOR = 1 / 3
 
 @Injectable()
 export class SnapshotManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -97,6 +99,60 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
+  @Cron(CronExpression.EVERY_MINUTE, { name: 'scale-down-runner-snapshots', waitForCompletion: true })
+  @TrackJobExecution()
+  @LogExecution('scale-down-runner-snapshots')
+  @WithInstrumentation()
+  async scaleDownRunnerSnapshots() {
+    const lockKey = 'scale-down-runner-snapshots-lock'
+    const lockTtl = 3 * 60 // seconds (3 min)
+    if (!(await this.redisLockProvider.lock(lockKey, lockTtl))) {
+      return
+    }
+
+    const skip = (await this.redis.get('scale-down-runner-snapshots-skip')) || 0
+
+    const snapshots = await this.snapshotRepository
+      .createQueryBuilder('snapshot')
+      .innerJoin('organization', 'org', 'org.id = snapshot.organizationId')
+      .innerJoin('region_quota', 'rq', 'rq."organizationId" = org.id AND rq."regionId" = org."defaultRegionId"')
+      .select(['snapshot.*', 'rq.total_cpu_quota'])
+      .where('snapshot.state = :snapshotState', { snapshotState: SnapshotState.ACTIVE })
+      .andWhere('org.suspended = false')
+      .orderBy('snapshot.createdAt', 'ASC')
+      .limit(50)
+      .offset(Number(skip))
+      .getRawMany()
+
+    if (snapshots.length === 0) {
+      await this.redisLockProvider.unlock(lockKey)
+      await this.redis.set('scale-down-runner-snapshots-skip', 0)
+      return
+    }
+
+    await this.redis.set('scale-down-runner-snapshots-skip', Number(skip) + snapshots.length)
+
+    const results = await Promise.allSettled(
+      snapshots.map(async (snapshot) => {
+        const regions = await this.snapshotService.getSnapshotRegions(snapshot.id)
+
+        const sharedRegionIds = regions
+          .filter((r) => r.organizationId === null && r.regionType === RegionType.SHARED)
+          .map((r) => r.id)
+
+        return this.scaleDownSnapshotFromRunners(snapshot, sharedRegionIds)
+      }),
+    )
+
+    results.forEach((result) => {
+      if (result.status === 'rejected') {
+        this.logger.error(`Error scaling down snapshot from runners: ${fromAxiosError(result.reason)}`)
+      }
+    })
+
+    await this.redisLockProvider.unlock(lockKey)
+  }
+
   @Cron(CronExpression.EVERY_5_SECONDS, { name: 'sync-runner-snapshots', waitForCompletion: true })
   @TrackJobExecution()
   @LogExecution('sync-runner-snapshots')
@@ -116,8 +172,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       .where('snapshot.state = :snapshotState', { snapshotState: SnapshotState.ACTIVE })
       .andWhere('org.suspended = false')
       .orderBy('snapshot.createdAt', 'ASC')
-      .take(100)
-      .skip(Number(skip))
+      .limit(150)
+      .offset(Number(skip))
       .getMany()
 
     if (snapshots.length === 0) {
@@ -151,7 +207,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     await this.redisLockProvider.unlock(lockKey)
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-runner-snapshot-states', waitForCompletion: true })
+  @Cron(CronExpression.EVERY_5_SECONDS, { name: 'sync-runner-snapshot-states', waitForCompletion: true })
   @TrackJobExecution()
   @LogExecution('sync-runner-snapshot-states')
   @WithInstrumentation()
@@ -168,14 +224,57 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     const runnerSnapshots = await this.snapshotRunnerRepository
       .createQueryBuilder('snapshotRunner')
       .where({
-        state: In([
-          SnapshotRunnerState.PULLING_SNAPSHOT,
-          SnapshotRunnerState.BUILDING_SNAPSHOT,
-          SnapshotRunnerState.REMOVING,
-        ]),
+        state: In([SnapshotRunnerState.PULLING_SNAPSHOT, SnapshotRunnerState.BUILDING_SNAPSHOT]),
       })
       .orderBy('RANDOM()')
       .take(100)
+      .getMany()
+
+    await Promise.allSettled(
+      runnerSnapshots.map((snapshotRunner) => {
+        return this.syncRunnerSnapshotState(snapshotRunner).catch((err) => {
+          if (err.code !== 'ECONNRESET') {
+            if (err instanceof RunnerNotReadyError) {
+              this.logger.debug(
+                `Runner ${snapshotRunner.runnerId} is not ready while trying to sync snapshot runner ${snapshotRunner.id}: ${err}`,
+              )
+              return
+            }
+            this.logger.error(`Error syncing runner snapshot state ${snapshotRunner.id}: ${fromAxiosError(err)}`)
+            this.snapshotRunnerRepository.update(snapshotRunner.id, {
+              state: SnapshotRunnerState.ERROR,
+              errorReason: fromAxiosError(err).message,
+            })
+          }
+        })
+      }),
+    )
+
+    await this.redisLockProvider.unlock(lockKey)
+  }
+
+  // REMOVING is split out to its own cron with its own lock so it doesn't compete with
+  // the higher-priority PULLING/BUILDING states. We additionally wait at least 3 minutes
+  // since the last update to give in-flight removals a chance to settle on the runner.
+  @Cron(CronExpression.EVERY_5_SECONDS, { name: 'sync-removing-runner-snapshot-states' })
+  @TrackJobExecution()
+  @LogExecution('sync-removing-runner-snapshot-states')
+  @WithInstrumentation()
+  async syncRemovingRunnerSnapshotStates() {
+    const lockKey = 'sync-removing-runner-snapshot-states-lock'
+    if (!(await this.redisLockProvider.lock(lockKey, 120))) {
+      return
+    }
+
+    const threeMinutesAgo = new Date(Date.now() - 3 * 60 * 1000)
+    const runnerSnapshots = await this.snapshotRunnerRepository
+      .createQueryBuilder('snapshotRunner')
+      .where({
+        state: SnapshotRunnerState.REMOVING,
+        updatedAt: LessThan(threeMinutesAgo),
+      })
+      .orderBy('RANDOM()')
+      .take(200)
       .getMany()
 
     await Promise.allSettled(
@@ -291,7 +390,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       // respect the propagation limit for shared runners
       const sharedRunnersPropagateLimit = Math.max(
         0,
-        Math.ceil(sharedRunners.length / 3) - sharedSnapshotRunnersDistinctRunnersIds.size,
+        Math.ceil(sharedRunners.length * BASE_PROPAGATION_FACTOR) - sharedSnapshotRunnersDistinctRunnersIds.size,
       )
       runnersToPropagateTo.push(...shuffleArray(unallocatedSharedRunners).slice(0, sharedRunnersPropagateLimit))
 
@@ -345,6 +444,80 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       })
     } catch (err) {
       this.logger.error(err)
+    }
+  }
+
+  async scaleDownSnapshotFromRunners(
+    snapshot: Snapshot,
+    sharedRegionIds: string[],
+    propagationFactor: number = BASE_PROPAGATION_FACTOR,
+  ): Promise<number> {
+    try {
+      if (sharedRegionIds.length === 0) {
+        return 0
+      }
+
+      // Get all shared runners in the regions
+      const sharedRunners = await this.runnerRepository.find({
+        where: {
+          state: RunnerState.READY,
+          unschedulable: Not(true),
+          region: In(sharedRegionIds),
+        },
+      })
+
+      const sharedRunnerIds = sharedRunners.map((runner) => runner.id)
+
+      if (sharedRunnerIds.length === 0) {
+        return 0
+      }
+
+      // Get all snapshot runners in READY state for shared runners (excluding those created in the last hour)
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
+      const sharedSnapshotRunners = await this.snapshotRunnerRepository.find({
+        where: {
+          snapshotRef: snapshot.ref,
+          state: SnapshotRunnerState.READY,
+          runnerId: In(sharedRunnerIds),
+          createdAt: LessThan(oneHourAgo),
+        },
+      })
+
+      // Calculate the maximum allowed number of snapshot runners (same formula as propagation)
+      const maxSharedSnapshotRunners = Math.ceil(propagationFactor * sharedRunners.length)
+
+      // Only scale down if the propagated amount exceeds the limit by more than 15%
+      const scaleDownThreshold = Math.ceil(maxSharedSnapshotRunners * 1.15)
+      const excessCount = sharedSnapshotRunners.length - maxSharedSnapshotRunners
+
+      if (sharedSnapshotRunners.length > scaleDownThreshold) {
+        // Sort by createdAt ascending (oldest first) to remove oldest ones
+        const sortedSnapshotRunners = sharedSnapshotRunners.sort(
+          (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+        )
+
+        // Take the excess ones to remove
+        const snapshotRunnersToRemove = sortedSnapshotRunners.slice(0, excessCount)
+
+        await Promise.allSettled(
+          snapshotRunnersToRemove.map(async (snapshotRunner) => {
+            await this.snapshotRunnerRepository.update(snapshotRunner.id, {
+              state: SnapshotRunnerState.REMOVING,
+            })
+          }),
+        )
+
+        this.logger.log(
+          `Marked ${snapshotRunnersToRemove.length} snapshot runners for removal for snapshot ${snapshot.ref}`,
+        )
+
+        return snapshotRunnersToRemove.length
+      }
+
+      return 0
+    } catch (err) {
+      this.logger.error(`Error scaling down snapshot ${snapshot.ref}: ${fromAxiosError(err)}`)
+      return 0
     }
   }
 
@@ -727,8 +900,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   async handleCheckInitialRunnerSnapshot(snapshot: Snapshot): Promise<SyncState> {
-    // Check for timeout - allow up to 30 minutes
-    const timeoutMinutes = 30
+    // Check for timeout - allow up to 60 minutes
+    const timeoutMinutes = 60
     const timeoutMs = timeoutMinutes * 60 * 1000
     if (Date.now() - snapshot.updatedAt.getTime() > timeoutMs) {
       await this.updateSnapshotState(snapshot, SnapshotState.ERROR, 'Timeout processing snapshot on initial runner')
@@ -846,8 +1019,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   async processPullOnInitialRunner(snapshot: Snapshot, runner: Runner) {
-    // Check for timeout - allow up to 30 minutes
-    const timeoutMinutes = 30
+    // Check for timeout - allow up to 60 minutes
+    const timeoutMinutes = 60
     const timeoutMs = timeoutMinutes * 60 * 1000
     if (Date.now() - snapshot.updatedAt.getTime() > timeoutMs) {
       await this.updateSnapshotState(
@@ -1032,18 +1205,24 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
 
     try {
+      // Dedicated regions get a much shorter staleness window so we don't pin disk space
+      // on small fleets when an org stops using a snapshot.
+      const stalenessDays = this.configService.getOrThrow('buildInfoSnapshotRunnerStalenessDays')
+      const stalenessInterval = `(CASE WHEN r.region IN (:dedicatedElementor, :dedicatedRL) THEN interval '2 days' ELSE interval '${stalenessDays} days' END)`
+
       const staleEntries = await this.snapshotRunnerRepository
         .createQueryBuilder('sr')
         .select('sr.id')
         .innerJoin(BuildInfo, 'bi', 'sr."snapshotRef" = bi."snapshotRef"')
+        .innerJoin('runner', 'r', 'r.id = sr."runnerId"::uuid')
         .where('sr.state = :readyState', { readyState: SnapshotRunnerState.READY })
-        .andWhere(
-          `bi.lastUsedAt < now() - interval '${this.configService.getOrThrow('buildInfoSnapshotRunnerStalenessDays')} days'`,
-        )
-        .andWhere(
-          `sr.updatedAt < now() - interval '${this.configService.getOrThrow('buildInfoSnapshotRunnerStalenessDays')} days'`,
-        )
+        .andWhere(`bi.lastUsedAt < now() - ${stalenessInterval}`)
+        .andWhere(`sr.updatedAt < now() - ${stalenessInterval}`)
         .andWhere("sr.snapshotRef LIKE 'daytona-%'")
+        .setParameters({
+          dedicatedElementor: ELEMENTOR_DEDICATED_REGION,
+          dedicatedRL: RL_REGION,
+        })
         .limit(500)
         .getMany()
 
@@ -1145,7 +1324,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'cleanup-inactive-snapshots-from-runners' })
+  @Cron(CronExpression.EVERY_MINUTE, { name: 'cleanup-inactive-snapshots-from-runners' })
   @TrackJobExecution()
   @LogExecution('cleanup-inactive-snapshots-from-runners')
   @WithInstrumentation()
@@ -1184,6 +1363,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
             activeState: SnapshotState.ACTIVE,
           },
         )
+        .orderBy('snapshot."updatedAt"', 'DESC')
         .take(100)
         .getRawMany()
 
