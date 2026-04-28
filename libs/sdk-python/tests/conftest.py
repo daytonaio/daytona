@@ -109,14 +109,6 @@ def mock_async_sandbox_api():
 
 
 @pytest.fixture
-def mock_code_toolbox():
-    """Return a MagicMock for the SandboxCodeToolbox."""
-    toolbox = MagicMock()
-    toolbox.get_run_command.return_value = 'python3 -c "print(1)"'
-    return toolbox
-
-
-@pytest.fixture
 def env_with_api_key(monkeypatch):
     """Set standard env vars for Daytona client initialization."""
     monkeypatch.setenv("DAYTONA_API_KEY", "test-api-key-123")

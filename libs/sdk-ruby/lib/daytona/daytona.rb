@@ -47,12 +47,25 @@ module Daytona
       @snapshots_api = DaytonaApiClient::SnapshotsApi.new(api_client)
       @snapshot = SnapshotService.new(snapshots_api:, object_storage_api:, default_region_id: config.target,
                                       otel_state:)
+      token = config.api_key || config.jwt_token
+
+      @event_dispatcher = EventDispatcher.new(
+        api_url: config.api_url,
+        token: token,
+        organization_id: config.organization_id
+      )
+      @event_dispatcher.ensure_connected
+      @subscription_manager = EventSubscriptionManager.new(@event_dispatcher)
     end
 
     # Shuts down OTel providers, flushing any pending telemetry data.
     #
     # @return [void]
     def close
+      @subscription_manager&.shutdown
+      @subscription_manager = nil
+      @event_dispatcher&.disconnect
+      @event_dispatcher = nil
       ::Daytona.shutdown_otel(@otel_state)
       @otel_state = nil
     end
@@ -258,7 +271,8 @@ module Daytona
         sandbox_dto:,
         config:,
         sandbox_api:,
-        otel_state: @otel_state
+        otel_state: @otel_state,
+        subscription_manager: @subscription_manager
       )
     end
 

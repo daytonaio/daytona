@@ -9,6 +9,7 @@ const mockSandboxApi = {
   getSandbox: jest.fn(),
   listSandboxesPaginated: jest.fn(),
   getBuildLogsUrl: jest.fn(),
+  getToolboxProxyUrl: jest.fn(),
 }
 const mockSnapshotsApi = {}
 const mockObjectStorageApi = {}
@@ -82,7 +83,7 @@ jest.mock('../Volume', () => ({
 }))
 
 jest.mock('../Sandbox', () => ({
-  Sandbox: jest.fn().mockImplementation((dto: { id: string; state?: string }) => {
+  Sandbox: jest.fn().mockImplementation((dto: { id: string; state?: string }, ...args: unknown[]) => {
     const sandbox = {
       ...dto,
       start: jest.fn(),
@@ -91,7 +92,7 @@ jest.mock('../Sandbox', () => ({
       waitUntilStarted: jest.fn(),
       _experimental_fork: jest.fn(),
     }
-    mockSandboxCtor(dto)
+    mockSandboxCtor(dto, ...args)
     return sandbox
   }),
 }))
@@ -115,6 +116,7 @@ describe('Daytona', () => {
         response: { use: jest.fn() },
       },
     })
+    mockSandboxApi.getToolboxProxyUrl.mockResolvedValue(createApiResponse({ url: 'http://sandbox-proxy/' }))
   })
 
   it('uses explicit api key config and builds dependent services', async () => {
@@ -373,7 +375,7 @@ describe('Daytona', () => {
     mockSandboxApi.createSandbox.mockResolvedValue(
       createApiResponse({ id: 'sb-timeout', state: 'starting', labels: { 'code-toolbox-language': 'python' } }),
     )
-    ;(Sandbox as jest.Mock).mockImplementationOnce((dto: { id: string; state?: string }) => ({
+    ;(Sandbox as jest.Mock).mockImplementationOnce((dto: { id: string; state?: string }, ..._args: unknown[]) => ({
       ...dto,
       start: jest.fn(),
       stop: jest.fn(),

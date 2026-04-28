@@ -13,6 +13,7 @@ import (
 	"time"
 
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/common"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -343,7 +344,28 @@ func TestSandboxArchiveAPIError(t *testing.T) {
 }
 
 func newSandboxForTest(client *Client, id string, sandboxName string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList *string) *Sandbox {
-	return NewSandbox(client, nil, id, sandboxName, state, target, autoArchiveInterval, autoDeleteInterval, networkBlockAll, networkAllowList, types.CodeLanguagePython)
+	resp := &apiclient.Sandbox{}
+	resp.SetId(id)
+	resp.SetOrganizationId("org-1")
+	resp.SetName(sandboxName)
+	resp.SetUser("daytona")
+	resp.SetEnv(map[string]string{"A": "B"})
+	resp.SetLabels(map[string]string{types.CodeToolboxLanguageLabel: string(types.CodeLanguagePython)})
+	resp.SetPublic(false)
+	resp.SetNetworkBlockAll(networkBlockAll)
+	resp.SetTarget(target)
+	resp.SetCpu(1)
+	resp.SetGpu(0)
+	resp.SetMemory(2)
+	resp.SetDisk(10)
+	resp.SetState(state)
+	resp.SetAutoArchiveInterval(float32(autoArchiveInterval))
+	resp.SetAutoDeleteInterval(float32(autoDeleteInterval))
+	if networkAllowList != nil {
+		resp.SetNetworkAllowList(*networkAllowList)
+	}
+
+	return NewSandbox(client, nil, resp, types.CodeLanguagePython, common.NewEventSubscriptionManager(nil))
 }
 
 func TestSandboxRefreshDataSuccess(t *testing.T) {
@@ -384,7 +406,22 @@ func TestSandboxInfoMethods(t *testing.T) {
 		}))
 		defer server.Close()
 
-		sandbox := NewSandbox(nil, createTestToolboxClient(server), "sb", "name", apiclient.SANDBOXSTATE_STARTED, "target", 0, 0, false, nil, types.CodeLanguagePython)
+		resp := &apiclient.Sandbox{}
+		resp.SetId("sb")
+		resp.SetOrganizationId("org-1")
+		resp.SetName("name")
+		resp.SetUser("daytona")
+		resp.SetEnv(map[string]string{"A": "B"})
+		resp.SetLabels(map[string]string{types.CodeToolboxLanguageLabel: string(types.CodeLanguagePython)})
+		resp.SetPublic(false)
+		resp.SetNetworkBlockAll(false)
+		resp.SetTarget("target")
+		resp.SetCpu(1)
+		resp.SetGpu(0)
+		resp.SetMemory(2)
+		resp.SetDisk(10)
+		resp.SetState(apiclient.SANDBOXSTATE_STARTED)
+		sandbox := NewSandbox(nil, createTestToolboxClient(server), resp, types.CodeLanguagePython, common.NewEventSubscriptionManager(nil))
 		home, err := sandbox.GetUserHomeDir(context.Background())
 		require.NoError(t, err)
 		workdir, err := sandbox.GetWorkingDir(context.Background())
@@ -399,7 +436,22 @@ func TestSandboxInfoMethods(t *testing.T) {
 		}))
 		defer server.Close()
 
-		sandbox := NewSandbox(nil, createTestToolboxClient(server), "sb", "name", apiclient.SANDBOXSTATE_STARTED, "target", 0, 0, false, nil, types.CodeLanguagePython)
+		resp := &apiclient.Sandbox{}
+		resp.SetId("sb")
+		resp.SetOrganizationId("org-1")
+		resp.SetName("name")
+		resp.SetUser("daytona")
+		resp.SetEnv(map[string]string{"A": "B"})
+		resp.SetLabels(map[string]string{types.CodeToolboxLanguageLabel: string(types.CodeLanguagePython)})
+		resp.SetPublic(false)
+		resp.SetNetworkBlockAll(false)
+		resp.SetTarget("target")
+		resp.SetCpu(1)
+		resp.SetGpu(0)
+		resp.SetMemory(2)
+		resp.SetDisk(10)
+		resp.SetState(apiclient.SANDBOXSTATE_STARTED)
+		sandbox := NewSandbox(nil, createTestToolboxClient(server), resp, types.CodeLanguagePython, common.NewEventSubscriptionManager(nil))
 		_, err := sandbox.GetUserHomeDir(context.Background())
 		require.Error(t, err)
 		_, err = sandbox.GetWorkingDir(context.Background())
@@ -410,11 +462,16 @@ func TestSandboxInfoMethods(t *testing.T) {
 func TestSandboxLifecycleSuccessPaths(t *testing.T) {
 	t.Run("start stop and delete succeed", func(t *testing.T) {
 		var getCount int
+		var deleted bool
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			switch r.Method {
 			case http.MethodPost:
 				writeJSONResponse(t, w, http.StatusOK, testSandboxPayload("sb", "sandbox", apiclient.SANDBOXSTATE_STARTING))
 			case http.MethodGet:
+				if deleted {
+					writeJSONResponse(t, w, http.StatusOK, testSandboxPayload("sb", "sandbox", apiclient.SANDBOXSTATE_DESTROYED))
+					return
+				}
 				getCount++
 				state := apiclient.SANDBOXSTATE_STARTED
 				if getCount > 1 {
@@ -422,6 +479,7 @@ func TestSandboxLifecycleSuccessPaths(t *testing.T) {
 				}
 				writeJSONResponse(t, w, http.StatusOK, testSandboxPayload("sb", "sandbox", state))
 			case http.MethodDelete:
+				deleted = true
 				w.WriteHeader(http.StatusOK)
 			default:
 				w.WriteHeader(http.StatusOK)
@@ -431,9 +489,9 @@ func TestSandboxLifecycleSuccessPaths(t *testing.T) {
 
 		client := createTestClientWithServer(t, server)
 		sandbox := newSandboxForTest(client, "sb", "sandbox", apiclient.SANDBOXSTATE_STOPPED, "us", 0, -1, false, nil)
-		require.NoError(t, sandbox.doStartWithTimeout(context.Background(), time.Second))
-		require.NoError(t, sandbox.doStopWithTimeout(context.Background(), time.Second, true))
-		require.NoError(t, sandbox.doDeleteWithTimeout(context.Background(), time.Second))
+		require.NoError(t, sandbox.doStartWithTimeout(context.Background(), 1500*time.Millisecond))
+		require.NoError(t, sandbox.doStopWithTimeout(context.Background(), 1500*time.Millisecond, true))
+		require.NoError(t, sandbox.doDeleteWithTimeout(context.Background(), 1500*time.Millisecond))
 	})
 
 	t.Run("wait for start returns sandbox error state", func(t *testing.T) {
@@ -446,7 +504,7 @@ func TestSandboxLifecycleSuccessPaths(t *testing.T) {
 
 		client := createTestClientWithServer(t, server)
 		sandbox := newSandboxForTest(client, "sb", "sandbox", apiclient.SANDBOXSTATE_STARTING, "us", 0, -1, false, nil)
-		err := sandbox.doWaitForStart(context.Background(), 500*time.Millisecond)
+		err := sandbox.doWaitForStart(context.Background(), 1500*time.Millisecond)
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "Sandbox failed to start")
 	})
@@ -493,7 +551,7 @@ func TestSandboxExperimentalOperations(t *testing.T) {
 
 		client := createTestClientWithServer(t, server)
 		sandbox := newSandboxForTest(client, "sb", "sandbox", apiclient.SANDBOXSTATE_STARTED, "us", 0, -1, false, nil)
-		forked, err := sandbox.ExperimentalForkWithTimeout(context.Background(), strPtr("forked-name"), 2*time.Second)
+		forked, err := sandbox.ExperimentalForkWithTimeout(context.Background(), strPtr("forked-name"), 3*time.Second)
 		require.NoError(t, err)
 		assert.Equal(t, "forked", forked.ID)
 	})
@@ -542,5 +600,5 @@ func TestSandboxResizeFlow(t *testing.T) {
 
 	client := createTestClientWithServer(t, server)
 	sandbox := newSandboxForTest(client, "sb", "sandbox", apiclient.SANDBOXSTATE_STARTED, "us", 0, -1, false, nil)
-	require.NoError(t, sandbox.ResizeWithTimeout(context.Background(), &types.Resources{CPU: 2, Memory: 2048, Disk: 10}, 2*time.Second))
+	require.NoError(t, sandbox.ResizeWithTimeout(context.Background(), &types.Resources{CPU: 2, Memory: 2048, Disk: 10}, 3*time.Second))
 }

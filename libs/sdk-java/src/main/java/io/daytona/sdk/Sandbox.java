@@ -3,6 +3,8 @@
 
 package io.daytona.sdk;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.daytona.api.client.api.SandboxApi;
 import io.daytona.api.client.model.CreateSandboxSnapshot;
 import io.daytona.api.client.model.ForkSandbox;
@@ -10,27 +12,78 @@ import io.daytona.api.client.model.SandboxLabels;
 import io.daytona.api.client.model.ToolboxProxyUrl;
 import io.daytona.api.client.model.UpdateSandboxNetworkSettings;
 import io.daytona.sdk.exception.DaytonaException;
+import io.daytona.sdk.exception.DaytonaNotFoundException;
+import io.daytona.sdk.exception.DaytonaTimeoutException;
+import io.daytona.sdk.internal.EventSubscriptionManager;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Represents a Daytona Sandbox instance.
  *
  * <p>Exposes lifecycle controls and operation facades for process execution, file-system access,
- * and Git.
+ * and Git. State changes are detected instantly via WebSocket events with periodic polling as a
+ * safety net.
  */
 public class Sandbox {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    private static final long POLL_SAFETY_INTERVAL_SECONDS = 1;
+    private static final Set<String> STARTED_STATES = Collections.singleton("started");
+    private static final Set<String> STOPPED_STATES = new HashSet<>(Arrays.asList("stopped", "destroyed"));
+    private static final Set<String> DESTROYED_STATES = Collections.singleton("destroyed");
+    private static final Set<String> ERROR_STATES = new HashSet<>(Arrays.asList("error", "build_failed"));
+    private static final Set<String> RESIZE_TARGET_STATES;
+    private static final Set<String> SNAPSHOT_TARGET_STATES;
+    static {
+        Set<String> allStates = new HashSet<>();
+        for (io.daytona.api.client.model.SandboxState s : io.daytona.api.client.model.SandboxState.values()) {
+            allStates.add(s.getValue());
+        }
+        allStates.removeAll(ERROR_STATES);
+
+        Set<String> resizeStates = new HashSet<>(allStates);
+        resizeStates.remove("resizing");
+        RESIZE_TARGET_STATES = Collections.unmodifiableSet(resizeStates);
+
+        Set<String> snapshotStates = new HashSet<>(allStates);
+        snapshotStates.remove("snapshotting");
+        SNAPSHOT_TARGET_STATES = Collections.unmodifiableSet(snapshotStates);
+    }
+
+    private static final ScheduledExecutorService POLL_SCHEDULER = Executors.newScheduledThreadPool(2, r -> {
+        Thread t = new Thread(r, "daytona-sandbox-poller");
+        t.setDaemon(true);
+        return t;
+    });
+
     private final SandboxApi sandboxApi;
     private final DaytonaConfig config;
     private final io.daytona.toolbox.client.ApiClient toolboxApiClient;
     private final io.daytona.toolbox.client.api.InfoApi infoApi;
     private final String apiKey;
+    private final EventSubscriptionManager subscriptionManager;
+    private final Object subscriptionLock = new Object();
+    private String subId;
+    private final CopyOnWriteArrayList<StateWaiter> stateWaiters = new CopyOnWriteArrayList<>();
 
     private String id;
     private String name;
-    private String state;
+    private volatile String state;
     private String target;
     private String user;
     private String toolboxProxyUrl;
@@ -57,10 +110,12 @@ public class Sandbox {
     /** Stateful code interpreter for this Sandbox (Python). */
     public final CodeInterpreter codeInterpreter;
 
-    Sandbox(SandboxApi sandboxApi, DaytonaConfig config, io.daytona.api.client.model.Sandbox data) {
+    Sandbox(SandboxApi sandboxApi, DaytonaConfig config, io.daytona.api.client.model.Sandbox data,
+            EventSubscriptionManager subscriptionManager) {
         this.sandboxApi = sandboxApi;
         this.config = config;
         this.apiKey = config.getApiKey();
+        this.subscriptionManager = subscriptionManager;
         updateFromModel(data);
 
         String proxyBase = this.toolboxProxyUrl;
@@ -85,6 +140,7 @@ public class Sandbox {
         this.git = new Git(new io.daytona.toolbox.client.api.GitApi(toolboxApiClient));
         this.computerUse = new ComputerUse(new io.daytona.toolbox.client.api.ComputerUseApi(toolboxApiClient));
         this.codeInterpreter = new CodeInterpreter(new io.daytona.toolbox.client.api.InterpreterApi(toolboxApiClient), this);
+        ensureSubscribed();
     }
 
     /**
@@ -95,6 +151,7 @@ public class Sandbox {
      * @return a new {@link LspServer} configured for the given language
      */
     public LspServer createLspServer(String languageId, String pathToProject) {
+        ensureSubscribed();
         return new LspServer(new io.daytona.toolbox.client.api.LspApi(toolboxApiClient));
     }
 
@@ -112,6 +169,7 @@ public class Sandbox {
      * @throws DaytonaException if the Sandbox fails to start
      */
     public void start() {
+        ensureSubscribed();
         start(60);
     }
 
@@ -122,11 +180,18 @@ public class Sandbox {
      * @throws DaytonaException if start fails or times out
      */
     public void start(long timeoutSeconds) {
+        if (timeoutSeconds < 0) {
+            throw new DaytonaException("Timeout must be non-negative");
+        }
+        ensureSubscribed();
+        long startTime = System.currentTimeMillis();
         io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(() -> sandboxApi.startSandbox(id, null));
         if (response != null) {
             updateFromModel(response);
         }
-        waitUntilStarted(timeoutSeconds);
+        long elapsed = (System.currentTimeMillis() - startTime) / 1000;
+        long remaining = timeoutSeconds > 0 ? Math.max(1, timeoutSeconds - elapsed) : 0;
+        waitUntilStarted(remaining);
     }
 
     /**
@@ -135,6 +200,7 @@ public class Sandbox {
      * @throws DaytonaException if the Sandbox fails to stop
      */
     public void stop() {
+        ensureSubscribed();
         stop(60);
     }
 
@@ -145,9 +211,16 @@ public class Sandbox {
      * @throws DaytonaException if stop fails or times out
      */
     public void stop(long timeoutSeconds) {
+        if (timeoutSeconds < 0) {
+            throw new DaytonaException("Timeout must be non-negative");
+        }
+        ensureSubscribed();
+        long startTime = System.currentTimeMillis();
         ExceptionMapper.callMain(() -> sandboxApi.stopSandbox(id, null, null));
         refreshData();
-        waitUntilStopped(timeoutSeconds);
+        long elapsed = (System.currentTimeMillis() - startTime) / 1000;
+        long remaining = timeoutSeconds > 0 ? Math.max(1, timeoutSeconds - elapsed) : 0;
+        waitUntilStopped(remaining);
     }
 
     /**
@@ -157,28 +230,14 @@ public class Sandbox {
      * @throws DaytonaException if timeout is invalid, state becomes error, or timeout expires
      */
     public void waitUntilStopped(long timeoutSeconds) {
+        ensureSubscribed();
         if (timeoutSeconds < 0) {
             throw new DaytonaException("Timeout must be non-negative");
         }
-        long startedAt = System.currentTimeMillis();
-        while (!"stopped".equalsIgnoreCase(state) && !"destroyed".equalsIgnoreCase(state)) {
-            refreshData();
-            if ("stopped".equalsIgnoreCase(state) || "destroyed".equalsIgnoreCase(state)) {
-                return;
-            }
-            if ("error".equalsIgnoreCase(state)) {
-                throw new DaytonaException("Sandbox entered error state while stopping");
-            }
-            if (timeoutSeconds > 0 && (System.currentTimeMillis() - startedAt) > timeoutSeconds * 1000L) {
-                throw new DaytonaException("Sandbox failed to stop before timeout");
-            }
-            try {
-                Thread.sleep(250);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new DaytonaException("Interrupted while waiting for sandbox stop", e);
-            }
+        if (STOPPED_STATES.contains(state)) {
+            return;
         }
+        waitForState(STOPPED_STATES, ERROR_STATES, timeoutSeconds, false);
     }
 
     /**
@@ -187,17 +246,36 @@ public class Sandbox {
      * @throws DaytonaException if deletion fails
      */
     public void delete() {
+        ensureSubscribed();
         delete(60);
     }
 
     /**
-     * Deletes this Sandbox.
+     * Deletes this Sandbox and waits for it to reach the {@code destroyed} state.
      *
-     * @param timeoutSeconds reserved timeout parameter for parity with other SDKs
-     * @throws DaytonaException if deletion fails
+     * @param timeoutSeconds maximum seconds to wait; {@code 0} disables timeout
+     * @throws DaytonaException if deletion fails or times out
      */
     public void delete(long timeoutSeconds) {
+        if (timeoutSeconds < 0) {
+            throw new DaytonaException("Timeout must be non-negative");
+        }
+        ensureSubscribed();
+        long startTime = System.currentTimeMillis();
         ExceptionMapper.callMain(() -> sandboxApi.deleteSandbox(id, null));
+
+        try {
+            refreshDataSafe();
+            if (!"destroyed".equalsIgnoreCase(state)) {
+                long elapsed = (System.currentTimeMillis() - startTime) / 1000;
+                long remaining = timeoutSeconds > 0 ? Math.max(1, timeoutSeconds - elapsed) : 0;
+                waitForState(DESTROYED_STATES, ERROR_STATES, remaining, true);
+            }
+        } finally {
+            synchronized (subscriptionLock) {
+                unsubscribeFromEventsLocked();
+            }
+        }
     }
 
     /**
@@ -208,6 +286,7 @@ public class Sandbox {
      * @throws DaytonaException if label update fails
      */
     public Map<String, String> setLabels(Map<String, String> labels) {
+        ensureSubscribed();
         ExceptionMapper.callMain(() -> {
             okhttp3.Call call = sandboxApi.replaceLabelsCall(id, new SandboxLabels().labels(labels), null, null);
             sandboxApi.getApiClient().execute(call, null);
@@ -224,6 +303,7 @@ public class Sandbox {
      * @throws DaytonaException if the update fails
      */
     public void setAutostopInterval(int minutes) {
+        ensureSubscribed();
         io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(() -> sandboxApi.setAutostopInterval(id, BigDecimal.valueOf(minutes), null));
         if (response != null) {
             updateFromModel(response);
@@ -237,6 +317,7 @@ public class Sandbox {
      * @throws DaytonaException if the update fails
      */
     public void setAutoArchiveInterval(int minutes) {
+        ensureSubscribed();
         io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(() -> sandboxApi.setAutoArchiveInterval(id, BigDecimal.valueOf(minutes), null));
         if (response != null) {
             updateFromModel(response);
@@ -250,6 +331,7 @@ public class Sandbox {
      * @throws DaytonaException if the update fails
      */
     public void setAutoDeleteInterval(int minutes) {
+        ensureSubscribed();
         io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(() -> sandboxApi.setAutoDeleteInterval(id, BigDecimal.valueOf(minutes), null));
         if (response != null) {
             updateFromModel(response);
@@ -276,6 +358,7 @@ public class Sandbox {
      * @throws DaytonaException if the request fails
      */
     public String getUserHomeDir() {
+        ensureSubscribed();
         io.daytona.toolbox.client.model.UserHomeDirResponse value = ExceptionMapper.callToolbox(() -> infoApi.getUserHomeDir());
         return value == null ? "" : asString(value.getDir());
     }
@@ -287,6 +370,7 @@ public class Sandbox {
      * @throws DaytonaException if the request fails
      */
     public String getWorkDir() {
+        ensureSubscribed();
         io.daytona.toolbox.client.model.WorkDirResponse value = ExceptionMapper.callToolbox(() -> infoApi.getWorkDir());
         return value == null ? "" : asString(value.getDir());
     }
@@ -298,29 +382,31 @@ public class Sandbox {
      * @throws DaytonaException if timeout is invalid, state becomes failure, or timeout expires
      */
     public void waitUntilStarted(long timeoutSeconds) {
+        ensureSubscribed();
         if (timeoutSeconds < 0) {
             throw new DaytonaException("Timeout must be non-negative");
         }
-
-        long startedAt = System.currentTimeMillis();
-        while (!"started".equalsIgnoreCase(state)) {
-            refreshData();
-
-            if ("error".equalsIgnoreCase(state) || "build_failed".equalsIgnoreCase(state)) {
-                throw new DaytonaException("Sandbox entered failure state: " + state);
-            }
-
-            if (timeoutSeconds > 0 && (System.currentTimeMillis() - startedAt) > timeoutSeconds * 1000L) {
-                throw new DaytonaException("Sandbox failed to become started before timeout");
-            }
-
-            try {
-                Thread.sleep(250);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new DaytonaException("Interrupted while waiting for sandbox start", e);
-            }
+        if ("started".equalsIgnoreCase(state)) {
+            return;
         }
+        waitForState(STARTED_STATES, ERROR_STATES, timeoutSeconds, false);
+    }
+
+    /**
+     * Waits for a resize operation to complete.
+     *
+     * @param timeoutSeconds maximum seconds to wait; {@code 0} disables timeout
+     * @throws DaytonaException if resize times out or fails
+     */
+    public void waitForResizeComplete(long timeoutSeconds) {
+        ensureSubscribed();
+        if (timeoutSeconds < 0) {
+            throw new DaytonaException("Timeout must be non-negative");
+        }
+        if (!"resizing".equalsIgnoreCase(state)) {
+            return;
+        }
+        waitForState(RESIZE_TARGET_STATES, ERROR_STATES, timeoutSeconds, false);
     }
 
     /**
@@ -329,9 +415,137 @@ public class Sandbox {
      * @throws DaytonaException if refresh fails
      */
     public void refreshData() {
+        ensureSubscribed();
         io.daytona.api.client.model.Sandbox data = ExceptionMapper.callMain(() -> sandboxApi.getSandbox(id, null, null));
         if (data != null) {
             updateFromModel(data);
+        }
+    }
+
+    private void applyState(String newState) {
+        if (newState == null || newState.equals(this.state)) {
+            return;
+        }
+        this.state = newState;
+        for (StateWaiter waiter : stateWaiters) {
+            waiter.onStateChanged(newState);
+        }
+    }
+
+    private void ensureSubscribed() {
+        synchronized (subscriptionLock) {
+            if (subId != null) {
+                if (subscriptionManager.refresh(subId)) {
+                    return;
+                }
+                subId = null;
+            }
+
+            subId = subscriptionManager.subscribe(id, this::handleEvent,
+                    Arrays.asList("sandbox.state.updated", "sandbox.created"));
+        }
+    }
+
+    private void handleEvent(String eventName, JsonNode data) {
+        if (data == null || !data.isObject()) {
+            return;
+        }
+
+        if ("sandbox.created".equals(eventName)) {
+            JsonNode sandboxNode = data.has("sandbox") ? data.get("sandbox") : data;
+            if (sandboxNode != null) {
+                updateFromJsonEvent(sandboxNode);
+            }
+            return;
+        }
+
+        JsonNode stateNode = data.path("newState");
+        if (!stateNode.isTextual()) {
+            JsonNode sandboxNode = data.has("sandbox") ? data.get("sandbox") : data;
+            if (sandboxNode != null) {
+                stateNode = sandboxNode.path("state");
+            }
+        }
+
+        if (stateNode.isTextual()) {
+            applyState(stateNode.asText());
+        }
+    }
+
+    private void unsubscribeFromEventsLocked() {
+        if (subId == null) {
+            subId = null;
+            return;
+        }
+
+        subscriptionManager.unsubscribe(subId);
+        subId = null;
+    }
+
+    private void waitForState(Set<String> targetStates, Set<String> errorStates,
+                              long timeoutSeconds, boolean safeRefresh) {
+        ensureSubscribed();
+        StateWaiter waiter = new StateWaiter(targetStates, errorStates);
+        stateWaiters.add(waiter);
+
+        try {
+            String current = state;
+            if (current != null) {
+                waiter.onStateChanged(current);
+            }
+            if (waiter.isResolved()) {
+                waiter.throwIfError();
+                return;
+            }
+
+            ScheduledFuture<?> pollFuture = POLL_SCHEDULER.scheduleAtFixedRate(() -> {
+                if (waiter.isResolved()) {
+                    return;
+                }
+                runPollingRefresh(waiter, safeRefresh);
+            }, POLL_SAFETY_INTERVAL_SECONDS, POLL_SAFETY_INTERVAL_SECONDS, TimeUnit.SECONDS);
+
+            try {
+                boolean completed;
+                if (timeoutSeconds > 0) {
+                    completed = waiter.latch.await(timeoutSeconds, TimeUnit.SECONDS);
+                } else {
+                    waiter.latch.await();
+                    completed = true;
+                }
+
+                if (!completed) {
+                    throw new DaytonaTimeoutException("Sandbox " + id + " did not reach target state within " + timeoutSeconds + " seconds");
+                }
+                waiter.throwIfError();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new DaytonaException("Interrupted while waiting for sandbox state change", e);
+            } finally {
+                pollFuture.cancel(false);
+            }
+        } finally {
+            stateWaiters.remove(waiter);
+        }
+    }
+
+    private void refreshDataSafe() {
+        try {
+            refreshData();
+        } catch (DaytonaNotFoundException e) {
+            applyState("destroyed");
+        }
+    }
+
+    private void runPollingRefresh(StateWaiter waiter, boolean safeRefresh) {
+        try {
+            if (safeRefresh) {
+                refreshDataSafe();
+            } else {
+                refreshData();
+            }
+        } catch (Exception e) {
+            waiter.onPollError(e instanceof RuntimeException ? (RuntimeException) e : new DaytonaException(e.getMessage(), e));
         }
     }
 
@@ -341,10 +555,13 @@ public class Sandbox {
         }
         this.id = asString(data.getId());
         this.name = asString(data.getName());
-        this.state = data.getState() == null ? "" : data.getState().getValue();
         this.target = asString(data.getTarget());
         this.user = asString(data.getUser());
-        this.toolboxProxyUrl = asString(data.getToolboxProxyUrl());
+        String newProxyUrl = asString(data.getToolboxProxyUrl());
+        if (!newProxyUrl.isEmpty() && !newProxyUrl.equals(this.toolboxProxyUrl) && this.toolboxApiClient != null) {
+            this.toolboxApiClient.setBasePath(trimTrailingSlash(newProxyUrl) + "/" + this.id);
+        }
+        this.toolboxProxyUrl = newProxyUrl;
         this.cpu = data.getCpu() == null ? 0 : data.getCpu().intValue();
         this.gpu = data.getGpu() == null ? 0 : data.getGpu().intValue();
         this.memory = data.getMemory() == null ? 0 : data.getMemory().intValue();
@@ -356,6 +573,64 @@ public class Sandbox {
         this.autoDeleteInterval = data.getAutoDeleteInterval() == null ? null : data.getAutoDeleteInterval().intValue();
         this.networkBlockAll = data.getNetworkBlockAll();
         this.networkAllowList = data.getNetworkAllowList();
+        applyState(data.getState() == null ? "" : data.getState().getValue());
+    }
+
+    private void updateFromJsonEvent(JsonNode node) {
+        try {
+            io.daytona.api.client.model.Sandbox model = OBJECT_MAPPER.treeToValue(node, io.daytona.api.client.model.Sandbox.class);
+            if (model != null) {
+                updateFromModel(model);
+            }
+        } catch (Exception e) {
+            JsonNode stateNode = node.path("state");
+            if (stateNode.isTextual()) {
+                applyState(stateNode.asText());
+            }
+        }
+    }
+
+    private static class StateWaiter {
+        final Set<String> targetStates;
+        final Set<String> errorStates;
+        final AtomicReference<String> resolvedState = new AtomicReference<>();
+        final AtomicReference<RuntimeException> pollError = new AtomicReference<>();
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        StateWaiter(Set<String> targetStates, Set<String> errorStates) {
+            this.targetStates = targetStates;
+            this.errorStates = errorStates;
+        }
+
+        void onStateChanged(String newState) {
+            if (targetStates.contains(newState) || errorStates.contains(newState)) {
+                if (resolvedState.compareAndSet(null, newState)) {
+                    latch.countDown();
+                }
+            }
+        }
+
+        boolean isResolved() {
+            return resolvedState.get() != null || pollError.get() != null;
+        }
+
+        void onPollError(RuntimeException error) {
+            if (pollError.compareAndSet(null, error)) {
+                latch.countDown();
+            }
+        }
+
+        void throwIfError() {
+            RuntimeException refreshFailure = pollError.get();
+            if (refreshFailure != null) {
+                throw refreshFailure;
+            }
+
+            String resolved = resolvedState.get();
+            if (resolved != null && errorStates.contains(resolved)) {
+                throw new DaytonaException("Sandbox entered error state: " + resolved);
+            }
+        }
     }
 
     private String asString(Object value) {
@@ -401,7 +676,7 @@ public class Sandbox {
         io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(
             () -> sandboxApi.forkSandbox(id, forkReq, null)
         );
-        Sandbox forked = new Sandbox(sandboxApi, config, response);
+        Sandbox forked = new Sandbox(sandboxApi, config, response, subscriptionManager);
         forked.waitUntilStarted(timeoutSeconds);
         return forked;
     }
@@ -428,122 +703,57 @@ public class Sandbox {
     public void experimentalCreateSnapshot(String name, long timeoutSeconds) {
         CreateSandboxSnapshot req = new CreateSandboxSnapshot();
         req.setName(name);
-        ExceptionMapper.callMain(() -> sandboxApi.createSandboxSnapshot(id, req, null));
-        refreshData();
+        io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(
+            () -> sandboxApi.createSandboxSnapshot(id, req, null)
+        );
+        if (response != null) {
+            updateFromModel(response);
+        }
         waitForSnapshotComplete(timeoutSeconds);
     }
 
     private void waitForSnapshotComplete(long timeoutSeconds) {
-        long startedAt = System.currentTimeMillis();
-        while ("snapshotting".equalsIgnoreCase(state)) {
-            refreshData();
-            if ("error".equalsIgnoreCase(state) || "build_failed".equalsIgnoreCase(state)) {
-                throw new DaytonaException("Sandbox snapshot failed with state: " + state);
-            }
-            if (!"snapshotting".equalsIgnoreCase(state)) {
-                return;
-            }
-            if (timeoutSeconds > 0 && (System.currentTimeMillis() - startedAt) > timeoutSeconds * 1000L) {
-                throw new DaytonaException("Sandbox snapshot did not complete before timeout");
-            }
-            try {
-                Thread.sleep(250);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new DaytonaException("Interrupted while waiting for snapshot complete", e);
-            }
+        ensureSubscribed();
+        if (timeoutSeconds < 0) {
+            throw new DaytonaException("Timeout must be non-negative");
         }
+        if (!"snapshotting".equalsIgnoreCase(state)) {
+            return;
+        }
+        waitForState(SNAPSHOT_TARGET_STATES, ERROR_STATES, timeoutSeconds, false);
     }
 
     /**
-     * Returns Sandbox ID.
-     *
      * @return Sandbox ID
      */
     public String getId() { return id; }
-    /**
-     * Returns Sandbox name.
-     *
-     * @return Sandbox name
-     */
+    /** @return Sandbox name */
     public String getName() { return name; }
-    /**
-     * Returns Sandbox state.
-     *
-     * @return lifecycle state
-     */
+    /** @return lifecycle state */
     public String getState() { return state; }
-    /**
-     * Returns target region.
-     *
-     * @return target identifier
-     */
+    /** @return target identifier */
     public String getTarget() { return target; }
-    /**
-     * Returns Sandbox OS user.
-     *
-     * @return OS user
-     */
+    /** @return OS user */
     public String getUser() { return user; }
-    /**
-     * Returns toolbox proxy URL.
-     *
-     * @return proxy URL
-     */
+    /** @return proxy URL */
     public String getToolboxProxyUrl() { return toolboxProxyUrl; }
-    /**
-     * Returns allocated CPU cores.
-     *
-     * @return CPU cores
-     */
+    /** @return CPU cores */
     public int getCpu() { return cpu; }
-    /**
-     * Returns allocated GPU units.
-     *
-     * @return GPU units
-     */
+    /** @return GPU units */
     public int getGpu() { return gpu; }
-    /**
-     * Returns allocated memory in GiB.
-     *
-     * @return memory in GiB
-     */
+    /** @return memory in GiB */
     public int getMemory() { return memory; }
-    /**
-     * Returns allocated disk in GiB.
-     *
-     * @return disk in GiB
-     */
+    /** @return disk in GiB */
     public int getDisk() { return disk; }
-    /**
-     * Returns Sandbox environment variables.
-     *
-     * @return environment map
-     */
+    /** @return environment map */
     public Map<String, String> getEnv() { return env; }
-    /**
-     * Returns Sandbox labels.
-     *
-     * @return labels map
-     */
+    /** @return labels map */
     public Map<String, String> getLabels() { return labels; }
-    /**
-     * Returns auto-stop interval in minutes.
-     *
-     * @return auto-stop interval
-     */
+    /** @return auto-stop interval */
     public Integer getAutoStopInterval() { return autoStopInterval; }
-    /**
-     * Returns auto-archive interval in minutes.
-     *
-     * @return auto-archive interval
-     */
+    /** @return auto-archive interval */
     public Integer getAutoArchiveInterval() { return autoArchiveInterval; }
-    /**
-     * Returns auto-delete interval in minutes.
-     *
-     * @return auto-delete interval
-     */
+    /** @return auto-delete interval */
     public Integer getAutoDeleteInterval() { return autoDeleteInterval; }
     /**
      * Returns whether all network access is blocked for this Sandbox.
@@ -557,24 +767,11 @@ public class Sandbox {
      * @return allow list or null
      */
     public String getNetworkAllowList() { return networkAllowList; }
-
-    /**
-     * Returns process operations facade.
-     *
-     * @return process interface
-     */
+    /** @return process interface */
     public Process getProcess() { return process; }
-    /**
-     * Returns file-system operations facade.
-     *
-     * @return file-system interface
-     */
+    /** @return file-system interface */
     public FileSystem getFs() { return fs; }
-    /**
-     * Returns Git operations facade.
-     *
-     * @return Git interface
-     */
+    /** @return Git interface */
     public Git getGit() { return git; }
     io.daytona.toolbox.client.ApiClient getToolboxApiClient() { return toolboxApiClient; }
     String getApiKey() { return apiKey; }

@@ -50,6 +50,8 @@ from ..common.daytona import (
 )
 from ..common.errors import DaytonaAuthenticationError, DaytonaValidationError
 from ..common.image import Image
+from ..internal.event_dispatcher import SyncEventDispatcher
+from ..internal.event_subscription_manager import SyncEventSubscriptionManager
 from ..internal.urllib3_retry import RemoteDisconnectedRetry
 from .sandbox import PaginatedSandboxes, Sandbox
 from .snapshot import SnapshotService
@@ -234,6 +236,12 @@ class Daytona:
         self.snapshot: SnapshotService = SnapshotService(
             SnapshotsApi(self._api_client), self._object_storage_api, self._target
         )
+
+        self._event_dispatcher: SyncEventDispatcher = SyncEventDispatcher(
+            self._api_url, self._api_key or self._jwt_token or "", self._organization_id
+        )
+        self._event_dispatcher.ensure_connected()
+        self._subscription_manager: SyncEventSubscriptionManager = SyncEventSubscriptionManager(self._event_dispatcher)
 
         # Initialize OpenTelemetry if enabled
         otel_enabled = (config and config._experimental and config._experimental.get("otelEnabled")) or (
@@ -485,6 +493,7 @@ class Daytona:
             self._toolbox_api_client,
             self._sandbox_api,
             validated_language.value,
+            subscription_manager=self._subscription_manager,
             ws_handshake_semaphore=self._ws_handshake_semaphore,
         )
 
@@ -547,6 +556,7 @@ class Daytona:
             self._toolbox_api_client,
             self._sandbox_api,
             language,
+            subscription_manager=self._subscription_manager,
             ws_handshake_semaphore=self._ws_handshake_semaphore,
         )
 
@@ -589,6 +599,7 @@ class Daytona:
                     self._toolbox_api_client,
                     self._sandbox_api,
                     language,
+                    subscription_manager=self._subscription_manager,
                     ws_handshake_semaphore=self._ws_handshake_semaphore,
                 )
             )

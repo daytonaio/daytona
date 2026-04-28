@@ -16,6 +16,9 @@ RSpec.describe Daytona::Daytona do
   let(:volumes_api) { instance_double(DaytonaApiClient::VolumesApi) }
   let(:object_storage_api) { instance_double(DaytonaApiClient::ObjectStorageApi) }
   let(:snapshots_api) { instance_double(DaytonaApiClient::SnapshotsApi) }
+  let(:subscription_manager) do
+    instance_double(Daytona::EventSubscriptionManager, shutdown: nil)
+  end
   let(:sandbox_dto) { build_sandbox_dto }
   let(:sandbox) { instance_double(Daytona::Sandbox, id: 'sandbox-123', state: DaytonaApiClient::SandboxState::STARTED) }
 
@@ -26,6 +29,7 @@ RSpec.describe Daytona::Daytona do
     allow(DaytonaApiClient::VolumesApi).to receive(:new).and_return(volumes_api)
     allow(DaytonaApiClient::ObjectStorageApi).to receive(:new).and_return(object_storage_api)
     allow(DaytonaApiClient::SnapshotsApi).to receive(:new).and_return(snapshots_api)
+    allow(Daytona::EventSubscriptionManager).to receive(:new).and_return(subscription_manager)
     allow(Daytona::Sandbox).to receive(:new).and_return(sandbox)
   end
 
@@ -236,6 +240,7 @@ RSpec.describe Daytona::Daytona do
         sandbox_dto: sandbox_dto,
         config: config,
         sandbox_api: sandbox_api,
+        subscription_manager: subscription_manager,
         otel_state: nil
       )
     end

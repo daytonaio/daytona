@@ -6,6 +6,7 @@ package daytona
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -13,6 +14,7 @@ import (
 	"time"
 
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/common"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,13 +35,36 @@ func TestVolumeServiceCreation(t *testing.T) {
 
 func createTestClientWithServer(t *testing.T, server *httptest.Server) *Client {
 	t.Helper()
-	t.Setenv("DAYTONA_API_KEY", "test-api-key")
-	t.Setenv("DAYTONA_API_URL", server.URL)
-	t.Setenv("DAYTONA_JWT_TOKEN", "")
-	t.Setenv("DAYTONA_ORGANIZATION_ID", "")
+	client := &Client{
+		apiKey:          "test-api-key",
+		apiURL:          server.URL,
+		defaultLanguage: types.CodeLanguagePython,
+		httpClient: &http.Client{
+			Timeout: defaultTimeout,
+			Transport: func() *http.Transport {
+				transport := http.DefaultTransport.(*http.Transport).Clone()
+				transport.DisableKeepAlives = true
+				return transport
+			}(),
+		},
+	}
 
-	client, err := NewClient()
-	require.NoError(t, err)
+	apiCfg := apiclient.NewConfiguration()
+	apiCfg.Host = common.ExtractHost(client.apiURL)
+	apiCfg.Scheme = common.ExtractScheme(client.apiURL)
+	apiCfg.HTTPClient = client.httpClient
+	apiCfg.AddDefaultHeader("X-Daytona-Source", sdkSource)
+	apiCfg.AddDefaultHeader("X-Daytona-SDK-Version", Version)
+	apiCfg.UserAgent = "sdk-go/" + Version
+	basePath := common.ExtractPath(client.apiURL)
+	apiCfg.Servers = apiclient.ServerConfigurations{{
+		URL: fmt.Sprintf("%s://%s%s", apiCfg.Scheme, apiCfg.Host, basePath),
+	}}
+
+	client.apiClient = apiclient.NewAPIClient(apiCfg)
+	client.Volume = NewVolumeService(client)
+	client.Snapshot = NewSnapshotService(client)
+
 	return client
 }
 

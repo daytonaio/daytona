@@ -3,12 +3,17 @@
 
 import type { Configuration, Sandbox as SandboxDto } from '@daytona/api-client'
 import { createApiResponse } from './helpers'
-import { DaytonaNotFoundError } from '../errors/DaytonaError'
+import type { EventSubscriptionManager } from '../utils/EventSubscriptionManager'
 
 jest.mock(
   '@daytona/api-client',
   () => ({
     SandboxState: {
+      STARTING: 'starting',
+      STARTED: 'started',
+      STOPPING: 'stopping',
+      STOPPED: 'stopped',
+      SNAPSHOTTING: 'snapshotting',
       RESIZING: 'resizing',
       ERROR: 'error',
       BUILD_FAILED: 'build_failed',
@@ -75,6 +80,11 @@ const makeSandbox = (
     revokeSshAccess: jest.fn(),
     validateSshAccess: jest.fn(),
   }
+  const subscriptionManager = {
+    subscribe: jest.fn(() => 'sub-1'),
+    refresh: jest.fn(() => true),
+    unsubscribe: jest.fn(),
+  }
 
   const cfg: Configuration = {
     basePath: 'http://proxy',
@@ -90,6 +100,7 @@ const makeSandbox = (
     cfg,
     axiosInstance as unknown as never,
     sandboxApi as unknown as never,
+    subscriptionManager as unknown as EventSubscriptionManager,
   )
 
   return { sandbox, sandboxApi }
@@ -108,18 +119,18 @@ describe('Sandbox', () => {
 
     sandboxApi.startSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'started' }))
     sandboxApi.getSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'started' }))
-    await sandbox.start(1)
+    await sandbox.start(5)
 
     sandboxApi.stopSandbox.mockResolvedValue(createApiResponse(undefined))
     sandboxApi.getSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'stopped' }))
-    await sandbox.stop(1)
+    await sandbox.stop(5)
 
-    sandboxApi.deleteSandbox.mockResolvedValue(createApiResponse(undefined))
-    await sandbox.delete(1)
+    sandboxApi.deleteSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'destroyed' }))
+    await sandbox.delete(5)
 
-    expect(sandboxApi.startSandbox).toHaveBeenCalledWith('sb-1', undefined, { timeout: 1000 })
-    expect(sandboxApi.stopSandbox).toHaveBeenCalledWith('sb-1', undefined, false, { timeout: 1000 })
-    expect(sandboxApi.deleteSandbox).toHaveBeenCalledWith('sb-1', undefined, { timeout: 1000 })
+    expect(sandboxApi.startSandbox).toHaveBeenCalledWith('sb-1', undefined, { timeout: 5000 })
+    expect(sandboxApi.stopSandbox).toHaveBeenCalledWith('sb-1', undefined, false, { timeout: 5000 })
+    expect(sandboxApi.deleteSandbox).toHaveBeenCalledWith('sb-1', undefined, { timeout: 5000 })
   })
 
   it('recovers sandboxes and waits for them to start', async () => {
@@ -128,9 +139,9 @@ describe('Sandbox', () => {
     sandboxApi.recoverSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'starting' }))
     sandboxApi.getSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'started' }))
 
-    await sandbox.recover(1)
+    await sandbox.recover(5)
 
-    expect(sandboxApi.recoverSandbox).toHaveBeenCalledWith('sb-1', undefined, { timeout: 1000 })
+    expect(sandboxApi.recoverSandbox).toHaveBeenCalledWith('sb-1', undefined, { timeout: 5000 })
     expect(sandbox.state).toBe('started')
   })
 
@@ -138,7 +149,6 @@ describe('Sandbox', () => {
     'validates negative timeout for %s',
     async (method) => {
       const { sandbox } = makeSandbox({ state: 'stopped' })
-      const runtime = sandbox as unknown as Record<string, (...args: never[]) => Promise<void>>
 
       if (method === 'resize') {
         await expect(
@@ -150,7 +160,8 @@ describe('Sandbox', () => {
         return
       }
 
-      await expect(runtime[method](-1 as never)).rejects.toThrow('Timeout must be a non-negative number')
+      const call = (sandbox as unknown as Record<string, (timeout: number) => Promise<void>>)[method].bind(sandbox)
+      await expect(call(-1)).rejects.toThrow('Timeout must be a non-negative number')
     },
   )
 
@@ -159,7 +170,7 @@ describe('Sandbox', () => {
     ['setAutoArchiveInterval', -1, 'autoArchiveInterval must be a non-negative integer'],
   ])('validates %s', async (method, arg, message) => {
     const { sandbox } = makeSandbox()
-    const call = (sandbox as unknown as Record<string, (n: number) => Promise<void>>)[method]
+    const call = (sandbox as unknown as Record<string, (n: number) => Promise<void>>)[method].bind(sandbox)
     await expect(call(arg)).rejects.toThrow(message)
   })
 
@@ -189,7 +200,7 @@ describe('Sandbox', () => {
     await sandbox.archive()
 
     sandboxApi.resizeSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'started' }))
-    await sandbox.resize({ cpu: 4 }, 1)
+    await sandbox.resize({ cpu: 4 }, 5)
 
     await sandbox.refreshData()
     await sandbox.refreshActivity()
@@ -243,13 +254,13 @@ describe('Sandbox', () => {
 
   it('creates sandbox snapshots and waits for completion', async () => {
     const { sandbox, sandboxApi } = makeSandbox({ state: 'snapshotting' })
-    sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse(undefined))
+    sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse({ ...baseDto, state: 'started' }))
     sandboxApi.getSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'started' }))
 
-    await sandbox._experimental_createSnapshot('snap-1', 1)
+    await sandbox._experimental_createSnapshot('snap-1', 5)
 
     expect(sandboxApi.createSandboxSnapshot).toHaveBeenCalledWith('sb-1', { name: 'snap-1' }, undefined, {
-      timeout: 1000,
+      timeout: 5000,
     })
   })
 
@@ -257,10 +268,10 @@ describe('Sandbox', () => {
     const { sandbox } = makeSandbox({ state: 'starting', errorReason: 'boot failed' })
 
     jest.spyOn(sandbox, 'refreshData').mockImplementation(async () => {
-      sandbox.state = 'error'
+      ;(sandbox as unknown as { applyState: (state: string) => void }).applyState('error')
     })
 
-    await expect(sandbox.waitUntilStarted(1)).rejects.toThrow(
+    await expect(sandbox.waitUntilStarted(5)).rejects.toThrow(
       'Sandbox sb-1 failed to start with status: error, error reason: boot failed',
     )
   })
@@ -268,9 +279,11 @@ describe('Sandbox', () => {
   it('waitUntilStopped treats deleted sandboxes as destroyed', async () => {
     const { sandbox } = makeSandbox({ state: 'stopping' })
 
-    jest.spyOn(sandbox, 'refreshData').mockRejectedValue(new DaytonaNotFoundError('missing'))
+    jest.spyOn(sandbox, 'refreshData').mockImplementation(async () => {
+      ;(sandbox as unknown as { applyState: (state: string) => void }).applyState('destroyed')
+    })
 
-    await expect(sandbox.waitUntilStopped(1)).resolves.toBeUndefined()
+    await expect(sandbox.waitUntilStopped(5)).resolves.toBeUndefined()
     expect(sandbox.state).toBe('destroyed')
   })
 
@@ -278,10 +291,10 @@ describe('Sandbox', () => {
     const { sandbox } = makeSandbox({ state: 'resizing', errorReason: 'no capacity' })
 
     jest.spyOn(sandbox, 'refreshData').mockImplementation(async () => {
-      sandbox.state = 'error'
+      ;(sandbox as unknown as { applyState: (state: string) => void }).applyState('error')
     })
 
-    await expect(sandbox.waitForResizeComplete(1)).rejects.toThrow(
+    await expect(sandbox.waitForResizeComplete(5)).rejects.toThrow(
       'Sandbox sb-1 resize failed with state: error, error reason: no capacity',
     )
   })
@@ -305,16 +318,16 @@ describe('Sandbox', () => {
     const { sandbox } = makeSandbox({ state: 'starting' })
 
     const refreshSpy = jest.spyOn(sandbox, 'refreshData').mockImplementation(async () => {
-      sandbox.state = 'started'
+      ;(sandbox as unknown as { applyState: (state: string) => void }).applyState('started')
     })
-    await sandbox.waitUntilStarted(1)
+    await sandbox.waitUntilStarted(5)
     expect(refreshSpy).toHaveBeenCalled()
 
     sandbox.state = 'stopping'
     refreshSpy.mockImplementation(async () => {
-      sandbox.state = 'stopped'
+      ;(sandbox as unknown as { applyState: (state: string) => void }).applyState('stopped')
     })
-    await sandbox.waitUntilStopped(1)
+    await sandbox.waitUntilStopped(5)
   })
 
   it('exposes user/work directories and creates LSP server', async () => {

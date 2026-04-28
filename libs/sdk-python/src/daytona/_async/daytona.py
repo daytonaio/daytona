@@ -25,11 +25,9 @@ from daytona_api_client_async import (
     CreateBuildInfo,
     CreateSandbox,
     ObjectStorageApi,
-    SandboxApi,
-    SandboxState,
-    SandboxVolume,
-    SnapshotsApi,
 )
+from daytona_api_client_async import Sandbox as SandboxDto
+from daytona_api_client_async import SandboxApi, SandboxState, SandboxVolume, SnapshotsApi
 from daytona_api_client_async import VolumesApi as VolumesApi
 from daytona_toolbox_api_client_async import ApiClient as ToolboxApiClient
 
@@ -48,6 +46,8 @@ from ..common.daytona import (
 )
 from ..common.errors import DaytonaAuthenticationError, DaytonaValidationError
 from ..common.image import Image
+from ..internal.event_dispatcher import AsyncEventDispatcher
+from ..internal.event_subscription_manager import AsyncEventSubscriptionManager
 from ..internal.pool_tracker import AsyncPoolSaturationTracker
 from .sandbox import AsyncPaginatedSandboxes, AsyncSandbox
 from .snapshot import AsyncSnapshotService
@@ -237,6 +237,14 @@ class AsyncDaytona:
             self._target,
         )
 
+        self._event_dispatcher: AsyncEventDispatcher = AsyncEventDispatcher(
+            self._api_url, self._api_key or self._jwt_token or "", self._organization_id
+        )
+        self._event_dispatcher.ensure_connected()
+        self._subscription_manager: AsyncEventSubscriptionManager = AsyncEventSubscriptionManager(
+            self._event_dispatcher
+        )
+
         # Initialize OpenTelemetry if enabled
         otel_enabled = (config and config._experimental and config._experimental.get("otelEnabled")) or (
             env_reader or DaytonaEnvReader()
@@ -312,12 +320,18 @@ class AsyncDaytona:
             self._tracer_provider.shutdown()
 
         # Close the main API client
-        if hasattr(self, "_api_client") and self._api_client:
+        if self._api_client:
             await self._api_client.close()
 
         # Close the toolbox API client
-        if hasattr(self, "_toolbox_api_client") and self._toolbox_api_client:
+        if self._toolbox_api_client:
             await self._toolbox_api_client.close()
+
+        if self._subscription_manager:
+            self._subscription_manager.shutdown()
+
+        if self._event_dispatcher:
+            await self._event_dispatcher.disconnect()
 
     @overload
     async def create(
@@ -533,10 +547,11 @@ class AsyncDaytona:
             response = response_ref["response"]
 
         sandbox = AsyncSandbox(
-            response,
+            await self._ensure_toolbox_proxy_url(response),
             self._toolbox_api_client,
             self._sandbox_api,
             validated_language.value,
+            self._subscription_manager,
             self._pool_tracker,
             ws_handshake_semaphore=self._ws_handshake_semaphore,
         )
@@ -600,6 +615,7 @@ class AsyncDaytona:
             self._toolbox_api_client,
             self._sandbox_api,
             language,
+            self._subscription_manager,
             self._pool_tracker,
             ws_handshake_semaphore=self._ws_handshake_semaphore,
         )
@@ -639,10 +655,11 @@ class AsyncDaytona:
             language = self._validate_language_label(sandbox.labels.get(CODE_TOOLBOX_LANGUAGE_LABEL)).value
             items.append(
                 AsyncSandbox(
-                    sandbox,
+                    await self._ensure_toolbox_proxy_url(sandbox),
                     self._toolbox_api_client,
                     self._sandbox_api,
                     language,
+                    self._subscription_manager,
                     self._pool_tracker,
                     ws_handshake_semaphore=self._ws_handshake_semaphore,
                 )
@@ -674,6 +691,14 @@ class AsyncDaytona:
         if enum_language is None:
             raise DaytonaValidationError(f"Invalid {CODE_TOOLBOX_LANGUAGE_LABEL}: {language}")
         return enum_language
+
+    async def _ensure_toolbox_proxy_url(self, sandbox: SandboxDto) -> SandboxDto:
+        if sandbox.toolbox_proxy_url:
+            return sandbox
+
+        proxy_url = await self._sandbox_api.get_toolbox_proxy_url(sandbox.id)
+        sandbox.toolbox_proxy_url = proxy_url.url
+        return sandbox
 
     @with_instrumentation()
     async def start(self, sandbox: AsyncSandbox, timeout: float = 60) -> None:

@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-
+	"strings"
 	"testing"
 	"time"
 
@@ -569,6 +569,9 @@ func TestStreamBuildLogsToChannel(t *testing.T) {
 	t.Run("streams logs successfully", func(t *testing.T) {
 		// Create a test server that returns log lines
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if strings.HasPrefix(r.URL.Path, "/socket.io") || r.Header.Get("Upgrade") == "websocket" {
+				return
+			}
 			// Verify auth header
 			assert.Equal(t, "Bearer test-api-key", r.Header.Get("Authorization"))
 
@@ -846,17 +849,19 @@ func TestSandboxTargetField(t *testing.T) {
 		client, err := NewClient()
 		require.NoError(t, err)
 
-		sandbox := newSandboxForTest(
-			client,
-			"test-id",
-			"test-name",
-			apiclient.SANDBOXSTATE_STARTED,
-			"us-east-1", // target
-			60,          // autoArchiveInterval
-			-1,          // autoDeleteInterval
-			false,       // networkBlockAll
-			nil,         // networkAllowList
-		)
+		autoArchive := float32(60)
+		autoDelete := float32(-1)
+		resp := &apiclient.Sandbox{
+			Id:                  "test-id",
+			Name:                "test-name",
+			State:               apiclient.SANDBOXSTATE_STARTED.Ptr(),
+			Target:              "us-east-1",
+			AutoArchiveInterval: &autoArchive,
+			AutoDeleteInterval:  &autoDelete,
+			NetworkBlockAll:     false,
+			NetworkAllowList:    nil,
+		}
+		sandbox := NewSandbox(client, nil, resp, types.CodeLanguagePython, client.subscriptionManager)
 
 		assert.Equal(t, "test-id", sandbox.ID)
 		assert.Equal(t, "test-name", sandbox.Name)

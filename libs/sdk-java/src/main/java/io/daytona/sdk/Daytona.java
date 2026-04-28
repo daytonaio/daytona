@@ -10,6 +10,8 @@ import io.daytona.api.client.model.CreateBuildInfo;
 import io.daytona.api.client.model.CreateSandbox;
 import io.daytona.api.client.model.SandboxVolume;
 import io.daytona.sdk.exception.DaytonaException;
+import io.daytona.sdk.internal.EventDispatcher;
+import io.daytona.sdk.internal.EventSubscriptionManager;
 import io.daytona.sdk.model.CreateSandboxFromImageParams;
 import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
 import io.daytona.sdk.model.PaginatedSandboxes;
@@ -44,6 +46,8 @@ public class Daytona implements AutoCloseable {
     private final SandboxApi sandboxApi;
     private final SnapshotService snapshot;
     private final VolumeService volume;
+    private final EventDispatcher eventDispatcher;
+    private final EventSubscriptionManager subscriptionManager;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
@@ -76,6 +80,9 @@ public class Daytona implements AutoCloseable {
         this.sandboxApi = new SandboxApi(apiClient);
         this.snapshot = new SnapshotService(new io.daytona.api.client.api.SnapshotsApi(apiClient), apiClient.getHttpClient(), config.getApiKey());
         this.volume = new VolumeService(new io.daytona.api.client.api.VolumesApi(apiClient));
+        this.eventDispatcher = new EventDispatcher(config.getApiUrl(), config.getApiKey());
+        this.eventDispatcher.ensureConnected();
+        this.subscriptionManager = new EventSubscriptionManager(eventDispatcher);
     }
 
     /**
@@ -124,7 +131,7 @@ public class Daytona implements AutoCloseable {
             body.setSnapshot(params.getSnapshot());
         }
         io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(() -> sandboxApi.createSandbox(body, null));
-        Sandbox sandbox = new Sandbox(sandboxApi, config, response);
+        Sandbox sandbox = new Sandbox(sandboxApi, config, response, subscriptionManager);
         sandbox.waitUntilStarted(timeoutSeconds);
         return sandbox;
     }
@@ -178,7 +185,8 @@ public class Daytona implements AutoCloseable {
         }
 
         Sandbox sandbox = new Sandbox(sandboxApi, config,
-                ExceptionMapper.callMain(() -> sandboxApi.getSandbox(response.getId(), null, null)));
+                ExceptionMapper.callMain(() -> sandboxApi.getSandbox(response.getId(), null, null)),
+                subscriptionManager);
         long elapsed = (System.currentTimeMillis() - startTime) / 1000;
         long remaining = timeoutSeconds > 0 ? Math.max(1, timeoutSeconds - elapsed) : timeoutSeconds;
         sandbox.waitUntilStarted(remaining);
@@ -194,7 +202,7 @@ public class Daytona implements AutoCloseable {
      */
     public Sandbox get(String sandboxIdOrName) {
         io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(() -> sandboxApi.getSandbox(sandboxIdOrName, null, null));
-        return new Sandbox(sandboxApi, config, response);
+        return new Sandbox(sandboxApi, config, response, subscriptionManager);
     }
 
     /**
@@ -284,6 +292,12 @@ public class Daytona implements AutoCloseable {
      */
     @Override
     public void close() {
+        if (subscriptionManager != null) {
+            subscriptionManager.shutdown();
+        }
+        if (eventDispatcher != null) {
+            eventDispatcher.shutdown();
+        }
         shutdownHttpClient(apiClient.getHttpClient());
     }
 

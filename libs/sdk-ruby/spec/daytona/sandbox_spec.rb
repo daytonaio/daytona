@@ -19,6 +19,14 @@ RSpec.describe Daytona::Sandbox do
   let(:computer_use_api) { instance_double(DaytonaToolboxApiClient::ComputerUseApi) }
   let(:interpreter_api) { instance_double(DaytonaToolboxApiClient::InterpreterApi) }
   let(:info_api) { instance_double(DaytonaToolboxApiClient::InfoApi) }
+  let(:subscription_manager) do
+    instance_double(
+      Daytona::EventSubscriptionManager,
+      subscribe: 'sub-123',
+      refresh: true,
+      unsubscribe: nil
+    )
+  end
 
   before do
     allow(DaytonaToolboxApiClient::ApiClient).to receive(:new).and_return(toolbox_client)
@@ -35,7 +43,8 @@ RSpec.describe Daytona::Sandbox do
     described_class.new(
       sandbox_dto: sandbox_dto,
       config: config,
-      sandbox_api: sandbox_api
+      sandbox_api: sandbox_api,
+      subscription_manager: subscription_manager
     )
   end
 
@@ -62,7 +71,8 @@ RSpec.describe Daytona::Sandbox do
     end
 
     it 'configures toolbox client authorization and sdk headers' do
-      described_class.new(sandbox_dto: sandbox_dto, config: config, sandbox_api: sandbox_api)
+      described_class.new(sandbox_dto: sandbox_dto, config: config, sandbox_api: sandbox_api,
+                          subscription_manager: subscription_manager)
 
       expect(toolbox_client.default_headers['Authorization']).to eq('Bearer test-api-key')
       expect(toolbox_client.default_headers['X-Daytona-Source']).to eq('sdk-ruby')
@@ -73,7 +83,8 @@ RSpec.describe Daytona::Sandbox do
     it 'adds organization header when using JWT auth' do
       jwt_config = Daytona::Config.new(jwt_token: 'jwt', organization_id: 'org-9', api_url: 'https://api.example.com')
 
-      described_class.new(sandbox_dto: sandbox_dto, config: jwt_config, sandbox_api: sandbox_api)
+      described_class.new(sandbox_dto: sandbox_dto, config: jwt_config, sandbox_api: sandbox_api,
+                          subscription_manager: subscription_manager)
 
       expect(toolbox_client.default_headers['X-Daytona-Organization-ID']).to eq('org-9')
     end
@@ -154,8 +165,10 @@ RSpec.describe Daytona::Sandbox do
     end
 
     it 'sets state to destroyed on 404' do
-      allow(sandbox_api).to receive(:delete_sandbox).and_raise(DaytonaApiClient::ApiError.new(code: 404,
-                                                                                              message: 'Not found'))
+      allow(sandbox_api).to receive(:delete_sandbox).with('sandbox-123')
+      allow(sandbox_api).to receive(:get_sandbox).and_raise(
+        DaytonaApiClient::ApiError.new(code: 404, message: 'Not found')
+      )
 
       sandbox.delete
 
@@ -202,7 +215,10 @@ RSpec.describe Daytona::Sandbox do
     it 'replaces labels via API' do
       label_request = instance_double(DaytonaApiClient::SandboxLabels)
       label_response = instance_double(DaytonaApiClient::SandboxLabels, labels: { 'env' => 'prod' })
-      allow(DaytonaApiClient::SandboxLabels).to receive(:build_from_hash).with(labels: { 'env' => 'prod' }).and_return(label_request)
+      allow(DaytonaApiClient::SandboxLabels)
+        .to receive(:build_from_hash)
+        .with(labels: { 'env' => 'prod' })
+        .and_return(label_request)
       allow(sandbox_api).to receive(:replace_labels).with('sandbox-123', label_request).and_return(label_response)
 
       sandbox.labels = { 'env' => 'prod' }
@@ -374,13 +390,14 @@ RSpec.describe Daytona::Sandbox do
       errored = described_class.new(
         sandbox_dto: build_sandbox_dto(state: DaytonaApiClient::SandboxState::ERROR, error_reason: 'boom'),
         config: config,
-        sandbox_api: sandbox_api
+        sandbox_api: sandbox_api,
+        subscription_manager: subscription_manager
       )
 
       expect do
         errored.wait_for_sandbox_start
       end.to raise_error(Daytona::Sdk::Error,
-                         /failed to start with state: error, error reason: boom/i)
+                         /entered error state: error, error reason: boom/i)
     end
   end
 
@@ -389,7 +406,8 @@ RSpec.describe Daytona::Sandbox do
       destroyed = described_class.new(
         sandbox_dto: build_sandbox_dto(state: DaytonaApiClient::SandboxState::DESTROYED),
         config: config,
-        sandbox_api: sandbox_api
+        sandbox_api: sandbox_api,
+        subscription_manager: subscription_manager
       )
 
       expect { destroyed.wait_for_sandbox_stop }.not_to raise_error

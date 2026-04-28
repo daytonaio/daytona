@@ -5,10 +5,14 @@ package daytona
 
 import (
 	"context"
+	stderrors "errors"
 	"fmt"
+	"strings"
+	"sync"
 	"time"
 
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/common"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/errors"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 	"github.com/daytonaio/daytona/libs/toolbox-api-client-go"
@@ -42,34 +46,49 @@ import (
 //	// Work with files
 //	err = sandbox.FileSystem.UploadFile(ctx, "local.txt", "/home/user/remote.txt")
 type Sandbox struct {
-	client        *Client
-	otel          *otelState
-	ID            string                 // Unique sandbox identifier
-	Name          string                 // Human-readable sandbox name
-	State         apiclient.SandboxState // Current sandbox state
-	Target        string                 // Target region/environment where the sandbox runs
-	ToolboxClient *toolbox.APIClient     // Internal API client
+	client              *Client
+	otel                *otelState
+	ToolboxClient       *toolbox.APIClient
+	mu                  sync.RWMutex
+	stateWaiters        []chan apiclient.SandboxState
+	subscriptionManager *common.EventSubscriptionManager
+	subID               string
 
-	// AutoArchiveInterval is the time in minutes after stopping before auto-archiving.
-	// Set to 0 to disable auto-archiving.
+	ID                  string
+	Name                string
+	OrganizationID      string
+	State               apiclient.SandboxState
+	Target              string
+	Snapshot            string
+	User                string
+	Env                 map[string]string
+	Labels              map[string]string
+	Public              bool
+	CPU                 int32
+	GPU                 int32
+	Memory              int32
+	Disk                int32
+	ErrorReason         string
+	Recoverable         bool
+	BackupState         string
+	BackupCreatedAt     string
+	AutoStopInterval    int
 	AutoArchiveInterval int
+	AutoDeleteInterval  int
+	ToolboxProxyUrl     string
+	NetworkBlockAll     bool
+	NetworkAllowList    *string
+	CreatedAt           string
+	UpdatedAt           string
 
-	// AutoDeleteInterval is the time in minutes after stopping before auto-deletion.
-	// Set to -1 to disable auto-deletion.
-	// Set to 0 to delete immediately upon stopping.
-	AutoDeleteInterval int
+	Volumes   []apiclient.SandboxVolume
+	BuildInfo *apiclient.BuildInfo
 
-	// NetworkBlockAll blocks all network access when true.
-	NetworkBlockAll bool
-
-	// NetworkAllowList is a comma-separated list of allowed CIDR addresses.
-	NetworkAllowList *string
-
-	FileSystem      *FileSystemService      // File system operations
-	Git             *GitService             // Git operations
-	Process         *ProcessService         // Process and PTY operations
-	CodeInterpreter *CodeInterpreterService // Python code execution
-	ComputerUse     *ComputerUseService     // Desktop automation
+	FileSystem      *FileSystemService
+	Git             *GitService
+	Process         *ProcessService
+	CodeInterpreter *CodeInterpreterService
+	ComputerUse     *ComputerUseService
 }
 
 // PaginatedSandboxes represents a paginated list of sandboxes.
@@ -84,29 +103,260 @@ type PaginatedSandboxes struct {
 //
 // This is typically called internally by the SDK. Users should create sandboxes
 // using [Client.Create] rather than calling this directly.
-func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, name string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList *string, language types.CodeLanguage) *Sandbox {
+func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, resp *apiclient.Sandbox, language types.CodeLanguage, subscriptionManager *common.EventSubscriptionManager) *Sandbox {
 	var otelSt *otelState
 	if client != nil {
 		otelSt = client.Otel
 	}
-	return &Sandbox{
+	s := &Sandbox{
 		client:              client,
 		otel:                otelSt,
-		ID:                  id,
-		Name:                name,
-		State:               state,
-		Target:              target,
-		AutoArchiveInterval: autoArchiveInterval,
-		AutoDeleteInterval:  autoDeleteInterval,
-		NetworkBlockAll:     networkBlockAll,
-		NetworkAllowList:    networkAllowList,
+		ID:                  resp.GetId(),
 		ToolboxClient:       toolboxClient,
+		subscriptionManager: subscriptionManager,
 		FileSystem:          NewFileSystemService(toolboxClient, otelSt),
 		Git:                 NewGitService(toolboxClient, otelSt),
 		Process:             NewProcessService(toolboxClient, otelSt, language),
 		CodeInterpreter:     NewCodeInterpreterService(toolboxClient, otelSt),
 		ComputerUse:         NewComputerUseService(toolboxClient, otelSt),
 	}
+
+	s.updateFromAPIResponse(resp)
+	s.ensureSubscribed()
+
+	return s
+}
+
+func (s *Sandbox) ensureSubscribed() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.subID != "" {
+		if s.subscriptionManager.Refresh(s.subID) {
+			return
+		}
+		s.subID = ""
+	}
+
+	s.subscribeToEventsLocked()
+}
+
+func (s *Sandbox) subscribeToEventsLocked() {
+	if s.subID != "" {
+		return
+	}
+
+	s.subID = s.subscriptionManager.Subscribe(
+		s.ID,
+		s.handleEvent,
+		[]string{"sandbox.state.updated", "sandbox.created"},
+	)
+}
+
+func (s *Sandbox) handleEvent(event common.SandboxEvent) {
+	switch event.Type {
+	case common.SandboxEventStateUpdated:
+		if event.StateEvent != nil {
+			s.applyState(event.StateEvent.NewState)
+		}
+	case common.SandboxEventCreated:
+		if event.CreatedEvent != nil {
+			s.updateFromAPIResponse(event.CreatedEvent)
+		}
+	}
+}
+
+func (s *Sandbox) unsubscribe() {
+	s.mu.Lock()
+	subID := s.subID
+	s.subID = ""
+	manager := s.subscriptionManager
+	s.mu.Unlock()
+
+	if subID != "" && manager != nil {
+		manager.Unsubscribe(subID)
+	}
+}
+
+func (s *Sandbox) applyState(newState apiclient.SandboxState) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.applyStateLocked(newState)
+}
+
+func (s *Sandbox) applyStateLocked(newState apiclient.SandboxState) {
+
+	if newState == s.State {
+		return
+	}
+
+	s.State = newState
+
+	for _, waiter := range s.stateWaiters {
+		select {
+		case waiter <- newState:
+		default:
+			select {
+			case <-waiter:
+			default:
+			}
+			select {
+			case waiter <- newState:
+			default:
+			}
+		}
+	}
+}
+
+// updateFromAPIResponse updates sandbox fields from an API sandbox response.
+func (s *Sandbox) updateFromAPIResponse(resp *apiclient.Sandbox) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if resp == nil {
+		return
+	}
+
+	s.Name = resp.GetName()
+	s.OrganizationID = resp.GetOrganizationId()
+	s.Target = resp.GetTarget()
+	s.Snapshot = resp.GetSnapshot()
+	s.User = resp.GetUser()
+	s.Env = resp.GetEnv()
+	s.Labels = resp.GetLabels()
+	s.Public = resp.GetPublic()
+	s.CPU = int32(resp.GetCpu())
+	s.GPU = int32(resp.GetGpu())
+	s.Memory = int32(resp.GetMemory())
+	s.Disk = int32(resp.GetDisk())
+	s.ErrorReason = resp.GetErrorReason()
+	s.Recoverable = resp.GetRecoverable()
+	s.BackupState = resp.GetBackupState()
+	s.BackupCreatedAt = resp.GetBackupCreatedAt()
+	s.CreatedAt = resp.GetCreatedAt()
+	s.UpdatedAt = resp.GetUpdatedAt()
+	s.Volumes = resp.GetVolumes()
+	s.BuildInfo = resp.BuildInfo
+	s.NetworkBlockAll = resp.GetNetworkBlockAll()
+	s.NetworkAllowList = resp.NetworkAllowList
+
+	if resp.AutoStopInterval != nil {
+		s.AutoStopInterval = int(*resp.AutoStopInterval)
+	}
+	if resp.AutoArchiveInterval != nil {
+		s.AutoArchiveInterval = int(*resp.AutoArchiveInterval)
+	}
+	if resp.AutoDeleteInterval != nil {
+		s.AutoDeleteInterval = int(*resp.AutoDeleteInterval)
+	}
+
+	newProxyURL := resp.GetToolboxProxyUrl()
+	if newProxyURL != "" && newProxyURL != s.ToolboxProxyUrl && s.ToolboxClient != nil {
+		toolboxURL := fmt.Sprintf("%s/%s", strings.TrimRight(newProxyURL, "/"), s.ID)
+		cfg := s.ToolboxClient.GetConfig()
+		newServerURL := fmt.Sprintf("%s://%s%s", common.ExtractScheme(toolboxURL), common.ExtractHost(toolboxURL), common.ExtractPath(toolboxURL))
+		if len(cfg.Servers) == 0 || cfg.Servers[0].URL != newServerURL {
+			cfg.Host = common.ExtractHost(toolboxURL)
+			cfg.Scheme = common.ExtractScheme(toolboxURL)
+			cfg.Servers = toolbox.ServerConfigurations{{URL: newServerURL}}
+		}
+	}
+	s.ToolboxProxyUrl = newProxyURL
+
+	s.applyStateLocked(resp.GetState())
+}
+
+// waitForState waits for the sandbox to reach a target state using WebSocket events
+// with periodic polling as a safety net for missed events.
+// When safeRefresh is true, polling errors are ignored (useful for delete operations
+// where the sandbox may return 404 during polling).
+func (s *Sandbox) waitForState(
+	ctx context.Context,
+	targetStates []apiclient.SandboxState,
+	errorStates []apiclient.SandboxState,
+	safeRefresh bool,
+) error {
+	s.ensureSubscribed()
+
+	stateCh := make(chan apiclient.SandboxState, 1)
+	s.mu.Lock()
+	s.stateWaiters = append(s.stateWaiters, stateCh)
+	s.mu.Unlock()
+	defer func() {
+		s.mu.Lock()
+		defer s.mu.Unlock()
+
+		for i, waiter := range s.stateWaiters {
+			if waiter == stateCh {
+				s.stateWaiters = append(s.stateWaiters[:i], s.stateWaiters[i+1:]...)
+				break
+			}
+		}
+	}()
+
+	s.mu.RLock()
+	currentState := s.State
+	s.mu.RUnlock()
+
+	if containsSandboxState(errorStates, currentState) {
+		return fmt.Errorf("sandbox entered error state: %s", currentState)
+	}
+	if containsSandboxState(targetStates, currentState) {
+		return nil
+	}
+
+	pollTicker := time.NewTicker(1 * time.Second)
+	defer pollTicker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case newState := <-stateCh:
+			if containsSandboxState(errorStates, newState) {
+				return fmt.Errorf("sandbox entered error state: %s", newState)
+			}
+			if containsSandboxState(targetStates, newState) {
+				return nil
+			}
+		case <-pollTicker.C:
+			if safeRefresh {
+				if err := s.refreshDataSafe(ctx); err != nil {
+					return err
+				}
+				continue
+			}
+
+			if err := s.doRefreshData(ctx); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func (s *Sandbox) refreshDataSafe(ctx context.Context) error {
+	refreshErr := s.doRefreshData(ctx)
+	if refreshErr == nil {
+		return nil
+	}
+
+	var notFoundErr *errors.DaytonaNotFoundError
+	if stderrors.As(refreshErr, &notFoundErr) {
+		s.applyState(apiclient.SANDBOXSTATE_DESTROYED)
+		return nil
+	}
+
+	return refreshErr
+}
+
+func containsSandboxState(states []apiclient.SandboxState, state apiclient.SandboxState) bool {
+	for _, candidate := range states {
+		if candidate == state {
+			return true
+		}
+	}
+
+	return false
 }
 
 // RefreshData refreshes the sandbox data from the API.
@@ -122,6 +372,7 @@ func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, nam
 //	}
 //	fmt.Printf("Current state: %s\n", sandbox.State)
 func (s *Sandbox) RefreshData(ctx context.Context) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "RefreshData", func(ctx context.Context) error {
 		return s.doRefreshData(ctx)
 	})
@@ -134,22 +385,7 @@ func (s *Sandbox) doRefreshData(ctx context.Context) error {
 		return errors.ConvertAPIError(err, httpResp)
 	}
 
-	// Update sandboxDTO for backward compatibility
-	s.Name = sandboxResp.GetName()
-	s.State = sandboxResp.GetState()
-	s.Target = sandboxResp.GetTarget()
-
-	// Update intervals
-	if sandboxResp.AutoArchiveInterval != nil {
-		s.AutoArchiveInterval = int(*sandboxResp.AutoArchiveInterval)
-	}
-	if sandboxResp.AutoDeleteInterval != nil {
-		s.AutoDeleteInterval = int(*sandboxResp.AutoDeleteInterval)
-	}
-
-	// Update network settings
-	s.NetworkBlockAll = sandboxResp.GetNetworkBlockAll()
-	s.NetworkAllowList = sandboxResp.NetworkAllowList
+	s.updateFromAPIResponse(sandboxResp)
 
 	return nil
 }
@@ -164,6 +400,7 @@ func (s *Sandbox) doRefreshData(ctx context.Context) error {
 //	}
 //	fmt.Printf("Home directory: %s\n", homeDir) // e.g., "/home/daytona"
 func (s *Sandbox) GetUserHomeDir(ctx context.Context) (string, error) {
+	s.ensureSubscribed()
 	return withInstrumentation(ctx, s.otel, "Sandbox", "GetUserHomeDir", func(ctx context.Context) (string, error) {
 		resp, httpResp, err := s.ToolboxClient.InfoAPI.GetUserHomeDir(ctx).Execute()
 		if err != nil {
@@ -184,6 +421,7 @@ func (s *Sandbox) GetUserHomeDir(ctx context.Context) (string, error) {
 //	}
 //	fmt.Printf("Working directory: %s\n", workDir)
 func (s *Sandbox) GetWorkingDir(ctx context.Context) (string, error) {
+	s.ensureSubscribed()
 	return withInstrumentation(ctx, s.otel, "Sandbox", "GetWorkingDir", func(ctx context.Context) (string, error) {
 		resp, httpResp, err := s.ToolboxClient.InfoAPI.GetWorkDir(ctx).Execute()
 		if err != nil {
@@ -207,6 +445,7 @@ func (s *Sandbox) GetWorkingDir(ctx context.Context) (string, error) {
 //	}
 //	// Sandbox is now running
 func (s *Sandbox) Start(ctx context.Context) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "Start", func(ctx context.Context) error {
 		return s.StartWithTimeout(ctx, 60*time.Second)
 	})
@@ -224,6 +463,7 @@ func (s *Sandbox) Start(ctx context.Context) error {
 //	    return err
 //	}
 func (s *Sandbox) StartWithTimeout(ctx context.Context, timeout time.Duration) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "StartWithTimeout", func(ctx context.Context) error {
 		return s.doStartWithTimeout(ctx, timeout)
 	})
@@ -241,10 +481,11 @@ func (s *Sandbox) doStartWithTimeout(ctx context.Context, timeout time.Duration)
 	}
 
 	authCtx := s.client.getAuthContext(ctx)
-	_, httpResp, err := s.client.apiClient.SandboxAPI.StartSandbox(authCtx, s.ID).Execute()
+	sandboxResp, httpResp, err := s.client.apiClient.SandboxAPI.StartSandbox(authCtx, s.ID).Execute()
 	if err != nil {
 		return errors.ConvertAPIError(err, httpResp)
 	}
+	s.updateFromAPIResponse(sandboxResp)
 
 	return s.WaitForStart(ctx, timeout)
 }
@@ -258,6 +499,7 @@ func (s *Sandbox) doStartWithTimeout(ctx context.Context, timeout time.Duration)
 //
 //	err := sandbox.Stop(ctx)
 func (s *Sandbox) Stop(ctx context.Context) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "Stop", func(ctx context.Context) error {
 		return s.StopWithTimeout(ctx, 60*time.Second, false)
 	})
@@ -273,6 +515,7 @@ func (s *Sandbox) Stop(ctx context.Context) error {
 //
 //	err := sandbox.StopWithTimeout(ctx, 2*time.Minute, false)
 func (s *Sandbox) StopWithTimeout(ctx context.Context, timeout time.Duration, force bool) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "StopWithTimeout", func(ctx context.Context) error {
 		return s.doStopWithTimeout(ctx, timeout, force)
 	})
@@ -294,10 +537,11 @@ func (s *Sandbox) doStopWithTimeout(ctx context.Context, timeout time.Duration, 
 	if force {
 		req = req.Force(force)
 	}
-	_, httpResp, err := req.Execute()
+	sandboxResp, httpResp, err := req.Execute()
 	if err != nil {
 		return errors.ConvertAPIError(err, httpResp)
 	}
+	s.updateFromAPIResponse(sandboxResp)
 
 	return s.WaitForStop(ctx, timeout)
 }
@@ -311,6 +555,7 @@ func (s *Sandbox) doStopWithTimeout(ctx context.Context, timeout time.Duration, 
 //
 //	err := sandbox.Delete(ctx)
 func (s *Sandbox) Delete(ctx context.Context) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "Delete", func(ctx context.Context) error {
 		return s.DeleteWithTimeout(ctx, 60*time.Second)
 	})
@@ -322,6 +567,7 @@ func (s *Sandbox) Delete(ctx context.Context) error {
 //
 //	err := sandbox.DeleteWithTimeout(ctx, 2*time.Minute)
 func (s *Sandbox) DeleteWithTimeout(ctx context.Context, timeout time.Duration) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "DeleteWithTimeout", func(ctx context.Context) error {
 		return s.doDeleteWithTimeout(ctx, timeout)
 	})
@@ -339,9 +585,23 @@ func (s *Sandbox) doDeleteWithTimeout(ctx context.Context, timeout time.Duration
 	}
 
 	authCtx := s.client.getAuthContext(ctx)
-	_, httpResp, err := s.client.apiClient.SandboxAPI.DeleteSandbox(authCtx, s.ID).Execute()
+	sandboxResp, httpResp, err := s.client.apiClient.SandboxAPI.DeleteSandbox(authCtx, s.ID).Execute()
 	if err != nil {
 		return errors.ConvertAPIError(err, httpResp)
+	}
+	defer s.unsubscribe()
+	s.updateFromAPIResponse(sandboxResp)
+
+	err = s.waitForState(ctx,
+		[]apiclient.SandboxState{apiclient.SANDBOXSTATE_DESTROYED},
+		[]apiclient.SandboxState{apiclient.SANDBOXSTATE_ERROR, apiclient.SANDBOXSTATE_BUILD_FAILED},
+		true,
+	)
+	if err != nil {
+		if ctx.Err() != nil {
+			return errors.NewDaytonaTimeoutError(fmt.Sprintf("Sandbox was not destroyed within %s", timeout))
+		}
+		return errors.NewDaytonaError(fmt.Sprintf("Sandbox failed to delete: %v", err), 0, nil)
 	}
 
 	return nil
@@ -361,6 +621,7 @@ func (s *Sandbox) doDeleteWithTimeout(ctx context.Context, timeout time.Duration
 //	}
 //	// Sandbox is now archived and can be restored later
 func (s *Sandbox) Archive(ctx context.Context) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "Archive", func(ctx context.Context) error {
 		return s.doArchive(ctx)
 	})
@@ -368,12 +629,13 @@ func (s *Sandbox) Archive(ctx context.Context) error {
 
 func (s *Sandbox) doArchive(ctx context.Context) error {
 	authCtx := s.client.getAuthContext(ctx)
-	_, httpResp, err := s.client.apiClient.SandboxAPI.ArchiveSandbox(authCtx, s.ID).Execute()
+	sandboxResp, httpResp, err := s.client.apiClient.SandboxAPI.ArchiveSandbox(authCtx, s.ID).Execute()
 	if err != nil {
 		return errors.ConvertAPIError(err, httpResp)
 	}
+	s.updateFromAPIResponse(sandboxResp)
 
-	return s.RefreshData(ctx)
+	return nil
 }
 
 // WaitForStart waits for the sandbox to reach the "started" state.
@@ -389,6 +651,7 @@ func (s *Sandbox) doArchive(ctx context.Context) error {
 //	}
 //	// Sandbox is now running
 func (s *Sandbox) WaitForStart(ctx context.Context, timeout time.Duration) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "WaitForStart", func(ctx context.Context) error {
 		return s.doWaitForStart(ctx, timeout)
 	})
@@ -405,36 +668,18 @@ func (s *Sandbox) doWaitForStart(ctx context.Context, timeout time.Duration) err
 		defer cancel()
 	}
 
-	interval := 100 * time.Millisecond
-	timer := time.NewTimer(interval)
-	defer timer.Stop()
-	startTime := time.Now()
-
-	for {
-		select {
-		case <-ctx.Done():
+	err := s.waitForState(ctx,
+		[]apiclient.SandboxState{apiclient.SANDBOXSTATE_STARTED},
+		[]apiclient.SandboxState{apiclient.SANDBOXSTATE_ERROR, apiclient.SANDBOXSTATE_BUILD_FAILED},
+		false,
+	)
+	if err != nil {
+		if ctx.Err() != nil {
 			return errors.NewDaytonaTimeoutError(fmt.Sprintf("Sandbox did not start within %s", timeout))
-		case <-timer.C:
-			if err := s.RefreshData(ctx); err != nil {
-				return err
-			}
-
-			if s.State == apiclient.SANDBOXSTATE_STARTED {
-				return nil
-			}
-			if s.State == apiclient.SANDBOXSTATE_ERROR || s.State == apiclient.SANDBOXSTATE_BUILD_FAILED {
-				return errors.NewDaytonaError("Sandbox failed to start", 0, nil)
-			}
-
-			if time.Since(startTime) > 5*time.Second {
-				interval = time.Duration(float64(interval) * 1.1)
-				if interval > time.Second {
-					interval = time.Second
-				}
-			}
-			timer.Reset(interval)
 		}
+		return errors.NewDaytonaError(fmt.Sprintf("Sandbox failed to start: %v", err), 0, nil)
 	}
+	return nil
 }
 
 // WaitForStop waits for the sandbox to reach the "stopped" state.
@@ -446,6 +691,7 @@ func (s *Sandbox) doWaitForStart(ctx context.Context, timeout time.Duration) err
 //
 //	err := sandbox.WaitForStop(ctx, 2*time.Minute)
 func (s *Sandbox) WaitForStop(ctx context.Context, timeout time.Duration) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "WaitForStop", func(ctx context.Context) error {
 		return s.doWaitForStop(ctx, timeout)
 	})
@@ -462,33 +708,18 @@ func (s *Sandbox) doWaitForStop(ctx context.Context, timeout time.Duration) erro
 		defer cancel()
 	}
 
-	interval := 100 * time.Millisecond
-	timer := time.NewTimer(interval)
-	defer timer.Stop()
-	startTime := time.Now()
-
-	for {
-		select {
-		case <-ctx.Done():
+	err := s.waitForState(ctx,
+		[]apiclient.SandboxState{apiclient.SANDBOXSTATE_STOPPED, apiclient.SANDBOXSTATE_DESTROYED},
+		[]apiclient.SandboxState{apiclient.SANDBOXSTATE_ERROR, apiclient.SANDBOXSTATE_BUILD_FAILED},
+		false,
+	)
+	if err != nil {
+		if ctx.Err() != nil {
 			return errors.NewDaytonaTimeoutError(fmt.Sprintf("Sandbox did not stop within %s", timeout))
-		case <-timer.C:
-			if err := s.RefreshData(ctx); err != nil {
-				return err
-			}
-
-			if s.State == apiclient.SANDBOXSTATE_STOPPED {
-				return nil
-			}
-
-			if time.Since(startTime) > 5*time.Second {
-				interval = time.Duration(float64(interval) * 1.1)
-				if interval > time.Second {
-					interval = time.Second
-				}
-			}
-			timer.Reset(interval)
 		}
+		return errors.NewDaytonaError(fmt.Sprintf("Sandbox failed to stop: %v", err), 0, nil)
 	}
+	return nil
 }
 
 // SetLabels sets custom labels on the sandbox.
@@ -504,6 +735,7 @@ func (s *Sandbox) doWaitForStop(ctx context.Context, timeout time.Duration) erro
 //	    "project": "api-server",
 //	})
 func (s *Sandbox) SetLabels(ctx context.Context, labels map[string]string) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "SetLabels", func(ctx context.Context) error {
 		return s.doSetLabels(ctx, labels)
 	})
@@ -540,6 +772,7 @@ func (s *Sandbox) doSetLabels(ctx context.Context, labels map[string]string) err
 //	}
 //	fmt.Printf("URL: %s\nToken: %s\n", preview.URL, preview.Token)
 func (s *Sandbox) GetPreviewLink(ctx context.Context, port int) (*types.PreviewLink, error) {
+	s.ensureSubscribed()
 	return withInstrumentation(ctx, s.otel, "Sandbox", "GetPreviewLink", func(ctx context.Context) (*types.PreviewLink, error) {
 		result, httpResp, err := s.client.apiClient.SandboxAPI.GetPortPreviewUrl(
 			s.client.getAuthContext(ctx),
@@ -569,6 +802,7 @@ func (s *Sandbox) GetPreviewLink(ctx context.Context, port int) (*types.PreviewL
 //	}
 //	fmt.Printf("Sandbox ID: %s\nPort: %d\nURL: %s\nToken: %s\n", preview.SandboxID, preview.Port, preview.URL, preview.Token)
 func (s *Sandbox) GetSignedPreviewLink(ctx context.Context, port int, expiresInSeconds int) (*types.SignedPreviewLink, error) {
+	s.ensureSubscribed()
 	return withInstrumentation(ctx, s.otel, "Sandbox", "GetSignedPreviewLink", func(ctx context.Context) (*types.SignedPreviewLink, error) {
 		result, httpResp, err := s.client.apiClient.SandboxAPI.GetSignedPortPreviewUrl(
 			s.client.getAuthContext(ctx),
@@ -600,6 +834,7 @@ func (s *Sandbox) GetSignedPreviewLink(ctx context.Context, port int, expiresInS
 //	    return err
 //	}
 func (s *Sandbox) ExpireSignedPreviewLink(ctx context.Context, port int, token string) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "ExpireSignedPreviewLink", func(ctx context.Context) error {
 		httpResp, err := s.client.apiClient.SandboxAPI.ExpireSignedPortPreviewUrl(
 			s.client.getAuthContext(ctx),
@@ -632,6 +867,7 @@ func (s *Sandbox) ExpireSignedPreviewLink(ctx context.Context, port int, token s
 //	interval := 0
 //	err := sandbox.SetAutoArchiveInterval(ctx, &interval)
 func (s *Sandbox) SetAutoArchiveInterval(ctx context.Context, intervalMinutes *int) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "SetAutoArchiveInterval", func(ctx context.Context) error {
 		return s.doSetAutoArchiveInterval(ctx, intervalMinutes)
 	})
@@ -642,7 +878,7 @@ func (s *Sandbox) doSetAutoArchiveInterval(ctx context.Context, intervalMinutes 
 		return errors.NewDaytonaError("intervalMinutes cannot be nil", 0, nil)
 	}
 
-	_, httpResp, err := s.client.apiClient.SandboxAPI.SetAutoArchiveInterval(
+	sandboxResp, httpResp, err := s.client.apiClient.SandboxAPI.SetAutoArchiveInterval(
 		s.client.getAuthContext(ctx),
 		s.ID,
 		float32(*intervalMinutes),
@@ -652,7 +888,7 @@ func (s *Sandbox) doSetAutoArchiveInterval(ctx context.Context, intervalMinutes 
 		return errors.ConvertAPIError(err, httpResp)
 	}
 
-	s.AutoArchiveInterval = *intervalMinutes
+	s.updateFromAPIResponse(sandboxResp)
 	return nil
 }
 
@@ -679,6 +915,7 @@ func (s *Sandbox) doSetAutoArchiveInterval(ctx context.Context, intervalMinutes 
 //	interval := -1
 //	err := sandbox.SetAutoDeleteInterval(ctx, &interval)
 func (s *Sandbox) SetAutoDeleteInterval(ctx context.Context, intervalMinutes *int) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "SetAutoDeleteInterval", func(ctx context.Context) error {
 		return s.doSetAutoDeleteInterval(ctx, intervalMinutes)
 	})
@@ -689,7 +926,7 @@ func (s *Sandbox) doSetAutoDeleteInterval(ctx context.Context, intervalMinutes *
 		return errors.NewDaytonaError("intervalMinutes cannot be nil", 0, nil)
 	}
 
-	_, httpResp, err := s.client.apiClient.SandboxAPI.SetAutoDeleteInterval(
+	sandboxResp, httpResp, err := s.client.apiClient.SandboxAPI.SetAutoDeleteInterval(
 		s.client.getAuthContext(ctx),
 		s.ID,
 		float32(*intervalMinutes),
@@ -699,7 +936,7 @@ func (s *Sandbox) doSetAutoDeleteInterval(ctx context.Context, intervalMinutes *
 		return errors.ConvertAPIError(err, httpResp)
 	}
 
-	s.AutoDeleteInterval = *intervalMinutes
+	s.updateFromAPIResponse(sandboxResp)
 	return nil
 }
 
@@ -793,18 +1030,8 @@ func (s *Sandbox) doExperimentalForkWithTimeout(ctx context.Context, name *strin
 		return nil, err
 	}
 
-	autoArchiveInterval := 0
-	if sandboxResp.AutoArchiveInterval != nil {
-		autoArchiveInterval = int(*sandboxResp.AutoArchiveInterval)
-	}
-
-	autoDeleteInterval := 0
-	if sandboxResp.AutoDeleteInterval != nil {
-		autoDeleteInterval = int(*sandboxResp.AutoDeleteInterval)
-	}
-
 	language := types.CodeLanguage(sandboxResp.GetLabels()[types.CodeToolboxLanguageLabel])
-	forked := NewSandbox(s.client, toolboxClient, sandboxResp.GetId(), sandboxResp.GetName(), sandboxResp.GetState(), sandboxResp.GetTarget(), autoArchiveInterval, autoDeleteInterval, sandboxResp.GetNetworkBlockAll(), sandboxResp.NetworkAllowList, language)
+	forked := NewSandbox(s.client, toolboxClient, sandboxResp, language, s.subscriptionManager)
 
 	if err := forked.WaitForStart(ctx, timeout); err != nil {
 		return nil, err
@@ -858,48 +1085,30 @@ func (s *Sandbox) doExperimentalCreateSnapshotWithTimeout(ctx context.Context, n
 	req := apiclient.NewCreateSandboxSnapshot(name)
 
 	authCtx := s.client.getAuthContext(ctx)
-	_, httpResp, err := s.client.apiClient.SandboxAPI.CreateSandboxSnapshot(authCtx, s.ID).CreateSandboxSnapshot(*req).Execute()
+	resp, httpResp, err := s.client.apiClient.SandboxAPI.CreateSandboxSnapshot(authCtx, s.ID).CreateSandboxSnapshot(*req).Execute()
 	if err != nil {
 		return errors.ConvertAPIError(err, httpResp)
 	}
 
-	if err := s.RefreshData(ctx); err != nil {
-		return err
-	}
+	s.updateFromAPIResponse(resp)
 
 	return s.waitForSnapshotComplete(ctx)
 }
 
 func (s *Sandbox) waitForSnapshotComplete(ctx context.Context) error {
-	checkInterval := 100 * time.Millisecond
-	startTime := time.Now()
-
-	for s.State == apiclient.SANDBOXSTATE_SNAPSHOTTING {
-		if err := s.RefreshData(ctx); err != nil {
-			return err
-		}
-
-		if s.State == apiclient.SANDBOXSTATE_ERROR || s.State == apiclient.SANDBOXSTATE_BUILD_FAILED {
-			return errors.NewDaytonaError(
-				fmt.Sprintf("Sandbox %s snapshot failed with state: %s", s.ID, s.State), 0, nil,
-			)
-		}
-
-		if s.State != apiclient.SANDBOXSTATE_SNAPSHOTTING {
-			return nil
-		}
-
-		select {
-		case <-ctx.Done():
-			return errors.NewDaytonaError("Sandbox snapshot did not complete within the timeout period", 0, nil)
-		case <-time.After(checkInterval):
-		}
-
-		if time.Since(startTime) > 5*time.Second {
-			checkInterval = min(time.Duration(float64(checkInterval)*1.1), 1*time.Second)
+	errorStates := []apiclient.SandboxState{apiclient.SANDBOXSTATE_ERROR, apiclient.SANDBOXSTATE_BUILD_FAILED}
+	excludeSet := map[apiclient.SandboxState]bool{apiclient.SANDBOXSTATE_SNAPSHOTTING: true}
+	for _, st := range errorStates {
+		excludeSet[st] = true
+	}
+	var targetStates []apiclient.SandboxState
+	for _, st := range apiclient.AllowedSandboxStateEnumValues {
+		if !excludeSet[st] {
+			targetStates = append(targetStates, st)
 		}
 	}
-	return nil
+
+	return s.waitForState(ctx, targetStates, errorStates, false)
 }
 
 // Resize resizes the sandbox resources with a default timeout of 60 seconds.
@@ -917,6 +1126,7 @@ func (s *Sandbox) waitForSnapshotComplete(ctx context.Context) error {
 //	sandbox.Stop(ctx)
 //	err := sandbox.Resize(ctx, &types.Resources{CPU: 2, Memory: 4, Disk: 30})
 func (s *Sandbox) Resize(ctx context.Context, resources *types.Resources) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "Resize", func(ctx context.Context) error {
 		return s.ResizeWithTimeout(ctx, resources, 60*time.Second)
 	})
@@ -932,6 +1142,7 @@ func (s *Sandbox) Resize(ctx context.Context, resources *types.Resources) error 
 //
 //	err := sandbox.ResizeWithTimeout(ctx, &types.Resources{CPU: 4, Memory: 8}, 2*time.Minute)
 func (s *Sandbox) ResizeWithTimeout(ctx context.Context, resources *types.Resources, timeout time.Duration) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "ResizeWithTimeout", func(ctx context.Context) error {
 		return s.doResizeWithTimeout(ctx, resources, timeout)
 	})
@@ -972,9 +1183,7 @@ func (s *Sandbox) doResizeWithTimeout(ctx context.Context, resources *types.Reso
 	}
 
 	// Update sandbox data from response
-	s.Name = sandboxResp.GetName()
-	s.State = sandboxResp.GetState()
-	s.Target = sandboxResp.GetTarget()
+	s.updateFromAPIResponse(sandboxResp)
 
 	var remainingTimeout time.Duration
 	if timeout == 0 {
@@ -999,6 +1208,7 @@ func (s *Sandbox) doResizeWithTimeout(ctx context.Context, resources *types.Reso
 //
 //	err := sandbox.WaitForResize(ctx, 2*time.Minute)
 func (s *Sandbox) WaitForResize(ctx context.Context, timeout time.Duration) error {
+	s.ensureSubscribed()
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "WaitForResize", func(ctx context.Context) error {
 		if timeout < 0 {
 			return errors.NewDaytonaError("Timeout must be a non-negative number", 0, nil)
@@ -1010,35 +1220,25 @@ func (s *Sandbox) WaitForResize(ctx context.Context, timeout time.Duration) erro
 			defer cancel()
 		}
 
-		interval := 100 * time.Millisecond
-		timer := time.NewTimer(interval)
-		defer timer.Stop()
-		startTime := time.Now()
-
-		for {
-			select {
-			case <-ctx.Done():
-				return errors.NewDaytonaTimeoutError(fmt.Sprintf("Sandbox resize did not complete within %s", timeout))
-			case <-timer.C:
-				if err := s.RefreshData(ctx); err != nil {
-					return err
-				}
-
-				if s.State == apiclient.SANDBOXSTATE_ERROR || s.State == apiclient.SANDBOXSTATE_BUILD_FAILED {
-					return errors.NewDaytonaError("Sandbox resize failed", 0, nil)
-				}
-				if s.State != apiclient.SANDBOXSTATE_RESIZING {
-					return nil
-				}
-
-				if time.Since(startTime) > 5*time.Second {
-					interval = time.Duration(float64(interval) * 1.1)
-					if interval > time.Second {
-						interval = time.Second
-					}
-				}
-				timer.Reset(interval)
+		errorStates := []apiclient.SandboxState{apiclient.SANDBOXSTATE_ERROR, apiclient.SANDBOXSTATE_BUILD_FAILED}
+		excludeSet := map[apiclient.SandboxState]bool{apiclient.SANDBOXSTATE_RESIZING: true}
+		for _, s := range errorStates {
+			excludeSet[s] = true
+		}
+		var targetStates []apiclient.SandboxState
+		for _, s := range apiclient.AllowedSandboxStateEnumValues {
+			if !excludeSet[s] {
+				targetStates = append(targetStates, s)
 			}
 		}
+
+		err := s.waitForState(ctx, targetStates, errorStates, false)
+		if err != nil {
+			if ctx.Err() != nil {
+				return errors.NewDaytonaTimeoutError(fmt.Sprintf("Sandbox resize did not complete within %s", timeout))
+			}
+			return errors.NewDaytonaError(fmt.Sprintf("Sandbox resize failed: %v", err), 0, nil)
+		}
+		return nil
 	})
 }

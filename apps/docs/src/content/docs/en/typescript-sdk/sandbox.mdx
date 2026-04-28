@@ -237,7 +237,8 @@ new Sandbox(
    sandboxDto: Sandbox, 
    clientConfig: Configuration, 
    axiosInstance: AxiosInstance, 
-   sandboxApi: SandboxApi): Sandbox
+   sandboxApi: SandboxApi, 
+   subscriptionManager: EventSubscriptionManager): Sandbox
 ```
 
 Creates a new Sandbox instance
@@ -247,7 +248,8 @@ Creates a new Sandbox instance
 - `sandboxDto` _Sandbox_ - The API Sandbox instance
 - `clientConfig` _Configuration_
 - `axiosInstance` _AxiosInstance_
-- `sandboxApi` _SandboxApi_
+- `sandboxApi` _SandboxApi_ - API client for Sandbox operations
+- `subscriptionManager` _EventSubscriptionManager_ - Event subscription manager for real-time updates
 
 
 **Returns**:
@@ -404,14 +406,15 @@ Creates an SSH access token for the sandbox.
 #### delete()
 
 ```ts
-delete(timeout: number): Promise<void>
+delete(timeout?: number): Promise<void>
 ```
 
-Deletes the Sandbox.
+Deletes the Sandbox and waits for it to reach the 'destroyed' state.
 
 **Parameters**:
 
-- `timeout` _number = 60_
+- `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
+    Defaults to 60-second timeout.
 
 
 **Returns**:

@@ -17,7 +17,13 @@ from .conftest import make_sandbox_dto
 def make_async_sandbox(sandbox_dto, mock_async_toolbox_api_client, mock_async_sandbox_api):
     from daytona._async.sandbox import AsyncSandbox
 
-    return AsyncSandbox(sandbox_dto, mock_async_toolbox_api_client, mock_async_sandbox_api, "python")
+    return AsyncSandbox(
+        sandbox_dto,
+        mock_async_toolbox_api_client,
+        mock_async_sandbox_api,
+        "python",
+        subscription_manager=MagicMock(),
+    )
 
 
 class TestAsyncSandboxInit:
@@ -153,5 +159,5 @@ class TestAsyncSandboxWaitForStart:
         error_dto = make_sandbox_dto(state=SandboxState.ERROR, error_reason="build failed")
         sandbox = make_async_sandbox(error_dto, mock_async_toolbox_api_client, mock_async_sandbox_api)
         mock_async_sandbox_api.get_sandbox = AsyncMock(return_value=error_dto)
-        with pytest.raises(DaytonaError, match="failed to start"):
+        with pytest.raises(DaytonaError, match="Failure during waiting for sandbox to start"):
             await sandbox.wait_for_sandbox_start(timeout=0)

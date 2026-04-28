@@ -1,7 +1,7 @@
+# frozen_string_literal: true
+
 # Copyright Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
-
-# frozen_string_literal: true
 
 require 'logger'
 
@@ -27,6 +27,9 @@ require_relative 'common/response'
 require_relative 'common/snapshot'
 require_relative 'code_interpreter'
 require_relative 'computer_use'
+require_relative 'common/socketio_client'
+require_relative 'common/event_dispatcher'
+require_relative 'common/event_subscription_manager'
 require_relative 'daytona'
 require_relative 'file_system'
 require_relative 'git'

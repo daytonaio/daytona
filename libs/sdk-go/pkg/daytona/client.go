@@ -114,6 +114,10 @@ type Client struct {
 	// apiClient is the underlying OpenAPI-generated client
 	apiClient *apiclient.APIClient
 
+	eventDispatcher *common.EventDispatcher
+
+	subscriptionManager *common.EventSubscriptionManager
+
 	// Volume provides methods for managing persistent volumes.
 	Volume *VolumeService
 
@@ -258,6 +262,16 @@ func NewClientWithConfig(config *types.DaytonaConfig) (*Client, error) {
 	client.Volume = NewVolumeService(client)
 	client.Snapshot = NewSnapshotService(client)
 
+	token := client.apiKey
+	if token == "" {
+		token = client.jwtToken
+	}
+	if token != "" {
+		client.eventDispatcher = common.NewEventDispatcher(client.apiURL, token, client.organizationID)
+		client.subscriptionManager = common.NewEventSubscriptionManager(client.eventDispatcher)
+		client.eventDispatcher.EnsureConnected()
+	}
+
 	return client, nil
 }
 
@@ -265,6 +279,12 @@ func NewClientWithConfig(config *types.DaytonaConfig) (*Client, error) {
 // When OpenTelemetry is enabled, Close flushes and shuts down the OTel providers.
 // It is safe to call Close even when OTel is not enabled.
 func (c *Client) Close(ctx context.Context) error {
+	if c.subscriptionManager != nil {
+		c.subscriptionManager.Shutdown()
+	}
+	if c.eventDispatcher != nil {
+		c.eventDispatcher.Disconnect()
+	}
 	return shutdownOtel(ctx, c.Otel)
 }
 
@@ -548,18 +568,9 @@ func (c *Client) doCreate(ctx context.Context, params any, opts ...func(*options
 		return nil, err
 	}
 
-	autoArchiveInterval := 0
-	if sandboxResp.AutoArchiveInterval != nil {
-		autoArchiveInterval = int(*sandboxResp.AutoArchiveInterval)
-	}
-
-	autoDeleteInterval := 0
-	if sandboxResp.AutoDeleteInterval != nil {
-		autoDeleteInterval = int(*sandboxResp.AutoDeleteInterval)
-	}
-
 	language := types.CodeLanguage(sandboxResp.GetLabels()[types.CodeToolboxLanguageLabel])
-	sandbox := NewSandbox(c, toolboxClient, sandboxResp.GetId(), sandboxResp.GetName(), sandboxResp.GetState(), sandboxResp.GetTarget(), autoArchiveInterval, autoDeleteInterval, sandboxResp.GetNetworkBlockAll(), sandboxResp.NetworkAllowList, language)
+
+	sandbox := NewSandbox(c, toolboxClient, sandboxResp, language, c.subscriptionManager)
 
 	// Handle snapshot build logs
 	if sandbox.State == apiclient.SANDBOXSTATE_PENDING_BUILD {
@@ -644,30 +655,9 @@ func (c *Client) doGet(ctx context.Context, sandboxIDOrName string) (*Sandbox, e
 		return nil, err
 	}
 
-	autoArchiveInterval := 0
-	if sandboxResp.AutoArchiveInterval != nil {
-		autoArchiveInterval = int(*sandboxResp.AutoArchiveInterval)
-	}
-
-	autoDeleteInterval := 0
-	if sandboxResp.AutoDeleteInterval != nil {
-		autoDeleteInterval = int(*sandboxResp.AutoDeleteInterval)
-	}
-
 	language := types.CodeLanguage(sandboxResp.GetLabels()[types.CodeToolboxLanguageLabel])
-	sandbox := NewSandbox(c,
-		toolboxClient,
-		sandboxResp.GetId(),
-		sandboxResp.GetName(),
-		sandboxResp.GetState(),
-		sandboxResp.GetTarget(),
-		autoArchiveInterval,
-		autoDeleteInterval,
-		sandboxResp.GetNetworkBlockAll(),
-		sandboxResp.NetworkAllowList,
-		language,
-	)
-	return sandbox, nil
+
+	return NewSandbox(c, toolboxClient, sandboxResp, language, c.subscriptionManager), nil
 }
 
 // List retrieves sandboxes with optional label filtering and pagination.
@@ -737,29 +727,8 @@ func (c *Client) doList(ctx context.Context, labels map[string]string, page *int
 			return nil, err
 		}
 
-		autoArchiveInterval := 0
-		if items[i].AutoArchiveInterval != nil {
-			autoArchiveInterval = int(*items[i].AutoArchiveInterval)
-		}
-
-		autoDeleteInterval := 0
-		if items[i].AutoDeleteInterval != nil {
-			autoDeleteInterval = int(*items[i].AutoDeleteInterval)
-		}
-
 		lang := types.CodeLanguage(items[i].GetLabels()[types.CodeToolboxLanguageLabel])
-		sandboxes[i] = NewSandbox(c,
-			toolboxClient,
-			items[i].GetId(),
-			items[i].GetName(),
-			items[i].GetState(),
-			items[i].GetTarget(),
-			autoArchiveInterval,
-			autoDeleteInterval,
-			items[i].GetNetworkBlockAll(),
-			items[i].NetworkAllowList,
-			lang,
-		)
+		sandboxes[i] = NewSandbox(c, toolboxClient, &items[i], lang, c.subscriptionManager)
 	}
 
 	return &PaginatedSandboxes{

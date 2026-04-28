@@ -12,7 +12,7 @@ Sandbox class for Daytona SDK.
 #### new Sandbox()
 
 ```ruby
-def initialize(sandbox_dto:, config:, sandbox_api:, otel_state:)
+def initialize(sandbox_dto:, config:, sandbox_api:, subscription_manager:, otel_state:)
 
 ```
 
@@ -332,6 +332,15 @@ def daemon_version()
 
 - `String` - The version of the daemon running in the sandbox
 
+#### toolbox_proxy_url()
+
+```ruby
+def toolbox_proxy_url()
+
+```
+
+Returns the value of attribute toolbox_proxy_url.
+
 #### config()
 
 ```ruby
@@ -536,9 +545,15 @@ Creates an SSH access token for the sandbox.
 #### delete()
 
 ```ruby
-def delete()
+def delete(timeout)
 
 ```
+
+Deletes the Sandbox and waits for it to reach the 'destroyed' state.
+
+**Parameters**:
+
+- `timeout` _Numeric_ - Maximum wait time in seconds (defaults to 60 s).
 
 **Returns**:
 
@@ -832,7 +847,7 @@ sandbox.resize(Daytona::Resources.new(cpu: 2, memory: 4, disk: 30))
 #### wait_for_resize_complete()
 
 ```ruby
-def wait_for_resize_complete(_timeout)
+def wait_for_resize_complete(timeout)
 
 ```
 
@@ -888,7 +903,7 @@ Validates an SSH access token for the sandbox.
 #### wait_for_sandbox_start()
 
 ```ruby
-def wait_for_sandbox_start(_timeout)
+def wait_for_sandbox_start(timeout)
 
 ```
 
@@ -906,7 +921,7 @@ reaches the 'started' state or encounters an error.
 #### wait_for_sandbox_stop()
 
 ```ruby
-def wait_for_sandbox_stop(_timeout)
+def wait_for_sandbox_stop(timeout)
 
 ```
 

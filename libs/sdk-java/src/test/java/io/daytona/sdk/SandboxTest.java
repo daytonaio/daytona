@@ -16,6 +16,7 @@ import io.daytona.sdk.exception.DaytonaNotFoundException;
 import io.daytona.sdk.exception.DaytonaRateLimitException;
 import io.daytona.sdk.exception.DaytonaServerException;
 import io.daytona.sdk.exception.DaytonaValidationException;
+import io.daytona.sdk.internal.EventSubscriptionManager;
 import io.daytona.toolbox.client.api.InfoApi;
 import io.daytona.toolbox.client.model.UserHomeDirResponse;
 import io.daytona.toolbox.client.model.WorkDirResponse;
@@ -41,6 +42,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -57,7 +60,7 @@ class SandboxTest {
 
     @BeforeEach
     void setUp() {
-        sandbox = new Sandbox(sandboxApi, TestSupport.config(), TestSupport.mainSandbox("sb-1", SandboxState.STARTED));
+        sandbox = new Sandbox(sandboxApi, TestSupport.config(), TestSupport.mainSandbox("sb-1", SandboxState.STARTED), mockSubscriptionManager());
     }
 
     @Test
@@ -80,7 +83,7 @@ class SandboxTest {
         model.setToolboxProxyUrl("");
         when(sandboxApi.getToolboxProxyUrl("sb-2", null)).thenReturn(new ToolboxProxyUrl().url("https://proxy.example"));
 
-        Sandbox loaded = new Sandbox(sandboxApi, TestSupport.config(), model);
+        Sandbox loaded = new Sandbox(sandboxApi, TestSupport.config(), model, mockSubscriptionManager());
 
         assertThat(loaded.getToolboxProxyUrl()).isEmpty();
         assertThat(loaded.getToolboxApiClient().getBasePath()).isEqualTo("https://proxy.example/sb-2");
@@ -94,7 +97,7 @@ class SandboxTest {
         model.setLabels(Collections.singletonMap(Daytona.CODE_TOOLBOX_LANGUAGE_LABEL, "javascript"));
         model.setToolboxProxyUrl("https://proxy.example/");
 
-        Sandbox loaded = new Sandbox(sandboxApi, TestSupport.config(), model);
+        Sandbox loaded = new Sandbox(sandboxApi, TestSupport.config(), model, mockSubscriptionManager());
 
         assertThat(loaded.getLanguage()).isEqualTo("javascript");
         assertThat(loaded.getName()).isEmpty();
@@ -107,7 +110,7 @@ class SandboxTest {
         when(sandboxApi.startSandbox("sb-1", null)).thenReturn(TestSupport.mainSandbox("sb-1", SandboxState.STARTING));
         when(sandboxApi.getSandbox("sb-1", null, null)).thenReturn(TestSupport.mainSandbox("sb-1", SandboxState.STARTED));
 
-        sandbox.start(1);
+        sandbox.start(2);
 
         assertThat(sandbox.getState()).isEqualTo("started");
     }
@@ -120,8 +123,8 @@ class SandboxTest {
         when(sandboxApi.getSandbox("sb-1", null, null)).thenReturn(TestSupport.mainSandbox("sb-1", SandboxState.ERROR));
         TestSupport.setField(sandbox, "state", "starting");
 
-        assertThatThrownBy(() -> sandbox.waitUntilStarted(1))
-                .hasMessageContaining("Sandbox entered failure state");
+        assertThatThrownBy(() -> sandbox.waitUntilStarted(2))
+                .hasMessageContaining("Sandbox entered error state: error");
     }
 
     @Test
@@ -130,14 +133,14 @@ class SandboxTest {
         TestSupport.setField(sandbox, "state", "starting");
 
         assertThatThrownBy(() -> sandbox.waitUntilStarted(1))
-                .hasMessageContaining("Sandbox failed to become started before timeout");
+                .hasMessageContaining("did not reach target state within 1 seconds");
     }
 
     @Test
     void stopRefreshesAndWaitsUntilStopped() {
         when(sandboxApi.getSandbox("sb-1", null, null)).thenReturn(TestSupport.mainSandbox("sb-1", SandboxState.STOPPED));
 
-        sandbox.stop(1);
+        sandbox.stop(2);
 
         assertThat(sandbox.getState()).isEqualTo("stopped");
         verify(sandboxApi).stopSandbox("sb-1", null, null);
@@ -151,8 +154,8 @@ class SandboxTest {
         when(sandboxApi.getSandbox("sb-1", null, null)).thenReturn(TestSupport.mainSandbox("sb-1", SandboxState.ERROR));
         TestSupport.setField(sandbox, "state", "stopping");
 
-        assertThatThrownBy(() -> sandbox.waitUntilStopped(1))
-                .hasMessageContaining("Sandbox entered error state while stopping");
+        assertThatThrownBy(() -> sandbox.waitUntilStopped(2))
+                .hasMessageContaining("Sandbox entered error state: error");
     }
 
     @Test
@@ -160,19 +163,22 @@ class SandboxTest {
         when(sandboxApi.getSandbox("sb-1", null, null)).thenReturn(TestSupport.mainSandbox("sb-1", SandboxState.DESTROYED));
         TestSupport.setField(sandbox, "state", "stopping");
 
-        sandbox.waitUntilStopped(1);
+        sandbox.waitUntilStopped(2);
 
         assertThat(sandbox.getState()).isEqualTo("destroyed");
     }
 
     @Test
     void deleteAndRefreshDelegate() {
-        when(sandboxApi.getSandbox("sb-1", null, null)).thenReturn(TestSupport.mainSandbox("sb-1", SandboxState.STARTED));
+        when(sandboxApi.getSandbox("sb-1", null, null)).thenReturn(
+                TestSupport.mainSandbox("sb-1", SandboxState.STARTED),
+                TestSupport.mainSandbox("sb-1", SandboxState.DESTROYED)
+        );
 
         sandbox.refreshData();
         sandbox.delete(5);
 
-        verify(sandboxApi).getSandbox("sb-1", null, null);
+        verify(sandboxApi, org.mockito.Mockito.times(2)).getSandbox("sb-1", null, null);
         verify(sandboxApi).deleteSandbox("sb-1", null);
     }
 
@@ -240,10 +246,11 @@ class SandboxTest {
         when(sandboxApi.forkSandbox(eq("sb-1"), any(ForkSandbox.class), isNull())).thenReturn(TestSupport.mainSandbox("sb-2", SandboxState.STARTED));
         io.daytona.api.client.model.Sandbox snapshotting = TestSupport.mainSandbox("sb-1", SandboxState.SNAPSHOTTING);
         io.daytona.api.client.model.Sandbox started = TestSupport.mainSandbox("sb-1", SandboxState.STARTED);
-        when(sandboxApi.getSandbox("sb-1", null, null)).thenReturn(snapshotting, started);
+        when(sandboxApi.createSandboxSnapshot(eq("sb-1"), any(CreateSandboxSnapshot.class), isNull())).thenReturn(snapshotting);
+        when(sandboxApi.getSandbox("sb-1", null, null)).thenReturn(started);
 
-        Sandbox forked = sandbox.experimentalFork("forked", 1);
-        sandbox.experimentalCreateSnapshot("snap-1", 1);
+        Sandbox forked = sandbox.experimentalFork("forked", 2);
+        sandbox.experimentalCreateSnapshot("snap-1", 2);
 
         assertThat(forked.getId()).isEqualTo("sb-2");
         verify(sandboxApi).createSandboxSnapshot(eq("sb-1"), any(CreateSandboxSnapshot.class), isNull());
@@ -264,19 +271,21 @@ class SandboxTest {
     void experimentalCreateSnapshotFailsForErrorState() {
         io.daytona.api.client.model.Sandbox snapshotting = TestSupport.mainSandbox("sb-1", SandboxState.SNAPSHOTTING);
         io.daytona.api.client.model.Sandbox error = TestSupport.mainSandbox("sb-1", SandboxState.ERROR);
-        when(sandboxApi.getSandbox("sb-1", null, null)).thenReturn(snapshotting, error);
+        when(sandboxApi.createSandboxSnapshot(eq("sb-1"), any(CreateSandboxSnapshot.class), isNull())).thenReturn(snapshotting);
+        when(sandboxApi.getSandbox("sb-1", null, null)).thenReturn(error);
 
-        assertThatThrownBy(() -> sandbox.experimentalCreateSnapshot("snap-err", 1))
-                .hasMessageContaining("Sandbox snapshot failed with state: error");
+        assertThatThrownBy(() -> sandbox.experimentalCreateSnapshot("snap-err", 2))
+                .hasMessageContaining("Sandbox entered error state: error");
     }
 
     @Test
     void experimentalCreateSnapshotTimesOutWhenSnapshottingPersists() {
         io.daytona.api.client.model.Sandbox snapshotting = TestSupport.mainSandbox("sb-1", SandboxState.SNAPSHOTTING);
-        when(sandboxApi.getSandbox("sb-1", null, null)).thenReturn(snapshotting, snapshotting, snapshotting, snapshotting, snapshotting);
+        when(sandboxApi.createSandboxSnapshot(eq("sb-1"), any(CreateSandboxSnapshot.class), isNull())).thenReturn(snapshotting);
+        when(sandboxApi.getSandbox("sb-1", null, null)).thenReturn(snapshotting, snapshotting);
 
-        assertThatThrownBy(() -> sandbox.experimentalCreateSnapshot("snap-timeout", 1))
-                .hasMessageContaining("Sandbox snapshot did not complete before timeout");
+        assertThatThrownBy(() -> sandbox.experimentalCreateSnapshot("snap-timeout", 2))
+                .hasMessageContaining("did not reach target state within 2 seconds");
     }
 
     @ParameterizedTest
@@ -300,5 +309,12 @@ class SandboxTest {
                 Arguments.of(429, DaytonaRateLimitException.class),
                 Arguments.of(500, DaytonaServerException.class)
         );
+    }
+
+    private EventSubscriptionManager mockSubscriptionManager() {
+        EventSubscriptionManager mockManager = mock(EventSubscriptionManager.class);
+        lenient().when(mockManager.subscribe(any(), any(), any())).thenReturn("mock-sub-id");
+        lenient().when(mockManager.refresh("mock-sub-id")).thenReturn(true);
+        return mockManager;
     }
 }
