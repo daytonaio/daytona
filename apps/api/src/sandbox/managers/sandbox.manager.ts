@@ -54,6 +54,8 @@ import Redis from 'ioredis'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 
+export const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
+
 @Injectable()
 export class SandboxManager implements TrackableJobExecutions, OnApplicationShutdown {
   activeJobs = new Set<string>()
@@ -661,89 +663,118 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-states' })
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-states-per-runner-locked' })
   @TrackJobExecution()
   @WithInstrumentation()
-  @LogExecution('sync-states')
+  @LogExecution('sync-states-per-runner-locked')
   async syncStates(): Promise<void> {
-    const globalLockKey = 'sync-states'
-    const lockTtl = 10 * 60 // seconds (10 min)
-    if (!(await this.redisLockProvider.lock(globalLockKey, lockTtl))) {
-      return
-    }
+    const readyRunners = await this.runnerService.findAllReady()
 
-    try {
-      const queryBuilder = this.sandboxRepository
-        .createQueryBuilder('sandbox')
-        .select(['sandbox.id'])
-        .leftJoin('sandbox_last_activity', 'activity', 'activity."sandboxId" = sandbox.id')
-        .where('sandbox.state NOT IN (:...excludedStates)', {
-          excludedStates: [
-            SandboxState.DESTROYED,
-            SandboxState.ERROR,
-            SandboxState.BUILD_FAILED,
-            SandboxState.RESIZING,
-            SandboxState.FORKING,
-            SandboxState.SNAPSHOTTING,
-          ],
-        })
-        .andWhere('sandbox."desiredState"::text != sandbox.state::text')
-        .andWhere('sandbox."desiredState"::text != :archived', { archived: SandboxDesiredState.ARCHIVED })
-        .orderBy('activity."lastActivityAt"', 'DESC', 'NULLS LAST')
+    const runnerIds: (string | null)[] = [null, ...readyRunners.map((r) => r.id)]
+    const lockTtl = 5 * 60 // seconds
 
-      const stream = await queryBuilder.stream()
-      let processedCount = 0
-      const maxProcessPerRun = 1000
-      const pendingProcesses: Promise<void>[] = []
-
-      try {
-        await new Promise<void>((resolve, reject) => {
-          stream.on('data', async (row: any) => {
-            if (processedCount >= maxProcessPerRun) {
-              resolve()
-              return
-            }
-
-            const lockKey = getStateChangeLockKey(row.sandbox_id)
-            if (await this.redisLockProvider.isLocked(lockKey)) {
-              // Sandbox is already being processed, skip it
-              return
-            }
-
-            // Process sandbox asynchronously but track the promise
-            const processPromise = this.syncInstanceState(row.sandbox_id).catch((err) => {
-              this.logger.error(`Error syncing sandbox state for ${row.sandbox_id}`, err)
-            })
-            pendingProcesses.push(processPromise)
-            processedCount++
-
-            // Limit concurrent processing to avoid overwhelming the system
-            if (pendingProcesses.length >= 10) {
-              stream.pause()
-              Promise.allSettled(pendingProcesses.splice(0, pendingProcesses.length))
-                .then(() => stream.resume())
-                .catch(reject)
-            }
-          })
-
-          stream.on('end', () => {
-            Promise.allSettled(pendingProcesses)
-              .then(() => {
-                resolve()
-              })
-              .catch(reject)
-          })
-
-          stream.on('error', reject)
-        })
-      } finally {
-        if (!stream.destroyed) {
-          stream.destroy()
+    await Promise.all(
+      runnerIds.map(async (runnerId) => {
+        const runnerLockKey = `sync-states:${runnerId ?? 'unassigned'}`
+        if (!(await this.redisLockProvider.lock(runnerLockKey, lockTtl))) {
+          return
         }
-      }
-    } finally {
-      await this.redisLockProvider.unlock(globalLockKey)
-    }
+
+        try {
+          const maxSandboxesPerRunner = runnerId === null ? 250 : 50
+
+          const sandboxes = await this.sandboxRepository.find({
+            where: {
+              runnerId: runnerId === null ? IsNull() : runnerId,
+              state: Not(SandboxState.RESTORING),
+              pending: true,
+            },
+            select: ['id'],
+            take: maxSandboxesPerRunner,
+          })
+
+          const pendingProcesses: Promise<void>[] = []
+          const concurrencyLimit = 10
+
+          for (const sandbox of sandboxes) {
+            const lockKey = getStateChangeLockKey(sandbox.id)
+            if (await this.redisLockProvider.isLocked(lockKey)) {
+              continue
+            }
+
+            const processPromise = this.syncInstanceState(sandbox.id)
+            pendingProcesses.push(processPromise)
+
+            if (pendingProcesses.length >= concurrencyLimit) {
+              await Promise.allSettled(pendingProcesses.splice(0, pendingProcesses.length))
+            }
+          }
+
+          if (pendingProcesses.length > 0) {
+            await Promise.allSettled(pendingProcesses)
+          }
+        } finally {
+          await this.redisLockProvider.unlock(runnerLockKey)
+        }
+      }),
+    )
+  }
+
+  // RESTORING is split out so it gets its own faster cadence and its own per-runner locks,
+  // and is not blocked by the longer-lived state syncs above.
+  @Cron(CronExpression.EVERY_5_SECONDS, { name: 'sync-restoring-states' })
+  @TrackJobExecution()
+  @WithInstrumentation()
+  @LogExecution('sync-restoring-states')
+  async syncRestoringStates(): Promise<void> {
+    const readyRunners = await this.runnerService.findAllReady()
+
+    const runnerIds: string[] = readyRunners.map((r) => r.id)
+    const lockTtl = 60 // seconds (1 minute)
+
+    await Promise.all(
+      runnerIds.map(async (runnerId) => {
+        const runnerLockKey = `sync-restoring-states:${runnerId}`
+        if (!(await this.redisLockProvider.lock(runnerLockKey, lockTtl))) {
+          return
+        }
+
+        try {
+          const sandboxes = await this.sandboxRepository.find({
+            where: {
+              runnerId,
+              state: SandboxState.RESTORING,
+              pending: true,
+            },
+            select: ['id'],
+            take: 50,
+          })
+
+          const pendingProcesses: Promise<void>[] = []
+          const concurrencyLimit = 10
+
+          for (const sandbox of sandboxes) {
+            const lockKey = getStateChangeLockKey(sandbox.id)
+            if (await this.redisLockProvider.isLocked(lockKey)) {
+              continue
+            }
+
+            const processPromise = this.syncInstanceState(sandbox.id)
+            pendingProcesses.push(processPromise)
+
+            if (pendingProcesses.length >= concurrencyLimit) {
+              await Promise.allSettled(pendingProcesses.splice(0, pendingProcesses.length))
+            }
+          }
+
+          if (pendingProcesses.length > 0) {
+            await Promise.allSettled(pendingProcesses)
+          }
+        } finally {
+          await this.redisLockProvider.unlock(runnerLockKey)
+        }
+      }),
+    )
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-archived-desired-states' })
@@ -790,7 +821,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         desiredState: SandboxDesiredState.ARCHIVED,
         backupState: BackupState.COMPLETED,
       },
-      take: 100,
+      take: 200,
       order: {
         updatedAt: 'ASC',
       },
