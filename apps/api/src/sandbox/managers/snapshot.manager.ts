@@ -1205,10 +1205,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
 
     try {
-      // Dedicated regions get a much shorter staleness window so we don't pin disk space
-      // on small fleets when an org stops using a snapshot.
       const stalenessDays = this.configService.getOrThrow('buildInfoSnapshotRunnerStalenessDays')
-      const stalenessInterval = `(CASE WHEN r.region IN (:dedicatedElementor, :dedicatedRL) THEN interval '2 days' ELSE interval '${stalenessDays} days' END)`
+      const stalenessInterval = `interval '${stalenessDays} days'`
 
       const staleEntries = await this.snapshotRunnerRepository
         .createQueryBuilder('sr')
@@ -1219,10 +1217,6 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         .andWhere(`bi.lastUsedAt < now() - ${stalenessInterval}`)
         .andWhere(`sr.updatedAt < now() - ${stalenessInterval}`)
         .andWhere("sr.snapshotRef LIKE 'daytona-%'")
-        .setParameters({
-          dedicatedElementor: ELEMENTOR_DEDICATED_REGION,
-          dedicatedRL: RL_REGION,
-        })
         .limit(500)
         .getMany()
 
