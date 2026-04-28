@@ -19,7 +19,7 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { MoreHorizontal, Package } from 'lucide-react'
+import { MoreHorizontal, PackageOpen } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { PageFooterPortal } from './PageLayout'
 import { Pagination } from './Pagination'
@@ -151,7 +151,7 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
               overlay
               colSpan={columns.length}
               message={hasFilters ? 'No matching registries found.' : 'No Container registries found.'}
-              icon={<Package />}
+              icon={<PackageOpen />}
               description={
                 hasFilters ? null : (
                   <p>

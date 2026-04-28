@@ -36,7 +36,7 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { Check, MailPlus, X } from 'lucide-react'
+import { Check, Mail, X } from 'lucide-react'
 import { useState } from 'react'
 
 type UserOrganizationInvitationTableMeta = {
@@ -159,7 +159,7 @@ export function UserOrganizationInvitationTable({
               overlay
               colSpan={userOrganizationInvitationColumns.length}
               message={hasSearch ? 'No matching Invitations found.' : 'No Invitations found.'}
-              icon={<MailPlus />}
+              icon={<Mail />}
               description={hasSearch ? null : 'You have no pending organization invitations.'}
               action={
                 hasSearch ? (
