@@ -28,7 +28,7 @@ export interface SandboxTableProps {
   getWebTerminalUrl: (id: string) => Promise<string | null>
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
-  onRowClick?: (sandbox: Sandbox) => void
+  onRowClick?: (sandbox: Sandbox, orderedSandboxes: Sandbox[]) => void
   handleRecover: (id: string) => void
   handleScreenRecordings: (id: string) => void
   handleCreateSnapshot: (id: string) => void

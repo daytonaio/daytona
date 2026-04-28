@@ -111,6 +111,7 @@ const Sandboxes: React.FC = () => {
   // Sandbox Details Drawer
 
   const [selectedSandbox, setSelectedSandbox] = useState<Sandbox | null>(null)
+  const [orderedSandboxItems, setOrderedSandboxItems] = useState<Sandbox[] | null>(null)
   const [showSandboxDetails, setShowSandboxDetails] = useState(false)
   const [showCreateSshDialog, setShowCreateSshDialog] = useState(false)
   const [showRevokeSshDialog, setShowRevokeSshDialog] = useState(false)
@@ -704,7 +705,7 @@ const Sandboxes: React.FC = () => {
     setShowRevokeSshDialog(true)
   }
 
-  const sandboxItems = useMemo(() => sandboxes ?? [], [sandboxes])
+  const sandboxItems = useMemo(() => orderedSandboxItems ?? sandboxes ?? [], [orderedSandboxItems, sandboxes])
   const selectedSandboxIndex = useMemo(
     () => sandboxItems.findIndex((sandbox) => sandbox.id === selectedSandbox?.id),
     [sandboxItems, selectedSandbox?.id],
@@ -819,7 +820,8 @@ const Sandboxes: React.FC = () => {
           data={sandboxes}
           loading={loadingTable}
           snapshots={snapshots}
-          onRowClick={(sandbox: Sandbox) => {
+          onRowClick={(sandbox: Sandbox, orderedSandboxes: Sandbox[]) => {
+            setOrderedSandboxItems(orderedSandboxes)
             setSelectedSandbox(sandbox)
             setShowSandboxDetails(true)
           }}
