@@ -540,9 +540,38 @@ export class DockerRegistryService {
       return this.createTemporaryRegistryConfig(parsedImage.registry)
     } else {
       // Image has no registry prefix (e.g., "alpine:3.21")
-      // Create temporary Docker Hub config
+      // Check if organization has a Docker Hub registry configured with credentials
+      if (organizationId) {
+        const dockerHubRegistry = await this.findDockerHubRegistryForOrganization(organizationId)
+        if (dockerHubRegistry) {
+          return dockerHubRegistry
+        }
+      }
+      // Fall back to temporary Docker Hub config for public images
       return this.createTemporaryRegistryConfig('docker.io')
     }
+  }
+
+  /**
+   * Finds a Docker Hub registry configured for the given organization.
+   */
+  private async findDockerHubRegistryForOrganization(organizationId: string): Promise<DockerRegistry | null> {
+    const registries = await this.dockerRegistryRepository.find({
+      where: {
+        organizationId: organizationId,
+        registryType: RegistryType.ORGANIZATION,
+      },
+    })
+
+    // Look for a Docker Hub registry (url contains docker.io)
+    for (const registry of registries) {
+      const strippedUrl = registry.url.replace(/^(https?:\/\/)/, '')
+      if (strippedUrl === 'docker.io' || strippedUrl.startsWith('docker.io/')) {
+        return registry
+      }
+    }
+
+    return null
   }
 
   /**
@@ -553,8 +582,17 @@ export class DockerRegistryService {
    * @returns The matching registry, or null if no match is found.
    */
   private findRegistryByUrlMatch(registries: DockerRegistry[], targetString: string): DockerRegistry | null {
-    for (const registry of registries) {
-      const strippedUrl = registry.url.replace(/^(https?:\/\/)/, '').replace(/\/+$/, '')
+    // Prioritize ORGANIZATION registries over others
+    // This ensures user-configured credentials take precedence over shared internal ones
+    const priority: Partial<Record<RegistryType, number>> = {
+      [RegistryType.ORGANIZATION]: 0,
+    }
+    const sortedRegistries = [...registries].sort(
+      (a, b) => (priority[a.registryType] ?? 1) - (priority[b.registryType] ?? 1),
+    )
+
+    for (const registry of sortedRegistries) {
+      const strippedUrl = registry.url.replace(/^(https?:\/\/)/, '')
       if (targetString.startsWith(strippedUrl)) {
         // Ensure match is at a proper boundary (followed by '/', ':', or end-of-string)
         // to prevent "registry.depot.dev" from matching "registry.depot.dev-evil.com/..."
