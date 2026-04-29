@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useState } from 'react'
-import { Region } from '@daytona/api-client'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -17,44 +15,60 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useSetOrganizationDefaultRegionMutation } from '@/hooks/mutations/useSetOrganizationDefaultRegionMutation'
+import { useOrganizations } from '@/hooks/useOrganizations'
+import { useRegions } from '@/hooks/useRegions'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { handleApiError } from '@/lib/error-handling'
+import { Ref, useId, useImperativeHandle, useState } from 'react'
+import { toast } from 'sonner'
+import { Spinner } from '../ui/spinner'
 
 interface SetDefaultRegionDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  regions: Region[]
-  loadingRegions: boolean
-  onSetDefaultRegion: (defaultRegionId: string) => Promise<boolean>
+  ref?: Ref<SetDefaultRegionDialogRef>
 }
 
-export const SetDefaultRegionDialog: React.FC<SetDefaultRegionDialogProps> = ({
-  open,
-  onOpenChange,
-  regions,
-  loadingRegions,
-  onSetDefaultRegion,
-}) => {
+export type SetDefaultRegionDialogRef = {
+  open: () => void
+}
+
+export const SetDefaultRegionDialog: React.FC<SetDefaultRegionDialogProps> = ({ ref }) => {
+  const { refreshOrganizations } = useOrganizations()
+  const { sharedRegions: regions, loadingSharedRegions: loadingRegions } = useRegions()
+  const { selectedOrganization } = useSelectedOrganization()
+  const setDefaultRegionMutation = useSetOrganizationDefaultRegionMutation()
+  const formId = useId()
+  const regionSelectId = useId()
+  const [open, setOpen] = useState(false)
   const [defaultRegionId, setDefaultRegionId] = useState<string | undefined>(undefined)
-  const [loading, setLoading] = useState(false)
+
+  useImperativeHandle(ref, () => ({
+    open: () => setOpen(true),
+  }))
 
   const handleSetDefaultRegion = async () => {
-    if (!defaultRegionId) {
+    if (!selectedOrganization || !defaultRegionId) {
       return
     }
 
-    setLoading(true)
-    const success = await onSetDefaultRegion(defaultRegionId)
-    // TODO: Return when we fix the selected org states
-    // if (success) {
-    //   onOpenChange(false)
-    // }
-    // setLoading(false)
+    try {
+      await setDefaultRegionMutation.mutateAsync({
+        organizationId: selectedOrganization.id,
+        defaultRegionId,
+      })
+      toast.success('Default region set successfully')
+      setOpen(false)
+      void refreshOrganizations(selectedOrganization.id)
+    } catch (error) {
+      handleApiError(error, 'Failed to set default region')
+    }
   }
 
   return (
     <Dialog
       open={open}
       onOpenChange={(isOpen) => {
-        onOpenChange(isOpen)
+        setOpen(isOpen)
         if (!isOpen) {
           setDefaultRegionId(undefined)
         }
@@ -74,7 +88,7 @@ export const SetDefaultRegionDialog: React.FC<SetDefaultRegionDialogProps> = ({
           </div>
         ) : (
           <form
-            id="set-default-region-form"
+            id={formId}
             className="space-y-6 overflow-y-auto px-1 pb-1"
             onSubmit={async (e) => {
               e.preventDefault()
@@ -82,9 +96,9 @@ export const SetDefaultRegionDialog: React.FC<SetDefaultRegionDialogProps> = ({
             }}
           >
             <div className="space-y-3">
-              <Label htmlFor="region-select">Region</Label>
+              <Label htmlFor={regionSelectId}>Region</Label>
               <Select value={defaultRegionId} onValueChange={setDefaultRegionId}>
-                <SelectTrigger className="h-8" id="region-select" disabled={loadingRegions} loading={loadingRegions}>
+                <SelectTrigger className="h-8" id={regionSelectId} disabled={loadingRegions} loading={loadingRegions}>
                   <SelectValue placeholder={loadingRegions ? 'Loading regions...' : 'Select a region'} />
                 </SelectTrigger>
                 <SelectContent>
@@ -100,19 +114,19 @@ export const SetDefaultRegionDialog: React.FC<SetDefaultRegionDialogProps> = ({
         )}
         <DialogFooter>
           <DialogClose asChild>
-            <Button type="button" variant="secondary" disabled={loading}>
+            <Button type="button" variant="secondary" disabled={setDefaultRegionMutation.isPending}>
               Cancel
             </Button>
           </DialogClose>
-          {loading ? (
-            <Button type="button" variant="default" disabled>
-              Saving...
-            </Button>
-          ) : (
-            <Button type="submit" form="set-default-region-form" variant="default" disabled={!defaultRegionId}>
-              Save
-            </Button>
-          )}
+          <Button
+            type="submit"
+            form={formId}
+            variant="default"
+            disabled={!defaultRegionId || setDefaultRegionMutation.isPending}
+          >
+            {setDefaultRegionMutation.isPending && <Spinner />}
+            Save
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -3,11 +3,15 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 
 import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 import { CommandPalette, useRegisterCommands, type CommandConfig } from '@/components/CommandPalette'
+import {
+  SetDefaultRegionDialog,
+  type SetDefaultRegionDialogRef,
+} from '@/components/Organizations/SetDefaultRegionDialog'
 import { Sidebar } from '@/components/Sidebar'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
@@ -15,7 +19,6 @@ import { VerifyEmailDialog } from '@/components/VerifyEmailDialog'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 import { useTheme } from '@/contexts/ThemeContext'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
-import { RoutePath } from '@/enums/RoutePath'
 import { useOwnerWalletQuery } from '@/hooks/queries/billingQueries'
 import { useConfig } from '@/hooks/useConfig'
 import { useDocsSearchCommands } from '@/hooks/useDocsSearchCommands'
@@ -23,7 +26,6 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useSuspensionBanner } from '@/hooks/useSuspensionBanner'
 import { cn } from '@/lib/utils'
 import { BookOpen, BookSearchIcon, SlackIcon, SunMoon } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 import { PrivacyBanner } from '@/components/PrivacyBanner'
 
 function useDashboardCommands() {
@@ -71,13 +73,12 @@ function useDashboardCommands() {
 const Dashboard: React.FC = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
+  const setDefaultRegionDialogRef = useRef<SetDefaultRegionDialogRef>(null)
   const config = useConfig()
   useOwnerWalletQuery() // prefetch wallet
 
   useDashboardCommands()
   useDocsSearchCommands()
-
-  const navigate = useNavigate()
 
   useSuspensionBanner(selectedOrganization)
 
@@ -91,19 +92,10 @@ const Dashboard: React.FC = () => {
   }, [selectedOrganization])
 
   useEffect(() => {
-    if (!config.billingApiUrl) {
-      return
+    if (selectedOrganization?.id && !selectedOrganization.defaultRegionId) {
+      setDefaultRegionDialogRef.current?.open()
     }
-
-    if (!selectedOrganization) {
-      return
-    }
-
-    if (!selectedOrganization.defaultRegionId) {
-      navigate(RoutePath.SETTINGS)
-      return
-    }
-  }, [config.billingApiUrl, selectedOrganization]) // Do not depend on navigate to avoid infinite loops
+  }, [selectedOrganization?.id, selectedOrganization?.defaultRegionId])
 
   const [bannerText, bannerLearnMoreUrl] = useMemo(() => {
     if (!config.announcements || Object.entries(config.announcements).length === 0) {
@@ -150,6 +142,7 @@ const Dashboard: React.FC = () => {
         </SidebarInset>
         <Toaster />
         <VerifyEmailDialog open={showVerifyEmailDialog} onOpenChange={setShowVerifyEmailDialog} />
+        <SetDefaultRegionDialog ref={setDefaultRegionDialogRef} />
         <PrivacyBanner />
       </SidebarProvider>
     </div>

@@ -5,7 +5,10 @@
 
 import { DeleteOrganizationDialog } from '@/components/Organizations/DeleteOrganizationDialog'
 import { LeaveOrganizationDialog } from '@/components/Organizations/LeaveOrganizationDialog'
-import { SetDefaultRegionDialog } from '@/components/Organizations/SetDefaultRegionDialog'
+import {
+  SetDefaultRegionDialog,
+  type SetDefaultRegionDialogRef,
+} from '@/components/Organizations/SetDefaultRegionDialog'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,52 +17,28 @@ import { Input } from '@/components/ui/input'
 import { InputGroup, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
 import { useDeleteOrganizationMutation } from '@/hooks/mutations/useDeleteOrganizationMutation'
 import { useLeaveOrganizationMutation } from '@/hooks/mutations/useLeaveOrganizationMutation'
-import { useSetOrganizationDefaultRegionMutation } from '@/hooks/mutations/useSetOrganizationDefaultRegionMutation'
 import { useOrganizations } from '@/hooks/useOrganizations'
 import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { OrganizationUserRoleEnum } from '@daytona/api-client'
 import { CheckIcon, CopyIcon } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { useRef } from 'react'
 import { toast } from 'sonner'
 import { useCopyToClipboard } from 'usehooks-ts'
 
 const OrganizationSettings: React.FC = () => {
   const { refreshOrganizations } = useOrganizations()
   const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
-  const { getRegionName, sharedRegions: regions, loadingSharedRegions: loadingRegions } = useRegions()
+  const { getRegionName } = useRegions()
 
   const deleteOrganizationMutation = useDeleteOrganizationMutation()
   const leaveOrganizationMutation = useLeaveOrganizationMutation()
-  const setDefaultRegionMutation = useSetOrganizationDefaultRegionMutation()
-  const [showSetDefaultRegionDialog, setSetDefaultRegionDialog] = useState(false)
+  const setDefaultRegionDialogRef = useRef<SetDefaultRegionDialogRef>(null)
   const [copied, copyToClipboard] = useCopyToClipboard()
-
-  useEffect(() => {
-    if (selectedOrganization && !selectedOrganization.defaultRegionId) {
-      setSetDefaultRegionDialog(true)
-    }
-  }, [selectedOrganization])
 
   if (!selectedOrganization) {
     return null
-  }
-
-  const handleSetDefaultRegion = async (defaultRegionId: string): Promise<boolean> => {
-    try {
-      await setDefaultRegionMutation.mutateAsync({
-        organizationId: selectedOrganization.id,
-        defaultRegionId,
-      })
-      toast.success('Default region set successfully')
-      await refreshOrganizations(selectedOrganization.id)
-      setSetDefaultRegionDialog(false)
-      return true
-    } catch (error) {
-      handleApiError(error, 'Failed to set default region')
-      return false
-    }
   }
 
   const handleDeleteOrganization = async () => {
@@ -149,7 +128,7 @@ const OrganizationSettings: React.FC = () => {
                 />
               ) : isOwner ? (
                 <div className="flex sm:justify-end">
-                  <Button onClick={() => setSetDefaultRegionDialog(true)} variant="secondary">
+                  <Button onClick={() => setDefaultRegionDialogRef.current?.open()} variant="secondary">
                     Set Region
                   </Button>
                 </div>
@@ -188,13 +167,7 @@ const OrganizationSettings: React.FC = () => {
             </CardContent>
           </Card>
         )}
-        <SetDefaultRegionDialog
-          open={showSetDefaultRegionDialog}
-          onOpenChange={setSetDefaultRegionDialog}
-          regions={regions}
-          loadingRegions={loadingRegions}
-          onSetDefaultRegion={handleSetDefaultRegion}
-        />
+        <SetDefaultRegionDialog ref={setDefaultRegionDialogRef} />
       </PageContent>
     </PageLayout>
   )
