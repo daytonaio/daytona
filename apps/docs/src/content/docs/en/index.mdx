@@ -18,9 +18,25 @@ tableOfContents: true
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona is an open-source, secure and elastic infrastructure for running AI-generated code. Daytona provides full composable computers — [sandboxes](/docs/en/sandboxes) — that you can manage programmatically using the **Daytona SDKs**, [CLI](/docs/en/tools/cli), and [API](/docs/en/tools/api) to run and control code execution.
+Daytona is an open-source, secure and elastic infrastructure for running AI-generated code. Daytona provides full composable computers — [sandboxes](/docs/en/sandboxes) — with complete isolation, a dedicated kernel, filesystem, network stack, and allocated vCPU, RAM, and disk.
 
-Daytona SDK is available for [Python](/docs/en/python-sdk), [TypeScript](/docs/en/typescript-sdk), [Ruby](/docs/en/ruby-sdk), [Go](/docs/en/go-sdk), and [Java](/docs/en/java-sdk) interfaces.
+Sandboxes are the core component of the Daytona platform, spinning up in under 90ms from code to execution and running any code in Python, TypeScript, and JavaScript. Built on OCI/Docker compatibility, massive parallelization, and unlimited persistence, sandboxes deliver consistent, predictable environments for agent workflows.
+
+Agents and developers interact with sandboxes programmatically using the Daytona SDKs, API, and CLI. Operations span sandbox lifecycle management, filesystem operations, process and code execution, and runtime configuration. Our stateful environment snapshots enable persistent agent operations across sessions, making Daytona the ideal foundation for AI agent architectures.
+
+- **Daytona SDKs**: [TypeScript](/docs/en/typescript-sdk), [Python](/docs/en/python-sdk), [Ruby](/docs/en/ruby-sdk), [Go](/docs/en/go-sdk), [Java](/docs/en/java-sdk)
+- **Daytona API**: [RESTful API](/docs/en/tools/api#daytona) ([OpenAPI spec](/docs/openapi.json)), [Toolbox API](/docs/en/tools/api#daytona-toolbox) ([OpenAPI spec](/docs/toolbox-openapi.json))
+- **Daytona CLI**: [Mac/Linux](/docs/en/getting-started#cli), [Windows](/docs/en/getting-started#cli), [Reference](/docs/en/tools/cli)
+
+:::tip
+For faster development with AI agents and assistants, use our LLMs context files: [llms.txt](https://www.daytona.io/docs/llms.txt) and [llms-full.txt](https://www.daytona.io/docs/llms-full.txt), [agent skills](https://github.com/daytonaio/daytona), and markdown pages by appending `.md` to URLs.
+
+&nbsp;
+
+```text
+npx skills add https://github.com/daytona/skills --skill daytona
+```
+:::
 
 ## 1. Create an account
 
@@ -28,11 +44,11 @@ Open the [Daytona Dashboard ↗](https://app.daytona.io/) to create your account
 
 ## 2. Obtain an API key
 
-Generate an API key from the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys) or using the [Daytona API](/docs/en/tools/api/#daytona/tag/api-keys/POST/api-keys) to authenticate SDK requests and access Daytona services.
+Generate an API key from the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys) or using the [Daytona API](/docs/en/tools/api/#daytona/tag/api-keys/POST/api-keys) to authenticate SDK requests and access Daytona services. Daytona supports multiple options to configure your environment and API keys: [in code](/docs/en/configuration#configuration-in-code), [environment variables](/docs/en/configuration#environment-variables), [.env file](/docs/en/configuration#env-file), and [default values](/docs/en/configuration#default-values).
 
 ## 3. Install the SDK
 
-Install the Daytona [Python](/docs/en/python-sdk), [TypeScript](/docs/en/typescript-sdk), [Ruby](/docs/en/ruby-sdk), [Go](/docs/en/go-sdk), or [Java](/docs/en/java-sdk) SDKs to interact with sandboxes.
+Install the Daytona **Python**, **TypeScript**, **Ruby**, **Go**, or **Java** SDKs to interact with sandboxes.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -92,7 +108,7 @@ Add the Daytona SDK dependency to your `pom.xml`:
 
 ## 4. Create a Sandbox
 
-Create a [sandbox](/docs/en/sandboxes) to run your code securely in an isolated environment.
+Create a sandbox to run your code securely in an isolated environment.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -208,10 +224,6 @@ daytona create
 
 </TabItem>
 </Tabs>
-
-:::tip
-Daytona supports multiple options to configure your environment: [in code](/docs/en/configuration#configuration-in-code), [environment variables](/docs/en/configuration#environment-variables), [.env file](/docs/en/configuration#env-file), and [default values](/docs/en/configuration#default-values).
-:::
 
 ## 5. Write and run code
 
@@ -398,13 +410,6 @@ By following the steps above, you successfully create a Daytona account, obtain 
 
 Use the following resources to interact with sandboxes:
 
-- Learn more about Daytona with the [getting started](/docs/en/getting-started) guide
-- Get started with [Python](/docs/en/python-sdk), [TypeScript](/docs/en/typescript-sdk), [Ruby](/docs/en/ruby-sdk), [Go](/docs/en/go-sdk), and [Java](/docs/en/java-sdk) **SDKs**
-- Install the [CLI](/docs/en/getting-started#cli) to manage sandboxes from the command line
-- Use the [API](/docs/en/tools/api) to manage sandboxes programmatically
+- Learn more about Daytona with the [getting started](/docs/en/getting-started) and [sandboxes](/docs/en/sandboxes) guides
 - View [examples](/docs/en/getting-started#examples) for common sandbox operations and best practices
 - Explore [guides](/docs/en/guides) to connect Daytona with [Claude](/docs/en/guides/claude), [OpenCode](/docs/en/guides/opencode/opencode-web-agent), [Codex](/docs/en/guides/codex/codex-sdk-interactive-terminal-sandbox), [LangChain](/docs/en/guides/langchain/langchain-data-analysis) and more
-
-:::tip
-For faster development with AI agents and assistants, use our LLMs context files and agent skills. Copy the [llms-full.txt](https://www.daytona.io/docs/llms-full.txt) and [llms.txt](https://www.daytona.io/docs/llms.txt) files and include them in your projects or chat contexts, and install the [**skill**](https://github.com/daytona/skills) in your agent's skills directory to use Daytona features.
-:::
