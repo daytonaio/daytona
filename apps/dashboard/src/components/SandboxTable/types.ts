@@ -25,7 +25,6 @@ export interface SandboxTableProps {
   handleBulkArchive: (ids: string[]) => void
   handleArchive: (id: string) => void
   handleVnc: (id: string) => void
-  getWebTerminalUrl: (id: string) => Promise<string | null>
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
   onRowClick?: (sandbox: Sandbox, orderedSandboxes: Sandbox[]) => void
@@ -47,7 +46,6 @@ export interface SandboxTableActionsProps {
   onDelete: (id: string) => void
   onArchive: (id: string) => void
   onVnc: (id: string) => void
-  onOpenWebTerminal: (id: string) => void
   onCreateSshAccess: (id: string) => void
   onRevokeSshAccess: (id: string) => void
   onFork?: () => void

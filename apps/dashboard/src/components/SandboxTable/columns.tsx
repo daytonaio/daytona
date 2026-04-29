@@ -49,7 +49,6 @@ interface GetColumnsProps {
   handleDelete: (id: string) => void
   handleArchive: (id: string) => void
   handleVnc: (id: string) => void
-  getWebTerminalUrl: (id: string) => Promise<string | null>
   sandboxIsLoading: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
@@ -69,7 +68,6 @@ export function getColumns({
   handleDelete,
   handleArchive,
   handleVnc,
-  getWebTerminalUrl,
   sandboxIsLoading,
   writePermitted,
   deletePermitted,
@@ -82,13 +80,6 @@ export function getColumns({
   handleFork,
   handleViewForks,
 }: GetColumnsProps): ColumnDef<Sandbox>[] {
-  const handleOpenWebTerminal = async (sandboxId: string) => {
-    const url = await getWebTerminalUrl(sandboxId)
-    if (url) {
-      window.open(url, '_blank')
-    }
-  }
-
   const columns: ColumnDef<Sandbox>[] = [
     {
       id: 'select',
@@ -347,9 +338,9 @@ export function getColumns({
     },
     {
       id: 'actions',
-      size: 124,
-      minSize: 124,
-      maxSize: 124,
+      size: 88,
+      minSize: 88,
+      maxSize: 88,
       enableHiding: false,
       cell: ({ row }) => (
         <div className="w-full flex justify-end">
@@ -363,7 +354,6 @@ export function getColumns({
             onDelete={handleDelete}
             onArchive={handleArchive}
             onVnc={handleVnc}
-            onOpenWebTerminal={handleOpenWebTerminal}
             onCreateSshAccess={handleCreateSshAccess}
             onRevokeSshAccess={handleRevokeSshAccess}
             onRecover={handleRecover}

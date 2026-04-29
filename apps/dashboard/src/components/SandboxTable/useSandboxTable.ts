@@ -34,7 +34,6 @@ interface UseSandboxTableProps {
   handleDelete: (id: string) => void
   handleArchive: (id: string) => void
   handleVnc: (id: string) => void
-  getWebTerminalUrl: (id: string) => Promise<string | null>
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
   handleScreenRecordings: (id: string) => void
@@ -56,7 +55,6 @@ export function useSandboxTable({
   handleDelete,
   handleArchive,
   handleVnc,
-  getWebTerminalUrl,
   handleCreateSshAccess,
   handleRevokeSshAccess,
   handleScreenRecordings,
@@ -118,7 +116,6 @@ export function useSandboxTable({
         handleDelete,
         handleArchive,
         handleVnc,
-        getWebTerminalUrl,
         sandboxIsLoading,
         writePermitted,
         deletePermitted,
@@ -137,7 +134,6 @@ export function useSandboxTable({
       handleDelete,
       handleArchive,
       handleVnc,
-      getWebTerminalUrl,
       sandboxIsLoading,
       writePermitted,
       deletePermitted,

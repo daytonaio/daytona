@@ -22,7 +22,6 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { FeatureFlags } from '@/enums/FeatureFlags'
-import { RoutePath } from '@/enums/RoutePath'
 import { useCreateSandboxMutation } from '@/hooks/mutations/useCreateSandboxMutation'
 import { useSetOrganizationDefaultRegionMutation } from '@/hooks/mutations/useSetOrganizationDefaultRegionMutation'
 import { useSnapshotsQuery } from '@/hooks/queries/useSnapshotsQuery'
@@ -41,7 +40,6 @@ import { Info, Minus, Plus, Upload } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { ComponentProps, Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
-import { createSearchParams, generatePath, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { Tooltip } from '../Tooltip'
@@ -150,8 +148,15 @@ const InfoTooltipButton = ({ className, ...props }: ComponentProps<'button'>) =>
   )
 }
 
-export const CreateSandboxSheet = ({ className, ref }: { className?: string; ref?: Ref<{ open: () => void }> }) => {
-  const navigate = useNavigate()
+export const CreateSandboxSheet = ({
+  className,
+  ref,
+  onSandboxCreated,
+}: {
+  className?: string
+  ref?: Ref<{ open: () => void }>
+  onSandboxCreated?: (sandbox: Sandbox) => void
+}) => {
   const createSandboxEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_CREATE_SANDBOX)
   const [open, setOpen] = useState(false)
 
@@ -266,13 +271,8 @@ export const CreateSandboxSheet = ({ className, ref }: { className?: string; ref
 
         setOpen(false)
 
-        if (sandbox?.id) {
-          navigate({
-            pathname: generatePath(RoutePath.SANDBOX_DETAILS, { sandboxId: sandbox.id }),
-            search: `${createSearchParams({
-              tab: 'terminal',
-            })}`,
-          })
+        if (sandbox) {
+          onSandboxCreated?.(sandbox)
         }
       } catch (error) {
         handleApiError(error, 'Failed to create sandbox')
