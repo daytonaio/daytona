@@ -78,8 +78,8 @@ export class DockerRegistryService {
     if (!this.ecrCredentials.isEcrUrl(registry.url) || !registry.organizationId) {
       return registry
     }
-    // legacy basic-auth flow (e.g. username "AWS" + pre-baked token) — pass through
-    if (registry.username && !isIamRoleArn(registry.username)) {
+    // empty username or legacy basic-auth (e.g. "AWS" + pre-baked token) — pass through
+    if (!isIamRoleArn(registry.username)) {
       return registry
     }
     const { username, password } = await this.ecrCredentials.resolveEcrCredentials(

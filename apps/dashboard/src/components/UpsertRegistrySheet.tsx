@@ -58,17 +58,23 @@ const editFormSchema = baseFormSchema.extend({
 // ECR resolves credentials server-side via STS:AssumeRole, so the form
 // doesn't collect a password. URL is required (no docker.io fallback).
 const ecrCreateFormSchema = baseFormSchema.extend({
-  url: z.string().min(1, 'Registry URL is required'),
+  url: z.string().trim().min(1, 'Registry URL is required'),
+  username: z.string().trim().min(1, 'Role ARN is required'),
   password: z.string(),
 })
 
 // Google Artifact Registry: URL is region-specific, must be provided.
 const gcpCreateFormSchema = baseFormSchema.extend({
-  url: z.string().min(1, 'Registry URL is required'),
-  password: z.string().min(1, 'Service Account JSON Key is required'),
+  url: z.string().trim().min(1, 'Registry URL is required'),
+  password: z.string().trim().min(1, 'Service Account JSON Key is required'),
 })
 
 type FormValues = z.infer<typeof createFormSchema>
+
+const CREATE_SCHEMAS: Partial<Record<RegistryProvider, typeof createFormSchema>> = {
+  ecr: ecrCreateFormSchema as typeof createFormSchema,
+  gcp: gcpCreateFormSchema as typeof createFormSchema,
+}
 
 const defaultValues: FormValues = {
   name: '',
@@ -162,13 +168,7 @@ export const UpsertRegistrySheet = ({
   const form = useForm({
     defaultValues: getDefaultValues(),
     validators: {
-      onSubmit: isEditMode
-        ? editFormSchema
-        : provider === 'ecr'
-          ? ecrCreateFormSchema
-          : provider === 'gcp'
-            ? gcpCreateFormSchema
-            : createFormSchema,
+      onSubmit: isEditMode ? editFormSchema : (CREATE_SCHEMAS[provider] ?? createFormSchema),
     },
     onSubmitInvalid: () => {
       const formEl = formRef.current

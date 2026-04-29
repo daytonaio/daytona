@@ -8,6 +8,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr'
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 interface EcrAuth {
   username: string
@@ -21,8 +22,14 @@ const REFRESH_BUFFER_SEC = 30 * 60
 @Injectable()
 export class EcrCredentialsService {
   private readonly logger = new Logger(EcrCredentialsService.name)
+  private readonly apiIdentityRoleArn: string
 
-  constructor(@InjectRedis() private readonly redis: Redis) {}
+  constructor(
+    @InjectRedis() private readonly redis: Redis,
+    configService: TypedConfigService,
+  ) {
+    this.apiIdentityRoleArn = configService.get('ecr.apiIdentityRoleArn')?.trim() ?? ''
+  }
 
   isEcrUrl(url: string): boolean {
     return ECR_HOST_REGEX.test(stripScheme(url))
@@ -30,8 +37,8 @@ export class EcrCredentialsService {
 
   /**
    * Resolves a fresh `AWS:<token>` Docker auth pair for an ECR registry.
-   * With a role ARN, assumes it (cross-account); without one, uses the API's
-   * own AWS identity (default credential chain — env, IRSA, IMDS).
+   * AssumeRoles the supplied ARN, except when it matches the operator-declared
+   * `ECR_API_IDENTITY_ROLE_ARN` — then the API's own AWS identity is used.
    * Cached in Redis with TTL derived from AWS's `expiresAt`.
    */
   async resolveEcrCredentials(url: string, roleArn: string, externalId: string): Promise<EcrAuth> {
@@ -40,9 +47,12 @@ export class EcrCredentialsService {
       throw new Error(`Not an ECR URL: ${url}`)
     }
     const region = match[1]
-    const useAssumeRole = roleArn.trim() !== ''
+    const normalizedArn = roleArn.trim()
+    const useApiIdentity = this.apiIdentityRoleArn !== '' && normalizedArn === this.apiIdentityRoleArn
 
-    const cacheKey = useAssumeRole ? `ecr:token:${externalId}:${roleArn}:${region}` : `ecr:token:default:${region}`
+    const cacheKey = useApiIdentity
+      ? `ecr:token:default:${region}`
+      : `ecr:token:${externalId}:${normalizedArn}:${region}`
     const cached = await this.redis.get(cacheKey)
     if (cached) {
       try {
@@ -54,15 +64,15 @@ export class EcrCredentialsService {
 
     const ecr = new ECRClient({
       region,
-      credentials: useAssumeRole
-        ? fromTemporaryCredentials({
+      credentials: useApiIdentity
+        ? undefined
+        : fromTemporaryCredentials({
             params: {
-              RoleArn: roleArn,
+              RoleArn: normalizedArn,
               RoleSessionName: `daytona-${externalId}-pull`,
               ExternalId: externalId,
             },
-          })
-        : undefined,
+          }),
     })
 
     const resp = await ecr.send(new GetAuthorizationTokenCommand({}))
@@ -88,7 +98,9 @@ export class EcrCredentialsService {
       }
     }
 
-    this.logger.log(`Resolved ECR credentials for region=${region} role=${roleArn || '(default)'}`)
+    this.logger.log(
+      `Resolved ECR credentials for region=${region} role=${useApiIdentity ? '(API identity)' : normalizedArn}`,
+    )
     return auth
   }
 }
