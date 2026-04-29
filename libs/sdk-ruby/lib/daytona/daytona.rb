@@ -227,13 +227,13 @@ module Daytona
       unless config.jwt_token
         raise Sdk::Error,
               'Authentication credentials not found. Set DAYTONA_API_KEY, or both DAYTONA_JWT_TOKEN and ' \
-              'DAYTONA_ORGANIZATION_ID. These can also be provided via Config.'
+              'DAYTONA_ORGANIZATION_ID. These can also be provided via Daytona::Config.'
       end
       return if config.organization_id
 
       raise Sdk::Error,
             'DAYTONA_ORGANIZATION_ID is required when authenticating with DAYTONA_JWT_TOKEN. ' \
-            'It can also be provided via Config.'
+            'It can also be provided via Daytona::Config.'
     end
 
     # @return [DaytonaApiClient::ApiClient]

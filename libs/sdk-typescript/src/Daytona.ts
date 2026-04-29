@@ -240,7 +240,8 @@ export class Daytona implements AsyncDisposable {
    * Creates a new Daytona client instance.
    *
    * @param {DaytonaConfig} [config] - Configuration options
-   * @throws {DaytonaError} - `DaytonaError` - When API key is missing
+   * @throws {DaytonaAuthenticationError} When no credentials are provided (neither API key nor JWT token)
+   * @throws {DaytonaAuthenticationError} When JWT token is provided without an organization ID
    */
   constructor(config?: DaytonaConfig) {
     let apiUrl: string | undefined
