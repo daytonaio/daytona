@@ -239,10 +239,16 @@ final class FileTransfer {
     }
 
     private static final class MultipartPartInputStream extends InputStream {
+        private static final int BUF_SIZE = 8192;
+
         private final InputStream source;
         private final Response response;
         private final byte[] delimiter;
-        private final java.util.ArrayDeque<Integer> bufferedBytes = new java.util.ArrayDeque<Integer>();
+
+        private byte[] buf = new byte[BUF_SIZE];
+        private int pos;
+        private int limit;
+        private int delimiterAt = -1;
         private boolean sourceEnded;
         private boolean finished;
         private boolean closed;
@@ -255,112 +261,115 @@ final class FileTransfer {
 
         @Override
         public int read() throws IOException {
-            if (finished || closed) {
-                return -1;
-            }
+            byte[] single = new byte[1];
+            int n = read(single, 0, 1);
+            return n == -1 ? -1 : single[0] & 0xFF;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            if (finished || closed) return -1;
+            if (b == null) throw new NullPointerException();
+            if (off < 0 || len < 0 || len > b.length - off) throw new IndexOutOfBoundsException();
+            if (len == 0) return 0;
 
             while (true) {
-                while (!sourceEnded && bufferedBytes.size() < delimiter.length) {
-                    int nextByte = source.read();
-                    if (nextByte == -1) {
-                        sourceEnded = true;
-                        break;
-                    }
-                    bufferedBytes.addLast(nextByte);
+                int safe = safeBytes();
+                if (safe > 0) {
+                    int n = Math.min(len, safe);
+                    System.arraycopy(buf, pos, b, off, n);
+                    pos += n;
+                    return n;
                 }
 
-                if (matchesDelimiter()) {
-                    bufferedBytes.clear();
-                    consumeBoundaryRemainder();
+                if (delimiterAt == pos) {
                     finished = true;
                     close();
                     return -1;
                 }
 
-                if (!bufferedBytes.isEmpty()) {
-                    int value = bufferedBytes.removeFirst();
-                    if (sourceEnded && bufferedBytes.isEmpty()) {
-                        finished = true;
-                        close();
-                    }
-                    return value;
+                if (sourceEnded && pos >= limit) {
+                    finished = true;
+                    close();
+                    return -1;
                 }
 
-                finished = true;
-                close();
-                return -1;
+                if (!fill()) {
+                    int remaining = limit - pos;
+                    if (remaining > 0) {
+                        int n = Math.min(len, remaining);
+                        System.arraycopy(buf, pos, b, off, n);
+                        pos += n;
+                        return n;
+                    }
+                    finished = true;
+                    close();
+                    return -1;
+                }
             }
-        }
-
-        @Override
-        public int read(byte[] b, int off, int len) throws IOException {
-            if (b == null) throw new NullPointerException();
-            if (off < 0 || len < 0 || len > b.length - off) throw new IndexOutOfBoundsException();
-            if (len == 0) return 0;
-
-            int first = read();
-            if (first == -1) return -1;
-            b[off] = (byte) first;
-
-            int i = 1;
-            while (i < len) {
-                int next = read();
-                if (next == -1) break;
-                b[off + i] = (byte) next;
-                i++;
-            }
-            return i;
         }
 
         @Override
         public void close() {
-            if (closed) {
-                return;
-            }
+            if (closed) return;
             closed = true;
             response.close();
         }
 
-        private boolean matchesDelimiter() {
-            if (bufferedBytes.size() != delimiter.length) {
-                return false;
-            }
+        private int safeBytes() {
+            int available = limit - pos;
+            if (available <= 0) return 0;
 
-            int index = 0;
-            for (Integer bufferedByte : bufferedBytes) {
-                if ((byte) bufferedByte.intValue() != delimiter[index]) {
-                    return false;
-                }
-                index++;
+            if (delimiterAt >= 0) return delimiterAt - pos;
+
+            if (sourceEnded) return available;
+
+            return Math.max(0, available - (delimiter.length - 1));
+        }
+
+        private boolean fill() throws IOException {
+            compact();
+            if (sourceEnded) return limit > 0;
+
+            int read = source.read(buf, limit, buf.length - limit);
+            if (read == -1) {
+                sourceEnded = true;
+                return limit > 0;
             }
+            limit += read;
+            scanForDelimiter();
             return true;
         }
 
-        private void consumeBoundaryRemainder() throws IOException {
-            int nextByte = source.read();
-            if (nextByte == '-') {
-                source.read();
-                consumeUntilLineEnd();
-                return;
+        private void compact() {
+            if (pos == 0) return;
+            int remaining = limit - pos;
+            if (remaining > 0) {
+                System.arraycopy(buf, pos, buf, 0, remaining);
             }
-            if (nextByte == '\r') {
-                int lineFeed = source.read();
-                if (lineFeed == '\n') {
+            if (delimiterAt >= 0) {
+                delimiterAt -= pos;
+            }
+            limit = remaining;
+            pos = 0;
+        }
+
+        private void scanForDelimiter() {
+            if (delimiterAt >= 0) return;
+            int end = limit - delimiter.length + 1;
+            for (int i = pos; i < end; i++) {
+                if (matchesAt(i)) {
+                    delimiterAt = i;
                     return;
                 }
-            }
-            if (nextByte != '\n' && nextByte != -1) {
-                consumeUntilLineEnd();
             }
         }
 
-        private void consumeUntilLineEnd() throws IOException {
-            int nextByte;
-            while ((nextByte = source.read()) != -1) {
-                if (nextByte == '\n') {
-                    return;
-                }
+        private boolean matchesAt(int offset) {
+            for (int j = 0; j < delimiter.length; j++) {
+                if (buf[offset + j] != delimiter[j]) return false;
             }
+            return true;
         }
     }
 }
