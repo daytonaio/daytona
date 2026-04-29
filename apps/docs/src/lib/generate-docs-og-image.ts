@@ -48,7 +48,6 @@ function clampText(s: string, max: number): string {
 
 export async function generateDocsOgImagePng(options: {
   title: string
-  description: string
 }): Promise<Buffer> {
   const title = clampText(options.title, 118)
 

@@ -29,12 +29,7 @@ export const GET: APIRoute = async ({ params }) => {
     typeof entry.data.title === 'string' && entry.data.title.trim()
       ? entry.data.title.trim()
       : slug
-  const description =
-    typeof entry.data.description === 'string' && entry.data.description.trim()
-      ? entry.data.description.trim()
-      : 'Daytona documentation.'
-
-  const png = await generateDocsOgImagePng({ title, description })
+  const png = await generateDocsOgImagePng({ title })
 
   return new Response(new Uint8Array(png), {
     headers: {
