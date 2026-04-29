@@ -35,7 +35,7 @@
       "outputs": ["{projectRoot}/build"],
       "options": {
         "cwd": "{projectRoot}",
-        "command": "./gradlew build -x test"
+        "command": "./gradlew --stop; ./gradlew build -x test"
       },
       "dependsOn": [
         "set-version",

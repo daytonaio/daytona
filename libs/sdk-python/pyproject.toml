@@ -43,5 +43,5 @@ keywords = ["daytona", "sdk"]
 license = {text = "Apache-2.0"}
 
 [tool.deptry]
-exclude = ["scripts"]
+exclude = ["scripts", "tests"]
 extend_exclude = [".venv", "dist", "build", ".pytest_cache", "__pycache__"]
