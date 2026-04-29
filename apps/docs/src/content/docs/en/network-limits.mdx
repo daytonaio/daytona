@@ -179,12 +179,146 @@ daytona create --network-block-all
 </Tabs>
 
 :::note
-If both `networkBlockAll` and `networkAllowList` are specified, `networkBlockAll` takes precedence and all network access will be blocked, ignoring the allow list.
+When **creating** a sandbox, if both `networkBlockAll` and `networkAllowList` are specified, `networkBlockAll` takes precedence and all network access will be blocked, ignoring the allow list.
 :::
+
+## Update network settings while a sandbox is running
+
+For sandboxes on [Tier 3 and Tier 4](#tier-based-network-restrictions), you can change outbound firewall policy after the sandbox is created. The API applies the new rules on the runner and persists them on the sandbox record. The sandbox keeps running; no stop or start is required.
+
+The request must include at least one of `networkBlockAll` or `networkAllowList`. Rules match create-time behavior and use the same [allow list format](#network-allow-list-format).
+
+- Sending `networkAllowList` as an empty string clears a stored allow list
+- Sending `networkBlockAll: true` blocks all outbound traffic and clears the allow list
+- Sending only `networkBlockAll: false` restores general outbound access (for your tier) and clears a stored allow list
+
+This operation requires the `WRITE_SANDBOXES` permission. Organizations on Tier 1 or Tier 2 cannot override network policy at the sandbox level, and the API returns an error in that case.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+# Block all outbound traffic (clears any allow list)
+sandbox.update_network_settings(network_block_all=True)
+
+# Restore general outbound access and clear the allow list
+sandbox.update_network_settings(network_block_all=False)
+
+# Apply or replace a CIDR allow list (implies not blocking all)
+sandbox.update_network_settings(
+    network_allow_list='208.80.154.232/32,192.168.1.0/24'
+)
+
+# Clear a stored allow list (empty string). Outbound traffic still follows `network_block_all`.
+sandbox.update_network_settings(network_allow_list='')
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+// Block all outbound traffic (clears any allow list)
+await sandbox.updateNetworkSettings({ networkBlockAll: true })
+
+// Restore general outbound access and clear the allow list
+await sandbox.updateNetworkSettings({ networkBlockAll: false })
+
+// Apply or replace a CIDR allow list (implies not blocking all)
+await sandbox.updateNetworkSettings({
+  networkAllowList: '208.80.154.232/32,192.168.1.0/24',
+})
+
+// Clear a stored allow list (empty string). Outbound traffic still follows `networkBlockAll`.
+await sandbox.updateNetworkSettings({ networkAllowList: '' })
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Block all outbound traffic (clears any allow list)
+sandbox.update_network_settings(network_block_all: true)
+
+# Restore general outbound access and clear the allow list
+sandbox.update_network_settings(network_block_all: false)
+
+# Apply or replace a CIDR allow list (implies not blocking all)
+sandbox.update_network_settings(
+  network_allow_list: '208.80.154.232/32,192.168.1.0/24'
+)
+
+# Clear the allow list (empty string)
+sandbox.update_network_settings(network_allow_list: '')
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import apiclient "github.com/daytonaio/daytona/libs/api-client-go"
+
+settings := apiclient.NewUpdateSandboxNetworkSettings()
+settings.SetNetworkBlockAll(true)
+if err := sandbox.UpdateNetworkSettings(ctx, *settings); err != nil {
+	log.Fatal(err)
+}
+
+restore := apiclient.NewUpdateSandboxNetworkSettings()
+restore.SetNetworkBlockAll(false)
+if err := sandbox.UpdateNetworkSettings(ctx, *restore); err != nil {
+	log.Fatal(err)
+}
+
+allow := apiclient.NewUpdateSandboxNetworkSettings()
+allow.SetNetworkAllowList("208.80.154.232/32,192.168.1.0/24")
+if err := sandbox.UpdateNetworkSettings(ctx, *allow); err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.api.client.model.UpdateSandboxNetworkSettings;
+
+// Block all outbound traffic (clears any allow list)
+sandbox.updateNetworkSettings(new UpdateSandboxNetworkSettings().networkBlockAll(true));
+
+// Restore general outbound access and clear the allow list
+sandbox.updateNetworkSettings(new UpdateSandboxNetworkSettings().networkBlockAll(false));
+
+// Apply or replace a CIDR allow list
+sandbox.updateNetworkSettings(
+    new UpdateSandboxNetworkSettings().networkAllowList("208.80.154.232/32,192.168.1.0/24"));
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/sandbox/SANDBOX_ID_OR_NAME/network-settings' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{"networkBlockAll": true}'
+
+# Restore access and clear allow list
+curl 'https://app.daytona.io/api/sandbox/SANDBOX_ID_OR_NAME/network-settings' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{"networkBlockAll": false}'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox/), [TypeScript SDK](/docs/en/typescript-sdk/sandbox/), [Ruby SDK](/docs/en/ruby-sdk/sandbox/), [Go SDK](/docs/en/go-sdk/daytona/#Sandbox.UpdateNetworkSettings), [Java SDK](/docs/en/java-sdk/sandbox/), and [OpenAPI specification](https://github.com/daytonaio/daytona/blob/main/libs/api-client-go/api/openapi.yaml) (`updateNetworkSettings`).
 
 ## Network allow list format
 
-The network allow list is a comma-separated list of IPv4 CIDR blocks. Set your allowed networks using the `networkAllowList` parameter when [creating a sandbox](/docs/en/sandboxes#create-sandboxes).
+The network allow list is a comma-separated list of IPv4 CIDR blocks. Set your allowed networks using the `networkAllowList` parameter when [creating a sandbox](/docs/en/sandboxes#create-sandboxes) or when [updating settings on a running sandbox](#update-network-settings-while-a-sandbox-is-running).
 
 - **IPv4 only**: hostnames, domains, and IPv6 are not supported
 - **CIDR required**: every entry must include a `/` prefix length integer in the range `0` to `32` (inclusive), for example: `/32`
