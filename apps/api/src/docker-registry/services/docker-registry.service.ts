@@ -33,6 +33,10 @@ const AXIOS_TIMEOUT_MS = 3000
 const DOCKER_HUB_REGISTRY = 'registry-1.docker.io'
 const DOCKER_HUB_URL = 'docker.io'
 
+function isIamRoleArn(value: string): boolean {
+  return /^arn:aws:iam::\d+:role\/.+$/.test(value)
+}
+
 /**
  * Normalizes Docker Hub URLs to 'docker.io' for storage.
  * Empty URLs are assumed to be Docker Hub.
@@ -68,10 +72,14 @@ export class DockerRegistryService {
     private readonly ecrCredentials: EcrCredentialsService,
   ) {}
 
-  // For ECR registries, swap stored role ARN / org id for a fresh AWS:<token>
-  // pair (Redis-cached). Non-ECR registries pass through unchanged.
-  private async resolveEcrIfNeeded(registry: DockerRegistry): Promise<DockerRegistry> {
+  // used only for ECR, swap the stored role ARN for a fresh AWS:<token> pair (Redis-cached)
+  private async resolveCredentials(registry: DockerRegistry): Promise<DockerRegistry> {
+    // not ECR, or pre-org row (internal/transient) — nothing to resolve
     if (!this.ecrCredentials.isEcrUrl(registry.url) || !registry.organizationId) {
+      return registry
+    }
+    // legacy basic-auth flow (e.g. username "AWS" + pre-baked token) — pass through
+    if (registry.username && !isIamRoleArn(registry.username)) {
       return registry
     }
     const { username, password } = await this.ecrCredentials.resolveEcrCredentials(
@@ -402,7 +410,7 @@ export class DockerRegistryService {
     )
 
     const matched = this.findRegistryByUrlMatch(sortedRegistries, imageName)
-    return matched ? this.resolveEcrIfNeeded(matched) : null
+    return matched ? this.resolveCredentials(matched) : null
   }
 
   /**
@@ -801,7 +809,7 @@ export class DockerRegistryService {
     // If so, include all user's registries (we can't reliably match specific registries)
     if (checkDockerfileHasRegistryPrefix(dockerfileContent)) {
       const userRegistries = await this.findAll(organizationId, RegistryType.ORGANIZATION)
-      const resolved = await Promise.all(userRegistries.map((r) => this.resolveEcrIfNeeded(r)))
+      const resolved = await Promise.all(userRegistries.map((r) => this.resolveCredentials(r)))
       sourceRegistries.push(...resolved)
     }
 

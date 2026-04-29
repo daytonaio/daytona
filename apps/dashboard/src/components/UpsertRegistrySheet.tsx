@@ -55,10 +55,17 @@ const editFormSchema = baseFormSchema.extend({
   password: z.string(),
 })
 
-// ECR auto-injects the password server-side from the org id, so the form
-// doesn't collect one. Used in place of createFormSchema for the ECR tab.
+// ECR resolves credentials server-side via STS:AssumeRole, so the form
+// doesn't collect a password. URL is required (no docker.io fallback).
 const ecrCreateFormSchema = baseFormSchema.extend({
+  url: z.string().min(1, 'Registry URL is required'),
   password: z.string(),
+})
+
+// Google Artifact Registry: URL is region-specific, must be provided.
+const gcpCreateFormSchema = baseFormSchema.extend({
+  url: z.string().min(1, 'Registry URL is required'),
+  password: z.string().min(1, 'Service Account JSON Key is required'),
 })
 
 type FormValues = z.infer<typeof createFormSchema>
@@ -155,7 +162,13 @@ export const UpsertRegistrySheet = ({
   const form = useForm({
     defaultValues: getDefaultValues(),
     validators: {
-      onSubmit: isEditMode ? editFormSchema : provider === 'ecr' ? ecrCreateFormSchema : createFormSchema,
+      onSubmit: isEditMode
+        ? editFormSchema
+        : provider === 'ecr'
+          ? ecrCreateFormSchema
+          : provider === 'gcp'
+            ? gcpCreateFormSchema
+            : createFormSchema,
     },
     onSubmitInvalid: () => {
       const formEl = formRef.current
@@ -172,9 +185,14 @@ export const UpsertRegistrySheet = ({
         return
       }
 
+      // docker.io fallback applies only to Generic / Edit (today's behavior);
+      // other providers require URL via Zod validation above.
+      const resolvedUrl = resolveField(activeSpec.url, value.url)
+      const url = !resolvedUrl && (isEditMode || provider === 'generic') ? 'docker.io' : resolvedUrl
+
       const payload = {
         name: value.name.trim(),
-        url: resolveField(activeSpec.url, value.url) || 'docker.io',
+        url,
         username: resolveField(activeSpec.username, value.username),
         password: resolveField(activeSpec.password, value.password),
         project: resolveField(activeSpec.project, value.project),
