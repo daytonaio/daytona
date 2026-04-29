@@ -268,14 +268,14 @@ export class SandboxStartAction extends SandboxAction {
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
       const sourceRegistries = await this.dockerRegistryService.getSourceRegistriesForDockerfile(
-        buildInfo.dockerfileContent,
-        organizationId,
+        sandbox.buildInfo.dockerfileContent,
+        sandbox.organizationId,
       )
 
       // Fire build request - resolves immediately
       await runnerAdapter.buildSnapshot(
-        buildInfo,
-        organizationId,
+        sandbox.buildInfo,
+        sandbox.organizationId,
         sourceRegistries.length > 0 ? sourceRegistries : undefined,
       )
 
@@ -330,7 +330,7 @@ export class SandboxStartAction extends SandboxAction {
     }
   }
 
-  // Initiates the snapshot build on the runner and creates an SnapshotRunner depending on the result
+  // Polls the snapshot build status on the runner and creates the SnapshotRunner entry based on the result
   async pollBuildStatus(buildInfo: BuildInfo, runner: Runner) {
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
