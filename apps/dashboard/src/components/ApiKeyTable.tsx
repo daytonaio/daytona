@@ -275,7 +275,7 @@ const columns: ColumnDef<ApiKeyList>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex min-w-0">
-          <PermissionsTooltip permissions={row.original.permissions} availablePermissions={allPermissions} />
+          <PermissionsTooltip permissions={row.original.permissions} availablePermissions={allKnownPermissions} />
         </div>
       )
     },
@@ -369,7 +369,9 @@ const columns: ColumnDef<ApiKeyList>[] = [
   },
 ]
 
-const allPermissions = Object.values(CreateApiKeyPermissionsEnum)
+const allKnownPermissions = Object.values(CreateApiKeyPermissionsEnum).filter(
+  (permission) => permission !== CreateApiKeyPermissionsEnum.UNKNOWN_DEFAULT_OPEN_API,
+)
 
 const IMPLICIT_READ_RESOURCES = ['Sandboxes', 'Snapshots', 'Registries', 'Regions']
 
@@ -380,10 +382,14 @@ function PermissionsTooltip({
   permissions: ApiKeyListPermissionsEnum[]
   availablePermissions: CreateApiKeyPermissionsEnum[]
 }) {
-  const isFullAccess = allPermissions.length === permissions.length
+  const knownPermissions = permissions.filter(
+    (permission) => permission !== ApiKeyListPermissionsEnum.UNKNOWN_DEFAULT_OPEN_API,
+  )
+  const knownPermissionSet = new Set<string>(knownPermissions)
+  const isFullAccess = allKnownPermissions.length === knownPermissions.length
   const isSingleResourceAccess = CREATE_API_KEY_PERMISSIONS_GROUPS.find(
     (group) =>
-      group.permissions.length === permissions.length && group.permissions.every((p) => permissions.includes(p)),
+      group.permissions.length === knownPermissions.length && group.permissions.every((p) => knownPermissionSet.has(p)),
   )
 
   const availableGroups = useMemo(() => {
