@@ -41,6 +41,7 @@
     "@astrojs/starlight": "0.38.3",
     "@astrojs/starlight-tailwind": "5.0.0",
     "@astrojs/tailwind": "6.0.2",
+    "@aws-sdk/client-ecr": "^3.901.0",
     "@aws-sdk/client-s3": "^3.787.0",
     "@aws-sdk/client-sts": "^3.803.0",
     "@aws-sdk/credential-provider-node": "^3.901.0",

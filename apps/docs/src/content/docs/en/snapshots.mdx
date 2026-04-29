@@ -422,7 +422,7 @@ Copy the ARN of the role you just created (e.g. `arn:aws:iam::123456789012:role/
    - **Registry URL**: `<account_id>.dkr.ecr.<region>.amazonaws.com`
    - **Role ARN**: the role you created in step 1 — Daytona assumes it on every pull
 
-   Password is auto-filled with your organization ID (used as the AssumeRole `ExternalId`) and not shown in the form.
+   Password is not used for ECR — Daytona resolves credentials server-side by assuming the role you created in step 1, using your organization ID as the AssumeRole `ExternalId`.
 
 ##### 3. Create the snapshot
 

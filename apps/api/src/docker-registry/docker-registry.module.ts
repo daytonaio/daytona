@@ -7,6 +7,7 @@ import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { DockerRegistry } from './entities/docker-registry.entity'
 import { DockerRegistryService } from './services/docker-registry.service'
+import { EcrCredentialsService } from './services/ecr-credentials.service'
 import { DockerRegistryController } from './controllers/docker-registry.controller'
 import { HttpModule } from '@nestjs/axios'
 import { DockerRegistryProvider } from './providers/docker-registry.provider'
@@ -23,6 +24,7 @@ import { RegionModule } from '../region/region.module'
       useClass: DockerRegistryProvider,
     },
     DockerRegistryService,
+    EcrCredentialsService,
   ],
   exports: [DockerRegistryService],
 })

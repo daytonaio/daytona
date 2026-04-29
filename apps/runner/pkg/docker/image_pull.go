@@ -42,13 +42,8 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 		defer d.pullTracker.Remove(*sandboxId)
 	}
 
-	auth, err := getRegistryAuth(ctx, reg)
-	if err != nil {
-		return nil, err
-	}
-
 	responseBody, err := d.apiClient.ImagePull(ctx, imageName, image.PullOptions{
-		RegistryAuth: auth,
+		RegistryAuth: getRegistryAuth(reg),
 		Platform:     "linux/amd64",
 	})
 	if err != nil {
@@ -71,28 +66,21 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 	return &inspect, nil
 }
 
-// getRegistryAuth returns a base64-encoded Docker auth header for the
-// registry. For ECR URLs the resolver performs sts:AssumeRole + ECR
-// GetAuthorizationToken on cache miss and reuses the cached token otherwise.
-func getRegistryAuth(ctx context.Context, reg *dto.RegistryDTO) (string, error) {
-	if !shouldResolveAuth(reg) {
-		// Sometimes registry auth fails if "" is sent, so sending "empty" instead.
-		return "empty", nil
-	}
-
-	username, password, err := resolveRegistryCredentials(ctx, reg)
-	if err != nil {
-		return "", err
+func getRegistryAuth(reg *dto.RegistryDTO) string {
+	if reg == nil || !reg.HasAuth() {
+		// Sometimes registry auth fails if "" is sent, so sending "empty" instead
+		return "empty"
 	}
 
 	authConfig := registry.AuthConfig{
-		Username: username,
-		Password: password,
+		Username: *reg.Username,
+		Password: *reg.Password,
 	}
 	encodedJSON, err := json.Marshal(authConfig)
 	if err != nil {
-		return "empty", nil
+		// Sometimes registry auth fails if "" is sent, so sending "empty" instead
+		return "empty"
 	}
 
-	return base64.URLEncoding.EncodeToString(encodedJSON), nil
+	return base64.URLEncoding.EncodeToString(encodedJSON)
 }

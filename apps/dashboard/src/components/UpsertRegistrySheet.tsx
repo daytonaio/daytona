@@ -172,17 +172,11 @@ export const UpsertRegistrySheet = ({
         return
       }
 
-      // ECR: the runner uses `password` as the AssumeRole ExternalId, which
-      // must be the org id. The password field is hidden in the form; we
-      // supply the org id here so the API contract (password required) holds.
-      const password =
-        !isEditMode && provider === 'ecr' ? selectedOrganization.id : resolveField(activeSpec.password, value.password)
-
       const payload = {
         name: value.name.trim(),
         url: resolveField(activeSpec.url, value.url) || 'docker.io',
         username: resolveField(activeSpec.username, value.username),
-        password,
+        password: resolveField(activeSpec.password, value.password),
         project: resolveField(activeSpec.project, value.project),
       }
 

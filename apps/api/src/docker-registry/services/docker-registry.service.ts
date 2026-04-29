@@ -27,6 +27,7 @@ import {
   RegionSnapshotManagerCredsRegeneratedEvent,
   RegionSnapshotManagerUpdatedEvent,
 } from '../../region/events/region-snapshot-manager-creds.event'
+import { EcrCredentialsService } from './ecr-credentials.service'
 
 const AXIOS_TIMEOUT_MS = 3000
 const DOCKER_HUB_REGISTRY = 'registry-1.docker.io'
@@ -64,7 +65,22 @@ export class DockerRegistryService {
     @Inject(DOCKER_REGISTRY_PROVIDER)
     private readonly dockerRegistryProvider: IDockerRegistryProvider,
     private readonly regionService: RegionService,
+    private readonly ecrCredentials: EcrCredentialsService,
   ) {}
+
+  // For ECR registries, swap stored role ARN / org id for a fresh AWS:<token>
+  // pair (Redis-cached). Non-ECR registries pass through unchanged.
+  private async resolveEcrIfNeeded(registry: DockerRegistry): Promise<DockerRegistry> {
+    if (!this.ecrCredentials.isEcrUrl(registry.url) || !registry.organizationId) {
+      return registry
+    }
+    const { username, password } = await this.ecrCredentials.resolveEcrCredentials(
+      registry.url,
+      registry.username,
+      registry.organizationId,
+    )
+    return { ...registry, username, password }
+  }
 
   async create(
     createDto: CreateDockerRegistryInternalDto,
@@ -385,7 +401,8 @@ export class DockerRegistryService {
       (a, b) => (priority[a.registryType] ?? 1) - (priority[b.registryType] ?? 1),
     )
 
-    return this.findRegistryByUrlMatch(sortedRegistries, imageName)
+    const matched = this.findRegistryByUrlMatch(sortedRegistries, imageName)
+    return matched ? this.resolveEcrIfNeeded(matched) : null
   }
 
   /**
@@ -784,7 +801,8 @@ export class DockerRegistryService {
     // If so, include all user's registries (we can't reliably match specific registries)
     if (checkDockerfileHasRegistryPrefix(dockerfileContent)) {
       const userRegistries = await this.findAll(organizationId, RegistryType.ORGANIZATION)
-      sourceRegistries.push(...userRegistries)
+      const resolved = await Promise.all(userRegistries.map((r) => this.resolveEcrIfNeeded(r)))
+      sourceRegistries.push(...resolved)
     }
 
     // Add default Docker Hub registry only if user doesn't have their own Docker Hub credentials
