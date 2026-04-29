@@ -5,6 +5,7 @@ package git
 
 import (
 	"errors"
+	"net/http"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/gin-gonic/gin"
@@ -14,15 +15,13 @@ import (
 )
 
 func classifyGitError(err error) error {
-	msg := err.Error()
-
 	if errors.Is(err, transport.ErrAuthenticationRequired) ||
 		errors.Is(err, transport.ErrInvalidAuthMethod) {
-		return &common_errors.UnauthorizedError{Message: msg}
+		return common_errors.NewUnauthorizedError(err)
 	}
 
 	if errors.Is(err, transport.ErrAuthorizationFailed) {
-		return &common_errors.ForbiddenError{Message: msg}
+		return common_errors.NewForbiddenError(err)
 	}
 
 	if errors.Is(err, transport.ErrRepositoryNotFound) ||
@@ -33,7 +32,7 @@ func classifyGitError(err error) error {
 		errors.Is(err, go_git.ErrTagNotFound) ||
 		errors.Is(err, plumbing.ErrReferenceNotFound) ||
 		errors.Is(err, plumbing.ErrObjectNotFound) {
-		return &common_errors.NotFoundError{Message: msg}
+		return common_errors.NewNotFoundError(err)
 	}
 
 	if errors.Is(err, go_git.ErrNonFastForwardUpdate) ||
@@ -42,10 +41,10 @@ func classifyGitError(err error) error {
 		errors.Is(err, go_git.ErrRepositoryAlreadyExists) ||
 		errors.Is(err, go_git.ErrBranchExists) ||
 		errors.Is(err, go_git.ErrFastForwardMergeNotPossible) {
-		return &common_errors.ConflictError{Message: msg}
+		return common_errors.NewConflictError(err)
 	}
 
-	return &common_errors.BadRequestError{Message: msg}
+	return common_errors.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR")
 }
 
 func abortWithGitError(c *gin.Context, err error) {

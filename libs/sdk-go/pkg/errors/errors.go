@@ -309,7 +309,7 @@ func mapStatusCodeToError(statusCode int, message string, headers http.Header) e
 		return NewDaytonaConflictError(message, headers)
 	case statusCode == http.StatusTooManyRequests:
 		return NewDaytonaRateLimitError(message, headers)
-	case statusCode >= 500:
+	case statusCode >= 500 && statusCode <= 599:
 		return NewDaytonaServerError(message, statusCode, headers)
 	case statusCode == 0:
 		return NewDaytonaError(message, 0, nil)
