@@ -31,7 +31,6 @@ import {
 const AXIOS_TIMEOUT_MS = 3000
 const DOCKER_HUB_REGISTRY = 'registry-1.docker.io'
 const DOCKER_HUB_URL = 'docker.io'
-const ECR_HOST_REGEX = /^\d+\.dkr\.ecr\.[a-z0-9-]+\.amazonaws\.com$/
 
 /**
  * Normalizes Docker Hub URLs to 'docker.io' for storage.
@@ -43,20 +42,6 @@ function normalizeRegistryUrl(url: string): string {
   }
   // Strip trailing slashes for consistent matching
   return url.trim().replace(/\/+$/, '')
-}
-
-/**
- * For ECR registries the runner does sts:AssumeRole with role ARN in
- * `username` and orgId as ExternalId. We ship orgId through `password` so
- * the runner DTO is unchanged. Returns a shallow copy to avoid mutating the
- * TypeORM entity instance in-place.
- */
-function injectEcrOrgIdAsPassword(registry: DockerRegistry): DockerRegistry {
-  const strippedUrl = registry.url.replace(/^(https?:\/\/)/, '')
-  if (ECR_HOST_REGEX.test(strippedUrl) && registry.organizationId) {
-    return { ...registry, password: registry.organizationId }
-  }
-  return registry
 }
 
 export interface ImageDetails {
@@ -400,8 +385,7 @@ export class DockerRegistryService {
       (a, b) => (priority[a.registryType] ?? 1) - (priority[b.registryType] ?? 1),
     )
 
-    const matched = this.findRegistryByUrlMatch(sortedRegistries, imageName)
-    return matched ? injectEcrOrgIdAsPassword(matched) : null
+    return this.findRegistryByUrlMatch(sortedRegistries, imageName)
   }
 
   /**
@@ -800,7 +784,7 @@ export class DockerRegistryService {
     // If so, include all user's registries (we can't reliably match specific registries)
     if (checkDockerfileHasRegistryPrefix(dockerfileContent)) {
       const userRegistries = await this.findAll(organizationId, RegistryType.ORGANIZATION)
-      sourceRegistries.push(...userRegistries.map(injectEcrOrgIdAsPassword))
+      sourceRegistries.push(...userRegistries)
     }
 
     // Add default Docker Hub registry only if user doesn't have their own Docker Hub credentials
