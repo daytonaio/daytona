@@ -9,7 +9,7 @@ import { ForkTreeDialog } from '@/components/ForkTreeDialog'
 import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { RecursiveDeleteDialog } from '@/components/RecursiveDeleteDialog'
 import { CreateSandboxSheet } from '@/components/Sandbox/CreateSandboxSheet'
-import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
+import SandboxDetailsSheet, { type SandboxDetailsSheetTabValue } from '@/components/SandboxDetailsSheet'
 import { CreateSshAccessSheet } from '@/components/sandboxes/CreateSshAccessSheet'
 import { RevokeSshAccessDialog } from '@/components/sandboxes/RevokeSshAccessDialog'
 import { SandboxTable } from '@/components/SandboxTable'
@@ -45,6 +45,7 @@ import {
   SandboxState,
   SnapshotDto,
 } from '@daytona/api-client'
+import type { Sandbox as CreatedSandbox } from '@daytona/sdk'
 import { PlusIcon } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
@@ -113,6 +114,7 @@ const Sandboxes: React.FC = () => {
   const [selectedSandbox, setSelectedSandbox] = useState<Sandbox | null>(null)
   const [orderedSandboxItems, setOrderedSandboxItems] = useState<Sandbox[] | null>(null)
   const [showSandboxDetails, setShowSandboxDetails] = useState(false)
+  const [sandboxDetailsInitialTab, setSandboxDetailsInitialTab] = useState<SandboxDetailsSheetTabValue>('overview')
   const [showCreateSshDialog, setShowCreateSshDialog] = useState(false)
   const [showRevokeSshDialog, setShowRevokeSshDialog] = useState(false)
   const [sshSandboxId, setSshSandboxId] = useState<string>('')
@@ -187,9 +189,9 @@ const Sandboxes: React.FC = () => {
 
   useEffect(() => {
     const handleSandboxCreatedEvent = (sandbox: Sandbox) => {
-      if (!sandboxes.some((s) => s.id === sandbox.id)) {
-        setSandboxes((prev) => [sandbox, ...prev])
-      }
+      setSandboxes((prev) =>
+        prev.some((existingSandbox) => existingSandbox.id === sandbox.id) ? prev : [sandbox, ...prev],
+      )
     }
 
     const handleSandboxStateUpdatedEvent = (data: {
@@ -727,6 +729,20 @@ const Sandboxes: React.FC = () => {
     [sandboxItems, selectedSandboxIndex],
   )
 
+  const handleSandboxCreated = useCallback((sandbox: CreatedSandbox) => {
+    const createdSandbox = sandbox as unknown as Sandbox
+
+    setSandboxes((prev) =>
+      prev.some((existingSandbox) => existingSandbox.id === createdSandbox.id)
+        ? prev.map((existingSandbox) => (existingSandbox.id === createdSandbox.id ? createdSandbox : existingSandbox))
+        : [createdSandbox, ...prev],
+    )
+    setOrderedSandboxItems(null)
+    setSelectedSandbox(createdSandbox)
+    setSandboxDetailsInitialTab('overview')
+    setShowSandboxDetails(true)
+  }, [])
+
   const writePermitted = useMemo(
     () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SANDBOXES),
     [authenticatedUserHasPermission],
@@ -798,7 +814,9 @@ const Sandboxes: React.FC = () => {
               </Button>
             </>
           )}
-          {canCreateSandbox && <CreateSandboxSheet ref={createSandboxSheetRef} />}
+          {canCreateSandbox && (
+            <CreateSandboxSheet ref={createSandboxSheetRef} onSandboxCreated={handleSandboxCreated} />
+          )}
         </div>
       </PageHeader>
       <PageContent size="full" className="overflow-hidden">
@@ -823,6 +841,7 @@ const Sandboxes: React.FC = () => {
           onRowClick={(sandbox: Sandbox, orderedSandboxes: Sandbox[]) => {
             setOrderedSandboxItems(orderedSandboxes)
             setSelectedSandbox(sandbox)
+            setSandboxDetailsInitialTab('overview')
             setShowSandboxDetails(true)
           }}
           loadingSnapshots={loadingSnapshots}
@@ -963,6 +982,7 @@ const Sandboxes: React.FC = () => {
           onNavigate={handleSandboxSheetNavigate}
           hasPrev={selectedSandboxIndex > 0}
           hasNext={selectedSandboxIndex >= 0 && selectedSandboxIndex < sandboxItems.length - 1}
+          initialTab={sandboxDetailsInitialTab}
         />
 
         {forkTreeSandboxId && (

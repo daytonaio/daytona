@@ -234,7 +234,7 @@ interface ResizableSheetContentProps extends Omit<SheetContentProps, 'ref' | 'st
 }
 
 export interface ResizableSheetContentRef {
-  resize: (width: number, options?: { duration?: number; immediate?: boolean }) => void
+  resize: (width: number, options?: { duration?: number; immediate?: boolean; notify?: boolean }) => void
   getWidth: () => number
 }
 

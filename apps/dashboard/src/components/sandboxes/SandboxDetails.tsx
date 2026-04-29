@@ -253,7 +253,15 @@ export default function SandboxDetails() {
                         </Button>
                       </div>
                     ) : (
-                      <SandboxInfoPanel sandbox={sandbox} getRegionName={getRegionName} />
+                      <SandboxInfoPanel
+                        sandbox={sandbox}
+                        getRegionName={getRegionName}
+                        actionsDisabled={actionsDisabled}
+                        writePermitted={writePermitted}
+                        onCreateSshAccess={() => setCreateSshDialogOpen(true)}
+                        onRevokeSshAccess={() => setRevokeSshDialogOpen(true)}
+                        onScreenRecordings={handleScreenRecordings}
+                      />
                     )}
                   </ScrollArea>
                 </Panel>

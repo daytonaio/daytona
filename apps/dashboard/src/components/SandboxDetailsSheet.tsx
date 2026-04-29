@@ -13,14 +13,13 @@ import {
 } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { FeatureFlags } from '@/enums/FeatureFlags'
-import { RoutePath } from '@/enums/RoutePath'
 import { useConfig } from '@/hooks/useConfig'
+import { cn } from '@/lib/utils'
 import { SandboxSessionProvider } from '@/providers/SandboxSessionProvider'
 import { Sandbox } from '@daytona/api-client'
-import { ArrowRight, ChevronDown, ChevronUp, X } from 'lucide-react'
+import { ChevronDown, ChevronUp, ChevronsRight, X } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
 import React, { useCallback, useEffect, useState } from 'react'
-import { Link, generatePath } from 'react-router-dom'
 import { CopyButton } from './CopyButton'
 import { SandboxState as SandboxStateComponent } from './SandboxTable/SandboxState'
 import { SandboxActionsSegmented } from './sandboxes/SandboxActionsSegmented'
@@ -35,12 +34,22 @@ import { SandboxVncTab } from './sandboxes/SandboxVncTab'
 import { ScrollArea } from './ui/scroll-area'
 import { useSidebar } from './ui/sidebar'
 
-type SheetTabValue = 'overview' | 'logs' | 'traces' | 'metrics' | 'spending' | 'terminal' | 'filesystem' | 'vnc'
+export type SandboxDetailsSheetTabValue =
+  | 'overview'
+  | 'logs'
+  | 'traces'
+  | 'metrics'
+  | 'spending'
+  | 'terminal'
+  | 'filesystem'
+  | 'vnc'
 
-const OVERVIEW_WIDTH = 580
-const EXPANDED_WIDTH = 1024
-const MOBILE_BREAKPOINT = 640
+const OVERVIEW_WIDTH = 450
+const EXPANDED_WIDTH = 1600
+const MOBILE_BREAKPOINT = 1024
+const SIDE_BY_SIDE_MIN_WIDTH = 1000
 const TAB_RESIZE_DURATION = 0.5
+const TAB_CONTENT_RENDER_DELAY_MS = 120
 
 interface SandboxDetailsSheetProps {
   sandbox: Sandbox | null
@@ -61,6 +70,7 @@ interface SandboxDetailsSheetProps {
   onNavigate: (direction: 'prev' | 'next') => void
   hasPrev: boolean
   hasNext: boolean
+  initialTab?: SandboxDetailsSheetTabValue
 }
 
 function getViewportWidth() {
@@ -75,7 +85,7 @@ function getExpandedWidth(viewportWidth: number, sidebarWidth: number) {
   return Math.max(OVERVIEW_WIDTH, Math.min(EXPANDED_WIDTH, viewportWidth - sidebarWidth))
 }
 
-function getWidthForTab(tab: SheetTabValue, viewportWidth: number, sidebarWidth: number) {
+function getWidthForTab(tab: SandboxDetailsSheetTabValue, viewportWidth: number, sidebarWidth: number) {
   return tab === 'overview' ? getOverviewWidth(viewportWidth) : getExpandedWidth(viewportWidth, sidebarWidth)
 }
 
@@ -83,7 +93,7 @@ function clampSheetWidth(width: number, viewportWidth: number, sidebarWidth: num
   return Math.min(Math.max(width, getOverviewWidth(viewportWidth)), getExpandedWidth(viewportWidth, sidebarWidth))
 }
 
-function SandboxOverviewTab({
+function SandboxOverviewPanel({
   sandbox,
   getRegionName,
   actionDisabled,
@@ -97,7 +107,9 @@ function SandboxOverviewTab({
   onCreateSshAccess,
   onRevokeSshAccess,
   onScreenRecordings,
-  detailsPath,
+  tabs,
+  showDetails = true,
+  className,
 }: {
   sandbox: Sandbox
   getRegionName: (regionId: string) => string | undefined
@@ -112,26 +124,16 @@ function SandboxOverviewTab({
   onCreateSshAccess: (id: string) => void
   onRevokeSshAccess: (id: string) => void
   onScreenRecordings: (id: string) => void
-  detailsPath: string
+  tabs?: React.ReactNode
+  showDetails?: boolean
+  className?: string
 }) {
   const hasCustomName = !!sandbox.name && sandbox.name !== sandbox.id
 
   return (
-    <ScrollArea fade="mask" className="flex-1 min-h-0">
-      <div className="flex flex-col pt-2">
-        <InfoSection
-          title={
-            <div className="flex items-center justify-between gap-3">
-              <span>Overview</span>
-              <Button variant="link" asChild className="h-auto px-0 text-sm tracking-normal normal-case py-0">
-                <Link to={detailsPath}>
-                  Details
-                  <ArrowRight className="size-4" />
-                </Link>
-              </Button>
-            </div>
-          }
-        >
+    <div className={cn('flex min-h-0 flex-col', showDetails ? 'flex-1' : 'shrink-0', className)}>
+      <div className="shrink-0">
+        <InfoSection title={null} className="last:border-b">
           <InfoRow label={hasCustomName ? 'Name' : 'Name / UUID'} className="-mr-2">
             <div className="flex items-center gap-1 min-w-0">
               <span className="truncate">{hasCustomName ? sandbox.name : sandbox.id}</span>
@@ -176,10 +178,151 @@ function SandboxOverviewTab({
             )}
           </div>
         </InfoSection>
-
-        <SandboxInfoPanel sandbox={sandbox} getRegionName={getRegionName} />
       </div>
-    </ScrollArea>
+
+      {tabs}
+
+      {showDetails && (
+        <ScrollArea fade="mask" className="flex-1 min-h-0">
+          <SandboxInfoPanel
+            sandbox={sandbox}
+            getRegionName={getRegionName}
+            actionsDisabled={actionDisabled}
+            writePermitted={writePermitted}
+            onCreateSshAccess={() => onCreateSshAccess(sandbox.id)}
+            onRevokeSshAccess={() => onRevokeSshAccess(sandbox.id)}
+            onScreenRecordings={() => onScreenRecordings(sandbox.id)}
+          />
+        </ScrollArea>
+      )}
+    </div>
+  )
+}
+
+function SandboxDetailsTabsList({
+  experimentsEnabled,
+  filesystemEnabled,
+  spendingTabAvailable,
+  showOverview,
+  leadingContent,
+}: {
+  experimentsEnabled: boolean | undefined
+  filesystemEnabled: boolean | undefined
+  spendingTabAvailable: boolean | undefined
+  showOverview: boolean
+  leadingContent?: React.ReactNode
+}) {
+  const triggerClassName = 'h-[41px] border-b py-0'
+
+  return (
+    <div className="h-11 shrink-0 border-b border-border">
+      <ScrollArea
+        fade="mask"
+        horizontal
+        vertical={false}
+        fadeOffset={36}
+        className="h-full [&_[data-slot=scroll-area-scrollbar]]:hidden [&_[data-slot=scroll-area-viewport]]:pb-px"
+      >
+        <TabsList variant="underline" className="h-[41px] w-max min-w-full border-b-0">
+          {leadingContent}
+          {showOverview && (
+            <TabsTrigger value="overview" className={triggerClassName}>
+              Overview
+            </TabsTrigger>
+          )}
+          {experimentsEnabled && (
+            <>
+              <TabsTrigger value="logs" className={triggerClassName}>
+                Logs
+              </TabsTrigger>
+              <TabsTrigger value="traces" className={triggerClassName}>
+                Traces
+              </TabsTrigger>
+              <TabsTrigger value="metrics" className={triggerClassName}>
+                Metrics
+              </TabsTrigger>
+              {spendingTabAvailable && (
+                <TabsTrigger value="spending" className={triggerClassName}>
+                  Spending
+                </TabsTrigger>
+              )}
+            </>
+          )}
+          <TabsTrigger value="terminal" className={triggerClassName}>
+            Terminal
+          </TabsTrigger>
+          {filesystemEnabled && (
+            <TabsTrigger value="filesystem" className={triggerClassName}>
+              Filesystem
+            </TabsTrigger>
+          )}
+          <TabsTrigger value="vnc" className={triggerClassName}>
+            VNC
+          </TabsTrigger>
+        </TabsList>
+      </ScrollArea>
+    </div>
+  )
+}
+
+function SandboxOverviewTabTrigger() {
+  return (
+    <div className="h-11 shrink-0 border-b border-border">
+      <div className="inline-flex h-[41px] items-center px-4 py-0 text-sm font-medium text-foreground">Overview</div>
+    </div>
+  )
+}
+
+function SandboxDetailsTabContent({
+  sandbox,
+  experimentsEnabled,
+  filesystemEnabled,
+  spendingTabAvailable,
+}: {
+  sandbox: Sandbox
+  experimentsEnabled: boolean | undefined
+  filesystemEnabled: boolean | undefined
+  spendingTabAvailable: boolean | undefined
+}) {
+  return (
+    <>
+      {experimentsEnabled && (
+        <>
+          <TabsContent value="logs" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden">
+            <SandboxLogsTab sandboxId={sandbox.id} persistFilters={false} />
+          </TabsContent>
+          <TabsContent value="traces" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden">
+            <SandboxTracesTab sandboxId={sandbox.id} persistFilters={false} />
+          </TabsContent>
+          <TabsContent value="metrics" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden">
+            <SandboxMetricsTab sandboxId={sandbox.id} persistFilters={false} />
+          </TabsContent>
+          {spendingTabAvailable && (
+            <TabsContent
+              value="spending"
+              className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden"
+            >
+              <SandboxSpendingTab sandboxId={sandbox.id} persistFilters={false} />
+            </TabsContent>
+          )}
+        </>
+      )}
+
+      <TabsContent value="terminal" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden">
+        <SandboxTerminalTab sandbox={sandbox} />
+      </TabsContent>
+      {filesystemEnabled && (
+        <TabsContent
+          value="filesystem"
+          className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden"
+        >
+          <SandboxFileSystemTab sandbox={sandbox} />
+        </TabsContent>
+      )}
+      <TabsContent value="vnc" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden">
+        <SandboxVncTab sandbox={sandbox} />
+      </TabsContent>
+    </>
   )
 }
 
@@ -202,10 +345,14 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   onNavigate,
   hasPrev,
   hasNext,
+  initialTab = 'overview',
 }) => {
   const { currentWidth: sidebarWidth } = useSidebar()
   const sheetContentRef = React.useRef<ResizableSheetContentRef>(null)
-  const [activeTab, setActiveTab] = useState<SheetTabValue>('overview')
+  const isHeaderNavigationRef = React.useRef(false)
+  const hasManualExpandedWidthRef = React.useRef(false)
+  const [activeTab, setActiveTab] = useState<SandboxDetailsSheetTabValue>('overview')
+  const [renderExpandedContent, setRenderExpandedContent] = useState(false)
   const [viewportWidth, setViewportWidth] = useState(() => getViewportWidth())
   const experimentsEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_EXPERIMENTS)
   const filesystemEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_FILESYSTEM)
@@ -224,7 +371,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   }, [])
 
   const resizeSheetToTab = useCallback(
-    (tab: SheetTabValue, immediate = false) => {
+    (tab: SandboxDetailsSheetTabValue, immediate = false) => {
       if (!isDesktop) {
         return
       }
@@ -233,6 +380,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
       sheetContentRef.current?.resize(nextWidth, {
         duration: TAB_RESIZE_DURATION,
         immediate,
+        notify: false,
       })
     },
     [isDesktop, sidebarWidth, viewportWidth],
@@ -240,19 +388,70 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
 
   const resetToOverview = useCallback(
     (immediate = false) => {
+      hasManualExpandedWidthRef.current = false
       setActiveTab('overview')
-      resizeSheetToTab('overview', immediate)
+      requestAnimationFrame(() => resizeSheetToTab('overview', immediate))
+    },
+    [resizeSheetToTab],
+  )
+
+  const resetToTab = useCallback(
+    (tab: SandboxDetailsSheetTabValue, immediate = false) => {
+      hasManualExpandedWidthRef.current = false
+      setActiveTab(tab)
+      setRenderExpandedContent(false)
+      requestAnimationFrame(() => resizeSheetToTab(tab, immediate))
     },
     [resizeSheetToTab],
   )
 
   const handleTabChange = useCallback(
     (value: string) => {
-      const nextTab = value as SheetTabValue
+      const nextTab = value as SandboxDetailsSheetTabValue
+      const expandingFromOverview = activeTab === 'overview' && nextTab !== 'overview'
       setActiveTab(nextTab)
-      resizeSheetToTab(nextTab)
+
+      if (nextTab === 'overview') {
+        setRenderExpandedContent(false)
+        hasManualExpandedWidthRef.current = false
+        resizeSheetToTab(nextTab)
+        return
+      }
+
+      if (expandingFromOverview) {
+        setRenderExpandedContent(false)
+      }
+
+      if (!hasManualExpandedWidthRef.current) {
+        resizeSheetToTab(nextTab)
+      }
     },
-    [resizeSheetToTab],
+    [activeTab, resizeSheetToTab],
+  )
+
+  useEffect(() => {
+    if (!isDesktop || activeTab === 'overview') {
+      setRenderExpandedContent(false)
+      return
+    }
+
+    if (renderExpandedContent) {
+      return
+    }
+
+    const timeout = window.setTimeout(() => {
+      setRenderExpandedContent(true)
+    }, TAB_CONTENT_RENDER_DELAY_MS)
+
+    return () => window.clearTimeout(timeout)
+  }, [activeTab, isDesktop, renderExpandedContent])
+
+  const handleSheetWidthChange = useCallback(
+    (width: number) => {
+      hasManualExpandedWidthRef.current =
+        isDesktop && activeTab !== 'overview' && width < getExpandedWidth(viewportWidth, sidebarWidth)
+    },
+    [activeTab, isDesktop, sidebarWidth, viewportWidth],
   )
 
   useEffect(() => {
@@ -260,8 +459,14 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
       return
     }
 
-    resetToOverview(true)
-  }, [open, sandbox?.id, resetToOverview])
+    if (isHeaderNavigationRef.current) {
+      isHeaderNavigationRef.current = false
+      return
+    }
+
+    hasManualExpandedWidthRef.current = false
+    resetToTab(initialTab, true)
+  }, [initialTab, open, resetToTab, sandbox?.id])
 
   useEffect(() => {
     if (!open || isDesktop) {
@@ -289,15 +494,18 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   if (!sandbox) return null
 
   const actionDisabled = sandboxIsLoading[sandbox.id]
-  const detailsPath = generatePath(RoutePath.SANDBOX_DETAILS, { sandboxId: sandbox.id })
-  const minWidth = isDesktop ? getOverviewWidth(viewportWidth) : viewportWidth
   const maxWidth = isDesktop ? getExpandedWidth(viewportWidth, sidebarWidth) : viewportWidth
+  const minWidth = isDesktop
+    ? activeTab === 'overview'
+      ? getOverviewWidth(viewportWidth)
+      : Math.min(SIDE_BY_SIDE_MIN_WIDTH, maxWidth)
+    : viewportWidth
   const targetWidth = isDesktop
     ? clampSheetWidth(getWidthForTab(activeTab, viewportWidth, sidebarWidth), viewportWidth, sidebarWidth)
     : viewportWidth
 
   const handleNavigate = (direction: 'prev' | 'next') => {
-    resetToOverview(true)
+    isHeaderNavigationRef.current = true
     onNavigate(direction)
   }
 
@@ -310,7 +518,8 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
         defaultWidth={isDesktop ? targetWidth : viewportWidth}
         minWidth={minWidth}
         maxWidth={maxWidth}
-        resizable={isDesktop}
+        resizable={false}
+        onWidthChange={handleSheetWidthChange}
         className="p-0 flex flex-col gap-0 [&>button]:hidden"
       >
         <SheetHeader className="flex flex-row items-start justify-between p-4 px-5 space-y-0 border-b border-border">
@@ -334,82 +543,149 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
         </SheetHeader>
 
         <SandboxSessionProvider>
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-1 min-h-0 gap-0">
-            <ScrollArea
-              fade="mask"
-              horizontal
-              vertical={false}
-              fadeOffset={36}
-              className="h-[41px] shrink-0 border-b border-border"
-            >
-              <TabsList variant="underline" className="h-[41px] w-max min-w-full border-b-0">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                {experimentsEnabled && (
-                  <>
-                    <TabsTrigger value="logs">Logs</TabsTrigger>
-                    <TabsTrigger value="traces">Traces</TabsTrigger>
-                    <TabsTrigger value="metrics">Metrics</TabsTrigger>
-                    {spendingTabAvailable && <TabsTrigger value="spending">Spending</TabsTrigger>}
-                  </>
-                )}
-                <TabsTrigger value="terminal">Terminal</TabsTrigger>
-                {filesystemEnabled && <TabsTrigger value="filesystem">Filesystem</TabsTrigger>}
-                <TabsTrigger value="vnc">VNC</TabsTrigger>
-              </TabsList>
-            </ScrollArea>
-
-            <TabsContent value="overview" className="m-0 min-h-0 data-[state=active]:flex flex-col">
-              <SandboxOverviewTab
-                sandbox={sandbox}
-                getRegionName={getRegionName}
-                actionDisabled={actionDisabled}
-                writePermitted={writePermitted}
-                deletePermitted={deletePermitted}
-                handleStart={handleStart}
-                handleStop={handleStop}
-                handleRecover={handleRecover}
-                handleArchive={handleArchive}
-                handleDelete={handleDelete}
-                onCreateSshAccess={onCreateSshAccess}
-                onRevokeSshAccess={onRevokeSshAccess}
-                onScreenRecordings={onScreenRecordings}
-                detailsPath={detailsPath}
-              />
-            </TabsContent>
-
-            {experimentsEnabled && (
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="flex flex-1 min-h-0 flex-col gap-0">
+            {isDesktop ? (
+              activeTab === 'overview' ? (
+                <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
+                  <SandboxDetailsTabsList
+                    experimentsEnabled={experimentsEnabled}
+                    filesystemEnabled={filesystemEnabled}
+                    spendingTabAvailable={spendingTabAvailable}
+                    showOverview
+                  />
+                  <SandboxOverviewPanel
+                    sandbox={sandbox}
+                    getRegionName={getRegionName}
+                    actionDisabled={actionDisabled}
+                    writePermitted={writePermitted}
+                    deletePermitted={deletePermitted}
+                    handleStart={handleStart}
+                    handleStop={handleStop}
+                    handleRecover={handleRecover}
+                    handleArchive={handleArchive}
+                    handleDelete={handleDelete}
+                    onCreateSshAccess={onCreateSshAccess}
+                    onRevokeSshAccess={onRevokeSshAccess}
+                    onScreenRecordings={onScreenRecordings}
+                    className="max-w-[450px]"
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-1 min-h-0 overflow-hidden">
+                  <div className="flex w-[450px] shrink-0 min-h-0 flex-col border-r border-border">
+                    <SandboxOverviewTabTrigger />
+                    <SandboxOverviewPanel
+                      sandbox={sandbox}
+                      getRegionName={getRegionName}
+                      actionDisabled={actionDisabled}
+                      writePermitted={writePermitted}
+                      deletePermitted={deletePermitted}
+                      handleStart={handleStart}
+                      handleStop={handleStop}
+                      handleRecover={handleRecover}
+                      handleArchive={handleArchive}
+                      handleDelete={handleDelete}
+                      onCreateSshAccess={onCreateSshAccess}
+                      onRevokeSshAccess={onRevokeSshAccess}
+                      onScreenRecordings={onScreenRecordings}
+                      showDetails={false}
+                    />
+                    <ScrollArea fade="mask" className="min-h-0 flex-1">
+                      <SandboxInfoPanel
+                        sandbox={sandbox}
+                        getRegionName={getRegionName}
+                        actionsDisabled={actionDisabled}
+                        writePermitted={writePermitted}
+                        onCreateSshAccess={() => onCreateSshAccess(sandbox.id)}
+                        onRevokeSshAccess={() => onRevokeSshAccess(sandbox.id)}
+                        onScreenRecordings={() => onScreenRecordings(sandbox.id)}
+                      />
+                    </ScrollArea>
+                  </div>
+                  <div className="flex min-w-0 min-h-0 flex-1 flex-col overflow-hidden">
+                    <div className="animate-in fade-in slide-in-from-left-3 duration-500 ease-out">
+                      <SandboxDetailsTabsList
+                        experimentsEnabled={experimentsEnabled}
+                        filesystemEnabled={filesystemEnabled}
+                        spendingTabAvailable={spendingTabAvailable}
+                        showOverview={false}
+                        leadingContent={
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="mx-1 size-8 text-muted-foreground hover:text-foreground"
+                            onClick={() => resetToOverview()}
+                          >
+                            <ChevronsRight className="size-4" />
+                            <span className="sr-only">Collapse to overview</span>
+                          </Button>
+                        }
+                      />
+                    </div>
+                    <div className="flex min-w-0 min-h-0 flex-1 flex-col overflow-hidden">
+                      {renderExpandedContent && (
+                        <div className="flex min-h-0 flex-1 flex-col animate-in fade-in slide-in-from-right-12 duration-100 ease-out">
+                          <SandboxDetailsTabContent
+                            sandbox={sandbox}
+                            experimentsEnabled={experimentsEnabled}
+                            filesystemEnabled={filesystemEnabled}
+                            spendingTabAvailable={spendingTabAvailable}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )
+            ) : (
               <>
-                <TabsContent value="logs" className="m-0 min-h-0 data-[state=active]:flex flex-col overflow-hidden">
-                  <SandboxLogsTab sandboxId={sandbox.id} persistFilters={false} />
+                <SandboxOverviewPanel
+                  sandbox={sandbox}
+                  getRegionName={getRegionName}
+                  actionDisabled={actionDisabled}
+                  writePermitted={writePermitted}
+                  deletePermitted={deletePermitted}
+                  handleStart={handleStart}
+                  handleStop={handleStop}
+                  handleRecover={handleRecover}
+                  handleArchive={handleArchive}
+                  handleDelete={handleDelete}
+                  onCreateSshAccess={onCreateSshAccess}
+                  onRevokeSshAccess={onRevokeSshAccess}
+                  onScreenRecordings={onScreenRecordings}
+                  showDetails={false}
+                  tabs={
+                    <SandboxDetailsTabsList
+                      experimentsEnabled={experimentsEnabled}
+                      filesystemEnabled={filesystemEnabled}
+                      spendingTabAvailable={spendingTabAvailable}
+                      showOverview
+                    />
+                  }
+                />
+
+                <TabsContent value="overview" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col">
+                  <ScrollArea fade="mask" className="flex-1 min-h-0">
+                    <SandboxInfoPanel
+                      sandbox={sandbox}
+                      getRegionName={getRegionName}
+                      actionsDisabled={actionDisabled}
+                      writePermitted={writePermitted}
+                      onCreateSshAccess={() => onCreateSshAccess(sandbox.id)}
+                      onRevokeSshAccess={() => onRevokeSshAccess(sandbox.id)}
+                      onScreenRecordings={() => onScreenRecordings(sandbox.id)}
+                    />
+                  </ScrollArea>
                 </TabsContent>
-                <TabsContent value="traces" className="m-0 min-h-0 data-[state=active]:flex flex-col overflow-hidden">
-                  <SandboxTracesTab sandboxId={sandbox.id} persistFilters={false} />
-                </TabsContent>
-                <TabsContent value="metrics" className="m-0 min-h-0 data-[state=active]:flex flex-col overflow-hidden">
-                  <SandboxMetricsTab sandboxId={sandbox.id} persistFilters={false} />
-                </TabsContent>
-                {spendingTabAvailable && (
-                  <TabsContent
-                    value="spending"
-                    className="m-0 min-h-0 data-[state=active]:flex flex-col overflow-hidden"
-                  >
-                    <SandboxSpendingTab sandboxId={sandbox.id} persistFilters={false} />
-                  </TabsContent>
-                )}
+
+                <SandboxDetailsTabContent
+                  sandbox={sandbox}
+                  experimentsEnabled={experimentsEnabled}
+                  filesystemEnabled={filesystemEnabled}
+                  spendingTabAvailable={spendingTabAvailable}
+                />
               </>
             )}
-
-            <TabsContent value="terminal" className="m-0 min-h-0 data-[state=active]:flex flex-col overflow-hidden">
-              <SandboxTerminalTab sandbox={sandbox} />
-            </TabsContent>
-            {filesystemEnabled && (
-              <TabsContent value="filesystem" className="m-0 min-h-0 data-[state=active]:flex flex-col overflow-hidden">
-                <SandboxFileSystemTab sandbox={sandbox} />
-              </TabsContent>
-            )}
-            <TabsContent value="vnc" className="m-0 min-h-0 data-[state=active]:flex flex-col overflow-hidden">
-              <SandboxVncTab sandbox={sandbox} />
-            </TabsContent>
           </Tabs>
         </SandboxSessionProvider>
       </ResizableSheetContent>

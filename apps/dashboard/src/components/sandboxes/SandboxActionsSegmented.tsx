@@ -5,18 +5,10 @@
 
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { isArchivable, isRecoverable, isStartable, isStoppable, isTransitioning } from '@/lib/utils/sandbox'
 import { Sandbox, SandboxState } from '@daytona/api-client'
-import { Archive, MoreHorizontal, Play, Square, Trash2, Wrench } from 'lucide-react'
+import { Archive, Play, Square, Trash2, Wrench } from 'lucide-react'
 
 interface SandboxActionsSegmentedProps {
   sandbox: Sandbox
@@ -79,9 +71,6 @@ export function SandboxActionsSegmented({
   onArchive,
   onRecover,
   onDelete,
-  onCreateSshAccess,
-  onRevokeSshAccess,
-  onScreenRecordings,
 }: SandboxActionsSegmentedProps) {
   const actionsLocked = actionsDisabled || isTransitioning(sandbox)
   const visibleActions = getVisibleActions(sandbox, writePermitted)
@@ -89,7 +78,6 @@ export function SandboxActionsSegmented({
   const showStop = visibleActions.stop
   const showArchive = visibleActions.archive
   const showRecover = visibleActions.recover
-  const showMoreActions = writePermitted
   const showDelete = deletePermitted
 
   return (
@@ -144,29 +132,6 @@ export function SandboxActionsSegmented({
           </TooltipTrigger>
           <TooltipContent>Delete</TooltipContent>
         </Tooltip>
-      )}
-      {showMoreActions && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon-sm" aria-label="More actions" disabled={actionsLocked}>
-              <MoreHorizontal className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuGroup>
-              <DropdownMenuItem onClick={onCreateSshAccess} disabled={actionsLocked}>
-                Create SSH Access
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onRevokeSshAccess} disabled={actionsLocked}>
-                Revoke SSH Access
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onScreenRecordings} disabled={actionsLocked}>
-                Screen Recordings
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
       )}
     </ButtonGroup>
   )
