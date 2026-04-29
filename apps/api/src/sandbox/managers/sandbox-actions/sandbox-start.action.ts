@@ -265,7 +265,21 @@ export class SandboxStartAction extends SandboxAction {
     }
 
     if (isBuild) {
-      this.buildOnRunner(sandbox.buildInfo, runner, sandbox.organizationId)
+      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+      const sourceRegistries = await this.dockerRegistryService.getSourceRegistriesForDockerfile(
+        buildInfo.dockerfileContent,
+        organizationId,
+      )
+
+      // Fire build request - resolves immediately
+      await runnerAdapter.buildSnapshot(
+        buildInfo,
+        organizationId,
+        sourceRegistries.length > 0 ? sourceRegistries : undefined,
+      )
+
+      this.pollBuildStatus(sandbox.buildInfo, runner).catch(this.logger.error)
       await this.updateSandboxState(sandbox, SandboxState.BUILDING_SNAPSHOT, lockCode, runner.id)
     } else {
       const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
@@ -317,20 +331,8 @@ export class SandboxStartAction extends SandboxAction {
   }
 
   // Initiates the snapshot build on the runner and creates an SnapshotRunner depending on the result
-  async buildOnRunner(buildInfo: BuildInfo, runner: Runner, organizationId: string) {
+  async pollBuildStatus(buildInfo: BuildInfo, runner: Runner) {
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-
-    const sourceRegistries = await this.dockerRegistryService.getSourceRegistriesForDockerfile(
-      buildInfo.dockerfileContent,
-      organizationId,
-    )
-
-    // Fire build request (runner returns 202 immediately)
-    await runnerAdapter.buildSnapshot(
-      buildInfo,
-      organizationId,
-      sourceRegistries.length > 0 ? sourceRegistries : undefined,
-    )
 
     const pollTimeoutMs = 60 * 60 * 1_000 // 1 hour
     const pollIntervalMs = 5 * 1_000 // 5 seconds
