@@ -52,7 +52,9 @@ def SUBMIT(output=None, **kwargs):
 # This server mediates tool calls between sandbox code and the host.
 _BROKER_SERVER_CODE = '''
 """Broker server for mediating tool calls between sandbox and host."""
+import functools
 import json
+import os
 import threading
 import time
 import uuid
@@ -65,12 +67,25 @@ _lock = threading.Lock()
 _pending_requests = {}  # id -> {tool_name, args, kwargs, claimed, claimed_at, lease_token}
 _results = {}  # id -> result
 
+_API_SECRET = os.environ.get("BROKER_API_SECRET", "")
+
+def require_auth(f):
+    @functools.wraps(f)
+    def decorated(*args, **kwargs):
+        if _API_SECRET:
+            token = request.headers.get("X-Broker-Secret", "")
+            if token != _API_SECRET:
+                return jsonify({"error": "Unauthorized"}), 401
+        return f(*args, **kwargs)
+    return decorated
+
 @app.route("/health", methods=["GET"])
 def health():
     """Health check endpoint."""
     return jsonify({"status": "ok"})
 
 @app.route("/tool_call", methods=["POST"])
+@require_auth
 def tool_call():
     """Sandbox code calls this to request a tool execution.
 
@@ -114,6 +129,7 @@ def tool_call():
     return jsonify({"error": "Tool call timeout"}), 504
 
 @app.route("/pending", methods=["GET"])
+@require_auth
 def get_pending():
     """Host polls this to get pending tool requests.
 
@@ -160,6 +176,7 @@ def get_pending():
     return jsonify({"requests": requests_out})
 
 @app.route("/result/<call_id>", methods=["POST"])
+@require_auth
 def post_result(call_id):
     """Host calls this to provide tool execution result for a valid claim."""
     data = request.json
@@ -203,7 +220,7 @@ def {tool_name}({signature}):
     req = _urllib_request.Request(
         "http://localhost:3000/tool_call",
         data=payload,
-        headers={{"Content-Type": "application/json"}},
+        headers={{"Content-Type": "application/json", "X-Broker-Secret": "{broker_api_secret}"}},
         method="POST",
     )
 
@@ -286,6 +303,7 @@ class DaytonaInterpreter:
         # Broker-related state
         self._broker_url = None  # Preview URL for broker (e.g., https://xxx.preview.daytona.work)
         self._broker_token = None  # Auth token for preview URL
+        self._broker_api_secret = None  # Internal secret for broker API auth
         self._broker_session_id = None  # Session ID for the broker process
 
         # Track which tools have been injected into the sandbox so we can
@@ -405,11 +423,12 @@ print("Broker server code written")
 
         # Start broker server as background process
         self._broker_session_id = f"broker-{uuid.uuid4().hex[:8]}"
+        self._broker_api_secret = uuid.uuid4().hex
         self._sandbox.process.create_session(self._broker_session_id)
         self._sandbox.process.execute_session_command(
             self._broker_session_id,
             self._session_execute_request(
-                command="cd /home/daytona && python broker_server.py",
+                command=f"cd /home/daytona && BROKER_API_SECRET={self._broker_api_secret} python broker_server.py",
                 run_async=True,
             ),
         )
@@ -426,7 +445,7 @@ print("Broker server code written")
     def _wait_for_broker_health(self, timeout: float = 30.0) -> None:
         """Poll broker health endpoint until ready."""
         url = f"{self._broker_url}/health"
-        headers = {"x-daytona-preview-token": self._broker_token}
+        headers = {"x-daytona-preview-token": self._broker_token, "X-Broker-Secret": self._broker_api_secret or ""}
 
         start_time = time.time()
         while time.time() - start_time < timeout:
@@ -525,6 +544,7 @@ print("Broker server code written")
             signature=signature,
             args_list=args_str,
             kwargs_dict=kwargs_str,
+            broker_api_secret=self._broker_api_secret or "",
         )
 
     def _poll_and_execute_tools(self, code_done_event: threading.Event) -> None:
