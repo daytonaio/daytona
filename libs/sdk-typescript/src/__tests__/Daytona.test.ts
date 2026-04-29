@@ -214,6 +214,14 @@ describe('Daytona', () => {
     expect(firstConfigArg.baseOptions.headers['X-Daytona-Organization-ID']).toBe('org-1')
   })
 
+  it('throws when no credentials are provided', async () => {
+    const { Daytona } = await import('../Daytona')
+    delete process.env.DAYTONA_API_KEY
+    delete process.env.DAYTONA_JWT_TOKEN
+    delete process.env.DAYTONA_ORGANIZATION_ID
+    expect(() => new Daytona()).toThrow('Authentication credentials not found.')
+  })
+
   it('throws when jwt auth has no organization id', async () => {
     const { Daytona } = await import('../Daytona')
     delete process.env.DAYTONA_ORGANIZATION_ID
@@ -224,7 +232,7 @@ describe('Daytona', () => {
           apiUrl: 'https://jwt.daytona/api',
           target: 'us',
         }),
-    ).toThrow('Organization ID is required when using JWT token')
+    ).toThrow('DAYTONA_ORGANIZATION_ID is required when authenticating with DAYTONA_JWT_TOKEN.')
   })
 
   it('reads jwt credentials from env when config omits them', async () => {

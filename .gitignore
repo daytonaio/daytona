@@ -83,7 +83,9 @@ examples/**/*.png
 
 go.work.sum
 
+# Claude
 .claude/worktrees
+.claude/settings.local.json
 
 # Java build outputs
 **/.gradle/

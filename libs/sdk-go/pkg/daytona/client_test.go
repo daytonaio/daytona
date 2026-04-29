@@ -82,7 +82,7 @@ func TestNewClient(t *testing.T) {
 			name:          "error without API key or JWT token",
 			envVars:       map[string]string{},
 			expectedError: true,
-			errorContains: "API key or JWT token is required",
+			errorContains: "Authentication credentials not found. Set DAYTONA_API_KEY, or both DAYTONA_JWT_TOKEN and DAYTONA_ORGANIZATION_ID",
 		},
 		{
 			name: "error with JWT token but no org ID",
@@ -90,7 +90,7 @@ func TestNewClient(t *testing.T) {
 				"DAYTONA_JWT_TOKEN": "test-jwt-token",
 			},
 			expectedError: true,
-			errorContains: "Organization ID is required when using JWT token",
+			errorContains: "DAYTONA_ORGANIZATION_ID is required when authenticating with DAYTONA_JWT_TOKEN",
 		},
 	}
 
@@ -214,7 +214,7 @@ func TestNewClientWithConfig(t *testing.T) {
 				OrganizationID: "org-id-only",
 			},
 			expectedError: true,
-			errorContains: "API key or JWT token is required",
+			errorContains: "Authentication credentials not found.",
 		},
 	}
 

@@ -69,11 +69,11 @@ class DaytonaTest {
     void constructorValidatesConfiguration() {
         assertThatThrownBy(() -> new Daytona((DaytonaConfig) null))
                 .isInstanceOf(DaytonaException.class)
-                .hasMessage("DAYTONA_API_KEY is required");
+                .hasMessage("Authentication required: set DAYTONA_API_KEY environment variable or pass apiKey in DaytonaConfig");
 
         assertThatThrownBy(() -> new Daytona(new DaytonaConfig.Builder().apiKey("").build()))
                 .isInstanceOf(DaytonaException.class)
-                .hasMessage("DAYTONA_API_KEY is required");
+                .hasMessage("Authentication required: set DAYTONA_API_KEY environment variable or pass apiKey in DaytonaConfig");
     }
 
     @Test

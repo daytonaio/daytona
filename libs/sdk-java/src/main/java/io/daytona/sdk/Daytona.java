@@ -69,7 +69,8 @@ public class Daytona implements AutoCloseable {
      */
     public Daytona(DaytonaConfig config) {
         if (config == null || config.getApiKey() == null || config.getApiKey().isEmpty()) {
-            throw new DaytonaException("DAYTONA_API_KEY is required");
+            throw new DaytonaException(
+                    "Authentication required: set DAYTONA_API_KEY environment variable or pass apiKey in DaytonaConfig");
         }
         this.config = config;
         this.apiClient = createMainApiClient(config);

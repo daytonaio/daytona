@@ -78,14 +78,14 @@ RSpec.describe Daytona::Daytona do
       bad_config = Daytona::Config.new(api_key: nil, jwt_token: nil, api_url: 'https://api.example.com')
 
       expect { described_class.new(bad_config) }
-        .to raise_error(Daytona::Sdk::Error, /API key or JWT token is required/)
+        .to raise_error(Daytona::Sdk::Error, /Authentication credentials not found. Set DAYTONA_API_KEY/)
     end
 
     it 'raises error when jwt_token without organization_id' do
       bad_config = Daytona::Config.new(jwt_token: 'jwt', organization_id: nil, api_url: 'https://api.example.com')
 
       expect { described_class.new(bad_config) }
-        .to raise_error(Daytona::Sdk::Error, /Organization ID is required/)
+        .to raise_error(Daytona::Sdk::Error, /DAYTONA_ORGANIZATION_ID is required/)
     end
   end
 

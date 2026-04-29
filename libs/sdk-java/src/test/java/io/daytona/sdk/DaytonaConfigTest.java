@@ -112,6 +112,6 @@ class DaytonaConfigTest {
 
         TestSupport.withEnvironment(env, () -> assertThatThrownBy(Daytona::new)
                 .isInstanceOf(DaytonaException.class)
-                .hasMessage("DAYTONA_API_KEY is required"));
+                .hasMessage("Authentication required: set DAYTONA_API_KEY environment variable or pass apiKey in DaytonaConfig"));
     }
 }

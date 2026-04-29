@@ -191,7 +191,7 @@ func NewClientWithConfig(config *types.DaytonaConfig) (*Client, error) {
 
 	// Validate authentication
 	if client.apiKey == "" && client.jwtToken == "" {
-		return nil, errors.NewDaytonaError("API key or JWT token is required", 0, nil)
+		return nil, errors.NewDaytonaError("Authentication credentials not found. Set DAYTONA_API_KEY, or both DAYTONA_JWT_TOKEN and DAYTONA_ORGANIZATION_ID. These can also be provided via DaytonaConfig.", 0, nil)
 	}
 
 	if client.organizationID == "" {
@@ -199,7 +199,7 @@ func NewClientWithConfig(config *types.DaytonaConfig) (*Client, error) {
 	}
 
 	if client.jwtToken != "" && client.organizationID == "" {
-		return nil, errors.NewDaytonaError("Organization ID is required when using JWT token", 0, nil)
+		return nil, errors.NewDaytonaError("DAYTONA_ORGANIZATION_ID is required when authenticating with DAYTONA_JWT_TOKEN. It can also be provided via DaytonaConfig.", 0, nil)
 	}
 
 	if client.apiURL == "" {

@@ -68,11 +68,13 @@ class TestAsyncDaytonaInit:
 
         from daytona._async.daytona import AsyncDaytona
 
-        with pytest.raises(DaytonaAuthenticationError, match="API key or JWT token is required"):
+        with pytest.raises(
+            DaytonaAuthenticationError, match="Authentication credentials not found. Set DAYTONA_API_KEY"
+        ):
             AsyncDaytona()
 
     def test_jwt_without_organization_id_raises(self):
-        with pytest.raises(DaytonaAuthenticationError, match="Organization ID is required"):
+        with pytest.raises(DaytonaAuthenticationError, match="DAYTONA_ORGANIZATION_ID is required"):
             _make_async_daytona(DaytonaConfig(jwt_token="jwt", api_url="https://api.test.io", target="us"))
 
 

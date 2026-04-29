@@ -182,7 +182,12 @@ class AsyncDaytona:
         self._api_url = api_url or default_api_url
 
         if not self._api_key and not self._jwt_token:
-            raise DaytonaAuthenticationError("API key or JWT token is required")
+            msg = (
+                "Authentication credentials not found."
+                + " Set DAYTONA_API_KEY, or both DAYTONA_JWT_TOKEN and DAYTONA_ORGANIZATION_ID."
+                + " These can also be provided via DaytonaConfig."
+            )
+            raise DaytonaAuthenticationError(msg)
 
         # Create API configuration without api_key
         configuration = Configuration(host=self._api_url)
@@ -213,7 +218,10 @@ class AsyncDaytona:
 
         if not self._api_key:
             if not self._organization_id:
-                raise DaytonaAuthenticationError("Organization ID is required when using JWT token")
+                raise DaytonaAuthenticationError(
+                    "DAYTONA_ORGANIZATION_ID is required when authenticating with DAYTONA_JWT_TOKEN."
+                    + " It can also be provided via DaytonaConfig."
+                )
             self._api_client.default_headers["X-Daytona-Organization-ID"] = self._organization_id
 
         self._pool_tracker: AsyncPoolSaturationTracker = AsyncPoolSaturationTracker(pool_size)

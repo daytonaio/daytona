@@ -224,8 +224,16 @@ module Daytona
     def ensure_access_token_defined
       return if config.api_key
 
-      raise Sdk::Error, 'API key or JWT token is required' unless config.jwt_token
-      raise Sdk::Error, 'Organization ID is required when using JWT token' unless config.organization_id
+      unless config.jwt_token
+        raise Sdk::Error,
+              'Authentication credentials not found. Set DAYTONA_API_KEY, or both DAYTONA_JWT_TOKEN and ' \
+              'DAYTONA_ORGANIZATION_ID. These can also be provided via Config.'
+      end
+      return if config.organization_id
+
+      raise Sdk::Error,
+            'DAYTONA_ORGANIZATION_ID is required when authenticating with DAYTONA_JWT_TOKEN. ' \
+            'It can also be provided via Config.'
     end
 
     # @return [DaytonaApiClient::ApiClient]

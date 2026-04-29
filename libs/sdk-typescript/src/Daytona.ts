@@ -282,10 +282,20 @@ export class Daytona implements AsyncDisposable {
 
     this.apiUrl = apiUrl || 'https://app.daytona.io/api'
 
+    if (!this.apiKey && !this.jwtToken) {
+      throw new DaytonaAuthenticationError(
+        'Authentication credentials not found. Set DAYTONA_API_KEY, or both DAYTONA_JWT_TOKEN and DAYTONA_ORGANIZATION_ID.' +
+          ' These can also be provided via DaytonaConfig.',
+      )
+    }
+
     const orgHeader: Record<string, string> = {}
     if (!this.apiKey) {
       if (!this.organizationId) {
-        throw new DaytonaAuthenticationError('Organization ID is required when using JWT token')
+        throw new DaytonaAuthenticationError(
+          'DAYTONA_ORGANIZATION_ID is required when authenticating with DAYTONA_JWT_TOKEN.' +
+            ' It can also be provided via DaytonaConfig.',
+        )
       }
       orgHeader['X-Daytona-Organization-ID'] = this.organizationId
     }
@@ -617,7 +627,12 @@ export class Daytona implements AsyncDisposable {
     const response = await this.sandboxApi.getSandbox(sandboxIdOrName)
     const sandboxInstance = response.data
 
-    return new Sandbox(sandboxInstance, structuredClone(this.clientConfig), Daytona.createAxiosInstance(), this.sandboxApi)
+    return new Sandbox(
+      sandboxInstance,
+      structuredClone(this.clientConfig),
+      Daytona.createAxiosInstance(),
+      this.sandboxApi,
+    )
   }
 
   /**
