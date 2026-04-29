@@ -20,6 +20,9 @@ const ensureTrailingSlash = (value = '') =>
 
 const isHttpUrl = url => url.startsWith('http://') || url.startsWith('https://')
 
+const DOCS_STATIC_FILE_EXT_RE =
+  /\.(?:txt|json|xml|rss|atom|ico|png|jpe?g|gif|webp|svg|pdf|wasm|map|woff2?|ttf|eot|css|js|webmanifest)$/i
+
 export const toMarkdownUrl = (href, docsBaseUrl) => {
   if (!href) return href
 
@@ -37,6 +40,7 @@ export const toMarkdownUrl = (href, docsBaseUrl) => {
   if (!isHttpUrl(targetUrl.href)) return href
   if (!targetUrl.href.startsWith(baseUrl.href)) return href
   if (/\.mdx?$/i.test(targetUrl.pathname)) return targetUrl.href
+  if (DOCS_STATIC_FILE_EXT_RE.test(targetUrl.pathname)) return targetUrl.href
 
   let docPath = targetUrl.pathname.slice(baseUrl.pathname.length)
   docPath = docPath.replace(/\/+/g, '/').replace(/\/+$/, '')
