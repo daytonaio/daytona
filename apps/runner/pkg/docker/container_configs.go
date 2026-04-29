@@ -155,7 +155,7 @@ func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, v
 		hostConfig.Runtime = containerRuntime
 	}
 
-	if d.filesystem == "xfs" {
+	if !d.resourceLimitsDisabled && d.filesystem == "xfs" {
 		hostConfig.StorageOpt = map[string]string{
 			"size": fmt.Sprintf("%dG", sandboxDto.StorageQuota),
 		}
