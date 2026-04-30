@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	toolbox "github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 )
@@ -50,18 +51,13 @@ func TestAtspiStatusUsesA11yHealth(t *testing.T) {
 }
 
 func TestInitializeProcessesRegistersAtspiAsBootstrap(t *testing.T) {
-	binDir := t.TempDir()
-	atspiPath := filepath.Join(binDir, "at-spi-bus-launcher")
-	if err := os.WriteFile(atspiPath, []byte("#!/bin/sh\nexit 0\n"), 0755); err != nil {
-		t.Fatalf("write fake at-spi-bus-launcher: %v", err)
-	}
-
-	t.Setenv("PATH", binDir)
-	t.Setenv("DBUS_SESSION_BUS_ADDRESS", "")
+	addAtspiLauncherToPath(t)
+	t.Setenv("DBUS_SESSION_BUS_ADDRESS", "unix:path=/tmp/daytona-test-bus")
 
 	c := &ComputerUse{
 		processes: make(map[string]*Process),
 		configDir: t.TempDir(),
+		waitDBus:  func(string, time.Duration) error { return nil },
 	}
 	c.initializeProcesses(t.TempDir())
 
@@ -72,4 +68,30 @@ func TestInitializeProcessesRegistersAtspiAsBootstrap(t *testing.T) {
 	if atspi.AutoRestart {
 		t.Fatal("atspi launcher should not auto-restart")
 	}
+}
+
+func TestInitializeProcessesSkipsAtspiWhenSessionBusAddressIsMissing(t *testing.T) {
+	addAtspiLauncherToPath(t)
+	t.Setenv("DBUS_SESSION_BUS_ADDRESS", "")
+
+	c := &ComputerUse{
+		processes: make(map[string]*Process),
+		configDir: t.TempDir(),
+	}
+	c.initializeProcesses(t.TempDir())
+
+	if _, ok := c.processes["atspi"]; ok {
+		t.Fatal("atspi process should not be registered without a session D-Bus address")
+	}
+}
+
+func addAtspiLauncherToPath(t *testing.T) {
+	t.Helper()
+
+	binDir := t.TempDir()
+	atspiPath := filepath.Join(binDir, "at-spi-bus-launcher")
+	if err := os.WriteFile(atspiPath, []byte("#!/bin/sh\nexit 0\n"), 0755); err != nil {
+		t.Fatalf("write fake at-spi-bus-launcher: %v", err)
+	}
+	t.Setenv("PATH", binDir)
 }
