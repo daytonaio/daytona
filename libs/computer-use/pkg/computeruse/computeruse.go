@@ -45,6 +45,8 @@ type ComputerUse struct {
 	// connectA11y(); protected by atspiMu. Implementation lives in accessibility.go.
 	atspiMu   sync.Mutex
 	atspiConn *dbus.Conn
+
+	a11yHealth func() bool
 }
 
 var _ computeruse.IComputerUse = &ComputerUse{}
@@ -195,9 +197,8 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 	// Path lives in /usr/libexec on Debian/Ubuntu; some distros ship it under
 	// /usr/lib/at-spi2-core/; as a last resort fall back to $PATH so images
 	// that put the binary somewhere unusual still work. If we can't find the
-	// binary anywhere, we skip registering the supervised process entirely —
-	// the a11y endpoints will return 503 cleanly instead of the supervisor
-	// thrashing on a nonexistent command.
+	// binary anywhere, we skip registering atspi entirely — the a11y endpoints
+	// will return 503 cleanly instead of thrashing on a nonexistent command.
 	atspiCommand := ""
 	if _, err := os.Stat("/usr/libexec/at-spi-bus-launcher"); err == nil {
 		atspiCommand = "/usr/libexec/at-spi-bus-launcher"
@@ -210,7 +211,7 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 		log.Warnf("at-spi-bus-launcher not found in any known location; accessibility API will return 503 until the binary is installed")
 	} else {
 		if err := waitForSessionBus(dbusAddress, 5*time.Second); err != nil {
-			log.Warnf("session D-Bus check failed for at-spi-bus-launcher; starting supervised process anyway so it can retry when D-Bus is usable: %v", err)
+			log.Warnf("session D-Bus check failed for at-spi-bus-launcher; launching anyway so the a11y bus can start if D-Bus becomes usable: %v", err)
 		}
 		c.processes["atspi"] = &Process{
 			Name:        "atspi",
@@ -218,7 +219,7 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 			Args:        []string{"--launch-immediately"},
 			User:        user,
 			Priority:    250,
-			AutoRestart: true,
+			AutoRestart: false,
 			Env: map[string]string{
 				"DISPLAY":                  display,
 				"HOME":                     homeDir,
@@ -472,40 +473,56 @@ func (c *ComputerUse) stopProcess(process *Process) {
 
 func (c *ComputerUse) GetProcessStatus() (map[string]computeruse.ProcessStatus, error) {
 	c.mu.RLock()
-	defer c.mu.RUnlock()
-
-	status := make(map[string]computeruse.ProcessStatus)
+	processes := make(map[string]*Process, len(c.processes))
 	for name, process := range c.processes {
-		process.mu.Lock()
-		processStatus := computeruse.ProcessStatus{
-			Running:     false,
-			Priority:    process.Priority,
-			AutoRestart: process.AutoRestart,
-		}
+		processes[name] = process
+	}
+	c.mu.RUnlock()
 
-		if process.cmd != nil && process.cmd.Process != nil {
-			// Check if the process is still alive
-			if err := process.cmd.Process.Signal(syscall.Signal(0)); err == nil {
-				processStatus.Running = true
-				processStatus.Pid = &process.cmd.Process.Pid
-			}
+	status := make(map[string]computeruse.ProcessStatus, len(processes))
+	for name, process := range processes {
+		processStatus := getProcessStatus(process)
+		if name == "atspi" {
+			processStatus.Running = c.isA11yAvailable()
+			processStatus.Pid = nil
 		}
-
-		process.mu.Unlock()
 		status[name] = processStatus
 	}
 
 	return status, nil
 }
 
+func getProcessStatus(process *Process) computeruse.ProcessStatus {
+	process.mu.Lock()
+	defer process.mu.Unlock()
+
+	status := computeruse.ProcessStatus{
+		Running:     false,
+		Priority:    process.Priority,
+		AutoRestart: process.AutoRestart,
+	}
+
+	if process.cmd != nil && process.cmd.Process != nil {
+		if err := process.cmd.Process.Signal(syscall.Signal(0)); err == nil {
+			pid := process.cmd.Process.Pid
+			status.Running = true
+			status.Pid = &pid
+		}
+	}
+
+	return status
+}
+
 // IsProcessRunning checks if a specific process is running
 func (c *ComputerUse) IsProcessRunning(req *computeruse.ProcessRequest) (bool, error) {
 	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	process, exists := c.processes[req.ProcessName]
+	c.mu.RUnlock()
 	if !exists {
 		return false, fmt.Errorf("process %s not found", req.ProcessName)
+	}
+	if req.ProcessName == "atspi" {
+		return c.isA11yAvailable(), nil
 	}
 
 	process.mu.Lock()
