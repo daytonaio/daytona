@@ -184,7 +184,7 @@ If both `networkBlockAll` and `networkAllowList` are specified, `networkBlockAll
 
 ## Update network settings while a sandbox is running
 
-For sandboxes on [Tier 3 and Tier 4](#tier-based-network-restrictions), you can change outbound firewall policy after the sandbox is created. The API applies the new rules on the runner and persists them on the sandbox record. The sandbox keeps running; no stop or start is required.
+Daytona provides methods to update network settings for running sandboxes. Organizations on [Tier 3 and Tier 4](#tier-based-network-restrictions) can change outbound firewall policy after the sandbox is created. The API applies the new rules on the runner and persists them on the sandbox record. The sandbox keeps running; stop or start are not required.
 
 The request must include at least one of `networkBlockAll` or `networkAllowList`. Rules match create-time behavior and use the same [allow list format](#network-allow-list-format).
 
