@@ -4,8 +4,7 @@
  */
 
 import { useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
-import { Logo, LogoText } from '@/assets/Logo'
-import { OrganizationPicker } from '@/components/Organizations/OrganizationPicker'
+import { Logo } from '@/assets/Logo'
 import {
   Sidebar as SidebarComponent,
   SidebarContent,
@@ -75,6 +74,9 @@ import {
 } from './ui/dropdown-menu'
 import { Kbd } from './ui/kbd'
 import { ScrollArea } from './ui/scroll-area'
+import { Separator } from './ui/separator'
+import { AnimatePresence } from 'motion/react'
+import { AnimatedLogo } from './AnimatedLogo'
 
 interface SidebarProps {
   isBannerVisible: boolean
@@ -345,22 +347,44 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
 
   const metaKey = getMetaKey()
 
+  const sidebarExpanded = sidebar.open || sidebar.openMobile
+
   return (
     <SidebarComponent isBannerVisible={isBannerVisible} collapsible="icon">
       <SidebarHeader>
         <div
-          className={cn('flex justify-between items-center gap-2 px-2 mb-2 h-12', {
-            'justify-center px-0': !sidebar.open,
+          className={cn('flex justify-between items-center gap-2 px-2 pt-2 h-12', {
+            'justify-center px-0': !sidebarExpanded,
           })}
         >
           <div className="flex items-center gap-2 group-data-[state=collapsed]:hidden text-primary">
-            <Logo />
-            <LogoText />
+            <AnimatePresence initial={false}>
+              {sidebarExpanded && <AnimatedLogo className={cn('w-[117px]')} key={String(sidebar.open)} />}
+            </AnimatePresence>
           </div>
-          <SidebarTrigger className="p-2 [&_svg]:size-5" />
+          <div className="relative">
+            <SidebarTrigger
+              className={cn(
+                'p-2 [&_svg]:size-5 group-hover:opacity-100 opacity-0 transition-all peer focus-visible:opacity-100',
+                {
+                  'opacity-100': sidebarExpanded,
+                },
+              )}
+            />
+            <Logo
+              className={cn(
+                'w-6 h-6 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none group-hover:opacity-0 transition-all peer-focus-visible:opacity-0',
+                {
+                  'opacity-0': sidebarExpanded,
+                },
+              )}
+            />
+          </div>
         </div>
-        <SidebarMenu>
-          <OrganizationPicker />
+      </SidebarHeader>
+      <Separator className="mx-0 w-full" />
+      <SidebarContent className="pt-4">
+        <SidebarMenu className="px-2 pb-1">
           <SidebarMenuItem className="mb-1">
             <SidebarMenuButton
               tooltip={`Search ${metaKey}+K`}
@@ -378,8 +402,6 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
         <ScrollArea fade="shadow" className="overflow-auto flex-1">
           {sidebarGroups.map((group, i) => (
             <React.Fragment key={group.label}>
@@ -514,17 +536,10 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
                   <LogOut className="size-4" />
                   Sign out
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <div className="px-2 py-1.5 text-xs text-muted-foreground">Version {version}</div>
               </DropdownMenuContent>
             </DropdownMenu>
-          </SidebarMenuItem>
-          <SidebarMenuItem key="version">
-            <div
-              className={cn(
-                'flex items-center w-full justify-center gap-2 mt-2 overflow-auto min-h-4 whitespace-nowrap',
-              )}
-            >
-              {sidebar.open && <span className="text-xs text-muted-foreground">Version {version}</span>}
-            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

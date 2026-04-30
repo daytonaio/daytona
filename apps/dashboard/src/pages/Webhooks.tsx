@@ -4,11 +4,21 @@
  */
 
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import {
+  PageBreadcrumbs,
+  PageContent,
+  PageDocsLink,
+  PageFooter,
+  PageHeader,
+  PageIntro,
+  PageLayout,
+  PageStats,
+} from '@/components/PageLayout'
 import { UpsertEndpointSheet } from '@/components/Webhooks/UpsertEndpointSheet'
 import { WebhooksEndpointTable } from '@/components/Webhooks/WebhooksEndpointTable'
 import { WebhooksMessagesTable } from '@/components/Webhooks/WebhooksMessagesTable/WebhooksMessagesTable'
 import { Button } from '@/components/ui/button'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useDeleteWebhookEndpointMutation } from '@/hooks/mutations/useDeleteWebhookEndpointMutation'
@@ -95,13 +105,30 @@ const Webhooks: React.FC = () => {
 
   useRegisterCommands(rootCommands, { groupId: 'webhook-actions', groupLabel: 'Webhook actions', groupOrder: 0 })
 
+  const endpointStats = useMemo(() => {
+    const endpointList = endpoints.data || []
+    const disabledCount = endpointList.filter((endpoint) => endpoint.disabled).length
+    const activeCount = endpointList.length - disabledCount
+
+    return [
+      { label: 'total', value: endpointList.length },
+      { label: 'Active', value: activeCount, markerClassName: 'bg-success-foreground' },
+      { label: 'Disabled', value: disabledCount, markerClassName: 'bg-muted-foreground/50' },
+    ].filter((item) => item.value > 0 || item.label === 'total')
+  }, [endpoints.data])
+
   if (endpoints.error) {
     return (
       <PageLayout>
         <PageHeader>
-          <PageTitle>Webhooks</PageTitle>
+          <PageBreadcrumbs current="Webhooks" />
+          <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/webhooks/`} label="Webhook Docs" />
         </PageHeader>
         <PageContent>
+          <PageIntro
+            title="Webhooks"
+            description="Manage event delivery endpoints and inspect webhook message attempts."
+          />
           <Empty className="py-12 max-h-64 border" variant="destructive">
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -125,25 +152,18 @@ const Webhooks: React.FC = () => {
   return (
     <PageLayout contained>
       <PageHeader>
-        <PageTitle>Webhooks</PageTitle>
-        <a
-          href="https://www.daytona.io/docs/en/tools/api/#daytona/webhook/undefined/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="ml-auto"
-        >
-          <Button variant="link" size="sm">
-            Docs
-          </Button>
-        </a>
-        <UpsertEndpointSheet
-          onSuccess={handleSuccess}
-          ref={createEndpointSheetRef}
-          className={activeTab === 'endpoints' ? '' : 'hidden'}
-        />
+        <PageBreadcrumbs current="Webhooks" />
+        <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/webhooks/`} label="Webhook Docs" />
       </PageHeader>
 
-      <PageContent size="full" className="p-0 overflow-hidden">
+      <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="Webhooks"
+          description="Manage event delivery endpoints and inspect webhook message attempts."
+          titleActions={
+            <PageStats items={endpointStats} loadingText={endpoints.loading ? 'Loading endpoints...' : undefined} />
+          }
+        />
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col gap-0">
           <TabsList
             className="shadow-none bg-transparent w-auto p-0 pb-0 justify-start rounded-none"
@@ -166,6 +186,13 @@ const Webhooks: React.FC = () => {
               isLoadingEndpoint={isLoadingEndpoint}
               onDisable={handleDisable}
               onDelete={handleDelete}
+              toolbarActions={
+                <UpsertEndpointSheet
+                  onSuccess={handleSuccess}
+                  ref={createEndpointSheetRef}
+                  className={activeTab === 'endpoints' ? '' : 'hidden'}
+                />
+              }
             />
           </TabsContent>
           <TabsContent

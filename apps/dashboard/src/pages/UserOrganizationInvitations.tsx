@@ -3,9 +3,18 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import {
+  PageBreadcrumbs,
+  PageContent,
+  PageDocsLink,
+  PageFooter,
+  PageHeader,
+  PageIntro,
+  PageLayout,
+} from '@/components/PageLayout'
 import { OrganizationInvitationActionDialog } from '@/components/UserOrganizationInvitations/OrganizationInvitationActionDialog'
 import { UserOrganizationInvitationTable } from '@/components/UserOrganizationInvitations/UserOrganizationInvitationTable'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { useApi } from '@/hooks/useApi'
 import { useOrganizations } from '@/hooks/useOrganizations'
 import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
@@ -103,10 +112,12 @@ const UserOrganizationInvitations: React.FC = () => {
   return (
     <PageLayout contained>
       <PageHeader>
-        <PageTitle>Invitations</PageTitle>
+        <PageBreadcrumbs current="Invitations" />
+        <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/organizations/`} label="Invitation Docs" />
       </PageHeader>
 
       <PageContent size="full" className="overflow-hidden">
+        <PageIntro title="Invitations" description="Review invitations to join organizations." />
         <UserOrganizationInvitationTable
           data={invitations}
           loadingData={loadingInvitations}

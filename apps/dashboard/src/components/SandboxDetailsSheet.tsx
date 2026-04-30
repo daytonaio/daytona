@@ -298,7 +298,7 @@ function SandboxDetailsTabsList({
         >
           <TabsList variant="underline" className="h-[41px] w-max min-w-full border-b-0">
             {showOverview && (
-              <TabsTrigger value="overview" className={triggerClassName}>
+              <TabsTrigger value="overview" className={cn(triggerClassName, 'ml-2')}>
                 Overview
               </TabsTrigger>
             )}
@@ -385,7 +385,9 @@ function SandboxDetailsTabsList({
 function SandboxOverviewTabTrigger() {
   return (
     <div className="h-[42px] shrink-0 border-b border-border">
-      <div className="inline-flex h-[41px] items-center px-4 py-0 text-sm font-medium text-foreground">Overview</div>
+      <div className="ml-2 inline-flex h-[41px] items-center px-4 py-0 text-sm font-medium text-foreground">
+        Overview
+      </div>
     </div>
   )
 }

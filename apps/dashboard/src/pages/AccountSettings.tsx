@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageBreadcrumbs, PageContent, PageDocsLink, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { PrivacyPreferencesDialog } from '@/components/PrivacyPreferencesDialog'
 import { usePrivacyConsent } from '@/hooks/usePrivacyConsent'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import React, { useState } from 'react'
 import LinkedAccounts from './LinkedAccounts'
 
@@ -18,10 +19,12 @@ const AccountSettings: React.FC<{ linkedAccountsEnabled: boolean }> = ({ linkedA
   return (
     <PageLayout>
       <PageHeader>
-        <PageTitle>Account Settings</PageTitle>
+        <PageBreadcrumbs current="Account Settings" />
+        <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/linked-accounts/`} label="Account Docs" />
       </PageHeader>
 
       <PageContent>
+        <PageIntro title="Account Settings" description="Manage account connections and privacy preferences." />
         <div className="flex flex-col gap-6">
           {linkedAccountsEnabled && <LinkedAccounts />}
 

@@ -17,6 +17,8 @@ import { Sandbox } from '@daytona/api-client'
 import { AlertCircle, ArrowUpRight, KeyRound, Tag, UserRoundX } from 'lucide-react'
 import React, { ReactNode, useMemo } from 'react'
 
+const infoSectionLabelClassName = 'font-mono text-xs uppercase tracking-widest text-muted-foreground'
+
 export function InfoSection({
   title,
   children,
@@ -28,7 +30,7 @@ export function InfoSection({
 }) {
   return (
     <div className={cn('px-5 py-4 border-b border-border last:border-b-0', className)}>
-      {title && <div className="text-xs uppercase tracking-widest text-muted-foreground mb-2">{title}</div>}
+      {title && <div className={cn(infoSectionLabelClassName, 'mb-2')}>{title}</div>}
       {children}
     </div>
   )
@@ -148,7 +150,7 @@ export function SandboxInfoPanel({
       {showSshSection && (
         <div className="px-5 py-3 border-b border-border">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">SSH Access</span>
+            <span className={infoSectionLabelClassName}>SSH Access</span>
             <ButtonGroup>
               {onCreateSshAccess && (
                 <Button
@@ -201,7 +203,7 @@ export function SandboxInfoPanel({
       {showRecordingsSection && (
         <div className="px-5 py-3 border-b border-border">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">Recordings</span>
+            <span className={infoSectionLabelClassName}>Recordings</span>
             <Button
               variant="link"
               className="h-auto px-0 py-0 text-sm"

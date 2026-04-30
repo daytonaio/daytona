@@ -7,9 +7,18 @@ import { type CommandConfig, useRegisterCommands } from '@/components/CommandPal
 import { OrganizationInvitationTable } from '@/components/OrganizationMembers/OrganizationInvitationTable'
 import { OrganizationMemberTable } from '@/components/OrganizationMembers/OrganizationMemberTable'
 import { UpsertOrganizationAccessSheet } from '@/components/OrganizationMembers/UpsertOrganizationAccessSheet'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import {
+  PageBreadcrumbs,
+  PageContent,
+  PageDocsLink,
+  PageHeader,
+  PageIntro,
+  PageLayout,
+  PageStats,
+} from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { mutationKeys } from '@/hooks/mutations/mutationKeys'
 import { useCancelOrganizationInvitationMutation } from '@/hooks/mutations/useCancelOrganizationInvitationMutation'
 import { useCreateOrganizationInvitationMutation } from '@/hooks/mutations/useCreateOrganizationInvitationMutation'
@@ -196,21 +205,36 @@ const OrganizationMembers: React.FC = () => {
 
   useRegisterCommands(rootCommands, { groupId: 'member-actions', groupLabel: 'Member actions', groupOrder: 0 })
 
+  const memberStats = useMemo(() => {
+    const owners = organizationMembers.filter((member) => member.role === OrganizationUserRoleEnum.OWNER).length
+    const members = organizationMembers.length - owners
+
+    return [
+      { label: 'total', value: organizationMembers.length },
+      { label: 'Owners', value: owners, markerClassName: 'bg-success-foreground' },
+      { label: 'Members', value: members, markerClassName: 'bg-muted-foreground/50' },
+      { label: 'Invitations', value: invitations.length, markerClassName: 'bg-warning-foreground' },
+    ].filter((item) => item.value > 0 || item.label === 'total')
+  }, [organizationMembers, invitations.length])
+
   return (
     <PageLayout>
       <PageHeader>
-        <PageTitle>Members</PageTitle>
-        {authenticatedUserIsOwner && (
-          <UpsertOrganizationAccessSheet
-            mode="create"
-            className="ml-auto"
-            onSubmit={({ email, role, assignedRoleIds }) => handleCreateInvitation(email, role, assignedRoleIds)}
-            ref={createInvitationSheetRef}
-          />
-        )}
+        <PageBreadcrumbs current="Members" />
+        <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/organizations/`} label="Organization Docs" />
       </PageHeader>
 
-      <PageContent className="gap-14">
+      <PageContent>
+        <PageIntro
+          title="Members"
+          description="Manage organization access, roles, and pending invitations."
+          titleActions={
+            <PageStats
+              items={memberStats}
+              loadingText={loadingMembers || loadingInvitations ? 'Loading members...' : undefined}
+            />
+          }
+        />
         <OrganizationMemberTable
           data={organizationMembers}
           loadingData={loadingMembers}
@@ -219,6 +243,15 @@ const OrganizationMembers: React.FC = () => {
           pendingMemberIds={pendingMemberIds}
           ownerMode={authenticatedUserIsOwner}
           currentUserId={user?.profile.sub}
+          toolbarActions={
+            authenticatedUserIsOwner && (
+              <UpsertOrganizationAccessSheet
+                mode="create"
+                onSubmit={({ email, role, assignedRoleIds }) => handleCreateInvitation(email, role, assignedRoleIds)}
+                ref={createInvitationSheetRef}
+              />
+            )
+          }
         />
 
         {authenticatedUserIsOwner && (

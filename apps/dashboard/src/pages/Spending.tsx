@@ -4,7 +4,7 @@
  */
 
 import { BillableMetricCode, OrganizationUsage } from '@/billing-api/types/OrganizationUsage'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageBreadcrumbs, PageContent, PageDocsLink, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { AggregatedUsageChart, ResourceUsageBreakdown, UsageSummary } from '@/components/spending/AggregatedUsageChart'
 import { CostBreakdown } from '@/components/spending/CostBreakdown'
 import { UsageChartData } from '@/components/spending/ResourceUsageChart'
@@ -12,6 +12,7 @@ import { SandboxUsageTable } from '@/components/spending/SandboxUsageTable'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { DateRangePicker, QuickRangesConfig } from '@/components/ui/date-range-picker'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Separator } from '@/components/ui/separator'
 import { FeatureFlags } from '@/enums/FeatureFlags'
@@ -135,10 +136,15 @@ const Spending = () => {
   return (
     <PageLayout>
       <PageHeader>
-        <PageTitle>Spending</PageTitle>
+        <PageBreadcrumbs current="Spending" />
+        <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/billing/#spending`} label="Spending Docs" />
       </PageHeader>
 
       <PageContent>
+        <PageIntro
+          title="Spending"
+          description="Analyze resource usage, sandbox costs, and billing trends over time."
+        />
         {analyticsAvailable && (
           <Card>
             <CardHeader className="flex flex-row items-center gap-2 space-y-0 border-b p-4">

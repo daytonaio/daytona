@@ -3,7 +3,16 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import {
+  PageBreadcrumbs,
+  PageContent,
+  PageDocsLink,
+  PageFooter,
+  PageHeader,
+  PageIntro,
+  PageLayout,
+  PageStats,
+} from '@/components/PageLayout'
 import { CreateSnapshotSheet } from '@/components/snapshots/CreateSnapshotSheet'
 import { SnapshotTable } from '@/components/snapshots/SnapshotTable'
 import { Button } from '@/components/ui/button'
@@ -17,6 +26,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Spinner } from '@/components/ui/spinner'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useActivateSnapshotMutation } from '@/hooks/mutations/useActivateSnapshotMutation'
 import { useDeactivateSnapshotMutation } from '@/hooks/mutations/useDeactivateSnapshotMutation'
@@ -95,6 +105,33 @@ const Snapshots: React.FC = () => {
     }
     return items.filter((snapshot) => stateFilter.has(snapshot.state))
   }, [snapshotsData?.items, stateFilter])
+
+  const snapshotStats = useMemo(() => {
+    const items = snapshotsData?.items ?? []
+    const counts = items.reduce((acc, snapshot) => {
+      acc.set(snapshot.state, (acc.get(snapshot.state) ?? 0) + 1)
+      return acc
+    }, new Map<SnapshotState, number>())
+
+    const markerColors: Partial<Record<SnapshotState, string>> = {
+      [SnapshotState.ACTIVE]: 'bg-success-foreground',
+      [SnapshotState.ERROR]: 'bg-destructive-foreground',
+      [SnapshotState.BUILD_FAILED]: 'bg-destructive-foreground',
+      [SnapshotState.INACTIVE]: 'bg-muted-foreground/50',
+    }
+
+    return [
+      { label: 'total', value: snapshotsData?.total ?? items.length },
+      ...Array.from(counts.entries()).map(([state, count]) => ({
+        label: state
+          .split('_')
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' '),
+        value: count,
+        markerClassName: markerColors[state] ?? 'bg-muted-foreground/50',
+      })),
+    ]
+  }, [snapshotsData?.items, snapshotsData?.total])
 
   useEffect(() => {
     if (snapshotsDataError) {
@@ -346,11 +383,21 @@ const Snapshots: React.FC = () => {
   return (
     <PageLayout contained>
       <PageHeader>
-        <PageTitle>Snapshots</PageTitle>
-        {writePermitted && <CreateSnapshotSheet className="ml-auto" ref={dialogRef} />}
+        <PageBreadcrumbs current="Snapshots" />
+        <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/snapshots/`} label="Snapshot Docs" />
       </PageHeader>
 
       <PageContent size="full" className="flex-1 overflow-hidden">
+        <PageIntro
+          title="Snapshots"
+          description="Manage reusable sandbox templates built from container images and declarative environments."
+          titleActions={
+            <PageStats
+              items={snapshotStats}
+              loadingText={snapshotsDataIsLoading ? 'Loading snapshots...' : undefined}
+            />
+          }
+        />
         <SnapshotTable
           data={filteredItems}
           loading={snapshotsDataIsLoading}
@@ -382,6 +429,7 @@ const Snapshots: React.FC = () => {
             setStateFilter(values)
             setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
           }}
+          toolbarActions={writePermitted && <CreateSnapshotSheet ref={dialogRef} />}
         />
 
         {snapshotToDelete && (

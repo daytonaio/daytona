@@ -6,7 +6,7 @@
 import { Invoice } from '@/billing-api/types/Invoice'
 import { AutomaticTopUp } from '@/billing-api/types/OrganizationWallet'
 import { InvoicesTable } from '@/components/Invoices'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageBreadcrumbs, PageContent, PageDocsLink, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -15,6 +15,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { useCreateInvoicePaymentUrlMutation } from '@/hooks/mutations/useCreateInvoicePaymentUrlMutation'
 import { useRedeemCouponMutation } from '@/hooks/mutations/useRedeemCouponMutation'
 import { useSetAutomaticTopUpMutation } from '@/hooks/mutations/useSetAutomaticTopUpMutation'
@@ -244,10 +245,12 @@ const Wallet = () => {
   return (
     <PageLayout>
       <PageHeader>
-        <PageTitle>Wallet</PageTitle>
+        <PageBreadcrumbs current="Wallet" />
+        <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/billing/#wallet`} label="Wallet Docs" />
       </PageHeader>
 
       <PageContent>
+        <PageIntro title="Wallet" description="Manage wallet balance, top ups, payment methods, and invoices." />
         {isBillingLoading && (
           <div className="flex flex-col gap-6">
             <Card className="flex flex-col gap-4">

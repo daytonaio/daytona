@@ -5,6 +5,7 @@
 
 import { Region, Sandbox, SandboxState, SnapshotDto } from '@daytona/api-client'
 import { Table } from '@tanstack/react-table'
+import { ReactNode } from 'react'
 
 export interface SandboxTableProps {
   data: Sandbox[]
@@ -33,6 +34,7 @@ export interface SandboxTableProps {
   handleCreateSnapshot: (id: string) => void
   handleFork: (id: string) => void
   handleViewForks: (id: string) => void
+  toolbarActions?: ReactNode
 }
 
 export interface SandboxTableActionsProps {
@@ -62,6 +64,7 @@ export interface SandboxTableHeaderProps {
   regionsDataIsLoading: boolean
   snapshots: SnapshotDto[]
   loadingSnapshots: boolean
+  toolbarActions?: ReactNode
 }
 
 export interface FacetedFilterOption {

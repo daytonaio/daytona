@@ -20,7 +20,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { MoreHorizontal, PackageOpen } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { type ReactNode, useMemo, useState } from 'react'
 import { PageFooterPortal } from './PageLayout'
 import { Pagination } from './Pagination'
 import { SearchInput } from './SearchInput'
@@ -67,9 +67,10 @@ interface DataTableProps {
   loading: boolean
   onDelete: (id: string) => void
   onEdit: (registry: DockerRegistry) => void
+  toolbarActions?: ReactNode
 }
 
-export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProps) {
+export function RegistryTable({ data, loading, onDelete, onEdit, toolbarActions }: DataTableProps) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
 
   const writePermitted = useMemo(
@@ -140,8 +141,9 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
           value={globalFilter}
           onValueChange={handleChangeFilter}
           placeholder="Search by Name, URL, Project, or Username"
-          containerClassName="max-w-sm"
+          containerClassName="min-w-0 flex-1 sm:max-w-sm"
         />
+        {toolbarActions ? <div className="flex shrink-0 items-center gap-2 sm:ml-auto">{toolbarActions}</div> : null}
       </div>
       <TableContainer
         className={isEmpty ? 'min-h-[26rem]' : undefined}

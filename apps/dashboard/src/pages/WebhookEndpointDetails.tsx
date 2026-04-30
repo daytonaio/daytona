@@ -4,7 +4,7 @@
  */
 
 import { CopyButton } from '@/components/CopyButton'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageBreadcrumbs, PageContent, PageDocsLink, PageHeader, PageLayout } from '@/components/PageLayout'
 import { TimestampTooltip } from '@/components/TimestampTooltip'
 import {
   AlertDialog,
@@ -31,6 +31,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import DeliveryStatsLine from '@/components/Webhooks/DeliveryStatsLine'
 import { EndpointEventsTable } from '@/components/Webhooks/EndpointEventsTable'
 import { UpsertEndpointSheet } from '@/components/Webhooks/UpsertEndpointSheet'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { RoutePath } from '@/enums/RoutePath'
 import { useDeleteWebhookEndpointMutation } from '@/hooks/mutations/useDeleteWebhookEndpointMutation'
 import { useReplayWebhookEventMutation } from '@/hooks/mutations/useReplayWebhookEventMutation'
@@ -138,7 +139,8 @@ const WebhookEndpointDetails: React.FC = () => {
   return (
     <PageLayout>
       <PageHeader>
-        <PageTitle>Webhooks</PageTitle>
+        <PageBreadcrumbs current="Webhook Endpoint" />
+        <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/webhooks/`} label="Webhook Docs" />
       </PageHeader>
 
       <PageContent className="gap-6">

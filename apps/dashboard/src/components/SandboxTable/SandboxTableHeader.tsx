@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Calendar, Camera, Columns, Cpu, Globe, HardDrive, ListFilter, MemoryStick, Square, Tag } from 'lucide-react'
+import { Calendar, Camera, Cpu, Globe, HardDrive, ListFilter, MemoryStick, Square, Tag } from 'lucide-react'
 import { SearchInput } from '../SearchInput'
-import { TableColumnVisibilityToggle } from '../TableColumnVisibilityToggle'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,
@@ -37,6 +36,7 @@ export function SandboxTableHeader({
   regionsDataIsLoading,
   snapshots,
   loadingSnapshots,
+  toolbarActions,
 }: SandboxTableHeaderProps) {
   const hasStateFilter = ((table.getColumn('state')?.getFilterValue() as string[]) || []).length > 0
   const hasSnapshotFilter = ((table.getColumn('snapshot')?.getFilterValue() as string[]) || []).length > 0
@@ -57,7 +57,7 @@ export function SandboxTableHeader({
 
   return (
     <div className="flex flex-col gap-1">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div className="flex items-center gap-2">
         <div className="flex flex-1 items-center gap-2 min-w-0">
           <SearchInput
             debounced
@@ -71,7 +71,7 @@ export function SandboxTableHeader({
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="shrink-0">
                 <ListFilter className="w-4 h-4" />
-                Filter
+                <span className="max-[420px]:hidden">Filter</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-40" align="start">
@@ -173,33 +173,7 @@ export function SandboxTableHeader({
           </DropdownMenu>
         </div>
 
-        <div className="hidden sm:block ml-auto">
-          <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="shrink-0">
-                <Columns className="w-4 h-4" />
-                View
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px] p-0">
-              <TableColumnVisibilityToggle
-                columns={table.getAllColumns().filter((column) => ['name', 'id', 'labels'].includes(column.id))}
-                getColumnLabel={(id: string) => {
-                  switch (id) {
-                    case 'name':
-                      return 'Name'
-                    case 'id':
-                      return 'UUID'
-                    case 'labels':
-                      return 'Labels'
-                    default:
-                      return id
-                  }
-                }}
-              />
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        {toolbarActions ? <div className="flex shrink-0 items-center gap-2 sm:ml-auto">{toolbarActions}</div> : null}
       </div>
 
       {hasActiveFilters ? (

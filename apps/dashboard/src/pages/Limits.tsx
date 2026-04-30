@@ -4,7 +4,7 @@
  */
 
 import { LiveIndicator } from '@/components/LiveIndicator'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageBreadcrumbs, PageContent, PageDocsLink, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { TierComparisonTable, TierComparisonTableSkeleton } from '@/components/TierComparisonTable'
 import { TierUpgradeCard } from '@/components/TierUpgradeCard'
 import { Badge } from '@/components/ui/badge'
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { UsageOverview, UsageOverviewSkeleton } from '@/components/UsageOverview'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { RoutePath } from '@/enums/RoutePath'
 import { useOwnerTierQuery, useOwnerWalletQuery } from '@/hooks/queries/billingQueries'
 import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
@@ -90,10 +91,15 @@ export default function Limits() {
   return (
     <PageLayout>
       <PageHeader>
-        <PageTitle>Limits</PageTitle>
+        <PageBreadcrumbs current="Limits" />
+        <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/limits/`} label="Limit Docs" />
       </PageHeader>
 
       <PageContent>
+        <PageIntro
+          title="Limits"
+          description="Monitor current usage against organization limits and compare available tiers."
+        />
         {isError ? (
           <Card>
             <CardHeader>

@@ -38,7 +38,17 @@ import { useForm } from '@tanstack/react-form'
 import { isAxiosError } from 'axios'
 import { Info, Minus, Plus, Upload } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
-import { ComponentProps, Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import {
+  ComponentProps,
+  ReactNode,
+  Ref,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { NumericFormat } from 'react-number-format'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -152,10 +162,12 @@ export const CreateSandboxSheet = ({
   className,
   ref,
   onSandboxCreated,
+  triggerLabel = 'Create Sandbox',
 }: {
   className?: string
   ref?: Ref<{ open: () => void }>
   onSandboxCreated?: (sandbox: Sandbox) => void
+  triggerLabel?: ReactNode
 }) => {
   const createSandboxEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_CREATE_SANDBOX)
   const [open, setOpen] = useState(false)
@@ -368,7 +380,7 @@ export const CreateSandboxSheet = ({
       <SheetTrigger asChild>
         <Button variant="default" size="sm">
           <Plus className="size-4" />
-          Create Sandbox
+          {triggerLabel}
         </Button>
       </SheetTrigger>
       <SheetContent className={`w-dvw sm:w-[500px] p-0 flex flex-col gap-0 ${className ?? ''}`}>
@@ -491,7 +503,9 @@ export const CreateSandboxSheet = ({
                       }}
                     </form.Field>
                     <div className="flex flex-col gap-2">
-                      <Label className="text-sm font-medium">Resources</Label>
+                      <Label className="font-mono text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                        Resources
+                      </Label>
                       <div className="flex flex-col gap-2">
                         <form.Field name="cpu">
                           {(field) => {
@@ -655,7 +669,9 @@ export const CreateSandboxSheet = ({
               </form.Field>
             )}
             <div className="flex flex-col gap-2">
-              <Label className="text-sm font-medium">Lifecycle</Label>
+              <Label className="font-mono text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                Lifecycle
+              </Label>
               <div className="flex flex-col gap-2">
                 <form.Field name="autoStopInterval">
                   {(field) => (
@@ -873,7 +889,9 @@ export const CreateSandboxSheet = ({
                 const hasErrors = field.state.meta.errors.length > 0
                 return (
                   <Field data-invalid={hasErrors}>
-                    <FieldLabel>Labels</FieldLabel>
+                    <FieldLabel className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                      Labels
+                    </FieldLabel>
                     <div className="flex flex-col gap-2">
                       {(field.state.value ?? []).map((_, index) => (
                         <div key={index} className="flex items-center gap-2">

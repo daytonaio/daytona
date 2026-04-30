@@ -6,7 +6,16 @@
 import { CreateOrganizationRoleSheet } from '@/components/OrganizationRoles/CreateOrganizationRoleSheet'
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { OrganizationRoleTable } from '@/components/OrganizationRoles/OrganizationRoleTable'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import {
+  PageBreadcrumbs,
+  PageContent,
+  PageDocsLink,
+  PageHeader,
+  PageIntro,
+  PageLayout,
+  PageStats,
+} from '@/components/PageLayout'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { useApi } from '@/hooks/useApi'
 import { useOrganizationRoles } from '@/hooks/useOrganizationRoles'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
@@ -110,17 +119,28 @@ const OrganizationRoles: React.FC = () => {
   return (
     <PageLayout>
       <PageHeader>
-        <PageTitle>Roles</PageTitle>
-        <CreateOrganizationRoleSheet className="ml-auto" onCreateRole={handleCreateRole} ref={createRoleSheetRef} />
+        <PageBreadcrumbs current="Roles" />
+        <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/organizations/`} label="Role Docs" />
       </PageHeader>
 
       <PageContent>
+        <PageIntro
+          title="Roles"
+          description="Manage custom access roles and permission sets."
+          titleActions={
+            <PageStats
+              items={[{ label: 'total', value: roles.length }]}
+              loadingText={loadingRoles ? 'Loading roles...' : undefined}
+            />
+          }
+        />
         <OrganizationRoleTable
           data={roles}
           loadingData={loadingRoles}
           onUpdateRole={handleUpdateRole}
           onDeleteRole={handleDeleteRole}
           loadingRoleAction={loadingRoleAction}
+          toolbarActions={<CreateOrganizationRoleSheet onCreateRole={handleCreateRole} ref={createRoleSheetRef} />}
         />
       </PageContent>
     </PageLayout>

@@ -5,9 +5,19 @@
 
 import { UpsertRegistrySheet } from '@/components/UpsertRegistrySheet'
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import {
+  PageBreadcrumbs,
+  PageContent,
+  PageDocsLink,
+  PageFooter,
+  PageHeader,
+  PageIntro,
+  PageLayout,
+  PageStats,
+} from '@/components/PageLayout'
 import { RegistryTable } from '@/components/RegistryTable'
 import { Button } from '@/components/ui/button'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import {
   Dialog,
   DialogClose,
@@ -81,11 +91,24 @@ const Registries: React.FC = () => {
   return (
     <PageLayout contained>
       <PageHeader>
-        <PageTitle>Registries</PageTitle>
-        {writePermitted && <UpsertRegistrySheet className="ml-auto" disabled={loading} ref={addRegistrySheetRef} />}
+        <PageBreadcrumbs current="Registries" />
+        <PageDocsLink
+          href={`${DAYTONA_DOCS_URL}/en/snapshots/#using-images-from-private-registries`}
+          label="Registry Docs"
+        />
       </PageHeader>
 
       <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="Registries"
+          description="Manage private container registries used to pull snapshot and sandbox images."
+          titleActions={
+            <PageStats
+              items={[{ label: 'total', value: registries.length }]}
+              loadingText={loading ? 'Loading registries...' : undefined}
+            />
+          }
+        />
         <RegistryTable
           data={registries}
           loading={loading}
@@ -94,6 +117,7 @@ const Registries: React.FC = () => {
             setRegistryToEdit(registry)
             setShowEditSheet(true)
           }}
+          toolbarActions={writePermitted && <UpsertRegistrySheet disabled={loading} ref={addRegistrySheetRef} />}
         />
 
         <UpsertRegistrySheet

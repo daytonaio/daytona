@@ -231,7 +231,9 @@ export const CreateSnapshotSheet = ({ className, ref }: { className?: string; re
             </form.Field>
 
             <div className="flex flex-col gap-2">
-              <Label className="text-sm font-medium">Resources</Label>
+              <Label className="font-mono text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                Resources
+              </Label>
               <div className="flex flex-col gap-2">
                 <form.Field name="cpu">
                   {(field) => (

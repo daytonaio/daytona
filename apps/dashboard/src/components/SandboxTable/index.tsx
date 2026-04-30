@@ -71,6 +71,7 @@ export function SandboxTable({
   handleCreateSnapshot,
   handleFork,
   handleViewForks,
+  toolbarActions,
 }: SandboxTableProps) {
   const navigate = useNavigate()
   const { authenticatedUserHasPermission } = useSelectedOrganization()
@@ -176,6 +177,7 @@ export function SandboxTable({
         regionsDataIsLoading={regionsDataIsLoading}
         snapshots={snapshots}
         loadingSnapshots={loadingSnapshots}
+        toolbarActions={toolbarActions}
       />
 
       <TableContainer

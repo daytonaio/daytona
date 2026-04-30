@@ -4,7 +4,7 @@
  */
 
 import { OrganizationSuspendedError } from '@/api/errors'
-import { PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageBreadcrumbs, PageDocsLink, PageHeader, PageLayout } from '@/components/PageLayout'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +20,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { useArchiveSandboxMutation } from '@/hooks/mutations/useArchiveSandboxMutation'
 import { useDeleteSandboxMutation } from '@/hooks/mutations/useDeleteSandboxMutation'
 import { useRecoverSandboxMutation } from '@/hooks/mutations/useRecoverSandboxMutation'
@@ -190,7 +191,8 @@ export default function SandboxDetails() {
     <SandboxSessionProvider>
       <PageLayout className="max-h-screen overflow-hidden">
         <PageHeader>
-          <PageTitle>Sandboxes</PageTitle>
+          <PageBreadcrumbs current="Sandbox Details" />
+          <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/sandboxes/`} label="Sandbox Docs" />
         </PageHeader>
 
         <SandboxHeader

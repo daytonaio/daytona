@@ -5,8 +5,18 @@
 
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { CreateApiKeySheet } from '@/components/CreateApiKeySheet'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import {
+  PageBreadcrumbs,
+  PageContent,
+  PageDocsLink,
+  PageFooter,
+  PageHeader,
+  PageIntro,
+  PageLayout,
+  PageStats,
+} from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import {
   Dialog,
   DialogClose,
@@ -103,17 +113,21 @@ const Keys: React.FC = () => {
   return (
     <PageLayout contained>
       <PageHeader>
-        <PageTitle>API Keys</PageTitle>
-        <CreateApiKeySheet
-          className="ml-auto"
-          availablePermissions={availablePermissions}
-          apiUrl={apiUrl}
-          organizationId={selectedOrganization?.id}
-          ref={createApiKeySheetRef}
-        />
+        <PageBreadcrumbs current="API Keys" />
+        <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/api-keys/`} label="API Key Docs" />
       </PageHeader>
 
       <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="API Keys"
+          description="Create and revoke credentials used to access Daytona APIs and tooling."
+          titleActions={
+            <PageStats
+              items={[{ label: 'total', value: apiKeysQuery.data?.length ?? 0 }]}
+              loadingText={apiKeysQuery.isLoading ? 'Loading API keys...' : undefined}
+            />
+          }
+        />
         <ApiKeyTable
           data={apiKeysQuery.data ?? []}
           loading={apiKeysQuery.isLoading}
@@ -122,6 +136,14 @@ const Keys: React.FC = () => {
             setApiKeyToRevoke(key)
             setShowRevokeDialog(true)
           }}
+          toolbarActions={
+            <CreateApiKeySheet
+              availablePermissions={availablePermissions}
+              apiUrl={apiUrl}
+              organizationId={selectedOrganization?.id}
+              ref={createApiKeySheetRef}
+            />
+          }
         />
 
         {apiKeyToRevoke && (

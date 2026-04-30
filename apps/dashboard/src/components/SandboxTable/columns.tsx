@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { formatTimestamp, getRelativeTimeString } from '@/lib/utils'
+import { getRelativeTimeString } from '@/lib/utils'
 import { Sandbox, SandboxDesiredState, SandboxState } from '@daytona/api-client'
 import { ColumnDef } from '@tanstack/react-table'
 import React from 'react'
@@ -326,11 +326,11 @@ export function getColumns({
       },
       accessorFn: (row) => (row.createdAt ? new Date(row.createdAt) : new Date()),
       cell: ({ row }) => {
-        const timestamp = formatTimestamp(row.original.createdAt)
+        const timestamp = getRelativeTimeString(row.original.createdAt)
         return (
           <TimestampTooltip timestamp={row.original.createdAt}>
             <div className="w-full truncate">
-              <span className="truncate block">{timestamp}</span>
+              <span className="truncate block">{timestamp.relativeTimeString}</span>
             </div>
           </TimestampTooltip>
         )

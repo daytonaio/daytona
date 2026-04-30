@@ -7,6 +7,7 @@ import React, { useMemo, useRef, useState } from 'react'
 import { useApi } from '@/hooks/useApi'
 import {
   Region,
+  RegionType,
   OrganizationRolePermissionsEnum,
   CreateRegion,
   CreateRegionResponse,
@@ -18,7 +19,16 @@ import { type CommandConfig, useRegisterCommands } from '@/components/CommandPal
 import { CreateRegionSheet } from '@/components/CreateRegionSheet'
 import { UpdateRegionDialog } from '@/components/UpdateRegionDialog'
 import RegionDetailsSheet from '@/components/RegionDetailsSheet'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import {
+  PageBreadcrumbs,
+  PageContent,
+  PageDocsLink,
+  PageFooter,
+  PageHeader,
+  PageIntro,
+  PageLayout,
+  PageStats,
+} from '@/components/PageLayout'
 import {
   Dialog,
   DialogClose,
@@ -39,6 +49,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { toast } from 'sonner'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
@@ -189,6 +200,17 @@ const Regions: React.FC = () => {
     setShowRegionDetails(false)
   }
 
+  const regionStats = useMemo(() => {
+    const customCount = regions.filter((region) => region.regionType === RegionType.CUSTOM).length
+    const managedCount = regions.length - customCount
+
+    return [
+      { label: 'total', value: regions.length },
+      { label: 'custom', value: customCount, markerClassName: 'bg-success-foreground' },
+      { label: 'managed', value: managedCount, markerClassName: 'bg-muted-foreground/50' },
+    ].filter((item) => item.value > 0 || item.label === 'total')
+  }, [regions])
+
   const confirmRegenerateProxyApiKey = async () => {
     if (!regionForRegenerate || !selectedOrganization) {
       return
@@ -271,18 +293,18 @@ const Regions: React.FC = () => {
   return (
     <PageLayout contained>
       <PageHeader>
-        <PageTitle>Regions</PageTitle>
-        <div className="ml-auto">
-          <CreateRegionSheet
-            onCreateRegion={handleCreateRegion}
-            writePermitted={writePermitted}
-            loadingData={loadingRegions}
-            ref={createRegionSheetRef}
-          />
-        </div>
+        <PageBreadcrumbs current="Regions" />
+        <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/runners/`} label="Region Docs" />
       </PageHeader>
 
       <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="Regions"
+          description="Manage where sandboxes run and which infrastructure is available to your organization."
+          titleActions={
+            <PageStats items={regionStats} loadingText={loadingRegions ? 'Loading regions...' : undefined} />
+          }
+        />
         <RegionTable
           data={regions}
           loading={loadingRegions}
@@ -294,6 +316,14 @@ const Regions: React.FC = () => {
             setDeleteRegionDialogIsOpen(true)
           }}
           onOpenDetails={handleOpenRegionDetails}
+          toolbarActions={
+            <CreateRegionSheet
+              onCreateRegion={handleCreateRegion}
+              writePermitted={writePermitted}
+              loadingData={loadingRegions}
+              ref={createRegionSheetRef}
+            />
+          }
         />
       </PageContent>
       <PageFooter />

@@ -9,12 +9,13 @@ import {
   SetDefaultRegionDialog,
   type SetDefaultRegionDialogRef,
 } from '@/components/Organizations/SetDefaultRegionDialog'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageBreadcrumbs, PageContent, PageDocsLink, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Field, FieldContent, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { InputGroup, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { useDeleteOrganizationMutation } from '@/hooks/mutations/useDeleteOrganizationMutation'
 import { useLeaveOrganizationMutation } from '@/hooks/mutations/useLeaveOrganizationMutation'
 import { useOrganizations } from '@/hooks/useOrganizations'
@@ -70,10 +71,15 @@ const OrganizationSettings: React.FC = () => {
   return (
     <PageLayout>
       <PageHeader>
-        <PageTitle>Settings</PageTitle>
+        <PageBreadcrumbs current="Settings" />
+        <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/organizations/`} label="Organization Docs" />
       </PageHeader>
 
       <PageContent>
+        <PageIntro
+          title="Settings"
+          description="Manage organization details, default region, and organization lifecycle actions."
+        />
         <Card>
           <CardHeader className="p-4">
             <CardTitle>Organization Details</CardTitle>

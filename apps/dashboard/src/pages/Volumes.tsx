@@ -4,8 +4,18 @@
  */
 
 import { CreateVolumeSheet } from '@/components/CreateVolumeSheet'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import {
+  PageBreadcrumbs,
+  PageContent,
+  PageDocsLink,
+  PageFooter,
+  PageHeader,
+  PageIntro,
+  PageLayout,
+  PageStats,
+} from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import {
   Dialog,
   DialogClose,
@@ -153,16 +163,50 @@ const Volumes: React.FC = () => {
     [authenticatedUserHasPermission],
   )
 
+  const volumeStats = useMemo(() => {
+    const counts = volumes.reduce((acc, volume) => {
+      acc.set(volume.state, (acc.get(volume.state) ?? 0) + 1)
+      return acc
+    }, new Map<VolumeState, number>())
+
+    const markerColors: Partial<Record<VolumeState, string>> = {
+      [VolumeState.READY]: 'bg-success-foreground',
+      [VolumeState.ERROR]: 'bg-destructive-foreground',
+      [VolumeState.CREATING]: 'bg-warning-foreground',
+      [VolumeState.PENDING_CREATE]: 'bg-warning-foreground',
+      [VolumeState.PENDING_DELETE]: 'bg-warning-foreground',
+      [VolumeState.DELETING]: 'bg-warning-foreground',
+      [VolumeState.DELETED]: 'bg-muted-foreground/50',
+    }
+
+    return [
+      { label: 'total', value: volumes.length },
+      ...Array.from(counts.entries()).map(([state, count]) => ({
+        label: state
+          .split('_')
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' '),
+        value: count,
+        markerClassName: markerColors[state] ?? 'bg-muted-foreground/50',
+      })),
+    ]
+  }, [volumes])
+
   return (
     <PageLayout contained>
       <PageHeader>
-        <PageTitle>Volumes</PageTitle>
-        {writePermitted && (
-          <CreateVolumeSheet className="ml-auto" disabled={loadingVolumes} ref={createVolumeSheetRef} />
-        )}
+        <PageBreadcrumbs current="Volumes" />
+        <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/volumes/`} label="Volume Docs" />
       </PageHeader>
 
       <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="Volumes"
+          description="Manage persistent storage that can be attached to sandboxes across sessions."
+          titleActions={
+            <PageStats items={volumeStats} loadingText={loadingVolumes ? 'Loading volumes...' : undefined} />
+          }
+        />
         <VolumeTable
           data={volumes}
           loading={loadingVolumes}
@@ -179,6 +223,7 @@ const Volumes: React.FC = () => {
             setShowDeleteDialog(true)
           }}
           onBulkDelete={handleBulkDelete}
+          toolbarActions={writePermitted && <CreateVolumeSheet disabled={loadingVolumes} ref={createVolumeSheetRef} />}
         />
 
         {volumeToDelete && (

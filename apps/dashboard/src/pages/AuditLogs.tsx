@@ -4,9 +4,19 @@
  */
 
 import { AuditLogTable } from '@/components/AuditLogTable'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import {
+  PageBreadcrumbs,
+  PageContent,
+  PageDocsLink,
+  PageFooter,
+  PageHeader,
+  PageIntro,
+  PageLayout,
+  PageStats,
+} from '@/components/PageLayout'
 import { RefreshSegmentedButton } from '@/components/RefreshSegmentedButton'
 import { DateRangePicker, QuickRangesConfig } from '@/components/ui/date-range-picker'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useAuditLogsQuery, type AuditLogsQueryParams } from '@/hooks/queries/useAuditLogsQuery'
 import { handleApiError } from '@/lib/error-handling'
@@ -226,46 +236,74 @@ const AuditLogs: React.FC = () => {
     resetPagination()
   }, [resetPagination])
 
+  const auditLogStats = useMemo(() => {
+    const successCount = data.items.filter((item) => {
+      const statusCode = item.statusCode ?? 204
+      return statusCode >= 200 && statusCode < 300
+    }).length
+    const errorCount = data.items.filter((item) => {
+      const statusCode = item.statusCode ?? 204
+      return statusCode >= 400
+    }).length
+
+    return [
+      { label: 'total', value: data.total },
+      { label: 'Success', value: successCount, markerClassName: 'bg-green-600' },
+      { label: 'Error', value: errorCount, markerClassName: 'bg-red-600' },
+    ].filter((item) => item.value > 0 || item.label === 'total')
+  }, [data.items, data.total])
+
   return (
     <PageLayout contained>
       <PageHeader>
-        <PageTitle>Audit Logs</PageTitle>
+        <PageBreadcrumbs current="Audit Logs" />
+        <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/audit-logs/`} label="Audit Log Docs" />
       </PageHeader>
 
-      <PageContent size="full" className="overflow-hidden gap-3">
-        <div className="flex gap-2 flex-wrap justify-between">
-          <DateRangePicker
-            className="max-w-[380px] truncate"
-            value={dateRange}
-            onChange={handleDateRangeChange}
-            quickRangesEnabled
-            quickRanges={AUDIT_LOG_QUICK_RANGES}
-            timeSelection
-            disabled={isLoading}
-          />
-          <RefreshSegmentedButton
-            value={refreshInterval}
-            onChange={setRefreshInterval}
-            onRefresh={refetch}
-            isRefreshing={isRefetching}
-            lastUpdatedAt={dataUpdatedAt}
+      <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="Audit Logs"
+          description="Review organization activity, security events, and operational changes."
+          titleActions={
+            <PageStats items={auditLogStats} loadingText={isLoading ? 'Loading audit logs...' : undefined} />
+          }
+        />
+        <div className="flex min-h-0 flex-1 flex-col gap-4">
+          <AuditLogTable
+            data={data.items}
+            loading={isLoading}
+            isRefetching={isRefetching}
+            hasFilters={hasFilters}
+            onClearFilters={handleClearFilters}
+            pageCount={data.totalPages}
+            totalItems={data.total}
+            onPaginationChange={handlePaginationChange}
+            pagination={{
+              pageIndex: pagination.pageIndex,
+              pageSize: pagination.pageSize,
+            }}
+            toolbar={
+              <>
+                <DateRangePicker
+                  className="max-w-[380px] truncate"
+                  value={dateRange}
+                  onChange={handleDateRangeChange}
+                  quickRangesEnabled
+                  quickRanges={AUDIT_LOG_QUICK_RANGES}
+                  timeSelection
+                  disabled={isLoading}
+                />
+                <RefreshSegmentedButton
+                  value={refreshInterval}
+                  onChange={setRefreshInterval}
+                  onRefresh={refetch}
+                  isRefreshing={isRefetching}
+                  lastUpdatedAt={dataUpdatedAt}
+                />
+              </>
+            }
           />
         </div>
-
-        <AuditLogTable
-          data={data.items}
-          loading={isLoading}
-          isRefetching={isRefetching}
-          hasFilters={hasFilters}
-          onClearFilters={handleClearFilters}
-          pageCount={data.totalPages}
-          totalItems={data.total}
-          onPaginationChange={handlePaginationChange}
-          pagination={{
-            pageIndex: pagination.pageIndex,
-            pageSize: pagination.pageSize,
-          }}
-        />
       </PageContent>
       <PageFooter />
     </PageLayout>

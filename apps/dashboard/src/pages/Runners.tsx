@@ -5,11 +5,21 @@
 
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { CreateRunnerSheet } from '@/components/CreateRunnerSheet'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import {
+  PageBreadcrumbs,
+  PageContent,
+  PageDocsLink,
+  PageFooter,
+  PageHeader,
+  PageIntro,
+  PageLayout,
+  PageStats,
+} from '@/components/PageLayout'
 import { RefreshIntervalValue } from '@/components/RefreshSegmentedButton'
 import RunnerDetailsSheet from '@/components/RunnerDetailsSheet'
 import { RunnerTable } from '@/components/RunnerTable'
 import { Button } from '@/components/ui/button'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import {
   Dialog,
   DialogClose,
@@ -236,18 +246,51 @@ const Runners: React.FC = () => {
 
   useRegisterCommands(rootCommands, { groupId: 'runner-actions', groupLabel: 'Runner actions', groupOrder: 0 })
 
+  const runnerStats = useMemo(() => {
+    const counts = runners.reduce((acc, runner) => {
+      acc.set(runner.state, (acc.get(runner.state) ?? 0) + 1)
+      return acc
+    }, new Map<RunnerState, number>())
+
+    const markerColors: Partial<Record<RunnerState, string>> = {
+      [RunnerState.READY]: 'bg-success-foreground',
+      [RunnerState.INITIALIZING]: 'bg-warning-foreground',
+      [RunnerState.UNRESPONSIVE]: 'bg-destructive-foreground',
+      [RunnerState.DISABLED]: 'bg-muted-foreground/50',
+      [RunnerState.DECOMMISSIONED]: 'bg-muted-foreground/50',
+    }
+
+    return [
+      { label: 'total', value: runners.length },
+      ...Array.from(counts.entries()).map(([state, count]) => ({
+        label: state
+          .split('_')
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' '),
+        value: count,
+        markerClassName: markerColors[state] ?? 'bg-muted-foreground/50',
+      })),
+    ]
+  }, [runners])
+
   return (
     <PageLayout contained>
       <PageHeader>
-        <PageTitle>Runners</PageTitle>
-        {writePermitted && regions.length > 0 && (
-          <div className="ml-auto">
-            <CreateRunnerSheet regions={regions} onCreateRunner={handleCreateRunner} ref={createRunnerSheetRef} />
-          </div>
-        )}
+        <PageBreadcrumbs current="Runners" />
+        <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/runners/`} label="Runner Docs" />
       </PageHeader>
 
       <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="Runners"
+          description="Manage compute workers connected to your custom regions."
+          titleActions={
+            <PageStats
+              items={runnerStats}
+              loadingText={loadingRunnersData || loadingRegions ? 'Loading runners...' : undefined}
+            />
+          }
+        />
         <RunnerTable
           data={runners}
           regions={regions}
@@ -267,6 +310,12 @@ const Runners: React.FC = () => {
           onRefresh={() => fetchRunners(false)}
           isRefreshing={loadingRunnersData}
           lastUpdatedAt={runnersUpdatedAt}
+          toolbarActions={
+            writePermitted &&
+            regions.length > 0 && (
+              <CreateRunnerSheet regions={regions} onCreateRunner={handleCreateRunner} ref={createRunnerSheetRef} />
+            )
+          }
         />
       </PageContent>
       <PageFooter />

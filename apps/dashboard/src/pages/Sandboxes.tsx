@@ -6,7 +6,16 @@
 import { OrganizationSuspendedError } from '@/api/errors'
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { ForkTreeDialog } from '@/components/ForkTreeDialog'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import {
+  PageBreadcrumbs,
+  PageContent,
+  PageDocsLink,
+  PageFooter,
+  PageHeader,
+  PageIntro,
+  PageLayout,
+  PageStats,
+} from '@/components/PageLayout'
 import { RecursiveDeleteDialog } from '@/components/RecursiveDeleteDialog'
 import { CreateSandboxSheet } from '@/components/Sandbox/CreateSandboxSheet'
 import SandboxDetailsSheet, { type SandboxDetailsSheetTabValue } from '@/components/SandboxDetailsSheet'
@@ -14,6 +23,7 @@ import { tabParser } from '@/components/sandboxes/SearchParams'
 import { CreateSshAccessSheet } from '@/components/sandboxes/CreateSshAccessSheet'
 import { RevokeSshAccessDialog } from '@/components/sandboxes/RevokeSshAccessDialog'
 import { SandboxTable } from '@/components/SandboxTable'
+import { getStateLabel } from '@/components/SandboxTable/constants'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,7 +47,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { createBulkActionToast } from '@/lib/bulk-action-toast'
 import { handleApiError } from '@/lib/error-handling'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
-import { formatDuration, pluralize } from '@/lib/utils'
+import { cn, formatDuration, pluralize } from '@/lib/utils'
 import {
   OrganizationRolePermissionsEnum,
   OrganizationUserRoleEnum,
@@ -53,6 +63,18 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+
+const SANDBOX_STATE_MARKER_COLORS: Partial<Record<SandboxState, string>> = {
+  [SandboxState.STARTED]: 'bg-green-600',
+  [SandboxState.STOPPED]: 'bg-muted-foreground/50',
+  [SandboxState.ERROR]: 'bg-destructive',
+  [SandboxState.BUILD_FAILED]: 'bg-destructive',
+  [SandboxState.UNKNOWN]: 'bg-muted-foreground/20',
+  [SandboxState.UNKNOWN_DEFAULT_OPEN_API]: 'bg-muted-foreground/20',
+  [SandboxState.ARCHIVED]: 'bg-muted-foreground/20',
+  [SandboxState.DESTROYED]: 'bg-muted-foreground/20',
+  [SandboxState.PENDING_BUILD]: 'bg-muted-foreground/20',
+}
 
 const Sandboxes: React.FC = () => {
   const { sandboxApi, apiKeyApi, toolboxApi, snapshotApi } = useApi()
@@ -785,6 +807,49 @@ const Sandboxes: React.FC = () => {
     [authenticatedUserHasPermission],
   )
   const canCreateSandbox = writePermitted && !selectedOrganization?.suspended
+  const sandboxStateStats = useMemo(() => {
+    const counts = sandboxes.reduce((acc, sandbox) => {
+      const state = sandbox.state ?? SandboxState.UNKNOWN
+      acc.set(state, (acc.get(state) ?? 0) + 1)
+      return acc
+    }, new Map<SandboxState, number>())
+
+    const states = [
+      SandboxState.STARTED,
+      SandboxState.STOPPED,
+      SandboxState.ARCHIVED,
+      SandboxState.ERROR,
+      SandboxState.BUILD_FAILED,
+      SandboxState.STARTING,
+      SandboxState.STOPPING,
+      SandboxState.ARCHIVING,
+      SandboxState.CREATING,
+      SandboxState.PENDING_BUILD,
+      SandboxState.RESTORING,
+      SandboxState.BUILDING_SNAPSHOT,
+      SandboxState.PULLING_SNAPSHOT,
+      SandboxState.RESIZING,
+      SandboxState.SNAPSHOTTING,
+      SandboxState.FORKING,
+      SandboxState.DESTROYING,
+      SandboxState.UNKNOWN,
+      SandboxState.UNKNOWN_DEFAULT_OPEN_API,
+    ]
+
+    return states.map((state) => ({ state, count: counts.get(state) ?? 0 })).filter(({ count }) => count > 0)
+  }, [sandboxes])
+
+  const sandboxStats = useMemo(
+    () => [
+      { label: 'total', value: sandboxes.length },
+      ...sandboxStateStats.map(({ state, count }) => ({
+        label: getStateLabel(state),
+        value: count,
+        markerClassName: SANDBOX_STATE_MARKER_COLORS[state] ?? 'bg-muted-foreground/50',
+      })),
+    ],
+    [sandboxStateStats, sandboxes.length],
+  )
 
   const rootCommands: CommandConfig[] = useMemo(() => {
     if (!canCreateSandbox) {
@@ -837,26 +902,17 @@ const Sandboxes: React.FC = () => {
   return (
     <PageLayout contained>
       <PageHeader>
-        <PageTitle>Sandboxes</PageTitle>
-        <div className="flex items-center gap-2 ml-auto">
-          {!loadingTable && sandboxes.length === 0 && (
-            <>
-              <Button variant="link" className="text-primary" onClick={() => navigate(RoutePath.ONBOARDING)} size="sm">
-                Onboarding guide
-              </Button>
-              <Button variant="link" className="text-primary" asChild size="sm">
-                <a href={DAYTONA_DOCS_URL} target="_blank" rel="noopener noreferrer" className="text-primary">
-                  Docs
-                </a>
-              </Button>
-            </>
-          )}
-          {canCreateSandbox && (
-            <CreateSandboxSheet ref={createSandboxSheetRef} onSandboxCreated={handleSandboxCreated} />
-          )}
-        </div>
+        <PageBreadcrumbs current="Sandboxes" />
+        <PageDocsLink href={`${DAYTONA_DOCS_URL}/en/sandboxes/`} label="Sandbox Docs" />
       </PageHeader>
       <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="Sandboxes"
+          description="Manage isolated runtime environments for code execution and agent workloads."
+          titleActions={
+            <PageStats items={sandboxStats} loadingText={loadingTable ? 'Loading sandboxes...' : undefined} />
+          }
+        />
         <SandboxTable
           sandboxIsLoading={loadingSandboxes}
           sandboxStateIsTransitioning={transitioningSandboxes}
@@ -891,6 +947,32 @@ const Sandboxes: React.FC = () => {
           handleCreateSnapshot={handleCreateSnapshot}
           handleFork={handleFork}
           handleViewForks={handleViewForks}
+          toolbarActions={
+            <>
+              {!loadingTable && sandboxes.length === 0 && (
+                <Button
+                  variant="link"
+                  className="text-primary"
+                  onClick={() => navigate(RoutePath.ONBOARDING)}
+                  size="sm"
+                >
+                  Onboarding guide
+                </Button>
+              )}
+              {canCreateSandbox && (
+                <CreateSandboxSheet
+                  ref={createSandboxSheetRef}
+                  onSandboxCreated={handleSandboxCreated}
+                  triggerLabel={
+                    <>
+                      <span className="hidden sm:inline">Create Sandbox</span>
+                      <span className="max-[380px]:hidden sm:hidden">Create</span>
+                    </>
+                  }
+                />
+              )}
+            </>
+          }
         />
 
         {sandboxToDelete && (

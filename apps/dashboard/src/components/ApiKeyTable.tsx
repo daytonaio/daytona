@@ -22,7 +22,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { KeyRound, Loader2, MoreHorizontal } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { type ReactNode, useMemo, useState } from 'react'
 import { PageFooterPortal } from './PageLayout'
 import { Pagination } from './Pagination'
 import { SearchInput } from './SearchInput'
@@ -63,9 +63,10 @@ interface DataTableProps {
   loading: boolean
   isLoadingKey: (key: ApiKeyList) => boolean
   onRevokeRequest: (key: ApiKeyList) => void
+  toolbarActions?: ReactNode
 }
 
-export function ApiKeyTable({ data, loading, isLoadingKey, onRevokeRequest }: DataTableProps) {
+export function ApiKeyTable({ data, loading, isLoadingKey, onRevokeRequest, toolbarActions }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
   const table = useReactTable({
@@ -117,14 +118,15 @@ export function ApiKeyTable({ data, loading, isLoadingKey, onRevokeRequest }: Da
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <div>
+      <div className="flex items-center gap-2">
         <SearchInput
           debounced
           value={globalFilter}
           onValueChange={handleChangeFilter}
           placeholder="Search by Name or Permission"
-          containerClassName="max-w-sm"
+          containerClassName="min-w-0 flex-1 sm:max-w-sm"
         />
+        {toolbarActions ? <div className="flex shrink-0 items-center gap-2 sm:ml-auto">{toolbarActions}</div> : null}
       </div>
       <TableContainer
         className={isEmpty ? 'min-h-[26rem]' : undefined}
