@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -35,6 +35,7 @@ import type { ReplaceResult } from '../models';
 import type { SearchFilesResponse } from '../models';
 /**
  * FileSystemApi - axios parameter creator
+ * @export
  */
 export const FileSystemApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -72,6 +73,7 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
             }
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -113,6 +115,7 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
             }
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -148,8 +151,8 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
                 localVarQueryParameter['path'] = path;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/octet-stream';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -181,8 +184,9 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'multipart/form-data';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -227,8 +231,8 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
                 localVarQueryParameter['pattern'] = pattern;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -264,8 +268,8 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
                 localVarQueryParameter['path'] = path;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -299,8 +303,8 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
                 localVarQueryParameter['path'] = path;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -344,6 +348,7 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
             }
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -375,8 +380,9 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -421,8 +427,8 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
                 localVarQueryParameter['pattern'] = pattern;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -474,6 +480,7 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
             }
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -517,9 +524,10 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
             if (file !== undefined) { 
                 localVarFormParams.append('file', file as any);
             }
+    
+    
             localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
-            localVarHeaderParameter['Accept'] = '*/*';
-
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -550,6 +558,7 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
             const localVarQueryParameter = {} as any;
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -564,6 +573,7 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
 
 /**
  * FileSystemApi - functional programming interface
+ * @export
  */
 export const FileSystemApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = FileSystemApiAxiosParamCreator(configuration)
@@ -750,6 +760,7 @@ export const FileSystemApiFp = function(configuration?: Configuration) {
 
 /**
  * FileSystemApi - factory interface
+ * @export
  */
 export const FileSystemApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = FileSystemApiFp(configuration)
@@ -897,6 +908,9 @@ export const FileSystemApiFactory = function (configuration?: Configuration, bas
 
 /**
  * FileSystemApi - object-oriented interface
+ * @export
+ * @class FileSystemApi
+ * @extends {BaseAPI}
  */
 export class FileSystemApi extends BaseAPI {
     /**
@@ -906,6 +920,7 @@ export class FileSystemApi extends BaseAPI {
      * @param {string} mode Octal permission mode (default: 0755)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof FileSystemApi
      */
     public createFolder(path: string, mode: string, options?: RawAxiosRequestConfig) {
         return FileSystemApiFp(this.configuration).createFolder(path, mode, options).then((request) => request(this.axios, this.basePath));
@@ -918,6 +933,7 @@ export class FileSystemApi extends BaseAPI {
      * @param {boolean} [recursive] Enable recursive deletion for directories
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof FileSystemApi
      */
     public deleteFile(path: string, recursive?: boolean, options?: RawAxiosRequestConfig) {
         return FileSystemApiFp(this.configuration).deleteFile(path, recursive, options).then((request) => request(this.axios, this.basePath));
@@ -929,6 +945,7 @@ export class FileSystemApi extends BaseAPI {
      * @param {string} path File path to download
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof FileSystemApi
      */
     public downloadFile(path: string, options?: RawAxiosRequestConfig) {
         return FileSystemApiFp(this.configuration).downloadFile(path, options).then((request) => request(this.axios, this.basePath));
@@ -940,6 +957,7 @@ export class FileSystemApi extends BaseAPI {
      * @param {FilesDownloadRequest} downloadFiles Paths of files to download
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof FileSystemApi
      */
     public downloadFiles(downloadFiles: FilesDownloadRequest, options?: RawAxiosRequestConfig) {
         return FileSystemApiFp(this.configuration).downloadFiles(downloadFiles, options).then((request) => request(this.axios, this.basePath));
@@ -952,6 +970,7 @@ export class FileSystemApi extends BaseAPI {
      * @param {string} pattern Text pattern to search for
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof FileSystemApi
      */
     public findInFiles(path: string, pattern: string, options?: RawAxiosRequestConfig) {
         return FileSystemApiFp(this.configuration).findInFiles(path, pattern, options).then((request) => request(this.axios, this.basePath));
@@ -963,6 +982,7 @@ export class FileSystemApi extends BaseAPI {
      * @param {string} path File or directory path
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof FileSystemApi
      */
     public getFileInfo(path: string, options?: RawAxiosRequestConfig) {
         return FileSystemApiFp(this.configuration).getFileInfo(path, options).then((request) => request(this.axios, this.basePath));
@@ -974,6 +994,7 @@ export class FileSystemApi extends BaseAPI {
      * @param {string} [path] Directory path to list (defaults to working directory)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof FileSystemApi
      */
     public listFiles(path?: string, options?: RawAxiosRequestConfig) {
         return FileSystemApiFp(this.configuration).listFiles(path, options).then((request) => request(this.axios, this.basePath));
@@ -986,6 +1007,7 @@ export class FileSystemApi extends BaseAPI {
      * @param {string} destination Destination file or directory path
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof FileSystemApi
      */
     public moveFile(source: string, destination: string, options?: RawAxiosRequestConfig) {
         return FileSystemApiFp(this.configuration).moveFile(source, destination, options).then((request) => request(this.axios, this.basePath));
@@ -997,6 +1019,7 @@ export class FileSystemApi extends BaseAPI {
      * @param {ReplaceRequest} request Replace request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof FileSystemApi
      */
     public replaceInFiles(request: ReplaceRequest, options?: RawAxiosRequestConfig) {
         return FileSystemApiFp(this.configuration).replaceInFiles(request, options).then((request) => request(this.axios, this.basePath));
@@ -1009,6 +1032,7 @@ export class FileSystemApi extends BaseAPI {
      * @param {string} pattern File pattern to match (e.g., *.txt, *.go)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof FileSystemApi
      */
     public searchFiles(path: string, pattern: string, options?: RawAxiosRequestConfig) {
         return FileSystemApiFp(this.configuration).searchFiles(path, pattern, options).then((request) => request(this.axios, this.basePath));
@@ -1023,6 +1047,7 @@ export class FileSystemApi extends BaseAPI {
      * @param {string} [mode] File mode in octal format (e.g., 0755)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof FileSystemApi
      */
     public setFilePermissions(path: string, owner?: string, group?: string, mode?: string, options?: RawAxiosRequestConfig) {
         return FileSystemApiFp(this.configuration).setFilePermissions(path, owner, group, mode, options).then((request) => request(this.axios, this.basePath));
@@ -1035,6 +1060,7 @@ export class FileSystemApi extends BaseAPI {
      * @param {File} file File to upload
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof FileSystemApi
      */
     public uploadFile(path: string, file: File, options?: RawAxiosRequestConfig) {
         return FileSystemApiFp(this.configuration).uploadFile(path, file, options).then((request) => request(this.axios, this.basePath));
@@ -1045,6 +1071,7 @@ export class FileSystemApi extends BaseAPI {
      * @summary Upload multiple files
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof FileSystemApi
      */
     public uploadFiles(options?: RawAxiosRequestConfig) {
         return FileSystemApiFp(this.configuration).uploadFiles(options).then((request) => request(this.axios, this.basePath));

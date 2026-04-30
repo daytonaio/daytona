@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -29,6 +29,7 @@ import type { ApiKeyResponse } from '../models';
 import type { CreateApiKey } from '../models';
 /**
  * ApiKeysApi - axios parameter creator
+ * @export
  */
 export const ApiKeysApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -61,8 +62,9 @@ export const ApiKeysApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -108,6 +110,7 @@ export const ApiKeysApiAxiosParamCreator = function (configuration?: Configurati
             // authentication oauth2 required
 
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -155,6 +158,7 @@ export const ApiKeysApiAxiosParamCreator = function (configuration?: Configurati
             // authentication oauth2 required
 
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -197,8 +201,8 @@ export const ApiKeysApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -237,8 +241,8 @@ export const ApiKeysApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -277,8 +281,8 @@ export const ApiKeysApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -296,6 +300,7 @@ export const ApiKeysApiAxiosParamCreator = function (configuration?: Configurati
 
 /**
  * ApiKeysApi - functional programming interface
+ * @export
  */
 export const ApiKeysApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ApiKeysApiAxiosParamCreator(configuration)
@@ -388,6 +393,7 @@ export const ApiKeysApiFp = function(configuration?: Configuration) {
 
 /**
  * ApiKeysApi - factory interface
+ * @export
  */
 export const ApiKeysApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = ApiKeysApiFp(configuration)
@@ -462,6 +468,9 @@ export const ApiKeysApiFactory = function (configuration?: Configuration, basePa
 
 /**
  * ApiKeysApi - object-oriented interface
+ * @export
+ * @class ApiKeysApi
+ * @extends {BaseAPI}
  */
 export class ApiKeysApi extends BaseAPI {
     /**
@@ -471,6 +480,7 @@ export class ApiKeysApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ApiKeysApi
      */
     public createApiKey(createApiKey: CreateApiKey, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ApiKeysApiFp(this.configuration).createApiKey(createApiKey, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -483,6 +493,7 @@ export class ApiKeysApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ApiKeysApi
      */
     public deleteApiKey(name: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ApiKeysApiFp(this.configuration).deleteApiKey(name, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -496,6 +507,7 @@ export class ApiKeysApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ApiKeysApi
      */
     public deleteApiKeyForUser(userId: string, name: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ApiKeysApiFp(this.configuration).deleteApiKeyForUser(userId, name, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -508,6 +520,7 @@ export class ApiKeysApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ApiKeysApi
      */
     public getApiKey(name: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ApiKeysApiFp(this.configuration).getApiKey(name, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -519,6 +532,7 @@ export class ApiKeysApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ApiKeysApi
      */
     public getCurrentApiKey(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ApiKeysApiFp(this.configuration).getCurrentApiKey(xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -530,6 +544,7 @@ export class ApiKeysApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ApiKeysApi
      */
     public listApiKeys(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return ApiKeysApiFp(this.configuration).listApiKeys(xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));

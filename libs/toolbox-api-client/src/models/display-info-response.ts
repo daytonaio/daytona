@@ -17,7 +17,17 @@
 // @ts-ignore
 import type { DisplayInfo } from './display-info';
 
+/**
+ * 
+ * @export
+ * @interface DisplayInfoResponse
+ */
 export interface DisplayInfoResponse {
+    /**
+     * 
+     * @type {Array<DisplayInfo>}
+     * @memberof DisplayInfoResponse
+     */
     'displays'?: Array<DisplayInfo>;
 }
 

@@ -1,3 +1,5 @@
+# coding: utf-8
+
 """
     Daytona Toolbox API
 
@@ -8,7 +10,6 @@
 
     Do not edit the class manually.
 """  # noqa: E501
-
 
 import warnings
 from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
@@ -603,7 +604,7 @@ class FileSystemApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> bytes:
+    ) -> bytearray:
         """Download a file
 
         Download a file by providing its path
@@ -641,7 +642,7 @@ class FileSystemApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bytes",
+            '200': "bytearray",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -670,7 +671,7 @@ class FileSystemApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[bytes]:
+    ) -> ApiResponse[bytearray]:
         """Download a file
 
         Download a file by providing its path
@@ -708,7 +709,7 @@ class FileSystemApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bytes",
+            '200': "bytearray",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -775,7 +776,7 @@ class FileSystemApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bytes",
+            '200': "bytearray",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3080,7 +3081,7 @@ class FileSystemApi:
         :param path: Destination path for the uploaded file (required)
         :type path: str
         :param file: File to upload (required)
-        :type file: bytes
+        :type file: bytearray
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -3151,7 +3152,7 @@ class FileSystemApi:
         :param path: Destination path for the uploaded file (required)
         :type path: str
         :param file: File to upload (required)
-        :type file: bytes
+        :type file: bytearray
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -3222,7 +3223,7 @@ class FileSystemApi:
         :param path: Destination path for the uploaded file (required)
         :type path: str
         :param file: File to upload (required)
-        :type file: bytes
+        :type file: bytearray
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of

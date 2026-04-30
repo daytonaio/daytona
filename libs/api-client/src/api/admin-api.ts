@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -47,6 +47,7 @@ import type { SnapshotDto } from '../models';
 import type { User } from '../models';
 /**
  * AdminApi - axios parameter creator
+ * @export
  */
 export const AdminApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -82,8 +83,8 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
                 localVarQueryParameter['imageName'] = imageName;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -121,8 +122,9 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -162,6 +164,8 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -204,6 +208,7 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
             // authentication oauth2 required
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -267,8 +272,8 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
                 localVarQueryParameter['nextToken'] = nextToken;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -311,8 +316,8 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -351,8 +356,8 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -391,8 +396,8 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -427,8 +432,8 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -468,6 +473,7 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
             // authentication oauth2 required
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -507,8 +513,8 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
                 localVarQueryParameter['regionId'] = regionId;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -544,6 +550,7 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
             // authentication oauth2 required
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -582,8 +589,8 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -623,6 +630,7 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
             // authentication oauth2 required
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -664,6 +672,8 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -705,8 +715,8 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -748,8 +758,9 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -791,6 +802,7 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
             // authentication oauth2 required
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -805,6 +817,7 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
 
 /**
  * AdminApi - functional programming interface
+ * @export
  */
 export const AdminApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = AdminApiAxiosParamCreator(configuration)
@@ -1053,6 +1066,7 @@ export const AdminApiFp = function(configuration?: Configuration) {
 
 /**
  * AdminApi - factory interface
+ * @export
  */
 export const AdminApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = AdminApiFp(configuration)
@@ -1247,6 +1261,9 @@ export const AdminApiFactory = function (configuration?: Configuration, basePath
 
 /**
  * AdminApi - object-oriented interface
+ * @export
+ * @class AdminApi
+ * @extends {BaseAPI}
  */
 export class AdminApi extends BaseAPI {
     /**
@@ -1255,6 +1272,7 @@ export class AdminApi extends BaseAPI {
      * @param {string} imageName Image name with tag to check
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AdminApi
      */
     public adminCanCleanupImage(imageName: string, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminCanCleanupImage(imageName, options).then((request) => request(this.axios, this.basePath));
@@ -1266,6 +1284,7 @@ export class AdminApi extends BaseAPI {
      * @param {AdminCreateRunner} adminCreateRunner 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AdminApi
      */
     public adminCreateRunner(adminCreateRunner: AdminCreateRunner, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminCreateRunner(adminCreateRunner, options).then((request) => request(this.axios, this.basePath));
@@ -1277,6 +1296,7 @@ export class AdminApi extends BaseAPI {
      * @param {CreateUser} createUser 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AdminApi
      */
     public adminCreateUser(createUser: CreateUser, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminCreateUser(createUser, options).then((request) => request(this.axios, this.basePath));
@@ -1288,6 +1308,7 @@ export class AdminApi extends BaseAPI {
      * @param {string} id Runner ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AdminApi
      */
     public adminDeleteRunner(id: string, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminDeleteRunner(id, options).then((request) => request(this.axios, this.basePath));
@@ -1303,6 +1324,7 @@ export class AdminApi extends BaseAPI {
      * @param {string} [nextToken] Token for cursor-based pagination. When provided, takes precedence over page parameter.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AdminApi
      */
     public adminGetAllAuditLogs(page?: number, limit?: number, from?: Date, to?: Date, nextToken?: string, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminGetAllAuditLogs(page, limit, from, to, nextToken, options).then((request) => request(this.axios, this.basePath));
@@ -1315,6 +1337,7 @@ export class AdminApi extends BaseAPI {
      * @param {string} messageId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AdminApi
      */
     public adminGetMessageAttempts(organizationId: string, messageId: string, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminGetMessageAttempts(organizationId, messageId, options).then((request) => request(this.axios, this.basePath));
@@ -1326,6 +1349,7 @@ export class AdminApi extends BaseAPI {
      * @param {string} id Runner ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AdminApi
      */
     public adminGetRunnerById(id: string, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminGetRunnerById(id, options).then((request) => request(this.axios, this.basePath));
@@ -1337,6 +1361,7 @@ export class AdminApi extends BaseAPI {
      * @param {string} id 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AdminApi
      */
     public adminGetUser(id: string, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminGetUser(id, options).then((request) => request(this.axios, this.basePath));
@@ -1347,6 +1372,7 @@ export class AdminApi extends BaseAPI {
      * @summary Get webhook service status
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AdminApi
      */
     public adminGetWebhookStatus(options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminGetWebhookStatus(options).then((request) => request(this.axios, this.basePath));
@@ -1358,6 +1384,7 @@ export class AdminApi extends BaseAPI {
      * @param {string} organizationId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AdminApi
      */
     public adminInitializeWebhooks(organizationId: string, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminInitializeWebhooks(organizationId, options).then((request) => request(this.axios, this.basePath));
@@ -1369,6 +1396,7 @@ export class AdminApi extends BaseAPI {
      * @param {string} [regionId] Filter runners by region ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AdminApi
      */
     public adminListRunners(regionId?: string, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminListRunners(regionId, options).then((request) => request(this.axios, this.basePath));
@@ -1379,6 +1407,7 @@ export class AdminApi extends BaseAPI {
      * @summary List all users
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AdminApi
      */
     public adminListUsers(options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminListUsers(options).then((request) => request(this.axios, this.basePath));
@@ -1390,6 +1419,7 @@ export class AdminApi extends BaseAPI {
      * @param {string} sandboxId ID of the sandbox
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AdminApi
      */
     public adminRecoverSandbox(sandboxId: string, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminRecoverSandbox(sandboxId, options).then((request) => request(this.axios, this.basePath));
@@ -1401,6 +1431,7 @@ export class AdminApi extends BaseAPI {
      * @param {string} id 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AdminApi
      */
     public adminRegenerateKeyPair(id: string, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminRegenerateKeyPair(id, options).then((request) => request(this.axios, this.basePath));
@@ -1413,6 +1444,7 @@ export class AdminApi extends BaseAPI {
      * @param {SendWebhookDto} sendWebhookDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AdminApi
      */
     public adminSendWebhook(organizationId: string, sendWebhookDto: SendWebhookDto, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminSendWebhook(organizationId, sendWebhookDto, options).then((request) => request(this.axios, this.basePath));
@@ -1424,6 +1456,7 @@ export class AdminApi extends BaseAPI {
      * @param {string} id ID of the docker registry
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AdminApi
      */
     public adminSetDefaultRegistry(id: string, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminSetDefaultRegistry(id, options).then((request) => request(this.axios, this.basePath));
@@ -1436,6 +1469,7 @@ export class AdminApi extends BaseAPI {
      * @param {SetSnapshotGeneralStatusDto} setSnapshotGeneralStatusDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AdminApi
      */
     public adminSetSnapshotGeneralStatus(id: string, setSnapshotGeneralStatusDto: SetSnapshotGeneralStatusDto, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminSetSnapshotGeneralStatus(id, setSnapshotGeneralStatusDto, options).then((request) => request(this.axios, this.basePath));
@@ -1447,6 +1481,7 @@ export class AdminApi extends BaseAPI {
      * @param {string} id 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AdminApi
      */
     public adminUpdateRunnerScheduling(id: string, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminUpdateRunnerScheduling(id, options).then((request) => request(this.axios, this.basePath));

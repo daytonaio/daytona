@@ -14,8 +14,23 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface MouseDragResponse
+ */
 export interface MouseDragResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof MouseDragResponse
+     */
     'x'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof MouseDragResponse
+     */
     'y'?: number;
 }
 

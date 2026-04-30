@@ -14,9 +14,16 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface DownloadFiles
+ */
 export interface DownloadFiles {
     /**
      * List of remote file paths to download
+     * @type {Array<string>}
+     * @memberof DownloadFiles
      */
     'paths': Array<string>;
 }

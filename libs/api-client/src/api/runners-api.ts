@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -35,6 +35,7 @@ import type { RunnerHealthcheck } from '../models';
 import type { RunnerSnapshotDto } from '../models';
 /**
  * RunnersApi - axios parameter creator
+ * @export
  */
 export const RunnersApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -67,8 +68,9 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -114,6 +116,7 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
             // authentication oauth2 required
 
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -151,8 +154,8 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -192,8 +195,8 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -235,8 +238,8 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -275,8 +278,8 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -318,8 +321,8 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['ref'] = ref;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -360,8 +363,8 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['regionId'] = regionId;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -402,6 +405,8 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -444,8 +449,8 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -488,8 +493,8 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -507,6 +512,7 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
 
 /**
  * RunnersApi - functional programming interface
+ * @export
  */
 export const RunnersApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = RunnersApiAxiosParamCreator(configuration)
@@ -664,6 +670,7 @@ export const RunnersApiFp = function(configuration?: Configuration) {
 
 /**
  * RunnersApi - factory interface
+ * @export
  */
 export const RunnersApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = RunnersApiFp(configuration)
@@ -788,6 +795,9 @@ export const RunnersApiFactory = function (configuration?: Configuration, basePa
 
 /**
  * RunnersApi - object-oriented interface
+ * @export
+ * @class RunnersApi
+ * @extends {BaseAPI}
  */
 export class RunnersApi extends BaseAPI {
     /**
@@ -797,6 +807,7 @@ export class RunnersApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof RunnersApi
      */
     public createRunner(createRunner: CreateRunner, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return RunnersApiFp(this.configuration).createRunner(createRunner, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -809,6 +820,7 @@ export class RunnersApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof RunnersApi
      */
     public deleteRunner(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return RunnersApiFp(this.configuration).deleteRunner(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -819,6 +831,7 @@ export class RunnersApi extends BaseAPI {
      * @summary Get info for authenticated runner
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof RunnersApi
      */
     public getInfoForAuthenticatedRunner(options?: RawAxiosRequestConfig) {
         return RunnersApiFp(this.configuration).getInfoForAuthenticatedRunner(options).then((request) => request(this.axios, this.basePath));
@@ -831,6 +844,7 @@ export class RunnersApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof RunnersApi
      */
     public getRunnerById(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return RunnersApiFp(this.configuration).getRunnerById(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -842,6 +856,7 @@ export class RunnersApi extends BaseAPI {
      * @param {string} sandboxId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof RunnersApi
      */
     public getRunnerBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig) {
         return RunnersApiFp(this.configuration).getRunnerBySandboxId(sandboxId, options).then((request) => request(this.axios, this.basePath));
@@ -853,6 +868,7 @@ export class RunnersApi extends BaseAPI {
      * @param {string} id Runner ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof RunnersApi
      */
     public getRunnerFullById(id: string, options?: RawAxiosRequestConfig) {
         return RunnersApiFp(this.configuration).getRunnerFullById(id, options).then((request) => request(this.axios, this.basePath));
@@ -864,6 +880,7 @@ export class RunnersApi extends BaseAPI {
      * @param {string} ref Snapshot ref
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof RunnersApi
      */
     public getRunnersBySnapshotRef(ref: string, options?: RawAxiosRequestConfig) {
         return RunnersApiFp(this.configuration).getRunnersBySnapshotRef(ref, options).then((request) => request(this.axios, this.basePath));
@@ -876,6 +893,7 @@ export class RunnersApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof RunnersApi
      */
     public listRunners(regionId?: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return RunnersApiFp(this.configuration).listRunners(regionId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -887,6 +905,7 @@ export class RunnersApi extends BaseAPI {
      * @param {RunnerHealthcheck} runnerHealthcheck 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof RunnersApi
      */
     public runnerHealthcheck(runnerHealthcheck: RunnerHealthcheck, options?: RawAxiosRequestConfig) {
         return RunnersApiFp(this.configuration).runnerHealthcheck(runnerHealthcheck, options).then((request) => request(this.axios, this.basePath));
@@ -899,6 +918,7 @@ export class RunnersApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof RunnersApi
      */
     public updateRunnerDraining(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return RunnersApiFp(this.configuration).updateRunnerDraining(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -911,6 +931,7 @@ export class RunnersApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof RunnersApi
      */
     public updateRunnerScheduling(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return RunnersApiFp(this.configuration).updateRunnerScheduling(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));

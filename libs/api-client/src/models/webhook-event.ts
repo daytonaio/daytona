@@ -16,6 +16,8 @@
 
 /**
  * The type of event being sent
+ * @export
+ * @enum {string}
  */
 
 export const WebhookEvent = {
@@ -26,7 +28,7 @@ export const WebhookEvent = {
     SNAPSHOT_REMOVED: 'snapshot.removed',
     VOLUME_CREATED: 'volume.created',
     VOLUME_STATE_UPDATED: 'volume.state.updated',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809'
 } as const;
 
 export type WebhookEvent = typeof WebhookEvent[keyof typeof WebhookEvent];

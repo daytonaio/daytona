@@ -14,7 +14,17 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface StartSandboxResponse
+ */
 export interface StartSandboxResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof StartSandboxResponse
+     */
     'daemonVersion'?: string;
 }
 

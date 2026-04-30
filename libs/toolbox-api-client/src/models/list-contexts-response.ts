@@ -17,7 +17,17 @@
 // @ts-ignore
 import type { InterpreterContext } from './interpreter-context';
 
+/**
+ * 
+ * @export
+ * @interface ListContextsResponse
+ */
 export interface ListContextsResponse {
+    /**
+     * 
+     * @type {Array<InterpreterContext>}
+     * @memberof ListContextsResponse
+     */
     'contexts': Array<InterpreterContext>;
 }
 

@@ -14,9 +14,29 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface UpdateNetworkSettingsDTO
+ */
 export interface UpdateNetworkSettingsDTO {
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateNetworkSettingsDTO
+     */
     'networkAllowList'?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UpdateNetworkSettingsDTO
+     */
     'networkBlockAll'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof UpdateNetworkSettingsDTO
+     */
     'networkLimitEgress'?: boolean;
 }
 

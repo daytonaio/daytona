@@ -19,7 +19,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/FindAccessibilityNodesRequest"
+              $ref: '#/components/schemas/FindAccessibilityNodesRequest'
         description: Find request
         required: true
       responses:
@@ -27,7 +27,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AccessibilityNodesResponse"
+                $ref: '#/components/schemas/AccessibilityNodesResponse'
           description: OK
         "400":
           content:
@@ -73,7 +73,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AccessibilityNodeRequest"
+              $ref: '#/components/schemas/AccessibilityNodeRequest'
         description: Node focus request
         required: true
       responses:
@@ -81,7 +81,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Empty"
+                $ref: '#/components/schemas/Empty'
           description: OK
         "400":
           content:
@@ -128,7 +128,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AccessibilityInvokeRequest"
+              $ref: '#/components/schemas/AccessibilityInvokeRequest'
         description: Invoke request
         required: true
       responses:
@@ -136,7 +136,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Empty"
+                $ref: '#/components/schemas/Empty'
           description: OK
         "400":
           content:
@@ -183,7 +183,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AccessibilitySetValueRequest"
+              $ref: '#/components/schemas/AccessibilitySetValueRequest'
         description: Set value request
         required: true
       responses:
@@ -191,7 +191,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Empty"
+                $ref: '#/components/schemas/Empty'
           description: OK
         "400":
           content:
@@ -255,7 +255,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AccessibilityTreeResponse"
+                $ref: '#/components/schemas/AccessibilityTreeResponse'
           description: OK
         "400":
           content:
@@ -301,7 +301,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DisplayInfoResponse"
+                $ref: '#/components/schemas/DisplayInfoResponse'
           description: OK
       summary: Get display information
       tags:
@@ -315,7 +315,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WindowsResponse"
+                $ref: '#/components/schemas/WindowsResponse'
           description: OK
       summary: Get windows information
       tags:
@@ -328,7 +328,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/KeyboardHotkeyRequest"
+              $ref: '#/components/schemas/KeyboardHotkeyRequest'
         description: Hotkey press request
         required: true
       responses:
@@ -336,7 +336,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Empty"
+                $ref: '#/components/schemas/Empty'
           description: OK
       summary: Press hotkey
       tags:
@@ -350,7 +350,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/KeyboardPressRequest"
+              $ref: '#/components/schemas/KeyboardPressRequest'
         description: Key press request
         required: true
       responses:
@@ -358,7 +358,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Empty"
+                $ref: '#/components/schemas/Empty'
           description: OK
       summary: Press key
       tags:
@@ -372,7 +372,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/KeyboardTypeRequest"
+              $ref: '#/components/schemas/KeyboardTypeRequest'
         description: Text typing request
         required: true
       responses:
@@ -380,7 +380,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Empty"
+                $ref: '#/components/schemas/Empty'
           description: OK
       summary: Type text
       tags:
@@ -394,7 +394,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/MouseClickRequest"
+              $ref: '#/components/schemas/MouseClickRequest'
         description: Mouse click request
         required: true
       responses:
@@ -402,7 +402,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MouseClickResponse"
+                $ref: '#/components/schemas/MouseClickResponse'
           description: OK
       summary: Click mouse button
       tags:
@@ -416,7 +416,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/MouseDragRequest"
+              $ref: '#/components/schemas/MouseDragRequest'
         description: Mouse drag request
         required: true
       responses:
@@ -424,7 +424,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MouseDragResponse"
+                $ref: '#/components/schemas/MouseDragResponse'
           description: OK
       summary: Drag mouse
       tags:
@@ -438,7 +438,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/MouseMoveRequest"
+              $ref: '#/components/schemas/MouseMoveRequest'
         description: Mouse move request
         required: true
       responses:
@@ -446,7 +446,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MousePositionResponse"
+                $ref: '#/components/schemas/MousePositionResponse'
           description: OK
       summary: Move mouse cursor
       tags:
@@ -461,7 +461,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MousePositionResponse"
+                $ref: '#/components/schemas/MousePositionResponse'
           description: OK
       summary: Get mouse position
       tags:
@@ -474,7 +474,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/MouseScrollRequest"
+              $ref: '#/components/schemas/MouseScrollRequest'
         description: Mouse scroll request
         required: true
       responses:
@@ -482,7 +482,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ScrollResponse"
+                $ref: '#/components/schemas/ScrollResponse'
           description: OK
       summary: Scroll mouse wheel
       tags:
@@ -497,7 +497,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ComputerUseStatusResponse"
+                $ref: '#/components/schemas/ComputerUseStatusResponse'
           description: OK
       summary: Get computer use process status
       tags:
@@ -518,7 +518,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProcessErrorsResponse"
+                $ref: '#/components/schemas/ProcessErrorsResponse'
           description: OK
       summary: Get process errors
       tags:
@@ -539,7 +539,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProcessLogsResponse"
+                $ref: '#/components/schemas/ProcessLogsResponse'
           description: OK
       summary: Get process logs
       tags:
@@ -560,7 +560,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProcessRestartResponse"
+                $ref: '#/components/schemas/ProcessRestartResponse'
           description: OK
       summary: Restart specific process
       tags:
@@ -581,7 +581,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProcessStatusResponse"
+                $ref: '#/components/schemas/ProcessStatusResponse'
           description: OK
       summary: Get specific process status
       tags:
@@ -595,7 +595,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ListRecordingsResponse"
+                $ref: '#/components/schemas/ListRecordingsResponse'
           description: OK
         "500":
           content:
@@ -616,7 +616,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/StartRecordingRequest"
+              $ref: '#/components/schemas/StartRecordingRequest'
         description: Recording options
         required: false
       responses:
@@ -624,7 +624,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Recording"
+                $ref: '#/components/schemas/Recording'
           description: Created
         "400":
           content:
@@ -654,7 +654,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/StopRecordingRequest"
+              $ref: '#/components/schemas/StopRecordingRequest'
         description: Recording ID to stop
         required: true
       responses:
@@ -662,7 +662,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Recording"
+                $ref: '#/components/schemas/Recording'
           description: OK
         "400":
           content:
@@ -741,7 +741,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Recording"
+                $ref: '#/components/schemas/Recording'
           description: OK
         "404":
           content:
@@ -815,7 +815,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ScreenshotResponse"
+                $ref: '#/components/schemas/ScreenshotResponse'
           description: OK
       summary: Take a screenshot
       tags:
@@ -850,7 +850,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ScreenshotResponse"
+                $ref: '#/components/schemas/ScreenshotResponse'
           description: OK
       summary: Take a compressed screenshot
       tags:
@@ -894,7 +894,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ScreenshotResponse"
+                $ref: '#/components/schemas/ScreenshotResponse'
           description: OK
       summary: Take a region screenshot
       tags:
@@ -953,7 +953,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ScreenshotResponse"
+                $ref: '#/components/schemas/ScreenshotResponse'
           description: OK
       summary: Take a compressed region screenshot
       tags:
@@ -967,7 +967,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ComputerUseStartResponse"
+                $ref: '#/components/schemas/ComputerUseStartResponse'
           description: OK
       summary: Start computer use processes
       tags:
@@ -981,7 +981,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ComputerUseStatusResponse"
+                $ref: '#/components/schemas/ComputerUseStatusResponse'
           description: OK
       summary: Get computer use status
       tags:
@@ -995,7 +995,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ComputerUseStopResponse"
+                $ref: '#/components/schemas/ComputerUseStopResponse'
           description: OK
       summary: Stop computer use processes
       tags:
@@ -1038,7 +1038,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: "#/components/schemas/FileInfo"
+                  $ref: '#/components/schemas/FileInfo'
                 type: array
           description: OK
       summary: List files and directories
@@ -1054,7 +1054,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/FilesDownloadRequest"
+              $ref: '#/components/schemas/FilesDownloadRequest'
         description: Paths of files to download
         required: true
       responses:
@@ -1062,7 +1062,7 @@ paths:
           content:
             multipart/form-data:
               schema:
-                $ref: "#/components/schemas/gin.H"
+                $ref: '#/components/schemas/gin.H'
           description: Multipart response with file parts and JSON error parts
       summary: Download multiple files
       tags:
@@ -1124,7 +1124,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: "#/components/schemas/Match"
+                  $ref: '#/components/schemas/Match'
                 type: array
           description: OK
       summary: Find text in files
@@ -1170,7 +1170,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/FileInfo"
+                $ref: '#/components/schemas/FileInfo'
           description: OK
       summary: Get file information
       tags:
@@ -1240,7 +1240,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReplaceRequest"
+              $ref: '#/components/schemas/ReplaceRequest'
         description: Replace request
         required: true
       responses:
@@ -1249,7 +1249,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: "#/components/schemas/ReplaceResult"
+                  $ref: '#/components/schemas/ReplaceResult'
                 type: array
           description: OK
       summary: Replace text in files
@@ -1278,7 +1278,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SearchFilesResponse"
+                $ref: '#/components/schemas/SearchFilesResponse'
           description: OK
       summary: Search files by pattern
       tags:
@@ -1298,14 +1298,14 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/UploadFile_request"
+              $ref: '#/components/schemas/UploadFile_request'
         required: true
       responses:
         "200":
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/gin.H"
+                $ref: '#/components/schemas/gin.H'
           description: OK
       summary: Upload a file
       tags:
@@ -1318,7 +1318,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GitAddRequest"
+              $ref: '#/components/schemas/GitAddRequest'
         description: Add files request
         required: true
       responses:
@@ -1337,7 +1337,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GitDeleteBranchRequest"
+              $ref: '#/components/schemas/GitDeleteBranchRequest'
         description: Delete branch request
         required: true
       responses:
@@ -1363,7 +1363,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ListBranchResponse"
+                $ref: '#/components/schemas/ListBranchResponse'
           description: OK
       summary: List branches
       tags:
@@ -1375,7 +1375,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GitBranchRequest"
+              $ref: '#/components/schemas/GitBranchRequest'
         description: Create branch request
         required: true
       responses:
@@ -1394,7 +1394,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GitCheckoutRequest"
+              $ref: '#/components/schemas/GitCheckoutRequest'
         description: Checkout request
         required: true
       responses:
@@ -1413,7 +1413,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GitCloneRequest"
+              $ref: '#/components/schemas/GitCloneRequest'
         description: Clone repository request
         required: true
       responses:
@@ -1432,7 +1432,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GitCommitRequest"
+              $ref: '#/components/schemas/GitCommitRequest'
         description: Commit request
         required: true
       responses:
@@ -1440,7 +1440,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/GitCommitResponse"
+                $ref: '#/components/schemas/GitCommitResponse'
           description: OK
       summary: Commit changes
       tags:
@@ -1463,7 +1463,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: "#/components/schemas/GitCommitInfo"
+                  $ref: '#/components/schemas/GitCommitInfo'
                 type: array
           description: OK
       summary: Get commit history
@@ -1477,7 +1477,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GitRepoRequest"
+              $ref: '#/components/schemas/GitRepoRequest'
         description: Pull request
         required: true
       responses:
@@ -1496,7 +1496,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GitRepoRequest"
+              $ref: '#/components/schemas/GitRepoRequest'
         description: Push request
         required: true
       responses:
@@ -1523,7 +1523,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/GitStatus"
+                $ref: '#/components/schemas/GitStatus'
           description: OK
       summary: Get Git status
       tags:
@@ -1536,7 +1536,7 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: "#/components/schemas/InitializeRequest"
+              $ref: '#/components/schemas/InitializeRequest'
         description: Initialization request
         required: true
       responses:
@@ -1560,7 +1560,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LspCompletionParams"
+              $ref: '#/components/schemas/LspCompletionParams'
         description: Completion request
         required: true
       responses:
@@ -1568,7 +1568,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CompletionList"
+                $ref: '#/components/schemas/CompletionList'
           description: OK
       summary: Get code completions
       tags:
@@ -1582,7 +1582,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LspDocumentRequest"
+              $ref: '#/components/schemas/LspDocumentRequest'
         description: Document request
         required: true
       responses:
@@ -1601,7 +1601,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LspDocumentRequest"
+              $ref: '#/components/schemas/LspDocumentRequest'
         description: Document request
         required: true
       responses:
@@ -1641,7 +1641,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: "#/components/schemas/LspSymbol"
+                  $ref: '#/components/schemas/LspSymbol'
                 type: array
           description: OK
       summary: Get document symbols
@@ -1655,7 +1655,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LspServerRequest"
+              $ref: '#/components/schemas/LspServerRequest'
         description: LSP server request
         required: true
       responses:
@@ -1674,7 +1674,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LspServerRequest"
+              $ref: '#/components/schemas/LspServerRequest'
         description: LSP server request
         required: true
       responses:
@@ -1714,7 +1714,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: "#/components/schemas/LspSymbol"
+                  $ref: '#/components/schemas/LspSymbol'
                 type: array
           description: OK
       summary: Get workspace symbols
@@ -1729,7 +1729,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PortList"
+                $ref: '#/components/schemas/PortList'
           description: OK
       summary: Get active ports
       tags:
@@ -1750,7 +1750,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IsPortInUseResponse"
+                $ref: '#/components/schemas/IsPortInUseResponse'
           description: OK
       summary: Check if port is in use
       tags:
@@ -1764,7 +1764,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CodeRunRequest"
+              $ref: '#/components/schemas/CodeRunRequest'
         description: Code execution request
         required: true
       responses:
@@ -1772,7 +1772,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CodeRunResponse"
+                $ref: '#/components/schemas/CodeRunResponse'
           description: OK
       summary: Execute code
       tags:
@@ -1786,7 +1786,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ExecuteRequest"
+              $ref: '#/components/schemas/ExecuteRequest'
         description: Command execution request
         required: true
       responses:
@@ -1794,7 +1794,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ExecuteResponse"
+                $ref: '#/components/schemas/ExecuteResponse'
           description: OK
       summary: Execute a command
       tags:
@@ -1810,7 +1810,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ListContextsResponse"
+                $ref: '#/components/schemas/ListContextsResponse'
           description: OK
       summary: List all user-created interpreter contexts
       tags:
@@ -1823,7 +1823,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateContextRequest"
+              $ref: '#/components/schemas/CreateContextRequest'
         description: Context configuration
         required: true
       responses:
@@ -1831,7 +1831,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InterpreterContext"
+                $ref: '#/components/schemas/InterpreterContext'
           description: OK
         "400":
           content:
@@ -1925,7 +1925,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PtyListResponse"
+                $ref: '#/components/schemas/PtyListResponse'
           description: OK
       summary: List all PTY sessions
       tags:
@@ -1937,7 +1937,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PtyCreateRequest"
+              $ref: '#/components/schemas/PtyCreateRequest'
         description: PTY session creation request
         required: true
       responses:
@@ -1945,7 +1945,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PtyCreateResponse"
+                $ref: '#/components/schemas/PtyCreateResponse'
           description: Created
       summary: Create a new PTY session
       tags:
@@ -1967,7 +1967,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/gin.H"
+                $ref: '#/components/schemas/gin.H'
           description: OK
       summary: Delete a PTY session
       tags:
@@ -1987,7 +1987,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PtySessionInfo"
+                $ref: '#/components/schemas/PtySessionInfo'
           description: OK
       summary: Get PTY session information
       tags:
@@ -2026,7 +2026,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PtyResizeRequest"
+              $ref: '#/components/schemas/PtyResizeRequest'
         description: Resize request with new dimensions
         required: true
       responses:
@@ -2034,7 +2034,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PtySessionInfo"
+                $ref: '#/components/schemas/PtySessionInfo'
           description: OK
       summary: Resize a PTY session
       tags:
@@ -2050,7 +2050,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: "#/components/schemas/Session"
+                  $ref: '#/components/schemas/Session'
                 type: array
           description: OK
       summary: List all sessions
@@ -2063,7 +2063,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateSessionRequest"
+              $ref: '#/components/schemas/CreateSessionRequest'
         description: Session creation request
         required: true
       responses:
@@ -2083,7 +2083,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Session"
+                $ref: '#/components/schemas/Session'
           description: OK
       summary: Get entrypoint session details
       tags:
@@ -2105,10 +2105,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SessionCommandLogsResponse"
+                $ref: '#/components/schemas/SessionCommandLogsResponse'
             text/plain:
               schema:
-                $ref: "#/components/schemas/SessionCommandLogsResponse"
+                $ref: '#/components/schemas/SessionCommandLogsResponse'
           description: Entrypoint log content
       summary: Get entrypoint logs
       tags:
@@ -2146,7 +2146,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Session"
+                $ref: '#/components/schemas/Session'
           description: OK
       summary: Get session details
       tags:
@@ -2173,7 +2173,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Command"
+                $ref: '#/components/schemas/Command'
           description: OK
       summary: Get session command details
       tags:
@@ -2200,7 +2200,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SessionSendInputRequest"
+              $ref: '#/components/schemas/SessionSendInputRequest'
         description: Input send request
         required: true
       responses:
@@ -2240,10 +2240,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SessionCommandLogsResponse"
+                $ref: '#/components/schemas/SessionCommandLogsResponse'
             text/plain:
               schema:
-                $ref: "#/components/schemas/SessionCommandLogsResponse"
+                $ref: '#/components/schemas/SessionCommandLogsResponse'
           description: "Log content (JSON for new SDKs, plain text for old SDKs)"
       summary: Get session command logs
       tags:
@@ -2263,7 +2263,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SessionExecuteRequest"
+              $ref: '#/components/schemas/SessionExecuteRequest'
         description: Command execution request
         required: true
       responses:
@@ -2271,13 +2271,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SessionExecuteResponse"
+                $ref: '#/components/schemas/SessionExecuteResponse'
           description: OK
         "202":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SessionExecuteResponse"
+                $ref: '#/components/schemas/SessionExecuteResponse'
           description: Accepted
       summary: Execute command in session
       tags:
@@ -2292,7 +2292,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserHomeDirResponse"
+                $ref: '#/components/schemas/UserHomeDirResponse'
           description: OK
       summary: Get user home directory
       tags:
@@ -2323,7 +2323,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WorkDirResponse"
+                $ref: '#/components/schemas/WorkDirResponse'
           description: OK
       summary: Get working directory
       tags:
@@ -2410,7 +2410,7 @@ components:
       properties:
         matches:
           items:
-            $ref: "#/components/schemas/computeruse.AccessibilityNode"
+            $ref: '#/components/schemas/computeruse.AccessibilityNode'
           type: array
         truncated:
           type: boolean
@@ -2451,7 +2451,7 @@ components:
         truncated: true
       properties:
         root:
-          $ref: "#/components/schemas/computeruse.AccessibilityNode"
+          $ref: '#/components/schemas/computeruse.AccessibilityNode'
         truncated:
           type: boolean
       type: object
@@ -2526,7 +2526,7 @@ components:
       properties:
         elements:
           items:
-            $ref: "#/components/schemas/ChartElement"
+            $ref: '#/components/schemas/ChartElement'
           type: array
         png:
           type: string
@@ -2764,7 +2764,7 @@ components:
       properties:
         charts:
           items:
-            $ref: "#/components/schemas/Chart"
+            $ref: '#/components/schemas/Chart'
           type: array
       type: object
     CodeRunRequest:
@@ -2937,7 +2937,7 @@ components:
             type: type
       properties:
         artifacts:
-          $ref: "#/components/schemas/CodeRunArtifacts"
+          $ref: '#/components/schemas/CodeRunArtifacts'
         exitCode:
           type: integer
         result:
@@ -3021,7 +3021,7 @@ components:
           type: boolean
         items:
           items:
-            $ref: "#/components/schemas/CompletionItem"
+            $ref: '#/components/schemas/CompletionItem'
           type: array
       required:
       - isIncomplete
@@ -3041,7 +3041,7 @@ components:
           type: string
         status:
           additionalProperties:
-            $ref: "#/components/schemas/ProcessStatus"
+            $ref: '#/components/schemas/ProcessStatus'
           type: object
       type: object
     ComputerUseStatusResponse:
@@ -3065,7 +3065,7 @@ components:
           type: string
         status:
           additionalProperties:
-            $ref: "#/components/schemas/ProcessStatus"
+            $ref: '#/components/schemas/ProcessStatus'
           type: object
       type: object
     CreateContextRequest:
@@ -3127,7 +3127,7 @@ components:
       properties:
         displays:
           items:
-            $ref: "#/components/schemas/DisplayInfo"
+            $ref: '#/components/schemas/DisplayInfo'
           type: array
       type: object
     Empty:
@@ -3217,9 +3217,9 @@ components:
         name:
           type: string
         staging:
-          $ref: "#/components/schemas/Status"
+          $ref: '#/components/schemas/Status'
         worktree:
-          $ref: "#/components/schemas/Status"
+          $ref: '#/components/schemas/Status'
       required:
       - extra
       - name
@@ -3450,7 +3450,7 @@ components:
           type: string
         fileStatus:
           items:
-            $ref: "#/components/schemas/FileStatus"
+            $ref: '#/components/schemas/FileStatus'
           type: array
       required:
       - currentBranch
@@ -3560,7 +3560,7 @@ components:
       properties:
         contexts:
           items:
-            $ref: "#/components/schemas/InterpreterContext"
+            $ref: '#/components/schemas/InterpreterContext'
           type: array
       required:
       - contexts
@@ -3587,7 +3587,7 @@ components:
       properties:
         recordings:
           items:
-            $ref: "#/components/schemas/Recording"
+            $ref: '#/components/schemas/Recording'
           type: array
       required:
       - recordings
@@ -3605,13 +3605,13 @@ components:
         uri: uri
       properties:
         context:
-          $ref: "#/components/schemas/CompletionContext"
+          $ref: '#/components/schemas/CompletionContext'
         languageId:
           type: string
         pathToProject:
           type: string
         position:
-          $ref: "#/components/schemas/LspPosition"
+          $ref: '#/components/schemas/LspPosition'
         uri:
           type: string
       required:
@@ -3649,7 +3649,7 @@ components:
         uri: uri
       properties:
         range:
-          $ref: "#/components/schemas/LspRange"
+          $ref: '#/components/schemas/LspRange'
         uri:
           type: string
       required:
@@ -3679,9 +3679,9 @@ components:
           line: 1
       properties:
         end:
-          $ref: "#/components/schemas/LspPosition"
+          $ref: '#/components/schemas/LspPosition'
         start:
-          $ref: "#/components/schemas/LspPosition"
+          $ref: '#/components/schemas/LspPosition'
       required:
       - end
       - start
@@ -3716,7 +3716,7 @@ components:
         kind:
           type: integer
         location:
-          $ref: "#/components/schemas/LspLocation"
+          $ref: '#/components/schemas/LspLocation'
         name:
           type: string
       required:
@@ -3971,7 +3971,7 @@ components:
       properties:
         sessions:
           items:
-            $ref: "#/components/schemas/PtySessionInfo"
+            $ref: '#/components/schemas/PtySessionInfo'
           type: array
       required:
       - sessions
@@ -4111,7 +4111,7 @@ components:
         sizeBytes: 1
       properties:
         cursorPosition:
-          $ref: "#/components/schemas/Position"
+          $ref: '#/components/schemas/Position'
         screenshot:
           type: string
         sizeBytes:
@@ -4150,7 +4150,7 @@ components:
       properties:
         commands:
           items:
-            $ref: "#/components/schemas/Command"
+            $ref: '#/components/schemas/Command'
           type: array
         sessionId:
           type: string
@@ -4313,7 +4313,7 @@ components:
       properties:
         windows:
           items:
-            $ref: "#/components/schemas/WindowInfo"
+            $ref: '#/components/schemas/WindowInfo'
           type: array
       type: object
     WorkDirResponse:
@@ -4351,10 +4351,10 @@ components:
             type: string
           type: array
         bounds:
-          $ref: "#/components/schemas/AccessibilityBounds"
+          $ref: '#/components/schemas/AccessibilityBounds'
         children:
           items:
-            $ref: "#/components/schemas/computeruse.AccessibilityNode"
+            $ref: '#/components/schemas/computeruse.AccessibilityNode'
           type: array
         description:
           type: string

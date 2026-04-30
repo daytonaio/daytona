@@ -17,8 +17,23 @@
 // @ts-ignore
 import type { Position } from './position';
 
+/**
+ * 
+ * @export
+ * @interface Range
+ */
 export interface Range {
+    /**
+     * 
+     * @type {Position}
+     * @memberof Range
+     */
     'start': Position;
+    /**
+     * 
+     * @type {Position}
+     * @memberof Range
+     */
     'end': Position;
 }
 

@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -31,6 +31,7 @@ import type { Workspace } from '../models';
 import type { WorkspacePortPreviewUrl } from '../models';
 /**
  * WorkspaceApi - axios parameter creator
+ * @export
  */
 export const WorkspaceApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -66,6 +67,7 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
             // authentication oauth2 required
 
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -109,8 +111,8 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -153,8 +155,9 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -208,6 +211,7 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
             }
 
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -257,6 +261,7 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
             }
 
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -304,8 +309,8 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -354,8 +359,8 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
                 localVarQueryParameter['verbose'] = verbose;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -405,8 +410,8 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
                 localVarQueryParameter['labels'] = labels;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -453,8 +458,9 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -505,6 +511,7 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
             // authentication oauth2 required
 
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -553,6 +560,7 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
             // authentication oauth2 required
 
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -597,6 +605,7 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
             // authentication oauth2 required
 
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -641,6 +650,7 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
             // authentication oauth2 required
 
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -689,6 +699,7 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
             // authentication oauth2 required
 
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -706,6 +717,7 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
 
 /**
  * WorkspaceApi - functional programming interface
+ * @export
  */
 export const WorkspaceApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = WorkspaceApiAxiosParamCreator(configuration)
@@ -934,6 +946,7 @@ export const WorkspaceApiFp = function(configuration?: Configuration) {
 
 /**
  * WorkspaceApi - factory interface
+ * @export
  */
 export const WorkspaceApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = WorkspaceApiFp(configuration)
@@ -1120,6 +1133,9 @@ export const WorkspaceApiFactory = function (configuration?: Configuration, base
 
 /**
  * WorkspaceApi - object-oriented interface
+ * @export
+ * @class WorkspaceApi
+ * @extends {BaseAPI}
  */
 export class WorkspaceApi extends BaseAPI {
     /**
@@ -1130,6 +1146,7 @@ export class WorkspaceApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
+     * @memberof WorkspaceApi
      */
     public archiveWorkspaceDeprecated(workspaceId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return WorkspaceApiFp(this.configuration).archiveWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -1143,6 +1160,7 @@ export class WorkspaceApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
+     * @memberof WorkspaceApi
      */
     public createBackupWorkspaceDeprecated(workspaceId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return WorkspaceApiFp(this.configuration).createBackupWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -1156,6 +1174,7 @@ export class WorkspaceApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
+     * @memberof WorkspaceApi
      */
     public createWorkspaceDeprecated(createWorkspace: CreateWorkspace, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return WorkspaceApiFp(this.configuration).createWorkspaceDeprecated(createWorkspace, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -1170,6 +1189,7 @@ export class WorkspaceApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
+     * @memberof WorkspaceApi
      */
     public deleteWorkspaceDeprecated(workspaceId: string, force: boolean, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return WorkspaceApiFp(this.configuration).deleteWorkspaceDeprecated(workspaceId, force, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -1184,6 +1204,7 @@ export class WorkspaceApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
+     * @memberof WorkspaceApi
      */
     public getBuildLogsWorkspaceDeprecated(workspaceId: string, xDaytonaOrganizationID?: string, follow?: boolean, options?: RawAxiosRequestConfig) {
         return WorkspaceApiFp(this.configuration).getBuildLogsWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, follow, options).then((request) => request(this.axios, this.basePath));
@@ -1198,6 +1219,7 @@ export class WorkspaceApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
+     * @memberof WorkspaceApi
      */
     public getPortPreviewUrlWorkspaceDeprecated(workspaceId: string, port: number, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return WorkspaceApiFp(this.configuration).getPortPreviewUrlWorkspaceDeprecated(workspaceId, port, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -1212,6 +1234,7 @@ export class WorkspaceApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
+     * @memberof WorkspaceApi
      */
     public getWorkspaceDeprecated(workspaceId: string, xDaytonaOrganizationID?: string, verbose?: boolean, options?: RawAxiosRequestConfig) {
         return WorkspaceApiFp(this.configuration).getWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, verbose, options).then((request) => request(this.axios, this.basePath));
@@ -1226,6 +1249,7 @@ export class WorkspaceApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
+     * @memberof WorkspaceApi
      */
     public listWorkspacesDeprecated(xDaytonaOrganizationID?: string, verbose?: boolean, labels?: string, options?: RawAxiosRequestConfig) {
         return WorkspaceApiFp(this.configuration).listWorkspacesDeprecated(xDaytonaOrganizationID, verbose, labels, options).then((request) => request(this.axios, this.basePath));
@@ -1240,6 +1264,7 @@ export class WorkspaceApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
+     * @memberof WorkspaceApi
      */
     public replaceLabelsWorkspaceDeprecated(workspaceId: string, sandboxLabels: SandboxLabels, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return WorkspaceApiFp(this.configuration).replaceLabelsWorkspaceDeprecated(workspaceId, sandboxLabels, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -1254,6 +1279,7 @@ export class WorkspaceApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
+     * @memberof WorkspaceApi
      */
     public setAutoArchiveIntervalWorkspaceDeprecated(workspaceId: string, interval: number, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return WorkspaceApiFp(this.configuration).setAutoArchiveIntervalWorkspaceDeprecated(workspaceId, interval, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -1268,6 +1294,7 @@ export class WorkspaceApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
+     * @memberof WorkspaceApi
      */
     public setAutostopIntervalWorkspaceDeprecated(workspaceId: string, interval: number, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return WorkspaceApiFp(this.configuration).setAutostopIntervalWorkspaceDeprecated(workspaceId, interval, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -1281,6 +1308,7 @@ export class WorkspaceApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
+     * @memberof WorkspaceApi
      */
     public startWorkspaceDeprecated(workspaceId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return WorkspaceApiFp(this.configuration).startWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -1294,6 +1322,7 @@ export class WorkspaceApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
+     * @memberof WorkspaceApi
      */
     public stopWorkspaceDeprecated(workspaceId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return WorkspaceApiFp(this.configuration).stopWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -1308,6 +1337,7 @@ export class WorkspaceApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
+     * @memberof WorkspaceApi
      */
     public updatePublicStatusWorkspaceDeprecated(workspaceId: string, isPublic: boolean, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return WorkspaceApiFp(this.configuration).updatePublicStatusWorkspaceDeprecated(workspaceId, isPublic, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));

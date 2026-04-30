@@ -14,9 +14,29 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface Command
+ */
 export interface Command {
+    /**
+     * 
+     * @type {string}
+     * @memberof Command
+     */
     'command': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Command
+     */
     'exitCode'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Command
+     */
     'id': string;
 }
 

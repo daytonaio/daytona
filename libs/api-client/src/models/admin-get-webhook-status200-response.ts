@@ -14,7 +14,17 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface AdminGetWebhookStatus200Response
+ */
 export interface AdminGetWebhookStatus200Response {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof AdminGetWebhookStatus200Response
+     */
     'enabled'?: boolean;
 }
 

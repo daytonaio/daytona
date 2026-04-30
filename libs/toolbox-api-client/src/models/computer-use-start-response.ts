@@ -17,8 +17,23 @@
 // @ts-ignore
 import type { ProcessStatus } from './process-status';
 
+/**
+ * 
+ * @export
+ * @interface ComputerUseStartResponse
+ */
 export interface ComputerUseStartResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof ComputerUseStartResponse
+     */
     'message'?: string;
+    /**
+     * 
+     * @type {{ [key: string]: ProcessStatus; }}
+     * @memberof ComputerUseStartResponse
+     */
     'status'?: { [key: string]: ProcessStatus; };
 }
 

@@ -14,8 +14,23 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface MouseMoveRequest
+ */
 export interface MouseMoveRequest {
+    /**
+     * 
+     * @type {number}
+     * @memberof MouseMoveRequest
+     */
     'x'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof MouseMoveRequest
+     */
     'y'?: number;
 }
 

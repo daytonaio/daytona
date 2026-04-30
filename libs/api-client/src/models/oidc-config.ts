@@ -14,17 +14,28 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface OidcConfig
+ */
 export interface OidcConfig {
     /**
      * OIDC issuer
+     * @type {string}
+     * @memberof OidcConfig
      */
     'issuer': string;
     /**
      * OIDC client ID
+     * @type {string}
+     * @memberof OidcConfig
      */
     'clientId': string;
     /**
      * OIDC audience
+     * @type {string}
+     * @memberof OidcConfig
      */
     'audience': string;
 }

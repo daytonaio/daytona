@@ -14,8 +14,23 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface ProcessLogsResponse
+ */
 export interface ProcessLogsResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessLogsResponse
+     */
     'logs'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessLogsResponse
+     */
     'processName'?: string;
 }
 

@@ -14,7 +14,17 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface StartRecordingRequest
+ */
 export interface StartRecordingRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof StartRecordingRequest
+     */
     'label'?: string;
 }
 

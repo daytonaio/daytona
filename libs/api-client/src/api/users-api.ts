@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -29,6 +29,7 @@ import type { CreateLinkedAccount } from '../models';
 import type { User } from '../models';
 /**
  * UsersApi - axios parameter creator
+ * @export
  */
 export const UsersApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -57,8 +58,8 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -93,8 +94,8 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -129,8 +130,8 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -168,6 +169,8 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -214,6 +217,7 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             // authentication oauth2 required
 
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -228,6 +232,7 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
 
 /**
  * UsersApi - functional programming interface
+ * @export
  */
 export const UsersApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = UsersApiAxiosParamCreator(configuration)
@@ -300,6 +305,7 @@ export const UsersApiFp = function(configuration?: Configuration) {
 
 /**
  * UsersApi - factory interface
+ * @export
  */
 export const UsersApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = UsersApiFp(configuration)
@@ -357,6 +363,9 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
 
 /**
  * UsersApi - object-oriented interface
+ * @export
+ * @class UsersApi
+ * @extends {BaseAPI}
  */
 export class UsersApi extends BaseAPI {
     /**
@@ -364,6 +373,7 @@ export class UsersApi extends BaseAPI {
      * @summary Enroll in SMS MFA
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof UsersApi
      */
     public enrollInSmsMfa(options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).enrollInSmsMfa(options).then((request) => request(this.axios, this.basePath));
@@ -374,6 +384,7 @@ export class UsersApi extends BaseAPI {
      * @summary Get authenticated user
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof UsersApi
      */
     public getAuthenticatedUser(options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).getAuthenticatedUser(options).then((request) => request(this.axios, this.basePath));
@@ -384,6 +395,7 @@ export class UsersApi extends BaseAPI {
      * @summary Get available account providers
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof UsersApi
      */
     public getAvailableAccountProviders(options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).getAvailableAccountProviders(options).then((request) => request(this.axios, this.basePath));
@@ -395,6 +407,7 @@ export class UsersApi extends BaseAPI {
      * @param {CreateLinkedAccount} createLinkedAccount 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof UsersApi
      */
     public linkAccount(createLinkedAccount: CreateLinkedAccount, options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).linkAccount(createLinkedAccount, options).then((request) => request(this.axios, this.basePath));
@@ -407,6 +420,7 @@ export class UsersApi extends BaseAPI {
      * @param {string} providerUserId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof UsersApi
      */
     public unlinkAccount(provider: string, providerUserId: string, options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).unlinkAccount(provider, providerUserId, options).then((request) => request(this.axios, this.basePath));

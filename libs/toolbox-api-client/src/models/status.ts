@@ -14,6 +14,11 @@
 
 
 
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
 
 export const Status = {
     Unmodified: 'Unmodified',
@@ -24,7 +29,7 @@ export const Status = {
     Renamed: 'Renamed',
     Copied: 'Copied',
     UpdatedButUnmerged: 'Updated but unmerged',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809'
 } as const;
 
 export type Status = typeof Status[keyof typeof Status];

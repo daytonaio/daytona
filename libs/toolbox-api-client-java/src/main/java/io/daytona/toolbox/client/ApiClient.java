@@ -61,7 +61,7 @@ import io.daytona.toolbox.client.auth.ApiKeyAuth;
  */
 public class ApiClient {
 
-    protected String basePath = "http://localhost";
+    private String basePath = "http://localhost";
     protected List<ServerConfiguration> servers = new ArrayList<ServerConfiguration>(Arrays.asList(
     new ServerConfiguration(
       "",
@@ -71,27 +71,26 @@ public class ApiClient {
   ));
     protected Integer serverIndex = 0;
     protected Map<String, String> serverVariables = null;
-    protected boolean debugging = false;
-    protected Map<String, String> defaultHeaderMap = new HashMap<String, String>();
-    protected Map<String, String> defaultCookieMap = new HashMap<String, String>();
-    protected String tempFolderPath = null;
+    private boolean debugging = false;
+    private Map<String, String> defaultHeaderMap = new HashMap<String, String>();
+    private Map<String, String> defaultCookieMap = new HashMap<String, String>();
+    private String tempFolderPath = null;
 
-    protected Map<String, Authentication> authentications;
+    private Map<String, Authentication> authentications;
 
-    protected DateFormat dateFormat;
-    protected DateFormat datetimeFormat;
-    protected boolean lenientDatetimeFormat;
-    protected int dateLength;
+    private DateFormat dateFormat;
+    private DateFormat datetimeFormat;
+    private boolean lenientDatetimeFormat;
+    private int dateLength;
 
-    protected InputStream sslCaCert;
-    protected boolean verifyingSsl;
-    protected KeyManager[] keyManagers;
-    protected String tlsServerName;
-    
-    protected OkHttpClient httpClient;
-    protected JSON json;
+    private InputStream sslCaCert;
+    private boolean verifyingSsl;
+    private KeyManager[] keyManagers;
 
-    protected HttpLoggingInterceptor loggingInterceptor;
+    private OkHttpClient httpClient;
+    private JSON json;
+
+    private HttpLoggingInterceptor loggingInterceptor;
 
     /**
      * Basic constructor for ApiClient
@@ -120,11 +119,11 @@ public class ApiClient {
         authentications = Collections.unmodifiableMap(authentications);
     }
 
-    protected void initHttpClient() {
+    private void initHttpClient() {
         initHttpClient(Collections.<Interceptor>emptyList());
     }
 
-    protected void initHttpClient(List<Interceptor> interceptors) {
+    private void initHttpClient(List<Interceptor> interceptors) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.addNetworkInterceptor(getProgressInterceptor());
         for (Interceptor interceptor: interceptors) {
@@ -134,7 +133,7 @@ public class ApiClient {
         httpClient = builder.build();
     }
 
-    protected void init() {
+    private void init() {
         verifyingSsl = true;
 
         json = new JSON();
@@ -157,8 +156,8 @@ public class ApiClient {
     /**
      * Set base path
      *
-     * @param basePath Base path of the URL (e.g http://localhost)
-     * @return An instance of ApiClient
+     * @param basePath Base path of the URL (e.g http://localhost
+     * @return An instance of OkHttpClient
      */
     public ApiClient setBasePath(String basePath) {
         this.basePath = basePath;
@@ -206,7 +205,7 @@ public class ApiClient {
      * Set HTTP client, which must never be null.
      *
      * @param newHttpClient An instance of OkHttpClient
-     * @return ApiClient
+     * @return Api Client
      * @throws java.lang.NullPointerException when newHttpClient is null
      */
     public ApiClient setHttpClient(OkHttpClient newHttpClient) {
@@ -297,29 +296,6 @@ public class ApiClient {
      */
     public ApiClient setKeyManagers(KeyManager[] managers) {
         this.keyManagers = managers;
-        applySslSettings();
-        return this;
-    }
-
-    /**
-     * Get TLS server name for SNI (Server Name Indication).
-     *
-     * @return The TLS server name
-     */
-    public String getTlsServerName() {
-        return tlsServerName;
-    }
-
-    /**
-     * Set TLS server name for SNI (Server Name Indication).
-     * This is used to verify the server certificate against a specific hostname
-     * instead of the hostname in the URL.
-     *
-     * @param tlsServerName The TLS server name to use for certificate verification
-     * @return ApiClient
-     */
-    public ApiClient setTlsServerName(String tlsServerName) {
-        this.tlsServerName = tlsServerName;
         applySslSettings();
         return this;
     }
@@ -717,7 +693,7 @@ public class ApiClient {
      * @param value The value of the parameter.
      * @return A list of {@code Pair} objects.
      */
-    public List<Pair> parameterToPairs(String collectionFormat, String name, Collection<?> value) {
+    public List<Pair> parameterToPairs(String collectionFormat, String name, Collection value) {
         List<Pair> params = new ArrayList<Pair>();
 
         // preconditions
@@ -824,7 +800,7 @@ public class ApiClient {
      * @return The sanitized filename
      */
     public String sanitizeFilename(String filename) {
-        return filename.replaceFirst("^.*[/\\\\]", "");
+        return filename.replaceAll(".*[/\\\\]", "");
     }
 
     /**
@@ -934,8 +910,17 @@ public class ApiClient {
             return (T) downloadFileFromResponse(response);
         }
 
-        ResponseBody respBody = response.body();
-        if (respBody == null) {
+        String respBody;
+        try {
+            if (response.body() != null)
+                respBody = response.body().string();
+            else
+                respBody = null;
+        } catch (IOException e) {
+            throw new ApiException(e);
+        }
+
+        if (respBody == null || "".equals(respBody)) {
             return null;
         }
 
@@ -944,35 +929,17 @@ public class ApiClient {
             // ensuring a default content type
             contentType = "application/json";
         }
-        try {
-            if (isJsonMime(contentType)) {
-                if (returnType.equals(String.class)) {
-                    String respBodyString = respBody.string();
-                    if (respBodyString.isEmpty()) {
-                        return null;
-                    }
-                    // Use String-based deserialize for String return type with fallback
-                    return JSON.deserialize(respBodyString, returnType);
-                } else {
-                    // Use InputStream-based deserialize which supports responses > 2GB
-                    return JSON.deserialize(respBody.byteStream(), returnType);
-                }
-            } else if (returnType.equals(String.class)) {
-                String respBodyString = respBody.string();
-                if (respBodyString.isEmpty()) {
-                    return null;
-                }
-                // Expecting string, return the raw response body.
-                return (T) respBodyString;
-            } else {
-                throw new ApiException(
+        if (isJsonMime(contentType)) {
+            return JSON.deserialize(respBody, returnType);
+        } else if (returnType.equals(String.class)) {
+            // Expecting string, return the raw response body.
+            return (T) respBody;
+        } else {
+            throw new ApiException(
                     "Content type \"" + contentType + "\" is not supported for type: " + returnType,
                     response.code(),
                     response.headers().toMultimap(),
-                    response.body().string());
-            }
-        } catch (IOException e) {
-            throw new ApiException(e);
+                    respBody);
         }
     }
 
@@ -1299,8 +1266,7 @@ public class ApiClient {
             if (serverIndex != null) {
                 if (serverIndex < 0 || serverIndex >= servers.size()) {
                     throw new ArrayIndexOutOfBoundsException(String.format(
-                        java.util.Locale.ROOT,
-                        "Invalid index %d when selecting the host settings. Must be less than %d", serverIndex, servers.size()
+                    "Invalid index %d when selecting the host settings. Must be less than %d", serverIndex, servers.size()
                     ));
                 }
                 baseURL = servers.get(serverIndex).URL(serverVariables);
@@ -1372,11 +1338,11 @@ public class ApiClient {
      */
     public void processCookieParams(Map<String, String> cookieParams, Request.Builder reqBuilder) {
         for (Entry<String, String> param : cookieParams.entrySet()) {
-            reqBuilder.addHeader("Cookie", String.format(java.util.Locale.ROOT, "%s=%s", param.getKey(), param.getValue()));
+            reqBuilder.addHeader("Cookie", String.format("%s=%s", param.getKey(), param.getValue()));
         }
         for (Entry<String, String> param : defaultCookieMap.entrySet()) {
             if (!cookieParams.containsKey(param.getKey())) {
-                reqBuilder.addHeader("Cookie", String.format(java.util.Locale.ROOT, "%s=%s", param.getKey(), param.getValue()));
+                reqBuilder.addHeader("Cookie", String.format("%s=%s", param.getKey(), param.getValue()));
             }
         }
     }
@@ -1469,7 +1435,7 @@ public class ApiClient {
      * @param key The key of the Header element
      * @param file The file to add to the Header
      */ 
-    protected void addPartToMultiPartBuilder(MultipartBody.Builder mpBuilder, String key, File file) {
+    private void addPartToMultiPartBuilder(MultipartBody.Builder mpBuilder, String key, File file) {
         Headers partHeaders = Headers.of("Content-Disposition", "form-data; name=\"" + key + "\"; filename=\"" + file.getName() + "\"");
         MediaType mediaType = MediaType.parse(guessContentTypeFromFile(file));
         mpBuilder.addPart(partHeaders, RequestBody.create(file, mediaType));
@@ -1482,7 +1448,7 @@ public class ApiClient {
      * @param key The key of the Header element
      * @param obj The complex object to add to the Header
      */
-    protected void addPartToMultiPartBuilder(MultipartBody.Builder mpBuilder, String key, Object obj) {
+    private void addPartToMultiPartBuilder(MultipartBody.Builder mpBuilder, String key, Object obj) {
         RequestBody requestBody;
         if (obj instanceof String) {
             requestBody = RequestBody.create((String) obj, MediaType.parse("text/plain"));
@@ -1504,7 +1470,7 @@ public class ApiClient {
      * Get network interceptor to add it to the httpClient to track download progress for
      * async requests.
      */
-    protected Interceptor getProgressInterceptor() {
+    private Interceptor getProgressInterceptor() {
         return new Interceptor() {
             @Override
             public Response intercept(Interceptor.Chain chain) throws IOException {
@@ -1525,7 +1491,7 @@ public class ApiClient {
      * Apply SSL related settings to httpClient according to the current values of
      * verifyingSsl and sslCaCert.
      */
-    protected void applySslSettings() {
+    private void applySslSettings() {
         try {
             TrustManager[] trustManagers;
             HostnameVerifier hostnameVerifier;
@@ -1573,17 +1539,7 @@ public class ApiClient {
                     trustManagerFactory.init(caKeyStore);
                 }
                 trustManagers = trustManagerFactory.getTrustManagers();
-                if (tlsServerName != null && !tlsServerName.isEmpty()) {
-                    hostnameVerifier = new HostnameVerifier() {
-                        @Override
-                        public boolean verify(String hostname, SSLSession session) {
-                            // Verify the certificate against tlsServerName instead of the actual hostname
-                            return OkHostnameVerifier.INSTANCE.verify(tlsServerName, session);
-                        }
-                    };
-                } else {
-                    hostnameVerifier = OkHostnameVerifier.INSTANCE;
-                }
+                hostnameVerifier = OkHostnameVerifier.INSTANCE;
             }
 
             SSLContext sslContext = SSLContext.getInstance("TLS");
@@ -1597,7 +1553,7 @@ public class ApiClient {
         }
     }
 
-    protected KeyStore newEmptyKeyStore(char[] password) throws GeneralSecurityException {
+    private KeyStore newEmptyKeyStore(char[] password) throws GeneralSecurityException {
         try {
             KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
             keyStore.load(null, password);
@@ -1614,7 +1570,7 @@ public class ApiClient {
      * @return The string representation of the HTTP request body
      * @throws io.daytona.toolbox.client.ApiException If fail to serialize the request body object into a string
      */
-    protected String requestBodyToString(RequestBody requestBody) throws ApiException {
+    private String requestBodyToString(RequestBody requestBody) throws ApiException {
         if (requestBody != null) {
             try {
                 final Buffer buffer = new Buffer();

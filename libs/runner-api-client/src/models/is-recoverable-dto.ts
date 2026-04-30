@@ -14,7 +14,17 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface IsRecoverableDTO
+ */
 export interface IsRecoverableDTO {
+    /**
+     * 
+     * @type {string}
+     * @memberof IsRecoverableDTO
+     */
     'errorReason': string;
 }
 

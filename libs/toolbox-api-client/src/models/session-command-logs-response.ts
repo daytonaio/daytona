@@ -14,9 +14,29 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface SessionCommandLogsResponse
+ */
 export interface SessionCommandLogsResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof SessionCommandLogsResponse
+     */
     'output': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SessionCommandLogsResponse
+     */
     'stderr': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SessionCommandLogsResponse
+     */
     'stdout': string;
 }
 

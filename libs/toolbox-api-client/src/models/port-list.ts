@@ -14,7 +14,17 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface PortList
+ */
 export interface PortList {
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof PortList
+     */
     'ports'?: Array<number>;
 }
 

@@ -14,17 +14,59 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface PtySessionInfo
+ */
 export interface PtySessionInfo {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof PtySessionInfo
+     */
     'active': boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof PtySessionInfo
+     */
     'cols': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PtySessionInfo
+     */
     'createdAt': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PtySessionInfo
+     */
     'cwd': string;
+    /**
+     * 
+     * @type {{ [key: string]: string; }}
+     * @memberof PtySessionInfo
+     */
     'envs': { [key: string]: string; };
+    /**
+     * 
+     * @type {string}
+     * @memberof PtySessionInfo
+     */
     'id': string;
     /**
      * Whether this session uses lazy start
+     * @type {boolean}
+     * @memberof PtySessionInfo
      */
     'lazyStart': boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof PtySessionInfo
+     */
     'rows': number;
 }
 

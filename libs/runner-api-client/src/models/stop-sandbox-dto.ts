@@ -14,7 +14,17 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface StopSandboxDTO
+ */
 export interface StopSandboxDTO {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof StopSandboxDTO
+     */
     'force'?: boolean;
 }
 

@@ -14,13 +14,35 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface MouseClickRequest
+ */
 export interface MouseClickRequest {
     /**
      * left, right, middle
+     * @type {string}
+     * @memberof MouseClickRequest
      */
     'button'?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof MouseClickRequest
+     */
     'double'?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof MouseClickRequest
+     */
     'x'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof MouseClickRequest
+     */
     'y'?: number;
 }
 

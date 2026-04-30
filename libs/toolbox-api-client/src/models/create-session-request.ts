@@ -14,7 +14,17 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface CreateSessionRequest
+ */
 export interface CreateSessionRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateSessionRequest
+     */
     'sessionId': string;
 }
 

@@ -17,9 +17,29 @@
 // @ts-ignore
 import type { LspLocation } from './lsp-location';
 
+/**
+ * 
+ * @export
+ * @interface LspSymbol
+ */
 export interface LspSymbol {
+    /**
+     * 
+     * @type {number}
+     * @memberof LspSymbol
+     */
     'kind': number;
+    /**
+     * 
+     * @type {LspLocation}
+     * @memberof LspSymbol
+     */
     'location': LspLocation;
+    /**
+     * 
+     * @type {string}
+     * @memberof LspSymbol
+     */
     'name': string;
 }
 

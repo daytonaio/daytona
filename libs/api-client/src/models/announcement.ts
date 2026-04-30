@@ -14,13 +14,22 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface Announcement
+ */
 export interface Announcement {
     /**
      * The announcement text
+     * @type {string}
+     * @memberof Announcement
      */
     'text': string;
     /**
      * URL to learn more about the announcement
+     * @type {string}
+     * @memberof Announcement
      */
     'learnMoreUrl'?: string;
 }
