@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils'
 import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
 export const sheetVariants = cva(
-  'fixed z-50 gap-4 bg-background p-6 shadow-lg transition ease-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:duration-200 data-[state=open]:duration-250',
+  'fixed z-50 gap-4 bg-background p-6 shadow-lg outline-none transition ease-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:duration-200 data-[state=open]:duration-250',
   {
     variants: {
       side: {

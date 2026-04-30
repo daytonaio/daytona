@@ -17,7 +17,8 @@ import { useConfig } from '@/hooks/useConfig'
 import { cn } from '@/lib/utils'
 import { SandboxSessionProvider } from '@/providers/SandboxSessionProvider'
 import { Sandbox } from '@daytona/api-client'
-import { ChevronDown, ChevronUp, ChevronsRight, X } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ChevronsRight, X } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
 import React, { useCallback, useEffect, useState } from 'react'
 import { CopyButton } from './CopyButton'
@@ -32,6 +33,7 @@ import { SandboxTerminalTab } from './sandboxes/SandboxTerminalTab'
 import { SandboxTracesTab } from './sandboxes/SandboxTracesTab'
 import { SandboxVncTab } from './sandboxes/SandboxVncTab'
 import { ScrollArea } from './ui/scroll-area'
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import { useSidebar } from './ui/sidebar'
 
 export type SandboxDetailsSheetTabValue =
@@ -49,7 +51,7 @@ const EXPANDED_WIDTH = 1600
 const MOBILE_BREAKPOINT = 1024
 const SIDE_BY_SIDE_MIN_WIDTH = 1000
 const TAB_RESIZE_DURATION = 0.5
-const TAB_CONTENT_RENDER_DELAY_MS = 120
+const TAB_CONTENT_RENDER_DELAY_MS = 0
 
 interface SandboxDetailsSheetProps {
   sandbox: Sandbox | null
@@ -71,6 +73,8 @@ interface SandboxDetailsSheetProps {
   hasPrev: boolean
   hasNext: boolean
   initialTab?: SandboxDetailsSheetTabValue
+  activeTab?: SandboxDetailsSheetTabValue
+  onTabChange?: (tab: SandboxDetailsSheetTabValue) => void
 }
 
 function getViewportWidth() {
@@ -91,6 +95,13 @@ function getWidthForTab(tab: SandboxDetailsSheetTabValue, viewportWidth: number,
 
 function clampSheetWidth(width: number, viewportWidth: number, sidebarWidth: number) {
   return Math.min(Math.max(width, getOverviewWidth(viewportWidth)), getExpandedWidth(viewportWidth, sidebarWidth))
+}
+
+function isNestedAlertDialogEvent(event: Event) {
+  return (
+    event.target instanceof HTMLElement &&
+    Boolean(event.target.closest('[data-slot="alert-dialog-content"], [data-slot="alert-dialog-overlay"]'))
+  )
 }
 
 function SandboxOverviewPanel({
@@ -213,61 +224,167 @@ function SandboxDetailsTabsList({
   leadingContent?: React.ReactNode
 }) {
   const triggerClassName = 'h-[41px] border-b py-0'
+  const tabViewportRef = React.useRef<HTMLDivElement | null>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+  const [isTabStripHovered, setIsTabStripHovered] = useState(false)
+
+  const updateCanScrollRight = useCallback(() => {
+    const viewport = tabViewportRef.current
+    if (!viewport) {
+      setCanScrollLeft(false)
+      setCanScrollRight(false)
+      return
+    }
+
+    const remainingScroll = viewport.scrollWidth - viewport.clientWidth - viewport.scrollLeft
+    setCanScrollLeft(viewport.scrollLeft > 1)
+    setCanScrollRight(remainingScroll > 1)
+  }, [])
+
+  const scrollTabs = useCallback((direction: 'left' | 'right') => {
+    const viewport = tabViewportRef.current
+    if (!viewport) {
+      return
+    }
+
+    viewport.scrollBy({
+      left: (direction === 'left' ? -1 : 1) * Math.max(180, viewport.clientWidth * 0.7),
+      behavior: 'smooth',
+    })
+  }, [])
+
+  useEffect(() => {
+    const viewport = tabViewportRef.current
+    if (!viewport) {
+      return
+    }
+
+    updateCanScrollRight()
+    viewport.addEventListener('scroll', updateCanScrollRight, { passive: true })
+    window.addEventListener('resize', updateCanScrollRight)
+
+    return () => {
+      viewport.removeEventListener('scroll', updateCanScrollRight)
+      window.removeEventListener('resize', updateCanScrollRight)
+    }
+  }, [updateCanScrollRight])
+
+  useEffect(() => {
+    updateCanScrollRight()
+  }, [experimentsEnabled, filesystemEnabled, spendingTabAvailable, showOverview, leadingContent, updateCanScrollRight])
 
   return (
-    <div className="h-11 shrink-0 border-b border-border">
-      <ScrollArea
-        fade="mask"
-        horizontal
-        vertical={false}
-        fadeOffset={36}
-        className="h-full [&_[data-slot=scroll-area-scrollbar]]:hidden [&_[data-slot=scroll-area-viewport]]:pb-px"
-      >
-        <TabsList variant="underline" className="h-[41px] w-max min-w-full border-b-0">
-          {leadingContent}
-          {showOverview && (
-            <TabsTrigger value="overview" className={triggerClassName}>
-              Overview
-            </TabsTrigger>
-          )}
-          {experimentsEnabled && (
-            <>
-              <TabsTrigger value="logs" className={triggerClassName}>
-                Logs
+    <div
+      className="relative flex h-[42px] shrink-0 border-b border-border"
+      onMouseEnter={() => setIsTabStripHovered(true)}
+      onMouseLeave={() => setIsTabStripHovered(false)}
+      onFocusCapture={() => setIsTabStripHovered(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          setIsTabStripHovered(false)
+        }
+      }}
+    >
+      {leadingContent ? <div className="flex h-full shrink-0 items-center">{leadingContent}</div> : null}
+      <div className="relative h-full min-w-0 flex-1">
+        <ScrollArea
+          fade="mask"
+          horizontal
+          vertical={false}
+          fadeOffset={36}
+          viewportRef={tabViewportRef}
+          className="h-full [&_[data-slot=scroll-area-scrollbar]]:hidden [&_[data-slot=scroll-area-viewport]]:pb-px"
+        >
+          <TabsList variant="underline" className="h-[41px] w-max min-w-full border-b-0">
+            {showOverview && (
+              <TabsTrigger value="overview" className={triggerClassName}>
+                Overview
               </TabsTrigger>
-              <TabsTrigger value="traces" className={triggerClassName}>
-                Traces
-              </TabsTrigger>
-              <TabsTrigger value="metrics" className={triggerClassName}>
-                Metrics
-              </TabsTrigger>
-              {spendingTabAvailable && (
-                <TabsTrigger value="spending" className={triggerClassName}>
-                  Spending
+            )}
+            {experimentsEnabled && (
+              <>
+                <TabsTrigger value="logs" className={triggerClassName}>
+                  Logs
                 </TabsTrigger>
-              )}
-            </>
-          )}
-          <TabsTrigger value="terminal" className={triggerClassName}>
-            Terminal
-          </TabsTrigger>
-          {filesystemEnabled && (
-            <TabsTrigger value="filesystem" className={triggerClassName}>
-              Filesystem
+                <TabsTrigger value="traces" className={triggerClassName}>
+                  Traces
+                </TabsTrigger>
+                <TabsTrigger value="metrics" className={triggerClassName}>
+                  Metrics
+                </TabsTrigger>
+                {spendingTabAvailable && (
+                  <TabsTrigger value="spending" className={triggerClassName}>
+                    Spending
+                  </TabsTrigger>
+                )}
+              </>
+            )}
+            <TabsTrigger value="terminal" className={triggerClassName}>
+              Terminal
             </TabsTrigger>
+            {filesystemEnabled && (
+              <TabsTrigger value="filesystem" className={triggerClassName}>
+                Filesystem
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="vnc" className={triggerClassName}>
+              VNC
+            </TabsTrigger>
+          </TabsList>
+        </ScrollArea>
+        <AnimatePresence initial={false}>
+          {canScrollLeft && isTabStripHovered && (
+            <motion.div
+              key="scroll-tabs-left"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.16, ease: 'easeOut' }}
+              className="pointer-events-none absolute inset-y-0 left-0 z-20 flex w-20 items-center justify-start pl-1 after:absolute after:inset-0 after:z-0 after:bg-background/90 after:[mask-image:linear-gradient(to_right,black_50%,transparent_100%)] after:content-['']"
+            >
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className="pointer-events-auto relative z-10 size-8 text-muted-foreground hover:text-foreground"
+                onClick={() => scrollTabs('left')}
+                aria-label="Scroll tabs left"
+              >
+                <ChevronLeft className="size-4" />
+              </Button>
+            </motion.div>
           )}
-          <TabsTrigger value="vnc" className={triggerClassName}>
-            VNC
-          </TabsTrigger>
-        </TabsList>
-      </ScrollArea>
+          {canScrollRight && isTabStripHovered && (
+            <motion.div
+              key="scroll-tabs-right"
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              transition={{ duration: 0.16, ease: 'easeOut' }}
+              className="pointer-events-none absolute inset-y-0 right-0 z-20 flex w-20 items-center justify-end pr-1 after:absolute after:inset-0 after:z-0 after:bg-background/90 after:[mask-image:linear-gradient(to_left,black_50%,transparent_100%)] after:content-['']"
+            >
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className="pointer-events-auto relative z-10 size-8 text-muted-foreground hover:text-foreground"
+                onClick={() => scrollTabs('right')}
+                aria-label="Scroll tabs right"
+              >
+                <ChevronRight className="size-4" />
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }
 
 function SandboxOverviewTabTrigger() {
   return (
-    <div className="h-11 shrink-0 border-b border-border">
+    <div className="h-[42px] shrink-0 border-b border-border">
       <div className="inline-flex h-[41px] items-center px-4 py-0 text-sm font-medium text-foreground">Overview</div>
     </div>
   )
@@ -289,20 +406,20 @@ function SandboxDetailsTabContent({
       {experimentsEnabled && (
         <>
           <TabsContent value="logs" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden">
-            <SandboxLogsTab sandboxId={sandbox.id} persistFilters={false} />
+            <SandboxLogsTab sandboxId={sandbox.id} />
           </TabsContent>
           <TabsContent value="traces" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden">
-            <SandboxTracesTab sandboxId={sandbox.id} persistFilters={false} />
+            <SandboxTracesTab sandboxId={sandbox.id} />
           </TabsContent>
           <TabsContent value="metrics" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden">
-            <SandboxMetricsTab sandboxId={sandbox.id} persistFilters={false} />
+            <SandboxMetricsTab sandboxId={sandbox.id} />
           </TabsContent>
           {spendingTabAvailable && (
             <TabsContent
               value="spending"
               className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden"
             >
-              <SandboxSpendingTab sandboxId={sandbox.id} persistFilters={false} />
+              <SandboxSpendingTab sandboxId={sandbox.id} />
             </TabsContent>
           )}
         </>
@@ -346,12 +463,16 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   hasPrev,
   hasNext,
   initialTab = 'overview',
+  activeTab: activeTabProp,
+  onTabChange,
 }) => {
   const { currentWidth: sidebarWidth } = useSidebar()
   const sheetContentRef = React.useRef<ResizableSheetContentRef>(null)
   const isHeaderNavigationRef = React.useRef(false)
   const hasManualExpandedWidthRef = React.useRef(false)
-  const [activeTab, setActiveTab] = useState<SandboxDetailsSheetTabValue>('overview')
+  const initializedOpenSandboxIdRef = React.useRef<string | null>(null)
+  const [internalActiveTab, setInternalActiveTab] = useState<SandboxDetailsSheetTabValue>('overview')
+  const activeTab = activeTabProp ?? internalActiveTab
   const [renderExpandedContent, setRenderExpandedContent] = useState(false)
   const [viewportWidth, setViewportWidth] = useState(() => getViewportWidth())
   const experimentsEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_EXPERIMENTS)
@@ -386,30 +507,41 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
     [isDesktop, sidebarWidth, viewportWidth],
   )
 
+  const setActiveTabValue = useCallback(
+    (tab: SandboxDetailsSheetTabValue) => {
+      if (activeTabProp === undefined) {
+        setInternalActiveTab(tab)
+      }
+
+      onTabChange?.(tab)
+    },
+    [activeTabProp, onTabChange],
+  )
+
   const resetToOverview = useCallback(
     (immediate = false) => {
       hasManualExpandedWidthRef.current = false
-      setActiveTab('overview')
+      setActiveTabValue('overview')
       requestAnimationFrame(() => resizeSheetToTab('overview', immediate))
     },
-    [resizeSheetToTab],
+    [resizeSheetToTab, setActiveTabValue],
   )
 
   const resetToTab = useCallback(
     (tab: SandboxDetailsSheetTabValue, immediate = false) => {
       hasManualExpandedWidthRef.current = false
-      setActiveTab(tab)
+      setActiveTabValue(tab)
       setRenderExpandedContent(false)
       requestAnimationFrame(() => resizeSheetToTab(tab, immediate))
     },
-    [resizeSheetToTab],
+    [resizeSheetToTab, setActiveTabValue],
   )
 
   const handleTabChange = useCallback(
     (value: string) => {
       const nextTab = value as SandboxDetailsSheetTabValue
       const expandingFromOverview = activeTab === 'overview' && nextTab !== 'overview'
-      setActiveTab(nextTab)
+      setActiveTabValue(nextTab)
 
       if (nextTab === 'overview') {
         setRenderExpandedContent(false)
@@ -426,7 +558,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
         resizeSheetToTab(nextTab)
       }
     },
-    [activeTab, resizeSheetToTab],
+    [activeTab, resizeSheetToTab, setActiveTabValue],
   )
 
   useEffect(() => {
@@ -456,8 +588,14 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
 
   useEffect(() => {
     if (!open) {
+      initializedOpenSandboxIdRef.current = null
       return
     }
+
+    if (initializedOpenSandboxIdRef.current === sandbox?.id) {
+      return
+    }
+    initializedOpenSandboxIdRef.current = sandbox?.id ?? null
 
     if (isHeaderNavigationRef.current) {
       isHeaderNavigationRef.current = false
@@ -467,6 +605,19 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
     hasManualExpandedWidthRef.current = false
     resetToTab(initialTab, true)
   }, [initialTab, open, resetToTab, sandbox?.id])
+
+  useEffect(() => {
+    if (!open || activeTabProp === undefined) {
+      return
+    }
+
+    if (activeTabProp === 'overview') {
+      setRenderExpandedContent(false)
+      hasManualExpandedWidthRef.current = false
+    }
+
+    requestAnimationFrame(() => resizeSheetToTab(activeTabProp))
+  }, [activeTabProp, open, resizeSheetToTab])
 
   useEffect(() => {
     if (!open || isDesktop) {
@@ -520,13 +671,23 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
         maxWidth={maxWidth}
         resizable={false}
         onWidthChange={handleSheetWidthChange}
-        className="p-0 flex flex-col gap-0 [&>button]:hidden"
+        onPointerDownOutside={(event) => {
+          if (isNestedAlertDialogEvent(event)) {
+            event.preventDefault()
+          }
+        }}
+        onFocusOutside={(event) => {
+          if (isNestedAlertDialogEvent(event)) {
+            event.preventDefault()
+          }
+        }}
+        className="p-0 flex flex-col gap-0 data-[state=closed]:slide-out-to-right-[400px] data-[state=closed]:duration-150 data-[state=open]:slide-in-from-right-[400px] ease-[cubic-bezier(0.22,1,0.36,1)] [&>button]:hidden"
       >
         <SheetHeader className="flex flex-row items-start justify-between p-4 px-5 space-y-0 border-b border-border">
           <div className="min-w-0">
             <SheetTitle className="text-2xl font-medium">Sandbox Details</SheetTitle>
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
+          <div className="flex flex-wrap items-center justify-end shrink-0">
             <Button variant="ghost" size="icon-sm" disabled={!hasPrev} onClick={() => handleNavigate('prev')}>
               <ChevronUp className="size-4" />
               <span className="sr-only">Previous sandbox</span>
@@ -610,21 +771,26 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                         spendingTabAvailable={spendingTabAvailable}
                         showOverview={false}
                         leadingContent={
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            className="mx-1 size-8 text-muted-foreground hover:text-foreground"
-                            onClick={() => resetToOverview()}
-                          >
-                            <ChevronsRight className="size-4" />
-                            <span className="sr-only">Collapse to overview</span>
-                          </Button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                className="mx-1 size-8 text-muted-foreground hover:text-foreground"
+                                onClick={() => resetToOverview()}
+                              >
+                                <ChevronsRight className="size-4" />
+                                <span className="sr-only">Collapse</span>
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Collapse</TooltipContent>
+                          </Tooltip>
                         }
                       />
                     </div>
                     <div className="flex min-w-0 min-h-0 flex-1 flex-col overflow-hidden">
                       {renderExpandedContent && (
-                        <div className="flex min-h-0 flex-1 flex-col animate-in fade-in slide-in-from-right-12 duration-100 ease-out">
+                        <div className="flex min-h-0 flex-1 flex-col animate-in fade-in slide-in-from-right-20 duration-300 ease-out">
                           <SandboxDetailsTabContent
                             sandbox={sandbox}
                             experimentsEnabled={experimentsEnabled}
