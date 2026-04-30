@@ -8,11 +8,13 @@
 package computeruse
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 	"github.com/godbus/dbus/v5"
@@ -94,6 +96,8 @@ const (
 	// State bit indices of interest. Covers the full AT-SPI StateType enum
 	// (AT-SPI uses 2x uint32 = 64 bit-slots; ~44 are defined today).
 	stateActive = 1 // used for focus-scoped root resolution
+
+	a11yHealthTimeout = time.Second
 )
 
 // atspiStateNames is the AT-SPI StateType enum ordered by bit index. Names
@@ -165,6 +169,10 @@ type accessibleRef struct {
 // instance whose address is discovered via org.a11y.Bus.GetAddress() on the
 // session bus.
 func (c *ComputerUse) connectA11y() (*dbus.Conn, error) {
+	return c.connectA11yContext(context.Background())
+}
+
+func (c *ComputerUse) connectA11yContext(ctx context.Context) (*dbus.Conn, error) {
 	c.atspiMu.Lock()
 	defer c.atspiMu.Unlock()
 
@@ -187,7 +195,7 @@ func (c *ComputerUse) connectA11y() (*dbus.Conn, error) {
 
 	var addr string
 	busObj := sess.Object(atspiBusServiceBN, atspiBusServiceOP)
-	if err := busObj.Call("org.a11y.Bus.GetAddress", 0).Store(&addr); err != nil {
+	if err := busObj.CallWithContext(ctx, "org.a11y.Bus.GetAddress", 0).Store(&addr); err != nil {
 		return nil, fmt.Errorf("%w: GetAddress: %v", ErrA11yUnavailable, err)
 	}
 	if addr == "" {
@@ -201,6 +209,21 @@ func (c *ComputerUse) connectA11y() (*dbus.Conn, error) {
 
 	c.atspiConn = conn
 	return conn, nil
+}
+
+func (c *ComputerUse) isA11yAvailable() bool {
+	if c.a11yHealth != nil {
+		return c.a11yHealth()
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), a11yHealthTimeout)
+	defer cancel()
+
+	conn, err := c.connectA11yContext(ctx)
+	if err != nil {
+		return false
+	}
+	_, err = getChildrenContext(ctx, conn, atspiRegistryBus, atspiRootPath)
+	return err == nil
 }
 
 // ---------------------------------------------------------------------------
@@ -341,9 +364,13 @@ func getInt32Prop(obj dbus.BusObject, prop string) (int32, bool) {
 }
 
 func getChildren(conn *dbus.Conn, sender string, path dbus.ObjectPath) ([]accessibleRef, error) {
+	return getChildrenContext(context.Background(), conn, sender, path)
+}
+
+func getChildrenContext(ctx context.Context, conn *dbus.Conn, sender string, path dbus.ObjectPath) ([]accessibleRef, error) {
 	obj := conn.Object(sender, path)
 	var refs []accessibleRef
-	if err := obj.Call(ifaceAccessible+".GetChildren", 0).Store(&refs); err != nil {
+	if err := obj.CallWithContext(ctx, ifaceAccessible+".GetChildren", 0).Store(&refs); err != nil {
 		return nil, classifyDbusError(err)
 	}
 	return refs, nil
