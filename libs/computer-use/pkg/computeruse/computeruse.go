@@ -47,6 +47,7 @@ type ComputerUse struct {
 	atspiConn *dbus.Conn
 
 	a11yHealth func() bool
+	waitDBus   func(string, time.Duration) error
 }
 
 var _ computeruse.IComputerUse = &ComputerUse{}
@@ -209,8 +210,14 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 	}
 	if atspiCommand == "" {
 		log.Warnf("at-spi-bus-launcher not found in any known location; accessibility API will return 503 until the binary is installed")
+	} else if dbusAddress == "" {
+		log.Warnf("DBUS_SESSION_BUS_ADDRESS is empty; accessibility API will return 503 until session D-Bus is available")
 	} else {
-		if err := waitForSessionBus(dbusAddress, 5*time.Second); err != nil {
+		waitDBus := waitForSessionBus
+		if c.waitDBus != nil {
+			waitDBus = c.waitDBus
+		}
+		if err := waitDBus(dbusAddress, 5*time.Second); err != nil {
 			log.Warnf("session D-Bus check failed for at-spi-bus-launcher; launching anyway so the a11y bus can start if D-Bus becomes usable: %v", err)
 		}
 		c.processes["atspi"] = &Process{
