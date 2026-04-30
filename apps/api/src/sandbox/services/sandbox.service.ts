@@ -2710,6 +2710,23 @@ export class SandboxService {
     })
   }
 
+  async setSandboxErrorStateByAdmin(sandboxId: string, errorReason: string, recoverable = false): Promise<Sandbox> {
+    const sandbox = await this.findOne(sandboxId)
+
+    if (sandbox.state === SandboxState.DESTROYED) {
+      throw new BadRequestError('Sandbox is destroyed')
+    }
+
+    const updateData: Partial<Sandbox> = {
+      state: SandboxState.ERROR,
+      pending: false,
+      recoverable,
+      errorReason,
+    }
+
+    return this.sandboxRepository.update(sandbox.id, { updateData, entity: sandbox })
+  }
+
   @OnEvent(WarmPoolEvents.TOPUP_REQUESTED)
   private async createWarmPoolSandbox(event: WarmPoolTopUpRequested) {
     await this.createForWarmPool(event.warmPool)

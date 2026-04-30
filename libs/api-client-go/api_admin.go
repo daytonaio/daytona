@@ -221,6 +221,19 @@ type AdminAPI interface {
 	AdminSetDefaultRegistryExecute(r AdminAPIAdminSetDefaultRegistryRequest) (*DockerRegistry, *http.Response, error)
 
 	/*
+	AdminSetSandboxErrorState Set sandbox state to error as an admin
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@return AdminAPIAdminSetSandboxErrorStateRequest
+	*/
+	AdminSetSandboxErrorState(ctx context.Context, sandboxId string) AdminAPIAdminSetSandboxErrorStateRequest
+
+	// AdminSetSandboxErrorStateExecute executes the request
+	//  @return Sandbox
+	AdminSetSandboxErrorStateExecute(r AdminAPIAdminSetSandboxErrorStateRequest) (*Sandbox, *http.Response, error)
+
+	/*
 	AdminSetSnapshotGeneralStatus Set snapshot general status
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -1850,6 +1863,118 @@ func (a *AdminAPIService) AdminSetDefaultRegistryExecute(r AdminAPIAdminSetDefau
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type AdminAPIAdminSetSandboxErrorStateRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	sandboxId string
+	setSandboxErrorStateDto *SetSandboxErrorStateDto
+}
+
+func (r AdminAPIAdminSetSandboxErrorStateRequest) SetSandboxErrorStateDto(setSandboxErrorStateDto SetSandboxErrorStateDto) AdminAPIAdminSetSandboxErrorStateRequest {
+	r.setSandboxErrorStateDto = &setSandboxErrorStateDto
+	return r
+}
+
+func (r AdminAPIAdminSetSandboxErrorStateRequest) Execute() (*Sandbox, *http.Response, error) {
+	return r.ApiService.AdminSetSandboxErrorStateExecute(r)
+}
+
+/*
+AdminSetSandboxErrorState Set sandbox state to error as an admin
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxId ID of the sandbox
+ @return AdminAPIAdminSetSandboxErrorStateRequest
+*/
+func (a *AdminAPIService) AdminSetSandboxErrorState(ctx context.Context, sandboxId string) AdminAPIAdminSetSandboxErrorStateRequest {
+	return AdminAPIAdminSetSandboxErrorStateRequest{
+		ApiService: a,
+		ctx: ctx,
+		sandboxId: sandboxId,
+	}
+}
+
+// Execute executes the request
+//  @return Sandbox
+func (a *AdminAPIService) AdminSetSandboxErrorStateExecute(r AdminAPIAdminSetSandboxErrorStateRequest) (*Sandbox, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Sandbox
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.AdminSetSandboxErrorState")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/admin/sandbox/{sandboxId}/error"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.setSandboxErrorStateDto == nil {
+		return localVarReturnValue, nil, reportError("setSandboxErrorStateDto is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.setSandboxErrorStateDto
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err

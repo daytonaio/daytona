@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Controller, HttpCode, NotFoundException, Param, Post, UseGuards } from '@nestjs/common'
+import { Body, Controller, HttpCode, NotFoundException, Param, Patch, Post, UseGuards } from '@nestjs/common'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { ApiBearerAuth, ApiOAuth2, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { Audit } from '../../audit/decorators/audit.decorator'
@@ -16,6 +16,8 @@ import { SandboxService } from '../../sandbox/services/sandbox.service'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
 import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
+import { SetSandboxErrorStateDto } from '../dto/set-sandbox-error-state.dto'
+import { TypedRequest } from '../../audit/decorators/audit.decorator'
 
 @Controller('admin/sandbox')
 @ApiTags('admin')
@@ -59,5 +61,45 @@ export class AdminSandboxController {
     }
     const recoveredSandbox = await this.sandboxService.recover(sandboxId, organization)
     return this.sandboxService.toSandboxDto(recoveredSandbox)
+  }
+
+  @Patch(':sandboxId/error')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Set sandbox state to error as an admin',
+    operationId: 'adminSetSandboxErrorState',
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'ID of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Sandbox state updated to error',
+    type: SandboxDto,
+  })
+  @Audit({
+    action: AuditAction.UPDATE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    targetIdFromResult: (result: SandboxDto) => result?.id,
+    requestMetadata: {
+      body: (req: TypedRequest<SetSandboxErrorStateDto>) => ({
+        errorReason: req.body?.errorReason,
+        recoverable: req.body?.recoverable,
+      }),
+    },
+  })
+  async setSandboxErrorState(
+    @Param('sandboxId') sandboxId: string,
+    @Body() dto: SetSandboxErrorStateDto,
+  ): Promise<SandboxDto> {
+    const sandbox = await this.sandboxService.setSandboxErrorStateByAdmin(
+      sandboxId,
+      dto.errorReason,
+      dto.recoverable ?? false,
+    )
+    return this.sandboxService.toSandboxDto(sandbox)
   }
 }

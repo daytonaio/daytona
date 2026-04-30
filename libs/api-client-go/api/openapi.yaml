@@ -8348,6 +8348,40 @@ paths:
       summary: Recover sandbox from error state as an admin
       tags:
       - admin
+  /admin/sandbox/{sandboxId}/error:
+    patch:
+      operationId: adminSetSandboxErrorState
+      parameters:
+      - description: ID of the sandbox
+        explode: false
+        in: path
+        name: sandboxId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetSandboxErrorStateDto"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sandbox"
+          description: Sandbox state updated to error
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Set sandbox state to error as an admin
+      tags:
+      - admin
   /admin/users:
     get:
       operationId: adminListUsers
@@ -14589,6 +14623,23 @@ components:
       - apiVersion
       - name
       - regionId
+      type: object
+    SetSandboxErrorStateDto:
+      example:
+        errorReason: Sandbox encountered an unrecoverable runtime error.
+        recoverable: false
+      properties:
+        errorReason:
+          description: Custom error message stored on the sandbox
+          example: Sandbox encountered an unrecoverable runtime error.
+          type: string
+        recoverable:
+          default: false
+          description: Whether the sandbox can be recovered from this error
+          example: false
+          type: boolean
+      required:
+      - errorReason
       type: object
     CreateOrganizationQuota:
       example:

@@ -171,6 +171,7 @@ daytona_api_client_async/models/send_webhook_dto.py
 daytona_api_client_async/models/session.py
 daytona_api_client_async/models/session_execute_request.py
 daytona_api_client_async/models/session_execute_response.py
+daytona_api_client_async/models/set_sandbox_error_state_dto.py
 daytona_api_client_async/models/set_snapshot_general_status_dto.py
 daytona_api_client_async/models/signed_port_preview_url.py
 daytona_api_client_async/models/snapshot_dto.py

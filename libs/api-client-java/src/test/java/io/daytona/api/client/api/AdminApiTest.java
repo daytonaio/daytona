@@ -25,6 +25,7 @@ import io.daytona.api.client.model.PaginatedAuditLogs;
 import io.daytona.api.client.model.RunnerFull;
 import io.daytona.api.client.model.Sandbox;
 import io.daytona.api.client.model.SendWebhookDto;
+import io.daytona.api.client.model.SetSandboxErrorStateDto;
 import io.daytona.api.client.model.SetSnapshotGeneralStatusDto;
 import io.daytona.api.client.model.SnapshotDto;
 import io.daytona.api.client.model.User;
@@ -237,6 +238,19 @@ public class AdminApiTest {
     public void adminSetDefaultRegistryTest() throws ApiException {
         String id = null;
         DockerRegistry response = api.adminSetDefaultRegistry(id);
+        // TODO: test validations
+    }
+
+    /**
+     * Set sandbox state to error as an admin
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void adminSetSandboxErrorStateTest() throws ApiException {
+        String sandboxId = null;
+        SetSandboxErrorStateDto setSandboxErrorStateDto = null;
+        Sandbox response = api.adminSetSandboxErrorState(sandboxId, setSandboxErrorStateDto);
         // TODO: test validations
     }
 

@@ -166,6 +166,7 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.session import Session
     from daytona_api_client_async.models.session_execute_request import SessionExecuteRequest
     from daytona_api_client_async.models.session_execute_response import SessionExecuteResponse
+    from daytona_api_client_async.models.set_sandbox_error_state_dto import SetSandboxErrorStateDto
     from daytona_api_client_async.models.set_snapshot_general_status_dto import SetSnapshotGeneralStatusDto
     from daytona_api_client_async.models.signed_port_preview_url import SignedPortPreviewUrl
     from daytona_api_client_async.models.snapshot_dto import SnapshotDto
@@ -349,6 +350,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "Session": "daytona_api_client_async.models.session",
     "SessionExecuteRequest": "daytona_api_client_async.models.session_execute_request",
     "SessionExecuteResponse": "daytona_api_client_async.models.session_execute_response",
+    "SetSandboxErrorStateDto": "daytona_api_client_async.models.set_sandbox_error_state_dto",
     "SetSnapshotGeneralStatusDto": "daytona_api_client_async.models.set_snapshot_general_status_dto",
     "SignedPortPreviewUrl": "daytona_api_client_async.models.signed_port_preview_url",
     "SnapshotDto": "daytona_api_client_async.models.snapshot_dto",

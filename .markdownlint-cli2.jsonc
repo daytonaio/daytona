@@ -22,6 +22,7 @@
     "**/node_modules/**",
     "**/apps/docs/**",
     "**/.venv/**",
+    "**/.bundle/**",
     "**/libs/toolbox-api-client-go/**"
   ],
 }

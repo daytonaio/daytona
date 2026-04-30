@@ -200,6 +200,7 @@ if TYPE_CHECKING:
     from daytona_api_client.models.session import Session
     from daytona_api_client.models.session_execute_request import SessionExecuteRequest
     from daytona_api_client.models.session_execute_response import SessionExecuteResponse
+    from daytona_api_client.models.set_sandbox_error_state_dto import SetSandboxErrorStateDto
     from daytona_api_client.models.set_snapshot_general_status_dto import SetSnapshotGeneralStatusDto
     from daytona_api_client.models.signed_port_preview_url import SignedPortPreviewUrl
     from daytona_api_client.models.snapshot_dto import SnapshotDto
@@ -414,6 +415,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "Session": "daytona_api_client.models.session",
     "SessionExecuteRequest": "daytona_api_client.models.session_execute_request",
     "SessionExecuteResponse": "daytona_api_client.models.session_execute_response",
+    "SetSandboxErrorStateDto": "daytona_api_client.models.set_sandbox_error_state_dto",
     "SetSnapshotGeneralStatusDto": "daytona_api_client.models.set_snapshot_general_status_dto",
     "SignedPortPreviewUrl": "daytona_api_client.models.signed_port_preview_url",
     "SnapshotDto": "daytona_api_client.models.snapshot_dto",
@@ -642,6 +644,7 @@ __all__ = [
     "Session",
     "SessionExecuteRequest",
     "SessionExecuteResponse",
+    "SetSandboxErrorStateDto",
     "SetSnapshotGeneralStatusDto",
     "SignedPortPreviewUrl",
     "SnapshotDto",

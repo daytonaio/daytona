@@ -173,6 +173,7 @@ lib/daytona_api_client/models/send_webhook_dto.rb
 lib/daytona_api_client/models/session.rb
 lib/daytona_api_client/models/session_execute_request.rb
 lib/daytona_api_client/models/session_execute_response.rb
+lib/daytona_api_client/models/set_sandbox_error_state_dto.rb
 lib/daytona_api_client/models/set_snapshot_general_status_dto.rb
 lib/daytona_api_client/models/signed_port_preview_url.rb
 lib/daytona_api_client/models/snapshot_dto.rb

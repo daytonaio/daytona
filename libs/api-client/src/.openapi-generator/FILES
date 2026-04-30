@@ -171,6 +171,7 @@ models/send-webhook-dto.ts
 models/session-execute-request.ts
 models/session-execute-response.ts
 models/session.ts
+models/set-sandbox-error-state-dto.ts
 models/set-snapshot-general-status-dto.ts
 models/signed-port-preview-url.ts
 models/snapshot-dto.ts

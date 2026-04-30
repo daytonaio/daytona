@@ -144,6 +144,7 @@ export * from './send-webhook-dto';
 export * from './session';
 export * from './session-execute-request';
 export * from './session-execute-response';
+export * from './set-sandbox-error-state-dto';
 export * from './set-snapshot-general-status-dto';
 export * from './signed-port-preview-url';
 export * from './snapshot-dto';
