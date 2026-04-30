@@ -18,13 +18,14 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
 import type { DaytonaConfiguration } from '../models';
 /**
  * ConfigApi - axios parameter creator
+ * @export
  */
 export const ConfigApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -47,8 +48,8 @@ export const ConfigApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -63,6 +64,7 @@ export const ConfigApiAxiosParamCreator = function (configuration?: Configuratio
 
 /**
  * ConfigApi - functional programming interface
+ * @export
  */
 export const ConfigApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ConfigApiAxiosParamCreator(configuration)
@@ -84,6 +86,7 @@ export const ConfigApiFp = function(configuration?: Configuration) {
 
 /**
  * ConfigApi - factory interface
+ * @export
  */
 export const ConfigApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = ConfigApiFp(configuration)
@@ -102,6 +105,9 @@ export const ConfigApiFactory = function (configuration?: Configuration, basePat
 
 /**
  * ConfigApi - object-oriented interface
+ * @export
+ * @class ConfigApi
+ * @extends {BaseAPI}
  */
 export class ConfigApi extends BaseAPI {
     /**
@@ -109,6 +115,7 @@ export class ConfigApi extends BaseAPI {
      * @summary Get config
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ConfigApi
      */
     public configControllerGetConfig(options?: RawAxiosRequestConfig) {
         return ConfigApiFp(this.configuration).configControllerGetConfig(options).then((request) => request(this.axios, this.basePath));

@@ -14,11 +14,41 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface SessionExecuteResponse
+ */
 export interface SessionExecuteResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof SessionExecuteResponse
+     */
     'cmdId': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof SessionExecuteResponse
+     */
     'exitCode'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SessionExecuteResponse
+     */
     'output'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SessionExecuteResponse
+     */
     'stderr'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SessionExecuteResponse
+     */
     'stdout'?: string;
 }
 

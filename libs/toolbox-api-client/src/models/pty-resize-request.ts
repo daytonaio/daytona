@@ -14,8 +14,23 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface PtyResizeRequest
+ */
 export interface PtyResizeRequest {
+    /**
+     * 
+     * @type {number}
+     * @memberof PtyResizeRequest
+     */
     'cols': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof PtyResizeRequest
+     */
     'rows': number;
 }
 

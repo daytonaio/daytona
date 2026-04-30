@@ -18,13 +18,14 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
 import type { PaginatedAuditLogs } from '../models';
 /**
  * AuditApi - axios parameter creator
+ * @export
  */
 export const AuditApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -86,8 +87,8 @@ export const AuditApiAxiosParamCreator = function (configuration?: Configuration
                 localVarQueryParameter['nextToken'] = nextToken;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -102,6 +103,7 @@ export const AuditApiAxiosParamCreator = function (configuration?: Configuration
 
 /**
  * AuditApi - functional programming interface
+ * @export
  */
 export const AuditApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = AuditApiAxiosParamCreator(configuration)
@@ -129,6 +131,7 @@ export const AuditApiFp = function(configuration?: Configuration) {
 
 /**
  * AuditApi - factory interface
+ * @export
  */
 export const AuditApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = AuditApiFp(configuration)
@@ -153,6 +156,9 @@ export const AuditApiFactory = function (configuration?: Configuration, basePath
 
 /**
  * AuditApi - object-oriented interface
+ * @export
+ * @class AuditApi
+ * @extends {BaseAPI}
  */
 export class AuditApi extends BaseAPI {
     /**
@@ -166,6 +172,7 @@ export class AuditApi extends BaseAPI {
      * @param {string} [nextToken] Token for cursor-based pagination. When provided, takes precedence over page parameter.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof AuditApi
      */
     public getOrganizationAuditLogs(organizationId: string, page?: number, limit?: number, from?: Date, to?: Date, nextToken?: string, options?: RawAxiosRequestConfig) {
         return AuditApiFp(this.configuration).getOrganizationAuditLogs(organizationId, page, limit, from, to, nextToken, options).then((request) => request(this.axios, this.basePath));

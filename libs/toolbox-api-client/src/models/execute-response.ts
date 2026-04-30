@@ -14,8 +14,23 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface ExecuteResponse
+ */
 export interface ExecuteResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof ExecuteResponse
+     */
     'exitCode'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExecuteResponse
+     */
     'result': string;
 }
 

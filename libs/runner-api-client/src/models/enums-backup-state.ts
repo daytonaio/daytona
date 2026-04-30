@@ -14,6 +14,11 @@
 
 
 
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
 
 export const EnumsBackupState = {
     BackupStateNone: 'NONE',
@@ -21,7 +26,7 @@ export const EnumsBackupState = {
     BackupStateInProgress: 'IN_PROGRESS',
     BackupStateCompleted: 'COMPLETED',
     BackupStateFailed: 'FAILED',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809'
 } as const;
 
 export type EnumsBackupState = typeof EnumsBackupState[keyof typeof EnumsBackupState];

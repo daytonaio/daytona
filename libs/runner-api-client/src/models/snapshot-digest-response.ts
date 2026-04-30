@@ -14,8 +14,23 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface SnapshotDigestResponse
+ */
 export interface SnapshotDigestResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof SnapshotDigestResponse
+     */
     'hash'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof SnapshotDigestResponse
+     */
     'sizeGB'?: number;
 }
 

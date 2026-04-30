@@ -14,6 +14,11 @@
 
 
 
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
 
 export const SnapshotState = {
     BUILDING: 'building',
@@ -24,7 +29,7 @@ export const SnapshotState = {
     ERROR: 'error',
     BUILD_FAILED: 'build_failed',
     REMOVING: 'removing',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809'
 } as const;
 
 export type SnapshotState = typeof SnapshotState[keyof typeof SnapshotState];

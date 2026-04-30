@@ -48,7 +48,7 @@ import io.daytona.api.client.JSON;
 /**
  * SessionExecuteRequest
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
 public class SessionExecuteRequest {
   public static final String SERIALIZED_NAME_COMMAND = "command";
   @SerializedName(SERIALIZED_NAME_COMMAND)
@@ -212,7 +212,10 @@ public class SessionExecuteRequest {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    return o == null ? "null" : o.toString().replace("\n", "\n    ");
+    if (o == null) {
+      return "null";
+    }
+    return o.toString().replace("\n", "\n    ");
   }
 
 
@@ -221,10 +224,14 @@ public class SessionExecuteRequest {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("command", "runAsync", "async"));
+    openapiFields = new HashSet<String>();
+    openapiFields.add("command");
+    openapiFields.add("runAsync");
+    openapiFields.add("async");
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>(Arrays.asList("command"));
+    openapiRequiredFields = new HashSet<String>();
+    openapiRequiredFields.add("command");
   }
 
   /**
@@ -236,19 +243,19 @@ public class SessionExecuteRequest {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!SessionExecuteRequest.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in SessionExecuteRequest is not found in the empty JSON string", SessionExecuteRequest.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format("The required field(s) %s in SessionExecuteRequest is not found in the empty JSON string", SessionExecuteRequest.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : SessionExecuteRequest.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("command").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `command` to be a primitive type in the JSON string but got `%s`", jsonObj.get("command").toString()));
+        throw new IllegalArgumentException(String.format("Expected the field `command` to be a primitive type in the JSON string but got `%s`", jsonObj.get("command").toString()));
       }
   }
 
@@ -309,7 +316,7 @@ public class SessionExecuteRequest {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

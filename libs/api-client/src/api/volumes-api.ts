@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -27,6 +27,7 @@ import type { CreateVolume } from '../models';
 import type { VolumeDto } from '../models';
 /**
  * VolumesApi - axios parameter creator
+ * @export
  */
 export const VolumesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -59,8 +60,9 @@ export const VolumesApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -106,6 +108,7 @@ export const VolumesApiAxiosParamCreator = function (configuration?: Configurati
             // authentication oauth2 required
 
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -148,8 +151,8 @@ export const VolumesApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -192,8 +195,8 @@ export const VolumesApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -237,8 +240,8 @@ export const VolumesApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['includeDeleted'] = includeDeleted;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -256,6 +259,7 @@ export const VolumesApiAxiosParamCreator = function (configuration?: Configurati
 
 /**
  * VolumesApi - functional programming interface
+ * @export
  */
 export const VolumesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = VolumesApiAxiosParamCreator(configuration)
@@ -335,6 +339,7 @@ export const VolumesApiFp = function(configuration?: Configuration) {
 
 /**
  * VolumesApi - factory interface
+ * @export
  */
 export const VolumesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = VolumesApiFp(configuration)
@@ -399,6 +404,9 @@ export const VolumesApiFactory = function (configuration?: Configuration, basePa
 
 /**
  * VolumesApi - object-oriented interface
+ * @export
+ * @class VolumesApi
+ * @extends {BaseAPI}
  */
 export class VolumesApi extends BaseAPI {
     /**
@@ -408,6 +416,7 @@ export class VolumesApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof VolumesApi
      */
     public createVolume(createVolume: CreateVolume, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return VolumesApiFp(this.configuration).createVolume(createVolume, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -420,6 +429,7 @@ export class VolumesApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof VolumesApi
      */
     public deleteVolume(volumeId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return VolumesApiFp(this.configuration).deleteVolume(volumeId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -432,6 +442,7 @@ export class VolumesApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof VolumesApi
      */
     public getVolume(volumeId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return VolumesApiFp(this.configuration).getVolume(volumeId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -444,6 +455,7 @@ export class VolumesApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof VolumesApi
      */
     public getVolumeByName(name: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return VolumesApiFp(this.configuration).getVolumeByName(name, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -456,6 +468,7 @@ export class VolumesApi extends BaseAPI {
      * @param {boolean} [includeDeleted] Include deleted volumes in the response
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof VolumesApi
      */
     public listVolumes(xDaytonaOrganizationID?: string, includeDeleted?: boolean, options?: RawAxiosRequestConfig) {
         return VolumesApiFp(this.configuration).listVolumes(xDaytonaOrganizationID, includeDeleted, options).then((request) => request(this.axios, this.basePath));

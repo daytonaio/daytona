@@ -14,13 +14,18 @@
 
 
 
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
 
 export const JobStatus = {
     PENDING: 'PENDING',
     IN_PROGRESS: 'IN_PROGRESS',
     COMPLETED: 'COMPLETED',
     FAILED: 'FAILED',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809'
 } as const;
 
 export type JobStatus = typeof JobStatus[keyof typeof JobStatus];

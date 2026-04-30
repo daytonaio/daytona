@@ -1,3 +1,5 @@
+# coding: utf-8
+
 """
     Daytona
 
@@ -9,7 +11,6 @@
 
     Do not edit the class manually.
 """  # noqa: E501
-
 
 import warnings
 from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
@@ -2224,7 +2225,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> bytes:
+    ) -> bytearray:
         """(Deprecated) [DEPRECATED] Download file
 
         Download file from sandbox
@@ -2269,7 +2270,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bytes",
+            '200': "bytearray",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -2300,7 +2301,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[bytes]:
+    ) -> ApiResponse[bytearray]:
         """(Deprecated) [DEPRECATED] Download file
 
         Download file from sandbox
@@ -2345,7 +2346,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bytes",
+            '200': "bytearray",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -2421,7 +2422,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bytes",
+            '200': "bytearray",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -2521,7 +2522,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> bytes:
+    ) -> bytearray:
         """(Deprecated) [DEPRECATED] Download multiple files
 
         Streams back a multipart/form-data bundle of the requested paths
@@ -2566,7 +2567,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bytes",
+            '200': "bytearray",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -2597,7 +2598,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[bytes]:
+    ) -> ApiResponse[bytearray]:
         """(Deprecated) [DEPRECATED] Download multiple files
 
         Streams back a multipart/form-data bundle of the requested paths
@@ -2642,7 +2643,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bytes",
+            '200': "bytearray",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -2718,7 +2719,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bytes",
+            '200': "bytearray",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -20185,7 +20186,7 @@ class ToolboxApi:
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param file:
-        :type file: bytes
+        :type file: bytearray
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -20265,7 +20266,7 @@ class ToolboxApi:
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param file:
-        :type file: bytes
+        :type file: bytearray
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -20345,7 +20346,7 @@ class ToolboxApi:
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param file:
-        :type file: bytes
+        :type file: bytearray
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of

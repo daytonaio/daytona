@@ -1,3 +1,5 @@
+# coding: utf-8
+
 """
     Daytona Toolbox API
 
@@ -8,7 +10,6 @@
 
     Do not edit the class manually.
 """  # noqa: E501
-
 
 import warnings
 from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
@@ -626,7 +627,7 @@ class ComputerUseApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> bytes:
+    ) -> bytearray:
         """Download a recording
 
         Download a recording by providing its ID
@@ -664,7 +665,7 @@ class ComputerUseApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bytes",
+            '200': "bytearray",
             '404': "Dict[str, str]",
             '500': "Dict[str, str]",
         }
@@ -695,7 +696,7 @@ class ComputerUseApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[bytes]:
+    ) -> ApiResponse[bytearray]:
         """Download a recording
 
         Download a recording by providing its ID
@@ -733,7 +734,7 @@ class ComputerUseApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bytes",
+            '200': "bytearray",
             '404': "Dict[str, str]",
             '500': "Dict[str, str]",
         }
@@ -802,7 +803,7 @@ class ComputerUseApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bytes",
+            '200': "bytearray",
             '404': "Dict[str, str]",
             '500': "Dict[str, str]",
         }

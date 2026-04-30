@@ -41,17 +41,12 @@ class RESTResponse(io.IOBase):
             self.data = await self.response.read()
         return self.data
 
-    @property
-    def headers(self):
-        """Returns a CIMultiDictProxy of response headers."""
-        return self.response.headers
-
     def getheaders(self):
-        """Returns a CIMultiDictProxy of the response headers; use ``headers`` instead."""
+        """Returns a CIMultiDictProxy of the response headers."""
         return self.response.headers
 
     def getheader(self, name, default=None):
-        """Returns a given response header; use ``headers.get()`` instead."""
+        """Returns a given response header."""
         return self.response.headers.get(name, default)
 
 
@@ -78,20 +73,7 @@ class RESTClientObject:
         self.proxy = configuration.proxy
         self.proxy_headers = configuration.proxy_headers
 
-        retries = configuration.retries
-        if retries is None:
-            self._effective_retry_options = None
-        elif isinstance(retries, aiohttp_retry.RetryOptionsBase):
-            self._effective_retry_options = retries
-        elif isinstance(retries, int):
-            self._effective_retry_options = aiohttp_retry.ExponentialRetry(
-                attempts=retries,
-                factor=2.0,
-                start_timeout=0.1,
-                max_timeout=120.0
-            )
-        else:
-            self._effective_retry_options = None
+        self.retries = configuration.retries
 
         self.pool_manager: Optional[aiohttp.ClientSession] = None
         self.retry_client: Optional[aiohttp_retry.RetryClient] = None
@@ -214,11 +196,16 @@ class RESTClientObject:
             )
         pool_manager = self.pool_manager
 
-        if self._effective_retry_options is not None and method in ALLOW_RETRY_METHODS:
+        if self.retries is not None and method in ALLOW_RETRY_METHODS:
             if self.retry_client is None:
                 self.retry_client = aiohttp_retry.RetryClient(
                     client_session=self.pool_manager,
-                    retry_options=self._effective_retry_options
+                    retry_options=aiohttp_retry.ExponentialRetry(
+                        attempts=self.retries,
+                        factor=2.0,
+                        start_timeout=0.1,
+                        max_timeout=120.0
+                    )
                 )
             pool_manager = self.retry_client
 

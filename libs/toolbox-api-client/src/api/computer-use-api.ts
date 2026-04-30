@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -85,6 +85,7 @@ import type { StopRecordingRequest } from '../models';
 import type { WindowsResponse } from '../models';
 /**
  * ComputerUseApi - axios parameter creator
+ * @export
  */
 export const ComputerUseApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -110,8 +111,9 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -146,8 +148,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarHeaderParameter['Accept'] = '*/*';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -180,8 +182,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarHeaderParameter['Accept'] = 'application/octet-stream';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -213,8 +215,9 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -362,8 +365,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -392,8 +395,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -422,8 +425,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -452,8 +455,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -486,8 +489,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -520,8 +523,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -554,8 +557,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -588,8 +591,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -618,8 +621,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -684,8 +687,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -717,8 +720,9 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -752,8 +756,9 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -787,8 +792,9 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -823,8 +829,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -856,8 +862,9 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -924,8 +931,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -955,8 +962,9 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -987,8 +995,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1020,8 +1028,9 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -1100,8 +1109,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
                 localVarQueryParameter['scale'] = scale;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1150,8 +1159,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
                 localVarQueryParameter['scale'] = scale;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1213,8 +1222,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
                 localVarQueryParameter['showCursor'] = showCursor;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1248,8 +1257,8 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
                 localVarQueryParameter['showCursor'] = showCursor;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1281,8 +1290,9 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -1299,6 +1309,7 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
 
 /**
  * ComputerUseApi - functional programming interface
+ * @export
  */
 export const ComputerUseApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ComputerUseApiAxiosParamCreator(configuration)
@@ -1745,6 +1756,7 @@ export const ComputerUseApiFp = function(configuration?: Configuration) {
 
 /**
  * ComputerUseApi - factory interface
+ * @export
  */
 export const ComputerUseApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = ComputerUseApiFp(configuration)
@@ -2092,6 +2104,9 @@ export const ComputerUseApiFactory = function (configuration?: Configuration, ba
 
 /**
  * ComputerUseApi - object-oriented interface
+ * @export
+ * @class ComputerUseApi
+ * @extends {BaseAPI}
  */
 export class ComputerUseApi extends BaseAPI {
     /**
@@ -2100,6 +2115,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {MouseClickRequest} request Mouse click request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public click(request: MouseClickRequest, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).click(request, options).then((request) => request(this.axios, this.basePath));
@@ -2111,6 +2127,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {string} id Recording ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public deleteRecording(id: string, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).deleteRecording(id, options).then((request) => request(this.axios, this.basePath));
@@ -2122,6 +2139,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {string} id Recording ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public downloadRecording(id: string, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).downloadRecording(id, options).then((request) => request(this.axios, this.basePath));
@@ -2133,6 +2151,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {MouseDragRequest} request Mouse drag request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public drag(request: MouseDragRequest, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).drag(request, options).then((request) => request(this.axios, this.basePath));
@@ -2181,6 +2200,7 @@ export class ComputerUseApi extends BaseAPI {
      * @summary Get computer use process status
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public getComputerUseStatus(options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).getComputerUseStatus(options).then((request) => request(this.axios, this.basePath));
@@ -2191,6 +2211,7 @@ export class ComputerUseApi extends BaseAPI {
      * @summary Get computer use status
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public getComputerUseSystemStatus(options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).getComputerUseSystemStatus(options).then((request) => request(this.axios, this.basePath));
@@ -2201,6 +2222,7 @@ export class ComputerUseApi extends BaseAPI {
      * @summary Get display information
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public getDisplayInfo(options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).getDisplayInfo(options).then((request) => request(this.axios, this.basePath));
@@ -2211,6 +2233,7 @@ export class ComputerUseApi extends BaseAPI {
      * @summary Get mouse position
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public getMousePosition(options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).getMousePosition(options).then((request) => request(this.axios, this.basePath));
@@ -2222,6 +2245,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {string} processName Process name to get errors for
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public getProcessErrors(processName: string, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).getProcessErrors(processName, options).then((request) => request(this.axios, this.basePath));
@@ -2233,6 +2257,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {string} processName Process name to get logs for
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public getProcessLogs(processName: string, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).getProcessLogs(processName, options).then((request) => request(this.axios, this.basePath));
@@ -2244,6 +2269,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {string} processName Process name to check
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public getProcessStatus(processName: string, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).getProcessStatus(processName, options).then((request) => request(this.axios, this.basePath));
@@ -2255,6 +2281,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {string} id Recording ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public getRecording(id: string, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).getRecording(id, options).then((request) => request(this.axios, this.basePath));
@@ -2265,6 +2292,7 @@ export class ComputerUseApi extends BaseAPI {
      * @summary Get windows information
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public getWindows(options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).getWindows(options).then((request) => request(this.axios, this.basePath));
@@ -2287,6 +2315,7 @@ export class ComputerUseApi extends BaseAPI {
      * @summary List all recordings
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public listRecordings(options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).listRecordings(options).then((request) => request(this.axios, this.basePath));
@@ -2298,6 +2327,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {MouseMoveRequest} request Mouse move request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public moveMouse(request: MouseMoveRequest, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).moveMouse(request, options).then((request) => request(this.axios, this.basePath));
@@ -2309,6 +2339,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {KeyboardHotkeyRequest} request Hotkey press request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public pressHotkey(request: KeyboardHotkeyRequest, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).pressHotkey(request, options).then((request) => request(this.axios, this.basePath));
@@ -2320,6 +2351,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {KeyboardPressRequest} request Key press request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public pressKey(request: KeyboardPressRequest, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).pressKey(request, options).then((request) => request(this.axios, this.basePath));
@@ -2331,6 +2363,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {string} processName Process name to restart
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public restartProcess(processName: string, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).restartProcess(processName, options).then((request) => request(this.axios, this.basePath));
@@ -2342,6 +2375,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {MouseScrollRequest} request Mouse scroll request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public scroll(request: MouseScrollRequest, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).scroll(request, options).then((request) => request(this.axios, this.basePath));
@@ -2364,6 +2398,7 @@ export class ComputerUseApi extends BaseAPI {
      * @summary Start computer use processes
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public startComputerUse(options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).startComputerUse(options).then((request) => request(this.axios, this.basePath));
@@ -2375,6 +2410,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {StartRecordingRequest} [request] Recording options
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public startRecording(request?: StartRecordingRequest, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).startRecording(request, options).then((request) => request(this.axios, this.basePath));
@@ -2385,6 +2421,7 @@ export class ComputerUseApi extends BaseAPI {
      * @summary Stop computer use processes
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public stopComputerUse(options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).stopComputerUse(options).then((request) => request(this.axios, this.basePath));
@@ -2396,6 +2433,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {StopRecordingRequest} request Recording ID to stop
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public stopRecording(request: StopRecordingRequest, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).stopRecording(request, options).then((request) => request(this.axios, this.basePath));
@@ -2414,6 +2452,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {number} [scale] Scale factor (0.1-1.0)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public takeCompressedRegionScreenshot(x: number, y: number, width: number, height: number, showCursor?: boolean, format?: string, quality?: number, scale?: number, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).takeCompressedRegionScreenshot(x, y, width, height, showCursor, format, quality, scale, options).then((request) => request(this.axios, this.basePath));
@@ -2428,6 +2467,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {number} [scale] Scale factor (0.1-1.0)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public takeCompressedScreenshot(showCursor?: boolean, format?: string, quality?: number, scale?: number, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).takeCompressedScreenshot(showCursor, format, quality, scale, options).then((request) => request(this.axios, this.basePath));
@@ -2443,6 +2483,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {boolean} [showCursor] Whether to show cursor in screenshot
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public takeRegionScreenshot(x: number, y: number, width: number, height: number, showCursor?: boolean, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).takeRegionScreenshot(x, y, width, height, showCursor, options).then((request) => request(this.axios, this.basePath));
@@ -2454,6 +2495,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {boolean} [showCursor] Whether to show cursor in screenshot
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public takeScreenshot(showCursor?: boolean, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).takeScreenshot(showCursor, options).then((request) => request(this.axios, this.basePath));
@@ -2465,6 +2507,7 @@ export class ComputerUseApi extends BaseAPI {
      * @param {KeyboardTypeRequest} request Text typing request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof ComputerUseApi
      */
     public typeText(request: KeyboardTypeRequest, options?: RawAxiosRequestConfig) {
         return ComputerUseApiFp(this.configuration).typeText(request, options).then((request) => request(this.axios, this.basePath));

@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -27,6 +27,7 @@ import type { IsPortInUseResponse } from '../models';
 import type { PortList } from '../models';
 /**
  * PortApi - axios parameter creator
+ * @export
  */
 export const PortApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -49,8 +50,8 @@ export const PortApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -83,8 +84,8 @@ export const PortApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -99,6 +100,7 @@ export const PortApiAxiosParamCreator = function (configuration?: Configuration)
 
 /**
  * PortApi - functional programming interface
+ * @export
  */
 export const PortApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = PortApiAxiosParamCreator(configuration)
@@ -133,6 +135,7 @@ export const PortApiFp = function(configuration?: Configuration) {
 
 /**
  * PortApi - factory interface
+ * @export
  */
 export const PortApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = PortApiFp(configuration)
@@ -161,6 +164,9 @@ export const PortApiFactory = function (configuration?: Configuration, basePath?
 
 /**
  * PortApi - object-oriented interface
+ * @export
+ * @class PortApi
+ * @extends {BaseAPI}
  */
 export class PortApi extends BaseAPI {
     /**
@@ -168,6 +174,7 @@ export class PortApi extends BaseAPI {
      * @summary Get active ports
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof PortApi
      */
     public getPorts(options?: RawAxiosRequestConfig) {
         return PortApiFp(this.configuration).getPorts(options).then((request) => request(this.axios, this.basePath));
@@ -179,6 +186,7 @@ export class PortApi extends BaseAPI {
      * @param {number} port Port number (3000-9999)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof PortApi
      */
     public isPortInUse(port: number, options?: RawAxiosRequestConfig) {
         return PortApiFp(this.configuration).isPortInUse(port, options).then((request) => request(this.axios, this.basePath));

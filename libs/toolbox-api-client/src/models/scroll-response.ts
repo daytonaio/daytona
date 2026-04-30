@@ -14,7 +14,17 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface ScrollResponse
+ */
 export interface ScrollResponse {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ScrollResponse
+     */
     'success'?: boolean;
 }
 

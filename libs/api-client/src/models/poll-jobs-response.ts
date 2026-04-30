@@ -17,9 +17,16 @@
 // @ts-ignore
 import type { Job } from './job';
 
+/**
+ * 
+ * @export
+ * @interface PollJobsResponse
+ */
 export interface PollJobsResponse {
     /**
      * List of jobs
+     * @type {Array<Job>}
+     * @memberof PollJobsResponse
      */
     'jobs': Array<Job>;
 }

@@ -14,13 +14,22 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface ComputerUseStartResponse
+ */
 export interface ComputerUseStartResponse {
     /**
      * A message indicating the result of starting computer use processes
+     * @type {string}
+     * @memberof ComputerUseStartResponse
      */
     'message': string;
     /**
      * Status information about all VNC desktop processes after starting
+     * @type {object}
+     * @memberof ComputerUseStartResponse
      */
     'status': object;
 }

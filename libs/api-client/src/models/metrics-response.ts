@@ -17,9 +17,16 @@
 // @ts-ignore
 import type { MetricSeries } from './metric-series';
 
+/**
+ * 
+ * @export
+ * @interface MetricsResponse
+ */
 export interface MetricsResponse {
     /**
      * List of metric series
+     * @type {Array<MetricSeries>}
+     * @memberof MetricsResponse
      */
     'series': Array<MetricSeries>;
 }

@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -65,6 +65,7 @@ import type { UpdateSandboxStateDto } from '../models';
 import type { Url } from '../models';
 /**
  * SandboxApi - axios parameter creator
+ * @export
  */
 export const SandboxApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -98,8 +99,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -142,8 +143,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -185,8 +186,9 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -234,8 +236,9 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -285,8 +288,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['expiresInMinutes'] = expiresInMinutes;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -329,8 +332,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -382,6 +385,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             // authentication oauth2 required
 
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -427,8 +431,9 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -480,6 +485,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -522,8 +528,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -566,8 +572,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -614,8 +620,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -658,8 +664,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -707,8 +713,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['verbose'] = verbose;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -751,8 +757,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -800,8 +806,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['includeDestroyed'] = includeDestroyed;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -882,8 +888,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['search'] = search;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -949,8 +955,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['metricNames'] = metricNames;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -993,8 +999,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1041,8 +1047,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1113,8 +1119,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['limit'] = limit;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1163,8 +1169,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['skipReconcilingSandboxes'] = skipReconcilingSandboxes;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1216,8 +1222,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['expiresInSeconds'] = expiresInSeconds;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1260,8 +1266,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1315,8 +1321,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['includeErroredDeleted'] = includeErroredDeleted;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1454,8 +1460,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['order'] = order;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1503,8 +1509,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['skipStart'] = skipStart;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1550,8 +1556,9 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -1599,8 +1606,9 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -1650,8 +1658,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['token'] = token;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1698,8 +1706,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1746,8 +1754,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1794,8 +1802,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1838,8 +1846,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1887,8 +1895,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['force'] = force;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1932,6 +1940,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             // authentication oauth2 required
 
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -1977,8 +1986,9 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -2027,8 +2037,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -2074,6 +2084,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
@@ -2122,8 +2134,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['token'] = token;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -2141,6 +2153,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
 /**
  * SandboxApi - functional programming interface
+ * @export
  */
 export const SandboxApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = SandboxApiAxiosParamCreator(configuration)
@@ -2768,6 +2781,7 @@ export const SandboxApiFp = function(configuration?: Configuration) {
 
 /**
  * SandboxApi - factory interface
+ * @export
  */
 export const SandboxApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = SandboxApiFp(configuration)
@@ -3275,6 +3289,9 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
 
 /**
  * SandboxApi - object-oriented interface
+ * @export
+ * @class SandboxApi
+ * @extends {BaseAPI}
  */
 export class SandboxApi extends BaseAPI {
     /**
@@ -3284,6 +3301,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public archiveSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).archiveSandbox(sandboxIdOrName, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3296,6 +3314,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public createBackup(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).createBackup(sandboxIdOrName, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3308,6 +3327,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public createSandbox(createSandbox: CreateSandbox, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).createSandbox(createSandbox, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3321,6 +3341,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public createSandboxSnapshot(sandboxIdOrName: string, createSandboxSnapshot: CreateSandboxSnapshot, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).createSandboxSnapshot(sandboxIdOrName, createSandboxSnapshot, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3334,6 +3355,7 @@ export class SandboxApi extends BaseAPI {
      * @param {number} [expiresInMinutes] Expiration time in minutes (default: 60)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public createSshAccess(sandboxIdOrName: string, xDaytonaOrganizationID?: string, expiresInMinutes?: number, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).createSshAccess(sandboxIdOrName, xDaytonaOrganizationID, expiresInMinutes, options).then((request) => request(this.axios, this.basePath));
@@ -3346,6 +3368,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public deleteSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).deleteSandbox(sandboxIdOrName, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3360,6 +3383,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public expireSignedPortPreviewUrl(sandboxIdOrName: string, port: number, token: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).expireSignedPortPreviewUrl(sandboxIdOrName, port, token, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3373,6 +3397,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public forkSandbox(sandboxIdOrName: string, forkSandbox: ForkSandbox, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).forkSandbox(sandboxIdOrName, forkSandbox, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3387,6 +3412,7 @@ export class SandboxApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public getBuildLogs(sandboxIdOrName: string, xDaytonaOrganizationID?: string, follow?: boolean, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getBuildLogs(sandboxIdOrName, xDaytonaOrganizationID, follow, options).then((request) => request(this.axios, this.basePath));
@@ -3399,6 +3425,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public getBuildLogsUrl(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getBuildLogsUrl(sandboxIdOrName, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3411,6 +3438,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public getOrganizationBySandboxId(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getOrganizationBySandboxId(sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3424,6 +3452,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public getPortPreviewUrl(sandboxIdOrName: string, port: number, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getPortPreviewUrl(sandboxIdOrName, port, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3436,6 +3465,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public getRegionQuotaBySandboxId(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getRegionQuotaBySandboxId(sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3449,6 +3479,7 @@ export class SandboxApi extends BaseAPI {
      * @param {boolean} [verbose] Include verbose output
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public getSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, verbose?: boolean, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getSandbox(sandboxIdOrName, xDaytonaOrganizationID, verbose, options).then((request) => request(this.axios, this.basePath));
@@ -3461,6 +3492,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public getSandboxAncestors(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getSandboxAncestors(sandboxIdOrName, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3474,6 +3506,7 @@ export class SandboxApi extends BaseAPI {
      * @param {boolean} [includeDestroyed] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public getSandboxForks(sandboxIdOrName: string, xDaytonaOrganizationID?: string, includeDestroyed?: boolean, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getSandboxForks(sandboxIdOrName, xDaytonaOrganizationID, includeDestroyed, options).then((request) => request(this.axios, this.basePath));
@@ -3492,6 +3525,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [search] Search in log body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public getSandboxLogs(sandboxId: string, from: Date, to: Date, xDaytonaOrganizationID?: string, page?: number, limit?: number, severities?: Array<string>, search?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getSandboxLogs(sandboxId, from, to, xDaytonaOrganizationID, page, limit, severities, search, options).then((request) => request(this.axios, this.basePath));
@@ -3507,6 +3541,7 @@ export class SandboxApi extends BaseAPI {
      * @param {Array<string>} [metricNames] Filter by metric names
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public getSandboxMetrics(sandboxId: string, from: Date, to: Date, xDaytonaOrganizationID?: string, metricNames?: Array<string>, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getSandboxMetrics(sandboxId, from, to, xDaytonaOrganizationID, metricNames, options).then((request) => request(this.axios, this.basePath));
@@ -3519,6 +3554,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public getSandboxParent(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getSandboxParent(sandboxIdOrName, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3532,6 +3568,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public getSandboxTraceSpans(sandboxId: string, traceId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getSandboxTraceSpans(sandboxId, traceId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3548,6 +3585,7 @@ export class SandboxApi extends BaseAPI {
      * @param {number} [limit] Number of items per page
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public getSandboxTraces(sandboxId: string, from: Date, to: Date, xDaytonaOrganizationID?: string, page?: number, limit?: number, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getSandboxTraces(sandboxId, from, to, xDaytonaOrganizationID, page, limit, options).then((request) => request(this.axios, this.basePath));
@@ -3561,6 +3599,7 @@ export class SandboxApi extends BaseAPI {
      * @param {boolean} [skipReconcilingSandboxes] Skip sandboxes where state differs from desired state
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public getSandboxesForRunner(xDaytonaOrganizationID?: string, states?: string, skipReconcilingSandboxes?: boolean, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getSandboxesForRunner(xDaytonaOrganizationID, states, skipReconcilingSandboxes, options).then((request) => request(this.axios, this.basePath));
@@ -3575,6 +3614,7 @@ export class SandboxApi extends BaseAPI {
      * @param {number} [expiresInSeconds] Expiration time in seconds (default: 60 seconds)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public getSignedPortPreviewUrl(sandboxIdOrName: string, port: number, xDaytonaOrganizationID?: string, expiresInSeconds?: number, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getSignedPortPreviewUrl(sandboxIdOrName, port, xDaytonaOrganizationID, expiresInSeconds, options).then((request) => request(this.axios, this.basePath));
@@ -3587,6 +3627,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public getToolboxProxyUrl(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getToolboxProxyUrl(sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3601,6 +3642,7 @@ export class SandboxApi extends BaseAPI {
      * @param {boolean} [includeErroredDeleted] Include errored and deleted sandboxes
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public listSandboxes(xDaytonaOrganizationID?: string, verbose?: boolean, labels?: string, includeErroredDeleted?: boolean, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).listSandboxes(xDaytonaOrganizationID, verbose, labels, includeErroredDeleted, options).then((request) => request(this.axios, this.basePath));
@@ -3631,6 +3673,7 @@ export class SandboxApi extends BaseAPI {
      * @param {ListSandboxesPaginatedOrderEnum} [order] Direction to sort by
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public listSandboxesPaginated(xDaytonaOrganizationID?: string, page?: number, limit?: number, id?: string, name?: string, labels?: string, includeErroredDeleted?: boolean, states?: Array<ListSandboxesPaginatedStatesEnum>, snapshots?: Array<string>, regions?: Array<string>, minCpu?: number, maxCpu?: number, minMemoryGiB?: number, maxMemoryGiB?: number, minDiskGiB?: number, maxDiskGiB?: number, lastEventAfter?: Date, lastEventBefore?: Date, sort?: ListSandboxesPaginatedSortEnum, order?: ListSandboxesPaginatedOrderEnum, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).listSandboxesPaginated(xDaytonaOrganizationID, page, limit, id, name, labels, includeErroredDeleted, states, snapshots, regions, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, lastEventAfter, lastEventBefore, sort, order, options).then((request) => request(this.axios, this.basePath));
@@ -3644,6 +3687,7 @@ export class SandboxApi extends BaseAPI {
      * @param {boolean} [skipStart] If true, the sandbox is left in STOPPED after recovery instead of being started.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public recoverSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, skipStart?: boolean, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).recoverSandbox(sandboxIdOrName, xDaytonaOrganizationID, skipStart, options).then((request) => request(this.axios, this.basePath));
@@ -3657,6 +3701,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public replaceLabels(sandboxIdOrName: string, sandboxLabels: SandboxLabels, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).replaceLabels(sandboxIdOrName, sandboxLabels, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3670,6 +3715,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public resizeSandbox(sandboxIdOrName: string, resizeSandbox: ResizeSandbox, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).resizeSandbox(sandboxIdOrName, resizeSandbox, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3683,6 +3729,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [token] SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public revokeSshAccess(sandboxIdOrName: string, xDaytonaOrganizationID?: string, token?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).revokeSshAccess(sandboxIdOrName, xDaytonaOrganizationID, token, options).then((request) => request(this.axios, this.basePath));
@@ -3696,6 +3743,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public setAutoArchiveInterval(sandboxIdOrName: string, interval: number, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).setAutoArchiveInterval(sandboxIdOrName, interval, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3709,6 +3757,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public setAutoDeleteInterval(sandboxIdOrName: string, interval: number, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).setAutoDeleteInterval(sandboxIdOrName, interval, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3722,6 +3771,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public setAutostopInterval(sandboxIdOrName: string, interval: number, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).setAutostopInterval(sandboxIdOrName, interval, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3734,6 +3784,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public startSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).startSandbox(sandboxIdOrName, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3747,6 +3798,7 @@ export class SandboxApi extends BaseAPI {
      * @param {boolean} [force] Force stop the sandbox using SIGKILL instead of SIGTERM
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public stopSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, force?: boolean, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).stopSandbox(sandboxIdOrName, xDaytonaOrganizationID, force, options).then((request) => request(this.axios, this.basePath));
@@ -3759,6 +3811,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public updateLastActivity(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).updateLastActivity(sandboxId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3772,6 +3825,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public updateNetworkSettings(sandboxIdOrName: string, updateSandboxNetworkSettings: UpdateSandboxNetworkSettings, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).updateNetworkSettings(sandboxIdOrName, updateSandboxNetworkSettings, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3785,6 +3839,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public updatePublicStatus(sandboxIdOrName: string, isPublic: boolean, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).updatePublicStatus(sandboxIdOrName, isPublic, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3798,6 +3853,7 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public updateSandboxState(sandboxId: string, updateSandboxStateDto: UpdateSandboxStateDto, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).updateSandboxState(sandboxId, updateSandboxStateDto, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -3810,12 +3866,16 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SandboxApi
      */
     public validateSshAccess(token: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).validateSshAccess(token, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
+/**
+ * @export
+ */
 export const ListSandboxesPaginatedStatesEnum = {
     CREATING: 'creating',
     RESTORING: 'restoring',
@@ -3835,9 +3895,12 @@ export const ListSandboxesPaginatedStatesEnum = {
     RESIZING: 'resizing',
     SNAPSHOTTING: 'snapshotting',
     FORKING: 'forking',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809'
 } as const;
 export type ListSandboxesPaginatedStatesEnum = typeof ListSandboxesPaginatedStatesEnum[keyof typeof ListSandboxesPaginatedStatesEnum];
+/**
+ * @export
+ */
 export const ListSandboxesPaginatedSortEnum = {
     ID: 'id',
     NAME: 'name',
@@ -3847,12 +3910,15 @@ export const ListSandboxesPaginatedSortEnum = {
     UPDATED_AT: 'updatedAt',
     CREATED_AT: 'createdAt',
     LAST_ACTIVITY_AT: 'lastActivityAt',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809'
 } as const;
 export type ListSandboxesPaginatedSortEnum = typeof ListSandboxesPaginatedSortEnum[keyof typeof ListSandboxesPaginatedSortEnum];
+/**
+ * @export
+ */
 export const ListSandboxesPaginatedOrderEnum = {
     ASC: 'asc',
     DESC: 'desc',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809'
 } as const;
 export type ListSandboxesPaginatedOrderEnum = typeof ListSandboxesPaginatedOrderEnum[keyof typeof ListSandboxesPaginatedOrderEnum];

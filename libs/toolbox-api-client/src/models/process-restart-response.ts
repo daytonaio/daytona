@@ -14,8 +14,23 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface ProcessRestartResponse
+ */
 export interface ProcessRestartResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessRestartResponse
+     */
     'message'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ProcessRestartResponse
+     */
     'processName'?: string;
 }
 

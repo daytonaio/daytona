@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -31,6 +31,7 @@ import type { SnapshotDto } from '../models';
 import type { Url } from '../models';
 /**
  * SnapshotsApi - axios parameter creator
+ * @export
  */
 export const SnapshotsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -64,8 +65,8 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -107,8 +108,9 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
 
             // authentication oauth2 required
 
+
+    
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -154,6 +156,7 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
             // authentication oauth2 required
 
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -217,8 +220,8 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
                 localVarQueryParameter['order'] = order;
             }
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -261,8 +264,8 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -312,6 +315,7 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
             }
 
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -354,8 +358,8 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
 
             // authentication oauth2 required
 
-            localVarHeaderParameter['Accept'] = 'application/json';
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -399,6 +403,7 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
             // authentication oauth2 required
 
 
+    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -416,6 +421,7 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
 
 /**
  * SnapshotsApi - functional programming interface
+ * @export
  */
 export const SnapshotsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = SnapshotsApiAxiosParamCreator(configuration)
@@ -543,6 +549,7 @@ export const SnapshotsApiFp = function(configuration?: Configuration) {
 
 /**
  * SnapshotsApi - factory interface
+ * @export
  */
 export const SnapshotsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = SnapshotsApiFp(configuration)
@@ -646,6 +653,9 @@ export const SnapshotsApiFactory = function (configuration?: Configuration, base
 
 /**
  * SnapshotsApi - object-oriented interface
+ * @export
+ * @class SnapshotsApi
+ * @extends {BaseAPI}
  */
 export class SnapshotsApi extends BaseAPI {
     /**
@@ -655,6 +665,7 @@ export class SnapshotsApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SnapshotsApi
      */
     public activateSnapshot(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).activateSnapshot(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -667,6 +678,7 @@ export class SnapshotsApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SnapshotsApi
      */
     public createSnapshot(createSnapshot: CreateSnapshot, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).createSnapshot(createSnapshot, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -679,6 +691,7 @@ export class SnapshotsApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SnapshotsApi
      */
     public deactivateSnapshot(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).deactivateSnapshot(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -695,6 +708,7 @@ export class SnapshotsApi extends BaseAPI {
      * @param {GetAllSnapshotsOrderEnum} [order] Direction to sort by
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SnapshotsApi
      */
     public getAllSnapshots(xDaytonaOrganizationID?: string, page?: number, limit?: number, name?: string, sort?: GetAllSnapshotsSortEnum, order?: GetAllSnapshotsOrderEnum, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).getAllSnapshots(xDaytonaOrganizationID, page, limit, name, sort, order, options).then((request) => request(this.axios, this.basePath));
@@ -707,6 +721,7 @@ export class SnapshotsApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SnapshotsApi
      */
     public getSnapshot(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).getSnapshot(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -721,6 +736,7 @@ export class SnapshotsApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
+     * @memberof SnapshotsApi
      */
     public getSnapshotBuildLogs(id: string, xDaytonaOrganizationID?: string, follow?: boolean, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).getSnapshotBuildLogs(id, xDaytonaOrganizationID, follow, options).then((request) => request(this.axios, this.basePath));
@@ -733,6 +749,7 @@ export class SnapshotsApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SnapshotsApi
      */
     public getSnapshotBuildLogsUrl(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).getSnapshotBuildLogsUrl(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -745,23 +762,30 @@ export class SnapshotsApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
+     * @memberof SnapshotsApi
      */
     public removeSnapshot(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).removeSnapshot(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
+/**
+ * @export
+ */
 export const GetAllSnapshotsSortEnum = {
     NAME: 'name',
     STATE: 'state',
     LAST_USED_AT: 'lastUsedAt',
     CREATED_AT: 'createdAt',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809'
 } as const;
 export type GetAllSnapshotsSortEnum = typeof GetAllSnapshotsSortEnum[keyof typeof GetAllSnapshotsSortEnum];
+/**
+ * @export
+ */
 export const GetAllSnapshotsOrderEnum = {
     ASC: 'asc',
     DESC: 'desc',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809'
 } as const;
 export type GetAllSnapshotsOrderEnum = typeof GetAllSnapshotsOrderEnum[keyof typeof GetAllSnapshotsOrderEnum];

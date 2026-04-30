@@ -14,17 +14,28 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface UpdateOrganizationInvitation
+ */
 export interface UpdateOrganizationInvitation {
     /**
      * Organization member role
+     * @type {string}
+     * @memberof UpdateOrganizationInvitation
      */
     'role': UpdateOrganizationInvitationRoleEnum;
     /**
      * Array of role IDs
+     * @type {Array<string>}
+     * @memberof UpdateOrganizationInvitation
      */
     'assignedRoleIds': Array<string>;
     /**
      * Expiration date of the invitation
+     * @type {Date}
+     * @memberof UpdateOrganizationInvitation
      */
     'expiresAt'?: Date;
 }
@@ -32,7 +43,7 @@ export interface UpdateOrganizationInvitation {
 export const UpdateOrganizationInvitationRoleEnum = {
     OWNER: 'owner',
     MEMBER: 'member',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809'
 } as const;
 
 export type UpdateOrganizationInvitationRoleEnum = typeof UpdateOrganizationInvitationRoleEnum[keyof typeof UpdateOrganizationInvitationRoleEnum];

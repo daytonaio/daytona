@@ -14,7 +14,17 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface CreateVolume
+ */
 export interface CreateVolume {
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateVolume
+     */
     'name': string;
 }
 

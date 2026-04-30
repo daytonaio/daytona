@@ -17,10 +17,35 @@
 // @ts-ignore
 import type { Status } from './status';
 
+/**
+ * 
+ * @export
+ * @interface FileStatus
+ */
 export interface FileStatus {
+    /**
+     * 
+     * @type {string}
+     * @memberof FileStatus
+     */
     'extra': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof FileStatus
+     */
     'name': string;
+    /**
+     * 
+     * @type {Status}
+     * @memberof FileStatus
+     */
     'staging': Status;
+    /**
+     * 
+     * @type {Status}
+     * @memberof FileStatus
+     */
     'worktree': Status;
 }
 

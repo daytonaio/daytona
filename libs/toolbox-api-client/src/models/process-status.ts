@@ -14,10 +14,35 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface ProcessStatus
+ */
 export interface ProcessStatus {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ProcessStatus
+     */
     'autoRestart'?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof ProcessStatus
+     */
     'pid'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ProcessStatus
+     */
     'priority'?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ProcessStatus
+     */
     'running'?: boolean;
 }
 

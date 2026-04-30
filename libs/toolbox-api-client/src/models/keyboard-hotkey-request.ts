@@ -14,9 +14,16 @@
 
 
 
+/**
+ * 
+ * @export
+ * @interface KeyboardHotkeyRequest
+ */
 export interface KeyboardHotkeyRequest {
     /**
      * e.g., \"ctrl+c\", \"cmd+v\"
+     * @type {string}
+     * @memberof KeyboardHotkeyRequest
      */
     'keys'?: string;
 }
