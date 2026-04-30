@@ -9,7 +9,6 @@ import {
   Command,
   Session,
   SessionExecuteRequest,
-  SessionExecuteResponse as ApiSessionExecuteResponse,
   CodeRunRequest,
   PtyCreateRequest,
   PtySessionInfo,
@@ -41,7 +40,10 @@ export class CodeRunParams {
   env?: Record<string, string>
 }
 
-export interface SessionExecuteResponse extends ApiSessionExecuteResponse {
+export interface SessionExecuteResponse {
+  cmdId: string
+  exitCode?: number
+  output?: string
   stdout?: string
   stderr?: string
 }

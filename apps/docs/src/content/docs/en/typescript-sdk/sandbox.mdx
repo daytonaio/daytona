@@ -129,6 +129,10 @@ Represents a Daytona Sandbox.
     ```
 - `name` _string_ - The name of the sandbox
     
+    ##### Memberof
+
+    Sandbox
+
     ##### Implementation of
     
     ```ts
@@ -193,6 +197,10 @@ Represents a Daytona Sandbox.
     ```
 - `toolboxProxyUrl` _string_ - The toolbox proxy URL for the sandbox
     
+    ##### Memberof
+
+    Sandbox
+
     ##### Implementation of
     
     ```ts
@@ -1022,18 +1030,9 @@ or encounters an error.
 - `DaytonaError` - If the sandbox fails to stop within the timeout period.
 ## PaginatedSandboxes
 
-**Extends:**
-
 **Properties**:
 
 - `items` _Sandbox\[\]_
 - `page` _number_
-    - _Inherited from_: `PaginatedSandboxesDto.page`
 - `total` _number_
-    - _Inherited from_: `PaginatedSandboxesDto.total`
 - `totalPages` _number_
-    - _Inherited from_: `PaginatedSandboxesDto.totalPages`
-
-
-
-- `Omit`\<`PaginatedSandboxesDto`, `"items"`\>
