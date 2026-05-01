@@ -32,7 +32,7 @@ const docSearchEnabled =
   import.meta.env.PUBLIC_DOCSEARCH_APP_ID &&
   import.meta.env.PUBLIC_DOCSEARCH_API_KEY &&
   import.meta.env.PUBLIC_DOCSEARCH_INDEX_NAME &&
-  Astro.props.lang === gtconfig.defaultLocale
+  lang === gtconfig.defaultLocale
 
 const showDocSearch = docSearchEnabled || import.meta.env.DEV
 

@@ -66,8 +66,6 @@ const TOOLBOX_API_PATH = path.join(
 
 const MAX_CONTENT_LENGTH = 5000
 
-const MAX_CONTENT_LENGTH = 5000
-
 function processContent(content) {
   return content
     .split('\n')
