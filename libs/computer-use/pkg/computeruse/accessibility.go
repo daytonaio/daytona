@@ -11,6 +11,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -175,7 +177,12 @@ func (c *ComputerUse) connectA11y() (*dbus.Conn, error) {
 }
 
 func (c *ComputerUse) connectA11yContext(ctx context.Context) (*dbus.Conn, error) {
-	c.atspiMu.Lock()
+	if c.connectA11yContextHook != nil {
+		return c.connectA11yContextHook(ctx)
+	}
+	if err := c.lockA11yContext(ctx); err != nil {
+		return nil, err
+	}
 	defer c.atspiMu.Unlock()
 
 	if c.atspiConn != nil && c.atspiConn.Connected() {
@@ -190,26 +197,115 @@ func (c *ComputerUse) connectA11yContext(ctx context.Context) (*dbus.Conn, error
 	}
 	c.atspiConn = nil
 
-	sess, err := dbus.SessionBus()
+	sess, err := connectSessionBusContext(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("%w: session bus: %v", ErrA11yUnavailable, err)
+		return nil, wrapA11yBootstrapError(ctx, fmt.Errorf("%w: session bus: %w", ErrA11yUnavailable, err))
 	}
+	defer sess.Close()
 
 	var addr string
 	busObj := sess.Object(atspiBusServiceBN, atspiBusServiceOP)
 	if err := busObj.CallWithContext(ctx, "org.a11y.Bus.GetAddress", 0).Store(&addr); err != nil {
-		return nil, fmt.Errorf("%w: GetAddress: %v", ErrA11yUnavailable, err)
+		return nil, wrapA11yBootstrapError(ctx, fmt.Errorf("%w: GetAddress: %w", ErrA11yUnavailable, err))
 	}
 	if addr == "" {
 		return nil, fmt.Errorf("%w: GetAddress returned empty address", ErrA11yUnavailable)
 	}
 
-	conn, err := dbus.Connect(addr)
+	conn, err := connectDBusWithContext(ctx, addr)
 	if err != nil {
-		return nil, fmt.Errorf("%w: dial %s: %v", ErrA11yUnavailable, addr, err)
+		return nil, wrapA11yBootstrapError(ctx, fmt.Errorf("%w: dial %s: %w", ErrA11yUnavailable, addr, err))
 	}
 
 	c.atspiConn = conn
+	return conn, nil
+}
+
+func (c *ComputerUse) lockA11yContext(ctx context.Context) error {
+	if _, hasDeadline := ctx.Deadline(); !hasDeadline {
+		c.atspiMu.Lock()
+		return nil
+	}
+	for {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		if c.atspiMu.TryLock() {
+			return nil
+		}
+		timer := time.NewTimer(time.Millisecond)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return ctx.Err()
+		case <-timer.C:
+		}
+	}
+}
+
+func wrapA11yBootstrapError(ctx context.Context, err error) error {
+	if ctxErr := ctx.Err(); ctxErr != nil {
+		return ctxErr
+	}
+	return err
+}
+
+func connectSessionBusContext(ctx context.Context) (*dbus.Conn, error) {
+	if _, hasDeadline := ctx.Deadline(); !hasDeadline {
+		return dbus.ConnectSessionBus(dbus.WithContext(ctx))
+	}
+	addr, err := sessionBusAddressNoAutolaunch()
+	if err != nil {
+		return nil, err
+	}
+	return connectDBusWithContext(ctx, addr)
+}
+
+func sessionBusAddressNoAutolaunch() (string, error) {
+	if addr := os.Getenv("DBUS_SESSION_BUS_ADDRESS"); addr != "" && addr != "autolaunch:" {
+		return addr, nil
+	}
+	runUserBus := filepath.Join("/run/user", strconv.Itoa(os.Geteuid()), "bus")
+	if _, err := os.Stat(runUserBus); err == nil {
+		return "unix:path=" + dbus.EscapeBusAddressValue(runUserBus), nil
+	}
+	runUserSession := filepath.Join("/run/user", strconv.Itoa(os.Geteuid()), "dbus-session")
+	if b, err := os.ReadFile(runUserSession); err == nil {
+		if addr, ok := strings.CutPrefix(string(b), "DBUS_SESSION_BUS_ADDRESS="); ok {
+			return strings.TrimRight(addr, "\n\r"), nil
+		}
+	}
+	return "", errors.New("dbus: couldn't determine address of session bus without autolaunch")
+}
+
+func connectDBusWithContext(ctx context.Context, addr string) (*dbus.Conn, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	connCtx, cancelConn := context.WithCancel(context.Background())
+	done := make(chan struct{})
+	go func() {
+		select {
+		case <-ctx.Done():
+			cancelConn()
+		case <-done:
+		}
+	}()
+
+	conn, err := dbus.Connect(addr, dbus.WithContext(connCtx))
+	close(done)
+	if err != nil {
+		cancelConn()
+		if ctxErr := ctx.Err(); ctxErr != nil {
+			return nil, ctxErr
+		}
+		return nil, err
+	}
+	if err := ctx.Err(); err != nil {
+		cancelConn()
+		_ = conn.Close()
+		return nil, err
+	}
 	return conn, nil
 }
 
@@ -375,25 +471,52 @@ func classifyDbusError(err error) error {
 // UnknownProperty error is silently squashed to "" so we don't blow up a walk
 // when a node declines to implement an optional property.
 func getStringProp(obj dbus.BusObject, prop string) string {
-	v, err := obj.GetProperty(prop)
+	s, _ := getStringPropContext(context.Background(), obj, prop)
+	return s
+}
+
+func getStringPropContext(ctx context.Context, obj dbus.BusObject, prop string) (string, error) {
+	v, err := getPropertyContext(ctx, obj, prop)
 	if err != nil {
-		return ""
+		return "", optionalReadError(ctx, err)
 	}
 	if s, ok := v.Value().(string); ok {
-		return s
+		return s, nil
 	}
-	return ""
+	return "", nil
 }
 
 func getInt32Prop(obj dbus.BusObject, prop string) (int32, bool) {
-	v, err := obj.GetProperty(prop)
+	i, ok, _ := getInt32PropContext(context.Background(), obj, prop)
+	return i, ok
+}
+
+func getInt32PropContext(ctx context.Context, obj dbus.BusObject, prop string) (int32, bool, error) {
+	v, err := getPropertyContext(ctx, obj, prop)
 	if err != nil {
-		return 0, false
+		return 0, false, optionalReadError(ctx, err)
 	}
 	if i, ok := v.Value().(int32); ok {
-		return i, true
+		return i, true, nil
 	}
-	return 0, false
+	return 0, false, nil
+}
+
+func getPropertyContext(ctx context.Context, obj dbus.BusObject, prop string) (dbus.Variant, error) {
+	idx := strings.LastIndex(prop, ".")
+	if idx == -1 || idx+1 == len(prop) {
+		return dbus.Variant{}, errors.New("dbus: invalid property " + prop)
+	}
+	var result dbus.Variant
+	err := obj.CallWithContext(ctx, "org.freedesktop.DBus.Properties.Get", 0, prop[:idx], prop[idx+1:]).Store(&result)
+	return result, err
+}
+
+func optionalReadError(ctx context.Context, err error) error {
+	if err != nil && ctx.Err() != nil {
+		return ctx.Err()
+	}
+	return nil
 }
 
 func getChildren(conn *dbus.Conn, sender string, path dbus.ObjectPath) ([]accessibleRef, error) {
@@ -410,19 +533,28 @@ func getChildrenContext(ctx context.Context, conn *dbus.Conn, sender string, pat
 }
 
 func getState(obj dbus.BusObject) ([]uint32, error) {
+	return getStateContext(context.Background(), obj)
+}
+
+func getStateContext(ctx context.Context, obj dbus.BusObject) ([]uint32, error) {
 	var bits []uint32
-	if err := obj.Call(ifaceAccessible+".GetState", 0).Store(&bits); err != nil {
+	if err := obj.CallWithContext(ctx, ifaceAccessible+".GetState", 0).Store(&bits); err != nil {
 		return nil, classifyDbusError(err)
 	}
 	return bits, nil
 }
 
 func getInterfaces(obj dbus.BusObject) []string {
-	var ifaces []string
-	if err := obj.Call(ifaceAccessible+".GetInterfaces", 0).Store(&ifaces); err != nil {
-		return nil
-	}
+	ifaces, _ := getInterfacesContext(context.Background(), obj)
 	return ifaces
+}
+
+func getInterfacesContext(ctx context.Context, obj dbus.BusObject) ([]string, error) {
+	var ifaces []string
+	if err := obj.CallWithContext(ctx, ifaceAccessible+".GetInterfaces", 0).Store(&ifaces); err != nil {
+		return nil, optionalReadError(ctx, err)
+	}
+	return ifaces, nil
 }
 
 func containsStr(haystack []string, needle string) bool {
@@ -435,60 +567,118 @@ func containsStr(haystack []string, needle string) bool {
 }
 
 func getExtents(obj dbus.BusObject) (A11yBounds, bool) {
+	bounds, ok, _ := getExtentsContext(context.Background(), obj)
+	return bounds, ok
+}
+
+func getExtentsContext(ctx context.Context, obj dbus.BusObject) (A11yBounds, bool, error) {
 	var ext struct {
 		X, Y, W, H int32
 	}
-	if err := obj.Call(ifaceComponent+".GetExtents", 0, coordTypeScreen).Store(&ext); err != nil {
-		return A11yBounds{}, false
+	if err := obj.CallWithContext(ctx, ifaceComponent+".GetExtents", 0, coordTypeScreen).Store(&ext); err != nil {
+		return A11yBounds{}, false, optionalReadError(ctx, err)
 	}
-	return A11yBounds{X: int(ext.X), Y: int(ext.Y), Width: int(ext.W), Height: int(ext.H)}, true
+	return A11yBounds{X: int(ext.X), Y: int(ext.Y), Width: int(ext.W), Height: int(ext.H)}, true, nil
 }
 
 func getActionNames(obj dbus.BusObject) []string {
+	actions, _ := getActionNamesContext(context.Background(), obj)
+	return actions
+}
+
+func getActionNamesContext(ctx context.Context, obj dbus.BusObject) ([]string, error) {
 	var actions []struct {
 		Name, Description, KeyBinding string
 	}
-	if err := obj.Call(ifaceAction+".GetActions", 0).Store(&actions); err != nil {
-		return nil
+	if err := obj.CallWithContext(ctx, ifaceAction+".GetActions", 0).Store(&actions); err != nil {
+		return nil, optionalReadError(ctx, err)
 	}
 	out := make([]string, 0, len(actions))
 	for _, a := range actions {
 		out = append(out, a.Name)
 	}
-	return out
+	return out, nil
 }
 
 // fetchNodeMeta reads every per-node field other than children. interfaces is
 // returned so callers can decide whether to try optional sub-interface calls.
 func fetchNodeMeta(conn *dbus.Conn, sender string, path dbus.ObjectPath) (*A11yNode, []string, error) {
-	obj := conn.Object(sender, path)
+	return fetchNodeMetaContext(context.Background(), conn, sender, path)
+}
 
+func fetchNodeMetaContext(ctx context.Context, conn *dbus.Conn, sender string, path dbus.ObjectPath) (*A11yNode, []string, error) {
+	return fetchNodeMetaFromObjectContext(ctx, conn.Object(sender, path), sender, path)
+}
+
+func fetchNodeMetaFromObjectContext(ctx context.Context, obj dbus.BusObject, sender string, path dbus.ObjectPath) (*A11yNode, []string, error) {
 	var role string
-	if err := obj.Call(ifaceAccessible+".GetRoleName", 0).Store(&role); err != nil {
+	if err := obj.CallWithContext(ctx, ifaceAccessible+".GetRoleName", 0).Store(&role); err != nil {
 		return nil, nil, classifyDbusError(err)
 	}
+	if err := ctx.Err(); err != nil {
+		return nil, nil, err
+	}
 
-	ifaces := getInterfaces(obj)
+	ifaces, err := getInterfacesContext(ctx, obj)
+	if err != nil {
+		return nil, nil, err
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, nil, err
+	}
+	name, err := getStringPropContext(ctx, obj, ifaceAccessible+".Name")
+	if err != nil {
+		return nil, nil, err
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, nil, err
+	}
+	description, err := getStringPropContext(ctx, obj, ifaceAccessible+".Description")
+	if err != nil {
+		return nil, nil, err
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, nil, err
+	}
 
 	node := &A11yNode{
 		ID:          makeNodeID(sender, path),
 		Role:        role,
-		Name:        getStringProp(obj, ifaceAccessible+".Name"),
-		Description: getStringProp(obj, ifaceAccessible+".Description"),
+		Name:        name,
+		Description: description,
 	}
 
-	if bits, err := getState(obj); err == nil {
+	if bits, err := getStateContext(ctx, obj); err == nil {
 		node.States = stateBitsToNames(bits)
+	} else if err := optionalReadError(ctx, err); err != nil {
+		return nil, nil, err
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, nil, err
 	}
 
 	if containsStr(ifaces, ifaceComponent) {
-		if b, ok := getExtents(obj); ok {
+		b, ok, err := getExtentsContext(ctx, obj)
+		if err != nil {
+			return nil, nil, err
+		}
+		if ok {
 			node.Bounds = b
+		}
+		if err := ctx.Err(); err != nil {
+			return nil, nil, err
 		}
 	}
 
 	if containsStr(ifaces, ifaceAction) {
-		node.Actions = getActionNames(obj)
+		actions, err := getActionNamesContext(ctx, obj)
+		if err != nil {
+			return nil, nil, err
+		}
+		node.Actions = actions
+		if err := ctx.Err(); err != nil {
+			return nil, nil, err
+		}
 	}
 
 	return node, ifaces, nil
@@ -500,13 +690,17 @@ func fetchNodeMeta(conn *dbus.Conn, sender string, path dbus.ObjectPath) (*A11yN
 
 // resolveScopeRoot picks the starting accessibleRef for a walk based on scope.
 func (c *ComputerUse) resolveScopeRoot(conn *dbus.Conn, scope A11yScope, pid int) (accessibleRef, error) {
+	return c.resolveScopeRootContext(context.Background(), conn, scope, pid)
+}
+
+func (c *ComputerUse) resolveScopeRootContext(ctx context.Context, conn *dbus.Conn, scope A11yScope, pid int) (accessibleRef, error) {
 	switch scope {
 	case A11yScopeAll, "":
 		return accessibleRef{Sender: atspiRegistryBus, Path: atspiRootPath}, nil
 	case A11yScopeFocused:
-		return c.getFocusedAppRoot(conn)
+		return c.getFocusedAppRootContext(ctx, conn)
 	case A11yScopePID:
-		return c.getAppRootByPID(conn, pid)
+		return c.getAppRootByPIDContext(ctx, conn, pid)
 	default:
 		return accessibleRef{}, fmt.Errorf("%w: unknown scope %q", ErrInvalidScope, scope)
 	}
@@ -516,7 +710,11 @@ func (c *ComputerUse) resolveScopeRoot(conn *dbus.Conn, scope A11yScope, pid int
 // top-level window descendant has the ACTIVE state set. Falls back to the
 // first registered app when no ACTIVE window is found.
 func (c *ComputerUse) getFocusedAppRoot(conn *dbus.Conn) (accessibleRef, error) {
-	apps, err := getChildren(conn, atspiRegistryBus, atspiRootPath)
+	return c.getFocusedAppRootContext(context.Background(), conn)
+}
+
+func (c *ComputerUse) getFocusedAppRootContext(ctx context.Context, conn *dbus.Conn) (accessibleRef, error) {
+	apps, err := getChildrenContext(ctx, conn, atspiRegistryBus, atspiRootPath)
 	if err != nil {
 		return accessibleRef{}, err
 	}
@@ -524,7 +722,7 @@ func (c *ComputerUse) getFocusedAppRoot(conn *dbus.Conn) (accessibleRef, error) 
 		return accessibleRef{}, ErrNoAccessibleRoot
 	}
 	for _, app := range apps {
-		if appHasActiveWindow(conn, app) {
+		if appHasActiveWindowContext(ctx, conn, app) {
 			return app, nil
 		}
 	}
@@ -532,13 +730,17 @@ func (c *ComputerUse) getFocusedAppRoot(conn *dbus.Conn) (accessibleRef, error) 
 }
 
 func appHasActiveWindow(conn *dbus.Conn, app accessibleRef) bool {
-	windows, err := getChildren(conn, app.Sender, app.Path)
+	return appHasActiveWindowContext(context.Background(), conn, app)
+}
+
+func appHasActiveWindowContext(ctx context.Context, conn *dbus.Conn, app accessibleRef) bool {
+	windows, err := getChildrenContext(ctx, conn, app.Sender, app.Path)
 	if err != nil {
 		return false
 	}
 	for _, w := range windows {
 		obj := conn.Object(w.Sender, w.Path)
-		bits, err := getState(obj)
+		bits, err := getStateContext(ctx, obj)
 		if err != nil {
 			continue
 		}
@@ -552,16 +754,24 @@ func appHasActiveWindow(conn *dbus.Conn, app accessibleRef) bool {
 // getAppRootByPID matches by the Application.Id property, which AT-SPI wires
 // to the app's OS process id.
 func (c *ComputerUse) getAppRootByPID(conn *dbus.Conn, pid int) (accessibleRef, error) {
+	return c.getAppRootByPIDContext(context.Background(), conn, pid)
+}
+
+func (c *ComputerUse) getAppRootByPIDContext(ctx context.Context, conn *dbus.Conn, pid int) (accessibleRef, error) {
 	if pid <= 0 {
 		return accessibleRef{}, fmt.Errorf("%w: pid must be positive", ErrInvalidRequest)
 	}
-	apps, err := getChildren(conn, atspiRegistryBus, atspiRootPath)
+	apps, err := getChildrenContext(ctx, conn, atspiRegistryBus, atspiRootPath)
 	if err != nil {
 		return accessibleRef{}, err
 	}
 	for _, app := range apps {
 		obj := conn.Object(app.Sender, app.Path)
-		if id, ok := getInt32Prop(obj, ifaceApplication+".Id"); ok {
+		id, ok, err := getInt32PropContext(ctx, obj, ifaceApplication+".Id")
+		if err != nil {
+			return accessibleRef{}, err
+		}
+		if ok {
 			if int(id) == pid {
 				return app, nil
 			}
@@ -578,16 +788,20 @@ func (c *ComputerUse) getAppRootByPID(conn *dbus.Conn, pid int) (accessibleRef, 
 // returns the subtree as an A11yNode. Returns truncated=true when the global
 // node budget is exhausted.
 func (c *ComputerUse) getAccessibilityTree(scope A11yScope, pid int, maxDepth int) (*A11yNode, bool, error) {
-	conn, err := c.connectA11y()
+	return c.getAccessibilityTreeContext(context.Background(), scope, pid, maxDepth)
+}
+
+func (c *ComputerUse) getAccessibilityTreeContext(ctx context.Context, scope A11yScope, pid int, maxDepth int) (*A11yNode, bool, error) {
+	conn, err := c.connectA11yContext(ctx)
 	if err != nil {
 		return nil, false, err
 	}
-	root, err := c.resolveScopeRoot(conn, scope, pid)
+	root, err := c.resolveScopeRootContext(ctx, conn, scope, pid)
 	if err != nil {
 		return nil, false, err
 	}
 	budget := walkBudget
-	node, err := walkNode(conn, root.Sender, root.Path, maxDepth, &budget)
+	node, err := walkNodeContext(ctx, conn, root.Sender, root.Path, maxDepth, &budget)
 	if err != nil {
 		return nil, false, err
 	}
@@ -599,12 +813,19 @@ func (c *ComputerUse) getAccessibilityTree(scope A11yScope, pid int, maxDepth in
 // maxDepth < 0 means unbounded. budget is decremented on every visited node;
 // when it hits zero, descent stops and the caller infers truncation.
 func walkNode(conn *dbus.Conn, sender string, path dbus.ObjectPath, maxDepth int, budget *int) (*A11yNode, error) {
+	return walkNodeContext(context.Background(), conn, sender, path, maxDepth, budget)
+}
+
+func walkNodeContext(ctx context.Context, conn *dbus.Conn, sender string, path dbus.ObjectPath, maxDepth int, budget *int) (*A11yNode, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if *budget <= 0 {
 		return nil, nil
 	}
 	*budget--
 
-	node, _, err := fetchNodeMeta(conn, sender, path)
+	node, _, err := fetchNodeMetaContext(ctx, conn, sender, path)
 	if err != nil {
 		return nil, err
 	}
@@ -613,7 +834,7 @@ func walkNode(conn *dbus.Conn, sender string, path dbus.ObjectPath, maxDepth int
 		return node, nil
 	}
 
-	refs, err := getChildren(conn, sender, path)
+	refs, err := getChildrenContext(ctx, conn, sender, path)
 	if err != nil {
 		// Missing children list isn't fatal for the walk; log implicitly by
 		// returning the node without children.
@@ -629,7 +850,7 @@ func walkNode(conn *dbus.Conn, sender string, path dbus.ObjectPath, maxDepth int
 		if *budget <= 0 {
 			break
 		}
-		child, err := walkNode(conn, r.Sender, r.Path, nextDepth, budget)
+		child, err := walkNodeContext(ctx, conn, r.Sender, r.Path, nextDepth, budget)
 		if err != nil {
 			// A child disappearing mid-walk shouldn't abort the walk.
 			if errors.Is(err, ErrNodeNotFound) {
@@ -656,6 +877,10 @@ const (
 // findAccessibilityNodes walks the same scope as getAccessibilityTree but
 // returns a flat list of matches. Children of returned nodes are always nil.
 func (c *ComputerUse) findAccessibilityNodes(scope A11yScope, pid int, filter A11yFilter, limit int) ([]*A11yNode, bool, error) {
+	return c.findAccessibilityNodesContext(context.Background(), scope, pid, filter, limit)
+}
+
+func (c *ComputerUse) findAccessibilityNodesContext(ctx context.Context, scope A11yScope, pid int, filter A11yFilter, limit int) ([]*A11yNode, bool, error) {
 	if limit <= 0 {
 		limit = findDefaultLimit
 	}
@@ -668,18 +893,18 @@ func (c *ComputerUse) findAccessibilityNodes(scope A11yScope, pid int, filter A1
 		return nil, false, err
 	}
 
-	conn, err := c.connectA11y()
+	conn, err := c.connectA11yContext(ctx)
 	if err != nil {
 		return nil, false, err
 	}
-	root, err := c.resolveScopeRoot(conn, scope, pid)
+	root, err := c.resolveScopeRootContext(ctx, conn, scope, pid)
 	if err != nil {
 		return nil, false, err
 	}
 
 	budget := walkBudget
 	matches := make([]*A11yNode, 0, 16)
-	truncated, err := findWalk(conn, root.Sender, root.Path, matcher, &matches, limit, &budget, false)
+	truncated, err := findWalkContext(ctx, conn, root.Sender, root.Path, matcher, &matches, limit, &budget, false)
 	if err != nil {
 		return nil, false, err
 	}
@@ -689,12 +914,19 @@ func (c *ComputerUse) findAccessibilityNodes(scope A11yScope, pid int, filter A1
 // findWalk returns true when the walk was truncated by either the node budget
 // or the result limit.
 func findWalk(conn *dbus.Conn, sender string, path dbus.ObjectPath, match func(*A11yNode) bool, out *[]*A11yNode, limit int, budget *int, ignoreMissing bool) (bool, error) {
+	return findWalkContext(context.Background(), conn, sender, path, match, out, limit, budget, ignoreMissing)
+}
+
+func findWalkContext(ctx context.Context, conn *dbus.Conn, sender string, path dbus.ObjectPath, match func(*A11yNode) bool, out *[]*A11yNode, limit int, budget *int, ignoreMissing bool) (bool, error) {
+	if err := ctx.Err(); err != nil {
+		return false, err
+	}
 	if *budget <= 0 {
 		return true, nil
 	}
 	*budget--
 
-	node, _, err := fetchNodeMeta(conn, sender, path)
+	node, _, err := fetchNodeMetaContext(ctx, conn, sender, path)
 	if err != nil {
 		if ignoreMissing && errors.Is(err, ErrNodeNotFound) {
 			return false, nil
@@ -712,7 +944,7 @@ func findWalk(conn *dbus.Conn, sender string, path dbus.ObjectPath, match func(*
 		}
 	}
 
-	refs, err := getChildren(conn, sender, path)
+	refs, err := getChildrenContext(ctx, conn, sender, path)
 	if err != nil {
 		if ignoreMissing && errors.Is(err, ErrNodeNotFound) {
 			return false, nil
@@ -723,7 +955,7 @@ func findWalk(conn *dbus.Conn, sender string, path dbus.ObjectPath, match func(*
 		if *budget <= 0 {
 			return true, nil
 		}
-		truncated, err := findWalk(conn, r.Sender, r.Path, match, out, limit, budget, true)
+		truncated, err := findWalkContext(ctx, conn, r.Sender, r.Path, match, out, limit, budget, true)
 		if err != nil || truncated {
 			return truncated, err
 		}
@@ -742,6 +974,10 @@ const (
 )
 
 func (c *ComputerUse) findWireAccessibilityNodes(req *computeruse.FindAccessibilityNodesRequest) ([]*A11yNode, bool, error) {
+	return c.findWireAccessibilityNodesContext(context.Background(), req)
+}
+
+func (c *ComputerUse) findWireAccessibilityNodesContext(ctx context.Context, req *computeruse.FindAccessibilityNodesRequest) ([]*A11yNode, bool, error) {
 	if req == nil {
 		return nil, false, fmt.Errorf("%w: query is required", ErrInvalidRequest)
 	}
@@ -755,13 +991,23 @@ func (c *ComputerUse) findWireAccessibilityNodes(req *computeruse.FindAccessibil
 		NameMatch: req.NameMatch,
 		States:    req.States,
 	}
+	if c.findA11yNodesContext != nil {
+		return c.findA11yNodesContext(ctx, scope, req.PID, filter, req.Limit)
+	}
 	if c.findA11yNodes != nil {
 		return c.findA11yNodes(scope, req.PID, filter, req.Limit)
 	}
-	return c.findAccessibilityNodes(scope, req.PID, filter, req.Limit)
+	return c.findAccessibilityNodesContext(ctx, scope, req.PID, filter, req.Limit)
 }
 
 func (c *ComputerUse) fetchAccessibilityNode(id string) (*A11yNode, error) {
+	return c.fetchAccessibilityNodeContext(context.Background(), id)
+}
+
+func (c *ComputerUse) fetchAccessibilityNodeContext(ctx context.Context, id string) (*A11yNode, error) {
+	if c.fetchA11yNodeContext != nil {
+		return c.fetchA11yNodeContext(ctx, id)
+	}
 	if c.fetchA11yNode != nil {
 		return c.fetchA11yNode(id)
 	}
@@ -769,11 +1015,11 @@ func (c *ComputerUse) fetchAccessibilityNode(id string) (*A11yNode, error) {
 	if err != nil {
 		return nil, err
 	}
-	conn, err := c.connectA11y()
+	conn, err := c.connectA11yContext(ctx)
 	if err != nil {
 		return nil, err
 	}
-	node, _, err := fetchNodeMeta(conn, sender, path)
+	node, _, err := fetchNodeMetaContext(ctx, conn, sender, path)
 	return node, err
 }
 
@@ -794,6 +1040,13 @@ func waitDurations(timeoutMs, pollIntervalMs int) (time.Duration, time.Duration)
 
 func elapsedMs(start time.Time) int64 {
 	return time.Since(start).Milliseconds()
+}
+
+func waitTimedOutResponse(start time.Time) *computeruse.AccessibilityWaitResponse {
+	return &computeruse.AccessibilityWaitResponse{
+		TimedOut:  true,
+		ElapsedMs: elapsedMs(start),
+	}
 }
 
 func validateWaitRequest(req *computeruse.AccessibilityWaitRequest) error {
@@ -846,10 +1099,14 @@ func matchingStateNodes(nodes []*A11yNode, states []string, forbidden bool) []*A
 }
 
 func (c *ComputerUse) waitStateCandidates(req *computeruse.AccessibilityWaitRequest) ([]*A11yNode, bool, error) {
+	return c.waitStateCandidatesContext(context.Background(), req)
+}
+
+func (c *ComputerUse) waitStateCandidatesContext(ctx context.Context, req *computeruse.AccessibilityWaitRequest) ([]*A11yNode, bool, error) {
 	if req.Query != nil {
-		return c.findWireAccessibilityNodes(req.Query)
+		return c.findWireAccessibilityNodesContext(ctx, req.Query)
 	}
-	node, err := c.fetchAccessibilityNode(req.ID)
+	node, err := c.fetchAccessibilityNodeContext(ctx, req.ID)
 	if err != nil {
 		return nil, false, err
 	}
@@ -857,16 +1114,20 @@ func (c *ComputerUse) waitStateCandidates(req *computeruse.AccessibilityWaitRequ
 }
 
 func (c *ComputerUse) evalAccessibilityWait(req *computeruse.AccessibilityWaitRequest) ([]*A11yNode, bool, bool, error) {
+	return c.evalAccessibilityWaitContext(context.Background(), req)
+}
+
+func (c *ComputerUse) evalAccessibilityWaitContext(ctx context.Context, req *computeruse.AccessibilityWaitRequest) ([]*A11yNode, bool, bool, error) {
 	condition := strings.ToLower(strings.TrimSpace(req.Condition))
 	switch condition {
 	case "exists":
-		matches, truncated, err := c.findWireAccessibilityNodes(req.Query)
+		matches, truncated, err := c.findWireAccessibilityNodesContext(ctx, req.Query)
 		return matches, truncated, len(matches) > 0, err
 	case "gone":
-		matches, truncated, err := c.findWireAccessibilityNodes(req.Query)
+		matches, truncated, err := c.findWireAccessibilityNodesContext(ctx, req.Query)
 		return nil, truncated, !truncated && len(matches) == 0, err
 	case "state", "not_state":
-		candidates, truncated, err := c.waitStateCandidates(req)
+		candidates, truncated, err := c.waitStateCandidatesContext(ctx, req)
 		if err != nil {
 			return nil, false, false, err
 		}
@@ -886,12 +1147,19 @@ func (c *ComputerUse) WaitAccessibility(req *computeruse.AccessibilityWaitReques
 	}
 	timeout, interval := waitDurations(req.TimeoutMs, req.PollIntervalMs)
 	start := time.Now()
-	deadline := start.Add(timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
 
 	for {
-		matches, truncated, matched, err := c.evalAccessibilityWait(req)
+		matches, truncated, matched, err := c.evalAccessibilityWaitContext(ctx, req)
 		if err != nil {
+			if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+				return waitTimedOutResponse(start), nil
+			}
 			return nil, err
+		}
+		if err := ctx.Err(); err != nil {
+			return waitTimedOutResponse(start), nil
 		}
 		if matched {
 			return &computeruse.AccessibilityWaitResponse{
@@ -901,13 +1169,13 @@ func (c *ComputerUse) WaitAccessibility(req *computeruse.AccessibilityWaitReques
 				Truncated: truncated,
 			}, nil
 		}
-		if !time.Now().Before(deadline) {
-			return &computeruse.AccessibilityWaitResponse{
-				TimedOut:  true,
-				ElapsedMs: elapsedMs(start),
-			}, nil
+		timer := time.NewTimer(interval)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return waitTimedOutResponse(start), nil
+		case <-timer.C:
 		}
-		time.Sleep(min(interval, time.Until(deadline)))
 	}
 }
 
