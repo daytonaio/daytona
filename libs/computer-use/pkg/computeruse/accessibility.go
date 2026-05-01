@@ -864,7 +864,7 @@ func (c *ComputerUse) evalAccessibilityWait(req *computeruse.AccessibilityWaitRe
 		return matches, truncated, len(matches) > 0, err
 	case "gone":
 		matches, truncated, err := c.findWireAccessibilityNodes(req.Query)
-		return nil, truncated, len(matches) == 0, err
+		return nil, truncated, !truncated && len(matches) == 0, err
 	case "state", "not_state":
 		candidates, truncated, err := c.waitStateCandidates(req)
 		if err != nil {

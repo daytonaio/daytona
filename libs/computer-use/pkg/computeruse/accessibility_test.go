@@ -405,6 +405,27 @@ func TestWaitAccessibilityGoneMatchesEmptyResult(t *testing.T) {
 	}
 }
 
+func TestWaitAccessibilityGoneDoesNotMatchTruncatedEmptyResult(t *testing.T) {
+	c := &ComputerUse{
+		findA11yNodes: func(A11yScope, int, A11yFilter, int) ([]*A11yNode, bool, error) {
+			return nil, true, nil
+		},
+	}
+
+	resp, err := c.WaitAccessibility(&wire.AccessibilityWaitRequest{
+		Condition:      "gone",
+		Query:          &wire.FindAccessibilityNodesRequest{Scope: "all", Name: "Toast"},
+		TimeoutMs:      1,
+		PollIntervalMs: 1,
+	})
+	if err != nil {
+		t.Fatalf("WaitAccessibility returned error: %v", err)
+	}
+	if resp.Matched || !resp.TimedOut {
+		t.Fatalf("unexpected response: %+v", resp)
+	}
+}
+
 func TestWaitAccessibilityValidation(t *testing.T) {
 	c := &ComputerUse{}
 	cases := []struct {
