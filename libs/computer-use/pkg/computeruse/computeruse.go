@@ -40,6 +40,8 @@ type ComputerUse struct {
 	processes map[string]*Process
 	mu        sync.RWMutex
 	configDir string
+	browser   *browserManager
+	browserMu sync.Mutex
 
 	// AT-SPI accessibility bus connection. Lazily established on first call to
 	// connectA11y(); protected by atspiMu. Implementation lives in accessibility.go.
@@ -426,6 +428,8 @@ func (c *ComputerUse) startProcess(process *Process) {
 
 func (c *ComputerUse) Stop() (*computeruse.Empty, error) {
 	log.Info("Stopping all computer use processes...")
+
+	_, _ = c.StopBrowser()
 
 	c.mu.RLock()
 	processes := make([]*Process, 0, len(c.processes))

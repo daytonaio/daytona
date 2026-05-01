@@ -18,6 +18,7 @@ Computer Use for macOS and Windows is currently in private alpha and requires ac
 - **GUI application testing**: automate interactions with native applications, click buttons, fill forms, and validate UI behavior
 - **Visual testing & screenshots**: capture screenshots of applications, compare UI states, and perform visual regression testing
 - **Desktop automation**: automate repetitive desktop tasks, file management through GUI, and complex workflows
+- **Browser automation**: launch a visible Daytona-managed Chromium process and connect Playwright, Puppeteer, or any CDP-compatible client to it
 
 ## Start Computer Use
 
@@ -195,6 +196,48 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/status'
 
 </TabItem>
 </Tabs>
+
+## Connect to Managed Chromium
+
+Start a visible Chromium process on the sandbox desktop and return a CDP WebSocket URL. The SDK helpers return the toolbox-proxy URL, so CDP clients can connect from your local process without bundling Playwright or Puppeteer into the sandbox.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+cdp_url = sandbox.computer_use.browser.get_cdp_url()
+
+from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.connect_over_cdp(cdp_url)
+    page = browser.contexts[0].new_page()
+    page.goto("https://example.com")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+const cdpUrl = await sandbox.computerUse.browser.getCdpUrl();
+
+const { chromium } = await import('playwright');
+const browser = await chromium.connectOverCDP(cdpUrl);
+const page = await browser.contexts()[0].newPage();
+await page.goto('https://example.com');
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/browser/cdp'
+```
+
+</TabItem>
+</Tabs>
+
+Use `GET /computeruse/browser/status` to inspect the managed browser process and `POST /computeruse/browser/stop` to stop only Chromium.
 
 ## Get process status
 

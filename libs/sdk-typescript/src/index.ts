@@ -40,7 +40,7 @@ export {
 export { Image } from './Image'
 export { Sandbox } from './Sandbox'
 export type { CreateSnapshotParams } from './Snapshot'
-export { ComputerUse, Mouse, Keyboard, Screenshot, Display } from './ComputerUse'
+export { ComputerUse, Mouse, Keyboard, Screenshot, Display, Browser } from './ComputerUse'
 export type {
   BarChart,
   BarData,

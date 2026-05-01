@@ -306,6 +306,11 @@ func (s *server) Start() error {
 		cuRoutes.GET("/process/:processName/logs", computerUseHandler.GetProcessLogs)
 		cuRoutes.GET("/process/:processName/errors", computerUseHandler.GetProcessErrors)
 
+		// Browser endpoints
+		cuRoutes.GET("/browser/cdp", computeruse.WrapBrowserCDPHandler(lazyCU.GetBrowserCDP))
+		cuRoutes.GET("/browser/status", computeruse.WrapBrowserStatusHandler(lazyCU.GetBrowserStatus))
+		cuRoutes.POST("/browser/stop", computeruse.WrapStopBrowserHandler(lazyCU.StopBrowser))
+
 		// Screenshot endpoints
 		cuRoutes.GET("/screenshot", computeruse.WrapScreenshotHandler(lazyCU.TakeScreenshot))
 		cuRoutes.GET("/screenshot/region", computeruse.WrapRegionScreenshotHandler(lazyCU.TakeRegionScreenshot))
@@ -334,6 +339,12 @@ func (s *server) Start() error {
 		cuRoutes.POST("/a11y/node/focus", computeruse.WrapFocusAccessibilityNodeHandler(lazyCU.FocusAccessibilityNode))
 		cuRoutes.POST("/a11y/node/invoke", computeruse.WrapInvokeAccessibilityNodeHandler(lazyCU.InvokeAccessibilityNode))
 		cuRoutes.POST("/a11y/node/value", computeruse.WrapSetAccessibilityNodeValueHandler(lazyCU.SetAccessibilityNodeValue))
+	}
+
+	browserController := r.Group("/browser", computeruse.LazyCheckMiddleware(lazyCU))
+	{
+		browserController.GET("/cdp", computeruse.WrapBrowserCDPHandler(lazyCU.GetBrowserCDP))
+		browserController.Any("/cdp/*path", computeruse.WrapBrowserCDPProxyHandler(lazyCU.GetBrowserStatus))
 	}
 
 	// Recording endpoints - always registered, independent of computer-use plugin

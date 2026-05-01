@@ -178,3 +178,21 @@ func (m *ComputerUseRPCClient) SetAccessibilityNodeValue(request *AccessibilityS
 	err := m.client.Call("Plugin.SetAccessibilityNodeValue", request, new(Empty))
 	return new(Empty), err
 }
+
+// Browser methods
+func (m *ComputerUseRPCClient) GetBrowserCDP(request *BrowserCDPRequest) (*BrowserCDPResponse, error) {
+	var resp BrowserCDPResponse
+	err := m.client.Call("Plugin.GetBrowserCDP", request, &resp)
+	return &resp, err
+}
+
+func (m *ComputerUseRPCClient) GetBrowserStatus() (*BrowserStatusResponse, error) {
+	var resp BrowserStatusResponse
+	err := m.client.Call("Plugin.GetBrowserStatus", new(any), &resp)
+	return &resp, err
+}
+
+func (m *ComputerUseRPCClient) StopBrowser() (*Empty, error) {
+	err := m.client.Call("Plugin.StopBrowser", new(any), new(Empty))
+	return new(Empty), err
+}

@@ -27,6 +27,7 @@ class TestAsyncComputerUse:
         assert computer_use.keyboard is not None
         assert computer_use.screenshot is not None
         assert computer_use.display is not None
+        assert computer_use.browser is not None
         assert computer_use.recording is not None
 
     @pytest.mark.asyncio
@@ -162,3 +163,48 @@ class TestAsyncComputerUse:
         assert (await computer_use.get_process_errors("xvfb")).errors == ["err"]
 
         api_client.get_process_status.assert_awaited_once_with(process_name="xvfb")
+
+    @pytest.mark.asyncio
+    async def test_browser_get_cdp_url_rewrites_to_proxy_url(self):
+        from daytona._async.computer_use import AsyncComputerUse
+
+        api_client = AsyncMock()
+        api_client.get_browser_cdp.return_value = MagicMock(
+            web_socket_debugger_url="ws://127.0.0.1:9222/devtools/browser/abc",
+            proxy_path="/browser/cdp/devtools/browser/abc",
+        )
+        computer_use = AsyncComputerUse(api_client, "https://proxy.example.com/toolbox/sandbox-1")
+
+        assert (
+            await computer_use.browser.get_cdp_url()
+            == "wss://proxy.example.com/toolbox/sandbox-1/browser/cdp/devtools/browser/abc"
+        )
+
+    @pytest.mark.asyncio
+    async def test_browser_get_cdp_url_uses_toolbox_proxy_base_url(self):
+        from daytona._async.computer_use import AsyncComputerUse
+
+        toolbox_api = MagicMock()
+        toolbox_api._toolbox_base_url = "https://proxy.example.com/toolbox"
+        toolbox_api._sandbox_id = "sandbox-1"
+        api_client = AsyncMock(api_client=toolbox_api)
+        api_client.get_browser_cdp.return_value = MagicMock(
+            web_socket_debugger_url="ws://127.0.0.1:9222/devtools/browser/abc",
+            proxy_path="/browser/cdp/devtools/browser/abc",
+        )
+        computer_use = AsyncComputerUse(api_client)
+
+        assert (
+            await computer_use.browser.get_cdp_url()
+            == "wss://proxy.example.com/toolbox/sandbox-1/browser/cdp/devtools/browser/abc"
+        )
+
+    @pytest.mark.asyncio
+    async def test_browser_status_and_stop_delegate_to_api(self):
+        computer_use, api_client = _make_async_computer_use()
+        api_client.get_browser_status.return_value = MagicMock(status="running")
+
+        assert (await computer_use.browser.get_status()).status == "running"
+        await computer_use.browser.stop()
+
+        api_client.stop_browser.assert_awaited_once_with()

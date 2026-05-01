@@ -4,6 +4,8 @@ export * from './accessibility-node-request';
 export * from './accessibility-nodes-response';
 export * from './accessibility-set-value-request';
 export * from './accessibility-tree-response';
+export * from './browser-cdpresponse';
+export * from './browser-status-response';
 export * from './chart';
 export * from './chart-element';
 export * from './code-run-artifacts';

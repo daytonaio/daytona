@@ -26,6 +26,8 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client_async.models.accessibility_nodes_response import AccessibilityNodesResponse
     from daytona_toolbox_api_client_async.models.accessibility_set_value_request import AccessibilitySetValueRequest
     from daytona_toolbox_api_client_async.models.accessibility_tree_response import AccessibilityTreeResponse
+    from daytona_toolbox_api_client_async.models.browser_cdp_response import BrowserCDPResponse
+    from daytona_toolbox_api_client_async.models.browser_status_response import BrowserStatusResponse
     from daytona_toolbox_api_client_async.models.chart import Chart
     from daytona_toolbox_api_client_async.models.chart_element import ChartElement
     from daytona_toolbox_api_client_async.models.code_run_artifacts import CodeRunArtifacts
@@ -121,6 +123,8 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "AccessibilityNodesResponse": "daytona_toolbox_api_client_async.models.accessibility_nodes_response",
     "AccessibilitySetValueRequest": "daytona_toolbox_api_client_async.models.accessibility_set_value_request",
     "AccessibilityTreeResponse": "daytona_toolbox_api_client_async.models.accessibility_tree_response",
+    "BrowserCDPResponse": "daytona_toolbox_api_client_async.models.browser_cdp_response",
+    "BrowserStatusResponse": "daytona_toolbox_api_client_async.models.browser_status_response",
     "Chart": "daytona_toolbox_api_client_async.models.chart",
     "ChartElement": "daytona_toolbox_api_client_async.models.chart_element",
     "CodeRunArtifacts": "daytona_toolbox_api_client_async.models.code_run_artifacts",

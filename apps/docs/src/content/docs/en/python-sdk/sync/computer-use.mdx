@@ -11,7 +11,7 @@ class ComputerUse()
 
 Computer Use functionality for interacting with the desktop environment.
 
-Provides access to mouse, keyboard, screenshot, display, and recording operations
+Provides access to mouse, keyboard, screenshot, display, browser, and recording operations
 for automating desktop interactions within a sandbox.
 
 **Attributes**:
@@ -20,6 +20,7 @@ for automating desktop interactions within a sandbox.
 - `keyboard` _Keyboard_ - Keyboard operations interface.
 - `screenshot` _Screenshot_ - Screenshot operations interface.
 - `display` _Display_ - Display operations interface.
+- `browser` _Browser_ - Managed Chromium browser operations.
 - `recording` _RecordingService_ - Screen recording operations interface.
 
 #### ComputerUse.start
@@ -898,4 +899,3 @@ Options for screenshot compression and display.
 - `fmt` _str | None_ - Image format (e.g., 'png', 'jpeg', 'webp').
 - `quality` _int | None_ - Compression quality (0-100).
 - `scale` _float | None_ - Scale factor for the screenshot.
-
