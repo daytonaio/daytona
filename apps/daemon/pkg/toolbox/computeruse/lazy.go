@@ -279,6 +279,32 @@ func (l *LazyComputerUse) SetAccessibilityNodeValue(req *AccessibilitySetValueRe
 	return impl.SetAccessibilityNodeValue(req)
 }
 
+// --- Browser proxy methods ---
+
+func (l *LazyComputerUse) GetBrowserCDP(req *BrowserCDPRequest) (*BrowserCDPResponse, error) {
+	impl, err := l.get()
+	if err != nil {
+		return nil, err
+	}
+	return impl.GetBrowserCDP(req)
+}
+
+func (l *LazyComputerUse) GetBrowserStatus() (*BrowserStatusResponse, error) {
+	impl, err := l.get()
+	if err != nil {
+		return nil, err
+	}
+	return impl.GetBrowserStatus()
+}
+
+func (l *LazyComputerUse) StopBrowser() (*Empty, error) {
+	impl, err := l.get()
+	if err != nil {
+		return nil, err
+	}
+	return impl.StopBrowser()
+}
+
 // LazyCheckMiddleware returns 503 if the computer-use plugin has not loaded yet.
 func LazyCheckMiddleware(lazy *LazyComputerUse) gin.HandlerFunc {
 	return func(c *gin.Context) {

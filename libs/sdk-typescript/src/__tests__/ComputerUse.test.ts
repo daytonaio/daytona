@@ -40,9 +40,16 @@ describe('ComputerUse', () => {
     restartProcess: jest.fn(),
     getProcessLogs: jest.fn(),
     getProcessErrors: jest.fn(),
+    getBrowserCDP: jest.fn(),
+    getBrowserStatus: jest.fn(),
+    stopBrowser: jest.fn(),
   }
 
   const computerUse = new ComputerUse(apiClient as unknown as never)
+  const proxiedComputerUse = new ComputerUse(
+    apiClient as unknown as never,
+    'https://proxy.example.com/toolbox/sandbox-1',
+  )
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -201,6 +208,29 @@ describe('ComputerUse', () => {
     await expect(computerUse.restartProcess('xvfb')).resolves.toEqual({ message: 'restarted' })
     await expect(computerUse.getProcessLogs('xvfb')).resolves.toEqual({ logs: 'ok' })
     await expect(computerUse.getProcessErrors('xvfb')).resolves.toEqual({ errors: '' })
+  })
+
+  it('returns a proxy-rewritten browser CDP URL', async () => {
+    apiClient.getBrowserCDP.mockResolvedValue(
+      createApiResponse({
+        webSocketDebuggerUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+        proxyPath: '/browser/cdp/devtools/browser/abc',
+      }),
+    )
+
+    await expect(proxiedComputerUse.browser.getCdpUrl()).resolves.toBe(
+      'wss://proxy.example.com/toolbox/sandbox-1/browser/cdp/devtools/browser/abc',
+    )
+  })
+
+  it('delegates browser status and stop', async () => {
+    apiClient.getBrowserStatus.mockResolvedValue(createApiResponse({ status: 'running' }))
+    apiClient.stopBrowser.mockResolvedValue(createApiResponse({}))
+
+    await expect(computerUse.browser.getStatus()).resolves.toEqual({ status: 'running' })
+    await computerUse.browser.stop()
+
+    expect(apiClient.stopBrowser).toHaveBeenCalledTimes(1)
   })
 
   it('passes process names through to process control helpers', async () => {

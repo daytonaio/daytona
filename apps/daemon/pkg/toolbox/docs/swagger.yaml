@@ -51,6 +51,34 @@ definitions:
       truncated:
         type: boolean
     type: object
+  BrowserCDPResponse:
+    properties:
+      localWebSocketDebuggerUrl:
+        type: string
+      port:
+        type: integer
+      proxyPath:
+        type: string
+      webSocketDebuggerUrl:
+        type: string
+    type: object
+  BrowserStatusResponse:
+    properties:
+      localWebSocketDebuggerUrl:
+        type: string
+      pid:
+        type: integer
+      port:
+        type: integer
+      proxyPath:
+        type: string
+      running:
+        type: boolean
+      status:
+        type: string
+      webSocketDebuggerUrl:
+        type: string
+    type: object
   Chart:
     properties:
       elements:
@@ -1372,6 +1400,48 @@ paths:
               type: string
             type: object
       summary: Get accessibility tree
+      tags:
+        - computer-use
+  /computeruse/browser/cdp:
+    get:
+      description: Lazily start managed Chromium and return a CDP WebSocket URL
+      operationId: GetBrowserCDP
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/BrowserCDPResponse'
+      summary: Get browser CDP URL
+      tags:
+        - computer-use
+  /computeruse/browser/status:
+    get:
+      description: Get the managed Chromium process status
+      operationId: GetBrowserStatus
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/BrowserStatusResponse'
+      summary: Get browser status
+      tags:
+        - computer-use
+  /computeruse/browser/stop:
+    post:
+      description: Stop the managed Chromium process
+      operationId: StopBrowser
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Empty'
+      summary: Stop browser
       tags:
         - computer-use
   /computeruse/display/info:

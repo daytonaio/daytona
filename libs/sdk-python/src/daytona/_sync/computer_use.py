@@ -4,10 +4,13 @@
 from __future__ import annotations
 
 import os
+from urllib.parse import urlparse, urlunparse
 
 import httpx
 
 from daytona_toolbox_api_client import (
+    BrowserCDPResponse,
+    BrowserStatusResponse,
     ComputerUseApi,
     ComputerUseStartResponse,
     ComputerUseStatusResponse,
@@ -615,6 +618,56 @@ class RecordingService:
                         _ = f.write(chunk)
 
 
+class Browser:
+    """Browser operations for the managed Chromium process."""
+
+    def __init__(self, api_client: ComputerUseApi, cdp_base_url: str | None = None):
+        self._api_client: ComputerUseApi = api_client
+        self._cdp_base_url: str | None = cdp_base_url or _toolbox_cdp_base_url(api_client)
+
+    @intercept_errors(message_prefix="Failed to get browser CDP URL: ")
+    @with_instrumentation()
+    def get_cdp_url(self) -> str:
+        """Lazily starts Chromium and returns an externally connectable CDP WebSocket URL."""
+        return _browser_cdp_url(self._api_client.get_browser_cdp(), self._cdp_base_url)
+
+    @intercept_errors(message_prefix="Failed to get browser status: ")
+    @with_instrumentation()
+    def get_status(self) -> BrowserStatusResponse:
+        """Gets the managed Chromium process status."""
+        return self._api_client.get_browser_status()
+
+    @intercept_errors(message_prefix="Failed to stop browser: ")
+    @with_instrumentation()
+    def stop(self) -> None:
+        """Stops the managed Chromium process."""
+        _ = self._api_client.stop_browser()
+
+
+def _browser_cdp_url(response: BrowserCDPResponse, cdp_base_url: str | None) -> str:
+    url = response.web_socket_debugger_url
+    if not cdp_base_url or not response.proxy_path or not _is_local_cdp_url(url):
+        return url or ""
+
+    parsed = urlparse(cdp_base_url)
+    scheme = "ws" if parsed.scheme == "http" else "wss"
+    path = parsed.path.rstrip("/") + response.proxy_path
+    return urlunparse((scheme, parsed.netloc, path, "", "", ""))
+
+
+def _is_local_cdp_url(value: str | None) -> bool:
+    return not value or "://127.0.0.1:" in value or "://localhost:" in value
+
+
+def _toolbox_cdp_base_url(api_client: ComputerUseApi) -> str | None:
+    toolbox_api = getattr(api_client, "api_client", None)
+    base_url = getattr(toolbox_api, "_toolbox_base_url", None)
+    sandbox_id = getattr(toolbox_api, "_sandbox_id", None)
+    if isinstance(base_url, str) and isinstance(sandbox_id, str):
+        return f"{base_url.rstrip('/')}/{sandbox_id}"
+    return None
+
+
 class ComputerUse:
     """Computer Use functionality for interacting with the desktop environment.
 
@@ -626,12 +679,14 @@ class ComputerUse:
         keyboard (Keyboard): Keyboard operations interface.
         screenshot (Screenshot): Screenshot operations interface.
         display (Display): Display operations interface.
+        browser (Browser): Managed Chromium browser operations.
         recording (RecordingService): Screen recording operations interface.
     """
 
     def __init__(
         self,
         api_client: ComputerUseApi,
+        cdp_base_url: str | None = None,
     ):
         self._api_client: ComputerUseApi = api_client
 
@@ -639,6 +694,7 @@ class ComputerUse:
         self.keyboard: Keyboard = Keyboard(api_client)
         self.screenshot: Screenshot = Screenshot(api_client)
         self.display: Display = Display(api_client)
+        self.browser: Browser = Browser(api_client, cdp_base_url)
         self.recording: RecordingService = RecordingService(api_client)
 
     @intercept_errors(message_prefix="Failed to start computer use: ")

@@ -225,3 +225,27 @@ func (m *ComputerUseRPCServer) SetAccessibilityNodeValue(arg *AccessibilitySetVa
 	_, err := m.Impl.SetAccessibilityNodeValue(arg)
 	return err
 }
+
+// Browser methods
+func (m *ComputerUseRPCServer) GetBrowserCDP(arg *BrowserCDPRequest, resp *BrowserCDPResponse) error {
+	response, err := m.Impl.GetBrowserCDP(arg)
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
+}
+
+func (m *ComputerUseRPCServer) GetBrowserStatus(arg any, resp *BrowserStatusResponse) error {
+	response, err := m.Impl.GetBrowserStatus()
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
+}
+
+func (m *ComputerUseRPCServer) StopBrowser(arg any, resp *Empty) error {
+	_, err := m.Impl.StopBrowser()
+	return err
+}

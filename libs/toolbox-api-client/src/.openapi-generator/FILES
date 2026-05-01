@@ -20,6 +20,8 @@ models/accessibility-node-request.ts
 models/accessibility-nodes-response.ts
 models/accessibility-set-value-request.ts
 models/accessibility-tree-response.ts
+models/browser-cdpresponse.ts
+models/browser-status-response.ts
 models/chart-element.ts
 models/chart.ts
 models/code-run-artifacts.ts

@@ -380,6 +380,69 @@ const docTemplate = `{
                 }
             }
         },
+        "/computeruse/browser/cdp": {
+            "get": {
+                "description": "Lazily start managed Chromium and return a CDP WebSocket URL",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "computer-use"
+                ],
+                "summary": "Get browser CDP URL",
+                "operationId": "GetBrowserCDP",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/BrowserCDPResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/computeruse/browser/status": {
+            "get": {
+                "description": "Get the managed Chromium process status",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "computer-use"
+                ],
+                "summary": "Get browser status",
+                "operationId": "GetBrowserStatus",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/BrowserStatusResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/computeruse/browser/stop": {
+            "post": {
+                "description": "Stop the managed Chromium process",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "computer-use"
+                ],
+                "summary": "Stop browser",
+                "operationId": "StopBrowser",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Empty"
+                        }
+                    }
+                }
+            }
+        },
         "/computeruse/display/info": {
             "get": {
                 "description": "Get information about all available displays",
@@ -3383,6 +3446,49 @@ const docTemplate = `{
                 },
                 "truncated": {
                     "type": "boolean"
+                }
+            }
+        },
+        "BrowserCDPResponse": {
+            "type": "object",
+            "properties": {
+                "localWebSocketDebuggerUrl": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "proxyPath": {
+                    "type": "string"
+                },
+                "webSocketDebuggerUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "BrowserStatusResponse": {
+            "type": "object",
+            "properties": {
+                "localWebSocketDebuggerUrl": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "proxyPath": {
+                    "type": "string"
+                },
+                "running": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "webSocketDebuggerUrl": {
+                    "type": "string"
                 }
             }
         },

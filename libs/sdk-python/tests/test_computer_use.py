@@ -24,6 +24,7 @@ class TestComputerUse:
         assert computer_use.keyboard is not None
         assert computer_use.screenshot is not None
         assert computer_use.display is not None
+        assert computer_use.browser is not None
         assert computer_use.recording is not None
 
     def test_mouse_methods_delegate_to_api(self):
@@ -167,3 +168,45 @@ class TestComputerUse:
 
         api_client.get_process_status.assert_called_once_with(process_name="xvfb")
         api_client.restart_process.assert_called_once_with(process_name="xvfb")
+
+    def test_browser_get_cdp_url_rewrites_to_proxy_url(self):
+        from daytona._sync.computer_use import ComputerUse
+
+        api_client = MagicMock()
+        api_client.get_browser_cdp.return_value = MagicMock(
+            web_socket_debugger_url="ws://127.0.0.1:9222/devtools/browser/abc",
+            proxy_path="/browser/cdp/devtools/browser/abc",
+        )
+        computer_use = ComputerUse(api_client, "https://proxy.example.com/toolbox/sandbox-1")
+
+        assert (
+            computer_use.browser.get_cdp_url()
+            == "wss://proxy.example.com/toolbox/sandbox-1/browser/cdp/devtools/browser/abc"
+        )
+
+    def test_browser_get_cdp_url_uses_toolbox_proxy_base_url(self):
+        from daytona._sync.computer_use import ComputerUse
+
+        toolbox_api = MagicMock()
+        toolbox_api._toolbox_base_url = "https://proxy.example.com/toolbox"
+        toolbox_api._sandbox_id = "sandbox-1"
+        api_client = MagicMock(api_client=toolbox_api)
+        api_client.get_browser_cdp.return_value = MagicMock(
+            web_socket_debugger_url="ws://127.0.0.1:9222/devtools/browser/abc",
+            proxy_path="/browser/cdp/devtools/browser/abc",
+        )
+        computer_use = ComputerUse(api_client)
+
+        assert (
+            computer_use.browser.get_cdp_url()
+            == "wss://proxy.example.com/toolbox/sandbox-1/browser/cdp/devtools/browser/abc"
+        )
+
+    def test_browser_status_and_stop_delegate_to_api(self):
+        computer_use, api_client = _make_computer_use()
+        api_client.get_browser_status.return_value = MagicMock(status="running")
+
+        assert computer_use.browser.get_status().status == "running"
+        computer_use.browser.stop()
+
+        api_client.stop_browser.assert_called_once_with()
