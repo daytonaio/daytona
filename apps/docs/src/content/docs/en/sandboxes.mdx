@@ -403,8 +403,8 @@ Daytona provides methods to link sandboxes to existing sandboxes. A linked sandb
 
 Create the parent sandbox first, then create one or more children whose create request references the parent's sandbox ID. The API records the relationship on the child sandbox as the linked sandbox ID. Omitting the linked sandbox parameter yields an unlinked sandbox.
 
-- **Lifecycle**: Linked sandboxes are always ephemeral, and cannot be persisted or resumed after stop. The [auto-delete interval](#auto-delete-interval) must be exactly `0` on create; this is enforced, not merely a default. Set the [auto-stop interval](#auto-stop-interval) to the idle period in minutes after which the child sandbox stops. Once stopped, linked children are auto-deleted. Deleting the parent deletes all of its linked children (cascade). One parent may have many linked children (1:N).
-- **Networking**: TCP connection established from the parent sandbox to the child sandbox using the child sandbox's ID as the host. The traffic stays on the internal link network on the runner. For example: `telnet DEVICE_SANDBOX_ID 5555` reaches port `5555` on the linked child sandbox.
+- **Lifecycle**: Linked sandboxes are always ephemeral and cannot be persisted or resumed after stop. The [auto-delete interval](#auto-delete-interval) must be exactly `0` on create; this is enforced, not a default. The [auto-stop interval](#auto-stop-interval) sets the idle period in minutes after which the child sandbox stops. Once stopped, linked children are auto-deleted. Deleting the parent deletes all of its linked children (cascade). One parent may have many linked children (1:N).
+- **Networking**: TCP connection establishes from the parent sandbox to the child sandbox using the child sandbox's ID as the host. The traffic stays on the internal link network on the runner. For example: `telnet DEVICE_SANDBOX_ID 5555` reaches port `5555` on the linked child sandbox.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -565,10 +565,9 @@ This feature is experimental. To request access, contact [support@daytona.io](ma
 
 Daytona provides methods to create Android sandboxes. Android sandboxes combine a standard Linux **base sandbox** (your development environment: git, builds, POSIX tooling) with one or more **device sandboxes** that run Android emulators. The device sandboxes are [linked sandboxes](#linked-sandboxes) attached to the base sandbox over a shared internal link network.
 
-The user code runs in the base sandbox, and the base sandbox talks to each device over the link network. This layout avoids nested virtualization while providing an isolated emulator surface per device sandbox.
+The user code runs in the base sandbox, and the base sandbox talks to each device over the link network. This avoids nested virtualization while providing an isolated emulator surface per device sandbox.
 
 - **Region target**: Android workloads require the `android` target region on every sandbox in the setup (base and devices). Set `DAYTONA_TARGET=android` in the environment, or pass the `android` target parameter
-
 - **Snapshots**: Base: `android-base`. Devices: **x86_64**, **AOSP**. 
 
   The number corresponds to Android SDK levels / OS versions:
