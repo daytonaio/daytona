@@ -859,7 +859,7 @@ curl 'https://app.daytona.io/api/sandbox' \
 </TabItem>
 </Tabs>
 
-### Sandbox details page
+##### Sandbox details page
 
 [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) provides a sandbox details page to view detailed information about a sandbox and interact with it directly.
 
@@ -1061,7 +1061,7 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/recover' \
 </TabItem>
 </Tabs>
 
-### Recover from error state
+##### Recover from error state
 
 When a sandbox enters an error state, it can sometimes be recovered using the `recover` method, depending on the underlying error reason. The `recoverable` flag indicates whether the error state can be resolved through an automated recovery procedure.
 
@@ -1264,7 +1264,7 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/fork' \
 </TabItem>
 </Tabs>
 
-### View Forks
+##### View Forks
 
 Daytona provides methods to view forks. You can view the fork tree for a sandbox and all its related sandboxes.
 
@@ -1510,7 +1510,7 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autostop/{interval}' 
 </TabItem>
 </Tabs>
 
-#### What resets the timer
+##### What resets the timer
 
 The inactivity timer resets only for specific external interactions:
 
@@ -1519,7 +1519,7 @@ The inactivity timer resets only for specific external interactions:
 - Active [SSH connections](/docs/en/ssh-access)
 - API requests to the [Daytona Toolbox SDK](/docs/en/tools/api/#daytona-toolbox)
 
-#### What does not reset the timer
+##### What does not reset the timer
 
 The following do not reset the timer:
 
