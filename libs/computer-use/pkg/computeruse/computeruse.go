@@ -6,9 +6,13 @@ package computeruse
 import (
 	"context"
 	"fmt"
+	"io"
+	"net"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -20,20 +24,24 @@ import (
 )
 
 type Process struct {
-	Name        string
-	Command     string
-	Args        []string
-	User        string
-	Priority    int
-	Env         map[string]string
-	LogFile     string
-	ErrFile     string
-	AutoRestart bool
-	cmd         *exec.Cmd
-	ctx         context.Context
-	cancel      context.CancelFunc
-	mu          sync.Mutex
-	running     bool
+	Name         string
+	Command      string
+	Args         []string
+	User         string
+	Priority     int
+	Required     bool
+	Env          map[string]string
+	LogFile      string
+	ErrFile      string
+	AutoRestart  bool
+	Ready        func(context.Context, *Process) error
+	ReadyName    string
+	ReadyTimeout time.Duration
+	cmd          *exec.Cmd
+	ctx          context.Context
+	cancel       context.CancelFunc
+	mu           sync.Mutex
+	running      bool
 }
 
 type ComputerUse struct {
@@ -52,9 +60,19 @@ type ComputerUse struct {
 	a11yStatusMu        sync.Mutex
 	a11yStatusRunning   bool
 	a11yStatusCheckedAt time.Time
+	restartDelay        time.Duration
 }
 
 var _ computeruse.IComputerUse = &ComputerUse{}
+
+type processFile interface {
+	io.Writer
+	Close() error
+}
+
+var openProcessFile = func(name string) (processFile, error) {
+	return os.OpenFile(name, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+}
 
 func (c *ComputerUse) Initialize() (*computeruse.Empty, error) {
 	c.processes = make(map[string]*Process)
@@ -103,7 +121,9 @@ func (c *ComputerUse) Start() (*computeruse.Empty, error) {
 	log.Infof("Set DISPLAY environment variable to: %s", display)
 
 	// Start all processes in order of priority
-	c.startAllProcesses()
+	if err := c.startAllProcesses(context.Background()); err != nil {
+		return nil, err
+	}
 	c.invalidateA11yStatus()
 
 	// Check process status after starting
@@ -166,12 +186,16 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 
 	// Process 1: Xvfb (X Virtual Framebuffer)
 	c.processes["xvfb"] = &Process{
-		Name:        "xvfb",
-		Command:     "/usr/bin/Xvfb",
-		Args:        []string{display, "-screen", "0", vncResolution + "x24"},
-		User:        user,
-		Priority:    100,
-		AutoRestart: true,
+		Name:         "xvfb",
+		Command:      "/usr/bin/Xvfb",
+		Args:         []string{display, "-screen", "0", vncResolution + "x24"},
+		User:         user,
+		Priority:     100,
+		Required:     true,
+		AutoRestart:  true,
+		Ready:        readyXvfb(display),
+		ReadyName:    "xvfb-display",
+		ReadyTimeout: 10 * time.Second,
 		Env: map[string]string{
 			"DISPLAY": display,
 		},
@@ -181,12 +205,16 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 
 	// Process 2: xfce4 (Desktop Environment)
 	c.processes["xfce4"] = &Process{
-		Name:        "xfce4",
-		Command:     "/usr/bin/startxfce4",
-		Args:        []string{},
-		User:        user,
-		Priority:    200,
-		AutoRestart: true,
+		Name:         "xfce4",
+		Command:      "/usr/bin/startxfce4",
+		Args:         []string{},
+		User:         user,
+		Priority:     200,
+		Required:     true,
+		AutoRestart:  true,
+		Ready:        readyXfce(display, user),
+		ReadyName:    "xfce4-desktop",
+		ReadyTimeout: 20 * time.Second,
 		Env: map[string]string{
 			"DISPLAY":                  display,
 			"HOME":                     homeDir,
@@ -232,6 +260,14 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 			User:        user,
 			Priority:    250,
 			AutoRestart: false,
+			Ready: func(context.Context, *Process) error {
+				if c.isA11yAvailable() {
+					return nil
+				}
+				return fmt.Errorf("AT-SPI bus is unavailable")
+			},
+			ReadyName:    "atspi-bus",
+			ReadyTimeout: 2 * time.Second,
 			Env: map[string]string{
 				"DISPLAY":                  display,
 				"HOME":                     homeDir,
@@ -245,12 +281,16 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 
 	// Process 3: x11vnc (VNC Server)
 	c.processes["x11vnc"] = &Process{
-		Name:        "x11vnc",
-		Command:     "/usr/bin/x11vnc",
-		Args:        []string{"-display", display, "-forever", "-shared", "-rfbport", vncPort},
-		User:        user,
-		Priority:    300,
-		AutoRestart: true,
+		Name:         "x11vnc",
+		Command:      "/usr/bin/x11vnc",
+		Args:         []string{"-display", display, "-forever", "-shared", "-rfbport", vncPort},
+		User:         user,
+		Priority:     300,
+		Required:     true,
+		AutoRestart:  true,
+		Ready:        readyTCP("127.0.0.1", vncPort),
+		ReadyName:    "x11vnc-tcp",
+		ReadyTimeout: 10 * time.Second,
 		Env: map[string]string{
 			"DISPLAY": display,
 		},
@@ -279,12 +319,16 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 	}
 
 	c.processes["novnc"] = &Process{
-		Name:        "novnc",
-		Command:     novncCommand,
-		Args:        novncArgs,
-		User:        user,
-		Priority:    400,
-		AutoRestart: true,
+		Name:         "novnc",
+		Command:      novncCommand,
+		Args:         novncArgs,
+		User:         user,
+		Priority:     400,
+		Required:     true,
+		AutoRestart:  true,
+		Ready:        readyHTTP("127.0.0.1", noVncPort),
+		ReadyName:    "novnc-http",
+		ReadyTimeout: 10 * time.Second,
 		Env: map[string]string{
 			"DISPLAY": display,
 		},
@@ -315,15 +359,22 @@ func waitForSessionBus(address string, timeout time.Duration) error {
 	}
 }
 
-func (c *ComputerUse) startAllProcesses() {
+func (c *ComputerUse) startAllProcesses(ctx context.Context) error {
 	// Sort processes by priority and start them
 	processes := c.getProcessesByPriority()
 
 	for _, process := range processes {
 		go c.startProcess(process)
-		// Wait a bit between starting processes to ensure proper initialization
-		time.Sleep(2 * time.Second)
+		if !process.Required {
+			go c.logOptionalReadiness(ctx, process)
+			continue
+		}
+		if err := c.waitProcessReady(ctx, process); err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
 func (c *ComputerUse) getProcessesByPriority() []*Process {
@@ -356,59 +407,15 @@ func (c *ComputerUse) startProcess(process *Process) {
 	process.running = true
 	process.mu.Unlock()
 
+	defer func() {
+		process.mu.Lock()
+		process.running = false
+		process.mu.Unlock()
+	}()
+
 	for {
 		log.Infof("Starting process: %s", process.Name)
-
-		// Create context for the process
-		process.ctx, process.cancel = context.WithCancel(context.Background())
-
-		// Create command
-		process.cmd = exec.CommandContext(process.ctx, process.Command, process.Args...)
-
-		// Set environment variables
-		if len(process.Env) > 0 {
-			process.cmd.Env = os.Environ()
-			for key, value := range process.Env {
-				process.cmd.Env = append(process.cmd.Env, fmt.Sprintf("%s=%s", key, value))
-			}
-		}
-
-		// Set up logging
-		if process.LogFile != "" {
-			logFile, err := os.OpenFile(process.LogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-			if err != nil {
-				log.Errorf("Failed to open log file for %s: %v", process.Name, err)
-			} else {
-				process.cmd.Stdout = logFile
-				defer logFile.Close()
-			}
-		}
-
-		if process.ErrFile != "" {
-			errFile, err := os.OpenFile(process.ErrFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-			if err != nil {
-				log.Errorf("Failed to open error file for %s: %v", process.Name, err)
-			} else {
-				process.cmd.Stderr = errFile
-				defer errFile.Close()
-			}
-		}
-
-		// Start the process
-		err := process.cmd.Start()
-		if err != nil {
-			log.Errorf("Failed to start process %s: %v", process.Name, err)
-			if !process.AutoRestart {
-				break
-			}
-			time.Sleep(5 * time.Second)
-			continue
-		}
-
-		log.Infof("Process %s started with PID: %d", process.Name, process.cmd.Process.Pid)
-
-		// Wait for the process to finish
-		err = process.cmd.Wait()
+		err := c.runProcessOnce(process)
 		if err != nil {
 			log.Errorf("Process %s exited with error: %v", process.Name, err)
 		} else {
@@ -416,17 +423,230 @@ func (c *ComputerUse) startProcess(process *Process) {
 		}
 
 		// Check if we should restart
-		if !process.AutoRestart {
+		if !process.AutoRestart || !process.isRunning() {
 			break
 		}
 
-		log.Infof("Restarting process %s in 5 seconds...", process.Name)
-		time.Sleep(5 * time.Second)
+		delay := c.processRestartDelay()
+		log.Infof("Restarting process %s in %s...", process.Name, delay)
+		time.Sleep(delay)
+		if !process.isRunning() {
+			break
+		}
+	}
+}
+
+func (c *ComputerUse) runProcessOnce(process *Process) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	cmd := exec.CommandContext(ctx, process.Command, process.Args...)
+	if len(process.Env) > 0 {
+		cmd.Env = os.Environ()
+		for key, value := range process.Env {
+			cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, value))
+		}
 	}
 
+	logFile, errFile := c.openProcessLogs(process, cmd)
+	defer closeProcessFile(process.Name, "log", logFile)
+	defer closeProcessFile(process.Name, "error", errFile)
+
 	process.mu.Lock()
-	process.running = false
+	process.ctx = ctx
+	process.cancel = cancel
+	process.cmd = cmd
 	process.mu.Unlock()
+
+	if err := cmd.Start(); err != nil {
+		cancel()
+		return fmt.Errorf("failed to start process: %w", err)
+	}
+
+	log.Infof("Process %s started with PID: %d", process.Name, cmd.Process.Pid)
+	err := cmd.Wait()
+	cancel()
+	return err
+}
+
+func (c *ComputerUse) openProcessLogs(process *Process, cmd *exec.Cmd) (processFile, processFile) {
+	var logFile, errFile processFile
+	if process.LogFile != "" {
+		file, err := openProcessFile(process.LogFile)
+		if err != nil {
+			log.Errorf("Failed to open log file for %s: %v", process.Name, err)
+		} else {
+			cmd.Stdout = file
+			logFile = file
+		}
+	}
+
+	if process.ErrFile != "" {
+		file, err := openProcessFile(process.ErrFile)
+		if err != nil {
+			log.Errorf("Failed to open error file for %s: %v", process.Name, err)
+		} else {
+			cmd.Stderr = file
+			errFile = file
+		}
+	}
+
+	return logFile, errFile
+}
+
+func closeProcessFile(processName, fileType string, file processFile) {
+	if file == nil {
+		return
+	}
+	if err := file.Close(); err != nil {
+		log.Errorf("Failed to close %s file for %s: %v", fileType, processName, err)
+	}
+}
+
+func (c *ComputerUse) processRestartDelay() time.Duration {
+	if c.restartDelay > 0 {
+		return c.restartDelay
+	}
+	return 5 * time.Second
+}
+
+func (process *Process) isRunning() bool {
+	process.mu.Lock()
+	defer process.mu.Unlock()
+	return process.running
+}
+
+func (c *ComputerUse) logOptionalReadiness(ctx context.Context, process *Process) {
+	if err := c.waitProcessReady(ctx, process); err != nil {
+		log.Warnf("Optional process %s is not ready: %v", process.Name, err)
+	}
+}
+
+func (c *ComputerUse) waitProcessReady(ctx context.Context, process *Process) error {
+	if process.Ready == nil {
+		return nil
+	}
+
+	timeout := process.ReadyTimeout
+	if timeout <= 0 {
+		timeout = 10 * time.Second
+	}
+	probe := process.ReadyName
+	if probe == "" {
+		probe = "ready"
+	}
+
+	readyCtx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	var lastErr error
+	for {
+		if err := process.Ready(readyCtx, process); err == nil {
+			return nil
+		} else {
+			lastErr = err
+		}
+
+		select {
+		case <-readyCtx.Done():
+			return fmt.Errorf("process %s readiness probe %s timed out after %s: %v", process.Name, probe, timeout, lastErr)
+		case <-time.After(100 * time.Millisecond):
+		}
+	}
+}
+
+func readyXvfb(display string) func(context.Context, *Process) error {
+	return func(ctx context.Context, _ *Process) error {
+		if path, err := exec.LookPath("xdpyinfo"); err == nil {
+			return runDisplayCommand(ctx, display, path, "-display", display)
+		}
+
+		socket, err := displaySocket(display)
+		if err != nil {
+			return err
+		}
+		if _, err := os.Stat(socket); err != nil {
+			return fmt.Errorf("X socket %s is not ready: %w", socket, err)
+		}
+		return nil
+	}
+}
+
+func readyXfce(display, user string) func(context.Context, *Process) error {
+	return func(ctx context.Context, _ *Process) error {
+		if path, err := exec.LookPath("xprop"); err == nil {
+			output, err := runDisplayCommandOutput(ctx, display, path, "-root", "_NET_SUPPORTING_WM_CHECK")
+			if err != nil {
+				return err
+			}
+			if strings.Contains(output, "not found") {
+				return fmt.Errorf("window manager root property is not ready")
+			}
+			return nil
+		}
+
+		args := []string{"-f", "xfce4-session|xfdesktop|xfwm4"}
+		if user != "" {
+			args = []string{"-u", user, "-f", "xfce4-session|xfdesktop|xfwm4"}
+		}
+		if err := exec.CommandContext(ctx, "pgrep", args...).Run(); err != nil {
+			return fmt.Errorf("xfce desktop process is not ready: %w", err)
+		}
+		return nil
+	}
+}
+
+func readyTCP(host, port string) func(context.Context, *Process) error {
+	return func(ctx context.Context, _ *Process) error {
+		dialer := net.Dialer{}
+		conn, err := dialer.DialContext(ctx, "tcp", net.JoinHostPort(host, port))
+		if err != nil {
+			return err
+		}
+		return conn.Close()
+	}
+}
+
+func readyHTTP(host, port string) func(context.Context, *Process) error {
+	return func(ctx context.Context, _ *Process) error {
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://"+net.JoinHostPort(host, port)+"/", nil)
+		if err != nil {
+			return err
+		}
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode >= http.StatusInternalServerError {
+			return fmt.Errorf("HTTP status %s", resp.Status)
+		}
+		return nil
+	}
+}
+
+func runDisplayCommand(ctx context.Context, display, command string, args ...string) error {
+	_, err := runDisplayCommandOutput(ctx, display, command, args...)
+	return err
+}
+
+func runDisplayCommandOutput(ctx context.Context, display, command string, args ...string) (string, error) {
+	cmd := exec.CommandContext(ctx, command, args...)
+	cmd.Env = append(os.Environ(), "DISPLAY="+display)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("%s failed: %w: %s", filepath.Base(command), err, strings.TrimSpace(string(output)))
+	}
+	return string(output), nil
+}
+
+func displaySocket(display string) (string, error) {
+	display = strings.TrimPrefix(display, ":")
+	display = strings.Split(display, ".")[0]
+	display = strings.Split(display, " ")[0]
+	n, err := strconv.Atoi(display)
+	if err != nil {
+		return "", fmt.Errorf("cannot derive X socket from DISPLAY=%q: %w", display, err)
+	}
+	return fmt.Sprintf("/tmp/.X11-unix/X%d", n), nil
 }
 
 func (c *ComputerUse) Stop() (*computeruse.Empty, error) {
