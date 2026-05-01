@@ -83,6 +83,37 @@ func TestStartAllProcessesReturnsRequiredReadinessError(t *testing.T) {
 	}
 }
 
+func TestStartAllProcessesStopsStartedProcessesOnRequiredReadinessFailure(t *testing.T) {
+	sleep := lookPath(t, "sleep")
+	c := &ComputerUse{processes: map[string]*Process{}}
+	c.processes["xvfb"] = readyTestProcess("xvfb", sleep, 100, true, func(_ context.Context, p *Process) error {
+		if !getProcessStatus(p).Running {
+			return fmt.Errorf("process is not running")
+		}
+		return nil
+	})
+	c.processes["xfce4"] = readyTestProcess("xfce4", sleep, 200, true, func(_ context.Context, p *Process) error {
+		if !getProcessStatus(p).Running {
+			return fmt.Errorf("process is not running")
+		}
+		return fmt.Errorf("desktop unavailable")
+	})
+	c.processes["xfce4"].ReadyTimeout = 250 * time.Millisecond
+	defer c.Stop()
+
+	err := c.startAllProcesses(context.Background())
+	if err == nil {
+		t.Fatal("startAllProcesses() error = nil, want required readiness error")
+	}
+
+	for _, process := range c.processes {
+		p := process
+		waitUntil(t, time.Second, func() bool {
+			return !getProcessStatus(p).Running
+		})
+	}
+}
+
 func TestStartAllProcessesDoesNotBlockOnOptionalReadinessFailure(t *testing.T) {
 	sleep := lookPath(t, "sleep")
 	c := &ComputerUse{processes: map[string]*Process{}}

@@ -362,14 +362,19 @@ func waitForSessionBus(address string, timeout time.Duration) error {
 func (c *ComputerUse) startAllProcesses(ctx context.Context) error {
 	// Sort processes by priority and start them
 	processes := c.getProcessesByPriority()
+	started := make([]*Process, 0, len(processes))
 
 	for _, process := range processes {
 		go c.startProcess(process)
+		started = append(started, process)
 		if !process.Required {
 			go c.logOptionalReadiness(ctx, process)
 			continue
 		}
 		if err := c.waitProcessReady(ctx, process); err != nil {
+			for i := len(started) - 1; i >= 0; i-- {
+				c.stopProcess(started[i])
+			}
 			return err
 		}
 	}
