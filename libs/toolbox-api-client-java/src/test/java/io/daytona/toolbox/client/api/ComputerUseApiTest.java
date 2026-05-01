@@ -20,6 +20,8 @@ import io.daytona.toolbox.client.model.AccessibilityNodesResponse;
 import io.daytona.toolbox.client.model.AccessibilitySetValueRequest;
 import io.daytona.toolbox.client.model.AccessibilityTreeResponse;
 import java.math.BigDecimal;
+import io.daytona.toolbox.client.model.BrowserCDPResponse;
+import io.daytona.toolbox.client.model.BrowserStatusResponse;
 import io.daytona.toolbox.client.model.ComputerUseStartResponse;
 import io.daytona.toolbox.client.model.ComputerUseStatusResponse;
 import io.daytona.toolbox.client.model.ComputerUseStopResponse;
@@ -160,6 +162,32 @@ public class ComputerUseApiTest {
         Integer pid = null;
         Integer maxDepth = null;
         AccessibilityTreeResponse response = api.getAccessibilityTree(scope, pid, maxDepth);
+        // TODO: test validations
+    }
+
+    /**
+     * Get browser CDP URL
+     *
+     * Lazily start managed Chromium and return a CDP WebSocket URL
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void getBrowserCDPTest() throws ApiException {
+        BrowserCDPResponse response = api.getBrowserCDP();
+        // TODO: test validations
+    }
+
+    /**
+     * Get browser status
+     *
+     * Get the managed Chromium process status
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void getBrowserStatusTest() throws ApiException {
+        BrowserStatusResponse response = api.getBrowserStatus();
         // TODO: test validations
     }
 
@@ -419,6 +447,19 @@ public class ComputerUseApiTest {
     public void startRecordingTest() throws ApiException {
         StartRecordingRequest request = null;
         Recording response = api.startRecording(request);
+        // TODO: test validations
+    }
+
+    /**
+     * Stop browser
+     *
+     * Stop the managed Chromium process
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void stopBrowserTest() throws ApiException {
+        Object response = api.stopBrowser();
         // TODO: test validations
     }
 

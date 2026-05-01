@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	commonproxy "github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/gin-gonic/gin"
 )
 
@@ -44,6 +45,10 @@ func RewriteBrowserCDPURL(localURL, externalBaseURL string) string {
 }
 
 func externalBaseURL(r *http.Request) string {
+	if base := firstHeader(r, commonproxy.DaytonaToolboxBaseURLHeader); base != "" {
+		return strings.TrimRight(base, "/")
+	}
+
 	host := firstHeader(r, "X-Forwarded-Host")
 	if host == "" {
 		host = r.Host
@@ -80,7 +85,7 @@ func rewriteBrowserCDPResponse(r *http.Request, response *BrowserCDPResponse) {
 	if response.ProxyPath == "" {
 		response.ProxyPath = BrowserProxyPath(response.LocalWebSocketDebuggerURL)
 	}
-	if response.WebSocketDebuggerURL == "" || strings.Contains(response.WebSocketDebuggerURL, "://127.0.0.1:") {
+	if response.WebSocketDebuggerURL == "" || isLocalBrowserCDPURL(response.WebSocketDebuggerURL) {
 		response.WebSocketDebuggerURL = RewriteBrowserCDPURL(response.LocalWebSocketDebuggerURL, externalBaseURL(r))
 	}
 }
@@ -92,8 +97,21 @@ func rewriteBrowserStatusResponse(r *http.Request, response *BrowserStatusRespon
 	if response.ProxyPath == "" {
 		response.ProxyPath = BrowserProxyPath(response.LocalWebSocketDebuggerURL)
 	}
-	if response.WebSocketDebuggerURL == "" || strings.Contains(response.WebSocketDebuggerURL, "://127.0.0.1:") {
+	if response.WebSocketDebuggerURL == "" || isLocalBrowserCDPURL(response.WebSocketDebuggerURL) {
 		response.WebSocketDebuggerURL = RewriteBrowserCDPURL(response.LocalWebSocketDebuggerURL, externalBaseURL(r))
+	}
+}
+
+func isLocalBrowserCDPURL(value string) bool {
+	u, err := url.Parse(value)
+	if err != nil {
+		return false
+	}
+	switch u.Hostname() {
+	case "127.0.0.1", "localhost", "::1":
+		return true
+	default:
+		return false
 	}
 }
 

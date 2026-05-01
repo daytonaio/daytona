@@ -23,6 +23,8 @@ lib/daytona_toolbox_api_client/models/accessibility_node_request.rb
 lib/daytona_toolbox_api_client/models/accessibility_nodes_response.rb
 lib/daytona_toolbox_api_client/models/accessibility_set_value_request.rb
 lib/daytona_toolbox_api_client/models/accessibility_tree_response.rb
+lib/daytona_toolbox_api_client/models/browser_cdp_response.rb
+lib/daytona_toolbox_api_client/models/browser_status_response.rb
 lib/daytona_toolbox_api_client/models/chart.rb
 lib/daytona_toolbox_api_client/models/chart_element.rb
 lib/daytona_toolbox_api_client/models/code_run_artifacts.rb
