@@ -993,6 +993,37 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/keyboard/hotk
 
 Common aliases like `Return` → `enter`, `control` → `ctrl`, `command` / `meta` / `win` → `cmd`, and `option` → `alt` are normalized automatically. Unsupported or malformed inputs return an error, sometimes with a suggested alternative.
 
+## Accessibility wait
+
+Use `/computeruse/a11y/wait` after an accessibility action when the desktop needs time to publish the next UI state. The wait loop runs inside the computer-use plugin and returns the node snapshot that satisfied the condition.
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/a11y/node/focus' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{"id":":1.42:/org/a11y/atspi/accessible/12"}'
+
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/a11y/node/invoke' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{"id":":1.42:/org/a11y/atspi/accessible/12","action":"click"}'
+
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/a11y/wait' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "condition": "exists",
+  "query": {
+    "scope": "all",
+    "role": "alert",
+    "name": "Saved",
+    "nameMatch": "substring"
+  },
+  "timeoutMs": 5000,
+  "pollIntervalMs": 100
+}'
+```
+
 ## Screenshot operations
 
 ### Take full screen

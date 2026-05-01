@@ -177,6 +177,38 @@ func WrapFindAccessibilityNodesHandler(fn func(*FindAccessibilityNodesRequest) (
 	}
 }
 
+// WaitAccessibility godoc
+//
+//	@Summary		Wait for accessibility readiness
+//	@Description	Poll AT-SPI inside the computer-use plugin until an accessibility condition succeeds or times out.
+//	@Tags			computer-use
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		AccessibilityWaitRequest	true	"Wait request"
+//	@Success		200		{object}	AccessibilityWaitResponse
+//	@Failure		400		{object}	map[string]string
+//	@Failure		404		{object}	map[string]string
+//	@Failure		500		{object}	map[string]string
+//	@Failure		503		{object}	map[string]string
+//	@Router			/computeruse/a11y/wait [post]
+//
+//	@id				WaitAccessibility
+func WrapWaitAccessibilityHandler(fn func(*AccessibilityWaitRequest) (*AccessibilityWaitResponse, error)) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req AccessibilityWaitRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			writeA11yInvalidRequest(c, err.Error())
+			return
+		}
+		response, err := fn(&req)
+		if err != nil {
+			writeA11yError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, response)
+	}
+}
+
 // FocusAccessibilityNode godoc
 //
 //	@Summary		Focus an accessibility node

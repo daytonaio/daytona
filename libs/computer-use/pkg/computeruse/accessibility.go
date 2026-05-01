@@ -732,6 +732,186 @@ func findWalk(conn *dbus.Conn, sender string, path dbus.ObjectPath, match func(*
 }
 
 // ---------------------------------------------------------------------------
+// Wait.
+// ---------------------------------------------------------------------------
+
+const (
+	waitDefaultTimeout      = 5 * time.Second
+	waitMaxTimeout          = 30 * time.Second
+	waitDefaultPollInterval = 100 * time.Millisecond
+)
+
+func (c *ComputerUse) findWireAccessibilityNodes(req *computeruse.FindAccessibilityNodesRequest) ([]*A11yNode, bool, error) {
+	if req == nil {
+		return nil, false, fmt.Errorf("%w: query is required", ErrInvalidRequest)
+	}
+	scope, err := parseWireScope(req.Scope)
+	if err != nil {
+		return nil, false, err
+	}
+	filter := A11yFilter{
+		Role:      req.Role,
+		Name:      req.Name,
+		NameMatch: req.NameMatch,
+		States:    req.States,
+	}
+	if c.findA11yNodes != nil {
+		return c.findA11yNodes(scope, req.PID, filter, req.Limit)
+	}
+	return c.findAccessibilityNodes(scope, req.PID, filter, req.Limit)
+}
+
+func (c *ComputerUse) fetchAccessibilityNode(id string) (*A11yNode, error) {
+	if c.fetchA11yNode != nil {
+		return c.fetchA11yNode(id)
+	}
+	sender, path, err := parseNodeID(id)
+	if err != nil {
+		return nil, err
+	}
+	conn, err := c.connectA11y()
+	if err != nil {
+		return nil, err
+	}
+	node, _, err := fetchNodeMeta(conn, sender, path)
+	return node, err
+}
+
+func waitDurations(timeoutMs, pollIntervalMs int) (time.Duration, time.Duration) {
+	timeout := time.Duration(timeoutMs) * time.Millisecond
+	if timeout <= 0 {
+		timeout = waitDefaultTimeout
+	}
+	if timeout > waitMaxTimeout {
+		timeout = waitMaxTimeout
+	}
+	interval := time.Duration(pollIntervalMs) * time.Millisecond
+	if interval <= 0 {
+		interval = waitDefaultPollInterval
+	}
+	return timeout, interval
+}
+
+func elapsedMs(start time.Time) int64 {
+	return time.Since(start).Milliseconds()
+}
+
+func validateWaitRequest(req *computeruse.AccessibilityWaitRequest) error {
+	switch strings.ToLower(strings.TrimSpace(req.Condition)) {
+	case "exists", "gone":
+		if req.Query == nil {
+			return fmt.Errorf("%w: query is required for %s", ErrInvalidRequest, req.Condition)
+		}
+	case "state", "not_state":
+		hasQuery := req.Query != nil
+		hasID := req.ID != ""
+		if hasQuery == hasID {
+			return fmt.Errorf("%w: exactly one of query or id is required for %s", ErrInvalidRequest, req.Condition)
+		}
+		if len(req.States) == 0 {
+			return fmt.Errorf("%w: states are required for %s", ErrInvalidRequest, req.Condition)
+		}
+	default:
+		return fmt.Errorf("%w: unknown wait condition %q", ErrInvalidRequest, req.Condition)
+	}
+	return nil
+}
+
+func hasAllStates(nodeStates, want []string) bool {
+	for _, state := range want {
+		if !containsStr(nodeStates, state) {
+			return false
+		}
+	}
+	return true
+}
+
+func hasNoStates(nodeStates, forbidden []string) bool {
+	for _, state := range forbidden {
+		if containsStr(nodeStates, state) {
+			return false
+		}
+	}
+	return true
+}
+
+func matchingStateNodes(nodes []*A11yNode, states []string, forbidden bool) []*A11yNode {
+	out := make([]*A11yNode, 0, len(nodes))
+	for _, node := range nodes {
+		if (!forbidden && hasAllStates(node.States, states)) || (forbidden && hasNoStates(node.States, states)) {
+			out = append(out, node)
+		}
+	}
+	return out
+}
+
+func (c *ComputerUse) waitStateCandidates(req *computeruse.AccessibilityWaitRequest) ([]*A11yNode, bool, error) {
+	if req.Query != nil {
+		return c.findWireAccessibilityNodes(req.Query)
+	}
+	node, err := c.fetchAccessibilityNode(req.ID)
+	if err != nil {
+		return nil, false, err
+	}
+	return []*A11yNode{node}, false, nil
+}
+
+func (c *ComputerUse) evalAccessibilityWait(req *computeruse.AccessibilityWaitRequest) ([]*A11yNode, bool, bool, error) {
+	condition := strings.ToLower(strings.TrimSpace(req.Condition))
+	switch condition {
+	case "exists":
+		matches, truncated, err := c.findWireAccessibilityNodes(req.Query)
+		return matches, truncated, len(matches) > 0, err
+	case "gone":
+		matches, truncated, err := c.findWireAccessibilityNodes(req.Query)
+		return nil, truncated, len(matches) == 0, err
+	case "state", "not_state":
+		candidates, truncated, err := c.waitStateCandidates(req)
+		if err != nil {
+			return nil, false, false, err
+		}
+		matches := matchingStateNodes(candidates, req.States, condition == "not_state")
+		return matches, truncated, len(matches) > 0, nil
+	default:
+		return nil, false, false, fmt.Errorf("%w: unknown wait condition %q", ErrInvalidRequest, req.Condition)
+	}
+}
+
+func (c *ComputerUse) WaitAccessibility(req *computeruse.AccessibilityWaitRequest) (*computeruse.AccessibilityWaitResponse, error) {
+	if req == nil {
+		return nil, fmt.Errorf("%w: request is required", ErrInvalidRequest)
+	}
+	if err := validateWaitRequest(req); err != nil {
+		return nil, err
+	}
+	timeout, interval := waitDurations(req.TimeoutMs, req.PollIntervalMs)
+	start := time.Now()
+	deadline := start.Add(timeout)
+
+	for {
+		matches, truncated, matched, err := c.evalAccessibilityWait(req)
+		if err != nil {
+			return nil, err
+		}
+		if matched {
+			return &computeruse.AccessibilityWaitResponse{
+				Matched:   true,
+				ElapsedMs: elapsedMs(start),
+				Matches:   toWireNodes(matches),
+				Truncated: truncated,
+			}, nil
+		}
+		if !time.Now().Before(deadline) {
+			return &computeruse.AccessibilityWaitResponse{
+				TimedOut:  true,
+				ElapsedMs: elapsedMs(start),
+			}, nil
+		}
+		time.Sleep(min(interval, time.Until(deadline)))
+	}
+}
+
+// ---------------------------------------------------------------------------
 // Filter logic (pure, unit-testable).
 // ---------------------------------------------------------------------------
 

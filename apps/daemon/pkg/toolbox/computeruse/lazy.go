@@ -255,6 +255,14 @@ func (l *LazyComputerUse) FindAccessibilityNodes(req *FindAccessibilityNodesRequ
 	return impl.FindAccessibilityNodes(req)
 }
 
+func (l *LazyComputerUse) WaitAccessibility(req *AccessibilityWaitRequest) (*AccessibilityWaitResponse, error) {
+	impl, err := l.get()
+	if err != nil {
+		return nil, err
+	}
+	return impl.WaitAccessibility(req)
+}
+
 func (l *LazyComputerUse) FocusAccessibilityNode(req *AccessibilityNodeRequest) (*Empty, error) {
 	impl, err := l.get()
 	if err != nil {

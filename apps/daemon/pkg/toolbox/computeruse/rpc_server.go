@@ -211,6 +211,15 @@ func (m *ComputerUseRPCServer) FindAccessibilityNodes(arg *FindAccessibilityNode
 	return nil
 }
 
+func (m *ComputerUseRPCServer) WaitAccessibility(arg *AccessibilityWaitRequest, resp *AccessibilityWaitResponse) error {
+	response, err := m.Impl.WaitAccessibility(arg)
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
+}
+
 func (m *ComputerUseRPCServer) FocusAccessibilityNode(arg *AccessibilityNodeRequest, resp *Empty) error {
 	_, err := m.Impl.FocusAccessibilityNode(arg)
 	return err

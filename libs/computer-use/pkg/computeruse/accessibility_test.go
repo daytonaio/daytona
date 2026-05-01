@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	wire "github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 	"github.com/godbus/dbus/v5"
 )
 
@@ -317,6 +318,236 @@ func TestParseWireScope(t *testing.T) {
 				t.Errorf("parseWireScope(%q) = %q, want %q", tc.in, got, tc.want)
 			}
 		})
+	}
+}
+
+func TestWaitAccessibilityExistsPollsUntilMatch(t *testing.T) {
+	calls := 0
+	c := &ComputerUse{
+		findA11yNodes: func(scope A11yScope, pid int, filter A11yFilter, limit int) ([]*A11yNode, bool, error) {
+			calls++
+			if scope != A11yScopeAll || filter.Role != "push button" {
+				t.Fatalf("unexpected find args: scope=%q filter=%+v", scope, filter)
+			}
+			if calls == 1 {
+				return nil, false, nil
+			}
+			return []*A11yNode{{
+				ID:     ":1.42:/org/a11y/atspi/accessible/12",
+				Role:   "push button",
+				Name:   "OK",
+				States: []string{"enabled", "visible"},
+			}}, false, nil
+		},
+	}
+
+	resp, err := c.WaitAccessibility(&wire.AccessibilityWaitRequest{
+		Condition:      "exists",
+		Query:          &wire.FindAccessibilityNodesRequest{Scope: "all", Role: "push button"},
+		TimeoutMs:      100,
+		PollIntervalMs: 1,
+	})
+	if err != nil {
+		t.Fatalf("WaitAccessibility returned error: %v", err)
+	}
+	if calls != 2 {
+		t.Fatalf("find calls = %d, want 2", calls)
+	}
+	if !resp.Matched || resp.TimedOut || len(resp.Matches) != 1 || resp.Matches[0].Name != "OK" {
+		t.Fatalf("unexpected response: %+v", resp)
+	}
+}
+
+func TestWaitAccessibilityTimeout(t *testing.T) {
+	c := &ComputerUse{
+		findA11yNodes: func(A11yScope, int, A11yFilter, int) ([]*A11yNode, bool, error) {
+			return nil, false, nil
+		},
+	}
+
+	resp, err := c.WaitAccessibility(&wire.AccessibilityWaitRequest{
+		Condition:      "exists",
+		Query:          &wire.FindAccessibilityNodesRequest{Scope: "all", Name: "Ready"},
+		TimeoutMs:      1,
+		PollIntervalMs: 1,
+	})
+	if err != nil {
+		t.Fatalf("WaitAccessibility returned error: %v", err)
+	}
+	if resp.Matched || !resp.TimedOut {
+		t.Fatalf("unexpected response: %+v", resp)
+	}
+}
+
+func TestWaitAccessibilityGoneMatchesEmptyResult(t *testing.T) {
+	calls := 0
+	c := &ComputerUse{
+		findA11yNodes: func(A11yScope, int, A11yFilter, int) ([]*A11yNode, bool, error) {
+			calls++
+			if calls == 1 {
+				return []*A11yNode{{ID: ":1.42:/node", Name: "Toast"}}, false, nil
+			}
+			return nil, false, nil
+		},
+	}
+
+	resp, err := c.WaitAccessibility(&wire.AccessibilityWaitRequest{
+		Condition:      "gone",
+		Query:          &wire.FindAccessibilityNodesRequest{Scope: "all", Name: "Toast"},
+		TimeoutMs:      100,
+		PollIntervalMs: 1,
+	})
+	if err != nil {
+		t.Fatalf("WaitAccessibility returned error: %v", err)
+	}
+	if calls != 2 || !resp.Matched || len(resp.Matches) != 0 {
+		t.Fatalf("calls=%d response=%+v", calls, resp)
+	}
+}
+
+func TestWaitAccessibilityValidation(t *testing.T) {
+	c := &ComputerUse{}
+	cases := []struct {
+		name string
+		req  *wire.AccessibilityWaitRequest
+	}{
+		{
+			name: "invalid condition",
+			req:  &wire.AccessibilityWaitRequest{Condition: "visible"},
+		},
+		{
+			name: "exists missing query",
+			req:  &wire.AccessibilityWaitRequest{Condition: "exists"},
+		},
+		{
+			name: "gone missing query",
+			req:  &wire.AccessibilityWaitRequest{Condition: "gone"},
+		},
+		{
+			name: "state missing query and id",
+			req:  &wire.AccessibilityWaitRequest{Condition: "state", States: []string{"focused"}},
+		},
+		{
+			name: "state has query and id",
+			req: &wire.AccessibilityWaitRequest{
+				Condition: "state",
+				Query:     &wire.FindAccessibilityNodesRequest{Scope: "all"},
+				ID:        ":1.42:/org/a11y/atspi/accessible/12",
+				States:    []string{"focused"},
+			},
+		},
+		{
+			name: "state missing states",
+			req:  &wire.AccessibilityWaitRequest{Condition: "state", ID: ":1.42:/org/a11y/atspi/accessible/12"},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := c.WaitAccessibility(tc.req)
+			if !errors.Is(err, ErrInvalidRequest) {
+				t.Fatalf("error = %v, want ErrInvalidRequest", err)
+			}
+		})
+	}
+}
+
+func TestWaitAccessibilityStateByQuery(t *testing.T) {
+	calls := 0
+	c := &ComputerUse{
+		findA11yNodes: func(A11yScope, int, A11yFilter, int) ([]*A11yNode, bool, error) {
+			calls++
+			states := []string{"visible"}
+			if calls > 1 {
+				states = []string{"visible", "focused", "enabled"}
+			}
+			return []*A11yNode{{ID: ":1.42:/node", Name: "Search", States: states}}, false, nil
+		},
+	}
+
+	resp, err := c.WaitAccessibility(&wire.AccessibilityWaitRequest{
+		Condition:      "state",
+		Query:          &wire.FindAccessibilityNodesRequest{Scope: "all", Name: "Search"},
+		States:         []string{"focused", "enabled"},
+		TimeoutMs:      100,
+		PollIntervalMs: 1,
+	})
+	if err != nil {
+		t.Fatalf("WaitAccessibility returned error: %v", err)
+	}
+	if calls != 2 || !resp.Matched || len(resp.Matches) != 1 || resp.Matches[0].Name != "Search" {
+		t.Fatalf("calls=%d response=%+v", calls, resp)
+	}
+}
+
+func TestWaitAccessibilityStateByID(t *testing.T) {
+	calls := 0
+	c := &ComputerUse{
+		fetchA11yNode: func(id string) (*A11yNode, error) {
+			calls++
+			if id != ":1.42:/node" {
+				t.Fatalf("id = %q, want :1.42:/node", id)
+			}
+			states := []string{"visible"}
+			if calls > 1 {
+				states = []string{"visible", "focused"}
+			}
+			return &A11yNode{ID: id, Name: "Search", States: states}, nil
+		},
+	}
+
+	resp, err := c.WaitAccessibility(&wire.AccessibilityWaitRequest{
+		Condition:      "state",
+		ID:             ":1.42:/node",
+		States:         []string{"focused"},
+		TimeoutMs:      100,
+		PollIntervalMs: 1,
+	})
+	if err != nil {
+		t.Fatalf("WaitAccessibility returned error: %v", err)
+	}
+	if calls != 2 || !resp.Matched || len(resp.Matches) != 1 || resp.Matches[0].ID != ":1.42:/node" {
+		t.Fatalf("calls=%d response=%+v", calls, resp)
+	}
+}
+
+func TestWaitAccessibilityNotStateRequiresNoForbiddenStates(t *testing.T) {
+	calls := 0
+	c := &ComputerUse{
+		fetchA11yNode: func(id string) (*A11yNode, error) {
+			calls++
+			states := []string{"visible", "busy"}
+			if calls > 1 {
+				states = []string{"visible"}
+			}
+			return &A11yNode{ID: id, Name: "Save", States: states}, nil
+		},
+	}
+
+	resp, err := c.WaitAccessibility(&wire.AccessibilityWaitRequest{
+		Condition:      "not_state",
+		ID:             ":1.42:/node",
+		States:         []string{"busy", "focused"},
+		TimeoutMs:      100,
+		PollIntervalMs: 1,
+	})
+	if err != nil {
+		t.Fatalf("WaitAccessibility returned error: %v", err)
+	}
+	if calls != 2 || !resp.Matched || len(resp.Matches) != 1 || resp.Matches[0].Name != "Save" {
+		t.Fatalf("calls=%d response=%+v", calls, resp)
+	}
+}
+
+func TestWaitAccessibilityBadIDError(t *testing.T) {
+	c := &ComputerUse{}
+	_, err := c.WaitAccessibility(&wire.AccessibilityWaitRequest{
+		Condition: "state",
+		ID:        "not-a-node-id",
+		States:    []string{"focused"},
+	})
+	if !errors.Is(err, ErrInvalidRequest) {
+		t.Fatalf("error = %v, want ErrInvalidRequest", err)
 	}
 }
 

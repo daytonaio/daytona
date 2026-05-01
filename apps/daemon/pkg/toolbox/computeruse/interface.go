@@ -50,6 +50,7 @@ type IComputerUse interface {
 	// Accessibility (AT-SPI) methods
 	GetAccessibilityTree(*GetAccessibilityTreeRequest) (*AccessibilityTreeResponse, error)
 	FindAccessibilityNodes(*FindAccessibilityNodesRequest) (*AccessibilityNodesResponse, error)
+	WaitAccessibility(*AccessibilityWaitRequest) (*AccessibilityWaitResponse, error)
 	FocusAccessibilityNode(*AccessibilityNodeRequest) (*Empty, error)
 	InvokeAccessibilityNode(*AccessibilityInvokeRequest) (*Empty, error)
 	SetAccessibilityNodeValue(*AccessibilitySetValueRequest) (*Empty, error)
@@ -450,6 +451,23 @@ type AccessibilityNodesResponse struct {
 	Matches   []AccessibilityNode `json:"matches"`
 	Truncated bool                `json:"truncated"`
 } //	@name	AccessibilityNodesResponse
+
+type AccessibilityWaitRequest struct {
+	Condition      string                         `json:"condition"`
+	Query          *FindAccessibilityNodesRequest `json:"query,omitempty"`
+	ID             string                         `json:"id,omitempty"`
+	States         []string                       `json:"states,omitempty"`
+	TimeoutMs      int                            `json:"timeoutMs,omitempty"`
+	PollIntervalMs int                            `json:"pollIntervalMs,omitempty"`
+} //	@name	AccessibilityWaitRequest
+
+type AccessibilityWaitResponse struct {
+	Matched   bool                `json:"matched"`
+	TimedOut  bool                `json:"timedOut"`
+	ElapsedMs int64               `json:"elapsedMs"`
+	Matches   []AccessibilityNode `json:"matches"`
+	Truncated bool                `json:"truncated,omitempty"`
+} //	@name	AccessibilityWaitResponse
 
 type AccessibilityNodeRequest struct {
 	ID string `json:"id" binding:"required"`
