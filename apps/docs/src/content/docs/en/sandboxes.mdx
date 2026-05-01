@@ -882,7 +882,7 @@ Daytona provides methods to link sandboxes to existing sandboxes. A linked sandb
 Create the parent sandbox first, then create one or more children whose create request references the parent's sandbox ID. The API records the relationship on the child sandbox as the linked sandbox ID. Omitting the linked sandbox parameter yields an unlinked sandbox.
 
 - **Lifecycle**: Linked sandboxes are always ephemeral, and cannot be persisted or resumed after stop. The [auto-delete interval](#auto-delete-interval) must be exactly `0` on create; this is enforced, not merely a default. Set the [auto-stop interval](#auto-stop-interval) to the idle period in minutes after which the child sandbox stops. Once stopped, linked children are auto-deleted. Deleting the parent deletes all of its linked children (cascade). One parent may have many linked children (1:N).
-- **Networking**: TCP connection from the parent sandbox to another sandbox using that sandbox's ID as the host. The traffic stays on the internal link network on the runner. For example: `telnet DEVICE_SANDBOX_ID 5555` reaches port `5555` on the linked child sandbox.
+- **Networking**: TCP connection established from the parent sandbox to the child sandbox using the child sandbox's ID as the host. The traffic stays on the internal link network on the runner. For example: `telnet DEVICE_SANDBOX_ID 5555` reaches port `5555` on the linked child sandbox.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -1045,24 +1045,14 @@ Daytona provides methods to create Android sandboxes. Android sandboxes combine 
 
 The user code runs in the base sandbox, and the base sandbox talks to each device over the link network. This layout avoids nested virtualization while providing an isolated emulator surface per device sandbox.
 
-- **Region target**: Android workloads require the `android` target region on every sandbox in the setup (base and each device). Set `DAYTONA_TARGET=android` in the environment, or pass the `target="android"` parameter to the Daytona client
-- **Snapshots**: Base: `android-base`. Devices (**x86_64**, **AOSP**). The number corresponds to Android SDK levels / OS versions:
+- **Region target**: Android workloads require the `android` target region on every sandbox in the setup (base and devices). Set `DAYTONA_TARGET=android` in the environment, or pass the `android` target parameter
+
+- **Snapshots**: Base: `android-base`. Devices: **x86_64**, **AOSP**. 
+
+  The number corresponds to Android SDK levels / OS versions:
 
   `android-device-12-aosp`, `android-device-13-aosp`, `android-device-14-aosp`, `android-device-15-aosp`, `android-device-16-aosp`
-- **`adb` from the base**: After the device sandbox is started, connect from the base using the device sandbox ID and port `5555` (for example: `adb connect DEVICE_SANDBOX_ID:5555`). The traffic uses the same link-network described in [linked sandboxes](#linked-sandboxes)
-
-**SSH port forwarding**
-
-For connecting tools like Android Studio from your laptop, tunnel through the base sandbox, not the device. In the following snippet, the device appears as `localhost:5555` on your machine.
-
-```bash
-ssh -L 5555:DEVICE_SANDBOX_ID:5555 SSH_ACCESS_TOKEN@ssh.app.daytona.io
-```
-
-**Customization rules**
-
-- **Custom images**: Build and register custom base snapshots using the same Dockerfile-based flow as other sandboxes, with two requirements: the snapshot must be built in the `android` region and use the `android` class
-- **Custom device snapshots**: Currently not supported, available on request. Device images are built by Daytona from a specification you provide by contacting [support@daytona.io](mailto:support@daytona.io).
+- **adb from the base**: After the device sandbox is started, connect from the base using the device sandbox ID and port `5555` (for example: `adb connect DEVICE_SANDBOX_ID:5555`). The traffic uses the same link-network as described in [linked sandboxes](#linked-sandboxes)
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -1211,6 +1201,19 @@ curl 'https://app.daytona.io/api/sandbox' \
 
 </TabItem>
 </Tabs>
+
+##### SSH port forwarding
+
+For connecting tools like Android Studio from your laptop, tunnel through the base sandbox, not the device. In the following snippet, the device appears as `localhost:5555` on your machine.
+
+```bash
+ssh -L 5555:DEVICE_SANDBOX_ID:5555 SSH_ACCESS_TOKEN@ssh.app.daytona.io
+```
+
+##### Customization rules
+
+- **Custom images**: Build and register custom base snapshots using the same Dockerfile-based flow as other sandboxes, with two requirements: the snapshot must be built in the `android` region and use the `android` class
+- **Custom device snapshots**: Currently not supported, available on request. Device images are built by Daytona from a specification you provide by contacting [support@daytona.io](mailto:support@daytona.io).
 
 ## Start Sandboxes
 
