@@ -168,3 +168,38 @@ func TestNewProxyRequestHandler_PreservesPathEncoding(t *testing.T) {
 		})
 	}
 }
+
+func TestNewProxyRequestHandler_ExtraHeadersOverrideClientHeaders(t *testing.T) {
+	var gotHeader string
+	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotHeader = r.Header.Get("X-Proxy-Owned")
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer backend.Close()
+
+	backendURL, _ := url.Parse(backend.URL)
+	getTarget := func(ctx *gin.Context) (*url.URL, map[string]string, error) {
+		return backendURL, map[string]string{"X-Proxy-Owned": "trusted"}, nil
+	}
+
+	router := gin.New()
+	router.GET("/*path", proxy.NewProxyRequestHandler(getTarget, nil))
+	proxyServer := httptest.NewServer(router)
+	defer proxyServer.Close()
+
+	req, err := http.NewRequest(http.MethodGet, proxyServer.URL+"/test", nil)
+	if err != nil {
+		t.Fatalf("failed to create request: %v", err)
+	}
+	req.Header.Set("X-Proxy-Owned", "client")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("proxy request failed: %v", err)
+	}
+	resp.Body.Close()
+
+	if gotHeader != "trusted" {
+		t.Fatalf("backend header = %q, want %q", gotHeader, "trusted")
+	}
+}

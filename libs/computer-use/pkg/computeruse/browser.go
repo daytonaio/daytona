@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
 package computeruse
@@ -6,11 +6,13 @@ package computeruse
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -19,7 +21,6 @@ import (
 )
 
 const (
-	defaultBrowserCDPPort = 9222
 	defaultBrowserTimeout = 15 * time.Second
 	defaultBrowserPoll    = 200 * time.Millisecond
 )
@@ -29,6 +30,7 @@ type browserManager struct {
 	cmd          *exec.Cmd
 	done         chan error
 	port         int
+	dynamicPort  bool
 	profileDir   string
 	binary       string
 	localCDPURL  string
@@ -64,8 +66,10 @@ func (c *ComputerUse) ensureBrowserManager() (*browserManager, error) {
 		return nil, err
 	}
 
+	port, dynamicPort := browserPort()
 	c.browser = &browserManager{
-		port:         browserPort(),
+		port:         port,
+		dynamicPort:  dynamicPort,
 		profileDir:   filepath.Join(configDir, "browser-profile"),
 		binary:       binary,
 		httpClient:   &http.Client{Timeout: 2 * time.Second},
@@ -105,13 +109,13 @@ func locateChromium() (string, error) {
 	return "", fmt.Errorf("chromium binary not found")
 }
 
-func browserPort() int {
+func browserPort() (int, bool) {
 	if raw := os.Getenv("DAYTONA_BROWSER_CDP_PORT"); raw != "" {
 		if port, err := strconv.Atoi(raw); err == nil && port > 0 {
-			return port
+			return port, false
 		}
 	}
-	return defaultBrowserCDPPort
+	return 0, true
 }
 
 func desktopEnv(homeDir string) map[string]string {
@@ -164,14 +168,18 @@ func (b *browserManager) status(externalBaseURL string) *computeruse.BrowserStat
 	}
 
 	response := &computeruse.BrowserStatusResponse{
-		Status:                    status,
-		Running:                   running,
-		Pid:                       pid,
-		Port:                      b.port,
-		LocalWebSocketDebuggerURL: b.localCDPURL,
-		ProxyPath:                 computeruse.BrowserProxyPath(b.localCDPURL),
+		Status:  status,
+		Running: running,
+		Pid:     pid,
+		Port:    b.port,
 	}
-	response.WebSocketDebuggerURL = computeruse.RewriteBrowserCDPURL(b.localCDPURL, externalBaseURL)
+	if running && b.localCDPURL != "" {
+		response.LocalWebSocketDebuggerURL = b.localCDPURL
+		response.ProxyPath = computeruse.BrowserProxyPath(b.localCDPURL)
+		response.WebSocketDebuggerURL = computeruse.RewriteBrowserCDPURL(b.localCDPURL, externalBaseURL)
+	} else {
+		b.localCDPURL = ""
+	}
 	return response
 }
 
@@ -183,9 +191,17 @@ func (b *browserManager) stop() {
 
 func (b *browserManager) startLocked() error {
 	b.stopLocked()
+	if b.dynamicPort {
+		b.port = 0
+	} else if err := ensurePortAvailable(b.port); err != nil {
+		return err
+	}
 
 	if err := os.MkdirAll(b.profileDir, 0755); err != nil {
 		return fmt.Errorf("failed to create browser profile directory: %w", err)
+	}
+	if b.dynamicPort {
+		_ = os.Remove(filepath.Join(b.profileDir, "DevToolsActivePort"))
 	}
 
 	cmd := exec.Command(b.binary, b.args()...)
@@ -262,6 +278,14 @@ func (b *browserManager) waitForReady(done <-chan error) (string, error) {
 }
 
 func (b *browserManager) fetchCDPURL() (string, error) {
+	if b.port == 0 {
+		port, err := readDevToolsActivePort(b.profileDir)
+		if err != nil {
+			return "", err
+		}
+		b.port = port
+	}
+
 	resp, err := b.httpClient.Get("http://127.0.0.1:" + strconv.Itoa(b.port) + "/json/version")
 	if err != nil {
 		return "", err
@@ -280,6 +304,32 @@ func (b *browserManager) fetchCDPURL() (string, error) {
 		return "", fmt.Errorf("CDP version response did not include webSocketDebuggerUrl")
 	}
 	return version.WebSocketDebuggerURL, nil
+}
+
+func readDevToolsActivePort(profileDir string) (int, error) {
+	content, err := os.ReadFile(filepath.Join(profileDir, "DevToolsActivePort"))
+	if err != nil {
+		return 0, err
+	}
+
+	lines := strings.Split(strings.TrimSpace(string(content)), "\n")
+	if len(lines) == 0 || strings.TrimSpace(lines[0]) == "" {
+		return 0, fmt.Errorf("DevToolsActivePort did not include a port")
+	}
+
+	port, err := strconv.Atoi(strings.TrimSpace(lines[0]))
+	if err != nil || port <= 0 {
+		return 0, fmt.Errorf("invalid DevToolsActivePort port %q", strings.TrimSpace(lines[0]))
+	}
+	return port, nil
+}
+
+func ensurePortAvailable(port int) error {
+	listener, err := net.Listen("tcp", "127.0.0.1:"+strconv.Itoa(port))
+	if err != nil {
+		return fmt.Errorf("browser CDP port %d is unavailable: %w", port, err)
+	}
+	return listener.Close()
 }
 
 func (b *browserManager) response(externalBaseURL string) *computeruse.BrowserCDPResponse {

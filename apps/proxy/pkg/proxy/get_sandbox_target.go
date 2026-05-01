@@ -14,6 +14,7 @@ import (
 	"time"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/daytonaio/common-go/pkg/utils"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/gin-gonic/gin"
@@ -115,10 +116,29 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 		return nil, nil, fmt.Errorf("failed to parse target URL: %w", err)
 	}
 
-	return target, map[string]string{
+	headers := map[string]string{
 		"X-Daytona-Authorization": fmt.Sprintf("Bearer %s", runnerInfo.ApiKey),
 		"X-Forwarded-Host":        ctx.Request.Host,
-	}, nil
+	}
+	if ctx.GetBool(IS_TOOLBOX_REQUEST_KEY) {
+		for key, value := range toolboxForwardedHeaders(p.config.ProxyProtocol, ctx.Request.Host, sandboxId) {
+			headers[key] = value
+		}
+	}
+
+	return target, headers, nil
+}
+
+func toolboxForwardedHeaders(protocol, host, sandboxId string) map[string]string {
+	return map[string]string{
+		common_proxy.DaytonaToolboxBaseURLHeader: toolboxBaseURL(protocol, host, sandboxId),
+		"X-Forwarded-Proto":                      protocol,
+		"X-Forwarded-Prefix":                     fmt.Sprintf("/toolbox/%s", sandboxId),
+	}
+}
+
+func toolboxBaseURL(protocol, host, sandboxId string) string {
+	return fmt.Sprintf("%s://%s/toolbox/%s", protocol, host, sandboxId)
 }
 
 func (p *Proxy) getSandboxRunnerInfo(ctx context.Context, sandboxId string) (*RunnerInfo, error) {

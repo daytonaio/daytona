@@ -483,6 +483,120 @@ module DaytonaToolboxApiClient
       return data, status_code, headers
     end
 
+    # Get browser CDP URL
+    # Lazily start managed Chromium and return a CDP WebSocket URL
+    # @param [Hash] opts the optional parameters
+    # @return [BrowserCDPResponse]
+    def get_browser_cdp(opts = {})
+      data, _status_code, _headers = get_browser_cdp_with_http_info(opts)
+      data
+    end
+
+    # Get browser CDP URL
+    # Lazily start managed Chromium and return a CDP WebSocket URL
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(BrowserCDPResponse, Integer, Hash)>] BrowserCDPResponse data, response status code and response headers
+    def get_browser_cdp_with_http_info(opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ComputerUseApi.get_browser_cdp ...'
+      end
+      # resource path
+      local_var_path = '/computeruse/browser/cdp'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'BrowserCDPResponse'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ComputerUseApi.get_browser_cdp",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ComputerUseApi#get_browser_cdp\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Get browser status
+    # Get the managed Chromium process status
+    # @param [Hash] opts the optional parameters
+    # @return [BrowserStatusResponse]
+    def get_browser_status(opts = {})
+      data, _status_code, _headers = get_browser_status_with_http_info(opts)
+      data
+    end
+
+    # Get browser status
+    # Get the managed Chromium process status
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(BrowserStatusResponse, Integer, Hash)>] BrowserStatusResponse data, response status code and response headers
+    def get_browser_status_with_http_info(opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ComputerUseApi.get_browser_status ...'
+      end
+      # resource path
+      local_var_path = '/computeruse/browser/status'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'BrowserStatusResponse'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ComputerUseApi.get_browser_status",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ComputerUseApi#get_browser_status\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Get computer use process status
     # Get the status of all computer use processes
     # @param [Hash] opts the optional parameters
@@ -1665,6 +1779,63 @@ module DaytonaToolboxApiClient
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: ComputerUseApi#start_recording\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Stop browser
+    # Stop the managed Chromium process
+    # @param [Hash] opts the optional parameters
+    # @return [Object]
+    def stop_browser(opts = {})
+      data, _status_code, _headers = stop_browser_with_http_info(opts)
+      data
+    end
+
+    # Stop browser
+    # Stop the managed Chromium process
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(Object, Integer, Hash)>] Object data, response status code and response headers
+    def stop_browser_with_http_info(opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ComputerUseApi.stop_browser ...'
+      end
+      # resource path
+      local_var_path = '/computeruse/browser/stop'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Object'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ComputerUseApi.stop_browser",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ComputerUseApi#stop_browser\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
