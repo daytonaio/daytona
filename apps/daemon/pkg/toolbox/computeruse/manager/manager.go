@@ -127,16 +127,16 @@ func detectPluginError(logger *slog.Logger, path string) *ComputerUseError {
 For Ubuntu/Debian:
   sudo apt-get update && sudo apt-get install -y \\
     libx11-6 libxrandr2 libxext6 libxrender1 libxfixes3 libxss1 libxtst6 libxi6 libxinerama1 \\
-    xvfb x11vnc novnc xfce4 xfce4-terminal dbus-x11
+    xvfb x11vnc novnc websockify xfce4 xfce4-terminal dbus-x11
 
 For CentOS/RHEL/Fedora:
   sudo yum install -y libX11 libXrandr libXext libXrender libXfixes libXScrnSaver libXtst libXi libXinerama \\
-    xorg-x11-server-Xvfb x11vnc novnc xfce4 xfce4-terminal dbus-x11
+    xorg-x11-server-Xvfb x11vnc novnc python3-websockify xfce4 xfce4-terminal dbus-x11
 
 For Alpine:
   apk add --no-cache \\
     libx11 libxrandr libxext libxrender libxfixes libxss libxtst libxi libxinerama \\
-    xvfb x11vnc novnc xfce4 xfce4-terminal dbus-x11
+    xvfb x11vnc novnc websockify xfce4 xfce4-terminal dbus-x11
 
 Raw error output: %s
 

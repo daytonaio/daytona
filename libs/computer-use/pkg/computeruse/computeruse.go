@@ -5,6 +5,7 @@ package computeruse
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -37,11 +38,12 @@ type Process struct {
 	Ready        func(context.Context, *Process) error
 	ReadyName    string
 	ReadyTimeout time.Duration
-	cmd          *exec.Cmd
-	ctx          context.Context
+	childPID     int
 	cancel       context.CancelFunc
+	supervisorID uint64
 	mu           sync.Mutex
-	running      bool
+	supervising  bool
+	stopping     bool
 }
 
 type ComputerUse struct {
@@ -106,7 +108,9 @@ func (c *ComputerUse) Initialize() (*computeruse.Empty, error) {
 		}
 	}
 
-	c.initializeProcesses(homeDir)
+	if err := c.initializeProcesses(homeDir); err != nil {
+		return new(computeruse.Empty), err
+	}
 
 	return new(computeruse.Empty), nil
 }
@@ -150,7 +154,7 @@ func (c *ComputerUse) Start() (*computeruse.Empty, error) {
 	return new(computeruse.Empty), nil
 }
 
-func (c *ComputerUse) initializeProcesses(homeDir string) {
+func (c *ComputerUse) initializeProcesses(homeDir string) error {
 	// Get environment variables from Dockerfile or use defaults
 	vncResolution := os.Getenv("VNC_RESOLUTION")
 	if vncResolution == "" {
@@ -183,6 +187,11 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 
 	// Get D-Bus session address from environment
 	dbusAddress := os.Getenv("DBUS_SESSION_BUS_ADDRESS")
+
+	novncCommand, novncArgs, err := selectNoVNCCommand(vncPort, noVncPort)
+	if err != nil {
+		return fmt.Errorf("failed to initialize novnc process: %w", err)
+	}
 
 	// Process 1: Xvfb (X Virtual Framebuffer)
 	c.processes["xvfb"] = &Process{
@@ -297,26 +306,6 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 		LogFile: filepath.Join(c.configDir, "x11vnc.log"),
 		ErrFile: filepath.Join(c.configDir, "x11vnc.err"),
 	}
-	// Determine the best available NoVNC command with fallback options
-	var novncCommand string
-	var novncArgs []string
-
-	// Priority 1: Try launch.sh (modern NoVNC with enhanced features)
-	if _, err := os.Stat("/usr/share/novnc/utils/launch.sh"); err == nil {
-		novncCommand = "/usr/share/novnc/utils/launch.sh"
-		novncArgs = []string{"--vnc", "localhost:" + vncPort, "--listen", noVncPort}
-		log.Infof("Using NoVNC launch.sh (recommended)")
-	} else if _, err := os.Stat("/usr/share/novnc/utils/novnc_proxy"); err == nil {
-		// Priority 2: Try novnc_proxy (legacy NoVNC script)
-		novncCommand = "/usr/share/novnc/utils/novnc_proxy"
-		novncArgs = []string{"--vnc", "localhost:" + vncPort, "--listen", noVncPort}
-		log.Infof("Using NoVNC novnc_proxy (legacy)")
-	} else {
-		// Priority 3: Fallback to direct websockify (always available)
-		novncCommand = "websockify"
-		novncArgs = []string{"--web=/usr/share/novnc/", noVncPort, "localhost:" + vncPort}
-		log.Infof("Using direct websockify (fallback)")
-	}
 
 	c.processes["novnc"] = &Process{
 		Name:         "novnc",
@@ -335,6 +324,16 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 		LogFile: filepath.Join(c.configDir, "novnc.log"),
 		ErrFile: filepath.Join(c.configDir, "novnc.err"),
 	}
+	return nil
+}
+
+func selectNoVNCCommand(vncPort, noVncPort string) (string, []string, error) {
+	command, err := exec.LookPath("websockify")
+	if err != nil {
+		return "", nil, fmt.Errorf("websockify not found in PATH: %w", err)
+	}
+	log.Infof("Using direct websockify")
+	return command, []string{"--web=/usr/share/novnc/", noVncPort, "localhost:" + vncPort}, nil
 }
 
 func waitForSessionBus(address string, timeout time.Duration) error {
@@ -365,8 +364,10 @@ func (c *ComputerUse) startAllProcesses(ctx context.Context) error {
 	started := make([]*Process, 0, len(processes))
 
 	for _, process := range processes {
-		go c.startProcess(process)
-		started = append(started, process)
+		if supervisorID, ok := process.beginSupervising(); ok {
+			go c.superviseProcess(process, supervisorID)
+			started = append(started, process)
+		}
 		if !process.Required {
 			go c.logOptionalReadiness(ctx, process)
 			continue
@@ -404,23 +405,44 @@ func (c *ComputerUse) getProcessesByPriority() []*Process {
 }
 
 func (c *ComputerUse) startProcess(process *Process) {
-	process.mu.Lock()
-	if process.running {
-		process.mu.Unlock()
+	supervisorID, ok := process.beginSupervising()
+	if !ok {
 		return
 	}
-	process.running = true
-	process.mu.Unlock()
+	c.superviseProcess(process, supervisorID)
+}
 
+func (process *Process) beginSupervising() (uint64, bool) {
+	process.mu.Lock()
+	defer process.mu.Unlock()
+
+	if process.supervising {
+		return 0, false
+	}
+
+	process.supervisorID++
+	process.supervising = true
+	process.stopping = false
+	process.childPID = 0
+	process.cancel = nil
+	return process.supervisorID, true
+}
+
+func (c *ComputerUse) superviseProcess(process *Process, supervisorID uint64) {
 	defer func() {
 		process.mu.Lock()
-		process.running = false
+		if process.supervisorID == supervisorID {
+			process.supervising = false
+			process.stopping = false
+			process.childPID = 0
+			process.cancel = nil
+		}
 		process.mu.Unlock()
 	}()
 
 	for {
 		log.Infof("Starting process: %s", process.Name)
-		err := c.runProcessOnce(process)
+		err := c.runProcessOnce(process, supervisorID)
 		if err != nil {
 			log.Errorf("Process %s exited with error: %v", process.Name, err)
 		} else {
@@ -428,20 +450,20 @@ func (c *ComputerUse) startProcess(process *Process) {
 		}
 
 		// Check if we should restart
-		if !process.AutoRestart || !process.isRunning() {
+		if !process.AutoRestart || !process.isSupervising(supervisorID) {
 			break
 		}
 
 		delay := c.processRestartDelay()
 		log.Infof("Restarting process %s in %s...", process.Name, delay)
 		time.Sleep(delay)
-		if !process.isRunning() {
+		if !process.isSupervising(supervisorID) {
 			break
 		}
 	}
 }
 
-func (c *ComputerUse) runProcessOnce(process *Process) error {
+func (c *ComputerUse) runProcessOnce(process *Process, supervisorID uint64) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	cmd := exec.CommandContext(ctx, process.Command, process.Args...)
 	if len(process.Env) > 0 {
@@ -456,20 +478,50 @@ func (c *ComputerUse) runProcessOnce(process *Process) error {
 	defer closeProcessFile(process.Name, "error", errFile)
 
 	process.mu.Lock()
-	process.ctx = ctx
+	if process.stopping || !process.supervising || process.supervisorID != supervisorID {
+		process.mu.Unlock()
+		cancel()
+		return nil
+	}
 	process.cancel = cancel
-	process.cmd = cmd
 	process.mu.Unlock()
 
 	if err := cmd.Start(); err != nil {
+		c.clearChildProcess(process, supervisorID, 0)
 		cancel()
 		return fmt.Errorf("failed to start process: %w", err)
 	}
 
+	process.mu.Lock()
+	if process.stopping || !process.supervising || process.supervisorID != supervisorID {
+		process.mu.Unlock()
+		cancel()
+		killProcess(cmd.Process.Pid)
+		err := cmd.Wait()
+		c.clearChildProcess(process, supervisorID, cmd.Process.Pid)
+		return err
+	}
+	process.childPID = cmd.Process.Pid
+	process.mu.Unlock()
+
 	log.Infof("Process %s started with PID: %d", process.Name, cmd.Process.Pid)
 	err := cmd.Wait()
 	cancel()
+	c.clearChildProcess(process, supervisorID, cmd.Process.Pid)
 	return err
+}
+
+func (c *ComputerUse) clearChildProcess(process *Process, supervisorID uint64, pid int) {
+	process.mu.Lock()
+	defer process.mu.Unlock()
+
+	if process.supervisorID != supervisorID {
+		return
+	}
+	if pid != 0 && process.childPID == pid {
+		process.childPID = 0
+	}
+	process.cancel = nil
 }
 
 func (c *ComputerUse) openProcessLogs(process *Process, cmd *exec.Cmd) (processFile, processFile) {
@@ -513,10 +565,10 @@ func (c *ComputerUse) processRestartDelay() time.Duration {
 	return 5 * time.Second
 }
 
-func (process *Process) isRunning() bool {
+func (process *Process) isSupervising(supervisorID uint64) bool {
 	process.mu.Lock()
 	defer process.mu.Unlock()
-	return process.running
+	return process.supervising && process.supervisorID == supervisorID
 }
 
 func (c *ComputerUse) logOptionalReadiness(ctx context.Context, process *Process) {
@@ -578,14 +630,7 @@ func readyXvfb(display string) func(context.Context, *Process) error {
 func readyXfce(display, user string) func(context.Context, *Process) error {
 	return func(ctx context.Context, _ *Process) error {
 		if path, err := exec.LookPath("xprop"); err == nil {
-			output, err := runDisplayCommandOutput(ctx, display, path, "-root", "_NET_SUPPORTING_WM_CHECK")
-			if err != nil {
-				return err
-			}
-			if strings.Contains(output, "not found") {
-				return fmt.Errorf("window manager root property is not ready")
-			}
-			return nil
+			return readyWindowManager(ctx, display, path)
 		}
 
 		args := []string{"-f", "xfce4-session|xfdesktop|xfwm4"}
@@ -643,6 +688,52 @@ func runDisplayCommandOutput(ctx context.Context, display, command string, args 
 	return string(output), nil
 }
 
+func readyWindowManager(ctx context.Context, display, xprop string) error {
+	rootID, err := xpropWindowID(ctx, display, xprop, "-root", "_NET_SUPPORTING_WM_CHECK")
+	if err != nil {
+		return err
+	}
+
+	childID, err := xpropWindowID(ctx, display, xprop, "-id", rootID, "_NET_SUPPORTING_WM_CHECK")
+	if err != nil {
+		return err
+	}
+	if childID != rootID {
+		return fmt.Errorf("window manager check window mismatch: root points to %s, child points to %s", rootID, childID)
+	}
+	return nil
+}
+
+func xpropWindowID(ctx context.Context, display, xprop string, args ...string) (string, error) {
+	output, err := runDisplayCommandOutput(ctx, display, xprop, args...)
+	if err != nil {
+		return "", err
+	}
+	return parseXpropWindowID(output)
+}
+
+func parseXpropWindowID(output string) (string, error) {
+	if strings.Contains(output, "not found") {
+		return "", fmt.Errorf("window manager check property is not ready")
+	}
+
+	i := strings.Index(output, "#")
+	if i < 0 {
+		return "", fmt.Errorf("window manager check property has no window id: %s", strings.TrimSpace(output))
+	}
+	fields := strings.Fields(output[i+1:])
+	if len(fields) == 0 {
+		return "", fmt.Errorf("window manager check property has an empty window id")
+	}
+
+	id := strings.Trim(fields[0], ",")
+	n, err := strconv.ParseUint(id, 0, 64)
+	if err != nil || n == 0 {
+		return "", fmt.Errorf("window manager check property has invalid window id %q", id)
+	}
+	return fmt.Sprintf("0x%x", n), nil
+}
+
 func displaySocket(display string) (string, error) {
 	display = strings.TrimPrefix(display, ":")
 	display = strings.Split(display, ".")[0]
@@ -685,28 +776,38 @@ func (c *ComputerUse) Stop() (*computeruse.Empty, error) {
 
 func (c *ComputerUse) stopProcess(process *Process) {
 	process.mu.Lock()
-	defer process.mu.Unlock()
-
-	if !process.running {
+	if !process.supervising && process.childPID == 0 {
+		process.mu.Unlock()
 		return
 	}
 
 	log.Infof("Stopping process: %s", process.Name)
+	process.stopping = true
+	process.supervising = false
+	cancel := process.cancel
+	childPID := process.childPID
+	process.mu.Unlock()
 
 	// Cancel the context to stop the process
-	if process.cancel != nil {
-		process.cancel()
+	if cancel != nil {
+		cancel()
 	}
 
 	// Kill the process if it's still running
-	if process.cmd != nil && process.cmd.Process != nil {
-		err := process.cmd.Process.Kill()
-		if err != nil {
-			log.Errorf("Failed to kill process %s: %v", process.Name, err)
-		}
+	if childPID != 0 {
+		killProcess(childPID)
 	}
+}
 
-	process.running = false
+func killProcess(pid int) {
+	process, err := os.FindProcess(pid)
+	if err != nil {
+		log.Errorf("Failed to find process %d: %v", pid, err)
+		return
+	}
+	if err := process.Kill(); err != nil && !errors.Is(err, os.ErrProcessDone) {
+		log.Errorf("Failed to kill process %d: %v", pid, err)
+	}
 }
 
 func (c *ComputerUse) GetProcessStatus() (map[string]computeruse.ProcessStatus, error) {
@@ -740,12 +841,15 @@ func getProcessStatus(process *Process) computeruse.ProcessStatus {
 		AutoRestart: process.AutoRestart,
 	}
 
-	if process.cmd != nil && process.cmd.Process != nil {
-		if err := process.cmd.Process.Signal(syscall.Signal(0)); err == nil {
-			pid := process.cmd.Process.Pid
-			status.Running = true
-			status.Pid = &pid
-		}
+	childPID := process.childPID
+	if childPID == 0 {
+		return status
+	}
+
+	child, err := os.FindProcess(childPID)
+	if err == nil && child.Signal(syscall.Signal(0)) == nil {
+		status.Running = true
+		status.Pid = &childPID
 	}
 
 	return status
@@ -763,9 +867,7 @@ func (c *ComputerUse) IsProcessRunning(req *computeruse.ProcessRequest) (bool, e
 		return c.isA11yAvailable(), nil
 	}
 
-	process.mu.Lock()
-	defer process.mu.Unlock()
-	return process.running, nil
+	return getProcessStatus(process).Running, nil
 }
 
 // RestartProcess restarts a specific process

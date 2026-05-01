@@ -77,7 +77,7 @@ func TestAtspiStatusCachesA11yHealth(t *testing.T) {
 }
 
 func TestInitializeProcessesRegistersAtspiAsBootstrap(t *testing.T) {
-	addAtspiLauncherToPath(t)
+	addCommandsToPath(t, "at-spi-bus-launcher", "websockify")
 	t.Setenv("DBUS_SESSION_BUS_ADDRESS", "unix:path=/tmp/daytona-test-bus")
 
 	c := &ComputerUse{
@@ -85,7 +85,9 @@ func TestInitializeProcessesRegistersAtspiAsBootstrap(t *testing.T) {
 		configDir: t.TempDir(),
 		waitDBus:  func(string, time.Duration) error { return nil },
 	}
-	c.initializeProcesses(t.TempDir())
+	if err := c.initializeProcesses(t.TempDir()); err != nil {
+		t.Fatalf("initializeProcesses() error = %v", err)
+	}
 
 	atspi, ok := c.processes["atspi"]
 	if !ok {
@@ -97,27 +99,31 @@ func TestInitializeProcessesRegistersAtspiAsBootstrap(t *testing.T) {
 }
 
 func TestInitializeProcessesSkipsAtspiWhenSessionBusAddressIsMissing(t *testing.T) {
-	addAtspiLauncherToPath(t)
+	addCommandsToPath(t, "at-spi-bus-launcher", "websockify")
 	t.Setenv("DBUS_SESSION_BUS_ADDRESS", "")
 
 	c := &ComputerUse{
 		processes: make(map[string]*Process),
 		configDir: t.TempDir(),
 	}
-	c.initializeProcesses(t.TempDir())
+	if err := c.initializeProcesses(t.TempDir()); err != nil {
+		t.Fatalf("initializeProcesses() error = %v", err)
+	}
 
 	if _, ok := c.processes["atspi"]; ok {
 		t.Fatal("atspi process should not be registered without a session D-Bus address")
 	}
 }
 
-func addAtspiLauncherToPath(t *testing.T) {
+func addCommandsToPath(t *testing.T, commands ...string) {
 	t.Helper()
 
 	binDir := t.TempDir()
-	atspiPath := filepath.Join(binDir, "at-spi-bus-launcher")
-	if err := os.WriteFile(atspiPath, []byte("#!/bin/sh\nexit 0\n"), 0755); err != nil {
-		t.Fatalf("write fake at-spi-bus-launcher: %v", err)
+	for _, command := range commands {
+		path := filepath.Join(binDir, command)
+		if err := os.WriteFile(path, []byte("#!/bin/sh\nexit 0\n"), 0755); err != nil {
+			t.Fatalf("write fake %s: %v", command, err)
+		}
 	}
 	t.Setenv("PATH", binDir)
 }
