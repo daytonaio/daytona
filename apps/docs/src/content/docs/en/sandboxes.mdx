@@ -1203,7 +1203,7 @@ curl 'https://app.daytona.io/api/sandbox' \
 
 ##### SSH port forwarding
 
-For connecting tools like Android Studio from your laptop, tunnel through the base sandbox, not the device. In the following snippet, the device appears as `localhost:5555` on your machine.
+For connecting tools like Android Studio from your machine, tunnel through the base sandbox, not the device. In the following snippet, the device appears as `localhost:5555`:
 
 ```bash
 ssh -L 5555:DEVICE_SANDBOX_ID:5555 SSH_ACCESS_TOKEN@ssh.app.daytona.io
@@ -1212,7 +1212,7 @@ ssh -L 5555:DEVICE_SANDBOX_ID:5555 SSH_ACCESS_TOKEN@ssh.app.daytona.io
 ##### Customization rules
 
 - **Custom images**: Build and register custom base snapshots using the same Dockerfile-based flow as other sandboxes, with two requirements: the snapshot must be built in the `android` region and use the `android` class
-- **Custom device snapshots**: Currently not supported, available on request. Device images are built by Daytona from a specification you provide by contacting [support@daytona.io](mailto:support@daytona.io).
+- **Custom device snapshots**: Available on request. Device images are built by Daytona from a specification you provide. Contact [support@daytona.io](mailto:support@daytona.io) for more information.
 
 ## Start Sandboxes
 
