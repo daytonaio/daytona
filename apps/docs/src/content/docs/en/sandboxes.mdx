@@ -1052,7 +1052,9 @@ You run your code in the base sandbox and reach each device over adb.
 - **Snapshots**: Base: `android-base`. Devices (x86_64, AOSP, the numbers correspond to Android SDK levels / OS versions):
 
   `android-device-12-aosp`, `android-device-13-aosp`, `android-device-14-aosp`, `android-device-15-aosp`, `android-device-16-aosp`
-- **adb from the base**: After the device sandbox is started, connect from the base using the device sandbox ID and port `5555` (for example: `adb connect DEVICE_SANDBOX_ID:5555`). The traffic uses the same link-network as described in [linked sandboxes](#linked-sandboxes)
+- **adb from the base**: connect using the device sandbox ID and port `5555`: 
+
+  `adb connect DEVICE_SANDBOX_ID:5555`
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
