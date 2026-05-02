@@ -877,7 +877,7 @@ final class CreateSandboxResources {
 This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
 :::
 
-Daytona provides methods to link sandboxes to existing sandboxes. A linked sandbox is attached to an existing parent sandbox at creation time. The child sandbox is scheduled on the same runner as the parent, and joins a shared internal link network. 
+Daytona provides methods to link sandboxes to existing sandboxes. A linked sandbox is attached to an existing parent sandbox at creation time.
 
 Create the parent sandbox first, then create one or more children whose create request references the parent's sandbox ID. The API records the relationship on the child sandbox as the linked sandbox ID. Omitting the linked sandbox parameter yields an unlinked sandbox.
 
@@ -1041,14 +1041,15 @@ curl 'https://app.daytona.io/api/sandbox' \
 This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
 :::
 
-Daytona provides methods to create Android sandboxes. Android sandboxes combine a standard Linux **base sandbox** (your development environment: git, builds, POSIX tooling) with one or more **device sandboxes** that run Android emulators. The device sandboxes are [linked sandboxes](#linked-sandboxes) attached to the base sandbox over a shared internal link network.
+Daytona provides Android sandboxes for running Android emulators alongside a standard Linux development environment.
 
-The user code runs in the base sandbox, and the base sandbox talks to each device over the link network. This avoids nested virtualization while providing an isolated emulator surface per device sandbox.
+- **Base sandbox**: a standard Linux sandbox where your code runs (git, builds, POSIX tooling)
+- **Device sandbox(es)**: one or more Android emulator devices, attached to the base sandbox as [linked sandboxes](#linked-sandboxes)
+
+You run your code in the base sandbox and reach each device over adb.
 
 - **Region target**: Android workloads require the `android` target region on every sandbox in the setup (base and devices). Set `DAYTONA_TARGET=android` in the environment, or pass the `android` target parameter
-- **Snapshots**: Base: `android-base`. Devices: **x86_64**, **AOSP**. 
-
-  The number corresponds to Android SDK levels / OS versions:
+- **Snapshots**: Base: `android-base`. Devices (x86_64, AOSP, the numbers correspond to Android SDK levels / OS versions):
 
   `android-device-12-aosp`, `android-device-13-aosp`, `android-device-14-aosp`, `android-device-15-aosp`, `android-device-16-aosp`
 - **adb from the base**: After the device sandbox is started, connect from the base using the device sandbox ID and port `5555` (for example: `adb connect DEVICE_SANDBOX_ID:5555`). The traffic uses the same link-network as described in [linked sandboxes](#linked-sandboxes)
