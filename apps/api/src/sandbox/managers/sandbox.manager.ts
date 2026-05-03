@@ -481,6 +481,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       where: {
         runnerId,
         recoverable: true,
+        pending: false,
         desiredState: Not(In([SandboxDesiredState.DESTROYED])),
         backupSnapshot: Not(IsNull()),
       },

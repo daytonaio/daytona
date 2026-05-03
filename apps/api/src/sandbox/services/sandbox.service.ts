@@ -1733,60 +1733,96 @@ export class SandboxService {
   }
 
   async recover(sandboxIdOrName: string, organization: Organization, skipStart = false): Promise<Sandbox> {
+    let pendingDiskIncrement: number | undefined
+
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
-    if (sandbox.state !== SandboxState.ERROR) {
-      throw new BadRequestError('Sandbox must be in error state to recover')
+    const region = await this.regionService.findOne(sandbox.region)
+    if (!region) {
+      throw new NotFoundException(`Region with ID ${sandbox.region} not found`)
     }
-
-    if (sandbox.pending) {
-      throw new StateChangeInProgressError()
-    }
-
-    // Validate runner exists
-    if (!sandbox.runnerId) {
-      throw new NotFoundException(`Sandbox with ID ${sandbox.id} does not have a runner`)
-    }
-    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
-
-    if (runner.apiVersion === '2') {
-      // TODO: we need "recovering" state that can be set after calling recover
-      // Once in recovering, we abort further processing and let the manager/job handler take care of it
-      // (Also, since desiredState would be STARTED, we need to check the quota)
-      throw new ForbiddenException('Recovering sandboxes with runner API version 2 is not supported')
-    }
-
-    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
     try {
-      await runnerAdapter.recoverSandbox(sandbox)
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('storage cannot be further expanded')) {
-        const errorMsg = `Sandbox storage cannot be further expanded. Maximum expansion of ${(sandbox.disk * 0.1).toFixed(2)}GB (10% of original ${sandbox.disk.toFixed(2)}GB) has been reached. Please contact support for further assistance.`
-        throw new ForbiddenException(errorMsg)
+      if (sandbox.state !== SandboxState.ERROR) {
+        throw new BadRequestError('Sandbox must be in error state to recover')
       }
+
+      if (sandbox.pending) {
+        throw new StateChangeInProgressError()
+      }
+
+      if (!sandbox.runnerId) {
+        throw new NotFoundException(`Sandbox with ID ${sandbox.id} does not have a runner`)
+      }
+      const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
+
+      if (runner.apiVersion === '2') {
+        // TODO: we need "recovering" state that can be set after calling recover
+        // Once in recovering, we abort further processing and let the manager/job handler take care of it
+        // (Also, since desiredState would be STARTED, we need to check the quota)
+        throw new ForbiddenException('Recovering sandboxes with runner API version 2 is not supported')
+      }
+
+      // ERROR doesn't consume disk, STOPPED does — reserve before the runner round-trip
+      // so an over-quota org is rejected before disk is expanded on the runner.
+      const { pendingDiskIncremented } = await this.validateOrganizationQuotas(
+        organization,
+        region,
+        0,
+        0,
+        sandbox.disk,
+        isEphemeral(sandbox),
+        sandbox.id,
+      )
+      if (pendingDiskIncremented) {
+        pendingDiskIncrement = sandbox.disk
+      }
+
+      // Atomic claim — matches start()/stop(); throws SandboxConflictError on race.
+      await this.sandboxRepository.updateWhere(sandbox.id, {
+        updateData: { pending: true },
+        whereCondition: { state: SandboxState.ERROR, pending: false },
+      })
+
+      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+      try {
+        await runnerAdapter.recoverSandbox(sandbox)
+      } catch (error) {
+        await this.sandboxRepository.updateWhere(sandbox.id, {
+          updateData: { pending: false },
+          whereCondition: { state: SandboxState.ERROR, pending: true },
+        })
+        if (error instanceof Error && error.message.includes('storage cannot be further expanded')) {
+          throw new ForbiddenException(
+            `Sandbox storage cannot be further expanded. Maximum expansion of ${(sandbox.disk * 0.1).toFixed(2)}GB (10% of original ${sandbox.disk.toFixed(2)}GB) has been reached. Please contact support for further assistance.`,
+          )
+        }
+        throw error
+      }
+
+      const updatedSandbox = await this.sandboxRepository.updateWhere(sandbox.id, {
+        updateData: {
+          state: SandboxState.STOPPED,
+          desiredState: SandboxDesiredState.STOPPED,
+          errorReason: null,
+          recoverable: false,
+          pending: false,
+        },
+        whereCondition: { state: SandboxState.ERROR },
+      })
+
+      if (skipStart) {
+        return updatedSandbox
+      }
+
+      // Sandbox is now STOPPED — normal start flow handles cpu/mem quota + pending usage.
+      // Disk is now in current usage; start()'s self-excluded validation skips re-incrementing it.
+      return await this.start(sandbox.id, organization)
+    } catch (error) {
+      await this.rollbackPendingUsage(organization.id, sandbox.region, undefined, undefined, pendingDiskIncrement)
       throw error
     }
-
-    const updateData: Partial<Sandbox> = {
-      state: SandboxState.STOPPED,
-      desiredState: SandboxDesiredState.STOPPED,
-      errorReason: null,
-      recoverable: false,
-    }
-
-    const updatedSandbox = await this.sandboxRepository.updateWhere(sandbox.id, {
-      updateData,
-      whereCondition: { state: SandboxState.ERROR },
-    })
-
-    if (skipStart) {
-      return updatedSandbox
-    }
-
-    // Now that sandbox is in STOPPED state, use the normal start flow
-    // This handles quota validation, pending usage, event emission, etc.
-    return await this.start(sandbox.id, organization)
   }
 
   async resize(sandboxIdOrName: string, resizeDto: ResizeSandboxDto, organization: Organization): Promise<Sandbox> {
