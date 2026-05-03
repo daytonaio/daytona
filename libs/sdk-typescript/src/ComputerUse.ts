@@ -4,8 +4,8 @@
  */
 
 import * as pathe from 'pathe'
-import {
-  ComputerUseApi,
+import { ComputerUseApi } from '@daytona/toolbox-api-client'
+import type {
   MousePositionResponse,
   MouseMoveRequest,
   MouseClickRequest,
