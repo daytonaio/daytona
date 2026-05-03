@@ -17,13 +17,58 @@ description: A reference of supported operations using the Daytona CLI.
 sidebar:
   label: Daytona CLI Reference
 ---
+import { TabItem, Tabs } from "@astrojs/starlight/components";
 import Aside from "@components/Aside.astro";
 import Label from "@components/Label.astro";
 
-The \`daytona\` command-line tool provides access to Daytona's core features including managing Snapshots and the lifecycle of Daytona Sandboxes. View the installation instructions by clicking [here](/docs/getting-started#cli).
+Daytona provides command-line access to core features for interacting with Daytona Sandboxes, including managing their lifecycle, snapshots, and more.
 
-This reference lists all commands supported by the \`daytona\` command-line tool complete with a description of their behaviour, and any supported flags.
+The CLI reference lists all commands supported by the \`daytona\` command-line tool, complete with a description of their behavior, and any supported flags.
 You can access this documentation on a per-command basis by appending the \`--help\`/\`-h\` flag when invoking \`daytona\`.
+
+## Installation
+
+Install the Daytona CLI to interact with Daytona sandboxes from the command line.
+
+<Tabs syncKey="language">
+<TabItem label="Mac/Linux">
+
+  \`\`\`bash
+  brew install daytonaio/cli/daytona
+  \`\`\`
+
+</TabItem>
+<TabItem label="Windows">
+
+  \`\`\`bash
+  powershell -Command "irm https://get.daytona.io/windows | iex"
+  \`\`\`
+
+</TabItem>
+</Tabs>
+
+After installing the Daytona CLI, use the \`daytona\` command to interact with Daytona Sandboxes from the command line.
+
+## Update
+
+To update the Daytona CLI to the latest version:
+
+<Tabs syncKey="language">
+<TabItem label="Mac/Linux">
+
+\`\`\`bash
+brew upgrade daytonaio/cli/daytona
+\`\`\`
+
+</TabItem>
+<TabItem label="Windows">
+
+\`\`\`bash
+powershell -Command "irm https://get.daytona.io/windows | iex"
+\`\`\`
+
+</TabItem>
+</Tabs>
 `
 
 // content to appear below the commands outline
