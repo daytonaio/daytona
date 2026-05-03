@@ -23,9 +23,9 @@ For connecting to a VPN network, you need to [create or access your Daytona sand
 
 Daytona provides multiple ways to connect to a Daytona sandbox with a Tailscale network:
 
-- [Connect with browser login](#connect-with-browser-login)
-- [Connect with auth key](#connect-with-auth-key)
-- [Connect with web terminal](#connect-with-web-terminal)
+- [Connect with browser login](#tailscale-browser-login)
+- [Connect with auth key](#tailscale-auth-key)
+- [Connect with web terminal](#tailscale-web-terminal)
 
 When you connect a Daytona sandbox to a Tailscale network, the sandbox becomes part of your private Tailscale network, allowing you to access resources that are available within the network and enabling other devices on the network to access the sandbox.
 
@@ -551,7 +551,7 @@ You've now successfully connected your Daytona sandbox to your Tailscale network
 Daytona provides multiple ways to connect to a Daytona sandbox with an OpenVPN network:
 
 - [OpenVPN client configuration](#openvpn-client-configuration)
-- [OpenVPN web terminal](#openvpn-web-terminal)
+- [Connect with web terminal](#openvpn-web-terminal)
 
 OpenVPN uses a client-server model where your Daytona sandbox acts as a client connecting to an OpenVPN server. This approach is suitable for connecting to existing corporate VPNs, accessing resources behind firewalls, or integrating with infrastructure that already uses OpenVPN.
 
@@ -615,6 +615,8 @@ verb 3
 ```
 
 ### OpenVPN client configuration
+
+The following snippets demonstrate connecting to an OpenVPN network using a client configuration file.
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -864,8 +866,8 @@ You've now successfully connected your Daytona sandbox to your OpenVPN network.
 
 Daytona provides multiple ways to connect to a Daytona sandbox with a Netbird network:
 
-- [Netbird setup key](#netbird-setup-key)
-- [Netbird browser login](#netbird-browser-login)
+- [Connect with setup key](#netbird-setup-key)
+- [Connect with browser login](#netbird-browser-login)
 
 When you connect a Daytona sandbox to a Netbird network, the sandbox becomes part of your private Netbird network, allowing you to access resources that are available within the network and enabling other devices on the network to access the sandbox.
 
@@ -875,7 +877,11 @@ This integration makes your sandbox appear as a device within your Netbird netwo
 
 Using a Netbird setup key provides a non-interactive way to connect your Daytona sandbox to Netbird, making it suitable for automated scripts, CI/CD pipelines, or any scenario where manual browser interaction is not available.
 
-For more information about Netbird setup keys, see the [Netbird documentation ↗](https://docs.netbird.io/manage/peers/access-infrastructure/setup-keys-add-servers-to-network).
+1. Access your [Netbird dashboard ↗](https://app.netbird.io/)
+2. Click **Setup Keys**
+3. Create a new setup key or use an existing one
+
+The following snippets demonstrate connecting to a Netbird network using a setup key.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -884,17 +890,18 @@ For more information about Netbird setup keys, see the [Netbird documentation �
 from daytona import Daytona, DaytonaConfig
 
 # Configuration
-DAYTONA_API_KEY = "YOUR_API_KEY" # Replace with your API key
-NETBIRD_SETUP_KEY = "YOUR_SETUP_KEY" # Replace with your setup key
+DAYTONA_API_KEY = "YOUR_API_KEY"
+NETBIRD_SETUP_KEY = "YOUR_SETUP_KEY"
 
 # Initialize the Daytona client
 config = DaytonaConfig(api_key=DAYTONA_API_KEY)
 daytona = Daytona(config)
 
-def setup_netbird_vpn_with_setup_key():
+
+def setup_netbird():
     """
     Connect a Daytona sandbox to a NetBird network using the Python SDK.
-    Uses a NetBird Setup Key for non-interactive authentication.
+    Uses the official NetBird install script and a Setup Key for non-interactive auth.
     See: https://docs.netbird.io/manage/peers/access-infrastructure/setup-keys-add-servers-to-network
     """
     if NETBIRD_SETUP_KEY == "YOUR_SETUP_KEY":
@@ -905,18 +912,10 @@ def setup_netbird_vpn_with_setup_key():
     print("Creating sandbox...")
     sandbox = daytona.create()
     print(f"Sandbox created: {sandbox.id}")
-
-    # Install NetBird (manual repo setup since the bundled installer can fail
-    # on the broken Yarn repo present in the base image).
-    print("\nInstalling NetBird (this may take a few minutes)...")
+    print("\nInstalling NetBird via the official install script...")
     install_cmd = (
         "sudo rm -f /etc/apt/sources.list.d/yarn.list && "
-        "sudo apt-get update && "
-        "sudo apt-get install -y ca-certificates curl gnupg && "
-        "curl -sSL https://pkgs.netbird.io/debian/public.key | sudo gpg --dearmor --output /usr/share/keyrings/netbird-archive-keyring.gpg && "
-        "echo 'deb [signed-by=/usr/share/keyrings/netbird-archive-keyring.gpg] https://pkgs.netbird.io/debian stable main' | sudo tee /etc/apt/sources.list.d/netbird.list && "
-        "sudo apt-get update && "
-        "sudo apt-get install -y netbird"
+        "curl -fsSL https://pkgs.netbird.io/install.sh | sudo sh"
     )
     response = sandbox.process.exec(install_cmd, timeout=300)
     if response.exit_code != 0:
@@ -924,8 +923,7 @@ def setup_netbird_vpn_with_setup_key():
         return sandbox
     print("NetBird installed successfully.")
 
-    # Connect to the NetBird network using the setup key.
-    # The setup key authenticates this peer without any interactive browser flow.
+    # Connect to the NetBird network using the setup key
     print("\nConnecting to NetBird network with setup key...")
     up_cmd = f"sudo netbird up --setup-key {NETBIRD_SETUP_KEY}"
     response = sandbox.process.exec(up_cmd, timeout=120)
@@ -943,7 +941,7 @@ def setup_netbird_vpn_with_setup_key():
 
 
 if __name__ == "__main__":
-    sandbox = setup_netbird_vpn_with_setup_key()
+    sandbox = setup_netbird()
 ```
 
 </TabItem>
@@ -953,18 +951,18 @@ if __name__ == "__main__":
 import { Daytona } from '@daytonaio/sdk';
 
 // Configuration
-const DAYTONA_API_KEY = "YOUR_API_KEY"; // Replace with your API key
-const NETBIRD_SETUP_KEY = "YOUR_SETUP_KEY"; // Replace with your setup key
+const DAYTONA_API_KEY = "YOUR_API_KEY";
+const NETBIRD_SETUP_KEY = "YOUR_SETUP_KEY";
 
 // Initialize the Daytona client
 const daytona = new Daytona({
   apiKey: DAYTONA_API_KEY,
 });
 
-async function setupNetbirdVpnWithSetupKey(): Promise<void> {
+async function setupNetbird(): Promise<void> {
   /**
    * Connect a Daytona sandbox to a NetBird network using the TypeScript SDK.
-   * Uses a NetBird Setup Key for non-interactive authentication.
+   * Uses the official NetBird install script and a Setup Key for non-interactive auth.
    * See: https://docs.netbird.io/manage/peers/access-infrastructure/setup-keys-add-servers-to-network
    */
 
@@ -973,17 +971,11 @@ async function setupNetbirdVpnWithSetupKey(): Promise<void> {
   const sandbox = await daytona.create();
   console.log(`Sandbox created: ${sandbox.id}`);
 
-  // Install NetBird (manual repo setup since the bundled installer can fail
-  // on the broken Yarn repo present in the base image).
-  console.log("\nInstalling NetBird (this may take a few minutes)...");
+  // Install NetBird via the official install script
+  console.log("\nInstalling NetBird via the official install script...");
   const installCmd = [
     "sudo rm -f /etc/apt/sources.list.d/yarn.list",
-    "sudo apt-get update",
-    "sudo apt-get install -y ca-certificates curl gnupg",
-    "curl -sSL https://pkgs.netbird.io/debian/public.key | sudo gpg --dearmor --output /usr/share/keyrings/netbird-archive-keyring.gpg",
-    "echo 'deb [signed-by=/usr/share/keyrings/netbird-archive-keyring.gpg] https://pkgs.netbird.io/debian stable main' | sudo tee /etc/apt/sources.list.d/netbird.list",
-    "sudo apt-get update",
-    "sudo apt-get install -y netbird",
+    "curl -fsSL https://pkgs.netbird.io/install.sh | sudo sh",
   ].join(" && ");
   let response = await sandbox.process.executeCommand(
     installCmd,
@@ -997,8 +989,7 @@ async function setupNetbirdVpnWithSetupKey(): Promise<void> {
   }
   console.log("NetBird installed successfully.");
 
-  // Connect to the NetBird network using the setup key.
-  // The setup key authenticates this peer without any interactive browser flow.
+  // Connect to the NetBird network using the setup key
   console.log("\nConnecting to NetBird network with setup key...");
   const upCmd = `sudo netbird up --setup-key ${NETBIRD_SETUP_KEY}`;
   response = await sandbox.process.executeCommand(
@@ -1025,7 +1016,7 @@ async function setupNetbirdVpnWithSetupKey(): Promise<void> {
 }
 
 // Run the main function
-setupNetbirdVpnWithSetupKey().catch(console.error);
+setupNetbird().catch(console.error);
 ```
 
 </TabItem>
@@ -1034,6 +1025,8 @@ setupNetbirdVpnWithSetupKey().catch(console.error);
 ### Netbird browser login
 
 The browser login method initiates an interactive authentication flow where Netbird generates a unique login URL that you visit in your web browser to authenticate the Daytona sandbox.
+
+The following snippets demonstrate connecting to a Netbird network using a browser login.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -1044,33 +1037,27 @@ import time
 import re
 
 # Configuration
-DAYTONA_API_KEY = "YOUR_API_KEY" # Replace with your API key
+DAYTONA_API_KEY = "YOUR_API_KEY"
 
 # Initialize the Daytona client
 config = DaytonaConfig(api_key=DAYTONA_API_KEY)
 daytona = Daytona(config)
 
 
-def setup_netbird_vpn_interactive():
+def setup_netbird():
     """
     Connect a Daytona sandbox to a NetBird network using the Python SDK.
-    Uses interactive login via browser URL.
+    Uses the official NetBird install script and interactive browser login.
     """
     # Create the sandbox
     print("Creating sandbox...")
     sandbox = daytona.create()
     print(f"Sandbox created: {sandbox.id}")
-
-    # Step 1: Remove problematic Yarn repo that breaks apt update, then install NetBird manually
-    print("\nInstalling NetBird (this may take a few minutes)...")
+    # Install NetBird via the official install script
+    print("\nInstalling NetBird via the official install script...")
     install_cmd = (
         "sudo rm -f /etc/apt/sources.list.d/yarn.list && "
-        "sudo apt-get update && "
-        "sudo apt-get install -y ca-certificates curl gnupg && "
-        "curl -sSL https://pkgs.netbird.io/debian/public.key | sudo gpg --dearmor --output /usr/share/keyrings/netbird-archive-keyring.gpg && "
-        "echo 'deb [signed-by=/usr/share/keyrings/netbird-archive-keyring.gpg] https://pkgs.netbird.io/debian stable main' | sudo tee /etc/apt/sources.list.d/netbird.list && "
-        "sudo apt-get update && "
-        "sudo apt-get install -y netbird"
+        "curl -fsSL https://pkgs.netbird.io/install.sh | sudo sh"
     )
     response = sandbox.process.exec(install_cmd, timeout=300)
     if response.exit_code != 0:
@@ -1078,7 +1065,7 @@ def setup_netbird_vpn_interactive():
         return sandbox
     print("NetBird installed successfully.")
 
-    # Step 3: Run netbird up in background and capture output to a file
+    # Run netbird up in background and capture output to a file
     print("\nInitiating NetBird login...")
     sandbox.process.exec(
         "netbird up > /tmp/netbird-login.txt 2>&1 &",
@@ -1142,7 +1129,7 @@ def setup_netbird_vpn_interactive():
 
 
 if __name__ == "__main__":
-    sandbox = setup_netbird_vpn_interactive()
+    sandbox = setup_netbird()
 ```
 
 </TabItem>
@@ -1152,7 +1139,7 @@ if __name__ == "__main__":
 import { Daytona } from '@daytonaio/sdk';
 
 // Configuration
-const DAYTONA_API_KEY = "YOUR_API_KEY"; // Replace with your API key
+const DAYTONA_API_KEY = "YOUR_API_KEY";
 
 // Initialize the Daytona client
 const daytona = new Daytona({
@@ -1166,7 +1153,7 @@ function sleep(ms: number): Promise<void> {
 async function setupNetbirdVpnInteractive(): Promise<void> {
   /**
    * Connect a Daytona sandbox to a NetBird network using the TypeScript SDK.
-   * Uses interactive login via browser URL.
+   * Uses the official NetBird install script and interactive browser login.
    */
 
   // Create the sandbox
@@ -1174,16 +1161,14 @@ async function setupNetbirdVpnInteractive(): Promise<void> {
   const sandbox = await daytona.create();
   console.log(`Sandbox created: ${sandbox.id}`);
 
-  // Step 1: Remove problematic Yarn repo that breaks apt update, then install NetBird manually
-  console.log("\nInstalling NetBird (this may take a few minutes)...");
+  // Remove the broken Yarn list so apt-get update inside the installer succeeds,
+  // then run the official NetBird install script. The script adds the NetBird
+  // APT repo, imports the signing key, installs the package, and registers the
+  // systemd service.
+  console.log("\nInstalling NetBird via the official install script...");
   const installCmd = [
     "sudo rm -f /etc/apt/sources.list.d/yarn.list",
-    "sudo apt-get update",
-    "sudo apt-get install -y ca-certificates curl gnupg",
-    "curl -sSL https://pkgs.netbird.io/debian/public.key | sudo gpg --dearmor --output /usr/share/keyrings/netbird-archive-keyring.gpg",
-    "echo 'deb [signed-by=/usr/share/keyrings/netbird-archive-keyring.gpg] https://pkgs.netbird.io/debian stable main' | sudo tee /etc/apt/sources.list.d/netbird.list",
-    "sudo apt-get update",
-    "sudo apt-get install -y netbird",
+    "curl -fsSL https://pkgs.netbird.io/install.sh | sudo sh",
   ].join(" && ");
   let response = await sandbox.process.executeCommand(
     installCmd,
@@ -1197,7 +1182,7 @@ async function setupNetbirdVpnInteractive(): Promise<void> {
   }
   console.log("NetBird installed successfully.");
 
-  // Step 3: Run netbird up in background and capture output to a file
+  // Run netbird up in background and capture output to a file
   console.log("\nInitiating NetBird login...");
   await sandbox.process.executeCommand(
     "netbird up > /tmp/netbird-login.txt 2>&1 &",
