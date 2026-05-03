@@ -10,10 +10,11 @@ import {
   SandboxApi,
   SandboxState,
   VolumesApi,
-  SandboxVolume,
   ConfigApi,
 } from '@daytona/api-client'
-import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios'
+import type { SandboxVolume } from '@daytona/api-client'
+import axios, { AxiosError } from 'axios'
+import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios'
 import {
   DaytonaAuthenticationError,
   createAxiosDaytonaError,
@@ -22,7 +23,8 @@ import {
   DaytonaValidationError,
 } from './errors/DaytonaError'
 import { Image } from './Image'
-import { Sandbox, PaginatedSandboxes } from './Sandbox'
+import { Sandbox } from './Sandbox'
+import type { PaginatedSandboxes } from './Sandbox'
 import { SnapshotService } from './Snapshot'
 import { VolumeService } from './Volume'
 import { getPackageInfo, dynamicRequire } from './utils/Import'

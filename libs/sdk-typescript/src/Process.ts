@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  Configuration,
-  ProcessApi,
+import { Configuration, ProcessApi } from '@daytona/toolbox-api-client'
+import type {
   Command,
   Session,
   SessionExecuteRequest,
@@ -14,11 +13,11 @@ import {
   PtyCreateRequest,
   PtySessionInfo,
 } from '@daytona/toolbox-api-client'
-import { ExecuteResponse } from './types/ExecuteResponse'
+import type { ExecuteResponse } from './types/ExecuteResponse'
 import { parseChart } from './types/Charts'
 import { stdDemuxStream } from './utils/Stream'
 import { PtyHandle } from './PtyHandle'
-import { PtyCreateOptions, PtyConnectOptions } from './types/Pty'
+import type { PtyCreateOptions, PtyConnectOptions } from './types/Pty'
 import { createSandboxWebSocket } from './utils/WebSocket'
 import { WithInstrumentation } from './utils/otel.decorator'
 
