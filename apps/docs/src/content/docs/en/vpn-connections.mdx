@@ -31,7 +31,7 @@ When you connect a Daytona sandbox to a Tailscale network, the sandbox becomes p
 
 This integration makes your sandbox appear as a device within your Tailscale network, with its own Tailscale IP address and access to other devices and services on the network.
 
-### Connect with browser login
+### Tailscale browser login
 
 The browser login method initiates an interactive authentication flow where Tailscale generates a unique login URL that you visit in your web browser to authenticate the Dayona sandbox.
 
@@ -318,7 +318,7 @@ setupTailscaleVpnInteractive().catch(console.error)
 
 Once the connection is established and authentication is complete, the sandbox will maintain its connection as long as the service is running.
 
-### Connect with auth key
+### Tailscale auth key
 
 Using an auth key provides a non-interactive way to connect your Daytona sandbox to Tailscale, making it suitable for automated scripts, CI/CD pipelines, or any scenario where manual browser interaction is not available.
 
@@ -496,7 +496,7 @@ setupTailscaleVpn(TAILSCALE_AUTH_KEY).catch(console.error)
 
 Once the connection is established and authentication is complete, the sandbox will maintain its connection as long as the service is running.
 
-### Connect with web terminal
+### Tailscale web terminal
 
 For working directly in the terminal or for more control over the Tailscale connection process, you can set up Tailscale manually through the Daytona [web terminal](/docs/en/web-terminal) or [SSH](/docs/en/ssh-access).
 
@@ -550,8 +550,8 @@ You've now successfully connected your Daytona sandbox to your Tailscale network
 
 Daytona provides multiple ways to connect to a Daytona sandbox with an OpenVPN network:
 
-- [Connect with client configuration](#connect-with-client-configuration)
-- [Connect with web terminal](#connect-with-web-terminal)
+- [OpenVPN client configuration](#openvpn-client-configuration)
+- [OpenVPN web terminal](#openvpn-web-terminal)
 
 OpenVPN uses a client-server model where your Daytona sandbox acts as a client connecting to an OpenVPN server. This approach is suitable for connecting to existing corporate VPNs, accessing resources behind firewalls, or integrating with infrastructure that already uses OpenVPN.
 
@@ -559,7 +559,7 @@ OpenVPN uses a client-server model where your Daytona sandbox acts as a client c
 Connecting a Daytona sandbox to OpenVPN network requires a [client configuration file](#client-configuration-file).
 :::
 
-### Client configuration file
+### OpenVPN client configuration file
 
 Client configuration file contains the connection parameters, certificates, and keys required to establish a secure connection to your OpenVPN server. This file is typically provided by your network administrator or generated from your OpenVPN server setup.
 
@@ -614,7 +614,7 @@ verb 3
 </tls-crypt-v2>
 ```
 
-### Connect with client configuration
+### OpenVPN client configuration
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -820,7 +820,7 @@ setupOpenvpn(OPENVPN_CONFIG).catch(console.error);
   </TabItem>
 </Tabs>
 
-### Connect with web terminal
+### OpenVPN web terminal
 
 Daytona provides a [web terminal](/docs/en/web-terminal) for interacting with your sandboxes, allowing you to install OpenVPN and connect to your OpenVPN network.
 
@@ -864,14 +864,14 @@ You've now successfully connected your Daytona sandbox to your OpenVPN network.
 
 Daytona provides multiple ways to connect to a Daytona sandbox with a Netbird network:
 
-- [Connect with setup key](#connect-with-setup-key)
-- [Connect with browser login](#connect-with-browser-login)
+- [Netbird setup key](#netbird-setup-key)
+- [Netbird browser login](#netbird-browser-login)
 
 When you connect a Daytona sandbox to a Netbird network, the sandbox becomes part of your private Netbird network, allowing you to access resources that are available within the network and enabling other devices on the network to access the sandbox.
 
 This integration makes your sandbox appear as a device within your Netbird network, with its own Netbird IP address and access to other devices and services on the network.
 
-### Connect with setup key
+### Netbird setup key
 
 Using a Netbird setup key provides a non-interactive way to connect your Daytona sandbox to Netbird, making it suitable for automated scripts, CI/CD pipelines, or any scenario where manual browser interaction is not available.
 
@@ -890,7 +890,6 @@ NETBIRD_SETUP_KEY = "YOUR_SETUP_KEY" # Replace with your setup key
 # Initialize the Daytona client
 config = DaytonaConfig(api_key=DAYTONA_API_KEY)
 daytona = Daytona(config)
-
 
 def setup_netbird_vpn_with_setup_key():
     """
@@ -969,11 +968,6 @@ async function setupNetbirdVpnWithSetupKey(): Promise<void> {
    * See: https://docs.netbird.io/manage/peers/access-infrastructure/setup-keys-add-servers-to-network
    */
 
-  if (NETBIRD_SETUP_KEY === "YOUR_SETUP_KEY") {
-    console.log("Error: please set NETBIRD_SETUP_KEY to a valid setup key.");
-    return;
-  }
-
   // Create the sandbox
   console.log("Creating sandbox...");
   const sandbox = await daytona.create();
@@ -1037,7 +1031,7 @@ setupNetbirdVpnWithSetupKey().catch(console.error);
 </TabItem>
 </Tabs>
 
-### Connect with browser login
+### Netbird browser login
 
 The browser login method initiates an interactive authentication flow where Netbird generates a unique login URL that you visit in your web browser to authenticate the Daytona sandbox.
 
