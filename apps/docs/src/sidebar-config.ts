@@ -636,6 +636,18 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath(
+            '/docs/guides/flue/flue-autonomous-bug-fix-agent',
+            locale
+          ),
+          label: t('sidebarconfig.flue'),
+          disablePagination: true,
+          attrs: {
+            icon: 'flue.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
             '/docs/guides/reinforcement-learning/trl-grpo-training',
             locale
           ),

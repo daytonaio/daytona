@@ -1,0 +1,36 @@
+{
+  "name": "flue-bug-fix-agent",
+  "version": "1.0.0",
+  "description": "AI bug-fix agent that reproduces a GitHub issue with a failing test, implements the fix, and opens a PR — powered by Flue and Daytona.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "flue dev --target node --env .env",
+    "start": "flue dev --target node --env .env",
+    "run": "flue run bug-fix --target node --id run-1 --env .env --payload '{}'",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "flue",
+    "daytona",
+    "agent",
+    "github",
+    "bug-fix",
+    "tdd",
+    "sandbox"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@daytona/sdk": "^0.163.0",
+    "@flue/cli": "^0.3.10",
+    "@flue/sdk": "^0.3.10",
+    "valibot": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.10",
+    "typescript": "^5.9.2"
+  }
+}
