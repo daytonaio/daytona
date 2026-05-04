@@ -74,7 +74,7 @@ export function SandboxContentTabs({
           <TabsTrigger value="logs">Logs</TabsTrigger>
           <TabsTrigger value="traces">Traces</TabsTrigger>
           <TabsTrigger value="metrics">Metrics</TabsTrigger>
-          <TabsTrigger value="spending">Spending</TabsTrigger>
+          {spendingTabAvailable && <TabsTrigger value="spending">Spending</TabsTrigger>}
           <TabsTrigger value="terminal">Terminal</TabsTrigger>
           {filesystemEnabled && <TabsTrigger value="filesystem">Filesystem</TabsTrigger>}
           <TabsTrigger value="vnc">VNC</TabsTrigger>
