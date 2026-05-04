@@ -7,12 +7,6 @@ import { TabItem, Tabs } from '@astrojs/starlight/components'
 
 OpenTelemetry (OTEL) tracing allows you to monitor and debug your Daytona SDK operations by collecting distributed traces. This is particularly useful for understanding performance bottlenecks, debugging issues, and gaining visibility into your sandbox operations.
 
-:::caution
-OpenTelemetry collection is currently an experimental feature and may change in future releases. To request access to this feature, please contact [support@daytona.io](mailto:support@daytona.io).
-:::
-
----
-
 ## Sandbox Telemetry Collection
 
 Daytona can collect traces, logs, and metrics directly from your sandboxes. This provides complete observability across your entire Daytona environment, from [SDK calls](#sdk-tracing-configuration) to sandbox runtime behavior.
@@ -23,15 +17,15 @@ When sandbox telemetry is enabled, the following data is collected:
 
 **Metrics:**
 
-- `daytona.sandbox.cpu.utilization` - CPU usage percentage (0-100%)
-- `daytona.sandbox.cpu.limit` - CPU cores limit
-- `daytona.sandbox.memory.utilization` - Memory usage percentage (0-100%)
-- `daytona.sandbox.memory.usage` - Memory used in bytes
-- `daytona.sandbox.memory.limit` - Memory limit in bytes
-- `daytona.sandbox.filesystem.utilization` - Disk usage percentage (0-100%)
-- `daytona.sandbox.filesystem.usage` - Disk space used in bytes
-- `daytona.sandbox.filesystem.available` - Disk space available in bytes
-- `daytona.sandbox.filesystem.total` - Total disk space in bytes
+- `daytona.sandbox.cpu.utilization`: CPU usage percentage (0-100%)
+- `daytona.sandbox.cpu.limit`: CPU cores limit
+- `daytona.sandbox.memory.utilization`: Memory usage percentage (0-100%)
+- `daytona.sandbox.memory.usage`: Memory used in bytes
+- `daytona.sandbox.memory.limit`: Memory limit in bytes
+- `daytona.sandbox.filesystem.utilization`: Disk usage percentage (0-100%)
+- `daytona.sandbox.filesystem.usage`: Disk space used in bytes
+- `daytona.sandbox.filesystem.available`: Disk space available in bytes
+- `daytona.sandbox.filesystem.total`: Total disk space in bytes
 
 **Traces:**
 
@@ -91,8 +85,6 @@ DAYTONA_SANDBOX_OTEL_EXTRA_LABELS="team=backend,env=staging,app=my-service"
 
 These labels are added as OTel resource attributes to all traces, logs, and metrics emitted by the sandbox. This is useful for filtering and grouping telemetry data by custom dimensions in your observability platform.
 
----
-
 ## Organization-Level Metrics
 
 In addition to per-sandbox telemetry, Daytona exports organization-level resource metrics to your configured OTLP endpoint. These metrics are pushed every 60 seconds and provide a high-level view of resource consumption and quotas across your organization.
@@ -101,12 +93,12 @@ In addition to per-sandbox telemetry, Daytona exports organization-level resourc
 
 | Metric | Unit | Description |
 | --- | --- | --- |
-| `daytona.sandbox.used_cpu` | cpu cores | Total CPU currently consumed by active sandboxes |
-| `daytona.sandbox.used_ram` | GiB | Total memory currently consumed by active sandboxes |
-| `daytona.sandbox.used_storage` | GiB | Total disk currently consumed by sandboxes |
-| `daytona.sandbox.total_cpu` | cpu cores | Total CPU quota for the organization |
-| `daytona.sandbox.total_ram` | GiB | Total memory quota for the organization |
-| `daytona.sandbox.total_storage` | GiB | Total disk quota for the organization |
+| **`daytona.sandbox.used_cpu`** | CPU cores | Total CPU currently consumed by active sandboxes |
+| **`daytona.sandbox.used_ram`** | GiB | Total memory currently consumed by active sandboxes |
+| **`daytona.sandbox.used_storage`** | GiB | Total disk currently consumed by sandboxes |
+| **`daytona.sandbox.total_cpu`** | CPU cores | Total CPU quota for the organization |
+| **`daytona.sandbox.total_ram`** | GiB | Total memory quota for the organization |
+| **`daytona.sandbox.total_storage`** | GiB | Total disk quota for the organization |
 
 ### Metric Attributes
 
@@ -118,8 +110,6 @@ Each metric includes the following attributes for filtering and grouping:
 ### Configuration
 
 Organization metrics are automatically exported when you have a [sandbox collection endpoint configured](#configure-sandbox-collection). No additional setup is required — the same OTLP endpoint receives both sandbox telemetry and organization metrics.
-
----
 
 ## SDK Tracing Configuration
 
@@ -272,8 +262,6 @@ OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp.nr-data.net:4317
 OTEL_EXPORTER_OTLP_HEADERS="api-key=your-api-key-here"
 ```
 
----
-
 ## Provider-Specific Examples
 
 ### New Relic
@@ -297,8 +285,6 @@ OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic <BASE64_ENCODED_CREDENTIALS>"
 ```
 
 Setup: Go to [Grafana Cloud Portal](https://grafana.com) → **Connections** → **Add new connection** → Search for **OpenTelemetry (OTLP)** → Follow the wizard to create an access token. The endpoint and headers will be provided in the instrumentation instructions. See the [Grafana dashboard example](https://github.com/daytonaio/daytona/tree/main/examples/otel-dashboards/grafana) for detailed setup steps.
-
----
 
 ## Complete Example
 
@@ -497,8 +483,6 @@ print(f'NumPy version: {np.__version__}')
   </TabItem>
 </Tabs>
 
----
-
 ## What Gets Traced
 
 The Daytona SDK automatically instruments the following operations:
@@ -528,8 +512,6 @@ Each trace includes valuable metadata such as:
 - Request and response duration
 - Error details (if applicable)
 - Custom SDK operation metadata
-
----
 
 ## Dashboard Examples
 
@@ -565,16 +547,12 @@ Each trace includes valuable metadata such as:
 - Verify API key format matches your provider's requirements
 - Check that the `OTEL_EXPORTER_OTLP_HEADERS` format is correct (key=value pairs)
 
----
-
 ## Best Practices
 
 1. **Always close the client**: Use `async with` (Python), `await using` (TypeScript), `defer client.Close()` (Go), or `ensure daytona.close` (Ruby) to ensure traces are properly flushed
 1. **Monitor trace volume**: Be aware that enabling tracing will increase network traffic and storage in your observability platform
 1. **Use in development first**: Test OTEL configuration in development before enabling in production
 1. **Configure sampling**: For high-volume applications, consider configuring trace sampling to reduce costs
-
----
 
 ## Additional Resources
 
