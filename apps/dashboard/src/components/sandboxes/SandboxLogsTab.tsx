@@ -23,24 +23,6 @@ import { useQueryStates } from 'nuqs'
 import React, { useCallback, useMemo, useState } from 'react'
 import { logsSearchParams, SEVERITY_OPTIONS, timeRangeSearchParams } from './SearchParams'
 
-type LogSeverity = (typeof SEVERITY_OPTIONS)[number]
-type LogsParamsState = {
-  logsPage: number
-  search: string
-  severity: LogSeverity[]
-}
-type TimeRangeState = {
-  from: Date | null
-  to: Date | null
-}
-
-const DEFAULT_LOGS_PARAMS: LogsParamsState = {
-  logsPage: 1,
-  search: '',
-  severity: [],
-}
-const EMPTY_TIME_RANGE: TimeRangeState = { from: null, to: null }
-
 function formatTimestamp(timestamp: string) {
   try {
     return format(new Date(timestamp), 'yyyy-MM-dd HH:mm:ss.SSS')
@@ -128,40 +110,12 @@ function LogsEmptyState({ hasFilters, onClearFilters }: { hasFilters: boolean; o
   )
 }
 
-export function SandboxLogsTab({ sandboxId, persistFilters = true }: { sandboxId: string; persistFilters?: boolean }) {
-  const [urlParams, setUrlParams] = useQueryStates(logsSearchParams)
-  const [queryTimeRange, setQueryTimeRange] = useQueryStates(timeRangeSearchParams)
-  const [localParams, setLocalParams] = useState<LogsParamsState>(DEFAULT_LOGS_PARAMS)
-  const [localTimeRange, setLocalTimeRange] = useState<TimeRangeState>(EMPTY_TIME_RANGE)
+export function SandboxLogsTab({ sandboxId }: { sandboxId: string }) {
+  const [params, setParams] = useQueryStates(logsSearchParams)
+  const [timeRange, setTimeRange] = useQueryStates(timeRangeSearchParams)
   const [expandedRow, setExpandedRow] = useState<number | null>(null)
   const [timeRangeSelectorKey, setTimeRangeSelectorKey] = useState(0)
   const limit = 50
-  const params = persistFilters ? urlParams : localParams
-  const timeRange = persistFilters ? queryTimeRange : localTimeRange
-
-  const setParams = useCallback(
-    (value: Partial<LogsParamsState>) => {
-      if (persistFilters) {
-        setUrlParams(value)
-        return
-      }
-
-      setLocalParams((previous) => ({ ...previous, ...value }))
-    },
-    [persistFilters, setUrlParams],
-  )
-
-  const setTimeRange = useCallback(
-    (value: TimeRangeState) => {
-      if (persistFilters) {
-        setQueryTimeRange(value)
-        return
-      }
-
-      setLocalTimeRange(value)
-    },
-    [persistFilters, setQueryTimeRange],
-  )
 
   const resolvedFrom = useMemo(() => timeRange.from ?? subHours(new Date(), 1), [timeRange.from])
   const resolvedTo = useMemo(() => timeRange.to ?? new Date(), [timeRange.to])

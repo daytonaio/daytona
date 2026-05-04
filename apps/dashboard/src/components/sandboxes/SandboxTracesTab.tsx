@@ -21,17 +21,6 @@ import { useQueryStates } from 'nuqs'
 import React, { useCallback, useMemo, useState } from 'react'
 import { timeRangeSearchParams, tracesSearchParams } from './SearchParams'
 
-type TracesParamsState = {
-  tracesPage: number
-}
-type TimeRangeState = {
-  from: Date | null
-  to: Date | null
-}
-
-const DEFAULT_TRACES_PARAMS: TracesParamsState = { tracesPage: 1 }
-const EMPTY_TIME_RANGE: TimeRangeState = { from: null, to: null }
-
 interface SpanNode extends TraceSpan {
   depth: number
   children: SpanNode[]
@@ -399,46 +388,12 @@ function TraceExpandedRow({ sandboxId, trace }: { sandboxId: string; trace: Trac
   )
 }
 
-export function SandboxTracesTab({
-  sandboxId,
-  persistFilters = true,
-}: {
-  sandboxId: string
-  persistFilters?: boolean
-}) {
-  const [urlParams, setUrlParams] = useQueryStates(tracesSearchParams)
-  const [queryTimeRange, setQueryTimeRange] = useQueryStates(timeRangeSearchParams)
-  const [localParams, setLocalParams] = useState<TracesParamsState>(DEFAULT_TRACES_PARAMS)
-  const [localTimeRange, setLocalTimeRange] = useState<TimeRangeState>(EMPTY_TIME_RANGE)
+export function SandboxTracesTab({ sandboxId }: { sandboxId: string }) {
+  const [params, setParams] = useQueryStates(tracesSearchParams)
+  const [timeRange, setTimeRange] = useQueryStates(timeRangeSearchParams)
   const [expandedTraceId, setExpandedTraceId] = useState<string | null>(null)
   const [timeRangeSelectorKey, setTimeRangeSelectorKey] = useState(0)
   const limit = 50
-  const params = persistFilters ? urlParams : localParams
-  const timeRange = persistFilters ? queryTimeRange : localTimeRange
-
-  const setParams = useCallback(
-    (value: Partial<TracesParamsState>) => {
-      if (persistFilters) {
-        setUrlParams(value)
-        return
-      }
-
-      setLocalParams((previous) => ({ ...previous, ...value }))
-    },
-    [persistFilters, setUrlParams],
-  )
-
-  const setTimeRange = useCallback(
-    (value: TimeRangeState) => {
-      if (persistFilters) {
-        setQueryTimeRange(value)
-        return
-      }
-
-      setLocalTimeRange(value)
-    },
-    [persistFilters, setQueryTimeRange],
-  )
 
   const resolvedFrom = useMemo(() => timeRange.from ?? subHours(new Date(), 1), [timeRange.from])
   const resolvedTo = useMemo(() => timeRange.to ?? new Date(), [timeRange.to])

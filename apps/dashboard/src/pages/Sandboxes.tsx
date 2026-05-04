@@ -9,10 +9,10 @@ import { ForkTreeDialog } from '@/components/ForkTreeDialog'
 import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { RecursiveDeleteDialog } from '@/components/RecursiveDeleteDialog'
 import { CreateSandboxSheet } from '@/components/Sandbox/CreateSandboxSheet'
-import SandboxDetailsSheet, { type SandboxDetailsSheetTabValue } from '@/components/SandboxDetailsSheet'
 import { tabParser } from '@/components/sandboxes/SearchParams'
 import { CreateSshAccessSheet } from '@/components/sandboxes/CreateSshAccessSheet'
 import { RevokeSshAccessDialog } from '@/components/sandboxes/RevokeSshAccessDialog'
+import SandboxDetailsSheet, { type SandboxDetailsSheetTabValue } from '@/components/sandboxes/SandboxDetailsSheet'
 import { SandboxTable } from '@/components/SandboxTable'
 import {
   AlertDialog,
@@ -725,60 +725,52 @@ const Sandboxes: React.FC = () => {
     [sandboxItems, selectedSandbox?.id],
   )
 
-  const handleSandboxSheetNavigate = useCallback(
-    (direction: 'prev' | 'next') => {
-      if (selectedSandboxIndex < 0) {
-        return
-      }
+  const handleSandboxSheetNavigate = (direction: 'prev' | 'next') => {
+    if (selectedSandboxIndex < 0) {
+      return
+    }
 
-      const nextIndex = direction === 'prev' ? selectedSandboxIndex - 1 : selectedSandboxIndex + 1
-      const nextSandbox = sandboxItems[nextIndex]
+    const nextIndex = direction === 'prev' ? selectedSandboxIndex - 1 : selectedSandboxIndex + 1
+    const nextSandbox = sandboxItems[nextIndex]
 
-      if (nextSandbox) {
-        setSelectedSandbox(nextSandbox)
-        setSandboxIdParam(nextSandbox.id)
-      }
-    },
-    [sandboxItems, selectedSandboxIndex, setSandboxIdParam],
-  )
+    if (nextSandbox) {
+      setSelectedSandbox(nextSandbox)
+      setSandboxIdParam(nextSandbox.id)
+    }
+  }
 
-  const handleSandboxDetailsOpenChange = useCallback(
-    (isOpen: boolean) => {
-      setShowSandboxDetails(isOpen)
+  const handleSandboxDetailsOpenChange = (isOpen: boolean) => {
+    setShowSandboxDetails(isOpen)
 
-      if (!isOpen) {
-        setSandboxIdParam(null)
-        setSandboxTabParam(null)
-      }
-    },
-    [setSandboxIdParam, setSandboxTabParam],
-  )
+    if (!isOpen) {
+      setSandboxIdParam(null)
+      setSandboxTabParam(null)
+    }
+  }
 
-  const handleSandboxDetailsTabChange = useCallback(
-    (tab: SandboxDetailsSheetTabValue) => {
-      setSandboxTabParam(tab)
-    },
-    [setSandboxTabParam],
-  )
+  const openSandboxDetails = (sandbox: Sandbox, orderedSandboxes: Sandbox[] | null) => {
+    setOrderedSandboxItems(orderedSandboxes)
+    setSelectedSandbox(sandbox)
+    setSandboxDetailsInitialTab('overview')
+    setSandboxIdParam(sandbox.id)
+    setSandboxTabParam('overview')
+    setShowSandboxDetails(true)
+  }
 
-  const handleSandboxCreated = useCallback(
-    (sandbox: CreatedSandbox) => {
-      const createdSandbox = sandbox as unknown as Sandbox
+  const handleSandboxRowClick = (sandbox: Sandbox, orderedSandboxes: Sandbox[]) => {
+    openSandboxDetails(sandbox, orderedSandboxes)
+  }
 
-      setSandboxes((prev) =>
-        prev.some((existingSandbox) => existingSandbox.id === createdSandbox.id)
-          ? prev.map((existingSandbox) => (existingSandbox.id === createdSandbox.id ? createdSandbox : existingSandbox))
-          : [createdSandbox, ...prev],
-      )
-      setOrderedSandboxItems(null)
-      setSelectedSandbox(createdSandbox)
-      setSandboxDetailsInitialTab('overview')
-      setSandboxIdParam(createdSandbox.id)
-      setSandboxTabParam('overview')
-      setShowSandboxDetails(true)
-    },
-    [setSandboxIdParam, setSandboxTabParam],
-  )
+  const handleSandboxCreated = (sandbox: CreatedSandbox) => {
+    const createdSandbox = sandbox as unknown as Sandbox
+
+    setSandboxes((prev) =>
+      prev.some((existingSandbox) => existingSandbox.id === createdSandbox.id)
+        ? prev.map((existingSandbox) => (existingSandbox.id === createdSandbox.id ? createdSandbox : existingSandbox))
+        : [createdSandbox, ...prev],
+    )
+    openSandboxDetails(createdSandbox, null)
+  }
 
   const writePermitted = useMemo(
     () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SANDBOXES),
@@ -860,6 +852,7 @@ const Sandboxes: React.FC = () => {
         <SandboxTable
           sandboxIsLoading={loadingSandboxes}
           sandboxStateIsTransitioning={transitioningSandboxes}
+          activeSandboxId={showSandboxDetails ? selectedSandbox?.id : undefined}
           handleStart={handleStart}
           handleStop={handleStop}
           handleDelete={openDeleteDialog}
@@ -874,14 +867,7 @@ const Sandboxes: React.FC = () => {
           data={sandboxes}
           loading={loadingTable}
           snapshots={snapshots}
-          onRowClick={(sandbox: Sandbox, orderedSandboxes: Sandbox[]) => {
-            setOrderedSandboxItems(orderedSandboxes)
-            setSelectedSandbox(sandbox)
-            setSandboxDetailsInitialTab('overview')
-            setSandboxIdParam(sandbox.id)
-            setSandboxTabParam('overview')
-            setShowSandboxDetails(true)
-          }}
+          onRowClick={handleSandboxRowClick}
           loadingSnapshots={loadingSnapshots}
           regionsData={regionsData}
           regionsDataIsLoading={regionsDataIsLoading}
@@ -1021,7 +1007,7 @@ const Sandboxes: React.FC = () => {
           hasNext={selectedSandboxIndex >= 0 && selectedSandboxIndex < sandboxItems.length - 1}
           initialTab={sandboxDetailsInitialTab}
           activeTab={sandboxTabParam as SandboxDetailsSheetTabValue}
-          onTabChange={handleSandboxDetailsTabChange}
+          onTabChange={setSandboxTabParam}
         />
 
         {forkTreeSandboxId && (

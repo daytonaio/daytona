@@ -48,6 +48,7 @@ export function SandboxTable({
   data,
   sandboxIsLoading,
   sandboxStateIsTransitioning,
+  activeSandboxId,
   loading,
   snapshots,
   loadingSnapshots,
@@ -257,7 +258,7 @@ export function SandboxTable({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
+                  data-selected={row.getIsSelected() || row.original.id === activeSandboxId ? true : undefined}
                   className={cn('group/table-row transition-all', {
                     'opacity-80 pointer-events-none':
                       sandboxIsLoading[row.original.id] || row.original.state === SandboxState.DESTROYED,

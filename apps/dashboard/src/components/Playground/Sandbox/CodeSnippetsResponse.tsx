@@ -389,6 +389,7 @@ const SandboxCodeSnippetsResponse = ({ className }: { className?: string }) => {
                     />
                     <ScrollArea
                       fade="mask"
+                      fadeOrientation="vertical"
                       horizontal
                       className="h-full overflow-auto bg-[hsl(var(--code-background))]"
                       fadeOffset={35}

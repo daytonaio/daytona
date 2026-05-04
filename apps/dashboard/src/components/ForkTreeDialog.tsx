@@ -11,7 +11,7 @@ import { Sandbox } from '@daytona/api-client'
 import { ChevronDown, ChevronRight, GitFork } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { SandboxState } from './SandboxTable/SandboxState'
+import { SandboxState } from './sandboxes/SandboxState'
 
 interface ForkTreeDialogProps {
   sandboxId: string

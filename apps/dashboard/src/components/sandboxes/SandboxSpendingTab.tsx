@@ -17,13 +17,6 @@ import { useQueryStates } from 'nuqs'
 import { useCallback, useMemo, useState } from 'react'
 import { timeRangeSearchParams } from './SearchParams'
 
-type TimeRangeState = {
-  from: Date | null
-  to: Date | null
-}
-
-const EMPTY_TIME_RANGE: TimeRangeState = { from: null, to: null }
-
 function formatTimestamp(timestamp: string) {
   try {
     return format(new Date(timestamp), 'yyyy-MM-dd HH:mm:ss')
@@ -111,29 +104,9 @@ function SpendingEmptyState({ hasFilters, onClearFilters }: { hasFilters: boolea
   )
 }
 
-export function SandboxSpendingTab({
-  sandboxId,
-  persistFilters = true,
-}: {
-  sandboxId: string
-  persistFilters?: boolean
-}) {
-  const [queryTimeRange, setQueryTimeRange] = useQueryStates(timeRangeSearchParams)
-  const [localTimeRange, setLocalTimeRange] = useState<TimeRangeState>(EMPTY_TIME_RANGE)
+export function SandboxSpendingTab({ sandboxId }: { sandboxId: string }) {
+  const [timeRange, setTimeRange] = useQueryStates(timeRangeSearchParams)
   const [timeRangeSelectorKey, setTimeRangeSelectorKey] = useState(0)
-  const timeRange = persistFilters ? queryTimeRange : localTimeRange
-
-  const setTimeRange = useCallback(
-    (value: TimeRangeState) => {
-      if (persistFilters) {
-        setQueryTimeRange(value)
-        return
-      }
-
-      setLocalTimeRange(value)
-    },
-    [persistFilters, setQueryTimeRange],
-  )
 
   const resolvedFrom = useMemo(() => timeRange.from ?? subHours(new Date(), 24), [timeRange.from])
   const resolvedTo = useMemo(() => timeRange.to ?? new Date(), [timeRange.to])

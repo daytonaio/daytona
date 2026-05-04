@@ -21,13 +21,6 @@ import React, { useCallback, useMemo, useState } from 'react'
 import { CartesianGrid, Legend, Line, LineChart, XAxis, YAxis } from 'recharts'
 import { timeRangeSearchParams } from './SearchParams'
 
-type TimeRangeState = {
-  from: Date | null
-  to: Date | null
-}
-
-const EMPTY_TIME_RANGE: TimeRangeState = { from: null, to: null }
-
 const CHART_COLORS = [
   'hsl(var(--chart-1))',
   'hsl(var(--chart-2))',
@@ -249,30 +242,10 @@ function MetricsEmptyState({ hasFilters, onClearFilters }: { hasFilters: boolean
   )
 }
 
-export function SandboxMetricsTab({
-  sandboxId,
-  persistFilters = true,
-}: {
-  sandboxId: string
-  persistFilters?: boolean
-}) {
-  const [queryTimeRange, setQueryTimeRange] = useQueryStates(timeRangeSearchParams)
-  const [localTimeRange, setLocalTimeRange] = useState<TimeRangeState>(EMPTY_TIME_RANGE)
+export function SandboxMetricsTab({ sandboxId }: { sandboxId: string }) {
+  const [timeRange, setTimeRange] = useQueryStates(timeRangeSearchParams)
   const [viewModes, setViewModes] = useState<Record<string, ViewMode>>({ memory: '%', filesystem: '%' })
   const [timeRangeSelectorKey, setTimeRangeSelectorKey] = useState(0)
-  const timeRange = persistFilters ? queryTimeRange : localTimeRange
-
-  const setTimeRange = useCallback(
-    (value: TimeRangeState) => {
-      if (persistFilters) {
-        setQueryTimeRange(value)
-        return
-      }
-
-      setLocalTimeRange(value)
-    },
-    [persistFilters, setQueryTimeRange],
-  )
 
   const resolvedFrom = useMemo(() => timeRange.from ?? subHours(new Date(), 1), [timeRange.from])
   const resolvedTo = useMemo(() => timeRange.to ?? new Date(), [timeRange.to])

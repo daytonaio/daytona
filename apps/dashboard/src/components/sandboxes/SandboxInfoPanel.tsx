@@ -22,7 +22,7 @@ export function InfoSection({
   children,
   className,
 }: {
-  title: ReactNode
+  title?: ReactNode
   children: ReactNode
   className?: string
 }) {

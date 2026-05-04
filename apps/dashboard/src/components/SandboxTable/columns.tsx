@@ -12,10 +12,10 @@ import { EllipsisWithTooltip } from '../EllipsisWithTooltip'
 import { SandboxLabel } from '../SandboxLabel'
 import { SortOrderIcon } from '../SortIcon'
 import { TimestampTooltip } from '../TimestampTooltip'
+import { SandboxState as SandboxStateComponent } from '../sandboxes/SandboxState'
 import { Badge } from '../ui/badge'
 import { Checkbox } from '../ui/checkbox'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
-import { SandboxState as SandboxStateComponent } from './SandboxState'
 import { SandboxTableActions } from './SandboxTableActions'
 import { STATE_PRIORITY_ORDER } from './constants'
 import { ResourceFilterValue } from './filters/ResourceFilter'
@@ -42,6 +42,18 @@ const SortableHeader: React.FC<SortableHeaderProps> = ({ column, label, dataStat
     </button>
   )
 }
+
+const SandboxStateCell = React.memo(function SandboxStateCell({
+  state,
+  errorReason,
+  recoverable,
+}: Pick<Sandbox, 'state' | 'errorReason' | 'recoverable'>) {
+  return (
+    <div className="w-full truncate">
+      <SandboxStateComponent state={state} errorReason={errorReason} recoverable={recoverable} />
+    </div>
+  )
+})
 
 interface GetColumnsProps {
   handleStart: (id: string) => void
@@ -170,13 +182,11 @@ export function getColumns({
         return <SortableHeader column={column} label="State" />
       },
       cell: ({ row }) => (
-        <div className="w-full truncate">
-          <SandboxStateComponent
-            state={row.original.state}
-            errorReason={row.original.errorReason}
-            recoverable={row.original.recoverable}
-          />
-        </div>
+        <SandboxStateCell
+          state={row.original.state}
+          errorReason={row.original.errorReason}
+          recoverable={row.original.recoverable}
+        />
       ),
       accessorKey: 'state',
       sortingFn: (rowA, rowB) => {

@@ -4,7 +4,7 @@
  */
 
 import { CopyButton } from '@/components/CopyButton'
-import { SandboxState } from '@/components/SandboxTable/SandboxState'
+import { SandboxState } from './SandboxState'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
