@@ -54,6 +54,16 @@ RSpec.describe Daytona::Daytona do
       expect(api_client.default_headers['X-Daytona-Organization-ID']).to eq('org-1')
     end
 
+    it 'initializes otel when the otel_enabled config option is set' do
+      otel_state = double('OtelState')
+      otel_config = build_config(otel_enabled: true)
+      allow(Daytona).to receive(:init_otel).and_return(otel_state)
+
+      described_class.new(otel_config)
+
+      expect(Daytona).to have_received(:init_otel).with(Daytona::Sdk::VERSION)
+    end
+
     it 'initializes otel when experimental config enables it' do
       otel_state = double('OtelState')
       experimental_config = build_config(_experimental: { 'otel_enabled' => true })
@@ -64,8 +74,20 @@ RSpec.describe Daytona::Daytona do
       expect(Daytona).to have_received(:init_otel).with(Daytona::Sdk::VERSION)
     end
 
-    it 'initializes otel when the environment variable enables it' do
+    it 'initializes otel when DAYTONA_OTEL_ENABLED is set' do
       env_config = build_config
+      allow(env_config).to receive(:read_env).with('DAYTONA_OTEL_ENABLED').and_return('true')
+      allow(env_config).to receive(:read_env).with('DAYTONA_EXPERIMENTAL_OTEL_ENABLED').and_return(nil)
+      allow(Daytona).to receive(:init_otel).and_return(double('OtelState'))
+
+      described_class.new(env_config)
+
+      expect(Daytona).to have_received(:init_otel)
+    end
+
+    it 'initializes otel when DAYTONA_EXPERIMENTAL_OTEL_ENABLED is set' do
+      env_config = build_config
+      allow(env_config).to receive(:read_env).with('DAYTONA_OTEL_ENABLED').and_return(nil)
       allow(env_config).to receive(:read_env).with('DAYTONA_EXPERIMENTAL_OTEL_ENABLED').and_return('true')
       allow(Daytona).to receive(:init_otel).and_return(double('OtelState'))
 
