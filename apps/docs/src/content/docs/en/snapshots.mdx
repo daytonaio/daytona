@@ -292,7 +292,7 @@ Use the flags `--cpu`, `--memory` and `--disk` to specify the [resources](/docs/
 <br />
 ```bash
 daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cpu 2 --memory 4 --disk 8
-``` 
+```
 :::
 
 Alternatively, use the `--dockerfile` flag under `create` to pass the path to the Dockerfile you want to use and Daytona will build the snapshot for you. The `COPY`/`ADD` commands will be automatically parsed and added to the context. To manually add files to the context, use the `--context` flag.
@@ -1091,6 +1091,7 @@ All default snapshots are based on the `daytonaio/sandbox:<version>` image. For 
 - `anthropic` (v0.76.0)
 - `beautifulsoup4` (v4.14.3)
 - `claude-agent-sdk` (v0.1.22)
+- `openai-agents` (v0.15.1)
 - `daytona` (v0.134.0)
 - `django` (v6.0.1)
 - `flask` (v3.1.2)
@@ -1102,7 +1103,7 @@ All default snapshots are based on the `daytonaio/sandbox:<version>` image. For 
 - `matplotlib` (v3.10.8)
 - `numpy` (v2.4.1)
 - `ollama` (v0.6.1)
-- `openai` (v2.15.0)
+- `openai` (v2.33.0)
 - `opencv-python` (v4.13.0.90)
 - `pandas` (v2.3.3)
 - `pillow` (v12.1.0)
@@ -1118,6 +1119,7 @@ All default snapshots are based on the `daytonaio/sandbox:<version>` image. For 
 ### Node.js packages (npm)
 
 - `@anthropic-ai/claude-code` (v2.1.19)
+- `@openai/codex` (0.128.0)
 - `bun` (v1.3.6)
 - `openclaw` (v2026.2.1)
 - `opencode-ai` (v1.1.35)
