@@ -98,6 +98,8 @@ const (
 	stateActive = 1 // used for focus-scoped root resolution
 
 	a11yHealthTimeout = time.Second
+	a11yStatusTimeout = 100 * time.Millisecond
+	a11yStatusTTL     = 2 * time.Second
 )
 
 // atspiStateNames is the AT-SPI StateType enum ordered by bit index. Names
@@ -212,10 +214,41 @@ func (c *ComputerUse) connectA11yContext(ctx context.Context) (*dbus.Conn, error
 }
 
 func (c *ComputerUse) isA11yAvailable() bool {
+	return c.checkA11yAvailable(a11yHealthTimeout)
+}
+
+func (c *ComputerUse) cachedA11yAvailable() bool {
+	c.a11yStatusMu.Lock()
+	running := c.a11yStatusRunning
+	fresh := time.Since(c.a11yStatusCheckedAt) < a11yStatusTTL
+	c.a11yStatusMu.Unlock()
+	if fresh {
+		return running
+	}
+
+	running = c.checkA11yAvailable(a11yStatusTimeout)
+	c.setA11yStatus(running)
+	return running
+}
+
+func (c *ComputerUse) setA11yStatus(running bool) {
+	c.a11yStatusMu.Lock()
+	c.a11yStatusRunning = running
+	c.a11yStatusCheckedAt = time.Now()
+	c.a11yStatusMu.Unlock()
+}
+
+func (c *ComputerUse) invalidateA11yStatus() {
+	c.a11yStatusMu.Lock()
+	c.a11yStatusCheckedAt = time.Time{}
+	c.a11yStatusMu.Unlock()
+}
+
+func (c *ComputerUse) checkA11yAvailable(timeout time.Duration) bool {
 	if c.a11yHealth != nil {
 		return c.a11yHealth()
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), a11yHealthTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	conn, err := c.connectA11yContext(ctx)

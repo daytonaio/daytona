@@ -169,7 +169,7 @@ The processes are configured with the following settings based on environment va
 | ------- | ---------------------------------------------------------------------------------- | -------- | ------------ | --------- | ----------------------------------------------------- |
 | xvfb    | `/usr/bin/Xvfb $DISPLAY -screen 0 $VNC_RESOLUTIONx24`                              | 100      | Yes          | No        | `DISPLAY`                                             |
 | xfce4   | `/usr/bin/startxfce4`                                                              | 200      | Yes          | Yes       | `DISPLAY`, `HOME`, `USER`, `DBUS_SESSION_BUS_ADDRESS` |
-| atspi   | `/usr/libexec/at-spi-bus-launcher --launch-immediately`                            | 250      | Yes          | Yes       | `DISPLAY`, `HOME`, `USER`, `DBUS_SESSION_BUS_ADDRESS` |
+| atspi   | `/usr/libexec/at-spi-bus-launcher --launch-immediately`                            | 250      | No           | Yes       | `DISPLAY`, `HOME`, `USER`, `DBUS_SESSION_BUS_ADDRESS` |
 | x11vnc  | `/usr/bin/x11vnc -display $DISPLAY -forever -shared -rfbport $VNC_PORT`            | 300      | Yes          | No        | `DISPLAY`                                             |
 | novnc   | `/usr/share/novnc/utils/launch.sh --vnc localhost:$VNC_PORT --listen $NO_VNC_PORT` | 400      | Yes          | No        | `DISPLAY`                                             |
 

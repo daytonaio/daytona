@@ -48,6 +48,10 @@ type ComputerUse struct {
 
 	a11yHealth func() bool
 	waitDBus   func(string, time.Duration) error
+
+	a11yStatusMu        sync.Mutex
+	a11yStatusRunning   bool
+	a11yStatusCheckedAt time.Time
 }
 
 var _ computeruse.IComputerUse = &ComputerUse{}
@@ -100,6 +104,7 @@ func (c *ComputerUse) Start() (*computeruse.Empty, error) {
 
 	// Start all processes in order of priority
 	c.startAllProcesses()
+	c.invalidateA11yStatus()
 
 	// Check process status after starting
 	status, err := c.GetProcessStatus()
@@ -448,6 +453,7 @@ func (c *ComputerUse) Stop() (*computeruse.Empty, error) {
 		c.atspiConn = nil
 	}
 	c.atspiMu.Unlock()
+	c.setA11yStatus(false)
 
 	return new(computeruse.Empty), nil
 }
@@ -490,7 +496,7 @@ func (c *ComputerUse) GetProcessStatus() (map[string]computeruse.ProcessStatus, 
 	for name, process := range processes {
 		processStatus := getProcessStatus(process)
 		if name == "atspi" {
-			processStatus.Running = c.isA11yAvailable()
+			processStatus.Running = c.cachedA11yAvailable()
 			processStatus.Pid = nil
 		}
 		status[name] = processStatus

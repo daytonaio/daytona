@@ -50,6 +50,32 @@ func TestAtspiStatusUsesA11yHealth(t *testing.T) {
 	}
 }
 
+func TestAtspiStatusCachesA11yHealth(t *testing.T) {
+	healthCalls := 0
+	c := &ComputerUse{
+		processes: map[string]*Process{
+			"atspi": {Name: "atspi", Priority: 250, AutoRestart: false},
+		},
+		a11yHealth: func() bool {
+			healthCalls++
+			return true
+		},
+	}
+
+	for i := 0; i < 2; i++ {
+		status, err := c.GetProcessStatus()
+		if err != nil {
+			t.Fatalf("GetProcessStatus() error = %v", err)
+		}
+		if !status["atspi"].Running {
+			t.Fatal("atspi status should use the cached AT-SPI health result")
+		}
+	}
+	if healthCalls != 1 {
+		t.Fatalf("health check calls = %d, want 1", healthCalls)
+	}
+}
+
 func TestInitializeProcessesRegistersAtspiAsBootstrap(t *testing.T) {
 	addAtspiLauncherToPath(t)
 	t.Setenv("DBUS_SESSION_BUS_ADDRESS", "unix:path=/tmp/daytona-test-bus")
