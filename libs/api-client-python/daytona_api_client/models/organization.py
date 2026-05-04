@@ -21,6 +21,7 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
+from daytona_api_client.models.otel_config import OtelConfig
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
@@ -52,11 +53,12 @@ class Organization(BaseModel):
     sandbox_create_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(description="Sandbox create rate limit per minute", serialization_alias="sandboxCreateRateLimit")
     sandbox_lifecycle_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(description="Sandbox lifecycle rate limit per minute", serialization_alias="sandboxLifecycleRateLimit")
     experimental_config: Dict[str, Any] = Field(description="Experimental configuration", serialization_alias="experimentalConfig")
+    otel_config: Optional[OtelConfig] = Field(description="OpenTelemetry collection configuration", serialization_alias="otelConfig")
     authenticated_rate_limit_ttl_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(description="Authenticated rate limit TTL in seconds", serialization_alias="authenticatedRateLimitTtlSeconds")
     sandbox_create_rate_limit_ttl_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(description="Sandbox create rate limit TTL in seconds", serialization_alias="sandboxCreateRateLimitTtlSeconds")
     sandbox_lifecycle_rate_limit_ttl_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(description="Sandbox lifecycle rate limit TTL in seconds", serialization_alias="sandboxLifecycleRateLimitTtlSeconds")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "defaultRegionId", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"]
+    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "defaultRegionId", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "otelConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -98,6 +100,9 @@ class Organization(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of otel_config
+        if self.otel_config:
+            _dict['otelConfig'] = self.otel_config.to_dict()
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -117,6 +122,11 @@ class Organization(BaseModel):
         # and model_fields_set contains the field
         if self.sandbox_lifecycle_rate_limit is None and "sandbox_lifecycle_rate_limit" in self.model_fields_set:
             _dict['sandboxLifecycleRateLimit'] = None
+
+        # set to None if otel_config (nullable) is None
+        # and model_fields_set contains the field
+        if self.otel_config is None and "otel_config" in self.model_fields_set:
+            _dict['otelConfig'] = None
 
         # set to None if authenticated_rate_limit_ttl_seconds (nullable) is None
         # and model_fields_set contains the field
@@ -166,6 +176,7 @@ class Organization(BaseModel):
             "sandbox_create_rate_limit": obj.get("sandboxCreateRateLimit"),
             "sandbox_lifecycle_rate_limit": obj.get("sandboxLifecycleRateLimit"),
             "experimental_config": obj.get("experimentalConfig"),
+            "otel_config": OtelConfig.from_dict(obj["otelConfig"]) if obj.get("otelConfig") is not None else None,
             "authenticated_rate_limit_ttl_seconds": obj.get("authenticatedRateLimitTtlSeconds"),
             "sandbox_create_rate_limit_ttl_seconds": obj.get("sandboxCreateRateLimitTtlSeconds"),
             "sandbox_lifecycle_rate_limit_ttl_seconds": obj.get("sandboxLifecycleRateLimitTtlSeconds")

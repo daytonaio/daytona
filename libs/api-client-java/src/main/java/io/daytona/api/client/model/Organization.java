@@ -19,6 +19,7 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import io.daytona.api.client.model.OtelConfig;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -156,6 +157,11 @@ public class Organization {
   @SerializedName(SERIALIZED_NAME_EXPERIMENTAL_CONFIG)
   @javax.annotation.Nonnull
   private Object experimentalConfig;
+
+  public static final String SERIALIZED_NAME_OTEL_CONFIG = "otelConfig";
+  @SerializedName(SERIALIZED_NAME_OTEL_CONFIG)
+  @javax.annotation.Nullable
+  private OtelConfig otelConfig;
 
   public static final String SERIALIZED_NAME_AUTHENTICATED_RATE_LIMIT_TTL_SECONDS = "authenticatedRateLimitTtlSeconds";
   @SerializedName(SERIALIZED_NAME_AUTHENTICATED_RATE_LIMIT_TTL_SECONDS)
@@ -574,6 +580,25 @@ public class Organization {
   }
 
 
+  public Organization otelConfig(@javax.annotation.Nullable OtelConfig otelConfig) {
+    this.otelConfig = otelConfig;
+    return this;
+  }
+
+  /**
+   * OpenTelemetry collection configuration
+   * @return otelConfig
+   */
+  @javax.annotation.Nullable
+  public OtelConfig getOtelConfig() {
+    return otelConfig;
+  }
+
+  public void setOtelConfig(@javax.annotation.Nullable OtelConfig otelConfig) {
+    this.otelConfig = otelConfig;
+  }
+
+
   public Organization authenticatedRateLimitTtlSeconds(@javax.annotation.Nullable BigDecimal authenticatedRateLimitTtlSeconds) {
     this.authenticatedRateLimitTtlSeconds = authenticatedRateLimitTtlSeconds;
     return this;
@@ -706,6 +731,7 @@ public class Organization {
         Objects.equals(this.sandboxCreateRateLimit, organization.sandboxCreateRateLimit) &&
         Objects.equals(this.sandboxLifecycleRateLimit, organization.sandboxLifecycleRateLimit) &&
         Objects.equals(this.experimentalConfig, organization.experimentalConfig) &&
+        Objects.equals(this.otelConfig, organization.otelConfig) &&
         Objects.equals(this.authenticatedRateLimitTtlSeconds, organization.authenticatedRateLimitTtlSeconds) &&
         Objects.equals(this.sandboxCreateRateLimitTtlSeconds, organization.sandboxCreateRateLimitTtlSeconds) &&
         Objects.equals(this.sandboxLifecycleRateLimitTtlSeconds, organization.sandboxLifecycleRateLimitTtlSeconds)&&
@@ -714,7 +740,7 @@ public class Organization {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, createdBy, personal, createdAt, updatedAt, suspended, suspendedAt, suspensionReason, suspendedUntil, suspensionCleanupGracePeriodHours, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, snapshotDeactivationTimeoutMinutes, sandboxLimitedNetworkEgress, defaultRegionId, authenticatedRateLimit, sandboxCreateRateLimit, sandboxLifecycleRateLimit, experimentalConfig, authenticatedRateLimitTtlSeconds, sandboxCreateRateLimitTtlSeconds, sandboxLifecycleRateLimitTtlSeconds, additionalProperties);
+    return Objects.hash(id, name, createdBy, personal, createdAt, updatedAt, suspended, suspendedAt, suspensionReason, suspendedUntil, suspensionCleanupGracePeriodHours, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, snapshotDeactivationTimeoutMinutes, sandboxLimitedNetworkEgress, defaultRegionId, authenticatedRateLimit, sandboxCreateRateLimit, sandboxLifecycleRateLimit, experimentalConfig, otelConfig, authenticatedRateLimitTtlSeconds, sandboxCreateRateLimitTtlSeconds, sandboxLifecycleRateLimitTtlSeconds, additionalProperties);
   }
 
   @Override
@@ -742,6 +768,7 @@ public class Organization {
     sb.append("    sandboxCreateRateLimit: ").append(toIndentedString(sandboxCreateRateLimit)).append("\n");
     sb.append("    sandboxLifecycleRateLimit: ").append(toIndentedString(sandboxLifecycleRateLimit)).append("\n");
     sb.append("    experimentalConfig: ").append(toIndentedString(experimentalConfig)).append("\n");
+    sb.append("    otelConfig: ").append(toIndentedString(otelConfig)).append("\n");
     sb.append("    authenticatedRateLimitTtlSeconds: ").append(toIndentedString(authenticatedRateLimitTtlSeconds)).append("\n");
     sb.append("    sandboxCreateRateLimitTtlSeconds: ").append(toIndentedString(sandboxCreateRateLimitTtlSeconds)).append("\n");
     sb.append("    sandboxLifecycleRateLimitTtlSeconds: ").append(toIndentedString(sandboxLifecycleRateLimitTtlSeconds)).append("\n");
@@ -764,10 +791,10 @@ public class Organization {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "defaultRegionId", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "defaultRegionId", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "otelConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"));
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "otelConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"));
   }
 
   /**
@@ -804,6 +831,10 @@ public class Organization {
       }
       if ((jsonObj.get("defaultRegionId") != null && !jsonObj.get("defaultRegionId").isJsonNull()) && !jsonObj.get("defaultRegionId").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `defaultRegionId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("defaultRegionId").toString()));
+      }
+      if (jsonObj.get("otelConfig") != null && !jsonObj.get("otelConfig").isJsonNull()) {
+      // validate the required field `otelConfig`
+      OtelConfig.validateJsonElement(jsonObj.get("otelConfig"));
       }
   }
 

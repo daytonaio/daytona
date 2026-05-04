@@ -13,6 +13,9 @@
  */
 
 
+// May contain unused imports in some cases
+// @ts-ignore
+import type { OtelConfig } from './otel-config';
 
 export interface Organization {
     /**
@@ -99,6 +102,10 @@ export interface Organization {
      * Experimental configuration
      */
     'experimentalConfig': object;
+    /**
+     * OpenTelemetry collection configuration
+     */
+    'otelConfig': OtelConfig | null;
     /**
      * Authenticated rate limit TTL in seconds
      */

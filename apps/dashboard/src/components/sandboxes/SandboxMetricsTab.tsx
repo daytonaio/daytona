@@ -223,7 +223,7 @@ function MetricsEmptyState() {
         <EmptyTitle>No metrics available</EmptyTitle>
         <EmptyDescription>
           Metrics may take a moment to appear after the sandbox starts.{' '}
-          <a href={`${DAYTONA_DOCS_URL}/en/experimental/otel-collection`} target="_blank" rel="noopener noreferrer">
+          <a href={`${DAYTONA_DOCS_URL}/en/observability/otel-collection`} target="_blank" rel="noopener noreferrer">
             Learn more about observability
           </a>
           .

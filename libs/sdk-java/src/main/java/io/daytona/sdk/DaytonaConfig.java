@@ -13,6 +13,7 @@ public final class DaytonaConfig {
     private final String apiKey;
     private final String apiUrl;
     private final String target;
+    private final boolean otelEnabled;
 
     private DaytonaConfig(Builder builder) {
         this.apiKey = builder.apiKey;
@@ -20,6 +21,7 @@ public final class DaytonaConfig {
                 ? "https://app.daytona.io/api"
                 : builder.apiUrl;
         this.target = builder.target;
+        this.otelEnabled = builder.otelEnabled;
     }
 
     /**
@@ -50,12 +52,26 @@ public final class DaytonaConfig {
     }
 
     /**
+     * Returns whether OpenTelemetry tracing is enabled for SDK operations.
+     *
+     * <p>Note: SDK-side OpenTelemetry instrumentation is not yet implemented in the Java SDK.
+     * This setter exists for API parity with the other SDKs and to allow code to opt in ahead
+     * of instrumentation landing in a future release.
+     *
+     * @return {@code true} if OpenTelemetry tracing is enabled
+     */
+    public boolean isOtelEnabled() {
+        return otelEnabled;
+    }
+
+    /**
      * Builder for creating immutable {@link DaytonaConfig} instances.
      */
     public static class Builder {
         private String apiKey;
         private String apiUrl;
         private String target;
+        private boolean otelEnabled;
 
         /**
          * Sets the API key used for authenticating SDK requests.
@@ -87,6 +103,21 @@ public final class DaytonaConfig {
          */
         public Builder target(String target) {
             this.target = target;
+            return this;
+        }
+
+        /**
+         * Enables OpenTelemetry tracing for SDK operations.
+         *
+         * <p>Note: SDK-side OpenTelemetry instrumentation is not yet implemented in the Java SDK.
+         * This setter exists for API parity with the other SDKs and to allow code to opt in ahead
+         * of instrumentation landing in a future release.
+         *
+         * @param otelEnabled whether to enable OpenTelemetry tracing
+         * @return this builder instance
+         */
+        public Builder otelEnabled(boolean otelEnabled) {
+            this.otelEnabled = otelEnabled;
             return this;
         }
 

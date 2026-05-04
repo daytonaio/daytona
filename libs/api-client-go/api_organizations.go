@@ -137,6 +137,18 @@ type OrganizationsAPI interface {
 	DeleteOrganizationMemberExecute(r OrganizationsAPIDeleteOrganizationMemberRequest) (*http.Response, error)
 
 	/*
+	DeleteOrganizationOtelConfig Delete organization OpenTelemetry configuration
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId Organization ID
+	@return OrganizationsAPIDeleteOrganizationOtelConfigRequest
+	*/
+	DeleteOrganizationOtelConfig(ctx context.Context, organizationId string) OrganizationsAPIDeleteOrganizationOtelConfigRequest
+
+	// DeleteOrganizationOtelConfigExecute executes the request
+	DeleteOrganizationOtelConfigExecute(r OrganizationsAPIDeleteOrganizationOtelConfigRequest) (*http.Response, error)
+
+	/*
 	DeleteOrganizationRole Delete organization role
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -439,6 +451,18 @@ type OrganizationsAPI interface {
 	// UpdateOrganizationInvitationExecute executes the request
 	//  @return OrganizationInvitation
 	UpdateOrganizationInvitationExecute(r OrganizationsAPIUpdateOrganizationInvitationRequest) (*OrganizationInvitation, *http.Response, error)
+
+	/*
+	UpdateOrganizationOtelConfig Update organization OpenTelemetry configuration
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId Organization ID
+	@return OrganizationsAPIUpdateOrganizationOtelConfigRequest
+	*/
+	UpdateOrganizationOtelConfig(ctx context.Context, organizationId string) OrganizationsAPIUpdateOrganizationOtelConfigRequest
+
+	// UpdateOrganizationOtelConfigExecute executes the request
+	UpdateOrganizationOtelConfigExecute(r OrganizationsAPIUpdateOrganizationOtelConfigRequest) (*http.Response, error)
 
 	/*
 	UpdateOrganizationQuota Update organization quota
@@ -1376,6 +1400,96 @@ func (a *OrganizationsAPIService) DeleteOrganizationMemberExecute(r Organization
 	localVarPath := localBasePath + "/organizations/{organizationId}/users/{userId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"userId"+"}", url.PathEscape(parameterValueToString(r.userId, "userId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type OrganizationsAPIDeleteOrganizationOtelConfigRequest struct {
+	ctx context.Context
+	ApiService OrganizationsAPI
+	organizationId string
+}
+
+func (r OrganizationsAPIDeleteOrganizationOtelConfigRequest) Execute() (*http.Response, error) {
+	return r.ApiService.DeleteOrganizationOtelConfigExecute(r)
+}
+
+/*
+DeleteOrganizationOtelConfig Delete organization OpenTelemetry configuration
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param organizationId Organization ID
+ @return OrganizationsAPIDeleteOrganizationOtelConfigRequest
+*/
+func (a *OrganizationsAPIService) DeleteOrganizationOtelConfig(ctx context.Context, organizationId string) OrganizationsAPIDeleteOrganizationOtelConfigRequest {
+	return OrganizationsAPIDeleteOrganizationOtelConfigRequest{
+		ApiService: a,
+		ctx: ctx,
+		organizationId: organizationId,
+	}
+}
+
+// Execute executes the request
+func (a *OrganizationsAPIService) DeleteOrganizationOtelConfigExecute(r OrganizationsAPIDeleteOrganizationOtelConfigRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrganizationsAPIService.DeleteOrganizationOtelConfig")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/organizations/{organizationId}/otel-config"
+	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -3877,6 +3991,107 @@ func (a *OrganizationsAPIService) UpdateOrganizationInvitationExecute(r Organiza
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type OrganizationsAPIUpdateOrganizationOtelConfigRequest struct {
+	ctx context.Context
+	ApiService OrganizationsAPI
+	organizationId string
+	otelConfig *OtelConfig
+}
+
+func (r OrganizationsAPIUpdateOrganizationOtelConfigRequest) OtelConfig(otelConfig OtelConfig) OrganizationsAPIUpdateOrganizationOtelConfigRequest {
+	r.otelConfig = &otelConfig
+	return r
+}
+
+func (r OrganizationsAPIUpdateOrganizationOtelConfigRequest) Execute() (*http.Response, error) {
+	return r.ApiService.UpdateOrganizationOtelConfigExecute(r)
+}
+
+/*
+UpdateOrganizationOtelConfig Update organization OpenTelemetry configuration
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param organizationId Organization ID
+ @return OrganizationsAPIUpdateOrganizationOtelConfigRequest
+*/
+func (a *OrganizationsAPIService) UpdateOrganizationOtelConfig(ctx context.Context, organizationId string) OrganizationsAPIUpdateOrganizationOtelConfigRequest {
+	return OrganizationsAPIUpdateOrganizationOtelConfigRequest{
+		ApiService: a,
+		ctx: ctx,
+		organizationId: organizationId,
+	}
+}
+
+// Execute executes the request
+func (a *OrganizationsAPIService) UpdateOrganizationOtelConfigExecute(r OrganizationsAPIUpdateOrganizationOtelConfigRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrganizationsAPIService.UpdateOrganizationOtelConfig")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/organizations/{organizationId}/otel-config"
+	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.otelConfig == nil {
+		return nil, reportError("otelConfig is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.otelConfig
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
 }
 
 type OrganizationsAPIUpdateOrganizationQuotaRequest struct {

@@ -64,6 +64,8 @@ type Organization struct {
 	SandboxLifecycleRateLimit NullableFloat32 `json:"sandboxLifecycleRateLimit"`
 	// Experimental configuration
 	ExperimentalConfig map[string]interface{} `json:"experimentalConfig"`
+	// OpenTelemetry collection configuration
+	OtelConfig NullableOtelConfig `json:"otelConfig"`
 	// Authenticated rate limit TTL in seconds
 	AuthenticatedRateLimitTtlSeconds NullableFloat32 `json:"authenticatedRateLimitTtlSeconds"`
 	// Sandbox create rate limit TTL in seconds
@@ -79,7 +81,7 @@ type _Organization Organization
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewOrganization(id string, name string, createdBy string, personal bool, createdAt time.Time, updatedAt time.Time, suspended bool, suspendedAt time.Time, suspensionReason string, suspendedUntil time.Time, suspensionCleanupGracePeriodHours float32, maxCpuPerSandbox float32, maxMemoryPerSandbox float32, maxDiskPerSandbox float32, snapshotDeactivationTimeoutMinutes float32, sandboxLimitedNetworkEgress bool, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32, experimentalConfig map[string]interface{}, authenticatedRateLimitTtlSeconds NullableFloat32, sandboxCreateRateLimitTtlSeconds NullableFloat32, sandboxLifecycleRateLimitTtlSeconds NullableFloat32) *Organization {
+func NewOrganization(id string, name string, createdBy string, personal bool, createdAt time.Time, updatedAt time.Time, suspended bool, suspendedAt time.Time, suspensionReason string, suspendedUntil time.Time, suspensionCleanupGracePeriodHours float32, maxCpuPerSandbox float32, maxMemoryPerSandbox float32, maxDiskPerSandbox float32, snapshotDeactivationTimeoutMinutes float32, sandboxLimitedNetworkEgress bool, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32, experimentalConfig map[string]interface{}, otelConfig NullableOtelConfig, authenticatedRateLimitTtlSeconds NullableFloat32, sandboxCreateRateLimitTtlSeconds NullableFloat32, sandboxLifecycleRateLimitTtlSeconds NullableFloat32) *Organization {
 	this := Organization{}
 	this.Id = id
 	this.Name = name
@@ -101,6 +103,7 @@ func NewOrganization(id string, name string, createdBy string, personal bool, cr
 	this.SandboxCreateRateLimit = sandboxCreateRateLimit
 	this.SandboxLifecycleRateLimit = sandboxLifecycleRateLimit
 	this.ExperimentalConfig = experimentalConfig
+	this.OtelConfig = otelConfig
 	this.AuthenticatedRateLimitTtlSeconds = authenticatedRateLimitTtlSeconds
 	this.SandboxCreateRateLimitTtlSeconds = sandboxCreateRateLimitTtlSeconds
 	this.SandboxLifecycleRateLimitTtlSeconds = sandboxLifecycleRateLimitTtlSeconds
@@ -635,6 +638,32 @@ func (o *Organization) SetExperimentalConfig(v map[string]interface{}) {
 	o.ExperimentalConfig = v
 }
 
+// GetOtelConfig returns the OtelConfig field value
+// If the value is explicit nil, the zero value for OtelConfig will be returned
+func (o *Organization) GetOtelConfig() OtelConfig {
+	if o == nil || o.OtelConfig.Get() == nil {
+		var ret OtelConfig
+		return ret
+	}
+
+	return *o.OtelConfig.Get()
+}
+
+// GetOtelConfigOk returns a tuple with the OtelConfig field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Organization) GetOtelConfigOk() (*OtelConfig, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.OtelConfig.Get(), o.OtelConfig.IsSet()
+}
+
+// SetOtelConfig sets field value
+func (o *Organization) SetOtelConfig(v OtelConfig) {
+	o.OtelConfig.Set(&v)
+}
+
 // GetAuthenticatedRateLimitTtlSeconds returns the AuthenticatedRateLimitTtlSeconds field value
 // If the value is explicit nil, the zero value for float32 will be returned
 func (o *Organization) GetAuthenticatedRateLimitTtlSeconds() float32 {
@@ -746,6 +775,7 @@ func (o Organization) ToMap() (map[string]interface{}, error) {
 	toSerialize["sandboxCreateRateLimit"] = o.SandboxCreateRateLimit.Get()
 	toSerialize["sandboxLifecycleRateLimit"] = o.SandboxLifecycleRateLimit.Get()
 	toSerialize["experimentalConfig"] = o.ExperimentalConfig
+	toSerialize["otelConfig"] = o.OtelConfig.Get()
 	toSerialize["authenticatedRateLimitTtlSeconds"] = o.AuthenticatedRateLimitTtlSeconds.Get()
 	toSerialize["sandboxCreateRateLimitTtlSeconds"] = o.SandboxCreateRateLimitTtlSeconds.Get()
 	toSerialize["sandboxLifecycleRateLimitTtlSeconds"] = o.SandboxLifecycleRateLimitTtlSeconds.Get()
@@ -782,6 +812,7 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 		"sandboxCreateRateLimit",
 		"sandboxLifecycleRateLimit",
 		"experimentalConfig",
+		"otelConfig",
 		"authenticatedRateLimitTtlSeconds",
 		"sandboxCreateRateLimitTtlSeconds",
 		"sandboxLifecycleRateLimitTtlSeconds",
@@ -835,6 +866,7 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "sandboxCreateRateLimit")
 		delete(additionalProperties, "sandboxLifecycleRateLimit")
 		delete(additionalProperties, "experimentalConfig")
+		delete(additionalProperties, "otelConfig")
 		delete(additionalProperties, "authenticatedRateLimitTtlSeconds")
 		delete(additionalProperties, "sandboxCreateRateLimitTtlSeconds")
 		delete(additionalProperties, "sandboxLifecycleRateLimitTtlSeconds")

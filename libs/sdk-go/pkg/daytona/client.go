@@ -238,7 +238,10 @@ func NewClientWithConfig(config *types.DaytonaConfig) (*Client, error) {
 	client.apiClient = apiclient.NewAPIClient(apiCfg)
 
 	// Initialize OpenTelemetry if enabled
-	otelEnabled := (config != nil && config.Experimental != nil && config.Experimental.OtelEnabled) || os.Getenv("DAYTONA_EXPERIMENTAL_OTEL_ENABLED") == "true"
+	otelEnabled := (config != nil && config.OtelEnabled) ||
+		(config != nil && config.Experimental != nil && config.Experimental.OtelEnabled) ||
+		os.Getenv("DAYTONA_OTEL_ENABLED") == "true" ||
+		os.Getenv("DAYTONA_EXPERIMENTAL_OTEL_ENABLED") == "true"
 	if otelEnabled {
 		otelState, err := initOtel(context.Background())
 		if err != nil {

@@ -38,7 +38,6 @@ import AccountSettings from './pages/AccountSettings'
 import AuditLogs from './pages/AuditLogs'
 import Dashboard from './pages/Dashboard'
 import EmailVerify from './pages/EmailVerify'
-import Experimental from './pages/Experimental'
 import Keys from './pages/Keys'
 import LandingPage from './pages/LandingPage'
 import Limits from './pages/Limits'
@@ -262,14 +261,6 @@ function App() {
         />
         <Route path={getRouteSubPath(RoutePath.USER_INVITATIONS)} element={<UserOrganizationInvitations />} />
         <Route path={getRouteSubPath(RoutePath.ONBOARDING)} element={<Onboarding />} />
-        <Route
-          path={getRouteSubPath(RoutePath.EXPERIMENTAL)}
-          element={
-            <OwnerAccessOrganizationPageWrapper>
-              <Experimental />
-            </OwnerAccessOrganizationPageWrapper>
-          }
-        />
         <Route path={getRouteSubPath(RoutePath.PLAYGROUND)} element={<Playground />} />
         <Route
           path={getRouteSubPath(RoutePath.WEBHOOKS)}

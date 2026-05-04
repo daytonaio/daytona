@@ -396,24 +396,58 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       throw new NotFoundException(`Organization with ID ${organizationId} not found`)
     }
 
-    const existingConfig = organization._experimentalConfig
+    if (experimentalConfig && 'otel' in experimentalConfig) {
+      throw new ForbiddenException(
+        'OpenTelemetry configuration has moved to a dedicated endpoint: PUT /organizations/:organizationId/otel-config',
+      )
+    }
 
-    organization._experimentalConfig = await this.validatedExperimentalConfig(experimentalConfig)
+    organization._experimentalConfig = experimentalConfig
 
-    // If experimentalConfig contains redacted fields, we need to preserve the existing encrypted values
-    if (experimentalConfig && experimentalConfig.otel && experimentalConfig.otel.headers) {
-      if (existingConfig && existingConfig.otel && existingConfig.otel.headers) {
-        for (const [key, value] of Object.entries(experimentalConfig.otel.headers)) {
-          if (
-            typeof value === 'string' &&
-            value.match(/\*/g)?.length === value.length &&
-            existingConfig.otel.headers[key]
-          ) {
-            organization._experimentalConfig.otel.headers[key] = existingConfig.otel.headers[key]
-          }
+    await this.organizationRepository.save(organization)
+  }
+
+  async updateOtelConfig(organizationId: string, dto: OtelConfigDto): Promise<void> {
+    const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
+    }
+
+    if (typeof dto.endpoint !== 'string' || !dto.endpoint.trim()) {
+      throw new ForbiddenException('Invalid OpenTelemetry endpoint')
+    }
+
+    const existingHeaders = organization.otelConfig?.headers ?? {}
+    const encryptedHeaders: Record<string, string> = {}
+    if (dto.headers && typeof dto.headers === 'object') {
+      for (const [key, value] of Object.entries(dto.headers)) {
+        if (typeof key !== 'string' || !key.trim() || typeof value !== 'string' || !value.trim()) {
+          continue
+        }
+        // Preserve existing encrypted value when the client sends back a redacted (all-asterisks) placeholder
+        if (value.match(/\*/g)?.length === value.length && existingHeaders[key]) {
+          encryptedHeaders[key] = existingHeaders[key]
+        } else {
+          encryptedHeaders[key] = await this.encryptionService.encrypt(value)
         }
       }
     }
+
+    organization.otelConfig = {
+      endpoint: dto.endpoint,
+      headers: encryptedHeaders,
+    }
+
+    await this.organizationRepository.save(organization)
+  }
+
+  async deleteOtelConfig(organizationId: string): Promise<void> {
+    const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
+    }
+
+    organization.otelConfig = null
 
     await this.organizationRepository.save(organization)
   }
@@ -429,15 +463,11 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   }
 
   private async resolveOtelConfig(organization: Organization | null): Promise<OtelConfigDto | null> {
-    if (!organization) {
+    if (!organization || !organization.otelConfig) {
       return null
     }
 
-    if (!organization._experimentalConfig || !organization._experimentalConfig.otel) {
-      return null
-    }
-
-    const otelConfig = organization._experimentalConfig.otel
+    const otelConfig = organization.otelConfig
     const decryptedHeaders: Record<string, string> = {}
     if (otelConfig.headers && typeof otelConfig.headers === 'object') {
       for (const [key, value] of Object.entries(otelConfig.headers)) {
@@ -456,43 +486,9 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   async findOrganizationsWithOtelConfig(): Promise<Organization[]> {
     return this.organizationRepository
       .createQueryBuilder('organization')
-      .where(`organization."experimentalConfig"::jsonb -> 'otel' ->> 'endpoint' IS NOT NULL`)
-      .andWhere(`organization."experimentalConfig"::jsonb -> 'otel' ->> 'endpoint' != ''`)
+      .where(`organization."otelConfig" ->> 'endpoint' IS NOT NULL`)
+      .andWhere(`organization."otelConfig" ->> 'endpoint' != ''`)
       .getMany()
-  }
-
-  private async validatedExperimentalConfig(
-    experimentalConfig: Record<string, any> | null,
-  ): Promise<Record<string, any> | null> {
-    if (!experimentalConfig) {
-      return null
-    }
-
-    if (!experimentalConfig.otel) {
-      return experimentalConfig
-    }
-
-    const otelConfig = { ...experimentalConfig.otel }
-    if (typeof otelConfig.endpoint !== 'string' || !otelConfig.endpoint.trim()) {
-      throw new ForbiddenException('Invalid OpenTelemetry endpoint')
-    }
-
-    if (otelConfig.headers && typeof otelConfig.headers === 'object') {
-      const headers: Record<string, string> = {}
-      for (const [key, value] of Object.entries(otelConfig.headers)) {
-        if (typeof key === 'string' && key.trim() && typeof value === 'string' && value.trim()) {
-          headers[key] = await this.encryptionService.encrypt(value)
-        }
-      }
-      otelConfig.headers = headers
-    } else {
-      otelConfig.headers = {}
-    }
-
-    return {
-      ...experimentalConfig,
-      otel: otelConfig,
-    }
   }
 
   private async createWithEntityManager(

@@ -159,6 +159,6 @@
   "sidebarconfig.dspyRlms": "RLMs via DSPy",
   "sidebarconfig.pty": "Pseudo Terminal (PTY)",
   "sidebarconfig.ptyDescription": "Learn how to manage PTY sessions in your Sandboxes using the Daytona SDK.",
-  "sidebarconfig.experimental": "Experimental",
+  "sidebarconfig.observability": "Observability",
   "sidebarconfig.otelCollection": "OpenTelemetry Collection"
 }

@@ -36,7 +36,10 @@ module Daytona
       @config = config
       ensure_access_token_defined
 
-      otel_enabled = config._experimental&.dig('otel_enabled') || config.read_env('DAYTONA_EXPERIMENTAL_OTEL_ENABLED') == 'true'
+      otel_enabled = config.otel_enabled ||
+                     config._experimental&.dig('otel_enabled') ||
+                     config.read_env('DAYTONA_OTEL_ENABLED') == 'true' ||
+                     config.read_env('DAYTONA_EXPERIMENTAL_OTEL_ENABLED') == 'true'
       @otel_state = (::Daytona.init_otel(Sdk::VERSION) if otel_enabled)
 
       @api_client = build_api_client

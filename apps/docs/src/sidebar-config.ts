@@ -752,13 +752,13 @@ export const getSidebarConfig = (
     },
     {
       type: 'group',
-      label: t('sidebarconfig.experimental'),
+      label: t('sidebarconfig.observability'),
       homePageHref: localizePath('/docs', locale),
       category: NavigationCategory.GENERAL,
       entries: [
         {
           type: 'link',
-          href: localizePath('/docs/experimental/otel-collection', locale),
+          href: localizePath('/docs/observability/otel-collection', locale),
           label: t('sidebarconfig.otelCollection'),
           disablePagination: true,
           attrs: {

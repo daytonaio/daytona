@@ -168,6 +168,18 @@ public class OrganizationsApiTest {
     }
 
     /**
+     * Delete organization OpenTelemetry configuration
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void deleteOrganizationOtelConfigTest() throws ApiException {
+        String organizationId = null;
+        api.deleteOrganizationOtelConfig(organizationId);
+        // TODO: test validations
+    }
+
+    /**
      * Delete organization role
      *
      * @throws ApiException if the Api call fails
@@ -462,6 +474,19 @@ public class OrganizationsApiTest {
         String invitationId = null;
         UpdateOrganizationInvitation updateOrganizationInvitation = null;
         OrganizationInvitation response = api.updateOrganizationInvitation(organizationId, invitationId, updateOrganizationInvitation);
+        // TODO: test validations
+    }
+
+    /**
+     * Update organization OpenTelemetry configuration
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void updateOrganizationOtelConfigTest() throws ApiException {
+        String organizationId = null;
+        OtelConfig otelConfig = null;
+        api.updateOrganizationOtelConfig(organizationId, otelConfig);
         // TODO: test validations
     }
 

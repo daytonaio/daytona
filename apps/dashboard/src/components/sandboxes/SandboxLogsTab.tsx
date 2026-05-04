@@ -91,7 +91,7 @@ function LogsEmptyState() {
         <EmptyTitle>No logs found</EmptyTitle>
         <EmptyDescription>
           Try adjusting your time range or filters.{' '}
-          <a href={`${DAYTONA_DOCS_URL}/en/experimental/otel-collection`} target="_blank" rel="noopener noreferrer">
+          <a href={`${DAYTONA_DOCS_URL}/en/observability/otel-collection`} target="_blank" rel="noopener noreferrer">
             Learn more about observability
           </a>
           .

@@ -598,6 +598,71 @@ export class OrganizationController {
     )
   }
 
+  @Put('/:organizationId/otel-config')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Update organization OpenTelemetry configuration',
+    operationId: 'updateOrganizationOtelConfig',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @ApiBody({
+    type: OtelConfigDto,
+    required: true,
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'OpenTelemetry configuration updated successfully',
+  })
+  @UseGuards(OrganizationAuthContextGuard)
+  @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @Audit({
+    action: AuditAction.UPDATE_OTEL_CONFIG,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+    requestMetadata: {
+      body: (req: TypedRequest<OtelConfigDto>) => ({
+        endpoint: req.body?.endpoint,
+        headerKeys: req.body?.headers ? Object.keys(req.body.headers) : [],
+      }),
+    },
+  })
+  async updateOtelConfig(
+    @Param('organizationId') organizationId: string,
+    @Body() otelConfigDto: OtelConfigDto,
+  ): Promise<void> {
+    await this.organizationService.updateOtelConfig(organizationId, otelConfigDto)
+  }
+
+  @Delete('/:organizationId/otel-config')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Delete organization OpenTelemetry configuration',
+    operationId: 'deleteOrganizationOtelConfig',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'OpenTelemetry configuration deleted successfully',
+  })
+  @UseGuards(OrganizationAuthContextGuard)
+  @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @Audit({
+    action: AuditAction.DELETE_OTEL_CONFIG,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+  })
+  async deleteOtelConfig(@Param('organizationId') organizationId: string): Promise<void> {
+    await this.organizationService.deleteOtelConfig(organizationId)
+  }
+
   @Put('/:organizationId/experimental-config')
   @RequireFlagsEnabled({ flags: [{ flagKey: 'organization_experiments', defaultValue: true }] })
   @ApiOperation({

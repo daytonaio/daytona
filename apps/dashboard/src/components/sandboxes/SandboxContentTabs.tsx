@@ -21,7 +21,7 @@ import { TabValue } from './SearchParams'
 interface SandboxContentTabsProps {
   sandbox: Sandbox | undefined
   isLoading: boolean
-  experimentsEnabled: boolean | undefined
+  spendingTabAvailable: boolean
   filesystemEnabled: boolean | undefined
   tab: TabValue
   onTabChange: (tab: TabValue) => void
@@ -30,7 +30,7 @@ interface SandboxContentTabsProps {
 export function SandboxContentTabs({
   sandbox,
   isLoading,
-  experimentsEnabled,
+  spendingTabAvailable,
   filesystemEnabled,
   tab,
   onTabChange,
@@ -63,14 +63,10 @@ export function SandboxContentTabs({
         <TabsTrigger value="overview" className="lg:hidden">
           Overview
         </TabsTrigger>
-        {experimentsEnabled && (
-          <>
-            <TabsTrigger value="logs">Logs</TabsTrigger>
-            <TabsTrigger value="traces">Traces</TabsTrigger>
-            <TabsTrigger value="metrics">Metrics</TabsTrigger>
-            <TabsTrigger value="spending">Spending</TabsTrigger>
-          </>
-        )}
+        <TabsTrigger value="logs">Logs</TabsTrigger>
+        <TabsTrigger value="traces">Traces</TabsTrigger>
+        <TabsTrigger value="metrics">Metrics</TabsTrigger>
+        {spendingTabAvailable && <TabsTrigger value="spending">Spending</TabsTrigger>}
         <TabsTrigger value="terminal">Terminal</TabsTrigger>
         {filesystemEnabled && <TabsTrigger value="filesystem">Filesystem</TabsTrigger>}
         <TabsTrigger value="vnc">VNC</TabsTrigger>
@@ -79,24 +75,19 @@ export function SandboxContentTabs({
       <TabsContent value="overview" className="flex-1 min-h-0 m-0 overflow-y-auto scrollbar-sm lg:hidden">
         <SandboxInfoPanel sandbox={sandbox} getRegionName={getRegionName} />
       </TabsContent>
-      {experimentsEnabled && (
-        <>
-          <TabsContent value="logs" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
-            <SandboxLogsTab sandboxId={sandbox.id} />
-          </TabsContent>
-          <TabsContent value="traces" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
-            <SandboxTracesTab sandboxId={sandbox.id} />
-          </TabsContent>
-          <TabsContent value="metrics" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
-            <SandboxMetricsTab sandboxId={sandbox.id} />
-          </TabsContent>
-          <TabsContent
-            value="spending"
-            className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
-          >
-            <SandboxSpendingTab sandboxId={sandbox.id} />
-          </TabsContent>
-        </>
+      <TabsContent value="logs" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
+        <SandboxLogsTab sandboxId={sandbox.id} />
+      </TabsContent>
+      <TabsContent value="traces" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
+        <SandboxTracesTab sandboxId={sandbox.id} />
+      </TabsContent>
+      <TabsContent value="metrics" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
+        <SandboxMetricsTab sandboxId={sandbox.id} />
+      </TabsContent>
+      {spendingTabAvailable && (
+        <TabsContent value="spending" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
+          <SandboxSpendingTab sandboxId={sandbox.id} />
+        </TabsContent>
       )}
       <TabsContent value="terminal" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
         <SandboxTerminalTab sandbox={sandbox} />

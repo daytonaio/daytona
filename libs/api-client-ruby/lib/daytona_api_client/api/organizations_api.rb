@@ -607,6 +607,65 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Delete organization OpenTelemetry configuration
+    # @param organization_id [String] Organization ID
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def delete_organization_otel_config(organization_id, opts = {})
+      delete_organization_otel_config_with_http_info(organization_id, opts)
+      nil
+    end
+
+    # Delete organization OpenTelemetry configuration
+    # @param organization_id [String] Organization ID
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def delete_organization_otel_config_with_http_info(organization_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: OrganizationsApi.delete_organization_otel_config ...'
+      end
+      # verify the required parameter 'organization_id' is set
+      if @api_client.config.client_side_validation && organization_id.nil?
+        fail ArgumentError, "Missing the required parameter 'organization_id' when calling OrganizationsApi.delete_organization_otel_config"
+      end
+      # resource path
+      local_var_path = '/organizations/{organizationId}/otel-config'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"OrganizationsApi.delete_organization_otel_config",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:DELETE, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: OrganizationsApi#delete_organization_otel_config\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Delete organization role
     # @param organization_id [String] Organization ID
     # @param role_id [String] Role ID
@@ -2112,6 +2171,76 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:PUT, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: OrganizationsApi#update_organization_invitation\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Update organization OpenTelemetry configuration
+    # @param organization_id [String] Organization ID
+    # @param otel_config [OtelConfig] 
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def update_organization_otel_config(organization_id, otel_config, opts = {})
+      update_organization_otel_config_with_http_info(organization_id, otel_config, opts)
+      nil
+    end
+
+    # Update organization OpenTelemetry configuration
+    # @param organization_id [String] Organization ID
+    # @param otel_config [OtelConfig] 
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def update_organization_otel_config_with_http_info(organization_id, otel_config, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: OrganizationsApi.update_organization_otel_config ...'
+      end
+      # verify the required parameter 'organization_id' is set
+      if @api_client.config.client_side_validation && organization_id.nil?
+        fail ArgumentError, "Missing the required parameter 'organization_id' when calling OrganizationsApi.update_organization_otel_config"
+      end
+      # verify the required parameter 'otel_config' is set
+      if @api_client.config.client_side_validation && otel_config.nil?
+        fail ArgumentError, "Missing the required parameter 'otel_config' when calling OrganizationsApi.update_organization_otel_config"
+      end
+      # resource path
+      local_var_path = '/organizations/{organizationId}/otel-config'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(otel_config)
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"OrganizationsApi.update_organization_otel_config",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:PUT, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: OrganizationsApi#update_organization_otel_config\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end

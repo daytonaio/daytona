@@ -5,6 +5,7 @@
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { Organization } from '../entities/organization.entity'
+import { OtelConfigDto } from './otel-config.dto'
 
 @ApiSchema({ name: 'Organization' })
 export class OrganizationDto {
@@ -119,6 +120,13 @@ export class OrganizationDto {
   experimentalConfig: Record<string, any> | null
 
   @ApiProperty({
+    description: 'OpenTelemetry collection configuration',
+    type: OtelConfigDto,
+    nullable: true,
+  })
+  otelConfig: OtelConfigDto | null
+
+  @ApiProperty({
     description: 'Authenticated rate limit TTL in seconds',
     nullable: true,
   })
@@ -148,6 +156,22 @@ export class OrganizationDto {
       )
     }
 
+    let otelConfig: OtelConfigDto | null = null
+    if (organization.otelConfig) {
+      otelConfig = {
+        endpoint: organization.otelConfig.endpoint,
+        headers: organization.otelConfig.headers
+          ? Object.keys(organization.otelConfig.headers).reduce(
+              (acc, key) => {
+                acc[key] = '******'
+                return acc
+              },
+              {} as Record<string, string>,
+            )
+          : undefined,
+      }
+    }
+
     const dto: OrganizationDto = {
       id: organization.id,
       name: organization.name,
@@ -170,6 +194,7 @@ export class OrganizationDto {
       sandboxCreateRateLimit: organization.sandboxCreateRateLimit,
       sandboxLifecycleRateLimit: organization.sandboxLifecycleRateLimit,
       experimentalConfig,
+      otelConfig,
       authenticatedRateLimitTtlSeconds: organization.authenticatedRateLimitTtlSeconds,
       sandboxCreateRateLimitTtlSeconds: organization.sandboxCreateRateLimitTtlSeconds,
       sandboxLifecycleRateLimitTtlSeconds: organization.sandboxLifecycleRateLimitTtlSeconds,

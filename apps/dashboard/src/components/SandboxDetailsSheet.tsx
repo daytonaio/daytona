@@ -54,7 +54,6 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   handleRecover,
 }) => {
   const [terminalUrl, setTerminalUrl] = useState<string | null>(null)
-  const experimentsEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_EXPERIMENTS)
   const spendingEnabled = useFeatureFlagEnabled(FeatureFlags.SANDBOX_SPENDING)
   const config = useConfig()
   const spendingTabAvailable = spendingEnabled && !!config.analyticsApiUrl
@@ -175,42 +174,40 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
         </SheetHeader>
 
         <Tabs defaultValue="overview" className="flex-1 flex flex-col min-h-0">
-          {experimentsEnabled && (
-            <TabsList className="mx-4 w-fit flex-shrink-0 bg-transparent border-b border-border rounded-none h-auto p-0 gap-0 mt-2">
+          <TabsList className="mx-4 w-fit flex-shrink-0 bg-transparent border-b border-border rounded-none h-auto p-0 gap-0 mt-2">
+            <TabsTrigger
+              value="overview"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2"
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger
+              value="logs"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2"
+            >
+              Logs
+            </TabsTrigger>
+            <TabsTrigger
+              value="traces"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2"
+            >
+              Traces
+            </TabsTrigger>
+            <TabsTrigger
+              value="metrics"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2"
+            >
+              Metrics
+            </TabsTrigger>
+            {spendingTabAvailable && (
               <TabsTrigger
-                value="overview"
+                value="spending"
                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2"
               >
-                Overview
+                Spending
               </TabsTrigger>
-              <TabsTrigger
-                value="logs"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2"
-              >
-                Logs
-              </TabsTrigger>
-              <TabsTrigger
-                value="traces"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2"
-              >
-                Traces
-              </TabsTrigger>
-              <TabsTrigger
-                value="metrics"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2"
-              >
-                Metrics
-              </TabsTrigger>
-              {spendingTabAvailable && (
-                <TabsTrigger
-                  value="spending"
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2"
-                >
-                  Spending
-                </TabsTrigger>
-              )}
-            </TabsList>
-          )}
+            )}
+          </TabsList>
 
           <TabsContent value="overview" className="flex-1 p-6 space-y-10 overflow-y-auto min-h-0">
             <div className="grid grid-cols-2 gap-6">

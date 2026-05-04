@@ -648,6 +648,29 @@ paths:
       tags:
       - organizations
   /organizations/{organizationId}/otel-config:
+    delete:
+      operationId: deleteOrganizationOtelConfig
+      parameters:
+      - description: Organization ID
+        explode: false
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: OpenTelemetry configuration deleted successfully
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Delete organization OpenTelemetry configuration
+      tags:
+      - organizations
     get:
       operationId: getOrganizationOtelConfig
       parameters:
@@ -673,6 +696,35 @@ paths:
         - profile
         - email
       summary: Get organization OTEL config by organization ID
+      tags:
+      - organizations
+    put:
+      operationId: updateOrganizationOtelConfig
+      parameters:
+      - description: Organization ID
+        explode: false
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OtelConfig"
+        required: true
+      responses:
+        "204":
+          description: OpenTelemetry configuration updated successfully
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Update organization OpenTelemetry configuration
       tags:
       - organizations
   /organizations/{organizationId}/sandbox-default-limited-network-egress:
@@ -9669,8 +9721,39 @@ components:
       - defaultRegionId
       - name
       type: object
+    OtelConfig:
+      example:
+        headers:
+          x-api-key: my-api-key
+        endpoint: endpoint
+      properties:
+        endpoint:
+          description: Endpoint
+          type: string
+        headers:
+          additionalProperties:
+            type: string
+          description: Headers
+          example:
+            x-api-key: my-api-key
+          nullable: true
+          type: object
+      required:
+      - endpoint
+      type: object
     Organization:
       example:
+        sandboxCreateRateLimit: 7.061401241503109
+        sandboxLifecycleRateLimitTtlSeconds: 4.145608029883936
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        sandboxLimitedNetworkEgress: true
+        suspendedUntil: 2000-01-23T04:56:07.000+00:00
+        snapshotDeactivationTimeoutMinutes: 5.637376656633329
+        otelConfig: ""
+        authenticatedRateLimitTtlSeconds: 3.616076749251911
+        id: id
+        experimentalConfig: "{}"
+        updatedAt: 2000-01-23T04:56:07.000+00:00
         defaultRegionId: defaultRegionId
         sandboxCreateRateLimitTtlSeconds: 2.027123023002322
         suspensionReason: suspensionReason
@@ -9680,21 +9763,11 @@ components:
         suspensionCleanupGracePeriodHours: 0.8008281904610115
         authenticatedRateLimit: 2.3021358869347655
         suspended: true
-        sandboxCreateRateLimit: 7.061401241503109
-        sandboxLifecycleRateLimitTtlSeconds: 4.145608029883936
-        createdAt: 2000-01-23T04:56:07.000+00:00
         maxCpuPerSandbox: 6.027456183070403
-        sandboxLimitedNetworkEgress: true
-        suspendedUntil: 2000-01-23T04:56:07.000+00:00
         maxDiskPerSandbox: 5.962133916683182
         createdBy: createdBy
-        snapshotDeactivationTimeoutMinutes: 5.637376656633329
         name: name
         maxMemoryPerSandbox: 1.4658129805029452
-        authenticatedRateLimitTtlSeconds: 3.616076749251911
-        id: id
-        experimentalConfig: "{}"
-        updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
           description: Organization ID
@@ -9767,6 +9840,11 @@ components:
         experimentalConfig:
           description: Experimental configuration
           type: object
+        otelConfig:
+          allOf:
+          - $ref: "#/components/schemas/OtelConfig"
+          description: OpenTelemetry collection configuration
+          nullable: true
         authenticatedRateLimitTtlSeconds:
           description: Authenticated rate limit TTL in seconds
           nullable: true
@@ -9790,6 +9868,7 @@ components:
       - maxDiskPerSandbox
       - maxMemoryPerSandbox
       - name
+      - otelConfig
       - personal
       - sandboxCreateRateLimit
       - sandboxCreateRateLimitTtlSeconds
@@ -10044,26 +10123,6 @@ components:
       required:
       - reason
       - until
-      type: object
-    OtelConfig:
-      example:
-        headers:
-          x-api-key: my-api-key
-        endpoint: endpoint
-      properties:
-        endpoint:
-          description: Endpoint
-          type: string
-        headers:
-          additionalProperties:
-            type: string
-          description: Headers
-          example:
-            x-api-key: my-api-key
-          nullable: true
-          type: object
-      required:
-      - endpoint
       type: object
     OrganizationSandboxDefaultLimitedNetworkEgress:
       example:

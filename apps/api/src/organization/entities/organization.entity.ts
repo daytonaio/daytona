@@ -199,6 +199,13 @@ export class Organization {
   // configuration for experimental features
   _experimentalConfig: Record<string, any> | null
 
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    name: 'otelConfig',
+  })
+  otelConfig: { endpoint: string; headers: Record<string, string> } | null
+
   get sandboxMetadata(): Record<string, string> {
     return {
       organizationId: this.id,

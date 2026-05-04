@@ -5,6 +5,7 @@
 
 import { DeleteOrganizationDialog } from '@/components/Organizations/DeleteOrganizationDialog'
 import { LeaveOrganizationDialog } from '@/components/Organizations/LeaveOrganizationDialog'
+import { OtelConfigCard } from '@/components/Organizations/OtelConfigCard'
 import {
   SetDefaultRegionDialog,
   type SetDefaultRegionDialogRef,
@@ -136,6 +137,8 @@ const OrganizationSettings: React.FC = () => {
             </Field>
           </CardContent>
         </Card>
+
+        {isOwner && <OtelConfigCard />}
 
         {!selectedOrganization.personal && authenticatedUserOrganizationMember !== null && (
           <Card className="bg-destructive-background border-destructive-separator">

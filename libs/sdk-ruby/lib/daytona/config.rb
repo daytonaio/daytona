@@ -34,6 +34,11 @@ module Daytona
     # @return [String, nil] Daytona target
     attr_accessor :target
 
+    # Enable OpenTelemetry tracing for SDK operations.
+    #
+    # @return [Boolean, nil]
+    attr_accessor :otel_enabled
+
     # Experimental configuration options
     #
     # @return [Hash, nil] Experimental configuration hash
@@ -46,6 +51,7 @@ module Daytona
     # @param api_url [String, nil] Daytona API URL. Defaults to ENV['DAYTONA_API_URL'] or Daytona::Config::API_URL.
     # @param organization_id [String, nil] Daytona organization ID. Defaults to ENV['DAYTONA_ORGANIZATION_ID'].
     # @param target [String, nil] Daytona target. Defaults to ENV['DAYTONA_TARGET'].
+    # @param otel_enabled [Boolean, nil] Enable OpenTelemetry tracing for SDK operations.
     # @param _experimental [Hash, nil] Experimental configuration options.
     def initialize( # rubocop:disable Metrics/ParameterLists
       api_key: nil,
@@ -53,6 +59,7 @@ module Daytona
       api_url: nil,
       organization_id: nil,
       target: nil,
+      otel_enabled: nil,
       _experimental: nil
     )
       @env_reader = daytona_env_reader
@@ -62,6 +69,7 @@ module Daytona
       @api_url = api_url || @env_reader.call('DAYTONA_API_URL') || API_URL
       @target = target || @env_reader.call('DAYTONA_TARGET')
       @organization_id = organization_id || @env_reader.call('DAYTONA_ORGANIZATION_ID')
+      @otel_enabled = otel_enabled
       @_experimental = _experimental
     end
 

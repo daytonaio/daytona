@@ -1268,6 +1268,128 @@ public class OrganizationsApi {
         return localVarCall;
     }
     /**
+     * Build call for deleteOrganizationOtelConfig
+     * @param organizationId Organization ID (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> OpenTelemetry configuration deleted successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call deleteOrganizationOtelConfigCall(@javax.annotation.Nonnull String organizationId, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/organizations/{organizationId}/otel-config"
+            .replace("{" + "organizationId" + "}", localVarApiClient.escapeString(organizationId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "DELETE", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call deleteOrganizationOtelConfigValidateBeforeCall(@javax.annotation.Nonnull String organizationId, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'organizationId' is set
+        if (organizationId == null) {
+            throw new ApiException("Missing the required parameter 'organizationId' when calling deleteOrganizationOtelConfig(Async)");
+        }
+
+        return deleteOrganizationOtelConfigCall(organizationId, _callback);
+
+    }
+
+    /**
+     * Delete organization OpenTelemetry configuration
+     * 
+     * @param organizationId Organization ID (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> OpenTelemetry configuration deleted successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public void deleteOrganizationOtelConfig(@javax.annotation.Nonnull String organizationId) throws ApiException {
+        deleteOrganizationOtelConfigWithHttpInfo(organizationId);
+    }
+
+    /**
+     * Delete organization OpenTelemetry configuration
+     * 
+     * @param organizationId Organization ID (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> OpenTelemetry configuration deleted successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> deleteOrganizationOtelConfigWithHttpInfo(@javax.annotation.Nonnull String organizationId) throws ApiException {
+        okhttp3.Call localVarCall = deleteOrganizationOtelConfigValidateBeforeCall(organizationId, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Delete organization OpenTelemetry configuration (asynchronously)
+     * 
+     * @param organizationId Organization ID (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> OpenTelemetry configuration deleted successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call deleteOrganizationOtelConfigAsync(@javax.annotation.Nonnull String organizationId, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = deleteOrganizationOtelConfigValidateBeforeCall(organizationId, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for deleteOrganizationRole
      * @param organizationId Organization ID (required)
      * @param roleId Role ID (required)
@@ -4362,6 +4484,138 @@ public class OrganizationsApi {
         okhttp3.Call localVarCall = updateOrganizationInvitationValidateBeforeCall(organizationId, invitationId, updateOrganizationInvitation, _callback);
         Type localVarReturnType = new TypeToken<OrganizationInvitation>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for updateOrganizationOtelConfig
+     * @param organizationId Organization ID (required)
+     * @param otelConfig  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> OpenTelemetry configuration updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call updateOrganizationOtelConfigCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull OtelConfig otelConfig, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = otelConfig;
+
+        // create path and map variables
+        String localVarPath = "/organizations/{organizationId}/otel-config"
+            .replace("{" + "organizationId" + "}", localVarApiClient.escapeString(organizationId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call updateOrganizationOtelConfigValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull OtelConfig otelConfig, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'organizationId' is set
+        if (organizationId == null) {
+            throw new ApiException("Missing the required parameter 'organizationId' when calling updateOrganizationOtelConfig(Async)");
+        }
+
+        // verify the required parameter 'otelConfig' is set
+        if (otelConfig == null) {
+            throw new ApiException("Missing the required parameter 'otelConfig' when calling updateOrganizationOtelConfig(Async)");
+        }
+
+        return updateOrganizationOtelConfigCall(organizationId, otelConfig, _callback);
+
+    }
+
+    /**
+     * Update organization OpenTelemetry configuration
+     * 
+     * @param organizationId Organization ID (required)
+     * @param otelConfig  (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> OpenTelemetry configuration updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public void updateOrganizationOtelConfig(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull OtelConfig otelConfig) throws ApiException {
+        updateOrganizationOtelConfigWithHttpInfo(organizationId, otelConfig);
+    }
+
+    /**
+     * Update organization OpenTelemetry configuration
+     * 
+     * @param organizationId Organization ID (required)
+     * @param otelConfig  (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> OpenTelemetry configuration updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> updateOrganizationOtelConfigWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull OtelConfig otelConfig) throws ApiException {
+        okhttp3.Call localVarCall = updateOrganizationOtelConfigValidateBeforeCall(organizationId, otelConfig, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Update organization OpenTelemetry configuration (asynchronously)
+     * 
+     * @param organizationId Organization ID (required)
+     * @param otelConfig  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> OpenTelemetry configuration updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call updateOrganizationOtelConfigAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull OtelConfig otelConfig, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = updateOrganizationOtelConfigValidateBeforeCall(organizationId, otelConfig, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
         return localVarCall;
     }
     /**

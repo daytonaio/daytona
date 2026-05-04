@@ -280,6 +280,9 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
           case '/api/volumes/:volumeId':
             this.captureDeleteVolume(props, request.params.volumeId)
             break
+          case '/api/organizations/:organizationId/otel-config':
+            this.captureDeleteOrganizationOtelConfig(props, request.params.organizationId)
+            break
         }
         break
       case 'PUT':
@@ -306,6 +309,9 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
             break
           case '/api/organizations/:organizationId/experimental-config':
             this.captureUpdateOrganizationExperimentalConfig(props, request.body)
+            break
+          case '/api/organizations/:organizationId/otel-config':
+            this.captureUpdateOrganizationOtelConfig(props, request.params.organizationId, request.body)
             break
         }
         break
@@ -956,6 +962,24 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
         experimental_config_otel_set: !!experimentalConfig?.otel,
       },
     )
+  }
+
+  private captureUpdateOrganizationOtelConfig(
+    props: CommonCaptureProps,
+    organizationId: string,
+    otelConfig: { endpoint?: string; headers?: Record<string, string> } | null,
+  ) {
+    this.capture('api_organization_otel_config_updated', props, 'api_organization_otel_config_update_failed', {
+      organization_id: organizationId,
+      otel_endpoint_set: !!otelConfig?.endpoint,
+      otel_headers_count: otelConfig?.headers ? Object.keys(otelConfig.headers).length : 0,
+    })
+  }
+
+  private captureDeleteOrganizationOtelConfig(props: CommonCaptureProps, organizationId: string) {
+    this.capture('api_organization_otel_config_deleted', props, 'api_organization_otel_config_delete_failed', {
+      organization_id: organizationId,
+    })
   }
 
   private captureToolboxCommand(

@@ -18,6 +18,7 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import io.daytona.api.client.model.OtelConfig;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -205,6 +206,14 @@ public class OrganizationTest {
     @Test
     public void experimentalConfigTest() {
         // TODO: test experimentalConfig
+    }
+
+    /**
+     * Test the property 'otelConfig'
+     */
+    @Test
+    public void otelConfigTest() {
+        // TODO: test otelConfig
     }
 
     /**

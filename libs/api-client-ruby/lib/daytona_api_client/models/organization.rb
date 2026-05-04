@@ -78,6 +78,9 @@ module DaytonaApiClient
     # Experimental configuration
     attr_accessor :experimental_config
 
+    # OpenTelemetry collection configuration
+    attr_accessor :otel_config
+
     # Authenticated rate limit TTL in seconds
     attr_accessor :authenticated_rate_limit_ttl_seconds
 
@@ -111,6 +114,7 @@ module DaytonaApiClient
         :'sandbox_create_rate_limit' => :'sandboxCreateRateLimit',
         :'sandbox_lifecycle_rate_limit' => :'sandboxLifecycleRateLimit',
         :'experimental_config' => :'experimentalConfig',
+        :'otel_config' => :'otelConfig',
         :'authenticated_rate_limit_ttl_seconds' => :'authenticatedRateLimitTtlSeconds',
         :'sandbox_create_rate_limit_ttl_seconds' => :'sandboxCreateRateLimitTtlSeconds',
         :'sandbox_lifecycle_rate_limit_ttl_seconds' => :'sandboxLifecycleRateLimitTtlSeconds'
@@ -151,6 +155,7 @@ module DaytonaApiClient
         :'sandbox_create_rate_limit' => :'Float',
         :'sandbox_lifecycle_rate_limit' => :'Float',
         :'experimental_config' => :'Object',
+        :'otel_config' => :'OtelConfig',
         :'authenticated_rate_limit_ttl_seconds' => :'Float',
         :'sandbox_create_rate_limit_ttl_seconds' => :'Float',
         :'sandbox_lifecycle_rate_limit_ttl_seconds' => :'Float'
@@ -163,6 +168,7 @@ module DaytonaApiClient
         :'authenticated_rate_limit',
         :'sandbox_create_rate_limit',
         :'sandbox_lifecycle_rate_limit',
+        :'otel_config',
         :'authenticated_rate_limit_ttl_seconds',
         :'sandbox_create_rate_limit_ttl_seconds',
         :'sandbox_lifecycle_rate_limit_ttl_seconds'
@@ -307,6 +313,12 @@ module DaytonaApiClient
         self.experimental_config = attributes[:'experimental_config']
       else
         self.experimental_config = nil
+      end
+
+      if attributes.key?(:'otel_config')
+        self.otel_config = attributes[:'otel_config']
+      else
+        self.otel_config = nil
       end
 
       if attributes.key?(:'authenticated_rate_limit_ttl_seconds')
@@ -624,6 +636,7 @@ module DaytonaApiClient
           sandbox_create_rate_limit == o.sandbox_create_rate_limit &&
           sandbox_lifecycle_rate_limit == o.sandbox_lifecycle_rate_limit &&
           experimental_config == o.experimental_config &&
+          otel_config == o.otel_config &&
           authenticated_rate_limit_ttl_seconds == o.authenticated_rate_limit_ttl_seconds &&
           sandbox_create_rate_limit_ttl_seconds == o.sandbox_create_rate_limit_ttl_seconds &&
           sandbox_lifecycle_rate_limit_ttl_seconds == o.sandbox_lifecycle_rate_limit_ttl_seconds
@@ -638,7 +651,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, name, created_by, personal, created_at, updated_at, suspended, suspended_at, suspension_reason, suspended_until, suspension_cleanup_grace_period_hours, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, snapshot_deactivation_timeout_minutes, sandbox_limited_network_egress, default_region_id, authenticated_rate_limit, sandbox_create_rate_limit, sandbox_lifecycle_rate_limit, experimental_config, authenticated_rate_limit_ttl_seconds, sandbox_create_rate_limit_ttl_seconds, sandbox_lifecycle_rate_limit_ttl_seconds].hash
+      [id, name, created_by, personal, created_at, updated_at, suspended, suspended_at, suspension_reason, suspended_until, suspension_cleanup_grace_period_hours, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, snapshot_deactivation_timeout_minutes, sandbox_limited_network_egress, default_region_id, authenticated_rate_limit, sandbox_create_rate_limit, sandbox_lifecycle_rate_limit, experimental_config, otel_config, authenticated_rate_limit_ttl_seconds, sandbox_create_rate_limit_ttl_seconds, sandbox_lifecycle_rate_limit_ttl_seconds].hash
     end
 
     # Builds the object from hash

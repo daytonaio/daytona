@@ -246,9 +246,13 @@ class AsyncDaytona:
         )
 
         # Initialize OpenTelemetry if enabled
-        otel_enabled = (config and config._experimental and config._experimental.get("otelEnabled")) or (
-            env_reader or DaytonaEnvReader()
-        ).get("DAYTONA_EXPERIMENTAL_OTEL_ENABLED") == "true"
+        env = env_reader or DaytonaEnvReader()
+        otel_enabled = (
+            (config and config.otel_enabled)
+            or (config and config._experimental and config._experimental.get("otelEnabled"))
+            or env.get("DAYTONA_OTEL_ENABLED") == "true"
+            or env.get("DAYTONA_EXPERIMENTAL_OTEL_ENABLED") == "true"
+        )
         if otel_enabled:
             self._init_otel(sdk_version)
 

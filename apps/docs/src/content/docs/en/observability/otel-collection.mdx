@@ -7,10 +7,6 @@ import { TabItem, Tabs } from '@astrojs/starlight/components'
 
 OpenTelemetry (OTEL) tracing allows you to monitor and debug your Daytona SDK operations by collecting distributed traces. This is particularly useful for understanding performance bottlenecks, debugging issues, and gaining visibility into your sandbox operations.
 
-:::caution
-OpenTelemetry collection is currently an experimental feature and may change in future releases. To request access to this feature, please contact [support@daytona.io](mailto:support@daytona.io).
-:::
-
 ---
 
 ## Sandbox Telemetry Collection
@@ -65,11 +61,11 @@ Sandbox telemetry collection works independently from SDK tracing. You can enabl
 To enable telemetry collection from sandboxes:
 
 1. Navigate to the [Daytona Dashboard](https://app.daytona.io)
-2. Go to **Settings** → **Experimental**
+2. Go to **Settings** and find the **OpenTelemetry** card (visible to organization owners)
 3. Configure the following fields:
-   
+
 - **OTLP Endpoint**: Your OpenTelemetry collector endpoint (e.g., `https://otlp.nr-data.net`)
-- **OTLP Headers**: Authentication headers in `key=value` format (e.g., `api-key=YOUR_API_KEY`)
+- **Headers**: Authentication headers as key/value pairs (e.g., `api-key` = `YOUR_API_KEY`)
 
 Once configured, all sandboxes will automatically export their telemetry data to your specified OTLP endpoint.
 
@@ -135,12 +131,12 @@ Traces are exported using the OTLP (OpenTelemetry Protocol) format and can be se
 
 ### 1. Enable OTEL in SDK
 
-To enable OpenTelemetry tracing, pass the `otelEnabled` experimental flag when initializing the Daytona client:
+To enable OpenTelemetry tracing, pass the `otelEnabled` flag when initializing the Daytona client:
 
-Alternatively, you can set the `DAYTONA_EXPERIMENTAL_OTEL_ENABLED` environment variable to `true` instead of passing the configuration option:
+Alternatively, you can set the `DAYTONA_OTEL_ENABLED` environment variable to `true` instead of passing the configuration option:
 
 ```bash
-export DAYTONA_EXPERIMENTAL_OTEL_ENABLED=true
+export DAYTONA_OTEL_ENABLED=true
 ```
 
 <Tabs syncKey="language">
@@ -149,9 +145,7 @@ export DAYTONA_EXPERIMENTAL_OTEL_ENABLED=true
     from daytona import Daytona, DaytonaConfig
 
     # Using async context manager (recommended)
-    async with Daytona(DaytonaConfig(
-        _experimental={"otelEnabled": True}
-    )) as daytona:
+    async with Daytona(DaytonaConfig(otel_enabled=True)) as daytona:
         sandbox = await daytona.create()
         # All operations will be traced
     # OpenTelemetry traces are flushed on close
@@ -159,9 +153,7 @@ export DAYTONA_EXPERIMENTAL_OTEL_ENABLED=true
 
     Or without context manager:
     ```python
-    daytona = Daytona(DaytonaConfig(
-        _experimental={"otelEnabled": True}
-    ))
+    daytona = Daytona(DaytonaConfig(otel_enabled=True))
     try:
         sandbox = await daytona.create()
         # All operations will be traced
@@ -176,9 +168,7 @@ export DAYTONA_EXPERIMENTAL_OTEL_ENABLED=true
     import { Daytona } from '@daytona/sdk'
 
     // Using async dispose (recommended)
-    await using daytona = new Daytona({
-      _experimental: { otelEnabled: true }
-    })
+    await using daytona = new Daytona({ otelEnabled: true })
 
     const sandbox = await daytona.create()
     // All operations will be traced
@@ -187,9 +177,7 @@ export DAYTONA_EXPERIMENTAL_OTEL_ENABLED=true
 
     Or with explicit disposal:
     ```typescript
-    const daytona = new Daytona({
-      _experimental: { otelEnabled: true }
-    })
+    const daytona = new Daytona({ otelEnabled: true })
 
     try {
       const sandbox = await daytona.create()
@@ -212,9 +200,7 @@ export DAYTONA_EXPERIMENTAL_OTEL_ENABLED=true
     )
 
     client, err := daytona.NewClientWithConfig(&types.DaytonaConfig{
-        Experimental: &types.ExperimentalConfig{
-            OtelEnabled: true,
-        },
+        OtelEnabled: true,
     })
     if err != nil {
         log.Fatal(err)
@@ -231,9 +217,7 @@ export DAYTONA_EXPERIMENTAL_OTEL_ENABLED=true
     ```ruby
     require 'daytona'
 
-    config = Daytona::Config.new(
-      _experimental: { 'otel_enabled' => true }
-    )
+    config = Daytona::Config.new(otel_enabled: true)
     daytona = Daytona::Daytona.new(config)
 
     sandbox = daytona.create
@@ -245,7 +229,7 @@ export DAYTONA_EXPERIMENTAL_OTEL_ENABLED=true
     Or with `ensure` block:
     ```ruby
     daytona = Daytona::Daytona.new(
-      Daytona::Config.new(_experimental: { 'otel_enabled' => true })
+      Daytona::Config.new(otel_enabled: true)
     )
     begin
       sandbox = daytona.create
@@ -257,6 +241,10 @@ export DAYTONA_EXPERIMENTAL_OTEL_ENABLED=true
 
   </TabItem>
 </Tabs>
+
+:::note
+The legacy `_experimental.otelEnabled` option (and the `DAYTONA_EXPERIMENTAL_OTEL_ENABLED` env var) still work as deprecated aliases for backwards compatibility.
+:::
 
 ### 2. Configure OTLP Exporter
 
@@ -317,9 +305,7 @@ Here's a complete example showing how to use OpenTelemetry tracing with the Dayt
 
     async def main():
         # Initialize Daytona with OTEL enabled
-        async with Daytona(DaytonaConfig(
-            _experimental={"otelEnabled": True}
-        )) as daytona:
+        async with Daytona(DaytonaConfig(otel_enabled=True)) as daytona:
 
             # Create a sandbox - this operation will be traced
             sandbox = await daytona.create()
@@ -357,9 +343,7 @@ print(f"NumPy version: {np.__version__}")
 
     async function main() {
       // Initialize Daytona with OTEL enabled
-      await using daytona = new Daytona({
-        _experimental: { otelEnabled: true }
-      })
+      await using daytona = new Daytona({ otelEnabled: true })
 
       // Create a sandbox - this operation will be traced
       const sandbox = await daytona.create()
@@ -410,9 +394,7 @@ print(f"NumPy version: {np.__version__}")
 
         // Initialize Daytona with OTEL enabled
         client, err := daytona.NewClientWithConfig(&types.DaytonaConfig{
-          Experimental: &types.ExperimentalConfig{
             OtelEnabled: true,
-          },
         })
         if err != nil {
           log.Fatal(err)
@@ -466,9 +448,7 @@ print(f"NumPy version: {np.__version__}")
     ENV["OTEL_EXPORTER_OTLP_HEADERS"] = "api-key=YOUR_API_KEY"
 
     # Initialize Daytona with OTEL enabled
-    config = Daytona::Config.new(
-      _experimental: { 'otel_enabled' => true }
-    )
+    config = Daytona::Config.new(otel_enabled: true)
     daytona = Daytona::Daytona.new(config)
 
     begin

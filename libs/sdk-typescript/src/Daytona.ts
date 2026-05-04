@@ -93,6 +93,8 @@ export interface DaytonaConfig {
   serverUrl?: string
   /** Target environment for sandboxes */
   target?: string
+  /** Enable OpenTelemetry tracing for SDK operations. */
+  otelEnabled?: boolean
   /** Configuration for experimental features */
   _experimental?: Record<string, any>
 }
@@ -331,7 +333,14 @@ export class Daytona implements AsyncDisposable {
     )
     this.clientConfig = configuration
 
-    if (!config?._experimental?.otelEnabled && envReader()?.get('DAYTONA_EXPERIMENTAL_OTEL_ENABLED') !== 'true') {
+    const env = envReader()
+    const otelEnabled =
+      config?.otelEnabled ||
+      config?._experimental?.otelEnabled ||
+      env?.get('DAYTONA_OTEL_ENABLED') === 'true' ||
+      env?.get('DAYTONA_EXPERIMENTAL_OTEL_ENABLED') === 'true'
+
+    if (!otelEnabled) {
       return
     }
 

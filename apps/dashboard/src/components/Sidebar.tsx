@@ -40,7 +40,6 @@ import {
   ChevronsUpDown,
   Container,
   CreditCard,
-  FlaskConical,
   HardDrive,
   Joystick,
   KeyRound,
@@ -122,7 +121,6 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
   const { isInitialized: webhooksInitialized } = useWebhooks()
   const webhooksAccess = useWebhookAppPortalAccessQuery(selectedOrganization?.id)
   const orgInfraEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_INFRASTRUCTURE)
-  const organizationExperimentsEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_EXPERIMENTS)
   const playgroundEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_PLAYGROUND)
   const webhooksEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_WEBHOOKS)
 
@@ -221,22 +219,6 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     webhooksEnabled,
   ])
 
-  const experimentalItems = useMemo(() => {
-    const arr: SidebarItem[] = []
-
-    if (
-      organizationExperimentsEnabled &&
-      authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
-    ) {
-      arr.push({
-        icon: <FlaskConical size={16} strokeWidth={1.5} />,
-        label: 'Experimental',
-        path: RoutePath.EXPERIMENTAL,
-      })
-    }
-    return arr
-  }, [organizationExperimentsEnabled, authenticatedUserOrganizationMember?.role])
-
   const billingItems = useMemo(() => {
     if (!billingEnabled || authenticatedUserOrganizationMember?.role !== OrganizationUserRoleEnum.OWNER) {
       return []
@@ -309,9 +291,8 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       { label: 'Settings', items: settingsItems },
       { label: 'Billing', items: billingItems },
       { label: 'Infrastructure', items: infrastructureItems },
-      { label: 'Experimental', items: experimentalItems },
     ].filter((group) => group.items.length > 0)
-  }, [sidebarItems, settingsItems, billingItems, infrastructureItems, experimentalItems, miscItems])
+  }, [sidebarItems, settingsItems, billingItems, infrastructureItems, miscItems])
 
   const commandItems = useMemo(() => {
     return sidebarGroups

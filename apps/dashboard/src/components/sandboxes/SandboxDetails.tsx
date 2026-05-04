@@ -60,8 +60,9 @@ export default function SandboxDetails() {
     useSelectedOrganization()
   const { getRegionName } = useRegions()
 
-  const experimentsEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_EXPERIMENTS)
   const filesystemEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_FILESYSTEM)
+  const spendingEnabled = useFeatureFlagEnabled(FeatureFlags.SANDBOX_SPENDING)
+  const spendingTabAvailable = spendingEnabled && !!config.analyticsApiUrl
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [createSshDialogOpen, setCreateSshDialogOpen] = useState(false)
@@ -72,16 +73,15 @@ export default function SandboxDetails() {
   // On desktop (lg+), the overview tab is hidden in the sidebar, so switch to a content tab
   useEffect(() => {
     if (isDesktop && tab === 'overview') {
-      setTab(experimentsEnabled ? 'logs' : 'terminal')
+      setTab('logs')
     }
-  }, [isDesktop, tab, setTab, experimentsEnabled])
+  }, [isDesktop, tab, setTab])
 
-  // When experiments are disabled, coerce experimental tabs back to a supported default
   useEffect(() => {
-    if (!experimentsEnabled && (tab === 'logs' || tab === 'traces' || tab === 'metrics' || tab === 'spending')) {
+    if (!spendingTabAvailable && tab === 'spending') {
       setTab('terminal')
     }
-  }, [experimentsEnabled, tab, setTab])
+  }, [spendingTabAvailable, tab, setTab])
 
   useEffect(() => {
     if (filesystemEnabled === false && tab === 'filesystem') {
@@ -270,7 +270,7 @@ export default function SandboxDetails() {
               <SandboxContentTabs
                 sandbox={sandbox}
                 isLoading={isLoading}
-                experimentsEnabled={experimentsEnabled}
+                spendingTabAvailable={spendingTabAvailable}
                 filesystemEnabled={filesystemEnabled}
                 tab={tab}
                 onTabChange={setTab}

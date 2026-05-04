@@ -89,6 +89,13 @@ class DaytonaConfig(BaseModel):
     jwt_token: str | None = None
     organization_id: str | None = None
     connection_pool_maxsize: int | None = 250
+    otel_enabled: Annotated[
+        bool | None,
+        Field(
+            default=None,
+            description="Enable OpenTelemetry tracing for SDK operations.",
+        ),
+    ] = None
     _experimental: Annotated[
         dict[str, object] | None,
         Field(

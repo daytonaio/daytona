@@ -22,7 +22,8 @@ const (
 
 // ExperimentalConfig holds experimental feature flags for the Daytona client.
 type ExperimentalConfig struct {
-	OtelEnabled bool // Enable OpenTelemetry tracing and metrics
+	// Deprecated: use DaytonaConfig.OtelEnabled. Kept for backwards compatibility.
+	OtelEnabled bool
 }
 
 // DaytonaConfig represents the configuration for the Daytona client.
@@ -33,6 +34,7 @@ type DaytonaConfig struct {
 	OrganizationID string
 	APIUrl         string
 	Target         string
+	OtelEnabled    bool // Enable OpenTelemetry tracing for SDK operations.
 	Experimental   *ExperimentalConfig
 }
 
