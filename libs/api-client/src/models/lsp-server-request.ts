@@ -14,22 +14,13 @@
 
 
 
-/**
- * 
- * @export
- * @interface LspServerRequest
- */
 export interface LspServerRequest {
     /**
      * Language identifier
-     * @type {string}
-     * @memberof LspServerRequest
      */
     'languageId': string;
     /**
      * Path to the project
-     * @type {string}
-     * @memberof LspServerRequest
      */
     'pathToProject': string;
 }

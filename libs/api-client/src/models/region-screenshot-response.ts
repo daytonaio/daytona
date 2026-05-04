@@ -14,28 +14,17 @@
 
 
 
-/**
- * 
- * @export
- * @interface RegionScreenshotResponse
- */
 export interface RegionScreenshotResponse {
     /**
      * Base64 encoded screenshot image data of the specified region
-     * @type {string}
-     * @memberof RegionScreenshotResponse
      */
     'screenshot': string;
     /**
      * The current cursor position when the region screenshot was taken
-     * @type {object}
-     * @memberof RegionScreenshotResponse
      */
     'cursorPosition'?: object;
     /**
      * The size of the screenshot data in bytes
-     * @type {number}
-     * @memberof RegionScreenshotResponse
      */
     'sizeBytes'?: number;
 }

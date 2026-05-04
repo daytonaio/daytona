@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """
     Daytona
 
@@ -159,11 +157,25 @@ class Configuration:
       string values to replace variables in templated server configuration.
       The validation of enums is performed for variables with defined enum
       values before.
+    :param verify_ssl: bool - Set this to false to skip verifying SSL certificate
+      when calling API from https server.
     :param ssl_ca_cert: str - the path to a file of concatenated CA certificates
       in PEM format.
-    :param retries: Number of retries for API requests.
+    :param retries: int | urllib3.util.retry.Retry - Retry configuration.
     :param ca_cert_data: verify the peer using concatenated CA certificate data
       in PEM (str) or DER (bytes) format.
+    :param cert_file: the path to a client certificate file, for mTLS.
+    :param key_file: the path to a client key file, for mTLS.
+    :param assert_hostname: Set this to True/False to enable/disable SSL hostname verification.
+    :param tls_server_name: SSL/TLS Server Name Indication (SNI). Set this to the SNI value expected by the server.
+    :param connection_pool_maxsize: Connection pool max size. None in the constructor is coerced to 100 for async and cpu_count * 5 for sync.
+    :param proxy: Proxy URL.
+    :param proxy_headers: Proxy headers.
+    :param safe_chars_for_path_param: Safe characters for path parameter encoding.
+    :param client_side_validation: Enable client-side validation. Default True.
+    :param socket_options: Options to pass down to the underlying urllib3 socket.
+    :param datetime_format: Datetime format string for serialization.
+    :param date_format: Date format string for serialization.
 
     :Example:
     """
@@ -184,8 +196,21 @@ class Configuration:
         server_operation_variables: Optional[Dict[int, ServerVariablesT]]=None,
         ignore_operation_servers: bool=False,
         ssl_ca_cert: Optional[str]=None,
-        retries: Optional[int] = None,
+        retries: Optional[Union[int, Any]] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
+        cert_file: Optional[str]=None,
+        key_file: Optional[str]=None,
+        verify_ssl: bool=True,
+        assert_hostname: Optional[bool]=None,
+        tls_server_name: Optional[str]=None,
+        connection_pool_maxsize: Optional[int]=None,
+        proxy: Optional[str]=None,
+        proxy_headers: Optional[Any]=None,
+        safe_chars_for_path_param: str='',
+        client_side_validation: bool=True,
+        socket_options: Optional[Any]=None,
+        datetime_format: str="%Y-%m-%dT%H:%M:%S.%f%z",
+        date_format: str="%Y-%m-%d",
         *,
         debug: Optional[bool] = None,
     ) -> None:
@@ -255,7 +280,7 @@ class Configuration:
         """Debug switch
         """
 
-        self.verify_ssl = True
+        self.verify_ssl = verify_ssl
         """SSL/TLS verification
            Set this to false to skip verifying SSL certificate when calling API
            from https server.
@@ -267,52 +292,49 @@ class Configuration:
         """Set this to verify the peer using PEM (str) or DER (bytes)
            certificate data.
         """
-        self.cert_file = None
+        self.cert_file = cert_file
         """client certificate file
         """
-        self.key_file = None
+        self.key_file = key_file
         """client key file
         """
-        self.assert_hostname = None
+        self.assert_hostname = assert_hostname
         """Set this to True/False to enable/disable SSL hostname verification.
         """
-        self.tls_server_name = None
+        self.tls_server_name = tls_server_name
         """SSL/TLS Server Name Indication (SNI)
            Set this to the SNI value expected by the server.
         """
 
-        self.connection_pool_maxsize = multiprocessing.cpu_count() * 5
+        self.connection_pool_maxsize = connection_pool_maxsize if connection_pool_maxsize is not None else multiprocessing.cpu_count() * 5
         """urllib3 connection pool's maximum number of connections saved
-           per pool. urllib3 uses 1 connection as default value, but this is
-           not the best value when you are making a lot of possibly parallel
-           requests to the same host, which is often the case here.
-           cpu_count * 5 is used as default value to increase performance.
+           per pool. None in the constructor is coerced to cpu_count * 5.
         """
 
-        self.proxy: Optional[str] = None
+        self.proxy = proxy
         """Proxy URL
         """
-        self.proxy_headers = None
+        self.proxy_headers = proxy_headers
         """Proxy headers
         """
-        self.safe_chars_for_path_param = ''
+        self.safe_chars_for_path_param = safe_chars_for_path_param
         """Safe chars for path_param
         """
         self.retries = retries
-        """Adding retries to override urllib3 default value 3
+        """Retry configuration
         """
         # Enable client side validation
-        self.client_side_validation = True
+        self.client_side_validation = client_side_validation
 
-        self.socket_options = None
+        self.socket_options = socket_options
         """Options to pass down to the underlying urllib3 socket
         """
 
-        self.datetime_format = "%Y-%m-%dT%H:%M:%S.%f%z"
+        self.datetime_format = datetime_format
         """datetime format
         """
 
-        self.date_format = "%Y-%m-%d"
+        self.date_format = date_format
         """date format
         """
 
@@ -483,6 +505,7 @@ class Configuration:
         password = ""
         if self.password is not None:
             password = self.password
+
         return urllib3.util.make_headers(
             basic_auth=username + ':' + password
         ).get('authorization')
@@ -560,6 +583,7 @@ class Configuration:
                 variable_name, variable['default_value'])
 
             if 'enum_values' in variable \
+                    and variable['enum_values'] \
                     and used_value not in variable['enum_values']:
                 raise ValueError(
                     "The variable `{0}` in the host URL has invalid value "

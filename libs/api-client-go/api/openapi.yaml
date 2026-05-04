@@ -22,7 +22,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DaytonaConfiguration'
+                $ref: "#/components/schemas/DaytonaConfiguration"
           description: Daytona configuration
       summary: Get config
       tags:
@@ -45,7 +45,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/ApiKeyList'
+                  $ref: "#/components/schemas/ApiKeyList"
                 type: array
           description: API keys retrieved successfully.
         "500":
@@ -74,14 +74,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateApiKey'
+              $ref: "#/components/schemas/CreateApiKey"
         required: true
       responses:
         "201":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiKeyResponse'
+                $ref: "#/components/schemas/ApiKeyResponse"
           description: API key created successfully.
       security:
       - bearer: []
@@ -109,7 +109,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiKeyList'
+                $ref: "#/components/schemas/ApiKeyList"
           description: API key retrieved successfully.
       security:
       - bearer: []
@@ -174,7 +174,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiKeyList'
+                $ref: "#/components/schemas/ApiKeyList"
           description: API key retrieved successfully.
       security:
       - bearer: []
@@ -233,7 +233,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/OrganizationInvitation'
+                  $ref: "#/components/schemas/OrganizationInvitation"
                 type: array
           description: List of organization invitations
       security:
@@ -282,7 +282,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationInvitation'
+                $ref: "#/components/schemas/OrganizationInvitation"
           description: Organization invitation accepted successfully
       security:
       - bearer: []
@@ -327,7 +327,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Organization'
+                  $ref: "#/components/schemas/Organization"
                 type: array
           description: List of organizations
       security:
@@ -346,14 +346,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateOrganization'
+              $ref: "#/components/schemas/CreateOrganization"
         required: true
       responses:
         "201":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Organization'
+                $ref: "#/components/schemas/Organization"
           description: Organization created successfully
       security:
       - bearer: []
@@ -380,7 +380,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateOrganizationDefaultRegion'
+              $ref: "#/components/schemas/UpdateOrganizationDefaultRegion"
         required: true
       responses:
         "204":
@@ -434,7 +434,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Organization'
+                $ref: "#/components/schemas/Organization"
           description: Organization details
       security:
       - bearer: []
@@ -462,7 +462,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationUsageOverview'
+                $ref: "#/components/schemas/OrganizationUsageOverview"
           description: Current usage overview
       security:
       - bearer: []
@@ -489,7 +489,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateOrganizationQuota'
+              $ref: "#/components/schemas/UpdateOrganizationQuota"
         required: true
       responses:
         "204":
@@ -527,7 +527,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateOrganizationRegionQuota'
+              $ref: "#/components/schemas/UpdateOrganizationRegionQuota"
         required: true
       responses:
         "204":
@@ -581,7 +581,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OrganizationSuspension'
+              $ref: "#/components/schemas/OrganizationSuspension"
         required: false
       responses:
         "204":
@@ -636,7 +636,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OtelConfig'
+                $ref: "#/components/schemas/OtelConfig"
           description: OTEL Config
       security:
       - bearer: []
@@ -687,7 +687,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OtelConfig'
+                $ref: "#/components/schemas/OtelConfig"
           description: OTEL Config
       security:
       - bearer: []
@@ -743,7 +743,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OrganizationSandboxDefaultLimitedNetworkEgress'
+              $ref: "#/components/schemas/OrganizationSandboxDefaultLimitedNetworkEgress"
         required: true
       responses:
         "204":
@@ -813,7 +813,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/OrganizationRole'
+                  $ref: "#/components/schemas/OrganizationRole"
                 type: array
           description: List of organization roles
       security:
@@ -840,14 +840,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateOrganizationRole'
+              $ref: "#/components/schemas/CreateOrganizationRole"
         required: true
       responses:
         "201":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationRole'
+                $ref: "#/components/schemas/OrganizationRole"
           description: Organization role created successfully
       security:
       - bearer: []
@@ -913,14 +913,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateOrganizationRole'
+              $ref: "#/components/schemas/UpdateOrganizationRole"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationRole'
+                $ref: "#/components/schemas/OrganizationRole"
           description: Role updated successfully
       security:
       - bearer: []
@@ -949,7 +949,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/OrganizationUser'
+                  $ref: "#/components/schemas/OrganizationUser"
                 type: array
           description: List of organization members
       security:
@@ -985,14 +985,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateOrganizationMemberAccess'
+              $ref: "#/components/schemas/UpdateOrganizationMemberAccess"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationUser'
+                $ref: "#/components/schemas/OrganizationUser"
           description: Access updated successfully
       security:
       - bearer: []
@@ -1053,7 +1053,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/OrganizationInvitation'
+                  $ref: "#/components/schemas/OrganizationInvitation"
                 type: array
           description: List of pending organization invitations
       security:
@@ -1080,14 +1080,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateOrganizationInvitation'
+              $ref: "#/components/schemas/CreateOrganizationInvitation"
         required: true
       responses:
         "201":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationInvitation'
+                $ref: "#/components/schemas/OrganizationInvitation"
           description: Organization invitation created successfully
       security:
       - bearer: []
@@ -1122,14 +1122,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateOrganizationInvitation'
+              $ref: "#/components/schemas/UpdateOrganizationInvitation"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrganizationInvitation'
+                $ref: "#/components/schemas/OrganizationInvitation"
           description: Organization invitation updated successfully
       security:
       - bearer: []
@@ -1190,7 +1190,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Region'
+                  $ref: "#/components/schemas/Region"
                 type: array
           description: List of all available regions
       security:
@@ -1217,14 +1217,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateRegion'
+              $ref: "#/components/schemas/CreateRegion"
         required: true
       responses:
         "201":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateRegionResponse'
+                $ref: "#/components/schemas/CreateRegionResponse"
           description: The region has been successfully created.
       security:
       - bearer: []
@@ -1291,7 +1291,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Region'
+                $ref: "#/components/schemas/Region"
           description: ""
       security:
       - bearer: []
@@ -1325,7 +1325,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateRegion'
+              $ref: "#/components/schemas/UpdateRegion"
         required: true
       responses:
         "200":
@@ -1364,7 +1364,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RegenerateApiKeyResponse'
+                $ref: "#/components/schemas/RegenerateApiKeyResponse"
           description: The proxy API key has been successfully regenerated.
       security:
       - bearer: []
@@ -1400,7 +1400,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RegenerateApiKeyResponse'
+                $ref: "#/components/schemas/RegenerateApiKeyResponse"
           description: The SSH gateway API key has been successfully regenerated.
       security:
       - bearer: []
@@ -1436,7 +1436,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SnapshotManagerCredentials'
+                $ref: "#/components/schemas/SnapshotManagerCredentials"
           description: The snapshot manager credentials have been successfully regenerated.
       security:
       - bearer: []
@@ -1456,7 +1456,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
           description: User details
       security:
       - bearer: []
@@ -1477,7 +1477,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/AccountProvider'
+                  $ref: "#/components/schemas/AccountProvider"
                 type: array
           description: Available account providers
       security:
@@ -1497,7 +1497,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateLinkedAccount'
+              $ref: "#/components/schemas/CreateLinkedAccount"
         required: true
       responses:
         "204":
@@ -1571,7 +1571,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Region'
+                  $ref: "#/components/schemas/Region"
                 type: array
           description: List of all shared regions
       summary: List all shared regions
@@ -1620,7 +1620,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Sandbox'
+                  $ref: "#/components/schemas/Sandbox"
                 type: array
           description: List of all sandboxes
       security:
@@ -1647,14 +1647,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateSandbox'
+              $ref: "#/components/schemas/CreateSandbox"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: The sandbox has been successfully created.
       security:
       - bearer: []
@@ -1892,7 +1892,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedSandboxes'
+                $ref: "#/components/schemas/PaginatedSandboxes"
           description: Paginated list of all sandboxes
       security:
       - bearer: []
@@ -1937,7 +1937,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Sandbox'
+                  $ref: "#/components/schemas/Sandbox"
                 type: array
           description: List of sandboxes for the authenticated runner
       security:
@@ -1974,7 +1974,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: Sandbox has been deleted
       security:
       - bearer: []
@@ -2017,7 +2017,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: Sandbox details
       security:
       - bearer: []
@@ -2062,7 +2062,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: Recovery initiated
       security:
       - bearer: []
@@ -2098,7 +2098,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: Sandbox has been started or is being restored from archived
             state
       security:
@@ -2143,7 +2143,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: Sandbox has been stopped
       security:
       - bearer: []
@@ -2178,14 +2178,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ResizeSandbox'
+              $ref: "#/components/schemas/ResizeSandbox"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: Sandbox has been resized
       security:
       - bearer: []
@@ -2220,14 +2220,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SandboxLabels'
+              $ref: "#/components/schemas/SandboxLabels"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SandboxLabels'
+                $ref: "#/components/schemas/SandboxLabels"
           description: Labels have been successfully replaced
       security:
       - bearer: []
@@ -2262,7 +2262,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateSandboxStateDto'
+              $ref: "#/components/schemas/UpdateSandboxStateDto"
         required: true
       responses:
         "200":
@@ -2301,7 +2301,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: Sandbox backup has been initiated
       security:
       - bearer: []
@@ -2335,14 +2335,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateSandboxSnapshot'
+              $ref: "#/components/schemas/CreateSandboxSnapshot"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: Snapshot creation has been initiated
       security:
       - bearer: []
@@ -2376,14 +2376,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ForkSandbox'
+              $ref: "#/components/schemas/ForkSandbox"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: Fork operation has been initiated
       security:
       - bearer: []
@@ -2426,7 +2426,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Sandbox'
+                  $ref: "#/components/schemas/Sandbox"
                 type: array
           description: ""
       security:
@@ -2462,7 +2462,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: ""
       security:
       - bearer: []
@@ -2498,7 +2498,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Sandbox'
+                  $ref: "#/components/schemas/Sandbox"
                 type: array
           description: ""
       security:
@@ -2543,7 +2543,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: Public status has been successfully updated
       security:
       - bearer: []
@@ -2619,7 +2619,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: Auto-stop interval has been set
       security:
       - bearer: []
@@ -2664,7 +2664,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: Auto-archive interval has been set
       security:
       - bearer: []
@@ -2709,7 +2709,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: Auto-delete interval has been set
       security:
       - bearer: []
@@ -2746,14 +2746,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateSandboxNetworkSettings'
+              $ref: "#/components/schemas/UpdateSandboxNetworkSettings"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: Network settings have been updated
       security:
       - bearer: []
@@ -2788,7 +2788,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: Sandbox has been archived
       security:
       - bearer: []
@@ -2832,7 +2832,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PortPreviewUrl'
+                $ref: "#/components/schemas/PortPreviewUrl"
           description: Preview URL for the specified port
       security:
       - bearer: []
@@ -2884,7 +2884,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SignedPortPreviewUrl'
+                $ref: "#/components/schemas/SignedPortPreviewUrl"
           description: Signed preview URL for the specified port
       security:
       - bearer: []
@@ -3010,7 +3010,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Url'
+                $ref: "#/components/schemas/Url"
           description: Build logs URL
       security:
       - bearer: []
@@ -3055,7 +3055,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: SSH access has been revoked
       security:
       - bearer: []
@@ -3098,7 +3098,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SshAccessDto'
+                $ref: "#/components/schemas/SshAccessDto"
           description: SSH access has been created
       security:
       - bearer: []
@@ -3134,7 +3134,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SshAccessValidationDto'
+                $ref: "#/components/schemas/SshAccessValidationDto"
           description: SSH access validation result
       security:
       - bearer: []
@@ -3170,7 +3170,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ToolboxProxyUrl'
+                $ref: "#/components/schemas/ToolboxProxyUrl"
           description: Toolbox proxy URL for the specified sandbox
       security:
       - bearer: []
@@ -3206,7 +3206,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Organization'
+                $ref: "#/components/schemas/Organization"
           description: Organization
       security:
       - bearer: []
@@ -3242,7 +3242,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RegionQuota'
+                $ref: "#/components/schemas/RegionQuota"
           description: Region quota
       security:
       - bearer: []
@@ -3279,7 +3279,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Runner'
+                  $ref: "#/components/schemas/Runner"
                 type: array
           description: ""
       security:
@@ -3306,14 +3306,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateRunner'
+              $ref: "#/components/schemas/CreateRunner"
         required: true
       responses:
         "201":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateRunnerResponse'
+                $ref: "#/components/schemas/CreateRunnerResponse"
           description: ""
       security:
       - bearer: []
@@ -3333,7 +3333,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RunnerFull'
+                $ref: "#/components/schemas/RunnerFull"
           description: Runner info
       security:
       - bearer: []
@@ -3360,7 +3360,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RunnerFull'
+                $ref: "#/components/schemas/RunnerFull"
           description: ""
       security:
       - bearer: []
@@ -3389,7 +3389,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/RunnerSnapshotDto'
+                  $ref: "#/components/schemas/RunnerSnapshotDto"
                 type: array
           description: ""
       security:
@@ -3457,7 +3457,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Runner'
+                $ref: "#/components/schemas/Runner"
           description: ""
       security:
       - bearer: []
@@ -3485,7 +3485,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RunnerFull'
+                $ref: "#/components/schemas/RunnerFull"
           description: ""
       security:
       - bearer: []
@@ -3521,7 +3521,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Runner'
+                $ref: "#/components/schemas/Runner"
           description: ""
       security:
       - bearer: []
@@ -3557,7 +3557,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Runner'
+                $ref: "#/components/schemas/Runner"
           description: ""
       security:
       - bearer: []
@@ -3578,7 +3578,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RunnerHealthcheck'
+              $ref: "#/components/schemas/RunnerHealthcheck"
         required: true
       responses:
         "200":
@@ -3617,7 +3617,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectDirResponse'
+                $ref: "#/components/schemas/ProjectDirResponse"
           description: Project directory retrieved successfully
       security:
       - bearer: []
@@ -3653,7 +3653,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserHomeDirResponse'
+                $ref: "#/components/schemas/UserHomeDirResponse"
           description: User home directory retrieved successfully
       security:
       - bearer: []
@@ -3689,7 +3689,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WorkDirResponse'
+                $ref: "#/components/schemas/WorkDirResponse"
           description: Work-dir retrieved successfully
       security:
       - bearer: []
@@ -3779,7 +3779,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/FileInfo'
+                  $ref: "#/components/schemas/FileInfo"
                 type: array
           description: Files listed successfully
       security:
@@ -3861,7 +3861,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DownloadFiles'
+              $ref: "#/components/schemas/DownloadFiles"
         required: true
       responses:
         "200":
@@ -3921,7 +3921,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Match'
+                  $ref: "#/components/schemas/Match"
                 type: array
           description: Search completed successfully
       security:
@@ -4013,7 +4013,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileInfo'
+                $ref: "#/components/schemas/FileInfo"
           description: File info retrieved successfully
       security:
       - bearer: []
@@ -4157,7 +4157,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReplaceRequest'
+              $ref: "#/components/schemas/ReplaceRequest"
         required: true
       responses:
         "200":
@@ -4165,7 +4165,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/ReplaceResult'
+                  $ref: "#/components/schemas/ReplaceResult"
                 type: array
           description: Text replaced successfully
       security:
@@ -4217,7 +4217,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SearchFilesResponse'
+                $ref: "#/components/schemas/SearchFilesResponse"
           description: Search completed successfully
       security:
       - bearer: []
@@ -4260,7 +4260,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/uploadFile_deprecated_request'
+              $ref: "#/components/schemas/uploadFile_deprecated_request"
         required: true
       responses:
         "200":
@@ -4300,7 +4300,7 @@ paths:
           multipart/form-data:
             schema:
               items:
-                $ref: '#/components/schemas/UploadFile'
+                $ref: "#/components/schemas/UploadFile"
               type: array
         required: true
       responses:
@@ -4340,7 +4340,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GitAddRequest'
+              $ref: "#/components/schemas/GitAddRequest"
         required: true
       responses:
         "200":
@@ -4379,7 +4379,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GitDeleteBranchRequest'
+              $ref: "#/components/schemas/GitDeleteBranchRequest"
         required: true
       responses:
         "200":
@@ -4425,7 +4425,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListBranchResponse'
+                $ref: "#/components/schemas/ListBranchResponse"
           description: Branch list retrieved successfully
       security:
       - bearer: []
@@ -4460,7 +4460,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GitBranchRequest'
+              $ref: "#/components/schemas/GitBranchRequest"
         required: true
       responses:
         "200":
@@ -4499,7 +4499,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GitCloneRequest'
+              $ref: "#/components/schemas/GitCloneRequest"
         required: true
       responses:
         "200":
@@ -4538,14 +4538,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GitCommitRequest'
+              $ref: "#/components/schemas/GitCommitRequest"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GitCommitResponse'
+                $ref: "#/components/schemas/GitCommitResponse"
           description: Changes committed successfully
       security:
       - bearer: []
@@ -4590,7 +4590,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/GitCommitInfo'
+                  $ref: "#/components/schemas/GitCommitInfo"
                 type: array
           description: Commit history retrieved successfully
       security:
@@ -4627,7 +4627,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GitRepoRequest'
+              $ref: "#/components/schemas/GitRepoRequest"
         required: true
       responses:
         "200":
@@ -4666,7 +4666,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GitRepoRequest'
+              $ref: "#/components/schemas/GitRepoRequest"
         required: true
       responses:
         "200":
@@ -4705,7 +4705,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GitCheckoutRequest'
+              $ref: "#/components/schemas/GitCheckoutRequest"
         required: true
       responses:
         "200":
@@ -4752,7 +4752,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GitStatus'
+                $ref: "#/components/schemas/GitStatus"
           description: Git status retrieved successfully
       security:
       - bearer: []
@@ -4788,14 +4788,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ExecuteRequest'
+              $ref: "#/components/schemas/ExecuteRequest"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExecuteResponse'
+                $ref: "#/components/schemas/ExecuteResponse"
           description: Command executed successfully
       security:
       - bearer: []
@@ -4833,7 +4833,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Session'
+                  $ref: "#/components/schemas/Session"
                 type: array
           description: Sessions retrieved successfully
       security:
@@ -4869,7 +4869,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateSessionRequest'
+              $ref: "#/components/schemas/CreateSessionRequest"
         required: true
       responses:
         "200":
@@ -4955,7 +4955,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Session'
+                $ref: "#/components/schemas/Session"
           description: Session retrieved successfully
       security:
       - bearer: []
@@ -4998,20 +4998,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SessionExecuteRequest'
+              $ref: "#/components/schemas/SessionExecuteRequest"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SessionExecuteResponse'
+                $ref: "#/components/schemas/SessionExecuteResponse"
           description: Command executed successfully
         "202":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SessionExecuteResponse'
+                $ref: "#/components/schemas/SessionExecuteResponse"
           description: Command accepted and is being processed
       security:
       - bearer: []
@@ -5062,7 +5062,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Command'
+                $ref: "#/components/schemas/Command"
           description: Session command retrieved successfully
       security:
       - bearer: []
@@ -5158,7 +5158,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PtyListResponse'
+                $ref: "#/components/schemas/PtyListResponse"
           description: PTY sessions retrieved successfully
       security:
       - bearer: []
@@ -5193,14 +5193,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PtyCreateRequest'
+              $ref: "#/components/schemas/PtyCreateRequest"
         required: true
       responses:
         "201":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PtyCreateResponse'
+                $ref: "#/components/schemas/PtyCreateResponse"
           description: PTY session created successfully
       security:
       - bearer: []
@@ -5283,7 +5283,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PtySessionInfo'
+                $ref: "#/components/schemas/PtySessionInfo"
           description: PTY session retrieved successfully
       security:
       - bearer: []
@@ -5326,14 +5326,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PtyResizeRequest'
+              $ref: "#/components/schemas/PtyResizeRequest"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PtySessionInfo'
+                $ref: "#/components/schemas/PtySessionInfo"
           description: PTY session resized successfully
       security:
       - bearer: []
@@ -5370,14 +5370,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LspCompletionParams'
+              $ref: "#/components/schemas/LspCompletionParams"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CompletionList'
+                $ref: "#/components/schemas/CompletionList"
           description: OK
       security:
       - bearer: []
@@ -5414,7 +5414,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LspDocumentRequest'
+              $ref: "#/components/schemas/LspDocumentRequest"
         required: true
       responses:
         "200":
@@ -5454,7 +5454,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LspDocumentRequest'
+              $ref: "#/components/schemas/LspDocumentRequest"
         required: true
       responses:
         "200":
@@ -5516,7 +5516,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/LspSymbol'
+                  $ref: "#/components/schemas/LspSymbol"
                 type: array
           description: OK
       security:
@@ -5553,7 +5553,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LspServerRequest'
+              $ref: "#/components/schemas/LspServerRequest"
         required: true
       responses:
         "200":
@@ -5592,7 +5592,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LspServerRequest'
+              $ref: "#/components/schemas/LspServerRequest"
         required: true
       responses:
         "200":
@@ -5655,7 +5655,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/LspSymbol'
+                  $ref: "#/components/schemas/LspSymbol"
                 type: array
           description: OK
       security:
@@ -5693,7 +5693,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ComputerUseStartResponse'
+                $ref: "#/components/schemas/ComputerUseStartResponse"
           description: Computer use processes started successfully
       security:
       - bearer: []
@@ -5730,7 +5730,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ComputerUseStopResponse'
+                $ref: "#/components/schemas/ComputerUseStopResponse"
           description: Computer use processes stopped successfully
       security:
       - bearer: []
@@ -5767,7 +5767,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ComputerUseStatusResponse'
+                $ref: "#/components/schemas/ComputerUseStatusResponse"
           description: Computer use status retrieved successfully
       security:
       - bearer: []
@@ -5811,7 +5811,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProcessStatusResponse'
+                $ref: "#/components/schemas/ProcessStatusResponse"
           description: Process status retrieved successfully
       security:
       - bearer: []
@@ -5855,7 +5855,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProcessRestartResponse'
+                $ref: "#/components/schemas/ProcessRestartResponse"
           description: Process restarted successfully
       security:
       - bearer: []
@@ -5899,7 +5899,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProcessLogsResponse'
+                $ref: "#/components/schemas/ProcessLogsResponse"
           description: Process logs retrieved successfully
       security:
       - bearer: []
@@ -5943,7 +5943,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProcessErrorsResponse'
+                $ref: "#/components/schemas/ProcessErrorsResponse"
           description: Process errors retrieved successfully
       security:
       - bearer: []
@@ -5980,7 +5980,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MousePosition'
+                $ref: "#/components/schemas/MousePosition"
           description: Mouse position retrieved successfully
       security:
       - bearer: []
@@ -6016,14 +6016,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MouseMoveRequest'
+              $ref: "#/components/schemas/MouseMoveRequest"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MouseMoveResponse'
+                $ref: "#/components/schemas/MouseMoveResponse"
           description: Mouse moved successfully
       security:
       - bearer: []
@@ -6059,14 +6059,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MouseClickRequest'
+              $ref: "#/components/schemas/MouseClickRequest"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MouseClickResponse'
+                $ref: "#/components/schemas/MouseClickResponse"
           description: Mouse clicked successfully
       security:
       - bearer: []
@@ -6102,14 +6102,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MouseDragRequest'
+              $ref: "#/components/schemas/MouseDragRequest"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MouseDragResponse'
+                $ref: "#/components/schemas/MouseDragResponse"
           description: Mouse dragged successfully
       security:
       - bearer: []
@@ -6145,14 +6145,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MouseScrollRequest'
+              $ref: "#/components/schemas/MouseScrollRequest"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MouseScrollResponse'
+                $ref: "#/components/schemas/MouseScrollResponse"
           description: Mouse scrolled successfully
       security:
       - bearer: []
@@ -6188,7 +6188,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/KeyboardTypeRequest'
+              $ref: "#/components/schemas/KeyboardTypeRequest"
         required: true
       responses:
         "200":
@@ -6227,7 +6227,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/KeyboardPressRequest'
+              $ref: "#/components/schemas/KeyboardPressRequest"
         required: true
       responses:
         "200":
@@ -6266,7 +6266,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/KeyboardHotkeyRequest'
+              $ref: "#/components/schemas/KeyboardHotkeyRequest"
         required: true
       responses:
         "200":
@@ -6313,7 +6313,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScreenshotResponse'
+                $ref: "#/components/schemas/ScreenshotResponse"
           description: Screenshot taken successfully
       security:
       - bearer: []
@@ -6385,7 +6385,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RegionScreenshotResponse'
+                $ref: "#/components/schemas/RegionScreenshotResponse"
           description: Region screenshot taken successfully
       security:
       - bearer: []
@@ -6450,7 +6450,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CompressedScreenshotResponse'
+                $ref: "#/components/schemas/CompressedScreenshotResponse"
           description: Compressed screenshot taken successfully
       security:
       - bearer: []
@@ -6543,7 +6543,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CompressedScreenshotResponse'
+                $ref: "#/components/schemas/CompressedScreenshotResponse"
           description: Compressed region screenshot taken successfully
       security:
       - bearer: []
@@ -6580,7 +6580,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DisplayInfoResponse'
+                $ref: "#/components/schemas/DisplayInfoResponse"
           description: Display info retrieved successfully
       security:
       - bearer: []
@@ -6617,7 +6617,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WindowsResponse'
+                $ref: "#/components/schemas/WindowsResponse"
           description: Windows list retrieved successfully
       security:
       - bearer: []
@@ -6701,7 +6701,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedSnapshots'
+                $ref: "#/components/schemas/PaginatedSnapshots"
           description: Paginated list of all snapshots
       security:
       - bearer: []
@@ -6727,14 +6727,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateSnapshot'
+              $ref: "#/components/schemas/CreateSnapshot"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SnapshotDto'
+                $ref: "#/components/schemas/SnapshotDto"
           description: The snapshot has been successfully created.
         "400":
           description: Bad request - Snapshots with tag ":latest" are not allowed
@@ -6803,7 +6803,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SnapshotDto'
+                $ref: "#/components/schemas/SnapshotDto"
           description: The snapshot
         "404":
           description: Snapshot not found
@@ -6883,7 +6883,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Url'
+                $ref: "#/components/schemas/Url"
           description: The snapshot build logs URL
       security:
       - bearer: []
@@ -6919,7 +6919,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SnapshotDto'
+                $ref: "#/components/schemas/SnapshotDto"
           description: The snapshot has been successfully activated.
         "400":
           description: "Bad request - Snapshot is already active, not in inactive\
@@ -7003,7 +7003,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Workspace'
+                  $ref: "#/components/schemas/Workspace"
                 type: array
           description: List of all workspacees
       security:
@@ -7031,14 +7031,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateWorkspace'
+              $ref: "#/components/schemas/CreateWorkspace"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Workspace'
+                $ref: "#/components/schemas/Workspace"
           description: The workspace has been successfully created.
       security:
       - bearer: []
@@ -7122,7 +7122,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Workspace'
+                $ref: "#/components/schemas/Workspace"
           description: Workspace details
       security:
       - bearer: []
@@ -7224,14 +7224,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SandboxLabels'
+              $ref: "#/components/schemas/SandboxLabels"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SandboxLabels'
+                $ref: "#/components/schemas/SandboxLabels"
           description: Labels have been successfully replaced
       security:
       - bearer: []
@@ -7268,7 +7268,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Workspace'
+                $ref: "#/components/schemas/Workspace"
           description: Workspace backup has been initiated
       security:
       - bearer: []
@@ -7469,7 +7469,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WorkspacePortPreviewUrl'
+                $ref: "#/components/schemas/WorkspacePortPreviewUrl"
           description: Preview URL for the specified port
       security:
       - bearer: []
@@ -7674,7 +7674,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/VolumeDto'
+                  $ref: "#/components/schemas/VolumeDto"
                 type: array
           description: List of all volumes
       security:
@@ -7701,14 +7701,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateVolume'
+              $ref: "#/components/schemas/CreateVolume"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeDto'
+                $ref: "#/components/schemas/VolumeDto"
           description: The volume has been successfully created.
       security:
       - bearer: []
@@ -7777,7 +7777,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeDto'
+                $ref: "#/components/schemas/VolumeDto"
           description: Volume details
       security:
       - bearer: []
@@ -7813,7 +7813,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeDto'
+                $ref: "#/components/schemas/VolumeDto"
           description: Volume details
       security:
       - bearer: []
@@ -7857,7 +7857,7 @@ paths:
         name: status
         required: false
         schema:
-          $ref: '#/components/schemas/JobStatus'
+          $ref: "#/components/schemas/JobStatus"
         style: form
       - description: "Number of jobs to skip for pagination (default: 0)"
         explode: true
@@ -7872,7 +7872,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedJobs'
+                $ref: "#/components/schemas/PaginatedJobs"
           description: List of jobs for the runner
       security:
       - bearer: []
@@ -7910,7 +7910,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PollJobsResponse'
+                $ref: "#/components/schemas/PollJobsResponse"
           description: List of jobs for the runner
       security:
       - bearer: []
@@ -7938,7 +7938,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Job'
+                $ref: "#/components/schemas/Job"
           description: Job details
       security:
       - bearer: []
@@ -7965,14 +7965,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateJobStatus'
+              $ref: "#/components/schemas/UpdateJobStatus"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Job'
+                $ref: "#/components/schemas/Job"
           description: Job status updated successfully
       security:
       - bearer: []
@@ -8001,7 +8001,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/DockerRegistry'
+                  $ref: "#/components/schemas/DockerRegistry"
                 type: array
           description: List of all docker registries
       security:
@@ -8028,14 +8028,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateDockerRegistry'
+              $ref: "#/components/schemas/CreateDockerRegistry"
         required: true
       responses:
         "201":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DockerRegistry'
+                $ref: "#/components/schemas/DockerRegistry"
           description: The docker registry has been successfully created.
       security:
       - bearer: []
@@ -8072,7 +8072,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RegistryPushAccessDto'
+                $ref: "#/components/schemas/RegistryPushAccessDto"
           description: Temporary registry access has been generated
       security:
       - bearer: []
@@ -8139,7 +8139,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DockerRegistry'
+                $ref: "#/components/schemas/DockerRegistry"
           description: The docker registry
       security:
       - bearer: []
@@ -8173,14 +8173,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateDockerRegistry'
+              $ref: "#/components/schemas/UpdateDockerRegistry"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DockerRegistry'
+                $ref: "#/components/schemas/DockerRegistry"
           description: The docker registry has been successfully updated.
       security:
       - bearer: []
@@ -8209,7 +8209,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/RunnerFull'
+                  $ref: "#/components/schemas/RunnerFull"
                 type: array
           description: ""
       security:
@@ -8228,14 +8228,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AdminCreateRunner'
+              $ref: "#/components/schemas/AdminCreateRunner"
         required: true
       responses:
         "201":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateRunnerResponse'
+                $ref: "#/components/schemas/CreateRunnerResponse"
           description: ""
       security:
       - bearer: []
@@ -8286,7 +8286,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RunnerFull'
+                $ref: "#/components/schemas/RunnerFull"
           description: ""
       security:
       - bearer: []
@@ -8337,7 +8337,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Sandbox'
+                $ref: "#/components/schemas/Sandbox"
           description: Recovery initiated
       security:
       - bearer: []
@@ -8371,7 +8371,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateUser'
+              $ref: "#/components/schemas/CreateUser"
         required: true
       responses:
         "201":
@@ -8424,7 +8424,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
           description: User details
       security:
       - bearer: []
@@ -8450,7 +8450,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SendWebhookDto'
+              $ref: "#/components/schemas/SendWebhookDto"
         required: true
       responses:
         "200":
@@ -8509,7 +8509,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/adminGetWebhookStatus_200_response'
+                $ref: "#/components/schemas/adminGetWebhookStatus_200_response"
           description: Webhook service status
       security:
       - bearer: []
@@ -8562,7 +8562,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DockerRegistry'
+                $ref: "#/components/schemas/DockerRegistry"
           description: The docker registry has been set as default.
       security:
       - bearer: []
@@ -8617,14 +8617,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SetSnapshotGeneralStatusDto'
+              $ref: "#/components/schemas/SetSnapshotGeneralStatusDto"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SnapshotDto'
+                $ref: "#/components/schemas/SnapshotDto"
           description: Snapshot general status has been set
       security:
       - bearer: []
@@ -8692,7 +8692,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedAuditLogs'
+                $ref: "#/components/schemas/PaginatedAuditLogs"
           description: Paginated list of all audit logs
       security:
       - bearer: []
@@ -8727,7 +8727,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WebhookAppPortalAccess'
+                $ref: "#/components/schemas/WebhookAppPortalAccess"
           description: App Portal access generated successfully
       security:
       - bearer: []
@@ -8762,7 +8762,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WebhookInitializationStatus'
+                $ref: "#/components/schemas/WebhookInitializationStatus"
           description: Webhook initialization status
         "404":
           description: Webhook initialization status not found
@@ -8840,7 +8840,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedAuditLogs'
+                $ref: "#/components/schemas/PaginatedAuditLogs"
           description: Paginated list of organization audit logs
       security:
       - bearer: []
@@ -8868,7 +8868,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StorageAccessDto'
+                $ref: "#/components/schemas/StorageAccessDto"
           description: Temporary storage access has been generated
       security:
       - bearer: []
@@ -8897,13 +8897,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthController_check_200_response'
+                $ref: "#/components/schemas/HealthController_check_200_response"
           description: The Health Check is successful
         "503":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthController_check_503_response'
+                $ref: "#/components/schemas/HealthController_check_503_response"
           description: The Health Check is not successful
       security:
       - bearer: []
@@ -8989,7 +8989,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedLogs'
+                $ref: "#/components/schemas/PaginatedLogs"
           description: Paginated list of log entries
       security:
       - bearer: []
@@ -9062,7 +9062,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedTraces'
+                $ref: "#/components/schemas/PaginatedTraces"
           description: Paginated list of trace summaries
       security:
       - bearer: []
@@ -9108,7 +9108,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/TraceSpan'
+                  $ref: "#/components/schemas/TraceSpan"
                 type: array
           description: List of spans in the trace
       security:
@@ -9174,7 +9174,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MetricsResponse'
+                $ref: "#/components/schemas/MetricsResponse"
           description: Metrics time series data
       security:
       - bearer: []
@@ -9248,19 +9248,19 @@ components:
       properties:
         failedAuth:
           allOf:
-          - $ref: '#/components/schemas/RateLimitEntry'
+          - $ref: "#/components/schemas/RateLimitEntry"
           description: Failed authentication rate limit
         authenticated:
           allOf:
-          - $ref: '#/components/schemas/RateLimitEntry'
+          - $ref: "#/components/schemas/RateLimitEntry"
           description: Authenticated rate limit
         sandboxCreate:
           allOf:
-          - $ref: '#/components/schemas/RateLimitEntry'
+          - $ref: "#/components/schemas/RateLimitEntry"
           description: Sandbox create rate limit
         sandboxLifecycle:
           allOf:
-          - $ref: '#/components/schemas/RateLimitEntry'
+          - $ref: "#/components/schemas/RateLimitEntry"
           description: Sandbox lifecycle rate limit
       type: object
     DaytonaConfiguration:
@@ -9293,11 +9293,11 @@ components:
           type: string
         posthog:
           allOf:
-          - $ref: '#/components/schemas/PosthogConfig'
+          - $ref: "#/components/schemas/PosthogConfig"
           description: PostHog configuration
         oidc:
           allOf:
-          - $ref: '#/components/schemas/OidcConfig'
+          - $ref: "#/components/schemas/OidcConfig"
           description: OIDC configuration
         linkedAccountsEnabled:
           description: Whether linked accounts are enabled
@@ -9305,7 +9305,7 @@ components:
           type: boolean
         announcements:
           additionalProperties:
-            $ref: '#/components/schemas/Announcement'
+            $ref: "#/components/schemas/Announcement"
           description: System announcements
           example:
             feature-update:
@@ -9362,7 +9362,7 @@ components:
           type: string
         rateLimit:
           allOf:
-          - $ref: '#/components/schemas/RateLimitConfig'
+          - $ref: "#/components/schemas/RateLimitConfig"
           description: Rate limit configuration
       required:
       - announcements
@@ -9681,7 +9681,7 @@ components:
         assignedRoles:
           description: Assigned roles
           items:
-            $ref: '#/components/schemas/OrganizationRole'
+            $ref: "#/components/schemas/OrganizationRole"
           type: array
         createdAt:
           description: Creation timestamp
@@ -9979,7 +9979,7 @@ components:
       properties:
         regionUsage:
           items:
-            $ref: '#/components/schemas/RegionUsageOverview'
+            $ref: "#/components/schemas/RegionUsageOverview"
           type: array
         totalSnapshotQuota:
           type: number
@@ -10268,7 +10268,7 @@ components:
         assignedRoles:
           description: Roles assigned to the user
           items:
-            $ref: '#/components/schemas/OrganizationRole'
+            $ref: "#/components/schemas/OrganizationRole"
           type: array
         createdAt:
           description: Creation timestamp
@@ -10412,7 +10412,7 @@ components:
           type: string
         regionType:
           allOf:
-          - $ref: '#/components/schemas/RegionType'
+          - $ref: "#/components/schemas/RegionType"
           description: The type of the region
           example: shared
         createdAt:
@@ -10596,7 +10596,7 @@ components:
         publicKeys:
           description: User public keys
           items:
-            $ref: '#/components/schemas/UserPublicKey'
+            $ref: "#/components/schemas/UserPublicKey"
           type: array
         createdAt:
           description: Creation timestamp
@@ -10842,12 +10842,12 @@ components:
           type: number
         state:
           allOf:
-          - $ref: '#/components/schemas/SandboxState'
+          - $ref: "#/components/schemas/SandboxState"
           description: The state of the sandbox
           example: creating
         desiredState:
           allOf:
-          - $ref: '#/components/schemas/SandboxDesiredState'
+          - $ref: "#/components/schemas/SandboxDesiredState"
           description: The desired state of the sandbox
           example: destroyed
         errorReason:
@@ -10888,11 +10888,11 @@ components:
         volumes:
           description: Array of volumes attached to the sandbox
           items:
-            $ref: '#/components/schemas/SandboxVolume'
+            $ref: "#/components/schemas/SandboxVolume"
           type: array
         buildInfo:
           allOf:
-          - $ref: '#/components/schemas/BuildInfo'
+          - $ref: "#/components/schemas/BuildInfo"
           description: Build information for the sandbox
         createdAt:
           description: The creation timestamp of the sandbox
@@ -11034,7 +11034,7 @@ components:
       properties:
         items:
           items:
-            $ref: '#/components/schemas/Sandbox'
+            $ref: "#/components/schemas/Sandbox"
           type: array
         total:
           type: number
@@ -11185,11 +11185,11 @@ components:
         volumes:
           description: Array of volumes to attach to the sandbox
           items:
-            $ref: '#/components/schemas/SandboxVolume'
+            $ref: "#/components/schemas/SandboxVolume"
           type: array
         buildInfo:
           allOf:
-          - $ref: '#/components/schemas/CreateBuildInfo'
+          - $ref: "#/components/schemas/CreateBuildInfo"
           description: Build information for the sandbox
       type: object
     ResizeSandbox:
@@ -11617,7 +11617,7 @@ components:
           type: string
         class:
           allOf:
-          - $ref: '#/components/schemas/SandboxClass'
+          - $ref: "#/components/schemas/SandboxClass"
           description: The class of the runner
           example: small
         currentCpuUsagePercentage:
@@ -11666,7 +11666,7 @@ components:
           type: string
         state:
           allOf:
-          - $ref: '#/components/schemas/RunnerState'
+          - $ref: "#/components/schemas/RunnerState"
           description: The state of the runner
           example: initializing
         lastChecked:
@@ -11697,7 +11697,7 @@ components:
           type: string
         runnerClass:
           allOf:
-          - $ref: '#/components/schemas/RunnerClass'
+          - $ref: "#/components/schemas/RunnerClass"
           description: The class of the runner
           example: container
         appVersion:
@@ -11711,7 +11711,7 @@ components:
           type: string
         regionType:
           allOf:
-          - $ref: '#/components/schemas/RegionType'
+          - $ref: "#/components/schemas/RegionType"
           description: The region type of the runner
           example: shared
       required:
@@ -11823,7 +11823,7 @@ components:
           type: string
         class:
           allOf:
-          - $ref: '#/components/schemas/SandboxClass'
+          - $ref: "#/components/schemas/SandboxClass"
           description: The class of the runner
           example: small
         currentCpuUsagePercentage:
@@ -11872,7 +11872,7 @@ components:
           type: string
         state:
           allOf:
-          - $ref: '#/components/schemas/RunnerState'
+          - $ref: "#/components/schemas/RunnerState"
           description: The state of the runner
           example: initializing
         lastChecked:
@@ -11903,7 +11903,7 @@ components:
           type: string
         runnerClass:
           allOf:
-          - $ref: '#/components/schemas/RunnerClass'
+          - $ref: "#/components/schemas/RunnerClass"
           description: The class of the runner
           example: container
         appVersion:
@@ -12030,12 +12030,12 @@ components:
       properties:
         metrics:
           allOf:
-          - $ref: '#/components/schemas/RunnerHealthMetrics'
+          - $ref: "#/components/schemas/RunnerHealthMetrics"
           description: Runner metrics
         serviceHealth:
           description: Health status of individual services on the runner
           items:
-            $ref: '#/components/schemas/RunnerServiceHealth'
+            $ref: "#/components/schemas/RunnerServiceHealth"
           type: array
         domain:
           description: Runner domain
@@ -12414,7 +12414,7 @@ components:
           type: string
         fileStatus:
           items:
-            $ref: '#/components/schemas/FileStatus'
+            $ref: "#/components/schemas/FileStatus"
           type: array
         ahead:
           type: number
@@ -12500,7 +12500,7 @@ components:
         commands:
           description: The list of commands executed in this session
           items:
-            $ref: '#/components/schemas/Command'
+            $ref: "#/components/schemas/Command"
           nullable: true
           type: array
       required:
@@ -12652,7 +12652,7 @@ components:
         sessions:
           description: List of active PTY sessions
           items:
-            $ref: '#/components/schemas/PtySessionInfo'
+            $ref: "#/components/schemas/PtySessionInfo"
           type: array
       required:
       - sessions
@@ -12775,9 +12775,9 @@ components:
           description: Document URI
           type: string
         position:
-          $ref: '#/components/schemas/Position'
+          $ref: "#/components/schemas/Position"
         context:
-          $ref: '#/components/schemas/CompletionContext'
+          $ref: "#/components/schemas/CompletionContext"
       required:
       - languageId
       - pathToProject
@@ -12834,7 +12834,7 @@ components:
           type: boolean
         items:
           items:
-            $ref: '#/components/schemas/CompletionItem'
+            $ref: "#/components/schemas/CompletionItem"
           type: array
       required:
       - isIncomplete
@@ -12870,9 +12870,9 @@ components:
           line: 0.8008281904610115
       properties:
         start:
-          $ref: '#/components/schemas/Position'
+          $ref: "#/components/schemas/Position"
         end:
-          $ref: '#/components/schemas/Position'
+          $ref: "#/components/schemas/Position"
       required:
       - end
       - start
@@ -12889,7 +12889,7 @@ components:
         uri: uri
       properties:
         range:
-          $ref: '#/components/schemas/Range'
+          $ref: "#/components/schemas/Range"
         uri:
           type: string
       required:
@@ -12913,7 +12913,7 @@ components:
         kind:
           type: number
         location:
-          $ref: '#/components/schemas/LspLocation'
+          $ref: "#/components/schemas/LspLocation"
         name:
           type: string
       required:
@@ -13534,7 +13534,7 @@ components:
           type: integer
         buildInfo:
           allOf:
-          - $ref: '#/components/schemas/CreateBuildInfo'
+          - $ref: "#/components/schemas/CreateBuildInfo"
           description: Build information for the snapshot
         regionId:
           description: ID of the region where the snapshot will be available. Defaults
@@ -13593,7 +13593,7 @@ components:
           type: string
         state:
           allOf:
-          - $ref: '#/components/schemas/SnapshotState'
+          - $ref: "#/components/schemas/SnapshotState"
         size:
           nullable: true
           type: number
@@ -13625,7 +13625,7 @@ components:
           type: string
         buildInfo:
           allOf:
-          - $ref: '#/components/schemas/BuildInfo'
+          - $ref: "#/components/schemas/BuildInfo"
           description: Build information for the snapshot
         regionIds:
           description: IDs of regions where the snapshot is available
@@ -13713,7 +13713,7 @@ components:
       properties:
         items:
           items:
-            $ref: '#/components/schemas/SnapshotDto'
+            $ref: "#/components/schemas/SnapshotDto"
           type: array
         total:
           type: number
@@ -13864,12 +13864,12 @@ components:
           type: number
         state:
           allOf:
-          - $ref: '#/components/schemas/SandboxState'
+          - $ref: "#/components/schemas/SandboxState"
           description: The state of the sandbox
           example: creating
         desiredState:
           allOf:
-          - $ref: '#/components/schemas/SandboxDesiredState'
+          - $ref: "#/components/schemas/SandboxDesiredState"
           description: The desired state of the sandbox
           example: destroyed
         errorReason:
@@ -13910,11 +13910,11 @@ components:
         volumes:
           description: Array of volumes attached to the sandbox
           items:
-            $ref: '#/components/schemas/SandboxVolume'
+            $ref: "#/components/schemas/SandboxVolume"
           type: array
         buildInfo:
           allOf:
-          - $ref: '#/components/schemas/BuildInfo'
+          - $ref: "#/components/schemas/BuildInfo"
           description: Build information for the sandbox
         createdAt:
           description: The creation timestamp of the sandbox
@@ -13969,7 +13969,7 @@ components:
           type: string
         info:
           allOf:
-          - $ref: '#/components/schemas/SandboxInfo'
+          - $ref: "#/components/schemas/SandboxInfo"
           description: Additional information about the sandbox
       required:
       - cpu
@@ -14083,11 +14083,11 @@ components:
         volumes:
           description: Array of volumes to attach to the workspace
           items:
-            $ref: '#/components/schemas/SandboxVolume'
+            $ref: "#/components/schemas/SandboxVolume"
           type: array
         buildInfo:
           allOf:
-          - $ref: '#/components/schemas/CreateBuildInfo'
+          - $ref: "#/components/schemas/CreateBuildInfo"
           description: Build information for the workspace
       type: object
     WorkspacePortPreviewUrl:
@@ -14143,7 +14143,7 @@ components:
           type: string
         state:
           allOf:
-          - $ref: '#/components/schemas/VolumeState'
+          - $ref: "#/components/schemas/VolumeState"
           description: Volume state
           example: ready
         createdAt:
@@ -14227,12 +14227,12 @@ components:
           type: string
         type:
           allOf:
-          - $ref: '#/components/schemas/JobType'
+          - $ref: "#/components/schemas/JobType"
           description: The type of the job
           example: CREATE_SANDBOX
         status:
           allOf:
-          - $ref: '#/components/schemas/JobStatus'
+          - $ref: "#/components/schemas/JobStatus"
           description: The status of the job
           example: PENDING
         resourceType:
@@ -14309,7 +14309,7 @@ components:
       properties:
         items:
           items:
-            $ref: '#/components/schemas/Job'
+            $ref: "#/components/schemas/Job"
           type: array
         total:
           type: number
@@ -14352,7 +14352,7 @@ components:
         jobs:
           description: List of jobs
           items:
-            $ref: '#/components/schemas/Job'
+            $ref: "#/components/schemas/Job"
           type: array
       required:
       - jobs
@@ -14365,7 +14365,7 @@ components:
       properties:
         status:
           allOf:
-          - $ref: '#/components/schemas/JobStatus'
+          - $ref: "#/components/schemas/JobStatus"
           description: The new status of the job
           example: IN_PROGRESS
         errorMessage:
@@ -14647,7 +14647,7 @@ components:
         email:
           type: string
         personalOrganizationQuota:
-          $ref: '#/components/schemas/CreateOrganizationQuota'
+          $ref: "#/components/schemas/CreateOrganizationQuota"
         personalOrganizationDefaultRegionId:
           type: string
         role:
@@ -14682,7 +14682,7 @@ components:
       properties:
         eventType:
           allOf:
-          - $ref: '#/components/schemas/WebhookEvent'
+          - $ref: "#/components/schemas/WebhookEvent"
           description: The type of event being sent
           example: sandbox.created
         payload:
@@ -14815,7 +14815,7 @@ components:
       properties:
         items:
           items:
-            $ref: '#/components/schemas/AuditLog'
+            $ref: "#/components/schemas/AuditLog"
           type: array
         total:
           type: number
@@ -15018,7 +15018,7 @@ components:
         items:
           description: List of log entries
           items:
-            $ref: '#/components/schemas/LogEntry'
+            $ref: "#/components/schemas/LogEntry"
           type: array
         total:
           description: Total number of log entries matching the query
@@ -15098,7 +15098,7 @@ components:
         items:
           description: List of trace summaries
           items:
-            $ref: '#/components/schemas/TraceSummary'
+            $ref: "#/components/schemas/TraceSummary"
           type: array
         total:
           description: Total number of traces matching the query
@@ -15195,7 +15195,7 @@ components:
         dataPoints:
           description: Data points for this metric
           items:
-            $ref: '#/components/schemas/MetricDataPoint'
+            $ref: "#/components/schemas/MetricDataPoint"
           type: array
       required:
       - dataPoints
@@ -15220,7 +15220,7 @@ components:
         series:
           description: List of metric series
           items:
-            $ref: '#/components/schemas/MetricSeries'
+            $ref: "#/components/schemas/MetricSeries"
           type: array
       required:
       - series
@@ -15262,7 +15262,7 @@ components:
           type: string
         info:
           additionalProperties:
-            $ref: '#/components/schemas/HealthController_check_200_response_info_value'
+            $ref: "#/components/schemas/HealthController_check_200_response_info_value"
           example:
             database:
               status: up
@@ -15270,13 +15270,13 @@ components:
           type: object
         error:
           additionalProperties:
-            $ref: '#/components/schemas/HealthController_check_200_response_info_value'
+            $ref: "#/components/schemas/HealthController_check_200_response_info_value"
           example: {}
           nullable: true
           type: object
         details:
           additionalProperties:
-            $ref: '#/components/schemas/HealthController_check_200_response_info_value'
+            $ref: "#/components/schemas/HealthController_check_200_response_info_value"
           example:
             database:
               status: up
@@ -15304,7 +15304,7 @@ components:
           type: string
         info:
           additionalProperties:
-            $ref: '#/components/schemas/HealthController_check_200_response_info_value'
+            $ref: "#/components/schemas/HealthController_check_200_response_info_value"
           example:
             database:
               status: up
@@ -15312,7 +15312,7 @@ components:
           type: object
         error:
           additionalProperties:
-            $ref: '#/components/schemas/HealthController_check_200_response_info_value'
+            $ref: "#/components/schemas/HealthController_check_200_response_info_value"
           example:
             redis:
               status: down
@@ -15321,7 +15321,7 @@ components:
           type: object
         details:
           additionalProperties:
-            $ref: '#/components/schemas/HealthController_check_200_response_info_value'
+            $ref: "#/components/schemas/HealthController_check_200_response_info_value"
           example:
             database:
               status: up

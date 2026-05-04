@@ -16,8 +16,6 @@
 
 /**
  * The type of the job
- * @export
- * @enum {string}
  */
 
 export const JobType = {
@@ -35,7 +33,7 @@ export const JobType = {
     UPDATE_SANDBOX_NETWORK_SETTINGS: 'UPDATE_SANDBOX_NETWORK_SETTINGS',
     SNAPSHOT_SANDBOX: 'SNAPSHOT_SANDBOX',
     FORK_SANDBOX: 'FORK_SANDBOX',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809'
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type JobType = typeof JobType[keyof typeof JobType];

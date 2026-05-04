@@ -17,23 +17,8 @@
 // @ts-ignore
 import type { ComputerUseAccessibilityNode } from './computer-use-accessibility-node';
 
-/**
- * 
- * @export
- * @interface AccessibilityTreeResponse
- */
 export interface AccessibilityTreeResponse {
-    /**
-     * 
-     * @type {ComputerUseAccessibilityNode}
-     * @memberof AccessibilityTreeResponse
-     */
     'root'?: ComputerUseAccessibilityNode;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof AccessibilityTreeResponse
-     */
     'truncated'?: boolean;
 }
 

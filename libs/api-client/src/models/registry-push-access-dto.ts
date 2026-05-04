@@ -14,46 +14,29 @@
 
 
 
-/**
- * 
- * @export
- * @interface RegistryPushAccessDto
- */
 export interface RegistryPushAccessDto {
     /**
      * Temporary username for registry authentication
-     * @type {string}
-     * @memberof RegistryPushAccessDto
      */
     'username': string;
     /**
      * Temporary secret for registry authentication
-     * @type {string}
-     * @memberof RegistryPushAccessDto
      */
     'secret': string;
     /**
      * Registry URL
-     * @type {string}
-     * @memberof RegistryPushAccessDto
      */
     'registryUrl': string;
     /**
      * Registry ID
-     * @type {string}
-     * @memberof RegistryPushAccessDto
      */
     'registryId': string;
     /**
      * Registry project ID
-     * @type {string}
-     * @memberof RegistryPushAccessDto
      */
     'project': string;
     /**
      * Token expiration time in ISO format
-     * @type {string}
-     * @memberof RegistryPushAccessDto
      */
     'expiresAt': string;
 }

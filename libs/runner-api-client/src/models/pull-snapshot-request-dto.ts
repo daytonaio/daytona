@@ -17,41 +17,11 @@
 // @ts-ignore
 import type { RegistryDTO } from './registry-dto';
 
-/**
- * 
- * @export
- * @interface PullSnapshotRequestDTO
- */
 export interface PullSnapshotRequestDTO {
-    /**
-     * 
-     * @type {string}
-     * @memberof PullSnapshotRequestDTO
-     */
     'destinationRef'?: string;
-    /**
-     * 
-     * @type {RegistryDTO}
-     * @memberof PullSnapshotRequestDTO
-     */
     'destinationRegistry'?: RegistryDTO;
-    /**
-     * 
-     * @type {string}
-     * @memberof PullSnapshotRequestDTO
-     */
     'newTag'?: string;
-    /**
-     * 
-     * @type {RegistryDTO}
-     * @memberof PullSnapshotRequestDTO
-     */
     'registry'?: RegistryDTO;
-    /**
-     * 
-     * @type {string}
-     * @memberof PullSnapshotRequestDTO
-     */
     'snapshot': string;
 }
 

@@ -14,23 +14,8 @@
 
 
 
-/**
- * 
- * @export
- * @interface CompletionContext
- */
 export interface CompletionContext {
-    /**
-     * 
-     * @type {string}
-     * @memberof CompletionContext
-     */
     'triggerCharacter'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof CompletionContext
-     */
     'triggerKind': number;
 }
 

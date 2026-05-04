@@ -14,35 +14,10 @@
 
 
 
-/**
- * 
- * @export
- * @interface AccessibilityBounds
- */
 export interface AccessibilityBounds {
-    /**
-     * 
-     * @type {number}
-     * @memberof AccessibilityBounds
-     */
     'height'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof AccessibilityBounds
-     */
     'width'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof AccessibilityBounds
-     */
     'x'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof AccessibilityBounds
-     */
     'y'?: number;
 }
 

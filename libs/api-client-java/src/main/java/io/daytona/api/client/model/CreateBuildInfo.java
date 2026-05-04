@@ -50,7 +50,7 @@ import io.daytona.api.client.JSON;
 /**
  * CreateBuildInfo
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class CreateBuildInfo {
   public static final String SERIALIZED_NAME_DOCKERFILE_CONTENT = "dockerfileContent";
   @SerializedName(SERIALIZED_NAME_DOCKERFILE_CONTENT)
@@ -191,10 +191,7 @@ public class CreateBuildInfo {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -203,13 +200,10 @@ public class CreateBuildInfo {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("dockerfileContent");
-    openapiFields.add("contextHashes");
+    openapiFields = new HashSet<String>(Arrays.asList("dockerfileContent", "contextHashes"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("dockerfileContent");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("dockerfileContent"));
   }
 
   /**
@@ -221,23 +215,23 @@ public class CreateBuildInfo {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!CreateBuildInfo.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in CreateBuildInfo is not found in the empty JSON string", CreateBuildInfo.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in CreateBuildInfo is not found in the empty JSON string", CreateBuildInfo.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : CreateBuildInfo.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("dockerfileContent").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `dockerfileContent` to be a primitive type in the JSON string but got `%s`", jsonObj.get("dockerfileContent").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `dockerfileContent` to be a primitive type in the JSON string but got `%s`", jsonObj.get("dockerfileContent").toString()));
       }
       // ensure the optional json data is an array if present
       if (jsonObj.get("contextHashes") != null && !jsonObj.get("contextHashes").isJsonNull() && !jsonObj.get("contextHashes").isJsonArray()) {
-        throw new IllegalArgumentException(String.format("Expected the field `contextHashes` to be an array in the JSON string but got `%s`", jsonObj.get("contextHashes").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `contextHashes` to be an array in the JSON string but got `%s`", jsonObj.get("contextHashes").toString()));
       }
   }
 
@@ -298,7 +292,7 @@ public class CreateBuildInfo {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

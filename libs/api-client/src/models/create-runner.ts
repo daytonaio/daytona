@@ -14,23 +14,8 @@
 
 
 
-/**
- * 
- * @export
- * @interface CreateRunner
- */
 export interface CreateRunner {
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateRunner
-     */
     'regionId': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateRunner
-     */
     'name': string;
 }
 

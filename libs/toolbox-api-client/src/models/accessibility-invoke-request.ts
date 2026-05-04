@@ -14,23 +14,8 @@
 
 
 
-/**
- * 
- * @export
- * @interface AccessibilityInvokeRequest
- */
 export interface AccessibilityInvokeRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof AccessibilityInvokeRequest
-     */
     'action'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AccessibilityInvokeRequest
-     */
     'id': string;
 }
 

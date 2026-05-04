@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -27,7 +27,6 @@ import type { WebhookAppPortalAccess } from '../models';
 import type { WebhookInitializationStatus } from '../models';
 /**
  * WebhooksApi - axios parameter creator
- * @export
  */
 export const WebhooksApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -61,8 +60,8 @@ export const WebhooksApiAxiosParamCreator = function (configuration?: Configurat
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -105,8 +104,8 @@ export const WebhooksApiAxiosParamCreator = function (configuration?: Configurat
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -124,7 +123,6 @@ export const WebhooksApiAxiosParamCreator = function (configuration?: Configurat
 
 /**
  * WebhooksApi - functional programming interface
- * @export
  */
 export const WebhooksApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = WebhooksApiAxiosParamCreator(configuration)
@@ -162,7 +160,6 @@ export const WebhooksApiFp = function(configuration?: Configuration) {
 
 /**
  * WebhooksApi - factory interface
- * @export
  */
 export const WebhooksApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = WebhooksApiFp(configuration)
@@ -194,9 +191,6 @@ export const WebhooksApiFactory = function (configuration?: Configuration, baseP
 
 /**
  * WebhooksApi - object-oriented interface
- * @export
- * @class WebhooksApi
- * @extends {BaseAPI}
  */
 export class WebhooksApi extends BaseAPI {
     /**
@@ -206,7 +200,6 @@ export class WebhooksApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof WebhooksApi
      */
     public webhookControllerGetAppPortalAccess(organizationId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return WebhooksApiFp(this.configuration).webhookControllerGetAppPortalAccess(organizationId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -219,7 +212,6 @@ export class WebhooksApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof WebhooksApi
      */
     public webhookControllerGetInitializationStatus(organizationId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return WebhooksApiFp(this.configuration).webhookControllerGetInitializationStatus(organizationId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));

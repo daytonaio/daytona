@@ -14,17 +14,7 @@
 
 
 
-/**
- * 
- * @export
- * @interface FilesDownloadRequest
- */
 export interface FilesDownloadRequest {
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof FilesDownloadRequest
-     */
     'paths': Array<string>;
 }
 

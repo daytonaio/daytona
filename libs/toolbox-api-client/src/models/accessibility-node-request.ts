@@ -14,17 +14,7 @@
 
 
 
-/**
- * 
- * @export
- * @interface AccessibilityNodeRequest
- */
 export interface AccessibilityNodeRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof AccessibilityNodeRequest
-     */
     'id': string;
 }
 

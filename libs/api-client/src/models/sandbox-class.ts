@@ -16,15 +16,13 @@
 
 /**
  * The class of the runner
- * @export
- * @enum {string}
  */
 
 export const SandboxClass = {
     SMALL: 'small',
     MEDIUM: 'medium',
     LARGE: 'large',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809'
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type SandboxClass = typeof SandboxClass[keyof typeof SandboxClass];

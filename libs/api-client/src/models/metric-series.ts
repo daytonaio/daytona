@@ -17,22 +17,13 @@
 // @ts-ignore
 import type { MetricDataPoint } from './metric-data-point';
 
-/**
- * 
- * @export
- * @interface MetricSeries
- */
 export interface MetricSeries {
     /**
      * Name of the metric
-     * @type {string}
-     * @memberof MetricSeries
      */
     'metricName': string;
     /**
      * Data points for this metric
-     * @type {Array<MetricDataPoint>}
-     * @memberof MetricSeries
      */
     'dataPoints': Array<MetricDataPoint>;
 }

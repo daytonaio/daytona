@@ -17,23 +17,8 @@
 // @ts-ignore
 import type { RegistryDTO } from './registry-dto';
 
-/**
- * 
- * @export
- * @interface CreateBackupDTO
- */
 export interface CreateBackupDTO {
-    /**
-     * 
-     * @type {RegistryDTO}
-     * @memberof CreateBackupDTO
-     */
     'registry': RegistryDTO;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateBackupDTO
-     */
     'snapshot': string;
 }
 

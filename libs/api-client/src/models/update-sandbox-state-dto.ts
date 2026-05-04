@@ -14,28 +14,17 @@
 
 
 
-/**
- * 
- * @export
- * @interface UpdateSandboxStateDto
- */
 export interface UpdateSandboxStateDto {
     /**
      * The new state for the sandbox
-     * @type {string}
-     * @memberof UpdateSandboxStateDto
      */
     'state': UpdateSandboxStateDtoStateEnum;
     /**
      * Optional error message when reporting an error state
-     * @type {string}
-     * @memberof UpdateSandboxStateDto
      */
     'errorReason'?: string;
     /**
      * Whether the sandbox is recoverable
-     * @type {boolean}
-     * @memberof UpdateSandboxStateDto
      */
     'recoverable'?: boolean;
 }
@@ -60,7 +49,7 @@ export const UpdateSandboxStateDtoStateEnum = {
     RESIZING: 'resizing',
     SNAPSHOTTING: 'snapshotting',
     FORKING: 'forking',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809'
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type UpdateSandboxStateDtoStateEnum = typeof UpdateSandboxStateDtoStateEnum[keyof typeof UpdateSandboxStateDtoStateEnum];

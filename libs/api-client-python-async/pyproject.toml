@@ -1,25 +1,30 @@
-[tool.poetry]
+[project]
 name = "daytona_api_client_async"
 version = "0.0.0-dev"
 description = "Daytona"
-authors = ["Daytona Platforms Inc. <support@daytona.com>"]
-license = "Apache-2.0"
+authors = [
+  {name = "Daytona Platforms Inc.",email = "support@daytona.com"},
+]
+license = { text = "Apache-2.0" }
 readme = "README.md"
-repository = "https://github.com/daytonaio/daytona"
 keywords = ["OpenAPI", "OpenAPI-Generator", "Daytona"]
-include = ["daytona_api_client_async/py.typed"]
+requires-python = ">=3.9"
 
-[tool.poetry.dependencies]
-python = "^3.8"
+dependencies = [
+  "python-dateutil (>=2.8.2)",
+  "aiohttp (>=3.8.4)",
+  "aiohttp-retry (>=2.8.3)",
+  "pydantic (>=2.11)",
+  "typing-extensions (>=4.7.1)",
+]
 
-urllib3 = ">= 2.1.0, < 3.0.0"
-python-dateutil = ">= 2.8.2"
-aiohttp = ">= 3.8.4"
-aiohttp-retry = ">= 2.8.3"
-pydantic = ">= 2"
-typing-extensions = ">= 4.7.1"
+[project.urls]
+Repository = "https://github.com/daytonaio/daytona"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry]
+requires-poetry = ">=2.0"
+
+[tool.poetry.group.dev.dependencies]
 pytest = ">= 7.2.1"
 pytest-cov = ">= 2.8.1"
 tox = ">= 3.9.0"

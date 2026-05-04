@@ -16,14 +16,12 @@
 
 /**
  * The class of the runner
- * @export
- * @enum {string}
  */
 
 export const RunnerClass = {
     CONTAINER: 'container',
     VM: 'vm',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809'
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type RunnerClass = typeof RunnerClass[keyof typeof RunnerClass];

@@ -14,53 +14,16 @@
 
 
 
-/**
- * 
- * @export
- * @interface FindAccessibilityNodesRequest
- */
 export interface FindAccessibilityNodesRequest {
-    /**
-     * 
-     * @type {number}
-     * @memberof FindAccessibilityNodesRequest
-     */
     'limit'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof FindAccessibilityNodesRequest
-     */
     'name'?: string;
     /**
      * \"exact\" | \"substring\" | \"regex\"
-     * @type {string}
-     * @memberof FindAccessibilityNodesRequest
      */
     'nameMatch'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof FindAccessibilityNodesRequest
-     */
     'pid'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof FindAccessibilityNodesRequest
-     */
     'role'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof FindAccessibilityNodesRequest
-     */
     'scope'?: string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof FindAccessibilityNodesRequest
-     */
     'states'?: Array<string>;
 }
 

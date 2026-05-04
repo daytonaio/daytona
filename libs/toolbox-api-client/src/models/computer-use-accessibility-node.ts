@@ -17,59 +17,14 @@
 // @ts-ignore
 import type { AccessibilityBounds } from './accessibility-bounds';
 
-/**
- * 
- * @export
- * @interface ComputerUseAccessibilityNode
- */
 export interface ComputerUseAccessibilityNode {
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ComputerUseAccessibilityNode
-     */
     'actions'?: Array<string>;
-    /**
-     * 
-     * @type {AccessibilityBounds}
-     * @memberof ComputerUseAccessibilityNode
-     */
     'bounds'?: AccessibilityBounds;
-    /**
-     * 
-     * @type {Array<ComputerUseAccessibilityNode>}
-     * @memberof ComputerUseAccessibilityNode
-     */
     'children'?: Array<ComputerUseAccessibilityNode>;
-    /**
-     * 
-     * @type {string}
-     * @memberof ComputerUseAccessibilityNode
-     */
     'description'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ComputerUseAccessibilityNode
-     */
     'id'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ComputerUseAccessibilityNode
-     */
     'name'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof ComputerUseAccessibilityNode
-     */
     'role'?: string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ComputerUseAccessibilityNode
-     */
     'states'?: Array<string>;
 }
 

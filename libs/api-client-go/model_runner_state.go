@@ -119,4 +119,3 @@ func (v *NullableRunnerState) UnmarshalJSON(src []byte) error {
 	return json.Unmarshal(src, &v.value)
 }
 
-

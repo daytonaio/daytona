@@ -18,7 +18,7 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
@@ -31,7 +31,6 @@ import type { RegistryPushAccessDto } from '../models';
 import type { UpdateDockerRegistry } from '../models';
 /**
  * DockerRegistryApi - axios parameter creator
- * @export
  */
 export const DockerRegistryApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -64,9 +63,8 @@ export const DockerRegistryApiAxiosParamCreator = function (configuration?: Conf
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -112,7 +110,6 @@ export const DockerRegistryApiAxiosParamCreator = function (configuration?: Conf
             // authentication oauth2 required
 
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -155,8 +152,8 @@ export const DockerRegistryApiAxiosParamCreator = function (configuration?: Conf
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -200,8 +197,8 @@ export const DockerRegistryApiAxiosParamCreator = function (configuration?: Conf
                 localVarQueryParameter['regionId'] = regionId;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -240,8 +237,8 @@ export const DockerRegistryApiAxiosParamCreator = function (configuration?: Conf
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
@@ -287,9 +284,8 @@ export const DockerRegistryApiAxiosParamCreator = function (configuration?: Conf
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
@@ -309,7 +305,6 @@ export const DockerRegistryApiAxiosParamCreator = function (configuration?: Conf
 
 /**
  * DockerRegistryApi - functional programming interface
- * @export
  */
 export const DockerRegistryApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = DockerRegistryApiAxiosParamCreator(configuration)
@@ -403,7 +398,6 @@ export const DockerRegistryApiFp = function(configuration?: Configuration) {
 
 /**
  * DockerRegistryApi - factory interface
- * @export
  */
 export const DockerRegistryApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = DockerRegistryApiFp(configuration)
@@ -479,9 +473,6 @@ export const DockerRegistryApiFactory = function (configuration?: Configuration,
 
 /**
  * DockerRegistryApi - object-oriented interface
- * @export
- * @class DockerRegistryApi
- * @extends {BaseAPI}
  */
 export class DockerRegistryApi extends BaseAPI {
     /**
@@ -491,7 +482,6 @@ export class DockerRegistryApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof DockerRegistryApi
      */
     public createRegistry(createDockerRegistry: CreateDockerRegistry, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return DockerRegistryApiFp(this.configuration).createRegistry(createDockerRegistry, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -504,7 +494,6 @@ export class DockerRegistryApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof DockerRegistryApi
      */
     public deleteRegistry(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return DockerRegistryApiFp(this.configuration).deleteRegistry(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -517,7 +506,6 @@ export class DockerRegistryApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof DockerRegistryApi
      */
     public getRegistry(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return DockerRegistryApiFp(this.configuration).getRegistry(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -530,7 +518,6 @@ export class DockerRegistryApi extends BaseAPI {
      * @param {string} [regionId] ID of the region where the snapshot will be available (defaults to organization default region)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof DockerRegistryApi
      */
     public getTransientPushAccess(xDaytonaOrganizationID?: string, regionId?: string, options?: RawAxiosRequestConfig) {
         return DockerRegistryApiFp(this.configuration).getTransientPushAccess(xDaytonaOrganizationID, regionId, options).then((request) => request(this.axios, this.basePath));
@@ -542,7 +529,6 @@ export class DockerRegistryApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof DockerRegistryApi
      */
     public listRegistries(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return DockerRegistryApiFp(this.configuration).listRegistries(xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
@@ -556,7 +542,6 @@ export class DockerRegistryApi extends BaseAPI {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof DockerRegistryApi
      */
     public updateRegistry(id: string, updateDockerRegistry: UpdateDockerRegistry, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return DockerRegistryApiFp(this.configuration).updateRegistry(id, updateDockerRegistry, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));

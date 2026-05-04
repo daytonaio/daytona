@@ -14,23 +14,8 @@
 
 
 
-/**
- * 
- * @export
- * @interface GitDeleteBranchRequest
- */
 export interface GitDeleteBranchRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof GitDeleteBranchRequest
-     */
     'name': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GitDeleteBranchRequest
-     */
     'path': string;
 }
 

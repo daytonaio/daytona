@@ -25,6 +25,7 @@ lib/daytona_api_client/api/webhooks_api.rb
 lib/daytona_api_client/api/workspace_api.rb
 lib/daytona_api_client/api_client.rb
 lib/daytona_api_client/api_error.rb
+lib/daytona_api_client/api_model_base.rb
 lib/daytona_api_client/configuration.rb
 lib/daytona_api_client/models/account_provider.rb
 lib/daytona_api_client/models/admin_create_runner.rb

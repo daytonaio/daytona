@@ -14,77 +14,17 @@
 
 
 
-/**
- * 
- * @export
- * @interface RegionUsageOverview
- */
 export interface RegionUsageOverview {
-    /**
-     * 
-     * @type {string}
-     * @memberof RegionUsageOverview
-     */
     'regionId': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegionUsageOverview
-     */
     'totalCpuQuota': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegionUsageOverview
-     */
     'currentCpuUsage': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegionUsageOverview
-     */
     'totalMemoryQuota': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegionUsageOverview
-     */
     'currentMemoryUsage': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegionUsageOverview
-     */
     'totalDiskQuota': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegionUsageOverview
-     */
     'currentDiskUsage': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegionUsageOverview
-     */
     'maxCpuPerSandbox': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegionUsageOverview
-     */
     'maxMemoryPerSandbox': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegionUsageOverview
-     */
     'maxDiskPerSandbox': number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegionUsageOverview
-     */
     'maxDiskPerNonEphemeralSandbox': number | null;
 }
 

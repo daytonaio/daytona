@@ -14,23 +14,8 @@
 
 
 
-/**
- * 
- * @export
- * @interface AccessibilitySetValueRequest
- */
 export interface AccessibilitySetValueRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof AccessibilitySetValueRequest
-     */
     'id': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AccessibilitySetValueRequest
-     */
     'value'?: string;
 }
 

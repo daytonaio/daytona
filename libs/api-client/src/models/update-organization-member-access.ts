@@ -14,22 +14,13 @@
 
 
 
-/**
- * 
- * @export
- * @interface UpdateOrganizationMemberAccess
- */
 export interface UpdateOrganizationMemberAccess {
     /**
      * Organization member role
-     * @type {string}
-     * @memberof UpdateOrganizationMemberAccess
      */
     'role': UpdateOrganizationMemberAccessRoleEnum;
     /**
      * Array of assigned role IDs
-     * @type {Array<string>}
-     * @memberof UpdateOrganizationMemberAccess
      */
     'assignedRoleIds': Array<string>;
 }
@@ -37,7 +28,7 @@ export interface UpdateOrganizationMemberAccess {
 export const UpdateOrganizationMemberAccessRoleEnum = {
     OWNER: 'owner',
     MEMBER: 'member',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809'
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type UpdateOrganizationMemberAccessRoleEnum = typeof UpdateOrganizationMemberAccessRoleEnum[keyof typeof UpdateOrganizationMemberAccessRoleEnum];

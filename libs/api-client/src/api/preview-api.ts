@@ -18,12 +18,11 @@ import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 /**
  * PreviewApi - axios parameter creator
- * @export
  */
 export const PreviewApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -60,8 +59,8 @@ export const PreviewApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -100,8 +99,8 @@ export const PreviewApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -140,8 +139,8 @@ export const PreviewApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -184,8 +183,8 @@ export const PreviewApiAxiosParamCreator = function (configuration?: Configurati
 
             // authentication oauth2 required
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -200,7 +199,6 @@ export const PreviewApiAxiosParamCreator = function (configuration?: Configurati
 
 /**
  * PreviewApi - functional programming interface
- * @export
  */
 export const PreviewApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = PreviewApiAxiosParamCreator(configuration)
@@ -264,7 +262,6 @@ export const PreviewApiFp = function(configuration?: Configuration) {
 
 /**
  * PreviewApi - factory interface
- * @export
  */
 export const PreviewApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = PreviewApiFp(configuration)
@@ -316,9 +313,6 @@ export const PreviewApiFactory = function (configuration?: Configuration, basePa
 
 /**
  * PreviewApi - object-oriented interface
- * @export
- * @class PreviewApi
- * @extends {BaseAPI}
  */
 export class PreviewApi extends BaseAPI {
     /**
@@ -328,7 +322,6 @@ export class PreviewApi extends BaseAPI {
      * @param {number} port Port number to get sandbox ID from signed preview URL token
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof PreviewApi
      */
     public getSandboxIdFromSignedPreviewUrlToken(signedPreviewToken: string, port: number, options?: RawAxiosRequestConfig) {
         return PreviewApiFp(this.configuration).getSandboxIdFromSignedPreviewUrlToken(signedPreviewToken, port, options).then((request) => request(this.axios, this.basePath));
@@ -340,7 +333,6 @@ export class PreviewApi extends BaseAPI {
      * @param {string} sandboxId 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof PreviewApi
      */
     public hasSandboxAccess(sandboxId: string, options?: RawAxiosRequestConfig) {
         return PreviewApiFp(this.configuration).hasSandboxAccess(sandboxId, options).then((request) => request(this.axios, this.basePath));
@@ -352,7 +344,6 @@ export class PreviewApi extends BaseAPI {
      * @param {string} sandboxId ID of the sandbox
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof PreviewApi
      */
     public isSandboxPublic(sandboxId: string, options?: RawAxiosRequestConfig) {
         return PreviewApiFp(this.configuration).isSandboxPublic(sandboxId, options).then((request) => request(this.axios, this.basePath));
@@ -365,7 +356,6 @@ export class PreviewApi extends BaseAPI {
      * @param {string} authToken Auth token of the sandbox
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof PreviewApi
      */
     public isValidAuthToken(sandboxId: string, authToken: string, options?: RawAxiosRequestConfig) {
         return PreviewApiFp(this.configuration).isValidAuthToken(sandboxId, authToken, options).then((request) => request(this.axios, this.basePath));

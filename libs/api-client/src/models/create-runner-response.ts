@@ -14,22 +14,13 @@
 
 
 
-/**
- * 
- * @export
- * @interface CreateRunnerResponse
- */
 export interface CreateRunnerResponse {
     /**
      * The ID of the runner
-     * @type {string}
-     * @memberof CreateRunnerResponse
      */
     'id': string;
     /**
      * The API key for the runner
-     * @type {string}
-     * @memberof CreateRunnerResponse
      */
     'apiKey': string;
 }

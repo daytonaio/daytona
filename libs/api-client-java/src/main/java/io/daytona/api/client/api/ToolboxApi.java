@@ -151,7 +151,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call clickMouseDeprecatedCall(String sandboxId, MouseClickRequest mouseClickRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call clickMouseDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseClickRequest mouseClickRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -204,7 +204,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call clickMouseDeprecatedValidateBeforeCall(String sandboxId, MouseClickRequest mouseClickRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call clickMouseDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseClickRequest mouseClickRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling clickMouseDeprecated(Async)");
@@ -236,7 +236,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public MouseClickResponse clickMouseDeprecated(String sandboxId, MouseClickRequest mouseClickRequest, String xDaytonaOrganizationID) throws ApiException {
+    public MouseClickResponse clickMouseDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseClickRequest mouseClickRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<MouseClickResponse> localVarResp = clickMouseDeprecatedWithHttpInfo(sandboxId, mouseClickRequest, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -258,7 +258,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<MouseClickResponse> clickMouseDeprecatedWithHttpInfo(String sandboxId, MouseClickRequest mouseClickRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<MouseClickResponse> clickMouseDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseClickRequest mouseClickRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = clickMouseDeprecatedValidateBeforeCall(sandboxId, mouseClickRequest, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<MouseClickResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -282,7 +282,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call clickMouseDeprecatedAsync(String sandboxId, MouseClickRequest mouseClickRequest, String xDaytonaOrganizationID, final ApiCallback<MouseClickResponse> _callback) throws ApiException {
+    public okhttp3.Call clickMouseDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseClickRequest mouseClickRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<MouseClickResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = clickMouseDeprecatedValidateBeforeCall(sandboxId, mouseClickRequest, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<MouseClickResponse>(){}.getType();
@@ -307,7 +307,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call createFolderDeprecatedCall(String sandboxId, String path, String mode, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createFolderDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nonnull String mode, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -366,7 +366,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createFolderDeprecatedValidateBeforeCall(String sandboxId, String path, String mode, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createFolderDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nonnull String mode, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling createFolderDeprecated(Async)");
@@ -403,7 +403,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void createFolderDeprecated(String sandboxId, String path, String mode, String xDaytonaOrganizationID) throws ApiException {
+    public void createFolderDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nonnull String mode, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         createFolderDeprecatedWithHttpInfo(sandboxId, path, mode, xDaytonaOrganizationID);
     }
 
@@ -425,7 +425,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> createFolderDeprecatedWithHttpInfo(String sandboxId, String path, String mode, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> createFolderDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nonnull String mode, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = createFolderDeprecatedValidateBeforeCall(sandboxId, path, mode, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -449,7 +449,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call createFolderDeprecatedAsync(String sandboxId, String path, String mode, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call createFolderDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nonnull String mode, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createFolderDeprecatedValidateBeforeCall(sandboxId, path, mode, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -472,7 +472,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call createPTYSessionDeprecatedCall(String sandboxId, PtyCreateRequest ptyCreateRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createPTYSessionDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull PtyCreateRequest ptyCreateRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -525,7 +525,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createPTYSessionDeprecatedValidateBeforeCall(String sandboxId, PtyCreateRequest ptyCreateRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createPTYSessionDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull PtyCreateRequest ptyCreateRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling createPTYSessionDeprecated(Async)");
@@ -557,7 +557,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public PtyCreateResponse createPTYSessionDeprecated(String sandboxId, PtyCreateRequest ptyCreateRequest, String xDaytonaOrganizationID) throws ApiException {
+    public PtyCreateResponse createPTYSessionDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull PtyCreateRequest ptyCreateRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<PtyCreateResponse> localVarResp = createPTYSessionDeprecatedWithHttpInfo(sandboxId, ptyCreateRequest, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -579,7 +579,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<PtyCreateResponse> createPTYSessionDeprecatedWithHttpInfo(String sandboxId, PtyCreateRequest ptyCreateRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<PtyCreateResponse> createPTYSessionDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull PtyCreateRequest ptyCreateRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = createPTYSessionDeprecatedValidateBeforeCall(sandboxId, ptyCreateRequest, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<PtyCreateResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -603,7 +603,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call createPTYSessionDeprecatedAsync(String sandboxId, PtyCreateRequest ptyCreateRequest, String xDaytonaOrganizationID, final ApiCallback<PtyCreateResponse> _callback) throws ApiException {
+    public okhttp3.Call createPTYSessionDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull PtyCreateRequest ptyCreateRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<PtyCreateResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createPTYSessionDeprecatedValidateBeforeCall(sandboxId, ptyCreateRequest, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<PtyCreateResponse>(){}.getType();
@@ -627,7 +627,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call createSessionDeprecatedCall(String sandboxId, CreateSessionRequest createSessionRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createSessionDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull CreateSessionRequest createSessionRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -679,7 +679,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createSessionDeprecatedValidateBeforeCall(String sandboxId, CreateSessionRequest createSessionRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createSessionDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull CreateSessionRequest createSessionRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling createSessionDeprecated(Async)");
@@ -710,7 +710,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void createSessionDeprecated(String sandboxId, CreateSessionRequest createSessionRequest, String xDaytonaOrganizationID) throws ApiException {
+    public void createSessionDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull CreateSessionRequest createSessionRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         createSessionDeprecatedWithHttpInfo(sandboxId, createSessionRequest, xDaytonaOrganizationID);
     }
 
@@ -731,7 +731,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> createSessionDeprecatedWithHttpInfo(String sandboxId, CreateSessionRequest createSessionRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> createSessionDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull CreateSessionRequest createSessionRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = createSessionDeprecatedValidateBeforeCall(sandboxId, createSessionRequest, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -754,7 +754,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call createSessionDeprecatedAsync(String sandboxId, CreateSessionRequest createSessionRequest, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call createSessionDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull CreateSessionRequest createSessionRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = createSessionDeprecatedValidateBeforeCall(sandboxId, createSessionRequest, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -778,7 +778,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call deleteFileDeprecatedCall(String sandboxId, String path, String xDaytonaOrganizationID, Boolean recursive, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deleteFileDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean recursive, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -837,7 +837,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deleteFileDeprecatedValidateBeforeCall(String sandboxId, String path, String xDaytonaOrganizationID, Boolean recursive, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deleteFileDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean recursive, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling deleteFileDeprecated(Async)");
@@ -869,7 +869,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void deleteFileDeprecated(String sandboxId, String path, String xDaytonaOrganizationID, Boolean recursive) throws ApiException {
+    public void deleteFileDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean recursive) throws ApiException {
         deleteFileDeprecatedWithHttpInfo(sandboxId, path, xDaytonaOrganizationID, recursive);
     }
 
@@ -891,7 +891,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> deleteFileDeprecatedWithHttpInfo(String sandboxId, String path, String xDaytonaOrganizationID, Boolean recursive) throws ApiException {
+    public ApiResponse<Void> deleteFileDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean recursive) throws ApiException {
         okhttp3.Call localVarCall = deleteFileDeprecatedValidateBeforeCall(sandboxId, path, xDaytonaOrganizationID, recursive, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -915,7 +915,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call deleteFileDeprecatedAsync(String sandboxId, String path, String xDaytonaOrganizationID, Boolean recursive, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call deleteFileDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean recursive, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deleteFileDeprecatedValidateBeforeCall(sandboxId, path, xDaytonaOrganizationID, recursive, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -938,7 +938,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call deletePTYSessionDeprecatedCall(String sandboxId, String sessionId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deletePTYSessionDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -990,7 +990,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deletePTYSessionDeprecatedValidateBeforeCall(String sandboxId, String sessionId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deletePTYSessionDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling deletePTYSessionDeprecated(Async)");
@@ -1021,7 +1021,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void deletePTYSessionDeprecated(String sandboxId, String sessionId, String xDaytonaOrganizationID) throws ApiException {
+    public void deletePTYSessionDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         deletePTYSessionDeprecatedWithHttpInfo(sandboxId, sessionId, xDaytonaOrganizationID);
     }
 
@@ -1042,7 +1042,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> deletePTYSessionDeprecatedWithHttpInfo(String sandboxId, String sessionId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> deletePTYSessionDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = deletePTYSessionDeprecatedValidateBeforeCall(sandboxId, sessionId, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1065,7 +1065,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call deletePTYSessionDeprecatedAsync(String sandboxId, String sessionId, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call deletePTYSessionDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deletePTYSessionDeprecatedValidateBeforeCall(sandboxId, sessionId, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -1088,7 +1088,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call deleteSessionDeprecatedCall(String sandboxId, String sessionId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call deleteSessionDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1140,7 +1140,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call deleteSessionDeprecatedValidateBeforeCall(String sandboxId, String sessionId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call deleteSessionDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling deleteSessionDeprecated(Async)");
@@ -1171,7 +1171,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void deleteSessionDeprecated(String sandboxId, String sessionId, String xDaytonaOrganizationID) throws ApiException {
+    public void deleteSessionDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         deleteSessionDeprecatedWithHttpInfo(sandboxId, sessionId, xDaytonaOrganizationID);
     }
 
@@ -1192,7 +1192,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> deleteSessionDeprecatedWithHttpInfo(String sandboxId, String sessionId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> deleteSessionDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = deleteSessionDeprecatedValidateBeforeCall(sandboxId, sessionId, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1215,7 +1215,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call deleteSessionDeprecatedAsync(String sandboxId, String sessionId, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call deleteSessionDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = deleteSessionDeprecatedValidateBeforeCall(sandboxId, sessionId, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -1238,7 +1238,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call downloadFileDeprecatedCall(String sandboxId, String path, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call downloadFileDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1294,7 +1294,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call downloadFileDeprecatedValidateBeforeCall(String sandboxId, String path, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call downloadFileDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling downloadFileDeprecated(Async)");
@@ -1326,7 +1326,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public File downloadFileDeprecated(String sandboxId, String path, String xDaytonaOrganizationID) throws ApiException {
+    public File downloadFileDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<File> localVarResp = downloadFileDeprecatedWithHttpInfo(sandboxId, path, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -1348,7 +1348,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<File> downloadFileDeprecatedWithHttpInfo(String sandboxId, String path, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<File> downloadFileDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = downloadFileDeprecatedValidateBeforeCall(sandboxId, path, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<File>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1372,7 +1372,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call downloadFileDeprecatedAsync(String sandboxId, String path, String xDaytonaOrganizationID, final ApiCallback<File> _callback) throws ApiException {
+    public okhttp3.Call downloadFileDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<File> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = downloadFileDeprecatedValidateBeforeCall(sandboxId, path, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<File>(){}.getType();
@@ -1396,7 +1396,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call downloadFilesDeprecatedCall(String sandboxId, DownloadFiles downloadFiles, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call downloadFilesDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull DownloadFiles downloadFiles, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1449,7 +1449,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call downloadFilesDeprecatedValidateBeforeCall(String sandboxId, DownloadFiles downloadFiles, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call downloadFilesDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull DownloadFiles downloadFiles, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling downloadFilesDeprecated(Async)");
@@ -1481,7 +1481,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public File downloadFilesDeprecated(String sandboxId, DownloadFiles downloadFiles, String xDaytonaOrganizationID) throws ApiException {
+    public File downloadFilesDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull DownloadFiles downloadFiles, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<File> localVarResp = downloadFilesDeprecatedWithHttpInfo(sandboxId, downloadFiles, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -1503,7 +1503,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<File> downloadFilesDeprecatedWithHttpInfo(String sandboxId, DownloadFiles downloadFiles, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<File> downloadFilesDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull DownloadFiles downloadFiles, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = downloadFilesDeprecatedValidateBeforeCall(sandboxId, downloadFiles, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<File>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1527,7 +1527,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call downloadFilesDeprecatedAsync(String sandboxId, DownloadFiles downloadFiles, String xDaytonaOrganizationID, final ApiCallback<File> _callback) throws ApiException {
+    public okhttp3.Call downloadFilesDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull DownloadFiles downloadFiles, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<File> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = downloadFilesDeprecatedValidateBeforeCall(sandboxId, downloadFiles, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<File>(){}.getType();
@@ -1551,7 +1551,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call dragMouseDeprecatedCall(String sandboxId, MouseDragRequest mouseDragRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call dragMouseDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseDragRequest mouseDragRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1604,7 +1604,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call dragMouseDeprecatedValidateBeforeCall(String sandboxId, MouseDragRequest mouseDragRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call dragMouseDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseDragRequest mouseDragRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling dragMouseDeprecated(Async)");
@@ -1636,7 +1636,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public MouseDragResponse dragMouseDeprecated(String sandboxId, MouseDragRequest mouseDragRequest, String xDaytonaOrganizationID) throws ApiException {
+    public MouseDragResponse dragMouseDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseDragRequest mouseDragRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<MouseDragResponse> localVarResp = dragMouseDeprecatedWithHttpInfo(sandboxId, mouseDragRequest, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -1658,7 +1658,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<MouseDragResponse> dragMouseDeprecatedWithHttpInfo(String sandboxId, MouseDragRequest mouseDragRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<MouseDragResponse> dragMouseDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseDragRequest mouseDragRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = dragMouseDeprecatedValidateBeforeCall(sandboxId, mouseDragRequest, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<MouseDragResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1682,7 +1682,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call dragMouseDeprecatedAsync(String sandboxId, MouseDragRequest mouseDragRequest, String xDaytonaOrganizationID, final ApiCallback<MouseDragResponse> _callback) throws ApiException {
+    public okhttp3.Call dragMouseDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseDragRequest mouseDragRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<MouseDragResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = dragMouseDeprecatedValidateBeforeCall(sandboxId, mouseDragRequest, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<MouseDragResponse>(){}.getType();
@@ -1706,7 +1706,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call executeCommandDeprecatedCall(String sandboxId, ExecuteRequest executeRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call executeCommandDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull ExecuteRequest executeRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1759,7 +1759,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call executeCommandDeprecatedValidateBeforeCall(String sandboxId, ExecuteRequest executeRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call executeCommandDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull ExecuteRequest executeRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling executeCommandDeprecated(Async)");
@@ -1791,7 +1791,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ExecuteResponse executeCommandDeprecated(String sandboxId, ExecuteRequest executeRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ExecuteResponse executeCommandDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull ExecuteRequest executeRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<ExecuteResponse> localVarResp = executeCommandDeprecatedWithHttpInfo(sandboxId, executeRequest, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -1813,7 +1813,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<ExecuteResponse> executeCommandDeprecatedWithHttpInfo(String sandboxId, ExecuteRequest executeRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<ExecuteResponse> executeCommandDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull ExecuteRequest executeRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = executeCommandDeprecatedValidateBeforeCall(sandboxId, executeRequest, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<ExecuteResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -1837,7 +1837,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call executeCommandDeprecatedAsync(String sandboxId, ExecuteRequest executeRequest, String xDaytonaOrganizationID, final ApiCallback<ExecuteResponse> _callback) throws ApiException {
+    public okhttp3.Call executeCommandDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull ExecuteRequest executeRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<ExecuteResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = executeCommandDeprecatedValidateBeforeCall(sandboxId, executeRequest, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<ExecuteResponse>(){}.getType();
@@ -1863,7 +1863,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call executeSessionCommandDeprecatedCall(String sandboxId, String sessionId, SessionExecuteRequest sessionExecuteRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call executeSessionCommandDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull SessionExecuteRequest sessionExecuteRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1917,7 +1917,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call executeSessionCommandDeprecatedValidateBeforeCall(String sandboxId, String sessionId, SessionExecuteRequest sessionExecuteRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call executeSessionCommandDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull SessionExecuteRequest sessionExecuteRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling executeSessionCommandDeprecated(Async)");
@@ -1956,7 +1956,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public SessionExecuteResponse executeSessionCommandDeprecated(String sandboxId, String sessionId, SessionExecuteRequest sessionExecuteRequest, String xDaytonaOrganizationID) throws ApiException {
+    public SessionExecuteResponse executeSessionCommandDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull SessionExecuteRequest sessionExecuteRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<SessionExecuteResponse> localVarResp = executeSessionCommandDeprecatedWithHttpInfo(sandboxId, sessionId, sessionExecuteRequest, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -1980,7 +1980,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<SessionExecuteResponse> executeSessionCommandDeprecatedWithHttpInfo(String sandboxId, String sessionId, SessionExecuteRequest sessionExecuteRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<SessionExecuteResponse> executeSessionCommandDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull SessionExecuteRequest sessionExecuteRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = executeSessionCommandDeprecatedValidateBeforeCall(sandboxId, sessionId, sessionExecuteRequest, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<SessionExecuteResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2006,7 +2006,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call executeSessionCommandDeprecatedAsync(String sandboxId, String sessionId, SessionExecuteRequest sessionExecuteRequest, String xDaytonaOrganizationID, final ApiCallback<SessionExecuteResponse> _callback) throws ApiException {
+    public okhttp3.Call executeSessionCommandDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull SessionExecuteRequest sessionExecuteRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<SessionExecuteResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = executeSessionCommandDeprecatedValidateBeforeCall(sandboxId, sessionId, sessionExecuteRequest, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<SessionExecuteResponse>(){}.getType();
@@ -2031,7 +2031,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call findInFilesDeprecatedCall(String sandboxId, String path, String pattern, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call findInFilesDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2091,7 +2091,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call findInFilesDeprecatedValidateBeforeCall(String sandboxId, String path, String pattern, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call findInFilesDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling findInFilesDeprecated(Async)");
@@ -2129,7 +2129,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public List<Match> findInFilesDeprecated(String sandboxId, String path, String pattern, String xDaytonaOrganizationID) throws ApiException {
+    public List<Match> findInFilesDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<List<Match>> localVarResp = findInFilesDeprecatedWithHttpInfo(sandboxId, path, pattern, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -2152,7 +2152,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<List<Match>> findInFilesDeprecatedWithHttpInfo(String sandboxId, String path, String pattern, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<List<Match>> findInFilesDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = findInFilesDeprecatedValidateBeforeCall(sandboxId, path, pattern, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<List<Match>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2177,7 +2177,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call findInFilesDeprecatedAsync(String sandboxId, String path, String pattern, String xDaytonaOrganizationID, final ApiCallback<List<Match>> _callback) throws ApiException {
+    public okhttp3.Call findInFilesDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<List<Match>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = findInFilesDeprecatedValidateBeforeCall(sandboxId, path, pattern, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<List<Match>>(){}.getType();
@@ -2200,7 +2200,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getComputerUseStatusDeprecatedCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getComputerUseStatusDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2252,7 +2252,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getComputerUseStatusDeprecatedValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getComputerUseStatusDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getComputerUseStatusDeprecated(Async)");
@@ -2278,7 +2278,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ComputerUseStatusResponse getComputerUseStatusDeprecated(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ComputerUseStatusResponse getComputerUseStatusDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<ComputerUseStatusResponse> localVarResp = getComputerUseStatusDeprecatedWithHttpInfo(sandboxId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -2299,7 +2299,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<ComputerUseStatusResponse> getComputerUseStatusDeprecatedWithHttpInfo(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<ComputerUseStatusResponse> getComputerUseStatusDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getComputerUseStatusDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<ComputerUseStatusResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2322,7 +2322,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getComputerUseStatusDeprecatedAsync(String sandboxId, String xDaytonaOrganizationID, final ApiCallback<ComputerUseStatusResponse> _callback) throws ApiException {
+    public okhttp3.Call getComputerUseStatusDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<ComputerUseStatusResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getComputerUseStatusDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<ComputerUseStatusResponse>(){}.getType();
@@ -2345,7 +2345,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getDisplayInfoDeprecatedCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getDisplayInfoDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2397,7 +2397,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getDisplayInfoDeprecatedValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getDisplayInfoDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getDisplayInfoDeprecated(Async)");
@@ -2423,7 +2423,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public DisplayInfoResponse getDisplayInfoDeprecated(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public DisplayInfoResponse getDisplayInfoDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<DisplayInfoResponse> localVarResp = getDisplayInfoDeprecatedWithHttpInfo(sandboxId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -2444,7 +2444,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<DisplayInfoResponse> getDisplayInfoDeprecatedWithHttpInfo(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<DisplayInfoResponse> getDisplayInfoDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getDisplayInfoDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<DisplayInfoResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2467,7 +2467,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getDisplayInfoDeprecatedAsync(String sandboxId, String xDaytonaOrganizationID, final ApiCallback<DisplayInfoResponse> _callback) throws ApiException {
+    public okhttp3.Call getDisplayInfoDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<DisplayInfoResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getDisplayInfoDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<DisplayInfoResponse>(){}.getType();
@@ -2491,7 +2491,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getFileInfoDeprecatedCall(String sandboxId, String path, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getFileInfoDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2547,7 +2547,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getFileInfoDeprecatedValidateBeforeCall(String sandboxId, String path, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getFileInfoDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getFileInfoDeprecated(Async)");
@@ -2579,7 +2579,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public FileInfo getFileInfoDeprecated(String sandboxId, String path, String xDaytonaOrganizationID) throws ApiException {
+    public FileInfo getFileInfoDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<FileInfo> localVarResp = getFileInfoDeprecatedWithHttpInfo(sandboxId, path, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -2601,7 +2601,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<FileInfo> getFileInfoDeprecatedWithHttpInfo(String sandboxId, String path, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<FileInfo> getFileInfoDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getFileInfoDeprecatedValidateBeforeCall(sandboxId, path, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<FileInfo>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2625,7 +2625,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getFileInfoDeprecatedAsync(String sandboxId, String path, String xDaytonaOrganizationID, final ApiCallback<FileInfo> _callback) throws ApiException {
+    public okhttp3.Call getFileInfoDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<FileInfo> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getFileInfoDeprecatedValidateBeforeCall(sandboxId, path, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<FileInfo>(){}.getType();
@@ -2648,7 +2648,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getMousePositionDeprecatedCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getMousePositionDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2700,7 +2700,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getMousePositionDeprecatedValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getMousePositionDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getMousePositionDeprecated(Async)");
@@ -2726,7 +2726,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public MousePosition getMousePositionDeprecated(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public MousePosition getMousePositionDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<MousePosition> localVarResp = getMousePositionDeprecatedWithHttpInfo(sandboxId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -2747,7 +2747,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<MousePosition> getMousePositionDeprecatedWithHttpInfo(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<MousePosition> getMousePositionDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getMousePositionDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<MousePosition>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2770,7 +2770,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getMousePositionDeprecatedAsync(String sandboxId, String xDaytonaOrganizationID, final ApiCallback<MousePosition> _callback) throws ApiException {
+    public okhttp3.Call getMousePositionDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<MousePosition> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getMousePositionDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<MousePosition>(){}.getType();
@@ -2794,7 +2794,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getPTYSessionDeprecatedCall(String sandboxId, String sessionId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getPTYSessionDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -2847,7 +2847,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getPTYSessionDeprecatedValidateBeforeCall(String sandboxId, String sessionId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getPTYSessionDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getPTYSessionDeprecated(Async)");
@@ -2879,7 +2879,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public PtySessionInfo getPTYSessionDeprecated(String sandboxId, String sessionId, String xDaytonaOrganizationID) throws ApiException {
+    public PtySessionInfo getPTYSessionDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<PtySessionInfo> localVarResp = getPTYSessionDeprecatedWithHttpInfo(sandboxId, sessionId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -2901,7 +2901,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<PtySessionInfo> getPTYSessionDeprecatedWithHttpInfo(String sandboxId, String sessionId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<PtySessionInfo> getPTYSessionDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getPTYSessionDeprecatedValidateBeforeCall(sandboxId, sessionId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<PtySessionInfo>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -2925,7 +2925,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getPTYSessionDeprecatedAsync(String sandboxId, String sessionId, String xDaytonaOrganizationID, final ApiCallback<PtySessionInfo> _callback) throws ApiException {
+    public okhttp3.Call getPTYSessionDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<PtySessionInfo> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getPTYSessionDeprecatedValidateBeforeCall(sandboxId, sessionId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<PtySessionInfo>(){}.getType();
@@ -2949,7 +2949,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getProcessErrorsDeprecatedCall(String processName, String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getProcessErrorsDeprecatedCall(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3002,7 +3002,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getProcessErrorsDeprecatedValidateBeforeCall(String processName, String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getProcessErrorsDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'processName' is set
         if (processName == null) {
             throw new ApiException("Missing the required parameter 'processName' when calling getProcessErrorsDeprecated(Async)");
@@ -3034,7 +3034,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ProcessErrorsResponse getProcessErrorsDeprecated(String processName, String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ProcessErrorsResponse getProcessErrorsDeprecated(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<ProcessErrorsResponse> localVarResp = getProcessErrorsDeprecatedWithHttpInfo(processName, sandboxId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -3056,7 +3056,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<ProcessErrorsResponse> getProcessErrorsDeprecatedWithHttpInfo(String processName, String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<ProcessErrorsResponse> getProcessErrorsDeprecatedWithHttpInfo(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getProcessErrorsDeprecatedValidateBeforeCall(processName, sandboxId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<ProcessErrorsResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -3080,7 +3080,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getProcessErrorsDeprecatedAsync(String processName, String sandboxId, String xDaytonaOrganizationID, final ApiCallback<ProcessErrorsResponse> _callback) throws ApiException {
+    public okhttp3.Call getProcessErrorsDeprecatedAsync(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<ProcessErrorsResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getProcessErrorsDeprecatedValidateBeforeCall(processName, sandboxId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<ProcessErrorsResponse>(){}.getType();
@@ -3104,7 +3104,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getProcessLogsDeprecatedCall(String processName, String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getProcessLogsDeprecatedCall(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3157,7 +3157,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getProcessLogsDeprecatedValidateBeforeCall(String processName, String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getProcessLogsDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'processName' is set
         if (processName == null) {
             throw new ApiException("Missing the required parameter 'processName' when calling getProcessLogsDeprecated(Async)");
@@ -3189,7 +3189,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ProcessLogsResponse getProcessLogsDeprecated(String processName, String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ProcessLogsResponse getProcessLogsDeprecated(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<ProcessLogsResponse> localVarResp = getProcessLogsDeprecatedWithHttpInfo(processName, sandboxId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -3211,7 +3211,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<ProcessLogsResponse> getProcessLogsDeprecatedWithHttpInfo(String processName, String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<ProcessLogsResponse> getProcessLogsDeprecatedWithHttpInfo(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getProcessLogsDeprecatedValidateBeforeCall(processName, sandboxId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<ProcessLogsResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -3235,7 +3235,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getProcessLogsDeprecatedAsync(String processName, String sandboxId, String xDaytonaOrganizationID, final ApiCallback<ProcessLogsResponse> _callback) throws ApiException {
+    public okhttp3.Call getProcessLogsDeprecatedAsync(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<ProcessLogsResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getProcessLogsDeprecatedValidateBeforeCall(processName, sandboxId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<ProcessLogsResponse>(){}.getType();
@@ -3259,7 +3259,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getProcessStatusDeprecatedCall(String processName, String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getProcessStatusDeprecatedCall(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3312,7 +3312,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getProcessStatusDeprecatedValidateBeforeCall(String processName, String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getProcessStatusDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'processName' is set
         if (processName == null) {
             throw new ApiException("Missing the required parameter 'processName' when calling getProcessStatusDeprecated(Async)");
@@ -3344,7 +3344,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ProcessStatusResponse getProcessStatusDeprecated(String processName, String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ProcessStatusResponse getProcessStatusDeprecated(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<ProcessStatusResponse> localVarResp = getProcessStatusDeprecatedWithHttpInfo(processName, sandboxId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -3366,7 +3366,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<ProcessStatusResponse> getProcessStatusDeprecatedWithHttpInfo(String processName, String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<ProcessStatusResponse> getProcessStatusDeprecatedWithHttpInfo(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getProcessStatusDeprecatedValidateBeforeCall(processName, sandboxId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<ProcessStatusResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -3390,7 +3390,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getProcessStatusDeprecatedAsync(String processName, String sandboxId, String xDaytonaOrganizationID, final ApiCallback<ProcessStatusResponse> _callback) throws ApiException {
+    public okhttp3.Call getProcessStatusDeprecatedAsync(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<ProcessStatusResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getProcessStatusDeprecatedValidateBeforeCall(processName, sandboxId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<ProcessStatusResponse>(){}.getType();
@@ -3413,7 +3413,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getProjectDirDeprecatedCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getProjectDirDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3465,7 +3465,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getProjectDirDeprecatedValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getProjectDirDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getProjectDirDeprecated(Async)");
@@ -3491,7 +3491,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ProjectDirResponse getProjectDirDeprecated(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ProjectDirResponse getProjectDirDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<ProjectDirResponse> localVarResp = getProjectDirDeprecatedWithHttpInfo(sandboxId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -3512,7 +3512,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<ProjectDirResponse> getProjectDirDeprecatedWithHttpInfo(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<ProjectDirResponse> getProjectDirDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getProjectDirDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<ProjectDirResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -3535,7 +3535,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getProjectDirDeprecatedAsync(String sandboxId, String xDaytonaOrganizationID, final ApiCallback<ProjectDirResponse> _callback) throws ApiException {
+    public okhttp3.Call getProjectDirDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<ProjectDirResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getProjectDirDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<ProjectDirResponse>(){}.getType();
@@ -3560,7 +3560,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getSessionCommandDeprecatedCall(String sandboxId, String sessionId, String commandId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSessionCommandDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3614,7 +3614,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSessionCommandDeprecatedValidateBeforeCall(String sandboxId, String sessionId, String commandId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSessionCommandDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getSessionCommandDeprecated(Async)");
@@ -3652,7 +3652,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public Command getSessionCommandDeprecated(String sandboxId, String sessionId, String commandId, String xDaytonaOrganizationID) throws ApiException {
+    public Command getSessionCommandDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Command> localVarResp = getSessionCommandDeprecatedWithHttpInfo(sandboxId, sessionId, commandId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -3675,7 +3675,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Command> getSessionCommandDeprecatedWithHttpInfo(String sandboxId, String sessionId, String commandId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Command> getSessionCommandDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getSessionCommandDeprecatedValidateBeforeCall(sandboxId, sessionId, commandId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Command>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -3700,7 +3700,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getSessionCommandDeprecatedAsync(String sandboxId, String sessionId, String commandId, String xDaytonaOrganizationID, final ApiCallback<Command> _callback) throws ApiException {
+    public okhttp3.Call getSessionCommandDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Command> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSessionCommandDeprecatedValidateBeforeCall(sandboxId, sessionId, commandId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Command>(){}.getType();
@@ -3726,7 +3726,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getSessionCommandLogsDeprecatedCall(String sandboxId, String sessionId, String commandId, String xDaytonaOrganizationID, Boolean follow, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSessionCommandLogsDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3784,7 +3784,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSessionCommandLogsDeprecatedValidateBeforeCall(String sandboxId, String sessionId, String commandId, String xDaytonaOrganizationID, Boolean follow, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSessionCommandLogsDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getSessionCommandLogsDeprecated(Async)");
@@ -3823,7 +3823,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public String getSessionCommandLogsDeprecated(String sandboxId, String sessionId, String commandId, String xDaytonaOrganizationID, Boolean follow) throws ApiException {
+    public String getSessionCommandLogsDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow) throws ApiException {
         ApiResponse<String> localVarResp = getSessionCommandLogsDeprecatedWithHttpInfo(sandboxId, sessionId, commandId, xDaytonaOrganizationID, follow);
         return localVarResp.getData();
     }
@@ -3847,7 +3847,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<String> getSessionCommandLogsDeprecatedWithHttpInfo(String sandboxId, String sessionId, String commandId, String xDaytonaOrganizationID, Boolean follow) throws ApiException {
+    public ApiResponse<String> getSessionCommandLogsDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow) throws ApiException {
         okhttp3.Call localVarCall = getSessionCommandLogsDeprecatedValidateBeforeCall(sandboxId, sessionId, commandId, xDaytonaOrganizationID, follow, null);
         Type localVarReturnType = new TypeToken<String>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -3873,7 +3873,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getSessionCommandLogsDeprecatedAsync(String sandboxId, String sessionId, String commandId, String xDaytonaOrganizationID, Boolean follow, final ApiCallback<String> _callback) throws ApiException {
+    public okhttp3.Call getSessionCommandLogsDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean follow, final ApiCallback<String> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSessionCommandLogsDeprecatedValidateBeforeCall(sandboxId, sessionId, commandId, xDaytonaOrganizationID, follow, _callback);
         Type localVarReturnType = new TypeToken<String>(){}.getType();
@@ -3897,7 +3897,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getSessionDeprecatedCall(String sandboxId, String sessionId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getSessionDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3950,7 +3950,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getSessionDeprecatedValidateBeforeCall(String sandboxId, String sessionId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getSessionDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getSessionDeprecated(Async)");
@@ -3982,7 +3982,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public Session getSessionDeprecated(String sandboxId, String sessionId, String xDaytonaOrganizationID) throws ApiException {
+    public Session getSessionDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<Session> localVarResp = getSessionDeprecatedWithHttpInfo(sandboxId, sessionId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -4004,7 +4004,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Session> getSessionDeprecatedWithHttpInfo(String sandboxId, String sessionId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Session> getSessionDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getSessionDeprecatedValidateBeforeCall(sandboxId, sessionId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<Session>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -4028,7 +4028,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getSessionDeprecatedAsync(String sandboxId, String sessionId, String xDaytonaOrganizationID, final ApiCallback<Session> _callback) throws ApiException {
+    public okhttp3.Call getSessionDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Session> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getSessionDeprecatedValidateBeforeCall(sandboxId, sessionId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Session>(){}.getType();
@@ -4051,7 +4051,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getUserHomeDirDeprecatedCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getUserHomeDirDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -4103,7 +4103,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getUserHomeDirDeprecatedValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getUserHomeDirDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getUserHomeDirDeprecated(Async)");
@@ -4129,7 +4129,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public UserHomeDirResponse getUserHomeDirDeprecated(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public UserHomeDirResponse getUserHomeDirDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<UserHomeDirResponse> localVarResp = getUserHomeDirDeprecatedWithHttpInfo(sandboxId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -4150,7 +4150,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<UserHomeDirResponse> getUserHomeDirDeprecatedWithHttpInfo(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<UserHomeDirResponse> getUserHomeDirDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getUserHomeDirDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<UserHomeDirResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -4173,7 +4173,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getUserHomeDirDeprecatedAsync(String sandboxId, String xDaytonaOrganizationID, final ApiCallback<UserHomeDirResponse> _callback) throws ApiException {
+    public okhttp3.Call getUserHomeDirDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<UserHomeDirResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getUserHomeDirDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<UserHomeDirResponse>(){}.getType();
@@ -4196,7 +4196,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getWindowsDeprecatedCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getWindowsDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -4248,7 +4248,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getWindowsDeprecatedValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getWindowsDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getWindowsDeprecated(Async)");
@@ -4274,7 +4274,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public WindowsResponse getWindowsDeprecated(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public WindowsResponse getWindowsDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<WindowsResponse> localVarResp = getWindowsDeprecatedWithHttpInfo(sandboxId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -4295,7 +4295,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<WindowsResponse> getWindowsDeprecatedWithHttpInfo(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<WindowsResponse> getWindowsDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getWindowsDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<WindowsResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -4318,7 +4318,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getWindowsDeprecatedAsync(String sandboxId, String xDaytonaOrganizationID, final ApiCallback<WindowsResponse> _callback) throws ApiException {
+    public okhttp3.Call getWindowsDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<WindowsResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getWindowsDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<WindowsResponse>(){}.getType();
@@ -4341,7 +4341,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getWorkDirDeprecatedCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call getWorkDirDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -4393,7 +4393,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call getWorkDirDeprecatedValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call getWorkDirDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling getWorkDirDeprecated(Async)");
@@ -4419,7 +4419,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public WorkDirResponse getWorkDirDeprecated(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public WorkDirResponse getWorkDirDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<WorkDirResponse> localVarResp = getWorkDirDeprecatedWithHttpInfo(sandboxId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -4440,7 +4440,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<WorkDirResponse> getWorkDirDeprecatedWithHttpInfo(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<WorkDirResponse> getWorkDirDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = getWorkDirDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<WorkDirResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -4463,7 +4463,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call getWorkDirDeprecatedAsync(String sandboxId, String xDaytonaOrganizationID, final ApiCallback<WorkDirResponse> _callback) throws ApiException {
+    public okhttp3.Call getWorkDirDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<WorkDirResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getWorkDirDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<WorkDirResponse>(){}.getType();
@@ -4487,7 +4487,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitAddFilesDeprecatedCall(String sandboxId, GitAddRequest gitAddRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call gitAddFilesDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitAddRequest gitAddRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -4539,7 +4539,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call gitAddFilesDeprecatedValidateBeforeCall(String sandboxId, GitAddRequest gitAddRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call gitAddFilesDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitAddRequest gitAddRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling gitAddFilesDeprecated(Async)");
@@ -4570,7 +4570,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void gitAddFilesDeprecated(String sandboxId, GitAddRequest gitAddRequest, String xDaytonaOrganizationID) throws ApiException {
+    public void gitAddFilesDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitAddRequest gitAddRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         gitAddFilesDeprecatedWithHttpInfo(sandboxId, gitAddRequest, xDaytonaOrganizationID);
     }
 
@@ -4591,7 +4591,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> gitAddFilesDeprecatedWithHttpInfo(String sandboxId, GitAddRequest gitAddRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> gitAddFilesDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitAddRequest gitAddRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = gitAddFilesDeprecatedValidateBeforeCall(sandboxId, gitAddRequest, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -4614,7 +4614,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitAddFilesDeprecatedAsync(String sandboxId, GitAddRequest gitAddRequest, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call gitAddFilesDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitAddRequest gitAddRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = gitAddFilesDeprecatedValidateBeforeCall(sandboxId, gitAddRequest, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -4637,7 +4637,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitCheckoutBranchDeprecatedCall(String sandboxId, GitCheckoutRequest gitCheckoutRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call gitCheckoutBranchDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitCheckoutRequest gitCheckoutRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -4689,7 +4689,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call gitCheckoutBranchDeprecatedValidateBeforeCall(String sandboxId, GitCheckoutRequest gitCheckoutRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call gitCheckoutBranchDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitCheckoutRequest gitCheckoutRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling gitCheckoutBranchDeprecated(Async)");
@@ -4720,7 +4720,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void gitCheckoutBranchDeprecated(String sandboxId, GitCheckoutRequest gitCheckoutRequest, String xDaytonaOrganizationID) throws ApiException {
+    public void gitCheckoutBranchDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitCheckoutRequest gitCheckoutRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         gitCheckoutBranchDeprecatedWithHttpInfo(sandboxId, gitCheckoutRequest, xDaytonaOrganizationID);
     }
 
@@ -4741,7 +4741,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> gitCheckoutBranchDeprecatedWithHttpInfo(String sandboxId, GitCheckoutRequest gitCheckoutRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> gitCheckoutBranchDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitCheckoutRequest gitCheckoutRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = gitCheckoutBranchDeprecatedValidateBeforeCall(sandboxId, gitCheckoutRequest, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -4764,7 +4764,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitCheckoutBranchDeprecatedAsync(String sandboxId, GitCheckoutRequest gitCheckoutRequest, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call gitCheckoutBranchDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitCheckoutRequest gitCheckoutRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = gitCheckoutBranchDeprecatedValidateBeforeCall(sandboxId, gitCheckoutRequest, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -4787,7 +4787,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitCloneRepositoryDeprecatedCall(String sandboxId, GitCloneRequest gitCloneRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call gitCloneRepositoryDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitCloneRequest gitCloneRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -4839,7 +4839,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call gitCloneRepositoryDeprecatedValidateBeforeCall(String sandboxId, GitCloneRequest gitCloneRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call gitCloneRepositoryDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitCloneRequest gitCloneRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling gitCloneRepositoryDeprecated(Async)");
@@ -4870,7 +4870,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void gitCloneRepositoryDeprecated(String sandboxId, GitCloneRequest gitCloneRequest, String xDaytonaOrganizationID) throws ApiException {
+    public void gitCloneRepositoryDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitCloneRequest gitCloneRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         gitCloneRepositoryDeprecatedWithHttpInfo(sandboxId, gitCloneRequest, xDaytonaOrganizationID);
     }
 
@@ -4891,7 +4891,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> gitCloneRepositoryDeprecatedWithHttpInfo(String sandboxId, GitCloneRequest gitCloneRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> gitCloneRepositoryDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitCloneRequest gitCloneRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = gitCloneRepositoryDeprecatedValidateBeforeCall(sandboxId, gitCloneRequest, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -4914,7 +4914,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitCloneRepositoryDeprecatedAsync(String sandboxId, GitCloneRequest gitCloneRequest, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call gitCloneRepositoryDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitCloneRequest gitCloneRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = gitCloneRepositoryDeprecatedValidateBeforeCall(sandboxId, gitCloneRequest, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -4937,7 +4937,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitCommitChangesDeprecatedCall(String sandboxId, GitCommitRequest gitCommitRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call gitCommitChangesDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitCommitRequest gitCommitRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -4990,7 +4990,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call gitCommitChangesDeprecatedValidateBeforeCall(String sandboxId, GitCommitRequest gitCommitRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call gitCommitChangesDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitCommitRequest gitCommitRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling gitCommitChangesDeprecated(Async)");
@@ -5022,7 +5022,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public GitCommitResponse gitCommitChangesDeprecated(String sandboxId, GitCommitRequest gitCommitRequest, String xDaytonaOrganizationID) throws ApiException {
+    public GitCommitResponse gitCommitChangesDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitCommitRequest gitCommitRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<GitCommitResponse> localVarResp = gitCommitChangesDeprecatedWithHttpInfo(sandboxId, gitCommitRequest, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -5044,7 +5044,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<GitCommitResponse> gitCommitChangesDeprecatedWithHttpInfo(String sandboxId, GitCommitRequest gitCommitRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<GitCommitResponse> gitCommitChangesDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitCommitRequest gitCommitRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = gitCommitChangesDeprecatedValidateBeforeCall(sandboxId, gitCommitRequest, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<GitCommitResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -5068,7 +5068,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitCommitChangesDeprecatedAsync(String sandboxId, GitCommitRequest gitCommitRequest, String xDaytonaOrganizationID, final ApiCallback<GitCommitResponse> _callback) throws ApiException {
+    public okhttp3.Call gitCommitChangesDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitCommitRequest gitCommitRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<GitCommitResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = gitCommitChangesDeprecatedValidateBeforeCall(sandboxId, gitCommitRequest, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<GitCommitResponse>(){}.getType();
@@ -5092,7 +5092,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitCreateBranchDeprecatedCall(String sandboxId, GitBranchRequest gitBranchRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call gitCreateBranchDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitBranchRequest gitBranchRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -5144,7 +5144,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call gitCreateBranchDeprecatedValidateBeforeCall(String sandboxId, GitBranchRequest gitBranchRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call gitCreateBranchDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitBranchRequest gitBranchRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling gitCreateBranchDeprecated(Async)");
@@ -5175,7 +5175,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void gitCreateBranchDeprecated(String sandboxId, GitBranchRequest gitBranchRequest, String xDaytonaOrganizationID) throws ApiException {
+    public void gitCreateBranchDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitBranchRequest gitBranchRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         gitCreateBranchDeprecatedWithHttpInfo(sandboxId, gitBranchRequest, xDaytonaOrganizationID);
     }
 
@@ -5196,7 +5196,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> gitCreateBranchDeprecatedWithHttpInfo(String sandboxId, GitBranchRequest gitBranchRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> gitCreateBranchDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitBranchRequest gitBranchRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = gitCreateBranchDeprecatedValidateBeforeCall(sandboxId, gitBranchRequest, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -5219,7 +5219,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitCreateBranchDeprecatedAsync(String sandboxId, GitBranchRequest gitBranchRequest, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call gitCreateBranchDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitBranchRequest gitBranchRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = gitCreateBranchDeprecatedValidateBeforeCall(sandboxId, gitBranchRequest, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -5242,7 +5242,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitDeleteBranchDeprecatedCall(String sandboxId, GitDeleteBranchRequest gitDeleteBranchRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call gitDeleteBranchDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitDeleteBranchRequest gitDeleteBranchRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -5294,7 +5294,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call gitDeleteBranchDeprecatedValidateBeforeCall(String sandboxId, GitDeleteBranchRequest gitDeleteBranchRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call gitDeleteBranchDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitDeleteBranchRequest gitDeleteBranchRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling gitDeleteBranchDeprecated(Async)");
@@ -5325,7 +5325,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void gitDeleteBranchDeprecated(String sandboxId, GitDeleteBranchRequest gitDeleteBranchRequest, String xDaytonaOrganizationID) throws ApiException {
+    public void gitDeleteBranchDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitDeleteBranchRequest gitDeleteBranchRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         gitDeleteBranchDeprecatedWithHttpInfo(sandboxId, gitDeleteBranchRequest, xDaytonaOrganizationID);
     }
 
@@ -5346,7 +5346,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> gitDeleteBranchDeprecatedWithHttpInfo(String sandboxId, GitDeleteBranchRequest gitDeleteBranchRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> gitDeleteBranchDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitDeleteBranchRequest gitDeleteBranchRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = gitDeleteBranchDeprecatedValidateBeforeCall(sandboxId, gitDeleteBranchRequest, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -5369,7 +5369,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitDeleteBranchDeprecatedAsync(String sandboxId, GitDeleteBranchRequest gitDeleteBranchRequest, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call gitDeleteBranchDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitDeleteBranchRequest gitDeleteBranchRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = gitDeleteBranchDeprecatedValidateBeforeCall(sandboxId, gitDeleteBranchRequest, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -5392,7 +5392,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitGetHistoryDeprecatedCall(String sandboxId, String path, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call gitGetHistoryDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -5448,7 +5448,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call gitGetHistoryDeprecatedValidateBeforeCall(String sandboxId, String path, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call gitGetHistoryDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling gitGetHistoryDeprecated(Async)");
@@ -5480,7 +5480,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public List<GitCommitInfo> gitGetHistoryDeprecated(String sandboxId, String path, String xDaytonaOrganizationID) throws ApiException {
+    public List<GitCommitInfo> gitGetHistoryDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<List<GitCommitInfo>> localVarResp = gitGetHistoryDeprecatedWithHttpInfo(sandboxId, path, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -5502,7 +5502,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<List<GitCommitInfo>> gitGetHistoryDeprecatedWithHttpInfo(String sandboxId, String path, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<List<GitCommitInfo>> gitGetHistoryDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = gitGetHistoryDeprecatedValidateBeforeCall(sandboxId, path, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<List<GitCommitInfo>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -5526,7 +5526,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitGetHistoryDeprecatedAsync(String sandboxId, String path, String xDaytonaOrganizationID, final ApiCallback<List<GitCommitInfo>> _callback) throws ApiException {
+    public okhttp3.Call gitGetHistoryDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<List<GitCommitInfo>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = gitGetHistoryDeprecatedValidateBeforeCall(sandboxId, path, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<List<GitCommitInfo>>(){}.getType();
@@ -5550,7 +5550,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitGetStatusDeprecatedCall(String sandboxId, String path, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call gitGetStatusDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -5606,7 +5606,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call gitGetStatusDeprecatedValidateBeforeCall(String sandboxId, String path, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call gitGetStatusDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling gitGetStatusDeprecated(Async)");
@@ -5638,7 +5638,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public GitStatus gitGetStatusDeprecated(String sandboxId, String path, String xDaytonaOrganizationID) throws ApiException {
+    public GitStatus gitGetStatusDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<GitStatus> localVarResp = gitGetStatusDeprecatedWithHttpInfo(sandboxId, path, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -5660,7 +5660,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<GitStatus> gitGetStatusDeprecatedWithHttpInfo(String sandboxId, String path, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<GitStatus> gitGetStatusDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = gitGetStatusDeprecatedValidateBeforeCall(sandboxId, path, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<GitStatus>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -5684,7 +5684,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitGetStatusDeprecatedAsync(String sandboxId, String path, String xDaytonaOrganizationID, final ApiCallback<GitStatus> _callback) throws ApiException {
+    public okhttp3.Call gitGetStatusDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<GitStatus> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = gitGetStatusDeprecatedValidateBeforeCall(sandboxId, path, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<GitStatus>(){}.getType();
@@ -5708,7 +5708,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitListBranchesDeprecatedCall(String sandboxId, String path, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call gitListBranchesDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -5764,7 +5764,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call gitListBranchesDeprecatedValidateBeforeCall(String sandboxId, String path, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call gitListBranchesDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling gitListBranchesDeprecated(Async)");
@@ -5796,7 +5796,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ListBranchResponse gitListBranchesDeprecated(String sandboxId, String path, String xDaytonaOrganizationID) throws ApiException {
+    public ListBranchResponse gitListBranchesDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<ListBranchResponse> localVarResp = gitListBranchesDeprecatedWithHttpInfo(sandboxId, path, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -5818,7 +5818,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<ListBranchResponse> gitListBranchesDeprecatedWithHttpInfo(String sandboxId, String path, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<ListBranchResponse> gitListBranchesDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = gitListBranchesDeprecatedValidateBeforeCall(sandboxId, path, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<ListBranchResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -5842,7 +5842,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitListBranchesDeprecatedAsync(String sandboxId, String path, String xDaytonaOrganizationID, final ApiCallback<ListBranchResponse> _callback) throws ApiException {
+    public okhttp3.Call gitListBranchesDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<ListBranchResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = gitListBranchesDeprecatedValidateBeforeCall(sandboxId, path, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<ListBranchResponse>(){}.getType();
@@ -5866,7 +5866,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitPullChangesDeprecatedCall(String sandboxId, GitRepoRequest gitRepoRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call gitPullChangesDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitRepoRequest gitRepoRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -5918,7 +5918,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call gitPullChangesDeprecatedValidateBeforeCall(String sandboxId, GitRepoRequest gitRepoRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call gitPullChangesDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitRepoRequest gitRepoRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling gitPullChangesDeprecated(Async)");
@@ -5949,7 +5949,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void gitPullChangesDeprecated(String sandboxId, GitRepoRequest gitRepoRequest, String xDaytonaOrganizationID) throws ApiException {
+    public void gitPullChangesDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitRepoRequest gitRepoRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         gitPullChangesDeprecatedWithHttpInfo(sandboxId, gitRepoRequest, xDaytonaOrganizationID);
     }
 
@@ -5970,7 +5970,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> gitPullChangesDeprecatedWithHttpInfo(String sandboxId, GitRepoRequest gitRepoRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> gitPullChangesDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitRepoRequest gitRepoRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = gitPullChangesDeprecatedValidateBeforeCall(sandboxId, gitRepoRequest, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -5993,7 +5993,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitPullChangesDeprecatedAsync(String sandboxId, GitRepoRequest gitRepoRequest, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call gitPullChangesDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitRepoRequest gitRepoRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = gitPullChangesDeprecatedValidateBeforeCall(sandboxId, gitRepoRequest, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -6016,7 +6016,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitPushChangesDeprecatedCall(String sandboxId, GitRepoRequest gitRepoRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call gitPushChangesDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitRepoRequest gitRepoRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -6068,7 +6068,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call gitPushChangesDeprecatedValidateBeforeCall(String sandboxId, GitRepoRequest gitRepoRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call gitPushChangesDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitRepoRequest gitRepoRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling gitPushChangesDeprecated(Async)");
@@ -6099,7 +6099,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void gitPushChangesDeprecated(String sandboxId, GitRepoRequest gitRepoRequest, String xDaytonaOrganizationID) throws ApiException {
+    public void gitPushChangesDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitRepoRequest gitRepoRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         gitPushChangesDeprecatedWithHttpInfo(sandboxId, gitRepoRequest, xDaytonaOrganizationID);
     }
 
@@ -6120,7 +6120,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> gitPushChangesDeprecatedWithHttpInfo(String sandboxId, GitRepoRequest gitRepoRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> gitPushChangesDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitRepoRequest gitRepoRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = gitPushChangesDeprecatedValidateBeforeCall(sandboxId, gitRepoRequest, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -6143,7 +6143,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call gitPushChangesDeprecatedAsync(String sandboxId, GitRepoRequest gitRepoRequest, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call gitPushChangesDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull GitRepoRequest gitRepoRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = gitPushChangesDeprecatedValidateBeforeCall(sandboxId, gitRepoRequest, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -6166,7 +6166,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call listFilesDeprecatedCall(String sandboxId, String xDaytonaOrganizationID, String path, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listFilesDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String path, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -6222,7 +6222,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listFilesDeprecatedValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, String path, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call listFilesDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String path, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling listFilesDeprecated(Async)");
@@ -6249,7 +6249,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public List<FileInfo> listFilesDeprecated(String sandboxId, String xDaytonaOrganizationID, String path) throws ApiException {
+    public List<FileInfo> listFilesDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String path) throws ApiException {
         ApiResponse<List<FileInfo>> localVarResp = listFilesDeprecatedWithHttpInfo(sandboxId, xDaytonaOrganizationID, path);
         return localVarResp.getData();
     }
@@ -6271,7 +6271,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<List<FileInfo>> listFilesDeprecatedWithHttpInfo(String sandboxId, String xDaytonaOrganizationID, String path) throws ApiException {
+    public ApiResponse<List<FileInfo>> listFilesDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String path) throws ApiException {
         okhttp3.Call localVarCall = listFilesDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, path, null);
         Type localVarReturnType = new TypeToken<List<FileInfo>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -6295,7 +6295,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call listFilesDeprecatedAsync(String sandboxId, String xDaytonaOrganizationID, String path, final ApiCallback<List<FileInfo>> _callback) throws ApiException {
+    public okhttp3.Call listFilesDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String path, final ApiCallback<List<FileInfo>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = listFilesDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, path, _callback);
         Type localVarReturnType = new TypeToken<List<FileInfo>>(){}.getType();
@@ -6318,7 +6318,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call listPTYSessionsDeprecatedCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listPTYSessionsDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -6370,7 +6370,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listPTYSessionsDeprecatedValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call listPTYSessionsDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling listPTYSessionsDeprecated(Async)");
@@ -6396,7 +6396,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public PtyListResponse listPTYSessionsDeprecated(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public PtyListResponse listPTYSessionsDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<PtyListResponse> localVarResp = listPTYSessionsDeprecatedWithHttpInfo(sandboxId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -6417,7 +6417,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<PtyListResponse> listPTYSessionsDeprecatedWithHttpInfo(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<PtyListResponse> listPTYSessionsDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = listPTYSessionsDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<PtyListResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -6440,7 +6440,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call listPTYSessionsDeprecatedAsync(String sandboxId, String xDaytonaOrganizationID, final ApiCallback<PtyListResponse> _callback) throws ApiException {
+    public okhttp3.Call listPTYSessionsDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<PtyListResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = listPTYSessionsDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<PtyListResponse>(){}.getType();
@@ -6463,7 +6463,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call listSessionsDeprecatedCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listSessionsDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -6515,7 +6515,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listSessionsDeprecatedValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call listSessionsDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling listSessionsDeprecated(Async)");
@@ -6541,7 +6541,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public List<Session> listSessionsDeprecated(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public List<Session> listSessionsDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<List<Session>> localVarResp = listSessionsDeprecatedWithHttpInfo(sandboxId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -6562,7 +6562,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<List<Session>> listSessionsDeprecatedWithHttpInfo(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<List<Session>> listSessionsDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = listSessionsDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<List<Session>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -6585,7 +6585,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call listSessionsDeprecatedAsync(String sandboxId, String xDaytonaOrganizationID, final ApiCallback<List<Session>> _callback) throws ApiException {
+    public okhttp3.Call listSessionsDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<List<Session>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = listSessionsDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<List<Session>>(){}.getType();
@@ -6609,7 +6609,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call lspCompletionsDeprecatedCall(String sandboxId, LspCompletionParams lspCompletionParams, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call lspCompletionsDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspCompletionParams lspCompletionParams, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -6662,7 +6662,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call lspCompletionsDeprecatedValidateBeforeCall(String sandboxId, LspCompletionParams lspCompletionParams, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call lspCompletionsDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspCompletionParams lspCompletionParams, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling lspCompletionsDeprecated(Async)");
@@ -6694,7 +6694,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public CompletionList lspCompletionsDeprecated(String sandboxId, LspCompletionParams lspCompletionParams, String xDaytonaOrganizationID) throws ApiException {
+    public CompletionList lspCompletionsDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspCompletionParams lspCompletionParams, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<CompletionList> localVarResp = lspCompletionsDeprecatedWithHttpInfo(sandboxId, lspCompletionParams, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -6716,7 +6716,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<CompletionList> lspCompletionsDeprecatedWithHttpInfo(String sandboxId, LspCompletionParams lspCompletionParams, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<CompletionList> lspCompletionsDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspCompletionParams lspCompletionParams, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = lspCompletionsDeprecatedValidateBeforeCall(sandboxId, lspCompletionParams, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<CompletionList>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -6740,7 +6740,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call lspCompletionsDeprecatedAsync(String sandboxId, LspCompletionParams lspCompletionParams, String xDaytonaOrganizationID, final ApiCallback<CompletionList> _callback) throws ApiException {
+    public okhttp3.Call lspCompletionsDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspCompletionParams lspCompletionParams, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<CompletionList> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = lspCompletionsDeprecatedValidateBeforeCall(sandboxId, lspCompletionParams, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<CompletionList>(){}.getType();
@@ -6764,7 +6764,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call lspDidCloseDeprecatedCall(String sandboxId, LspDocumentRequest lspDocumentRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call lspDidCloseDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspDocumentRequest lspDocumentRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -6816,7 +6816,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call lspDidCloseDeprecatedValidateBeforeCall(String sandboxId, LspDocumentRequest lspDocumentRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call lspDidCloseDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspDocumentRequest lspDocumentRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling lspDidCloseDeprecated(Async)");
@@ -6847,7 +6847,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void lspDidCloseDeprecated(String sandboxId, LspDocumentRequest lspDocumentRequest, String xDaytonaOrganizationID) throws ApiException {
+    public void lspDidCloseDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspDocumentRequest lspDocumentRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         lspDidCloseDeprecatedWithHttpInfo(sandboxId, lspDocumentRequest, xDaytonaOrganizationID);
     }
 
@@ -6868,7 +6868,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> lspDidCloseDeprecatedWithHttpInfo(String sandboxId, LspDocumentRequest lspDocumentRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> lspDidCloseDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspDocumentRequest lspDocumentRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = lspDidCloseDeprecatedValidateBeforeCall(sandboxId, lspDocumentRequest, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -6891,7 +6891,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call lspDidCloseDeprecatedAsync(String sandboxId, LspDocumentRequest lspDocumentRequest, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call lspDidCloseDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspDocumentRequest lspDocumentRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = lspDidCloseDeprecatedValidateBeforeCall(sandboxId, lspDocumentRequest, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -6914,7 +6914,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call lspDidOpenDeprecatedCall(String sandboxId, LspDocumentRequest lspDocumentRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call lspDidOpenDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspDocumentRequest lspDocumentRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -6966,7 +6966,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call lspDidOpenDeprecatedValidateBeforeCall(String sandboxId, LspDocumentRequest lspDocumentRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call lspDidOpenDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspDocumentRequest lspDocumentRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling lspDidOpenDeprecated(Async)");
@@ -6997,7 +6997,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void lspDidOpenDeprecated(String sandboxId, LspDocumentRequest lspDocumentRequest, String xDaytonaOrganizationID) throws ApiException {
+    public void lspDidOpenDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspDocumentRequest lspDocumentRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         lspDidOpenDeprecatedWithHttpInfo(sandboxId, lspDocumentRequest, xDaytonaOrganizationID);
     }
 
@@ -7018,7 +7018,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> lspDidOpenDeprecatedWithHttpInfo(String sandboxId, LspDocumentRequest lspDocumentRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> lspDidOpenDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspDocumentRequest lspDocumentRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = lspDidOpenDeprecatedValidateBeforeCall(sandboxId, lspDocumentRequest, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -7041,7 +7041,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call lspDidOpenDeprecatedAsync(String sandboxId, LspDocumentRequest lspDocumentRequest, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call lspDidOpenDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspDocumentRequest lspDocumentRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = lspDidOpenDeprecatedValidateBeforeCall(sandboxId, lspDocumentRequest, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -7066,7 +7066,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call lspDocumentSymbolsDeprecatedCall(String sandboxId, String languageId, String pathToProject, String uri, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call lspDocumentSymbolsDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String uri, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -7130,7 +7130,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call lspDocumentSymbolsDeprecatedValidateBeforeCall(String sandboxId, String languageId, String pathToProject, String uri, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call lspDocumentSymbolsDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String uri, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling lspDocumentSymbolsDeprecated(Async)");
@@ -7174,7 +7174,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public List<LspSymbol> lspDocumentSymbolsDeprecated(String sandboxId, String languageId, String pathToProject, String uri, String xDaytonaOrganizationID) throws ApiException {
+    public List<LspSymbol> lspDocumentSymbolsDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String uri, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<List<LspSymbol>> localVarResp = lspDocumentSymbolsDeprecatedWithHttpInfo(sandboxId, languageId, pathToProject, uri, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -7198,7 +7198,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<List<LspSymbol>> lspDocumentSymbolsDeprecatedWithHttpInfo(String sandboxId, String languageId, String pathToProject, String uri, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<List<LspSymbol>> lspDocumentSymbolsDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String uri, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = lspDocumentSymbolsDeprecatedValidateBeforeCall(sandboxId, languageId, pathToProject, uri, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<List<LspSymbol>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -7224,7 +7224,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call lspDocumentSymbolsDeprecatedAsync(String sandboxId, String languageId, String pathToProject, String uri, String xDaytonaOrganizationID, final ApiCallback<List<LspSymbol>> _callback) throws ApiException {
+    public okhttp3.Call lspDocumentSymbolsDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String uri, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<List<LspSymbol>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = lspDocumentSymbolsDeprecatedValidateBeforeCall(sandboxId, languageId, pathToProject, uri, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<List<LspSymbol>>(){}.getType();
@@ -7248,7 +7248,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call lspStartDeprecatedCall(String sandboxId, LspServerRequest lspServerRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call lspStartDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspServerRequest lspServerRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -7300,7 +7300,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call lspStartDeprecatedValidateBeforeCall(String sandboxId, LspServerRequest lspServerRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call lspStartDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspServerRequest lspServerRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling lspStartDeprecated(Async)");
@@ -7331,7 +7331,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void lspStartDeprecated(String sandboxId, LspServerRequest lspServerRequest, String xDaytonaOrganizationID) throws ApiException {
+    public void lspStartDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspServerRequest lspServerRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         lspStartDeprecatedWithHttpInfo(sandboxId, lspServerRequest, xDaytonaOrganizationID);
     }
 
@@ -7352,7 +7352,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> lspStartDeprecatedWithHttpInfo(String sandboxId, LspServerRequest lspServerRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> lspStartDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspServerRequest lspServerRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = lspStartDeprecatedValidateBeforeCall(sandboxId, lspServerRequest, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -7375,7 +7375,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call lspStartDeprecatedAsync(String sandboxId, LspServerRequest lspServerRequest, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call lspStartDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspServerRequest lspServerRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = lspStartDeprecatedValidateBeforeCall(sandboxId, lspServerRequest, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -7398,7 +7398,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call lspStopDeprecatedCall(String sandboxId, LspServerRequest lspServerRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call lspStopDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspServerRequest lspServerRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -7450,7 +7450,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call lspStopDeprecatedValidateBeforeCall(String sandboxId, LspServerRequest lspServerRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call lspStopDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspServerRequest lspServerRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling lspStopDeprecated(Async)");
@@ -7481,7 +7481,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void lspStopDeprecated(String sandboxId, LspServerRequest lspServerRequest, String xDaytonaOrganizationID) throws ApiException {
+    public void lspStopDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspServerRequest lspServerRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         lspStopDeprecatedWithHttpInfo(sandboxId, lspServerRequest, xDaytonaOrganizationID);
     }
 
@@ -7502,7 +7502,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> lspStopDeprecatedWithHttpInfo(String sandboxId, LspServerRequest lspServerRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> lspStopDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspServerRequest lspServerRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = lspStopDeprecatedValidateBeforeCall(sandboxId, lspServerRequest, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -7525,7 +7525,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call lspStopDeprecatedAsync(String sandboxId, LspServerRequest lspServerRequest, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call lspStopDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull LspServerRequest lspServerRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = lspStopDeprecatedValidateBeforeCall(sandboxId, lspServerRequest, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -7550,7 +7550,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call lspWorkspaceSymbolsDeprecatedCall(String sandboxId, String languageId, String pathToProject, String query, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call lspWorkspaceSymbolsDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String query, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -7614,7 +7614,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call lspWorkspaceSymbolsDeprecatedValidateBeforeCall(String sandboxId, String languageId, String pathToProject, String query, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call lspWorkspaceSymbolsDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String query, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling lspWorkspaceSymbolsDeprecated(Async)");
@@ -7658,7 +7658,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public List<LspSymbol> lspWorkspaceSymbolsDeprecated(String sandboxId, String languageId, String pathToProject, String query, String xDaytonaOrganizationID) throws ApiException {
+    public List<LspSymbol> lspWorkspaceSymbolsDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String query, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<List<LspSymbol>> localVarResp = lspWorkspaceSymbolsDeprecatedWithHttpInfo(sandboxId, languageId, pathToProject, query, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -7682,7 +7682,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<List<LspSymbol>> lspWorkspaceSymbolsDeprecatedWithHttpInfo(String sandboxId, String languageId, String pathToProject, String query, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<List<LspSymbol>> lspWorkspaceSymbolsDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String query, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = lspWorkspaceSymbolsDeprecatedValidateBeforeCall(sandboxId, languageId, pathToProject, query, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<List<LspSymbol>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -7708,7 +7708,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call lspWorkspaceSymbolsDeprecatedAsync(String sandboxId, String languageId, String pathToProject, String query, String xDaytonaOrganizationID, final ApiCallback<List<LspSymbol>> _callback) throws ApiException {
+    public okhttp3.Call lspWorkspaceSymbolsDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String query, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<List<LspSymbol>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = lspWorkspaceSymbolsDeprecatedValidateBeforeCall(sandboxId, languageId, pathToProject, query, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<List<LspSymbol>>(){}.getType();
@@ -7733,7 +7733,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call moveFileDeprecatedCall(String sandboxId, String source, String destination, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call moveFileDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String source, @javax.annotation.Nonnull String destination, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -7792,7 +7792,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call moveFileDeprecatedValidateBeforeCall(String sandboxId, String source, String destination, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call moveFileDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String source, @javax.annotation.Nonnull String destination, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling moveFileDeprecated(Async)");
@@ -7829,7 +7829,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void moveFileDeprecated(String sandboxId, String source, String destination, String xDaytonaOrganizationID) throws ApiException {
+    public void moveFileDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String source, @javax.annotation.Nonnull String destination, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         moveFileDeprecatedWithHttpInfo(sandboxId, source, destination, xDaytonaOrganizationID);
     }
 
@@ -7851,7 +7851,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> moveFileDeprecatedWithHttpInfo(String sandboxId, String source, String destination, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> moveFileDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String source, @javax.annotation.Nonnull String destination, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = moveFileDeprecatedValidateBeforeCall(sandboxId, source, destination, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -7875,7 +7875,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call moveFileDeprecatedAsync(String sandboxId, String source, String destination, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call moveFileDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String source, @javax.annotation.Nonnull String destination, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = moveFileDeprecatedValidateBeforeCall(sandboxId, source, destination, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -7898,7 +7898,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call moveMouseDeprecatedCall(String sandboxId, MouseMoveRequest mouseMoveRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call moveMouseDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseMoveRequest mouseMoveRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -7951,7 +7951,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call moveMouseDeprecatedValidateBeforeCall(String sandboxId, MouseMoveRequest mouseMoveRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call moveMouseDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseMoveRequest mouseMoveRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling moveMouseDeprecated(Async)");
@@ -7983,7 +7983,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public MouseMoveResponse moveMouseDeprecated(String sandboxId, MouseMoveRequest mouseMoveRequest, String xDaytonaOrganizationID) throws ApiException {
+    public MouseMoveResponse moveMouseDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseMoveRequest mouseMoveRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<MouseMoveResponse> localVarResp = moveMouseDeprecatedWithHttpInfo(sandboxId, mouseMoveRequest, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -8005,7 +8005,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<MouseMoveResponse> moveMouseDeprecatedWithHttpInfo(String sandboxId, MouseMoveRequest mouseMoveRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<MouseMoveResponse> moveMouseDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseMoveRequest mouseMoveRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = moveMouseDeprecatedValidateBeforeCall(sandboxId, mouseMoveRequest, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<MouseMoveResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -8029,7 +8029,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call moveMouseDeprecatedAsync(String sandboxId, MouseMoveRequest mouseMoveRequest, String xDaytonaOrganizationID, final ApiCallback<MouseMoveResponse> _callback) throws ApiException {
+    public okhttp3.Call moveMouseDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseMoveRequest mouseMoveRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<MouseMoveResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = moveMouseDeprecatedValidateBeforeCall(sandboxId, mouseMoveRequest, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<MouseMoveResponse>(){}.getType();
@@ -8053,7 +8053,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call pressHotkeyDeprecatedCall(String sandboxId, KeyboardHotkeyRequest keyboardHotkeyRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call pressHotkeyDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull KeyboardHotkeyRequest keyboardHotkeyRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -8105,7 +8105,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call pressHotkeyDeprecatedValidateBeforeCall(String sandboxId, KeyboardHotkeyRequest keyboardHotkeyRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call pressHotkeyDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull KeyboardHotkeyRequest keyboardHotkeyRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling pressHotkeyDeprecated(Async)");
@@ -8136,7 +8136,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void pressHotkeyDeprecated(String sandboxId, KeyboardHotkeyRequest keyboardHotkeyRequest, String xDaytonaOrganizationID) throws ApiException {
+    public void pressHotkeyDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull KeyboardHotkeyRequest keyboardHotkeyRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         pressHotkeyDeprecatedWithHttpInfo(sandboxId, keyboardHotkeyRequest, xDaytonaOrganizationID);
     }
 
@@ -8157,7 +8157,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> pressHotkeyDeprecatedWithHttpInfo(String sandboxId, KeyboardHotkeyRequest keyboardHotkeyRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> pressHotkeyDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull KeyboardHotkeyRequest keyboardHotkeyRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = pressHotkeyDeprecatedValidateBeforeCall(sandboxId, keyboardHotkeyRequest, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -8180,7 +8180,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call pressHotkeyDeprecatedAsync(String sandboxId, KeyboardHotkeyRequest keyboardHotkeyRequest, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call pressHotkeyDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull KeyboardHotkeyRequest keyboardHotkeyRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = pressHotkeyDeprecatedValidateBeforeCall(sandboxId, keyboardHotkeyRequest, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -8203,7 +8203,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call pressKeyDeprecatedCall(String sandboxId, KeyboardPressRequest keyboardPressRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call pressKeyDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull KeyboardPressRequest keyboardPressRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -8255,7 +8255,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call pressKeyDeprecatedValidateBeforeCall(String sandboxId, KeyboardPressRequest keyboardPressRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call pressKeyDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull KeyboardPressRequest keyboardPressRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling pressKeyDeprecated(Async)");
@@ -8286,7 +8286,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void pressKeyDeprecated(String sandboxId, KeyboardPressRequest keyboardPressRequest, String xDaytonaOrganizationID) throws ApiException {
+    public void pressKeyDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull KeyboardPressRequest keyboardPressRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         pressKeyDeprecatedWithHttpInfo(sandboxId, keyboardPressRequest, xDaytonaOrganizationID);
     }
 
@@ -8307,7 +8307,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> pressKeyDeprecatedWithHttpInfo(String sandboxId, KeyboardPressRequest keyboardPressRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> pressKeyDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull KeyboardPressRequest keyboardPressRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = pressKeyDeprecatedValidateBeforeCall(sandboxId, keyboardPressRequest, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -8330,7 +8330,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call pressKeyDeprecatedAsync(String sandboxId, KeyboardPressRequest keyboardPressRequest, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call pressKeyDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull KeyboardPressRequest keyboardPressRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = pressKeyDeprecatedValidateBeforeCall(sandboxId, keyboardPressRequest, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -8353,7 +8353,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call replaceInFilesDeprecatedCall(String sandboxId, ReplaceRequest replaceRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call replaceInFilesDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull ReplaceRequest replaceRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -8406,7 +8406,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call replaceInFilesDeprecatedValidateBeforeCall(String sandboxId, ReplaceRequest replaceRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call replaceInFilesDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull ReplaceRequest replaceRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling replaceInFilesDeprecated(Async)");
@@ -8438,7 +8438,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public List<ReplaceResult> replaceInFilesDeprecated(String sandboxId, ReplaceRequest replaceRequest, String xDaytonaOrganizationID) throws ApiException {
+    public List<ReplaceResult> replaceInFilesDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull ReplaceRequest replaceRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<List<ReplaceResult>> localVarResp = replaceInFilesDeprecatedWithHttpInfo(sandboxId, replaceRequest, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -8460,7 +8460,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<List<ReplaceResult>> replaceInFilesDeprecatedWithHttpInfo(String sandboxId, ReplaceRequest replaceRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<List<ReplaceResult>> replaceInFilesDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull ReplaceRequest replaceRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = replaceInFilesDeprecatedValidateBeforeCall(sandboxId, replaceRequest, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<List<ReplaceResult>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -8484,7 +8484,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call replaceInFilesDeprecatedAsync(String sandboxId, ReplaceRequest replaceRequest, String xDaytonaOrganizationID, final ApiCallback<List<ReplaceResult>> _callback) throws ApiException {
+    public okhttp3.Call replaceInFilesDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull ReplaceRequest replaceRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<List<ReplaceResult>> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = replaceInFilesDeprecatedValidateBeforeCall(sandboxId, replaceRequest, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<List<ReplaceResult>>(){}.getType();
@@ -8509,7 +8509,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call resizePTYSessionDeprecatedCall(String sandboxId, String sessionId, PtyResizeRequest ptyResizeRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call resizePTYSessionDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull PtyResizeRequest ptyResizeRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -8563,7 +8563,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call resizePTYSessionDeprecatedValidateBeforeCall(String sandboxId, String sessionId, PtyResizeRequest ptyResizeRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call resizePTYSessionDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull PtyResizeRequest ptyResizeRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling resizePTYSessionDeprecated(Async)");
@@ -8601,7 +8601,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public PtySessionInfo resizePTYSessionDeprecated(String sandboxId, String sessionId, PtyResizeRequest ptyResizeRequest, String xDaytonaOrganizationID) throws ApiException {
+    public PtySessionInfo resizePTYSessionDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull PtyResizeRequest ptyResizeRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<PtySessionInfo> localVarResp = resizePTYSessionDeprecatedWithHttpInfo(sandboxId, sessionId, ptyResizeRequest, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -8624,7 +8624,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<PtySessionInfo> resizePTYSessionDeprecatedWithHttpInfo(String sandboxId, String sessionId, PtyResizeRequest ptyResizeRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<PtySessionInfo> resizePTYSessionDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull PtyResizeRequest ptyResizeRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = resizePTYSessionDeprecatedValidateBeforeCall(sandboxId, sessionId, ptyResizeRequest, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<PtySessionInfo>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -8649,7 +8649,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call resizePTYSessionDeprecatedAsync(String sandboxId, String sessionId, PtyResizeRequest ptyResizeRequest, String xDaytonaOrganizationID, final ApiCallback<PtySessionInfo> _callback) throws ApiException {
+    public okhttp3.Call resizePTYSessionDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull PtyResizeRequest ptyResizeRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<PtySessionInfo> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = resizePTYSessionDeprecatedValidateBeforeCall(sandboxId, sessionId, ptyResizeRequest, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<PtySessionInfo>(){}.getType();
@@ -8673,7 +8673,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call restartProcessDeprecatedCall(String processName, String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call restartProcessDeprecatedCall(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -8726,7 +8726,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call restartProcessDeprecatedValidateBeforeCall(String processName, String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call restartProcessDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'processName' is set
         if (processName == null) {
             throw new ApiException("Missing the required parameter 'processName' when calling restartProcessDeprecated(Async)");
@@ -8758,7 +8758,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ProcessRestartResponse restartProcessDeprecated(String processName, String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ProcessRestartResponse restartProcessDeprecated(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<ProcessRestartResponse> localVarResp = restartProcessDeprecatedWithHttpInfo(processName, sandboxId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -8780,7 +8780,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<ProcessRestartResponse> restartProcessDeprecatedWithHttpInfo(String processName, String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<ProcessRestartResponse> restartProcessDeprecatedWithHttpInfo(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = restartProcessDeprecatedValidateBeforeCall(processName, sandboxId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<ProcessRestartResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -8804,7 +8804,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call restartProcessDeprecatedAsync(String processName, String sandboxId, String xDaytonaOrganizationID, final ApiCallback<ProcessRestartResponse> _callback) throws ApiException {
+    public okhttp3.Call restartProcessDeprecatedAsync(@javax.annotation.Nonnull String processName, @javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<ProcessRestartResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = restartProcessDeprecatedValidateBeforeCall(processName, sandboxId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<ProcessRestartResponse>(){}.getType();
@@ -8828,7 +8828,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call scrollMouseDeprecatedCall(String sandboxId, MouseScrollRequest mouseScrollRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call scrollMouseDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseScrollRequest mouseScrollRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -8881,7 +8881,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call scrollMouseDeprecatedValidateBeforeCall(String sandboxId, MouseScrollRequest mouseScrollRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call scrollMouseDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseScrollRequest mouseScrollRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling scrollMouseDeprecated(Async)");
@@ -8913,7 +8913,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public MouseScrollResponse scrollMouseDeprecated(String sandboxId, MouseScrollRequest mouseScrollRequest, String xDaytonaOrganizationID) throws ApiException {
+    public MouseScrollResponse scrollMouseDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseScrollRequest mouseScrollRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<MouseScrollResponse> localVarResp = scrollMouseDeprecatedWithHttpInfo(sandboxId, mouseScrollRequest, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -8935,7 +8935,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<MouseScrollResponse> scrollMouseDeprecatedWithHttpInfo(String sandboxId, MouseScrollRequest mouseScrollRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<MouseScrollResponse> scrollMouseDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseScrollRequest mouseScrollRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = scrollMouseDeprecatedValidateBeforeCall(sandboxId, mouseScrollRequest, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<MouseScrollResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -8959,7 +8959,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call scrollMouseDeprecatedAsync(String sandboxId, MouseScrollRequest mouseScrollRequest, String xDaytonaOrganizationID, final ApiCallback<MouseScrollResponse> _callback) throws ApiException {
+    public okhttp3.Call scrollMouseDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull MouseScrollRequest mouseScrollRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<MouseScrollResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = scrollMouseDeprecatedValidateBeforeCall(sandboxId, mouseScrollRequest, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<MouseScrollResponse>(){}.getType();
@@ -8984,7 +8984,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call searchFilesDeprecatedCall(String sandboxId, String path, String pattern, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call searchFilesDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -9044,7 +9044,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call searchFilesDeprecatedValidateBeforeCall(String sandboxId, String path, String pattern, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call searchFilesDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling searchFilesDeprecated(Async)");
@@ -9082,7 +9082,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public SearchFilesResponse searchFilesDeprecated(String sandboxId, String path, String pattern, String xDaytonaOrganizationID) throws ApiException {
+    public SearchFilesResponse searchFilesDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<SearchFilesResponse> localVarResp = searchFilesDeprecatedWithHttpInfo(sandboxId, path, pattern, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -9105,7 +9105,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<SearchFilesResponse> searchFilesDeprecatedWithHttpInfo(String sandboxId, String path, String pattern, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<SearchFilesResponse> searchFilesDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = searchFilesDeprecatedValidateBeforeCall(sandboxId, path, pattern, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<SearchFilesResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -9130,7 +9130,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call searchFilesDeprecatedAsync(String sandboxId, String path, String pattern, String xDaytonaOrganizationID, final ApiCallback<SearchFilesResponse> _callback) throws ApiException {
+    public okhttp3.Call searchFilesDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nonnull String pattern, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<SearchFilesResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = searchFilesDeprecatedValidateBeforeCall(sandboxId, path, pattern, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<SearchFilesResponse>(){}.getType();
@@ -9157,7 +9157,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call setFilePermissionsDeprecatedCall(String sandboxId, String path, String xDaytonaOrganizationID, String owner, String group, String mode, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call setFilePermissionsDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String owner, @javax.annotation.Nullable String group, @javax.annotation.Nullable String mode, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -9224,7 +9224,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call setFilePermissionsDeprecatedValidateBeforeCall(String sandboxId, String path, String xDaytonaOrganizationID, String owner, String group, String mode, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call setFilePermissionsDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String owner, @javax.annotation.Nullable String group, @javax.annotation.Nullable String mode, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling setFilePermissionsDeprecated(Async)");
@@ -9258,7 +9258,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void setFilePermissionsDeprecated(String sandboxId, String path, String xDaytonaOrganizationID, String owner, String group, String mode) throws ApiException {
+    public void setFilePermissionsDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String owner, @javax.annotation.Nullable String group, @javax.annotation.Nullable String mode) throws ApiException {
         setFilePermissionsDeprecatedWithHttpInfo(sandboxId, path, xDaytonaOrganizationID, owner, group, mode);
     }
 
@@ -9282,7 +9282,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> setFilePermissionsDeprecatedWithHttpInfo(String sandboxId, String path, String xDaytonaOrganizationID, String owner, String group, String mode) throws ApiException {
+    public ApiResponse<Void> setFilePermissionsDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String owner, @javax.annotation.Nullable String group, @javax.annotation.Nullable String mode) throws ApiException {
         okhttp3.Call localVarCall = setFilePermissionsDeprecatedValidateBeforeCall(sandboxId, path, xDaytonaOrganizationID, owner, group, mode, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -9308,7 +9308,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call setFilePermissionsDeprecatedAsync(String sandboxId, String path, String xDaytonaOrganizationID, String owner, String group, String mode, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call setFilePermissionsDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String owner, @javax.annotation.Nullable String group, @javax.annotation.Nullable String mode, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = setFilePermissionsDeprecatedValidateBeforeCall(sandboxId, path, xDaytonaOrganizationID, owner, group, mode, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -9330,7 +9330,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call startComputerUseDeprecatedCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call startComputerUseDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -9382,7 +9382,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call startComputerUseDeprecatedValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call startComputerUseDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling startComputerUseDeprecated(Async)");
@@ -9408,7 +9408,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ComputerUseStartResponse startComputerUseDeprecated(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ComputerUseStartResponse startComputerUseDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<ComputerUseStartResponse> localVarResp = startComputerUseDeprecatedWithHttpInfo(sandboxId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -9429,7 +9429,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<ComputerUseStartResponse> startComputerUseDeprecatedWithHttpInfo(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<ComputerUseStartResponse> startComputerUseDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = startComputerUseDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<ComputerUseStartResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -9452,7 +9452,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call startComputerUseDeprecatedAsync(String sandboxId, String xDaytonaOrganizationID, final ApiCallback<ComputerUseStartResponse> _callback) throws ApiException {
+    public okhttp3.Call startComputerUseDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<ComputerUseStartResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = startComputerUseDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<ComputerUseStartResponse>(){}.getType();
@@ -9475,7 +9475,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call stopComputerUseDeprecatedCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call stopComputerUseDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -9527,7 +9527,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call stopComputerUseDeprecatedValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call stopComputerUseDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling stopComputerUseDeprecated(Async)");
@@ -9553,7 +9553,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ComputerUseStopResponse stopComputerUseDeprecated(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ComputerUseStopResponse stopComputerUseDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         ApiResponse<ComputerUseStopResponse> localVarResp = stopComputerUseDeprecatedWithHttpInfo(sandboxId, xDaytonaOrganizationID);
         return localVarResp.getData();
     }
@@ -9574,7 +9574,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<ComputerUseStopResponse> stopComputerUseDeprecatedWithHttpInfo(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<ComputerUseStopResponse> stopComputerUseDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = stopComputerUseDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, null);
         Type localVarReturnType = new TypeToken<ComputerUseStopResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -9597,7 +9597,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call stopComputerUseDeprecatedAsync(String sandboxId, String xDaytonaOrganizationID, final ApiCallback<ComputerUseStopResponse> _callback) throws ApiException {
+    public okhttp3.Call stopComputerUseDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<ComputerUseStopResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = stopComputerUseDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<ComputerUseStopResponse>(){}.getType();
@@ -9628,7 +9628,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call takeCompressedRegionScreenshotDeprecatedCall(String sandboxId, BigDecimal height, BigDecimal width, BigDecimal y, BigDecimal x, String xDaytonaOrganizationID, BigDecimal scale, BigDecimal quality, String format, Boolean showCursor, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call takeCompressedRegionScreenshotDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull BigDecimal height, @javax.annotation.Nonnull BigDecimal width, @javax.annotation.Nonnull BigDecimal y, @javax.annotation.Nonnull BigDecimal x, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal scale, @javax.annotation.Nullable BigDecimal quality, @javax.annotation.Nullable String format, @javax.annotation.Nullable Boolean showCursor, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -9712,7 +9712,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call takeCompressedRegionScreenshotDeprecatedValidateBeforeCall(String sandboxId, BigDecimal height, BigDecimal width, BigDecimal y, BigDecimal x, String xDaytonaOrganizationID, BigDecimal scale, BigDecimal quality, String format, Boolean showCursor, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call takeCompressedRegionScreenshotDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull BigDecimal height, @javax.annotation.Nonnull BigDecimal width, @javax.annotation.Nonnull BigDecimal y, @javax.annotation.Nonnull BigDecimal x, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal scale, @javax.annotation.Nullable BigDecimal quality, @javax.annotation.Nullable String format, @javax.annotation.Nullable Boolean showCursor, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling takeCompressedRegionScreenshotDeprecated(Async)");
@@ -9766,7 +9766,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public CompressedScreenshotResponse takeCompressedRegionScreenshotDeprecated(String sandboxId, BigDecimal height, BigDecimal width, BigDecimal y, BigDecimal x, String xDaytonaOrganizationID, BigDecimal scale, BigDecimal quality, String format, Boolean showCursor) throws ApiException {
+    public CompressedScreenshotResponse takeCompressedRegionScreenshotDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull BigDecimal height, @javax.annotation.Nonnull BigDecimal width, @javax.annotation.Nonnull BigDecimal y, @javax.annotation.Nonnull BigDecimal x, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal scale, @javax.annotation.Nullable BigDecimal quality, @javax.annotation.Nullable String format, @javax.annotation.Nullable Boolean showCursor) throws ApiException {
         ApiResponse<CompressedScreenshotResponse> localVarResp = takeCompressedRegionScreenshotDeprecatedWithHttpInfo(sandboxId, height, width, y, x, xDaytonaOrganizationID, scale, quality, format, showCursor);
         return localVarResp.getData();
     }
@@ -9795,7 +9795,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<CompressedScreenshotResponse> takeCompressedRegionScreenshotDeprecatedWithHttpInfo(String sandboxId, BigDecimal height, BigDecimal width, BigDecimal y, BigDecimal x, String xDaytonaOrganizationID, BigDecimal scale, BigDecimal quality, String format, Boolean showCursor) throws ApiException {
+    public ApiResponse<CompressedScreenshotResponse> takeCompressedRegionScreenshotDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull BigDecimal height, @javax.annotation.Nonnull BigDecimal width, @javax.annotation.Nonnull BigDecimal y, @javax.annotation.Nonnull BigDecimal x, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal scale, @javax.annotation.Nullable BigDecimal quality, @javax.annotation.Nullable String format, @javax.annotation.Nullable Boolean showCursor) throws ApiException {
         okhttp3.Call localVarCall = takeCompressedRegionScreenshotDeprecatedValidateBeforeCall(sandboxId, height, width, y, x, xDaytonaOrganizationID, scale, quality, format, showCursor, null);
         Type localVarReturnType = new TypeToken<CompressedScreenshotResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -9826,7 +9826,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call takeCompressedRegionScreenshotDeprecatedAsync(String sandboxId, BigDecimal height, BigDecimal width, BigDecimal y, BigDecimal x, String xDaytonaOrganizationID, BigDecimal scale, BigDecimal quality, String format, Boolean showCursor, final ApiCallback<CompressedScreenshotResponse> _callback) throws ApiException {
+    public okhttp3.Call takeCompressedRegionScreenshotDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull BigDecimal height, @javax.annotation.Nonnull BigDecimal width, @javax.annotation.Nonnull BigDecimal y, @javax.annotation.Nonnull BigDecimal x, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal scale, @javax.annotation.Nullable BigDecimal quality, @javax.annotation.Nullable String format, @javax.annotation.Nullable Boolean showCursor, final ApiCallback<CompressedScreenshotResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = takeCompressedRegionScreenshotDeprecatedValidateBeforeCall(sandboxId, height, width, y, x, xDaytonaOrganizationID, scale, quality, format, showCursor, _callback);
         Type localVarReturnType = new TypeToken<CompressedScreenshotResponse>(){}.getType();
@@ -9853,7 +9853,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call takeCompressedScreenshotDeprecatedCall(String sandboxId, String xDaytonaOrganizationID, BigDecimal scale, BigDecimal quality, String format, Boolean showCursor, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call takeCompressedScreenshotDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal scale, @javax.annotation.Nullable BigDecimal quality, @javax.annotation.Nullable String format, @javax.annotation.Nullable Boolean showCursor, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -9921,7 +9921,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call takeCompressedScreenshotDeprecatedValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, BigDecimal scale, BigDecimal quality, String format, Boolean showCursor, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call takeCompressedScreenshotDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal scale, @javax.annotation.Nullable BigDecimal quality, @javax.annotation.Nullable String format, @javax.annotation.Nullable Boolean showCursor, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling takeCompressedScreenshotDeprecated(Async)");
@@ -9951,7 +9951,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public CompressedScreenshotResponse takeCompressedScreenshotDeprecated(String sandboxId, String xDaytonaOrganizationID, BigDecimal scale, BigDecimal quality, String format, Boolean showCursor) throws ApiException {
+    public CompressedScreenshotResponse takeCompressedScreenshotDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal scale, @javax.annotation.Nullable BigDecimal quality, @javax.annotation.Nullable String format, @javax.annotation.Nullable Boolean showCursor) throws ApiException {
         ApiResponse<CompressedScreenshotResponse> localVarResp = takeCompressedScreenshotDeprecatedWithHttpInfo(sandboxId, xDaytonaOrganizationID, scale, quality, format, showCursor);
         return localVarResp.getData();
     }
@@ -9976,7 +9976,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<CompressedScreenshotResponse> takeCompressedScreenshotDeprecatedWithHttpInfo(String sandboxId, String xDaytonaOrganizationID, BigDecimal scale, BigDecimal quality, String format, Boolean showCursor) throws ApiException {
+    public ApiResponse<CompressedScreenshotResponse> takeCompressedScreenshotDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal scale, @javax.annotation.Nullable BigDecimal quality, @javax.annotation.Nullable String format, @javax.annotation.Nullable Boolean showCursor) throws ApiException {
         okhttp3.Call localVarCall = takeCompressedScreenshotDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, scale, quality, format, showCursor, null);
         Type localVarReturnType = new TypeToken<CompressedScreenshotResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -10003,7 +10003,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call takeCompressedScreenshotDeprecatedAsync(String sandboxId, String xDaytonaOrganizationID, BigDecimal scale, BigDecimal quality, String format, Boolean showCursor, final ApiCallback<CompressedScreenshotResponse> _callback) throws ApiException {
+    public okhttp3.Call takeCompressedScreenshotDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable BigDecimal scale, @javax.annotation.Nullable BigDecimal quality, @javax.annotation.Nullable String format, @javax.annotation.Nullable Boolean showCursor, final ApiCallback<CompressedScreenshotResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = takeCompressedScreenshotDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, scale, quality, format, showCursor, _callback);
         Type localVarReturnType = new TypeToken<CompressedScreenshotResponse>(){}.getType();
@@ -10031,7 +10031,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call takeRegionScreenshotDeprecatedCall(String sandboxId, BigDecimal height, BigDecimal width, BigDecimal y, BigDecimal x, String xDaytonaOrganizationID, Boolean showCursor, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call takeRegionScreenshotDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull BigDecimal height, @javax.annotation.Nonnull BigDecimal width, @javax.annotation.Nonnull BigDecimal y, @javax.annotation.Nonnull BigDecimal x, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean showCursor, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -10103,7 +10103,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call takeRegionScreenshotDeprecatedValidateBeforeCall(String sandboxId, BigDecimal height, BigDecimal width, BigDecimal y, BigDecimal x, String xDaytonaOrganizationID, Boolean showCursor, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call takeRegionScreenshotDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull BigDecimal height, @javax.annotation.Nonnull BigDecimal width, @javax.annotation.Nonnull BigDecimal y, @javax.annotation.Nonnull BigDecimal x, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean showCursor, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling takeRegionScreenshotDeprecated(Async)");
@@ -10154,7 +10154,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public RegionScreenshotResponse takeRegionScreenshotDeprecated(String sandboxId, BigDecimal height, BigDecimal width, BigDecimal y, BigDecimal x, String xDaytonaOrganizationID, Boolean showCursor) throws ApiException {
+    public RegionScreenshotResponse takeRegionScreenshotDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull BigDecimal height, @javax.annotation.Nonnull BigDecimal width, @javax.annotation.Nonnull BigDecimal y, @javax.annotation.Nonnull BigDecimal x, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean showCursor) throws ApiException {
         ApiResponse<RegionScreenshotResponse> localVarResp = takeRegionScreenshotDeprecatedWithHttpInfo(sandboxId, height, width, y, x, xDaytonaOrganizationID, showCursor);
         return localVarResp.getData();
     }
@@ -10180,7 +10180,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<RegionScreenshotResponse> takeRegionScreenshotDeprecatedWithHttpInfo(String sandboxId, BigDecimal height, BigDecimal width, BigDecimal y, BigDecimal x, String xDaytonaOrganizationID, Boolean showCursor) throws ApiException {
+    public ApiResponse<RegionScreenshotResponse> takeRegionScreenshotDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull BigDecimal height, @javax.annotation.Nonnull BigDecimal width, @javax.annotation.Nonnull BigDecimal y, @javax.annotation.Nonnull BigDecimal x, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean showCursor) throws ApiException {
         okhttp3.Call localVarCall = takeRegionScreenshotDeprecatedValidateBeforeCall(sandboxId, height, width, y, x, xDaytonaOrganizationID, showCursor, null);
         Type localVarReturnType = new TypeToken<RegionScreenshotResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -10208,7 +10208,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call takeRegionScreenshotDeprecatedAsync(String sandboxId, BigDecimal height, BigDecimal width, BigDecimal y, BigDecimal x, String xDaytonaOrganizationID, Boolean showCursor, final ApiCallback<RegionScreenshotResponse> _callback) throws ApiException {
+    public okhttp3.Call takeRegionScreenshotDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull BigDecimal height, @javax.annotation.Nonnull BigDecimal width, @javax.annotation.Nonnull BigDecimal y, @javax.annotation.Nonnull BigDecimal x, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean showCursor, final ApiCallback<RegionScreenshotResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = takeRegionScreenshotDeprecatedValidateBeforeCall(sandboxId, height, width, y, x, xDaytonaOrganizationID, showCursor, _callback);
         Type localVarReturnType = new TypeToken<RegionScreenshotResponse>(){}.getType();
@@ -10232,7 +10232,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call takeScreenshotDeprecatedCall(String sandboxId, String xDaytonaOrganizationID, Boolean showCursor, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call takeScreenshotDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean showCursor, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -10288,7 +10288,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call takeScreenshotDeprecatedValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, Boolean showCursor, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call takeScreenshotDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean showCursor, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling takeScreenshotDeprecated(Async)");
@@ -10315,7 +10315,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ScreenshotResponse takeScreenshotDeprecated(String sandboxId, String xDaytonaOrganizationID, Boolean showCursor) throws ApiException {
+    public ScreenshotResponse takeScreenshotDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean showCursor) throws ApiException {
         ApiResponse<ScreenshotResponse> localVarResp = takeScreenshotDeprecatedWithHttpInfo(sandboxId, xDaytonaOrganizationID, showCursor);
         return localVarResp.getData();
     }
@@ -10337,7 +10337,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<ScreenshotResponse> takeScreenshotDeprecatedWithHttpInfo(String sandboxId, String xDaytonaOrganizationID, Boolean showCursor) throws ApiException {
+    public ApiResponse<ScreenshotResponse> takeScreenshotDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean showCursor) throws ApiException {
         okhttp3.Call localVarCall = takeScreenshotDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, showCursor, null);
         Type localVarReturnType = new TypeToken<ScreenshotResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
@@ -10361,7 +10361,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call takeScreenshotDeprecatedAsync(String sandboxId, String xDaytonaOrganizationID, Boolean showCursor, final ApiCallback<ScreenshotResponse> _callback) throws ApiException {
+    public okhttp3.Call takeScreenshotDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable Boolean showCursor, final ApiCallback<ScreenshotResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = takeScreenshotDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, showCursor, _callback);
         Type localVarReturnType = new TypeToken<ScreenshotResponse>(){}.getType();
@@ -10385,7 +10385,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call typeTextDeprecatedCall(String sandboxId, KeyboardTypeRequest keyboardTypeRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call typeTextDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull KeyboardTypeRequest keyboardTypeRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -10437,7 +10437,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call typeTextDeprecatedValidateBeforeCall(String sandboxId, KeyboardTypeRequest keyboardTypeRequest, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call typeTextDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull KeyboardTypeRequest keyboardTypeRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling typeTextDeprecated(Async)");
@@ -10468,7 +10468,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void typeTextDeprecated(String sandboxId, KeyboardTypeRequest keyboardTypeRequest, String xDaytonaOrganizationID) throws ApiException {
+    public void typeTextDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull KeyboardTypeRequest keyboardTypeRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         typeTextDeprecatedWithHttpInfo(sandboxId, keyboardTypeRequest, xDaytonaOrganizationID);
     }
 
@@ -10489,7 +10489,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> typeTextDeprecatedWithHttpInfo(String sandboxId, KeyboardTypeRequest keyboardTypeRequest, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> typeTextDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull KeyboardTypeRequest keyboardTypeRequest, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = typeTextDeprecatedValidateBeforeCall(sandboxId, keyboardTypeRequest, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -10512,7 +10512,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call typeTextDeprecatedAsync(String sandboxId, KeyboardTypeRequest keyboardTypeRequest, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call typeTextDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull KeyboardTypeRequest keyboardTypeRequest, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = typeTextDeprecatedValidateBeforeCall(sandboxId, keyboardTypeRequest, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -10536,7 +10536,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call uploadFileDeprecatedCall(String sandboxId, String path, String xDaytonaOrganizationID, File _file, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call uploadFileDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable File _file, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -10596,7 +10596,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call uploadFileDeprecatedValidateBeforeCall(String sandboxId, String path, String xDaytonaOrganizationID, File _file, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call uploadFileDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable File _file, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling uploadFileDeprecated(Async)");
@@ -10628,7 +10628,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void uploadFileDeprecated(String sandboxId, String path, String xDaytonaOrganizationID, File _file) throws ApiException {
+    public void uploadFileDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable File _file) throws ApiException {
         uploadFileDeprecatedWithHttpInfo(sandboxId, path, xDaytonaOrganizationID, _file);
     }
 
@@ -10650,7 +10650,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> uploadFileDeprecatedWithHttpInfo(String sandboxId, String path, String xDaytonaOrganizationID, File _file) throws ApiException {
+    public ApiResponse<Void> uploadFileDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable File _file) throws ApiException {
         okhttp3.Call localVarCall = uploadFileDeprecatedValidateBeforeCall(sandboxId, path, xDaytonaOrganizationID, _file, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -10674,7 +10674,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call uploadFileDeprecatedAsync(String sandboxId, String path, String xDaytonaOrganizationID, File _file, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call uploadFileDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull String path, @javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable File _file, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = uploadFileDeprecatedValidateBeforeCall(sandboxId, path, xDaytonaOrganizationID, _file, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -10696,7 +10696,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call uploadFilesDeprecatedCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call uploadFilesDeprecatedCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -10748,7 +10748,7 @@ public class ToolboxApi {
 
     @Deprecated
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call uploadFilesDeprecatedValidateBeforeCall(String sandboxId, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call uploadFilesDeprecatedValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'sandboxId' is set
         if (sandboxId == null) {
             throw new ApiException("Missing the required parameter 'sandboxId' when calling uploadFilesDeprecated(Async)");
@@ -10773,7 +10773,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public void uploadFilesDeprecated(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public void uploadFilesDeprecated(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         uploadFilesDeprecatedWithHttpInfo(sandboxId, xDaytonaOrganizationID);
     }
 
@@ -10793,7 +10793,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public ApiResponse<Void> uploadFilesDeprecatedWithHttpInfo(String sandboxId, String xDaytonaOrganizationID) throws ApiException {
+    public ApiResponse<Void> uploadFilesDeprecatedWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
         okhttp3.Call localVarCall = uploadFilesDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -10815,7 +10815,7 @@ public class ToolboxApi {
      * @deprecated
      */
     @Deprecated
-    public okhttp3.Call uploadFilesDeprecatedAsync(String sandboxId, String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call uploadFilesDeprecatedAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = uploadFilesDeprecatedValidateBeforeCall(sandboxId, xDaytonaOrganizationID, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);

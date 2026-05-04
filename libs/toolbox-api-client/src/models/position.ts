@@ -14,23 +14,8 @@
 
 
 
-/**
- * 
- * @export
- * @interface Position
- */
 export interface Position {
-    /**
-     * 
-     * @type {number}
-     * @memberof Position
-     */
     'x'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Position
-     */
     'y'?: number;
 }
 

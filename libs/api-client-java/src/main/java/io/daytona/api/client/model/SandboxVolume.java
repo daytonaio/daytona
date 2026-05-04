@@ -48,7 +48,7 @@ import io.daytona.api.client.JSON;
 /**
  * SandboxVolume
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class SandboxVolume {
   public static final String SERIALIZED_NAME_VOLUME_ID = "volumeId";
   @SerializedName(SERIALIZED_NAME_VOLUME_ID)
@@ -207,10 +207,7 @@ public class SandboxVolume {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -219,15 +216,10 @@ public class SandboxVolume {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("volumeId");
-    openapiFields.add("mountPath");
-    openapiFields.add("subpath");
+    openapiFields = new HashSet<String>(Arrays.asList("volumeId", "mountPath", "subpath"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("volumeId");
-    openapiRequiredFields.add("mountPath");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("volumeId", "mountPath"));
   }
 
   /**
@@ -239,25 +231,25 @@ public class SandboxVolume {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!SandboxVolume.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in SandboxVolume is not found in the empty JSON string", SandboxVolume.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in SandboxVolume is not found in the empty JSON string", SandboxVolume.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : SandboxVolume.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("volumeId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `volumeId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("volumeId").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `volumeId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("volumeId").toString()));
       }
       if (!jsonObj.get("mountPath").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `mountPath` to be a primitive type in the JSON string but got `%s`", jsonObj.get("mountPath").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `mountPath` to be a primitive type in the JSON string but got `%s`", jsonObj.get("mountPath").toString()));
       }
       if ((jsonObj.get("subpath") != null && !jsonObj.get("subpath").isJsonNull()) && !jsonObj.get("subpath").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `subpath` to be a primitive type in the JSON string but got `%s`", jsonObj.get("subpath").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `subpath` to be a primitive type in the JSON string but got `%s`", jsonObj.get("subpath").toString()));
       }
   }
 
@@ -318,7 +310,7 @@ public class SandboxVolume {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

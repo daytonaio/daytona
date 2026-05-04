@@ -14,16 +14,9 @@
 
 
 
-/**
- * 
- * @export
- * @interface ToolboxProxyUrl
- */
 export interface ToolboxProxyUrl {
     /**
      * The toolbox proxy URL for the sandbox
-     * @type {string}
-     * @memberof ToolboxProxyUrl
      */
     'url': string;
 }

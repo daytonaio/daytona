@@ -16,15 +16,13 @@
 
 /**
  * The type of the region
- * @export
- * @enum {string}
  */
 
 export const RegionType = {
     SHARED: 'shared',
     DEDICATED: 'dedicated',
     CUSTOM: 'custom',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809'
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type RegionType = typeof RegionType[keyof typeof RegionType];
