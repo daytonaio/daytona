@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { json } from '@remix-run/node'
-import { Daytona } from '../../../../src/Daytona'
-import { Image } from '../../../../src/Image'
+import { Daytona, Image } from '@daytona/sdk'
 
 export async function loader() {
   const image = Image.base('alpine').env({ FOO: 'bar' })
