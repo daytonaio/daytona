@@ -62,13 +62,14 @@ RUN python3 -m pip install --no-cache-dir \
     pydantic-ai==1.47.0 \
     langchain==1.2.7 \
     transformers==4.57.6 \
-    openai==2.15.0 \
+    openai==2.33.0 \
     anthropic==0.76.0 \
     llama-index==0.14.13 \
     instructor==1.14.4 \
     huggingface-hub==0.36.0 \
     ollama==0.6.1 \
-    claude-agent-sdk==0.1.22
+    claude-agent-sdk==0.1.22 \
+    openai-agents==0.15.1
 
 # Create the Daytona user and configure sudo access
 RUN useradd -m daytona && echo "daytona ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/91-daytona
@@ -77,7 +78,7 @@ RUN useradd -m daytona && echo "daytona ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d
 RUN bash -c "source /usr/local/share/nvm/nvm.sh && nvm install 25 && nvm use 25 && nvm alias default 25" \
   && chown -R daytona:daytona /usr/local/share/nvm
 
-RUN npm install -g ts-node@10.9.2 typescript@5.9.3 typescript-language-server@5.1.3 bun@1.3.6 @anthropic-ai/claude-code@2.1.19 openclaw@2026.2.1 opencode-ai@1.1.35
+RUN npm install -g ts-node@10.9.2 typescript@5.9.3 typescript-language-server@5.1.3 bun@1.3.6 @anthropic-ai/claude-code@2.1.19 @openai/codex@0.128.0 openclaw@2026.2.1 opencode-ai@1.1.35
 
 # Create directory for computer use plugin
 RUN mkdir -p /usr/local/lib && chown daytona:daytona /usr/local/lib
