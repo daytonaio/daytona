@@ -63,6 +63,11 @@ jobs:
             echo "affected=false" >> $GITHUB_OUTPUT
             echo "No E2E-relevant projects affected — skipping"
           fi
+          if echo "$AFFECTED" | grep -qE '(^|,| )sdk-typescript($|,| )|(^|,| )api-client($|,| )|(^|,| )toolbox-api-client($|,| )'; then
+            echo "sdk_ts_affected=true" >> $GITHUB_OUTPUT
+          else
+            echo "sdk_ts_affected=false" >> $GITHUB_OUTPUT
+          fi
 
       - uses: ./.github/actions/setup-toolchain
         if: steps.affected.outputs.affected == 'true'
@@ -198,6 +203,33 @@ jobs:
           DAYTONA_API_URL: http://localhost:3001/api
           DAYTONA_API_KEY: e2e_admin_api_key
         run: yarn test:e2e
+
+      - name: Install Bun
+        if: steps.affected.outputs.sdk_ts_affected == 'true'
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: latest
+
+      - name: Install Deno
+        if: steps.affected.outputs.sdk_ts_affected == 'true'
+        uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282 # v2.0.4
+        with:
+          deno-version: v2.x
+
+      - name: Install Azure Functions Core Tools
+        if: steps.affected.outputs.sdk_ts_affected == 'true'
+        run: npm install -g azure-functions-core-tools@4 --unsafe-perm true
+
+      - name: Install Playwright Chromium (for vite-browser test)
+        if: steps.affected.outputs.sdk_ts_affected == 'true'
+        run: npx --yes playwright@1.48 install --with-deps chromium
+
+      - name: Run TypeScript SDK runtime compatibility tests
+        if: steps.affected.outputs.sdk_ts_affected == 'true'
+        env:
+          DAYTONA_API_URL: http://localhost:3001/api
+          DAYTONA_API_KEY: e2e_admin_api_key
+        run: yarn nx run sdk-typescript:test:runtime
 
       - name: Cleanup stale E2E sandboxes
         if: always() && steps.affected.outputs.affected == 'true'

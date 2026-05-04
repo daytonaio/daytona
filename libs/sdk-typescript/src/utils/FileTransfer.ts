@@ -3,11 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Buffer } from 'buffer'
-import busboy from 'busboy'
-import { pipeline, Readable, Transform } from 'stream'
+import type { Readable } from 'stream'
 import { DaytonaError } from '../errors/DaytonaError'
-import { dynamicImport } from './Import'
+import { dynamicImport, dynamicRequire } from './Import'
 import { collectStreamBytes, toBuffer, toUint8Array } from './Binary'
 import { extractBoundary, getHeader, parseMultipartWithFormData } from './Multipart'
 import { parseMultipart } from './Multipart'
@@ -228,6 +226,9 @@ export async function processDownloadFilesResponseWithBusboy(
   metadataMap: Map<string, DownloadMetadata>,
   onFileStream?: (source: string, fileStream: any, totalBytes?: number) => void,
 ): Promise<void> {
+  const errPrefix = '"downloadFiles" is not supported: '
+  const busboy = dynamicRequire('busboy', errPrefix)
+  const Buffer = (dynamicRequire('buffer', errPrefix) as any).Buffer
   const fileTasks: Promise<void>[] = []
 
   const boundary = extractBoundary(getHeader(headers, 'content-type') || '')
@@ -498,16 +499,18 @@ export function createAbortError(remotePath: string): DaytonaError {
  * through unchanged.
  */
 export async function coerceUploadSource(source: UploadSource): Promise<Readable> {
+  const errPrefix = 'Uploading files is not supported: '
+  const stream = await dynamicImport('stream', errPrefix)
   if (Buffer.isBuffer(source) || source instanceof Uint8Array) {
-    return Readable.from(Buffer.from(source))
+    return stream.Readable.from(Buffer.from(source))
   }
   if (typeof source === 'string') {
     const fs = await dynamicImport('fs', 'Uploading file from local file system is not supported: ')
     return fs.createReadStream(source)
   }
-  if (source instanceof Readable) return source
+  if (source instanceof stream.Readable) return source as Readable
   if (typeof (source as ReadableStream).getReader === 'function') {
-    return Readable.fromWeb(source as any)
+    return stream.Readable.fromWeb(source as any)
   }
   throw new DaytonaError(
     `Unsupported upload source: ${(source as { constructor?: { name?: string } }).constructor?.name ?? typeof source}`,
@@ -525,6 +528,9 @@ export function wrapWithUploadProgress(
   signal?: AbortSignal,
 ): Readable {
   if (!onProgress && !signal) return source
+
+  const errPrefix = 'Uploading files is not supported: '
+  const { Transform, pipeline } = dynamicRequire('stream', errPrefix) as typeof import('stream')
 
   let bytesSent = 0
   const tracker = new Transform({

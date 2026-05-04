@@ -1,0 +1,8 @@
+{
+  "name": "runtime-test-vite-ssr",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}

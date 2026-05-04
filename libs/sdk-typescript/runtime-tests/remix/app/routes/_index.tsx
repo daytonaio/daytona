@@ -1,9 +1,6 @@
 // Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-declare const value: {
-  name: string
-  version: string
+export default function Index() {
+  return <div>ok</div>
 }
-
-export = value

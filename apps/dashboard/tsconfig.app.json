@@ -10,7 +10,7 @@
     "paths": {
       "@/*": ["src/*"],
       "@daytona/*": ["../../libs/*"],
-      "@daytona/sdk": ["../../dist/libs/sdk-typescript/src/index.d.ts"]
+      "@daytona/sdk": ["../../dist/libs/sdk-typescript/esm/index.d.ts"]
     }
   },
   "exclude": [

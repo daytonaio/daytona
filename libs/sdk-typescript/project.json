@@ -41,11 +41,55 @@
         }
       ]
     },
+    "test:runtime": {
+      "executor": "nx:run-commands",
+      "inputs": ["{projectRoot}/runtime-tests/**/*", { "env": "DAYTONA_API_KEY" }, { "env": "DAYTONA_API_URL" }],
+      "options": {
+        "cwd": "{projectRoot}/runtime-tests",
+        "command": "bash run-all.sh"
+      },
+      "dependsOn": ["build"]
+    },
     "build": {
+      "executor": "nx:run-commands",
+      "inputs": ["default", "{projectRoot}/package.json"],
+      "outputs": ["{workspaceRoot}/dist/libs/sdk-typescript"],
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": [
+          "npx fix-esm-import-path ../../dist/libs/sdk-typescript/esm",
+          "node scripts/post-build.js ../../dist/libs/sdk-typescript ../.. .",
+          "attw --pack ../../dist/libs/sdk-typescript"
+        ],
+        "parallel": false
+      },
+      "dependsOn": ["build-cjs", "build-esm"]
+    },
+    "build-cjs": {
       "executor": "@nx/js:tsc",
       "options": {
-        "outputPath": "dist/libs/sdk-typescript",
-        "tsConfig": "{projectRoot}/tsconfig.lib.json",
+        "outputPath": "dist/libs/sdk-typescript/cjs",
+        "tsConfig": "{projectRoot}/tsconfig.cjs.json",
+        "packageJson": "{projectRoot}/package.json",
+        "main": "{projectRoot}/src/index.ts",
+        "updateBuildableProjectDepsInPackageJson": true,
+        "assets": ["{projectRoot}/README.md"]
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": ["api-client", "toolbox-api-client"]
+        },
+        "set-version"
+      ]
+    },
+    "build-esm": {
+      "executor": "@nx/js:tsc",
+      "inputs": ["default", "{projectRoot}/package.json"],
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/sdk-typescript/esm",
+        "tsConfig": "{projectRoot}/tsconfig.esm.json",
         "packageJson": "{projectRoot}/package.json",
         "main": "{projectRoot}/src/index.ts",
         "updateBuildableProjectDepsInPackageJson": true,

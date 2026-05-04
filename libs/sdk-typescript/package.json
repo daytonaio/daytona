@@ -2,8 +2,50 @@
   "name": "@daytona/sdk",
   "version": "0.0.0-dev",
   "description": "Daytona TypeScript SDK for sandbox management and code execution",
-  "main": "./src/index.js",
-  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./esm/index.d.ts",
+        "default": "./esm/index.js"
+      },
+      "require": {
+        "types": "./cjs/index.d.ts",
+        "default": "./cjs/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./cjs/index.js",
+  "module": "./esm/index.js",
+  "types": "./cjs/index.d.ts",
+  "browser": {
+    "module": false,
+    "fs": false,
+    "stream": false,
+    "crypto": false,
+    "buffer": false,
+    "tar": false,
+    "fast-glob": false,
+    "expand-tilde": false,
+    "@iarna/toml": false,
+    "form-data": false,
+    "busboy": false,
+    "@aws-sdk/client-s3": false,
+    "@aws-sdk/lib-storage": false,
+    "@opentelemetry/sdk-node": false,
+    "@opentelemetry/instrumentation-http": false,
+    "@opentelemetry/sdk-trace-base": false,
+    "@opentelemetry/exporter-trace-otlp-http": false,
+    "@opentelemetry/otlp-exporter-base": false,
+    "@opentelemetry/semantic-conventions": false,
+    "@opentelemetry/resources": false
+  },
+  "files": [
+    "esm",
+    "cjs",
+    "!**/__tests__",
+    "!**/*.d.ts.map"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/daytonaio/daytona.git"

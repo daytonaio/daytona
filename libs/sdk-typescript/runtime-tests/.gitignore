@@ -1,0 +1,15 @@
+node_modules/
+package-lock.json
+yarn.lock
+bun.lock
+bun.lockb
+dist/
+build/
+.next/
+.nuxt/
+.output/
+.wrangler/
+.dev.vars
+.sdk.tgz
+*.tgz
+*-runtime.log

@@ -1,0 +1,8 @@
+{
+  "name": "runtime-test-cloudflare-workers",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "wrangler": "^3.78.0"
+  }
+}
