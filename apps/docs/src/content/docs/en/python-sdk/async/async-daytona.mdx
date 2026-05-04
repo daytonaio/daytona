@@ -435,6 +435,8 @@ Configuration options for initializing the Daytona client.
 - `connection_pool_maxsize` _int | None_ - Maximum number of simultaneous HTTP connections
   the SDK will open. Defaults to 250. Set to `None` to remove the limit, which is
   recommended when running many concurrent long-lived operations like `process.exec`.
+- `otel_enabled` _bool | None_ - Enable OpenTelemetry tracing for SDK operations. Defaults
+  to `None`, which falls back to the `DAYTONA_OTEL_ENABLED` environment variable.
 - `_experimental` _dict[str, any] | None_ - Configuration for experimental features.
   
 
