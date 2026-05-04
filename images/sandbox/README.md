@@ -33,11 +33,13 @@ The default sandbox image contains Python, Node and their most popular dependenc
 - huggingface
 - ollama
 - claude-agent-sdk
+- openai-agents
 
 - ts-node
 - typescript
 - typescript-language-server
 - bun
 - @anthropic-ai/claude-code
+- @openai/codex
 - openclaw
 - opencode-ai
