@@ -29,17 +29,24 @@ func RunnerInfo(ctx *gin.Context) {
 		return
 	}
 
-	metrics, err := runnerInstance.MetricsCollector.Collect(ctx.Request.Context())
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
-
+	// Inspect services first so that failures in dependent subsystems
+	// (e.g. metrics collection, which talks to Docker) do not prevent us
+	// from reporting unhealthy services back to the API.
 	servicesInfo := runnerInstance.InspectRunnerServices(ctx.Request.Context())
 
 	response := dto.RunnerInfoResponseDTO{
 		ServiceHealth: mapRunnerServiceInfoToDTO(servicesInfo),
-		Metrics: &dto.RunnerMetrics{
+		AppVersion:    internal.Version,
+	}
+
+	metrics, err := runnerInstance.MetricsCollector.Collect(ctx.Request.Context())
+	if err != nil {
+		// Metric collection depends on Docker; if Docker is down we still
+		// want to surface the serviceHealth payload above. Log and continue
+		// with a metrics-less response rather than failing the whole call.
+		runnerInstance.Logger.WarnContext(ctx.Request.Context(), "Failed to collect runner metrics; returning info without metrics", "error", err)
+	} else {
+		response.Metrics = &dto.RunnerMetrics{
 			CurrentCpuLoadAverage:        float64(metrics.CPULoadAverage),
 			CurrentCpuUsagePercentage:    float64(metrics.CPUUsagePercentage),
 			CurrentMemoryUsagePercentage: float64(metrics.MemoryUsagePercentage),
@@ -49,8 +56,7 @@ func RunnerInfo(ctx *gin.Context) {
 			CurrentAllocatedDiskGiB:      float64(metrics.AllocatedDiskGiB),
 			CurrentSnapshotCount:         int(metrics.SnapshotCount),
 			CurrentStartedSandboxes:      int64(metrics.StartedSandboxCount),
-		},
-		AppVersion: internal.Version,
+		}
 	}
 
 	ctx.JSON(http.StatusOK, response)
