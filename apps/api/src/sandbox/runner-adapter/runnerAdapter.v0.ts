@@ -429,7 +429,8 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     throw new Error('createSnapshotFromSandbox is not supported for V0 runners')
   }
 
-  async recoverSandbox(sandbox: Sandbox): Promise<void> {
+  // skipStart is a v2-only signal (carried in the job payload); v0's sync API has no equivalent.
+  async recoverSandbox(sandbox: Sandbox, _skipStart?: boolean): Promise<void> {
     const recoverSandboxDTO: RecoverSandboxDTO = {
       userId: sandbox.organizationId,
       snapshot: sandbox.snapshot,

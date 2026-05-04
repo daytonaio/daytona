@@ -119,7 +119,7 @@ export interface RunnerAdapter {
     registry?: DockerRegistry,
   ): Promise<void>
 
-  recoverSandbox(sandbox: Sandbox): Promise<void>
+  recoverSandbox(sandbox: Sandbox, skipStart?: boolean): Promise<void>
 
   resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void>
 }

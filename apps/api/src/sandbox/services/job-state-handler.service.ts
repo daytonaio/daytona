@@ -28,6 +28,8 @@ import { getStateChangeLockKey } from '../utils/lock-key.util'
 import { v4 as uuidv4 } from 'uuid'
 import { SnapshotEvents } from '../constants/snapshot-events'
 import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
+import { SandboxEvents } from '../constants/sandbox-events.constants'
+import { SandboxStartedEvent } from '../events/sandbox-started.event'
 
 /**
  * Service for handling entity state updates based on job completion (v2 runners only).
@@ -498,31 +500,46 @@ export class JobStateHandlerService {
         return
       }
 
-      if (sandbox.desiredState !== SandboxDesiredState.STARTED) {
-        this.logger.error(
-          `Sandbox ${sandboxId} is not in desired state STARTED for RECOVER_SANDBOX job ${job.id}. Desired state: ${sandbox.desiredState}`,
-        )
-        return
-      }
+      const skipStart = job.getPayload<{ skipStart?: boolean }>()?.skipStart ?? true
 
       const updateData: Partial<Sandbox> = {}
 
       if (job.status === JobStatus.COMPLETED) {
-        this.logger.debug(
-          `RECOVER_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STARTED`,
-        )
-        updateData.state = SandboxState.STARTED
+        // Runner only expanded disk; container is left STOPPED. The chained start (if requested)
+        // is kicked off via SandboxStartedEvent below.
+        this.logger.debug(`RECOVER_SANDBOX job ${job.id} completed successfully for sandbox ${sandboxId}`)
+        updateData.state = SandboxState.STOPPED
+        updateData.desiredState = skipStart ? SandboxDesiredState.STOPPED : SandboxDesiredState.STARTED
         updateData.errorReason = null
+        updateData.recoverable = false
         if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
           Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.NONE))
         }
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`RECOVER_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
         updateData.state = SandboxState.ERROR
-        updateData.errorReason = job.errorMessage || 'Failed to recover sandbox'
+        const { recoverable, errorReason } = sanitizeSandboxError(job.errorMessage)
+        updateData.errorReason = errorReason || 'Failed to recover sandbox'
+        updateData.recoverable = recoverable
+
+        // Roll back the reservation made upstream (SandboxService.recover or the draining
+        // manager): disk always, cpu/mem only when start was requested.
+        await this.organizationUsageService.decrementPendingSandboxUsage(
+          sandbox.organizationId,
+          sandbox.region,
+          skipStart ? undefined : sandbox.cpu,
+          skipStart ? undefined : sandbox.mem,
+          sandbox.disk,
+        )
       }
 
-      await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
+      const updatedSandbox = await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
+
+      if (job.status === JobStatus.COMPLETED && !skipStart) {
+        // Pending was reserved by SandboxService.recover and authToken was already refreshed;
+        // sandboxStartAction does not re-validate.
+        this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(updatedSandbox))
+      }
     } catch (error) {
       this.logger.error(`Error handling RECOVER_SANDBOX job completion for sandbox ${sandboxId}:`, error)
     }

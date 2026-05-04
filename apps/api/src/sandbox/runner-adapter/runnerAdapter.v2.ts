@@ -223,7 +223,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     this.logger.debug(`Created DESTROY_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }
 
-  async recoverSandbox(sandbox: Sandbox): Promise<void> {
+  async recoverSandbox(sandbox: Sandbox, skipStart = false): Promise<void> {
     const recoverSandboxDTO: RecoverSandboxDTO = {
       userId: sandbox.organizationId,
       snapshot: sandbox.snapshot,
@@ -243,14 +243,11 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       errorReason: sandbox.errorReason,
       backupErrorReason: sandbox.backupErrorReason,
     }
-    await this.jobService.createJob(
-      null,
-      JobType.RECOVER_SANDBOX,
-      this.runner.id,
-      ResourceType.SANDBOX,
-      sandbox.id,
-      recoverSandboxDTO,
-    )
+    // skipStart is API-side metadata for the job-completion handler; the runner ignores extra fields.
+    await this.jobService.createJob(null, JobType.RECOVER_SANDBOX, this.runner.id, ResourceType.SANDBOX, sandbox.id, {
+      ...recoverSandboxDTO,
+      skipStart,
+    })
 
     this.logger.debug(`Created RECOVER_SANDBOX job for sandbox ${sandbox.id} on runner ${this.runner.id}`)
   }
