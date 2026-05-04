@@ -155,6 +155,22 @@ describe('[AUTH] OrganizationController', () => {
     expectArrayMatch(getAuthContextGuards(OrganizationController, methodName), [OtelCollectorAuthContextGuard])
   })
 
+  it('updateOtelConfig', () => {
+    const methodName = trackMethod('updateOtelConfig')
+    expect(isPublicEndpoint(OrganizationController, methodName)).toBe(false)
+    expectArrayMatch(getAllowedAuthStrategies(OrganizationController, methodName), [AuthStrategyType.JWT])
+    expectArrayMatch(getAuthContextGuards(OrganizationController, methodName), [OrganizationAuthContextGuard])
+    expect(getRequiredOrganizationMemberRole(OrganizationController, methodName)).toBe(OrganizationMemberRole.OWNER)
+  })
+
+  it('deleteOtelConfig', () => {
+    const methodName = trackMethod('deleteOtelConfig')
+    expect(isPublicEndpoint(OrganizationController, methodName)).toBe(false)
+    expectArrayMatch(getAllowedAuthStrategies(OrganizationController, methodName), [AuthStrategyType.JWT])
+    expectArrayMatch(getAuthContextGuards(OrganizationController, methodName), [OrganizationAuthContextGuard])
+    expect(getRequiredOrganizationMemberRole(OrganizationController, methodName)).toBe(OrganizationMemberRole.OWNER)
+  })
+
   it('updateSandboxDefaultLimitedNetworkEgress', () => {
     const methodName = trackMethod('updateSandboxDefaultLimitedNetworkEgress')
     expect(isPublicEndpoint(OrganizationController, methodName)).toBe(false)

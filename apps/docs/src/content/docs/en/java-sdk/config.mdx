@@ -45,6 +45,21 @@ Returns the default target location for newly created Sandboxes.
 
 - `String` - target region identifier, or `null` if not configured
 
+#### isOtelEnabled()
+```java
+public boolean isOtelEnabled()
+```
+
+Returns whether OpenTelemetry tracing is enabled for SDK operations.
+
+Note: SDK-side OpenTelemetry instrumentation is not yet implemented in the Java SDK.
+This setter exists for API parity with the other SDKs and to allow code to opt in ahead
+of instrumentation landing in a future release.
+
+**Returns**:
+
+- `boolean` - `true` if OpenTelemetry tracing is enabled
+
 ## DaytonaConfig.Builder
 
 Builder for creating immutable `DaytonaConfig` instances.
@@ -91,6 +106,25 @@ Sets the default target region for new Sandboxes.
 **Parameters**:
 
 - `target` _String_ - target location identifier
+
+**Returns**:
+
+- `Builder` - this builder instance
+
+#### otelEnabled()
+```java
+public Builder otelEnabled(boolean otelEnabled)
+```
+
+Enables OpenTelemetry tracing for SDK operations.
+
+Note: SDK-side OpenTelemetry instrumentation is not yet implemented in the Java SDK.
+This setter exists for API parity with the other SDKs and to allow code to opt in ahead
+of instrumentation landing in a future release.
+
+**Parameters**:
+
+- `otelEnabled` _boolean_ - whether to enable OpenTelemetry tracing
 
 **Returns**:
 

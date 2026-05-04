@@ -270,7 +270,7 @@ export default function SandboxDetails() {
               <SandboxContentTabs
                 sandbox={sandbox}
                 isLoading={isLoading}
-                spendingTabAvailable={spendingTabAvailable}
+                spendingTabAvailable={!!spendingTabAvailable}
                 filesystemEnabled={filesystemEnabled}
                 tab={tab}
                 onTabChange={setTab}
