@@ -4,6 +4,7 @@
  */
 
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -397,7 +398,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     }
 
     if (experimentalConfig && 'otel' in experimentalConfig) {
-      throw new ForbiddenException(
+      throw new BadRequestException(
         'OpenTelemetry configuration has moved to a dedicated endpoint: PUT /organizations/:organizationId/otel-config',
       )
     }
@@ -414,7 +415,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     }
 
     if (typeof dto.endpoint !== 'string' || !dto.endpoint.trim()) {
-      throw new ForbiddenException('Invalid OpenTelemetry endpoint')
+      throw new BadRequestException('Invalid OpenTelemetry endpoint')
     }
 
     const existingHeaders = organization.otelConfig?.headers ?? {}

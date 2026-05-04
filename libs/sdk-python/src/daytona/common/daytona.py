@@ -65,6 +65,8 @@ class DaytonaConfig(BaseModel):
         connection_pool_maxsize (int | None): Maximum number of simultaneous HTTP connections
             the SDK will open. Defaults to 250. Set to `None` to remove the limit, which is
             recommended when running many concurrent long-lived operations like `process.exec`.
+        otel_enabled (bool | None): Enable OpenTelemetry tracing for SDK operations. Defaults
+            to `None`, which falls back to the `DAYTONA_OTEL_ENABLED` environment variable.
         _experimental (dict[str, any] | None): Configuration for experimental features.
 
     Example:
@@ -89,13 +91,7 @@ class DaytonaConfig(BaseModel):
     jwt_token: str | None = None
     organization_id: str | None = None
     connection_pool_maxsize: int | None = 250
-    otel_enabled: Annotated[
-        bool | None,
-        Field(
-            default=None,
-            description="Enable OpenTelemetry tracing for SDK operations.",
-        ),
-    ] = None
+    otel_enabled: bool | None = None
     _experimental: Annotated[
         dict[str, object] | None,
         Field(

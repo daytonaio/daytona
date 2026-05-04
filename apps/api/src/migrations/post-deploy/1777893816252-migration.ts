@@ -33,11 +33,24 @@ export class Migration1777893816252 implements MigrationInterface {
       WHERE "otelConfig" IS NOT NULL
     `)
 
-    // Reinstall the sync trigger
+    // Reinstall the sync trigger (must mirror pre-deploy: handle INSERT and UPDATE separately
+    // because OLD is undefined on INSERT).
     await queryRunner.query(`
       CREATE OR REPLACE FUNCTION sync_organization_otel_config()
       RETURNS TRIGGER AS $$
       BEGIN
+        IF TG_OP = 'INSERT' THEN
+          IF NEW."otelConfig" IS NOT NULL THEN
+            NEW."experimentalConfig" := jsonb_set(
+              COALESCE(NEW."experimentalConfig", '{}'::jsonb), '{otel}', NEW."otelConfig"
+            );
+          ELSIF NEW."experimentalConfig" IS NOT NULL AND NEW."experimentalConfig" ? 'otel' THEN
+            NEW."otelConfig" := NEW."experimentalConfig" -> 'otel';
+          END IF;
+          RETURN NEW;
+        END IF;
+
+        -- TG_OP = 'UPDATE'
         IF NEW."otelConfig" IS DISTINCT FROM OLD."otelConfig" THEN
           IF NEW."otelConfig" IS NULL THEN
             NEW."experimentalConfig" := COALESCE(NEW."experimentalConfig", '{}'::jsonb) - 'otel';

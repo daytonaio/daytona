@@ -25,10 +25,23 @@ export class Migration1777893816251 implements MigrationInterface {
     // Bidirectional sync trigger so the rolling deploy is safe:
     //   Old API writes to experimentalConfig.otel -> mirror to otelConfig
     //   New API writes to otelConfig             -> mirror to experimentalConfig.otel
+    // INSERT and UPDATE need separate paths because OLD is undefined on INSERT.
     await queryRunner.query(`
       CREATE OR REPLACE FUNCTION sync_organization_otel_config()
       RETURNS TRIGGER AS $$
       BEGIN
+        IF TG_OP = 'INSERT' THEN
+          IF NEW."otelConfig" IS NOT NULL THEN
+            NEW."experimentalConfig" := jsonb_set(
+              COALESCE(NEW."experimentalConfig", '{}'::jsonb), '{otel}', NEW."otelConfig"
+            );
+          ELSIF NEW."experimentalConfig" IS NOT NULL AND NEW."experimentalConfig" ? 'otel' THEN
+            NEW."otelConfig" := NEW."experimentalConfig" -> 'otel';
+          END IF;
+          RETURN NEW;
+        END IF;
+
+        -- TG_OP = 'UPDATE'
         IF NEW."otelConfig" IS DISTINCT FROM OLD."otelConfig" THEN
           IF NEW."otelConfig" IS NULL THEN
             NEW."experimentalConfig" := COALESCE(NEW."experimentalConfig", '{}'::jsonb) - 'otel';
