@@ -46,19 +46,20 @@ The diagram below demonstrates the states and possible transitions between them.
 
 ## Runtime features
 
-| **Runtime features**  | **Linux <br /> (VM)**                             | **Linux (Container)**                               | **Windows <br /> (VM)**                       | **MacOS <br /> (VM)**                    | **Android <br /> (VM)**                       |
-| :-------------------- | :------------------------------------------------ | :-------------------------------------------------- | :-------------------------------------------- | :--------------------------------------- | :-------------------------------------------- |
-| Description           | <small>Full virtual machine running Linux</small> | <small>Lightweight isolated Linux container</small> | <small>Windows OS runtime environment</small> | <small>macOS runtime environment</small> | <small>Android OS runtime environment</small> |
-| GPU                   | ✓                                                 | ✗                                                   | ✓                                             | ✓                                        | ✗                                             |
-| Filesystem operations | ✓                                                 | ✓                                                   | ✓                                             | ✓                                        | ✗                                             |
-| Process and code exec | ✓                                                 | ✓                                                   | ✓                                             | ✓                                        | ✗                                             |
-| Pause sandboxes       | ✓                                                 | ✗                                                   | ✓                                             | ✗                                        | ✗                                             |
-| Fork sandboxes        | ✓                                                 | ✗                                                   | ✓                                             | ✗                                        | ✗                                             |
-| Resize sandboxes      | ✓                                                 | ✓                                                   | ✓                                             | ✓                                        | ✓                                             |
-| Create snapshot       | ✓                                                 | <small>Coming soon</small>                                         | ✓                                             | ✓                                        | ✗                                             |
-| Declarative builder   | ✗                                                 | ✓                                                   | ✗                                             | ✗                                        | ✗                                             |
-| SSH access            | ✓                                                 | ✓                                                   | ✓                                             | ✓                                        | ✗                                             |
-| ADB access            | ✗                                                 | ✗                                                   | ✗                                             | ✗                                        | ✓                                             |
+| **Runtime**           | **Linux <br />Container**               | **Linux <br /> VM**                  | **Windows <br /> VM**             | **MacOS <br /> VM**          | **Android <br /> VM**             |
+| :-------------------- | :--------------------------------------- | :------------------------------------ | :--------------------------------- | :---------------------------- | :--------------------------------- |
+| Description           | <small>Isolated Linux container</small> | <small>Linux virtual machine</small> | <small>Windows OS runtime</small> | <small>macOS runtime</small> | <small>Android OS runtime</small> |
+| GPU                   | ✗                                       | ✓                                    | ✓                                 | ✓                            | ✗                                 |
+| **Features**              |                                         |                                      |                                   |                              |                                   |
+| Filesystem operations | ✓                                       | ✓                                    | ✓                                 | ✓                            | ✗                                 |
+| Process and code exec | ✓                                       | ✓                                    | ✓                                 | ✓                            | ✗                                 |
+| Pause sandboxes       | ✗                                       | ✓                                    | ✓                                 | ✗                            | ✗                                 |
+| Fork sandboxes        | ✗                                       | ✓                                    | ✓                                 | ✗                            | ✗                                 |
+| Resize sandboxes      | ✓                                       | ✓                                    | ✓                                 | ✓                            | ✓                                 |
+| Create snapshots      | <small>*Coming soon*</small>            | ✓                                    | ✓                                 | ✓                            | ✗                                 |
+| Declarative builder   | ✓                                       | ✗                                    | ✗                                 | ✗                            | ✗                                 |
+| SSH access            | ✓                                       | ✓                                    | ✓                                 | ✓                            | ✗                                 |
+| ADB access            | ✗                                       | ✗                                    | ✗                                 | ✗                            | ✓                                 |
 
 ## Multiple runtime support
 
