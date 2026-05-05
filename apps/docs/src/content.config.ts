@@ -16,6 +16,13 @@ export const collections = {
       }),
     }),
   }),
+  examples: defineCollection({
+    type: 'content',
+    schema: z.object({
+      title: z.string(),
+      description: z.string().optional(),
+    }),
+  }),
   i18n: defineCollection({
     loader: i18nLoader(),
     schema: i18nSchema({
