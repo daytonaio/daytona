@@ -394,6 +394,13 @@ const Snapshots: React.FC = () => {
     dialogRef.current?.open()
   }
 
+  const handleSnapshotCreated = (snapshot: SnapshotDto) => {
+    setSelectedSnapshot(snapshot)
+    setOrderedSnapshotItems(null)
+    setSnapshotIdParam(snapshot.id)
+    setShowSnapshotSheet(true)
+  }
+
   const snapshotItems = orderedSnapshotItems ?? filteredItems
   const selectedSnapshotIndex = useMemo(
     () => snapshotItems.findIndex((snapshot) => snapshot.id === selectedSnapshot?.id),
@@ -434,7 +441,9 @@ const Snapshots: React.FC = () => {
     <PageLayout contained>
       <PageHeader>
         <PageTitle>Snapshots</PageTitle>
-        {writePermitted && <CreateSnapshotSheet className="ml-auto" ref={dialogRef} />}
+        {writePermitted && (
+          <CreateSnapshotSheet className="ml-auto" onSnapshotCreated={handleSnapshotCreated} ref={dialogRef} />
+        )}
       </PageHeader>
 
       <PageContent size="full" className="flex-1 overflow-hidden">

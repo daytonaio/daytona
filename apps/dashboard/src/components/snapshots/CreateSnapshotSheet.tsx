@@ -4,6 +4,10 @@
  */
 
 import { Button } from '@/components/ui/button'
+import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Sheet,
   SheetContent,
@@ -13,21 +17,18 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
 import { useCreateSnapshotMutation } from '@/hooks/mutations/useCreateSnapshotMutation'
 import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
+import { imageNameSchema } from '@/lib/schema'
 import { getRegionFullDisplayName } from '@/lib/utils'
+import type { SnapshotDto } from '@daytona/api-client'
 import { useForm } from '@tanstack/react-form'
 import { Plus } from 'lucide-react'
-import { Ref, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { imageNameSchema } from '@/lib/schema'
 import { z } from 'zod'
 import { ScrollArea } from '../ui/scroll-area'
 
@@ -60,20 +61,35 @@ const defaultValues: FormValues = {
   regionId: undefined,
 }
 
-export const CreateSnapshotSheet = ({ className, ref }: { className?: string; ref?: Ref<{ open: () => void }> }) => {
+export const CreateSnapshotSheet = ({
+  className,
+  onSnapshotCreated,
+  ref,
+}: {
+  className?: string
+  onSnapshotCreated?: (snapshot: SnapshotDto) => void
+  ref?: Ref<{ open: () => void }>
+}) => {
   const [open, setOpen] = useState(false)
 
   const { availableRegions: regions, loadingAvailableRegions: loadingRegions } = useRegions()
   const { selectedOrganization } = useSelectedOrganization()
   const { reset: resetCreateSnapshotMutation, ...createSnapshotMutation } = useCreateSnapshotMutation()
   const formRef = useRef<HTMLFormElement>(null)
+  const formDefaultValues = useMemo<FormValues>(
+    () => ({
+      ...defaultValues,
+      regionId: selectedOrganization?.defaultRegionId,
+    }),
+    [selectedOrganization?.defaultRegionId],
+  )
 
   useImperativeHandle(ref, () => ({
     open: () => setOpen(true),
   }))
 
   const form = useForm({
-    defaultValues,
+    defaultValues: formDefaultValues,
     validators: {
       onSubmit: formSchema,
     },
@@ -95,7 +111,7 @@ export const CreateSnapshotSheet = ({ className, ref }: { className?: string; re
       const trimmedEntrypoint = value.entrypoint?.trim()
 
       try {
-        await createSnapshotMutation.mutateAsync({
+        const snapshot = await createSnapshotMutation.mutateAsync({
           snapshot: {
             name: value.name.trim(),
             imageName: value.imageName.trim(),
@@ -109,6 +125,7 @@ export const CreateSnapshotSheet = ({ className, ref }: { className?: string; re
         })
 
         toast.success(`Creating snapshot ${value.name.trim()}`)
+        onSnapshotCreated?.(snapshot)
         setOpen(false)
       } catch (error) {
         handleApiError(error, 'Failed to create snapshot')
@@ -118,9 +135,9 @@ export const CreateSnapshotSheet = ({ className, ref }: { className?: string; re
   const { reset: resetForm } = form
 
   const resetState = useCallback(() => {
-    resetForm(defaultValues)
+    resetForm(formDefaultValues)
     resetCreateSnapshotMutation()
-  }, [resetForm, resetCreateSnapshotMutation])
+  }, [formDefaultValues, resetForm, resetCreateSnapshotMutation])
 
   useEffect(() => {
     if (open) {
@@ -222,10 +239,7 @@ export const CreateSnapshotSheet = ({ className, ref }: { className?: string; re
                       ))}
                     </SelectContent>
                   </Select>
-                  <FieldDescription>
-                    The region where the snapshot will be available. If not specified, your organization's default
-                    region will be used.
-                  </FieldDescription>
+                  <FieldDescription>The region where the snapshot will be available.</FieldDescription>
                 </Field>
               )}
             </form.Field>
