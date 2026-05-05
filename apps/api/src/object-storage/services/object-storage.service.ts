@@ -13,13 +13,14 @@ import { STSClient, AssumeRoleCommand } from '@aws-sdk/client-sts'
 
 interface S3Config {
   endpoint: string
-  stsEndpoint: string
+  stsEndpoint?: string
   accessKey: string
   secretKey: string
   bucket: string
   region: string
   accountId?: string
   roleName?: string
+  provider?: string
   organizationId: string
   policy: any
 }
@@ -37,15 +38,19 @@ export class ObjectStorageService {
 
     try {
       const bucket = this.configService.getOrThrow('s3.defaultBucket')
+      const provider =
+        this.configService.get('s3.provider') ||
+        (this.configService.get('s3.endpoint').includes('minio') ? 'minio' : 'aws')
+
       const s3Config: S3Config = {
         endpoint: this.configService.getOrThrow('s3.endpoint'),
-        stsEndpoint: this.configService.getOrThrow('s3.stsEndpoint'),
         accessKey: this.configService.getOrThrow('s3.accessKey'),
         secretKey: this.configService.getOrThrow('s3.secretKey'),
         bucket,
         region: this.configService.getOrThrow('s3.region'),
         accountId: this.configService.getOrThrow('s3.accountId'),
         roleName: this.configService.getOrThrow('s3.roleName'),
+        provider: provider,
         organizationId,
         policy: {
           Version: '2012-10-17',
@@ -65,9 +70,21 @@ export class ObjectStorageService {
         },
       }
 
-      const isMinioServer = s3Config.endpoint.includes('minio')
+      if (provider === 'rustfs') {
+        return {
+          accessKey: s3Config.accessKey,
+          secret: s3Config.secretKey,
+          sessionToken: '',
+          storageUrl: s3Config.endpoint,
+          organizationId,
+          bucket: s3Config.bucket,
+        }
+      }
 
-      if (isMinioServer) {
+      // STS Endpoint is required for MinIO and AWS
+      s3Config.stsEndpoint = this.configService.getOrThrow('s3.stsEndpoint')
+
+      if (provider === 'minio') {
         return this.getMinioCredentials(s3Config)
       } else {
         return this.getAwsCredentials(s3Config)
@@ -102,7 +119,7 @@ export class ObjectStorageService {
       secretAccessKey: config.secretKey,
     })
 
-    const response = await axios.post(config.stsEndpoint, body.toString(), {
+    const response = await axios.post(config.stsEndpoint as string, body.toString(), {
       headers: requestOptions.headers,
     })
 

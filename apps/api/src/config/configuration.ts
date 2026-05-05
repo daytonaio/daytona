@@ -85,6 +85,7 @@ const configuration = {
     defaultBucket: process.env.S3_DEFAULT_BUCKET,
     accountId: process.env.S3_ACCOUNT_ID,
     roleName: process.env.S3_ROLE_NAME,
+    provider: process.env.S3_PROVIDER,
   },
   notificationGatewayDisabled: process.env.NOTIFICATION_GATEWAY_DISABLED === 'true',
   skipConnections: process.env.SKIP_CONNECTIONS === 'true',
