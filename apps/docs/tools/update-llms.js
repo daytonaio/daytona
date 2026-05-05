@@ -34,7 +34,7 @@ const getCurrentDate = () => {
 const getVersionHeader = () => {
   return [
     `# Daytona Documentation`,
-    `# https://daytona.io/docs`,
+    `# ${DOCS_BASE_URL}`,
     `# Generated on: ${getCurrentDate()}`,
   ].join('\n')
 }
@@ -258,7 +258,7 @@ const searchDocs = () => {
 const generateLlmsTxtFile = docsData => {
   const llmsContent = [
     getVersionHeader(),
-    '# Full documentation: https://daytona.io/llms-full.txt',
+    `# Full documentation: ${DOCS_BASE_URL}/llms-full.txt`,
     '',
     '# Daytona',
     '',
