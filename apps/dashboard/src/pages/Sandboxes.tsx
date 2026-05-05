@@ -380,6 +380,8 @@ const Sandboxes: React.FC = () => {
       if (selectedSandbox?.id === id) {
         setShowSandboxDetails(false)
         setSelectedSandbox(null)
+        setSandboxIdParam(null)
+        setSandboxTabParam(null)
       }
 
       toast.success(`Deleting sandbox with ID:  ${id}`)
@@ -883,6 +885,10 @@ const Sandboxes: React.FC = () => {
           <AlertDialog
             open={showDeleteDialog}
             onOpenChange={(isOpen) => {
+              if (!isOpen && loadingSandboxes[sandboxToDelete]) {
+                return
+              }
+
               setShowDeleteDialog(isOpen)
               if (!isOpen) {
                 setSandboxToDelete(null)
@@ -897,10 +903,13 @@ const Sandboxes: React.FC = () => {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel disabled={loadingSandboxes[sandboxToDelete]}>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   variant="destructive"
-                  onClick={() => handleDelete(sandboxToDelete)}
+                  onClick={(event) => {
+                    event.preventDefault()
+                    handleDelete(sandboxToDelete)
+                  }}
                   disabled={loadingSandboxes[sandboxToDelete]}
                 >
                   {loadingSandboxes[sandboxToDelete] ? 'Deleting...' : 'Delete'}
