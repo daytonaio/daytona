@@ -166,6 +166,13 @@ export const CreateSandboxSheet = ({
   const { reset: resetCreateSandboxMutation, ...createSandboxMutation } = useCreateSandboxMutation()
   const setDefaultRegionMutation = useSetOrganizationDefaultRegionMutation()
   const formRef = useRef<HTMLFormElement>(null)
+  const formDefaultValues = useMemo<FormValues>(
+    () => ({
+      ...defaultValues,
+      regionId: selectedOrganization?.defaultRegionId,
+    }),
+    [selectedOrganization?.defaultRegionId],
+  )
 
   useImperativeHandle(ref, () => ({
     open: () => setOpen(true),
@@ -186,7 +193,7 @@ export const CreateSandboxSheet = ({
   })
 
   const form = useForm({
-    defaultValues,
+    defaultValues: formDefaultValues,
     validators: {
       onSubmit: formSchema,
     },
@@ -297,9 +304,9 @@ export const CreateSandboxSheet = ({
   )
 
   const resetState = useCallback(() => {
-    resetForm(defaultValues)
+    resetForm(formDefaultValues)
     resetCreateSandboxMutation()
-  }, [resetForm, resetCreateSandboxMutation])
+  }, [formDefaultValues, resetForm, resetCreateSandboxMutation])
 
   const handleEnvFileImport = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -620,10 +627,7 @@ export const CreateSandboxSheet = ({
                       ))}
                     </SelectContent>
                   </Select>
-                  <FieldDescription>
-                    The region where the sandbox will be created. If not specified, your organization's default region
-                    will be used.
-                  </FieldDescription>
+                  <FieldDescription>The region where the sandbox will be created.</FieldDescription>
                 </Field>
               )}
             </form.Field>
