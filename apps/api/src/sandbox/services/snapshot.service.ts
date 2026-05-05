@@ -58,6 +58,15 @@ import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
+const BYTES_PER_GIB = 1024 * 1024 * 1024
+
+function computeSnapshotSizeGiB(sizeBytes?: number): number | undefined {
+  if (typeof sizeBytes !== 'number' || !Number.isFinite(sizeBytes)) {
+    return undefined
+  }
+  return sizeBytes / BYTES_PER_GIB
+}
+
 @Injectable()
 export class SnapshotService {
   private readonly logger = new Logger(SnapshotService.name)
@@ -338,6 +347,74 @@ export class SnapshotService {
       await this.rollbackPendingUsage(organization.id, pendingSnapshotCountIncrement)
       throw error
     }
+  }
+
+  /**
+   * Persist a Snapshot row produced by a successful "snapshot from sandbox"
+   * operation. Shared by the v0 sync path (called from `SandboxService`) and
+   * the v2 async path (called from the job state handler when the job
+   * completes).
+   *
+   * Translates Postgres unique-constraint violations into a {@link ConflictException}
+   * so callers can decide whether to surface or swallow them.
+   */
+  async persistSnapshotFromSandbox(params: {
+    organizationId: string
+    name: string
+    ref: string
+    runnerId?: string | null
+    regionId: string
+    cpu: number
+    gpu: number
+    mem: number
+    disk: number
+    sizeGB?: number
+    sizeBytes?: number
+  }): Promise<Snapshot> {
+    const size = computeSnapshotSizeGiB(params.sizeBytes) ?? params.sizeGB
+    const runnerId = params.runnerId || undefined
+    const snapshotId = uuidv4()
+
+    const snapshot = this.snapshotRepository.create({
+      id: snapshotId,
+      organizationId: params.organizationId,
+      name: params.name,
+      ref: params.ref,
+      state: SnapshotState.ACTIVE,
+      cpu: params.cpu,
+      gpu: params.gpu,
+      mem: params.mem,
+      disk: params.disk,
+      size,
+      initialRunnerId: runnerId,
+      lastUsedAt: new Date(),
+      snapshotRegions: [{ snapshotId, regionId: params.regionId }],
+    })
+
+    let inserted: Snapshot
+    try {
+      inserted = await this.snapshotRepository.insert(snapshot)
+    } catch (error) {
+      if ((error as { code?: string }).code === '23505') {
+        throw new ConflictException(`Snapshot with name "${params.name}" already exists for this organization`)
+      }
+      throw error
+    }
+
+    // Only after the snapshot row is committed do we register a SnapshotRunner;
+    // otherwise a unique-name conflict on the snapshot would leave an orphan
+    // SnapshotRunner pointing at a ref no Snapshot owns.
+    if (runnerId) {
+      const snapshotRunner = this.snapshotRunnerRepository.create({
+        snapshotRef: params.ref,
+        runnerId,
+        state: SnapshotRunnerState.READY,
+      })
+      await this.snapshotRunnerRepository.save(snapshotRunner)
+    }
+
+    this.eventEmitter.emit(SnapshotEvents.CREATED, new SnapshotCreatedEvent(inserted))
+    return inserted
   }
 
   async removeSnapshot(snapshotId: string) {

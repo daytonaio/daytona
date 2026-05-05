@@ -25,9 +25,7 @@ import { Sandbox } from '../entities/sandbox.entity'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { ResourceType } from '../enums/resource-type.enum'
 import { getStateChangeLockKey } from '../utils/lock-key.util'
-import { v4 as uuidv4 } from 'uuid'
-import { SnapshotEvents } from '../constants/snapshot-events'
-import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
+import { SnapshotService } from './snapshot.service'
 
 /**
  * Service for handling entity state updates based on job completion (v2 runners only).
@@ -45,6 +43,7 @@ export class JobStateHandlerService {
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly eventEmitter: EventEmitter2,
+    private readonly snapshotService: SnapshotService,
   ) {}
 
   /**
@@ -734,8 +733,17 @@ export class JobStateHandlerService {
         if (!snapshotName) {
           this.logger.error(`SNAPSHOT_SANDBOX job ${job.id} payload missing snapshot name`)
         } else {
-          let snapshotRef = snapshotName
-          if (hash && payload?.registry?.url) {
+          // Prefer the ref the runner actually pushed to the registry. This
+          // avoids any drift between the pushed image and the stored ref.
+          // Fall back to reconstructing from {registry, project, hash} for
+          // older runners that don't return `ref`.
+          const refFromRunner =
+            (typeof metadata?.ref === 'string' && metadata.ref) ||
+            (typeof metadata?.Ref === 'string' && metadata.Ref) ||
+            undefined
+
+          let snapshotRef = refFromRunner ?? snapshotName
+          if (!refFromRunner && hash && payload?.registry?.url) {
             const project = payload.registry.project || 'daytona'
             snapshotRef = `${payload.registry.url}/${project}/daytona-${hash}:daytona`
           }
@@ -749,39 +757,23 @@ export class JobStateHandlerService {
                 : typeof rawSnapshotSizeBytes === 'string' && /^-?\d+$/.test(rawSnapshotSizeBytes)
                   ? Number(rawSnapshotSizeBytes)
                   : undefined
-          const snapshotSize = snapshotSizeBytes != null ? snapshotSizeBytes / (1024 * 1024 * 1024) : undefined
 
-          const snapshotId = uuidv4()
-
-          const snapshot = this.snapshotRepository.create({
-            id: snapshotId,
-            organizationId: sandbox.organizationId,
-            name: snapshotName,
-            imageName: '',
-            ref: snapshotRef,
-            state: SnapshotState.ACTIVE,
-            cpu: sandbox.cpu,
-            gpu: sandbox.gpu,
-            mem: sandbox.mem,
-            disk: sandbox.disk,
-            size: snapshotSize,
-            initialRunnerId: job.runnerId || undefined,
-            lastUsedAt: new Date(),
-            snapshotRegions: [{ snapshotId, regionId: sandbox.region }],
-          })
-
-          if (job.runnerId) {
-            const snapshotRunner = this.snapshotRunnerRepository.create({
-              snapshotRef,
+          try {
+            await this.snapshotService.persistSnapshotFromSandbox({
+              organizationId: sandbox.organizationId,
+              name: snapshotName,
+              ref: snapshotRef,
               runnerId: job.runnerId,
-              state: SnapshotRunnerState.READY,
+              regionId: sandbox.region,
+              cpu: sandbox.cpu,
+              gpu: sandbox.gpu,
+              mem: sandbox.mem,
+              disk: sandbox.disk,
+              sizeBytes: snapshotSizeBytes,
             })
-            await this.snapshotRunnerRepository.save(snapshotRunner)
+          } catch (error) {
+            this.logger.error(`Failed to persist snapshot from SNAPSHOT_SANDBOX job ${job.id}:`, error)
           }
-
-          const insertedSnapshot = await this.snapshotRepository.insert(snapshot)
-
-          this.eventEmitter.emit(SnapshotEvents.CREATED, new SnapshotCreatedEvent(insertedSnapshot))
         }
       }
     } catch (error) {

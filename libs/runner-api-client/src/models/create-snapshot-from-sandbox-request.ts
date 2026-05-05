@@ -13,13 +13,13 @@
  */
 
 
+// May contain unused imports in some cases
+// @ts-ignore
+import type { RegistryDTO } from './registry-dto';
 
-export interface SnapshotInfoResponse {
-    'cmd'?: Array<string>;
-    'entrypoint'?: Array<string>;
-    'hash'?: string;
-    'name'?: string;
-    'sizeBytes'?: number;
-    'sizeGB'?: number;
+export interface CreateSnapshotFromSandboxRequest {
+    'name': string;
+    'organizationId'?: string;
+    'registry': RegistryDTO;
 }
 
