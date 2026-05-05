@@ -130,9 +130,20 @@ func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, v
 		binds = append(binds, volumeMountPathBinds...)
 	}
 
+	// Enable Docker's built-in init (tini) as PID 1 inside the sandbox.
+	// Without this, the Daytona daemon runs as PID 1 and inherits responsibility
+	// for reaping reparented orphans (e.g. tmux servers daemonized from a
+	// process.exec call). Doing that reliably from Go is unsafe: an in-process
+	// SIGCHLD reaper races with os/exec.Cmd.Wait/CombinedOutput and produces
+	// spurious "wait: no child processes" errors. Letting docker-init handle it
+	// is the canonical, race-free fix and makes long-running sandboxes stable
+	// across many process.exec calls.
+	useInit := true
+
 	hostConfig := &container.HostConfig{
 		Privileged: true,
 		Binds:      binds,
+		Init:       &useInit,
 	}
 
 	if sandboxDto.OtelEndpoint != nil && strings.Contains(*sandboxDto.OtelEndpoint, "host.docker.internal") {
