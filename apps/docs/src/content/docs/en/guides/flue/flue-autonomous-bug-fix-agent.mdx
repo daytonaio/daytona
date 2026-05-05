@@ -594,7 +594,7 @@ try {
 
 Order matters: the **project** agent is destroyed first (closes its session, no sandbox impact since it doesn't have `cleanup: true`), then the **setup** agent's destroy fires the registered `sandbox.delete()` callback. The fallback `else` branch handles the edge case where `init()` itself threw before `setupAgent` was created — in that scenario nothing armed `cleanup: true`, so the orchestrator deletes the sandbox directly.
 
-This guarantees the sandbox is always torn down — on successful runs, on caught LLM errors, and on infrastructure failures. Confirm in your [Daytona Dashboard](https://app.daytona.io/dashboard); there should be no leftover sandboxes after a run completes.
+This covers the common failure paths: successful runs, caught LLM errors, and exceptions thrown during the workflow. Cleanup is best-effort — if `destroy()` or `sandbox.delete()` itself throws (transient API error, network drop), the failure is logged but the sandbox is not retried. Confirm in your [Daytona Dashboard](https://app.daytona.io/dashboard) after each run, and clean up any orphans manually if you spot them.
 
 **Key Advantages**
 

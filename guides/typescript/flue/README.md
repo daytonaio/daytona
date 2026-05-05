@@ -267,7 +267,7 @@ The orchestrator wraps the entire two-agent flow in a `try { ... } finally { ...
 
 This is necessary because Flue **does not auto-destroy sessions on handler return** — sessions persist for resumability via the same `<id>`, and the registered cleanup callback only runs when `agent.destroy()` is explicitly called. Without the `try/finally`, the Daytona sandbox would stay up indefinitely.
 
-Verify in your [Daytona Dashboard](https://app.daytona.io/dashboard); there should be no leftover sandboxes after a run completes (success or failure).
+Cleanup is best-effort: if `destroy()` or `sandbox.delete()` throws inside the `finally` block, the error is logged but the sandbox stays up. Verify in your [Daytona Dashboard](https://app.daytona.io/dashboard) after each run and remove any orphans manually if you see them.
 
 ## License
 
