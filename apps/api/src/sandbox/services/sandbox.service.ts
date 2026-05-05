@@ -55,7 +55,7 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { WarmPool } from '../entities/warm-pool.entity'
 import { SandboxDto, SandboxVolume } from '../dto/sandbox.dto'
 import { isValidUuid } from '../../common/utils/uuid'
-import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
+import { RunnerAdapter, RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { validateNetworkAllowList } from '../utils/network-validation.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { SshAccess } from '../entities/ssh-access.entity'
@@ -88,6 +88,7 @@ import { RegionService } from '../../region/services/region.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
 import { SnapshotService } from './snapshot.service'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
+import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { RegionType } from '../../region/enums/region-type.enum'
 import { getEffectivePerSandboxLimits } from '../../organization/utils/sandbox-limits.util'
 import { RegionQuotaDto } from '../../organization/dto/region-quota.dto'
@@ -1058,7 +1059,7 @@ export class SandboxService {
 
       const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
 
-      if (runner.runnerClass !== RunnerClass.VM) {
+      if (![RunnerClass.VM, RunnerClass.CONTAINER].includes(runner.runnerClass)) {
         throw new HttpException('Snapshotting is not supported for this sandbox', HttpStatus.UNPROCESSABLE_ENTITY)
       }
 
@@ -1067,6 +1068,14 @@ export class SandboxService {
       const region = await this.regionService.findOne(sandbox.region)
       if (!region) {
         throw new NotFoundException(`Region with ID ${sandbox.region} not found`)
+      }
+
+      const registry = (await this.dockerRegistryService.getAvailableInternalRegistry(sandbox.region)) ?? undefined
+
+      if (runner.runnerClass === RunnerClass.CONTAINER && !registry) {
+        throw new BadRequestError(
+          'No internal registry is available for this sandbox region; cannot snapshot a Docker sandbox',
+        )
       }
 
       const { pendingSnapshotCountIncremented } = await this.snapshotService.validateOrganizationQuotas(
@@ -1093,29 +1102,128 @@ export class SandboxService {
         },
       })
 
-      try {
-        const registry = sandbox.region
-          ? await this.dockerRegistryService.getAvailableInternalRegistry(sandbox.region)
-          : null
+      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-        const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-        await runnerAdapter.createSnapshotFromSandbox(sandbox.id, dto.name, organization.id, registry ?? undefined)
-      } catch (error) {
-        await this.sandboxRepository.updateWhere(sandbox.id, {
-          updateData: {
-            state: sandbox.state,
-            pending: false,
-          },
-          whereCondition: { state: SandboxState.SNAPSHOTTING },
+      // v2 runners enqueue a SNAPSHOT_SANDBOX job and resolve immediately
+      // with `undefined`; the job state handler will persist the resulting
+      // Snapshot on completion.
+      //
+      // v0 runners (Docker, container class) don't have jobs - the adapter
+      // performs a synchronous HTTP call to the runner's commit+push
+      // endpoint, which can take several minutes. We don't want to block
+      // the API request that long, so for v0 we kick the call off in the
+      // background and immediately return the SNAPSHOTTING sandbox to the
+      // caller. The background promise persists the snapshot or reverts
+      // sandbox state on failure.
+      if (runner.apiVersion === '0') {
+        // Hand off pending-quota ownership to the background driver - it must
+        // roll back on failure since the outer try/catch returns successfully
+        // here.
+        const inheritedPendingIncrement = pendingSnapshotCountIncrement
+        pendingSnapshotCountIncrement = undefined
+
+        void this.runV0SnapshotFromSandbox({
+          sandbox,
+          previousState: sandbox.state,
+          snapshotName: dto.name,
+          organizationId: organization.id,
+          registry,
+          runner,
+          runnerAdapter,
+          pendingSnapshotCountIncrement: inheritedPendingIncrement,
         })
+      } else {
+        try {
+          await runnerAdapter.createSnapshotFromSandbox(sandbox.id, dto.name, organization.id, registry)
+        } catch (error) {
+          await this.sandboxRepository.updateWhere(sandbox.id, {
+            updateData: {
+              state: sandbox.state,
+              pending: false,
+            },
+            whereCondition: { state: SandboxState.SNAPSHOTTING },
+          })
 
-        throw error
+          throw error
+        }
       }
 
       return updatedSandbox
     } catch (error) {
       await this.snapshotService.rollbackPendingUsage(organization.id, pendingSnapshotCountIncrement)
       throw error
+    }
+  }
+
+  /**
+   * Background driver for v0 (Docker) sandbox snapshotting.
+   *
+   * v0 runners expose a synchronous HTTP endpoint for "commit + push" that
+   * may take several minutes. We run it in a background promise so the
+   * user-facing API request can return immediately with state=SNAPSHOTTING,
+   * mirroring the v2 (job-driven) UX.
+   *
+   * Errors are intentionally swallowed - sandbox state is the source of
+   * truth. On any failure we restore state and refund the pending quota.
+   */
+  private async runV0SnapshotFromSandbox(params: {
+    sandbox: Sandbox
+    previousState: SandboxState
+    snapshotName: string
+    organizationId: string
+    registry?: DockerRegistry
+    runner: Runner
+    runnerAdapter: RunnerAdapter
+    pendingSnapshotCountIncrement?: number
+  }): Promise<void> {
+    const {
+      sandbox,
+      previousState,
+      snapshotName,
+      organizationId,
+      registry,
+      runner,
+      runnerAdapter,
+      pendingSnapshotCountIncrement,
+    } = params
+
+    let succeeded = false
+    try {
+      const result = await runnerAdapter.createSnapshotFromSandbox(sandbox.id, snapshotName, organizationId, registry)
+      if (!result) {
+        throw new Error('runner returned no snapshot result')
+      }
+
+      await this.snapshotService.persistSnapshotFromSandbox({
+        organizationId,
+        name: snapshotName,
+        ref: result.ref,
+        runnerId: runner.id,
+        regionId: sandbox.region,
+        cpu: sandbox.cpu,
+        gpu: sandbox.gpu,
+        mem: sandbox.mem,
+        disk: sandbox.disk,
+        sizeGB: result.sizeGB,
+      })
+      succeeded = true
+    } catch (error) {
+      this.logger.error(`v0 snapshotFromSandbox failed for sandbox ${sandbox.id}:`, error)
+    }
+
+    // Always clear SNAPSHOTTING - whether the snapshot was persisted or not,
+    // the sandbox itself should return to its previous state.
+    await this.sandboxRepository
+      .updateWhere(sandbox.id, {
+        updateData: { state: previousState, pending: false },
+        whereCondition: { state: SandboxState.SNAPSHOTTING },
+      })
+      .catch((err) => this.logger.error(`Failed to clear SNAPSHOTTING state for sandbox ${sandbox.id}:`, err))
+
+    if (!succeeded) {
+      await this.snapshotService
+        .rollbackPendingUsage(organizationId, pendingSnapshotCountIncrement)
+        .catch((err) => this.logger.error(`Failed to roll back pending snapshot quota for org ${organizationId}:`, err))
     }
   }
 

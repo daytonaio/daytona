@@ -26,6 +26,8 @@ import type { CreateBackupDTO } from '../models';
 // @ts-ignore
 import type { CreateSandboxDTO } from '../models';
 // @ts-ignore
+import type { CreateSnapshotFromSandboxRequest } from '../models';
+// @ts-ignore
 import type { ErrorResponse } from '../models';
 // @ts-ignore
 import type { IsRecoverableDTO } from '../models';
@@ -37,6 +39,8 @@ import type { RecoverSandboxDTO } from '../models';
 import type { ResizeSandboxDTO } from '../models';
 // @ts-ignore
 import type { SandboxInfoResponse } from '../models';
+// @ts-ignore
+import type { SnapshotInfoResponse } from '../models';
 // @ts-ignore
 import type { StartSandboxResponse } from '../models';
 // @ts-ignore
@@ -366,6 +370,48 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
+         * Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag.
+         * @summary Snapshot a running sandbox
+         * @param {string} sandboxId Sandbox ID
+         * @param {CreateSnapshotFromSandboxRequest} body Snapshot from sandbox
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        snapshotFromSandbox: async (sandboxId: string, body: CreateSnapshotFromSandboxRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'sandboxId' is not null or undefined
+            assertParamExists('snapshotFromSandbox', 'sandboxId', sandboxId)
+            // verify required parameter 'body' is not null or undefined
+            assertParamExists('snapshotFromSandbox', 'body', body)
+            const localVarPath = `/sandboxes/{sandboxId}/snapshot-from-sandbox`
+                .replace(`{${"sandboxId"}}`, encodeURIComponent(String(sandboxId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Start sandbox
          * @summary Start sandbox
          * @param {string} sandboxId Sandbox ID
@@ -610,6 +656,20 @@ export const SandboxApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag.
+         * @summary Snapshot a running sandbox
+         * @param {string} sandboxId Sandbox ID
+         * @param {CreateSnapshotFromSandboxRequest} body Snapshot from sandbox
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async snapshotFromSandbox(sandboxId: string, body: CreateSnapshotFromSandboxRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SnapshotInfoResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.snapshotFromSandbox(sandboxId, body, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SandboxApi.snapshotFromSandbox']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Start sandbox
          * @summary Start sandbox
          * @param {string} sandboxId Sandbox ID
@@ -746,6 +806,17 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.resize(sandboxId, sandbox, options).then((request) => request(axios, basePath));
         },
         /**
+         * Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag.
+         * @summary Snapshot a running sandbox
+         * @param {string} sandboxId Sandbox ID
+         * @param {CreateSnapshotFromSandboxRequest} body Snapshot from sandbox
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        snapshotFromSandbox(sandboxId: string, body: CreateSnapshotFromSandboxRequest, options?: RawAxiosRequestConfig): AxiosPromise<SnapshotInfoResponse> {
+            return localVarFp.snapshotFromSandbox(sandboxId, body, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Start sandbox
          * @summary Start sandbox
          * @param {string} sandboxId Sandbox ID
@@ -876,6 +947,18 @@ export class SandboxApi extends BaseAPI {
      */
     public resize(sandboxId: string, sandbox: ResizeSandboxDTO, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).resize(sandboxId, sandbox, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag.
+     * @summary Snapshot a running sandbox
+     * @param {string} sandboxId Sandbox ID
+     * @param {CreateSnapshotFromSandboxRequest} body Snapshot from sandbox
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public snapshotFromSandbox(sandboxId: string, body: CreateSnapshotFromSandboxRequest, options?: RawAxiosRequestConfig) {
+        return SandboxApiFp(this.configuration).snapshotFromSandbox(sandboxId, body, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

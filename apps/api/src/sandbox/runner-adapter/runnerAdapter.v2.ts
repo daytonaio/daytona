@@ -548,12 +548,16 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     )
   }
 
+  // v2 dispatches snapshot-from-sandbox as an async job; the actual
+  // CreateSandboxSnapshotResult arrives via the job state handler when the
+  // runner finishes the work, so this method intentionally resolves to
+  // `undefined`.
   async createSnapshotFromSandbox(
     sandboxId: string,
     snapshotName: string,
     organizationId: string,
     registry?: DockerRegistry,
-  ): Promise<void> {
+  ): Promise<undefined> {
     const payload = toJson(
       SnapshotSandboxPayloadSchema,
       create(SnapshotSandboxPayloadSchema, {

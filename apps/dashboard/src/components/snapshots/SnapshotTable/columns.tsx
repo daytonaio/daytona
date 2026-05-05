@@ -170,6 +170,15 @@ const columns: ColumnDef<SnapshotDto>[] = [
           </Badge>
         )
       }
+
+      if (!snapshot.imageName && !snapshot.buildInfo) {
+        return (
+          <Badge variant="secondary" className="rounded-sm px-1 font-medium">
+            FROM SANDBOX
+          </Badge>
+        )
+      }
+
       return snapshot.imageName ? (
         <div className="flex items-center gap-1 min-w-0 group/copy-button">
           <span className="truncate">{snapshot.imageName}</span>

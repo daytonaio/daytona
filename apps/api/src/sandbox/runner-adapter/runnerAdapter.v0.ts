@@ -9,6 +9,7 @@ import axiosRetry from 'axios-retry'
 
 import { Injectable, Logger } from '@nestjs/common'
 import {
+  CreateSandboxSnapshotResult,
   RunnerAdapter,
   RunnerInfo,
   RunnerSandboxInfo,
@@ -421,12 +422,38 @@ export class RunnerAdapterV0 implements RunnerAdapter {
   }
 
   async createSnapshotFromSandbox(
-    _sandboxId: string,
-    _snapshotName: string,
-    _organizationId: string,
-    _registry?: DockerRegistry,
-  ): Promise<void> {
-    throw new Error('createSnapshotFromSandbox is not supported for V0 runners')
+    sandboxId: string,
+    snapshotName: string,
+    organizationId: string,
+    registry?: DockerRegistry,
+  ): Promise<CreateSandboxSnapshotResult> {
+    if (!registry) {
+      throw new Error('registry is required to snapshot a Docker sandbox')
+    }
+
+    const response = await this.sandboxApiClient.snapshotFromSandbox(sandboxId, {
+      name: snapshotName,
+      organizationId,
+      registry: {
+        project: registry.project,
+        url: registry.url.replace(/^(https?:\/\/)/, ''),
+        username: registry.username,
+        password: registry.password,
+      },
+    })
+
+    const data = response.data
+    if (!data?.name || !data?.hash) {
+      throw new Error('runner returned invalid snapshot-from-sandbox response')
+    }
+
+    return {
+      ref: data.name,
+      hash: data.hash,
+      sizeGB: data.sizeGB,
+      entrypoint: data.entrypoint,
+      cmd: data.cmd,
+    }
   }
 
   // skipStart is a v2-only signal (carried in the job payload); v0's sync API has no equivalent.
