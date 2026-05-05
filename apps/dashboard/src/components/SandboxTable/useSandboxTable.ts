@@ -43,6 +43,7 @@ interface UseSandboxTableProps {
   handleCreateSnapshot: (id: string) => void
   handleFork: (id: string) => void
   handleViewForks: (id: string) => void
+  handleOpenTerminal: (sandbox: Sandbox) => void
 }
 
 export function useSandboxTable({
@@ -64,6 +65,7 @@ export function useSandboxTable({
   handleCreateSnapshot,
   handleFork,
   handleViewForks,
+  handleOpenTerminal,
 }: UseSandboxTableProps) {
   // Column visibility state management with persistence
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
@@ -127,6 +129,7 @@ export function useSandboxTable({
         handleCreateSnapshot,
         handleFork,
         handleViewForks,
+        handleOpenTerminal,
       }),
     [
       handleStart,
@@ -145,6 +148,7 @@ export function useSandboxTable({
       handleCreateSnapshot,
       handleFork,
       handleViewForks,
+      handleOpenTerminal,
     ],
   )
 

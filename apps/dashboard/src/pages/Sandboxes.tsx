@@ -750,17 +750,25 @@ const Sandboxes: React.FC = () => {
     }
   }
 
-  const openSandboxDetails = (sandbox: Sandbox, orderedSandboxes: Sandbox[] | null) => {
+  const openSandboxDetails = (
+    sandbox: Sandbox,
+    orderedSandboxes: Sandbox[] | null,
+    initialTab: SandboxDetailsSheetTabValue = 'overview',
+  ) => {
     setOrderedSandboxItems(orderedSandboxes)
     setSelectedSandbox(sandbox)
-    setSandboxDetailsInitialTab('overview')
+    setSandboxDetailsInitialTab(initialTab)
     setSandboxIdParam(sandbox.id)
-    setSandboxTabParam('overview')
+    setSandboxTabParam(initialTab)
     setShowSandboxDetails(true)
   }
 
   const handleSandboxRowClick = (sandbox: Sandbox, orderedSandboxes: Sandbox[]) => {
     openSandboxDetails(sandbox, orderedSandboxes)
+  }
+
+  const handleOpenTerminal = (sandbox: Sandbox) => {
+    openSandboxDetails(sandbox, null, 'terminal')
   }
 
   const handleSandboxCreated = (sandbox: CreatedSandbox) => {
@@ -879,6 +887,7 @@ const Sandboxes: React.FC = () => {
           handleCreateSnapshot={handleCreateSnapshot}
           handleFork={handleFork}
           handleViewForks={handleViewForks}
+          handleOpenTerminal={handleOpenTerminal}
         />
 
         {sandboxToDelete && (

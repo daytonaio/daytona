@@ -13,7 +13,7 @@ import { useVncSessionQuery } from '@/hooks/queries/useVncSessionQuery'
 import { isStoppable } from '@/lib/utils/sandbox'
 import { Sandbox } from '@daytona/api-client'
 import { Spinner } from '@/components/ui/spinner'
-import { Monitor, Play, RefreshCw } from 'lucide-react'
+import { ArrowUpRight, Monitor, Play, RefreshCw } from 'lucide-react'
 
 const VNC_MISSING_DEPS_MSG = 'Computer-use functionality is not available'
 
@@ -191,14 +191,20 @@ export function SandboxVncTab({ sandbox }: { sandbox: Sandbox }) {
 
   // Active session
   if (session) {
+    const vncUrl = `${session.url}/vnc.html?autoconnect=true&resize=scale`
+
     return (
       <div className="flex-1 flex flex-col p-4">
+        <div className="mb-2 flex shrink-0 justify-end">
+          <Button variant="link" size="sm" className="h-auto px-0 py-0" asChild>
+            <a href={vncUrl} target="_blank" rel="noopener noreferrer">
+              Open in new tab
+              <ArrowUpRight className="size-4" />
+            </a>
+          </Button>
+        </div>
         <div className="flex-1 min-h-0 rounded-md border border-border bg-neutral-950 overflow-hidden">
-          <iframe
-            title="VNC desktop"
-            src={`${session.url}/vnc.html?autoconnect=true&resize=scale`}
-            className="w-full h-full border-0"
-          />
+          <iframe title="VNC desktop" src={vncUrl} className="w-full h-full border-0" />
         </div>
       </div>
     )

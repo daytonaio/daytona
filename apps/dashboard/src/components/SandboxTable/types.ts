@@ -34,6 +34,7 @@ export interface SandboxTableProps {
   handleCreateSnapshot: (id: string) => void
   handleFork: (id: string) => void
   handleViewForks: (id: string) => void
+  handleOpenTerminal: (sandbox: Sandbox) => void
 }
 
 export interface SandboxTableActionsProps {
@@ -52,6 +53,7 @@ export interface SandboxTableActionsProps {
   onFork?: () => void
   onCreateSnapshot?: () => void
   onViewForks?: () => void
+  onOpenTerminal?: () => void
   onRecover: (id: string) => void
   onScreenRecordings: (id: string) => void
 }
