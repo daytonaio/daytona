@@ -5,6 +5,7 @@
 
 import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { CreateSnapshotSheet } from '@/components/snapshots/CreateSnapshotSheet'
+import { SnapshotSheet } from '@/components/snapshots/SnapshotSheet'
 import { SnapshotTable } from '@/components/snapshots/SnapshotTable'
 import { Button } from '@/components/ui/button'
 import {
@@ -36,6 +37,7 @@ import { handleApiError } from '@/lib/error-handling'
 import { pluralize } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, PaginatedSnapshots, SnapshotDto, SnapshotState } from '@daytona/api-client'
 import { useQueryClient } from '@tanstack/react-query'
+import { parseAsString, useQueryState } from 'nuqs'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -47,6 +49,10 @@ const Snapshots: React.FC = () => {
   const [loadingSnapshots, setLoadingSnapshots] = useState<Record<string, boolean>>({})
   const [snapshotToDelete, setSnapshotToDelete] = useState<SnapshotDto | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [selectedSnapshot, setSelectedSnapshot] = useState<SnapshotDto | null>(null)
+  const [orderedSnapshotItems, setOrderedSnapshotItems] = useState<SnapshotDto[] | null>(null)
+  const [showSnapshotSheet, setShowSnapshotSheet] = useState(false)
+  const [snapshotIdParam, setSnapshotIdParam] = useQueryState('snapshotId', parseAsString)
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
   const deleteSnapshotMutation = useDeleteSnapshotMutation({ invalidateOnSuccess: false })
@@ -88,6 +94,11 @@ const Snapshots: React.FC = () => {
     error: snapshotsDataError,
   } = useSnapshotsQuery(queryParams)
 
+  const snapshotFromLoadedResults = useMemo(
+    () => snapshotsData?.items.find((snapshot) => snapshot.id === snapshotIdParam),
+    [snapshotIdParam, snapshotsData?.items],
+  )
+
   const filteredItems = useMemo(() => {
     const items = snapshotsData?.items ?? []
     if (stateFilter.size === 0) {
@@ -102,8 +113,37 @@ const Snapshots: React.FC = () => {
     }
   }, [snapshotsDataError])
 
+  useEffect(() => {
+    if (!snapshotIdParam) {
+      setSelectedSnapshot(null)
+      setOrderedSnapshotItems(null)
+      setShowSnapshotSheet(false)
+      return
+    }
+
+    setShowSnapshotSheet(true)
+
+    if (!snapshotFromLoadedResults) {
+      if (selectedSnapshot?.id === snapshotIdParam) return
+      setSelectedSnapshot(null)
+      setOrderedSnapshotItems(null)
+      return
+    }
+
+    setSelectedSnapshot(snapshotFromLoadedResults)
+    setOrderedSnapshotItems(snapshotsData?.items ?? null)
+  }, [selectedSnapshot?.id, snapshotIdParam, snapshotFromLoadedResults, snapshotsData?.items])
+
   const updateSnapshotInCache = useCallback(
     (snapshotId: string, updates: Partial<SnapshotDto>) => {
+      queryClient.setQueryData<SnapshotDto>(
+        queryKeys.snapshots.detail(selectedOrganization?.id ?? '', snapshotId),
+        (oldData) => {
+          if (!oldData) return oldData
+          return { ...oldData, ...updates }
+        },
+      )
+
       queryClient.setQueryData(queryKey, (oldData: PaginatedSnapshots | undefined) => {
         if (!oldData) return oldData
         return {
@@ -112,7 +152,7 @@ const Snapshots: React.FC = () => {
         }
       })
     },
-    [queryClient, queryKey],
+    [queryClient, queryKey, selectedOrganization?.id],
   )
 
   const markAllSnapshotQueriesAsStale = useCallback(
@@ -209,6 +249,11 @@ const Snapshots: React.FC = () => {
 
   const writePermitted = useMemo(
     () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SNAPSHOTS),
+    [authenticatedUserHasPermission],
+  )
+
+  const deletePermitted = useMemo(
+    () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.DELETE_SNAPSHOTS),
     [authenticatedUserHasPermission],
   )
 
@@ -343,6 +388,42 @@ const Snapshots: React.FC = () => {
     dialogRef.current?.open()
   }
 
+  const snapshotItems = orderedSnapshotItems ?? filteredItems
+  const selectedSnapshotIndex = useMemo(
+    () => snapshotItems.findIndex((snapshot) => snapshot.id === selectedSnapshot?.id),
+    [snapshotItems, selectedSnapshot?.id],
+  )
+
+  const handleSnapshotRowClick = (snapshot: SnapshotDto, orderedSnapshots: SnapshotDto[]) => {
+    setOrderedSnapshotItems(orderedSnapshots)
+    setSelectedSnapshot(snapshot)
+    setSnapshotIdParam(snapshot.id)
+    setShowSnapshotSheet(true)
+  }
+
+  const handleSnapshotSheetOpenChange = (isOpen: boolean) => {
+    setShowSnapshotSheet(isOpen)
+
+    if (!isOpen) {
+      setSelectedSnapshot(null)
+      setOrderedSnapshotItems(null)
+      setSnapshotIdParam(null)
+    }
+  }
+
+  const handleSnapshotSheetNavigate = (direction: 'prev' | 'next') => {
+    if (selectedSnapshotIndex < 0) {
+      return
+    }
+
+    const nextIndex = direction === 'prev' ? selectedSnapshotIndex - 1 : selectedSnapshotIndex + 1
+    const nextSnapshot = snapshotItems[nextIndex]
+    if (nextSnapshot) {
+      setSelectedSnapshot(nextSnapshot)
+      setSnapshotIdParam(nextSnapshot.id)
+    }
+  }
+
   return (
     <PageLayout contained>
       <PageHeader>
@@ -366,6 +447,8 @@ const Snapshots: React.FC = () => {
           onActivate={handleActivate}
           onDeactivate={handleDeactivate}
           onCreateSnapshot={handleCreateSnapshot}
+          onRowClick={handleSnapshotRowClick}
+          activeSnapshotId={showSnapshotSheet ? selectedSnapshot?.id : undefined}
           pageCount={snapshotsData?.totalPages ?? 0}
           totalItems={snapshotsData?.total ?? 0}
           onPaginationChange={handlePaginationChange}
@@ -381,6 +464,26 @@ const Snapshots: React.FC = () => {
           onStateFilterChange={(values) => {
             setStateFilter(values)
             setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
+          }}
+        />
+
+        <SnapshotSheet
+          snapshotId={snapshotIdParam}
+          snapshot={selectedSnapshot}
+          open={showSnapshotSheet}
+          onOpenChange={handleSnapshotSheetOpenChange}
+          getRegionName={getRegionName}
+          onNavigate={handleSnapshotSheetNavigate}
+          hasPrev={selectedSnapshotIndex > 0}
+          hasNext={selectedSnapshotIndex >= 0 && selectedSnapshotIndex < snapshotItems.length - 1}
+          actionsDisabled={selectedSnapshot ? loadingSnapshots[selectedSnapshot.id] : false}
+          writePermitted={writePermitted}
+          deletePermitted={deletePermitted}
+          onActivate={handleActivate}
+          onDeactivate={handleDeactivate}
+          onDelete={(snapshot) => {
+            setSnapshotToDelete(snapshot)
+            setShowDeleteDialog(true)
           }}
         />
 

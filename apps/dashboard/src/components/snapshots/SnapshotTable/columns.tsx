@@ -4,6 +4,7 @@
  */
 
 import { TimestampTooltip } from '@/components/TimestampTooltip'
+import { CopyButton } from '@/components/CopyButton'
 import { getRelativeTimeString } from '@/lib/utils'
 import { SnapshotDto, SnapshotState } from '@daytona/api-client'
 import { ColumnDef, RowData, Table } from '@tanstack/react-table'
@@ -143,10 +144,11 @@ const columns: ColumnDef<SnapshotDto>[] = [
     cell: ({ row }) => {
       const snapshot = row.original
       return (
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-1 min-w-0 group/copy-button">
           <span className="truncate">{snapshot.name}</span>
+          <CopyButton value={snapshot.name} size="icon-xs" autoHide tooltipText="Copy name" />
           {snapshot.general && (
-            <Badge variant="secondary" className="shrink-0">
+            <Badge variant="secondary" className="ml-1 shrink-0">
               System
             </Badge>
           )}
@@ -168,7 +170,14 @@ const columns: ColumnDef<SnapshotDto>[] = [
           </Badge>
         )
       }
-      return <div className="truncate">{snapshot.imageName}</div>
+      return snapshot.imageName ? (
+        <div className="flex items-center gap-1 min-w-0 group/copy-button">
+          <span className="truncate">{snapshot.imageName}</span>
+          <CopyButton value={snapshot.imageName} size="icon-xs" autoHide tooltipText="Copy image" />
+        </div>
+      ) : (
+        <div className="truncate text-muted-foreground/50">-</div>
+      )
     },
   },
   {

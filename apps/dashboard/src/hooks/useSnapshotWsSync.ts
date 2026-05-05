@@ -21,6 +21,8 @@ export function useSnapshotWsSync() {
     const queryKey = queryKeys.snapshots.list(selectedOrganization.id)
 
     const updateSnapshotInCacheIfPresent = (snapshot: SnapshotDto) => {
+      queryClient.setQueryData<SnapshotDto>(queryKeys.snapshots.detail(selectedOrganization.id, snapshot.id), snapshot)
+
       queryClient.setQueriesData<PaginatedSnapshots>({ queryKey }, (previousSnapshots) => {
         if (!previousSnapshots) return previousSnapshots
         if (!previousSnapshots.items.some((existingSnapshot) => existingSnapshot.id === snapshot.id))

@@ -60,6 +60,8 @@ export const queryKeys = {
   },
   snapshots: {
     all: ['snapshots'] as const,
+    detail: (organizationId: string, snapshotId: string) =>
+      [...queryKeys.snapshots.all, organizationId, snapshotId, 'detail'] as const,
     list: (organizationId: string, params?: SnapshotQueryParams) => {
       const base = [...queryKeys.snapshots.all, organizationId, 'list'] as const
       if (!params) return base
