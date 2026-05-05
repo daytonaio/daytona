@@ -745,7 +745,9 @@ if err != nil {
 if err := producer.FileSystem.UploadFile(ctx, []byte("shared payload"), mountDir+"/payload.bin"); err != nil {
 	log.Fatal(err)
 }
-producer.Delete(ctx)
+if err := producer.Delete(ctx); err != nil {
+	log.Fatal(err)
+}
 
 // Consumer: a separate sandbox mounts the same volume by ID and reads the data
 consumer, err := client.Create(ctx, types.SnapshotParams{
