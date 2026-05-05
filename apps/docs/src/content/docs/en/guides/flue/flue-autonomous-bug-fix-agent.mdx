@@ -3,9 +3,9 @@ title: Build an Autonomous Bug-Fix Agent with Flue and Daytona
 description: Use Flue's agent harness and a Daytona sandbox to reproduce a GitHub issue with a failing test, fix it, and open a real pull request, end to end.
 ---
 
-This guide builds an autonomous bug-fix agent using [Flue](https://flueframework.com/) (a runtime-agnostic agent harness framework) together with [Daytona](https://www.daytona.io/) sandboxes. Given a GitHub issue URL, the agent reproduces the bug with a failing test, implements the minimal fix, runs the full test suite, and opens a real pull request.
+This guide builds an autonomous bug-fix agent using [Flue](https://flueframework.com/) and [Daytona](https://www.daytona.io/) sandboxes. Given a GitHub issue, the agent reproduces the bug with a failing test, implements the minimal fix, runs the full test suite, and opens a real pull request.
 
-A sandbox is non-negotiable for this workflow. The agent clones unknown code, installs unknown dependencies, and executes the project's test suite. Doing any of that on your laptop is a security and stability risk. Daytona runs every iteration in a clean Linux container and tears it down on completion, so an untrusted repo can never affect your host.
+A sandbox is essential for this workflow. The agent clones unknown code, installs unknown dependencies, and executes the project's test suite — operations that need strict isolation from your host. Daytona provisions a fresh isolated environment for every run and tears it down on completion, so an untrusted repository can never affect your host.
 
 ---
 
@@ -147,7 +147,7 @@ curl -X POST http://localhost:3583/agents/bug-fix/run-1 \
 
 Replace `your-username/your-fork` with your fork's slug and `<number>` with the issue number you want to target.
 
-The first terminal streams the orchestrator's setup logs as the agent runs. When it finishes, the response body contains the structured result.
+The `flue dev` terminal shows the orchestrator's setup logs in real time. When the agent finishes, the response body contains the structured result.
 
 **Option C: one-shot with live tool tracing** (recommended when iterating or debugging):
 
@@ -157,7 +157,7 @@ Stop `flue dev` (or leave it; doesn't matter) and run:
 npm run run
 ```
 
-That maps to `flue run bug-fix --target node --id run-1 --env .env --payload '{}'`. Unlike Options A and B, this **builds and spawns its own ephemeral server**, POSTs with `Accept: text/event-stream`, and decorates every agent event (`tool:start`, `tool:done`, the LLM's reasoning text) into a readable line on stderr. The final structured result lands on stdout. See the [Example Walkthrough](#4-example-walkthrough) below for a real `npm run run` trace.
+That maps to `flue run bug-fix --target node --id run-1 --env .env --payload '{}'`. Unlike Options A and B, this **builds and spawns its own ephemeral server**, POSTs with `Accept: text/event-stream`, and decorates every agent event (`tool:start`, `tool:done`, the LLM's reasoning text) into a readable progress line so you can watch the LLM work in real time. The final structured result is printed at the end, ready to pipe into downstream tooling. See the [Example Walkthrough](#4-example-walkthrough) below for a real `npm run run` trace.
 
 Use Options A/B for quiet production-style runs against a long-lived `flue dev` server. Use Option C when you want to watch the LLM's tool calls tool-by-tool.
 
@@ -219,63 +219,37 @@ const agent = await init({
 })
 ```
 
-The user owns the Daytona client lifecycle (you decide how the sandbox is created, reused, or cleaned up); Flue just adapts it for agent use. The `cleanup: true` option **arms** a `sandbox.delete()` callback that fires when `agent.destroy()` is called — but Flue does NOT auto-destroy on handler return. The orchestrator must explicitly call `destroy()`, which our `try/finally` does (covered in [Section 5: Cleanup](#5-cleanup)).
+The user owns the Daytona client lifecycle (you decide how the sandbox is created, reused, or cleaned up); Flue just adapts it for agent use. The `cleanup: true` option **arms** a `sandbox.delete()` callback that fires when `agent.destroy()` is called but Flue does NOT auto-destroy on handler return. The orchestrator must explicitly call `destroy()`, which our `try/finally` does (covered in [Section 5: Cleanup](#5-cleanup)).
 
 #### The Orchestrator
 
-The agent file (`.flue/agents/bug-fix.ts`) is small on purpose. It provisions the sandbox, prepares the environment, and hands off to a skill that does the real work. Here's the shape (see the full source for env validation, error checks, and package-manager detection):
+The agent file (`.flue/agents/bug-fix.ts`) is small on purpose. It provisions the sandbox, prepares the environment, and hands off to a skill that does the real work. Here's the structural shape — for the full file (env validation, slug-format checks, package-manager auto-install, gh/git config, the `try/finally` cleanup), open `.flue/agents/bug-fix.ts` from the guide directory you cloned earlier:
 
 ```typescript
-export const triggers = { webhook: true }
+// First agent: setup phase. cleanup: true arms sandbox.delete() on destroy().
+const setupAgent = await init({
+  sandbox: daytona(sandbox, { cleanup: true }),
+  model,
+})
+const setup = await setupAgent.session()
+// ... installing gh, setting up git, cloning the fork, installing deps,
+//     fetching the issue body, uploading the SKILL.md ...
 
-export default async function ({ init, payload, env }: FlueContext) {
-  const parsed = v.parse(PayloadSchema, payload ?? {})
-  const repo = parsed.repo ?? requireEnv(env, 'DEMO_REPO')
-  const issueNumber = parsed.issueNumber ?? Number.parseInt(requireEnv(env, 'DEMO_ISSUE'), 10)
+// Second agent: shares the same sandbox, but rooted in the cloned project dir
+// so Flue discovers our SKILL.md from `.agents/skills/bug-fix/SKILL.md`.
+const projectAgent = await init({
+  id: `bug-fix-${issueNumber}`,
+  sandbox: daytona(sandbox), // no cleanup option — setupAgent owns teardown
+  cwd: projectDir,
+  model,
+})
+const session = await projectAgent.session()
 
-  const client = new Daytona({ apiKey: requireEnv(env, 'DAYTONA_API_KEY') })
-  // Set GH_TOKEN as a sandbox-level env var so every gh/git invocation inside
-  // the sandbox inherits it without scope-validation surprises.
-  const sandbox = await client.create({
-    envVars: { GH_TOKEN: requireEnv(env, 'GITHUB_TOKEN') },
-  })
-
-  const setupAgent = await init({
-    sandbox: daytona(sandbox, { cleanup: true }),
-    model: env.MODEL ?? 'anthropic/claude-sonnet-4-6',
-  })
-  const setup = await setupAgent.session()
-
-  // Configure git's credential helper. We avoid `gh auth login --with-token`
-  // because it requires the `read:org` scope, which classic `repo`-only PATs
-  // don't include. `gh auth setup-git` only edits git config and works as
-  // long as GH_TOKEN is in the env.
-  await setup.shell('gh auth setup-git')
-  await setup.shell(`gh repo clone ${repo} /home/daytona/project`)
-  const packageManager = await detectPackageManager(setup)
-  await setup.shell(`${packageManager} install`, { cwd: '/home/daytona/project' })
-
-  // Issues live on the upstream parent (forks have issues disabled by default).
-  const issueRepo =
-    parsed.issueRepo ?? env.ISSUE_REPO ?? (await detectUpstream(setup, repo)) ?? repo
-  const issueData = await setup.shell(
-    `gh issue view ${issueNumber} --repo ${issueRepo} --json title,body,number,url`,
-  )
-
-  const projectAgent = await init({
-    id: `bug-fix-${issueNumber}`,
-    sandbox: daytona(sandbox),
-    cwd: '/home/daytona/project',
-    model: env.MODEL ?? 'anthropic/claude-sonnet-4-6',
-  })
-  const session = await projectAgent.session()
-
-  return await session.skill('bug-fix', {
-    args: { issueNumber, issueData: issueData.stdout, repo, issueRepo, packageManager },
-    role: 'test-driven-developer',
-    result: ResultSchema,
-  })
-}
+return await session.skill('bug-fix', {
+  args: { issueNumber, issueData, repo, issueRepo, packageManager },
+  role: 'test-driven-developer',
+  result: ResultSchema,
+})
 ```
 
 A few details worth highlighting:
@@ -284,7 +258,7 @@ A few details worth highlighting:
 - **No `AGENTS.md` upload.** Flue would happily read an `AGENTS.md` from the session cwd and prepend it to every system prompt, but that file lives at the cloned repo's root and uploading our own would overwrite the target's `AGENTS.md` if it has one. Every guardrail we'd put there (TDD discipline, minimal change, match host code style) is already covered by the `test-driven-developer` role and the `bug-fix` skill body, so the harness ships nothing at the worktree root.
 - **`.git/info/exclude` keeps the worktree clean.** After uploading `SKILL.md` to `.agents/skills/bug-fix/`, the orchestrator appends `.agents/` to the cloned repo's `.git/info/exclude` (git's local-only ignore — does NOT modify the target's `.gitignore`). The harness scaffolding stays invisible to `git status` and never accidentally lands in a commit.
 - **Two repos, one workflow.** `repo` is the user's fork (where branches and the PR land); `issueRepo` is where the issue lives (the upstream parent, auto-detected via `gh repo view --json parent` because GitHub disables issues on forks).
-- **Package-manager auto-detection.** The setup phase reads the project's lockfile (`pnpm-lock.yaml`, `yarn.lock`, `bun.lock(b)`, or falls back to `npm`) and uses the matching tool throughout. The detected name is also passed into the skill so the LLM uses the right test command.
+- **Package-manager auto-detection.** The setup phase detects the package manager from the project's lockfile, installs it if missing, and passes the name into the skill so the LLM uses the right test command.
 - **Structured input and output.** The `PayloadSchema` validates the incoming HTTP body with [Valibot](https://valibot.dev/), and `ResultSchema` forces the agent to return a typed `{ branch, prUrl, testFile, filesChanged, summary }` object you can pipe into downstream automation.
 - **Skills, not prompts.** Instead of cramming the TDD workflow into a string, the agent calls a named skill and supplies a role. The actual logic lives in markdown.
 
@@ -359,7 +333,7 @@ curl -N -X POST http://localhost:3583/agents/bug-fix/run-1 \
   -d '{}'
 ```
 
-Or use Flue's one-shot CLI invoker, which handles SSE for you and prints the result to stdout (this is what `npm run run` calls):
+Or use Flue's one-shot CLI invoker, which handles SSE for you and prints the result to stdout:
 
 ```bash
 npm run run
@@ -391,16 +365,6 @@ So same-id reuse persists the **conversation**, not the **sandbox**. For a chat-
 - One unique `<id>` per run (`run-1`, `run-2`, or `$(uuidgen)`). Treat each invocation as fresh.
 - Pick a stable `<id>` only if you want resumability (e.g., agent crashed mid-fix and you want the LLM to remember its prior reasoning). You'd also need to extend the orchestrator to skip sandbox setup when a sandbox already exists for that id.
 
-**Where session state lives:**
-
-| Runtime target | Storage | Survives restarts? |
-|---|---|---|
-| `flue dev --target node` (this guide) | In-memory, default `SessionStore` | No: stop the dev server and all sessions are gone |
-| `flue dev --target cloudflare` | Cloudflare Durable Objects | Yes: across requests, deploys, weeks/months |
-| Your own `init({ persist: customStore })` | Whatever you back it with (Redis, Postgres, etc.) | Up to you |
-
-For local development against `flue dev` on Node, sessions are wiped every time you Ctrl+C the dev server, so reusing an `<id>` only matters within one server lifetime.
-
 ### 4. Example Walkthrough
 
 Let's trace what happens when you trigger the agent against [`vercel/ms`](https://github.com/vercel/ms) issue [#284](https://github.com/vercel/ms/issues/284). The reporter found that `ms()` violates its own roundtrip contract: `ms(Number.MAX_VALUE)` returns a string in scientific notation that `parse()` can no longer read back.
@@ -411,7 +375,7 @@ To watch the agent work tool-by-tool, use Flue's one-shot CLI invoker (already w
 npm run run
 ```
 
-That runs `flue run bug-fix --target node --id run-1 --env .env --payload '{}'`, which builds, spawns an ephemeral server, POSTs with `Accept: text/event-stream`, and decorates each agent event into a readable line on stderr. Below is a trimmed real run against a fork of `vercel/ms`. The orchestrator's `[bug-fix] ...` lines come from our setup phase; the `[flue] tool:start/done ...` lines and inline italicized text are the LLM's tool calls and reasoning streamed back via SSE:
+That runs `flue run bug-fix --target node --id run-1 --env .env --payload '{}'`, which builds, spawns an ephemeral server, POSTs with `Accept: text/event-stream`, and decorates each agent event into a readable progress line. Below is a trimmed real run against a fork of `vercel/ms`. The orchestrator's `[bug-fix] ...` lines come from our setup phase; the `[flue] tool:start/done ...` lines and inline italicized text are the LLM's tool calls and reasoning streamed back via SSE:
 
 ```
 [bug-fix] target: your-username/your-fork#284 (model: anthropic/claude-sonnet-4-6)

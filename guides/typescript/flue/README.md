@@ -2,7 +2,7 @@
 
 ## Overview
 
-This example builds an autonomous bug-fix agent with [Flue](https://flueframework.com/) and [Daytona](https://www.daytona.io/). Given a GitHub issue URL, the agent:
+This example builds an autonomous bug-fix agent with [Flue](https://flueframework.com/) and [Daytona](https://www.daytona.io/). Given a GitHub issue, the agent:
 
 1. Spins up a fresh Daytona sandbox.
 2. Clones the target repository (your fork) into the sandbox.
@@ -12,7 +12,7 @@ This example builds an autonomous bug-fix agent with [Flue](https://flueframewor
 6. Runs the full test suite to verify the fix.
 7. Pushes a new branch to your fork and opens a pull request via `gh`.
 
-The whole TDD loop runs inside an isolated Daytona sandbox, so the agent can install dependencies and execute arbitrary code from any repository without ever touching your host machine. A sandbox is non-negotiable for this workflow: the agent clones unknown code, installs unknown dependencies, and executes the project's test suite. None of that should ever run locally on your laptop. Daytona gives every run a clean Linux environment and tears it down when done.
+The whole TDD loop runs inside an isolated Daytona sandbox, so the agent can install dependencies and execute arbitrary code from any repository without ever touching your host machine. A sandbox is essential for this workflow: the agent clones unknown code, installs unknown dependencies, and executes the project's test suite — operations that need strict isolation from your host. Daytona provisions a fresh isolated environment for every run and tears it down on completion, so an untrusted repository can never affect your host.
 
 ## Features
 
