@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger } from '@nestjs/common'
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
@@ -43,6 +43,11 @@ export class JobStateHandlerService {
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly eventEmitter: EventEmitter2,
+    // SnapshotService and JobStateHandlerService live in the same module and
+    // their import graph crosses; without forwardRef, `SnapshotService` is
+    // `undefined` at the moment `@Injectable()` decorates this class, which
+    // collapses the design:paramtypes entry to `Object` and breaks Nest DI.
+    @Inject(forwardRef(() => SnapshotService))
     private readonly snapshotService: SnapshotService,
   ) {}
 
