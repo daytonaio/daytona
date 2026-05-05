@@ -521,18 +521,19 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           return
         }
 
-        // ERROR → STOPPED activates disk usage; reserve so the v2 job-completion handler's
-        // decrement on failure is balanced. v0 path doesn't use the handler but keep parity.
-        const { diskIncremented } = await this.organizationUsageService.incrementPendingSandboxUsage(
-          sandbox.organizationId,
-          sandbox.region,
-          0,
-          0,
-          sandbox.disk,
-          sandbox.id,
-        )
-
+        let diskIncremented = false
         try {
+          // Reserve disk for the ERROR → STOPPED transition.
+          const result = await this.organizationUsageService.incrementPendingSandboxUsage(
+            sandbox.organizationId,
+            sandbox.region,
+            0,
+            0,
+            sandbox.disk,
+            sandbox.id,
+          )
+          diskIncremented = result.diskIncremented
+
           await runnerAdapter.recoverSandbox(sandbox, true)
 
           if (runner.apiVersion !== '2') {
@@ -547,6 +548,9 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               whereCondition: { pending: false, state: sandbox.state },
             })
           }
+
+          // Skip this sandbox on subsequent polls until the v2 job resolves.
+          await this.redis.set(redisKey, '1', 'EX', SandboxManager.DRAINING_RECOVER_TTL_SECONDS)
 
           this.logger.log(`Recovered sandbox ${sandbox.id} on draining runner ${runnerId}`)
         } catch (e) {

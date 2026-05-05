@@ -502,6 +502,15 @@ export class JobStateHandlerService {
 
       const skipStart = job.getPayload<{ skipStart?: boolean }>()?.skipStart ?? true
 
+      // Bail if the user changed intent mid-job (e.g. /destroy, /archive).
+      const expectedDesiredState = skipStart ? SandboxDesiredState.STOPPED : SandboxDesiredState.STARTED
+      if (sandbox.desiredState !== expectedDesiredState) {
+        this.logger.warn(
+          `Sandbox ${sandboxId} desiredState ${sandbox.desiredState} no longer matches RECOVER_SANDBOX job ${job.id} intent (expected ${expectedDesiredState}); skipping state update`,
+        )
+        return
+      }
+
       const updateData: Partial<Sandbox> = {}
 
       if (job.status === JobStatus.COMPLETED) {
