@@ -89,4 +89,4 @@ Return a structured result with these fields:
 - The fix must be minimal. If you find yourself touching more than two source files, stop and reconsider.
 - Never disable, skip, or delete pre-existing tests.
 - Never use `--force` on git push. Push to a fresh branch.
-- If the issue is ambiguous or you cannot reproduce it after one honest attempt, return early with `prUrl: ""` and explain in `summary` what context is missing. Do not fabricate.
+- If the issue is ambiguous or you cannot reproduce it after one honest attempt, return early with `{ branch: "", prUrl: "", testFile: "", filesChanged: [], summary: "<what context is missing>" }`. Do not fabricate.
