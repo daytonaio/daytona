@@ -168,6 +168,13 @@ const columns: ColumnDef<SnapshotDto>[] = [
           </Badge>
         )
       }
+      if (!snapshot.imageName && !snapshot.buildInfo) {
+        return (
+          <Badge variant="secondary" className="rounded-sm px-1 font-medium">
+            FROM SANDBOX
+          </Badge>
+        )
+      }
       return <div className="truncate">{snapshot.imageName}</div>
     },
   },
