@@ -1,3 +1,7 @@
+/*
+ * Copyright Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import type { FlueContext } from '@flue/sdk/client'
 import { Daytona } from '@daytona/sdk'
 import { daytona } from '../connectors/daytona'
