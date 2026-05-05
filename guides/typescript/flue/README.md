@@ -109,6 +109,8 @@ curl -X POST http://localhost:3583/agents/bug-fix/run-1 \
   }'
 ```
 
+Replace `your-username/your-fork` with your fork's slug and `<number>` with the issue number you want to target.
+
 The payload always wins over `.env`, so you can keep one default in `.env` and freely override per request when running multiple targets.
 
 Watch the first terminal. You'll see the agent provision the sandbox, clone, write a failing test, fix the bug, run tests, and open a PR.

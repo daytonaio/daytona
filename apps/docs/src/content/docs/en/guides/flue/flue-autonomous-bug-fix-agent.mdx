@@ -144,6 +144,8 @@ curl -X POST http://localhost:3583/agents/bug-fix/run-1 \
   }'
 ```
 
+Replace `your-username/your-fork` with your fork's slug and `<number>` with the issue number you want to target.
+
 The first terminal streams the orchestrator's setup logs as the agent runs. When it finishes, the response body contains the structured result.
 
 **Option C: one-shot with live tool tracing** (recommended when iterating or debugging):
@@ -354,7 +356,7 @@ curl -N -X POST http://localhost:3583/agents/bug-fix/run-1 \
   -d '{}'
 ```
 
-Or use Flue's one-shot CLI invoker, which handles SSE for you and prints the result to stdout (this is what `npm run` calls):
+Or use Flue's one-shot CLI invoker, which handles SSE for you and prints the result to stdout (this is what `npm run run` calls):
 
 ```bash
 npm run run

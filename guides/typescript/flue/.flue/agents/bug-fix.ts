@@ -7,12 +7,21 @@ import { Daytona } from '@daytona/sdk'
 import { daytona } from '../connectors/daytona'
 import * as v from 'valibot'
 import { readFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
-import { dirname, resolve } from 'node:path'
+import { resolve } from 'node:path'
 
 export const triggers = { webhook: true }
 
-const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const projectRoot = process.cwd()
+
+const REPO_SLUG = /^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/
+function assertRepoSlug(value: string, label: string): void {
+  if (!REPO_SLUG.test(value)) {
+    throw new Error(
+      `Invalid ${label}: ${JSON.stringify(value)}. Must be in '<owner>/<repo>' form ` +
+        `(alphanumerics, dots, hyphens, underscores only).`,
+    )
+  }
+}
 
 const PayloadSchema = v.object({
   repo: v.optional(v.string()),
@@ -39,6 +48,7 @@ function requireEnv(env: Record<string, string | undefined>, key: string): strin
 export default async function ({ init, payload, env }: FlueContext) {
   const parsed = v.parse(PayloadSchema, payload ?? {})
   const repo = parsed.repo ?? requireEnv(env, 'DEMO_REPO')
+  assertRepoSlug(repo, 'repo')
   const issueNumber = parsed.issueNumber ?? Number.parseInt(requireEnv(env, 'DEMO_ISSUE'), 10)
   if (!Number.isInteger(issueNumber) || issueNumber <= 0) {
     throw new Error(`Invalid issueNumber: ${issueNumber} (must be a positive integer)`)
@@ -136,6 +146,7 @@ export default async function ({ init, payload, env }: FlueContext) {
     const detectedParent = parentLookup.stdout.trim()
     issueRepo = detectedParent || repo
   }
+  assertRepoSlug(issueRepo, 'issueRepo')
   console.log(`[bug-fix] resolving issue source: ${issueRepo}`)
 
   console.log(`[bug-fix] fetching issue #${issueNumber} from ${issueRepo}...`)
