@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { TimestampTooltip } from '@/components/TimestampTooltip'
 import { CopyButton } from '@/components/CopyButton'
+import { TimestampTooltip } from '@/components/TimestampTooltip'
 import { getRelativeTimeString } from '@/lib/utils'
 import { SnapshotDto, SnapshotState } from '@daytona/api-client'
 import { ColumnDef, RowData, Table } from '@tanstack/react-table'
@@ -146,12 +146,12 @@ const columns: ColumnDef<SnapshotDto>[] = [
       return (
         <div className="flex items-center gap-1 min-w-0 group/copy-button">
           <span className="truncate">{snapshot.name}</span>
-          <CopyButton value={snapshot.name} size="icon-xs" autoHide tooltipText="Copy name" />
           {snapshot.general && (
             <Badge variant="secondary" className="ml-1 shrink-0">
               System
             </Badge>
           )}
+          <CopyButton value={snapshot.name} size="icon-xs" autoHide tooltipText="Copy name" />
         </div>
       )
     },
