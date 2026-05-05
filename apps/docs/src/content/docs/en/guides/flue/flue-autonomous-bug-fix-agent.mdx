@@ -26,7 +26,7 @@ A successful run against `vercel/ms` issue #284 looks like this in the `flue dev
 [bug-fix] installing project dependencies...
 [bug-fix] resolving issue source: vercel/ms
 [bug-fix] fetching issue #284 from vercel/ms...
-[bug-fix] copying skill + AGENTS.md into sandbox...
+[bug-fix] uploading skill into sandbox + excluding it from git...
 [bug-fix] running TDD workflow (reproduce → fix → PR)...
 [bug-fix] PR opened: https://github.com/your-username/your-fork/pull/1
 [bug-fix] branch: flue/fix-issue-284
@@ -279,7 +279,9 @@ export default async function ({ init, payload, env }: FlueContext) {
 
 A few details worth highlighting:
 
-- **Two agents, one sandbox.** The setup agent installs `gh`, configures auth, clones the repo, and installs dependencies. A second agent (given a different `id` and `cwd`) operates inside the cloned repo and discovers `AGENTS.md` and skills from there. Both share the same Daytona sandbox.
+- **Two agents, one sandbox.** The setup agent installs `gh`, configures auth, clones the repo, and installs dependencies. A second agent (given a different `id` and `cwd`) operates inside the cloned repo and discovers our `bug-fix` skill from `.agents/skills/bug-fix/SKILL.md`, which the orchestrator uploads into the cloned worktree just before init. Both agents share the same Daytona sandbox.
+- **No `AGENTS.md` upload.** Flue would happily read an `AGENTS.md` from the session cwd and prepend it to every system prompt, but that file lives at the cloned repo's root and uploading our own would overwrite the target's `AGENTS.md` if it has one. Every guardrail we'd put there (TDD discipline, minimal change, match host code style) is already covered by the `test-driven-developer` role and the `bug-fix` skill body, so the harness ships nothing at the worktree root.
+- **`.git/info/exclude` keeps the worktree clean.** After uploading `SKILL.md` to `.agents/skills/bug-fix/`, the orchestrator appends `.agents/` to the cloned repo's `.git/info/exclude` (git's local-only ignore — does NOT modify the target's `.gitignore`). The harness scaffolding stays invisible to `git status` and never accidentally lands in a commit.
 - **Two repos, one workflow.** `repo` is the user's fork (where branches and the PR land); `issueRepo` is where the issue lives (the upstream parent, auto-detected via `gh repo view --json parent` because GitHub disables issues on forks).
 - **Package-manager auto-detection.** The setup phase reads the project's lockfile (`pnpm-lock.yaml`, `yarn.lock`, `bun.lock(b)`, or falls back to `npm`) and uses the matching tool throughout. The detected name is also passed into the skill so the LLM uses the right test command.
 - **Structured input and output.** The `PayloadSchema` validates the incoming HTTP body with [Valibot](https://valibot.dev/), and `ResultSchema` forces the agent to return a typed `{ branch, prUrl, testFile, filesChanged, summary }` object you can pipe into downstream automation.
@@ -421,14 +423,12 @@ That runs `flue run bug-fix --target node --id run-1 --env .env --payload '{}'`,
 [bug-fix] installing project dependencies...
 [bug-fix] resolving issue source: vercel/ms
 [bug-fix] fetching issue #284 from vercel/ms...
-[bug-fix] copying skill + AGENTS.md into sandbox...
+[bug-fix] uploading skill into sandbox + excluding it from git...
 [bug-fix] running TDD workflow (reproduce → fix → PR)...
 [flue] Agent started
   I'll work through this systematically following the test-driven approach.
 [flue] tool:start  read  /home/daytona/project/package.json
-[flue] tool:start  read  /home/daytona/project/AGENTS.md
 [flue] tool:done   read  (1477 chars)
-[flue] tool:done   read  (626 chars)
 [flue] tool:start  glob  **/*.test.*
 [flue] tool:done   glob
 [flue] tool:start  read  /home/daytona/project/src/index.ts

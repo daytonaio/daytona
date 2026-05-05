@@ -164,12 +164,11 @@ export default async function ({ init, payload, env }: FlueContext) {
     )
   }
 
-  console.log('[bug-fix] copying skill + AGENTS.md into sandbox...')
+  console.log('[bug-fix] uploading skill into sandbox + excluding it from git...')
   const skillContent = readFileSync(resolve(projectRoot, '.agents/skills/bug-fix/SKILL.md'), 'utf-8')
-  const agentsContent = readFileSync(resolve(projectRoot, 'AGENTS.md'), 'utf-8')
   await setup.shell(`mkdir -p ${projectDir}/.agents/skills/bug-fix`)
   await sandbox.fs.uploadFile(Buffer.from(skillContent, 'utf-8'), `${projectDir}/.agents/skills/bug-fix/SKILL.md`)
-  await sandbox.fs.uploadFile(Buffer.from(agentsContent, 'utf-8'), `${projectDir}/AGENTS.md`)
+  await setup.shell(`echo '.agents/' >> ${projectDir}/.git/info/exclude`)
 
   const projectAgent = await init({
     id: `bug-fix-${issueNumber}`,

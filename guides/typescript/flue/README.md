@@ -157,7 +157,8 @@ Use this for the best introspection into what the LLM is doing tool-by-tool; use
                 │     ├─ install deps (pnpm/yarn/bun/npm)         │
                 │     ├─ resolve issue source (fork's upstream)   │
                 │     ├─ fetch issue body via gh                  │
-                │     └─ upload SKILL.md + AGENTS.md to sandbox   │
+                │     ├─ upload SKILL.md into project sandbox     │
+                │     └─ exclude .agents/ via .git/info/exclude   │
                 │     │                                           │
                 │     ▼                                           │
                 │  session.skill('bug-fix', { args, role, ... })  │
@@ -186,9 +187,6 @@ Use this for the best introspection into what the LLM is doing tool-by-tool; use
 guides/typescript/flue/
 ├── .env.example
 ├── .gitignore
-├── AGENTS.md                 # repo-level guardrails — Flue reads this from the
-│                             #   session cwd at runtime and prepends it to the
-│                             #   LLM's system prompt. Don't delete.
 ├── package.json
 ├── tsconfig.json
 ├── README.md                 # this file
@@ -198,12 +196,14 @@ guides/typescript/flue/
 │   ├── connectors/
 │   │   └── daytona.ts        # adapts Daytona SDK to Flue's SandboxFactory
 │   └── roles/
-│       └── test-driven-developer.md
+│       └── test-driven-developer.md   # subagent persona (TDD principles)
 └── .agents/
     └── skills/
         └── bug-fix/
             └── SKILL.md      # the TDD workflow (markdown, not code)
 ```
+
+The harness is intentionally minimal: a TypeScript orchestrator (`bug-fix.ts`), a Flue-spec connector (`daytona.ts`), one role markdown, and one skill markdown. There is **no `AGENTS.md`** at the guide root — Flue's runtime would prepend it to the LLM's system prompt for every agent call, but every guardrail it would contain (TDD discipline, minimal change, match host code style, etc.) is already covered by the `test-driven-developer` role and the `bug-fix` skill body. Adding `AGENTS.md` would be redundant and would also overwrite the target repository's `AGENTS.md` if it has one.
 
 ### Why split logic between `.ts` and `.md`?
 
@@ -224,7 +224,7 @@ A successful run against `vercel/ms` issue #284 produces output like this in the
 [bug-fix] installing project dependencies...
 [bug-fix] resolving issue source: vercel/ms
 [bug-fix] fetching issue #284 from vercel/ms...
-[bug-fix] copying skill + AGENTS.md into sandbox...
+[bug-fix] uploading skill into sandbox + excluding it from git...
 [bug-fix] running TDD workflow (reproduce → fix → PR)...
 [bug-fix] PR opened: https://github.com/your-username/your-fork/pull/1
 [bug-fix] branch: flue/fix-issue-284
@@ -253,7 +253,7 @@ The PR (and the underlying commit) are authored under the GitHub account that ow
 
 - **`gh: command not found` after install**: the agent installs `gh` if the sandbox image lacks it. If installation fails, switch to a Daytona snapshot that includes `gh` (or extend the install fallback in `bug-fix.ts`).
 - **`Failed to clone` errors**: make sure the `repo` payload field points at _your fork_ (e.g. `your-username/your-fork`), not the upstream, and that your `GITHUB_TOKEN` is a classic PAT with the `repo` scope.
-- **Test framework not detected**: the skill instructs the agent to read `package.json` and one existing test file. If the agent picks the wrong runner, surface this in your `AGENTS.md`.
+- **Test framework not detected**: the skill instructs the agent to read `package.json` and one existing test file. If the agent picks the wrong runner, tighten the Phase 1 instructions in `.agents/skills/bug-fix/SKILL.md`.
 - **PR not opened**: check that your fork has push protection disabled for branches matching `flue/*`, and that the token user is the fork owner.
 
 ## Cleanup
