@@ -25,7 +25,7 @@ type AdminCreateRunner struct {
 	Name string `json:"name"`
 	ApiKey string `json:"apiKey"`
 	// The api version of the runner to create
-	ApiVersion string `json:"apiVersion" validate:"regexp=^(0|2)$"`
+	ApiVersion string `json:"apiVersion" validate:"regexp=^(0|2|3)$"`
 	// The domain of the runner
 	Domain *string `json:"domain,omitempty"`
 	// The API URL of the runner

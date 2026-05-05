@@ -6,6 +6,26 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, IsNull, Not } from 'typeorm'
+import { create, toJson } from '@bufbuild/protobuf'
+import {
+  CreateSandboxPayloadSchema,
+  CreateSandboxResultSchema,
+  StartSandboxPayloadSchema,
+  StartSandboxResultSchema,
+  StopSandboxPayloadSchema,
+  ResizeSandboxPayloadSchema,
+  UpdateNetworkSettingsPayloadSchema,
+  PullSnapshotPayloadSchema,
+  SnapshotInfoResponseSchema,
+  InspectSnapshotInRegistryPayloadSchema,
+  SnapshotDigestResponseSchema,
+  ForkSandboxPayloadSchema,
+  ForkSandboxResultSchema,
+  SnapshotSandboxPayloadSchema,
+  SnapshotSandboxResultSchema,
+  RegistrySchema,
+  VolumeSchema,
+} from '@daytona/runner-proto'
 import {
   RunnerAdapter,
   RunnerInfo,
@@ -25,32 +45,18 @@ import { JobStatus } from '../enums/job-status.enum'
 import { ResourceType } from '../enums/resource-type.enum'
 import { JobService } from '../services/job.service'
 import { SandboxRepository } from '../repositories/sandbox.repository'
-import {
-  CreateSandboxDTO,
-  CreateBackupDTO,
-  BuildSnapshotRequestDTO,
-  PullSnapshotRequestDTO,
-  UpdateNetworkSettingsDTO,
-  InspectSnapshotInRegistryRequest,
-  RecoverSandboxDTO,
-} from '@daytona/runner-api-client'
 import { SnapshotStateError } from '../errors/snapshot-state-error'
 
-/**
- * RunnerAdapterV2 implements RunnerAdapter for v2 runners.
- * Instead of making direct API calls to the runner, it creates jobs in the database
- * that the v2 runner polls and processes asynchronously.
- */
 @Injectable()
-export class RunnerAdapterV2 implements RunnerAdapter {
-  private readonly logger = new Logger(RunnerAdapterV2.name)
-  protected runner: Runner
+export class RunnerAdapterV3 implements RunnerAdapter {
+  private readonly logger = new Logger(RunnerAdapterV3.name)
+  private runner: Runner
 
   constructor(
-    protected readonly sandboxRepository: SandboxRepository,
+    private readonly sandboxRepository: SandboxRepository,
     @InjectRepository(Job)
-    protected readonly jobRepository: Repository<Job>,
-    protected readonly jobService: JobService,
+    private readonly jobRepository: Repository<Job>,
+    private readonly jobService: JobService,
   ) {}
 
   async init(runner: Runner): Promise<void> {
@@ -58,15 +64,14 @@ export class RunnerAdapterV2 implements RunnerAdapter {
   }
 
   async healthCheck(_signal?: AbortSignal): Promise<void> {
-    throw new Error('healthCheck is not supported for V2 runners')
+    throw new Error('healthCheck is not supported for V3 runners')
   }
 
   async runnerInfo(_signal?: AbortSignal): Promise<RunnerInfo> {
-    throw new Error('runnerInfo is not supported for V2 runners')
+    throw new Error('runnerInfo is not supported for V3 runners')
   }
 
   async sandboxInfo(sandboxId: string): Promise<RunnerSandboxInfo> {
-    // Query the sandbox entity
     const sandbox = await this.sandboxRepository.findOne({
       where: { id: sandboxId },
     })
@@ -75,7 +80,6 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       throw new Error(`Sandbox ${sandboxId} not found`)
     }
 
-    // Query for any incomplete jobs for this sandbox to determine transitional state
     const incompleteJob = await this.jobRepository.findOne({
       where: {
         resourceType: ResourceType.SANDBOX,
@@ -86,15 +90,12 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     })
 
     let state = sandbox.state
-
     let daemonVersion: string | undefined = undefined
 
-    // If there's an incomplete job, infer the transitional state from job type
     if (incompleteJob) {
       state = this.inferStateFromJob(incompleteJob, sandbox)
       daemonVersion = incompleteJob.getResultMetadata()?.daemonVersion
     } else {
-      // Look for latest job for this sandbox
       const latestJob = await this.jobRepository.findOne({
         where: {
           resourceType: ResourceType.SANDBOX,
@@ -117,7 +118,6 @@ export class RunnerAdapterV2 implements RunnerAdapter {
   }
 
   private inferStateFromJob(job: Job, sandbox: Sandbox): SandboxState {
-    // Map job types to transitional states
     switch (job.type) {
       case JobType.CREATE_SANDBOX:
         return job.status === JobStatus.COMPLETED ? SandboxState.STARTED : SandboxState.CREATING
@@ -128,9 +128,17 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       case JobType.DESTROY_SANDBOX:
         return job.status === JobStatus.COMPLETED ? SandboxState.DESTROYED : SandboxState.DESTROYING
       default:
-        // For other job types (backup, etc.), return current sandbox state
         return sandbox.state
     }
+  }
+
+  private toRegistryProto(registry: DockerRegistry) {
+    return create(RegistrySchema, {
+      url: registry.url.replace(/^(https?:\/\/)/, ''),
+      username: registry.username ?? undefined,
+      password: registry.password ?? undefined,
+      project: registry.project ?? undefined,
+    })
   }
 
   async createSandbox(
@@ -142,39 +150,38 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     otelEndpoint?: string,
     skipStart?: boolean,
   ): Promise<StartSandboxResponse | undefined> {
-    const payload: CreateSandboxDTO = {
-      id: sandbox.id,
-      userId: sandbox.organizationId,
-      snapshot: snapshotRef,
-      osUser: sandbox.osUser,
-      cpuQuota: sandbox.cpu,
-      gpuQuota: sandbox.gpu,
-      memoryQuota: sandbox.mem,
-      storageQuota: sandbox.disk,
-      env: sandbox.env,
-      registry: registry
-        ? {
-            project: registry.project,
-            url: registry.url.replace(/^(https?:\/\/)/, ''),
-            username: registry.username,
-            password: registry.password,
-          }
-        : undefined,
-      entrypoint: entrypoint,
-      volumes: sandbox.volumes?.map((volume) => ({
-        volumeId: volume.volumeId,
-        mountPath: volume.mountPath,
-        subpath: volume.subpath,
-      })),
-      networkBlockAll: sandbox.networkBlockAll,
-      networkAllowList: sandbox.networkAllowList,
-      metadata: metadata,
-      authToken: sandbox.authToken,
-      otelEndpoint: otelEndpoint,
-      skipStart: skipStart,
-      organizationId: sandbox.organizationId,
-      regionId: sandbox.region,
-    }
+    const payload = toJson(
+      CreateSandboxPayloadSchema,
+      create(CreateSandboxPayloadSchema, {
+        id: sandbox.id,
+        userId: sandbox.organizationId,
+        snapshot: snapshotRef,
+        osUser: sandbox.osUser,
+        cpuQuota: BigInt(sandbox.cpu),
+        gpuQuota: BigInt(sandbox.gpu),
+        memoryQuota: BigInt(sandbox.mem),
+        storageQuota: BigInt(sandbox.disk),
+        env: sandbox.env ?? {},
+        registry: registry ? this.toRegistryProto(registry) : undefined,
+        entrypoint: entrypoint ?? [],
+        volumes:
+          sandbox.volumes?.map((volume) =>
+            create(VolumeSchema, {
+              volumeId: volume.volumeId,
+              mountPath: volume.mountPath,
+              subpath: volume.subpath,
+            }),
+          ) ?? [],
+        networkBlockAll: sandbox.networkBlockAll,
+        networkAllowList: sandbox.networkAllowList,
+        metadata: metadata ?? {},
+        authToken: sandbox.authToken,
+        otelEndpoint: otelEndpoint,
+        skipStart: skipStart,
+        organizationId: sandbox.organizationId,
+        regionId: sandbox.region,
+      }),
+    )
 
     await this.jobService.createJob(
       null,
@@ -182,12 +189,12 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       this.runner.id,
       ResourceType.SANDBOX,
       sandbox.id,
-      payload,
+      payload as Record<string, any>,
+      CreateSandboxPayloadSchema.typeName,
+      CreateSandboxResultSchema.typeName,
     )
 
     this.logger.debug(`Created CREATE_SANDBOX job for sandbox ${sandbox.id} on runner ${this.runner.id}`)
-
-    // Daemon version will be set in the job result metadata
     return undefined
   }
 
@@ -196,21 +203,41 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     authToken: string,
     metadata?: { [key: string]: string },
   ): Promise<StartSandboxResponse | undefined> {
-    await this.jobService.createJob(null, JobType.START_SANDBOX, this.runner.id, ResourceType.SANDBOX, sandboxId, {
-      authToken,
-      metadata,
-    })
+    const payload = toJson(
+      StartSandboxPayloadSchema,
+      create(StartSandboxPayloadSchema, {
+        authToken,
+        metadata: metadata ?? {},
+      }),
+    )
+
+    await this.jobService.createJob(
+      null,
+      JobType.START_SANDBOX,
+      this.runner.id,
+      ResourceType.SANDBOX,
+      sandboxId,
+      payload as Record<string, any>,
+      StartSandboxPayloadSchema.typeName,
+      StartSandboxResultSchema.typeName,
+    )
 
     this.logger.debug(`Created START_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
-
-    // Daemon version will be set in the job result metadata
     return undefined
   }
 
   async stopSandbox(sandboxId: string, force?: boolean): Promise<void> {
-    await this.jobService.createJob(null, JobType.STOP_SANDBOX, this.runner.id, ResourceType.SANDBOX, sandboxId, {
-      force,
-    })
+    const payload = toJson(StopSandboxPayloadSchema, create(StopSandboxPayloadSchema, { force }))
+
+    await this.jobService.createJob(
+      null,
+      JobType.STOP_SANDBOX,
+      this.runner.id,
+      ResourceType.SANDBOX,
+      sandboxId,
+      payload as Record<string, any>,
+      StopSandboxPayloadSchema.typeName,
+    )
 
     this.logger.debug(`Created STOP_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }
@@ -221,108 +248,22 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     this.logger.debug(`Created DESTROY_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }
 
-  async recoverSandbox(sandbox: Sandbox): Promise<void> {
-    const recoverSandboxDTO: RecoverSandboxDTO = {
-      userId: sandbox.organizationId,
-      snapshot: sandbox.snapshot,
-      osUser: sandbox.osUser,
-      cpuQuota: sandbox.cpu,
-      gpuQuota: sandbox.gpu,
-      memoryQuota: sandbox.mem,
-      storageQuota: sandbox.disk,
-      env: sandbox.env,
-      volumes: sandbox.volumes?.map((volume) => ({
-        volumeId: volume.volumeId,
-        mountPath: volume.mountPath,
-        subpath: volume.subpath,
-      })),
-      networkBlockAll: sandbox.networkBlockAll,
-      networkAllowList: sandbox.networkAllowList,
-      errorReason: sandbox.errorReason,
-      backupErrorReason: sandbox.backupErrorReason,
-    }
-    await this.jobService.createJob(
-      null,
-      JobType.RECOVER_SANDBOX,
-      this.runner.id,
-      ResourceType.SANDBOX,
-      sandbox.id,
-      recoverSandboxDTO,
-    )
-
-    this.logger.debug(`Created RECOVER_SANDBOX job for sandbox ${sandbox.id} on runner ${this.runner.id}`)
+  async recoverSandbox(_sandbox: Sandbox): Promise<void> {
+    throw new Error('recoverSandbox is not supported for V3 runners')
   }
 
-  async createBackup(sandbox: Sandbox, backupSnapshotName: string, registry?: DockerRegistry): Promise<void> {
-    const payload: CreateBackupDTO = {
-      snapshot: backupSnapshotName,
-      registry: undefined,
-    }
-
-    if (registry) {
-      payload.registry = {
-        project: registry.project,
-        url: registry.url.replace(/^(https?:\/\/)/, ''),
-        username: registry.username,
-        password: registry.password,
-      }
-    }
-
-    await this.jobService.createJob(
-      null,
-      JobType.CREATE_BACKUP,
-      this.runner.id,
-      ResourceType.SANDBOX,
-      sandbox.id,
-      payload,
-    )
-
-    this.logger.debug(`Created CREATE_BACKUP job for sandbox ${sandbox.id} on runner ${this.runner.id}`)
+  async createBackup(_sandbox: Sandbox, _backupSnapshotName: string, _registry?: DockerRegistry): Promise<void> {
+    throw new Error('createBackup is not supported for V3 runners')
   }
 
   async buildSnapshot(
-    buildInfo: BuildInfo,
-    organizationId?: string,
-    sourceRegistries?: DockerRegistry[],
-    registry?: DockerRegistry,
-    pushToInternalRegistry?: boolean,
+    _buildInfo: BuildInfo,
+    _organizationId?: string,
+    _sourceRegistries?: DockerRegistry[],
+    _registry?: DockerRegistry,
+    _pushToInternalRegistry?: boolean,
   ): Promise<void> {
-    const payload: BuildSnapshotRequestDTO = {
-      snapshot: buildInfo.snapshotRef,
-      dockerfile: buildInfo.dockerfileContent,
-      organizationId: organizationId,
-      context: buildInfo.contextHashes,
-      pushToInternalRegistry: pushToInternalRegistry,
-    }
-
-    if (sourceRegistries) {
-      payload.sourceRegistries = sourceRegistries.map((sourceRegistry) => ({
-        project: sourceRegistry.project,
-        url: sourceRegistry.url.replace(/^(https?:\/\/)/, ''),
-        username: sourceRegistry.username,
-        password: sourceRegistry.password,
-      }))
-    }
-
-    if (registry) {
-      payload.registry = {
-        project: registry.project,
-        url: registry.url.replace(/^(https?:\/\/)/, ''),
-        username: registry.username,
-        password: registry.password,
-      }
-    }
-
-    await this.jobService.createJob(
-      null,
-      JobType.BUILD_SNAPSHOT,
-      this.runner.id,
-      ResourceType.SNAPSHOT,
-      buildInfo.snapshotRef,
-      payload,
-    )
-
-    this.logger.debug(`Created BUILD_SNAPSHOT job for ${buildInfo.snapshotRef} on runner ${this.runner.id}`)
+    throw new Error('buildSnapshot is not supported for V3 runners')
   }
 
   async pullSnapshot(
@@ -332,32 +273,16 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     destinationRef?: string,
     newTag?: string,
   ): Promise<void> {
-    const payload: PullSnapshotRequestDTO = {
-      snapshot: snapshotName,
-      newTag,
-    }
-
-    if (registry) {
-      payload.registry = {
-        project: registry.project,
-        url: registry.url.replace(/^(https?:\/\/)/, ''),
-        username: registry.username,
-        password: registry.password,
-      }
-    }
-
-    if (destinationRegistry) {
-      payload.destinationRegistry = {
-        project: destinationRegistry.project,
-        url: destinationRegistry.url.replace(/^(https?:\/\/)/, ''),
-        username: destinationRegistry.username,
-        password: destinationRegistry.password,
-      }
-    }
-
-    if (destinationRef) {
-      payload.destinationRef = destinationRef
-    }
+    const payload = toJson(
+      PullSnapshotPayloadSchema,
+      create(PullSnapshotPayloadSchema, {
+        snapshot: snapshotName,
+        registry: registry ? this.toRegistryProto(registry) : undefined,
+        destinationRegistry: destinationRegistry ? this.toRegistryProto(destinationRegistry) : undefined,
+        destinationRef,
+        newTag,
+      }),
+    )
 
     await this.jobService.createJob(
       null,
@@ -365,7 +290,9 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       this.runner.id,
       ResourceType.SNAPSHOT,
       destinationRef || snapshotName,
-      payload,
+      payload as Record<string, any>,
+      PullSnapshotPayloadSchema.typeName,
+      SnapshotInfoResponseSchema.typeName,
     )
 
     this.logger.debug(`Created PULL_SNAPSHOT job for ${snapshotName} on runner ${this.runner.id}`)
@@ -378,8 +305,6 @@ export class RunnerAdapterV2 implements RunnerAdapter {
   }
 
   async snapshotExists(snapshotRef: string): Promise<boolean> {
-    // Find the latest job for this snapshot on this runner
-    // Do not include INSPECT_SNAPSHOT_IN_REGISTRY
     const latestJob = await this.jobRepository.findOne({
       where: [
         {
@@ -392,22 +317,18 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       order: { createdAt: 'DESC' },
     })
 
-    // If no job exists, snapshot doesn't exist
     if (!latestJob) {
       return false
     }
 
-    // If the latest job is a REMOVE_SNAPSHOT, the snapshot no longer exists
     if (latestJob.type === JobType.REMOVE_SNAPSHOT) {
       return false
     }
 
-    // If the latest job is PULL_SNAPSHOT or BUILD_SNAPSHOT, check if it completed successfully
     if (latestJob.type === JobType.PULL_SNAPSHOT || latestJob.type === JobType.BUILD_SNAPSHOT) {
       return latestJob.status === JobStatus.COMPLETED
     }
 
-    // For any other job type, snapshot doesn't exist
     return false
   }
 
@@ -433,12 +354,30 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     switch (latestJob.status) {
       case JobStatus.COMPLETED:
         if (latestJob.type === JobType.PULL_SNAPSHOT || latestJob.type === JobType.BUILD_SNAPSHOT) {
+          const missingFields: string[] = []
+          if (metadata?.sizeGB === undefined) {
+            missingFields.push('sizeGB')
+          }
+          if (metadata?.entrypoint === undefined) {
+            missingFields.push('entrypoint')
+          }
+          if (metadata?.cmd === undefined) {
+            missingFields.push('cmd')
+          }
+          if (metadata?.hash === undefined) {
+            missingFields.push('hash')
+          }
+          if (missingFields.length > 0) {
+            throw new Error(
+              `Snapshot ${snapshotRef} on runner ${this.runner.id} has incomplete result metadata: missing ${missingFields.join(', ')}`,
+            )
+          }
           return {
             name: latestJob.resourceId,
-            sizeGB: metadata?.sizeGB,
-            entrypoint: metadata?.entrypoint,
-            cmd: metadata?.cmd,
-            hash: metadata?.hash,
+            sizeGB: metadata.sizeGB,
+            entrypoint: metadata.entrypoint,
+            cmd: metadata.cmd,
+            hash: metadata.hash,
           }
         }
         throw new Error(
@@ -456,17 +395,13 @@ export class RunnerAdapterV2 implements RunnerAdapter {
   }
 
   async inspectSnapshotInRegistry(snapshotName: string, registry?: DockerRegistry): Promise<SnapshotDigestResponse> {
-    const payload: InspectSnapshotInRegistryRequest = {
-      snapshot: snapshotName,
-      registry: registry
-        ? {
-            project: registry.project,
-            url: registry.url.replace(/^(https?:\/\/)/, ''),
-            username: registry.username,
-            password: registry.password,
-          }
-        : undefined,
-    }
+    const payload = toJson(
+      InspectSnapshotInRegistryPayloadSchema,
+      create(InspectSnapshotInRegistryPayloadSchema, {
+        snapshot: snapshotName,
+        registry: registry ? this.toRegistryProto(registry) : undefined,
+      }),
+    )
 
     const job = await this.jobService.createJob(
       null,
@@ -474,12 +409,14 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       this.runner.id,
       ResourceType.SNAPSHOT,
       snapshotName,
-      payload,
+      payload as Record<string, any>,
+      InspectSnapshotInRegistryPayloadSchema.typeName,
+      SnapshotDigestResponseSchema.typeName,
     )
 
     this.logger.debug(`Created INSPECT_SNAPSHOT_IN_REGISTRY job for ${snapshotName} on runner ${this.runner.id}`)
 
-    const waitTimeout = 30 * 1000 // 30 seconds
+    const waitTimeout = 30 * 1000
     const completedJob = await this.jobService.waitJobCompletion(job.id, waitTimeout)
 
     if (!completedJob) {
@@ -494,9 +431,13 @@ export class RunnerAdapterV2 implements RunnerAdapter {
 
     const resultMetadata = completedJob.getResultMetadata()
 
+    if (typeof resultMetadata?.hash !== 'string' || typeof resultMetadata?.sizeGB !== 'number') {
+      throw new Error(`Snapshot ${snapshotName} inspection on runner ${this.runner.id} returned invalid metadata`)
+    }
+
     return {
-      hash: resultMetadata?.hash,
-      sizeGB: resultMetadata?.sizeGB,
+      hash: resultMetadata.hash,
+      sizeGB: resultMetadata.sizeGB,
     }
   }
 
@@ -506,11 +447,14 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     networkAllowList?: string,
     networkLimitEgress?: boolean,
   ): Promise<void> {
-    const payload: UpdateNetworkSettingsDTO = {
-      networkBlockAll: networkBlockAll,
-      networkAllowList: networkAllowList,
-      networkLimitEgress: networkLimitEgress,
-    }
+    const payload = toJson(
+      UpdateNetworkSettingsPayloadSchema,
+      create(UpdateNetworkSettingsPayloadSchema, {
+        networkBlockAll,
+        networkAllowList,
+        networkLimitEgress,
+      }),
+    )
 
     await this.jobService.createJob(
       null,
@@ -518,7 +462,8 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       this.runner.id,
       ResourceType.SANDBOX,
       sandboxId,
-      payload,
+      payload as Record<string, any>,
+      UpdateNetworkSettingsPayloadSchema.typeName,
     )
 
     this.logger.debug(
@@ -526,25 +471,81 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     )
   }
 
-  async forkSandbox(_sourceSandboxId: string, _newSandboxId: string): Promise<void> {
-    throw new Error('forkSandbox is not supported for V2 runners')
+  async forkSandbox(sourceSandboxId: string, newSandboxId: string): Promise<void> {
+    const payload = toJson(
+      ForkSandboxPayloadSchema,
+      create(ForkSandboxPayloadSchema, {
+        sourceSandboxId,
+        newSandboxId,
+      }),
+    )
+
+    await this.jobService.createJob(
+      null,
+      JobType.FORK_SANDBOX,
+      this.runner.id,
+      ResourceType.SANDBOX,
+      newSandboxId,
+      payload as Record<string, any>,
+      ForkSandboxPayloadSchema.typeName,
+      ForkSandboxResultSchema.typeName,
+    )
+
+    this.logger.debug(
+      `Created FORK_SANDBOX job for sandbox ${sourceSandboxId} -> ${newSandboxId} on runner ${this.runner.id}`,
+    )
   }
 
   async createSnapshotFromSandbox(
-    _sandboxId: string,
-    _snapshotName: string,
-    _organizationId: string,
-    _registry?: DockerRegistry,
+    sandboxId: string,
+    snapshotName: string,
+    organizationId: string,
+    registry?: DockerRegistry,
   ): Promise<void> {
-    throw new Error('createSnapshotFromSandbox is not supported for V2 runners')
+    const payload = toJson(
+      SnapshotSandboxPayloadSchema,
+      create(SnapshotSandboxPayloadSchema, {
+        sandboxId,
+        name: snapshotName,
+        organizationId,
+        registry: registry ? this.toRegistryProto(registry) : undefined,
+      }),
+    )
+
+    await this.jobService.createJob(
+      null,
+      JobType.SNAPSHOT_SANDBOX,
+      this.runner.id,
+      ResourceType.SANDBOX,
+      sandboxId,
+      payload as Record<string, any>,
+      SnapshotSandboxPayloadSchema.typeName,
+      SnapshotSandboxResultSchema.typeName,
+    )
+
+    this.logger.debug(`Created SNAPSHOT_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }
 
   async resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void> {
-    await this.jobService.createJob(null, JobType.RESIZE_SANDBOX, this.runner.id, ResourceType.SANDBOX, sandboxId, {
-      cpu,
-      memory,
-      disk,
-    })
+    const payload = toJson(
+      ResizeSandboxPayloadSchema,
+      create(ResizeSandboxPayloadSchema, {
+        cpu: BigInt(cpu ?? 0),
+        gpu: BigInt(0),
+        memory: BigInt(memory ?? 0),
+        disk: BigInt(disk ?? 0),
+      }),
+    )
+
+    await this.jobService.createJob(
+      null,
+      JobType.RESIZE_SANDBOX,
+      this.runner.id,
+      ResourceType.SANDBOX,
+      sandboxId,
+      payload as Record<string, any>,
+      ResizeSandboxPayloadSchema.typeName,
+    )
 
     this.logger.debug(`Created RESIZE_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }

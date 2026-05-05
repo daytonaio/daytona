@@ -14558,7 +14558,7 @@ components:
         apiVersion:
           description: The api version of the runner to create
           example: "2"
-          pattern: ^(0|2)$
+          pattern: ^(0|2|3)$
           type: string
         domain:
           description: The domain of the runner

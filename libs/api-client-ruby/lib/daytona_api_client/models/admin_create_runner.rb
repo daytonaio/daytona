@@ -176,7 +176,7 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "api_version", api_version cannot be nil.')
       end
 
-      pattern = Regexp.new(/^(0|2)$/)
+      pattern = Regexp.new(/^(0|2|3)$/)
       if @api_version !~ pattern
         invalid_properties.push("invalid value for \"api_version\", must conform to the pattern #{pattern}.")
       end
@@ -192,7 +192,7 @@ module DaytonaApiClient
       return false if @name.nil?
       return false if @api_key.nil?
       return false if @api_version.nil?
-      return false if @api_version !~ Regexp.new(/^(0|2)$/)
+      return false if @api_version !~ Regexp.new(/^(0|2|3)$/)
       true
     end
 
@@ -233,7 +233,7 @@ module DaytonaApiClient
         fail ArgumentError, 'api_version cannot be nil'
       end
 
-      pattern = Regexp.new(/^(0|2)$/)
+      pattern = Regexp.new(/^(0|2|3)$/)
       if api_version !~ pattern
         fail ArgumentError, "invalid value for \"api_version\", must conform to the pattern #{pattern}."
       end

@@ -24,79 +24,47 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type JobType int32
-
-const (
-	JobType_JOB_TYPE_UNSPECIFIED      JobType = 0
-	JobType_JOB_TYPE_SNAPSHOT_SANDBOX JobType = 1
-	JobType_JOB_TYPE_FORK_SANDBOX     JobType = 2
-)
-
-// Enum value maps for JobType.
-var (
-	JobType_name = map[int32]string{
-		0: "JOB_TYPE_UNSPECIFIED",
-		1: "JOB_TYPE_SNAPSHOT_SANDBOX",
-		2: "JOB_TYPE_FORK_SANDBOX",
-	}
-	JobType_value = map[string]int32{
-		"JOB_TYPE_UNSPECIFIED":      0,
-		"JOB_TYPE_SNAPSHOT_SANDBOX": 1,
-		"JOB_TYPE_FORK_SANDBOX":     2,
-	}
-)
-
-func (x JobType) Enum() *JobType {
-	p := new(JobType)
-	*p = x
-	return p
+type CreateSandboxPayload struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Id               string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	FromVolumeId     *string                `protobuf:"bytes,2,opt,name=from_volume_id,json=fromVolumeId,proto3,oneof" json:"from_volume_id,omitempty"`
+	UserId           string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Snapshot         string                 `protobuf:"bytes,4,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	OsUser           string                 `protobuf:"bytes,5,opt,name=os_user,json=osUser,proto3" json:"os_user,omitempty"`
+	CpuQuota         int64                  `protobuf:"varint,6,opt,name=cpu_quota,json=cpuQuota,proto3" json:"cpu_quota,omitempty"`
+	GpuQuota         int64                  `protobuf:"varint,7,opt,name=gpu_quota,json=gpuQuota,proto3" json:"gpu_quota,omitempty"`
+	MemoryQuota      int64                  `protobuf:"varint,8,opt,name=memory_quota,json=memoryQuota,proto3" json:"memory_quota,omitempty"`
+	StorageQuota     int64                  `protobuf:"varint,9,opt,name=storage_quota,json=storageQuota,proto3" json:"storage_quota,omitempty"`
+	Env              map[string]string      `protobuf:"bytes,10,rep,name=env,proto3" json:"env,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Registry         *Registry              `protobuf:"bytes,11,opt,name=registry,proto3,oneof" json:"registry,omitempty"`
+	Entrypoint       []string               `protobuf:"bytes,12,rep,name=entrypoint,proto3" json:"entrypoint,omitempty"`
+	Volumes          []*Volume              `protobuf:"bytes,13,rep,name=volumes,proto3" json:"volumes,omitempty"`
+	NetworkBlockAll  *bool                  `protobuf:"varint,14,opt,name=network_block_all,json=networkBlockAll,proto3,oneof" json:"network_block_all,omitempty"`
+	NetworkAllowList *string                `protobuf:"bytes,15,opt,name=network_allow_list,json=networkAllowList,proto3,oneof" json:"network_allow_list,omitempty"`
+	Metadata         map[string]string      `protobuf:"bytes,16,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	AuthToken        *string                `protobuf:"bytes,17,opt,name=auth_token,json=authToken,proto3,oneof" json:"auth_token,omitempty"`
+	OtelEndpoint     *string                `protobuf:"bytes,18,opt,name=otel_endpoint,json=otelEndpoint,proto3,oneof" json:"otel_endpoint,omitempty"`
+	SkipStart        *bool                  `protobuf:"varint,19,opt,name=skip_start,json=skipStart,proto3,oneof" json:"skip_start,omitempty"`
+	OrganizationId   *string                `protobuf:"bytes,20,opt,name=organization_id,json=organizationId,proto3,oneof" json:"organization_id,omitempty"`
+	RegionId         *string                `protobuf:"bytes,21,opt,name=region_id,json=regionId,proto3,oneof" json:"region_id,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
-func (x JobType) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (JobType) Descriptor() protoreflect.EnumDescriptor {
-	return file_runner_v1alpha1_job_proto_enumTypes[0].Descriptor()
-}
-
-func (JobType) Type() protoreflect.EnumType {
-	return &file_runner_v1alpha1_job_proto_enumTypes[0]
-}
-
-func (x JobType) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use JobType.Descriptor instead.
-func (JobType) EnumDescriptor() ([]byte, []int) {
-	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{0}
-}
-
-type Registry struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
-	Username      *string                `protobuf:"bytes,2,opt,name=username,proto3,oneof" json:"username,omitempty"`
-	Password      *string                `protobuf:"bytes,3,opt,name=password,proto3,oneof" json:"password,omitempty"`
-	Project       *string                `protobuf:"bytes,4,opt,name=project,proto3,oneof" json:"project,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Registry) Reset() {
-	*x = Registry{}
+func (x *CreateSandboxPayload) Reset() {
+	*x = CreateSandboxPayload{}
 	mi := &file_runner_v1alpha1_job_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Registry) String() string {
+func (x *CreateSandboxPayload) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Registry) ProtoMessage() {}
+func (*CreateSandboxPayload) ProtoMessage() {}
 
-func (x *Registry) ProtoReflect() protoreflect.Message {
+func (x *CreateSandboxPayload) ProtoReflect() protoreflect.Message {
 	mi := &file_runner_v1alpha1_job_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -108,35 +76,826 @@ func (x *Registry) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Registry.ProtoReflect.Descriptor instead.
-func (*Registry) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateSandboxPayload.ProtoReflect.Descriptor instead.
+func (*CreateSandboxPayload) Descriptor() ([]byte, []int) {
 	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Registry) GetUrl() string {
+func (x *CreateSandboxPayload) GetId() string {
 	if x != nil {
-		return x.Url
+		return x.Id
 	}
 	return ""
 }
 
-func (x *Registry) GetUsername() string {
-	if x != nil && x.Username != nil {
-		return *x.Username
+func (x *CreateSandboxPayload) GetFromVolumeId() string {
+	if x != nil && x.FromVolumeId != nil {
+		return *x.FromVolumeId
 	}
 	return ""
 }
 
-func (x *Registry) GetPassword() string {
-	if x != nil && x.Password != nil {
-		return *x.Password
+func (x *CreateSandboxPayload) GetUserId() string {
+	if x != nil {
+		return x.UserId
 	}
 	return ""
 }
 
-func (x *Registry) GetProject() string {
-	if x != nil && x.Project != nil {
-		return *x.Project
+func (x *CreateSandboxPayload) GetSnapshot() string {
+	if x != nil {
+		return x.Snapshot
+	}
+	return ""
+}
+
+func (x *CreateSandboxPayload) GetOsUser() string {
+	if x != nil {
+		return x.OsUser
+	}
+	return ""
+}
+
+func (x *CreateSandboxPayload) GetCpuQuota() int64 {
+	if x != nil {
+		return x.CpuQuota
+	}
+	return 0
+}
+
+func (x *CreateSandboxPayload) GetGpuQuota() int64 {
+	if x != nil {
+		return x.GpuQuota
+	}
+	return 0
+}
+
+func (x *CreateSandboxPayload) GetMemoryQuota() int64 {
+	if x != nil {
+		return x.MemoryQuota
+	}
+	return 0
+}
+
+func (x *CreateSandboxPayload) GetStorageQuota() int64 {
+	if x != nil {
+		return x.StorageQuota
+	}
+	return 0
+}
+
+func (x *CreateSandboxPayload) GetEnv() map[string]string {
+	if x != nil {
+		return x.Env
+	}
+	return nil
+}
+
+func (x *CreateSandboxPayload) GetRegistry() *Registry {
+	if x != nil {
+		return x.Registry
+	}
+	return nil
+}
+
+func (x *CreateSandboxPayload) GetEntrypoint() []string {
+	if x != nil {
+		return x.Entrypoint
+	}
+	return nil
+}
+
+func (x *CreateSandboxPayload) GetVolumes() []*Volume {
+	if x != nil {
+		return x.Volumes
+	}
+	return nil
+}
+
+func (x *CreateSandboxPayload) GetNetworkBlockAll() bool {
+	if x != nil && x.NetworkBlockAll != nil {
+		return *x.NetworkBlockAll
+	}
+	return false
+}
+
+func (x *CreateSandboxPayload) GetNetworkAllowList() string {
+	if x != nil && x.NetworkAllowList != nil {
+		return *x.NetworkAllowList
+	}
+	return ""
+}
+
+func (x *CreateSandboxPayload) GetMetadata() map[string]string {
+	if x != nil {
+		return x.Metadata
+	}
+	return nil
+}
+
+func (x *CreateSandboxPayload) GetAuthToken() string {
+	if x != nil && x.AuthToken != nil {
+		return *x.AuthToken
+	}
+	return ""
+}
+
+func (x *CreateSandboxPayload) GetOtelEndpoint() string {
+	if x != nil && x.OtelEndpoint != nil {
+		return *x.OtelEndpoint
+	}
+	return ""
+}
+
+func (x *CreateSandboxPayload) GetSkipStart() bool {
+	if x != nil && x.SkipStart != nil {
+		return *x.SkipStart
+	}
+	return false
+}
+
+func (x *CreateSandboxPayload) GetOrganizationId() string {
+	if x != nil && x.OrganizationId != nil {
+		return *x.OrganizationId
+	}
+	return ""
+}
+
+func (x *CreateSandboxPayload) GetRegionId() string {
+	if x != nil && x.RegionId != nil {
+		return *x.RegionId
+	}
+	return ""
+}
+
+type CreateSandboxResult struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DaemonVersion string                 `protobuf:"bytes,1,opt,name=daemon_version,json=daemonVersion,proto3" json:"daemon_version,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateSandboxResult) Reset() {
+	*x = CreateSandboxResult{}
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateSandboxResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateSandboxResult) ProtoMessage() {}
+
+func (x *CreateSandboxResult) ProtoReflect() protoreflect.Message {
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateSandboxResult.ProtoReflect.Descriptor instead.
+func (*CreateSandboxResult) Descriptor() ([]byte, []int) {
+	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *CreateSandboxResult) GetDaemonVersion() string {
+	if x != nil {
+		return x.DaemonVersion
+	}
+	return ""
+}
+
+type StartSandboxPayload struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AuthToken     *string                `protobuf:"bytes,1,opt,name=auth_token,json=authToken,proto3,oneof" json:"auth_token,omitempty"`
+	Metadata      map[string]string      `protobuf:"bytes,2,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StartSandboxPayload) Reset() {
+	*x = StartSandboxPayload{}
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StartSandboxPayload) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StartSandboxPayload) ProtoMessage() {}
+
+func (x *StartSandboxPayload) ProtoReflect() protoreflect.Message {
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StartSandboxPayload.ProtoReflect.Descriptor instead.
+func (*StartSandboxPayload) Descriptor() ([]byte, []int) {
+	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *StartSandboxPayload) GetAuthToken() string {
+	if x != nil && x.AuthToken != nil {
+		return *x.AuthToken
+	}
+	return ""
+}
+
+func (x *StartSandboxPayload) GetMetadata() map[string]string {
+	if x != nil {
+		return x.Metadata
+	}
+	return nil
+}
+
+type StartSandboxResult struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DaemonVersion string                 `protobuf:"bytes,1,opt,name=daemon_version,json=daemonVersion,proto3" json:"daemon_version,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StartSandboxResult) Reset() {
+	*x = StartSandboxResult{}
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StartSandboxResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StartSandboxResult) ProtoMessage() {}
+
+func (x *StartSandboxResult) ProtoReflect() protoreflect.Message {
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StartSandboxResult.ProtoReflect.Descriptor instead.
+func (*StartSandboxResult) Descriptor() ([]byte, []int) {
+	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *StartSandboxResult) GetDaemonVersion() string {
+	if x != nil {
+		return x.DaemonVersion
+	}
+	return ""
+}
+
+type StopSandboxPayload struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Force         *bool                  `protobuf:"varint,1,opt,name=force,proto3,oneof" json:"force,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StopSandboxPayload) Reset() {
+	*x = StopSandboxPayload{}
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StopSandboxPayload) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StopSandboxPayload) ProtoMessage() {}
+
+func (x *StopSandboxPayload) ProtoReflect() protoreflect.Message {
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StopSandboxPayload.ProtoReflect.Descriptor instead.
+func (*StopSandboxPayload) Descriptor() ([]byte, []int) {
+	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *StopSandboxPayload) GetForce() bool {
+	if x != nil && x.Force != nil {
+		return *x.Force
+	}
+	return false
+}
+
+type ResizeSandboxPayload struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Cpu           int64                  `protobuf:"varint,1,opt,name=cpu,proto3" json:"cpu,omitempty"`
+	Gpu           int64                  `protobuf:"varint,2,opt,name=gpu,proto3" json:"gpu,omitempty"`
+	Memory        int64                  `protobuf:"varint,3,opt,name=memory,proto3" json:"memory,omitempty"`
+	Disk          int64                  `protobuf:"varint,4,opt,name=disk,proto3" json:"disk,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ResizeSandboxPayload) Reset() {
+	*x = ResizeSandboxPayload{}
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResizeSandboxPayload) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResizeSandboxPayload) ProtoMessage() {}
+
+func (x *ResizeSandboxPayload) ProtoReflect() protoreflect.Message {
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResizeSandboxPayload.ProtoReflect.Descriptor instead.
+func (*ResizeSandboxPayload) Descriptor() ([]byte, []int) {
+	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ResizeSandboxPayload) GetCpu() int64 {
+	if x != nil {
+		return x.Cpu
+	}
+	return 0
+}
+
+func (x *ResizeSandboxPayload) GetGpu() int64 {
+	if x != nil {
+		return x.Gpu
+	}
+	return 0
+}
+
+func (x *ResizeSandboxPayload) GetMemory() int64 {
+	if x != nil {
+		return x.Memory
+	}
+	return 0
+}
+
+func (x *ResizeSandboxPayload) GetDisk() int64 {
+	if x != nil {
+		return x.Disk
+	}
+	return 0
+}
+
+type UpdateNetworkSettingsPayload struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	NetworkBlockAll    *bool                  `protobuf:"varint,1,opt,name=network_block_all,json=networkBlockAll,proto3,oneof" json:"network_block_all,omitempty"`
+	NetworkAllowList   *string                `protobuf:"bytes,2,opt,name=network_allow_list,json=networkAllowList,proto3,oneof" json:"network_allow_list,omitempty"`
+	NetworkLimitEgress *bool                  `protobuf:"varint,3,opt,name=network_limit_egress,json=networkLimitEgress,proto3,oneof" json:"network_limit_egress,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *UpdateNetworkSettingsPayload) Reset() {
+	*x = UpdateNetworkSettingsPayload{}
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateNetworkSettingsPayload) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateNetworkSettingsPayload) ProtoMessage() {}
+
+func (x *UpdateNetworkSettingsPayload) ProtoReflect() protoreflect.Message {
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateNetworkSettingsPayload.ProtoReflect.Descriptor instead.
+func (*UpdateNetworkSettingsPayload) Descriptor() ([]byte, []int) {
+	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *UpdateNetworkSettingsPayload) GetNetworkBlockAll() bool {
+	if x != nil && x.NetworkBlockAll != nil {
+		return *x.NetworkBlockAll
+	}
+	return false
+}
+
+func (x *UpdateNetworkSettingsPayload) GetNetworkAllowList() string {
+	if x != nil && x.NetworkAllowList != nil {
+		return *x.NetworkAllowList
+	}
+	return ""
+}
+
+func (x *UpdateNetworkSettingsPayload) GetNetworkLimitEgress() bool {
+	if x != nil && x.NetworkLimitEgress != nil {
+		return *x.NetworkLimitEgress
+	}
+	return false
+}
+
+type PullSnapshotPayload struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	Snapshot            string                 `protobuf:"bytes,1,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	Registry            *Registry              `protobuf:"bytes,2,opt,name=registry,proto3,oneof" json:"registry,omitempty"`
+	DestinationRegistry *Registry              `protobuf:"bytes,3,opt,name=destination_registry,json=destinationRegistry,proto3,oneof" json:"destination_registry,omitempty"`
+	DestinationRef      *string                `protobuf:"bytes,4,opt,name=destination_ref,json=destinationRef,proto3,oneof" json:"destination_ref,omitempty"`
+	NewTag              *string                `protobuf:"bytes,5,opt,name=new_tag,json=newTag,proto3,oneof" json:"new_tag,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *PullSnapshotPayload) Reset() {
+	*x = PullSnapshotPayload{}
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PullSnapshotPayload) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PullSnapshotPayload) ProtoMessage() {}
+
+func (x *PullSnapshotPayload) ProtoReflect() protoreflect.Message {
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PullSnapshotPayload.ProtoReflect.Descriptor instead.
+func (*PullSnapshotPayload) Descriptor() ([]byte, []int) {
+	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *PullSnapshotPayload) GetSnapshot() string {
+	if x != nil {
+		return x.Snapshot
+	}
+	return ""
+}
+
+func (x *PullSnapshotPayload) GetRegistry() *Registry {
+	if x != nil {
+		return x.Registry
+	}
+	return nil
+}
+
+func (x *PullSnapshotPayload) GetDestinationRegistry() *Registry {
+	if x != nil {
+		return x.DestinationRegistry
+	}
+	return nil
+}
+
+func (x *PullSnapshotPayload) GetDestinationRef() string {
+	if x != nil && x.DestinationRef != nil {
+		return *x.DestinationRef
+	}
+	return ""
+}
+
+func (x *PullSnapshotPayload) GetNewTag() string {
+	if x != nil && x.NewTag != nil {
+		return *x.NewTag
+	}
+	return ""
+}
+
+type SnapshotInfoResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	SizeGB        float64                `protobuf:"fixed64,2,opt,name=size_g_b,json=sizeGB,proto3" json:"size_g_b,omitempty"`
+	Entrypoint    []string               `protobuf:"bytes,3,rep,name=entrypoint,proto3" json:"entrypoint,omitempty"`
+	Cmd           []string               `protobuf:"bytes,4,rep,name=cmd,proto3" json:"cmd,omitempty"`
+	Hash          string                 `protobuf:"bytes,5,opt,name=hash,proto3" json:"hash,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SnapshotInfoResponse) Reset() {
+	*x = SnapshotInfoResponse{}
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SnapshotInfoResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SnapshotInfoResponse) ProtoMessage() {}
+
+func (x *SnapshotInfoResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SnapshotInfoResponse.ProtoReflect.Descriptor instead.
+func (*SnapshotInfoResponse) Descriptor() ([]byte, []int) {
+	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *SnapshotInfoResponse) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *SnapshotInfoResponse) GetSizeGB() float64 {
+	if x != nil {
+		return x.SizeGB
+	}
+	return 0
+}
+
+func (x *SnapshotInfoResponse) GetEntrypoint() []string {
+	if x != nil {
+		return x.Entrypoint
+	}
+	return nil
+}
+
+func (x *SnapshotInfoResponse) GetCmd() []string {
+	if x != nil {
+		return x.Cmd
+	}
+	return nil
+}
+
+func (x *SnapshotInfoResponse) GetHash() string {
+	if x != nil {
+		return x.Hash
+	}
+	return ""
+}
+
+type InspectSnapshotInRegistryPayload struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Snapshot      string                 `protobuf:"bytes,1,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	Registry      *Registry              `protobuf:"bytes,2,opt,name=registry,proto3,oneof" json:"registry,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *InspectSnapshotInRegistryPayload) Reset() {
+	*x = InspectSnapshotInRegistryPayload{}
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InspectSnapshotInRegistryPayload) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InspectSnapshotInRegistryPayload) ProtoMessage() {}
+
+func (x *InspectSnapshotInRegistryPayload) ProtoReflect() protoreflect.Message {
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InspectSnapshotInRegistryPayload.ProtoReflect.Descriptor instead.
+func (*InspectSnapshotInRegistryPayload) Descriptor() ([]byte, []int) {
+	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *InspectSnapshotInRegistryPayload) GetSnapshot() string {
+	if x != nil {
+		return x.Snapshot
+	}
+	return ""
+}
+
+func (x *InspectSnapshotInRegistryPayload) GetRegistry() *Registry {
+	if x != nil {
+		return x.Registry
+	}
+	return nil
+}
+
+type SnapshotDigestResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Hash          string                 `protobuf:"bytes,1,opt,name=hash,proto3" json:"hash,omitempty"`
+	SizeGB        float64                `protobuf:"fixed64,2,opt,name=size_g_b,json=sizeGB,proto3" json:"size_g_b,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SnapshotDigestResponse) Reset() {
+	*x = SnapshotDigestResponse{}
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SnapshotDigestResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SnapshotDigestResponse) ProtoMessage() {}
+
+func (x *SnapshotDigestResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SnapshotDigestResponse.ProtoReflect.Descriptor instead.
+func (*SnapshotDigestResponse) Descriptor() ([]byte, []int) {
+	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *SnapshotDigestResponse) GetHash() string {
+	if x != nil {
+		return x.Hash
+	}
+	return ""
+}
+
+func (x *SnapshotDigestResponse) GetSizeGB() float64 {
+	if x != nil {
+		return x.SizeGB
+	}
+	return 0
+}
+
+type SnapshotSandboxResult struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SizeBytes     int64                  `protobuf:"varint,1,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
+	Hash          string                 `protobuf:"bytes,2,opt,name=hash,proto3" json:"hash,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SnapshotSandboxResult) Reset() {
+	*x = SnapshotSandboxResult{}
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SnapshotSandboxResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SnapshotSandboxResult) ProtoMessage() {}
+
+func (x *SnapshotSandboxResult) ProtoReflect() protoreflect.Message {
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SnapshotSandboxResult.ProtoReflect.Descriptor instead.
+func (*SnapshotSandboxResult) Descriptor() ([]byte, []int) {
+	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *SnapshotSandboxResult) GetSizeBytes() int64 {
+	if x != nil {
+		return x.SizeBytes
+	}
+	return 0
+}
+
+func (x *SnapshotSandboxResult) GetHash() string {
+	if x != nil {
+		return x.Hash
+	}
+	return ""
+}
+
+type ForkSandboxPayload struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	SourceSandboxId string                 `protobuf:"bytes,1,opt,name=source_sandbox_id,json=sourceSandboxId,proto3" json:"source_sandbox_id,omitempty"`
+	NewSandboxId    string                 `protobuf:"bytes,2,opt,name=new_sandbox_id,json=newSandboxId,proto3" json:"new_sandbox_id,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *ForkSandboxPayload) Reset() {
+	*x = ForkSandboxPayload{}
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ForkSandboxPayload) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ForkSandboxPayload) ProtoMessage() {}
+
+func (x *ForkSandboxPayload) ProtoReflect() protoreflect.Message {
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ForkSandboxPayload.ProtoReflect.Descriptor instead.
+func (*ForkSandboxPayload) Descriptor() ([]byte, []int) {
+	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *ForkSandboxPayload) GetSourceSandboxId() string {
+	if x != nil {
+		return x.SourceSandboxId
+	}
+	return ""
+}
+
+func (x *ForkSandboxPayload) GetNewSandboxId() string {
+	if x != nil {
+		return x.NewSandboxId
 	}
 	return ""
 }
@@ -153,7 +912,7 @@ type SnapshotSandboxPayload struct {
 
 func (x *SnapshotSandboxPayload) Reset() {
 	*x = SnapshotSandboxPayload{}
-	mi := &file_runner_v1alpha1_job_proto_msgTypes[1]
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -165,7 +924,7 @@ func (x *SnapshotSandboxPayload) String() string {
 func (*SnapshotSandboxPayload) ProtoMessage() {}
 
 func (x *SnapshotSandboxPayload) ProtoReflect() protoreflect.Message {
-	mi := &file_runner_v1alpha1_job_proto_msgTypes[1]
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -178,7 +937,7 @@ func (x *SnapshotSandboxPayload) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SnapshotSandboxPayload.ProtoReflect.Descriptor instead.
 func (*SnapshotSandboxPayload) Descriptor() ([]byte, []int) {
-	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{1}
+	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *SnapshotSandboxPayload) GetSandboxId() string {
@@ -209,110 +968,6 @@ func (x *SnapshotSandboxPayload) GetRegistry() *Registry {
 	return nil
 }
 
-type ForkSandboxPayload struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	SourceSandboxId string                 `protobuf:"bytes,1,opt,name=source_sandbox_id,json=sourceSandboxId,proto3" json:"source_sandbox_id,omitempty"`
-	NewSandboxId    string                 `protobuf:"bytes,2,opt,name=new_sandbox_id,json=newSandboxId,proto3" json:"new_sandbox_id,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
-}
-
-func (x *ForkSandboxPayload) Reset() {
-	*x = ForkSandboxPayload{}
-	mi := &file_runner_v1alpha1_job_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ForkSandboxPayload) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ForkSandboxPayload) ProtoMessage() {}
-
-func (x *ForkSandboxPayload) ProtoReflect() protoreflect.Message {
-	mi := &file_runner_v1alpha1_job_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ForkSandboxPayload.ProtoReflect.Descriptor instead.
-func (*ForkSandboxPayload) Descriptor() ([]byte, []int) {
-	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *ForkSandboxPayload) GetSourceSandboxId() string {
-	if x != nil {
-		return x.SourceSandboxId
-	}
-	return ""
-}
-
-func (x *ForkSandboxPayload) GetNewSandboxId() string {
-	if x != nil {
-		return x.NewSandboxId
-	}
-	return ""
-}
-
-type SnapshotSandboxResult struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SizeBytes     int64                  `protobuf:"varint,1,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
-	Hash          string                 `protobuf:"bytes,2,opt,name=hash,proto3" json:"hash,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SnapshotSandboxResult) Reset() {
-	*x = SnapshotSandboxResult{}
-	mi := &file_runner_v1alpha1_job_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SnapshotSandboxResult) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SnapshotSandboxResult) ProtoMessage() {}
-
-func (x *SnapshotSandboxResult) ProtoReflect() protoreflect.Message {
-	mi := &file_runner_v1alpha1_job_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SnapshotSandboxResult.ProtoReflect.Descriptor instead.
-func (*SnapshotSandboxResult) Descriptor() ([]byte, []int) {
-	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *SnapshotSandboxResult) GetSizeBytes() int64 {
-	if x != nil {
-		return x.SizeBytes
-	}
-	return 0
-}
-
-func (x *SnapshotSandboxResult) GetHash() string {
-	if x != nil {
-		return x.Hash
-	}
-	return ""
-}
-
 type ForkSandboxResult struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	DaemonVersion *string                `protobuf:"bytes,1,opt,name=daemon_version,json=daemonVersion,proto3,oneof" json:"daemon_version,omitempty"`
@@ -322,7 +977,7 @@ type ForkSandboxResult struct {
 
 func (x *ForkSandboxResult) Reset() {
 	*x = ForkSandboxResult{}
-	mi := &file_runner_v1alpha1_job_proto_msgTypes[4]
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -334,7 +989,7 @@ func (x *ForkSandboxResult) String() string {
 func (*ForkSandboxResult) ProtoMessage() {}
 
 func (x *ForkSandboxResult) ProtoReflect() protoreflect.Message {
-	mi := &file_runner_v1alpha1_job_proto_msgTypes[4]
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -347,7 +1002,7 @@ func (x *ForkSandboxResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ForkSandboxResult.ProtoReflect.Descriptor instead.
 func (*ForkSandboxResult) Descriptor() ([]byte, []int) {
-	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{4}
+	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ForkSandboxResult) GetDaemonVersion() string {
@@ -357,11 +1012,252 @@ func (x *ForkSandboxResult) GetDaemonVersion() string {
 	return ""
 }
 
+type Registry struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	Username      *string                `protobuf:"bytes,2,opt,name=username,proto3,oneof" json:"username,omitempty"`
+	Password      *string                `protobuf:"bytes,3,opt,name=password,proto3,oneof" json:"password,omitempty"`
+	Project       *string                `protobuf:"bytes,4,opt,name=project,proto3,oneof" json:"project,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Registry) Reset() {
+	*x = Registry{}
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Registry) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Registry) ProtoMessage() {}
+
+func (x *Registry) ProtoReflect() protoreflect.Message {
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Registry.ProtoReflect.Descriptor instead.
+func (*Registry) Descriptor() ([]byte, []int) {
+	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *Registry) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+func (x *Registry) GetUsername() string {
+	if x != nil && x.Username != nil {
+		return *x.Username
+	}
+	return ""
+}
+
+func (x *Registry) GetPassword() string {
+	if x != nil && x.Password != nil {
+		return *x.Password
+	}
+	return ""
+}
+
+func (x *Registry) GetProject() string {
+	if x != nil && x.Project != nil {
+		return *x.Project
+	}
+	return ""
+}
+
+type Volume struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	VolumeId      string                 `protobuf:"bytes,1,opt,name=volume_id,json=volumeId,proto3" json:"volume_id,omitempty"`
+	MountPath     string                 `protobuf:"bytes,2,opt,name=mount_path,json=mountPath,proto3" json:"mount_path,omitempty"`
+	Subpath       *string                `protobuf:"bytes,3,opt,name=subpath,proto3,oneof" json:"subpath,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Volume) Reset() {
+	*x = Volume{}
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Volume) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Volume) ProtoMessage() {}
+
+func (x *Volume) ProtoReflect() protoreflect.Message {
+	mi := &file_runner_v1alpha1_job_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Volume.ProtoReflect.Descriptor instead.
+func (*Volume) Descriptor() ([]byte, []int) {
+	return file_runner_v1alpha1_job_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *Volume) GetVolumeId() string {
+	if x != nil {
+		return x.VolumeId
+	}
+	return ""
+}
+
+func (x *Volume) GetMountPath() string {
+	if x != nil {
+		return x.MountPath
+	}
+	return ""
+}
+
+func (x *Volume) GetSubpath() string {
+	if x != nil && x.Subpath != nil {
+		return *x.Subpath
+	}
+	return ""
+}
+
 var File_runner_v1alpha1_job_proto protoreflect.FileDescriptor
 
 const file_runner_v1alpha1_job_proto_rawDesc = "" +
 	"\n" +
-	"\x19runner/v1alpha1/job.proto\x12\x0frunner.v1alpha1\"\xa3\x01\n" +
+	"\x19runner/v1alpha1/job.proto\x12\x0frunner.v1alpha1\"\xfd\b\n" +
+	"\x14CreateSandboxPayload\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12)\n" +
+	"\x0efrom_volume_id\x18\x02 \x01(\tH\x00R\ffromVolumeId\x88\x01\x01\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x1a\n" +
+	"\bsnapshot\x18\x04 \x01(\tR\bsnapshot\x12\x17\n" +
+	"\aos_user\x18\x05 \x01(\tR\x06osUser\x12\x1b\n" +
+	"\tcpu_quota\x18\x06 \x01(\x03R\bcpuQuota\x12\x1b\n" +
+	"\tgpu_quota\x18\a \x01(\x03R\bgpuQuota\x12!\n" +
+	"\fmemory_quota\x18\b \x01(\x03R\vmemoryQuota\x12#\n" +
+	"\rstorage_quota\x18\t \x01(\x03R\fstorageQuota\x12@\n" +
+	"\x03env\x18\n" +
+	" \x03(\v2..runner.v1alpha1.CreateSandboxPayload.EnvEntryR\x03env\x12:\n" +
+	"\bregistry\x18\v \x01(\v2\x19.runner.v1alpha1.RegistryH\x01R\bregistry\x88\x01\x01\x12\x1e\n" +
+	"\n" +
+	"entrypoint\x18\f \x03(\tR\n" +
+	"entrypoint\x121\n" +
+	"\avolumes\x18\r \x03(\v2\x17.runner.v1alpha1.VolumeR\avolumes\x12/\n" +
+	"\x11network_block_all\x18\x0e \x01(\bH\x02R\x0fnetworkBlockAll\x88\x01\x01\x121\n" +
+	"\x12network_allow_list\x18\x0f \x01(\tH\x03R\x10networkAllowList\x88\x01\x01\x12O\n" +
+	"\bmetadata\x18\x10 \x03(\v23.runner.v1alpha1.CreateSandboxPayload.MetadataEntryR\bmetadata\x12\"\n" +
+	"\n" +
+	"auth_token\x18\x11 \x01(\tH\x04R\tauthToken\x88\x01\x01\x12(\n" +
+	"\rotel_endpoint\x18\x12 \x01(\tH\x05R\fotelEndpoint\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"skip_start\x18\x13 \x01(\bH\x06R\tskipStart\x88\x01\x01\x12,\n" +
+	"\x0forganization_id\x18\x14 \x01(\tH\aR\x0eorganizationId\x88\x01\x01\x12 \n" +
+	"\tregion_id\x18\x15 \x01(\tH\bR\bregionId\x88\x01\x01\x1a6\n" +
+	"\bEnvEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a;\n" +
+	"\rMetadataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\x11\n" +
+	"\x0f_from_volume_idB\v\n" +
+	"\t_registryB\x14\n" +
+	"\x12_network_block_allB\x15\n" +
+	"\x13_network_allow_listB\r\n" +
+	"\v_auth_tokenB\x10\n" +
+	"\x0e_otel_endpointB\r\n" +
+	"\v_skip_startB\x12\n" +
+	"\x10_organization_idB\f\n" +
+	"\n" +
+	"_region_id\"<\n" +
+	"\x13CreateSandboxResult\x12%\n" +
+	"\x0edaemon_version\x18\x01 \x01(\tR\rdaemonVersion\"\xd5\x01\n" +
+	"\x13StartSandboxPayload\x12\"\n" +
+	"\n" +
+	"auth_token\x18\x01 \x01(\tH\x00R\tauthToken\x88\x01\x01\x12N\n" +
+	"\bmetadata\x18\x02 \x03(\v22.runner.v1alpha1.StartSandboxPayload.MetadataEntryR\bmetadata\x1a;\n" +
+	"\rMetadataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\r\n" +
+	"\v_auth_token\";\n" +
+	"\x12StartSandboxResult\x12%\n" +
+	"\x0edaemon_version\x18\x01 \x01(\tR\rdaemonVersion\"9\n" +
+	"\x12StopSandboxPayload\x12\x19\n" +
+	"\x05force\x18\x01 \x01(\bH\x00R\x05force\x88\x01\x01B\b\n" +
+	"\x06_force\"f\n" +
+	"\x14ResizeSandboxPayload\x12\x10\n" +
+	"\x03cpu\x18\x01 \x01(\x03R\x03cpu\x12\x10\n" +
+	"\x03gpu\x18\x02 \x01(\x03R\x03gpu\x12\x16\n" +
+	"\x06memory\x18\x03 \x01(\x03R\x06memory\x12\x12\n" +
+	"\x04disk\x18\x04 \x01(\x03R\x04disk\"\xff\x01\n" +
+	"\x1cUpdateNetworkSettingsPayload\x12/\n" +
+	"\x11network_block_all\x18\x01 \x01(\bH\x00R\x0fnetworkBlockAll\x88\x01\x01\x121\n" +
+	"\x12network_allow_list\x18\x02 \x01(\tH\x01R\x10networkAllowList\x88\x01\x01\x125\n" +
+	"\x14network_limit_egress\x18\x03 \x01(\bH\x02R\x12networkLimitEgress\x88\x01\x01B\x14\n" +
+	"\x12_network_block_allB\x15\n" +
+	"\x13_network_allow_listB\x17\n" +
+	"\x15_network_limit_egress\"\xd2\x02\n" +
+	"\x13PullSnapshotPayload\x12\x1a\n" +
+	"\bsnapshot\x18\x01 \x01(\tR\bsnapshot\x12:\n" +
+	"\bregistry\x18\x02 \x01(\v2\x19.runner.v1alpha1.RegistryH\x00R\bregistry\x88\x01\x01\x12Q\n" +
+	"\x14destination_registry\x18\x03 \x01(\v2\x19.runner.v1alpha1.RegistryH\x01R\x13destinationRegistry\x88\x01\x01\x12,\n" +
+	"\x0fdestination_ref\x18\x04 \x01(\tH\x02R\x0edestinationRef\x88\x01\x01\x12\x1c\n" +
+	"\anew_tag\x18\x05 \x01(\tH\x03R\x06newTag\x88\x01\x01B\v\n" +
+	"\t_registryB\x17\n" +
+	"\x15_destination_registryB\x12\n" +
+	"\x10_destination_refB\n" +
+	"\n" +
+	"\b_new_tag\"\x8a\x01\n" +
+	"\x14SnapshotInfoResponse\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
+	"\bsize_g_b\x18\x02 \x01(\x01R\x06sizeGB\x12\x1e\n" +
+	"\n" +
+	"entrypoint\x18\x03 \x03(\tR\n" +
+	"entrypoint\x12\x10\n" +
+	"\x03cmd\x18\x04 \x03(\tR\x03cmd\x12\x12\n" +
+	"\x04hash\x18\x05 \x01(\tR\x04hash\"\x87\x01\n" +
+	" InspectSnapshotInRegistryPayload\x12\x1a\n" +
+	"\bsnapshot\x18\x01 \x01(\tR\bsnapshot\x12:\n" +
+	"\bregistry\x18\x02 \x01(\v2\x19.runner.v1alpha1.RegistryH\x00R\bregistry\x88\x01\x01B\v\n" +
+	"\t_registry\"F\n" +
+	"\x16SnapshotDigestResponse\x12\x12\n" +
+	"\x04hash\x18\x01 \x01(\tR\x04hash\x12\x18\n" +
+	"\bsize_g_b\x18\x02 \x01(\x01R\x06sizeGB\"J\n" +
+	"\x15SnapshotSandboxResult\x12\x1d\n" +
+	"\n" +
+	"size_bytes\x18\x01 \x01(\x03R\tsizeBytes\x12\x12\n" +
+	"\x04hash\x18\x02 \x01(\tR\x04hash\"f\n" +
+	"\x12ForkSandboxPayload\x12*\n" +
+	"\x11source_sandbox_id\x18\x01 \x01(\tR\x0fsourceSandboxId\x12$\n" +
+	"\x0enew_sandbox_id\x18\x02 \x01(\tR\fnewSandboxId\"\xbd\x01\n" +
+	"\x16SnapshotSandboxPayload\x12\x1d\n" +
+	"\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12'\n" +
+	"\x0forganization_id\x18\x03 \x01(\tR\x0eorganizationId\x12:\n" +
+	"\bregistry\x18\x04 \x01(\v2\x19.runner.v1alpha1.RegistryH\x00R\bregistry\x88\x01\x01B\v\n" +
+	"\t_registry\"R\n" +
+	"\x11ForkSandboxResult\x12*\n" +
+	"\x0edaemon_version\x18\x01 \x01(\tH\x00R\rdaemonVersion\x88\x01\x01B\x11\n" +
+	"\x0f_daemon_version\"\xa3\x01\n" +
 	"\bRegistry\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x1f\n" +
 	"\busername\x18\x02 \x01(\tH\x00R\busername\x88\x01\x01\x12\x1f\n" +
@@ -370,28 +1266,14 @@ const file_runner_v1alpha1_job_proto_rawDesc = "" +
 	"\t_usernameB\v\n" +
 	"\t_passwordB\n" +
 	"\n" +
-	"\b_project\"\xbd\x01\n" +
-	"\x16SnapshotSandboxPayload\x12\x1d\n" +
+	"\b_project\"o\n" +
+	"\x06Volume\x12\x1b\n" +
+	"\tvolume_id\x18\x01 \x01(\tR\bvolumeId\x12\x1d\n" +
 	"\n" +
-	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12'\n" +
-	"\x0forganization_id\x18\x03 \x01(\tR\x0eorganizationId\x12:\n" +
-	"\bregistry\x18\x04 \x01(\v2\x19.runner.v1alpha1.RegistryH\x00R\bregistry\x88\x01\x01B\v\n" +
-	"\t_registry\"\x89\x01\n" +
-	"\x12ForkSandboxPayload\x12*\n" +
-	"\x11source_sandbox_id\x18\x01 \x01(\tR\x0fsourceSandboxId\x12$\n" +
-	"\x0enew_sandbox_id\x18\x02 \x01(\tR\fnewSandboxId\x12!\n" +
-	"\x15SnapshotSandboxResult\x12\x1d\n" +
+	"mount_path\x18\x02 \x01(\tR\tmountPath\x12\x1d\n" +
+	"\asubpath\x18\x03 \x01(\tH\x00R\asubpath\x88\x01\x01B\n" +
 	"\n" +
-	"size_bytes\x18\x01 \x01(\x03R\tsizeBytes\x12\x12\n" +
-	"\x04hash\x18\x02 \x01(\tR\x04hash\"R\n" +
-	"\x11ForkSandboxResult\x12*\n" +
-	"\x0edaemon_version\x18\x01 \x01(\tH\x00R\rdaemonVersion\x88\x01\x01B\x11\n" +
-	"\x0f_daemon_version*]\n" +
-	"\aJobType\x12\x18\n" +
-	"\x14JOB_TYPE_UNSPECIFIED\x10\x00\x12\x1d\n" +
-	"\x19JOB_TYPE_SNAPSHOT_SANDBOX\x10\x01\x12\x19\n" +
-	"\x15JOB_TYPE_FORK_SANDBOX\x10\x02BGZEgithub.com/daytonaio/daytona/gen/proto/runner/v1alpha1;runnerv1alpha1b\x06proto3"
+	"\b_subpathBGZEgithub.com/daytonaio/daytona/gen/proto/runner/v1alpha1;runnerv1alpha1b\x06proto3"
 
 var (
 	file_runner_v1alpha1_job_proto_rawDescOnce sync.Once
@@ -405,23 +1287,44 @@ func file_runner_v1alpha1_job_proto_rawDescGZIP() []byte {
 	return file_runner_v1alpha1_job_proto_rawDescData
 }
 
-var file_runner_v1alpha1_job_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_runner_v1alpha1_job_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_runner_v1alpha1_job_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_runner_v1alpha1_job_proto_goTypes = []any{
-	(JobType)(0),                   // 0: runner.v1alpha1.JobType
-	(*Registry)(nil),               // 1: runner.v1alpha1.Registry
-	(*SnapshotSandboxPayload)(nil), // 2: runner.v1alpha1.SnapshotSandboxPayload
-	(*ForkSandboxPayload)(nil),     // 3: runner.v1alpha1.ForkSandboxPayload
-	(*SnapshotSandboxResult)(nil),  // 4: runner.v1alpha1.SnapshotSandboxResult
-	(*ForkSandboxResult)(nil),      // 5: runner.v1alpha1.ForkSandboxResult
+	(*CreateSandboxPayload)(nil),             // 0: runner.v1alpha1.CreateSandboxPayload
+	(*CreateSandboxResult)(nil),              // 1: runner.v1alpha1.CreateSandboxResult
+	(*StartSandboxPayload)(nil),              // 2: runner.v1alpha1.StartSandboxPayload
+	(*StartSandboxResult)(nil),               // 3: runner.v1alpha1.StartSandboxResult
+	(*StopSandboxPayload)(nil),               // 4: runner.v1alpha1.StopSandboxPayload
+	(*ResizeSandboxPayload)(nil),             // 5: runner.v1alpha1.ResizeSandboxPayload
+	(*UpdateNetworkSettingsPayload)(nil),     // 6: runner.v1alpha1.UpdateNetworkSettingsPayload
+	(*PullSnapshotPayload)(nil),              // 7: runner.v1alpha1.PullSnapshotPayload
+	(*SnapshotInfoResponse)(nil),             // 8: runner.v1alpha1.SnapshotInfoResponse
+	(*InspectSnapshotInRegistryPayload)(nil), // 9: runner.v1alpha1.InspectSnapshotInRegistryPayload
+	(*SnapshotDigestResponse)(nil),           // 10: runner.v1alpha1.SnapshotDigestResponse
+	(*SnapshotSandboxResult)(nil),            // 11: runner.v1alpha1.SnapshotSandboxResult
+	(*ForkSandboxPayload)(nil),               // 12: runner.v1alpha1.ForkSandboxPayload
+	(*SnapshotSandboxPayload)(nil),           // 13: runner.v1alpha1.SnapshotSandboxPayload
+	(*ForkSandboxResult)(nil),                // 14: runner.v1alpha1.ForkSandboxResult
+	(*Registry)(nil),                         // 15: runner.v1alpha1.Registry
+	(*Volume)(nil),                           // 16: runner.v1alpha1.Volume
+	nil,                                      // 17: runner.v1alpha1.CreateSandboxPayload.EnvEntry
+	nil,                                      // 18: runner.v1alpha1.CreateSandboxPayload.MetadataEntry
+	nil,                                      // 19: runner.v1alpha1.StartSandboxPayload.MetadataEntry
 }
 var file_runner_v1alpha1_job_proto_depIdxs = []int32{
-	1, // 0: runner.v1alpha1.SnapshotSandboxPayload.registry:type_name -> runner.v1alpha1.Registry
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	17, // 0: runner.v1alpha1.CreateSandboxPayload.env:type_name -> runner.v1alpha1.CreateSandboxPayload.EnvEntry
+	15, // 1: runner.v1alpha1.CreateSandboxPayload.registry:type_name -> runner.v1alpha1.Registry
+	16, // 2: runner.v1alpha1.CreateSandboxPayload.volumes:type_name -> runner.v1alpha1.Volume
+	18, // 3: runner.v1alpha1.CreateSandboxPayload.metadata:type_name -> runner.v1alpha1.CreateSandboxPayload.MetadataEntry
+	19, // 4: runner.v1alpha1.StartSandboxPayload.metadata:type_name -> runner.v1alpha1.StartSandboxPayload.MetadataEntry
+	15, // 5: runner.v1alpha1.PullSnapshotPayload.registry:type_name -> runner.v1alpha1.Registry
+	15, // 6: runner.v1alpha1.PullSnapshotPayload.destination_registry:type_name -> runner.v1alpha1.Registry
+	15, // 7: runner.v1alpha1.InspectSnapshotInRegistryPayload.registry:type_name -> runner.v1alpha1.Registry
+	15, // 8: runner.v1alpha1.SnapshotSandboxPayload.registry:type_name -> runner.v1alpha1.Registry
+	9,  // [9:9] is the sub-list for method output_type
+	9,  // [9:9] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_runner_v1alpha1_job_proto_init() }
@@ -430,21 +1333,27 @@ func file_runner_v1alpha1_job_proto_init() {
 		return
 	}
 	file_runner_v1alpha1_job_proto_msgTypes[0].OneofWrappers = []any{}
-	file_runner_v1alpha1_job_proto_msgTypes[1].OneofWrappers = []any{}
+	file_runner_v1alpha1_job_proto_msgTypes[2].OneofWrappers = []any{}
 	file_runner_v1alpha1_job_proto_msgTypes[4].OneofWrappers = []any{}
+	file_runner_v1alpha1_job_proto_msgTypes[6].OneofWrappers = []any{}
+	file_runner_v1alpha1_job_proto_msgTypes[7].OneofWrappers = []any{}
+	file_runner_v1alpha1_job_proto_msgTypes[9].OneofWrappers = []any{}
+	file_runner_v1alpha1_job_proto_msgTypes[13].OneofWrappers = []any{}
+	file_runner_v1alpha1_job_proto_msgTypes[14].OneofWrappers = []any{}
+	file_runner_v1alpha1_job_proto_msgTypes[15].OneofWrappers = []any{}
+	file_runner_v1alpha1_job_proto_msgTypes[16].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_runner_v1alpha1_job_proto_rawDesc), len(file_runner_v1alpha1_job_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   5,
+			NumEnums:      0,
+			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_runner_v1alpha1_job_proto_goTypes,
 		DependencyIndexes: file_runner_v1alpha1_job_proto_depIdxs,
-		EnumInfos:         file_runner_v1alpha1_job_proto_enumTypes,
 		MessageInfos:      file_runner_v1alpha1_job_proto_msgTypes,
 	}.Build()
 	File_runner_v1alpha1_job_proto = out.File

@@ -47,8 +47,8 @@ class AdminCreateRunner(BaseModel):
     @field_validator('api_version')
     def api_version_validate_regular_expression(cls, value):
         """Validates the regular expression"""
-        if not re.match(r"^(0|2)$", value):
-            raise ValueError(r"must validate the regular expression /^(0|2)$/")
+        if not re.match(r"^(0|2|3)$", value):
+            raise ValueError(r"must validate the regular expression /^(0|2|3)$/")
         return value
 
     model_config = ConfigDict(

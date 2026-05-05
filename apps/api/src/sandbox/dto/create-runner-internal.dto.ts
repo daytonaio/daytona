@@ -25,4 +25,12 @@ export type CreateRunnerV2InternalDto = {
   appVersion?: string
 }
 
-export type CreateRunnerInternalDto = CreateRunnerV0InternalDto | CreateRunnerV2InternalDto
+export type CreateRunnerV3InternalDto = {
+  apiKey?: string
+  regionId: string
+  name: string
+  apiVersion: '3'
+  appVersion?: string
+}
+
+export type CreateRunnerInternalDto = CreateRunnerV0InternalDto | CreateRunnerV2InternalDto | CreateRunnerV3InternalDto

@@ -495,9 +495,9 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
     const runner = await this.runnerService.findOneOrFail(runnerId)
 
-    if (runner.apiVersion === '2') {
+    if (runner.apiVersion === '2' || runner.apiVersion === '3') {
       this.logger.debug(
-        `Skipping recovery for sandboxes on draining runner ${runnerId} — not supported for runner API v2`,
+        `Skipping recovery for sandboxes on draining runner ${runnerId} — not supported for runner API v2/v3`,
       )
       return
     }

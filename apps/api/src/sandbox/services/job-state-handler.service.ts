@@ -144,7 +144,7 @@ export class JobStateHandlerService {
           Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.NONE))
         }
         const metadata = job.getResultMetadata()
-        if (metadata?.daemonVersion && typeof metadata.daemonVersion === 'string') {
+        if (metadata?.daemonVersion) {
           updateData.daemonVersion = metadata.daemonVersion
         }
       } else if (job.status === JobStatus.FAILED) {
@@ -189,7 +189,7 @@ export class JobStateHandlerService {
           Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.NONE))
         }
         const metadata = job.getResultMetadata()
-        if (metadata?.daemonVersion && typeof metadata.daemonVersion === 'string') {
+        if (metadata?.daemonVersion) {
           updateData.daemonVersion = metadata.daemonVersion
         }
       } else if (job.status === JobStatus.FAILED) {
@@ -668,7 +668,7 @@ export class JobStateHandlerService {
           Object.assign(updateData, Sandbox.getBackupStateUpdate(forkedSandbox, BackupState.NONE))
         }
         const metadata = job.getResultMetadata()
-        if (metadata?.daemonVersion && typeof metadata.daemonVersion === 'string') {
+        if (metadata?.daemonVersion) {
           updateData.daemonVersion = metadata.daemonVersion
         }
       } else if (job.status === JobStatus.FAILED) {
@@ -726,10 +726,7 @@ export class JobStateHandlerService {
         const payload = job.getPayload<{ name?: string; registry?: { url?: string; project?: string } }>()
         const metadata = job.getResultMetadata()
         const snapshotName = payload?.name
-        const hash =
-          (typeof metadata?.hash === 'string' && metadata.hash) ||
-          (typeof metadata?.Hash === 'string' && metadata.Hash) ||
-          undefined
+        const hash = metadata?.hash
 
         if (!snapshotName) {
           this.logger.error(`SNAPSHOT_SANDBOX job ${job.id} payload missing snapshot name`)
@@ -740,16 +737,7 @@ export class JobStateHandlerService {
             snapshotRef = `${payload.registry.url}/${project}/daytona-${hash}:daytona`
           }
 
-          const rawSnapshotSizeBytes = metadata?.sizeBytes ?? metadata?.size_bytes
-          const snapshotSizeBytes =
-            typeof rawSnapshotSizeBytes === 'number' && Number.isFinite(rawSnapshotSizeBytes)
-              ? rawSnapshotSizeBytes
-              : typeof rawSnapshotSizeBytes === 'bigint'
-                ? Number(rawSnapshotSizeBytes)
-                : typeof rawSnapshotSizeBytes === 'string' && /^-?\d+$/.test(rawSnapshotSizeBytes)
-                  ? Number(rawSnapshotSizeBytes)
-                  : undefined
-          const snapshotSize = snapshotSizeBytes != null ? snapshotSizeBytes / (1024 * 1024 * 1024) : undefined
+          const snapshotSize = metadata?.sizeBytes != null ? metadata.sizeBytes / (1024 * 1024 * 1024) : undefined
 
           const snapshotId = uuidv4()
 

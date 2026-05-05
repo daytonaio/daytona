@@ -55,6 +55,8 @@ export class JobService {
     resourceType: ResourceTypeForJobType<T>,
     resourceId: string,
     payload?: string | Record<string, any>,
+    payloadType?: string | null,
+    resultType?: string | null,
   ): Promise<Job> {
     // Use provided manager if available, otherwise use default repository
     const repo = manager ? manager.getRepository(Job) : this.jobRepository
@@ -72,6 +74,8 @@ export class JobService {
         resourceId,
         status: JobStatus.PENDING,
         payload: encodedPayload,
+        payloadType,
+        resultType,
         traceContext,
       })
 

@@ -13,6 +13,7 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm'
+import { parseProto } from '../proto/proto-registry'
 import { JobStatus } from '../enums/job-status.enum'
 import { JobType } from '../enums/job-type.enum'
 import { ResourceType } from '../enums/resource-type.enum'
@@ -86,6 +87,16 @@ export class Job {
 
   @Column({
     nullable: true,
+  })
+  payloadType: string | null
+
+  @Column({
+    nullable: true,
+  })
+  resultType: string | null
+
+  @Column({
+    nullable: true,
     type: 'text',
   })
   errorMessage: string | null
@@ -120,6 +131,8 @@ export class Job {
     resourceType: ResourceType
     resourceId: string
     payload?: string | null
+    payloadType?: string | null
+    resultType?: string | null
     traceContext?: Record<string, string> | null
     errorMessage?: string | null
     startedAt?: Date | null
@@ -133,6 +146,8 @@ export class Job {
     this.resourceType = params.resourceType
     this.resourceId = params.resourceId
     this.payload = params.payload || null
+    this.payloadType = params.payloadType || null
+    this.resultType = params.resultType || null
     this.traceContext = params.traceContext || null
     this.errorMessage = params.errorMessage || null
     this.startedAt = params.startedAt || null
@@ -147,7 +162,11 @@ export class Job {
     }
 
     try {
-      return JSON.parse(this.payload)
+      const parsed = JSON.parse(this.payload)
+      if (this.payloadType) {
+        return (parseProto(this.payloadType, parsed) ?? parsed) as T
+      }
+      return parsed
     } catch {
       return null
     }
@@ -159,7 +178,11 @@ export class Job {
     }
 
     try {
-      return JSON.parse(this.resultMetadata)
+      const parsed = JSON.parse(this.resultMetadata)
+      if (this.resultType) {
+        return parseProto(this.resultType, parsed) ?? parsed
+      }
+      return parsed
     } catch {
       return null
     }

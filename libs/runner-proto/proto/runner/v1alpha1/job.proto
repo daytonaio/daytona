@@ -7,36 +7,116 @@ package runner.v1alpha1;
 
 option go_package = "github.com/daytonaio/daytona/gen/proto/runner/v1alpha1;runnerv1alpha1";
 
-enum JobType {
-  JOB_TYPE_UNSPECIFIED      = 0;
-  JOB_TYPE_SNAPSHOT_SANDBOX = 1;
-  JOB_TYPE_FORK_SANDBOX     = 2;
+message CreateSandboxPayload {
+  string id = 1;
+  optional string from_volume_id = 2;
+  string user_id = 3;
+  string snapshot = 4;
+  string os_user = 5;
+  int64 cpu_quota = 6;
+  int64 gpu_quota = 7;
+  int64 memory_quota = 8;
+  int64 storage_quota = 9;
+  map<string, string> env = 10;
+  optional Registry registry = 11;
+  repeated string entrypoint = 12;
+  repeated Volume volumes = 13;
+  optional bool network_block_all = 14;
+  optional string network_allow_list = 15;
+  map<string, string> metadata = 16;
+  optional string auth_token = 17;
+  optional string otel_endpoint = 18;
+  optional bool skip_start = 19;
+  optional string organization_id = 20;
+  optional string region_id = 21;
 }
 
-message Registry {
-  string          url      = 1;
-  optional string username = 2;
-  optional string password = 3;
-  optional string project  = 4;
+message CreateSandboxResult {
+  string daemon_version = 1;
 }
 
-message SnapshotSandboxPayload {
-  string            sandbox_id      = 1;
-  string            name            = 2;
-  string            organization_id = 3;
-  optional Registry registry        = 4;
+message StartSandboxPayload {
+  optional string auth_token = 1;
+  map<string, string> metadata = 2;
+}
+
+message StartSandboxResult {
+  string daemon_version = 1;
+}
+
+message StopSandboxPayload {
+  optional bool force = 1;
+}
+
+message ResizeSandboxPayload {
+  int64 cpu = 1;
+  int64 gpu = 2;
+  int64 memory = 3;
+  int64 disk = 4;
+}
+
+message UpdateNetworkSettingsPayload {
+  optional bool network_block_all = 1;
+  optional string network_allow_list = 2;
+  optional bool network_limit_egress = 3;
+}
+
+message PullSnapshotPayload {
+  string snapshot = 1;
+  optional Registry registry = 2;
+  optional Registry destination_registry = 3;
+  optional string destination_ref = 4;
+  optional string new_tag = 5;
+}
+
+message SnapshotInfoResponse {
+  string name = 1;
+  double size_g_b = 2;
+  repeated string entrypoint = 3;
+  repeated string cmd = 4;
+  string hash = 5;
+}
+
+message InspectSnapshotInRegistryPayload {
+  string snapshot = 1;
+  optional Registry registry = 2;
+}
+
+message SnapshotDigestResponse {
+  string hash = 1;
+  double size_g_b = 2;
+}
+
+message SnapshotSandboxResult {
+  int64 size_bytes = 1;
+  string hash = 2;
 }
 
 message ForkSandboxPayload {
   string source_sandbox_id = 1;
-  string new_sandbox_id    = 2;
+  string new_sandbox_id = 2;
 }
 
-message SnapshotSandboxResult {
-  int64  size_bytes = 1;
-  string hash       = 2;
+message SnapshotSandboxPayload {
+  string sandbox_id = 1;
+  string name = 2;
+  string organization_id = 3;
+  optional Registry registry = 4;
 }
 
 message ForkSandboxResult {
   optional string daemon_version = 1;
+}
+
+message Registry {
+  string url = 1;
+  optional string username = 2;
+  optional string password = 3;
+  optional string project = 4;
+}
+
+message Volume {
+  string volume_id = 1;
+  string mount_path = 2;
+  optional string subpath = 3;
 }

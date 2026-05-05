@@ -102,6 +102,7 @@ export class RunnerService {
         })
         break
       case '2':
+      case '3':
         runner = new Runner({
           region: createRunnerDto.regionId,
           name: createRunnerDto.name,
@@ -522,7 +523,7 @@ export class RunnerService {
       await Promise.allSettled(
         runners.map(async (runner) => {
           // v2 runners report health via healthcheck endpoint, check based on lastChecked timestamp
-          if (runner.apiVersion === '2') {
+          if (runner.apiVersion === '2' || runner.apiVersion === '3') {
             await this.checkRunnerV2Health(runner)
             return
           }

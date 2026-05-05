@@ -1749,11 +1749,11 @@ export class SandboxService {
     }
     const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
 
-    if (runner.apiVersion === '2') {
+    if (runner.apiVersion === '2' || runner.apiVersion === '3') {
       // TODO: we need "recovering" state that can be set after calling recover
       // Once in recovering, we abort further processing and let the manager/job handler take care of it
       // (Also, since desiredState would be STARTED, we need to check the quota)
-      throw new ForbiddenException('Recovering sandboxes with runner API version 2 is not supported')
+      throw new ForbiddenException('Recovering sandboxes with runner API version 2 or 3 is not supported')
     }
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
