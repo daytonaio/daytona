@@ -63,7 +63,7 @@ export class Organization {
 
   @Column({
     type: 'int',
-    default: 100,
+    default: 30,
     name: 'snapshot_quota',
   })
   snapshotQuota: number
