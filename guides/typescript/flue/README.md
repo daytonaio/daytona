@@ -229,6 +229,7 @@ A successful run against `vercel/ms` issue #284 produces output like this in the
 [bug-fix] PR opened: https://github.com/your-username/your-fork/pull/1
 [bug-fix] branch: flue/fix-issue-284
 [bug-fix] files changed: src/index.ts, src/parse.test.ts
+[bug-fix] tearing down agents + sandbox...
 ```
 
 The four-phase TDD work happens inside the LLM's session in the sandbox, so it doesn't surface line by line in the dev-server log. To stream those events live, use Option C above (`npm run run`), or hit the webhook with `Accept: text/event-stream` from any HTTP client.
@@ -258,7 +259,15 @@ The PR (and the underlying commit) are authored under the GitHub account that ow
 
 ## Cleanup
 
-The sandbox auto-deletes when the agent session ends (`cleanup: true` is passed to the connector). Verify in your [Daytona Dashboard](https://app.daytona.io/dashboard); there should be no leftover sandboxes after the run.
+The orchestrator wraps the entire two-agent flow in a `try { ... } finally { ... }` block. On both successful runs and failures, the `finally` block:
+
+1. Destroys the **project** agent first (closes its session, no sandbox impact).
+2. Destroys the **setup** agent next, which fires `cleanup: true`'s registered `sandbox.delete()` callback and tears the Daytona sandbox down.
+3. As a fallback, if `init()` threw before the setup agent was created (so `cleanup: true` never armed), the orchestrator calls `sandbox.delete()` directly so we never leak a sandbox.
+
+This is necessary because Flue **does not auto-destroy sessions on handler return** — sessions persist for resumability via the same `<id>`, and the registered cleanup callback only runs when `agent.destroy()` is explicitly called. Without the `try/finally`, the Daytona sandbox would stay up indefinitely.
+
+Verify in your [Daytona Dashboard](https://app.daytona.io/dashboard); there should be no leftover sandboxes after a run completes (success or failure).
 
 ## License
 

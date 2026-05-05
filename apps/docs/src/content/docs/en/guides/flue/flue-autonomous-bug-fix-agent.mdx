@@ -31,6 +31,7 @@ A successful run against `vercel/ms` issue #284 looks like this in the `flue dev
 [bug-fix] PR opened: https://github.com/your-username/your-fork/pull/1
 [bug-fix] branch: flue/fix-issue-284
 [bug-fix] files changed: src/index.ts, src/parse.test.ts
+[bug-fix] tearing down agents + sandbox...
 ```
 
 The four-phase TDD work (Understand → Reproduce → Fix → Pull Request) happens entirely inside the LLM's session in the sandbox, so it doesn't surface in the dev-server log line by line. To see those events streamed live, switch to the SSE invocation shown later in [How `bug-fix.ts` is actually invoked](#how-bug-fixts-is-actually-invoked).
@@ -218,7 +219,7 @@ const agent = await init({
 })
 ```
 
-The user owns the Daytona client lifecycle (you decide how the sandbox is created, reused, or cleaned up); Flue just adapts it for agent use. The `cleanup: true` option deletes the sandbox automatically when the session ends.
+The user owns the Daytona client lifecycle (you decide how the sandbox is created, reused, or cleaned up); Flue just adapts it for agent use. The `cleanup: true` option **arms** a `sandbox.delete()` callback that fires when `agent.destroy()` is called — but Flue does NOT auto-destroy on handler return. The orchestrator must explicitly call `destroy()`, which our `try/finally` does (covered in [Section 5: Cleanup](#5-cleanup)).
 
 #### The Orchestrator
 
@@ -463,9 +464,12 @@ That runs `flue run bug-fix --target node --id run-1 --env .env --payload '{}'`,
 [bug-fix] PR opened: https://github.com/your-username/your-fork/pull/1
 [bug-fix] branch: flue/fix-issue-284
 [bug-fix] files changed: src/index.ts, src/parse.test.ts
+[bug-fix] tearing down agents + sandbox...
 ```
 
-Reading top to bottom you can see the agent following our SKILL.md phases: it understands the project (multiple parallel `read` calls), confirms the bug interactively before changing anything (the `node -e` reproduction in `bash`), creates a branch + writes the failing test, runs the suite to confirm the test fails, makes the fix, reruns the suite, then commits, pushes, and opens the PR.
+Reading top to bottom you can see the agent following our SKILL.md phases: it understands the project (multiple parallel `read` calls), confirms the bug interactively before changing anything (the `node -e` reproduction in `bash`), creates a branch + writes the failing test, runs the suite to confirm the test fails, makes the fix, reruns the suite, then commits, pushes, and opens the PR. The final `[bug-fix] tearing down agents + sandbox...` line is the orchestrator's `try/finally` doing its work — both agents get destroyed and the Daytona sandbox is deleted before the response is returned.
+
+Note that exact wording, file paths, test counts, and PR numbers vary between runs (the LLM is non-deterministic, and the PR number depends on how many PRs your fork already has). The shape — sandbox provision → setup → four-phase TDD workflow → PR URL → cleanup — is what's deterministic.
 
 The four phases below zoom in on each step.
 
@@ -567,7 +571,30 @@ Both the commit and the PR are authored under the GitHub account that owns your 
 
 ### 5. Cleanup
 
-The Daytona sandbox auto-deletes when the agent's session ends, thanks to the `cleanup: true` option passed to the connector. Confirm in your [Daytona Dashboard](https://app.daytona.io/dashboard); there should be no leftover sandboxes after a successful run.
+Flue does **not** auto-destroy sessions when a handler returns — sessions persist for resumability via the same `<id>`, and the `cleanup: true` callback registered on our connector only fires when `agent.destroy()` is explicitly called. The orchestrator therefore wraps the entire two-agent flow in a `try { ... } finally { ... }` block:
+
+```ts
+try {
+  setupAgent = await init({ sandbox: daytona(sandbox, { cleanup: true }), ... })
+  // ... setup work + projectAgent + skill invocation
+  return result
+} finally {
+  console.log('[bug-fix] tearing down agents + sandbox...')
+  if (projectAgent) {
+    try { await projectAgent.destroy() } catch (err) { console.error(err) }
+  }
+  if (setupAgent) {
+    try { await setupAgent.destroy() } catch (err) { console.error(err) }
+  } else {
+    // setupAgent never armed cleanup: true; delete sandbox directly
+    try { await sandbox.delete() } catch (err) { console.error(err) }
+  }
+}
+```
+
+Order matters: the **project** agent is destroyed first (closes its session, no sandbox impact since it doesn't have `cleanup: true`), then the **setup** agent's destroy fires the registered `sandbox.delete()` callback. The fallback `else` branch handles the edge case where `init()` itself threw before `setupAgent` was created — in that scenario nothing armed `cleanup: true`, so the orchestrator deletes the sandbox directly.
+
+This guarantees the sandbox is always torn down — on successful runs, on caught LLM errors, and on infrastructure failures. Confirm in your [Daytona Dashboard](https://app.daytona.io/dashboard); there should be no leftover sandboxes after a run completes.
 
 **Key Advantages**
 
