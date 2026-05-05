@@ -350,9 +350,9 @@ export function getColumns({
     },
     {
       id: 'actions',
-      size: 88,
-      minSize: 88,
-      maxSize: 88,
+      size: 136,
+      maxSize: 136,
+      minSize: 136,
       enableHiding: false,
       cell: ({ row }) => (
         <div className="w-full flex justify-end">

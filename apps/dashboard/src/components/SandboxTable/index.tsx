@@ -20,7 +20,7 @@ import { OrganizationRolePermissionsEnum, Sandbox, SandboxState } from '@daytona
 import { flexRender } from '@tanstack/react-table'
 import { Container } from 'lucide-react'
 import { AnimatePresence } from 'motion/react'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useImperativeHandle, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCommandPaletteActions } from '../CommandPalette'
 import { PageFooterPortal } from '../PageLayout'
@@ -40,11 +40,12 @@ import {
 } from '../ui/table'
 import { BulkAction, BulkActionAlertDialog } from './BulkActionAlertDialog'
 import { SandboxTableHeader } from './SandboxTableHeader'
-import { SandboxTableProps } from './types'
+import type { SandboxTableProps, SandboxTableRef } from './types'
 import { useSandboxCommands } from './useSandboxCommands'
 import { useSandboxTable } from './useSandboxTable'
 
 export function SandboxTable({
+  ref,
   data,
   sandboxIsLoading,
   sandboxStateIsTransitioning,
@@ -100,6 +101,14 @@ export function SandboxTable({
     handleViewForks,
     handleOpenTerminal,
   })
+
+  useImperativeHandle(
+    ref,
+    (): SandboxTableRef => ({
+      table,
+    }),
+    [table],
+  )
 
   const [pendingBulkAction, setPendingBulkAction] = useState<BulkAction | null>(null)
 
@@ -267,12 +276,7 @@ export function SandboxTable({
                     'bg-muted animate-pulse': sandboxStateIsTransitioning[row.original.id],
                     'cursor-pointer': onRowClick,
                   })}
-                  onClick={() =>
-                    onRowClick?.(
-                      row.original,
-                      table.getPrePaginationRowModel().rows.map((row) => row.original),
-                    )
-                  }
+                  onClick={() => onRowClick?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
