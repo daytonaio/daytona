@@ -5,9 +5,11 @@ package coderun
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"log/slog"
 	"net/http"
+	"os"
 	"os/exec"
 	"strings"
 	"sync/atomic"
@@ -18,6 +20,12 @@ import (
 	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
 )
+
+// stdioDrainGracePeriod bounds how long Wait blocks for stdout/stderr to drain
+// after the direct child has exited. Without this, a daemonized descendant
+// that inherits the stdio pipes would keep Wait blocked forever, hanging the
+// request.
+const stdioDrainGracePeriod = 100 * time.Millisecond
 
 // CodeRun godoc
 //
@@ -50,10 +58,34 @@ func CodeRun(logger *slog.Logger) gin.HandlerFunc {
 			return
 		}
 
+		ctx, cancel := context.WithCancel(c.Request.Context())
+		defer cancel()
+
+		var timeoutReached atomic.Bool
+		if request.Timeout != nil && *request.Timeout > 0 {
+			timeout := time.Duration(*request.Timeout) * time.Second
+			timer := time.AfterFunc(timeout, func() {
+				timeoutReached.Store(true)
+				cancel()
+			})
+			defer timer.Stop()
+		}
+
 		runCommand := toolbox.GetRunCommand(request.Code, request.Argv)
-		cmd := exec.Command(common.GetShell())
+		cmd := exec.CommandContext(ctx, common.GetShell())
 		cmd.Stdin = strings.NewReader(runCommand)
 		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+		// Kill the entire process group on cancel so any descendants spawned
+		// by the user's code (subshells, daemons, runaway children) go too.
+		cmd.Cancel = func() error {
+			if cmd.Process == nil {
+				return os.ErrProcessDone
+			}
+			return syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+		}
+		// Bound the post-exit I/O drain to keep a backgrounded descendant
+		// holding the stdio pipes from hanging this request indefinitely.
+		cmd.WaitDelay = stdioDrainGracePeriod
 		common.ApplyEnvs(cmd, request.Envs)
 
 		var outputBuf bytes.Buffer
@@ -68,18 +100,6 @@ func CodeRun(logger *slog.Logger) gin.HandlerFunc {
 			return
 		}
 
-		var timeoutReached atomic.Bool
-		if request.Timeout != nil && *request.Timeout > 0 {
-			timeout := time.Duration(*request.Timeout) * time.Second
-			timer := time.AfterFunc(timeout, func() {
-				timeoutReached.Store(true)
-				if killErr := syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL); killErr != nil {
-					logger.Error("failed to kill process group", "error", killErr)
-				}
-			})
-			defer timer.Stop()
-		}
-
 		err = cmd.Wait()
 		output := outputBuf.Bytes()
 		if err != nil {
@@ -88,10 +108,24 @@ func CodeRun(logger *slog.Logger) gin.HandlerFunc {
 				return
 			}
 
-			if exitError, ok := err.(*exec.ExitError); ok {
+			var exitError *exec.ExitError
+			if errors.As(err, &exitError) {
 				result, artifacts := ParseArtifacts(string(output))
 				c.JSON(http.StatusOK, CodeRunResponse{
 					ExitCode:  exitError.ExitCode(),
+					Result:    result,
+					Artifacts: artifacts,
+				})
+				return
+			}
+
+			// Process exited successfully but stdio drain was cut short by
+			// WaitDelay (e.g. backgrounded descendant kept the pipes open).
+			// Surface the partial output as a successful run.
+			if errors.Is(err, exec.ErrWaitDelay) {
+				result, artifacts := ParseArtifacts(string(output))
+				c.JSON(http.StatusOK, CodeRunResponse{
+					ExitCode:  0,
 					Result:    result,
 					Artifacts: artifacts,
 				})

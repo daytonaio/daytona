@@ -4,9 +4,11 @@
 package process
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"net/http"
+	"os"
 	"os/exec"
 	"strings"
 	"sync/atomic"
@@ -18,6 +20,12 @@ import (
 	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
 )
+
+// stdioDrainGracePeriod bounds how long Wait blocks for stdout/stderr to drain
+// after the direct child has exited. Without this, a daemonized descendant
+// (e.g. a tmux server backgrounded by the user's command) that inherits the
+// stdio pipes would keep CombinedOutput blocked forever, hanging the request.
+const stdioDrainGracePeriod = 100 * time.Millisecond
 
 // ExecuteCommand godoc
 //
@@ -49,14 +57,10 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 			return
 		}
 
-		// Pipe command via stdin to avoid OS ARG_MAX limits on large commands
-		cmd := exec.Command(common.GetShell())
-		cmd.Stdin = strings.NewReader(request.Command)
-		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-		if request.Cwd != nil {
-			cmd.Dir = *request.Cwd
-		}
-		common.ApplyEnvs(cmd, request.Envs)
+		// Derive a cancellable context from the request so client disconnects
+		// and explicit timeouts both reach the spawned process.
+		ctx, cancel := context.WithCancel(c.Request.Context())
+		defer cancel()
 
 		// set maximum execution time
 		var timeoutReached atomic.Bool
@@ -64,15 +68,31 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 			timeout := time.Duration(*request.Timeout) * time.Second
 			timer := time.AfterFunc(timeout, func() {
 				timeoutReached.Store(true)
-				if cmd.Process != nil {
-					// Kill the entire process group so child processes are also terminated
-					if err := syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL); err != nil {
-						logger.Error("failed to kill process group", "error", err)
-					}
-				}
+				cancel()
 			})
 			defer timer.Stop()
 		}
+
+		// Pipe command via stdin to avoid OS ARG_MAX limits on large commands
+		cmd := exec.CommandContext(ctx, common.GetShell())
+		cmd.Stdin = strings.NewReader(request.Command)
+		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+		// Override the default Cancel (which only kills the direct child) so
+		// the entire process group is terminated, including any shells, pipes
+		// or daemons forked by the user's command.
+		cmd.Cancel = func() error {
+			if cmd.Process == nil {
+				return os.ErrProcessDone
+			}
+			return syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+		}
+		// Bound the post-exit I/O drain so a backgrounded process that holds
+		// the stdio pipes open cannot hang this request indefinitely.
+		cmd.WaitDelay = stdioDrainGracePeriod
+		if request.Cwd != nil {
+			cmd.Dir = *request.Cwd
+		}
+		common.ApplyEnvs(cmd, request.Envs)
 
 		output, err := cmd.CombinedOutput()
 		if err != nil {
@@ -80,10 +100,20 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 				c.Error(common_errors.NewRequestTimeoutError(errors.New("command execution timeout")))
 				return
 			}
-			if exitError, ok := err.(*exec.ExitError); ok {
-				exitCode := exitError.ExitCode()
+			var exitError *exec.ExitError
+			if errors.As(err, &exitError) {
 				c.JSON(http.StatusOK, ExecuteResponse{
-					ExitCode: exitCode,
+					ExitCode: exitError.ExitCode(),
+					Result:   string(output),
+				})
+				return
+			}
+			// The command itself succeeded but a backgrounded descendant kept
+			// the stdio pipes open past WaitDelay. Return what we captured as
+			// a successful execution rather than a -1 error to the caller.
+			if errors.Is(err, exec.ErrWaitDelay) {
+				c.JSON(http.StatusOK, ExecuteResponse{
+					ExitCode: 0,
 					Result:   string(output),
 				})
 				return
