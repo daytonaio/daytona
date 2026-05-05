@@ -200,6 +200,12 @@ const Snapshots: React.FC = () => {
       await markAllSnapshotQueriesAsStale(true)
       setSnapshotToDelete(null)
       setShowDeleteDialog(false)
+      if (snapshotIdParam === snapshot.id || selectedSnapshot?.id === snapshot.id) {
+        setSelectedSnapshot(null)
+        setOrderedSnapshotItems(null)
+        setShowSnapshotSheet(false)
+        setSnapshotIdParam(null)
+      }
       toast.success(`Deleting snapshot ${snapshot.name}`)
     } catch (error) {
       handleApiError(error, 'Failed to delete snapshot')
