@@ -31,6 +31,7 @@ model_api_key_list.go
 model_api_key_response.go
 model_audit_log.go
 model_build_info.go
+model_change_volume_backend.go
 model_command.go
 model_completion_context.go
 model_completion_item.go
@@ -183,6 +184,7 @@ model_trace_summary.go
 model_update_docker_registry.go
 model_update_job_status.go
 model_update_organization_default_region.go
+model_update_organization_default_volume_backend.go
 model_update_organization_invitation.go
 model_update_organization_member_access.go
 model_update_organization_quota.go

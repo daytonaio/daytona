@@ -30,6 +30,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { WithSpan } from '../../../common/decorators/otel.decorator'
 import { SandboxActivityService } from '../../services/sandbox-activity.service'
+import { VolumeService } from '../../services/volume.service'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -45,6 +46,7 @@ export class SandboxStartAction extends SandboxAction {
     protected readonly redisLockProvider: RedisLockProvider,
     @InjectRedis() private readonly redis: Redis,
     private readonly sandboxActivityService: SandboxActivityService,
+    private readonly volumeService: VolumeService,
   ) {
     super(runnerService, runnerAdapterFactory, sandboxRepository, redisLockProvider)
   }
@@ -508,9 +510,16 @@ export class SandboxStartAction extends SandboxAction {
 
       const metadata: { [key: string]: string } = { ...organization?.sandboxMetadata }
       if (sandbox.volumes?.length) {
-        metadata['volumes'] = JSON.stringify(
-          sandbox.volumes.map((v) => ({ volumeId: v.volumeId, mountPath: v.mountPath, subpath: v.subpath })),
-        )
+        // Resolve once so the runner gets the same backend selection and
+        // (for experimental volumes) Archil disk + decrypted mount token
+        // that createSandbox/recoverSandbox would have sent. Without this,
+        // start.go's "re-establish FUSE mounts on stopped containers" path
+        // would only see legacy s3fuse-shaped fields.
+        const prepared = await this.volumeService.prepareRunnerVolumes(sandbox.volumes)
+        metadata['volumes'] = JSON.stringify(prepared.volumes)
+        if (prepared.backend) {
+          metadata['volumeBackend'] = prepared.backend
+        }
       }
 
       try {

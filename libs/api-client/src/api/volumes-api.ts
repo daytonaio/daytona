@@ -22,6 +22,8 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
+import type { ChangeVolumeBackend } from '../models';
+// @ts-ignore
 import type { CreateVolume } from '../models';
 // @ts-ignore
 import type { VolumeDto } from '../models';
@@ -31,6 +33,56 @@ import type { VolumeDto } from '../models';
  */
 export const VolumesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
+        /**
+         * Switches an existing volume between the s3fuse and experimental backends in place. The volume\'s S3 bucket and data are preserved; only the mount strategy changes. Refuses to switch while any sandbox referencing the volume is running.
+         * @summary Change a volume\'s backend
+         * @param {string} volumeId ID of the volume
+         * @param {ChangeVolumeBackend} changeVolumeBackend 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        changeVolumeBackend: async (volumeId: string, changeVolumeBackend: ChangeVolumeBackend, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'volumeId' is not null or undefined
+            assertParamExists('changeVolumeBackend', 'volumeId', volumeId)
+            // verify required parameter 'changeVolumeBackend' is not null or undefined
+            assertParamExists('changeVolumeBackend', 'changeVolumeBackend', changeVolumeBackend)
+            const localVarPath = `/volumes/{volumeId}/backend`
+                .replace(`{${"volumeId"}}`, encodeURIComponent(String(volumeId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(changeVolumeBackend, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
         /**
          * 
          * @summary Create a new volume
@@ -265,6 +317,21 @@ export const VolumesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = VolumesApiAxiosParamCreator(configuration)
     return {
         /**
+         * Switches an existing volume between the s3fuse and experimental backends in place. The volume\'s S3 bucket and data are preserved; only the mount strategy changes. Refuses to switch while any sandbox referencing the volume is running.
+         * @summary Change a volume\'s backend
+         * @param {string} volumeId ID of the volume
+         * @param {ChangeVolumeBackend} changeVolumeBackend 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async changeVolumeBackend(volumeId: string, changeVolumeBackend: ChangeVolumeBackend, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VolumeDto>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.changeVolumeBackend(volumeId, changeVolumeBackend, xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['VolumesApi.changeVolumeBackend']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * 
          * @summary Create a new volume
          * @param {CreateVolume} createVolume 
@@ -345,6 +412,18 @@ export const VolumesApiFactory = function (configuration?: Configuration, basePa
     const localVarFp = VolumesApiFp(configuration)
     return {
         /**
+         * Switches an existing volume between the s3fuse and experimental backends in place. The volume\'s S3 bucket and data are preserved; only the mount strategy changes. Refuses to switch while any sandbox referencing the volume is running.
+         * @summary Change a volume\'s backend
+         * @param {string} volumeId ID of the volume
+         * @param {ChangeVolumeBackend} changeVolumeBackend 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        changeVolumeBackend(volumeId: string, changeVolumeBackend: ChangeVolumeBackend, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<VolumeDto> {
+            return localVarFp.changeVolumeBackend(volumeId, changeVolumeBackend, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
          * 
          * @summary Create a new volume
          * @param {CreateVolume} createVolume 
@@ -409,6 +488,20 @@ export const VolumesApiFactory = function (configuration?: Configuration, basePa
  * @extends {BaseAPI}
  */
 export class VolumesApi extends BaseAPI {
+    /**
+     * Switches an existing volume between the s3fuse and experimental backends in place. The volume\'s S3 bucket and data are preserved; only the mount strategy changes. Refuses to switch while any sandbox referencing the volume is running.
+     * @summary Change a volume\'s backend
+     * @param {string} volumeId ID of the volume
+     * @param {ChangeVolumeBackend} changeVolumeBackend 
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof VolumesApi
+     */
+    public changeVolumeBackend(volumeId: string, changeVolumeBackend: ChangeVolumeBackend, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return VolumesApiFp(this.configuration).changeVolumeBackend(volumeId, changeVolumeBackend, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * 
      * @summary Create a new volume

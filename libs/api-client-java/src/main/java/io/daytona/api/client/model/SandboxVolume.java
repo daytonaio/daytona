@@ -65,6 +65,11 @@ public class SandboxVolume {
   @javax.annotation.Nullable
   private String subpath;
 
+  public static final String SERIALIZED_NAME_READ_ONLY = "readOnly";
+  @SerializedName(SERIALIZED_NAME_READ_ONLY)
+  @javax.annotation.Nullable
+  private Boolean readOnly = false;
+
   public SandboxVolume() {
   }
 
@@ -124,6 +129,25 @@ public class SandboxVolume {
     this.subpath = subpath;
   }
 
+
+  public SandboxVolume readOnly(@javax.annotation.Nullable Boolean readOnly) {
+    this.readOnly = readOnly;
+    return this;
+  }
+
+  /**
+   * Mount the volume read-only inside this sandbox. The volume itself is unchanged; this is a per-mount attribute, so the same volume can be mounted read-write in one sandbox and read-only in another. Defaults to false.
+   * @return readOnly
+   */
+  @javax.annotation.Nullable
+  public Boolean getReadOnly() {
+    return readOnly;
+  }
+
+  public void setReadOnly(@javax.annotation.Nullable Boolean readOnly) {
+    this.readOnly = readOnly;
+  }
+
   /**
    * A container for additional, undeclared properties.
    * This is a holder for any undeclared properties as specified with
@@ -181,13 +205,14 @@ public class SandboxVolume {
     SandboxVolume sandboxVolume = (SandboxVolume) o;
     return Objects.equals(this.volumeId, sandboxVolume.volumeId) &&
         Objects.equals(this.mountPath, sandboxVolume.mountPath) &&
-        Objects.equals(this.subpath, sandboxVolume.subpath)&&
+        Objects.equals(this.subpath, sandboxVolume.subpath) &&
+        Objects.equals(this.readOnly, sandboxVolume.readOnly)&&
         Objects.equals(this.additionalProperties, sandboxVolume.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(volumeId, mountPath, subpath, additionalProperties);
+    return Objects.hash(volumeId, mountPath, subpath, readOnly, additionalProperties);
   }
 
   @Override
@@ -197,6 +222,7 @@ public class SandboxVolume {
     sb.append("    volumeId: ").append(toIndentedString(volumeId)).append("\n");
     sb.append("    mountPath: ").append(toIndentedString(mountPath)).append("\n");
     sb.append("    subpath: ").append(toIndentedString(subpath)).append("\n");
+    sb.append("    readOnly: ").append(toIndentedString(readOnly)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -223,6 +249,7 @@ public class SandboxVolume {
     openapiFields.add("volumeId");
     openapiFields.add("mountPath");
     openapiFields.add("subpath");
+    openapiFields.add("readOnly");
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>();

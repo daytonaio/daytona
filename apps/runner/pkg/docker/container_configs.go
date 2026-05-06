@@ -4,6 +4,7 @@
 package docker
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
+	"github.com/daytonaio/runner/pkg/volume"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/strslice"
@@ -18,13 +20,13 @@ import (
 	"github.com/docker/docker/api/types/container"
 )
 
-func (d *DockerClient) getContainerConfigs(sandboxDto dto.CreateSandboxDTO, image *image.InspectResponse, volumeMountPathBinds []string) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error) {
-	containerConfig, err := d.getContainerCreateConfig(sandboxDto, image)
+func (d *DockerClient) getContainerConfigs(ctx context.Context, sandboxDto dto.CreateSandboxDTO, image *image.InspectResponse, volumeMountPathBinds []string, mounter volume.Mounter) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error) {
+	containerConfig, err := d.getContainerCreateConfig(ctx, sandboxDto, image, mounter)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	hostConfig, err := d.getContainerHostConfig(sandboxDto, volumeMountPathBinds)
+	hostConfig, err := d.getContainerHostConfig(sandboxDto, volumeMountPathBinds, mounter)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -33,7 +35,29 @@ func (d *DockerClient) getContainerConfigs(sandboxDto dto.CreateSandboxDTO, imag
 	return containerConfig, hostConfig, networkingConfig, nil
 }
 
-func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO, image *image.InspectResponse) (*container.Config, error) {
+// volumesToMounterSpec converts the incoming sandbox volume DTOs into the
+// package-neutral volume.Volume shape consumed by InContainerMounter.
+func volumesToMounterSpec(in []dto.VolumeDTO) []volume.Volume {
+	out := make([]volume.Volume, 0, len(in))
+	for _, v := range in {
+		subpath := ""
+		if v.Subpath != nil {
+			subpath = *v.Subpath
+		}
+		out = append(out, volume.Volume{
+			VolumeID:         v.VolumeId,
+			MountPath:        v.MountPath,
+			Subpath:          subpath,
+			ReadOnly:         v.ReadOnly,
+			ArchilDisk:       v.ArchilDisk,
+			ArchilRegion:     v.ArchilRegion,
+			ArchilMountToken: v.ArchilMountToken,
+		})
+	}
+	return out
+}
+
+func (d *DockerClient) getContainerCreateConfig(ctx context.Context, sandboxDto dto.CreateSandboxDTO, image *image.InspectResponse, mounter volume.Mounter) (*container.Config, error) {
 	if image == nil {
 		return nil, fmt.Errorf("image not found for sandbox: %s", sandboxDto.Id)
 	}
@@ -58,6 +82,17 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO,
 
 	if sandboxDto.RegionId != nil && *sandboxDto.RegionId != "" {
 		envVars = append(envVars, "DAYTONA_REGION_ID="+*sandboxDto.RegionId)
+	}
+
+	// In-container mounters contribute the volume spec + scoped credentials
+	// via env so the daemon can mount-s3 from within the sandbox. This may
+	// hit the network (e.g. STS AssumeRole) and can fail; surface that error.
+	if icm, ok := mounter.(volume.InContainerMounter); ok && len(sandboxDto.Volumes) > 0 {
+		extra, err := icm.ContainerEnv(ctx, volumesToMounterSpec(sandboxDto.Volumes))
+		if err != nil {
+			return nil, fmt.Errorf("in-container volume env: %w", err)
+		}
+		envVars = append(envVars, extra...)
 	}
 
 	labels := make(map[string]string)
@@ -116,7 +151,7 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO,
 	}, nil
 }
 
-func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) (*container.HostConfig, error) {
+func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string, mounter volume.Mounter) (*container.HostConfig, error) {
 	var binds []string
 
 	binds = append(binds, fmt.Sprintf("%s:%s:ro", d.daemonPath, common.DAEMON_PATH))
@@ -128,6 +163,11 @@ func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, v
 
 	if len(volumeMountPathBinds) > 0 {
 		binds = append(binds, volumeMountPathBinds...)
+	}
+
+	// In-container mounters may need extra RO binds (e.g. the mount-s3 binary).
+	if icm, ok := mounter.(volume.InContainerMounter); ok {
+		binds = append(binds, icm.ContainerBinds()...)
 	}
 
 	hostConfig := &container.HostConfig{

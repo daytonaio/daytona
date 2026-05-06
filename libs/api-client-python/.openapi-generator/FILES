@@ -33,6 +33,7 @@ daytona_api_client/models/api_key_list.py
 daytona_api_client/models/api_key_response.py
 daytona_api_client/models/audit_log.py
 daytona_api_client/models/build_info.py
+daytona_api_client/models/change_volume_backend.py
 daytona_api_client/models/command.py
 daytona_api_client/models/completion_context.py
 daytona_api_client/models/completion_item.py
@@ -185,6 +186,7 @@ daytona_api_client/models/trace_summary.py
 daytona_api_client/models/update_docker_registry.py
 daytona_api_client/models/update_job_status.py
 daytona_api_client/models/update_organization_default_region.py
+daytona_api_client/models/update_organization_default_volume_backend.py
 daytona_api_client/models/update_organization_invitation.py
 daytona_api_client/models/update_organization_member_access.py
 daytona_api_client/models/update_organization_quota.py

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Controller, Get, Post, Delete, Body, Param, Logger, UseGuards, HttpCode, Query } from '@nestjs/common'
+import { Controller, Get, Post, Put, Delete, Body, Param, Logger, UseGuards, HttpCode, Query } from '@nestjs/common'
 import {
   ApiOAuth2,
   ApiResponse,
@@ -23,6 +23,7 @@ import { RequiredOrganizationResourcePermissions } from '../../organization/deco
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationAuthContextGuard } from '../../organization/guards/organization-auth-context.guard'
 import { VolumeDto } from '../dto/volume.dto'
+import { ChangeVolumeBackendDto } from '../dto/change-volume-backend.dto'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
@@ -30,6 +31,7 @@ import { VolumeAccessGuard } from '../guards/volume-access.guard'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
 import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
+import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
 
 @Controller('volumes')
 @ApiTags('volumes')
@@ -148,6 +150,48 @@ export class VolumeController {
   })
   async deleteVolume(@Param('volumeId') volumeId: string): Promise<void> {
     return this.volumeService.delete(volumeId)
+  }
+
+  @Put(':volumeId/backend')
+  @RequireFlagsEnabled({ flags: [{ flagKey: 'volume_backend_picker', defaultValue: false }] })
+  @ApiOperation({
+    summary: "Change a volume's backend",
+    operationId: 'changeVolumeBackend',
+    description:
+      "Switches an existing volume between the s3fuse and experimental backends in place. The volume's S3 bucket and data are preserved; only the mount strategy changes. Refuses to switch while any sandbox referencing the volume is running.",
+  })
+  @ApiParam({
+    name: 'volumeId',
+    description: 'ID of the volume',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Volume's backend has been switched",
+    type: VolumeDto,
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Volume is in use by a running sandbox',
+  })
+  @UseGuards(VolumeAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_VOLUMES])
+  @Audit({
+    action: AuditAction.UPDATE,
+    targetType: AuditTarget.VOLUME,
+    targetIdFromRequest: (req) => req.params.volumeId,
+    requestMetadata: {
+      body: (req: TypedRequest<ChangeVolumeBackendDto>) => ({
+        backend: req.body?.backend,
+      }),
+    },
+  })
+  async changeVolumeBackend(
+    @Param('volumeId') volumeId: string,
+    @Body() body: ChangeVolumeBackendDto,
+  ): Promise<VolumeDto> {
+    const volume = await this.volumeService.changeBackend(volumeId, body.backend)
+    return VolumeDto.fromVolume(volume)
   }
 
   @Get('by-name/:name')

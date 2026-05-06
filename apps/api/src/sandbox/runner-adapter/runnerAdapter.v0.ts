@@ -39,6 +39,7 @@ import { DockerRegistry } from '../../docker-registry/entities/docker-registry.e
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
 import { RunnerApiError } from '../errors/runner-api-error'
+import { VolumeService } from '../services/volume.service'
 
 const isDebugEnabled = process.env.DEBUG === 'true'
 
@@ -52,6 +53,8 @@ export class RunnerAdapterV0 implements RunnerAdapter {
   private snapshotApiClient: SnapshotsApi
   private runnerApiClient: DefaultApi
   private toolboxApiClient: ToolboxApi
+
+  constructor(private readonly volumeService: VolumeService) {}
 
   private convertSandboxState(state: EnumsSandboxState): SandboxState {
     switch (state) {
@@ -194,6 +197,9 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     otelEndpoint?: string,
     skipStart?: boolean,
   ): Promise<StartSandboxResponse | undefined> {
+    const prepared = await this.volumeService.prepareRunnerVolumes(sandbox.volumes)
+    const effectiveMetadata = applyVolumeBackendMetadataV0(metadata, prepared.backend)
+
     const createSandboxDto: CreateSandboxDTO = {
       id: sandbox.id,
       userId: sandbox.organizationId,
@@ -213,14 +219,10 @@ export class RunnerAdapterV0 implements RunnerAdapter {
           }
         : undefined,
       entrypoint: entrypoint,
-      volumes: sandbox.volumes?.map((volume) => ({
-        volumeId: volume.volumeId,
-        mountPath: volume.mountPath,
-        subpath: volume.subpath,
-      })),
+      volumes: prepared.volumes.length ? prepared.volumes : undefined,
       networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
-      metadata: metadata,
+      metadata: effectiveMetadata,
       authToken: sandbox.authToken,
       otelEndpoint,
       skipStart: skipStart,
@@ -430,6 +432,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
   }
 
   async recoverSandbox(sandbox: Sandbox): Promise<void> {
+    const prepared = await this.volumeService.prepareRunnerVolumes(sandbox.volumes)
     const recoverSandboxDTO: RecoverSandboxDTO = {
       userId: sandbox.organizationId,
       snapshot: sandbox.snapshot,
@@ -439,11 +442,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       memoryQuota: sandbox.mem,
       storageQuota: sandbox.disk,
       env: sandbox.env,
-      volumes: sandbox.volumes?.map((volume) => ({
-        volumeId: volume.volumeId,
-        mountPath: volume.mountPath,
-        subpath: volume.subpath,
-      })),
+      volumes: prepared.volumes.length ? prepared.volumes : undefined,
       networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
       errorReason: sandbox.errorReason,
@@ -455,4 +454,16 @@ export class RunnerAdapterV0 implements RunnerAdapter {
   async resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void> {
     await this.sandboxApiClient.resize(sandboxId, { cpu, memory, disk })
   }
+}
+
+// See identical helper in runnerAdapter.v2.ts. Kept duplicated to avoid
+// cross-imports between adapter files.
+function applyVolumeBackendMetadataV0(
+  metadata: { [key: string]: string } | undefined,
+  resolvedBackend: string | undefined,
+): { [key: string]: string } | undefined {
+  if (!resolvedBackend) {
+    return metadata
+  }
+  return { ...(metadata ?? {}), volumeBackend: resolvedBackend }
 }

@@ -96,6 +96,13 @@ export class OrganizationDto {
   defaultRegionId?: string
 
   @ApiProperty({
+    description: 'Default volume backend for sandbox volumes',
+    example: 's3fuse',
+    enum: ['s3fuse', 'experimental'],
+  })
+  defaultVolumeBackend: string
+
+  @ApiProperty({
     description: 'Authenticated rate limit per minute',
     nullable: true,
   })
@@ -166,6 +173,7 @@ export class OrganizationDto {
       snapshotDeactivationTimeoutMinutes: organization.snapshotDeactivationTimeoutMinutes,
       sandboxLimitedNetworkEgress: organization.sandboxLimitedNetworkEgress,
       defaultRegionId: organization.defaultRegionId,
+      defaultVolumeBackend: organization.defaultVolumeBackend,
       authenticatedRateLimit: organization.authenticatedRateLimit,
       sandboxCreateRateLimit: organization.sandboxCreateRateLimit,
       sandboxLifecycleRateLimit: organization.sandboxLifecycleRateLimit,

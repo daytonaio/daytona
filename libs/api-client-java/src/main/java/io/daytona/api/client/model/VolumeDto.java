@@ -92,6 +92,63 @@ public class VolumeDto {
   @javax.annotation.Nullable
   private String errorReason;
 
+  /**
+   * Backend that physically stores the volume. Set when the volume is created from the organization default and immutable afterwards.
+   */
+  @JsonAdapter(BackendEnum.Adapter.class)
+  public enum BackendEnum {
+    S3FUSE("s3fuse"),
+    
+    EXPERIMENTAL("experimental");
+
+    private String value;
+
+    BackendEnum(String value) {
+      this.value = value;
+    }
+
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    public static BackendEnum fromValue(String value) {
+      for (BackendEnum b : BackendEnum.values()) {
+        if (b.value.equals(value)) {
+          return b;
+        }
+      }
+      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+    }
+
+    public static class Adapter extends TypeAdapter<BackendEnum> {
+      @Override
+      public void write(final JsonWriter jsonWriter, final BackendEnum enumeration) throws IOException {
+        jsonWriter.value(enumeration.getValue());
+      }
+
+      @Override
+      public BackendEnum read(final JsonReader jsonReader) throws IOException {
+        String value =  jsonReader.nextString();
+        return BackendEnum.fromValue(value);
+      }
+    }
+
+    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+      String value = jsonElement.getAsString();
+      BackendEnum.fromValue(value);
+    }
+  }
+
+  public static final String SERIALIZED_NAME_BACKEND = "backend";
+  @SerializedName(SERIALIZED_NAME_BACKEND)
+  @javax.annotation.Nonnull
+  private BackendEnum backend;
+
   public VolumeDto() {
   }
 
@@ -246,6 +303,25 @@ public class VolumeDto {
     this.errorReason = errorReason;
   }
 
+
+  public VolumeDto backend(@javax.annotation.Nonnull BackendEnum backend) {
+    this.backend = backend;
+    return this;
+  }
+
+  /**
+   * Backend that physically stores the volume. Set when the volume is created from the organization default and immutable afterwards.
+   * @return backend
+   */
+  @javax.annotation.Nonnull
+  public BackendEnum getBackend() {
+    return backend;
+  }
+
+  public void setBackend(@javax.annotation.Nonnull BackendEnum backend) {
+    this.backend = backend;
+  }
+
   /**
    * A container for additional, undeclared properties.
    * This is a holder for any undeclared properties as specified with
@@ -308,7 +384,8 @@ public class VolumeDto {
         Objects.equals(this.createdAt, volumeDto.createdAt) &&
         Objects.equals(this.updatedAt, volumeDto.updatedAt) &&
         Objects.equals(this.lastUsedAt, volumeDto.lastUsedAt) &&
-        Objects.equals(this.errorReason, volumeDto.errorReason)&&
+        Objects.equals(this.errorReason, volumeDto.errorReason) &&
+        Objects.equals(this.backend, volumeDto.backend)&&
         Objects.equals(this.additionalProperties, volumeDto.additionalProperties);
   }
 
@@ -318,7 +395,7 @@ public class VolumeDto {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, organizationId, state, createdAt, updatedAt, lastUsedAt, errorReason, additionalProperties);
+    return Objects.hash(id, name, organizationId, state, createdAt, updatedAt, lastUsedAt, errorReason, backend, additionalProperties);
   }
 
   private static <T> int hashCodeNullable(JsonNullable<T> a) {
@@ -340,6 +417,7 @@ public class VolumeDto {
     sb.append("    updatedAt: ").append(toIndentedString(updatedAt)).append("\n");
     sb.append("    lastUsedAt: ").append(toIndentedString(lastUsedAt)).append("\n");
     sb.append("    errorReason: ").append(toIndentedString(errorReason)).append("\n");
+    sb.append("    backend: ").append(toIndentedString(backend)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -371,6 +449,7 @@ public class VolumeDto {
     openapiFields.add("updatedAt");
     openapiFields.add("lastUsedAt");
     openapiFields.add("errorReason");
+    openapiFields.add("backend");
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>();
@@ -381,6 +460,7 @@ public class VolumeDto {
     openapiRequiredFields.add("createdAt");
     openapiRequiredFields.add("updatedAt");
     openapiRequiredFields.add("errorReason");
+    openapiRequiredFields.add("backend");
   }
 
   /**
@@ -426,6 +506,11 @@ public class VolumeDto {
       if ((jsonObj.get("errorReason") != null && !jsonObj.get("errorReason").isJsonNull()) && !jsonObj.get("errorReason").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `errorReason` to be a primitive type in the JSON string but got `%s`", jsonObj.get("errorReason").toString()));
       }
+      if (!jsonObj.get("backend").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format("Expected the field `backend` to be a primitive type in the JSON string but got `%s`", jsonObj.get("backend").toString()));
+      }
+      // validate the required field `backend`
+      BackendEnum.validateJsonElement(jsonObj.get("backend"));
   }
 
   public static class CustomTypeAdapterFactory implements TypeAdapterFactory {

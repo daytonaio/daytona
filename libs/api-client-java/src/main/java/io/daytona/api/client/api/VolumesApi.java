@@ -27,6 +27,7 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 
 
+import io.daytona.api.client.model.ChangeVolumeBackend;
 import io.daytona.api.client.model.CreateVolume;
 import io.daytona.api.client.model.VolumeDto;
 
@@ -73,6 +74,156 @@ public class VolumesApi {
         this.localCustomBaseUrl = customBaseUrl;
     }
 
+    /**
+     * Build call for changeVolumeBackend
+     * @param volumeId ID of the volume (required)
+     * @param changeVolumeBackend  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Volume&#39;s backend has been switched </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Volume is in use by a running sandbox </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call changeVolumeBackendCall(String volumeId, ChangeVolumeBackend changeVolumeBackend, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = changeVolumeBackend;
+
+        // create path and map variables
+        String localVarPath = "/volumes/{volumeId}/backend"
+            .replace("{" + "volumeId" + "}", localVarApiClient.escapeString(volumeId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (xDaytonaOrganizationID != null) {
+            localVarHeaderParams.put("X-Daytona-Organization-ID", localVarApiClient.parameterToString(xDaytonaOrganizationID));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call changeVolumeBackendValidateBeforeCall(String volumeId, ChangeVolumeBackend changeVolumeBackend, String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'volumeId' is set
+        if (volumeId == null) {
+            throw new ApiException("Missing the required parameter 'volumeId' when calling changeVolumeBackend(Async)");
+        }
+
+        // verify the required parameter 'changeVolumeBackend' is set
+        if (changeVolumeBackend == null) {
+            throw new ApiException("Missing the required parameter 'changeVolumeBackend' when calling changeVolumeBackend(Async)");
+        }
+
+        return changeVolumeBackendCall(volumeId, changeVolumeBackend, xDaytonaOrganizationID, _callback);
+
+    }
+
+    /**
+     * Change a volume&#39;s backend
+     * Switches an existing volume between the s3fuse and experimental backends in place. The volume&#39;s S3 bucket and data are preserved; only the mount strategy changes. Refuses to switch while any sandbox referencing the volume is running.
+     * @param volumeId ID of the volume (required)
+     * @param changeVolumeBackend  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return VolumeDto
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Volume&#39;s backend has been switched </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Volume is in use by a running sandbox </td><td>  -  </td></tr>
+     </table>
+     */
+    public VolumeDto changeVolumeBackend(String volumeId, ChangeVolumeBackend changeVolumeBackend, String xDaytonaOrganizationID) throws ApiException {
+        ApiResponse<VolumeDto> localVarResp = changeVolumeBackendWithHttpInfo(volumeId, changeVolumeBackend, xDaytonaOrganizationID);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Change a volume&#39;s backend
+     * Switches an existing volume between the s3fuse and experimental backends in place. The volume&#39;s S3 bucket and data are preserved; only the mount strategy changes. Refuses to switch while any sandbox referencing the volume is running.
+     * @param volumeId ID of the volume (required)
+     * @param changeVolumeBackend  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return ApiResponse&lt;VolumeDto&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Volume&#39;s backend has been switched </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Volume is in use by a running sandbox </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<VolumeDto> changeVolumeBackendWithHttpInfo(String volumeId, ChangeVolumeBackend changeVolumeBackend, String xDaytonaOrganizationID) throws ApiException {
+        okhttp3.Call localVarCall = changeVolumeBackendValidateBeforeCall(volumeId, changeVolumeBackend, xDaytonaOrganizationID, null);
+        Type localVarReturnType = new TypeToken<VolumeDto>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Change a volume&#39;s backend (asynchronously)
+     * Switches an existing volume between the s3fuse and experimental backends in place. The volume&#39;s S3 bucket and data are preserved; only the mount strategy changes. Refuses to switch while any sandbox referencing the volume is running.
+     * @param volumeId ID of the volume (required)
+     * @param changeVolumeBackend  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Volume&#39;s backend has been switched </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Volume is in use by a running sandbox </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call changeVolumeBackendAsync(String volumeId, ChangeVolumeBackend changeVolumeBackend, String xDaytonaOrganizationID, final ApiCallback<VolumeDto> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = changeVolumeBackendValidateBeforeCall(volumeId, changeVolumeBackend, xDaytonaOrganizationID, _callback);
+        Type localVarReturnType = new TypeToken<VolumeDto>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
     /**
      * Build call for createVolume
      * @param createVolume  (required)

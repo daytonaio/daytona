@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
 from daytona_api_client.models.volume_state import VolumeState
 from pydantic import TypeAdapter
@@ -39,8 +39,16 @@ class VolumeDto(BaseModel):
     updated_at: StrictStr = Field(description="Last update timestamp", serialization_alias="updatedAt")
     last_used_at: Optional[StrictStr] = Field(default=None, description="Last used timestamp", serialization_alias="lastUsedAt")
     error_reason: Optional[StrictStr] = Field(description="The error reason of the volume", serialization_alias="errorReason")
+    backend: StrictStr = Field(description="Backend that physically stores the volume. Set when the volume is created from the organization default and immutable afterwards.")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "state", "createdAt", "updatedAt", "lastUsedAt", "errorReason"]
+    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "state", "createdAt", "updatedAt", "lastUsedAt", "errorReason", "backend"]
+
+    @field_validator('backend')
+    def backend_validate_enum(cls, value):
+        """Validates the enum"""
+        if value not in set(['s3fuse', 'experimental']):
+            raise ValueError("must be one of enum values ('s3fuse', 'experimental')")
+        return value
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -116,7 +124,8 @@ class VolumeDto(BaseModel):
             "created_at": obj.get("createdAt"),
             "updated_at": obj.get("updatedAt"),
             "last_used_at": obj.get("lastUsedAt"),
-            "error_reason": obj.get("errorReason")
+            "error_reason": obj.get("errorReason"),
+            "backend": obj.get("backend")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

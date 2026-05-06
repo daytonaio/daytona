@@ -14,6 +14,7 @@ import (
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/netrules"
+	"github.com/daytonaio/runner/pkg/volume"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/system"
 	"github.com/docker/docker/client"
@@ -23,10 +24,8 @@ type DockerClientConfig struct {
 	ApiClient                    client.APIClient
 	BackupInfoCache              *cache.BackupInfoCache
 	Logger                       *slog.Logger
-	AWSRegion                    string
-	AWSEndpointUrl               string
-	AWSAccessKeyId               string
-	AWSSecretAccessKey           string
+	DefaultVolumeMounter         volume.Mounter
+	InContainerVolumeMounter     volume.Mounter // optional; when nil, the "experimental" backend silently falls back to s3fuse
 	DaemonPath                   string
 	ComputerUsePluginPath        string
 	NetRulesManager              *netrules.NetRulesManager
@@ -119,10 +118,8 @@ func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerCli
 		backupInfoCache:              config.BackupInfoCache,
 		pullTracker:                  &common.Tracker[string]{},
 		logger:                       logger,
-		awsRegion:                    config.AWSRegion,
-		awsEndpointUrl:               config.AWSEndpointUrl,
-		awsAccessKeyId:               config.AWSAccessKeyId,
-		awsSecretAccessKey:           config.AWSSecretAccessKey,
+		defaultVolumeMounter:         config.DefaultVolumeMounter,
+		inContainerVolumeMounter:     config.InContainerVolumeMounter,
 		volumeMutexes:                make(map[string]*sync.Mutex),
 		daemonPath:                   config.DaemonPath,
 		computerUsePluginPath:        config.ComputerUsePluginPath,
@@ -149,6 +146,33 @@ func (d *DockerClient) ApiClient() client.APIClient {
 	return d.apiClient
 }
 
+const volumeBackendMetadataKey = "volumeBackend"
+
+// Volume backend identifiers exchanged with the control plane via sandbox metadata.
+const (
+	// volumeBackendS3Fuse is the default: the runner mounts the S3 bucket on
+	// the host using its own AWS credentials and bind-mounts the host
+	// mountpoint into the sandbox. Used when no backend is explicitly
+	// requested or for any unknown backend value.
+	volumeBackendS3Fuse = "s3fuse"
+
+	// volumeBackendExperimental routes to the in-container mounter, which
+	// mounts an Archil disk from inside the sandbox using a per-volume
+	// ARCHIL_MOUNT_TOKEN. Falls back to s3fuse if the runner has no
+	// in-container mounter configured.
+	volumeBackendExperimental = "experimental"
+)
+
+// resolveVolumeMounter selects the volume mounter based on the per-sandbox
+// metadata key. "experimental" routes to the in-container (Archil) mounter
+// when configured; everything else falls back to the host-side s3fuse default.
+func (d *DockerClient) resolveVolumeMounter(metadata map[string]string) volume.Mounter {
+	if metadata[volumeBackendMetadataKey] == volumeBackendExperimental && d.inContainerVolumeMounter != nil {
+		return d.inContainerVolumeMounter
+	}
+	return d.defaultVolumeMounter
+}
+
 const RUNNER_BRIDGE_NETWORK_NAME = "runner-bridge"
 
 type DockerClient struct {
@@ -156,10 +180,8 @@ type DockerClient struct {
 	backupInfoCache              *cache.BackupInfoCache
 	pullTracker                  *common.Tracker[string]
 	logger                       *slog.Logger
-	awsRegion                    string
-	awsEndpointUrl               string
-	awsAccessKeyId               string
-	awsSecretAccessKey           string
+	defaultVolumeMounter         volume.Mounter
+	inContainerVolumeMounter     volume.Mounter // nil when the experimental backend is not configured
 	volumeMutexes                map[string]*sync.Mutex
 	volumeMutexesMutex           sync.Mutex
 	daemonPath                   string

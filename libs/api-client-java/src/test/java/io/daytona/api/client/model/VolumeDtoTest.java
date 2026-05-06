@@ -103,4 +103,12 @@ public class VolumeDtoTest {
         // TODO: test errorReason
     }
 
+    /**
+     * Test the property 'backend'
+     */
+    @Test
+    public void backendTest() {
+        // TODO: test backend
+    }
+
 }

@@ -5,6 +5,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -28,6 +29,9 @@ import (
 	"github.com/daytonaio/runner/pkg/services"
 	"github.com/daytonaio/runner/pkg/sshgateway"
 	"github.com/daytonaio/runner/pkg/telemetry/filters"
+	"github.com/daytonaio/runner/pkg/volume"
+	"github.com/daytonaio/runner/pkg/volume/incontainer"
+	"github.com/daytonaio/runner/pkg/volume/s3fuse"
 	"github.com/docker/docker/client"
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-isatty"
@@ -141,14 +145,32 @@ func run() int {
 
 	backupInfoCache := cache.NewBackupInfoCache(ctx, cfg.BackupInfoCacheRetention)
 
+	defaultVolumeMounter := volume.Mounter(s3fuse.NewMounter(s3fuse.Config{
+		AWSRegion:          cfg.AWSRegion,
+		AWSEndpointUrl:     cfg.AWSEndpointUrl,
+		AWSAccessKeyId:     cfg.AWSAccessKeyId,
+		AWSSecretAccessKey: cfg.AWSSecretAccessKey,
+	}, logger))
+
+	// Experimental in-container mounter: registered only when the operator
+	// has installed the `archil` CLI binary on the host and pointed
+	// ARCHIL_BINARY_PATH at it. When unset, the "experimental" backend is
+	// disabled and organizations that select it silently fall back to
+	// "s3fuse" (host-side). Per-disk mount tokens are supplied by the
+	// control plane on each volume; the runner does not need an Archil
+	// API key.
+	inContainerVolumeMounter, err := maybeBuildInContainerMounter(ctx, cfg, logger)
+	if err != nil {
+		logger.Error("Failed to initialize experimental in-container volume backend", "error", err)
+		return 2
+	}
+
 	dockerClient, err := docker.NewDockerClient(ctx, docker.DockerClientConfig{
 		ApiClient:                    cli,
 		BackupInfoCache:              backupInfoCache,
 		Logger:                       logger,
-		AWSRegion:                    cfg.AWSRegion,
-		AWSEndpointUrl:               cfg.AWSEndpointUrl,
-		AWSAccessKeyId:               cfg.AWSAccessKeyId,
-		AWSSecretAccessKey:           cfg.AWSSecretAccessKey,
+		DefaultVolumeMounter:         defaultVolumeMounter,
+		InContainerVolumeMounter:     inContainerVolumeMounter,
 		DaemonPath:                   daemonPath,
 		ComputerUsePluginPath:        pluginPath,
 		NetRulesManager:              netRulesManager,
@@ -319,4 +341,30 @@ func run() int {
 		logger.Error("Docker monitor error", "error", err)
 		return 1
 	}
+}
+
+// maybeBuildInContainerMounter constructs the experimental in-container
+// (Archil) volume mounter when the operator has provided ARCHIL_BINARY_PATH,
+// or returns (nil, nil) to indicate the backend stays disabled. When disabled,
+// resolveVolumeMounter silently falls "experimental" sandboxes back to s3fuse.
+//
+// A non-nil error is returned only when ARCHIL_BINARY_PATH is set but invalid,
+// so the runner fails fast on operator misconfiguration.
+func maybeBuildInContainerMounter(_ context.Context, cfg *config.Config, logger *slog.Logger) (volume.Mounter, error) {
+	if cfg.ArchilBinaryPath == "" {
+		return nil, nil
+	}
+	if _, err := os.Stat(cfg.ArchilBinaryPath); err != nil {
+		return nil, fmt.Errorf("ARCHIL_BINARY_PATH not accessible: %w", err)
+	}
+
+	mounter := incontainer.NewMounter(incontainer.Config{
+		ArchilBinaryHostPath: cfg.ArchilBinaryPath,
+	})
+
+	logger.Info(
+		"Experimental in-container (Archil) volume backend enabled",
+		"archilBinary", cfg.ArchilBinaryPath,
+	)
+	return mounter, nil
 }

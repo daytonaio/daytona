@@ -176,6 +176,14 @@ public class OrganizationTest {
     }
 
     /**
+     * Test the property 'defaultVolumeBackend'
+     */
+    @Test
+    public void defaultVolumeBackendTest() {
+        // TODO: test defaultVolumeBackend
+    }
+
+    /**
      * Test the property 'authenticatedRateLimit'
      */
     @Test

@@ -6,17 +6,14 @@ package docker
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
-	"time"
 
-	"github.com/daytonaio/common-go/pkg/log"
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/pkg/api/dto"
+	"github.com/daytonaio/runner/pkg/volume"
 )
 
 const volumeMountPrefix = "daytona-volume-"
@@ -28,13 +25,19 @@ func getVolumeMountBasePath() string {
 	return "/mnt"
 }
 
-func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []dto.VolumeDTO) ([]string, error) {
+func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []dto.VolumeDTO, mounter volume.Mounter) ([]string, error) {
+	// In-container mounters don't create any host mounts or binds — the mount
+	// happens inside the sandbox via the daemon. Return early.
+	if _, ok := mounter.(volume.InContainerMounter); ok {
+		return nil, nil
+	}
+
 	volumeMountPathBinds := make([]string, 0)
 
-	// Tracks volumes with FUSE mounts already ensured in this call,
+	// Tracks volumes with mounts already ensured in this call,
 	// preventing duplicate mount attempts and mutex deadlocks when
 	// multiple subpaths reference the same volume.
-	fuseMountedVolumes := make(map[string]bool)
+	mountedVolumes := make(map[string]bool)
 
 	for _, vol := range volumes {
 		volumeIdPrefixed := fmt.Sprintf("%s%s", volumeMountPrefix, vol.VolumeId)
@@ -45,18 +48,17 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 			subpathStr = *vol.Subpath
 		}
 
-		if !fuseMountedVolumes[volumeIdPrefixed] {
-			err := d.ensureVolumeFuseMounted(ctx, volumeIdPrefixed, baseMountPath)
+		if !mountedVolumes[volumeIdPrefixed] {
+			err := d.ensureVolumeMounted(ctx, volumeIdPrefixed, baseMountPath, mounter)
 			if err != nil {
 				return nil, err
 			}
-			fuseMountedVolumes[volumeIdPrefixed] = true
+			mountedVolumes[volumeIdPrefixed] = true
 		}
 
 		bindSource := baseMountPath
 		if vol.Subpath != nil && *vol.Subpath != "" {
 			bindSource = filepath.Join(baseMountPath, *vol.Subpath)
-			// Ensure the resolved path stays within baseMountPath to prevent path traversal
 			if !strings.HasPrefix(filepath.Clean(bindSource), filepath.Clean(baseMountPath)) {
 				return nil, fmt.Errorf("invalid subpath %q: resolves outside volume mount", *vol.Subpath)
 			}
@@ -66,14 +68,27 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 			}
 		}
 
-		d.logger.DebugContext(ctx, "binding volume subpath", "volumeId", volumeIdPrefixed, "subpath", subpathStr, "mountPath", vol.MountPath)
-		volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/:%s/", bindSource, vol.MountPath))
+		// Per-mount read-only support. The host-side mount-s3 stays
+		// writable (it's shared across every sandbox referencing this
+		// volume); we enforce read-only at the bind layer instead, so
+		// each sandbox gets its own RW/RO view independent of any other.
+		bindMode := ""
+		if vol.ReadOnly {
+			bindMode = ":ro"
+		}
+		d.logger.DebugContext(ctx, "binding volume subpath",
+			"volumeId", volumeIdPrefixed,
+			"subpath", subpathStr,
+			"mountPath", vol.MountPath,
+			"readOnly", vol.ReadOnly,
+		)
+		volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/:%s/%s", bindSource, vol.MountPath, bindMode))
 	}
 
 	return volumeMountPathBinds, nil
 }
 
-func (d *DockerClient) ensureVolumeFuseMounted(ctx context.Context, volumeId string, mountPath string) error {
+func (d *DockerClient) ensureVolumeMounted(ctx context.Context, volumeId string, mountPath string, mounter volume.Mounter) error {
 	d.volumeMutexesMutex.Lock()
 	volumeMutex, exists := d.volumeMutexes[volumeId]
 	if !exists {
@@ -85,12 +100,11 @@ func (d *DockerClient) ensureVolumeFuseMounted(ctx context.Context, volumeId str
 	volumeMutex.Lock()
 	defer volumeMutex.Unlock()
 
-	if d.isDirectoryMounted(mountPath) {
+	if mounter.IsMounted(mountPath) {
 		d.logger.DebugContext(ctx, "volume already mounted", "volumeId", volumeId, "mountPath", mountPath)
 		return nil
 	}
 
-	// Track if directory existed before we create it
 	_, statErr := os.Stat(mountPath)
 	dirExisted := statErr == nil
 
@@ -99,10 +113,7 @@ func (d *DockerClient) ensureVolumeFuseMounted(ctx context.Context, volumeId str
 		return fmt.Errorf("failed to create mount directory %s: %s", mountPath, err)
 	}
 
-	d.logger.InfoContext(ctx, "mounting S3 volume", "volumeId", volumeId, "mountPath", mountPath)
-
-	cmd := d.getMountCmd(ctx, volumeId, mountPath)
-	err = cmd.Run()
+	err = mounter.Mount(ctx, volumeId, mountPath)
 	if err != nil {
 		if !dirExisted {
 			removeErr := os.Remove(mountPath)
@@ -110,13 +121,13 @@ func (d *DockerClient) ensureVolumeFuseMounted(ctx context.Context, volumeId str
 				d.logger.WarnContext(ctx, "failed to remove mount directory", "path", mountPath, "error", removeErr)
 			}
 		}
-		return fmt.Errorf("failed to mount S3 volume %s to %s: %s", volumeId, mountPath, err)
+		return fmt.Errorf("failed to mount volume %s to %s: %w", volumeId, mountPath, err)
 	}
 
-	err = d.waitForMountReady(ctx, mountPath)
+	err = mounter.WaitUntilReady(ctx, mountPath)
 	if err != nil {
 		if !dirExisted {
-			umountErr := exec.Command("umount", mountPath).Run()
+			umountErr := mounter.Unmount(ctx, mountPath)
 			if umountErr != nil {
 				d.logger.WarnContext(ctx, "failed to unmount during cleanup", "path", mountPath, "error", umountErr)
 			}
@@ -125,93 +136,21 @@ func (d *DockerClient) ensureVolumeFuseMounted(ctx context.Context, volumeId str
 				d.logger.WarnContext(ctx, "failed to remove mount directory during cleanup", "path", mountPath, "error", removeErr)
 			}
 		}
-		return fmt.Errorf("mount %s not ready after mounting: %s", mountPath, err)
+		return fmt.Errorf("mount %s not ready after mounting: %w", mountPath, err)
 	}
 
-	d.logger.InfoContext(ctx, "mounted S3 volume", "volumeId", volumeId, "mountPath", mountPath)
+	d.logger.InfoContext(ctx, "mounted volume", "volumeId", volumeId, "mountPath", mountPath)
 	return nil
 }
 
+// unmountVolume unmounts the volume at the given host path. Only host-side
+// mounts exist on disk (the in-container backend never creates a host
+// mountpoint), so we always delegate to the default mounter here.
+func (d *DockerClient) unmountVolume(ctx context.Context, mountPath string) error {
+	return d.defaultVolumeMounter.Unmount(ctx, mountPath)
+}
+
+// isDirectoryMounted checks whether a path is an active mountpoint.
 func (d *DockerClient) isDirectoryMounted(path string) bool {
-	cmd := exec.Command("mountpoint", path)
-	_, err := cmd.Output()
-
-	return err == nil
-}
-
-// waitForMountReady waits for a FUSE mount to be fully accessible
-// FUSE mounts can be asynchronous - the mount command may return before the filesystem is ready
-// This prevents a race condition where the container writes to the directory before the mount is ready
-func (d *DockerClient) waitForMountReady(ctx context.Context, path string) error {
-	maxAttempts := 50 // 5 seconds total (50 * 100ms)
-	sleepDuration := 100 * time.Millisecond
-
-	for i := 0; i < maxAttempts; i++ {
-		// First verify the mountpoint is still registered
-		if !d.isDirectoryMounted(path) {
-			return fmt.Errorf("mount disappeared during readiness check")
-		}
-
-		// Try to stat the mount point to ensure filesystem is responsive
-		// This will fail if FUSE is not ready yet
-		_, err := os.Stat(path)
-		if err == nil {
-			// Try to read directory to ensure it's fully operational
-			_, err = os.ReadDir(path)
-			if err == nil {
-				d.logger.InfoContext(ctx, "mount is ready", "path", path, "attempts", i+1)
-				return nil
-			}
-		}
-
-		// Wait a bit before retrying
-		select {
-		case <-ctx.Done():
-			return fmt.Errorf("context cancelled while waiting for mount ready: %w", ctx.Err())
-		case <-time.After(sleepDuration):
-			// Continue to next iteration
-		}
-	}
-
-	return fmt.Errorf("mount did not become ready within timeout")
-}
-
-func (d *DockerClient) getMountCmd(ctx context.Context, volume string, path string) *exec.Cmd {
-	args := []string{"--allow-other", "--allow-delete", "--allow-overwrite", "--file-mode", "0666", "--dir-mode", "0777"}
-	args = append(args, volume, path)
-
-	var envVars []string
-	if d.awsEndpointUrl != "" {
-		envVars = append(envVars, "AWS_ENDPOINT_URL="+d.awsEndpointUrl)
-	}
-	if d.awsAccessKeyId != "" {
-		envVars = append(envVars, "AWS_ACCESS_KEY_ID="+d.awsAccessKeyId)
-	}
-	if d.awsSecretAccessKey != "" {
-		envVars = append(envVars, "AWS_SECRET_ACCESS_KEY="+d.awsSecretAccessKey)
-	}
-	if d.awsRegion != "" {
-		envVars = append(envVars, "AWS_REGION="+d.awsRegion)
-	}
-
-	// No systemd (containerized) — daemon orphan survives runner restarts naturally.
-	cmd := exec.Command("mount-s3", args...)
-	cmd.Env = envVars
-
-	_, err := os.Stat("/run/systemd/system")
-	if err == nil {
-		// Isolate mount-s3 in its own cgroup so the FUSE daemon survives runner restarts.
-		sdArgs := []string{"--scope"}
-		for _, env := range envVars {
-			sdArgs = append(sdArgs, "--setenv="+env)
-		}
-		sdArgs = append(sdArgs, "--", "mount-s3")
-		sdArgs = append(sdArgs, args...)
-		cmd = exec.CommandContext(ctx, "systemd-run", sdArgs...)
-	}
-
-	cmd.Stderr = io.Writer(&log.ErrorLogWriter{})
-	cmd.Stdout = io.Writer(&log.InfoLogWriter{})
-
-	return cmd
+	return d.defaultVolumeMounter.IsMounted(path)
 }

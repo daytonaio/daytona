@@ -62,6 +62,14 @@ export class VolumeDto {
   })
   errorReason?: string
 
+  @ApiProperty({
+    description:
+      'Backend that physically stores the volume. Set when the volume is created from the organization default and immutable afterwards.',
+    example: 's3fuse',
+    enum: ['s3fuse', 'experimental'],
+  })
+  backend: string
+
   static fromVolume(volume: Volume): VolumeDto {
     return {
       id: volume.id,
@@ -72,6 +80,7 @@ export class VolumeDto {
       updatedAt: volume.updatedAt?.toISOString(),
       lastUsedAt: volume.lastUsedAt?.toISOString(),
       errorReason: volume.errorReason,
+      backend: volume.backend,
     }
   }
 }

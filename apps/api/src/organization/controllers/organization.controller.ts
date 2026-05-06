@@ -43,6 +43,7 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { EmailUtils } from '../../common/utils/email.util'
 import { OrganizationUsageService } from '../services/organization-usage.service'
 import { OrganizationSandboxDefaultLimitedNetworkEgressDto } from '../dto/organization-sandbox-default-limited-network-egress.dto'
+import { UpdateOrganizationDefaultVolumeBackendDto } from '../dto/update-organization-default-volume-backend.dto'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-region-quota.dto'
@@ -596,6 +597,31 @@ export class OrganizationController {
       organizationId,
       body.sandboxDefaultLimitedNetworkEgress,
     )
+  }
+
+  @Put('/:organizationId/default-volume-backend')
+  @RequireFlagsEnabled({ flags: [{ flagKey: 'volume_backend_picker', defaultValue: false }] })
+  @ApiOperation({
+    summary: 'Set default volume backend',
+    operationId: 'setDefaultVolumeBackend',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Default volume backend updated successfully',
+  })
+  @HttpCode(204)
+  @UseGuards(OrganizationAuthContextGuard)
+  @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  async setDefaultVolumeBackend(
+    @Param('organizationId') organizationId: string,
+    @Body() body: UpdateOrganizationDefaultVolumeBackendDto,
+  ): Promise<void> {
+    await this.organizationService.setDefaultVolumeBackend(organizationId, body.defaultVolumeBackend)
   }
 
   @Put('/:organizationId/experimental-config')

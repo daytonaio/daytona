@@ -39,6 +39,9 @@ module DaytonaApiClient
     # The error reason of the volume
     attr_accessor :error_reason
 
+    # Backend that physically stores the volume. Set when the volume is created from the organization default and immutable afterwards.
+    attr_accessor :backend
+
     class EnumAttributeValidator
       attr_reader :datatype
       attr_reader :allowable_values
@@ -71,7 +74,8 @@ module DaytonaApiClient
         :'created_at' => :'createdAt',
         :'updated_at' => :'updatedAt',
         :'last_used_at' => :'lastUsedAt',
-        :'error_reason' => :'errorReason'
+        :'error_reason' => :'errorReason',
+        :'backend' => :'backend'
       }
     end
 
@@ -95,7 +99,8 @@ module DaytonaApiClient
         :'created_at' => :'String',
         :'updated_at' => :'String',
         :'last_used_at' => :'String',
-        :'error_reason' => :'String'
+        :'error_reason' => :'String',
+        :'backend' => :'String'
       }
     end
 
@@ -103,7 +108,7 @@ module DaytonaApiClient
     def self.openapi_nullable
       Set.new([
         :'last_used_at',
-        :'error_reason'
+        :'error_reason',
       ])
     end
 
@@ -168,6 +173,12 @@ module DaytonaApiClient
       else
         self.error_reason = nil
       end
+
+      if attributes.key?(:'backend')
+        self.backend = attributes[:'backend']
+      else
+        self.backend = nil
+      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -199,6 +210,10 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "updated_at", updated_at cannot be nil.')
       end
 
+      if @backend.nil?
+        invalid_properties.push('invalid value for "backend", backend cannot be nil.')
+      end
+
       invalid_properties
     end
 
@@ -212,6 +227,9 @@ module DaytonaApiClient
       return false if @state.nil?
       return false if @created_at.nil?
       return false if @updated_at.nil?
+      return false if @backend.nil?
+      backend_validator = EnumAttributeValidator.new('String', ["s3fuse", "experimental"])
+      return false unless backend_validator.valid?(@backend)
       true
     end
 
@@ -275,6 +293,16 @@ module DaytonaApiClient
       @updated_at = updated_at
     end
 
+    # Custom attribute writer method checking allowed values (enum).
+    # @param [Object] backend Object to be assigned
+    def backend=(backend)
+      validator = EnumAttributeValidator.new('String', ["s3fuse", "experimental"])
+      unless validator.valid?(backend)
+        fail ArgumentError, "invalid value for \"backend\", must be one of #{validator.allowable_values}."
+      end
+      @backend = backend
+    end
+
     # Checks equality by comparing each attribute.
     # @param [Object] Object to be compared
     def ==(o)
@@ -287,7 +315,8 @@ module DaytonaApiClient
           created_at == o.created_at &&
           updated_at == o.updated_at &&
           last_used_at == o.last_used_at &&
-          error_reason == o.error_reason
+          error_reason == o.error_reason &&
+          backend == o.backend
     end
 
     # @see the `==` method
@@ -299,7 +328,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, name, organization_id, state, created_at, updated_at, last_used_at, error_reason].hash
+      [id, name, organization_id, state, created_at, updated_at, last_used_at, error_reason, backend].hash
     end
 
     # Builds the object from hash

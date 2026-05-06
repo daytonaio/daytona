@@ -27,6 +27,7 @@ import { JobStatus } from '../enums/job-status.enum'
 import { ResourceType } from '../enums/resource-type.enum'
 import { JobService } from '../services/job.service'
 import { SandboxRepository } from '../repositories/sandbox.repository'
+import { VolumeService } from '../services/volume.service'
 import {
   CreateSandboxDTO,
   CreateBackupDTO,
@@ -53,6 +54,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     @InjectRepository(Job)
     protected readonly jobRepository: Repository<Job>,
     protected readonly jobService: JobService,
+    protected readonly volumeService: VolumeService,
   ) {}
 
   async init(runner: Runner): Promise<void> {
@@ -144,6 +146,13 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     otelEndpoint?: string,
     skipStart?: boolean,
   ): Promise<StartSandboxResponse | undefined> {
+    // Resolve volumes once, decorating them with backend-specific data
+    // (Archil disk + decrypted mount token for the experimental backend).
+    // The resolved backend overrides whatever the organization default put
+    // on `metadata.volumeBackend` so the runner picks the matching mounter.
+    const prepared = await this.volumeService.prepareRunnerVolumes(sandbox.volumes)
+    const effectiveMetadata = applyVolumeBackendMetadata(metadata, prepared.backend)
+
     const payload: CreateSandboxDTO = {
       id: sandbox.id,
       userId: sandbox.organizationId,
@@ -163,14 +172,10 @@ export class RunnerAdapterV2 implements RunnerAdapter {
           }
         : undefined,
       entrypoint: entrypoint,
-      volumes: sandbox.volumes?.map((volume) => ({
-        volumeId: volume.volumeId,
-        mountPath: volume.mountPath,
-        subpath: volume.subpath,
-      })),
+      volumes: prepared.volumes.length ? prepared.volumes : undefined,
       networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
-      metadata: metadata,
+      metadata: effectiveMetadata,
       authToken: sandbox.authToken,
       otelEndpoint: otelEndpoint,
       skipStart: skipStart,
@@ -224,6 +229,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
   }
 
   async recoverSandbox(sandbox: Sandbox): Promise<void> {
+    const prepared = await this.volumeService.prepareRunnerVolumes(sandbox.volumes)
     const recoverSandboxDTO: RecoverSandboxDTO = {
       userId: sandbox.organizationId,
       snapshot: sandbox.snapshot,
@@ -233,11 +239,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       memoryQuota: sandbox.mem,
       storageQuota: sandbox.disk,
       env: sandbox.env,
-      volumes: sandbox.volumes?.map((volume) => ({
-        volumeId: volume.volumeId,
-        mountPath: volume.mountPath,
-        subpath: volume.subpath,
-      })),
+      volumes: prepared.volumes.length ? prepared.volumes : undefined,
       networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
       errorReason: sandbox.errorReason,
@@ -595,4 +597,18 @@ export class RunnerAdapterV2 implements RunnerAdapter {
 
     this.logger.debug(`Created RESIZE_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }
+}
+
+// Stamps the resolved per-sandbox volume backend onto the metadata that the
+// runner uses to pick a mounter. Returns the original metadata unchanged
+// when the sandbox has no volumes (the runner falls back to the org-default
+// volumeBackend in that case, which is harmless because no mount happens).
+function applyVolumeBackendMetadata(
+  metadata: { [key: string]: string } | undefined,
+  resolvedBackend: string | undefined,
+): { [key: string]: string } | undefined {
+  if (!resolvedBackend) {
+    return metadata
+  }
+  return { ...(metadata ?? {}), volumeBackend: resolvedBackend }
 }

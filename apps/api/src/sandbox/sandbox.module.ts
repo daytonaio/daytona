@@ -33,6 +33,9 @@ import { VolumeController } from './controllers/volume.controller'
 import { VolumeService } from './services/volume.service'
 import { VolumeManager } from './managers/volume.manager'
 import { Volume } from './entities/volume.entity'
+import { VolumeDisk } from './entities/volume-disk.entity'
+import { ArchilClient } from './services/archil/archil.client'
+import { EncryptionModule } from '../encryption/encryption.module'
 import { BuildInfo } from './entities/build-info.entity'
 import { BackupManager } from './managers/backup.manager'
 import { VolumeSubscriber } from './subscribers/volume.subscriber'
@@ -67,6 +70,7 @@ import { SandboxActivityService } from './services/sandbox-activity.service'
     DockerRegistryModule,
     OrganizationModule,
     RegionModule,
+    EncryptionModule,
     TypeOrmModule.forFeature([
       Sandbox,
       Runner,
@@ -77,6 +81,7 @@ import { SandboxActivityService } from './services/sandbox-activity.service'
       DockerRegistry,
       WarmPool,
       Volume,
+      VolumeDisk,
       SshAccess,
       Region,
       Job,
@@ -106,6 +111,7 @@ import { SandboxActivityService } from './services/sandbox-activity.service'
     SandboxLookupCacheInvalidationService,
     SnapshotManager,
     RedisLockProvider,
+    ArchilClient,
     VolumeService,
     VolumeManager,
     VolumeSubscriber,

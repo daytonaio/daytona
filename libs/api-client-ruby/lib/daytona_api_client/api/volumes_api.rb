@@ -19,6 +19,83 @@ module DaytonaApiClient
     def initialize(api_client = ApiClient.default)
       @api_client = api_client
     end
+    # Change a volume's backend
+    # Switches an existing volume between the s3fuse and experimental backends in place. The volume's S3 bucket and data are preserved; only the mount strategy changes. Refuses to switch while any sandbox referencing the volume is running.
+    # @param volume_id [String] ID of the volume
+    # @param change_volume_backend [ChangeVolumeBackend] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [VolumeDto]
+    def change_volume_backend(volume_id, change_volume_backend, opts = {})
+      data, _status_code, _headers = change_volume_backend_with_http_info(volume_id, change_volume_backend, opts)
+      data
+    end
+
+    # Change a volume&#39;s backend
+    # Switches an existing volume between the s3fuse and experimental backends in place. The volume&#39;s S3 bucket and data are preserved; only the mount strategy changes. Refuses to switch while any sandbox referencing the volume is running.
+    # @param volume_id [String] ID of the volume
+    # @param change_volume_backend [ChangeVolumeBackend] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(VolumeDto, Integer, Hash)>] VolumeDto data, response status code and response headers
+    def change_volume_backend_with_http_info(volume_id, change_volume_backend, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: VolumesApi.change_volume_backend ...'
+      end
+      # verify the required parameter 'volume_id' is set
+      if @api_client.config.client_side_validation && volume_id.nil?
+        fail ArgumentError, "Missing the required parameter 'volume_id' when calling VolumesApi.change_volume_backend"
+      end
+      # verify the required parameter 'change_volume_backend' is set
+      if @api_client.config.client_side_validation && change_volume_backend.nil?
+        fail ArgumentError, "Missing the required parameter 'change_volume_backend' when calling VolumesApi.change_volume_backend"
+      end
+      # resource path
+      local_var_path = '/volumes/{volumeId}/backend'.sub('{' + 'volumeId' + '}', CGI.escape(volume_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(change_volume_backend)
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'VolumeDto'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"VolumesApi.change_volume_backend",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:PUT, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: VolumesApi#change_volume_backend\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Create a new volume
     # @param create_volume [CreateVolume] 
     # @param [Hash] opts the optional parameters

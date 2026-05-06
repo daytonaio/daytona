@@ -45,6 +45,7 @@ import io.daytona.api.client.model.RegenerateApiKeyResponse;
 import io.daytona.api.client.model.Region;
 import io.daytona.api.client.model.SnapshotManagerCredentials;
 import io.daytona.api.client.model.UpdateOrganizationDefaultRegion;
+import io.daytona.api.client.model.UpdateOrganizationDefaultVolumeBackend;
 import io.daytona.api.client.model.UpdateOrganizationInvitation;
 import io.daytona.api.client.model.UpdateOrganizationMemberAccess;
 import io.daytona.api.client.model.UpdateOrganizationQuota;
@@ -3560,6 +3561,138 @@ public class OrganizationsApi {
         okhttp3.Call localVarCall = regenerateSshGatewayApiKeyValidateBeforeCall(id, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<RegenerateApiKeyResponse>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for setDefaultVolumeBackend
+     * @param organizationId Organization ID (required)
+     * @param updateOrganizationDefaultVolumeBackend  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Default volume backend updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call setDefaultVolumeBackendCall(String organizationId, UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = updateOrganizationDefaultVolumeBackend;
+
+        // create path and map variables
+        String localVarPath = "/organizations/{organizationId}/default-volume-backend"
+            .replace("{" + "organizationId" + "}", localVarApiClient.escapeString(organizationId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call setDefaultVolumeBackendValidateBeforeCall(String organizationId, UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'organizationId' is set
+        if (organizationId == null) {
+            throw new ApiException("Missing the required parameter 'organizationId' when calling setDefaultVolumeBackend(Async)");
+        }
+
+        // verify the required parameter 'updateOrganizationDefaultVolumeBackend' is set
+        if (updateOrganizationDefaultVolumeBackend == null) {
+            throw new ApiException("Missing the required parameter 'updateOrganizationDefaultVolumeBackend' when calling setDefaultVolumeBackend(Async)");
+        }
+
+        return setDefaultVolumeBackendCall(organizationId, updateOrganizationDefaultVolumeBackend, _callback);
+
+    }
+
+    /**
+     * Set default volume backend
+     * 
+     * @param organizationId Organization ID (required)
+     * @param updateOrganizationDefaultVolumeBackend  (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Default volume backend updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public void setDefaultVolumeBackend(String organizationId, UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend) throws ApiException {
+        setDefaultVolumeBackendWithHttpInfo(organizationId, updateOrganizationDefaultVolumeBackend);
+    }
+
+    /**
+     * Set default volume backend
+     * 
+     * @param organizationId Organization ID (required)
+     * @param updateOrganizationDefaultVolumeBackend  (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Default volume backend updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> setDefaultVolumeBackendWithHttpInfo(String organizationId, UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend) throws ApiException {
+        okhttp3.Call localVarCall = setDefaultVolumeBackendValidateBeforeCall(organizationId, updateOrganizationDefaultVolumeBackend, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Set default volume backend (asynchronously)
+     * 
+     * @param organizationId Organization ID (required)
+     * @param updateOrganizationDefaultVolumeBackend  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Default volume backend updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call setDefaultVolumeBackendAsync(String organizationId, UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = setDefaultVolumeBackendValidateBeforeCall(organizationId, updateOrganizationDefaultVolumeBackend, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
         return localVarCall;
     }
     /**

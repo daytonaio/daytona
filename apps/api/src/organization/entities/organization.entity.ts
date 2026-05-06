@@ -192,11 +192,15 @@ export class Organization {
   updatedAt: Date
 
   @Column({
+    default: 's3fuse',
+  })
+  defaultVolumeBackend: string
+
+  @Column({
     type: 'jsonb',
     nullable: true,
     name: 'experimentalConfig',
   })
-  // configuration for experimental features
   _experimentalConfig: Record<string, any> | null
 
   get sandboxMetadata(): Record<string, string> {
@@ -204,6 +208,7 @@ export class Organization {
       organizationId: this.id,
       organizationName: this.name,
       limitNetworkEgress: String(this.sandboxLimitedNetworkEgress),
+      volumeBackend: this.defaultVolumeBackend,
     }
   }
 

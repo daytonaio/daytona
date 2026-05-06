@@ -56,6 +56,8 @@ import type { SnapshotManagerCredentials } from '../models';
 // @ts-ignore
 import type { UpdateOrganizationDefaultRegion } from '../models';
 // @ts-ignore
+import type { UpdateOrganizationDefaultVolumeBackend } from '../models';
+// @ts-ignore
 import type { UpdateOrganizationInvitation } from '../models';
 // @ts-ignore
 import type { UpdateOrganizationMemberAccess } from '../models';
@@ -1195,6 +1197,52 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
         },
         /**
          * 
+         * @summary Set default volume backend
+         * @param {string} organizationId Organization ID
+         * @param {UpdateOrganizationDefaultVolumeBackend} updateOrganizationDefaultVolumeBackend 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        setDefaultVolumeBackend: async (organizationId: string, updateOrganizationDefaultVolumeBackend: UpdateOrganizationDefaultVolumeBackend, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('setDefaultVolumeBackend', 'organizationId', organizationId)
+            // verify required parameter 'updateOrganizationDefaultVolumeBackend' is not null or undefined
+            assertParamExists('setDefaultVolumeBackend', 'updateOrganizationDefaultVolumeBackend', updateOrganizationDefaultVolumeBackend)
+            const localVarPath = `/organizations/{organizationId}/default-volume-backend`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateOrganizationDefaultVolumeBackend, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Set default region for organization
          * @param {string} organizationId Organization ID
          * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion 
@@ -2080,6 +2128,20 @@ export const OrganizationsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Set default volume backend
+         * @param {string} organizationId Organization ID
+         * @param {UpdateOrganizationDefaultVolumeBackend} updateOrganizationDefaultVolumeBackend 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async setDefaultVolumeBackend(organizationId: string, updateOrganizationDefaultVolumeBackend: UpdateOrganizationDefaultVolumeBackend, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.setDefaultVolumeBackend(organizationId, updateOrganizationDefaultVolumeBackend, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.setDefaultVolumeBackend']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Set default region for organization
          * @param {string} organizationId Organization ID
          * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion 
@@ -2523,6 +2585,17 @@ export const OrganizationsApiFactory = function (configuration?: Configuration, 
          */
         regenerateSshGatewayApiKey(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<RegenerateApiKeyResponse> {
             return localVarFp.regenerateSshGatewayApiKey(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Set default volume backend
+         * @param {string} organizationId Organization ID
+         * @param {UpdateOrganizationDefaultVolumeBackend} updateOrganizationDefaultVolumeBackend 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        setDefaultVolumeBackend(organizationId: string, updateOrganizationDefaultVolumeBackend: UpdateOrganizationDefaultVolumeBackend, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.setDefaultVolumeBackend(organizationId, updateOrganizationDefaultVolumeBackend, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2989,6 +3062,19 @@ export class OrganizationsApi extends BaseAPI {
      */
     public regenerateSshGatewayApiKey(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).regenerateSshGatewayApiKey(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Set default volume backend
+     * @param {string} organizationId Organization ID
+     * @param {UpdateOrganizationDefaultVolumeBackend} updateOrganizationDefaultVolumeBackend 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public setDefaultVolumeBackend(organizationId: string, updateOrganizationDefaultVolumeBackend: UpdateOrganizationDefaultVolumeBackend, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).setDefaultVolumeBackend(organizationId, updateOrganizationDefaultVolumeBackend, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

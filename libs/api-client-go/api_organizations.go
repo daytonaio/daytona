@@ -365,6 +365,18 @@ type OrganizationsAPI interface {
 	RegenerateSshGatewayApiKeyExecute(r OrganizationsAPIRegenerateSshGatewayApiKeyRequest) (*RegenerateApiKeyResponse, *http.Response, error)
 
 	/*
+	SetDefaultVolumeBackend Set default volume backend
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId Organization ID
+	@return OrganizationsAPISetDefaultVolumeBackendRequest
+	*/
+	SetDefaultVolumeBackend(ctx context.Context, organizationId string) OrganizationsAPISetDefaultVolumeBackendRequest
+
+	// SetDefaultVolumeBackendExecute executes the request
+	SetDefaultVolumeBackendExecute(r OrganizationsAPISetDefaultVolumeBackendRequest) (*http.Response, error)
+
+	/*
 	SetOrganizationDefaultRegion Set default region for organization
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -3257,6 +3269,107 @@ func (a *OrganizationsAPIService) RegenerateSshGatewayApiKeyExecute(r Organizati
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type OrganizationsAPISetDefaultVolumeBackendRequest struct {
+	ctx context.Context
+	ApiService OrganizationsAPI
+	organizationId string
+	updateOrganizationDefaultVolumeBackend *UpdateOrganizationDefaultVolumeBackend
+}
+
+func (r OrganizationsAPISetDefaultVolumeBackendRequest) UpdateOrganizationDefaultVolumeBackend(updateOrganizationDefaultVolumeBackend UpdateOrganizationDefaultVolumeBackend) OrganizationsAPISetDefaultVolumeBackendRequest {
+	r.updateOrganizationDefaultVolumeBackend = &updateOrganizationDefaultVolumeBackend
+	return r
+}
+
+func (r OrganizationsAPISetDefaultVolumeBackendRequest) Execute() (*http.Response, error) {
+	return r.ApiService.SetDefaultVolumeBackendExecute(r)
+}
+
+/*
+SetDefaultVolumeBackend Set default volume backend
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param organizationId Organization ID
+ @return OrganizationsAPISetDefaultVolumeBackendRequest
+*/
+func (a *OrganizationsAPIService) SetDefaultVolumeBackend(ctx context.Context, organizationId string) OrganizationsAPISetDefaultVolumeBackendRequest {
+	return OrganizationsAPISetDefaultVolumeBackendRequest{
+		ApiService: a,
+		ctx: ctx,
+		organizationId: organizationId,
+	}
+}
+
+// Execute executes the request
+func (a *OrganizationsAPIService) SetDefaultVolumeBackendExecute(r OrganizationsAPISetDefaultVolumeBackendRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrganizationsAPIService.SetDefaultVolumeBackend")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/organizations/{organizationId}/default-volume-backend"
+	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.updateOrganizationDefaultVolumeBackend == nil {
+		return nil, reportError("updateOrganizationDefaultVolumeBackend is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.updateOrganizationDefaultVolumeBackend
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
 }
 
 type OrganizationsAPISetOrganizationDefaultRegionRequest struct {

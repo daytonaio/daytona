@@ -14,6 +14,7 @@
 package io.daytona.api.client.api;
 
 import io.daytona.api.client.ApiException;
+import io.daytona.api.client.model.ChangeVolumeBackend;
 import io.daytona.api.client.model.CreateVolume;
 import io.daytona.api.client.model.VolumeDto;
 import org.junit.jupiter.api.Disabled;
@@ -31,6 +32,22 @@ import java.util.Map;
 public class VolumesApiTest {
 
     private final VolumesApi api = new VolumesApi();
+
+    /**
+     * Change a volume&#39;s backend
+     *
+     * Switches an existing volume between the s3fuse and experimental backends in place. The volume&#39;s S3 bucket and data are preserved; only the mount strategy changes. Refuses to switch while any sandbox referencing the volume is running.
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void changeVolumeBackendTest() throws ApiException {
+        String volumeId = null;
+        ChangeVolumeBackend changeVolumeBackend = null;
+        String xDaytonaOrganizationID = null;
+        VolumeDto response = api.changeVolumeBackend(volumeId, changeVolumeBackend, xDaytonaOrganizationID);
+        // TODO: test validations
+    }
 
     /**
      * Create a new volume

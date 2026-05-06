@@ -1950,8 +1950,24 @@ const docTemplate = `{
         "dto.VolumeDTO": {
             "type": "object",
             "properties": {
+                "archilDisk": {
+                    "description": "ArchilDisk identifies the Archil disk to mount, in the form\n\"owner/disk-name\" or \"dsk-XXXXXXXXXXXXXXXX\". Required when the\nsandbox uses the experimental in-container backend.",
+                    "type": "string"
+                },
+                "archilMountToken": {
+                    "description": "ArchilMountToken is the per-disk mount token used as ARCHIL_MOUNT_TOKEN\ninside the sandbox. The runner forwards it to the daemon via env vars\nand never stores or logs it. Required when ArchilDisk is set.",
+                    "type": "string"
+                },
+                "archilRegion": {
+                    "description": "ArchilRegion is the Archil region the disk lives in\n(e.g. \"aws-us-east-1\"). Required when ArchilDisk is set.",
+                    "type": "string"
+                },
                 "mountPath": {
                     "type": "string"
+                },
+                "readOnly": {
+                    "description": "ReadOnly mounts the volume read-only for this sandbox. It is a\nper-mount attribute (not a per-volume one), so the same volume can\nbe mounted RW in one sandbox and RO in another. The s3fuse path\nenforces it via the Docker bind mode (\":ro\"); the experimental\npath forwards it to ` + "`" + `archil mount --read-only` + "`" + `.",
+                    "type": "boolean"
                 },
                 "subpath": {
                     "type": "string"

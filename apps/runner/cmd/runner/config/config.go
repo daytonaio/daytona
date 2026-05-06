@@ -17,28 +17,40 @@ import (
 )
 
 type Config struct {
-	DaytonaApiUrl                      string        `envconfig:"DAYTONA_API_URL"`
-	ApiToken                           string        `envconfig:"DAYTONA_RUNNER_TOKEN"`
-	ApiPort                            int           `envconfig:"API_PORT"`
-	ApiLogRequests                     bool          `envconfig:"API_LOG_REQUESTS" default:"false"`
-	TLSCertFile                        string        `envconfig:"TLS_CERT_FILE"`
-	TLSKeyFile                         string        `envconfig:"TLS_KEY_FILE"`
-	EnableTLS                          bool          `envconfig:"ENABLE_TLS"`
-	OtelLoggingEnabled                 bool          `envconfig:"OTEL_LOGGING_ENABLED"`
-	OtelTracingEnabled                 bool          `envconfig:"OTEL_TRACING_ENABLED"`
-	OtelEndpoint                       string        `envconfig:"OTEL_EXPORTER_OTLP_ENDPOINT"`
-	OtelHeaders                        string        `envconfig:"OTEL_EXPORTER_OTLP_HEADERS"`
-	BackupInfoCacheRetention           time.Duration `envconfig:"BACKUP_INFO_CACHE_RETENTION" default:"168h" validate:"min=5m"`
-	Environment                        string        `envconfig:"ENVIRONMENT"`
-	ContainerRuntime                   string        `envconfig:"CONTAINER_RUNTIME"`
-	ContainerNetwork                   string        `envconfig:"CONTAINER_NETWORK"`
-	InterSandboxNetworkEnabled         bool          `envconfig:"INTER_SANDBOX_NETWORK_ENABLED" default:"true"`
-	LogFilePath                        string        `envconfig:"LOG_FILE_PATH"`
-	AWSRegion                          string        `envconfig:"AWS_REGION"`
-	AWSEndpointUrl                     string        `envconfig:"AWS_ENDPOINT_URL"`
-	AWSAccessKeyId                     string        `envconfig:"AWS_ACCESS_KEY_ID"`
-	AWSSecretAccessKey                 string        `envconfig:"AWS_SECRET_ACCESS_KEY"`
-	AWSDefaultBucket                   string        `envconfig:"AWS_DEFAULT_BUCKET"`
+	DaytonaApiUrl              string        `envconfig:"DAYTONA_API_URL"`
+	ApiToken                   string        `envconfig:"DAYTONA_RUNNER_TOKEN"`
+	ApiPort                    int           `envconfig:"API_PORT"`
+	ApiLogRequests             bool          `envconfig:"API_LOG_REQUESTS" default:"false"`
+	TLSCertFile                string        `envconfig:"TLS_CERT_FILE"`
+	TLSKeyFile                 string        `envconfig:"TLS_KEY_FILE"`
+	EnableTLS                  bool          `envconfig:"ENABLE_TLS"`
+	OtelLoggingEnabled         bool          `envconfig:"OTEL_LOGGING_ENABLED"`
+	OtelTracingEnabled         bool          `envconfig:"OTEL_TRACING_ENABLED"`
+	OtelEndpoint               string        `envconfig:"OTEL_EXPORTER_OTLP_ENDPOINT"`
+	OtelHeaders                string        `envconfig:"OTEL_EXPORTER_OTLP_HEADERS"`
+	BackupInfoCacheRetention   time.Duration `envconfig:"BACKUP_INFO_CACHE_RETENTION" default:"168h" validate:"min=5m"`
+	Environment                string        `envconfig:"ENVIRONMENT"`
+	ContainerRuntime           string        `envconfig:"CONTAINER_RUNTIME"`
+	ContainerNetwork           string        `envconfig:"CONTAINER_NETWORK"`
+	InterSandboxNetworkEnabled bool          `envconfig:"INTER_SANDBOX_NETWORK_ENABLED" default:"true"`
+	LogFilePath                string        `envconfig:"LOG_FILE_PATH"`
+	AWSRegion                  string        `envconfig:"AWS_REGION"`
+	AWSEndpointUrl             string        `envconfig:"AWS_ENDPOINT_URL"`
+	AWSAccessKeyId             string        `envconfig:"AWS_ACCESS_KEY_ID"`
+	AWSSecretAccessKey         string        `envconfig:"AWS_SECRET_ACCESS_KEY"`
+	AWSDefaultBucket           string        `envconfig:"AWS_DEFAULT_BUCKET"`
+	VolumeBackend              string        `envconfig:"VOLUME_BACKEND" default:"s3"`
+	// ArchilBinaryPath is the host path to the `archil` CLI binary that will
+	// be bind-mounted read-only into sandboxes opting into the experimental
+	// in-container backend. When empty, the experimental backend is disabled
+	// and organizations that select it silently fall back to s3fuse.
+	//
+	// Install the binary on the runner host with:
+	//
+	//   curl -s https://archil.com/install | sh
+	//
+	// then point this at the resulting binary (typically /usr/local/bin/archil).
+	ArchilBinaryPath                   string        `envconfig:"ARCHIL_BINARY_PATH"`
 	ResourceLimitsDisabled             bool          `envconfig:"RESOURCE_LIMITS_DISABLED"`
 	DaemonStartTimeoutSec              int           `envconfig:"DAEMON_START_TIMEOUT_SEC"`
 	SandboxStartTimeoutSec             int           `envconfig:"SANDBOX_START_TIMEOUT_SEC"`
