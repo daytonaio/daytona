@@ -5,6 +5,7 @@ package process
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os/exec"
@@ -18,6 +19,42 @@ import (
 	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
 )
+
+// shellSingleQuote wraps s in single quotes, escaping any embedded single
+// quotes via the standard '\” idiom. The result is safe to drop into a
+// POSIX shell command line.
+func shellSingleQuote(s string) string {
+	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
+}
+
+// detachedWrapperCommand wraps userCommand so that the spawned shell:
+//
+//   - verifies setsid is available and surfaces a clear error on stderr
+//     (which the daemon captures) before redirecting stdio, so callers
+//     using minimal images without util-linux get an actionable message
+//     instead of a bare exit code 127;
+//
+//   - exec's setsid -f, replacing itself; setsid then forks a session-leader
+//     child and exits immediately, so cmd.CombinedOutput returns within
+//     milliseconds instead of waiting for the user's daemon to terminate;
+//
+//   - has stdin/stdout/stderr pre-redirected to /dev/null before the exec,
+//     so the daemonized descendant inherits /dev/null on those fds rather
+//     than the daemon's stdout/stderr pipes (which would otherwise pin the
+//     request open until the daemon exited).
+//
+// The user command is still passed through bash's stdin (avoiding ARG_MAX
+// limits at the cmd.Args level) and is re-quoted into the inner `sh -c`
+// argument here.
+func detachedWrapperCommand(shell, userCommand string) string {
+	const setsidProbe = "command -v setsid >/dev/null 2>&1 || " +
+		`{ echo "runDetached requires setsid (install util-linux)" >&2; exit 127; }` + "\n"
+	return setsidProbe + fmt.Sprintf(
+		"exec setsid -f %s -c %s </dev/null >/dev/null 2>&1\n",
+		shellSingleQuote(shell),
+		shellSingleQuote(userCommand),
+	)
+}
 
 // ExecuteCommand godoc
 //
@@ -49,9 +86,18 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 			return
 		}
 
+		shell := common.GetShell()
+		stdinScript := request.Command
+		if request.RunDetached {
+			// Replace the user's command with a setsid-fork wrapper that
+			// returns control to the daemon as soon as the launcher forks,
+			// while detaching the user's process from this request's stdio.
+			stdinScript = detachedWrapperCommand(shell, request.Command)
+		}
+
 		// Pipe command via stdin to avoid OS ARG_MAX limits on large commands
-		cmd := exec.Command(common.GetShell())
-		cmd.Stdin = strings.NewReader(request.Command)
+		cmd := exec.Command(shell)
+		cmd.Stdin = strings.NewReader(stdinScript)
 		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 		if request.Cwd != nil {
 			cmd.Dir = *request.Cwd

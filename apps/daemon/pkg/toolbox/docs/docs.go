@@ -3313,6 +3313,10 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "runDetached": {
+                    "description": "If true, run the command fully detached: it is launched via ` + "`" + `setsid -f` + "`" + `\nin a new session with stdin/stdout/stderr redirected to /dev/null, so\nthe request returns as soon as the launcher forks. Use this for\nlong-running daemons (e.g. starting a tmux server, a background worker)\nwhere the caller does not need the command's output and must not be\nblocked by it. ExitCode reflects whether the launcher started cleanly,\nnot the eventual exit status of the detached process; Result is empty.",
+                    "type": "boolean"
+                },
                 "timeout": {
                     "description": "Timeout in seconds, defaults to 10 seconds",
                     "type": "integer"
