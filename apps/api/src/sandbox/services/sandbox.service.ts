@@ -1792,11 +1792,14 @@ export class SandboxService {
         pendingDiskIncrement = sandbox.disk
       }
 
-      // For v2 + !skipStart, refresh authToken now: sandboxStartAction reads the current token
-      // when queueing START_SANDBOX, and we're skipping start() which normally refreshes it.
-      if (willStartOnV2) {
+      // Normalize desiredState upfront so the job handler can detect mid-job intent changes
+      // (e.g. /destroy). For v2 + !skipStart, also refresh authToken since we're bypassing start().
+      if (runner.apiVersion === '2') {
         await this.sandboxRepository.updateWhere(sandbox.id, {
-          updateData: { authToken: nanoid(32).toLocaleLowerCase() },
+          updateData: {
+            desiredState: skipStart ? SandboxDesiredState.STOPPED : SandboxDesiredState.STARTED,
+            ...(willStartOnV2 && { authToken: nanoid(32).toLocaleLowerCase() }),
+          },
           whereCondition: { state: SandboxState.ERROR },
         })
       }

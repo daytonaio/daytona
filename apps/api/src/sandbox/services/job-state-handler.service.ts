@@ -502,11 +502,18 @@ export class JobStateHandlerService {
 
       const skipStart = job.getPayload<{ skipStart?: boolean }>()?.skipStart ?? true
 
-      // Bail if the user changed intent mid-job (e.g. /destroy, /archive).
+      // Intent changed mid-job (e.g. /destroy); state stays ERROR so pending won't auto-drain.
       const expectedDesiredState = skipStart ? SandboxDesiredState.STOPPED : SandboxDesiredState.STARTED
       if (sandbox.desiredState !== expectedDesiredState) {
         this.logger.warn(
-          `Sandbox ${sandboxId} desiredState ${sandbox.desiredState} no longer matches RECOVER_SANDBOX job ${job.id} intent (expected ${expectedDesiredState}); skipping state update`,
+          `Sandbox ${sandboxId} desiredState ${sandbox.desiredState} no longer matches RECOVER_SANDBOX job ${job.id} intent (${expectedDesiredState}); rolling back pending reservation and skipping state update`,
+        )
+        await this.organizationUsageService.decrementPendingSandboxUsage(
+          sandbox.organizationId,
+          sandbox.region,
+          skipStart ? undefined : sandbox.cpu,
+          skipStart ? undefined : sandbox.mem,
+          sandbox.disk,
         )
         return
       }
@@ -514,11 +521,9 @@ export class JobStateHandlerService {
       const updateData: Partial<Sandbox> = {}
 
       if (job.status === JobStatus.COMPLETED) {
-        // Runner only expanded disk; container is left STOPPED. The chained start (if requested)
-        // is kicked off via SandboxStartedEvent below.
+        // Container left STOPPED; chained start (if requested) fires via SandboxStartedEvent below.
         this.logger.debug(`RECOVER_SANDBOX job ${job.id} completed successfully for sandbox ${sandboxId}`)
         updateData.state = SandboxState.STOPPED
-        updateData.desiredState = skipStart ? SandboxDesiredState.STOPPED : SandboxDesiredState.STARTED
         updateData.errorReason = null
         updateData.recoverable = false
         if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
@@ -531,8 +536,7 @@ export class JobStateHandlerService {
         updateData.errorReason = errorReason || 'Failed to recover sandbox'
         updateData.recoverable = recoverable
 
-        // Roll back the reservation made upstream (SandboxService.recover or the draining
-        // manager): disk always, cpu/mem only when start was requested.
+        // Roll back upstream reservation: disk always, cpu/mem only when start was requested.
         await this.organizationUsageService.decrementPendingSandboxUsage(
           sandbox.organizationId,
           sandbox.region,
@@ -545,8 +549,7 @@ export class JobStateHandlerService {
       const updatedSandbox = await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
 
       if (job.status === JobStatus.COMPLETED && !skipStart) {
-        // Pending was reserved by SandboxService.recover and authToken was already refreshed;
-        // sandboxStartAction does not re-validate.
+        // Pending and authToken were prepped in recover(); sandboxStartAction does not re-validate.
         this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(updatedSandbox))
       }
     } catch (error) {

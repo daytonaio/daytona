@@ -534,6 +534,14 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           )
           diskIncremented = result.diskIncremented
 
+          // Normalize desiredState upfront so the v2 job handler can detect mid-job intent changes.
+          if (runner.apiVersion === '2') {
+            await this.sandboxRepository.updateWhere(sandbox.id, {
+              updateData: { desiredState: SandboxDesiredState.STOPPED },
+              whereCondition: { state: SandboxState.ERROR },
+            })
+          }
+
           await runnerAdapter.recoverSandbox(sandbox, true)
 
           if (runner.apiVersion !== '2') {
