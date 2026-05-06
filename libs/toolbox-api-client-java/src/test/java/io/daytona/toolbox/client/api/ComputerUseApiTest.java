@@ -19,6 +19,8 @@ import io.daytona.toolbox.client.model.AccessibilityNodeRequest;
 import io.daytona.toolbox.client.model.AccessibilityNodesResponse;
 import io.daytona.toolbox.client.model.AccessibilitySetValueRequest;
 import io.daytona.toolbox.client.model.AccessibilityTreeResponse;
+import io.daytona.toolbox.client.model.AccessibilityWaitRequest;
+import io.daytona.toolbox.client.model.AccessibilityWaitResponse;
 import java.math.BigDecimal;
 import io.daytona.toolbox.client.model.ComputerUseStartResponse;
 import io.daytona.toolbox.client.model.ComputerUseStatusResponse;
@@ -530,6 +532,20 @@ public class ComputerUseApiTest {
     public void typeTextTest() throws ApiException {
         KeyboardTypeRequest request = null;
         Object response = api.typeText(request);
+        // TODO: test validations
+    }
+
+    /**
+     * Wait for accessibility readiness
+     *
+     * Poll AT-SPI inside the computer-use plugin until an accessibility condition succeeds or times out.
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void waitAccessibilityTest() throws ApiException {
+        AccessibilityWaitRequest request = null;
+        AccessibilityWaitResponse response = api.waitAccessibility(request);
         // TODO: test validations
     }
 

@@ -164,6 +164,12 @@ func (m *ComputerUseRPCClient) FindAccessibilityNodes(request *FindAccessibility
 	return &resp, err
 }
 
+func (m *ComputerUseRPCClient) WaitAccessibility(request *AccessibilityWaitRequest) (*AccessibilityWaitResponse, error) {
+	var resp AccessibilityWaitResponse
+	err := m.client.Call("Plugin.WaitAccessibility", request, &resp)
+	return &resp, err
+}
+
 func (m *ComputerUseRPCClient) FocusAccessibilityNode(request *AccessibilityNodeRequest) (*Empty, error) {
 	err := m.client.Call("Plugin.FocusAccessibilityNode", request, new(Empty))
 	return new(Empty), err

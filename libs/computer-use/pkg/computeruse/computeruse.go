@@ -46,12 +46,18 @@ type ComputerUse struct {
 	atspiMu   sync.Mutex
 	atspiConn *dbus.Conn
 
-	a11yHealth func() bool
-	waitDBus   func(string, time.Duration) error
+	a11yHealth             func() bool
+	connectA11yContextHook func(context.Context) (*dbus.Conn, error)
+	waitDBus               func(string, time.Duration) error
 
 	a11yStatusMu        sync.Mutex
 	a11yStatusRunning   bool
 	a11yStatusCheckedAt time.Time
+
+	findA11yNodes        func(A11yScope, int, A11yFilter, int) ([]*A11yNode, bool, error)
+	findA11yNodesContext func(context.Context, A11yScope, int, A11yFilter, int) ([]*A11yNode, bool, error)
+	fetchA11yNode        func(string) (*A11yNode, error)
+	fetchA11yNodeContext func(context.Context, string) (*A11yNode, error)
 }
 
 var _ computeruse.IComputerUse = &ComputerUse{}

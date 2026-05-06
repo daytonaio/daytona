@@ -49,6 +49,8 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client.models.accessibility_nodes_response import AccessibilityNodesResponse
     from daytona_toolbox_api_client.models.accessibility_set_value_request import AccessibilitySetValueRequest
     from daytona_toolbox_api_client.models.accessibility_tree_response import AccessibilityTreeResponse
+    from daytona_toolbox_api_client.models.accessibility_wait_request import AccessibilityWaitRequest
+    from daytona_toolbox_api_client.models.accessibility_wait_response import AccessibilityWaitResponse
     from daytona_toolbox_api_client.models.chart import Chart
     from daytona_toolbox_api_client.models.chart_element import ChartElement
     from daytona_toolbox_api_client.models.code_run_artifacts import CodeRunArtifacts
@@ -165,6 +167,8 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "AccessibilityNodesResponse": "daytona_toolbox_api_client.models.accessibility_nodes_response",
     "AccessibilitySetValueRequest": "daytona_toolbox_api_client.models.accessibility_set_value_request",
     "AccessibilityTreeResponse": "daytona_toolbox_api_client.models.accessibility_tree_response",
+    "AccessibilityWaitRequest": "daytona_toolbox_api_client.models.accessibility_wait_request",
+    "AccessibilityWaitResponse": "daytona_toolbox_api_client.models.accessibility_wait_response",
     "Chart": "daytona_toolbox_api_client.models.chart",
     "ChartElement": "daytona_toolbox_api_client.models.chart_element",
     "CodeRunArtifacts": "daytona_toolbox_api_client.models.code_run_artifacts",
@@ -295,6 +299,8 @@ __all__ = [
     "AccessibilityNodesResponse",
     "AccessibilitySetValueRequest",
     "AccessibilityTreeResponse",
+    "AccessibilityWaitRequest",
+    "AccessibilityWaitResponse",
     "Chart",
     "ChartElement",
     "CodeRunArtifacts",

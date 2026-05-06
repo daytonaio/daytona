@@ -344,6 +344,71 @@
         }
       }
     },
+    "/computeruse/a11y/wait": {
+      "post": {
+        "description": "Poll AT-SPI inside the computer-use plugin until an accessibility condition succeeds or times out.",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["computer-use"],
+        "summary": "Wait for accessibility readiness",
+        "operationId": "WaitAccessibility",
+        "parameters": [
+          {
+            "description": "Wait request",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AccessibilityWaitRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/AccessibilityWaitResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
     "/computeruse/display/info": {
       "get": {
         "description": "Get information about all available displays",
@@ -2936,6 +3001,55 @@
       "properties": {
         "root": {
           "$ref": "#/definitions/computeruse.AccessibilityNode"
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "AccessibilityWaitRequest": {
+      "type": "object",
+      "properties": {
+        "condition": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "pollIntervalMs": {
+          "type": "integer"
+        },
+        "query": {
+          "$ref": "#/definitions/FindAccessibilityNodesRequest"
+        },
+        "states": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "timeoutMs": {
+          "type": "integer"
+        }
+      }
+    },
+    "AccessibilityWaitResponse": {
+      "type": "object",
+      "properties": {
+        "elapsedMs": {
+          "type": "integer"
+        },
+        "matched": {
+          "type": "boolean"
+        },
+        "matches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/computeruse.AccessibilityNode"
+          }
+        },
+        "timedOut": {
+          "type": "boolean"
         },
         "truncated": {
           "type": "boolean"

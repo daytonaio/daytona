@@ -292,6 +292,61 @@ paths:
       summary: Get accessibility tree
       tags:
       - computer-use
+  /computeruse/a11y/wait:
+    post:
+      description: Poll AT-SPI inside the computer-use plugin until an accessibility
+        condition succeeds or times out.
+      operationId: WaitAccessibility
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessibilityWaitRequest'
+        description: Wait request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessibilityWaitResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Internal Server Error
+        "503":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Service Unavailable
+      summary: Wait for accessibility readiness
+      tags:
+      - computer-use
+      x-codegen-request-body-name: request
   /computeruse/display/info:
     get:
       description: Get information about all available displays
@@ -2452,6 +2507,98 @@ components:
       properties:
         root:
           $ref: "#/components/schemas/computeruse.AccessibilityNode"
+        truncated:
+          type: boolean
+      type: object
+    AccessibilityWaitRequest:
+      example:
+        condition: condition
+        timeoutMs: 6
+        query:
+          role: role
+          scope: scope
+          limit: 0
+          name: name
+          pid: 6
+          nameMatch: nameMatch
+          states:
+          - states
+          - states
+        pollIntervalMs: 0
+        id: id
+        states:
+        - states
+        - states
+      properties:
+        condition:
+          type: string
+        id:
+          type: string
+        pollIntervalMs:
+          type: integer
+        query:
+          $ref: '#/components/schemas/FindAccessibilityNodesRequest'
+        states:
+          items:
+            type: string
+          type: array
+        timeoutMs:
+          type: integer
+      type: object
+    AccessibilityWaitResponse:
+      example:
+        timedOut: true
+        truncated: true
+        matched: true
+        matches:
+        - role: role
+          children:
+          - null
+          - null
+          bounds:
+            width: 6
+            x: 1
+            "y": 5
+            height: 0
+          name: name
+          description: description
+          id: id
+          actions:
+          - actions
+          - actions
+          states:
+          - states
+          - states
+        - role: role
+          children:
+          - null
+          - null
+          bounds:
+            width: 6
+            x: 1
+            "y": 5
+            height: 0
+          name: name
+          description: description
+          id: id
+          actions:
+          - actions
+          - actions
+          states:
+          - states
+          - states
+        elapsedMs: 0
+      properties:
+        elapsedMs:
+          type: integer
+        matched:
+          type: boolean
+        matches:
+          items:
+            $ref: '#/components/schemas/computeruse.AccessibilityNode'
+          type: array
+        timedOut:
+          type: boolean
         truncated:
           type: boolean
       type: object

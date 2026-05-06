@@ -4,6 +4,7 @@
 package computeruse
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -29,6 +30,122 @@ func writeA11yErrorResponse(t *testing.T, err error) (int, map[string]string) {
 		t.Fatalf("response body was not a flat JSON object: %v (raw=%q)", decodeErr, rec.Body.String())
 	}
 	return rec.Code, body
+}
+
+func TestWrapWaitAccessibilityHandlerReturnsMatchedNode(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	body := bytes.NewBufferString(`{"condition":"exists","query":{"scope":"all","role":"push button"}}`)
+	rec := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(rec)
+	ctx.Request = httptest.NewRequest(http.MethodPost, "/computeruse/a11y/wait", body)
+	ctx.Request.Header.Set("Content-Type", "application/json")
+
+	handler := WrapWaitAccessibilityHandler(func(req *AccessibilityWaitRequest) (*AccessibilityWaitResponse, error) {
+		if req.Condition != "exists" || req.Query == nil || req.Query.Role != "push button" {
+			t.Fatalf("unexpected request: %+v", req)
+		}
+		return &AccessibilityWaitResponse{
+			Matched: true,
+			Matches: []AccessibilityNode{{
+				ID:     ":1.42:/org/a11y/atspi/accessible/12",
+				Role:   "push button",
+				Name:   "OK",
+				States: []string{"enabled", "visible"},
+			}},
+		}, nil
+	})
+
+	handler(ctx)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d: %s", rec.Code, http.StatusOK, rec.Body.String())
+	}
+	var resp AccessibilityWaitResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("decode response: %v", err)
+	}
+	if !resp.Matched || resp.TimedOut || len(resp.Matches) != 1 || resp.Matches[0].Name != "OK" {
+		t.Fatalf("unexpected response: %+v", resp)
+	}
+}
+
+func TestWrapWaitAccessibilityHandlerReturnsTimeoutAsOK(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	rec := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(rec)
+	ctx.Request = httptest.NewRequest(http.MethodPost, "/computeruse/a11y/wait", bytes.NewBufferString(`{"condition":"exists","query":{"scope":"all","name":"Ready"}}`))
+	ctx.Request.Header.Set("Content-Type", "application/json")
+
+	WrapWaitAccessibilityHandler(func(*AccessibilityWaitRequest) (*AccessibilityWaitResponse, error) {
+		return &AccessibilityWaitResponse{Matched: false, TimedOut: true, ElapsedMs: 25}, nil
+	})(ctx)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d: %s", rec.Code, http.StatusOK, rec.Body.String())
+	}
+	var resp AccessibilityWaitResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("decode response: %v", err)
+	}
+	if resp.Matched || !resp.TimedOut {
+		t.Fatalf("unexpected response: %+v", resp)
+	}
+}
+
+func TestWrapWaitAccessibilityHandlerMapsA11yErrors(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	cases := []struct {
+		name       string
+		err        error
+		wantStatus int
+		wantCode   string
+	}{
+		{
+			name:       "a11y unavailable",
+			err:        fmt.Errorf("%s: session bus: connection refused", a11yMsgUnavailable),
+			wantStatus: http.StatusServiceUnavailable,
+			wantCode:   "A11Y_UNAVAILABLE",
+		},
+		{
+			name:       "bad or stale id",
+			err:        fmt.Errorf("%s: :1.42:/gone", a11yMsgNodeNotFound),
+			wantStatus: http.StatusNotFound,
+			wantCode:   "A11Y_NODE_NOT_FOUND",
+		},
+		{
+			name:       "invalid request",
+			err:        fmt.Errorf("%s: query is required", a11yMsgInvalidRequest),
+			wantStatus: http.StatusBadRequest,
+			wantCode:   "A11Y_INVALID_REQUEST",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			rec := httptest.NewRecorder()
+			ctx, _ := gin.CreateTestContext(rec)
+			ctx.Request = httptest.NewRequest(http.MethodPost, "/computeruse/a11y/wait", bytes.NewBufferString(`{"condition":"exists","query":{"scope":"all"}}`))
+			ctx.Request.Header.Set("Content-Type", "application/json")
+
+			WrapWaitAccessibilityHandler(func(*AccessibilityWaitRequest) (*AccessibilityWaitResponse, error) {
+				return nil, tc.err
+			})(ctx)
+
+			if rec.Code != tc.wantStatus {
+				t.Fatalf("status = %d, want %d: %s", rec.Code, tc.wantStatus, rec.Body.String())
+			}
+			var body map[string]string
+			if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+				t.Fatalf("decode response: %v", err)
+			}
+			if body["code"] != tc.wantCode {
+				t.Fatalf("code = %q, want %q", body["code"], tc.wantCode)
+			}
+		})
+	}
 }
 
 // TestWriteA11yError pins the status + code mapping that SDKs branch on.

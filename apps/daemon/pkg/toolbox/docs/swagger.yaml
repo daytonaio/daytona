@@ -51,6 +51,38 @@ definitions:
       truncated:
         type: boolean
     type: object
+  AccessibilityWaitRequest:
+    properties:
+      condition:
+        type: string
+      id:
+        type: string
+      pollIntervalMs:
+        type: integer
+      query:
+        $ref: '#/definitions/FindAccessibilityNodesRequest'
+      states:
+        items:
+          type: string
+        type: array
+      timeoutMs:
+        type: integer
+    type: object
+  AccessibilityWaitResponse:
+    properties:
+      elapsedMs:
+        type: integer
+      matched:
+        type: boolean
+      matches:
+        items:
+          $ref: '#/definitions/computeruse.AccessibilityNode'
+        type: array
+      timedOut:
+        type: boolean
+      truncated:
+        type: boolean
+    type: object
   Chart:
     properties:
       elements:
@@ -1372,6 +1404,54 @@ paths:
               type: string
             type: object
       summary: Get accessibility tree
+      tags:
+        - computer-use
+  /computeruse/a11y/wait:
+    post:
+      consumes:
+        - application/json
+      description: Poll AT-SPI inside the computer-use plugin until an accessibility
+        condition succeeds or times out.
+      operationId: WaitAccessibility
+      parameters:
+        - description: Wait request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/AccessibilityWaitRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/AccessibilityWaitResponse'
+        '400':
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '404':
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '500':
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '503':
+          description: Service Unavailable
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Wait for accessibility readiness
       tags:
         - computer-use
   /computeruse/display/info:
