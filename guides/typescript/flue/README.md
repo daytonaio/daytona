@@ -49,7 +49,7 @@ Copy `.env.example` to `.env` and fill in:
 | `DAYTONA_API_KEY` | yes | Get one from the [Daytona Dashboard](https://app.daytona.io/dashboard/keys) |
 | `ANTHROPIC_API_KEY` | yes | For this agent's default model, `anthropic/claude-sonnet-4-6`. Required only if you don't override `MODEL`. (Flue itself has no default; our `bug-fix.ts` picks one.) |
 | `GITHUB_TOKEN` | yes | Personal Access Token with `repo` scope. Create at [github.com/settings/tokens](https://github.com/settings/tokens) |
-| `MODEL` | no | Override this agent's default. Any `provider/model-id` recognized by [`@mariozechner/pi-ai`](https://www.npmjs.com/package/@mariozechner/pi-ai). Examples: `anthropic/claude-opus-4-7`, `openai/gpt-5.5`, `openrouter/moonshotai/kimi-k2.6` |
+| `MODEL` | no | Override this agent's default. Any `provider/model-id` recognized by [`@mariozechner/pi-ai`](https://www.npmjs.com/package/@mariozechner/pi-ai). Examples: `anthropic/claude-opus-4-7`, `openai/gpt-5.5` |
 | `DEMO_REPO` | no¹ | Default target fork in `<owner>/<repo>` form (e.g. `your-username/your-fork`). Used when the webhook payload omits `repo` |
 | `DEMO_ISSUE` | no¹ | Default issue number (e.g. `284`). Used when the webhook payload omits `issueNumber` |
 | `ISSUE_REPO` | no | Override the issue source, in `<owner>/<repo>` form. By default the agent auto-detects the upstream parent of `DEMO_REPO` via `gh repo view`; set this if `DEMO_REPO` is not a fork or you want to point at a different repo |
@@ -80,8 +80,16 @@ npm run dev
 You should see Flue's webhook server start on port `3583`:
 
 ```
-Flue dev server listening on http://localhost:3583
-  POST /agents/bug-fix/<session-id>
+[flue] Starting dev server (target: node)
+[flue] Target: node
+[flue] Found 1 role(s): test-driven-developer
+[flue] Found 1 agent(s): bug-fix
+[flue] Webhook agents: bug-fix
+[flue] Built: dist/server.mjs
+[flue] Server: http://localhost:3583
+[flue] Try: curl -X POST http://localhost:3583/agents/bug-fix/test-1 \
+         -H 'Content-Type: application/json' -d '{}'
+[flue] Press Ctrl+C to stop
 ```
 
 ### 3. Trigger the agent
