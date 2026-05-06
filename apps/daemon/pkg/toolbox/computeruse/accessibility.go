@@ -119,7 +119,8 @@ func writeA11yError(c *gin.Context, err error) {
 func WrapGetAccessibilityTreeHandler(fn func(*GetAccessibilityTreeRequest) (*AccessibilityTreeResponse, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Default to unbounded descent when the client omits maxDepth. We
-		// detect the omission by binding against a sentinel pointer value
+		// seed MaxDepth with the sentinel int value -1, then after binding
+		// explicitly check whether the maxDepth query parameter was present,
 		// rather than relying on form binding zero-semantics (0 is a valid
 		// maxDepth meaning "root only").
 		req := &GetAccessibilityTreeRequest{MaxDepth: -1}
