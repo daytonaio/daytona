@@ -17,7 +17,7 @@ be performed within a Daytona Sandbox.
 #### FileSystem.\_\_init\_\_
 
 ```python
-def __init__(api_client: FileSystemApi)
+def __init__(api_client: FileSystemApi, http_client: httpx.Client)
 ```
 
 Initializes a new FileSystem instance.
@@ -25,6 +25,7 @@ Initializes a new FileSystem instance.
 **Arguments**:
 
 - `api_client` _FileSystemApi_ - API client for Sandbox file system operations.
+- `http_client` _httpx.Client_ - Shared pooled client for upload/download.
 
 #### FileSystem.create\_folder
 

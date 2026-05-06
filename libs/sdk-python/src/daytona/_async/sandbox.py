@@ -105,17 +105,7 @@ class AsyncSandbox(SandboxDto):
         sandbox_api: SandboxApi,
         language: str,
         pool_tracker: AsyncPoolSaturationTracker | None = None,
-        ws_handshake_semaphore: asyncio.Semaphore | None = None,
     ):
-        """Initialize a new Sandbox instance.
-
-        Args:
-            sandbox_dto (SandboxDto): The sandbox data from the API.
-            toolbox_api (ApiClient): API client for toolbox operations.
-            sandbox_api (SandboxApi): API client for Sandbox operations.
-            language (str): Language code for the Sandbox code_run.
-            pool_tracker (AsyncPoolSaturationTracker | None): Tracker for connection pool saturation.
-        """
         super().__init__(**sandbox_dto.model_dump())
         self.__process_sandbox_dto(sandbox_dto)
         self._sandbox_api: SandboxApi = sandbox_api
@@ -126,9 +116,9 @@ class AsyncSandbox(SandboxDto):
 
         self._fs = AsyncFileSystem(FileSystemApi(self._toolbox_api))
         self._git = AsyncGit(GitApi(self._toolbox_api))
-        self._process = AsyncProcess(language, ProcessApi(self._toolbox_api), ws_handshake_semaphore)
+        self._process = AsyncProcess(language, ProcessApi(self._toolbox_api))
         self._computer_use = AsyncComputerUse(ComputerUseApi(self._toolbox_api))
-        self._code_interpreter = AsyncCodeInterpreter(InterpreterApi(self._toolbox_api), ws_handshake_semaphore)
+        self._code_interpreter = AsyncCodeInterpreter(InterpreterApi(self._toolbox_api))
         self._info_api: InfoApi = InfoApi(self._toolbox_api)
 
     @property
@@ -758,7 +748,6 @@ class AsyncSandbox(SandboxDto):
             self._toolbox_api._api_client,
             self._sandbox_api,
             language,
-            ws_handshake_semaphore=self._process._ws_handshake_semaphore,
         )
         await forked.wait_for_sandbox_start(timeout=0)
         return forked

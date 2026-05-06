@@ -6,10 +6,11 @@ from __future__ import annotations
 import json
 import time
 from collections.abc import Callable, Generator
+from contextlib import AbstractContextManager
 from typing import Any, cast
 
-from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
-from websockets.sync.client import ClientConnection
+from httpx_ws import WebSocketDisconnect, WebSocketSession
+from wsproto.events import BytesMessage, CloseConnection, TextMessage
 
 from daytona_toolbox_api_client import PtySessionInfo
 
@@ -49,21 +50,27 @@ class PtyHandle:
 
     def __init__(
         self,
-        ws: ClientConnection,
+        ws: WebSocketSession,
         session_id: str,
         handle_resize: Callable[[PtySize], PtySessionInfo] | None = None,
         handle_kill: Callable[[], None] | None = None,
+        ws_context_manager: AbstractContextManager[WebSocketSession] | None = None,
     ):
         """
         Initialize the PTY handle.
 
         Args:
-            ws: Connected WebSocket client connection
+            ws: Open httpx_ws WebSocketSession (long-lived; the handle owns its lifecycle)
             session_id: Session ID of the PTY session
             handle_resize: Optional callback for resizing the PTY
             handle_kill: Optional callback for killing the PTY
+            ws_context_manager: The httpx_ws.connect_ws() context manager that produced ``ws``.
+                When provided, ``disconnect()`` calls its ``__exit__`` so the underlying HTTP
+                stream is released back to the httpx connection pool. Pass ``None`` only if
+                the caller manages the context manager itself.
         """
-        self._ws: ClientConnection | None = ws
+        self._ws: WebSocketSession | None = ws
+        self._ws_cm: AbstractContextManager[WebSocketSession] | None = ws_context_manager
         self._session_id: str = session_id
         self._handle_resize: Callable[[PtySize], PtySessionInfo] | None = handle_resize
         self._handle_kill: Callable[[], None] | None = handle_kill
@@ -108,7 +115,6 @@ class PtyHandle:
         if self._ws is None:
             raise DaytonaConnectionError("WebSocket connection is not available")
 
-        # Wait for connection established control message
         start_time = time.time()
         while not self._connection_established:
             if time.time() - start_time > timeout:
@@ -117,20 +123,20 @@ class PtyHandle:
             if self._error:
                 raise DaytonaConnectionError(self._error or "Connection failed")
 
-            # Try to receive a control message
             try:
-                message = self._ws.recv(timeout=0.1)
-                if isinstance(message, str):
-                    try:
-                        control_msg: dict[str, object] = json.loads(message)
-                        if control_msg.get("type") == "control":
-                            self._handle_control_message(control_msg)
-                    except (json.JSONDecodeError, ValueError):
-                        pass
+                event = self._ws.receive(timeout=0.1)
             except TimeoutError:
-                continue  # Keep waiting
-            except (ConnectionClosedOK, ConnectionClosedError) as e:
+                continue
+            except WebSocketDisconnect as e:
                 raise DaytonaConnectionError("Connection closed during setup") from e
+
+            if isinstance(event, TextMessage):
+                try:
+                    control_msg: dict[str, object] = json.loads(event.data)
+                    if control_msg.get("type") == "control":
+                        self._handle_control_message(control_msg)
+                except (json.JSONDecodeError, ValueError):
+                    pass
 
     def send_input(self, data: str | bytes) -> None:
         """
@@ -150,9 +156,9 @@ class PtyHandle:
 
         try:
             if isinstance(data, str):
-                self._ws.send(data.encode("utf-8"))
+                self._ws.send_bytes(data.encode("utf-8"))
             else:
-                self._ws.send(data)
+                self._ws.send_bytes(data)
         except Exception as e:
             raise DaytonaConnectionError(f"Failed to send input to PTY: {e}") from e
 
@@ -204,40 +210,43 @@ class PtyHandle:
         if ws is None:
             return
 
+        close_code: int | None = None
+        close_reason: str | None = None
+
         try:
-            for message in ws:
-                if isinstance(message, str):
-                    # Try to parse as control message
+            while True:
+                try:
+                    event = ws.receive()
+                except WebSocketDisconnect as e:
+                    close_code = e.code
+                    close_reason = e.reason
+                    break
+
+                if isinstance(event, TextMessage):
+                    text = event.data
                     try:
-                        control_msg: dict[str, object] = json.loads(message)
+                        control_msg: dict[str, object] = json.loads(text)
                         if control_msg.get("type") == "control":
                             self._handle_control_message(control_msg)
                             continue
                     except (json.JSONDecodeError, ValueError):
-                        # Not a control message, treat as PTY output
                         pass
+                    yield text.encode("utf-8")
+                elif isinstance(event, BytesMessage):
+                    # wsproto's data is bytes | bytearray; coerce for the typed yield.
+                    yield bytes(event.data)
+                elif isinstance(event, CloseConnection):
+                    close_code = event.code
+                    close_reason = event.reason
+                    break
+                # Ping/Pong/etc. — wsproto auto-handles ping; just continue.
 
-                    # Convert string to bytes for PTY output
-                    yield message.encode("utf-8")
-                else:
-                    # Binary PTY data
-                    yield message
-
-            # If we exit the loop normally, the connection was closed gracefully
-            # Simulate a close event with normal close code
-            class CloseEvent:
-                def __init__(self, code: int = 1000, reason: str = ""):
-                    self.code: int = code
-                    self.reason: str = reason
-
-            self._handle_close(CloseEvent())
-
-        except (ConnectionClosedOK, ConnectionClosedError) as e:
-            # Handle connection close and extract exit data
-            self._handle_close(e)
         except Exception as e:
             if not self._error:
                 self._error = f"WebSocket error: {e}"
+            return
+
+        self._handle_close(close_code, close_reason)
 
     def wait(self, on_data: Callable[[bytes], None] | None = None, timeout: float | None = None) -> PtyResult:
         """
@@ -257,7 +266,6 @@ class PtyHandle:
                 if on_data:
                     on_data(data)
 
-                # Check timeout
                 if timeout and (time.time() - start_time) > timeout:
                     break
 
@@ -274,14 +282,24 @@ class PtyHandle:
 
     def disconnect(self) -> None:
         """Disconnect from the PTY session"""
-        if self._ws:
+        # Close via the original context manager so httpx releases its stream resources
+        # back to the connection pool. Falling back to ws.close() covers cases where the
+        # caller passed in a bare WebSocketSession (e.g. tests).
+        if self._ws_cm is not None:
+            try:
+                _ = self._ws_cm.__exit__(None, None, None)
+            except Exception:
+                pass
+            self._ws_cm = None
+            self._ws = None
+            self._connected = False
+        elif self._ws is not None:
             try:
                 self._ws.close()
             except Exception:
-                pass  # Ignore close errors
-            finally:
-                self._ws = None
-                self._connected = False
+                pass
+            self._ws = None
+            self._connected = False
 
     def _handle_control_message(self, control_msg: dict[str, object]) -> None:
         """Handle control messages from the PTY server"""
@@ -293,16 +311,12 @@ class PtyHandle:
             self._error = cast(str, control_msg.get("error", "Unknown connection error"))
             self._connected = False
 
-    def _handle_close(self, close_event: object) -> None:
-        """Handle WebSocket close event"""
+    def _handle_close(self, close_code: int | None, close_reason: str | None) -> None:
+        """Handle WebSocket close event."""
         self._connected = False
 
-        # In websockets library, the close event is a ConnectionClosed exception
-        # The close code is available as close_event.code and reason as close_event.reason
-        close_code = getattr(close_event, "code", None)
-        close_reason = getattr(close_event, "reason", None)
-
-        # Parse structured exit data from close reason
+        # Parse structured exit data from close reason (daemon encodes exit_code/error in
+        # the close frame so the client doesn't need a separate roundtrip to learn them).
         if close_reason:
             try:
                 exit_data = json.loads(close_reason)
@@ -323,6 +337,5 @@ class PtyHandle:
                     if isinstance(error_value, str):
                         self._error = error_value
 
-        # Default to exit code 0 if we can't parse it and it was a normal close
         if self._exit_code is None and close_code == 1000:
             self._exit_code = 0

@@ -4,10 +4,9 @@
 from __future__ import annotations
 
 import re
-import threading
 
-import websockets
-from websockets.sync.client import connect
+import httpx
+import httpx_ws
 
 from daytona_toolbox_api_client import (
     CodeRunRequest,
@@ -24,7 +23,7 @@ from daytona_toolbox_api_client import (
 
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
-from .._utils.stream import std_demux_stream
+from .._utils.stream import std_demux_stream_httpx_ws
 from .._utils.timeout import http_timeout
 from ..common.charts import parse_chart
 from ..common.process import (
@@ -47,16 +46,36 @@ class Process:
         self,
         language: str,
         api_client: ProcessApi,
-        ws_handshake_semaphore: threading.Semaphore | None = None,
+        http_client: httpx.Client,
     ):
         """Initialize a new Process instance.
 
         Args:
             api_client (ProcessApi): API client for process operations.
+            http_client: Shared httpx.Client whose connection pool the WS upgrade reuses.
         """
         self._language: str = language
         self._api_client: ProcessApi = api_client
-        self._ws_handshake_semaphore: threading.Semaphore | None = ws_handshake_semaphore
+        self._http_client: httpx.Client = http_client
+
+    async def _consume_log_websocket(
+        self,
+        url: str,
+        headers: dict[str, str],
+        on_stdout: OutputHandler[str],
+        on_stderr: OutputHandler[str],
+    ) -> None:
+        """Open a sync httpx_ws WebSocket, demux stdout/stderr until EOF, then close.
+
+        The surrounding method is ``async def`` (callable via ``asyncio.run`` from sync code)
+        so user-supplied callbacks may be ``async def`` and need awaiting. The httpx_ws session
+        itself is sync — its blocking ``receive()`` is bridged onto a worker thread inside
+        :func:`std_demux_stream_httpx_ws` so we don't stall the event loop. The WS upgrade
+        reuses ``self._http_client``'s connection pool, sharing TLS context + DNS cache with
+        every other sync HTTP request the SDK makes.
+        """
+        with httpx_ws.connect_ws(url, self._http_client, headers=headers) as ws:
+            await std_demux_stream_httpx_ws(ws, on_stdout, on_stderr)
 
     @intercept_errors(message_prefix="Failed to execute command: ")
     @with_instrumentation()
@@ -433,18 +452,7 @@ class Process:
 
         url = re.sub(r"^http", "ws", url)
 
-        if self._ws_handshake_semaphore is not None:
-            _ = self._ws_handshake_semaphore.acquire()
-        _sem_released = False
-        try:
-            async with websockets.connect(url, additional_headers=headers) as ws:
-                if self._ws_handshake_semaphore is not None:
-                    self._ws_handshake_semaphore.release()
-                    _sem_released = True
-                await std_demux_stream(ws, on_stdout, on_stderr)
-        finally:
-            if self._ws_handshake_semaphore is not None and not _sem_released:
-                self._ws_handshake_semaphore.release()
+        await self._consume_log_websocket(url, headers, on_stdout, on_stderr)
 
     @intercept_errors(message_prefix="Failed to get entrypoint logs: ")
     @with_instrumentation()
@@ -495,18 +503,7 @@ class Process:
 
         url = re.sub(r"^http", "ws", url)
 
-        if self._ws_handshake_semaphore is not None:
-            _ = self._ws_handshake_semaphore.acquire()
-        _sem_released = False
-        try:
-            async with websockets.connect(url, additional_headers=headers) as ws:
-                if self._ws_handshake_semaphore is not None:
-                    self._ws_handshake_semaphore.release()
-                    _sem_released = True
-                await std_demux_stream(ws, on_stdout, on_stderr)
-        finally:
-            if self._ws_handshake_semaphore is not None and not _sem_released:
-                self._ws_handshake_semaphore.release()
+        await self._consume_log_websocket(url, headers, on_stdout, on_stderr)
 
     @intercept_errors(message_prefix="Failed to send session command input: ")
     def send_session_command_input(self, session_id: str, command_id: str, data: str) -> None:
@@ -632,15 +629,13 @@ class Process:
         )
         url = re.sub(r"^http", "ws", url)
 
-        if self._ws_handshake_semaphore is not None:
-            _ = self._ws_handshake_semaphore.acquire()
-        try:
-            ws = connect(url, additional_headers=headers)
-        finally:
-            if self._ws_handshake_semaphore is not None:
-                self._ws_handshake_semaphore.release()
+        # Long-lived PTY: open without context manager so PtyHandle owns the lifecycle and
+        # closes via handle.disconnect(). The WS upgrade pulls a TCP/TLS connection from
+        # self._http_client's pool (shared TLS context, DNS cache) — once upgraded, that
+        # socket is dedicated to this PTY for its entire lifetime.
+        ws_cm = httpx_ws.connect_ws(url, self._http_client, headers=headers)
+        ws = ws_cm.__enter__()  # pylint: disable=unnecessary-dunder-call
 
-        # Create resize and kill handlers
         def resize_handler(pty_size: PtySize) -> PtySessionInfo:
             return self.resize_pty_session(session_id, pty_size)
 
@@ -652,8 +647,13 @@ class Process:
             session_id=session_id,
             handle_resize=resize_handler,
             handle_kill=kill_handler,
+            ws_context_manager=ws_cm,
         )
-        handle.wait_for_connection()
+        try:
+            handle.wait_for_connection()
+        except BaseException:
+            handle.disconnect()
+            raise
         return handle
 
     @intercept_errors(message_prefix="Failed to list PTY sessions: ")

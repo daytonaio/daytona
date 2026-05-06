@@ -38,6 +38,7 @@ from daytona_toolbox_api_client import (
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
 from ..common.computer_use import ScreenshotOptions, ScreenshotRegion
+from ..internal.http_client import request_timeout as _request_timeout
 
 
 class Mouse:
@@ -472,8 +473,10 @@ class RecordingService:
     def __init__(
         self,
         api_client: ComputerUseApi,
+        http_client: httpx.Client,
     ):
         self._api_client: ComputerUseApi = api_client
+        self._http_client: httpx.Client = http_client
 
     @intercept_errors(message_prefix="Failed to start recording: ")
     @with_instrumentation()
@@ -605,14 +608,15 @@ class RecordingService:
         if parent_dir:
             os.makedirs(parent_dir, exist_ok=True)
 
-        # Stream the download directly to file
-        with httpx.Client(timeout=30 * 60) as client:
-            with client.stream(method, url, headers=headers) as response:
-                _ = response.raise_for_status()
+        download_timeout = 30 * 60
+        with self._http_client.stream(
+            method, url, headers=headers, timeout=_request_timeout(download_timeout)
+        ) as response:
+            _ = response.raise_for_status()
 
-                with open(local_path, "wb") as f:
-                    for chunk in response.iter_bytes(64 * 1024):
-                        _ = f.write(chunk)
+            with open(local_path, "wb") as f:
+                for chunk in response.iter_bytes(64 * 1024):
+                    _ = f.write(chunk)
 
 
 class ComputerUse:
@@ -632,6 +636,7 @@ class ComputerUse:
     def __init__(
         self,
         api_client: ComputerUseApi,
+        http_client: httpx.Client,
     ):
         self._api_client: ComputerUseApi = api_client
 
@@ -639,7 +644,7 @@ class ComputerUse:
         self.keyboard: Keyboard = Keyboard(api_client)
         self.screenshot: Screenshot = Screenshot(api_client)
         self.display: Display = Display(api_client)
-        self.recording: RecordingService = RecordingService(api_client)
+        self.recording: RecordingService = RecordingService(api_client, http_client=http_client)
 
     @intercept_errors(message_prefix="Failed to start computer use: ")
     @with_instrumentation()

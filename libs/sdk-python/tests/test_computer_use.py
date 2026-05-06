@@ -13,7 +13,7 @@ def _make_computer_use():
     from daytona._sync.computer_use import ComputerUse
 
     api_client = MagicMock()
-    return ComputerUse(api_client), api_client
+    return ComputerUse(api_client, http_client=MagicMock()), api_client
 
 
 class TestComputerUse:
@@ -140,11 +140,15 @@ class TestComputerUse:
         )
         destination = tmp_path / "nested" / "recording.mp4"
 
-        with patch("daytona._sync.computer_use.httpx.Client", return_value=client):
-            computer_use.recording.download("rec-1", str(destination))
+        computer_use.recording._http_client = client
+        computer_use.recording.download("rec-1", str(destination))
 
         assert destination.read_bytes() == b"part1part2"
-        client.stream.assert_called_once_with("GET", "https://download", headers={"Authorization": "Bearer token"})
+        from daytona.internal.http_client import request_timeout
+
+        client.stream.assert_called_once_with(
+            "GET", "https://download", headers={"Authorization": "Bearer token"}, timeout=request_timeout(30 * 60)
+        )
 
     def test_top_level_methods_delegate_to_api(self):
         computer_use, api_client = _make_computer_use()

@@ -16,7 +16,7 @@ class TestSyncProcessExec:
         from daytona._sync.process import Process
 
         mock_api = MagicMock()
-        return Process("python", mock_api), mock_api
+        return Process("python", mock_api, http_client=MagicMock()), mock_api
 
     def test_exec_simple_command(self):
         proc, api = self._make_process()
@@ -76,7 +76,7 @@ class TestSyncProcessSessions:
         from daytona._sync.process import Process
 
         mock_api = MagicMock()
-        return Process("python", mock_api), mock_api
+        return Process("python", mock_api, http_client=MagicMock()), mock_api
 
     def test_create_session(self):
         proc, api = self._make_process()

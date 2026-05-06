@@ -49,6 +49,7 @@ from ..common.daytona import (
 from ..common.errors import DaytonaAuthenticationError, DaytonaValidationError
 from ..common.image import Image
 from ..internal.pool_tracker import AsyncPoolSaturationTracker
+from ..internal.shared_session import SharedAiohttpSession
 from .sandbox import AsyncPaginatedSandboxes, AsyncSandbox
 from .snapshot import AsyncSnapshotService
 from .volume import AsyncVolumeService
@@ -112,10 +113,6 @@ class AsyncDaytona:
         - `DAYTONA_API_KEY`: Required API key for authentication
         - `DAYTONA_API_URL`: Required api URL
         - `DAYTONA_TARGET`: Optional target environment (if not provided, default region for the organization is used)
-        - `DAYTONA_WS_MAX_CONCURRENT_HANDSHAKES`: Optional limit on concurrent WebSocket
-          handshakes. Only useful for workloads that open hundreds of WebSocket connections
-          simultaneously (e.g. creating 500+ PTY sessions in a single burst). When set,
-          the SDK queues excess handshakes until a slot is available. Disabled by default.
 
         Args:
             config (DaytonaConfig | None): Object containing api_key, api_url, and target.
@@ -193,6 +190,13 @@ class AsyncDaytona:
         configuration = Configuration(host=self._api_url)
         pool_size = config.connection_pool_maxsize if config else 250
         configuration.connection_pool_maxsize = pool_size  # pyright: ignore[reportAttributeAccessIssue]
+
+        # All async traffic funnels through one aiohttp.ClientSession (both rest_clients
+        # plus direct WS/streaming use). aiohttp.TCPConnector requires a running event
+        # loop, so the session is lazy-created on the first awaited request and the
+        # coordinator propagates it across attached rest_clients.
+        self._shared_session: SharedAiohttpSession = SharedAiohttpSession()
+
         self._api_client: ApiClient = ApiClient(configuration)
         self._api_client.default_headers["Authorization"] = f"Bearer {self._api_key or self._jwt_token}"
         self._api_client.default_headers["X-Daytona-Source"] = "sdk-python-async"
@@ -226,23 +230,23 @@ class AsyncDaytona:
 
         self._pool_tracker: AsyncPoolSaturationTracker = AsyncPoolSaturationTracker(pool_size)
 
-        ws_concurrency_str = (env_reader or DaytonaEnvReader()).get("DAYTONA_WS_MAX_CONCURRENT_HANDSHAKES")
-        self._ws_handshake_semaphore: asyncio.Semaphore | None = (
-            asyncio.Semaphore(int(ws_concurrency_str)) if ws_concurrency_str is not None else None
-        )
+        self._toolbox_api_client: ToolboxApiClient = self._clone_api_client_to_toolbox_api_client()
 
-        # Initialize API clients with the api_client instance
+        # Attach must happen before any request fires so the wrapper can intercept
+        # the lazy session creation and propagate it across both rest_clients.
+        self._shared_session.attach(self._api_client.rest_client)
+        self._shared_session.attach(self._toolbox_api_client.rest_client)
+
         self._sandbox_api: SandboxApi = SandboxApi(self._api_client)
         self._object_storage_api: ObjectStorageApi = ObjectStorageApi(self._api_client)
         self._config_api: ConfigApi = ConfigApi(self._api_client)
-        self._toolbox_api_client: ToolboxApiClient = self._clone_api_client_to_toolbox_api_client()
 
-        # Initialize services
         self.volume: AsyncVolumeService = AsyncVolumeService(VolumesApi(self._api_client))
         self.snapshot: AsyncSnapshotService = AsyncSnapshotService(
             SnapshotsApi(self._api_client),
             self._object_storage_api,
             self._target,
+            self._shared_session,
         )
 
         # Initialize OpenTelemetry if enabled
@@ -323,13 +327,18 @@ class AsyncDaytona:
         if self._tracer_provider is not None:
             self._tracer_provider.shutdown()
 
-        # Close the main API client
+        # All three close paths converge on the same shared aiohttp session.
+        # ClientSession.close() is idempotent, so the duplicates are no-ops; the
+        # trailing coordinator close is a safety net for the rare case where the
+        # session was adopted but neither api_client owns it yet.
         if hasattr(self, "_api_client") and self._api_client:
             await self._api_client.close()
 
-        # Close the toolbox API client
         if hasattr(self, "_toolbox_api_client") and self._toolbox_api_client:
             await self._toolbox_api_client.close()
+
+        if hasattr(self, "_shared_session"):
+            await self._shared_session.close()
 
     @overload
     async def create(
@@ -541,6 +550,7 @@ class AsyncDaytona:
                 headers=cast(dict[str, str], self._sandbox_api.api_client.default_headers),
                 on_chunk=lambda chunk: on_snapshot_create_logs(chunk.rstrip()),
                 should_terminate=should_terminate,
+                session=self._shared_session.session,
             )
             response = response_ref["response"]
 
@@ -550,7 +560,6 @@ class AsyncDaytona:
             self._sandbox_api,
             validated_language.value,
             self._pool_tracker,
-            ws_handshake_semaphore=self._ws_handshake_semaphore,
         )
 
         if sandbox.state != SandboxState.STARTED:
@@ -613,7 +622,6 @@ class AsyncDaytona:
             self._sandbox_api,
             language,
             self._pool_tracker,
-            ws_handshake_semaphore=self._ws_handshake_semaphore,
         )
 
     @intercept_errors(message_prefix="Failed to list sandboxes: ")
@@ -656,7 +664,6 @@ class AsyncDaytona:
                     self._sandbox_api,
                     language,
                     self._pool_tracker,
-                    ws_handshake_semaphore=self._ws_handshake_semaphore,
                 )
             )
 
@@ -716,10 +723,11 @@ class AsyncDaytona:
         await sandbox.stop(timeout)
 
     def _clone_api_client_to_toolbox_api_client(self) -> ToolboxApiClient:
-        """Creates the toolbox API client from the main API client with empty host.
+        """Build a toolbox ApiClient that shares the main client's configuration.
 
-        Returns:
-            ToolboxApiClient: The toolbox API client.
+        The toolbox client's host is left empty so ``ToolboxApiClientProxy`` can
+        inject the per-sandbox URL. Both clients are attached to ``_shared_session``
+        so they end up using the same aiohttp.ClientSession.
         """
         assert isinstance(self._api_client.configuration, Configuration)
         config = deepcopy(self._api_client.configuration)

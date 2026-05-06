@@ -51,11 +51,9 @@ Represents a Daytona Sandbox.
 #### Sandbox.\_\_init\_\_
 
 ```python
-def __init__(sandbox_dto: SandboxDto,
-             toolbox_api: ApiClient,
-             sandbox_api: SandboxApi,
-             language: str,
-             ws_handshake_semaphore: threading.Semaphore | None = None)
+def __init__(sandbox_dto: SandboxDto, toolbox_api: ApiClient,
+             sandbox_api: SandboxApi, language: str,
+             http_client: httpx.Client)
 ```
 
 Initialize a new Sandbox instance.
@@ -65,6 +63,7 @@ Initialize a new Sandbox instance.
 - `sandbox_dto` _SandboxDto_ - The sandbox data from the API.
 - `toolbox_api` _ApiClient_ - API client for toolbox operations.
 - `sandbox_api` _SandboxApi_ - API client for Sandbox operations.
+- `http_client` _httpx.Client_ - Shared pooled client for file transfers.
 
 #### Sandbox.refresh\_data
 

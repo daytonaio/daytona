@@ -12,6 +12,7 @@ from typing import Any, cast, final, overload
 
 import aiofiles
 import aiofiles.os
+import aiohttp
 import httpx
 from aiofiles.threadpool.binary import AsyncBufferedIOBase
 from python_multipart.multipart import MultipartParser, parse_options_header
@@ -43,6 +44,8 @@ from ..common.filesystem import (
     parse_file_download_error_payload,
     raise_if_stream_error,
 )
+from ..internal.http_client import aiohttp_request_timeout as _request_timeout
+from ..internal.shared_session import http_session_of
 
 
 class AsyncFileSystem:
@@ -320,31 +323,35 @@ class AsyncFileSystem:
                             _ = on_progress(progress)
                     yield piece
 
-            httpx_timeout = None if timeout == 0 else timeout
-            async with httpx.AsyncClient(timeout=httpx_timeout) as client:
-                async with client.stream(method, url, json=body, headers=headers) as resp:
-                    _ = resp.raise_for_status()
+            async with http_session_of(self._api_client.api_client).request(
+                method,
+                url,
+                json=body,
+                headers=headers,
+                timeout=_request_timeout(timeout),
+            ) as resp:
+                resp.raise_for_status()
 
-                    boundary = parse_content_type_boundary(resp.headers)
-                    parser = create_multipart_parser(
-                        boundary,
-                        on_part_begin,
-                        on_header_field,
-                        on_header_value,
-                        on_header_end,
-                        on_headers_finished,
-                        on_part_data,
-                        on_part_end,
-                    )
+                boundary = parse_content_type_boundary(resp.headers)
+                parser = create_multipart_parser(
+                    boundary,
+                    on_part_begin,
+                    on_header_field,
+                    on_header_value,
+                    on_header_end,
+                    on_headers_finished,
+                    on_part_data,
+                    on_part_end,
+                )
 
-                    async for chunk in resp.aiter_bytes(64 * 1024):
-                        _ = parser.write(chunk)
-                        async for piece in drain():
-                            yield piece
-
-                    parser.finalize()
+                async for chunk in resp.content.iter_chunked(64 * 1024):
+                    _ = parser.write(chunk)
                     async for piece in drain():
                         yield piece
+
+                parser.finalize()
+                async for piece in drain():
+                    yield piece
 
             raise_if_stream_error(remote_path, error_text, error_details, received_file_data)
 
@@ -407,154 +414,152 @@ class AsyncFileSystem:
         )
 
         try:
-            async with httpx.AsyncClient(timeout=timeout) as client:
-                async with client.stream(
-                    method,
-                    url,
-                    json=body,
-                    headers=headers,
-                ) as resp:
-                    _ = resp.raise_for_status()
+            async with http_session_of(self._api_client.api_client).request(
+                method,
+                url,
+                json=body,
+                headers=headers,
+                timeout=_request_timeout(timeout),
+            ) as resp:
+                resp.raise_for_status()
 
-                    content_type_raw, options = parse_options_header(resp.headers.get("Content-Type", ""))
-                    if not (content_type_raw == b"multipart/form-data" and b"boundary" in options):
-                        raise DaytonaError(f"Unexpected Content-Type: {content_type_raw!r}")
-                    boundary = options[b"boundary"]
+                content_type_raw, options = parse_options_header(resp.headers.get("Content-Type", ""))
+                if not (content_type_raw == b"multipart/form-data" and b"boundary" in options):
+                    raise DaytonaError(f"Unexpected Content-Type: {content_type_raw!r}")
+                boundary = options[b"boundary"]
 
-                    writer: io.BytesIO | AsyncBufferedIOBase | None = None
-                    mode: str | None = None
-                    part_content_type: str | None = None
-                    source: str | None = None
-                    header_field = bytearray()
-                    header_value = bytearray()
-                    pending_headers: list[tuple[str, str]] = []
-                    error_buffer = bytearray()
-                    events: list[tuple[str, object]] = []
+                writer: io.BytesIO | AsyncBufferedIOBase | None = None
+                mode: str | None = None
+                part_content_type: str | None = None
+                source: str | None = None
+                header_field = bytearray()
+                header_value = bytearray()
+                pending_headers: list[tuple[str, str]] = []
+                error_buffer = bytearray()
+                events: list[tuple[str, Any]] = []
 
-                    def on_part_begin() -> None:
-                        # Keep callback-owned header state local and communicate via immutable
-                        # event payloads to avoid deferred-processing state races.
-                        pending_headers.clear()
-                        header_field.clear()
-                        header_value.clear()
-                        events.append(("begin", None))
+                def on_part_begin() -> None:
+                    pending_headers.clear()
+                    header_field.clear()
+                    header_value.clear()
+                    events.append(("begin", None))
 
-                    def on_header_field(data: bytes, start: int, end: int) -> None:
-                        header_field.extend(data[start:end])
+                def on_header_field(data: bytes, start: int, end: int) -> None:
+                    header_field.extend(data[start:end])
 
-                    def on_header_value(data: bytes, start: int, end: int) -> None:
-                        header_value.extend(data[start:end])
+                def on_header_value(data: bytes, start: int, end: int) -> None:
+                    header_value.extend(data[start:end])
 
-                    def on_header_end() -> None:
-                        field = bytes(header_field).decode("utf-8", errors="ignore").lower()
-                        value = bytes(header_value).decode("utf-8", errors="ignore")
-                        pending_headers.append((field, value))
-                        header_field.clear()
-                        header_value.clear()
+                def on_header_end() -> None:
+                    field = bytes(header_field).decode("utf-8", errors="ignore").lower()
+                    value = bytes(header_value).decode("utf-8", errors="ignore")
+                    pending_headers.append((field, value))
+                    header_field.clear()
+                    header_value.clear()
 
-                    def on_headers_finished() -> None:
-                        events.append(("headers_finished", dict(pending_headers)))
+                def on_headers_finished() -> None:
+                    events.append(("headers_finished", dict(pending_headers)))
 
-                    def on_part_data(data: bytes, start: int, end: int) -> None:
-                        events.append(("data", bytes(data[start:end])))
+                def on_part_data(data: bytes, start: int, end: int) -> None:
+                    events.append(("data", bytes(data[start:end])))
 
-                    def on_part_end() -> None:
-                        events.append(("end", None))
+                def on_part_end() -> None:
+                    events.append(("end", None))
 
-                    parser = MultipartParser(
-                        boundary,
-                        callbacks={
-                            "on_part_begin": on_part_begin,
-                            "on_header_field": on_header_field,
-                            "on_header_value": on_header_value,
-                            "on_header_end": on_header_end,
-                            "on_headers_finished": on_headers_finished,
-                            "on_part_data": on_part_data,
-                            "on_part_end": on_part_end,
-                        },
-                    )
+                parser = MultipartParser(
+                    boundary,
+                    callbacks={
+                        "on_part_begin": on_part_begin,
+                        "on_header_field": on_header_field,
+                        "on_header_value": on_header_value,
+                        "on_header_end": on_header_end,
+                        "on_headers_finished": on_headers_finished,
+                        "on_part_data": on_part_data,
+                        "on_part_end": on_part_end,
+                    },
+                )
 
-                    async def _process_events() -> None:
-                        nonlocal writer, mode, part_content_type, source
-                        for event_tag, event_payload in events:
-                            if event_tag == "begin":
-                                error_buffer.clear()
-                                writer = None
-                                mode = None
-                                part_content_type = None
-                                source = None
+                async def _process_events() -> None:
+                    nonlocal writer, mode, part_content_type, source
+                    for event_tag, event_payload in events:
+                        if event_tag == "begin":
+                            error_buffer.clear()
+                            writer = None
+                            mode = None
+                            part_content_type = None
+                            source = None
 
-                            elif event_tag == "headers_finished":
-                                hdrs = cast(dict[str, str], event_payload)
-                                cd = hdrs.get("content-disposition", "")
-                                _, cd_params = parse_options_header(cd)
-                                name = cd_params.get(b"name", b"").decode("utf-8", errors="ignore")
-                                source = cd_params.get(b"filename", b"").decode("utf-8", errors="ignore") or None
-                                if not source:
-                                    raise DaytonaError("No source path found for this file")
-                                part_content_type = hdrs.get("content-type")
+                        elif event_tag == "headers_finished":
+                            hdrs: dict[str, str] = event_payload
+                            cd = hdrs.get("content-disposition", "")
+                            _, cd_params = parse_options_header(cd)
+                            name = cd_params.get(b"name", b"").decode("utf-8", errors="ignore")
+                            source = cd_params.get(b"filename", b"").decode("utf-8", errors="ignore") or None
+                            if not source:
+                                raise DaytonaError("No source path found for this file")
+                            part_content_type = hdrs.get("content-type")
 
-                                if name == "error":
-                                    mode = "error"
-                                elif name == "file":
-                                    mode = "file"
-                                    meta = src_file_meta_dict[source]
-                                    if meta.dst:
-                                        parent = os.path.dirname(meta.dst)
-                                        if parent:
-                                            await aiofiles.os.makedirs(parent, exist_ok=True)
-                                        # pylint: disable=consider-using-with
-                                        writer = await aiofiles.open(meta.dst, mode="wb")
-                                        file_writers.append(writer)
-                                        meta.result = meta.dst
-                                    else:
-                                        writer = io.BytesIO()
-                                        meta.result = writer
+                            if name == "error":
+                                mode = "error"
+                            elif name == "file":
+                                mode = "file"
+                                meta = src_file_meta_dict[source]
+                                if meta.dst:
+                                    parent = os.path.dirname(meta.dst)
+                                    if parent:
+                                        await aiofiles.os.makedirs(parent, exist_ok=True)
+                                    # pylint: disable=consider-using-with
+                                    writer = await aiofiles.open(meta.dst, mode="wb")
+                                    file_writers.append(writer)
+                                    meta.result = meta.dst
+                                else:
+                                    writer = io.BytesIO()
+                                    meta.result = writer
 
-                            elif event_tag == "data":
-                                part_data = cast(bytes, event_payload)
-                                if mode == "error":
-                                    error_buffer.extend(part_data)
-                                elif mode == "file":
-                                    try:
-                                        if isinstance(writer, io.BytesIO):
-                                            _ = writer.write(part_data)
-                                        elif writer:
-                                            _ = await writer.write(part_data)
-                                    except Exception as e:
-                                        if source:
-                                            src_file_meta_dict[source].error = f"Write failed: {e}"
-                                        else:
-                                            raise DaytonaError(f"Write failed for unknown file with error {e}") from e
-                                        mode = None
-
-                            elif event_tag == "end":
-                                if mode == "error" and error_buffer:
-                                    error_text, error_details = parse_file_download_error_payload(
-                                        bytes(error_buffer),
-                                        part_content_type,
-                                    )
+                        elif event_tag == "data":
+                            part_data: bytes = event_payload
+                            if mode == "error":
+                                error_buffer.extend(part_data)
+                            elif mode == "file":
+                                try:
+                                    if isinstance(writer, io.BytesIO):
+                                        _ = writer.write(part_data)
+                                    elif writer:
+                                        _ = await writer.write(part_data)
+                                except Exception as e:
                                     if source:
-                                        src_file_meta_dict[source].error = error_text
-                                        src_file_meta_dict[source].error_details = error_details
+                                        src_file_meta_dict[source].error = f"Write failed: {e}"
                                     else:
-                                        raise DaytonaError(f"Error happened for unknown file with error {error_text}")
-                                    error_buffer.clear()
-                                if writer and not isinstance(writer, io.BytesIO):
-                                    await writer.close()
-                                writer = None
-                                mode = None
-                                part_content_type = None
-                                source = None
+                                        raise DaytonaError(f"Write failed for unknown file with error {e}") from e
+                                    mode = None
 
-                    async for chunk in resp.aiter_bytes(64 * 1024):
-                        events.clear()
-                        _ = parser.write(chunk)
-                        await _process_events()
+                        elif event_tag == "end":
+                            if mode == "error" and error_buffer:
+                                error_text, error_details = parse_file_download_error_payload(
+                                    bytes(error_buffer),
+                                    part_content_type,
+                                )
+                                if source:
+                                    src_file_meta_dict[source].error = error_text
+                                    src_file_meta_dict[source].error_details = error_details
+                                else:
+                                    raise DaytonaError(f"Error happened for unknown file with error {error_text}")
+                                error_buffer.clear()
+                            if writer and not isinstance(writer, io.BytesIO):
+                                await writer.close()
+                            writer = None
+                            mode = None
+                            part_content_type = None
+                            source = None
 
+                async for chunk in resp.content.iter_chunked(64 * 1024):
                     events.clear()
-                    parser.finalize()
+                    _ = parser.write(chunk)
                     await _process_events()
+
+                events.clear()
+                parser.finalize()
+                await _process_events()
         finally:
             for writer in file_writers:
                 await writer.close()
@@ -918,40 +923,46 @@ class AsyncFileSystem:
             await sandbox.fs.upload_files(files)
             ```
         """
-        data_fields: dict[str, str] = {}
-        file_fields: dict[str, tuple[str, io.BytesIO | io.BufferedReader]] = {}
-
         with ExitStack() as stack:
+            form = aiohttp.FormData()
+
             for i, f in enumerate(files):
-                data_fields[f"files[{i}].path"] = f.destination
+                form.add_field(f"files[{i}].path", f.destination)
 
                 if isinstance(f.source, (bytes, bytearray)):
-                    stream = io.BytesIO(f.source)
-                    filename = f.destination
+                    stream: io.BytesIO | io.BufferedReader = io.BytesIO(f.source)
                 else:
                     stream = stack.enter_context(open(f.source, "rb"))
-                    filename = f.destination
 
-                # HTTPX will stream this file object in 64 KiB chunks :contentReference[oaicite:1]{index=1}
-                file_fields[f"files[{i}].file"] = (filename, stream)
-
-            _, url, headers, *_ = self._api_client._upload_files_serialize(None, None, None, None)
-            # strip any prior Content-Type so HTTPX can set its own multipart header
-            _ = headers.pop("Content-Type", None)
-
-            async with httpx.AsyncClient(timeout=timeout or None) as client:
-                response = await client.post(
-                    url, data=data_fields, files=file_fields, headers=headers  # any non-file form fields
+                # aiohttp streams the file-like object chunk-by-chunk; the destination path
+                # rides on the multipart filename so the daemon doesn't have to parse a
+                # sidecar field.
+                form.add_field(
+                    f"files[{i}].file",
+                    stream,
+                    filename=f.destination,
+                    content_type="application/octet-stream",
                 )
 
-                if not response.is_success:
+            _, url, headers, *_ = self._api_client._upload_files_serialize(None, None, None, None)
+            # strip any prior Content-Type so aiohttp can set its own multipart header
+            _ = headers.pop("Content-Type", None)
+
+            async with http_session_of(self._api_client.api_client).post(
+                url,
+                data=form,
+                headers=headers,
+                timeout=_request_timeout(timeout),
+            ) as response:
+                if response.status >= 400:
                     try:
-                        detail = ", ".join(response.json()["errors"])
+                        payload = await response.json()
+                        detail = ", ".join(payload["errors"])
                     except Exception:
-                        detail = response.text
+                        detail = await response.text()
                     raise DaytonaError(
-                        f"{response.status_code}: {detail}",
-                        status_code=response.status_code,
+                        f"{response.status}: {detail}",
+                        status_code=response.status,
                     )
 
     @intercept_errors(message_prefix="Failed to upload file: ")

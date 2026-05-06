@@ -5,14 +5,15 @@ from __future__ import annotations
 
 import json
 from types import SimpleNamespace
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
+import aiohttp
 import pytest
 
 from daytona.common.errors import DaytonaConnectionError, DaytonaTimeoutError
 
 
-def _make_async_interpreter():
+def _make_async_interpreter(http_session=None):
     from daytona._async.code_interpreter import AsyncCodeInterpreter
 
     api_client = MagicMock()
@@ -25,52 +26,61 @@ def _make_async_interpreter():
         {"Authorization": "Bearer token"},
         None,
     )
+    if http_session is not None:
+        api_client.api_client.http_session = http_session
     return AsyncCodeInterpreter(api_client), api_client
 
 
-def _close_event(code: int | None = None, reason: str | None = None, *, use_sent: bool = False):
-    payload = SimpleNamespace(code=code, reason=reason)
-    return SimpleNamespace(rcvd=None if use_sent else payload, sent=payload if use_sent else None)
+def _text_msg(payload: str) -> SimpleNamespace:
+    return SimpleNamespace(type=aiohttp.WSMsgType.TEXT, data=payload, extra=None)
+
+
+def _closed_msg() -> SimpleNamespace:
+    return SimpleNamespace(type=aiohttp.WSMsgType.CLOSED, data=None, extra=None)
+
+
+def _close_msg(code: int, reason: str | None = None) -> SimpleNamespace:
+    return SimpleNamespace(type=aiohttp.WSMsgType.CLOSE, data=code, extra=reason)
+
+
+def _make_session_with_ws(ws: AsyncMock) -> AsyncMock:
+    session = AsyncMock(spec=aiohttp.ClientSession)
+    session.ws_connect = AsyncMock(return_value=ws)
+    return session
+
+
+def _make_ws() -> AsyncMock:
+    ws = AsyncMock()
+    ws.closed = False
+    ws.close_code = 1000
+    return ws
 
 
 class TestAsyncCodeInterpreterRunCode:
     @pytest.mark.asyncio
     async def test_run_code_streams_messages_and_invokes_callbacks(self):
-        interpreter, _api_client = _make_async_interpreter()
+        ws = _make_ws()
+        ws.receive.side_effect = [
+            _text_msg(json.dumps({"type": "stdout", "text": "hello "})),
+            _text_msg(json.dumps({"type": "stderr", "text": "warn"})),
+            _text_msg(json.dumps({"type": "error", "name": "ValueError", "value": "bad", "traceback": "tb"})),
+            _closed_msg(),
+        ]
+        session = _make_session_with_ws(ws)
+
+        interpreter, _api_client = _make_async_interpreter(http_session=session)
         stdout_messages: list[str] = []
         stderr_messages: list[str] = []
         error_names: list[str] = []
 
-        class FakeConnectionClosed(Exception):
-            pass
+        result = await interpreter.run_code(
+            "print('hi')",
+            on_stdout=lambda msg: stdout_messages.append(msg.output),
+            on_stderr=lambda msg: stderr_messages.append(msg.output),
+            on_error=lambda err: error_names.append(err.name),
+        )
 
-        class FakeConnectionClosedOK(FakeConnectionClosed):
-            pass
-
-        websocket = AsyncMock()
-        websocket.recv.side_effect = [
-            json.dumps({"type": "stdout", "text": "hello "}),
-            json.dumps({"type": "stderr", "text": "warn"}),
-            json.dumps({"type": "error", "name": "ValueError", "value": "bad", "traceback": "tb"}),
-            FakeConnectionClosedOK(),
-        ]
-        websocket_cm = AsyncMock()
-        websocket_cm.__aenter__.return_value = websocket
-        websocket_cm.__aexit__.return_value = False
-
-        with (
-            patch("daytona._async.code_interpreter.connect", return_value=websocket_cm),
-            patch("daytona._async.code_interpreter.ConnectionClosed", FakeConnectionClosed),
-            patch("daytona._async.code_interpreter.ConnectionClosedOK", FakeConnectionClosedOK),
-        ):
-            result = await interpreter.run_code(
-                "print('hi')",
-                on_stdout=lambda msg: stdout_messages.append(msg.output),
-                on_stderr=lambda msg: stderr_messages.append(msg.output),
-                on_error=lambda err: error_names.append(err.name),
-            )
-
-        sent_payload = json.loads(websocket.send.call_args.args[0])
+        sent_payload = json.loads(ws.send_str.call_args.args[0])
         assert sent_payload == {"code": "print('hi')"}
         assert result.stdout == "hello "
         assert result.stderr == "warn"
@@ -82,51 +92,66 @@ class TestAsyncCodeInterpreterRunCode:
 
     @pytest.mark.asyncio
     async def test_run_code_includes_context_envs_and_timeout(self):
-        interpreter, _api_client = _make_async_interpreter()
+        ws = _make_ws()
+        ws.receive.side_effect = [_closed_msg()]
+        session = _make_session_with_ws(ws)
 
-        class FakeConnectionClosed(Exception):
-            pass
-
-        class FakeConnectionClosedOK(FakeConnectionClosed):
-            pass
-
-        websocket = AsyncMock()
-        websocket.recv.side_effect = [FakeConnectionClosedOK()]
-        websocket_cm = AsyncMock()
-        websocket_cm.__aenter__.return_value = websocket
-        websocket_cm.__aexit__.return_value = False
+        interpreter, _api_client = _make_async_interpreter(http_session=session)
         context = SimpleNamespace(id="ctx-1")
 
-        with (
-            patch("daytona._async.code_interpreter.connect", return_value=websocket_cm),
-            patch("daytona._async.code_interpreter.ConnectionClosed", FakeConnectionClosed),
-            patch("daytona._async.code_interpreter.ConnectionClosedOK", FakeConnectionClosedOK),
-        ):
-            await interpreter.run_code(
-                "print('hi')",
-                context=context,
-                envs={"DEBUG": "1"},
-                timeout=15,
-            )
+        await interpreter.run_code(
+            "print('hi')",
+            context=context,
+            envs={"DEBUG": "1"},
+            timeout=15,
+        )
 
-        assert json.loads(websocket.send.call_args.args[0]) == {
+        assert json.loads(ws.send_str.call_args.args[0]) == {
             "code": "print('hi')",
             "contextId": "ctx-1",
             "envs": {"DEBUG": "1"},
             "timeout": 15,
         }
 
-    def test_raise_from_ws_close_timeout(self):
+    @pytest.mark.asyncio
+    async def test_run_code_raises_timeout_on_close_code_4008(self):
+        ws = _make_ws()
+        ws.receive.side_effect = [_close_msg(4008, "timed out")]
+        session = _make_session_with_ws(ws)
+
+        interpreter, _api_client = _make_async_interpreter(http_session=session)
+
+        with pytest.raises(DaytonaTimeoutError, match="Execution timed out"):
+            await interpreter.run_code("print('hi')")
+
+    @pytest.mark.asyncio
+    async def test_run_code_raises_connection_error_on_unexpected_close(self):
+        ws = _make_ws()
+        ws.receive.side_effect = [_close_msg(4999, "closed unexpectedly")]
+        session = _make_session_with_ws(ws)
+
+        interpreter, _api_client = _make_async_interpreter(http_session=session)
+
+        with pytest.raises(DaytonaConnectionError, match=r"closed unexpectedly \(close code 4999\)"):
+            await interpreter.run_code("print('hi')")
+
+    def test_maybe_raise_from_ws_close_timeout(self):
         interpreter, _api_client = _make_async_interpreter()
 
         with pytest.raises(DaytonaTimeoutError, match="Execution timed out"):
-            interpreter._raise_from_ws_close(_close_event(4008, "timed out"))
+            interpreter._maybe_raise_from_ws_close(4008, "timed out")
 
-    def test_raise_from_ws_close_connection_error(self):
+    def test_maybe_raise_from_ws_close_connection_error(self):
         interpreter, _api_client = _make_async_interpreter()
 
         with pytest.raises(DaytonaConnectionError, match=r"closed unexpectedly \(close code 4999\)"):
-            interpreter._raise_from_ws_close(_close_event(4999, "closed unexpectedly"))
+            interpreter._maybe_raise_from_ws_close(4999, "closed unexpectedly")
+
+    def test_maybe_raise_from_ws_close_normal_close_does_not_raise(self):
+        interpreter, _api_client = _make_async_interpreter()
+
+        interpreter._maybe_raise_from_ws_close(1000, None)
+        interpreter._maybe_raise_from_ws_close(None, None)
 
 
 class TestAsyncCodeInterpreterContextManagement:

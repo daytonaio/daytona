@@ -6,7 +6,6 @@ from __future__ import annotations
 import os
 
 import aiofiles
-import httpx
 
 from daytona_toolbox_api_client_async import (
     ComputerUseApi,
@@ -39,6 +38,8 @@ from daytona_toolbox_api_client_async import (
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
 from ..common.computer_use import ScreenshotOptions, ScreenshotRegion
+from ..internal.http_client import aiohttp_request_timeout as _request_timeout
+from ..internal.shared_session import http_session_of
 
 
 class AsyncMouse:
@@ -606,14 +607,18 @@ class AsyncRecordingService:
         if parent_dir:
             os.makedirs(parent_dir, exist_ok=True)
 
-        # Stream the download directly to file
-        async with httpx.AsyncClient(timeout=30 * 60) as client:
-            async with client.stream(method, url, headers=headers) as response:
-                _ = response.raise_for_status()
+        download_timeout = 30 * 60
+        async with http_session_of(self._api_client.api_client).request(
+            method,
+            url,
+            headers=headers,
+            timeout=_request_timeout(download_timeout),
+        ) as response:
+            response.raise_for_status()
 
-                async with aiofiles.open(local_path, "wb") as f:
-                    async for chunk in response.aiter_bytes(64 * 1024):
-                        _ = await f.write(chunk)
+            async with aiofiles.open(local_path, "wb") as f:
+                async for chunk in response.content.iter_chunked(64 * 1024):
+                    _ = await f.write(chunk)
 
 
 class AsyncComputerUse:

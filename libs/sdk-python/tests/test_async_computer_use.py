@@ -104,7 +104,14 @@ class TestAsyncComputerUse:
         assert (await computer_use.recording.get("rec-1")).id == "rec-1"
         await computer_use.recording.delete("rec-1")
 
+        class FakeContent:
+            async def iter_chunked(self, _chunk_size):
+                for part in [b"part1", b"part2"]:
+                    yield part
+
         class FakeResponse:
+            content = FakeContent()
+
             async def __aenter__(self):
                 return self
 
@@ -114,10 +121,6 @@ class TestAsyncComputerUse:
             def raise_for_status(self):
                 return None
 
-            async def aiter_bytes(self, _chunk_size):
-                for part in [b"part1", b"part2"]:
-                    yield part
-
         class FakeClient:
             async def __aenter__(self):
                 return self
@@ -125,19 +128,22 @@ class TestAsyncComputerUse:
             async def __aexit__(self, exc_type, exc, tb):
                 return False
 
-            def stream(self, method, url, headers):
+            def request(self, method, url, headers=None, timeout=None):
                 assert method == "GET"
                 assert url == "https://download"
                 assert headers == {"Authorization": "Bearer token"}
                 return FakeResponse()
+
+            async def close(self):
+                pass
 
         api_client._download_recording_serialize = MagicMock(
             return_value=("GET", "https://download", {"Authorization": "Bearer token"}, None)
         )
         destination = tmp_path / "nested" / "recording.mp4"
 
-        with patch("daytona._async.computer_use.httpx.AsyncClient", return_value=FakeClient()):
-            await computer_use.recording.download("rec-1", str(destination))
+        api_client.api_client.http_session = FakeClient()
+        await computer_use.recording.download("rec-1", str(destination))
 
         assert destination.read_bytes() == b"part1part2"
 

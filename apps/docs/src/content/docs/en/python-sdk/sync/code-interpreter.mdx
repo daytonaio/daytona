@@ -22,8 +22,7 @@ or execute the appropriate command directly in the sandbox terminal.
 #### CodeInterpreter.\_\_init\_\_
 
 ```python
-def __init__(api_client: InterpreterApi,
-             ws_handshake_semaphore: threading.Semaphore | None = None)
+def __init__(api_client: InterpreterApi, http_client: httpx.Client)
 ```
 
 Initialize a new CodeInterpreter instance.
@@ -31,6 +30,7 @@ Initialize a new CodeInterpreter instance.
 **Arguments**:
 
 - `api_client` - API client for interpreter operations.
+- `http_client` - Shared httpx.Client whose connection pool the WS upgrade reuses.
 
 #### CodeInterpreter.run\_code
 

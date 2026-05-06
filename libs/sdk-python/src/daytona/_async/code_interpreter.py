@@ -3,12 +3,11 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 import re
+from typing import cast
 
-from websockets.asyncio.client import connect
-from websockets.exceptions import ConnectionClosed, ConnectionClosedOK
+import aiohttp
 
 from daytona_toolbox_api_client_async import CreateContextRequest, InterpreterApi, InterpreterContext
 
@@ -16,6 +15,7 @@ from .._utils.errors import intercept_errors
 from ..common.code_interpreter import ExecutionError, ExecutionResult, OutputMessage
 from ..common.errors import DaytonaConnectionError, DaytonaTimeoutError
 from ..common.process import OutputHandler
+from ..internal.shared_session import http_session_of
 
 WEBSOCKET_TIMEOUT_CODE = 4008
 
@@ -35,7 +35,6 @@ class AsyncCodeInterpreter:
     def __init__(
         self,
         api_client: InterpreterApi,
-        ws_handshake_semaphore: asyncio.Semaphore | None = None,
     ):
         """Initialize a new AsyncCodeInterpreter instance.
 
@@ -43,7 +42,6 @@ class AsyncCodeInterpreter:
             api_client: API client for interpreter operations.
         """
         self._api_client: InterpreterApi = api_client
-        self._ws_handshake_semaphore: asyncio.Semaphore | None = ws_handshake_semaphore
 
     @intercept_errors(message_prefix="Failed to run code: ")
     async def run_code(
@@ -118,70 +116,88 @@ class AsyncCodeInterpreter:
 
         result = ExecutionResult()
 
+        ws = await http_session_of(self._api_client.api_client).ws_connect(url, headers=headers)
         try:
-            if self._ws_handshake_semaphore is not None:
-                _ = await self._ws_handshake_semaphore.acquire()
-            _sem_released = False
-            try:
-                async with connect(url, additional_headers=headers) as websocket:
-                    if self._ws_handshake_semaphore is not None:
-                        self._ws_handshake_semaphore.release()
-                        _sem_released = True
+            request: dict[str, str | int | dict[str, str]] = {"code": code}
+            if context is not None:
+                request["contextId"] = context.id
+            if envs is not None:
+                request["envs"] = envs
+            if timeout is not None:
+                request["timeout"] = timeout
 
-                    # Send execution request as first message
-                    request: dict[str, str | int | dict[str, str]] = {"code": code}
-                    if context is not None:
-                        request["contextId"] = context.id
-                    if envs is not None:
-                        request["envs"] = envs
-                    if timeout is not None:
-                        request["timeout"] = timeout
+            await ws.send_str(json.dumps(request))
 
-                    await websocket.send(json.dumps(request))
+            while True:
+                msg = await ws.receive()
 
-                    # Process streaming chunks
-                    while True:
-                        try:
-                            message = await websocket.recv()
-                            chunk = json.loads(message)
-                            chunk_type = chunk.get("type")
+                if msg.type == aiohttp.WSMsgType.TEXT:
+                    chunk = json.loads(cast(str, msg.data))
+                    chunk_type = chunk.get("type")
 
-                            if chunk_type == "stdout":
-                                stdout = chunk.get("text", "")
-                                if on_stdout:
-                                    _ = on_stdout(OutputMessage(output=stdout))
-                                result.stdout += stdout
+                    if chunk_type == "stdout":
+                        stdout = chunk.get("text", "")
+                        if on_stdout:
+                            _ = on_stdout(OutputMessage(output=stdout))
+                        result.stdout += stdout
 
-                            elif chunk_type == "stderr":
-                                stderr = chunk.get("text", "")
-                                if on_stderr:
-                                    _ = on_stderr(OutputMessage(output=stderr))
-                                result.stderr += stderr
+                    elif chunk_type == "stderr":
+                        stderr = chunk.get("text", "")
+                        if on_stderr:
+                            _ = on_stderr(OutputMessage(output=stderr))
+                        result.stderr += stderr
 
-                            elif chunk_type == "error":
-                                error = ExecutionError(
-                                    name=chunk.get("name", ""),
-                                    value=chunk.get("value", ""),
-                                    traceback=chunk.get("traceback", ""),
-                                )
-                                result.error = error
-                                if on_error:
-                                    _ = on_error(error)
+                    elif chunk_type == "error":
+                        error = ExecutionError(
+                            name=chunk.get("name", ""),
+                            value=chunk.get("value", ""),
+                            traceback=chunk.get("traceback", ""),
+                        )
+                        result.error = error
+                        if on_error:
+                            _ = on_error(error)
+                    continue
 
-                        except ConnectionClosed as e:
-                            if isinstance(e, ConnectionClosedOK):
-                                break
-                            self._raise_from_ws_close(e)
-            finally:
-                if self._ws_handshake_semaphore is not None and not _sem_released:
-                    self._ws_handshake_semaphore.release()
+                if msg.type == aiohttp.WSMsgType.BINARY:
+                    chunk = json.loads(cast(bytes, msg.data).decode("utf-8"))
+                    chunk_type = chunk.get("type")
+                    if chunk_type == "stdout":
+                        stdout = chunk.get("text", "")
+                        if on_stdout:
+                            _ = on_stdout(OutputMessage(output=stdout))
+                        result.stdout += stdout
+                    elif chunk_type == "stderr":
+                        stderr = chunk.get("text", "")
+                        if on_stderr:
+                            _ = on_stderr(OutputMessage(output=stderr))
+                        result.stderr += stderr
+                    elif chunk_type == "error":
+                        error = ExecutionError(
+                            name=chunk.get("name", ""),
+                            value=chunk.get("value", ""),
+                            traceback=chunk.get("traceback", ""),
+                        )
+                        result.error = error
+                        if on_error:
+                            _ = on_error(error)
+                    continue
 
-        except ConnectionClosed as e:
-            if isinstance(e, ConnectionClosedOK):
-                return result
-            self._raise_from_ws_close(e)
+                if msg.type == aiohttp.WSMsgType.CLOSE:
+                    close_code = cast(int, msg.data) if msg.data is not None else None
+                    close_reason = msg.extra if msg.extra else None
+                    self._maybe_raise_from_ws_close(close_code, close_reason)
+                    return result
 
-        return result
+                if msg.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.CLOSING):
+                    self._maybe_raise_from_ws_close(ws.close_code, None)
+                    return result
+
+                if msg.type == aiohttp.WSMsgType.ERROR:
+                    exc = ws.exception()
+                    raise DaytonaConnectionError(f"WebSocket error: {exc}") from exc
+        finally:
+            if not ws.closed:
+                _ = await ws.close()
 
     @intercept_errors(message_prefix="Failed to create interpreter context: ")
     async def create_context(
@@ -266,23 +282,21 @@ class AsyncCodeInterpreter:
         """
         _ = await self._api_client.delete_interpreter_context(id=context.id)
 
-    def _raise_from_ws_close(self, error: ConnectionClosed) -> None:
-        """Raise the appropriate Daytona timeout or connection error from a websocket close event."""
-        code = None
-        reason = None
-        if error.rcvd is not None:
-            code = error.rcvd.code
-            reason = error.rcvd.reason
-        elif error.sent is not None:
-            code = error.sent.code
-            reason = error.sent.reason
+    def _maybe_raise_from_ws_close(self, close_code: int | None, close_reason: str | None) -> None:
+        """Translate a websocket close into a Daytona error when it indicates failure.
 
-        if code == WEBSOCKET_TIMEOUT_CODE:
+        The interpreter daemon emits close code 4008 to signal a per-execution timeout.
+        Other non-1000 close codes are treated as connection errors. Code 1000 / unknown
+        means clean completion and produces no exception.
+        """
+        if close_code == WEBSOCKET_TIMEOUT_CODE:
             raise DaytonaTimeoutError(
                 "Execution timed out: operation exceeded the configured `timeout`. Provide a larger value if needed."
             )
 
-        detail = reason or "WebSocket connection closed unexpectedly"
-        if code is not None:
-            detail = f"{detail} (close code {code})"
+        if close_code in (None, 1000):
+            return
+
+        detail = close_reason or "WebSocket connection closed unexpectedly"
+        detail = f"{detail} (close code {close_code})"
         raise DaytonaConnectionError(detail)

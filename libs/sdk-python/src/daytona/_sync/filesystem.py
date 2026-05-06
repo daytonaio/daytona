@@ -39,6 +39,7 @@ from ..common.filesystem import (
     parse_file_download_error_payload,
     raise_if_stream_error,
 )
+from ..internal.http_client import request_timeout as _request_timeout
 
 
 class FileSystem:
@@ -51,13 +52,16 @@ class FileSystem:
     def __init__(
         self,
         api_client: FileSystemApi,
+        http_client: httpx.Client,
     ):
         """Initializes a new FileSystem instance.
 
         Args:
             api_client (FileSystemApi): API client for Sandbox file system operations.
+            http_client (httpx.Client): Shared pooled client for upload/download.
         """
         self._api_client: FileSystemApi = api_client
+        self._http_client: httpx.Client = http_client
 
     @intercept_errors(message_prefix="Failed to create folder: ")
     @with_instrumentation()
@@ -307,29 +311,33 @@ class FileSystem:
                         on_progress(DownloadProgress(bytes_received=bytes_received, total_bytes=total_bytes))
                     yield piece
 
-            httpx_timeout = None if timeout == 0 else timeout
-            with httpx.Client(timeout=httpx_timeout) as client:
-                with client.stream(method, url, json=body, headers=headers) as resp:
-                    _ = resp.raise_for_status()
+            with self._http_client.stream(
+                method,
+                url,
+                json=body,
+                headers=headers,
+                timeout=_request_timeout(timeout),
+            ) as resp:
+                _ = resp.raise_for_status()
 
-                    boundary = parse_content_type_boundary(resp.headers)
-                    parser = create_multipart_parser(
-                        boundary,
-                        on_part_begin,
-                        on_header_field,
-                        on_header_value,
-                        on_header_end,
-                        on_headers_finished,
-                        on_part_data,
-                        on_part_end,
-                    )
+                boundary = parse_content_type_boundary(resp.headers)
+                parser = create_multipart_parser(
+                    boundary,
+                    on_part_begin,
+                    on_header_field,
+                    on_header_value,
+                    on_header_end,
+                    on_headers_finished,
+                    on_part_data,
+                    on_part_end,
+                )
 
-                    for chunk in resp.iter_bytes(64 * 1024):
-                        _ = parser.write(chunk)
-                        yield from drain()
-
-                    parser.finalize()
+                for chunk in resp.iter_bytes(64 * 1024):
+                    _ = parser.write(chunk)
                     yield from drain()
+
+                parser.finalize()
+                yield from drain()
 
             raise_if_stream_error(remote_path, error_text, error_details, received_file_data)
 
@@ -390,130 +398,130 @@ class FileSystem:
         )
 
         try:
-            with httpx.Client(timeout=timeout) as client:
-                with client.stream(
-                    method,
-                    url,
-                    json=body,
-                    headers=headers,
-                ) as resp:
-                    _ = resp.raise_for_status()
+            with self._http_client.stream(
+                method,
+                url,
+                json=body,
+                headers=headers,
+                timeout=_request_timeout(timeout),
+            ) as resp:
+                _ = resp.raise_for_status()
 
-                    content_type_raw, options = parse_options_header(resp.headers.get("Content-Type", ""))
-                    if not (content_type_raw == b"multipart/form-data" and b"boundary" in options):
-                        raise DaytonaError(f"Unexpected Content-Type: {content_type_raw!r}")
-                    boundary = options[b"boundary"]
+                content_type_raw, options = parse_options_header(resp.headers.get("Content-Type", ""))
+                if not (content_type_raw == b"multipart/form-data" and b"boundary" in options):
+                    raise DaytonaError(f"Unexpected Content-Type: {content_type_raw!r}")
+                boundary = options[b"boundary"]
 
-                    writer: io.BytesIO | io.BufferedIOBase | None = None
-                    mode: str | None = None
-                    part_content_type: str | None = None
-                    source: str | None = None
-                    header_field = bytearray()
-                    header_value = bytearray()
-                    part_headers: dict[str, str] = {}
-                    error_buffer = bytearray()
+                writer: io.BytesIO | io.BufferedIOBase | None = None
+                mode: str | None = None
+                part_content_type: str | None = None
+                source: str | None = None
+                header_field = bytearray()
+                header_value = bytearray()
+                part_headers: dict[str, str] = {}
+                error_buffer = bytearray()
 
-                    def on_part_begin() -> None:
-                        nonlocal writer, mode, part_content_type, source
-                        part_headers.clear()
-                        error_buffer.clear()
-                        writer = None
-                        mode = None
-                        part_content_type = None
-                        source = None
+                def on_part_begin() -> None:
+                    nonlocal writer, mode, part_content_type, source
+                    part_headers.clear()
+                    error_buffer.clear()
+                    writer = None
+                    mode = None
+                    part_content_type = None
+                    source = None
 
-                    def on_header_field(data: bytes, start: int, end: int) -> None:
-                        header_field.extend(data[start:end])
+                def on_header_field(data: bytes, start: int, end: int) -> None:
+                    header_field.extend(data[start:end])
 
-                    def on_header_value(data: bytes, start: int, end: int) -> None:
-                        header_value.extend(data[start:end])
+                def on_header_value(data: bytes, start: int, end: int) -> None:
+                    header_value.extend(data[start:end])
 
-                    def on_header_end() -> None:
-                        field = bytes(header_field).decode("utf-8", errors="ignore").lower()
-                        value = bytes(header_value).decode("utf-8", errors="ignore")
-                        part_headers[field] = value
-                        header_field.clear()
-                        header_value.clear()
+                def on_header_end() -> None:
+                    field = bytes(header_field).decode("utf-8", errors="ignore").lower()
+                    value = bytes(header_value).decode("utf-8", errors="ignore")
+                    part_headers[field] = value
+                    header_field.clear()
+                    header_value.clear()
 
-                    def on_headers_finished() -> None:
-                        nonlocal writer, mode, part_content_type, source
-                        cd = part_headers.get("content-disposition", "")
-                        _, cd_params = parse_options_header(cd)
-                        name = cd_params.get(b"name", b"").decode("utf-8", errors="ignore")
-                        source = cd_params.get(b"filename", b"").decode("utf-8", errors="ignore") or None
-                        if not source:
-                            raise DaytonaError("No source path found for this file")
-                        part_content_type = part_headers.get("content-type")
+                def on_headers_finished() -> None:
+                    nonlocal writer, mode, part_content_type, source
+                    cd = part_headers.get("content-disposition", "")
+                    _, cd_params = parse_options_header(cd)
+                    name = cd_params.get(b"name", b"").decode("utf-8", errors="ignore")
+                    source = cd_params.get(b"filename", b"").decode("utf-8", errors="ignore") or None
+                    if not source:
+                        raise DaytonaError("No source path found for this file")
+                    part_content_type = part_headers.get("content-type")
 
-                        if name == "error":
-                            mode = "error"
-                        elif name == "file":
-                            mode = "file"
-                            meta = src_file_meta_dict[source]
-                            if meta.dst:
-                                parent = os.path.dirname(meta.dst)
-                                if parent:
-                                    os.makedirs(parent, exist_ok=True)
-                                # pylint: disable=consider-using-with
-                                writer = open(meta.dst, mode="wb")
-                                file_writers.append(writer)
-                                meta.result = meta.dst
-                            else:
-                                writer = io.BytesIO()
-                                meta.result = writer
+                    if name == "error":
+                        mode = "error"
+                    elif name == "file":
+                        mode = "file"
+                        meta = src_file_meta_dict[source]
+                        if meta.dst:
+                            parent = os.path.dirname(meta.dst)
+                            if parent:
+                                os.makedirs(parent, exist_ok=True)
+                            # pylint: disable=consider-using-with
+                            writer = open(meta.dst, mode="wb")
+                            file_writers.append(writer)
+                            meta.result = meta.dst
+                        else:
+                            writer = io.BytesIO()
+                            meta.result = writer
 
-                    def on_part_data(data: bytes, start: int, end: int) -> None:
-                        nonlocal mode
-                        part_data = data[start:end]
-                        if mode == "error":
-                            error_buffer.extend(part_data)
-                        elif mode == "file":
-                            try:
-                                if writer:
-                                    _ = writer.write(part_data)
-                            except Exception as e:
-                                if source:
-                                    src_file_meta_dict[source].error = f"Write failed: {e}"
-                                else:
-                                    raise DaytonaError(f"Write failed for unknown file with error {e}") from e
-                                mode = None
-
-                    def on_part_end() -> None:
-                        nonlocal writer, mode, part_content_type, source
-                        if mode == "error" and error_buffer:
-                            error_text, error_details = parse_file_download_error_payload(
-                                bytes(error_buffer),
-                                part_content_type,
-                            )
+                def on_part_data(data: bytes, start: int, end: int) -> None:
+                    nonlocal mode
+                    part_data = data[start:end]
+                    if mode == "error":
+                        error_buffer.extend(part_data)
+                    elif mode == "file":
+                        try:
+                            if writer:
+                                _ = writer.write(part_data)
+                        except Exception as e:
                             if source:
-                                src_file_meta_dict[source].error = error_text
-                                src_file_meta_dict[source].error_details = error_details
+                                src_file_meta_dict[source].error = f"Write failed: {e}"
                             else:
-                                raise DaytonaError(f"Error happened for unknown file with error {error_text}")
-                            error_buffer.clear()
-                        if writer and not isinstance(writer, io.BytesIO):
-                            writer.close()
-                        writer = None
-                        mode = None
-                        part_content_type = None
-                        source = None
+                                raise DaytonaError(f"Write failed for unknown file with error {e}") from e
+                            mode = None
 
-                    parser = MultipartParser(
-                        boundary,
-                        callbacks={
-                            "on_part_begin": on_part_begin,
-                            "on_header_field": on_header_field,
-                            "on_header_value": on_header_value,
-                            "on_header_end": on_header_end,
-                            "on_headers_finished": on_headers_finished,
-                            "on_part_data": on_part_data,
-                            "on_part_end": on_part_end,
-                        },
-                    )
+                def on_part_end() -> None:
+                    nonlocal writer, mode, part_content_type, source
+                    if mode == "error" and error_buffer:
+                        error_text, error_details = parse_file_download_error_payload(
+                            bytes(error_buffer),
+                            part_content_type,
+                        )
+                        if source:
+                            src_file_meta_dict[source].error = error_text
+                            src_file_meta_dict[source].error_details = error_details
+                        else:
+                            raise DaytonaError(f"Error happened for unknown file with error {error_text}")
+                        error_buffer.clear()
+                    if writer and not isinstance(writer, io.BytesIO):
+                        writer.close()
+                    writer = None
+                    mode = None
+                    part_content_type = None
+                    source = None
 
-                    for chunk in resp.iter_bytes(64 * 1024):
-                        _ = parser.write(chunk)
-                    parser.finalize()
+                parser = MultipartParser(
+                    boundary,
+                    callbacks={
+                        "on_part_begin": on_part_begin,
+                        "on_header_field": on_header_field,
+                        "on_header_value": on_header_value,
+                        "on_header_end": on_header_end,
+                        "on_headers_finished": on_headers_finished,
+                        "on_part_data": on_part_data,
+                        "on_part_end": on_part_end,
+                    },
+                )
+
+                for chunk in resp.iter_bytes(64 * 1024):
+                    _ = parser.write(chunk)
+                parser.finalize()
         finally:
             for writer in file_writers:
                 writer.close()
@@ -898,20 +906,23 @@ class FileSystem:
             # strip any prior Content-Type so HTTPX can set its own multipart header
             _ = headers.pop("Content-Type", None)
 
-            with httpx.Client(timeout=timeout or None) as client:
-                response = client.post(
-                    url, data=data_fields, files=file_fields, headers=headers  # any non-file form fields
-                )
+            response = self._http_client.post(
+                url,
+                data=data_fields,
+                files=file_fields,
+                headers=headers,
+                timeout=_request_timeout(timeout),
+            )
 
-                if not response.is_success:
-                    try:
-                        detail = ", ".join(response.json()["errors"])
-                    except Exception:
-                        detail = response.text
-                    raise DaytonaError(
-                        f"{response.status_code}: {detail}",
-                        status_code=response.status_code,
-                    )
+            if not response.is_success:
+                try:
+                    detail = ", ".join(response.json()["errors"])
+                except Exception:
+                    detail = response.text
+                raise DaytonaError(
+                    f"{response.status_code}: {detail}",
+                    status_code=response.status_code,
+                )
 
     @intercept_errors(message_prefix="Failed to upload file: ")
     @with_instrumentation()

@@ -72,7 +72,8 @@ class TestDaytonaInit:
         ):
             Daytona()
 
-    def test_default_api_url(self, monkeypatch):
+    @patch("daytona._utils.env.dotenv_values", return_value={})
+    def test_default_api_url(self, _mock_dotenv, monkeypatch):
         monkeypatch.setenv("DAYTONA_API_KEY", "key")
         monkeypatch.setenv("DAYTONA_TARGET", "us")
         monkeypatch.delenv("DAYTONA_API_URL", raising=False)
@@ -80,7 +81,8 @@ class TestDaytonaInit:
         daytona = _make_daytona()
         assert daytona._api_url == "https://app.daytona.io/api"
 
-    def test_env_server_url_warns_when_api_url_missing(self, monkeypatch):
+    @patch("daytona._utils.env.dotenv_values", return_value={})
+    def test_env_server_url_warns_when_api_url_missing(self, _mock_dotenv, monkeypatch):
         monkeypatch.setenv("DAYTONA_API_KEY", "key")
         monkeypatch.setenv("DAYTONA_TARGET", "us")
         monkeypatch.setenv("DAYTONA_SERVER_URL", "https://server.daytona.io/api")

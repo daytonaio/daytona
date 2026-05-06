@@ -4,26 +4,26 @@
 from __future__ import annotations
 
 import functools
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, cast
 
-from daytona_toolbox_api_client import ApiClient
-from daytona_toolbox_api_client_async import ApiClient as AsyncApiClient
+import aiohttp
+from typing_extensions import override
 
+from .api_client_proxy import ApiClientT
 from .pool_tracker import AsyncPoolSaturationTracker
-
-# TypeVar constrained to either sync or async ApiClient
-ApiClientT = TypeVar("ApiClientT", ApiClient, AsyncApiClient)
 
 
 class ToolboxApiClientProxy(Generic[ApiClientT]):
     """Proxy around the toolbox API client.
 
-    Intercepts ``param_serialize`` to prepend the sandbox ID to the resource
-    path and set the host to the toolbox proxy URL.  When an
-    ``AsyncPoolSaturationTracker`` is provided, ``call_api`` is also wrapped
-    so that every async request is tracked against the connection-pool limit.
+    Intercepts ``param_serialize`` to prepend the sandbox ID to the resource path
+    and set the host to the toolbox proxy URL. When an ``AsyncPoolSaturationTracker``
+    is provided, ``call_api`` is wrapped to track each async request against the
+    connection-pool limit.
 
-    All other attributes are delegated to the underlying API client.
+    ``__getattr__`` and ``__setattr__`` make the proxy transparent: anything not
+    in the proxy's own ``__dict__`` (snapshotted at the end of ``__init__``)
+    delegates to the underlying api_client.
     """
 
     def __init__(
@@ -39,6 +39,35 @@ class ToolboxApiClientProxy(Generic[ApiClientT]):
         self._pool_tracker: AsyncPoolSaturationTracker | None = pool_tracker
         self._wrapped_call_api: Any | None = None
 
+        # Snapshot proxy-owned attribute names so __setattr__ can tell them apart from
+        # writes meant to delegate to the underlying api_client. Beats a hand-edited
+        # whitelist that drifts out of sync with __init__.
+        object.__setattr__(self, "_proxy_own_attrs", frozenset(self.__dict__))
+
+    @property
+    def http_session(self) -> aiohttp.ClientSession:
+        """Shared ``aiohttp.ClientSession`` reachable through the underlying ApiClient.
+
+        Only meaningful for the async variant. ``SharedAiohttpSession`` populates
+        ``rest_client.pool_manager`` on the first REST call, so any path going through
+        ``daytona.create/get/list`` is safe.
+
+        Raises:
+            RuntimeError: if no REST request has fired yet — only reachable when a
+                ``Sandbox`` is built outside the standard entrypoints.
+        """
+        # ApiClientT covers all four generated variants, so pyright widens
+        # pool_manager to a urllib3 / aiohttp union; this property is async-only,
+        # so the cast keeps the typed return honest.
+        session = self._api_client.rest_client.pool_manager
+        if session is None:
+            raise RuntimeError(
+                "Shared aiohttp session not initialized; this happens when toolbox"
+                + " APIs are called before any main API call. Use AsyncDaytona.create/get/list"
+                + " to obtain a Sandbox first."
+            )
+        return cast(aiohttp.ClientSession, session)
+
     def param_serialize(self, *args: object, **kwargs: object) -> Any:
         """Intercepts param_serialize to prepend sandbox ID to resource_path."""
         resource_path = kwargs.get("resource_path")
@@ -52,13 +81,23 @@ class ToolboxApiClientProxy(Generic[ApiClientT]):
         return self._api_client.param_serialize(*args, **kwargs)
 
     def __getattr__(self, name: str) -> Any:
-        """Delegate all other attributes to the wrapped client."""
         attr = getattr(self._api_client, name)
         if name == "call_api" and self._pool_tracker is not None:
             if self._wrapped_call_api is None:
                 self._wrapped_call_api = self._make_tracked_call_api(attr)
             return self._wrapped_call_api
         return attr
+
+    @override
+    def __setattr__(self, name: str, value: Any) -> None:
+        # Pre-snapshot (during __init__): all writes land on the proxy itself.
+        # Post-snapshot: only names captured in __init__ stay on the proxy; everything
+        # else delegates so callers can do e.g. ``api_client.user_agent = ...``.
+        own = self.__dict__.get("_proxy_own_attrs")
+        if own is None or name in own:
+            object.__setattr__(self, name, value)
+        else:
+            setattr(self._api_client, name, value)
 
     def _make_tracked_call_api(self, original_call_api: Any) -> Any:
         assert self._pool_tracker is not None
