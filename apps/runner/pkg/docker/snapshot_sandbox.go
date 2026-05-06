@@ -58,7 +58,7 @@ func (d *DockerClient) CreateSnapshotFromSandbox(ctx context.Context, sandboxID 
 	}
 
 	pausedByUs := false
-	if ct.State != nil && ct.State.Running {
+	if ct.State != nil && ct.State.Running && !ct.State.Paused {
 		d.logger.InfoContext(ctx, "Pausing container for consistent snapshot commit", "containerId", sandboxID)
 		if err := d.apiClient.ContainerPause(ctx, sandboxID); err != nil {
 			return nil, fmt.Errorf("pause container for snapshot: %w", err)
