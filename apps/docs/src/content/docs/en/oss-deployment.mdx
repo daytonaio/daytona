@@ -456,6 +456,7 @@ Below is a full list of environment variables with their default values:
 | `OTEL_COLLECTOR_ENDPOINT_URL`              | string  | (empty)                                              | OpenTelemetry collector endpoint URL for sandbox telemetry and organization metrics (also accepts `SANDBOX_OTEL_ENDPOINT_URL` for backward compatibility) |
 | `HEALTH_CHECK_API_KEY`                     | string  | `supersecretkey`                                     | Authentication key for the readiness health-check route.                                             |
 | `NOTIFICATION_GATEWAY_DISABLED`            | boolean | `false`                                              | Disable notification gateway service                                                                 |
+| `SANDBOX_SNAPSHOTTING_TIMEOUT_MIN`         | number  | `60`                                                 | Minutes before a sandbox stuck in SNAPSHOTTING state is considered stale and recovered               |
 | `FAILED_SNAPSHOT_RUNNER_RETENTION_HOURS`   | number  | `3`                                                  | Hours to retain failed snapshot runner records before cleanup                                        |
 | `BUILDINFO_SNAPSHOT_RUNNER_STALENESS_DAYS` | number  | `7`                                                  | Days of inactivity before a snapshot runner is considered stale and eligible for cleanup             |
 

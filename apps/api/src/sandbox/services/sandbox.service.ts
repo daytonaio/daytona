@@ -2473,15 +2473,17 @@ export class SandboxService {
     }
 
     try {
-      const oneHourAgo = new Date()
-      oneHourAgo.setHours(oneHourAgo.getHours() - 1)
+      const timeoutMinutes = this.configService.getOrThrow('sandboxSnapshottingTimeoutMin')
+      const cutoff = new Date()
+      cutoff.setMinutes(cutoff.getMinutes() - timeoutMinutes)
 
       const staleSandboxes = await this.sandboxRepository.find({
         where: {
           state: SandboxState.SNAPSHOTTING,
           pending: true,
-          updatedAt: LessThan(oneHourAgo),
+          updatedAt: LessThan(cutoff),
         },
+        take: 100,
       })
 
       if (staleSandboxes.length === 0) {
