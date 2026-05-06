@@ -7,12 +7,12 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from daytona_api_client import SandboxState
+    from daytona_api_client import SandboxListSortDirection, SandboxListSortField, SandboxState
     from daytona_toolbox_api_client import SessionExecuteResponse
 
     from ._async.computer_use import AsyncComputerUse, AsyncDisplay, AsyncKeyboard, AsyncMouse, AsyncScreenshot
     from ._async.daytona import AsyncDaytona
-    from ._async.sandbox import AsyncSandbox, ListSandboxesQuery
+    from ._async.sandbox import AsyncSandbox
     from ._sync.daytona import Daytona
     from ._sync.sandbox import Sandbox
     from .common.charts import (
@@ -50,7 +50,7 @@ if TYPE_CHECKING:
     from .common.lsp_server import LspCompletionPosition, LspLanguageId
     from .common.process import CodeRunParams, ExecuteResponse, ExecutionArtifacts, OutputHandler, SessionExecuteRequest
     from .common.pty import PtySize
-    from .common.sandbox import Resources
+    from .common.sandbox import ListSandboxesQuery, Resources
     from .common.snapshot import CreateSnapshotParams
     from .common.volume import VolumeMount
 
@@ -68,6 +68,8 @@ __all__ = [
     "Sandbox",
     "Resources",
     "SandboxState",
+    "SandboxListSortField",
+    "SandboxListSortDirection",
     "ChartType",
     "Chart",
     "LineChart",
@@ -81,9 +83,9 @@ __all__ = [
     "FileDownloadErrorDetails",
     "FileUpload",
     "VolumeMount",
+    "ListSandboxesQuery",
     "AsyncDaytona",
     "AsyncSandbox",
-    "ListSandboxesQuery",
     "AsyncComputerUse",
     "AsyncMouse",
     "AsyncKeyboard",
@@ -115,6 +117,11 @@ __all__ = [
 # Mapping of symbol name -> (absolute module path, attribute name) for external packages
 _EXTERNAL_IMPORTS: dict[str, tuple[str, str]] = {
     "SandboxState": ("daytona_api_client.models.sandbox_state", "SandboxState"),
+    "SandboxListSortField": ("daytona_api_client.models.sandbox_list_sort_field", "SandboxListSortField"),
+    "SandboxListSortDirection": (
+        "daytona_api_client.models.sandbox_list_sort_direction",
+        "SandboxListSortDirection",
+    ),
     "SessionExecuteResponse": ("daytona_toolbox_api_client.models.session_execute_response", "SessionExecuteResponse"),
 }
 
@@ -126,7 +133,6 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     # _async
     "AsyncDaytona": "_async.daytona",
     "AsyncSandbox": "_async.sandbox",
-    "ListSandboxesQuery": "_async.sandbox",
     "AsyncComputerUse": "_async.computer_use",
     "AsyncMouse": "_async.computer_use",
     "AsyncKeyboard": "_async.computer_use",
@@ -183,6 +189,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     # common.pty
     "PtySize": "common.pty",
     # common.sandbox
+    "ListSandboxesQuery": "common.sandbox",
     "Resources": "common.sandbox",
     # common.snapshot
     "CreateSnapshotParams": "common.snapshot",

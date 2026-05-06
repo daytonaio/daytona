@@ -56,21 +56,19 @@ func main() {
 
 	log.Println("Listing all sandboxes...")
 	limit := 10
-	sort := "createdAt"
-	order := "desc"
-	iter := client.List(ctx, &daytona.ListSandboxesQuery{
+	sort := daytona.SandboxListSortFieldCreatedAt
+	order := daytona.SandboxListSortDirectionDesc
+	for sandbox, err := range client.ListSeq(ctx, &daytona.ListSandboxesQuery{
 		Limit:  &limit,
 		Labels: map[string]string{"env": "dev"},
-		States: []string{"started"},
+		States: []daytona.SandboxState{daytona.SandboxStateStarted},
 		Sort:   &sort,
 		Order:  &order,
-	})
-	defer iter.Close()
-	for iter.Next() {
-		log.Println(iter.Value().ID)
-	}
-	if err := iter.Err(); err != nil {
-		log.Fatalf("Failed to list sandboxes: %v", err)
+	}) {
+		if err != nil {
+			log.Fatalf("Failed to list sandboxes: %v", err)
+		}
+		log.Println(sandbox.ID)
 	}
 
 	// Delete the sandbox

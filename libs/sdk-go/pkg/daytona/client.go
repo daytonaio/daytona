@@ -61,6 +61,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"iter"
 	"net/http"
 	"os"
 	"strings"
@@ -673,15 +674,14 @@ func (c *Client) doGet(ctx context.Context, sandboxIDOrName string) (*Sandbox, e
 	return sandbox, nil
 }
 
-// List returns an iterator over Sandboxes matching the given query.
+// List returns an iterator over Sandboxes matching the given query, following
+// the [database/sql.Rows] / [bufio.Scanner] iterator pattern.
 //
-// Callers MUST invoke [SandboxIterator.Close] (typically via defer) to release
-// resources held by the iterator.
+// For Go 1.23+ range-over-func consumers, see [Client.ListSeq].
 //
 // Example:
 //
 //	iter := client.List(ctx, &ListSandboxesQuery{Labels: map[string]string{"env": "dev"}})
-//	defer iter.Close()
 //	for iter.Next() {
 //	    fmt.Println(iter.Value().ID)
 //	}
@@ -693,6 +693,32 @@ func (c *Client) List(ctx context.Context, query *ListSandboxesQuery) *SandboxIt
 		client: c,
 		ctx:    ctx,
 		query:  query,
+	}
+}
+
+// ListSeq returns a Go 1.23+ range-over-func iterator over Sandboxes matching
+// the given query. Each yielded pair is (sandbox, error); a non-nil error
+// terminates iteration and the consumer should break out of the range.
+//
+// Example:
+//
+//	for sandbox, err := range client.ListSeq(ctx, &ListSandboxesQuery{...}) {
+//	    if err != nil {
+//	        log.Fatal(err)
+//	    }
+//	    fmt.Println(sandbox.ID)
+//	}
+func (c *Client) ListSeq(ctx context.Context, query *ListSandboxesQuery) iter.Seq2[*Sandbox, error] {
+	return func(yield func(*Sandbox, error) bool) {
+		it := c.List(ctx, query)
+		for it.Next() {
+			if !yield(it.Value(), nil) {
+				return
+			}
+		}
+		if err := it.Err(); err != nil {
+			yield(nil, err)
+		}
 	}
 }
 
@@ -741,17 +767,17 @@ func (c *Client) fetchPage(ctx context.Context, query *ListSandboxesQuery, curso
 			if query.MaxCpu != nil {
 				request = request.MaxCpu(float32(*query.MaxCpu))
 			}
-			if query.MinMemoryGiB != nil {
-				request = request.MinMemoryGiB(float32(*query.MinMemoryGiB))
+			if query.MinMemoryGib != nil {
+				request = request.MinMemoryGib(float32(*query.MinMemoryGib))
 			}
-			if query.MaxMemoryGiB != nil {
-				request = request.MaxMemoryGiB(float32(*query.MaxMemoryGiB))
+			if query.MaxMemoryGib != nil {
+				request = request.MaxMemoryGib(float32(*query.MaxMemoryGib))
 			}
-			if query.MinDiskGiB != nil {
-				request = request.MinDiskGiB(float32(*query.MinDiskGiB))
+			if query.MinDiskGib != nil {
+				request = request.MinDiskGib(float32(*query.MinDiskGib))
 			}
-			if query.MaxDiskGiB != nil {
-				request = request.MaxDiskGiB(float32(*query.MaxDiskGiB))
+			if query.MaxDiskGib != nil {
+				request = request.MaxDiskGib(float32(*query.MaxDiskGib))
 			}
 			if query.IsPublic != nil {
 				request = request.IsPublic(*query.IsPublic)

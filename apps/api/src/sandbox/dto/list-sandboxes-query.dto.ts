@@ -13,8 +13,8 @@ import { PageLimit } from '../../common/decorators/page-limit.decorator'
 export enum SandboxListSortField {
   NAME = 'name',
   CPU = 'cpu',
-  MEMORY = 'memoryGiB',
-  DISK = 'diskGiB',
+  MEMORY = 'memoryGib',
+  DISK = 'diskGib',
   LAST_ACTIVITY_AT = 'lastActivityAt',
   CREATED_AT = 'createdAt',
 }
@@ -91,9 +91,10 @@ export class ListSandboxesQueryDto {
 
   @ApiProperty({
     name: 'states',
-    description: 'List of states to filter by. Can not be combined with "name"',
+    description: `List of states to filter by. Can not be combined with "name". Allowed values: ${LIST_SANDBOXES_QUERY_VALID_STATES.join(', ')} (DESTROYED is rejected at validation time).`,
     required: false,
-    enum: LIST_SANDBOXES_QUERY_VALID_STATES,
+    enum: SandboxState,
+    enumName: 'SandboxState',
     isArray: true,
   })
   @IsOptional()
@@ -156,7 +157,7 @@ export class ListSandboxesQueryDto {
   maxCpu?: number
 
   @ApiProperty({
-    name: 'minMemoryGiB',
+    name: 'minMemoryGib',
     description: 'Minimum memory in GiB',
     required: false,
     type: Number,
@@ -166,10 +167,10 @@ export class ListSandboxesQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  minMemoryGiB?: number
+  minMemoryGib?: number
 
   @ApiProperty({
-    name: 'maxMemoryGiB',
+    name: 'maxMemoryGib',
     description: 'Maximum memory in GiB',
     required: false,
     type: Number,
@@ -179,10 +180,10 @@ export class ListSandboxesQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  maxMemoryGiB?: number
+  maxMemoryGib?: number
 
   @ApiProperty({
-    name: 'minDiskGiB',
+    name: 'minDiskGib',
     description: 'Minimum disk space in GiB',
     required: false,
     type: Number,
@@ -192,10 +193,10 @@ export class ListSandboxesQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  minDiskGiB?: number
+  minDiskGib?: number
 
   @ApiProperty({
-    name: 'maxDiskGiB',
+    name: 'maxDiskGib',
     description: 'Maximum disk space in GiB',
     required: false,
     type: Number,
@@ -205,7 +206,7 @@ export class ListSandboxesQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  maxDiskGiB?: number
+  maxDiskGib?: number
 
   @ApiProperty({
     name: 'isPublic',
@@ -288,6 +289,7 @@ export class ListSandboxesQueryDto {
     description: 'Field to sort by',
     required: false,
     enum: SandboxListSortField,
+    enumName: 'SandboxListSortField',
     default: DEFAULT_SANDBOX_LIST_SORT_FIELD,
   })
   @IsOptional()
@@ -299,6 +301,7 @@ export class ListSandboxesQueryDto {
     description: 'Direction to sort by',
     required: false,
     enum: SandboxListSortDirection,
+    enumName: 'SandboxListSortDirection',
     default: DEFAULT_SANDBOX_LIST_SORT_DIRECTION,
   })
   @IsOptional()

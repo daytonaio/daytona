@@ -6,6 +6,9 @@ package io.daytona.examples;
 import io.daytona.sdk.Daytona;
 import io.daytona.sdk.Sandbox;
 import io.daytona.sdk.model.ListSandboxesQuery;
+import io.daytona.sdk.model.SandboxListSortDirection;
+import io.daytona.sdk.model.SandboxListSortField;
+import io.daytona.sdk.model.SandboxState;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,9 +43,9 @@ public class Lifecycle {
                 ListSandboxesQuery query = new ListSandboxesQuery();
                 query.setLimit(10);
                 query.setLabels(Map.of("env", "dev"));
-                query.setStates(List.of("started"));
-                query.setSort("createdAt");
-                query.setOrder("desc");
+                query.setStates(List.of(SandboxState.STARTED));
+                query.setSort(SandboxListSortField.CREATED_AT);
+                query.setOrder(SandboxListSortDirection.DESC);
                 Iterator<Map<String, Object>> iter = daytona.list(query);
                 while (iter.hasNext()) {
                     Map<String, Object> sb = iter.next();

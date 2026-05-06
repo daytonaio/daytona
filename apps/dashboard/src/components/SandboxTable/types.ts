@@ -4,8 +4,8 @@
  */
 
 import {
-  ListSandboxesOrderEnum,
-  ListSandboxesSortEnum,
+  SandboxListSortDirection,
+  SandboxListSortField,
   Region,
   Sandbox,
   SandboxState,
@@ -99,25 +99,25 @@ export interface FacetedFilterOption {
 }
 
 const SORT_FIELD_TO_COLUMN: Record<string, string> = {
-  [ListSandboxesSortEnum.NAME]: 'name',
-  [ListSandboxesSortEnum.LAST_ACTIVITY_AT]: 'lastEvent',
-  [ListSandboxesSortEnum.CREATED_AT]: 'createdAt',
-  [ListSandboxesSortEnum.CPU]: 'cpu',
-  [ListSandboxesSortEnum.MEMORY_GI_B]: 'memory',
-  [ListSandboxesSortEnum.DISK_GI_B]: 'disk',
+  [SandboxListSortField.NAME]: 'name',
+  [SandboxListSortField.LAST_ACTIVITY_AT]: 'lastEvent',
+  [SandboxListSortField.CREATED_AT]: 'createdAt',
+  [SandboxListSortField.CPU]: 'cpu',
+  [SandboxListSortField.MEMORY_GI_B]: 'memory',
+  [SandboxListSortField.DISK_GI_B]: 'disk',
 }
 
-const COLUMN_TO_SORT_FIELD: Record<string, ListSandboxesSortEnum> = {
-  name: ListSandboxesSortEnum.NAME,
-  lastEvent: ListSandboxesSortEnum.LAST_ACTIVITY_AT,
-  createdAt: ListSandboxesSortEnum.CREATED_AT,
+const COLUMN_TO_SORT_FIELD: Record<string, SandboxListSortField> = {
+  name: SandboxListSortField.NAME,
+  lastEvent: SandboxListSortField.LAST_ACTIVITY_AT,
+  createdAt: SandboxListSortField.CREATED_AT,
 }
 
 export function convertApiSortingToTableSorting(sorting: SandboxSorting): SortingState {
   if (!sorting.field) return []
   const columnId = SORT_FIELD_TO_COLUMN[sorting.field]
   if (!columnId) return []
-  return [{ id: columnId, desc: sorting.direction === ListSandboxesOrderEnum.DESC }]
+  return [{ id: columnId, desc: sorting.direction === SandboxListSortDirection.DESC }]
 }
 
 export function convertTableSortingToApiSorting(tableSorting: SortingState): SandboxSorting {
@@ -127,7 +127,7 @@ export function convertTableSortingToApiSorting(tableSorting: SortingState): San
   if (!field) return {}
   return {
     field,
-    direction: desc ? ListSandboxesOrderEnum.DESC : ListSandboxesOrderEnum.ASC,
+    direction: desc ? SandboxListSortDirection.DESC : SandboxListSortDirection.ASC,
   }
 }
 
@@ -161,11 +161,11 @@ export function convertApiFiltersToTableFilters(filters: SandboxFilters): Column
   if (filters.minCpu !== undefined || filters.maxCpu !== undefined) {
     resourceValue.cpu = { min: filters.minCpu, max: filters.maxCpu }
   }
-  if (filters.minMemoryGiB !== undefined || filters.maxMemoryGiB !== undefined) {
-    resourceValue.memory = { min: filters.minMemoryGiB, max: filters.maxMemoryGiB }
+  if (filters.minMemoryGib !== undefined || filters.maxMemoryGib !== undefined) {
+    resourceValue.memory = { min: filters.minMemoryGib, max: filters.maxMemoryGib }
   }
-  if (filters.minDiskGiB !== undefined || filters.maxDiskGiB !== undefined) {
-    resourceValue.disk = { min: filters.minDiskGiB, max: filters.maxDiskGiB }
+  if (filters.minDiskGib !== undefined || filters.maxDiskGib !== undefined) {
+    resourceValue.disk = { min: filters.minDiskGib, max: filters.maxDiskGib }
   }
   if (Object.keys(resourceValue).length > 0) {
     columnFilters.push({ id: 'resources', value: resourceValue })
@@ -231,12 +231,12 @@ export function convertTableFiltersToApiFilters(tableFilters: ColumnFiltersState
           filters.maxCpu = resourceValue.cpu.max
         }
         if (resourceValue.memory) {
-          filters.minMemoryGiB = resourceValue.memory.min
-          filters.maxMemoryGiB = resourceValue.memory.max
+          filters.minMemoryGib = resourceValue.memory.min
+          filters.maxMemoryGib = resourceValue.memory.max
         }
         if (resourceValue.disk) {
-          filters.minDiskGiB = resourceValue.disk.min
-          filters.maxDiskGiB = resourceValue.disk.max
+          filters.minDiskGib = resourceValue.disk.min
+          filters.maxDiskGib = resourceValue.disk.max
         }
         break
       }

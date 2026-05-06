@@ -327,6 +327,8 @@ print(sandbox.state)
 #### AsyncDaytona.list
 
 ```python
+@intercept_errors(message_prefix="Failed to list sandboxes: ")
+@with_instrumentation()
 async def list(
         query: ListSandboxesQuery | None = None
 ) -> AsyncIterator[AsyncSandbox]

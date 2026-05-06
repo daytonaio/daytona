@@ -406,7 +406,6 @@ func TestList(t *testing.T) {
 			ctx := context.Background()
 			iter := client.List(ctx, tt.query)
 			require.NotNil(t, iter)
-			defer iter.Close()
 
 			// Iter.Next will trigger the (failing) API call. We expect false +
 			// a non-nil error since no real server is reachable here.
@@ -960,7 +959,6 @@ func TestClientGetAndListSuccess(t *testing.T) {
 			Labels: map[string]string{"env": "test"},
 			Limit:  &limit,
 		})
-		defer iter.Close()
 
 		var collected []*Sandbox
 		for iter.Next() {

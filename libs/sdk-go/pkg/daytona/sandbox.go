@@ -83,7 +83,7 @@ type ListSandboxesQuery struct {
 	// Filter by labels
 	Labels map[string]string
 	// Filter by states
-	States []string
+	States []apiclient.SandboxState
 	// Filter by snapshot names
 	Snapshots []string
 	// Filter by targets
@@ -93,13 +93,13 @@ type ListSandboxesQuery struct {
 	// Filter by maximum CPU
 	MaxCpu *int
 	// Filter by minimum memory in GiB
-	MinMemoryGiB *int
+	MinMemoryGib *int
 	// Filter by maximum memory in GiB
-	MaxMemoryGiB *int
+	MaxMemoryGib *int
 	// Filter by minimum disk space in GiB
-	MinDiskGiB *int
+	MinDiskGib *int
 	// Filter by maximum disk space in GiB
-	MaxDiskGiB *int
+	MaxDiskGib *int
 	// Filter by public status
 	IsPublic *bool
 	// Filter by recoverable status
@@ -112,33 +112,31 @@ type ListSandboxesQuery struct {
 	LastActivityAfter *time.Time
 	// Include sandboxes with last activity before this timestamp
 	LastActivityBefore *time.Time
-	// Sort by field (name, cpu, memoryGiB, diskGiB, lastActivityAt, createdAt)
-	Sort *string
-	// Sort direction (asc, desc)
-	Order *string
+	// Sort by field
+	Sort *apiclient.SandboxListSortField
+	// Sort direction
+	Order *apiclient.SandboxListSortDirection
 }
 
 // SandboxIterator iterates over Sandboxes returned by [Client.List], following
 // the standard Go iterator pattern used by [database/sql.Rows] and [bufio.Scanner].
 //
-// Callers MUST invoke [SandboxIterator.Close] (typically via defer) to release
-// resources held by the iterator.
+// For Go 1.23+ range-over-func consumers, see [Client.ListSeq].
 type SandboxIterator struct {
 	client *Client
 	ctx    context.Context
 	query  *ListSandboxesQuery
 
 	// Pagination state
-	cursor    *string
-	page      []*Sandbox
-	pageIndex int
-	firstPage bool // false until the first page has been fetched
-	exhausted bool // true once the API signaled no more pages
+	cursor           *string
+	page             []*Sandbox
+	pageIndex        int
+	firstPageFetched bool // true once the first page has been fetched
+	exhausted        bool // true once the API signaled no more pages
 
 	// Current item / terminal error
 	current *Sandbox
 	err     error
-	closed  bool
 }
 
 // Next advances the iterator to the next sandbox. It returns true if a sandbox
@@ -146,7 +144,7 @@ type SandboxIterator struct {
 // has finished or an error occurred. After Next returns false, callers should
 // inspect [SandboxIterator.Err].
 func (it *SandboxIterator) Next() bool {
-	if it.closed || it.err != nil {
+	if it.err != nil {
 		return false
 	}
 
@@ -159,13 +157,13 @@ func (it *SandboxIterator) Next() bool {
 		}
 
 		// Page exhausted. Stop if the API said there's no more.
-		if it.firstPage && it.exhausted {
+		if it.firstPageFetched && it.exhausted {
 			return false
 		}
 
 		// Fetch the next page.
 		items, nextCursor, err := it.client.fetchPage(it.ctx, it.query, it.cursor)
-		it.firstPage = true
+		it.firstPageFetched = true
 		if err != nil {
 			it.err = err
 			return false
@@ -199,16 +197,6 @@ func (it *SandboxIterator) Value() *Sandbox {
 // should check Err after [SandboxIterator.Next] returns false.
 func (it *SandboxIterator) Err() error {
 	return it.err
-}
-
-// Close releases resources held by the iterator. It is idempotent and safe
-// to call multiple times. After Close, [SandboxIterator.Next] always returns
-// false.
-func (it *SandboxIterator) Close() error {
-	it.closed = true
-	it.page = nil
-	it.current = nil
-	return nil
 }
 
 // NewSandbox creates a new Sandbox instance.

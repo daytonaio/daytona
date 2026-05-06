@@ -1034,14 +1034,14 @@ or encounters an error.
 - `lastActivityBefore?` _Date_ - Include sandboxes with last activity before this timestamp
 - `limit?` _number_ - Per-page fetch size. Does NOT limit the total number of Sandboxes returned.
 - `maxCpu?` _number_ - Filter by maximum CPU
-- `maxDiskGiB?` _number_ - Filter by maximum disk space in GiB
-- `maxMemoryGiB?` _number_ - Filter by maximum memory in GiB
+- `maxDiskGib?` _number_ - Filter by maximum disk space in GiB
+- `maxMemoryGib?` _number_ - Filter by maximum memory in GiB
 - `minCpu?` _number_ - Filter by minimum CPU
-- `minDiskGiB?` _number_ - Filter by minimum disk space in GiB
-- `minMemoryGiB?` _number_ - Filter by minimum memory in GiB
+- `minDiskGib?` _number_ - Filter by minimum disk space in GiB
+- `minMemoryGib?` _number_ - Filter by minimum memory in GiB
 - `name?` _string_ - Filter by name prefix (case-insensitive)
-- `order?` _"asc" \| "desc"_ - Sort direction
+- `order?` _SandboxListSortDirection_ - Sort direction
 - `snapshots?` _string\[\]_ - Filter by snapshot names
-- `sort?` _"name" \| "cpu" \| "memoryGiB" \| "diskGiB" \| "lastActivityAt" \| "createdAt"_ - Sort by field
-- `states?` _string\[\]_ - Filter by states
+- `sort?` _SandboxListSortField_ - Sort by field
+- `states?` _SandboxState\[\]_ - Filter by states
 - `targets?` _string\[\]_ - Filter by targets

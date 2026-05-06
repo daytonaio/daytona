@@ -19,24 +19,21 @@ func main() {
 
 	ctx := context.Background()
 
-	// Example 1: Iterate through sandboxes
+	// Example 1: Iterate through sandboxes (Go 1.23+ range-over-func)
 	limit := 10
-	sort := "createdAt"
-	order := "desc"
-	iter := client.List(ctx, &daytona.ListSandboxesQuery{
+	sort := daytona.SandboxListSortFieldCreatedAt
+	order := daytona.SandboxListSortDirectionDesc
+	for sandbox, err := range client.ListSeq(ctx, &daytona.ListSandboxesQuery{
 		Limit:  &limit,
 		Labels: map[string]string{"env": "dev"},
-		States: []string{"started"},
+		States: []daytona.SandboxState{daytona.SandboxStateStarted},
 		Sort:   &sort,
 		Order:  &order,
-	})
-	defer iter.Close()
-	for iter.Next() {
-		sandbox := iter.Value()
+	}) {
+		if err != nil {
+			log.Fatalf("Failed to list sandboxes: %v", err)
+		}
 		fmt.Println(sandbox.ID)
-	}
-	if err := iter.Err(); err != nil {
-		log.Fatalf("Failed to list sandboxes: %v", err)
 	}
 
 	// Example 2: Paginate through snapshots

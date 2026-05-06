@@ -30,6 +30,9 @@ import io.daytona.api.client.model.RegionQuota;
 import io.daytona.api.client.model.ResizeSandbox;
 import io.daytona.api.client.model.Sandbox;
 import io.daytona.api.client.model.SandboxLabels;
+import io.daytona.api.client.model.SandboxListSortDirection;
+import io.daytona.api.client.model.SandboxListSortField;
+import io.daytona.api.client.model.SandboxState;
 import io.daytona.api.client.model.SignedPortPreviewUrl;
 import io.daytona.api.client.model.SshAccessDto;
 import io.daytona.api.client.model.SshAccessValidationDto;
@@ -418,24 +421,24 @@ public class SandboxApiTest {
         String name = null;
         String labels = null;
         Boolean includeErroredDeleted = null;
-        List<String> states = null;
+        List<SandboxState> states = null;
         List<String> snapshots = null;
         List<String> regionIds = null;
         BigDecimal minCpu = null;
         BigDecimal maxCpu = null;
-        BigDecimal minMemoryGiB = null;
-        BigDecimal maxMemoryGiB = null;
-        BigDecimal minDiskGiB = null;
-        BigDecimal maxDiskGiB = null;
+        BigDecimal minMemoryGib = null;
+        BigDecimal maxMemoryGib = null;
+        BigDecimal minDiskGib = null;
+        BigDecimal maxDiskGib = null;
         Boolean isPublic = null;
         Boolean isRecoverable = null;
         OffsetDateTime createdAtAfter = null;
         OffsetDateTime createdAtBefore = null;
         OffsetDateTime lastEventAfter = null;
         OffsetDateTime lastEventBefore = null;
-        String sort = null;
-        String order = null;
-        ListSandboxesResponse response = api.listSandboxes(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order);
+        SandboxListSortField sort = null;
+        SandboxListSortDirection order = null;
+        ListSandboxesResponse response = api.listSandboxes(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, minCpu, maxCpu, minMemoryGib, maxMemoryGib, minDiskGib, maxDiskGib, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order);
         // TODO: test validations
     }
 

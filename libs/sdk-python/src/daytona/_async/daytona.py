@@ -27,6 +27,8 @@ from daytona_api_client_async import (
     CreateSandbox,
     ObjectStorageApi,
     SandboxApi,
+    SandboxListSortDirection,
+    SandboxListSortField,
     SandboxState,
     SandboxVolume,
     SnapshotsApi,
@@ -49,8 +51,9 @@ from ..common.daytona import (
 )
 from ..common.errors import DaytonaAuthenticationError, DaytonaValidationError
 from ..common.image import Image
+from ..common.sandbox import ListSandboxesQuery
 from ..internal.pool_tracker import AsyncPoolSaturationTracker
-from .sandbox import AsyncSandbox, ListSandboxesQuery
+from .sandbox import AsyncSandbox
 from .snapshot import AsyncSnapshotService
 from .volume import AsyncVolumeService
 
@@ -617,6 +620,8 @@ class AsyncDaytona:
             ws_handshake_semaphore=self._ws_handshake_semaphore,
         )
 
+    @intercept_errors(message_prefix="Failed to list sandboxes: ")
+    @with_instrumentation()
     async def list(
         self,
         query: ListSandboxesQuery | None = None,
@@ -638,6 +643,10 @@ class AsyncDaytona:
             ```
         """
         q = query or ListSandboxesQuery()
+
+        if q.limit is not None and q.limit < 1:
+            raise DaytonaValidationError("limit must be a positive integer")
+
         cursor: str | None = None
         first_page = True
 
@@ -656,33 +665,38 @@ class AsyncDaytona:
                 )
             cursor = response.next_cursor or None
 
-    @intercept_errors(message_prefix="Failed to list sandboxes: ")
     @with_instrumentation(name="AsyncDaytona.list.fetch_page")
     async def _fetch_sandbox_page(self, q: ListSandboxesQuery, cursor: str | None):
         """Fetches a single page of sandboxes. Each call is one OTEL span."""
+        # The shared ListSandboxesQuery is typed against the sync api-client
+        # enums; the async api-client expects its own copies of those enums.
+        # The wire values are identical, so we convert by string value.
+        states = [SandboxState(s.value) for s in q.states] if q.states is not None else None
+        sort = SandboxListSortField(q.sort.value) if q.sort is not None else None
+        order = SandboxListSortDirection(q.order.value) if q.order is not None else None
         return await self._sandbox_api.list_sandboxes(
             labels=json.dumps(q.labels) if q.labels else None,
             cursor=cursor,
             limit=q.limit,
             id=q.id,
             name=q.name,
-            states=q.states,
+            states=states,
             snapshots=q.snapshots,
             region_ids=q.targets,
             min_cpu=q.min_cpu,
             max_cpu=q.max_cpu,
-            min_memory_gi_b=q.min_memory_gi_b,
-            max_memory_gi_b=q.max_memory_gi_b,
-            min_disk_gi_b=q.min_disk_gi_b,
-            max_disk_gi_b=q.max_disk_gi_b,
+            min_memory_gib=q.min_memory_gib,
+            max_memory_gib=q.max_memory_gib,
+            min_disk_gib=q.min_disk_gib,
+            max_disk_gib=q.max_disk_gib,
             is_public=q.is_public,
             is_recoverable=q.is_recoverable,
             created_at_after=q.created_at_after,
             created_at_before=q.created_at_before,
             last_event_after=q.last_activity_after,
             last_event_before=q.last_activity_before,
-            sort=q.sort,
-            order=q.order,
+            sort=sort,
+            order=order,
         )
 
     def _validate_language_label(self, language: str | None = None) -> CodeLanguage:

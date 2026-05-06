@@ -276,6 +276,8 @@ print(sandbox.state)
 #### Daytona.list
 
 ```python
+@intercept_errors(message_prefix="Failed to list sandboxes: ")
+@with_instrumentation()
 def list(query: ListSandboxesQuery | None = None) -> Iterator[Sandbox]
 ```
 

@@ -24,7 +24,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 /**
- * The state of the sandbox
+ * Gets or Sets SandboxState
  */
 @JsonAdapter(SandboxState.Adapter.class)
 public enum SandboxState {

@@ -34,6 +34,9 @@ from daytona_api_client.models.region_quota import RegionQuota
 from daytona_api_client.models.resize_sandbox import ResizeSandbox
 from daytona_api_client.models.sandbox import Sandbox
 from daytona_api_client.models.sandbox_labels import SandboxLabels
+from daytona_api_client.models.sandbox_list_sort_direction import SandboxListSortDirection
+from daytona_api_client.models.sandbox_list_sort_field import SandboxListSortField
+from daytona_api_client.models.sandbox_state import SandboxState
 from daytona_api_client.models.signed_port_preview_url import SignedPortPreviewUrl
 from daytona_api_client.models.ssh_access_dto import SshAccessDto
 from daytona_api_client.models.ssh_access_validation_dto import SshAccessValidationDto
@@ -7176,23 +7179,23 @@ class SandboxApi:
         name: Annotated[Optional[StrictStr], Field(description="Filter by name prefix (case-insensitive)")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
         include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include results with errored state and deleted desired state")] = None,
-        states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by. Can not be combined with \"name\"")] = None,
+        states: Annotated[Optional[List[SandboxState]], Field(description="List of states to filter by. Can not be combined with \"name\". Allowed values: creating, restoring, destroying, started, stopped, starting, stopping, error, build_failed, pending_build, building_snapshot, unknown, pulling_snapshot, archived, archiving, resizing, snapshotting, forking (DESTROYED is rejected at validation time).")] = None,
         snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
         region_ids: Annotated[Optional[List[StrictStr]], Field(description="List of regions IDs to filter by")] = None,
         min_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum CPU")] = None,
         max_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum CPU")] = None,
-        min_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
-        max_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum memory in GiB")] = None,
-        min_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum disk space in GiB")] = None,
-        max_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
+        min_memory_gib: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
+        max_memory_gib: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum memory in GiB")] = None,
+        min_disk_gib: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum disk space in GiB")] = None,
+        max_disk_gib: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
         is_public: Annotated[Optional[StrictBool], Field(description="Filter by public status")] = None,
         is_recoverable: Annotated[Optional[StrictBool], Field(description="Filter by recoverable status")] = None,
         created_at_after: Annotated[Optional[datetime], Field(description="Include items created after this timestamp")] = None,
         created_at_before: Annotated[Optional[datetime], Field(description="Include items created before this timestamp")] = None,
         last_event_after: Annotated[Optional[datetime], Field(description="Include items with last event after this timestamp")] = None,
         last_event_before: Annotated[Optional[datetime], Field(description="Include items with last event before this timestamp")] = None,
-        sort: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
-        order: Annotated[Optional[StrictStr], Field(description="Direction to sort by")] = None,
+        sort: Annotated[Optional[SandboxListSortField], Field(description="Field to sort by")] = None,
+        order: Annotated[Optional[SandboxListSortDirection], Field(description="Direction to sort by")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -7224,8 +7227,8 @@ class SandboxApi:
         :type labels: str
         :param include_errored_deleted: Include results with errored state and deleted desired state
         :type include_errored_deleted: bool
-        :param states: List of states to filter by. Can not be combined with \"name\"
-        :type states: List[str]
+        :param states: List of states to filter by. Can not be combined with \"name\". Allowed values: creating, restoring, destroying, started, stopped, starting, stopping, error, build_failed, pending_build, building_snapshot, unknown, pulling_snapshot, archived, archiving, resizing, snapshotting, forking (DESTROYED is rejected at validation time).
+        :type states: List[SandboxState]
         :param snapshots: List of snapshot names to filter by
         :type snapshots: List[str]
         :param region_ids: List of regions IDs to filter by
@@ -7234,14 +7237,14 @@ class SandboxApi:
         :type min_cpu: float
         :param max_cpu: Maximum CPU
         :type max_cpu: float
-        :param min_memory_gi_b: Minimum memory in GiB
-        :type min_memory_gi_b: float
-        :param max_memory_gi_b: Maximum memory in GiB
-        :type max_memory_gi_b: float
-        :param min_disk_gi_b: Minimum disk space in GiB
-        :type min_disk_gi_b: float
-        :param max_disk_gi_b: Maximum disk space in GiB
-        :type max_disk_gi_b: float
+        :param min_memory_gib: Minimum memory in GiB
+        :type min_memory_gib: float
+        :param max_memory_gib: Maximum memory in GiB
+        :type max_memory_gib: float
+        :param min_disk_gib: Minimum disk space in GiB
+        :type min_disk_gib: float
+        :param max_disk_gib: Maximum disk space in GiB
+        :type max_disk_gib: float
         :param is_public: Filter by public status
         :type is_public: bool
         :param is_recoverable: Filter by recoverable status
@@ -7255,9 +7258,9 @@ class SandboxApi:
         :param last_event_before: Include items with last event before this timestamp
         :type last_event_before: datetime
         :param sort: Field to sort by
-        :type sort: str
+        :type sort: SandboxListSortField
         :param order: Direction to sort by
-        :type order: str
+        :type order: SandboxListSortDirection
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -7293,10 +7296,10 @@ class SandboxApi:
             region_ids=region_ids,
             min_cpu=min_cpu,
             max_cpu=max_cpu,
-            min_memory_gi_b=min_memory_gi_b,
-            max_memory_gi_b=max_memory_gi_b,
-            min_disk_gi_b=min_disk_gi_b,
-            max_disk_gi_b=max_disk_gi_b,
+            min_memory_gib=min_memory_gib,
+            max_memory_gib=max_memory_gib,
+            min_disk_gib=min_disk_gib,
+            max_disk_gib=max_disk_gib,
             is_public=is_public,
             is_recoverable=is_recoverable,
             created_at_after=created_at_after,
@@ -7335,23 +7338,23 @@ class SandboxApi:
         name: Annotated[Optional[StrictStr], Field(description="Filter by name prefix (case-insensitive)")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
         include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include results with errored state and deleted desired state")] = None,
-        states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by. Can not be combined with \"name\"")] = None,
+        states: Annotated[Optional[List[SandboxState]], Field(description="List of states to filter by. Can not be combined with \"name\". Allowed values: creating, restoring, destroying, started, stopped, starting, stopping, error, build_failed, pending_build, building_snapshot, unknown, pulling_snapshot, archived, archiving, resizing, snapshotting, forking (DESTROYED is rejected at validation time).")] = None,
         snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
         region_ids: Annotated[Optional[List[StrictStr]], Field(description="List of regions IDs to filter by")] = None,
         min_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum CPU")] = None,
         max_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum CPU")] = None,
-        min_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
-        max_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum memory in GiB")] = None,
-        min_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum disk space in GiB")] = None,
-        max_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
+        min_memory_gib: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
+        max_memory_gib: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum memory in GiB")] = None,
+        min_disk_gib: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum disk space in GiB")] = None,
+        max_disk_gib: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
         is_public: Annotated[Optional[StrictBool], Field(description="Filter by public status")] = None,
         is_recoverable: Annotated[Optional[StrictBool], Field(description="Filter by recoverable status")] = None,
         created_at_after: Annotated[Optional[datetime], Field(description="Include items created after this timestamp")] = None,
         created_at_before: Annotated[Optional[datetime], Field(description="Include items created before this timestamp")] = None,
         last_event_after: Annotated[Optional[datetime], Field(description="Include items with last event after this timestamp")] = None,
         last_event_before: Annotated[Optional[datetime], Field(description="Include items with last event before this timestamp")] = None,
-        sort: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
-        order: Annotated[Optional[StrictStr], Field(description="Direction to sort by")] = None,
+        sort: Annotated[Optional[SandboxListSortField], Field(description="Field to sort by")] = None,
+        order: Annotated[Optional[SandboxListSortDirection], Field(description="Direction to sort by")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -7383,8 +7386,8 @@ class SandboxApi:
         :type labels: str
         :param include_errored_deleted: Include results with errored state and deleted desired state
         :type include_errored_deleted: bool
-        :param states: List of states to filter by. Can not be combined with \"name\"
-        :type states: List[str]
+        :param states: List of states to filter by. Can not be combined with \"name\". Allowed values: creating, restoring, destroying, started, stopped, starting, stopping, error, build_failed, pending_build, building_snapshot, unknown, pulling_snapshot, archived, archiving, resizing, snapshotting, forking (DESTROYED is rejected at validation time).
+        :type states: List[SandboxState]
         :param snapshots: List of snapshot names to filter by
         :type snapshots: List[str]
         :param region_ids: List of regions IDs to filter by
@@ -7393,14 +7396,14 @@ class SandboxApi:
         :type min_cpu: float
         :param max_cpu: Maximum CPU
         :type max_cpu: float
-        :param min_memory_gi_b: Minimum memory in GiB
-        :type min_memory_gi_b: float
-        :param max_memory_gi_b: Maximum memory in GiB
-        :type max_memory_gi_b: float
-        :param min_disk_gi_b: Minimum disk space in GiB
-        :type min_disk_gi_b: float
-        :param max_disk_gi_b: Maximum disk space in GiB
-        :type max_disk_gi_b: float
+        :param min_memory_gib: Minimum memory in GiB
+        :type min_memory_gib: float
+        :param max_memory_gib: Maximum memory in GiB
+        :type max_memory_gib: float
+        :param min_disk_gib: Minimum disk space in GiB
+        :type min_disk_gib: float
+        :param max_disk_gib: Maximum disk space in GiB
+        :type max_disk_gib: float
         :param is_public: Filter by public status
         :type is_public: bool
         :param is_recoverable: Filter by recoverable status
@@ -7414,9 +7417,9 @@ class SandboxApi:
         :param last_event_before: Include items with last event before this timestamp
         :type last_event_before: datetime
         :param sort: Field to sort by
-        :type sort: str
+        :type sort: SandboxListSortField
         :param order: Direction to sort by
-        :type order: str
+        :type order: SandboxListSortDirection
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -7452,10 +7455,10 @@ class SandboxApi:
             region_ids=region_ids,
             min_cpu=min_cpu,
             max_cpu=max_cpu,
-            min_memory_gi_b=min_memory_gi_b,
-            max_memory_gi_b=max_memory_gi_b,
-            min_disk_gi_b=min_disk_gi_b,
-            max_disk_gi_b=max_disk_gi_b,
+            min_memory_gib=min_memory_gib,
+            max_memory_gib=max_memory_gib,
+            min_disk_gib=min_disk_gib,
+            max_disk_gib=max_disk_gib,
             is_public=is_public,
             is_recoverable=is_recoverable,
             created_at_after=created_at_after,
@@ -7494,23 +7497,23 @@ class SandboxApi:
         name: Annotated[Optional[StrictStr], Field(description="Filter by name prefix (case-insensitive)")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
         include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include results with errored state and deleted desired state")] = None,
-        states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by. Can not be combined with \"name\"")] = None,
+        states: Annotated[Optional[List[SandboxState]], Field(description="List of states to filter by. Can not be combined with \"name\". Allowed values: creating, restoring, destroying, started, stopped, starting, stopping, error, build_failed, pending_build, building_snapshot, unknown, pulling_snapshot, archived, archiving, resizing, snapshotting, forking (DESTROYED is rejected at validation time).")] = None,
         snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
         region_ids: Annotated[Optional[List[StrictStr]], Field(description="List of regions IDs to filter by")] = None,
         min_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum CPU")] = None,
         max_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum CPU")] = None,
-        min_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
-        max_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum memory in GiB")] = None,
-        min_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum disk space in GiB")] = None,
-        max_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
+        min_memory_gib: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
+        max_memory_gib: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum memory in GiB")] = None,
+        min_disk_gib: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum disk space in GiB")] = None,
+        max_disk_gib: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
         is_public: Annotated[Optional[StrictBool], Field(description="Filter by public status")] = None,
         is_recoverable: Annotated[Optional[StrictBool], Field(description="Filter by recoverable status")] = None,
         created_at_after: Annotated[Optional[datetime], Field(description="Include items created after this timestamp")] = None,
         created_at_before: Annotated[Optional[datetime], Field(description="Include items created before this timestamp")] = None,
         last_event_after: Annotated[Optional[datetime], Field(description="Include items with last event after this timestamp")] = None,
         last_event_before: Annotated[Optional[datetime], Field(description="Include items with last event before this timestamp")] = None,
-        sort: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
-        order: Annotated[Optional[StrictStr], Field(description="Direction to sort by")] = None,
+        sort: Annotated[Optional[SandboxListSortField], Field(description="Field to sort by")] = None,
+        order: Annotated[Optional[SandboxListSortDirection], Field(description="Direction to sort by")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -7542,8 +7545,8 @@ class SandboxApi:
         :type labels: str
         :param include_errored_deleted: Include results with errored state and deleted desired state
         :type include_errored_deleted: bool
-        :param states: List of states to filter by. Can not be combined with \"name\"
-        :type states: List[str]
+        :param states: List of states to filter by. Can not be combined with \"name\". Allowed values: creating, restoring, destroying, started, stopped, starting, stopping, error, build_failed, pending_build, building_snapshot, unknown, pulling_snapshot, archived, archiving, resizing, snapshotting, forking (DESTROYED is rejected at validation time).
+        :type states: List[SandboxState]
         :param snapshots: List of snapshot names to filter by
         :type snapshots: List[str]
         :param region_ids: List of regions IDs to filter by
@@ -7552,14 +7555,14 @@ class SandboxApi:
         :type min_cpu: float
         :param max_cpu: Maximum CPU
         :type max_cpu: float
-        :param min_memory_gi_b: Minimum memory in GiB
-        :type min_memory_gi_b: float
-        :param max_memory_gi_b: Maximum memory in GiB
-        :type max_memory_gi_b: float
-        :param min_disk_gi_b: Minimum disk space in GiB
-        :type min_disk_gi_b: float
-        :param max_disk_gi_b: Maximum disk space in GiB
-        :type max_disk_gi_b: float
+        :param min_memory_gib: Minimum memory in GiB
+        :type min_memory_gib: float
+        :param max_memory_gib: Maximum memory in GiB
+        :type max_memory_gib: float
+        :param min_disk_gib: Minimum disk space in GiB
+        :type min_disk_gib: float
+        :param max_disk_gib: Maximum disk space in GiB
+        :type max_disk_gib: float
         :param is_public: Filter by public status
         :type is_public: bool
         :param is_recoverable: Filter by recoverable status
@@ -7573,9 +7576,9 @@ class SandboxApi:
         :param last_event_before: Include items with last event before this timestamp
         :type last_event_before: datetime
         :param sort: Field to sort by
-        :type sort: str
+        :type sort: SandboxListSortField
         :param order: Direction to sort by
-        :type order: str
+        :type order: SandboxListSortDirection
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -7611,10 +7614,10 @@ class SandboxApi:
             region_ids=region_ids,
             min_cpu=min_cpu,
             max_cpu=max_cpu,
-            min_memory_gi_b=min_memory_gi_b,
-            max_memory_gi_b=max_memory_gi_b,
-            min_disk_gi_b=min_disk_gi_b,
-            max_disk_gi_b=max_disk_gi_b,
+            min_memory_gib=min_memory_gib,
+            max_memory_gib=max_memory_gib,
+            min_disk_gib=min_disk_gib,
+            max_disk_gib=max_disk_gib,
             is_public=is_public,
             is_recoverable=is_recoverable,
             created_at_after=created_at_after,
@@ -7653,10 +7656,10 @@ class SandboxApi:
         region_ids,
         min_cpu,
         max_cpu,
-        min_memory_gi_b,
-        max_memory_gi_b,
-        min_disk_gi_b,
-        max_disk_gi_b,
+        min_memory_gib,
+        max_memory_gib,
+        min_disk_gib,
+        max_disk_gib,
         is_public,
         is_recoverable,
         created_at_after,
@@ -7734,21 +7737,21 @@ class SandboxApi:
             
             _query_params.append(('maxCpu', max_cpu))
             
-        if min_memory_gi_b is not None:
+        if min_memory_gib is not None:
             
-            _query_params.append(('minMemoryGiB', min_memory_gi_b))
+            _query_params.append(('minMemoryGib', min_memory_gib))
             
-        if max_memory_gi_b is not None:
+        if max_memory_gib is not None:
             
-            _query_params.append(('maxMemoryGiB', max_memory_gi_b))
+            _query_params.append(('maxMemoryGib', max_memory_gib))
             
-        if min_disk_gi_b is not None:
+        if min_disk_gib is not None:
             
-            _query_params.append(('minDiskGiB', min_disk_gi_b))
+            _query_params.append(('minDiskGib', min_disk_gib))
             
-        if max_disk_gi_b is not None:
+        if max_disk_gib is not None:
             
-            _query_params.append(('maxDiskGiB', max_disk_gi_b))
+            _query_params.append(('maxDiskGib', max_disk_gib))
             
         if is_public is not None:
             
@@ -7812,11 +7815,11 @@ class SandboxApi:
             
         if sort is not None:
             
-            _query_params.append(('sort', sort))
+            _query_params.append(('sort', sort.value))
             
         if order is not None:
             
-            _query_params.append(('order', order))
+            _query_params.append(('order', order.value))
             
         # process the header parameters
         if x_daytona_organization_id is not None:

@@ -90,23 +90,21 @@ func main() {
 		log.Printf("Command output: %s\n", result.Result)
 	}
 
-	// List all sandboxes
+	// List all sandboxes (Go 1.23+ range-over-func)
 	limit := 10
-	sort := "createdAt"
-	order := "desc"
-	iter := client.List(ctx, &daytona.ListSandboxesQuery{
+	sort := daytona.SandboxListSortFieldCreatedAt
+	order := daytona.SandboxListSortDirectionDesc
+	for sb, err := range client.ListSeq(ctx, &daytona.ListSandboxesQuery{
 		Limit:  &limit,
 		Labels: map[string]string{"env": "dev"},
-		States: []string{"started"},
+		States: []daytona.SandboxState{daytona.SandboxStateStarted},
 		Sort:   &sort,
 		Order:  &order,
-	})
-	defer iter.Close()
-	for iter.Next() {
-		log.Println(iter.Value().ID)
-	}
-	if err := iter.Err(); err != nil {
-		log.Fatalf("Failed to list sandboxes: %v", err)
+	}) {
+		if err != nil {
+			log.Fatalf("Failed to list sandboxes: %v", err)
+		}
+		log.Println(sb.ID)
 	}
 
 	// Delete the sandbox

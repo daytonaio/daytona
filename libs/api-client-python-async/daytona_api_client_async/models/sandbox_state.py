@@ -21,7 +21,7 @@ from typing_extensions import Self
 
 class SandboxState(str, Enum):
     """
-    The state of the sandbox
+    SandboxState
     """
 
     """

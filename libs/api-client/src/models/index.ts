@@ -137,6 +137,8 @@ export * from './sandbox-class';
 export * from './sandbox-desired-state';
 export * from './sandbox-info';
 export * from './sandbox-labels';
+export * from './sandbox-list-sort-direction';
+export * from './sandbox-list-sort-field';
 export * from './sandbox-state';
 export * from './sandbox-volume';
 export * from './screenshot-response';

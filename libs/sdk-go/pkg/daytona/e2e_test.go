@@ -810,7 +810,6 @@ PY`, options.WithExecuteTimeout(10*time.Second))
 
 	t.Run("ClientOps/ListSandboxes", func(t *testing.T) {
 		iter := client.List(ctx, nil)
-		defer iter.Close()
 		count := 0
 		for iter.Next() {
 			require.NotNil(t, iter.Value())
@@ -823,7 +822,6 @@ PY`, options.WithExecuteTimeout(10*time.Second))
 	t.Run("ClientOps/ListWithPaginationLimit", func(t *testing.T) {
 		limit := 10
 		iter := client.List(ctx, &ListSandboxesQuery{Limit: &limit})
-		defer iter.Close()
 		count := 0
 		for iter.Next() {
 			require.NotNil(t, iter.Value())

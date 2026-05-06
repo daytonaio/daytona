@@ -1,6 +1,6 @@
 import asyncio
 
-from daytona import AsyncDaytona, ListSandboxesQuery
+from daytona import AsyncDaytona, ListSandboxesQuery, SandboxListSortDirection, SandboxListSortField, SandboxState
 
 
 async def main():
@@ -9,9 +9,9 @@ async def main():
             ListSandboxesQuery(
                 limit=10,
                 labels={"env": "dev"},
-                states=["started"],
-                sort="createdAt",
-                order="desc",
+                states=[SandboxState.STARTED],
+                sort=SandboxListSortField.CREATEDAT,
+                order=SandboxListSortDirection.DESC,
             )
         ):
             print(sandbox.id)

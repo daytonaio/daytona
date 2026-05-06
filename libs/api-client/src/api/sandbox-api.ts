@@ -50,6 +50,12 @@ import type { Sandbox } from '../models';
 // @ts-ignore
 import type { SandboxLabels } from '../models';
 // @ts-ignore
+import type { SandboxListSortDirection } from '../models';
+// @ts-ignore
+import type { SandboxListSortField } from '../models';
+// @ts-ignore
+import type { SandboxState } from '../models';
+// @ts-ignore
 import type { SignedPortPreviewUrl } from '../models';
 // @ts-ignore
 import type { SshAccessDto } from '../models';
@@ -1286,27 +1292,27 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
          * @param {string} [name] Filter by name prefix (case-insensitive)
          * @param {string} [labels] JSON encoded labels to filter by
          * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
-         * @param {Array<ListSandboxesStatesEnum>} [states] List of states to filter by. Can not be combined with \&quot;name\&quot;
+         * @param {Array<SandboxState>} [states] List of states to filter by. Can not be combined with \&quot;name\&quot;. Allowed values: creating, restoring, destroying, started, stopped, starting, stopping, error, build_failed, pending_build, building_snapshot, unknown, pulling_snapshot, archived, archiving, resizing, snapshotting, forking (DESTROYED is rejected at validation time).
          * @param {Array<string>} [snapshots] List of snapshot names to filter by
          * @param {Array<string>} [regionIds] List of regions IDs to filter by
          * @param {number} [minCpu] Minimum CPU
          * @param {number} [maxCpu] Maximum CPU
-         * @param {number} [minMemoryGiB] Minimum memory in GiB
-         * @param {number} [maxMemoryGiB] Maximum memory in GiB
-         * @param {number} [minDiskGiB] Minimum disk space in GiB
-         * @param {number} [maxDiskGiB] Maximum disk space in GiB
+         * @param {number} [minMemoryGib] Minimum memory in GiB
+         * @param {number} [maxMemoryGib] Maximum memory in GiB
+         * @param {number} [minDiskGib] Minimum disk space in GiB
+         * @param {number} [maxDiskGib] Maximum disk space in GiB
          * @param {boolean} [isPublic] Filter by public status
          * @param {boolean} [isRecoverable] Filter by recoverable status
          * @param {Date} [createdAtAfter] Include items created after this timestamp
          * @param {Date} [createdAtBefore] Include items created before this timestamp
          * @param {Date} [lastEventAfter] Include items with last event after this timestamp
          * @param {Date} [lastEventBefore] Include items with last event before this timestamp
-         * @param {ListSandboxesSortEnum} [sort] Field to sort by
-         * @param {ListSandboxesOrderEnum} [order] Direction to sort by
+         * @param {SandboxListSortField} [sort] Field to sort by
+         * @param {SandboxListSortDirection} [order] Direction to sort by
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listSandboxes: async (xDaytonaOrganizationID?: string, cursor?: string, limit?: number, id?: string, name?: string, labels?: string, includeErroredDeleted?: boolean, states?: Array<ListSandboxesStatesEnum>, snapshots?: Array<string>, regionIds?: Array<string>, minCpu?: number, maxCpu?: number, minMemoryGiB?: number, maxMemoryGiB?: number, minDiskGiB?: number, maxDiskGiB?: number, isPublic?: boolean, isRecoverable?: boolean, createdAtAfter?: Date, createdAtBefore?: Date, lastEventAfter?: Date, lastEventBefore?: Date, sort?: ListSandboxesSortEnum, order?: ListSandboxesOrderEnum, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listSandboxes: async (xDaytonaOrganizationID?: string, cursor?: string, limit?: number, id?: string, name?: string, labels?: string, includeErroredDeleted?: boolean, states?: Array<SandboxState>, snapshots?: Array<string>, regionIds?: Array<string>, minCpu?: number, maxCpu?: number, minMemoryGib?: number, maxMemoryGib?: number, minDiskGib?: number, maxDiskGib?: number, isPublic?: boolean, isRecoverable?: boolean, createdAtAfter?: Date, createdAtBefore?: Date, lastEventAfter?: Date, lastEventBefore?: Date, sort?: SandboxListSortField, order?: SandboxListSortDirection, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/sandbox`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1369,20 +1375,20 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['maxCpu'] = maxCpu;
             }
 
-            if (minMemoryGiB !== undefined) {
-                localVarQueryParameter['minMemoryGiB'] = minMemoryGiB;
+            if (minMemoryGib !== undefined) {
+                localVarQueryParameter['minMemoryGib'] = minMemoryGib;
             }
 
-            if (maxMemoryGiB !== undefined) {
-                localVarQueryParameter['maxMemoryGiB'] = maxMemoryGiB;
+            if (maxMemoryGib !== undefined) {
+                localVarQueryParameter['maxMemoryGib'] = maxMemoryGib;
             }
 
-            if (minDiskGiB !== undefined) {
-                localVarQueryParameter['minDiskGiB'] = minDiskGiB;
+            if (minDiskGib !== undefined) {
+                localVarQueryParameter['minDiskGib'] = minDiskGib;
             }
 
-            if (maxDiskGiB !== undefined) {
-                localVarQueryParameter['maxDiskGiB'] = maxDiskGiB;
+            if (maxDiskGib !== undefined) {
+                localVarQueryParameter['maxDiskGib'] = maxDiskGib;
             }
 
             if (isPublic !== undefined) {
@@ -2629,28 +2635,28 @@ export const SandboxApiFp = function(configuration?: Configuration) {
          * @param {string} [name] Filter by name prefix (case-insensitive)
          * @param {string} [labels] JSON encoded labels to filter by
          * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
-         * @param {Array<ListSandboxesStatesEnum>} [states] List of states to filter by. Can not be combined with \&quot;name\&quot;
+         * @param {Array<SandboxState>} [states] List of states to filter by. Can not be combined with \&quot;name\&quot;. Allowed values: creating, restoring, destroying, started, stopped, starting, stopping, error, build_failed, pending_build, building_snapshot, unknown, pulling_snapshot, archived, archiving, resizing, snapshotting, forking (DESTROYED is rejected at validation time).
          * @param {Array<string>} [snapshots] List of snapshot names to filter by
          * @param {Array<string>} [regionIds] List of regions IDs to filter by
          * @param {number} [minCpu] Minimum CPU
          * @param {number} [maxCpu] Maximum CPU
-         * @param {number} [minMemoryGiB] Minimum memory in GiB
-         * @param {number} [maxMemoryGiB] Maximum memory in GiB
-         * @param {number} [minDiskGiB] Minimum disk space in GiB
-         * @param {number} [maxDiskGiB] Maximum disk space in GiB
+         * @param {number} [minMemoryGib] Minimum memory in GiB
+         * @param {number} [maxMemoryGib] Maximum memory in GiB
+         * @param {number} [minDiskGib] Minimum disk space in GiB
+         * @param {number} [maxDiskGib] Maximum disk space in GiB
          * @param {boolean} [isPublic] Filter by public status
          * @param {boolean} [isRecoverable] Filter by recoverable status
          * @param {Date} [createdAtAfter] Include items created after this timestamp
          * @param {Date} [createdAtBefore] Include items created before this timestamp
          * @param {Date} [lastEventAfter] Include items with last event after this timestamp
          * @param {Date} [lastEventBefore] Include items with last event before this timestamp
-         * @param {ListSandboxesSortEnum} [sort] Field to sort by
-         * @param {ListSandboxesOrderEnum} [order] Direction to sort by
+         * @param {SandboxListSortField} [sort] Field to sort by
+         * @param {SandboxListSortDirection} [order] Direction to sort by
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listSandboxes(xDaytonaOrganizationID?: string, cursor?: string, limit?: number, id?: string, name?: string, labels?: string, includeErroredDeleted?: boolean, states?: Array<ListSandboxesStatesEnum>, snapshots?: Array<string>, regionIds?: Array<string>, minCpu?: number, maxCpu?: number, minMemoryGiB?: number, maxMemoryGiB?: number, minDiskGiB?: number, maxDiskGiB?: number, isPublic?: boolean, isRecoverable?: boolean, createdAtAfter?: Date, createdAtBefore?: Date, lastEventAfter?: Date, lastEventBefore?: Date, sort?: ListSandboxesSortEnum, order?: ListSandboxesOrderEnum, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListSandboxesResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listSandboxes(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order, options);
+        async listSandboxes(xDaytonaOrganizationID?: string, cursor?: string, limit?: number, id?: string, name?: string, labels?: string, includeErroredDeleted?: boolean, states?: Array<SandboxState>, snapshots?: Array<string>, regionIds?: Array<string>, minCpu?: number, maxCpu?: number, minMemoryGib?: number, maxMemoryGib?: number, minDiskGib?: number, maxDiskGib?: number, isPublic?: boolean, isRecoverable?: boolean, createdAtAfter?: Date, createdAtBefore?: Date, lastEventAfter?: Date, lastEventBefore?: Date, sort?: SandboxListSortField, order?: SandboxListSortDirection, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListSandboxesResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listSandboxes(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, minCpu, maxCpu, minMemoryGib, maxMemoryGib, minDiskGib, maxDiskGib, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SandboxApi.listSandboxes']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -3205,28 +3211,28 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
          * @param {string} [name] Filter by name prefix (case-insensitive)
          * @param {string} [labels] JSON encoded labels to filter by
          * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
-         * @param {Array<ListSandboxesStatesEnum>} [states] List of states to filter by. Can not be combined with \&quot;name\&quot;
+         * @param {Array<SandboxState>} [states] List of states to filter by. Can not be combined with \&quot;name\&quot;. Allowed values: creating, restoring, destroying, started, stopped, starting, stopping, error, build_failed, pending_build, building_snapshot, unknown, pulling_snapshot, archived, archiving, resizing, snapshotting, forking (DESTROYED is rejected at validation time).
          * @param {Array<string>} [snapshots] List of snapshot names to filter by
          * @param {Array<string>} [regionIds] List of regions IDs to filter by
          * @param {number} [minCpu] Minimum CPU
          * @param {number} [maxCpu] Maximum CPU
-         * @param {number} [minMemoryGiB] Minimum memory in GiB
-         * @param {number} [maxMemoryGiB] Maximum memory in GiB
-         * @param {number} [minDiskGiB] Minimum disk space in GiB
-         * @param {number} [maxDiskGiB] Maximum disk space in GiB
+         * @param {number} [minMemoryGib] Minimum memory in GiB
+         * @param {number} [maxMemoryGib] Maximum memory in GiB
+         * @param {number} [minDiskGib] Minimum disk space in GiB
+         * @param {number} [maxDiskGib] Maximum disk space in GiB
          * @param {boolean} [isPublic] Filter by public status
          * @param {boolean} [isRecoverable] Filter by recoverable status
          * @param {Date} [createdAtAfter] Include items created after this timestamp
          * @param {Date} [createdAtBefore] Include items created before this timestamp
          * @param {Date} [lastEventAfter] Include items with last event after this timestamp
          * @param {Date} [lastEventBefore] Include items with last event before this timestamp
-         * @param {ListSandboxesSortEnum} [sort] Field to sort by
-         * @param {ListSandboxesOrderEnum} [order] Direction to sort by
+         * @param {SandboxListSortField} [sort] Field to sort by
+         * @param {SandboxListSortDirection} [order] Direction to sort by
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listSandboxes(xDaytonaOrganizationID?: string, cursor?: string, limit?: number, id?: string, name?: string, labels?: string, includeErroredDeleted?: boolean, states?: Array<ListSandboxesStatesEnum>, snapshots?: Array<string>, regionIds?: Array<string>, minCpu?: number, maxCpu?: number, minMemoryGiB?: number, maxMemoryGiB?: number, minDiskGiB?: number, maxDiskGiB?: number, isPublic?: boolean, isRecoverable?: boolean, createdAtAfter?: Date, createdAtBefore?: Date, lastEventAfter?: Date, lastEventBefore?: Date, sort?: ListSandboxesSortEnum, order?: ListSandboxesOrderEnum, options?: RawAxiosRequestConfig): AxiosPromise<ListSandboxesResponse> {
-            return localVarFp.listSandboxes(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order, options).then((request) => request(axios, basePath));
+        listSandboxes(xDaytonaOrganizationID?: string, cursor?: string, limit?: number, id?: string, name?: string, labels?: string, includeErroredDeleted?: boolean, states?: Array<SandboxState>, snapshots?: Array<string>, regionIds?: Array<string>, minCpu?: number, maxCpu?: number, minMemoryGib?: number, maxMemoryGib?: number, minDiskGib?: number, maxDiskGib?: number, isPublic?: boolean, isRecoverable?: boolean, createdAtAfter?: Date, createdAtBefore?: Date, lastEventAfter?: Date, lastEventBefore?: Date, sort?: SandboxListSortField, order?: SandboxListSortDirection, options?: RawAxiosRequestConfig): AxiosPromise<ListSandboxesResponse> {
+            return localVarFp.listSandboxes(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, minCpu, maxCpu, minMemoryGib, maxMemoryGib, minDiskGib, maxDiskGib, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3755,28 +3761,28 @@ export class SandboxApi extends BaseAPI {
      * @param {string} [name] Filter by name prefix (case-insensitive)
      * @param {string} [labels] JSON encoded labels to filter by
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
-     * @param {Array<ListSandboxesStatesEnum>} [states] List of states to filter by. Can not be combined with \&quot;name\&quot;
+     * @param {Array<SandboxState>} [states] List of states to filter by. Can not be combined with \&quot;name\&quot;. Allowed values: creating, restoring, destroying, started, stopped, starting, stopping, error, build_failed, pending_build, building_snapshot, unknown, pulling_snapshot, archived, archiving, resizing, snapshotting, forking (DESTROYED is rejected at validation time).
      * @param {Array<string>} [snapshots] List of snapshot names to filter by
      * @param {Array<string>} [regionIds] List of regions IDs to filter by
      * @param {number} [minCpu] Minimum CPU
      * @param {number} [maxCpu] Maximum CPU
-     * @param {number} [minMemoryGiB] Minimum memory in GiB
-     * @param {number} [maxMemoryGiB] Maximum memory in GiB
-     * @param {number} [minDiskGiB] Minimum disk space in GiB
-     * @param {number} [maxDiskGiB] Maximum disk space in GiB
+     * @param {number} [minMemoryGib] Minimum memory in GiB
+     * @param {number} [maxMemoryGib] Maximum memory in GiB
+     * @param {number} [minDiskGib] Minimum disk space in GiB
+     * @param {number} [maxDiskGib] Maximum disk space in GiB
      * @param {boolean} [isPublic] Filter by public status
      * @param {boolean} [isRecoverable] Filter by recoverable status
      * @param {Date} [createdAtAfter] Include items created after this timestamp
      * @param {Date} [createdAtBefore] Include items created before this timestamp
      * @param {Date} [lastEventAfter] Include items with last event after this timestamp
      * @param {Date} [lastEventBefore] Include items with last event before this timestamp
-     * @param {ListSandboxesSortEnum} [sort] Field to sort by
-     * @param {ListSandboxesOrderEnum} [order] Direction to sort by
+     * @param {SandboxListSortField} [sort] Field to sort by
+     * @param {SandboxListSortDirection} [order] Direction to sort by
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public listSandboxes(xDaytonaOrganizationID?: string, cursor?: string, limit?: number, id?: string, name?: string, labels?: string, includeErroredDeleted?: boolean, states?: Array<ListSandboxesStatesEnum>, snapshots?: Array<string>, regionIds?: Array<string>, minCpu?: number, maxCpu?: number, minMemoryGiB?: number, maxMemoryGiB?: number, minDiskGiB?: number, maxDiskGiB?: number, isPublic?: boolean, isRecoverable?: boolean, createdAtAfter?: Date, createdAtBefore?: Date, lastEventAfter?: Date, lastEventBefore?: Date, sort?: ListSandboxesSortEnum, order?: ListSandboxesOrderEnum, options?: RawAxiosRequestConfig) {
-        return SandboxApiFp(this.configuration).listSandboxes(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order, options).then((request) => request(this.axios, this.basePath));
+    public listSandboxes(xDaytonaOrganizationID?: string, cursor?: string, limit?: number, id?: string, name?: string, labels?: string, includeErroredDeleted?: boolean, states?: Array<SandboxState>, snapshots?: Array<string>, regionIds?: Array<string>, minCpu?: number, maxCpu?: number, minMemoryGib?: number, maxMemoryGib?: number, minDiskGib?: number, maxDiskGib?: number, isPublic?: boolean, isRecoverable?: boolean, createdAtAfter?: Date, createdAtBefore?: Date, lastEventAfter?: Date, lastEventBefore?: Date, sort?: SandboxListSortField, order?: SandboxListSortDirection, options?: RawAxiosRequestConfig) {
+        return SandboxApiFp(this.configuration).listSandboxes(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, minCpu, maxCpu, minMemoryGib, maxMemoryGib, minDiskGib, maxDiskGib, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -3990,44 +3996,6 @@ export class SandboxApi extends BaseAPI {
     }
 }
 
-export const ListSandboxesStatesEnum = {
-    CREATING: 'creating',
-    RESTORING: 'restoring',
-    DESTROYING: 'destroying',
-    STARTED: 'started',
-    STOPPED: 'stopped',
-    STARTING: 'starting',
-    STOPPING: 'stopping',
-    ERROR: 'error',
-    BUILD_FAILED: 'build_failed',
-    PENDING_BUILD: 'pending_build',
-    BUILDING_SNAPSHOT: 'building_snapshot',
-    UNKNOWN: 'unknown',
-    PULLING_SNAPSHOT: 'pulling_snapshot',
-    ARCHIVED: 'archived',
-    ARCHIVING: 'archiving',
-    RESIZING: 'resizing',
-    SNAPSHOTTING: 'snapshotting',
-    FORKING: 'forking',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809',
-} as const;
-export type ListSandboxesStatesEnum = typeof ListSandboxesStatesEnum[keyof typeof ListSandboxesStatesEnum];
-export const ListSandboxesSortEnum = {
-    NAME: 'name',
-    CPU: 'cpu',
-    MEMORY_GI_B: 'memoryGiB',
-    DISK_GI_B: 'diskGiB',
-    LAST_ACTIVITY_AT: 'lastActivityAt',
-    CREATED_AT: 'createdAt',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809',
-} as const;
-export type ListSandboxesSortEnum = typeof ListSandboxesSortEnum[keyof typeof ListSandboxesSortEnum];
-export const ListSandboxesOrderEnum = {
-    ASC: 'asc',
-    DESC: 'desc',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809',
-} as const;
-export type ListSandboxesOrderEnum = typeof ListSandboxesOrderEnum[keyof typeof ListSandboxesOrderEnum];
 export const ListSandboxesPaginatedDeprecatedStatesEnum = {
     CREATING: 'creating',
     RESTORING: 'restoring',

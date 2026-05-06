@@ -18,6 +18,8 @@ import {
   ResizeSandbox,
   CreateSandboxSnapshot,
   UpdateSandboxNetworkSettings,
+  SandboxListSortField,
+  SandboxListSortDirection,
 } from '@daytona/api-client'
 import { Resources, Daytona } from './Daytona'
 import type { CodeLanguage } from './Daytona'
@@ -905,12 +907,12 @@ export interface ListSandboxesQuery {
   /**
    * Sort by field
    * */
-  sort?: 'name' | 'cpu' | 'memoryGiB' | 'diskGiB' | 'lastActivityAt' | 'createdAt'
+  sort?: SandboxListSortField
 
   /**
    * Sort direction
    * */
-  order?: 'asc' | 'desc'
+  order?: SandboxListSortDirection
 
   /**
    * Filter by ID prefix (case-insensitive)
@@ -930,7 +932,7 @@ export interface ListSandboxesQuery {
   /**
    * Filter by states
    * */
-  states?: string[]
+  states?: SandboxState[]
 
   /**
    * Filter by snapshot names
@@ -955,22 +957,22 @@ export interface ListSandboxesQuery {
   /**
    * Filter by minimum memory in GiB
    * */
-  minMemoryGiB?: number
+  minMemoryGib?: number
 
   /**
    * Filter by maximum memory in GiB
    * */
-  maxMemoryGiB?: number
+  maxMemoryGib?: number
 
   /**
    * Filter by minimum disk space in GiB
    * */
-  minDiskGiB?: number
+  minDiskGib?: number
 
   /**
    * Filter by maximum disk space in GiB
    * */
-  maxDiskGiB?: number
+  maxDiskGib?: number
 
   /**
    * Filter by public status

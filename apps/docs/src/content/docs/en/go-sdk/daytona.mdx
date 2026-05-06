@@ -76,6 +76,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
 
 ## Index
 
+- [Constants](<#constants>)
 - [Variables](<#variables>)
 - [type Client](<#Client>)
   - [func NewClient\(\) \(\*Client, error\)](<#NewClient>)
@@ -84,6 +85,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(c \*Client\) Create\(ctx context.Context, params any, opts ...func\(\*options.CreateSandbox\)\) \(\*Sandbox, error\)](<#Client.Create>)
   - [func \(c \*Client\) Get\(ctx context.Context, sandboxIDOrName string\) \(\*Sandbox, error\)](<#Client.Get>)
   - [func \(c \*Client\) List\(ctx context.Context, query \*ListSandboxesQuery\) \*SandboxIterator](<#Client.List>)
+  - [func \(c \*Client\) ListSeq\(ctx context.Context, query \*ListSandboxesQuery\) iter.Seq2\[\*Sandbox, error\]](<#Client.ListSeq>)
 - [type CodeInterpreterService](<#CodeInterpreterService>)
   - [func NewCodeInterpreterService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*CodeInterpreterService](<#NewCodeInterpreterService>)
   - [func \(c \*CodeInterpreterService\) CreateContext\(ctx context.Context, cwd \*string\) \(map\[string\]any, error\)](<#CodeInterpreterService.CreateContext>)
@@ -249,10 +251,12 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) WaitForStart\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForStart>)
   - [func \(s \*Sandbox\) WaitForStop\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForStop>)
 - [type SandboxIterator](<#SandboxIterator>)
-  - [func \(it \*SandboxIterator\) Close\(\) error](<#SandboxIterator.Close>)
   - [func \(it \*SandboxIterator\) Err\(\) error](<#SandboxIterator.Err>)
   - [func \(it \*SandboxIterator\) Next\(\) bool](<#SandboxIterator.Next>)
   - [func \(it \*SandboxIterator\) Value\(\) \*Sandbox](<#SandboxIterator.Value>)
+- [type SandboxListSortDirection](<#SandboxListSortDirection>)
+- [type SandboxListSortField](<#SandboxListSortField>)
+- [type SandboxState](<#SandboxState>)
 - [type ScreenshotService](<#ScreenshotService>)
   - [func NewScreenshotService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*ScreenshotService](<#NewScreenshotService>)
   - [func \(s \*ScreenshotService\) TakeFullScreen\(ctx context.Context, showCursor \*bool\) \(\*types.ScreenshotResponse, error\)](<#ScreenshotService.TakeFullScreen>)
@@ -271,6 +275,56 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(v \*VolumeService\) List\(ctx context.Context\) \(\[\]\*types.Volume, error\)](<#VolumeService.List>)
   - [func \(v \*VolumeService\) WaitForReady\(ctx context.Context, volume \*types.Volume, timeout time.Duration\) \(\*types.Volume, error\)](<#VolumeService.WaitForReady>)
 
+
+## Constants
+
+<a name="SandboxStateCreating"></a>CamelCase enum constants, matching idiomatic Go naming \(the underlying api\-client uses SCREAMING\_SNAKE\_CASE which is non\-idiomatic in Go\).
+
+```go
+const (
+    SandboxStateCreating         = apiclient.SANDBOXSTATE_CREATING
+    SandboxStateRestoring        = apiclient.SANDBOXSTATE_RESTORING
+    SandboxStateDestroyed        = apiclient.SANDBOXSTATE_DESTROYED
+    SandboxStateDestroying       = apiclient.SANDBOXSTATE_DESTROYING
+    SandboxStateStarted          = apiclient.SANDBOXSTATE_STARTED
+    SandboxStateStopped          = apiclient.SANDBOXSTATE_STOPPED
+    SandboxStateStarting         = apiclient.SANDBOXSTATE_STARTING
+    SandboxStateStopping         = apiclient.SANDBOXSTATE_STOPPING
+    SandboxStateError            = apiclient.SANDBOXSTATE_ERROR
+    SandboxStateBuildFailed      = apiclient.SANDBOXSTATE_BUILD_FAILED
+    SandboxStatePendingBuild     = apiclient.SANDBOXSTATE_PENDING_BUILD
+    SandboxStateBuildingSnapshot = apiclient.SANDBOXSTATE_BUILDING_SNAPSHOT
+    SandboxStateUnknown          = apiclient.SANDBOXSTATE_UNKNOWN
+    SandboxStatePullingSnapshot  = apiclient.SANDBOXSTATE_PULLING_SNAPSHOT
+    SandboxStateArchived         = apiclient.SANDBOXSTATE_ARCHIVED
+    SandboxStateArchiving        = apiclient.SANDBOXSTATE_ARCHIVING
+    SandboxStateResizing         = apiclient.SANDBOXSTATE_RESIZING
+    SandboxStateSnapshotting     = apiclient.SANDBOXSTATE_SNAPSHOTTING
+    SandboxStateForking          = apiclient.SANDBOXSTATE_FORKING
+)
+```
+
+<a name="SandboxListSortFieldName"></a>
+
+```go
+const (
+    SandboxListSortFieldName           = apiclient.SANDBOXLISTSORTFIELD_NAME
+    SandboxListSortFieldCpu            = apiclient.SANDBOXLISTSORTFIELD_CPU
+    SandboxListSortFieldMemoryGib      = apiclient.SANDBOXLISTSORTFIELD_MEMORY_GIB
+    SandboxListSortFieldDiskGib        = apiclient.SANDBOXLISTSORTFIELD_DISK_GIB
+    SandboxListSortFieldLastActivityAt = apiclient.SANDBOXLISTSORTFIELD_LAST_ACTIVITY_AT
+    SandboxListSortFieldCreatedAt      = apiclient.SANDBOXLISTSORTFIELD_CREATED_AT
+)
+```
+
+<a name="SandboxListSortDirectionAsc"></a>
+
+```go
+const (
+    SandboxListSortDirectionAsc  = apiclient.SANDBOXLISTSORTDIRECTION_ASC
+    SandboxListSortDirectionDesc = apiclient.SANDBOXLISTSORTDIRECTION_DESC
+)
+```
 
 ## Variables
 
@@ -445,20 +499,39 @@ if err != nil {
 func (c *Client) List(ctx context.Context, query *ListSandboxesQuery) *SandboxIterator
 ```
 
-List returns an iterator over Sandboxes matching the given query.
+List returns an iterator over Sandboxes matching the given query, following the [database/sql.Rows](<https://pkg.go.dev/database/sql/#Rows>) / [bufio.Scanner](<https://pkg.go.dev/bufio/#Scanner>) iterator pattern.
 
-Callers MUST invoke [SandboxIterator.Close](<#SandboxIterator.Close>) \(typically via defer\) to release resources held by the iterator.
+For Go 1.23\+ range\-over\-func consumers, see [Client.ListSeq](<#Client.ListSeq>).
 
 Example:
 
 ```
 iter := client.List(ctx, &ListSandboxesQuery{Labels: map[string]string{"env": "dev"}})
-defer iter.Close()
 for iter.Next() {
     fmt.Println(iter.Value().ID)
 }
 if err := iter.Err(); err != nil {
     log.Fatal(err)
+}
+```
+
+<a name="Client.ListSeq"></a>
+### func \(\*Client\) ListSeq
+
+```go
+func (c *Client) ListSeq(ctx context.Context, query *ListSandboxesQuery) iter.Seq2[*Sandbox, error]
+```
+
+ListSeq returns a Go 1.23\+ range\-over\-func iterator over Sandboxes matching the given query. Each yielded pair is \(sandbox, error\); a non\-nil error terminates iteration and the consumer should break out of the range.
+
+Example:
+
+```
+for sandbox, err := range client.ListSeq(ctx, &ListSandboxesQuery{...}) {
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println(sandbox.ID)
 }
 ```
 
@@ -2174,7 +2247,7 @@ type ListSandboxesQuery struct {
     // Filter by labels
     Labels map[string]string
     // Filter by states
-    States []string
+    States []apiclient.SandboxState
     // Filter by snapshot names
     Snapshots []string
     // Filter by targets
@@ -2184,13 +2257,13 @@ type ListSandboxesQuery struct {
     // Filter by maximum CPU
     MaxCpu *int
     // Filter by minimum memory in GiB
-    MinMemoryGiB *int
+    MinMemoryGib *int
     // Filter by maximum memory in GiB
-    MaxMemoryGiB *int
+    MaxMemoryGib *int
     // Filter by minimum disk space in GiB
-    MinDiskGiB *int
+    MinDiskGib *int
     // Filter by maximum disk space in GiB
-    MaxDiskGiB *int
+    MaxDiskGib *int
     // Filter by public status
     IsPublic *bool
     // Filter by recoverable status
@@ -2203,10 +2276,10 @@ type ListSandboxesQuery struct {
     LastActivityAfter *time.Time
     // Include sandboxes with last activity before this timestamp
     LastActivityBefore *time.Time
-    // Sort by field (name, cpu, memoryGiB, diskGiB, lastActivityAt, createdAt)
-    Sort *string
-    // Sort direction (asc, desc)
-    Order *string
+    // Sort by field
+    Sort *apiclient.SandboxListSortField
+    // Sort direction
+    Order *apiclient.SandboxListSortDirection
 }
 ```
 
@@ -4343,22 +4416,13 @@ err := sandbox.WaitForStop(ctx, 2*time.Minute)
 
 SandboxIterator iterates over Sandboxes returned by [Client.List](<#Client.List>), following the standard Go iterator pattern used by [database/sql.Rows](<https://pkg.go.dev/database/sql/#Rows>) and [bufio.Scanner](<https://pkg.go.dev/bufio/#Scanner>).
 
-Callers MUST invoke [SandboxIterator.Close](<#SandboxIterator.Close>) \(typically via defer\) to release resources held by the iterator.
+For Go 1.23\+ range\-over\-func consumers, see [Client.ListSeq](<#Client.ListSeq>).
 
 ```go
 type SandboxIterator struct {
     // contains filtered or unexported fields
 }
 ```
-
-<a name="SandboxIterator.Close"></a>
-### func \(\*SandboxIterator\) Close
-
-```go
-func (it *SandboxIterator) Close() error
-```
-
-Close releases resources held by the iterator. It is idempotent and safe to call multiple times. After Close, [SandboxIterator.Next](<#SandboxIterator.Next>) always returns false.
 
 <a name="SandboxIterator.Err"></a>
 ### func \(\*SandboxIterator\) Err
@@ -4386,6 +4450,33 @@ func (it *SandboxIterator) Value() *Sandbox
 ```
 
 Value returns the current sandbox. Only valid after [SandboxIterator.Next](<#SandboxIterator.Next>) has returned true.
+
+<a name="SandboxListSortDirection"></a>
+## type SandboxListSortDirection
+
+SandboxListSortDirection selects ascending or descending order for [Client.List](<#Client.List>).
+
+```go
+type SandboxListSortDirection = apiclient.SandboxListSortDirection
+```
+
+<a name="SandboxListSortField"></a>
+## type SandboxListSortField
+
+SandboxListSortField selects the field used to order results from [Client.List](<#Client.List>).
+
+```go
+type SandboxListSortField = apiclient.SandboxListSortField
+```
+
+<a name="SandboxState"></a>
+## type SandboxState
+
+SandboxState represents the lifecycle state of a Sandbox.
+
+```go
+type SandboxState = apiclient.SandboxState
+```
 
 <a name="ScreenshotService"></a>
 ## type ScreenshotService

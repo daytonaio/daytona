@@ -1643,33 +1643,18 @@ paths:
           default: false
           type: boolean
         style: form
-      - description: List of states to filter by. Can not be combined with "name"
+      - description: "List of states to filter by. Can not be combined with \"name\"\
+          . Allowed values: creating, restoring, destroying, started, stopped, starting,\
+          \ stopping, error, build_failed, pending_build, building_snapshot, unknown,\
+          \ pulling_snapshot, archived, archiving, resizing, snapshotting, forking\
+          \ (DESTROYED is rejected at validation time)."
         explode: true
         in: query
         name: states
         required: false
         schema:
           items:
-            enum:
-            - creating
-            - restoring
-            - destroying
-            - started
-            - stopped
-            - starting
-            - stopping
-            - error
-            - build_failed
-            - pending_build
-            - building_snapshot
-            - unknown
-            - pulling_snapshot
-            - archived
-            - archiving
-            - resizing
-            - snapshotting
-            - forking
-            type: string
+            $ref: "#/components/schemas/SandboxState"
           type: array
         style: form
       - description: List of snapshot names to filter by
@@ -1713,7 +1698,7 @@ paths:
       - description: Minimum memory in GiB
         explode: true
         in: query
-        name: minMemoryGiB
+        name: minMemoryGib
         required: false
         schema:
           minimum: 1
@@ -1722,7 +1707,7 @@ paths:
       - description: Maximum memory in GiB
         explode: true
         in: query
-        name: maxMemoryGiB
+        name: maxMemoryGib
         required: false
         schema:
           minimum: 1
@@ -1731,7 +1716,7 @@ paths:
       - description: Minimum disk space in GiB
         explode: true
         in: query
-        name: minDiskGiB
+        name: minDiskGib
         required: false
         schema:
           minimum: 1
@@ -1740,7 +1725,7 @@ paths:
       - description: Maximum disk space in GiB
         explode: true
         in: query
-        name: maxDiskGiB
+        name: maxDiskGib
         required: false
         schema:
           minimum: 1
@@ -1808,15 +1793,7 @@ paths:
         name: sort
         required: false
         schema:
-          default: lastActivityAt
-          enum:
-          - name
-          - cpu
-          - memoryGiB
-          - diskGiB
-          - lastActivityAt
-          - createdAt
-          type: string
+          $ref: "#/components/schemas/SandboxListSortField"
         style: form
       - description: Direction to sort by
         explode: true
@@ -1824,11 +1801,7 @@ paths:
         name: order
         required: false
         schema:
-          default: desc
-          enum:
-          - asc
-          - desc
-          type: string
+          $ref: "#/components/schemas/SandboxListSortDirection"
         style: form
       responses:
         "200":
@@ -10853,7 +10826,6 @@ components:
       - userId
       type: object
     SandboxState:
-      description: The state of the sandbox
       enum:
       - creating
       - restoring
@@ -10874,6 +10846,20 @@ components:
       - resizing
       - snapshotting
       - forking
+      type: string
+    SandboxListSortField:
+      enum:
+      - name
+      - cpu
+      - memoryGib
+      - diskGib
+      - lastActivityAt
+      - createdAt
+      type: string
+    SandboxListSortDirection:
+      enum:
+      - asc
+      - desc
       type: string
     SandboxDesiredState:
       description: The desired state of the sandbox

@@ -12,7 +12,6 @@ import {
   VolumesApi,
   SandboxVolume,
   ConfigApi,
-  ListSandboxesStatesEnum,
 } from '@daytona/api-client'
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios'
 import {
@@ -660,6 +659,10 @@ export class Daytona implements AsyncDisposable {
   public list(query?: ListSandboxesQuery): AsyncIterableIterator<Sandbox> {
     const { sandboxApi, clientConfig } = this
     const tracer = trace.getTracer('')
+    // Clone once per list() call — the config is read-only after construction
+    // and each Sandbox holds its own reference; cloning per page or per item
+    // would be wasteful.
+    const clonedConfig = structuredClone(clientConfig)
 
     async function* generator(): AsyncGenerator<Sandbox> {
       let cursor: string | undefined = undefined
@@ -693,15 +696,15 @@ export class Daytona implements AsyncDisposable {
               query?.name,
               query?.labels ? JSON.stringify(query.labels) : undefined,
               undefined,
-              query?.states as unknown as Array<ListSandboxesStatesEnum>,
+              query?.states,
               query?.snapshots,
               query?.targets,
               query?.minCpu,
               query?.maxCpu,
-              query?.minMemoryGiB,
-              query?.maxMemoryGiB,
-              query?.minDiskGiB,
-              query?.maxDiskGiB,
+              query?.minMemoryGib,
+              query?.maxMemoryGib,
+              query?.minDiskGib,
+              query?.maxDiskGib,
               query?.isPublic,
               query?.isRecoverable,
               query?.createdAtAfter,
@@ -727,7 +730,7 @@ export class Daytona implements AsyncDisposable {
         firstPage = false
 
         for (const sandbox of response.data.items) {
-          yield new Sandbox(sandbox, structuredClone(clientConfig), Daytona.createAxiosInstance(), sandboxApi)
+          yield new Sandbox(sandbox, clonedConfig, Daytona.createAxiosInstance(), sandboxApi)
         }
 
         cursor = response.data.nextCursor ?? undefined

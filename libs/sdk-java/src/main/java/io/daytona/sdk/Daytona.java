@@ -276,23 +276,23 @@ public class Daytona implements AutoCloseable {
         BigDecimal limitVal = null;
         String id = null;
         String name = null;
-        List<String> states = null;
+        List<io.daytona.api.client.model.SandboxState> states = null;
         List<String> snapshots = null;
         List<String> targets = null;
         BigDecimal minCpu = null;
         BigDecimal maxCpu = null;
-        BigDecimal minMemoryGiB = null;
-        BigDecimal maxMemoryGiB = null;
-        BigDecimal minDiskGiB = null;
-        BigDecimal maxDiskGiB = null;
+        BigDecimal minMemoryGib = null;
+        BigDecimal maxMemoryGib = null;
+        BigDecimal minDiskGib = null;
+        BigDecimal maxDiskGib = null;
         Boolean isPublic = null;
         Boolean isRecoverable = null;
         OffsetDateTime createdAtAfter = null;
         OffsetDateTime createdAtBefore = null;
         OffsetDateTime lastActivityAfter = null;
         OffsetDateTime lastActivityBefore = null;
-        String sort = null;
-        String order = null;
+        io.daytona.api.client.model.SandboxListSortField sort = null;
+        io.daytona.api.client.model.SandboxListSortDirection order = null;
 
         if (query != null) {
             if (query.getLimit() != null) limitVal = BigDecimal.valueOf(query.getLimit());
@@ -301,23 +301,28 @@ public class Daytona implements AutoCloseable {
             if (query.getLabels() != null && !query.getLabels().isEmpty()) {
                 labelsJson = toJson(query.getLabels());
             }
-            states = query.getStates();
+            if (query.getStates() != null) {
+                states = new ArrayList<>(query.getStates().size());
+                for (io.daytona.sdk.model.SandboxState s : query.getStates()) {
+                    states.add(s.toApiClient());
+                }
+            }
             snapshots = query.getSnapshots();
             targets = query.getTargets();
             if (query.getMinCpu() != null) minCpu = BigDecimal.valueOf(query.getMinCpu());
             if (query.getMaxCpu() != null) maxCpu = BigDecimal.valueOf(query.getMaxCpu());
-            if (query.getMinMemoryGiB() != null) minMemoryGiB = BigDecimal.valueOf(query.getMinMemoryGiB());
-            if (query.getMaxMemoryGiB() != null) maxMemoryGiB = BigDecimal.valueOf(query.getMaxMemoryGiB());
-            if (query.getMinDiskGiB() != null) minDiskGiB = BigDecimal.valueOf(query.getMinDiskGiB());
-            if (query.getMaxDiskGiB() != null) maxDiskGiB = BigDecimal.valueOf(query.getMaxDiskGiB());
+            if (query.getMinMemoryGib() != null) minMemoryGib = BigDecimal.valueOf(query.getMinMemoryGib());
+            if (query.getMaxMemoryGib() != null) maxMemoryGib = BigDecimal.valueOf(query.getMaxMemoryGib());
+            if (query.getMinDiskGib() != null) minDiskGib = BigDecimal.valueOf(query.getMinDiskGib());
+            if (query.getMaxDiskGib() != null) maxDiskGib = BigDecimal.valueOf(query.getMaxDiskGib());
             isPublic = query.getIsPublic();
             isRecoverable = query.getIsRecoverable();
-            if (query.getCreatedAtAfter() != null) createdAtAfter = OffsetDateTime.parse(query.getCreatedAtAfter());
-            if (query.getCreatedAtBefore() != null) createdAtBefore = OffsetDateTime.parse(query.getCreatedAtBefore());
-            if (query.getLastActivityAfter() != null) lastActivityAfter = OffsetDateTime.parse(query.getLastActivityAfter());
-            if (query.getLastActivityBefore() != null) lastActivityBefore = OffsetDateTime.parse(query.getLastActivityBefore());
-            sort = query.getSort();
-            order = query.getOrder();
+            createdAtAfter = query.getCreatedAtAfter();
+            createdAtBefore = query.getCreatedAtBefore();
+            lastActivityAfter = query.getLastActivityAfter();
+            lastActivityBefore = query.getLastActivityBefore();
+            if (query.getSort() != null) sort = query.getSort().toApiClient();
+            if (query.getOrder() != null) order = query.getOrder().toApiClient();
         }
 
         final String fLabelsJson = labelsJson;
@@ -325,23 +330,23 @@ public class Daytona implements AutoCloseable {
         final BigDecimal fLimitVal = limitVal;
         final String fId = id;
         final String fName = name;
-        final List<String> fStates = states;
+        final List<io.daytona.api.client.model.SandboxState> fStates = states;
         final List<String> fSnapshots = snapshots;
         final List<String> fTargets = targets;
         final BigDecimal fMinCpu = minCpu;
         final BigDecimal fMaxCpu = maxCpu;
-        final BigDecimal fMinMemoryGiB = minMemoryGiB;
-        final BigDecimal fMaxMemoryGiB = maxMemoryGiB;
-        final BigDecimal fMinDiskGiB = minDiskGiB;
-        final BigDecimal fMaxDiskGiB = maxDiskGiB;
+        final BigDecimal fMinMemoryGib = minMemoryGib;
+        final BigDecimal fMaxMemoryGib = maxMemoryGib;
+        final BigDecimal fMinDiskGib = minDiskGib;
+        final BigDecimal fMaxDiskGib = maxDiskGib;
         final Boolean fIsPublic = isPublic;
         final Boolean fIsRecoverable = isRecoverable;
         final OffsetDateTime fCreatedAtAfter = createdAtAfter;
         final OffsetDateTime fCreatedAtBefore = createdAtBefore;
         final OffsetDateTime fLastActivityAfter = lastActivityAfter;
         final OffsetDateTime fLastActivityBefore = lastActivityBefore;
-        final String fSort = sort;
-        final String fOrder = order;
+        final io.daytona.api.client.model.SandboxListSortField fSort = sort;
+        final io.daytona.api.client.model.SandboxListSortDirection fOrder = order;
 
         io.daytona.api.client.model.ListSandboxesResponse result = ExceptionMapper.callMain(() -> sandboxApi.listSandboxes(
                 null,
@@ -356,10 +361,10 @@ public class Daytona implements AutoCloseable {
                 fTargets,
                 fMinCpu,
                 fMaxCpu,
-                fMinMemoryGiB,
-                fMaxMemoryGiB,
-                fMinDiskGiB,
-                fMaxDiskGiB,
+                fMinMemoryGib,
+                fMaxMemoryGib,
+                fMinDiskGib,
+                fMaxDiskGib,
                 fIsPublic,
                 fIsRecoverable,
                 fCreatedAtAfter,

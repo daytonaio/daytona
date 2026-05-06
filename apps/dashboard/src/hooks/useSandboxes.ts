@@ -7,9 +7,9 @@ import { QueryKey, useQuery } from '@tanstack/react-query'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import {
-  ListSandboxesOrderEnum,
-  ListSandboxesSortEnum,
-  ListSandboxesStatesEnum,
+  SandboxListSortDirection,
+  SandboxListSortField,
+  SandboxState,
   ListSandboxesResponse,
 } from '@daytona/api-client'
 
@@ -17,15 +17,15 @@ export interface SandboxFilters {
   name?: string
   labels?: Record<string, string>
   includeErroredDeleted?: boolean
-  states?: ListSandboxesStatesEnum[]
+  states?: SandboxState[]
   snapshots?: string[]
   regions?: string[]
   minCpu?: number
   maxCpu?: number
-  minMemoryGiB?: number
-  maxMemoryGiB?: number
-  minDiskGiB?: number
-  maxDiskGiB?: number
+  minMemoryGib?: number
+  maxMemoryGib?: number
+  minDiskGib?: number
+  maxDiskGib?: number
   lastEventAfter?: Date
   lastEventBefore?: Date
   createdAtAfter?: Date
@@ -35,13 +35,13 @@ export interface SandboxFilters {
 }
 
 export interface SandboxSorting {
-  field?: ListSandboxesSortEnum
-  direction?: ListSandboxesOrderEnum
+  field?: SandboxListSortField
+  direction?: SandboxListSortDirection
 }
 
 export const DEFAULT_SANDBOX_SORTING: SandboxSorting = {
-  field: ListSandboxesSortEnum.LAST_ACTIVITY_AT,
-  direction: ListSandboxesOrderEnum.DESC,
+  field: SandboxListSortField.LAST_ACTIVITY_AT,
+  direction: SandboxListSortDirection.DESC,
 }
 
 export interface SandboxQueryParams {
@@ -94,10 +94,10 @@ export function useSandboxes(queryKey: QueryKey, params: SandboxQueryParams) {
         filters.regions,
         filters.minCpu,
         filters.maxCpu,
-        filters.minMemoryGiB,
-        filters.maxMemoryGiB,
-        filters.minDiskGiB,
-        filters.maxDiskGiB,
+        filters.minMemoryGib,
+        filters.maxMemoryGib,
+        filters.minDiskGib,
+        filters.maxDiskGib,
         filters.isPublic,
         filters.isRecoverable,
         filters.createdAtAfter,

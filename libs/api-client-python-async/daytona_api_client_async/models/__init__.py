@@ -159,6 +159,8 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.sandbox_desired_state import SandboxDesiredState
     from daytona_api_client_async.models.sandbox_info import SandboxInfo
     from daytona_api_client_async.models.sandbox_labels import SandboxLabels
+    from daytona_api_client_async.models.sandbox_list_sort_direction import SandboxListSortDirection
+    from daytona_api_client_async.models.sandbox_list_sort_field import SandboxListSortField
     from daytona_api_client_async.models.sandbox_state import SandboxState
     from daytona_api_client_async.models.sandbox_volume import SandboxVolume
     from daytona_api_client_async.models.screenshot_response import ScreenshotResponse
@@ -343,6 +345,8 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "SandboxDesiredState": "daytona_api_client_async.models.sandbox_desired_state",
     "SandboxInfo": "daytona_api_client_async.models.sandbox_info",
     "SandboxLabels": "daytona_api_client_async.models.sandbox_labels",
+    "SandboxListSortDirection": "daytona_api_client_async.models.sandbox_list_sort_direction",
+    "SandboxListSortField": "daytona_api_client_async.models.sandbox_list_sort_field",
     "SandboxState": "daytona_api_client_async.models.sandbox_state",
     "SandboxVolume": "daytona_api_client_async.models.sandbox_volume",
     "ScreenshotResponse": "daytona_api_client_async.models.screenshot_response",

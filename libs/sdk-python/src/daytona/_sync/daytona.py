@@ -36,7 +36,6 @@ from daytona_api_client import (
 from daytona_api_client import VolumesApi as VolumesApi
 from daytona_toolbox_api_client import ApiClient as ToolboxApiClient
 
-from .._async.sandbox import ListSandboxesQuery
 from .._utils.enum import to_enum
 from .._utils.env import DaytonaEnvReader
 from .._utils.errors import intercept_errors
@@ -52,6 +51,7 @@ from ..common.daytona import (
 )
 from ..common.errors import DaytonaAuthenticationError, DaytonaValidationError
 from ..common.image import Image
+from ..common.sandbox import ListSandboxesQuery
 from ..internal.urllib3_retry import RemoteDisconnectedRetry
 from .sandbox import Sandbox
 from .snapshot import SnapshotService
@@ -564,6 +564,8 @@ class Daytona:
             ws_handshake_semaphore=self._ws_handshake_semaphore,
         )
 
+    @intercept_errors(message_prefix="Failed to list sandboxes: ")
+    @with_instrumentation()
     def list(
         self,
         query: ListSandboxesQuery | None = None,
@@ -585,6 +587,10 @@ class Daytona:
             ```
         """
         q = query or ListSandboxesQuery()
+
+        if q.limit is not None and q.limit < 1:
+            raise DaytonaValidationError("limit must be a positive integer")
+
         cursor: str | None = None
         first_page = True
 
@@ -602,7 +608,6 @@ class Daytona:
                 )
             cursor = response.next_cursor or None
 
-    @intercept_errors(message_prefix="Failed to list sandboxes: ")
     @with_instrumentation(name="Daytona.list.fetch_page")
     def _fetch_sandbox_page(self, q: ListSandboxesQuery, cursor: str | None):
         """Fetches a single page of sandboxes. Each call is one OTEL span."""
@@ -617,10 +622,10 @@ class Daytona:
             region_ids=q.targets,
             min_cpu=q.min_cpu,
             max_cpu=q.max_cpu,
-            min_memory_gi_b=q.min_memory_gi_b,
-            max_memory_gi_b=q.max_memory_gi_b,
-            min_disk_gi_b=q.min_disk_gi_b,
-            max_disk_gi_b=q.max_disk_gi_b,
+            min_memory_gib=q.min_memory_gib,
+            max_memory_gib=q.max_memory_gib,
+            min_disk_gib=q.min_disk_gib,
+            max_disk_gib=q.max_disk_gib,
             is_public=q.is_public,
             is_recoverable=q.is_recoverable,
             created_at_after=q.created_at_after,

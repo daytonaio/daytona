@@ -1,4 +1,4 @@
-from daytona import Daytona, ListSandboxesQuery
+from daytona import Daytona, ListSandboxesQuery, SandboxListSortDirection, SandboxListSortField, SandboxState
 
 
 def main():
@@ -8,9 +8,9 @@ def main():
         ListSandboxesQuery(
             limit=10,
             labels={"env": "dev"},
-            states=["started"],
-            sort="createdAt",
-            order="desc",
+            states=[SandboxState.STARTED],
+            sort=SandboxListSortField.CREATEDAT,
+            order=SandboxListSortDirection.DESC,
         )
     ):
         print(sandbox.id)

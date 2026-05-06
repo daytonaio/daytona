@@ -3,9 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass
-from datetime import datetime
-from typing import Optional
 
 from deprecated import deprecated
 from pydantic import ConfigDict, PrivateAttr
@@ -852,55 +849,3 @@ class AsyncSandbox(SandboxDto):
             await self.refresh_data()
         except DaytonaNotFoundError:
             self.state = SandboxState.DESTROYED
-
-
-@dataclass
-class ListSandboxesQuery:
-    """Query parameters for filtering and sorting when listing Sandboxes.
-
-    Attributes:
-        limit: Per-page fetch size. Does NOT limit the total number of
-            Sandboxes returned.
-        id: Filter by ID prefix (case-insensitive).
-        name: Filter by name prefix (case-insensitive).
-        labels: Filter by labels.
-        states: Filter by states.
-        snapshots: Filter by snapshot names.
-        targets: Filter by targets.
-        min_cpu: Filter by minimum CPU.
-        max_cpu: Filter by maximum CPU.
-        min_memory_gi_b: Filter by minimum memory in GiB.
-        max_memory_gi_b: Filter by maximum memory in GiB.
-        min_disk_gi_b: Filter by minimum disk space in GiB.
-        max_disk_gi_b: Filter by maximum disk space in GiB.
-        is_public: Filter by public status.
-        is_recoverable: Filter by recoverable status.
-        created_at_after (datetime): Include sandboxes created after this timestamp.
-        created_at_before (datetime): Include sandboxes created before this timestamp.
-        last_activity_after (datetime): Include sandboxes with last activity after this timestamp.
-        last_activity_before (datetime): Include sandboxes with last activity before this timestamp.
-        sort: Sort by field (name, cpu, memoryGiB, diskGiB, lastActivityAt, createdAt).
-        order: Sort direction (asc, desc).
-    """
-
-    limit: Optional[int] = None
-    id: Optional[str] = None
-    name: Optional[str] = None
-    labels: Optional[dict[str, str]] = None
-    states: Optional[list[str]] = None
-    snapshots: Optional[list[str]] = None
-    targets: Optional[list[str]] = None
-    min_cpu: Optional[int] = None
-    max_cpu: Optional[int] = None
-    min_memory_gi_b: Optional[int] = None
-    max_memory_gi_b: Optional[int] = None
-    min_disk_gi_b: Optional[int] = None
-    max_disk_gi_b: Optional[int] = None
-    is_public: Optional[bool] = None
-    is_recoverable: Optional[bool] = None
-    created_at_after: Optional[datetime] = None
-    created_at_before: Optional[datetime] = None
-    last_activity_after: Optional[datetime] = None
-    last_activity_before: Optional[datetime] = None
-    sort: Optional[str] = None
-    order: Optional[str] = None

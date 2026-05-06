@@ -1,4 +1,4 @@
-import { Daytona } from '@daytona/sdk'
+import { Daytona, SandboxListSortDirection, SandboxListSortField, SandboxState } from '@daytona/sdk'
 
 async function main() {
   const daytona = new Daytona()
@@ -38,9 +38,9 @@ async function main() {
   for await (const sb of daytona.list({
     limit: 10,
     labels: { env: 'dev' },
-    states: ['started'],
-    sort: 'createdAt',
-    order: 'desc',
+    states: [SandboxState.STARTED],
+    sort: SandboxListSortField.CREATEDAT,
+    order: SandboxListSortDirection.DESC,
   })) {
     console.log(sb.id)
   }
