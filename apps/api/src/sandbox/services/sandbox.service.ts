@@ -2462,6 +2462,74 @@ export class SandboxService {
     }
   }
 
+  @Cron(CronExpression.EVERY_MINUTE, { name: 'recover-stale-snapshotting-sandboxes' })
+  @LogExecution('recover-stale-snapshotting-sandboxes')
+  @WithInstrumentation()
+  async recoverStaleSnapshottingSandboxes() {
+    const lockKey = 'sandbox:recover-stale-snapshotting-sandboxes'
+    const acquired = await this.redisLockProvider.lock(lockKey, 300)
+    if (!acquired) {
+      return
+    }
+
+    try {
+      const oneHourAgo = new Date()
+      oneHourAgo.setHours(oneHourAgo.getHours() - 1)
+
+      const staleSandboxes = await this.sandboxRepository.find({
+        where: {
+          state: SandboxState.SNAPSHOTTING,
+          pending: true,
+          updatedAt: LessThan(oneHourAgo),
+        },
+      })
+
+      if (staleSandboxes.length === 0) {
+        return
+      }
+
+      for (const sandbox of staleSandboxes) {
+        if (!sandbox.runnerId) {
+          continue
+        }
+
+        try {
+          const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
+
+          // v2 runners are recovered by the job system — skip them
+          if (runner.apiVersion !== '0') {
+            continue
+          }
+
+          const restoredState =
+            sandbox.desiredState === SandboxDesiredState.STARTED ? SandboxState.STARTED : SandboxState.STOPPED
+
+          await this.sandboxRepository.updateWhere(sandbox.id, {
+            updateData: { state: restoredState, pending: false },
+            whereCondition: { state: SandboxState.SNAPSHOTTING, desiredState: sandbox.desiredState },
+          })
+
+          await this.snapshotService
+            .rollbackPendingUsage(sandbox.organizationId, 1)
+            .catch((err) =>
+              this.logger.error(
+                `Failed to roll back pending snapshot quota for org ${sandbox.organizationId} during stale recovery:`,
+                err,
+              ),
+            )
+
+          this.logger.warn(
+            `Recovered stale SNAPSHOTTING sandbox ${sandbox.id} (v0 runner ${sandbox.runnerId}), restored to ${restoredState}`,
+          )
+        } catch (error) {
+          this.logger.error(`Error recovering stale SNAPSHOTTING sandbox ${sandbox.id}:`, error)
+        }
+      }
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
+  }
+
   async setAutostopInterval(sandboxIdOrName: string, interval: number, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
