@@ -7,6 +7,7 @@ import {
   SandboxState,
   SandboxApi,
   Sandbox as SandboxDto,
+  PaginatedSandboxes as PaginatedSandboxesDto,
   PortPreviewUrl,
   SandboxVolume,
   BuildInfo,
@@ -896,9 +897,6 @@ export class Sandbox implements SandboxDto {
   }
 }
 
-export interface PaginatedSandboxes {
+export interface PaginatedSandboxes extends Omit<PaginatedSandboxesDto, 'items'> {
   items: Sandbox[]
-  total: number
-  page: number
-  totalPages: number
 }

@@ -18,7 +18,6 @@
       "executor": "nx:run-commands",
       "outputs": ["{projectRoot}/src"],
       "inputs": [
-        "{workspaceRoot}/openapitools.json",
         "{workspaceRoot}/apps/runner/pkg/api/docs/swagger.json",
         { "dependentTasksOutputFiles": "**/*", "transitive": true }
       ],

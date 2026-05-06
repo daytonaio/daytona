@@ -10,7 +10,7 @@ import time
 import warnings
 from copy import deepcopy
 from importlib.metadata import version
-from typing import Any, Callable, cast, overload
+from typing import Callable, cast, overload
 
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -675,7 +675,7 @@ class Daytona:
         # (instead of urllib3.Retry with allowed_methods=None) avoids also retrying
         # IncompleteRead, where the server already started processing and sending a
         # response — retrying that would execute the operation a second time.
-        config.retries = cast(Any, RemoteDisconnectedRetry(total=3, raise_on_status=False))
+        config.retries = RemoteDisconnectedRetry(total=3, raise_on_status=False)
         toolbox_api_client = ToolboxApiClient(config)
         toolbox_api_client.default_headers = deepcopy(cast(dict[str, str], self._api_client.default_headers))
 

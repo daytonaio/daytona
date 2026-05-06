@@ -33,7 +33,6 @@
     "goProduction": ["default", "{workspaceRoot}/go.work", "{workspaceRoot}/go.work.sum", "sharedGlobals"],
     "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml"],
     "apiClient": [
-      "{workspaceRoot}/openapitools.json",
       "{workspaceRoot}/dist/apps/api/openapi.json",
       "{workspaceRoot}/apps/daemon/pkg/toolbox/docs/swagger.json",
       { "env": "DEFAULT_PACKAGE_VERSION" },
