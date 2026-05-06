@@ -3,7 +3,7 @@ module github.com/daytonaio/otel-collector/exporter
 go 1.25.4
 
 require (
-	github.com/daytonaio/daytona/libs/api-client-go v0.172.0
+	github.com/daytonaio/daytona/libs/api-client-go v0.173.0
 	go.opentelemetry.io/collector/client v1.50.0
 	go.opentelemetry.io/collector/component v1.50.0
 	go.opentelemetry.io/collector/config/configoptional v1.50.0
