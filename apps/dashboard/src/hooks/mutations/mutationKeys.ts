@@ -17,4 +17,11 @@ export const mutationKeys = {
       cancel: () => [...mutationKeys.organization.invitations.all, 'cancel'] as const,
     },
   },
+  user: {
+    invitations: {
+      all: ['user-invitations'] as const,
+      accept: () => [...mutationKeys.user.invitations.all, 'accept'] as const,
+      decline: () => [...mutationKeys.user.invitations.all, 'decline'] as const,
+    },
+  },
 } as const
