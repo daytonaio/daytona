@@ -793,16 +793,6 @@ export const getSidebarConfig = (
             icon: 'computer.svg',
           },
         },
-        {
-          type: 'link',
-          href: localizePath('/docs/runners', locale),
-          label: t('sidebarconfig.customerManagedCompute'),
-          description: t('sidebarconfig.customerManagedComputeDescription'),
-          disablePagination: true,
-          attrs: {
-            icon: 'computer.svg',
-          },
-        },
       ],
     },
     {
