@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { CopyButton } from '@/components/CopyButton'
 import { DeleteOrganizationDialog } from '@/components/Organizations/DeleteOrganizationDialog'
 import { LeaveOrganizationDialog } from '@/components/Organizations/LeaveOrganizationDialog'
 import { OtelConfigCard } from '@/components/Organizations/OtelConfigCard'
@@ -15,7 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Field, FieldContent, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { InputGroup, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
+import { InputGroup, InputGroupInput } from '@/components/ui/input-group'
 import { useDeleteOrganizationMutation } from '@/hooks/mutations/useDeleteOrganizationMutation'
 import { useLeaveOrganizationMutation } from '@/hooks/mutations/useLeaveOrganizationMutation'
 import { useOrganizations } from '@/hooks/useOrganizations'
@@ -23,10 +24,8 @@ import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { OrganizationUserRoleEnum } from '@daytona/api-client'
-import { CheckIcon, CopyIcon } from 'lucide-react'
 import React, { useRef } from 'react'
 import { toast } from 'sonner'
-import { useCopyToClipboard } from 'usehooks-ts'
 
 const OrganizationSettings: React.FC = () => {
   const { refreshOrganizations } = useOrganizations()
@@ -36,7 +35,6 @@ const OrganizationSettings: React.FC = () => {
   const deleteOrganizationMutation = useDeleteOrganizationMutation()
   const leaveOrganizationMutation = useLeaveOrganizationMutation()
   const setDefaultRegionDialogRef = useRef<SetDefaultRegionDialogRef>(null)
-  const [copied, copyToClipboard] = useCopyToClipboard()
 
   if (!selectedOrganization) {
     return null
@@ -101,16 +99,13 @@ const OrganizationSettings: React.FC = () => {
                 </FieldDescription>
               </FieldContent>
               <InputGroup className="pr-1 flex-1">
-                <InputGroupInput id="organization-id" value={selectedOrganization.id} readOnly />
-                <InputGroupButton
-                  variant="ghost"
-                  size="icon-xs"
-                  onClick={() =>
-                    copyToClipboard(selectedOrganization.id).then(() => toast.success('Copied to clipboard'))
-                  }
-                >
-                  {copied ? <CheckIcon className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
-                </InputGroupButton>
+                <InputGroupInput
+                  id="organization-id"
+                  value={selectedOrganization.id}
+                  readOnly
+                  className="font-mono text-sm"
+                />
+                <CopyButton value={selectedOrganization.id} size="icon-xs" tooltipText="Copy Organization ID" />
               </InputGroup>
             </Field>
           </CardContent>
