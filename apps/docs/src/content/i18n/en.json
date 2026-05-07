@@ -121,8 +121,6 @@
   "sidebarconfig.webhooksDescription": "Receive real-time notifications when events occur in your Daytona organization.",
   "sidebarconfig.regions": "Regions",
   "sidebarconfig.regionsDescription": "Region types and custom infrastructure.",
-  "sidebarconfig.runners": "Runners",
-  "sidebarconfig.runnersDescription": "Runner types and custom infrastructure.",
   "sidebarconfig.customerManagedCompute": "Customer Managed Compute",
   "sidebarconfig.customerManagedComputeDescription": "Customer managed compute for Daytona Sandboxes.",
   "sidebarconfig.mcpServer": "MCP Server",
