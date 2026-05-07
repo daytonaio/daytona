@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { cn } from '@/lib/utils'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import { Button } from './ui/button'
 import { PAGE_SIZE_OPTIONS } from '../constants/Pagination'
+import { Button } from './ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 
 interface CursorPaginationProps {
   pageSize: number
@@ -28,7 +29,7 @@ export function CursorPagination({
   className,
 }: CursorPaginationProps) {
   return (
-    <div className={`flex items-center justify-start gap-2 ${className}`}>
+    <div className={cn(`flex items-center justify-start gap-2`, className)}>
       <Select value={`${pageSize}`} onValueChange={(value) => onPageSizeChange(Number(value))}>
         <SelectTrigger className="h-8 w-[164px]">
           <SelectValue placeholder={pageSize + ' per page'} />

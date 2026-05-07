@@ -3,15 +3,20 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { QueryKey, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import type { QueryKey } from '@tanstack/react-query'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import {
+  type Sandbox,
   SandboxListSortDirection,
   SandboxListSortField,
   SandboxState,
   ListSandboxesResponse,
 } from '@daytona/api-client'
+import { queryKeys } from './queryKeys'
+
+type ListSandboxesQueryResponse = ListSandboxesResponse | Sandbox[]
 
 export interface SandboxFilters {
   name?: string
@@ -52,28 +57,29 @@ export interface SandboxQueryParams {
 }
 
 export const getSandboxesQueryKey = (organizationId: string | undefined, params?: SandboxQueryParams): QueryKey => {
-  const baseKey = ['sandboxes' as const, organizationId]
-
-  if (!params) {
-    return baseKey
-  }
-
-  const normalizedParams = {
-    cursor: params.cursor,
-    limit: params.limit,
-    ...(params.filters && { filters: params.filters }),
-    ...(params.sorting && { sorting: params.sorting }),
-  }
-
-  return [...baseKey, normalizedParams]
+  return queryKeys.sandboxes.list(organizationId ?? '', params)
 }
 
-export function useSandboxes(queryKey: QueryKey, params: SandboxQueryParams) {
+function normalizeListSandboxesResponse(data: ListSandboxesQueryResponse): ListSandboxesResponse {
+  if (Array.isArray(data)) {
+    return {
+      items: data,
+      nextCursor: null,
+    }
+  }
+
+  return {
+    items: data.items ?? [],
+    nextCursor: data.nextCursor ?? null,
+  }
+}
+
+export function useSandboxesQuery(params: SandboxQueryParams) {
   const { sandboxApi } = useApi()
   const { selectedOrganization } = useSelectedOrganization()
 
   return useQuery<ListSandboxesResponse>({
-    queryKey,
+    queryKey: queryKeys.sandboxes.list(selectedOrganization?.id ?? '', params),
     queryFn: async () => {
       if (!selectedOrganization) {
         throw new Error('No organization selected')
@@ -108,9 +114,10 @@ export function useSandboxes(queryKey: QueryKey, params: SandboxQueryParams) {
         sorting.direction,
       )
 
-      return listResponse.data
+      return normalizeListSandboxesResponse(listResponse.data)
     },
     enabled: !!selectedOrganization,
+    placeholderData: keepPreviousData,
     staleTime: 1000 * 10, // 10 seconds
     gcTime: 1000 * 60 * 5, // 5 minutes,
   })

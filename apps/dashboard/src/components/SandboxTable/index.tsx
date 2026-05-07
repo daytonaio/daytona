@@ -4,27 +4,35 @@
  */
 
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { RoutePath } from '@/enums/RoutePath'
 import { useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { cn } from '@/lib/utils'
+import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
+import { cn, getRegionFullDisplayName } from '@/lib/utils'
 import {
   filterArchivable,
   filterDeletable,
   filterStartable,
   filterStoppable,
   getBulkActionCounts,
+  isTransitioning,
 } from '@/lib/utils/sandbox'
 import { getColumnSizeStyles } from '@/lib/utils/table'
 import { OrganizationRolePermissionsEnum, Sandbox, SandboxState } from '@daytona/api-client'
-import { flexRender } from '@tanstack/react-table'
+import {
+  flexRender,
+  getCoreRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  useReactTable,
+  VisibilityState,
+} from '@tanstack/react-table'
 import { Container } from 'lucide-react'
 import { AnimatePresence } from 'motion/react'
-import { useCallback, useImperativeHandle, useMemo, useState } from 'react'
+import { useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCommandPaletteActions } from '../CommandPalette'
-import { CursorPagination } from '../CursorPagination'
-import { PageFooterPortal } from '../PageLayout'
 import { SelectionToast } from '../SelectionToast'
 import { Button } from '../ui/button'
 import { Skeleton } from '../ui/skeleton'
@@ -39,18 +47,24 @@ import {
   TableRow,
 } from '../ui/table'
 import { BulkAction, BulkActionAlertDialog } from './BulkActionAlertDialog'
+import { columns } from './columns'
 import { SandboxTableHeader } from './SandboxTableHeader'
-import type { SandboxTableProps, SandboxTableRef } from './types'
+import type { FacetedFilterOption, SandboxTableProps, SandboxTableRef } from './types'
+import {
+  convertApiFiltersToTableFilters,
+  convertApiSortingToTableSorting,
+  convertTableFiltersToApiFilters,
+  convertTableSortingToApiSorting,
+} from './types'
 import { useSandboxCommands } from './useSandboxCommands'
-import { useSandboxTable } from './useSandboxTable'
 
 export function SandboxTable({
   ref,
   data,
   sandboxIsLoading,
-  sandboxStateIsTransitioning,
   activeSandboxId,
   loading,
+  isShowingPreviousData,
   snapshots,
   snapshotsDataIsLoading,
   snapshotsDataHasMore,
@@ -77,12 +91,6 @@ export function SandboxTable({
   handleViewForks,
   handleRefresh,
   isRefreshing,
-  pageSize,
-  hasNextPage,
-  hasPreviousPage,
-  onNextPage,
-  onPreviousPage,
-  onPageSizeChange,
   sorting,
   onSortingChange,
   filters,
@@ -94,31 +102,90 @@ export function SandboxTable({
   const writePermitted = authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SANDBOXES)
   const deletePermitted = authenticatedUserHasPermission(OrganizationRolePermissionsEnum.DELETE_SANDBOXES)
 
-  const { table, regionOptions } = useSandboxTable({
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
+    const saved = getLocalStorageItem(LocalStorageKey.SandboxTableColumnVisibility)
+    if (saved) {
+      try {
+        return JSON.parse(saved)
+      } catch {
+        return { id: false, labels: false }
+      }
+    }
+    return { id: false, labels: false }
+  })
+
+  useEffect(() => {
+    setLocalStorageItem(LocalStorageKey.SandboxTableColumnVisibility, JSON.stringify(columnVisibility))
+  }, [columnVisibility])
+
+  const tableSorting = useMemo(() => convertApiSortingToTableSorting(sorting), [sorting])
+  const tableFilters = useMemo(() => convertApiFiltersToTableFilters(filters), [filters])
+
+  const regionOptions: FacetedFilterOption[] = useMemo(() => {
+    return regionsData.map((region) => ({
+      label: getRegionFullDisplayName(region),
+      value: region.id,
+    }))
+  }, [regionsData])
+
+  const selectableCount = useMemo(() => {
+    return data.filter((sandbox) => !sandboxIsLoading[sandbox.id] && sandbox.state !== SandboxState.DESTROYED).length
+  }, [sandboxIsLoading, data])
+
+  const table = useReactTable({
     data,
-    sandboxIsLoading,
-    writePermitted,
-    deletePermitted,
-    regionsData,
-    handleStart,
-    handleStop,
-    handleDelete,
-    handleArchive,
-    handleVnc,
-    handleCreateSshAccess,
-    handleRevokeSshAccess,
-    handleScreenRecordings,
-    handleRecover,
-    getRegionName,
-    handleCreateSnapshot,
-    handleFork,
-    handleViewForks,
-    pageSize,
-    sorting,
-    onSortingChange,
-    filters,
-    onFiltersChange,
-    handleOpenTerminal,
+    columns,
+    manualFiltering: true,
+    onColumnFiltersChange: (updater) => {
+      const newTableFilters = typeof updater === 'function' ? updater(table.getState().columnFilters) : updater
+      onFiltersChange(convertTableFiltersToApiFilters(newTableFilters))
+    },
+    getCoreRowModel: getCoreRowModel(),
+    manualSorting: true,
+    onSortingChange: (updater) => {
+      const newTableSorting = typeof updater === 'function' ? updater(table.getState().sorting) : updater
+      onSortingChange(convertTableSortingToApiSorting(newTableSorting))
+    },
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    state: {
+      sorting: tableSorting,
+      columnFilters: tableFilters,
+      columnVisibility,
+      columnPinning: {
+        left: ['select', 'name'],
+        right: ['actions'],
+      },
+    },
+    onColumnVisibilityChange: setColumnVisibility,
+    defaultColumn: {
+      minSize: 0,
+    },
+    enableRowSelection: (row) =>
+      deletePermitted && !sandboxIsLoading[row.original.id] && row.original.state !== SandboxState.DESTROYED,
+    meta: {
+      sandbox: {
+        sandboxIsLoading,
+        writePermitted,
+        deletePermitted,
+        selectableCount,
+        handleStart,
+        handleStop,
+        handleDelete,
+        handleArchive,
+        handleVnc,
+        handleCreateSshAccess,
+        handleRevokeSshAccess,
+        handleRecover,
+        getRegionName,
+        handleScreenRecordings,
+        handleCreateSnapshot,
+        handleFork,
+        handleViewForks,
+        handleOpenTerminal,
+      },
+    },
+    getRowId: (row) => row.id,
   })
 
   useImperativeHandle(
@@ -131,10 +198,9 @@ export function SandboxTable({
 
   const [pendingBulkAction, setPendingBulkAction] = useState<BulkAction | null>(null)
 
-  const selectedRows = table.getRowModel().rows.filter((row) => row.getIsSelected())
+  const selectedRows = table.getSelectedRowModel().rows
   const hasSelection = selectedRows.length > 0
   const selectedCount = selectedRows.length
-  const totalCount = table.getRowModel().rows.length
   const selectedSandboxes: Sandbox[] = selectedRows.map((row) => row.original)
   const isEmpty = !loading && table.getRowModel().rows.length === 0
   const hasFilters =
@@ -161,27 +227,21 @@ export function SandboxTable({
     (selected: boolean) => {
       if (selected) {
         for (const row of table.getRowModel().rows) {
-          const selectDisabled = sandboxIsLoading[row.original.id] || row.original.state === SandboxState.DESTROYED
-          if (!selectDisabled) {
+          if (row.getCanSelect()) {
             row.toggleSelected(true)
           }
         }
       } else {
-        table.toggleAllRowsSelected(selected)
+        table.toggleAllRowsSelected(false)
       }
     },
-    [sandboxIsLoading, table],
+    [table],
   )
-
-  const selectableCount = useMemo(() => {
-    return data.filter((sandbox) => !sandboxIsLoading[sandbox.id] && sandbox.state !== SandboxState.DESTROYED).length
-  }, [sandboxIsLoading, data])
 
   useSandboxCommands({
     writePermitted,
     deletePermitted,
     selectedCount,
-    totalCount,
     selectableCount,
     toggleAllRowsSelected,
     bulkActionCounts,
@@ -247,7 +307,6 @@ export function SandboxTable({
                     onClick={() => {
                       table.resetGlobalFilter()
                       table.resetColumnFilters()
-                      table.setPageIndex(0)
                     }}
                   >
                     Clear filters
@@ -293,9 +352,10 @@ export function SandboxTable({
                   key={row.id}
                   data-selected={row.getIsSelected() || row.original.id === activeSandboxId ? true : undefined}
                   className={cn('group/table-row transition-all', {
+                    'opacity-50': isShowingPreviousData,
                     'opacity-80 pointer-events-none':
                       sandboxIsLoading[row.original.id] || row.original.state === SandboxState.DESTROYED,
-                    'bg-muted animate-pulse': sandboxStateIsTransitioning[row.original.id],
+                    'bg-muted animate-pulse': isTransitioning(row.original),
                     'cursor-pointer': onRowClick,
                   })}
                   onClick={() => onRowClick?.(row.original)}
@@ -303,9 +363,9 @@ export function SandboxTable({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      onClick={(e) => {
+                      onClick={(event) => {
                         if (cell.column.id === 'select' || cell.column.id === 'actions') {
-                          e.stopPropagation()
+                          event.stopPropagation()
                         }
                       }}
                       className={cn({ 'group-hover/table-row:underline': cell.column.id === 'name' })}
@@ -322,21 +382,10 @@ export function SandboxTable({
         </Table>
       </TableContainer>
 
-      <PageFooterPortal>
-        <CursorPagination
-          pageSize={pageSize}
-          onPageSizeChange={onPageSizeChange}
-          hasNextPage={hasNextPage}
-          hasPreviousPage={hasPreviousPage}
-          onNextPage={onNextPage}
-          onPreviousPage={onPreviousPage}
-        />
-      </PageFooterPortal>
-
       <AnimatePresence>
         {hasSelection && (
           <SelectionToast
-            className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
+            className="absolute bottom-5 left-1/2 z-50 -translate-x-1/2"
             selectedCount={selectedRows.length}
             onClearSelection={() => table.resetRowSelection()}
             onActionClick={handleOpenCommandPalette}

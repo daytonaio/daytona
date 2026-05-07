@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { SandboxFilters, SandboxSorting } from '@/hooks/queries/useSandboxesQuery'
+import { DEFAULT_SANDBOX_SORTING, SandboxFilters, SandboxSorting } from '@/hooks/queries/useSandboxesQuery'
 import {
   Region,
   Sandbox,
@@ -24,9 +24,9 @@ export interface SandboxTableProps {
   ref?: Ref<SandboxTableRef>
   data: Sandbox[]
   sandboxIsLoading: Record<string, boolean>
-  sandboxStateIsTransitioning: Record<string, boolean>
   activeSandboxId?: string
   loading: boolean
+  isShowingPreviousData?: boolean
   snapshots: SnapshotDto[]
   snapshotsDataIsLoading: boolean
   snapshotsDataHasMore?: boolean
@@ -53,12 +53,6 @@ export interface SandboxTableProps {
   handleViewForks: (id: string) => void
   handleRefresh: () => void
   isRefreshing?: boolean
-  pageSize: number
-  hasNextPage: boolean
-  hasPreviousPage: boolean
-  onNextPage: () => void
-  onPreviousPage: () => void
-  onPageSizeChange: (pageSize: number) => void
   sorting: SandboxSorting
   onSortingChange: (sorting: SandboxSorting) => void
   filters: SandboxFilters
@@ -128,10 +122,10 @@ export function convertApiSortingToTableSorting(sorting: SandboxSorting): Sortin
 }
 
 export function convertTableSortingToApiSorting(tableSorting: SortingState): SandboxSorting {
-  if (tableSorting.length === 0) return {}
+  if (tableSorting.length === 0) return DEFAULT_SANDBOX_SORTING
   const { id, desc } = tableSorting[0]
   const field = COLUMN_TO_SORT_FIELD[id]
-  if (!field) return {}
+  if (!field) return DEFAULT_SANDBOX_SORTING
   return {
     field,
     direction: desc ? SandboxListSortDirection.DESC : SandboxListSortDirection.ASC,
@@ -194,18 +188,29 @@ export function convertTableFiltersToApiFilters(tableFilters: ColumnFiltersState
   for (const filter of tableFilters) {
     switch (filter.id) {
       case 'name':
-        filters.name = filter.value as string
+        if (typeof filter.value === 'string' && filter.value.trim()) {
+          filters.name = filter.value
+        }
         break
       case 'state':
-        filters.states = filter.value as SandboxFilters['states']
+        if (Array.isArray(filter.value) && filter.value.length > 0) {
+          filters.states = filter.value as SandboxFilters['states']
+        }
         break
       case 'snapshot':
-        filters.snapshots = filter.value as string[]
+        if (Array.isArray(filter.value) && filter.value.length > 0) {
+          filters.snapshots = filter.value as string[]
+        }
         break
       case 'region':
-        filters.regions = filter.value as string[]
+        if (Array.isArray(filter.value) && filter.value.length > 0) {
+          filters.regions = filter.value as string[]
+        }
         break
       case 'labels': {
+        if (!Array.isArray(filter.value) || filter.value.length === 0) {
+          break
+        }
         const labelStrings = filter.value as string[]
         const labels: Record<string, string> = {}
         for (const labelStr of labelStrings) {
@@ -220,18 +225,27 @@ export function convertTableFiltersToApiFilters(tableFilters: ColumnFiltersState
         break
       }
       case 'lastEvent': {
+        if (!Array.isArray(filter.value)) {
+          break
+        }
         const [after, before] = filter.value as (Date | undefined)[]
         filters.lastEventAfter = after
         filters.lastEventBefore = before
         break
       }
       case 'createdAt': {
+        if (!Array.isArray(filter.value)) {
+          break
+        }
         const [createdAfter, createdBefore] = filter.value as (Date | undefined)[]
         filters.createdAtAfter = createdAfter
         filters.createdAtBefore = createdBefore
         break
       }
       case 'resources': {
+        if (!filter.value) {
+          break
+        }
         const resourceValue = filter.value as ResourceFilterValue
         if (resourceValue.cpu) {
           filters.minCpu = resourceValue.cpu.min
