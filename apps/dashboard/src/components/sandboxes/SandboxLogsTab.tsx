@@ -4,11 +4,11 @@
  */
 
 import { CopyButton } from '@/components/CopyButton'
+import { SearchInput } from '@/components/SearchInput'
 import { SeverityBadge } from '@/components/telemetry/SeverityBadge'
 import { TimeRangeSelector } from '@/components/telemetry/TimeRangeSelector'
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
-import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -18,7 +18,7 @@ import { LogsQueryParams, useSandboxLogs } from '@/hooks/useSandboxLogs'
 import { cn } from '@/lib/utils'
 import { LogEntry } from '@daytona/api-client'
 import { format, subHours } from 'date-fns'
-import { ChevronDown, ChevronLeft, ChevronRight, FileText, RefreshCw, Search } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, FileText, RefreshCw } from 'lucide-react'
 import { useQueryStates } from 'nuqs'
 import React, { useCallback, useMemo, useState } from 'react'
 import { logsSearchParams, SEVERITY_OPTIONS, timeRangeSearchParams } from './SearchParams'
@@ -81,22 +81,31 @@ function LogsErrorState({ onRetry }: { onRetry: () => void }) {
   )
 }
 
-function LogsEmptyState() {
+function LogsEmptyState({ hasFilters, onClearFilters }: { hasFilters: boolean; onClearFilters: () => void }) {
   return (
     <Empty className="flex-1 border-0">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <FileText className="size-4" />
         </EmptyMedia>
-        <EmptyTitle>No logs found</EmptyTitle>
-        <EmptyDescription>
-          Try adjusting your time range or filters.{' '}
-          <a href={`${DAYTONA_DOCS_URL}/en/observability/otel-collection`} target="_blank" rel="noopener noreferrer">
-            Learn more about observability
-          </a>
-          .
-        </EmptyDescription>
+        <EmptyTitle>{hasFilters ? 'No matching logs found' : 'No logs yet'}</EmptyTitle>
+        {hasFilters ? (
+          <EmptyDescription>No logs matched your current filters.</EmptyDescription>
+        ) : (
+          <EmptyDescription>
+            Logs will appear here when the sandbox emits telemetry.{' '}
+            <a href={`${DAYTONA_DOCS_URL}/en/observability/otel-collection`} target="_blank" rel="noopener noreferrer">
+              Learn more about observability
+            </a>
+            .
+          </EmptyDescription>
+        )}
       </EmptyHeader>
+      {hasFilters ? (
+        <Button variant="outline" size="sm" onClick={onClearFilters}>
+          Clear filters
+        </Button>
+      ) : null}
     </Empty>
   )
 }
@@ -104,14 +113,14 @@ function LogsEmptyState() {
 export function SandboxLogsTab({ sandboxId }: { sandboxId: string }) {
   const [params, setParams] = useQueryStates(logsSearchParams)
   const [timeRange, setTimeRange] = useQueryStates(timeRangeSearchParams)
-  const [searchInput, setSearchInput] = useState(params.search)
   const [expandedRow, setExpandedRow] = useState<number | null>(null)
+  const [timeRangeSelectorKey, setTimeRangeSelectorKey] = useState(0)
   const limit = 50
 
   const resolvedFrom = useMemo(() => timeRange.from ?? subHours(new Date(), 1), [timeRange.from])
   const resolvedTo = useMemo(() => timeRange.to ?? new Date(), [timeRange.to])
 
-  const queryParams: LogsQueryParams = useMemo(
+  const requestParams: LogsQueryParams = useMemo(
     () => ({
       from: resolvedFrom,
       to: resolvedTo,
@@ -123,7 +132,7 @@ export function SandboxLogsTab({ sandboxId }: { sandboxId: string }) {
     [resolvedFrom, resolvedTo, params.logsPage, params.severity, params.search],
   )
 
-  const { data, isLoading, isError, refetch } = useSandboxLogs(sandboxId, queryParams)
+  const { data, isLoading, isError, refetch } = useSandboxLogs(sandboxId, requestParams)
 
   const handleTimeRangeChange = useCallback(
     (from: Date, to: Date) => {
@@ -133,9 +142,17 @@ export function SandboxLogsTab({ sandboxId }: { sandboxId: string }) {
     [setTimeRange, setParams],
   )
 
-  const handleSearch = useCallback(() => {
-    setParams({ search: searchInput, logsPage: 1 })
-  }, [searchInput, setParams])
+  const handleTimeRangeClear = useCallback(() => {
+    setTimeRange({ from: null, to: null })
+    setParams({ logsPage: 1 })
+  }, [setParams, setTimeRange])
+
+  const handleSearchChange = useCallback(
+    (search: string) => {
+      setParams({ search, logsPage: 1 })
+    },
+    [setParams],
+  )
 
   const handleSeverityChange = useCallback(
     (value: string) => {
@@ -148,27 +165,32 @@ export function SandboxLogsTab({ sandboxId }: { sandboxId: string }) {
     [setParams],
   )
 
+  const hasFilters = Boolean(params.search.trim() || params.severity.length > 0 || timeRange.from || timeRange.to)
+
+  const handleClearFilters = useCallback(() => {
+    setParams({ search: '', severity: [], logsPage: 1 })
+    setTimeRange({ from: null, to: null })
+    setTimeRangeSelectorKey((key) => key + 1)
+  }, [setParams, setTimeRange])
+
   return (
     <div className="flex flex-col h-full gap-4 p-4">
       <div className="flex flex-wrap items-center gap-3 shrink-0">
         <TimeRangeSelector
+          key={timeRangeSelectorKey}
           onChange={handleTimeRangeChange}
+          onClear={handleTimeRangeClear}
           defaultRange={timeRange.from && timeRange.to ? { from: timeRange.from, to: timeRange.to } : undefined}
           className="w-auto"
         />
 
-        <div className="flex items-center gap-2">
-          <Input
-            placeholder="Search logs..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            className="w-48"
-          />
-          <Button variant="outline" size="icon-sm" onClick={handleSearch}>
-            <Search className="size-4" />
-          </Button>
-        </div>
+        <SearchInput
+          debounced
+          value={params.search}
+          onValueChange={handleSearchChange}
+          placeholder="Search logs..."
+          containerClassName="w-48"
+        />
 
         <Select value={params.severity.length === 1 ? params.severity[0] : ''} onValueChange={handleSeverityChange}>
           <SelectTrigger className="w-32" size="sm">
@@ -199,7 +221,7 @@ export function SandboxLogsTab({ sandboxId }: { sandboxId: string }) {
         </div>
       ) : !data?.items?.length ? (
         <div className="flex-1 min-h-0 border rounded-md flex">
-          <LogsEmptyState />
+          <LogsEmptyState hasFilters={hasFilters} onClearFilters={handleClearFilters} />
         </div>
       ) : (
         <ScrollArea

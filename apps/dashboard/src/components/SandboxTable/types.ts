@@ -3,22 +3,29 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { SandboxFilters, SandboxSorting } from '@/hooks/queries/useSandboxesQuery'
 import {
-  SandboxListSortDirection,
-  SandboxListSortField,
   Region,
   Sandbox,
+  SandboxListSortDirection,
+  SandboxListSortField,
   SandboxState,
   SnapshotDto,
 } from '@daytona/api-client'
 import { ColumnFiltersState, SortingState, Table } from '@tanstack/react-table'
-import { SandboxFilters, SandboxSorting } from '@/hooks/useSandboxes'
+import type { Ref } from 'react'
 import { ResourceFilterValue } from './filters/ResourceFilter'
 
+export interface SandboxTableRef {
+  table: Table<Sandbox>
+}
+
 export interface SandboxTableProps {
+  ref?: Ref<SandboxTableRef>
   data: Sandbox[]
   sandboxIsLoading: Record<string, boolean>
   sandboxStateIsTransitioning: Record<string, boolean>
+  activeSandboxId?: string
   loading: boolean
   snapshots: SnapshotDto[]
   snapshotsDataIsLoading: boolean
@@ -36,7 +43,6 @@ export interface SandboxTableProps {
   handleBulkArchive: (ids: string[]) => void
   handleArchive: (id: string) => void
   handleVnc: (id: string) => void
-  getWebTerminalUrl: (id: string) => Promise<string | null>
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
   onRowClick?: (sandbox: Sandbox) => void
@@ -57,6 +63,7 @@ export interface SandboxTableProps {
   onSortingChange: (sorting: SandboxSorting) => void
   filters: SandboxFilters
   onFiltersChange: (filters: SandboxFilters) => void
+  handleOpenTerminal: (sandbox: Sandbox) => void
 }
 
 export interface SandboxTableActionsProps {
@@ -70,12 +77,12 @@ export interface SandboxTableActionsProps {
   onDelete: (id: string) => void
   onArchive: (id: string) => void
   onVnc: (id: string) => void
-  onOpenWebTerminal: (id: string) => void
   onCreateSshAccess: (id: string) => void
   onRevokeSshAccess: (id: string) => void
   onFork?: () => void
   onCreateSnapshot?: () => void
   onViewForks?: () => void
+  onOpenTerminal?: () => void
   onRecover: (id: string) => void
   onScreenRecordings: (id: string) => void
 }
@@ -103,8 +110,8 @@ const SORT_FIELD_TO_COLUMN: Record<string, string> = {
   [SandboxListSortField.LAST_ACTIVITY_AT]: 'lastEvent',
   [SandboxListSortField.CREATED_AT]: 'createdAt',
   [SandboxListSortField.CPU]: 'cpu',
-  [SandboxListSortField.MEMORY_GI_B]: 'memory',
-  [SandboxListSortField.DISK_GI_B]: 'disk',
+  [SandboxListSortField.MEMORY_GIB]: 'memory',
+  [SandboxListSortField.DISK_GIB]: 'disk',
 }
 
 const COLUMN_TO_SORT_FIELD: Record<string, SandboxListSortField> = {

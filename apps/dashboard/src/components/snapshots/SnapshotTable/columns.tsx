@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { CopyButton } from '@/components/CopyButton'
 import { TimestampTooltip } from '@/components/TimestampTooltip'
 import { getRelativeTimeString } from '@/lib/utils'
 import { SnapshotDto, SnapshotState } from '@daytona/api-client'
@@ -143,13 +144,14 @@ const columns: ColumnDef<SnapshotDto>[] = [
     cell: ({ row }) => {
       const snapshot = row.original
       return (
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-1 min-w-0 group/copy-button">
           <span className="truncate">{snapshot.name}</span>
           {snapshot.general && (
-            <Badge variant="secondary" className="shrink-0">
+            <Badge variant="secondary" className="ml-1 shrink-0">
               System
             </Badge>
           )}
+          <CopyButton value={snapshot.name} size="icon-xs" autoHide tooltipText="Copy name" />
         </div>
       )
     },
@@ -168,7 +170,23 @@ const columns: ColumnDef<SnapshotDto>[] = [
           </Badge>
         )
       }
-      return <div className="truncate">{snapshot.imageName}</div>
+
+      if (!snapshot.imageName && !snapshot.buildInfo) {
+        return (
+          <Badge variant="secondary" className="rounded-sm px-1 font-medium">
+            FROM SANDBOX
+          </Badge>
+        )
+      }
+
+      return snapshot.imageName ? (
+        <div className="flex items-center gap-1 min-w-0 group/copy-button">
+          <span className="truncate">{snapshot.imageName}</span>
+          <CopyButton value={snapshot.imageName} size="icon-xs" autoHide tooltipText="Copy image" />
+        </div>
+      ) : (
+        <div className="truncate text-muted-foreground/50">-</div>
+      )
     },
   },
   {

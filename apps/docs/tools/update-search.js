@@ -79,16 +79,16 @@ function processContent(content) {
 
 function cleanMarkdown(text) {
   return text
-    .replace(/```[\s\S]*?```/g, '') // remove code blocks
-    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1') // remove images but keep alt text
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // remove links but keep text
-    .replace(/^#{1,6}\s+/gm, '') // remove headings
-    .replace(/[*_~`]/g, '') // remove formatting characters
-    .replace(/<[^>]+>/g, '') // remove HTML tags
-    .replace(/\{[^}]*\}/g, '') // remove curly braces and their content
-    .replace(/\|/g, '') // remove pipe characters
-    .replace(/^[\s\-:]+$/gm, '') // remove lines that are just whitespace, dashes, or colons
-    .replace(/\n{3,}/g, '\n\n') // collapse multiple newlines into two
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/[*_~`]/g, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\{[^}]*\}/g, '')
+    .replace(/\|/g, '')
+    .replace(/^[\s\-:]+$/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
     .trim()
 }
 
@@ -97,7 +97,6 @@ function extractSearchableContent(text) {
 }
 
 function extractSentences(text) {
-  // Return text
   const match = text.match(/[^.!?]*[.!?]/g)
   const sentences = match ? match.map(m => m.trim()) : text.trim().split('\n')
   return sentences.length > 0
@@ -160,7 +159,6 @@ function extractCodeSnippets(content) {
 }
 
 function extractHeadings(content, tag, slug) {
-  // First, temporarily replace code blocks with placeholders to avoid matching # inside code
   const codeBlockRegex = /```[\s\S]*?```/g
   const codeBlocks = []
   let codeBlockIndex = 0
@@ -171,13 +169,11 @@ function extractHeadings(content, tag, slug) {
     return placeholder
   })
 
-  // Extract headings from content without code blocks
   const headingRegex = /^(#{1,6})\s+(.+)$/gm
   const headings = []
   const headingMatches = []
   let match
 
-  // Collect all heading positions from content WITHOUT code blocks -> we use them later to restore code blocks
   while ((match = headingRegex.exec(contentWithoutCode)) !== null) {
     headingMatches.push({
       title: match[2].trim().replace(/\\_/g, '_'),
@@ -186,17 +182,14 @@ function extractHeadings(content, tag, slug) {
     })
   }
 
-  // Process each heading content
   for (let i = 0; i < headingMatches.length; i++) {
     const current = headingMatches[i]
     const next = headingMatches[i + 1]
 
-    // Content below current heading and the next heading (or end)
     const startIndex = current.index + current.length
     const endIndex = next ? next.index : contentWithoutCode.length
     let currentTextBelow = contentWithoutCode.substring(startIndex, endIndex)
 
-    // Restore code blocks
     currentTextBelow = currentTextBelow.replace(
       /___CODE_BLOCK_(\d+)___/g,
       (match, index) => {
@@ -208,7 +201,7 @@ function extractHeadings(content, tag, slug) {
 
     const heading = current.title
     const description = extractRealSentence(cleanMarkdown(currentTextBelow))
-    const searchableContent = extractSearchableContent(currentTextBelow)
+    const content = extractSearchableContent(currentTextBelow)
     const codeSnippets = extractCodeSnippets(currentTextBelow)
     const headingSlug = `${slug}#${heading
       .toLowerCase()
@@ -218,7 +211,7 @@ function extractHeadings(content, tag, slug) {
     headings.push({
       title: heading,
       description,
-      content: searchableContent,
+      content,
       codeSnippets,
       tag,
       url: `/docs${headingSlug}`,
@@ -487,6 +480,14 @@ function main() {
       'utf8'
     )
   )
+
+  const allRecords = fileRecords.flatMap(({ records }) => records)
+  fs.writeFileSync(
+    path.join(outputDir, 'ai.json'),
+    JSON.stringify(allRecords, null, 2),
+    'utf8'
+  )
+
   console.log('search index updated')
 }
 

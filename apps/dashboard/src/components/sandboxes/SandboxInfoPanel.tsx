@@ -5,27 +5,30 @@
 
 import { CopyButton } from '@/components/CopyButton'
 import { ResourceChip } from '@/components/ResourceChip'
+import { SandboxLabel } from '@/components/SandboxLabel'
 import { TimestampTooltip } from '@/components/TimestampTooltip'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { ButtonGroup } from '@/components/ui/button-group'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn, formatDuration, getRelativeTimeString } from '@/lib/utils'
 import { Sandbox } from '@daytona/api-client'
-import { AlertCircle, Tag } from 'lucide-react'
-import React, { useMemo } from 'react'
+import { AlertCircle, ArrowUpRight, KeyRound, Tag, UserRoundX } from 'lucide-react'
+import React, { ReactNode, useMemo } from 'react'
 
 export function InfoSection({
   title,
   children,
   className,
 }: {
-  title: string
-  children: React.ReactNode
+  title?: ReactNode
+  children: ReactNode
   className?: string
 }) {
   return (
     <div className={cn('px-5 py-4 border-b border-border last:border-b-0', className)}>
-      <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">{title}</p>
+      {title && <div className="text-xs uppercase tracking-widest text-muted-foreground mb-2">{title}</div>}
       {children}
     </div>
   )
@@ -36,7 +39,7 @@ export function InfoRow({
   children,
   className,
 }: {
-  label: string
+  label: React.ReactNode
   children: React.ReactNode
   className?: string
 }) {
@@ -51,12 +54,27 @@ export function InfoRow({
 interface SandboxInfoPanelProps {
   sandbox: Sandbox
   getRegionName: (id: string) => string | undefined
+  actionsDisabled?: boolean
+  writePermitted?: boolean
+  onCreateSshAccess?: () => void
+  onRevokeSshAccess?: () => void
+  onScreenRecordings?: () => void
 }
 
-export function SandboxInfoPanel({ sandbox, getRegionName }: SandboxInfoPanelProps) {
+export function SandboxInfoPanel({
+  sandbox,
+  getRegionName,
+  actionsDisabled = false,
+  writePermitted = false,
+  onCreateSshAccess,
+  onRevokeSshAccess,
+  onScreenRecordings,
+}: SandboxInfoPanelProps) {
   const labelEntries = useMemo(() => {
     return sandbox.labels ? Object.entries(sandbox.labels) : []
   }, [sandbox.labels])
+  const showRecordingsSection = !!onScreenRecordings
+  const showSshSection = !!onCreateSshAccess || !!onRevokeSshAccess
 
   return (
     <div className="flex flex-col">
@@ -69,7 +87,7 @@ export function SandboxInfoPanel({ sandbox, getRegionName }: SandboxInfoPanelPro
         </div>
       )}
 
-      <InfoSection title="General">
+      <InfoSection title={null}>
         <InfoRow label="Region" className="-mr-2">
           <div className="flex items-center gap-1">
             <span className="truncate">{getRegionName(sandbox.target) ?? sandbox.target}</span>
@@ -85,6 +103,9 @@ export function SandboxInfoPanel({ sandbox, getRegionName }: SandboxInfoPanelPro
           ) : (
             <span className="text-muted-foreground font-normal">—</span>
           )}
+        </InfoRow>
+        <InfoRow label="Preview access">
+          {sandbox.public ? 'Public' : <span className="text-muted-foreground font-normal">Private</span>}
         </InfoRow>
       </InfoSection>
 
@@ -124,18 +145,44 @@ export function SandboxInfoPanel({ sandbox, getRegionName }: SandboxInfoPanelPro
         </InfoRow>
       </InfoSection>
 
+      {showSshSection && (
+        <div className="px-5 py-3 border-b border-border">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs uppercase tracking-widest text-muted-foreground">SSH Access</span>
+            <ButtonGroup>
+              {onCreateSshAccess && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onCreateSshAccess}
+                  disabled={actionsDisabled || !writePermitted}
+                >
+                  <KeyRound className="size-4" />
+                  Create
+                </Button>
+              )}
+              {onRevokeSshAccess && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onRevokeSshAccess}
+                  disabled={actionsDisabled || !writePermitted}
+                >
+                  <UserRoundX className="size-4" />
+                  Revoke
+                </Button>
+              )}
+            </ButtonGroup>
+          </div>
+        </div>
+      )}
+
       <InfoSection title="Labels">
         {labelEntries.length > 0 ? (
           <div className="max-h-[250px] overflow-y-auto scrollbar-sm">
             <div className="flex flex-wrap gap-2 py-1">
               {labelEntries.map(([key, value]) => (
-                <code
-                  key={key}
-                  className="flex items-center gap-1 bg-muted border border-border rounded px-2 py-1 text-xs font-mono"
-                >
-                  <span className="text-muted-foreground">{key}:</span>
-                  <span>{value}</span>
-                </code>
+                <SandboxLabel key={key} labelKey={key} value={value} />
               ))}
             </div>
           </div>
@@ -151,7 +198,24 @@ export function SandboxInfoPanel({ sandbox, getRegionName }: SandboxInfoPanelPro
         )}
       </InfoSection>
 
-      <InfoSection title="Timestamps">
+      {showRecordingsSection && (
+        <div className="px-5 py-3 border-b border-border">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs uppercase tracking-widest text-muted-foreground">Recordings</span>
+            <Button
+              variant="link"
+              className="h-auto px-0 py-0 text-sm"
+              onClick={onScreenRecordings}
+              disabled={actionsDisabled}
+            >
+              View
+              <ArrowUpRight className="size-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <InfoSection title="Activity">
         <InfoRow label="Created">
           <TimestampTooltip timestamp={sandbox.createdAt}>
             <span>{getRelativeTimeString(sandbox.createdAt).relativeTimeString}</span>

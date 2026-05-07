@@ -33,14 +33,15 @@ const getCurrentDate = () => {
 
 const getVersionHeader = () => {
   return [
-    `# Daytona Documentation v${version}`,
+    `# Daytona Documentation`,
+    `# ${DOCS_BASE_URL}`,
     `# Generated on: ${getCurrentDate()}`,
-    '',
   ].join('\n')
 }
 
 // Only include English docs
 const DOCS_PATH = path.join(__dirname, '../src/content/docs/en')
+const SIDEBAR_CONFIG_PATH = path.join(__dirname, '../src/sidebar-config.ts')
 const EXCLUDE_FILES = new Set(['404.md', 'api.mdx'])
 
 const ensureLeadingSlash = value =>
@@ -90,14 +91,23 @@ const extractSubHeadings = (content, slug) => {
   return headings
 }
 
+const prependTitleHeading = (content, title) => {
+  if (!title) return content
+  if (/^#\s+/m.test(content.split('\n', 1)[0] || '')) return content
+  return `# ${title}\n\n${content}`
+}
+
 const parseMarkdownFile = (filePath, fileContent) => {
   const { content, data } = matter(fileContent)
-  const cleanContent = processMarkdownContent(content)
+  const processedContent = processMarkdownContent(content)
+  const title =
+    data.title ||
+    processedContent.match(/^#\s+(.*)/)?.[1]?.trim() ||
+    'Untitled'
+  const cleanContent = prependTitleHeading(processedContent, title)
   const rewrittenContent = rewriteLinksToMd(cleanContent, DOCS_BASE_URL)
   const slug = getSlugFromFilePath(filePath)
   const normalizedSlug = normalizeSlugPath(slug)
-  const title =
-    data.title || cleanContent.match(/^#\s+(.*)/)?.[1]?.trim() || 'Untitled'
 
   return {
     entries: [
@@ -115,37 +125,129 @@ const parseMarkdownFile = (filePath, fileContent) => {
   }
 }
 
+const resolveSlugToFilePath = relativeSlug => {
+  if (!relativeSlug) {
+    const indexPath = path.join(DOCS_PATH, 'index.mdx')
+    return fs.existsSync(indexPath) ? indexPath : null
+  }
+
+  const candidates = [
+    path.join(DOCS_PATH, `${relativeSlug}.mdx`),
+    path.join(DOCS_PATH, `${relativeSlug}.md`),
+    path.join(DOCS_PATH, relativeSlug, 'index.mdx'),
+    path.join(DOCS_PATH, relativeSlug, 'index.md'),
+  ]
+  return candidates.find(candidate => fs.existsSync(candidate)) || null
+}
+
+const sidebarHrefToRelativeSlug = href => {
+  if (typeof href !== 'string' || !href.startsWith('/docs')) return null
+  return href.replace(/^\/docs\/?/, '')
+}
+
+const listAutopopulateDirSlugs = autoDir => {
+  const relative = autoDir.replace(/^\/docs\/?/, '')
+  if (!relative) return []
+
+  const dirPath = path.join(DOCS_PATH, relative)
+  if (!fs.existsSync(dirPath) || !fs.statSync(dirPath).isDirectory()) {
+    return []
+  }
+
+  return fs
+    .readdirSync(dirPath)
+    .filter(file => !['index.md', 'index.mdx'].includes(file))
+    .filter(file => file.endsWith('.md') || file.endsWith('.mdx'))
+    .sort()
+    .map(file => `${relative}/${file.replace(/\.(md|mdx)$/, '')}`)
+}
+
+const buildOrderedFilePaths = () => {
+  const orderedPaths = []
+  const seenPaths = new Set()
+
+  const addSlug = relativeSlug => {
+    const filePath = resolveSlugToFilePath(relativeSlug)
+    if (!filePath) return
+    if (seenPaths.has(filePath)) return
+    if (EXCLUDE_FILES.has(path.basename(filePath))) return
+    orderedPaths.push(filePath)
+    seenPaths.add(filePath)
+  }
+
+  if (fs.existsSync(SIDEBAR_CONFIG_PATH)) {
+    const sidebarSource = fs.readFileSync(SIDEBAR_CONFIG_PATH, 'utf8')
+    const groupChunks = sidebarSource.split(/(?=type:\s*['"]group['"])/g)
+
+    for (const chunk of groupChunks) {
+      if (!/type:\s*['"]group['"]/.test(chunk)) continue
+      if (/category:\s*NavigationCategory\.MAIN\b/.test(chunk)) continue
+
+      const hrefRegex = /href:\s*localizePath\(\s*['"]([^'"]+)['"]/g
+      let match
+      while ((match = hrefRegex.exec(chunk)) !== null) {
+        const slug = sidebarHrefToRelativeSlug(match[1])
+        if (slug !== null) addSlug(slug)
+      }
+
+      const autoMatch = chunk.match(
+        /autopopulateFromDir:\s*localizePath\(\s*['"]([^'"]+)['"]/
+      )
+      if (autoMatch) {
+        for (const slug of listAutopopulateDirSlugs(autoMatch[1])) {
+          addSlug(slug)
+        }
+      }
+    }
+  } else {
+    console.warn(
+      `Sidebar config not found at ${SIDEBAR_CONFIG_PATH}; falling back to filesystem order.`
+    )
+  }
+
+  const traverseAndAppend = directory => {
+    fs.readdirSync(directory)
+      .sort()
+      .forEach(file => {
+        const fullPath = path.join(directory, file)
+        const stat = fs.statSync(fullPath)
+        if (stat.isDirectory()) {
+          traverseAndAppend(fullPath)
+        } else if (
+          stat.isFile() &&
+          (file.endsWith('.md') || file.endsWith('.mdx')) &&
+          !EXCLUDE_FILES.has(file) &&
+          !seenPaths.has(fullPath)
+        ) {
+          orderedPaths.push(fullPath)
+          seenPaths.add(fullPath)
+        }
+      })
+  }
+  traverseAndAppend(DOCS_PATH)
+
+  return orderedPaths
+}
+
 const searchDocs = () => {
   const results = []
   const docs = []
   const fullContentArray = []
 
-  const traverseDirectory = directory => {
-    fs.readdirSync(directory).forEach(file => {
-      const fullPath = path.join(directory, file)
-      const stat = fs.statSync(fullPath)
+  const orderedFilePaths = buildOrderedFilePaths()
 
-      if (stat.isDirectory()) {
-        traverseDirectory(fullPath)
-      } else if (
-        stat.isFile() &&
-        (file.endsWith('.md') || file.endsWith('.mdx')) &&
-        !EXCLUDE_FILES.has(file)
-      ) {
-        const fileContent = fs.readFileSync(fullPath, 'utf8')
-        const { entries, doc, cleanContent } = parseMarkdownFile(
-          fullPath,
-          fileContent
-        )
+  for (const fullPath of orderedFilePaths) {
+    const fileContent = fs.readFileSync(fullPath, 'utf8')
+    const { entries, doc, cleanContent } = parseMarkdownFile(
+      fullPath,
+      fileContent
+    )
 
-        fullContentArray.push(cleanContent)
-        results.push(...entries)
-        docs.push(doc)
-      }
-    })
+    fullContentArray.push(cleanContent)
+    results.push(...entries)
+    docs.push(doc)
   }
 
-  traverseDirectory(DOCS_PATH)
   return {
     results,
     docs,
@@ -156,11 +258,17 @@ const searchDocs = () => {
 const generateLlmsTxtFile = docsData => {
   const llmsContent = [
     getVersionHeader(),
+    `# Full documentation: ${DOCS_BASE_URL}/llms-full.txt`,
+    '',
     '# Daytona',
     '',
-    '> Secure and Elastic Infrastructure for Running Your Al-Generated Code.',
+    'Daytona is an open-source, secure and elastic infrastructure for running AI-generated code. Daytona provides full composable computers — [sandboxes](https://daytona.io/docs/en/sandboxes.md) — with complete isolation, a dedicated kernel, filesystem, network stack, and allocated vCPU, RAM, and disk.',
     '',
-    '## Docs',
+    'Sandboxes are the core component of the Daytona platform, spinning up in under 90ms from code to execution and running any code in Python, TypeScript, and JavaScript. Built on OCI/Docker compatibility, massive parallelization, and unlimited persistence, sandboxes deliver consistent, predictable environments for agent workflows.',
+    '',
+    'Agents and developers interact with sandboxes programmatically using the Daytona SDKs, API, and CLI. Operations span sandbox lifecycle management, filesystem operations, process and code execution, and runtime configuration. Our stateful environment snapshots enable persistent agent operations across sessions, making Daytona the ideal foundation for AI agent architectures.',
+    '',
+    '## Daytona Documentation',
     '',
     ...docsData.map(doc => `- [${doc.title}](${PUBLIC_WEB_URL}${doc.url})`),
   ]

@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils'
 import { format, subDays, subHours, subMinutes } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
-import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { DateRange } from 'react-day-picker'
 
 // Simple configuration object
@@ -67,11 +67,31 @@ export interface DateRangePickerProps {
   timeSelection?: boolean
   disabled?: boolean
   defaultSelectedQuickRange?: string
+  selectedQuickRange?: string | null
   contentAlign?: 'start' | 'end'
 }
 
 export interface DateRangePickerRef {
   getCurrentRange: () => DateRange
+}
+
+function formatTime(date: Date) {
+  return format(date, 'HH:mm:ss')
+}
+
+function rangesMatch(left: DateRange, right: DateRange, toleranceMs = 60_000) {
+  if (!left.from && !left.to && !right.from && !right.to) {
+    return true
+  }
+
+  if (!left.from || !left.to || !right.from || !right.to) {
+    return false
+  }
+
+  return (
+    Math.abs(left.from.getTime() - right.from.getTime()) <= toleranceMs &&
+    Math.abs(left.to.getTime() - right.to.getTime()) <= toleranceMs
+  )
 }
 
 export const DateRangePicker = forwardRef<DateRangePickerRef, DateRangePickerProps>(
@@ -85,17 +105,31 @@ export const DateRangePicker = forwardRef<DateRangePickerRef, DateRangePickerPro
       timeSelection = true,
       disabled = false,
       defaultSelectedQuickRange,
+      selectedQuickRange: controlledSelectedQuickRange,
       contentAlign = 'start',
     },
     ref,
   ) => {
     const [isOpen, setIsOpen] = useState(false)
-    const [selectedQuickRange, setSelectedQuickRange] = useState<string | null>(defaultSelectedQuickRange ?? null)
-    const [fromTime, setFromTime] = useState<string>('00:00:00')
-    const [toTime, setToTime] = useState<string>('23:59:59')
+    const [selectedQuickRange, setSelectedQuickRange] = useState<string | null>(
+      controlledSelectedQuickRange ?? defaultSelectedQuickRange ?? null,
+    )
+    const [fromTime, setFromTime] = useState<string>(() => (value?.from ? formatTime(value.from) : '00:00:00'))
+    const [toTime, setToTime] = useState<string>(() => (value?.to ? formatTime(value.to) : '23:59:59'))
+    const selectedQuickRangeRef = useRef(selectedQuickRange)
 
     // Internal state to track the current selection for preview
     const [internalRange, setInternalRange] = useState<DateRange>(value || { from: undefined, to: undefined })
+
+    useEffect(() => {
+      selectedQuickRangeRef.current = selectedQuickRange
+    }, [selectedQuickRange])
+
+    useEffect(() => {
+      if (controlledSelectedQuickRange !== undefined) {
+        setSelectedQuickRange(controlledSelectedQuickRange)
+      }
+    }, [controlledSelectedQuickRange])
 
     // Expose methods to parent component
     useImperativeHandle(
@@ -120,8 +154,39 @@ export const DateRangePicker = forwardRef<DateRangePickerRef, DateRangePickerPro
 
     // Sync internal state when parent value changes
     useEffect(() => {
-      setInternalRange(value || { from: undefined, to: undefined })
-    }, [value])
+      const nextRange = value || { from: undefined, to: undefined }
+
+      setInternalRange(nextRange)
+
+      if (value?.from) {
+        setFromTime(formatTime(value.from))
+      }
+
+      if (value?.to) {
+        setToTime(formatTime(value.to))
+      }
+
+      const currentSelectedQuickRange = selectedQuickRangeRef.current
+
+      if (!currentSelectedQuickRange) {
+        return
+      }
+
+      if (currentSelectedQuickRange === 'All time') {
+        if (nextRange.from || nextRange.to) {
+          setSelectedQuickRange(null)
+        }
+        return
+      }
+
+      const matchingRange = createTimeRangesFromConfig(quickRanges).find(
+        (timeRange) => timeRange.label === currentSelectedQuickRange,
+      )
+
+      if (!matchingRange || !rangesMatch(nextRange, matchingRange.getRange())) {
+        setSelectedQuickRange(null)
+      }
+    }, [quickRanges, value])
 
     const handleQuickRangeSelect = (range: DateRange, label: string) => {
       setSelectedQuickRange(label)

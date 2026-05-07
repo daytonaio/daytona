@@ -14,7 +14,7 @@ import { formatMoney } from '@/lib/utils'
 import { format, subHours } from 'date-fns'
 import { DollarSign, RefreshCw } from 'lucide-react'
 import { useQueryStates } from 'nuqs'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { timeRangeSearchParams } from './SearchParams'
 
 function formatTimestamp(timestamp: string) {
@@ -81,22 +81,32 @@ function SpendingErrorState({ onRetry }: { onRetry: () => void }) {
   )
 }
 
-function SpendingEmptyState() {
+function SpendingEmptyState({ hasFilters, onClearFilters }: { hasFilters: boolean; onClearFilters: () => void }) {
   return (
     <Empty className="flex-1 border-0">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <DollarSign className="size-4" />
         </EmptyMedia>
-        <EmptyTitle>No usage periods found</EmptyTitle>
-        <EmptyDescription>Try adjusting your time range.</EmptyDescription>
+        <EmptyTitle>{hasFilters ? 'No matching usage periods found' : 'No usage periods yet'}</EmptyTitle>
+        <EmptyDescription>
+          {hasFilters
+            ? 'No usage periods matched your current filters.'
+            : 'Usage periods will appear here after the sandbox has billable activity.'}
+        </EmptyDescription>
       </EmptyHeader>
+      {hasFilters ? (
+        <Button variant="outline" size="sm" onClick={onClearFilters}>
+          Clear filters
+        </Button>
+      ) : null}
     </Empty>
   )
 }
 
 export function SandboxSpendingTab({ sandboxId }: { sandboxId: string }) {
   const [timeRange, setTimeRange] = useQueryStates(timeRangeSearchParams)
+  const [timeRangeSelectorKey, setTimeRangeSelectorKey] = useState(0)
 
   const resolvedFrom = useMemo(() => timeRange.from ?? subHours(new Date(), 24), [timeRange.from])
   const resolvedTo = useMemo(() => timeRange.to ?? new Date(), [timeRange.to])
@@ -111,11 +121,24 @@ export function SandboxSpendingTab({ sandboxId }: { sandboxId: string }) {
     [setTimeRange],
   )
 
+  const handleTimeRangeClear = useCallback(() => {
+    setTimeRange({ from: null, to: null })
+  }, [setTimeRange])
+
+  const hasFilters = Boolean(timeRange.from || timeRange.to)
+
+  const handleClearFilters = useCallback(() => {
+    setTimeRange({ from: null, to: null })
+    setTimeRangeSelectorKey((key) => key + 1)
+  }, [setTimeRange])
+
   return (
     <div className="flex flex-col h-full gap-4 p-4">
       <div className="flex flex-wrap items-center gap-3 shrink-0">
         <TimeRangeSelector
+          key={timeRangeSelectorKey}
           onChange={handleTimeRangeChange}
+          onClear={handleTimeRangeClear}
           defaultRange={timeRange.from && timeRange.to ? { from: timeRange.from, to: timeRange.to } : undefined}
           defaultSelectedQuickRange="Last 24 hours"
           className="w-auto"
@@ -135,7 +158,7 @@ export function SandboxSpendingTab({ sandboxId }: { sandboxId: string }) {
         </div>
       ) : !data?.length ? (
         <div className="flex-1 min-h-0 border rounded-md flex">
-          <SpendingEmptyState />
+          <SpendingEmptyState hasFilters={hasFilters} onClearFilters={handleClearFilters} />
         </div>
       ) : (
         <ScrollArea

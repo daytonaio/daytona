@@ -97,6 +97,19 @@ definitions:
       - snapshot
       - userId
     type: object
+  CreateSnapshotFromSandboxRequest:
+    properties:
+      name:
+        example: my-snapshot:latest
+        type: string
+      organizationId:
+        type: string
+      registry:
+        $ref: '#/definitions/RegistryDTO'
+    required:
+      - name
+      - registry
+    type: object
   ErrorResponse:
     description: Error response
     properties:
@@ -823,6 +836,53 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Resize sandbox
+      tags:
+        - sandbox
+  /sandboxes/{sandboxId}/snapshot-from-sandbox:
+    post:
+      description: Commit the sandbox container filesystem and push the image to the
+        supplied registry under the canonical daytona-{hash}:daytona tag.
+      operationId: SnapshotFromSandbox
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Snapshot from sandbox
+          in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateSnapshotFromSandboxRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SnapshotInfoResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Snapshot a running sandbox
       tags:
         - sandbox
   /sandboxes/{sandboxId}/start:

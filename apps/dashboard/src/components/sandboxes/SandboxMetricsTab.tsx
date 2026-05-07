@@ -3,22 +3,22 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useState, useCallback, useMemo } from 'react'
-import { useQueryStates } from 'nuqs'
-import { useSandboxMetrics, MetricsQueryParams } from '@/hooks/useSandboxMetrics'
 import { TimeRangeSelector } from '@/components/telemetry/TimeRangeSelector'
 import { Button } from '@/components/ui/button'
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart'
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from 'recharts'
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
-import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
-import { RefreshCw, BarChart3 } from 'lucide-react'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { format, subHours } from 'date-fns'
-import { MetricSeries } from '@daytona/api-client'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { getMetricDisplayName } from '@/constants/metrics'
+import { MetricsQueryParams, useSandboxMetrics } from '@/hooks/useSandboxMetrics'
+import { MetricSeries } from '@daytona/api-client'
+import { format, subHours } from 'date-fns'
+import { BarChart3, RefreshCw } from 'lucide-react'
+import { useQueryStates } from 'nuqs'
+import React, { useCallback, useMemo, useState } from 'react'
+import { CartesianGrid, Legend, Line, LineChart, XAxis, YAxis } from 'recharts'
 import { timeRangeSearchParams } from './SearchParams'
 
 const CHART_COLORS = [
@@ -213,22 +213,31 @@ function MetricsErrorState({ onRetry }: { onRetry: () => void }) {
   )
 }
 
-function MetricsEmptyState() {
+function MetricsEmptyState({ hasFilters, onClearFilters }: { hasFilters: boolean; onClearFilters: () => void }) {
   return (
     <Empty className="flex-1 border-0">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <BarChart3 className="size-4" />
         </EmptyMedia>
-        <EmptyTitle>No metrics available</EmptyTitle>
-        <EmptyDescription>
-          Metrics may take a moment to appear after the sandbox starts.{' '}
-          <a href={`${DAYTONA_DOCS_URL}/en/observability/otel-collection`} target="_blank" rel="noopener noreferrer">
-            Learn more about observability
-          </a>
-          .
-        </EmptyDescription>
+        <EmptyTitle>{hasFilters ? 'No matching metrics found' : 'No metrics yet'}</EmptyTitle>
+        {hasFilters ? (
+          <EmptyDescription>No metrics matched your current filters.</EmptyDescription>
+        ) : (
+          <EmptyDescription>
+            Metrics may take a moment to appear after the sandbox starts.{' '}
+            <a href={`${DAYTONA_DOCS_URL}/en/observability/otel-collection`} target="_blank" rel="noopener noreferrer">
+              Learn more about observability
+            </a>
+            .
+          </EmptyDescription>
+        )}
       </EmptyHeader>
+      {hasFilters ? (
+        <Button variant="outline" size="sm" onClick={onClearFilters}>
+          Clear filters
+        </Button>
+      ) : null}
     </Empty>
   )
 }
@@ -236,6 +245,7 @@ function MetricsEmptyState() {
 export function SandboxMetricsTab({ sandboxId }: { sandboxId: string }) {
   const [timeRange, setTimeRange] = useQueryStates(timeRangeSearchParams)
   const [viewModes, setViewModes] = useState<Record<string, ViewMode>>({ memory: '%', filesystem: '%' })
+  const [timeRangeSelectorKey, setTimeRangeSelectorKey] = useState(0)
 
   const resolvedFrom = useMemo(() => timeRange.from ?? subHours(new Date(), 1), [timeRange.from])
   const resolvedTo = useMemo(() => timeRange.to ?? new Date(), [timeRange.to])
@@ -250,9 +260,20 @@ export function SandboxMetricsTab({ sandboxId }: { sandboxId: string }) {
     [setTimeRange],
   )
 
+  const handleTimeRangeClear = useCallback(() => {
+    setTimeRange({ from: null, to: null })
+  }, [setTimeRange])
+
   const handleViewModeChange = useCallback((groupKey: string, mode: ViewMode) => {
     setViewModes((prev) => ({ ...prev, [groupKey]: mode }))
   }, [])
+
+  const hasFilters = Boolean(timeRange.from || timeRange.to)
+
+  const handleClearFilters = useCallback(() => {
+    setTimeRange({ from: null, to: null })
+    setTimeRangeSelectorKey((key) => key + 1)
+  }, [setTimeRange])
 
   const groupedSeries = React.useMemo(() => {
     if (!data?.series?.length) return []
@@ -322,7 +343,9 @@ export function SandboxMetricsTab({ sandboxId }: { sandboxId: string }) {
     <div className="flex flex-col h-full gap-4 p-4">
       <div className="flex flex-wrap items-center gap-3 shrink-0">
         <TimeRangeSelector
+          key={timeRangeSelectorKey}
           onChange={handleTimeRangeChange}
+          onClear={handleTimeRangeClear}
           defaultRange={timeRange.from && timeRange.to ? { from: timeRange.from, to: timeRange.to } : undefined}
           className="w-auto"
         />
@@ -341,7 +364,7 @@ export function SandboxMetricsTab({ sandboxId }: { sandboxId: string }) {
         </div>
       ) : !data?.series?.length ? (
         <div className="flex-1 min-h-0 rounded-md border border-border flex">
-          <MetricsEmptyState />
+          <MetricsEmptyState hasFilters={hasFilters} onClearFilters={handleClearFilters} />
         </div>
       ) : (
         <ScrollArea fade="mask" className="flex-1 min-h-0">

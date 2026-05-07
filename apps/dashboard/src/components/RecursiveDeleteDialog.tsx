@@ -19,7 +19,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { Sandbox } from '@daytona/api-client'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { SandboxState } from './SandboxTable/SandboxState'
+import { SandboxState } from './sandboxes/SandboxState'
 
 interface RecursiveDeleteDialogProps {
   sandboxId: string

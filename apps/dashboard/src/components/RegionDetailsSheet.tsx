@@ -58,7 +58,7 @@ const RegionDetailsSheet: React.FC<RegionDetailsSheetProps> = ({
       <SheetContent className="w-dvw sm:w-[800px] p-0 flex flex-col gap-0 [&>button]:hidden">
         <SheetHeader className="space-y-0 flex flex-row justify-between items-center p-6">
           <SheetTitle className="text-2xl font-medium">Region Details</SheetTitle>
-          <div className="flex gap-2 items-center">
+          <div className="flex items-center">
             {writePermitted && isCustomRegion && (
               <Button variant="outline" className="w-8 h-8" onClick={() => onUpdate(region)} disabled={isLoading}>
                 <Pencil className="w-4 h-4" />

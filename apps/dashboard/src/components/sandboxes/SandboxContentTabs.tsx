@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useRegions } from '@/hooks/useRegions'
 import { Sandbox } from '@daytona/api-client'
-import { SandboxInfoPanel } from './SandboxInfoPanel'
 import { SandboxFileSystemTab } from './SandboxFileSystemTab'
+import { SandboxInfoPanel } from './SandboxInfoPanel'
 import { SandboxLogsTab } from './SandboxLogsTab'
 import { SandboxMetricsTab } from './SandboxMetricsTab'
 import { SandboxSpendingTab } from './SandboxSpendingTab'
@@ -59,18 +60,26 @@ export function SandboxContentTabs({
 
   return (
     <Tabs value={tab} onValueChange={(v) => onTabChange(v as TabValue)} className="flex flex-col h-full gap-0">
-      <TabsList variant="underline" className="h-[41px] overflow-x-auto overflow-y-hidden scrollbar-sm">
-        <TabsTrigger value="overview" className="lg:hidden">
-          Overview
-        </TabsTrigger>
-        <TabsTrigger value="logs">Logs</TabsTrigger>
-        <TabsTrigger value="traces">Traces</TabsTrigger>
-        <TabsTrigger value="metrics">Metrics</TabsTrigger>
-        {spendingTabAvailable && <TabsTrigger value="spending">Spending</TabsTrigger>}
-        <TabsTrigger value="terminal">Terminal</TabsTrigger>
-        {filesystemEnabled && <TabsTrigger value="filesystem">Filesystem</TabsTrigger>}
-        <TabsTrigger value="vnc">VNC</TabsTrigger>
-      </TabsList>
+      <ScrollArea
+        fade="mask"
+        horizontal
+        vertical={false}
+        fadeOffset={36}
+        className="h-[41px] shrink-0 border-b border-border"
+      >
+        <TabsList variant="underline" className="h-[41px] w-max min-w-full border-b-0">
+          <TabsTrigger value="overview" className="lg:hidden">
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="logs">Logs</TabsTrigger>
+          <TabsTrigger value="traces">Traces</TabsTrigger>
+          <TabsTrigger value="metrics">Metrics</TabsTrigger>
+          {spendingTabAvailable && <TabsTrigger value="spending">Spending</TabsTrigger>}
+          <TabsTrigger value="terminal">Terminal</TabsTrigger>
+          {filesystemEnabled && <TabsTrigger value="filesystem">Filesystem</TabsTrigger>}
+          <TabsTrigger value="vnc">VNC</TabsTrigger>
+        </TabsList>
+      </ScrollArea>
 
       <TabsContent value="overview" className="flex-1 min-h-0 m-0 overflow-y-auto scrollbar-sm lg:hidden">
         <SandboxInfoPanel sandbox={sandbox} getRegionName={getRegionName} />

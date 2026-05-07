@@ -49,6 +49,8 @@
     "@bufbuild/protobuf": "^2.11.0",
     "@chenglou/pretext": "^0.0.5",
     "@clickhouse/client": "^1.16.0",
+    "@docsearch/css": "4.6.2",
+    "@docsearch/react": "4.6.2",
     "@dotenvx/dotenvx": "^1.25.1",
     "@esm2cjs/cacheable-lookup": "^7.0.0",
     "@headless-tree/core": "^1.6.3",

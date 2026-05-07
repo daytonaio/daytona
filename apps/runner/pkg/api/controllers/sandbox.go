@@ -4,6 +4,7 @@
 package controllers
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -15,6 +16,8 @@ import (
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
+
+var errInvalidSnapshotFromSandboxRegistry = errors.New("registry is required for sandbox snapshot")
 
 // Create 			godoc
 //
@@ -144,6 +147,52 @@ func CreateBackup(logger *slog.Logger) gin.HandlerFunc {
 
 		ctx.JSON(http.StatusCreated, "Backup started")
 	}
+}
+
+// SnapshotFromSandbox godoc
+//
+//	@Tags			sandbox
+//	@Summary		Snapshot a running sandbox
+//	@Description	Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag.
+//	@Produce		json
+//	@Param			sandboxId	path		string									true	"Sandbox ID"
+//	@Param			body		body		dto.CreateSnapshotFromSandboxRequestDTO	true	"Snapshot from sandbox"
+//	@Success		200			{object}	dto.SnapshotInfoResponse
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		409			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Router			/sandboxes/{sandboxId}/snapshot-from-sandbox [post]
+//
+//	@id				SnapshotFromSandbox
+func SnapshotFromSandbox(ctx *gin.Context) {
+	sandboxId := ctx.Param("sandboxId")
+
+	var request dto.CreateSnapshotFromSandboxRequestDTO
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
+		return
+	}
+
+	if request.Registry == nil {
+		ctx.Error(common_errors.NewBadRequestError(errInvalidSnapshotFromSandboxRegistry))
+		return
+	}
+
+	r, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	info, err := r.Docker.CreateSnapshotFromSandbox(ctx.Request.Context(), sandboxId, request.Registry)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, info)
 }
 
 // Resize 			godoc

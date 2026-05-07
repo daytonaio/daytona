@@ -20,7 +20,7 @@ import { OrganizationRolePermissionsEnum, Sandbox, SandboxState } from '@daytona
 import { flexRender } from '@tanstack/react-table'
 import { Container } from 'lucide-react'
 import { AnimatePresence } from 'motion/react'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useImperativeHandle, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCommandPaletteActions } from '../CommandPalette'
 import { CursorPagination } from '../CursorPagination'
@@ -40,14 +40,16 @@ import {
 } from '../ui/table'
 import { BulkAction, BulkActionAlertDialog } from './BulkActionAlertDialog'
 import { SandboxTableHeader } from './SandboxTableHeader'
-import { SandboxTableProps } from './types'
+import type { SandboxTableProps, SandboxTableRef } from './types'
 import { useSandboxCommands } from './useSandboxCommands'
 import { useSandboxTable } from './useSandboxTable'
 
 export function SandboxTable({
+  ref,
   data,
   sandboxIsLoading,
   sandboxStateIsTransitioning,
+  activeSandboxId,
   loading,
   snapshots,
   snapshotsDataIsLoading,
@@ -65,7 +67,6 @@ export function SandboxTable({
   handleBulkArchive,
   handleArchive,
   handleVnc,
-  getWebTerminalUrl,
   handleCreateSshAccess,
   handleRevokeSshAccess,
   handleScreenRecordings,
@@ -86,6 +87,7 @@ export function SandboxTable({
   onSortingChange,
   filters,
   onFiltersChange,
+  handleOpenTerminal,
 }: SandboxTableProps) {
   const navigate = useNavigate()
   const { authenticatedUserHasPermission } = useSelectedOrganization()
@@ -103,7 +105,6 @@ export function SandboxTable({
     handleDelete,
     handleArchive,
     handleVnc,
-    getWebTerminalUrl,
     handleCreateSshAccess,
     handleRevokeSshAccess,
     handleScreenRecordings,
@@ -117,7 +118,16 @@ export function SandboxTable({
     onSortingChange,
     filters,
     onFiltersChange,
+    handleOpenTerminal,
   })
+
+  useImperativeHandle(
+    ref,
+    (): SandboxTableRef => ({
+      table,
+    }),
+    [table],
+  )
 
   const [pendingBulkAction, setPendingBulkAction] = useState<BulkAction | null>(null)
 
@@ -281,7 +291,7 @@ export function SandboxTable({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
+                  data-selected={row.getIsSelected() || row.original.id === activeSandboxId ? true : undefined}
                   className={cn('group/table-row transition-all', {
                     'opacity-80 pointer-events-none':
                       sandboxIsLoading[row.original.id] || row.original.state === SandboxState.DESTROYED,

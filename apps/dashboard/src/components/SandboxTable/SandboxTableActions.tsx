@@ -4,12 +4,11 @@
  */
 
 import { FeatureFlags } from '@/enums/FeatureFlags'
-import { RoutePath } from '@/enums/RoutePath'
 import { useRegions } from '@/hooks/useRegions'
 import { SandboxState } from '@daytona/api-client'
+import { Loader2, MoreHorizontal, Play, Square, Terminal, Wrench } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
-import { Terminal, MoreHorizontal, Play, Square, Loader2, Wrench } from 'lucide-react'
-import { generatePath, useNavigate } from 'react-router-dom'
+import { useMemo } from 'react'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,
@@ -18,9 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { SandboxTableActionsProps } from './types'
-import { useMemo } from 'react'
 
 export function SandboxTableActions({
   sandbox,
@@ -33,7 +30,6 @@ export function SandboxTableActions({
   onDelete,
   onArchive,
   onVnc,
-  onOpenWebTerminal,
   onCreateSshAccess,
   onRevokeSshAccess,
   onCreateSnapshot,
@@ -41,8 +37,8 @@ export function SandboxTableActions({
   onScreenRecordings,
   onFork,
   onViewForks,
+  onOpenTerminal,
 }: SandboxTableActionsProps) {
-  const navigate = useNavigate()
   const linuxVmEnabled = useFeatureFlagEnabled(FeatureFlags.SANDBOX_LINUX_VM)
   const { getRegionName } = useRegions()
   const isExperimentalRegion = (getRegionName(sandbox.target) ?? '').toLowerCase() === 'experimental'
@@ -50,27 +46,8 @@ export function SandboxTableActions({
   const menuItems = useMemo(() => {
     const items = []
 
-    items.push({
-      key: 'open',
-      label: 'Open',
-      onClick: () => navigate(generatePath(RoutePath.SANDBOX_DETAILS, { sandboxId: sandbox.id })),
-      disabled: isLoading,
-    })
-
     if (writePermitted) {
       if (sandbox.state === SandboxState.STARTED) {
-        items.push({
-          key: 'vnc',
-          label: 'VNC',
-          onClick: () => onVnc(sandbox.id),
-          disabled: isLoading,
-        })
-        items.push({
-          key: 'screen-recordings',
-          label: 'Screen Recordings',
-          onClick: () => onScreenRecordings(sandbox.id),
-          disabled: isLoading,
-        })
         items.push({
           key: 'stop',
           label: 'Stop',
@@ -98,6 +75,25 @@ export function SandboxTableActions({
           key: 'archive',
           label: 'Archive',
           onClick: () => onArchive(sandbox.id),
+          disabled: isLoading,
+        })
+      }
+
+      if (items.length > 0) {
+        items.push({ key: 'lifecycle-separator', type: 'separator' })
+      }
+
+      if (sandbox.state === SandboxState.STARTED) {
+        items.push({
+          key: 'vnc',
+          label: 'VNC',
+          onClick: () => onVnc(sandbox.id),
+          disabled: isLoading,
+        })
+        items.push({
+          key: 'screen-recordings',
+          label: 'Screen Recordings',
+          onClick: () => onScreenRecordings(sandbox.id),
           disabled: isLoading,
         })
       }
@@ -147,8 +143,8 @@ export function SandboxTableActions({
     }
 
     if (deletePermitted) {
-      if (items.length > 0 && (sandbox.state === SandboxState.STOPPED || sandbox.state === SandboxState.STARTED)) {
-        items.push({ key: 'separator', type: 'separator' })
+      if (items.length > 0) {
+        items.push({ key: 'delete-separator', type: 'separator' })
       }
 
       items.push({
@@ -184,7 +180,6 @@ export function SandboxTableActions({
     linuxVmEnabled,
     isExperimentalRegion,
     sandbox.target,
-    navigate,
   ])
 
   if (!writePermitted && !deletePermitted) {
@@ -196,7 +191,6 @@ export function SandboxTableActions({
       <Button
         variant="ghost"
         size="icon-sm"
-        className="text-muted-foreground"
         aria-label={
           sandbox.state === SandboxState.STARTED
             ? 'Stop sandbox'
@@ -226,38 +220,21 @@ export function SandboxTableActions({
         )}
       </Button>
 
-      {sandbox.state === SandboxState.STARTED ? (
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="text-muted-foreground"
-          aria-label="Open terminal"
-          onClick={() => onOpenWebTerminal(sandbox.id)}
-        >
-          <Terminal className="w-4 h-4" />
-        </Button>
-      ) : (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="inline-flex" onClick={(e) => e.stopPropagation()}>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                className="text-muted-foreground"
-                aria-label="Open terminal"
-                disabled
-              >
-                <Terminal className="w-4 h-4" />
-              </Button>
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>Start sandbox to use terminal.</TooltipContent>
-        </Tooltip>
-      )}
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        aria-label="Open terminal"
+        onClick={(e) => {
+          e.stopPropagation()
+          onOpenTerminal?.()
+        }}
+      >
+        <Terminal className="w-4 h-4" />
+      </Button>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon-sm" className="text-muted-foreground" aria-label="Open menu">
+          <Button variant="ghost" size="icon-sm" aria-label="Open menu">
             <MoreHorizontal className="w-4 h-4" />
           </Button>
         </DropdownMenuTrigger>

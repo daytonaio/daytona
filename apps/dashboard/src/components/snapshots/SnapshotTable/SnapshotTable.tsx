@@ -14,6 +14,7 @@ import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { SnapshotSorting } from '@/hooks/queries/useSnapshotsQuery'
 import { useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { cn } from '@/lib/utils'
 import { getColumnSizeStyles } from '@/lib/utils/table'
 import { OrganizationRolePermissionsEnum, SnapshotDto, SnapshotState } from '@daytona/api-client'
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
@@ -54,6 +55,8 @@ interface DataTableProps {
   onActivate?: (snapshot: SnapshotDto) => void
   onDeactivate?: (snapshot: SnapshotDto) => void
   onCreateSnapshot?: () => void
+  onRowClick?: (snapshot: SnapshotDto, orderedSnapshots: SnapshotDto[]) => void
+  activeSnapshotId?: string
   pagination: {
     pageIndex: number
     pageSize: number
@@ -88,6 +91,8 @@ export function SnapshotTable({
   onActivate,
   onDeactivate,
   onCreateSnapshot,
+  onRowClick,
+  activeSnapshotId,
   pagination,
   pageCount,
   totalItems,
@@ -341,16 +346,28 @@ export function SnapshotTable({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() ? 'selected' : undefined}
-                  className={`${
-                    loadingSnapshots[row.original.id] || row.original.state === SnapshotState.REMOVING
-                      ? 'opacity-50 pointer-events-none'
-                      : ''
-                  } ${row.original.general ? 'pointer-events-none' : ''}`}
+                  data-selected={row.getIsSelected() || row.original.id === activeSnapshotId ? true : undefined}
+                  className={cn('group/table-row transition-all', {
+                    'opacity-50 pointer-events-none':
+                      loadingSnapshots[row.original.id] || row.original.state === SnapshotState.REMOVING,
+                    'cursor-pointer': onRowClick,
+                  })}
+                  onClick={() =>
+                    onRowClick?.(
+                      row.original,
+                      table.getRowModel().rows.map((row) => row.original),
+                    )
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
+                      onClick={(event) => {
+                        if (cell.column.id === 'select' || cell.column.id === 'actions') {
+                          event.stopPropagation()
+                        }
+                      }}
+                      className={cn({ 'group-hover/table-row:underline': cell.column.id === 'name' })}
                       sticky={cell.column.getIsPinned()}
                       style={getColumnSizeStyles(cell.column)}
                     >

@@ -3,23 +3,23 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useState, useCallback, useMemo } from 'react'
-import { useQueryStates } from 'nuqs'
-import { useSandboxTraces, TracesQueryParams } from '@/hooks/useSandboxTraces'
-import { useSandboxTraceSpans } from '@/hooks/useSandboxTraceSpans'
+import { CopyButton } from '@/components/CopyButton'
 import { TimeRangeSelector } from '@/components/telemetry/TimeRangeSelector'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
-import { CopyButton } from '@/components/CopyButton'
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
-import { ChevronLeft, ChevronRight, RefreshCw, Activity, ChevronDown } from 'lucide-react'
-import { format, subHours } from 'date-fns'
-import { TraceSummary, TraceSpan } from '@daytona/api-client'
+import { TracesQueryParams, useSandboxTraces } from '@/hooks/useSandboxTraces'
+import { useSandboxTraceSpans } from '@/hooks/useSandboxTraceSpans'
 import { cn } from '@/lib/utils'
-import { tracesSearchParams, timeRangeSearchParams } from './SearchParams'
+import { TraceSpan, TraceSummary } from '@daytona/api-client'
+import { format, subHours } from 'date-fns'
+import { Activity, ChevronDown, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react'
+import { useQueryStates } from 'nuqs'
+import React, { useCallback, useMemo, useState } from 'react'
+import { timeRangeSearchParams, tracesSearchParams } from './SearchParams'
 
 interface SpanNode extends TraceSpan {
   depth: number
@@ -151,22 +151,31 @@ function TracesErrorState({ onRetry }: { onRetry: () => void }) {
   )
 }
 
-function TracesEmptyState() {
+function TracesEmptyState({ hasFilters, onClearFilters }: { hasFilters: boolean; onClearFilters: () => void }) {
   return (
     <Empty className="flex-1 border-0">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <Activity className="size-4" />
         </EmptyMedia>
-        <EmptyTitle>No traces found</EmptyTitle>
-        <EmptyDescription>
-          Try adjusting your time range.{' '}
-          <a href={`${DAYTONA_DOCS_URL}/en/observability/otel-collection`} target="_blank" rel="noopener noreferrer">
-            Learn more about observability
-          </a>
-          .
-        </EmptyDescription>
+        <EmptyTitle>{hasFilters ? 'No matching traces found' : 'No traces yet'}</EmptyTitle>
+        {hasFilters ? (
+          <EmptyDescription>No traces matched your current filters.</EmptyDescription>
+        ) : (
+          <EmptyDescription>
+            Traces will appear here when the sandbox emits telemetry.{' '}
+            <a href={`${DAYTONA_DOCS_URL}/en/observability/otel-collection`} target="_blank" rel="noopener noreferrer">
+              Learn more about observability
+            </a>
+            .
+          </EmptyDescription>
+        )}
       </EmptyHeader>
+      {hasFilters ? (
+        <Button variant="outline" size="sm" onClick={onClearFilters}>
+          Clear filters
+        </Button>
+      ) : null}
     </Empty>
   )
 }
@@ -383,12 +392,13 @@ export function SandboxTracesTab({ sandboxId }: { sandboxId: string }) {
   const [params, setParams] = useQueryStates(tracesSearchParams)
   const [timeRange, setTimeRange] = useQueryStates(timeRangeSearchParams)
   const [expandedTraceId, setExpandedTraceId] = useState<string | null>(null)
+  const [timeRangeSelectorKey, setTimeRangeSelectorKey] = useState(0)
   const limit = 50
 
   const resolvedFrom = useMemo(() => timeRange.from ?? subHours(new Date(), 1), [timeRange.from])
   const resolvedTo = useMemo(() => timeRange.to ?? new Date(), [timeRange.to])
 
-  const queryParams: TracesQueryParams = useMemo(
+  const requestParams: TracesQueryParams = useMemo(
     () => ({
       from: resolvedFrom,
       to: resolvedTo,
@@ -398,7 +408,7 @@ export function SandboxTracesTab({ sandboxId }: { sandboxId: string }) {
     [resolvedFrom, resolvedTo, params.tracesPage],
   )
 
-  const { data, isLoading, isError, refetch } = useSandboxTraces(sandboxId, queryParams)
+  const { data, isLoading, isError, refetch } = useSandboxTraces(sandboxId, requestParams)
 
   const handleTimeRangeChange = useCallback(
     (from: Date, to: Date) => {
@@ -408,11 +418,26 @@ export function SandboxTracesTab({ sandboxId }: { sandboxId: string }) {
     [setTimeRange, setParams],
   )
 
+  const handleTimeRangeClear = useCallback(() => {
+    setTimeRange({ from: null, to: null })
+    setParams({ tracesPage: 1 })
+  }, [setParams, setTimeRange])
+
+  const hasFilters = Boolean(timeRange.from || timeRange.to)
+
+  const handleClearFilters = useCallback(() => {
+    setTimeRange({ from: null, to: null })
+    setParams({ tracesPage: 1 })
+    setTimeRangeSelectorKey((key) => key + 1)
+  }, [setParams, setTimeRange])
+
   return (
     <div className="flex flex-col h-full gap-4 p-4">
       <div className="flex flex-wrap items-center gap-3 shrink-0">
         <TimeRangeSelector
+          key={timeRangeSelectorKey}
           onChange={handleTimeRangeChange}
+          onClear={handleTimeRangeClear}
           defaultRange={timeRange.from && timeRange.to ? { from: timeRange.from, to: timeRange.to } : undefined}
           className="w-auto"
         />
@@ -431,7 +456,7 @@ export function SandboxTracesTab({ sandboxId }: { sandboxId: string }) {
         </div>
       ) : !data?.items?.length ? (
         <div className="flex-1 min-h-0 border rounded-md flex">
-          <TracesEmptyState />
+          <TracesEmptyState hasFilters={hasFilters} onClearFilters={handleClearFilters} />
         </div>
       ) : (
         <ScrollArea

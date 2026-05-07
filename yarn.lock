@@ -65,6 +65,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@algolia/autocomplete-core@npm:1.19.2":
+  version: 1.19.2
+  resolution: "@algolia/autocomplete-core@npm:1.19.2"
+  dependencies:
+    "@algolia/autocomplete-plugin-algolia-insights": "npm:1.19.2"
+    "@algolia/autocomplete-shared": "npm:1.19.2"
+  checksum: 10c0/383952bc43a31f0771987416c350471824e480fcd15e1db8ae13386cd387879f1c81eadafceffa69f87e6b8e59fb1aa713da375fc07a30c5d8edb16a157b5f45
+  languageName: node
+  linkType: hard
+
+"@algolia/autocomplete-plugin-algolia-insights@npm:1.19.2":
+  version: 1.19.2
+  resolution: "@algolia/autocomplete-plugin-algolia-insights@npm:1.19.2"
+  dependencies:
+    "@algolia/autocomplete-shared": "npm:1.19.2"
+  peerDependencies:
+    search-insights: ">= 1 < 3"
+  checksum: 10c0/8548b6514004dbf6fb34d6da176ac911371f3e84724ef6b94600cd84d29339d2f44cead03d7c0d507b130da0d9acc61f6e4c9a0fba6f967a5ae2a42eea93f0c1
+  languageName: node
+  linkType: hard
+
+"@algolia/autocomplete-shared@npm:1.19.2":
+  version: 1.19.2
+  resolution: "@algolia/autocomplete-shared@npm:1.19.2"
+  peerDependencies:
+    "@algolia/client-search": ">= 4.9.1 < 6"
+    algoliasearch: ">= 4.9.1 < 6"
+  checksum: 10c0/eee6615e6d9e6db7727727e442b876a554a6eda6f14c1d55d667ed2d14702c4c888a34b9bfb18f66ccc6d402995b2c7c37ace9f19ce9fc9c83bbb623713efbc4
+  languageName: node
+  linkType: hard
+
 "@algolia/client-abtesting@npm:5.37.0":
   version: 5.37.0
   resolution: "@algolia/client-abtesting@npm:5.37.0"
@@ -3683,6 +3714,56 @@ __metadata:
   version: 0.5.7
   resolution: "@discoveryjs/json-ext@npm:0.5.7"
   checksum: 10c0/e10f1b02b78e4812646ddf289b7d9f2cb567d336c363b266bd50cd223cf3de7c2c74018d91cd2613041568397ef3a4a2b500aba588c6e5bd78c38374ba68f38c
+  languageName: node
+  linkType: hard
+
+"@docsearch/core@npm:4.6.2":
+  version: 4.6.2
+  resolution: "@docsearch/core@npm:4.6.2"
+  peerDependencies:
+    "@types/react": ">= 16.8.0 < 20.0.0"
+    react: ">= 16.8.0 < 20.0.0"
+    react-dom: ">= 16.8.0 < 20.0.0"
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10c0/daeda4af110bef09a094853c6e67e13f5183eaeabdc91b3b8ca008e02f34cbe8b16a812d5d0618ba4ff7dca64e0ca7da26cc8dfcba437a61305a6e9e2de7b1b1
+  languageName: node
+  linkType: hard
+
+"@docsearch/css@npm:4.6.2":
+  version: 4.6.2
+  resolution: "@docsearch/css@npm:4.6.2"
+  checksum: 10c0/2f86dcaa90871eec1b8f71de2ec2a7c3e64fac21167d4ee5b83e25df54706cb9709327dc41ca49cdde441b731bb3024c4afe67b2705736e0e11610e0ae4cdad2
+  languageName: node
+  linkType: hard
+
+"@docsearch/react@npm:4.6.2":
+  version: 4.6.2
+  resolution: "@docsearch/react@npm:4.6.2"
+  dependencies:
+    "@algolia/autocomplete-core": "npm:1.19.2"
+    "@docsearch/core": "npm:4.6.2"
+    "@docsearch/css": "npm:4.6.2"
+  peerDependencies:
+    "@types/react": ">= 16.8.0 < 20.0.0"
+    react: ">= 16.8.0 < 20.0.0"
+    react-dom: ">= 16.8.0 < 20.0.0"
+    search-insights: ">= 1 < 3"
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    react:
+      optional: true
+    react-dom:
+      optional: true
+    search-insights:
+      optional: true
+  checksum: 10c0/33f6ddc1d6f648e0b80f86435c80654a59ddff9deb6a9236b863438a9cbc1b0283fa30437819e01d861451c88ea88990f7115e8b669a5d8ae7534decb71b085b
   languageName: node
   linkType: hard
 
@@ -20049,6 +20130,8 @@ __metadata:
     "@bufbuild/protoc-gen-es": "npm:^2.11.0"
     "@chenglou/pretext": "npm:^0.0.5"
     "@clickhouse/client": "npm:^1.16.0"
+    "@docsearch/css": "npm:4.6.2"
+    "@docsearch/react": "npm:4.6.2"
     "@dotenvx/dotenvx": "npm:^1.25.1"
     "@esbuild-plugins/node-globals-polyfill": "npm:^0.2.3"
     "@esbuild-plugins/node-modules-polyfill": "npm:^0.2.2"

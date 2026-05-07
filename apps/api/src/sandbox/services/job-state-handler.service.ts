@@ -25,9 +25,9 @@ import { Sandbox } from '../entities/sandbox.entity'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { ResourceType } from '../enums/resource-type.enum'
 import { getStateChangeLockKey } from '../utils/lock-key.util'
-import { v4 as uuidv4 } from 'uuid'
-import { SnapshotEvents } from '../constants/snapshot-events'
-import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
+import { SandboxEvents } from '../constants/sandbox-events.constants'
+import { SandboxStartedEvent } from '../events/sandbox-started.event'
+import { persistSnapshotFromSandbox } from '../utils/persist-snapshot-from-sandbox.util'
 
 /**
  * Service for handling entity state updates based on job completion (v2 runners only).
@@ -498,9 +498,20 @@ export class JobStateHandlerService {
         return
       }
 
-      if (sandbox.desiredState !== SandboxDesiredState.STARTED) {
-        this.logger.error(
-          `Sandbox ${sandboxId} is not in desired state STARTED for RECOVER_SANDBOX job ${job.id}. Desired state: ${sandbox.desiredState}`,
+      const skipStart = job.getPayload<{ skipStart?: boolean }>()?.skipStart ?? true
+
+      // Intent changed mid-job (e.g. /destroy); state stays ERROR so pending won't auto-drain.
+      const expectedDesiredState = skipStart ? SandboxDesiredState.STOPPED : SandboxDesiredState.STARTED
+      if (sandbox.desiredState !== expectedDesiredState) {
+        this.logger.warn(
+          `Sandbox ${sandboxId} desiredState ${sandbox.desiredState} no longer matches RECOVER_SANDBOX job ${job.id} intent (${expectedDesiredState}); rolling back pending reservation and skipping state update`,
+        )
+        await this.organizationUsageService.decrementPendingSandboxUsage(
+          sandbox.organizationId,
+          sandbox.region,
+          skipStart ? undefined : sandbox.cpu,
+          skipStart ? undefined : sandbox.mem,
+          sandbox.disk,
         )
         return
       }
@@ -508,21 +519,37 @@ export class JobStateHandlerService {
       const updateData: Partial<Sandbox> = {}
 
       if (job.status === JobStatus.COMPLETED) {
-        this.logger.debug(
-          `RECOVER_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STARTED`,
-        )
-        updateData.state = SandboxState.STARTED
+        // Container left STOPPED; chained start (if requested) fires via SandboxStartedEvent below.
+        this.logger.debug(`RECOVER_SANDBOX job ${job.id} completed successfully for sandbox ${sandboxId}`)
+        updateData.state = SandboxState.STOPPED
         updateData.errorReason = null
+        updateData.recoverable = false
         if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
           Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.NONE))
         }
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`RECOVER_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
         updateData.state = SandboxState.ERROR
-        updateData.errorReason = job.errorMessage || 'Failed to recover sandbox'
+        const { recoverable, errorReason } = sanitizeSandboxError(job.errorMessage)
+        updateData.errorReason = errorReason || 'Failed to recover sandbox'
+        updateData.recoverable = recoverable
+
+        // Roll back upstream reservation: disk always, cpu/mem only when start was requested.
+        await this.organizationUsageService.decrementPendingSandboxUsage(
+          sandbox.organizationId,
+          sandbox.region,
+          skipStart ? undefined : sandbox.cpu,
+          skipStart ? undefined : sandbox.mem,
+          sandbox.disk,
+        )
       }
 
-      await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
+      const updatedSandbox = await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
+
+      if (job.status === JobStatus.COMPLETED && !skipStart) {
+        // Pending and authToken were prepped in recover(); sandboxStartAction does not re-validate.
+        this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(updatedSandbox))
+      }
     } catch (error) {
       this.logger.error(`Error handling RECOVER_SANDBOX job completion for sandbox ${sandboxId}:`, error)
     }
@@ -734,54 +761,52 @@ export class JobStateHandlerService {
         if (!snapshotName) {
           this.logger.error(`SNAPSHOT_SANDBOX job ${job.id} payload missing snapshot name`)
         } else {
-          let snapshotRef = snapshotName
-          if (hash && payload?.registry?.url) {
+          // Prefer the ref the runner actually pushed to the registry. This
+          // avoids any drift between the pushed image and the stored ref.
+          // Fall back to reconstructing from {registry, project, hash} for
+          // older runners that don't return `ref`.
+          const refFromRunner =
+            (typeof metadata?.ref === 'string' && metadata.ref) ||
+            (typeof metadata?.Ref === 'string' && metadata.Ref) ||
+            undefined
+
+          let snapshotRef = refFromRunner ?? snapshotName
+          if (!refFromRunner && hash && payload?.registry?.url) {
             const project = payload.registry.project || 'daytona'
             snapshotRef = `${payload.registry.url}/${project}/daytona-${hash}:daytona`
           }
 
-          const rawSnapshotSizeBytes = metadata?.sizeBytes ?? metadata?.size_bytes
-          const snapshotSizeBytes =
-            typeof rawSnapshotSizeBytes === 'number' && Number.isFinite(rawSnapshotSizeBytes)
-              ? rawSnapshotSizeBytes
-              : typeof rawSnapshotSizeBytes === 'bigint'
-                ? Number(rawSnapshotSizeBytes)
-                : typeof rawSnapshotSizeBytes === 'string' && /^-?\d+$/.test(rawSnapshotSizeBytes)
-                  ? Number(rawSnapshotSizeBytes)
-                  : undefined
-          const snapshotSize = snapshotSizeBytes != null ? snapshotSizeBytes / (1024 * 1024 * 1024) : undefined
+          const rawSnapshotSizeGB = metadata?.sizeGB ?? metadata?.size_gb
+          const snapshotSizeGB =
+            typeof rawSnapshotSizeGB === 'number' && Number.isFinite(rawSnapshotSizeGB)
+              ? rawSnapshotSizeGB
+              : typeof rawSnapshotSizeGB === 'string' && Number.isFinite(Number(rawSnapshotSizeGB))
+                ? Number(rawSnapshotSizeGB)
+                : undefined
 
-          const snapshotId = uuidv4()
-
-          const snapshot = this.snapshotRepository.create({
-            id: snapshotId,
-            organizationId: sandbox.organizationId,
-            name: snapshotName,
-            imageName: '',
-            ref: snapshotRef,
-            state: SnapshotState.ACTIVE,
-            cpu: sandbox.cpu,
-            gpu: sandbox.gpu,
-            mem: sandbox.mem,
-            disk: sandbox.disk,
-            size: snapshotSize,
-            initialRunnerId: job.runnerId || undefined,
-            lastUsedAt: new Date(),
-            snapshotRegions: [{ snapshotId, regionId: sandbox.region }],
-          })
-
-          if (job.runnerId) {
-            const snapshotRunner = this.snapshotRunnerRepository.create({
-              snapshotRef,
-              runnerId: job.runnerId,
-              state: SnapshotRunnerState.READY,
-            })
-            await this.snapshotRunnerRepository.save(snapshotRunner)
+          try {
+            await persistSnapshotFromSandbox(
+              {
+                snapshotRepository: this.snapshotRepository,
+                snapshotRunnerRepository: this.snapshotRunnerRepository,
+                eventEmitter: this.eventEmitter,
+              },
+              {
+                organizationId: sandbox.organizationId,
+                name: snapshotName,
+                ref: snapshotRef,
+                runnerId: job.runnerId,
+                regionId: sandbox.region,
+                cpu: sandbox.cpu,
+                gpu: sandbox.gpu,
+                mem: sandbox.mem,
+                disk: sandbox.disk,
+                sizeGB: snapshotSizeGB,
+              },
+            )
+          } catch (error) {
+            this.logger.error(`Failed to persist snapshot from SNAPSHOT_SANDBOX job ${job.id}:`, error)
           }
-
-          const insertedSnapshot = await this.snapshotRepository.insert(snapshot)
-
-          this.eventEmitter.emit(SnapshotEvents.CREATED, new SnapshotCreatedEvent(insertedSnapshot))
         }
       }
     } catch (error) {

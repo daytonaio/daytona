@@ -169,7 +169,7 @@ function TableCell({ className, style, sticky, ...props }: React.ComponentProps<
       data-slot="table-cell"
       data-sticky-state={stickySide}
       className={cn(
-        'px-3 py-2.5 align-middle whitespace-nowrap border-b bg-table-cell group-hover/row:bg-table-cell-hover group-data-[state=selected]/row:bg-table-cell-active has-[[data-slot=empty]]:group-hover/row:bg-table-cell',
+        'px-3 py-2.5 align-middle whitespace-nowrap border-b bg-table-cell group-hover/row:bg-table-cell-hover group-data-[state=selected]/row:bg-table-cell-active group-data-[selected=true]/row:bg-table-cell-active has-[[data-slot=empty]]:group-hover/row:bg-table-cell',
         sticky && 'sticky z-[1]',
         stickySide === 'left' && 'left-0',
         stickySide === 'right' && 'right-0',
@@ -255,7 +255,7 @@ function TableFillHead() {
 function TableFillCell() {
   return (
     <td
-      className="p-0 border-b bg-table-cell group-hover/row:bg-table-cell-hover group-data-[state=selected]/row:bg-table-cell-active"
+      className="p-0 border-b bg-table-cell group-hover/row:bg-table-cell-hover group-data-[state=selected]/row:bg-table-cell-active group-data-[selected=true]/row:bg-table-cell-active"
       aria-hidden="true"
     />
   )

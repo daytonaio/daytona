@@ -22,7 +22,6 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { FeatureFlags } from '@/enums/FeatureFlags'
-import { RoutePath } from '@/enums/RoutePath'
 import { useCreateSandboxMutation } from '@/hooks/mutations/useCreateSandboxMutation'
 import { useSetOrganizationDefaultRegionMutation } from '@/hooks/mutations/useSetOrganizationDefaultRegionMutation'
 import { useSnapshotsQuery } from '@/hooks/queries/useSnapshotsQuery'
@@ -41,7 +40,6 @@ import { Info, Minus, Plus, Upload } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { ComponentProps, Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
-import { createSearchParams, generatePath, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { Tooltip } from '../Tooltip'
@@ -150,8 +148,15 @@ const InfoTooltipButton = ({ className, ...props }: ComponentProps<'button'>) =>
   )
 }
 
-export const CreateSandboxSheet = ({ className, ref }: { className?: string; ref?: Ref<{ open: () => void }> }) => {
-  const navigate = useNavigate()
+export const CreateSandboxSheet = ({
+  className,
+  ref,
+  onSandboxCreated,
+}: {
+  className?: string
+  ref?: Ref<{ open: () => void }>
+  onSandboxCreated?: (sandbox: Sandbox) => void
+}) => {
   const createSandboxEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_CREATE_SANDBOX)
   const [open, setOpen] = useState(false)
 
@@ -161,6 +166,13 @@ export const CreateSandboxSheet = ({ className, ref }: { className?: string; ref
   const { reset: resetCreateSandboxMutation, ...createSandboxMutation } = useCreateSandboxMutation()
   const setDefaultRegionMutation = useSetOrganizationDefaultRegionMutation()
   const formRef = useRef<HTMLFormElement>(null)
+  const formDefaultValues = useMemo<FormValues>(
+    () => ({
+      ...defaultValues,
+      regionId: selectedOrganization?.defaultRegionId,
+    }),
+    [selectedOrganization?.defaultRegionId],
+  )
 
   useImperativeHandle(ref, () => ({
     open: () => setOpen(true),
@@ -181,7 +193,7 @@ export const CreateSandboxSheet = ({ className, ref }: { className?: string; ref
   })
 
   const form = useForm({
-    defaultValues,
+    defaultValues: formDefaultValues,
     validators: {
       onSubmit: formSchema,
     },
@@ -266,13 +278,8 @@ export const CreateSandboxSheet = ({ className, ref }: { className?: string; ref
 
         setOpen(false)
 
-        if (sandbox?.id) {
-          navigate({
-            pathname: generatePath(RoutePath.SANDBOX_DETAILS, { sandboxId: sandbox.id }),
-            search: `${createSearchParams({
-              tab: 'terminal',
-            })}`,
-          })
+        if (sandbox) {
+          onSandboxCreated?.(sandbox)
         }
       } catch (error) {
         handleApiError(error, 'Failed to create sandbox')
@@ -297,9 +304,9 @@ export const CreateSandboxSheet = ({ className, ref }: { className?: string; ref
   )
 
   const resetState = useCallback(() => {
-    resetForm(defaultValues)
+    resetForm(formDefaultValues)
     resetCreateSandboxMutation()
-  }, [resetForm, resetCreateSandboxMutation])
+  }, [formDefaultValues, resetForm, resetCreateSandboxMutation])
 
   const handleEnvFileImport = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -620,10 +627,7 @@ export const CreateSandboxSheet = ({ className, ref }: { className?: string; ref
                       ))}
                     </SelectContent>
                   </Select>
-                  <FieldDescription>
-                    The region where the sandbox will be created. If not specified, your organization's default region
-                    will be used.
-                  </FieldDescription>
+                  <FieldDescription>The region where the sandbox will be created.</FieldDescription>
                 </Field>
               )}
             </form.Field>

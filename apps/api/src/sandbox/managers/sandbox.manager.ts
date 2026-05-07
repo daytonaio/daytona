@@ -47,6 +47,7 @@ import { Sandbox } from '../entities/sandbox.entity'
 import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { OrganizationService } from '../../organization/services/organization.service'
+import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { BackupManager } from './backup.manager'
 import { InjectRedis } from '@nestjs-modules/ioredis'
@@ -73,6 +74,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     private readonly configService: TypedConfigService,
     private readonly dockerRegistryService: DockerRegistryService,
     private readonly organizationService: OrganizationService,
+    private readonly organizationUsageService: OrganizationUsageService,
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
     private readonly backupManager: BackupManager,
     @InjectRedis() private readonly redis: Redis,
@@ -481,6 +483,10 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       where: {
         runnerId,
         recoverable: true,
+        // ERROR forces pending=false via Sandbox invariants, but filter both explicitly to
+        // document the intended target set (recoverable errored sandboxes only).
+        state: SandboxState.ERROR,
+        pending: false,
         desiredState: Not(In([SandboxDesiredState.DESTROYED])),
         backupSnapshot: Not(IsNull()),
       },
@@ -494,14 +500,6 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     this.logger.debug(`Found ${recoverableSandboxes.length} recoverable sandboxes on draining runner ${runnerId}`)
 
     const runner = await this.runnerService.findOneOrFail(runnerId)
-
-    if (runner.apiVersion === '2') {
-      this.logger.debug(
-        `Skipping recovery for sandboxes on draining runner ${runnerId} — not supported for runner API v2`,
-      )
-      return
-    }
-
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
     await Promise.allSettled(
@@ -523,24 +521,52 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           return
         }
 
+        let diskIncremented = false
         try {
-          await runnerAdapter.recoverSandbox(sandbox)
+          // Reserve disk for the ERROR → STOPPED transition.
+          const result = await this.organizationUsageService.incrementPendingSandboxUsage(
+            sandbox.organizationId,
+            sandbox.region,
+            0,
+            0,
+            sandbox.disk,
+            sandbox.id,
+          )
+          diskIncremented = result.diskIncremented
 
-          const updateData: Partial<Sandbox> = {
-            state: SandboxState.STOPPED,
-            desiredState: SandboxDesiredState.STOPPED,
-            errorReason: null,
-            recoverable: false,
-            backupState: BackupState.NONE,
+          // Normalize desiredState upfront so the v2 job handler can detect mid-job intent changes.
+          if (runner.apiVersion === '2') {
+            await this.sandboxRepository.updateWhere(sandbox.id, {
+              updateData: { desiredState: SandboxDesiredState.STOPPED },
+              whereCondition: { state: SandboxState.ERROR },
+            })
           }
 
-          await this.sandboxRepository.updateWhere(sandbox.id, {
-            updateData,
-            whereCondition: { pending: false, state: sandbox.state },
-          })
+          await runnerAdapter.recoverSandbox(sandbox, true)
+
+          if (runner.apiVersion !== '2') {
+            await this.sandboxRepository.updateWhere(sandbox.id, {
+              updateData: {
+                state: SandboxState.STOPPED,
+                desiredState: SandboxDesiredState.STOPPED,
+                errorReason: null,
+                recoverable: false,
+                backupState: BackupState.NONE,
+              },
+              whereCondition: { pending: false, state: sandbox.state },
+            })
+          }
+
+          // Skip this sandbox on subsequent polls until the v2 job resolves.
+          await this.redis.set(redisKey, '1', 'EX', SandboxManager.DRAINING_RECOVER_TTL_SECONDS)
 
           this.logger.log(`Recovered sandbox ${sandbox.id} on draining runner ${runnerId}`)
         } catch (e) {
+          if (diskIncremented) {
+            await this.organizationUsageService
+              .decrementPendingSandboxUsage(sandbox.organizationId, sandbox.region, undefined, undefined, sandbox.disk)
+              .catch(() => undefined)
+          }
           await this.redis.set(redisKey, '1', 'EX', SandboxManager.DRAINING_RECOVER_TTL_SECONDS)
           this.logger.error(`Failed to recover sandbox ${sandbox.id} on draining runner ${runnerId}`, e)
         } finally {
