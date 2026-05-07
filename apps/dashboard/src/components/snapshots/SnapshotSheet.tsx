@@ -94,6 +94,14 @@ function EmptyValue() {
   return <span className="text-muted-foreground">-</span>
 }
 
+function formatSnapshotSize(size: number | null | undefined) {
+  if (size == null || !Number.isFinite(size)) {
+    return null
+  }
+
+  return `${size.toFixed(2)} GB`
+}
+
 function getStateBadgeVariant(state: SnapshotState): BadgeProps['variant'] {
   switch (state) {
     case SnapshotState.ACTIVE:
@@ -140,7 +148,7 @@ function TimestampRow({ label, value }: { label: string; value: Date | null | un
 }
 
 function SnapshotSheetSkeleton() {
-  const overviewRows = ['name', 'image', 'entrypoint', 'state']
+  const overviewRows = ['name', 'image', 'size', 'entrypoint', 'state']
   const timestampRows = ['created', 'updated', 'last-used']
 
   return (
@@ -291,6 +299,7 @@ export function SnapshotSheet({
                     <EmptyValue />
                   )}
                 </InfoRow>
+                <InfoRow label="Size">{formatSnapshotSize(activeSnapshot.size) ?? <EmptyValue />}</InfoRow>
                 {activeSnapshot.entrypoint?.length ? (
                   <InfoRow label="Entrypoint" className="items-start -mr-2">
                     <CopyValue
