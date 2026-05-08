@@ -15,6 +15,8 @@ require 'time'
 
 module DaytonaApiClient
   class CreateOrganizationRegionQuota < ApiModelBase
+    attr_accessor :sandbox_class
+
     attr_accessor :total_cpu_quota
 
     attr_accessor :total_memory_quota
@@ -29,9 +31,32 @@ module DaytonaApiClient
 
     attr_accessor :max_disk_per_non_ephemeral_sandbox
 
+    class EnumAttributeValidator
+      attr_reader :datatype
+      attr_reader :allowable_values
+
+      def initialize(datatype, allowable_values)
+        @allowable_values = allowable_values.map do |value|
+          case datatype.to_s
+          when /Integer/i
+            value.to_i
+          when /Float/i
+            value.to_f
+          else
+            value
+          end
+        end
+      end
+
+      def valid?(value)
+        !value || allowable_values.include?(value)
+      end
+    end
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
+        :'sandbox_class' => :'sandboxClass',
         :'total_cpu_quota' => :'totalCpuQuota',
         :'total_memory_quota' => :'totalMemoryQuota',
         :'total_disk_quota' => :'totalDiskQuota',
@@ -55,6 +80,7 @@ module DaytonaApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
+        :'sandbox_class' => :'SandboxClass',
         :'total_cpu_quota' => :'Float',
         :'total_memory_quota' => :'Float',
         :'total_disk_quota' => :'Float',
@@ -90,6 +116,12 @@ module DaytonaApiClient
         end
         h[k.to_sym] = v
       }
+
+      if attributes.key?(:'sandbox_class')
+        self.sandbox_class = attributes[:'sandbox_class']
+      else
+        self.sandbox_class = nil
+      end
 
       if attributes.key?(:'total_cpu_quota')
         self.total_cpu_quota = attributes[:'total_cpu_quota']
@@ -131,6 +163,10 @@ module DaytonaApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
+      if @sandbox_class.nil?
+        invalid_properties.push('invalid value for "sandbox_class", sandbox_class cannot be nil.')
+      end
+
       if @total_cpu_quota.nil?
         invalid_properties.push('invalid value for "total_cpu_quota", total_cpu_quota cannot be nil.')
       end
@@ -150,10 +186,21 @@ module DaytonaApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
+      return false if @sandbox_class.nil?
       return false if @total_cpu_quota.nil?
       return false if @total_memory_quota.nil?
       return false if @total_disk_quota.nil?
       true
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] sandbox_class Value to be assigned
+    def sandbox_class=(sandbox_class)
+      if sandbox_class.nil?
+        fail ArgumentError, 'sandbox_class cannot be nil'
+      end
+
+      @sandbox_class = sandbox_class
     end
 
     # Custom attribute writer method with validation
@@ -191,6 +238,7 @@ module DaytonaApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
+          sandbox_class == o.sandbox_class &&
           total_cpu_quota == o.total_cpu_quota &&
           total_memory_quota == o.total_memory_quota &&
           total_disk_quota == o.total_disk_quota &&
@@ -209,7 +257,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [total_cpu_quota, total_memory_quota, total_disk_quota, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, max_disk_per_non_ephemeral_sandbox].hash
+      [sandbox_class, total_cpu_quota, total_memory_quota, total_disk_quota, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, max_disk_per_non_ephemeral_sandbox].hash
     end
 
     # Builds the object from hash

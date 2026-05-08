@@ -21,6 +21,7 @@ var _ MappedNullable = &CreateOrganizationRegionQuota{}
 
 // CreateOrganizationRegionQuota struct for CreateOrganizationRegionQuota
 type CreateOrganizationRegionQuota struct {
+	SandboxClass SandboxClass `json:"sandboxClass"`
 	TotalCpuQuota float32 `json:"totalCpuQuota"`
 	TotalMemoryQuota float32 `json:"totalMemoryQuota"`
 	TotalDiskQuota float32 `json:"totalDiskQuota"`
@@ -37,8 +38,9 @@ type _CreateOrganizationRegionQuota CreateOrganizationRegionQuota
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateOrganizationRegionQuota(totalCpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32) *CreateOrganizationRegionQuota {
+func NewCreateOrganizationRegionQuota(sandboxClass SandboxClass, totalCpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32) *CreateOrganizationRegionQuota {
 	this := CreateOrganizationRegionQuota{}
+	this.SandboxClass = sandboxClass
 	this.TotalCpuQuota = totalCpuQuota
 	this.TotalMemoryQuota = totalMemoryQuota
 	this.TotalDiskQuota = totalDiskQuota
@@ -51,6 +53,30 @@ func NewCreateOrganizationRegionQuota(totalCpuQuota float32, totalMemoryQuota fl
 func NewCreateOrganizationRegionQuotaWithDefaults() *CreateOrganizationRegionQuota {
 	this := CreateOrganizationRegionQuota{}
 	return &this
+}
+
+// GetSandboxClass returns the SandboxClass field value
+func (o *CreateOrganizationRegionQuota) GetSandboxClass() SandboxClass {
+	if o == nil {
+		var ret SandboxClass
+		return ret
+	}
+
+	return o.SandboxClass
+}
+
+// GetSandboxClassOk returns a tuple with the SandboxClass field value
+// and a boolean to check if the value has been set.
+func (o *CreateOrganizationRegionQuota) GetSandboxClassOk() (*SandboxClass, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.SandboxClass, true
+}
+
+// SetSandboxClass sets field value
+func (o *CreateOrganizationRegionQuota) SetSandboxClass(v SandboxClass) {
+	o.SandboxClass = v
 }
 
 // GetTotalCpuQuota returns the TotalCpuQuota field value
@@ -303,6 +329,7 @@ func (o CreateOrganizationRegionQuota) MarshalJSON() ([]byte, error) {
 
 func (o CreateOrganizationRegionQuota) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	toSerialize["sandboxClass"] = o.SandboxClass
 	toSerialize["totalCpuQuota"] = o.TotalCpuQuota
 	toSerialize["totalMemoryQuota"] = o.TotalMemoryQuota
 	toSerialize["totalDiskQuota"] = o.TotalDiskQuota
@@ -331,6 +358,7 @@ func (o *CreateOrganizationRegionQuota) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"sandboxClass",
 		"totalCpuQuota",
 		"totalMemoryQuota",
 		"totalDiskQuota",
@@ -363,6 +391,7 @@ func (o *CreateOrganizationRegionQuota) UnmarshalJSON(data []byte) (err error) {
 	additionalProperties := make(map[string]interface{})
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "sandboxClass")
 		delete(additionalProperties, "totalCpuQuota")
 		delete(additionalProperties, "totalMemoryQuota")
 		delete(additionalProperties, "totalDiskQuota")

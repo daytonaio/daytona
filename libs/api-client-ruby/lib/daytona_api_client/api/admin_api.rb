@@ -84,23 +84,21 @@ module DaytonaApiClient
     # Create organization region quota
     # @param organization_id [String] Organization ID
     # @param region_id [String] ID of the region the new quota applies to
-    # @param sandbox_class [SandboxClass] Sandbox class the new quota applies to
     # @param create_organization_region_quota [CreateOrganizationRegionQuota] 
     # @param [Hash] opts the optional parameters
     # @return [RegionQuota]
-    def admin_create_organization_region_quota(organization_id, region_id, sandbox_class, create_organization_region_quota, opts = {})
-      data, _status_code, _headers = admin_create_organization_region_quota_with_http_info(organization_id, region_id, sandbox_class, create_organization_region_quota, opts)
+    def admin_create_organization_region_quota(organization_id, region_id, create_organization_region_quota, opts = {})
+      data, _status_code, _headers = admin_create_organization_region_quota_with_http_info(organization_id, region_id, create_organization_region_quota, opts)
       data
     end
 
     # Create organization region quota
     # @param organization_id [String] Organization ID
     # @param region_id [String] ID of the region the new quota applies to
-    # @param sandbox_class [SandboxClass] Sandbox class the new quota applies to
     # @param create_organization_region_quota [CreateOrganizationRegionQuota] 
     # @param [Hash] opts the optional parameters
     # @return [Array<(RegionQuota, Integer, Hash)>] RegionQuota data, response status code and response headers
-    def admin_create_organization_region_quota_with_http_info(organization_id, region_id, sandbox_class, create_organization_region_quota, opts = {})
+    def admin_create_organization_region_quota_with_http_info(organization_id, region_id, create_organization_region_quota, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: AdminApi.admin_create_organization_region_quota ...'
       end
@@ -112,16 +110,12 @@ module DaytonaApiClient
       if @api_client.config.client_side_validation && region_id.nil?
         fail ArgumentError, "Missing the required parameter 'region_id' when calling AdminApi.admin_create_organization_region_quota"
       end
-      # verify the required parameter 'sandbox_class' is set
-      if @api_client.config.client_side_validation && sandbox_class.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_class' when calling AdminApi.admin_create_organization_region_quota"
-      end
       # verify the required parameter 'create_organization_region_quota' is set
       if @api_client.config.client_side_validation && create_organization_region_quota.nil?
         fail ArgumentError, "Missing the required parameter 'create_organization_region_quota' when calling AdminApi.admin_create_organization_region_quota"
       end
       # resource path
-      local_var_path = '/admin/organizations/{organizationId}/quota/{regionId}/{sandboxClass}'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s)).sub('{' + 'regionId' + '}', CGI.escape(region_id.to_s)).sub('{' + 'sandboxClass' + '}', CGI.escape(sandbox_class.to_s))
+      local_var_path = '/admin/organizations/{organizationId}/quota/{regionId}'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s)).sub('{' + 'regionId' + '}', CGI.escape(region_id.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}
@@ -1320,23 +1314,21 @@ module DaytonaApiClient
     # Update organization region quota
     # @param organization_id [String] Organization ID
     # @param region_id [String] Region ID
-    # @param sandbox_class [SandboxClass] Sandbox class the updated quota applies to
     # @param update_organization_region_quota [UpdateOrganizationRegionQuota] 
     # @param [Hash] opts the optional parameters
     # @return [nil]
-    def admin_update_organization_region_quota(organization_id, region_id, sandbox_class, update_organization_region_quota, opts = {})
-      admin_update_organization_region_quota_with_http_info(organization_id, region_id, sandbox_class, update_organization_region_quota, opts)
+    def admin_update_organization_region_quota(organization_id, region_id, update_organization_region_quota, opts = {})
+      admin_update_organization_region_quota_with_http_info(organization_id, region_id, update_organization_region_quota, opts)
       nil
     end
 
     # Update organization region quota
     # @param organization_id [String] Organization ID
     # @param region_id [String] Region ID
-    # @param sandbox_class [SandboxClass] Sandbox class the updated quota applies to
     # @param update_organization_region_quota [UpdateOrganizationRegionQuota] 
     # @param [Hash] opts the optional parameters
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def admin_update_organization_region_quota_with_http_info(organization_id, region_id, sandbox_class, update_organization_region_quota, opts = {})
+    def admin_update_organization_region_quota_with_http_info(organization_id, region_id, update_organization_region_quota, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: AdminApi.admin_update_organization_region_quota ...'
       end
@@ -1348,16 +1340,12 @@ module DaytonaApiClient
       if @api_client.config.client_side_validation && region_id.nil?
         fail ArgumentError, "Missing the required parameter 'region_id' when calling AdminApi.admin_update_organization_region_quota"
       end
-      # verify the required parameter 'sandbox_class' is set
-      if @api_client.config.client_side_validation && sandbox_class.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_class' when calling AdminApi.admin_update_organization_region_quota"
-      end
       # verify the required parameter 'update_organization_region_quota' is set
       if @api_client.config.client_side_validation && update_organization_region_quota.nil?
         fail ArgumentError, "Missing the required parameter 'update_organization_region_quota' when calling AdminApi.admin_update_organization_region_quota"
       end
       # resource path
-      local_var_path = '/admin/organizations/{organizationId}/quota/{regionId}/{sandboxClass}'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s)).sub('{' + 'regionId' + '}', CGI.escape(region_id.to_s)).sub('{' + 'sandboxClass' + '}', CGI.escape(sandbox_class.to_s))
+      local_var_path = '/admin/organizations/{organizationId}/quota/{regionId}'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s)).sub('{' + 'regionId' + '}', CGI.escape(region_id.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}

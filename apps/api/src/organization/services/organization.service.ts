@@ -204,7 +204,6 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   async createRegionQuota(
     organizationId: string,
     regionId: string,
-    sandboxClass: SandboxClass,
     createDto: CreateOrganizationRegionQuotaDto,
   ): Promise<RegionQuotaDto> {
     const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
@@ -221,18 +220,18 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     }
 
     const existing = await this.regionQuotaRepository.findOne({
-      where: { organizationId, regionId, sandboxClass },
+      where: { organizationId, regionId, sandboxClass: createDto.sandboxClass },
     })
     if (existing) {
       throw new ConflictException(
-        `Region quota for organization ${organizationId}, region ${regionId}, sandbox class ${sandboxClass} already exists`,
+        `Region quota for organization ${organizationId}, region ${regionId}, sandbox class ${createDto.sandboxClass} already exists`,
       )
     }
 
     const regionQuota = new RegionQuota(
       organizationId,
       regionId,
-      sandboxClass,
+      createDto.sandboxClass,
       createDto.totalCpuQuota,
       createDto.totalMemoryQuota,
       createDto.totalDiskQuota,
@@ -249,9 +248,10 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   async updateRegionQuota(
     organizationId: string,
     regionId: string,
-    sandboxClass: SandboxClass,
     updateDto: UpdateOrganizationRegionQuotaDto,
   ): Promise<void> {
+    const sandboxClass = updateDto.sandboxClass ?? this.configService.getOrThrow('defaultSandboxClass')
+
     const regionQuota = await this.regionQuotaRepository.findOne({
       where: { organizationId, regionId, sandboxClass },
     })

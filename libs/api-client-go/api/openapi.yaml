@@ -503,7 +503,7 @@ paths:
       summary: Update organization quota
       tags:
       - organizations
-  /organizations/{organizationId}/quota/{regionId}/{sandboxClass}:
+  /organizations/{organizationId}/quota/{regionId}:
     patch:
       operationId: updateOrganizationRegionQuota
       parameters:
@@ -522,14 +522,6 @@ paths:
         required: true
         schema:
           type: string
-        style: simple
-      - description: Sandbox class the updated quota applies to
-        explode: false
-        in: path
-        name: sandboxClass
-        required: true
-        schema:
-          $ref: "#/components/schemas/SandboxClass"
         style: simple
       requestBody:
         content:
@@ -8711,6 +8703,85 @@ paths:
       summary: Get all audit logs
       tags:
       - admin
+  /admin/organizations/{organizationId}/quota/{regionId}:
+    patch:
+      operationId: adminUpdateOrganizationRegionQuota
+      parameters:
+      - description: Organization ID
+        explode: false
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Region ID
+        explode: false
+        in: path
+        name: regionId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOrganizationRegionQuota"
+        required: true
+      responses:
+        "204":
+          description: Region quota updated successfully
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Update organization region quota
+      tags:
+      - admin
+    post:
+      operationId: adminCreateOrganizationRegionQuota
+      parameters:
+      - description: Organization ID
+        explode: false
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: ID of the region the new quota applies to
+        explode: false
+        in: path
+        name: regionId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrganizationRegionQuota"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegionQuota"
+          description: Region quota created successfully
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Create organization region quota
+      tags:
+      - admin
   /admin/organizations/{organizationId}/quota/{regionId}/{sandboxClass}:
     delete:
       operationId: adminDeleteOrganizationRegionQuota
@@ -8792,100 +8863,6 @@ paths:
         - profile
         - email
       summary: Get organization region quota
-      tags:
-      - admin
-    patch:
-      operationId: adminUpdateOrganizationRegionQuota
-      parameters:
-      - description: Organization ID
-        explode: false
-        in: path
-        name: organizationId
-        required: true
-        schema:
-          type: string
-        style: simple
-      - description: Region ID
-        explode: false
-        in: path
-        name: regionId
-        required: true
-        schema:
-          type: string
-        style: simple
-      - description: Sandbox class the updated quota applies to
-        explode: false
-        in: path
-        name: sandboxClass
-        required: true
-        schema:
-          $ref: "#/components/schemas/SandboxClass"
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateOrganizationRegionQuota"
-        required: true
-      responses:
-        "204":
-          description: Region quota updated successfully
-      security:
-      - bearer: []
-      - oauth2:
-        - openid
-        - profile
-        - email
-      summary: Update organization region quota
-      tags:
-      - admin
-    post:
-      operationId: adminCreateOrganizationRegionQuota
-      parameters:
-      - description: Organization ID
-        explode: false
-        in: path
-        name: organizationId
-        required: true
-        schema:
-          type: string
-        style: simple
-      - description: ID of the region the new quota applies to
-        explode: false
-        in: path
-        name: regionId
-        required: true
-        schema:
-          type: string
-        style: simple
-      - description: Sandbox class the new quota applies to
-        explode: false
-        in: path
-        name: sandboxClass
-        required: true
-        schema:
-          $ref: "#/components/schemas/SandboxClass"
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateOrganizationRegionQuota"
-        required: true
-      responses:
-        "201":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/RegionQuota"
-          description: Region quota created successfully
-      security:
-      - bearer: []
-      - oauth2:
-        - openid
-        - profile
-        - email
-      summary: Create organization region quota
       tags:
       - admin
   /webhooks/organizations/{organizationId}/app-portal-access:
@@ -10273,7 +10250,11 @@ components:
         maxMemoryPerSandbox: 5.637376656633329
         totalMemoryQuota: 6.027456183070403
         totalDiskQuota: 1.4658129805029452
+        sandboxClass: ""
       properties:
+        sandboxClass:
+          allOf:
+          - $ref: "#/components/schemas/SandboxClass"
         totalCpuQuota:
           nullable: true
           type: number
@@ -15019,7 +15000,11 @@ components:
         maxMemoryPerSandbox: 5.637376656633329
         totalMemoryQuota: 6.027456183070403
         totalDiskQuota: 1.4658129805029452
+        sandboxClass: ""
       properties:
+        sandboxClass:
+          allOf:
+          - $ref: "#/components/schemas/SandboxClass"
         totalCpuQuota:
           type: number
         totalMemoryQuota:
@@ -15039,6 +15024,7 @@ components:
           nullable: true
           type: number
       required:
+      - sandboxClass
       - totalCpuQuota
       - totalDiskQuota
       - totalMemoryQuota

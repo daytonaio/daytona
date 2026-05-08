@@ -106,24 +106,20 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
          * @summary Create organization region quota
          * @param {string} organizationId Organization ID
          * @param {string} regionId ID of the region the new quota applies to
-         * @param {SandboxClass} sandboxClass Sandbox class the new quota applies to
          * @param {CreateOrganizationRegionQuota} createOrganizationRegionQuota 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        adminCreateOrganizationRegionQuota: async (organizationId: string, regionId: string, sandboxClass: SandboxClass, createOrganizationRegionQuota: CreateOrganizationRegionQuota, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        adminCreateOrganizationRegionQuota: async (organizationId: string, regionId: string, createOrganizationRegionQuota: CreateOrganizationRegionQuota, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'organizationId' is not null or undefined
             assertParamExists('adminCreateOrganizationRegionQuota', 'organizationId', organizationId)
             // verify required parameter 'regionId' is not null or undefined
             assertParamExists('adminCreateOrganizationRegionQuota', 'regionId', regionId)
-            // verify required parameter 'sandboxClass' is not null or undefined
-            assertParamExists('adminCreateOrganizationRegionQuota', 'sandboxClass', sandboxClass)
             // verify required parameter 'createOrganizationRegionQuota' is not null or undefined
             assertParamExists('adminCreateOrganizationRegionQuota', 'createOrganizationRegionQuota', createOrganizationRegionQuota)
-            const localVarPath = `/admin/organizations/{organizationId}/quota/{regionId}/{sandboxClass}`
+            const localVarPath = `/admin/organizations/{organizationId}/quota/{regionId}`
                 .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)))
-                .replace(`{${"regionId"}}`, encodeURIComponent(String(regionId)))
-                .replace(`{${"sandboxClass"}}`, encodeURIComponent(String(sandboxClass)));
+                .replace(`{${"regionId"}}`, encodeURIComponent(String(regionId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -922,24 +918,20 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
          * @summary Update organization region quota
          * @param {string} organizationId Organization ID
          * @param {string} regionId Region ID
-         * @param {SandboxClass} sandboxClass Sandbox class the updated quota applies to
          * @param {UpdateOrganizationRegionQuota} updateOrganizationRegionQuota 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        adminUpdateOrganizationRegionQuota: async (organizationId: string, regionId: string, sandboxClass: SandboxClass, updateOrganizationRegionQuota: UpdateOrganizationRegionQuota, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        adminUpdateOrganizationRegionQuota: async (organizationId: string, regionId: string, updateOrganizationRegionQuota: UpdateOrganizationRegionQuota, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'organizationId' is not null or undefined
             assertParamExists('adminUpdateOrganizationRegionQuota', 'organizationId', organizationId)
             // verify required parameter 'regionId' is not null or undefined
             assertParamExists('adminUpdateOrganizationRegionQuota', 'regionId', regionId)
-            // verify required parameter 'sandboxClass' is not null or undefined
-            assertParamExists('adminUpdateOrganizationRegionQuota', 'sandboxClass', sandboxClass)
             // verify required parameter 'updateOrganizationRegionQuota' is not null or undefined
             assertParamExists('adminUpdateOrganizationRegionQuota', 'updateOrganizationRegionQuota', updateOrganizationRegionQuota)
-            const localVarPath = `/admin/organizations/{organizationId}/quota/{regionId}/{sandboxClass}`
+            const localVarPath = `/admin/organizations/{organizationId}/quota/{regionId}`
                 .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)))
-                .replace(`{${"regionId"}}`, encodeURIComponent(String(regionId)))
-                .replace(`{${"sandboxClass"}}`, encodeURIComponent(String(sandboxClass)));
+                .replace(`{${"regionId"}}`, encodeURIComponent(String(regionId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -1035,13 +1027,12 @@ export const AdminApiFp = function(configuration?: Configuration) {
          * @summary Create organization region quota
          * @param {string} organizationId Organization ID
          * @param {string} regionId ID of the region the new quota applies to
-         * @param {SandboxClass} sandboxClass Sandbox class the new quota applies to
          * @param {CreateOrganizationRegionQuota} createOrganizationRegionQuota 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async adminCreateOrganizationRegionQuota(organizationId: string, regionId: string, sandboxClass: SandboxClass, createOrganizationRegionQuota: CreateOrganizationRegionQuota, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegionQuota>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.adminCreateOrganizationRegionQuota(organizationId, regionId, sandboxClass, createOrganizationRegionQuota, options);
+        async adminCreateOrganizationRegionQuota(organizationId: string, regionId: string, createOrganizationRegionQuota: CreateOrganizationRegionQuota, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegionQuota>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.adminCreateOrganizationRegionQuota(organizationId, regionId, createOrganizationRegionQuota, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AdminApi.adminCreateOrganizationRegionQuota']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -1294,13 +1285,12 @@ export const AdminApiFp = function(configuration?: Configuration) {
          * @summary Update organization region quota
          * @param {string} organizationId Organization ID
          * @param {string} regionId Region ID
-         * @param {SandboxClass} sandboxClass Sandbox class the updated quota applies to
          * @param {UpdateOrganizationRegionQuota} updateOrganizationRegionQuota 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async adminUpdateOrganizationRegionQuota(organizationId: string, regionId: string, sandboxClass: SandboxClass, updateOrganizationRegionQuota: UpdateOrganizationRegionQuota, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.adminUpdateOrganizationRegionQuota(organizationId, regionId, sandboxClass, updateOrganizationRegionQuota, options);
+        async adminUpdateOrganizationRegionQuota(organizationId: string, regionId: string, updateOrganizationRegionQuota: UpdateOrganizationRegionQuota, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.adminUpdateOrganizationRegionQuota(organizationId, regionId, updateOrganizationRegionQuota, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AdminApi.adminUpdateOrganizationRegionQuota']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -1342,13 +1332,12 @@ export const AdminApiFactory = function (configuration?: Configuration, basePath
          * @summary Create organization region quota
          * @param {string} organizationId Organization ID
          * @param {string} regionId ID of the region the new quota applies to
-         * @param {SandboxClass} sandboxClass Sandbox class the new quota applies to
          * @param {CreateOrganizationRegionQuota} createOrganizationRegionQuota 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        adminCreateOrganizationRegionQuota(organizationId: string, regionId: string, sandboxClass: SandboxClass, createOrganizationRegionQuota: CreateOrganizationRegionQuota, options?: RawAxiosRequestConfig): AxiosPromise<RegionQuota> {
-            return localVarFp.adminCreateOrganizationRegionQuota(organizationId, regionId, sandboxClass, createOrganizationRegionQuota, options).then((request) => request(axios, basePath));
+        adminCreateOrganizationRegionQuota(organizationId: string, regionId: string, createOrganizationRegionQuota: CreateOrganizationRegionQuota, options?: RawAxiosRequestConfig): AxiosPromise<RegionQuota> {
+            return localVarFp.adminCreateOrganizationRegionQuota(organizationId, regionId, createOrganizationRegionQuota, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1544,13 +1533,12 @@ export const AdminApiFactory = function (configuration?: Configuration, basePath
          * @summary Update organization region quota
          * @param {string} organizationId Organization ID
          * @param {string} regionId Region ID
-         * @param {SandboxClass} sandboxClass Sandbox class the updated quota applies to
          * @param {UpdateOrganizationRegionQuota} updateOrganizationRegionQuota 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        adminUpdateOrganizationRegionQuota(organizationId: string, regionId: string, sandboxClass: SandboxClass, updateOrganizationRegionQuota: UpdateOrganizationRegionQuota, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.adminUpdateOrganizationRegionQuota(organizationId, regionId, sandboxClass, updateOrganizationRegionQuota, options).then((request) => request(axios, basePath));
+        adminUpdateOrganizationRegionQuota(organizationId: string, regionId: string, updateOrganizationRegionQuota: UpdateOrganizationRegionQuota, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.adminUpdateOrganizationRegionQuota(organizationId, regionId, updateOrganizationRegionQuota, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1585,13 +1573,12 @@ export class AdminApi extends BaseAPI {
      * @summary Create organization region quota
      * @param {string} organizationId Organization ID
      * @param {string} regionId ID of the region the new quota applies to
-     * @param {SandboxClass} sandboxClass Sandbox class the new quota applies to
      * @param {CreateOrganizationRegionQuota} createOrganizationRegionQuota 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public adminCreateOrganizationRegionQuota(organizationId: string, regionId: string, sandboxClass: SandboxClass, createOrganizationRegionQuota: CreateOrganizationRegionQuota, options?: RawAxiosRequestConfig) {
-        return AdminApiFp(this.configuration).adminCreateOrganizationRegionQuota(organizationId, regionId, sandboxClass, createOrganizationRegionQuota, options).then((request) => request(this.axios, this.basePath));
+    public adminCreateOrganizationRegionQuota(organizationId: string, regionId: string, createOrganizationRegionQuota: CreateOrganizationRegionQuota, options?: RawAxiosRequestConfig) {
+        return AdminApiFp(this.configuration).adminCreateOrganizationRegionQuota(organizationId, regionId, createOrganizationRegionQuota, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1806,13 +1793,12 @@ export class AdminApi extends BaseAPI {
      * @summary Update organization region quota
      * @param {string} organizationId Organization ID
      * @param {string} regionId Region ID
-     * @param {SandboxClass} sandboxClass Sandbox class the updated quota applies to
      * @param {UpdateOrganizationRegionQuota} updateOrganizationRegionQuota 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public adminUpdateOrganizationRegionQuota(organizationId: string, regionId: string, sandboxClass: SandboxClass, updateOrganizationRegionQuota: UpdateOrganizationRegionQuota, options?: RawAxiosRequestConfig) {
-        return AdminApiFp(this.configuration).adminUpdateOrganizationRegionQuota(organizationId, regionId, sandboxClass, updateOrganizationRegionQuota, options).then((request) => request(this.axios, this.basePath));
+    public adminUpdateOrganizationRegionQuota(organizationId: string, regionId: string, updateOrganizationRegionQuota: UpdateOrganizationRegionQuota, options?: RawAxiosRequestConfig) {
+        return AdminApiFp(this.configuration).adminUpdateOrganizationRegionQuota(organizationId, regionId, updateOrganizationRegionQuota, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

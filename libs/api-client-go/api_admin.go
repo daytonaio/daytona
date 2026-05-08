@@ -42,10 +42,9 @@ type AdminAPI interface {
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param organizationId Organization ID
 	@param regionId ID of the region the new quota applies to
-	@param sandboxClass Sandbox class the new quota applies to
 	@return AdminAPIAdminCreateOrganizationRegionQuotaRequest
 	*/
-	AdminCreateOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string, sandboxClass SandboxClass) AdminAPIAdminCreateOrganizationRegionQuotaRequest
+	AdminCreateOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string) AdminAPIAdminCreateOrganizationRegionQuotaRequest
 
 	// AdminCreateOrganizationRegionQuotaExecute executes the request
 	//  @return RegionQuota
@@ -283,10 +282,9 @@ type AdminAPI interface {
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param organizationId Organization ID
 	@param regionId Region ID
-	@param sandboxClass Sandbox class the updated quota applies to
 	@return AdminAPIAdminUpdateOrganizationRegionQuotaRequest
 	*/
-	AdminUpdateOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string, sandboxClass SandboxClass) AdminAPIAdminUpdateOrganizationRegionQuotaRequest
+	AdminUpdateOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string) AdminAPIAdminUpdateOrganizationRegionQuotaRequest
 
 	// AdminUpdateOrganizationRegionQuotaExecute executes the request
 	AdminUpdateOrganizationRegionQuotaExecute(r AdminAPIAdminUpdateOrganizationRegionQuotaRequest) (*http.Response, error)
@@ -420,7 +418,6 @@ type AdminAPIAdminCreateOrganizationRegionQuotaRequest struct {
 	ApiService AdminAPI
 	organizationId string
 	regionId string
-	sandboxClass SandboxClass
 	createOrganizationRegionQuota *CreateOrganizationRegionQuota
 }
 
@@ -439,16 +436,14 @@ AdminCreateOrganizationRegionQuota Create organization region quota
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param organizationId Organization ID
  @param regionId ID of the region the new quota applies to
- @param sandboxClass Sandbox class the new quota applies to
  @return AdminAPIAdminCreateOrganizationRegionQuotaRequest
 */
-func (a *AdminAPIService) AdminCreateOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string, sandboxClass SandboxClass) AdminAPIAdminCreateOrganizationRegionQuotaRequest {
+func (a *AdminAPIService) AdminCreateOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string) AdminAPIAdminCreateOrganizationRegionQuotaRequest {
 	return AdminAPIAdminCreateOrganizationRegionQuotaRequest{
 		ApiService: a,
 		ctx: ctx,
 		organizationId: organizationId,
 		regionId: regionId,
-		sandboxClass: sandboxClass,
 	}
 }
 
@@ -467,10 +462,9 @@ func (a *AdminAPIService) AdminCreateOrganizationRegionQuotaExecute(r AdminAPIAd
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/admin/organizations/{organizationId}/quota/{regionId}/{sandboxClass}"
+	localVarPath := localBasePath + "/admin/organizations/{organizationId}/quota/{regionId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"regionId"+"}", url.PathEscape(parameterValueToString(r.regionId, "regionId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxClass"+"}", url.PathEscape(parameterValueToString(r.sandboxClass, "sandboxClass")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2389,7 +2383,6 @@ type AdminAPIAdminUpdateOrganizationRegionQuotaRequest struct {
 	ApiService AdminAPI
 	organizationId string
 	regionId string
-	sandboxClass SandboxClass
 	updateOrganizationRegionQuota *UpdateOrganizationRegionQuota
 }
 
@@ -2408,16 +2401,14 @@ AdminUpdateOrganizationRegionQuota Update organization region quota
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param organizationId Organization ID
  @param regionId Region ID
- @param sandboxClass Sandbox class the updated quota applies to
  @return AdminAPIAdminUpdateOrganizationRegionQuotaRequest
 */
-func (a *AdminAPIService) AdminUpdateOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string, sandboxClass SandboxClass) AdminAPIAdminUpdateOrganizationRegionQuotaRequest {
+func (a *AdminAPIService) AdminUpdateOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string) AdminAPIAdminUpdateOrganizationRegionQuotaRequest {
 	return AdminAPIAdminUpdateOrganizationRegionQuotaRequest{
 		ApiService: a,
 		ctx: ctx,
 		organizationId: organizationId,
 		regionId: regionId,
-		sandboxClass: sandboxClass,
 	}
 }
 
@@ -2434,10 +2425,9 @@ func (a *AdminAPIService) AdminUpdateOrganizationRegionQuotaExecute(r AdminAPIAd
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/admin/organizations/{organizationId}/quota/{regionId}/{sandboxClass}"
+	localVarPath := localBasePath + "/admin/organizations/{organizationId}/quota/{regionId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"regionId"+"}", url.PathEscape(parameterValueToString(r.regionId, "regionId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxClass"+"}", url.PathEscape(parameterValueToString(r.sandboxClass, "sandboxClass")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}

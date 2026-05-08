@@ -482,10 +482,9 @@ type OrganizationsAPI interface {
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param organizationId Organization ID
 	@param regionId ID of the region where the updated quota will be applied
-	@param sandboxClass Sandbox class the updated quota applies to
 	@return OrganizationsAPIUpdateOrganizationRegionQuotaRequest
 	*/
-	UpdateOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string, sandboxClass SandboxClass) OrganizationsAPIUpdateOrganizationRegionQuotaRequest
+	UpdateOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string) OrganizationsAPIUpdateOrganizationRegionQuotaRequest
 
 	// UpdateOrganizationRegionQuotaExecute executes the request
 	UpdateOrganizationRegionQuotaExecute(r OrganizationsAPIUpdateOrganizationRegionQuotaRequest) (*http.Response, error)
@@ -4201,7 +4200,6 @@ type OrganizationsAPIUpdateOrganizationRegionQuotaRequest struct {
 	ApiService OrganizationsAPI
 	organizationId string
 	regionId string
-	sandboxClass SandboxClass
 	updateOrganizationRegionQuota *UpdateOrganizationRegionQuota
 }
 
@@ -4220,16 +4218,14 @@ UpdateOrganizationRegionQuota Update organization region quota
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param organizationId Organization ID
  @param regionId ID of the region where the updated quota will be applied
- @param sandboxClass Sandbox class the updated quota applies to
  @return OrganizationsAPIUpdateOrganizationRegionQuotaRequest
 */
-func (a *OrganizationsAPIService) UpdateOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string, sandboxClass SandboxClass) OrganizationsAPIUpdateOrganizationRegionQuotaRequest {
+func (a *OrganizationsAPIService) UpdateOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string) OrganizationsAPIUpdateOrganizationRegionQuotaRequest {
 	return OrganizationsAPIUpdateOrganizationRegionQuotaRequest{
 		ApiService: a,
 		ctx: ctx,
 		organizationId: organizationId,
 		regionId: regionId,
-		sandboxClass: sandboxClass,
 	}
 }
 
@@ -4246,10 +4242,9 @@ func (a *OrganizationsAPIService) UpdateOrganizationRegionQuotaExecute(r Organiz
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/organizations/{organizationId}/quota/{regionId}/{sandboxClass}"
+	localVarPath := localBasePath + "/organizations/{organizationId}/quota/{regionId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"regionId"+"}", url.PathEscape(parameterValueToString(r.regionId, "regionId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxClass"+"}", url.PathEscape(parameterValueToString(r.sandboxClass, "sandboxClass")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}

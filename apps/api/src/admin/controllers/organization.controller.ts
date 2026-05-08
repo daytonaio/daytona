@@ -41,7 +41,7 @@ import { RegionQuotaDto } from '../../organization/dto/region-quota.dto'
 export class AdminOrganizationController {
   constructor(private readonly organizationService: OrganizationService) {}
 
-  @Post(':organizationId/quota/:regionId/:sandboxClass')
+  @Post(':organizationId/quota/:regionId')
   @HttpCode(201)
   @ApiOperation({
     summary: 'Create organization region quota',
@@ -57,12 +57,6 @@ export class AdminOrganizationController {
     description: 'ID of the region the new quota applies to',
     type: 'string',
   })
-  @ApiParam({
-    name: 'sandboxClass',
-    description: 'Sandbox class the new quota applies to',
-    enum: SandboxClass,
-    enumName: 'SandboxClass',
-  })
   @ApiResponse({
     status: 201,
     description: 'Region quota created successfully',
@@ -75,9 +69,9 @@ export class AdminOrganizationController {
     requestMetadata: {
       params: (req) => ({
         regionId: req.params.regionId,
-        sandboxClass: req.params.sandboxClass,
       }),
       body: (req: TypedRequest<CreateOrganizationRegionQuotaDto>) => ({
+        sandboxClass: req.body?.sandboxClass,
         totalCpuQuota: req.body?.totalCpuQuota,
         totalMemoryQuota: req.body?.totalMemoryQuota,
         totalDiskQuota: req.body?.totalDiskQuota,
@@ -87,10 +81,9 @@ export class AdminOrganizationController {
   async createRegionQuota(
     @Param('organizationId') organizationId: string,
     @Param('regionId') regionId: string,
-    @Param('sandboxClass', new ParseEnumPipe(SandboxClass)) sandboxClass: SandboxClass,
     @Body() createDto: CreateOrganizationRegionQuotaDto,
   ): Promise<RegionQuotaDto> {
-    return this.organizationService.createRegionQuota(organizationId, regionId, sandboxClass, createDto)
+    return this.organizationService.createRegionQuota(organizationId, regionId, createDto)
   }
 
   @Get(':organizationId/quota/:regionId/:sandboxClass')
@@ -133,7 +126,7 @@ export class AdminOrganizationController {
     return regionQuota
   }
 
-  @Patch(':organizationId/quota/:regionId/:sandboxClass')
+  @Patch(':organizationId/quota/:regionId')
   @HttpCode(204)
   @ApiOperation({
     summary: 'Update organization region quota',
@@ -149,12 +142,6 @@ export class AdminOrganizationController {
     description: 'Region ID',
     type: 'string',
   })
-  @ApiParam({
-    name: 'sandboxClass',
-    description: 'Sandbox class the updated quota applies to',
-    enum: SandboxClass,
-    enumName: 'SandboxClass',
-  })
   @ApiResponse({
     status: 204,
     description: 'Region quota updated successfully',
@@ -166,9 +153,9 @@ export class AdminOrganizationController {
     requestMetadata: {
       params: (req) => ({
         regionId: req.params.regionId,
-        sandboxClass: req.params.sandboxClass,
       }),
       body: (req: TypedRequest<UpdateOrganizationRegionQuotaDto>) => ({
+        sandboxClass: req.body?.sandboxClass,
         totalCpuQuota: req.body?.totalCpuQuota,
         totalMemoryQuota: req.body?.totalMemoryQuota,
         totalDiskQuota: req.body?.totalDiskQuota,
@@ -182,10 +169,9 @@ export class AdminOrganizationController {
   async updateRegionQuota(
     @Param('organizationId') organizationId: string,
     @Param('regionId') regionId: string,
-    @Param('sandboxClass', new ParseEnumPipe(SandboxClass)) sandboxClass: SandboxClass,
     @Body() updateDto: UpdateOrganizationRegionQuotaDto,
   ): Promise<void> {
-    await this.organizationService.updateRegionQuota(organizationId, regionId, sandboxClass, updateDto)
+    await this.organizationService.updateRegionQuota(organizationId, regionId, updateDto)
   }
 
   @Delete(':organizationId/quota/:regionId/:sandboxClass')

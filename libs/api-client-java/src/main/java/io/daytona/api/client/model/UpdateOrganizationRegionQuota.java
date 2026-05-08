@@ -19,6 +19,7 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import io.daytona.api.client.model.SandboxClass;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -52,6 +53,11 @@ import io.daytona.api.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class UpdateOrganizationRegionQuota {
+  public static final String SERIALIZED_NAME_SANDBOX_CLASS = "sandboxClass";
+  @SerializedName(SERIALIZED_NAME_SANDBOX_CLASS)
+  @javax.annotation.Nullable
+  private SandboxClass sandboxClass;
+
   public static final String SERIALIZED_NAME_TOTAL_CPU_QUOTA = "totalCpuQuota";
   @SerializedName(SERIALIZED_NAME_TOTAL_CPU_QUOTA)
   @javax.annotation.Nullable
@@ -89,6 +95,25 @@ public class UpdateOrganizationRegionQuota {
 
   public UpdateOrganizationRegionQuota() {
   }
+
+  public UpdateOrganizationRegionQuota sandboxClass(@javax.annotation.Nullable SandboxClass sandboxClass) {
+    this.sandboxClass = sandboxClass;
+    return this;
+  }
+
+  /**
+   * Get sandboxClass
+   * @return sandboxClass
+   */
+  @javax.annotation.Nullable
+  public SandboxClass getSandboxClass() {
+    return sandboxClass;
+  }
+
+  public void setSandboxClass(@javax.annotation.Nullable SandboxClass sandboxClass) {
+    this.sandboxClass = sandboxClass;
+  }
+
 
   public UpdateOrganizationRegionQuota totalCpuQuota(@javax.annotation.Nullable BigDecimal totalCpuQuota) {
     this.totalCpuQuota = totalCpuQuota;
@@ -277,7 +302,8 @@ public class UpdateOrganizationRegionQuota {
       return false;
     }
     UpdateOrganizationRegionQuota updateOrganizationRegionQuota = (UpdateOrganizationRegionQuota) o;
-    return Objects.equals(this.totalCpuQuota, updateOrganizationRegionQuota.totalCpuQuota) &&
+    return Objects.equals(this.sandboxClass, updateOrganizationRegionQuota.sandboxClass) &&
+        Objects.equals(this.totalCpuQuota, updateOrganizationRegionQuota.totalCpuQuota) &&
         Objects.equals(this.totalMemoryQuota, updateOrganizationRegionQuota.totalMemoryQuota) &&
         Objects.equals(this.totalDiskQuota, updateOrganizationRegionQuota.totalDiskQuota) &&
         Objects.equals(this.maxCpuPerSandbox, updateOrganizationRegionQuota.maxCpuPerSandbox) &&
@@ -293,7 +319,7 @@ public class UpdateOrganizationRegionQuota {
 
   @Override
   public int hashCode() {
-    return Objects.hash(totalCpuQuota, totalMemoryQuota, totalDiskQuota, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, additionalProperties);
+    return Objects.hash(sandboxClass, totalCpuQuota, totalMemoryQuota, totalDiskQuota, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, additionalProperties);
   }
 
   private static <T> int hashCodeNullable(JsonNullable<T> a) {
@@ -307,6 +333,7 @@ public class UpdateOrganizationRegionQuota {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class UpdateOrganizationRegionQuota {\n");
+    sb.append("    sandboxClass: ").append(toIndentedString(sandboxClass)).append("\n");
     sb.append("    totalCpuQuota: ").append(toIndentedString(totalCpuQuota)).append("\n");
     sb.append("    totalMemoryQuota: ").append(toIndentedString(totalMemoryQuota)).append("\n");
     sb.append("    totalDiskQuota: ").append(toIndentedString(totalDiskQuota)).append("\n");
@@ -333,7 +360,7 @@ public class UpdateOrganizationRegionQuota {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
+    openapiFields = new HashSet<String>(Arrays.asList("sandboxClass", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("totalCpuQuota", "totalMemoryQuota", "totalDiskQuota"));
@@ -359,6 +386,10 @@ public class UpdateOrganizationRegionQuota {
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
+      // validate the optional field `sandboxClass`
+      if (jsonObj.get("sandboxClass") != null && !jsonObj.get("sandboxClass").isJsonNull()) {
+        SandboxClass.validateJsonElement(jsonObj.get("sandboxClass"));
+      }
   }
 
   public static class CustomTypeAdapterFactory implements TypeAdapterFactory {

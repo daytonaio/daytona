@@ -4,9 +4,16 @@
  */
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
+import { IsEnum, IsOptional } from 'class-validator'
+import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
 
 @ApiSchema({ name: 'UpdateOrganizationRegionQuota' })
 export class UpdateOrganizationRegionQuotaDto {
+  @ApiPropertyOptional({ enum: SandboxClass, enumName: 'SandboxClass' })
+  @IsOptional()
+  @IsEnum(SandboxClass)
+  sandboxClass?: SandboxClass
+
   @ApiProperty({ nullable: true })
   totalCpuQuota?: number
 

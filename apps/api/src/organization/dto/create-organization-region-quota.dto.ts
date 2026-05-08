@@ -1,13 +1,18 @@
 /*
- * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { IsNumber, IsOptional } from 'class-validator'
+import { IsEnum, IsNumber, IsOptional } from 'class-validator'
+import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
 
 @ApiSchema({ name: 'CreateOrganizationRegionQuota' })
 export class CreateOrganizationRegionQuotaDto {
+  @ApiProperty({ enum: SandboxClass, enumName: 'SandboxClass' })
+  @IsEnum(SandboxClass)
+  sandboxClass: SandboxClass
+
   @ApiProperty()
   @IsNumber()
   totalCpuQuota: number

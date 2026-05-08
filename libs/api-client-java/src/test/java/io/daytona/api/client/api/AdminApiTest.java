@@ -69,9 +69,8 @@ public class AdminApiTest {
     public void adminCreateOrganizationRegionQuotaTest() throws ApiException {
         String organizationId = null;
         String regionId = null;
-        SandboxClass sandboxClass = null;
         CreateOrganizationRegionQuota createOrganizationRegionQuota = null;
-        RegionQuota response = api.adminCreateOrganizationRegionQuota(organizationId, regionId, sandboxClass, createOrganizationRegionQuota);
+        RegionQuota response = api.adminCreateOrganizationRegionQuota(organizationId, regionId, createOrganizationRegionQuota);
         // TODO: test validations
     }
 
@@ -309,9 +308,8 @@ public class AdminApiTest {
     public void adminUpdateOrganizationRegionQuotaTest() throws ApiException {
         String organizationId = null;
         String regionId = null;
-        SandboxClass sandboxClass = null;
         UpdateOrganizationRegionQuota updateOrganizationRegionQuota = null;
-        api.adminUpdateOrganizationRegionQuota(organizationId, regionId, sandboxClass, updateOrganizationRegionQuota);
+        api.adminUpdateOrganizationRegionQuota(organizationId, regionId, updateOrganizationRegionQuota);
         // TODO: test validations
     }
 
