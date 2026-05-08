@@ -177,7 +177,7 @@ View the full documentation and examples in the GitHub repository:
 - Helm 3.2.0+
 - A Daytona organization with API access
 - DNS records pointing to your cluster's ingress
-- (Optional) S3-compatible storage for snapshot manager
+- S3-compatible storage for snapshot manager (optional)
 
 #### Installation
 
@@ -241,18 +241,18 @@ helm install my-region ./charts/daytona-region -f my-values.yaml
 
 **Proxy Service Configuration**
 
-| Parameter                                | Description                | Default                                                                                                                            |
-| ---------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **`services.proxy.image.repository`**    | Proxy image repository     | **`daytonaio/daytona-proxy`**                                                                                                      |
-| **`services.proxy.image.tag`**           | Proxy image tag            | **`""`** <small>(Chart.AppVersion)</small>                                                                                         |
-| **`services.proxy.service.type`**        | Service type               | **`ClusterIP`**                                                                                                                    |
-| **`services.proxy.service.port`**        | Service port               | **`4000`**                                                                                                                         |
-| **`services.proxy.ingress.enabled`**     | Enable ingress             | **`true`**                                                                                                                         |
-| **`services.proxy.ingress.className`**   | Ingress class              | **`nginx`**                                                                                                                        |
-| **`services.proxy.ingress.tls`**         | Enable TLS                 | **`true`**                                                                                                                         |
-| **`services.proxy.ingress.selfSigned`**  | Generate self-signed certs | **`false`**                                                                                                                        |
-| **`services.proxy.replicaCount`**        | Number of replicas         | **`1`**                                                                                                                            |
-| **`services.proxy.autoscaling.enabled`** | Enable HPA                 | **`false`**                                                                                                                        |
+| Parameter                                | Description                | Default                                                                                                                                 |
+| ---------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **`services.proxy.image.repository`**    | Proxy image repository     | **`daytonaio/daytona-proxy`**                                                                                                           |
+| **`services.proxy.image.tag`**           | Proxy image tag            | **`""`** <small>(Chart.AppVersion)</small>                                                                                              |
+| **`services.proxy.service.type`**        | Service type               | **`ClusterIP`**                                                                                                                         |
+| **`services.proxy.service.port`**        | Service port               | **`4000`**                                                                                                                              |
+| **`services.proxy.ingress.enabled`**     | Enable ingress             | **`true`**                                                                                                                              |
+| **`services.proxy.ingress.className`**   | Ingress class              | **`nginx`**                                                                                                                             |
+| **`services.proxy.ingress.tls`**         | Enable TLS                 | **`true`**                                                                                                                              |
+| **`services.proxy.ingress.selfSigned`**  | Generate self-signed certs | **`false`**                                                                                                                             |
+| **`services.proxy.replicaCount`**        | Number of replicas         | **`1`**                                                                                                                                 |
+| **`services.proxy.autoscaling.enabled`** | Enable HPA                 | **`false`**                                                                                                                             |
 | **`services.proxy.resources`**           | Resource limits/requests   | See [**<u>values.yaml</u>**](https://raw.githubusercontent.com/daytonaio/helm-charts/refs/heads/main/charts/daytona-region/values.yaml) |
 
 **Snapshot Manager Configuration**
@@ -273,22 +273,22 @@ helm install my-region ./charts/daytona-region -f my-values.yaml
 
 **Registration Configuration**
 
-| Parameter                           | Description                     | Default                                                                                                                            |
-| ----------------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **`registration.enabled`**          | Enable region registration hook | **`true`**                                                                                                                         |
-| **`registration.existingSecret`**   | Use existing secret for API key | **`""`**                                                                                                                           |
-| **`registration.image.repository`** | Job image                       | **`daytonaio/kubectl`**                                                                                                            |
+| Parameter                           | Description                     | Default                                                                                                                                 |
+| ----------------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **`registration.enabled`**          | Enable region registration hook | **`true`**                                                                                                                              |
+| **`registration.existingSecret`**   | Use existing secret for API key | **`""`**                                                                                                                                |
+| **`registration.image.repository`** | Job image                       | **`daytonaio/kubectl`**                                                                                                                 |
 | **`registration.resources`**        | Job resource limits             | See [**<u>values.yaml</u>**](https://raw.githubusercontent.com/daytonaio/helm-charts/refs/heads/main/charts/daytona-region/values.yaml) |
 
 **URL Derivation**
 
 The `proxyUrl` is the source of truth for proxy configuration. The following values are automatically derived:
 
-- **Proxy hostname**: Extracted from `proxyUrl` (e.g., `proxy.example.com`)
-- **Proxy port**: Extracted from `proxyUrl` (e.g., `4000`) or defaults to standard ports
-- **Protocol**: Extracted from `proxyUrl` (e.g., `https`)
-- **Cookie domain**: Base domain extracted by stripping first subdomain (e.g., `example.com`)
-- **Ingress hosts**: Proxy hostname + wildcard for sandbox subdomains
+- **Proxy hostname**: extracted from **`proxyUrl`** (e.g., `proxy.example.com`)
+- **Proxy port**: extracted from **`proxyUrl`** (e.g., `4000`) or defaults to standard ports
+- **Protocol**: extracted from **`proxyUrl`** (e.g., `https`)
+- **Cookie domain**: base domain extracted by stripping first subdomain (e.g., `example.com`)
+- **Ingress hosts**: proxy hostname + wildcard for sandbox subdomains
 
 **TLS Configuration**
 
@@ -299,9 +299,9 @@ The proxy ingress creates rules for both the proxy hostname and a wildcard patte
 
 Your TLS certificate should cover both patterns. Options:
 
-1. **cert-manager**: Automatically provisions certificates
-2. **Self-signed**: Set `services.proxy.ingress.selfSigned: true`
-3. **Custom certificate**: Provide via `services.proxy.ingress.secrets`
+1. **cert-manager**: automatically provisions certificates
+2. **Self-signed**: set **`services.proxy.ingress.selfSigned: true`**
+3. **Custom certificate**: provide via **`services.proxy.ingress.secrets`**
 
 #### S3 Authentication for Snapshot Manager
 
