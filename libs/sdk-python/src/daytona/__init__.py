@@ -45,7 +45,15 @@ if TYPE_CHECKING:
         DaytonaTimeoutError,
         DaytonaValidationError,
     )
-    from .common.filesystem import FileDownloadErrorDetails, FileDownloadRequest, FileDownloadResponse, FileUpload
+    from .common.filesystem import (
+        CancelEvent,
+        DownloadProgress,
+        FileDownloadErrorDetails,
+        FileDownloadRequest,
+        FileDownloadResponse,
+        FileUpload,
+        UploadProgress,
+    )
     from .common.image import Image
     from .common.lsp_server import LspCompletionPosition, LspLanguageId
     from .common.process import CodeRunParams, ExecuteResponse, ExecutionArtifacts, OutputHandler, SessionExecuteRequest
@@ -79,6 +87,9 @@ __all__ = [
     "FileDownloadRequest",
     "FileDownloadResponse",
     "FileDownloadErrorDetails",
+    "DownloadProgress",
+    "UploadProgress",
+    "CancelEvent",
     "FileUpload",
     "VolumeMount",
     "AsyncDaytona",
@@ -166,6 +177,9 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "DaytonaConnectionError": "common.errors",
     # common.filesystem
     "FileDownloadErrorDetails": "common.filesystem",
+    "DownloadProgress": "common.filesystem",
+    "UploadProgress": "common.filesystem",
+    "CancelEvent": "common.filesystem",
     "FileDownloadRequest": "common.filesystem",
     "FileDownloadResponse": "common.filesystem",
     "FileUpload": "common.filesystem",

@@ -59,6 +59,22 @@ jest.mock(
   { virtual: true },
 )
 
+// Constructor-time auth/url resolution must be deterministic in tests, so
+// short-circuit DaytonaEnvReader to read process.env only — never the
+// developer's .env / .env.local files.
+jest.mock('../utils/Runtime', () => {
+  const actual = jest.requireActual('../utils/Runtime')
+  class TestEnvReader {
+    get(name: string): string | undefined {
+      if (!name.startsWith('DAYTONA_')) {
+        throw new Error(`DaytonaEnvReader: variable name must start with 'DAYTONA_', got '${name}'`)
+      }
+      return process.env[name]
+    }
+  }
+  return { ...actual, DaytonaEnvReader: TestEnvReader }
+})
+
 jest.mock('../Snapshot', () => {
   const SnapshotService = jest.fn().mockImplementation((...args: unknown[]) => {
     mockSnapshotServiceCtor(...args)

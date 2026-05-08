@@ -189,6 +189,8 @@ results.forEach(result => {
 
 #### downloadFileStream()
 
+##### Call Signature
+
 ```ts
 downloadFileStream(remotePath: string, timeout?: number): Promise<Readable>
 ```
@@ -204,8 +206,7 @@ Browser and serverless environments should use downloadFile instead.
 
 - `remotePath` _string_ - Path to the file in the Sandbox. Relative paths are
     resolved based on the sandbox working directory.
-- `timeout?` _number = ..._ - Timeout in seconds. 0 means no timeout. Default is 30 minutes.
-
+- `timeout?` _number_
 
 **Returns**:
 
@@ -220,10 +221,54 @@ stream.pipe(res);
 ```
 
 ```ts
-// Pipe to a local file
-import { createWriteStream } from 'fs';
-const stream = await sandbox.fs.downloadFileStream('outputs/data.csv');
-stream.pipe(createWriteStream('local-data.csv'));
+// Download with progress tracking and cancellation
+const controller = new AbortController();
+const stream = await sandbox.fs.downloadFileStream('outputs/large-file.bin', {
+  signal: controller.signal,
+  onProgress: ({ bytesReceived, totalBytes }) => console.log(bytesReceived, totalBytes),
+});
+stream.pipe(createWriteStream('local-file.bin'));
+```
+
+##### Call Signature
+
+```ts
+downloadFileStream(remotePath: string, options?: DownloadStreamOptions): Promise<Readable>
+```
+
+Downloads a single file from the Sandbox as a readable stream without buffering
+the entire file into memory. The returned stream can be piped directly to an HTTP
+response, a file write stream, or any other writable destination.
+
+This method is only supported in Node.js-compatible runtimes (Node.js, Bun).
+Browser and serverless environments should use downloadFile instead.
+
+**Parameters**:
+
+- `remotePath` _string_ - Path to the file in the Sandbox. Relative paths are
+    resolved based on the sandbox working directory.
+- `options?` _DownloadStreamOptions_
+
+**Returns**:
+
+- `Promise<Readable>` - A Node.js Readable stream of the file content.
+
+**Examples:**
+
+```ts
+// Pipe directly to an HTTP response
+const stream = await sandbox.fs.downloadFileStream('outputs/report.pdf');
+stream.pipe(res);
+```
+
+```ts
+// Download with progress tracking and cancellation
+const controller = new AbortController();
+const stream = await sandbox.fs.downloadFileStream('outputs/large-file.bin', {
+  signal: controller.signal,
+  onProgress: ({ bytesReceived, totalBytes }) => console.log(bytesReceived, totalBytes),
+});
+stream.pipe(createWriteStream('local-file.bin'));
 ```
 
 ***
@@ -542,6 +587,52 @@ await fs.uploadFiles(files);
 
 ***
 
+#### uploadFileStream()
+
+```ts
+uploadFileStream(
+   source: UploadSource, 
+   remotePath: string, 
+options?: UploadStreamOptions): Promise<void>
+```
+
+Uploads a single file to the Sandbox using true streaming, with optional progress
+tracking and cancellation. Memory usage stays flat regardless of source size: the
+SDK pipes the source through a transform that counts bytes and forwards to the
+underlying multipart upload without buffering the whole payload. The HTTP layer
+uses chunked transfer encoding, so the source's natural EOF terminates the upload —
+no advance size is needed.
+
+**Parameters**:
+
+- `source` _UploadSource_ - The data to upload. Accepts the same `Buffer | string`
+    inputs as FileSystem.uploadFile, plus Node `Readable` streams and Web
+    `ReadableStream` instances. When a string is passed, it is treated as a local
+    file path and read in streaming chunks.
+- `remotePath` _string_ - Destination path in the Sandbox. Relative paths are
+    resolved against the sandbox working directory.
+- `options?` _UploadStreamOptions = {}_ - Streaming options: AbortSignal, onProgress
+    callback, timeout.
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+// Upload a 2 GB file with progress tracking and the ability to cancel
+import { createReadStream } from 'fs';
+const controller = new AbortController();
+await sandbox.fs.uploadFileStream(createReadStream('big.bin'), 'tmp/big.bin', {
+  signal: controller.signal,
+  onProgress: ({ bytesSent }) => console.log(`${bytesSent} bytes sent`),
+});
+```
+
+***
+
 
 ## DownloadMetadata
 
@@ -554,6 +645,24 @@ Represents metadata for a file download operation.
 - `errorDetails?` _FileDownloadErrorDetails_ - Structured error metadata for a failed download item.
 - `result?` _string \| Buffer\<ArrayBufferLike\> \| Uint8Array\<ArrayBufferLike\>_ - The download result - file path (if destination provided in the request)
     or bytes content (if no destination in the request), undefined if failed or no data received.
+## DownloadStreamOptions
+
+Options for streaming file downloads.
+
+**Properties**:
+
+- `onProgress()?` _\(progress: DownloadProgress\) =\> void_ - Callback invoked with cumulative progress information.
+    
+    **Parameters**:
+    
+    - `progress` _DownloadProgress_
+    
+    
+    **Returns**:
+    
+    - `void`
+- `signal?` _AbortSignal_ - AbortSignal for cancelling the download.
+- `timeout?` _number_ - Timeout in seconds. 0 means no timeout. Default is 30 minutes.
 ## FileDownloadErrorDetails
 
 Structured error metadata for a failed bulk file download item.
@@ -616,3 +725,60 @@ Represents a file to be uploaded to the Sandbox.
 - `destination` _string_ - Absolute destination path in the Sandbox. Relative paths are resolved based on the sandbox working directory.
 - `source` _string \| Buffer\<ArrayBufferLike\>_ - File to upload. If a Buffer, it is interpreted as the file content which is loaded into memory.
     Make sure it fits into memory, otherwise use the local file path which content will be streamed to the Sandbox.
+## UploadStreamOptions
+
+Options for streaming file uploads.
+
+**Properties**:
+
+- `onProgress()?` _\(progress: UploadProgress\) =\> void_ - Callback invoked with cumulative progress information.
+    
+    **Parameters**:
+    
+    - `progress` _UploadProgress_
+    
+    
+    **Returns**:
+    
+    - `void`
+- `signal?` _AbortSignal_ - AbortSignal for cancelling the upload.
+- `timeout?` _number_ - Timeout in seconds. 0 means no timeout. Default is 30 minutes.
+## DownloadProgress
+
+```ts
+type DownloadProgress = {
+  bytesReceived: number;
+  totalBytes: number;
+};
+```
+
+**Type declaration**:
+
+- `bytesReceived` _number_ - Cumulative bytes received so far.
+- `totalBytes?` _number_ - Total bytes expected, if known. Undefined if unavailable.
+    
+
+
+## UploadProgress
+
+```ts
+type UploadProgress = {
+  bytesSent: number;
+};
+```
+
+**Type declaration**:
+
+- `bytesSent` _number_ - Cumulative bytes sent so far.
+    
+
+
+## UploadSource
+
+```ts
+type UploadSource = Buffer | Uint8Array | string | Readable | ReadableStream<Uint8Array>;
+```
+
+Source for a streaming file upload. The same input shapes accepted by
+FileSystem.uploadFile are also valid here, plus Node `Readable`
+streams and Web `ReadableStream` instances.

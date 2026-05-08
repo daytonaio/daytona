@@ -83,7 +83,7 @@ public class FileSystem {
      * @throws io.daytona.sdk.exception.DaytonaException if the file does not exist or access is denied
      */
     public InputStream downloadFileStream(String remotePath) throws io.daytona.sdk.exception.DaytonaException {
-        return downloadFileStream(remotePath, FileTransfer.DEFAULT_DOWNLOAD_STREAM_TIMEOUT_SECONDS);
+        return downloadFileStream(remotePath, new DownloadStreamOptions());
     }
 
     /**
@@ -98,7 +98,19 @@ public class FileSystem {
      * @throws io.daytona.sdk.exception.DaytonaException if the file does not exist or access is denied
      */
     public InputStream downloadFileStream(String remotePath, int timeoutSeconds) throws io.daytona.sdk.exception.DaytonaException {
-        return FileTransfer.streamDownload(fileSystemApi, remotePath, timeoutSeconds);
+        return downloadFileStream(remotePath, new DownloadStreamOptions().setTimeout(timeoutSeconds));
+    }
+
+    /**
+     * Downloads a single file from the Sandbox as a stream with configurable options.
+     *
+     * @param remotePath source file path in the Sandbox
+     * @param options download options including timeout and progress callback
+     * @return an InputStream streaming the file content
+     * @throws io.daytona.sdk.exception.DaytonaException if download fails
+     */
+    public InputStream downloadFileStream(String remotePath, DownloadStreamOptions options) throws io.daytona.sdk.exception.DaytonaException {
+        return FileTransfer.streamDownload(fileSystemApi, remotePath, options != null ? options : new DownloadStreamOptions());
     }
 
     /**
@@ -117,6 +129,25 @@ public class FileSystem {
         } catch (IOException e) {
             throw new io.daytona.sdk.exception.DaytonaException("Failed to upload file", e);
         }
+    }
+
+    /**
+     * Streams an upload to a Sandbox path without buffering the source. The bytes are
+     * piped through a progress-counting wrapper directly into a streaming multipart
+     * request, so heap usage stays flat regardless of source size.
+     *
+     * @param source the data source; the caller retains ownership and is responsible for closing it
+     * @param remotePath destination file path in the Sandbox
+     * @param options upload options including timeout, cancellation, and progress callback
+     * @throws io.daytona.sdk.exception.DaytonaException if upload fails
+     */
+    public void uploadFileStream(InputStream source, String remotePath, UploadStreamOptions options) {
+        FileTransfer.streamUpload(fileSystemApi, source, remotePath, options != null ? options : new UploadStreamOptions());
+    }
+
+    /** Convenience overload using default options. */
+    public void uploadFileStream(InputStream source, String remotePath) {
+        uploadFileStream(source, remotePath, new UploadStreamOptions());
     }
 
     /**

@@ -13,6 +13,8 @@ import (
 	"net/textproto"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -179,6 +181,59 @@ func TestDownloadFileStream(t *testing.T) {
 	assert.Equal(t, "streamed file content", string(data))
 }
 
+func TestDownloadFileStreamProgress(t *testing.T) {
+	remotePath := "/home/user/file.txt"
+	content := "streamed file content"
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mw := multipart.NewWriter(w)
+		w.Header().Set("Content-Type", mw.FormDataContentType())
+		hdr := textproto.MIMEHeader{}
+		hdr.Set("Content-Disposition", `form-data; name="file"; filename="test.txt"`)
+		hdr.Set("Content-Length", strconv.Itoa(len(content)))
+		part, err := mw.CreatePart(hdr)
+		require.NoError(t, err)
+		_, err = part.Write([]byte(content))
+		require.NoError(t, err)
+		require.NoError(t, mw.Close())
+	}))
+	defer server.Close()
+
+	fs := NewFileSystemService(createTestToolboxClient(server), nil)
+
+	var progress []DownloadProgress
+	stream, err := fs.DownloadFileStream(context.Background(), remotePath, WithDownloadProgress(func(progressUpdate DownloadProgress) {
+		progress = append(progress, progressUpdate)
+	}))
+	require.NoError(t, err)
+	defer stream.Close()
+
+	buf := make([]byte, 5)
+	var data []byte
+	for {
+		n, readErr := stream.Read(buf)
+		if n > 0 {
+			data = append(data, buf[:n]...)
+		}
+		if readErr == io.EOF {
+			break
+		}
+		require.NoError(t, readErr)
+	}
+
+	assert.Equal(t, content, string(data))
+	// Validate monotonic progress with correct totals — do not assert exact intermediate
+	// byte boundaries, which depend on OS read chunk sizes and can be flaky in CI.
+	require.NotEmpty(t, progress)
+	expectedTotal := int64(len(content))
+	for i, p := range progress {
+		assert.Equal(t, expectedTotal, p.TotalBytes, "TotalBytes should always equal content length")
+		if i > 0 {
+			assert.Greater(t, p.BytesReceived, progress[i-1].BytesReceived, "progress should be strictly increasing")
+		}
+	}
+	assert.Equal(t, expectedTotal, progress[len(progress)-1].BytesReceived, "final BytesReceived should equal content length")
+}
+
 func TestDownloadFileStreamError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mw := multipart.NewWriter(w)
@@ -343,6 +398,52 @@ func TestUploadFileInvalidSource(t *testing.T) {
 	assert.Contains(t, err.Error(), "Invalid source type")
 }
 
+func TestUploadFileStreamCancellation(t *testing.T) {
+	before := runtime.NumGoroutine()
+
+	cfg := toolbox.NewConfiguration()
+	cfg.Servers = toolbox.ServerConfigurations{{URL: "http://example.test"}}
+	cfg.HTTPClient = &http.Client{Transport: uploadRoundTripFunc(func(req *http.Request) (*http.Response, error) {
+		<-req.Context().Done()
+		return nil, req.Context().Err()
+	})}
+
+	fs := NewFileSystemService(toolbox.NewAPIClient(cfg), nil)
+	ctx, cancel := context.WithCancel(context.Background())
+	time.AfterFunc(20*time.Millisecond, cancel)
+
+	err := fs.UploadFileStream(ctx, endlessReader{}, "/home/user/cancel.bin")
+	require.Error(t, err)
+	assert.Contains(t, strings.ToLower(err.Error()), "context canceled")
+	require.Eventually(t, func() bool {
+		return runtime.NumGoroutine() <= before+1
+	}, time.Second, 20*time.Millisecond)
+}
+
+func TestUploadFileStreamServerError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(`{"message":"upload failed"}`))
+	}))
+	defer server.Close()
+
+	fs := NewFileSystemService(createTestToolboxClient(server), nil)
+
+	done := make(chan error, 1)
+	go func() {
+		done <- fs.UploadFileStream(context.Background(), endlessReader{}, "/home/user/error.bin")
+	}()
+
+	select {
+	case err := <-done:
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "upload failed")
+	case <-time.After(2 * time.Second):
+		t.Fatal("UploadFileStream hung after server error")
+	}
+}
+
 func TestFileSystemErrorHandling(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -494,4 +595,19 @@ func TestFileSystemSearchAndReplaceSuccessMappings(t *testing.T) {
 	require.NoError(t, err)
 	results := replaced.([]map[string]any)
 	assert.Equal(t, "permission denied", results[1]["error"])
+}
+
+type uploadRoundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f uploadRoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
+	return f(req)
+}
+
+type endlessReader struct{}
+
+func (endlessReader) Read(p []byte) (int, error) {
+	for i := range p {
+		p[i] = 'a'
+	}
+	return len(p), nil
 }

@@ -14,7 +14,12 @@ export type {
 } from './Daytona'
 export { FileSystem } from './FileSystem'
 export type {
+  DownloadProgress,
   DownloadMetadata,
+  DownloadStreamOptions,
+  UploadProgress,
+  UploadStreamOptions,
+  UploadSource,
   FileDownloadErrorDetails,
   FileDownloadRequest,
   FileDownloadResponse,

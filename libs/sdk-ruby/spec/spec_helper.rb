@@ -26,6 +26,34 @@ RSpec.configure do |config|
   config.before(:suite) do
     Daytona::Sdk.logger.level = Logger::FATAL
   end
+
+  # Auth/url resolution must be deterministic in tests, so:
+  #   1. Stub Dotenv.parse so .env / .env.local files are never consulted.
+  #   2. Snapshot and clear DAYTONA_* ENV vars around each example, so the
+  #      developer's shell or local-service env can't leak into a unit test
+  #      that asserts on the absence of credentials.
+  # E2E specs read DAYTONA_API_KEY / DAYTONA_API_URL up front (in before(:all)
+  # / before(:suite) hooks that run prior to each example's around block, or
+  # via a manually re-set ENV inside the spec) and so remain unaffected.
+  daytona_env_keys = %w[
+    DAYTONA_API_KEY
+    DAYTONA_JWT_TOKEN
+    DAYTONA_API_URL
+    DAYTONA_SERVER_URL
+    DAYTONA_TARGET
+    DAYTONA_ORGANIZATION_ID
+  ].freeze
+
+  config.before do |example|
+    allow(Dotenv).to receive(:parse).and_return({}) unless example.metadata[:real_dotenv]
+  end
+
+  config.around do |example|
+    saved = daytona_env_keys.to_h { |key| [key, ENV.delete(key)] }
+    example.run
+  ensure
+    saved.each { |key, value| value ? ENV[key] = value : ENV.delete(key) }
+  end
 end
 
 # ---------------------------------------------------------------------------

@@ -2,17 +2,20 @@
 # SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
+import inspect
 import io
 import os
-from collections.abc import AsyncIterator
+import secrets
+from collections.abc import AsyncIterable, AsyncIterator, Awaitable, Callable
 from contextlib import ExitStack
-from typing import Any, cast, overload
+from typing import Any, cast, final, overload
 
 import aiofiles
 import aiofiles.os
 import httpx
 from aiofiles.threadpool.binary import AsyncBufferedIOBase
 from python_multipart.multipart import MultipartParser, parse_options_header
+from typing_extensions import override
 
 from daytona_toolbox_api_client_async import (
     FileInfo,
@@ -29,10 +32,13 @@ from .._utils.otel_decorator import with_instrumentation
 from ..common.errors import DaytonaError
 from ..common.file_transfer import create_multipart_parser, parse_content_type_boundary, serialize_download_request
 from ..common.filesystem import (
+    CancelEvent,
+    DownloadProgress,
     FileDownloadErrorDetails,
     FileDownloadRequest,
     FileDownloadResponse,
     FileUpload,
+    UploadProgress,
     create_file_download_error,
     parse_file_download_error_payload,
     raise_if_stream_error,
@@ -174,7 +180,13 @@ class AsyncFileSystem:
 
     @intercept_errors(message_prefix="Failed to download file: ")
     @with_instrumentation()
-    async def download_file_stream(self, remote_path: str, timeout: int = 30 * 60) -> AsyncIterator[bytes]:
+    async def download_file_stream(
+        self,
+        remote_path: str,
+        timeout: int = 30 * 60,
+        on_progress: Callable[[DownloadProgress], Awaitable[None] | None] | None = None,
+        cancel_event: CancelEvent | None = None,
+    ) -> AsyncIterator[bytes]:
         """Downloads a single file from the Sandbox as a stream without buffering the entire file
         into memory. Returns an async iterator that yields file content in chunks, which can be piped
         directly to an HTTP response, written to a file incrementally, or processed on the fly.
@@ -184,12 +196,22 @@ class AsyncFileSystem:
                 on the sandbox working directory.
             timeout (int): Timeout for the download operation in seconds. 0 means no timeout.
                 Default is 30 minutes.
+            on_progress (Callable[[DownloadProgress], Awaitable[None] | None] | None): Optional
+                callback invoked with cumulative bytes received and total bytes, when known, as
+                the download progresses. May be either a regular function or an ``async def``
+                coroutine — coroutine returns are awaited before the next chunk is yielded.
+                Default is None.
+            cancel_event (CancelEvent | None): Optional ``asyncio.Event``-compatible token. When
+                set during streaming, the next chunk raises ``DaytonaError`` and the underlying
+                HTTP connection is closed. Standard ``asyncio.CancelledError`` from task
+                cancellation is also honoured automatically by the generator.
 
         Returns:
             AsyncIterator[bytes]: An async iterator yielding chunks of file content as bytes.
 
         Raises:
-            DaytonaError: If the file does not exist or access is denied.
+            DaytonaError: If the file does not exist, access is denied, or the download is
+                cancelled via ``cancel_event``.
 
         Example:
             ```python
@@ -198,9 +220,12 @@ class AsyncFileSystem:
                 async for chunk in await sandbox.fs.download_file_stream("workspace/large-file.bin"):
                     await f.write(chunk)
 
-            # Stream to an HTTP response (FastAPI)
-            return StreamingResponse(await sandbox.fs.download_file_stream("workspace/report.pdf"),
-                                     media_type="application/pdf")
+            # Cancel a download from another coroutine
+            import asyncio
+            cancel = asyncio.Event()
+            asyncio.get_running_loop().call_later(5.0, cancel.set)
+            async for chunk in await sandbox.fs.download_file_stream("workspace/big.bin", cancel_event=cancel):
+                process(chunk)
             ```
         """
 
@@ -209,22 +234,24 @@ class AsyncFileSystem:
 
             mode: str | None = None
             part_content_type: str | None = None
-            source: str | None = None
             header_field = bytearray()
             header_value = bytearray()
-            pending_headers: list[tuple[str, str]] = []
+            part_headers: dict[str, str] = {}
             error_buffer = bytearray()
-            events: list[tuple[str, Any]] = []
-            file_chunks: list[bytes] = []
+            pending_chunks: list[bytes] = []
             error_text: str | None = None
             error_details: FileDownloadErrorDetails | None = None
             received_file_data = False
+            bytes_received = 0
+            total_bytes: int | None = None
 
             def on_part_begin() -> None:
-                pending_headers.clear()
+                nonlocal total_bytes
+                part_headers.clear()
                 header_field.clear()
                 header_value.clear()
-                events.append(("begin", None))
+                error_buffer.clear()
+                total_bytes = None
 
             def on_header_field(data: bytes, start: int, end: int) -> None:
                 header_field.extend(data[start:end])
@@ -235,72 +262,67 @@ class AsyncFileSystem:
             def on_header_end() -> None:
                 field = bytes(header_field).decode("utf-8", errors="ignore").lower()
                 value = bytes(header_value).decode("utf-8", errors="ignore")
-                pending_headers.append((field, value))
+                part_headers[field] = value
                 header_field.clear()
                 header_value.clear()
 
             def on_headers_finished() -> None:
-                events.append(("headers_finished", dict(pending_headers)))
+                nonlocal mode, part_content_type, total_bytes
+                cd = part_headers.get("content-disposition", "")
+                _, cd_params = parse_options_header(cd)
+                name = cd_params.get(b"name", b"").decode("utf-8", errors="ignore")
+                if not cd_params.get(b"filename"):
+                    raise DaytonaError("No source path found for this file")
+                part_content_type = part_headers.get("content-type")
+                cl = part_headers.get("content-length")
+                if cl is not None:
+                    try:
+                        total_bytes = int(cl)
+                    except (TypeError, ValueError):
+                        total_bytes = None
+                else:
+                    total_bytes = None
+                mode = name if name in ("file", "error") else None
 
             def on_part_data(data: bytes, start: int, end: int) -> None:
-                events.append(("data", bytes(data[start:end])))
+                if mode == "error":
+                    error_buffer.extend(data[start:end])
+                elif mode == "file":
+                    pending_chunks.append(bytes(data[start:end]))
 
             def on_part_end() -> None:
-                events.append(("end", None))
+                nonlocal mode, part_content_type, error_text, error_details
+                if mode == "error" and error_buffer:
+                    error_text, error_details = parse_file_download_error_payload(
+                        bytes(error_buffer),
+                        part_content_type,
+                    )
+                    error_buffer.clear()
+                mode = None
+                part_content_type = None
 
-            async def process_events() -> None:
-                nonlocal mode, part_content_type, source, error_text, error_details
-
-                for event_tag, event_payload in events:
-                    if event_tag == "begin":
-                        error_buffer.clear()
-                        mode = None
-                        part_content_type = None
-                        source = None
-
-                    elif event_tag == "headers_finished":
-                        hdrs = cast(dict[str, str], event_payload)
-                        cd = hdrs.get("content-disposition", "")
-                        _, cd_params = parse_options_header(cd)
-                        name = cd_params.get(b"name", b"").decode("utf-8", errors="ignore")
-                        source = cd_params.get(b"filename", b"").decode("utf-8", errors="ignore") or None
-                        if not source:
-                            raise DaytonaError("No source path found for this file")
-                        part_content_type = hdrs.get("content-type")
-
-                        if name == "error":
-                            mode = "error"
-                        elif name == "file":
-                            mode = "file"
-
-                    elif event_tag == "data":
-                        part_data = event_payload
-                        if not isinstance(part_data, bytes):
-                            continue
-                        if mode == "error":
-                            error_buffer.extend(part_data)
-                        elif mode == "file":
-                            file_chunks.append(part_data)
-
-                    elif event_tag == "end":
-                        if mode == "error" and error_buffer:
-                            error_text, error_details = parse_file_download_error_payload(
-                                bytes(error_buffer),
-                                part_content_type,
-                            )
-                            error_buffer.clear()
-                        mode = None
-                        part_content_type = None
-                        source = None
+            async def drain() -> AsyncIterator[bytes]:
+                nonlocal received_file_data, bytes_received
+                if not pending_chunks:
+                    return
+                if cancel_event is not None and cancel_event.is_set():
+                    raise DaytonaError(f"Download cancelled: {remote_path}")
+                emitted = pending_chunks.copy()
+                pending_chunks.clear()
+                received_file_data = True
+                for piece in emitted:
+                    bytes_received += len(piece)
+                    if on_progress is not None:
+                        progress = DownloadProgress(bytes_received=bytes_received, total_bytes=total_bytes)
+                        if inspect.iscoroutinefunction(on_progress):
+                            await on_progress(progress)
+                        else:
+                            _ = on_progress(progress)
+                    yield piece
 
             httpx_timeout = None if timeout == 0 else timeout
             async with httpx.AsyncClient(timeout=httpx_timeout) as client:
-                async with client.stream(
-                    method,
-                    url,
-                    json=body,
-                    headers=headers,
-                ) as resp:
+                async with client.stream(method, url, json=body, headers=headers) as resp:
                     _ = resp.raise_for_status()
 
                     boundary = parse_content_type_boundary(resp.headers)
@@ -316,25 +338,13 @@ class AsyncFileSystem:
                     )
 
                     async for chunk in resp.aiter_bytes(64 * 1024):
-                        events.clear()
                         _ = parser.write(chunk)
-                        await process_events()
-                        if file_chunks:
-                            emitted_chunks = file_chunks.copy()
-                            file_chunks.clear()
-                            received_file_data = True
-                            for file_chunk in emitted_chunks:
-                                yield file_chunk
+                        async for piece in drain():
+                            yield piece
 
-                    events.clear()
                     parser.finalize()
-                    await process_events()
-                    if file_chunks:
-                        emitted_chunks = file_chunks.copy()
-                        file_chunks.clear()
-                        received_file_data = True
-                        for file_chunk in emitted_chunks:
-                            yield file_chunk
+                    async for piece in drain():
+                        yield piece
 
             raise_if_stream_error(remote_path, error_text, error_details, received_file_data)
 
@@ -419,7 +429,7 @@ class AsyncFileSystem:
                     header_value = bytearray()
                     pending_headers: list[tuple[str, str]] = []
                     error_buffer = bytearray()
-                    events: list[tuple[str, Any]] = []
+                    events: list[tuple[str, object]] = []
 
                     def on_part_begin() -> None:
                         # Keep callback-owned header state local and communicate via immutable
@@ -475,7 +485,7 @@ class AsyncFileSystem:
                                 source = None
 
                             elif event_tag == "headers_finished":
-                                hdrs: dict[str, str] = event_payload
+                                hdrs = cast(dict[str, str], event_payload)
                                 cd = hdrs.get("content-disposition", "")
                                 _, cd_params = parse_options_header(cd)
                                 name = cd_params.get(b"name", b"").decode("utf-8", errors="ignore")
@@ -502,7 +512,7 @@ class AsyncFileSystem:
                                         meta.result = writer
 
                             elif event_tag == "data":
-                                part_data: bytes = event_payload
+                                part_data = cast(bytes, event_payload)
                                 if mode == "error":
                                     error_buffer.extend(part_data)
                                 elif mode == "file":
@@ -943,3 +953,270 @@ class AsyncFileSystem:
                         f"{response.status_code}: {detail}",
                         status_code=response.status_code,
                     )
+
+    @intercept_errors(message_prefix="Failed to upload file: ")
+    @with_instrumentation()
+    async def upload_file_stream(
+        self,
+        source: bytes | bytearray | str | io.IOBase | AsyncIterable[bytes] | object,
+        remote_path: str,
+        timeout: int = 30 * 60,
+        on_progress: Callable[[UploadProgress], Awaitable[None] | None] | None = None,
+        cancel_event: CancelEvent | None = None,
+    ) -> None:
+        """Uploads a single file to the Sandbox using true streaming, with optional progress
+        tracking and cancellation. Memory usage stays flat regardless of source size. The
+        HTTP layer uses chunked transfer encoding, so the source's natural EOF terminates
+        the upload — no advance size is needed.
+
+        Args:
+            source: Data to upload. Accepts:
+
+                * ``bytes`` / ``bytearray`` — uploaded from memory.
+                * ``str`` — treated as a local file path and read in chunks.
+                * sync file-like (anything with ``.read(n) -> bytes``) — streamed as-is.
+                * **async file-like** (anything with ``async def read(n) -> bytes``,
+                  e.g. an ``aiofiles`` handle) — streamed without ever blocking the loop.
+                * ``AsyncIterable[bytes]`` — yielded chunks are forwarded to the wire.
+            remote_path (str): Destination path in the Sandbox.
+            timeout (int): Timeout in seconds. 0 means no timeout. Default is 30 minutes.
+            on_progress (Callable[[UploadProgress], Awaitable[None] | None] | None): Optional
+                callback invoked with cumulative bytes sent. May be sync or ``async def``
+                **when paired with an async source** (async file-like or ``AsyncIterable[bytes]``).
+                Sync sources (``bytes``, ``str`` path, sync file-like) require a sync callback
+                because the underlying httpx multipart serializer pulls bytes through a
+                synchronous ``.read()``; passing an async callback alongside a sync source
+                raises ``DaytonaError``.
+            cancel_event (CancelEvent | None): Optional ``asyncio.Event``-compatible token.
+                When set during streaming, the next chunk raises ``DaytonaError`` and
+                tears down the request. Standard ``asyncio.CancelledError`` from task
+                cancellation is also honoured automatically.
+
+        Raises:
+            DaytonaError: If the upload fails or is cancelled via ``cancel_event``.
+
+        Example:
+            ```python
+            import aiofiles, asyncio
+            cancel = asyncio.Event()
+            async with aiofiles.open("large_dataset.csv", "rb") as f:
+                await sandbox.fs.upload_file_stream(
+                    f,
+                    "tmp/dataset.csv",
+                    on_progress=lambda p: print(f"{p.bytes_sent} bytes sent"),
+                    cancel_event=cancel,
+                )
+            ```
+        """
+        if cancel_event is not None and cancel_event.is_set():
+            raise DaytonaError(f"Upload cancelled: {remote_path}")
+
+        _, url, headers, *_ = self._api_client._upload_files_serialize(None, None, None, None)
+        _ = headers.pop("Content-Type", None)
+
+        if _is_async_source(source):
+            # Async file-like / AsyncIterable need their own multipart body builder
+            # because httpx.files= demands a sync .read(). We build the multipart
+            # envelope as an async byte iterator and ship it via httpx.content=.
+            await self._upload_async_stream(
+                source,
+                remote_path,
+                url,
+                headers,
+                timeout,
+                on_progress,
+                cancel_event,
+            )
+            return
+
+        # Sync sources flow through httpx's native multipart serialiser. The
+        # _CountingUploadReader interleaves byte counting + cancel checks into
+        # each .read() call that httpx makes during serialisation. That .read()
+        # is necessarily synchronous, so an async on_progress can't be awaited
+        # there — fail loudly instead of silently dropping the coroutine.
+        if on_progress is not None and inspect.iscoroutinefunction(on_progress):
+            raise DaytonaError(
+                "An async on_progress callback is only supported with an async source"
+                + " (async file-like or AsyncIterable[bytes]). With a sync source pass a"
+                + " regular function, or convert the source to async."
+            )
+        # The iscoroutinefunction guard above ensures on_progress is a plain
+        # sync callable on this branch, so the cast to the narrower type the
+        # _CountingUploadReader constructor expects is safe.
+        sync_on_progress = cast(Callable[[UploadProgress], None] | None, on_progress)
+        with ExitStack() as stack:
+            stream = _open_upload_source(stack, source)
+            wrapped = _CountingUploadReader(stream, sync_on_progress, cancel_event, remote_path)
+
+            data_fields = {"files[0].path": remote_path}
+            # httpx accepts any IO[bytes]-shaped object as a multipart file; our
+            # _CountingUploadReader is RawIOBase but pyright can't see that the
+            # (filename, reader) tuple satisfies the structural FileTypes union,
+            # so we drop into Any for the call.
+            file_fields = cast(Any, {"files[0].file": (remote_path, wrapped)})
+
+            async with httpx.AsyncClient(timeout=timeout or None) as client:
+                response = await client.post(url, data=data_fields, files=file_fields, headers=headers)
+                _raise_for_upload_status(response)
+
+    async def _upload_async_stream(
+        self,
+        source: object,
+        remote_path: str,
+        url: str,
+        headers: dict[str, str],
+        timeout: int,
+        on_progress: Callable[[UploadProgress], Awaitable[None] | None] | None,
+        cancel_event: CancelEvent | None,
+    ) -> None:
+        boundary = "----DaytonaUpload" + secrets.token_hex(12)
+        envelope_header, envelope_trailer = _build_multipart_envelope(boundary, remote_path)
+
+        async def body_generator() -> AsyncIterator[bytes]:
+            yield envelope_header
+            sent = 0
+            async for chunk in _iter_async_source_chunks(source):
+                if cancel_event is not None and cancel_event.is_set():
+                    raise DaytonaError(f"Upload cancelled: {remote_path}")
+                if not chunk:
+                    continue
+                sent += len(chunk)
+                if on_progress is not None:
+                    progress = UploadProgress(bytes_sent=sent)
+                    if inspect.iscoroutinefunction(on_progress):
+                        await on_progress(progress)
+                    else:
+                        _ = on_progress(progress)
+                yield chunk
+            yield envelope_trailer
+
+        request_headers = dict(headers)
+        request_headers["Content-Type"] = f"multipart/form-data; boundary={boundary}"
+
+        async with httpx.AsyncClient(timeout=timeout or None) as client:
+            response = await client.post(url, content=body_generator(), headers=request_headers)
+            _raise_for_upload_status(response)
+
+
+def _is_async_source(source: object) -> bool:
+    """A source is "async" if its ``read`` is a coroutine function (e.g. an aiofiles
+    file handle) or if it implements the ``__aiter__`` protocol. Sync ``IOBase`` and
+    bytes/str sources stay on the existing httpx-multipart path."""
+    if hasattr(source, "__aiter__"):
+        return True
+    read = getattr(source, "read", None)
+    return read is not None and inspect.iscoroutinefunction(read)
+
+
+async def _iter_async_source_chunks(source: object) -> AsyncIterator[bytes]:
+    """Yields bytes from either an async file-like (``async def read``) or an
+    ``AsyncIterable[bytes]``. Both variants are pulled in 64 KiB chunks; the async
+    iterable case forwards whatever sized chunks the producer emits."""
+    read = getattr(source, "read", None)
+    if read is not None and inspect.iscoroutinefunction(read):
+        while True:
+            chunk = cast(bytes, await read(64 * 1024))
+            if not chunk:
+                return
+            yield chunk
+
+    # The dispatch in upload_file_stream guarantees source has either an async
+    # `read` method (handled above) or implements `__aiter__`, so this branch
+    # is reached only with an AsyncIterable[bytes]. The cast lets pyright follow
+    # that invariant.
+    async for chunk in cast(AsyncIterable[bytes], source):
+        yield chunk
+
+
+_FILENAME_FORBIDDEN_CHARS = str.maketrans({'"': "_", "\\": "_", "\r": "_", "\n": "_"})
+
+
+def _build_multipart_envelope(boundary: str, remote_path: str) -> tuple[bytes, bytes]:
+    """Returns ``(header, trailer)`` byte strings for a single-file ``files[0]`` part
+    targeting the bulk-upload endpoint. The body of the file part goes between them.
+
+    The Content-Disposition filename is sanitized so a remote path containing quotes,
+    backslashes, or CR/LF can't break out of the header — the daemon doesn't actually
+    use this filename (the destination comes from the ``files[0].path`` text part), so
+    a lossy substitution is fine."""
+    filename = os.path.basename(remote_path).translate(_FILENAME_FORBIDDEN_CHARS) or "upload"
+    header = (
+        f"--{boundary}\r\n"
+        'Content-Disposition: form-data; name="files[0].path"\r\n\r\n'
+        f"{remote_path}\r\n"
+        f"--{boundary}\r\n"
+        f'Content-Disposition: form-data; name="files[0].file"; filename="{filename}"\r\n'
+        "Content-Type: application/octet-stream\r\n\r\n"
+    ).encode("utf-8")
+    trailer = f"\r\n--{boundary}--\r\n".encode("utf-8")
+    return header, trailer
+
+
+def _raise_for_upload_status(response: httpx.Response) -> None:
+    if response.is_success:
+        return
+    try:
+        detail = ", ".join(response.json()["errors"])
+    except Exception:
+        detail = response.text
+    raise DaytonaError(
+        f"{response.status_code}: {detail}",
+        status_code=response.status_code,
+    )
+
+
+def _open_upload_source(stack: ExitStack, source: object) -> io.IOBase:
+    """Coerces ``upload_file_stream`` source variants into a uniform read-ready stream.
+
+    The stack owns closing any file we opened on the caller's behalf; file-like objects passed
+    in by the caller are returned untouched (caller retains ownership and lifecycle).
+    """
+    if isinstance(source, (bytes, bytearray)):
+        return io.BytesIO(bytes(source))
+    if isinstance(source, str):
+        return stack.enter_context(open(source, "rb"))
+    if hasattr(source, "read"):
+        # Caller-supplied IOBase (or duck-typed file-like). httpx will read
+        # from it via .read(); the cast is structural since pyright can't
+        # infer "anything with .read" implies io.IOBase.
+        return cast(io.IOBase, source)
+    raise DaytonaError(f"Unsupported upload source: {type(source).__name__}")
+
+
+@final
+class _CountingUploadReader(io.RawIOBase):
+    """File-like wrapper that meters bytes flowing into httpx and honours cancellation
+    between chunks."""
+
+    def __init__(
+        self,
+        source: io.IOBase,
+        on_progress: Callable[[UploadProgress], None] | None,
+        cancel_event: CancelEvent | None,
+        remote_path: str,
+    ) -> None:
+        super().__init__()
+        self._source = source
+        self._on_progress = on_progress
+        self._cancel_event = cancel_event
+        self._remote_path = remote_path
+        self._sent = 0
+
+    @override
+    def readable(self) -> bool:
+        return True
+
+    @override
+    def read(self, size: int = -1) -> bytes:
+        if self._cancel_event is not None and self._cancel_event.is_set():
+            raise DaytonaError(f"Upload cancelled: {self._remote_path}")
+        chunk = self._source.read(size)
+        if chunk:
+            self._sent += len(chunk)
+            if self._on_progress is not None:
+                self._on_progress(UploadProgress(bytes_sent=self._sent))
+        return chunk
+
+    @override
+    def readall(self) -> bytes:
+        return self.read(-1)

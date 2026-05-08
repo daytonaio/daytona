@@ -6,11 +6,14 @@ package fs
 import (
 	"bytes"
 	"encoding/json"
+	"io"
+	"mime"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -24,13 +27,17 @@ func newTestContext(method string) *gin.Context {
 	return ctx
 }
 
-func TestClassifyDownloadPathError(t *testing.T) {
+func TestOpenDownloadFile(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	t.Run("rejects empty paths as validation errors", func(t *testing.T) {
 		ctx := newTestContext(http.MethodPost)
 
-		errorResponse := classifyDownloadPathError(ctx, "")
+		f, _, errorResponse := openDownloadFile(ctx, "")
+		if f != nil {
+			f.Close()
+			t.Fatal("expected no file handle for empty path")
+		}
 
 		if errorResponse == nil {
 			t.Fatal("expected an error response")
@@ -53,7 +60,11 @@ func TestClassifyDownloadPathError(t *testing.T) {
 		ctx := newTestContext(http.MethodPost)
 		tempDir := t.TempDir()
 
-		errorResponse := classifyDownloadPathError(ctx, tempDir)
+		f, _, errorResponse := openDownloadFile(ctx, tempDir)
+		if f != nil {
+			f.Close()
+			t.Fatal("expected no file handle for directory")
+		}
 
 		if errorResponse == nil {
 			t.Fatal("expected an error response")
@@ -73,6 +84,32 @@ func TestClassifyDownloadPathError(t *testing.T) {
 
 		if errorResponse.Path != tempDir {
 			t.Fatalf("expected path %q, got %q", tempDir, errorResponse.Path)
+		}
+	})
+
+	t.Run("returns file handle and info for a regular file", func(t *testing.T) {
+		ctx := newTestContext(http.MethodPost)
+		tempDir := t.TempDir()
+		path := filepath.Join(tempDir, "regular.txt")
+		const payload = "abcdef"
+		if err := os.WriteFile(path, []byte(payload), 0o644); err != nil {
+			t.Fatalf("write file: %v", err)
+		}
+
+		f, info, errorResponse := openDownloadFile(ctx, path)
+		if errorResponse != nil {
+			t.Fatalf("expected no error, got %+v", errorResponse)
+		}
+		if f == nil {
+			t.Fatal("expected an open file handle")
+		}
+		defer f.Close()
+
+		if info == nil {
+			t.Fatal("expected file info")
+		}
+		if got := info.Size(); got != int64(len(payload)) {
+			t.Fatalf("expected size %d, got %d", len(payload), got)
 		}
 	})
 }
@@ -243,5 +280,110 @@ func TestWriteErrorPart(t *testing.T) {
 
 	if errorResponse.Path != sourcePath {
 		t.Fatalf("expected path %q, got %q", sourcePath, errorResponse.Path)
+	}
+}
+
+// Exercises DownloadFiles end-to-end and asserts that successful file parts
+// carry an accurate Content-Length header (the load-bearing claim downstream
+// SDKs depend on for progress totalBytes), including for empty files. Mixed
+// in a directory path to verify the error part is still emitted correctly
+// alongside the file parts.
+func TestDownloadFilesEmitsContentLength(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	tempDir := t.TempDir()
+
+	smallPath := filepath.Join(tempDir, "small.txt")
+	const smallBody = "hello, world"
+	if err := os.WriteFile(smallPath, []byte(smallBody), 0o644); err != nil {
+		t.Fatalf("write small file: %v", err)
+	}
+
+	emptyPath := filepath.Join(tempDir, "empty.bin")
+	if err := os.WriteFile(emptyPath, nil, 0o644); err != nil {
+		t.Fatalf("write empty file: %v", err)
+	}
+
+	dirPath := filepath.Join(tempDir, "subdir")
+	if err := os.Mkdir(dirPath, 0o755); err != nil {
+		t.Fatalf("create dir: %v", err)
+	}
+
+	body, err := json.Marshal(FilesDownloadRequest{Paths: []string{smallPath, emptyPath, dirPath}})
+	if err != nil {
+		t.Fatalf("marshal request: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/files/bulk-download", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	_, engine := gin.CreateTestContext(rec)
+	engine.POST("/files/bulk-download", DownloadFiles)
+	engine.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d (body: %s)", http.StatusOK, rec.Code, rec.Body.String())
+	}
+
+	mediaType, params, err := mime.ParseMediaType(rec.Header().Get("Content-Type"))
+	if err != nil {
+		t.Fatalf("parse content type: %v", err)
+	}
+	if mediaType != "multipart/form-data" {
+		t.Fatalf("expected multipart/form-data, got %q", mediaType)
+	}
+
+	type wantPart struct {
+		formName   string
+		path       string
+		hasLength  bool
+		wantLength int
+		wantBody   string
+	}
+	wants := []wantPart{
+		{formName: "file", path: smallPath, hasLength: true, wantLength: len(smallBody), wantBody: smallBody},
+		{formName: "file", path: emptyPath, hasLength: true, wantLength: 0, wantBody: ""},
+		{formName: "error", path: dirPath, hasLength: false},
+	}
+
+	reader := multipart.NewReader(rec.Body, params["boundary"])
+	for i, want := range wants {
+		part, err := reader.NextPart()
+		if err != nil {
+			t.Fatalf("part %d (%s): read: %v", i, want.path, err)
+		}
+
+		if got := part.FormName(); got != want.formName {
+			t.Fatalf("part %d (%s): expected form name %q, got %q", i, want.path, want.formName, got)
+		}
+
+		gotLength := part.Header.Get("Content-Length")
+		if want.hasLength {
+			if gotLength == "" {
+				t.Fatalf("part %d (%s): expected Content-Length header, got none", i, want.path)
+			}
+			parsed, parseErr := strconv.Atoi(gotLength)
+			if parseErr != nil {
+				t.Fatalf("part %d (%s): Content-Length %q is not numeric: %v", i, want.path, gotLength, parseErr)
+			}
+			if parsed != want.wantLength {
+				t.Fatalf("part %d (%s): expected Content-Length %d, got %d", i, want.path, want.wantLength, parsed)
+			}
+		} else if gotLength != "" {
+			t.Fatalf("part %d (%s): expected no Content-Length on error part, got %q", i, want.path, gotLength)
+		}
+
+		gotBody, err := io.ReadAll(part)
+		if err != nil {
+			t.Fatalf("part %d (%s): read body: %v", i, want.path, err)
+		}
+		if want.formName == "file" && string(gotBody) != want.wantBody {
+			t.Fatalf("part %d (%s): expected body %q, got %q", i, want.path, want.wantBody, string(gotBody))
+		}
+	}
+
+	if _, err := reader.NextPart(); err != io.EOF {
+		t.Fatalf("expected io.EOF after final part, got %v", err)
 	}
 }

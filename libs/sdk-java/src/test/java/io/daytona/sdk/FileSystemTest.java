@@ -17,6 +17,7 @@ import io.daytona.toolbox.client.api.FileSystemApi;
 import io.daytona.toolbox.client.model.Match;
 import io.daytona.toolbox.client.model.ReplaceRequest;
 import io.daytona.toolbox.client.model.SearchFilesResponse;
+import okio.Buffer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,10 +33,13 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalLong;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -166,6 +170,125 @@ class FileSystemTest {
     }
 
     @Test
+    void downloadFileStreamWithProgressCallsCallback() throws Exception {
+        byte[] content = "hello progress".getBytes(StandardCharsets.UTF_8);
+        String multipart = "--DAYTONA-FILE-BOUNDARY\r\n"
+                + "Content-Disposition: form-data; name=\"file\"; filename=\"remote.txt\"\r\n"
+                + "Content-Type: application/octet-stream\r\n"
+                + "Content-Length: " + content.length + "\r\n"
+                + "\r\n"
+                + new String(content, StandardCharsets.UTF_8)
+                + "\r\n--DAYTONA-FILE-BOUNDARY--\r\n";
+
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(new MockResponse()
+                    .setHeader("Content-Type", "multipart/form-data; boundary=DAYTONA-FILE-BOUNDARY")
+                    .setBody(multipart));
+
+            io.daytona.toolbox.client.ApiClient apiClient = new io.daytona.toolbox.client.ApiClient();
+            apiClient.setBasePath(server.url("/").toString());
+            FileSystem streamingFileSystem = new FileSystem(new FileSystemApi(apiClient));
+            List<DownloadProgress> progressUpdates = new ArrayList<DownloadProgress>();
+
+            try (InputStream stream = streamingFileSystem.downloadFileStream(
+                    "/remote.txt",
+                    new DownloadStreamOptions().setOnProgress(progressUpdates::add))) {
+                byte[] buffer = new byte[4];
+                int read;
+                StringBuilder received = new StringBuilder();
+                while ((read = stream.read(buffer)) != -1) {
+                    received.append(new String(buffer, 0, read, StandardCharsets.UTF_8));
+                }
+
+                assertThat(received.toString()).isEqualTo(new String(content, StandardCharsets.UTF_8));
+            }
+
+            assertThat(progressUpdates)
+                    .extracting(DownloadProgress::getBytesReceived)
+                    .isEqualTo(Arrays.asList(4L, 8L, 12L, (long) content.length));
+            assertThat(progressUpdates)
+                    .extracting(DownloadProgress::getTotalBytes)
+                    .containsOnly(OptionalLong.of(content.length));
+        }
+    }
+
+    @Test
+    void downloadFileStreamSingleByteReadThrottlesProgressEvents() throws Exception {
+        // 9216 bytes -> with the 8 KiB throttle on single-byte read(), the
+        // callback should fire once when total crosses 8192 and once on EOF.
+        byte[] content = new byte[9216];
+        java.util.Arrays.fill(content, (byte) 'a');
+        String multipart = "--DAYTONA-FILE-BOUNDARY\r\n"
+                + "Content-Disposition: form-data; name=\"file\"; filename=\"remote.txt\"\r\n"
+                + "Content-Type: application/octet-stream\r\n"
+                + "Content-Length: " + content.length + "\r\n"
+                + "\r\n"
+                + new String(content, StandardCharsets.UTF_8)
+                + "\r\n--DAYTONA-FILE-BOUNDARY--\r\n";
+
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(new MockResponse()
+                    .setHeader("Content-Type", "multipart/form-data; boundary=DAYTONA-FILE-BOUNDARY")
+                    .setBody(multipart));
+
+            io.daytona.toolbox.client.ApiClient apiClient = new io.daytona.toolbox.client.ApiClient();
+            apiClient.setBasePath(server.url("/").toString());
+            FileSystem streamingFileSystem = new FileSystem(new FileSystemApi(apiClient));
+            List<DownloadProgress> progressUpdates = new ArrayList<DownloadProgress>();
+
+            try (InputStream stream = streamingFileSystem.downloadFileStream(
+                    "/remote.txt",
+                    new DownloadStreamOptions().setOnProgress(progressUpdates::add))) {
+                int totalRead = 0;
+                while (stream.read() != -1) {
+                    totalRead++;
+                }
+                assertThat(totalRead).isEqualTo(content.length);
+            }
+
+            assertThat(progressUpdates)
+                    .extracting(DownloadProgress::getBytesReceived)
+                    .isEqualTo(Arrays.asList(8192L, (long) content.length));
+        }
+    }
+
+    @Test
+    void downloadFileStreamCancellationCancelsRequest() throws Exception {
+        byte[] content = new byte[256 * 1024];
+        Arrays.fill(content, (byte) 'a');
+        Buffer multipart = new Buffer()
+                .writeUtf8("--DAYTONA-FILE-BOUNDARY\r\n")
+                .writeUtf8("Content-Disposition: form-data; name=\"file\"; filename=\"remote.txt\"\r\n")
+                .writeUtf8("Content-Type: application/octet-stream\r\n")
+                .writeUtf8("\r\n")
+                .write(content)
+                .writeUtf8("\r\n--DAYTONA-FILE-BOUNDARY--\r\n");
+
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(new MockResponse()
+                    .setHeader("Content-Type", "multipart/form-data; boundary=DAYTONA-FILE-BOUNDARY")
+                    .setBody(multipart)
+                    .throttleBody(1024, 25, TimeUnit.MILLISECONDS));
+
+            io.daytona.toolbox.client.ApiClient apiClient = new io.daytona.toolbox.client.ApiClient();
+            apiClient.setBasePath(server.url("/").toString());
+            FileSystem streamingFileSystem = new FileSystem(new FileSystemApi(apiClient));
+            CancellationToken token = new CancellationToken();
+            Thread canceller = cancelAfter(token, 50L);
+
+            try (InputStream stream = streamingFileSystem.downloadFileStream(
+                    "/remote.txt",
+                    new DownloadStreamOptions().setCancellationToken(token))) {
+                assertThatThrownBy(stream::readAllBytes)
+                        .isInstanceOf(DaytonaException.class)
+                        .hasMessageContaining("cancel");
+            } finally {
+                canceller.join(1000L);
+            }
+        }
+    }
+
+    @Test
     void downloadFileStreamThrowsOnErrorPart() throws Exception {
         try (MockWebServer server = new MockWebServer()) {
             server.enqueue(new MockResponse()
@@ -185,6 +308,124 @@ class FileSystemTest {
                     .isInstanceOf(DaytonaNotFoundException.class)
                     .hasMessage("missing file");
         }
+    }
+
+    @Test
+    void uploadFileStreamSendsBytesAndFiresProgress() throws Exception {
+        byte[] payload = ("upload-stream-content-").repeat(8).getBytes(StandardCharsets.UTF_8);
+
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(new MockResponse().setResponseCode(200));
+
+            io.daytona.toolbox.client.ApiClient apiClient = new io.daytona.toolbox.client.ApiClient();
+            apiClient.setBasePath(server.url("/").toString());
+            FileSystem streamingFileSystem = new FileSystem(new FileSystemApi(apiClient));
+            List<UploadProgress> updates = new ArrayList<UploadProgress>();
+
+            streamingFileSystem.uploadFileStream(
+                    new java.io.ByteArrayInputStream(payload),
+                    "/remote.txt",
+                    new UploadStreamOptions().setOnProgress(updates::add));
+
+            // The recorded request body should contain both multipart parts and the
+            // file bytes verbatim — proves we actually streamed content to the server.
+            okhttp3.mockwebserver.RecordedRequest request = server.takeRequest();
+            assertThat(request.getMethod()).isEqualTo("POST");
+            assertThat(request.getPath()).endsWith("/files/bulk-upload");
+            String contentType = request.getHeader("Content-Type");
+            assertThat(contentType).startsWith("multipart/form-data");
+            byte[] bodyBytes = request.getBody().readByteArray();
+            assertThat(new String(bodyBytes, StandardCharsets.UTF_8)).contains("name=\"files[0].path\"");
+            assertThat(new String(bodyBytes, StandardCharsets.UTF_8)).contains("name=\"files[0].file\"");
+            assertThat(indexOfBytes(bodyBytes, payload)).isGreaterThanOrEqualTo(0);
+
+            assertThat(updates).isNotEmpty();
+            UploadProgress last = updates.get(updates.size() - 1);
+            assertThat(last.getBytesSent()).isEqualTo(payload.length);
+            assertThat(updates).extracting(UploadProgress::getBytesSent).isSorted();
+        }
+    }
+
+    @Test
+    void uploadFileStreamCancellationCancelsRequest() throws Exception {
+        byte[] payload = new byte[256 * 1024];
+        Arrays.fill(payload, (byte) 'b');
+
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(new MockResponse().setResponseCode(200));
+
+            io.daytona.toolbox.client.ApiClient apiClient = new io.daytona.toolbox.client.ApiClient();
+            apiClient.setBasePath(server.url("/").toString());
+            FileSystem streamingFileSystem = new FileSystem(new FileSystemApi(apiClient));
+            CancellationToken token = new CancellationToken();
+            Thread canceller = cancelAfter(token, 50L);
+
+            try {
+                assertThatThrownBy(() -> streamingFileSystem.uploadFileStream(
+                        new SlowByteArrayInputStream(payload, 1024, 20L),
+                        "/remote.txt",
+                        new UploadStreamOptions().setCancellationToken(token)))
+                        .isInstanceOf(DaytonaException.class)
+                        .hasMessageContaining("cancel");
+            } finally {
+                canceller.join(1000L);
+            }
+        }
+    }
+
+    private static Thread cancelAfter(CancellationToken token, long delayMillis) {
+        Thread thread = new Thread(() -> {
+            try {
+                Thread.sleep(delayMillis);
+                token.cancel();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        thread.start();
+        return thread;
+    }
+
+    private static final class SlowByteArrayInputStream extends java.io.ByteArrayInputStream {
+        private final int maxChunkSize;
+        private final long delayMillis;
+
+        private SlowByteArrayInputStream(byte[] buf, int maxChunkSize, long delayMillis) {
+            super(buf);
+            this.maxChunkSize = maxChunkSize;
+            this.delayMillis = delayMillis;
+        }
+
+        @Override
+        public synchronized int read(byte[] b, int off, int len) {
+            sleepQuietly();
+            return super.read(b, off, Math.min(len, maxChunkSize));
+        }
+
+        @Override
+        public synchronized int read() {
+            sleepQuietly();
+            return super.read();
+        }
+
+        private void sleepQuietly() {
+            try {
+                Thread.sleep(delayMillis);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    private static int indexOfBytes(byte[] haystack, byte[] needle) {
+        outer:
+        for (int i = 0; i <= haystack.length - needle.length; i++) {
+            for (int j = 0; j < needle.length; j++) {
+                if (haystack[i + j] != needle[j]) continue outer;
+            }
+            return i;
+        }
+        return -1;
     }
 
     @Test

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'fileutils'
 require 'json'
 require 'daytona'
 
@@ -63,13 +64,29 @@ file = sandbox.fs.download_file(File.join(project_files, 'example.txt'))
 puts "Content of example.txt: #{file.open.read}"
 puts "Size of the downloaded file: #{file.size} bytes"
 
-# Stream download — process file content as chunks arrive
-puts "\nStreaming download example:"
+# Stream upload — push an IO straight to the Sandbox without buffering the whole
+# payload in memory, with live progress reporting.
+require 'stringio'
+
+puts "\nStreaming upload with progress:"
+generated_payload = ('streamed-upload-content-' * 2048).b # ~48 KB
+sandbox.fs.upload_file_stream(
+  StringIO.new(generated_payload),
+  File.join(project_files, 'streamed.bin'),
+  on_progress: ->(p) { puts "  uploaded #{p.bytes_sent} / #{generated_payload.bytesize} bytes" }
+)
+
+# Stream download — process file content as chunks arrive, with progress.
+# Pass any object responding to `set?` as cancel_event to abort a long-running transfer.
+puts "\nStreaming download with progress:"
 chunks = []
-sandbox.fs.download_file_stream(File.join(project_files, 'config.json')) { |chunk| chunks << chunk }
+sandbox.fs.download_file_stream(
+  File.join(project_files, 'config.json'),
+  on_progress: ->(p) { puts "  downloaded #{p.bytes_received} / #{p.total_bytes} bytes" }
+) { |chunk| chunks << chunk }
 puts "Streamed content: #{chunks.join}"
 
 # Cleanup
-File.delete('local-config.json') if File.exist?('local-config.json')
-File.delete('example.txt') if File.exist?('example.txt')
+FileUtils.rm_f('local-config.json')
+FileUtils.rm_f('example.txt')
 daytona.delete(sandbox)

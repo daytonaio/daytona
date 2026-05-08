@@ -147,8 +147,12 @@ print(f"Size of the downloaded file {local_path}: {size_mb} MB")
 ```python
 @intercept_errors(message_prefix="Failed to download file: ")
 @with_instrumentation()
-async def download_file_stream(remote_path: str,
-                               timeout: int = 30 * 60) -> AsyncIterator[bytes]
+async def download_file_stream(
+        remote_path: str,
+        timeout: int = 30 * 60,
+        on_progress: Callable[[DownloadProgress], Awaitable[None] | None]
+    | None = None,
+        cancel_event: CancelEvent | None = None) -> AsyncIterator[bytes]
 ```
 
 Downloads a single file from the Sandbox as a stream without buffering the entire file
@@ -161,6 +165,15 @@ directly to an HTTP response, written to a file incrementally, or processed on t
   on the sandbox working directory.
 - `timeout` _int_ - Timeout for the download operation in seconds. 0 means no timeout.
   Default is 30 minutes.
+- `on_progress` _Callable[[DownloadProgress], Awaitable[None] | None] | None_ - Optional
+  callback invoked with cumulative bytes received and total bytes, when known, as
+  the download progresses. May be either a regular function or an ``async def``
+  coroutine — coroutine returns are awaited before the next chunk is yielded.
+  Default is None.
+- `cancel_event` _CancelEvent | None_ - Optional ``asyncio.Event``-compatible token. When
+  set during streaming, the next chunk raises ``DaytonaError`` and the underlying
+  HTTP connection is closed. Standard ``asyncio.CancelledError`` from task
+  cancellation is also honoured automatically by the generator.
   
 
 **Returns**:
@@ -170,7 +183,8 @@ directly to an HTTP response, written to a file incrementally, or processed on t
 
 **Raises**:
 
-- `DaytonaError` - If the file does not exist or access is denied.
+- `DaytonaError` - If the file does not exist, access is denied, or the download is
+  cancelled via ``cancel_event``.
   
 
 **Example**:
@@ -181,9 +195,12 @@ async with aiofiles.open("local_copy.bin", "wb") as f:
     async for chunk in await sandbox.fs.download_file_stream("workspace/large-file.bin"):
         await f.write(chunk)
 
-# Stream to an HTTP response (FastAPI)
-return StreamingResponse(await sandbox.fs.download_file_stream("workspace/report.pdf"),
-                         media_type="application/pdf")
+# Cancel a download from another coroutine
+import asyncio
+cancel = asyncio.Event()
+asyncio.get_running_loop().call_later(5.0, cancel.set)
+async for chunk in await sandbox.fs.download_file_stream("workspace/big.bin", cancel_event=cancel):
+    process(chunk)
 ```
 
 #### AsyncFileSystem.download\_files
@@ -620,6 +637,82 @@ files = [
 await sandbox.fs.upload_files(files)
 ```
 
+#### AsyncFileSystem.upload\_file\_stream
+
+```python
+@intercept_errors(message_prefix="Failed to upload file: ")
+@with_instrumentation()
+async def upload_file_stream(source: bytes | bytearray | str | io.IOBase
+                             | AsyncIterable[bytes] | object,
+                             remote_path: str,
+                             timeout: int = 30 * 60,
+                             on_progress: Callable[[UploadProgress],
+                                                   Awaitable[None] | None]
+                             | None = None,
+                             cancel_event: CancelEvent | None = None) -> None
+```
+
+Uploads a single file to the Sandbox using true streaming, with optional progress
+tracking and cancellation. Memory usage stays flat regardless of source size. The
+HTTP layer uses chunked transfer encoding, so the source's natural EOF terminates
+the upload — no advance size is needed.
+
+**Arguments**:
+
+- `source` - Data to upload. Accepts:
+  
+  * ``bytes`` / ``bytearray`` — uploaded from memory.
+  * ``str`` — treated as a local file path and read in chunks.
+  * sync file-like (anything with ``.read(n) -> bytes``) — streamed as-is.
+  * **async file-like** (anything with ``async def read(n) -> bytes``,
+  e.g. an ``aiofiles`` handle) — streamed without ever blocking the loop.
+  * ``AsyncIterable[bytes]`` — yielded chunks are forwarded to the wire.
+- `remote_path` _str_ - Destination path in the Sandbox.
+- `timeout` _int_ - Timeout in seconds. 0 means no timeout. Default is 30 minutes.
+- `on_progress` _Callable[[UploadProgress], Awaitable[None] | None] | None_ - Optional
+  callback invoked with cumulative bytes sent. May be sync or ``async def``
+  **when paired with an async source** (async file-like or ``AsyncIterable[bytes]``).
+  Sync sources (``bytes``, ``str`` path, sync file-like) require a sync callback
+  because the underlying httpx multipart serializer pulls bytes through a
+  synchronous ``.read()``; passing an async callback alongside a sync source
+  raises ``DaytonaError``.
+- `cancel_event` _CancelEvent | None_ - Optional ``asyncio.Event``-compatible token.
+  When set during streaming, the next chunk raises ``DaytonaError`` and
+  tears down the request. Standard ``asyncio.CancelledError`` from task
+  cancellation is also honoured automatically.
+  
+
+**Raises**:
+
+- `DaytonaError` - If the upload fails or is cancelled via ``cancel_event``.
+  
+
+**Example**:
+
+```python
+import aiofiles, asyncio
+cancel = asyncio.Event()
+async with aiofiles.open("large_dataset.csv", "rb") as f:
+    await sandbox.fs.upload_file_stream(
+        f,
+        "tmp/dataset.csv",
+        on_progress=lambda p: print(f"{p.bytes_sent} bytes sent"),
+        cancel_event=cancel,
+    )
+```
+
+
+## CancelEvent
+
+```python
+@runtime_checkable
+class CancelEvent(Protocol)
+```
+
+Duck-typed cancellation token. Compatible with ``threading.Event`` and
+``asyncio.Event`` (both expose ``is_set()``). When supplied to a streaming
+download, the next chunk read after the event becomes set raises
+``DaytonaError``, closing the underlying HTTP connection.
 
 ## FileUpload
 
@@ -636,6 +729,33 @@ Represents a file to be uploaded to the Sandbox.
   make sure it fits into memory, otherwise use the local file path which content will be streamed to the Sandbox.
 - `destination` _str_ - Absolute destination path in the Sandbox. Relative paths are resolved based on
   the sandbox working directory.
+
+## DownloadProgress
+
+```python
+@dataclass
+class DownloadProgress()
+```
+
+Progress information for a streaming download.
+
+**Attributes**:
+
+- `bytes_received` _int_ - Cumulative bytes received so far.
+- `total_bytes` _int | None_ - Total bytes expected, if known.
+
+## UploadProgress
+
+```python
+@dataclass
+class UploadProgress()
+```
+
+Progress information for a streaming upload.
+
+**Attributes**:
+
+- `bytes_sent` _int_ - Cumulative bytes sent so far.
 
 ## FileDownloadRequest
 

@@ -239,7 +239,7 @@ puts "Size of the downloaded file: #{size_mb} MB"
 #### download_file_stream()
 
 ```ruby
-def download_file_stream(remote_path, timeout:)
+def download_file_stream(remote_path, timeout:, on_progress:, cancel_event:)
 
 ```
 
@@ -253,6 +253,12 @@ Enumerator if no block is given.
 based on the sandbox working directory.
 - `timeout` _Integer_ - Timeout for the download operation in seconds. 0 means no timeout.
 Default is 30 minutes.
+- `on_progress` _Proc, nil_ - Optional callback invoked with a Daytona::DownloadProgress
+struct containing bytes_received (Integer) and total_bytes (Integer or nil).
+- `cancel_event` _#set?, nil_ - Optional cancellation token (anything responding to +set?+;
+the standard library's +Concurrent::Event+ or a small ad-hoc object both work). When set
+during streaming, the next chunk raises Daytona::Sdk::Error and the underlying HTTP
+connection is torn down.
 
 **Returns**:
 
@@ -260,7 +266,8 @@ Default is 30 minutes.
 
 **Raises**:
 
-- `Daytona:Sdk:Error` - If the file does not exist or the operation fails
+- `Daytona:Sdk:Error` - If the file does not exist, the operation fails, or
++cancel_event+ is set during streaming
 
 **Examples:**
 
@@ -314,6 +321,48 @@ sandbox.fs.upload_file("local_file.txt", "tmp/file.txt")
 # Upload binary data
 data = { key: "value" }.to_json
 sandbox.fs.upload_file(data, "tmp/config.json")
+
+```
+
+#### upload_file_stream()
+
+```ruby
+def upload_file_stream(source, remote_path, timeout:, on_progress:, cancel_event:)
+
+```
+
+Streams +source+ to the Sandbox without buffering its contents in memory, with
+optional progress reporting.
+
+**Parameters**:
+
+- `source` _String, IO_ - A local file path or any IO-like object responding to
++read(n)+. Strings that don't reference an existing file are uploaded as their
+raw bytes (still streamed, just from memory).
+- `remote_path` _String_ - Destination path in the Sandbox.
+- `timeout` _Integer_ - Timeout in seconds. 0 means no timeout. Default 30 minutes.
+- `on_progress` _Proc, nil_ - Optional callback invoked with a
++Daytona::UploadProgress+ struct as libcurl reports bytes actually uploaded.
+- `cancel_event` _#set?, nil_ - Optional cancellation token. When set while
+staging a non-file source or during the libcurl upload, the operation raises
+Daytona::Sdk::Error and the in-progress upload is aborted (no destination file
+is left on the sandbox thanks to the daemon's atomic-rename behaviour).
+
+**Returns**:
+
+- `void`
+
+**Raises**:
+
+- `Daytona:Sdk:Error` - If the operation fails or +cancel_event+ is set.
+
+**Examples:**
+
+```ruby
+File.open("large.bin", "rb") do |f|
+  sandbox.fs.upload_file_stream(f, "tmp/large.bin",
+    on_progress: ->(p) { puts "#{p.bytes_sent} bytes sent" })
+end
 
 ```
 

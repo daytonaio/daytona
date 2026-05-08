@@ -15,6 +15,7 @@ import (
 	"net/textproto"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -72,19 +73,13 @@ func DownloadFiles(c *gin.Context) {
 	defer mw.Close() // ensure final boundary is written
 
 	for _, path := range req.Paths {
-		downloadErr := classifyDownloadPathError(c, path)
+		f, info, downloadErr := openDownloadFile(c, path)
 		if downloadErr != nil {
 			writeErrorPart(c, mw, path, *downloadErr)
 			continue
 		}
 
-		f, err := os.Open(path)
-		if err != nil {
-			writeErrorPart(c, mw, path, classifyOpenFileError(c, path, err))
-			continue
-		}
-
-		if err := writeFilePart(c.Request.Context(), mw, path, f); err != nil {
+		if err := writeFilePart(c.Request.Context(), mw, path, f, info.Size()); err != nil {
 			f.Close()
 
 			// If streaming fails after the multipart file part has started, emitting a
@@ -97,7 +92,7 @@ func DownloadFiles(c *gin.Context) {
 }
 
 // Streams a file part using io.Copy and respects context cancellation.
-func writeFilePart(ctx context.Context, mw *multipart.Writer, path string, r io.Reader) error {
+func writeFilePart(ctx context.Context, mw *multipart.Writer, path string, r io.Reader, size int64) error {
 	ctype := mime.TypeByExtension(filepath.Ext(path))
 	if ctype == "" {
 		ctype = "application/octet-stream"
@@ -106,6 +101,7 @@ func writeFilePart(ctx context.Context, mw *multipart.Writer, path string, r io.
 	hdr := textproto.MIMEHeader{}
 	hdr.Set("Content-Type", ctype)
 	hdr.Set("Content-Disposition", multipartContentDisposition("file", path))
+	hdr.Set("Content-Length", strconv.FormatInt(size, 10))
 
 	part, err := mw.CreatePart(hdr)
 	if err != nil {
@@ -141,8 +137,13 @@ func writeErrorPart(ctx *gin.Context, mw *multipart.Writer, path string, errorRe
 	}
 }
 
-func classifyDownloadPathError(ctx *gin.Context, path string) *common.ErrorResponse {
-	// Validate the input path before touching the filesystem.
+// openDownloadFile opens path for reading and validates it is a downloadable
+// regular file. On success, the caller owns closing the returned file.
+//
+// Stat is performed against the open file descriptor rather than the path, so
+// the size used for Content-Length and the bytes streamed afterwards reference
+// the same inode and cannot diverge under a concurrent rename or replace.
+func openDownloadFile(ctx *gin.Context, path string) (*os.File, os.FileInfo, *common.ErrorResponse) {
 	if path == "" {
 		errorResponse := newFileDownloadErrorResponse(
 			ctx,
@@ -151,17 +152,25 @@ func classifyDownloadPathError(ctx *gin.Context, path string) *common.ErrorRespo
 			"INVALID_FILE_PATH",
 			"invalid file path: path is empty",
 		)
-		return &errorResponse
+		return nil, nil, &errorResponse
 	}
 
-	info, err := os.Stat(path)
+	f, err := os.Open(path)
 	if err != nil {
+		errorResponse := classifyOpenFileError(ctx, path, err)
+		return nil, nil, &errorResponse
+	}
+
+	info, err := f.Stat()
+	if err != nil {
+		f.Close()
 		statusCode, errorCode, message := classifyPathStatError(path, err)
 		errorResponse := newFileDownloadErrorResponse(ctx, path, statusCode, errorCode, message)
-		return &errorResponse
+		return nil, nil, &errorResponse
 	}
 
 	if info.IsDir() {
+		f.Close()
 		errorResponse := newFileDownloadErrorResponse(
 			ctx,
 			path,
@@ -169,10 +178,10 @@ func classifyDownloadPathError(ctx *gin.Context, path string) *common.ErrorRespo
 			"INVALID_FILE_PATH",
 			fmt.Sprintf("invalid file path: path points to a directory: %s", path),
 		)
-		return &errorResponse
+		return nil, nil, &errorResponse
 	}
 
-	return nil
+	return f, info, nil
 }
 
 func multipartContentDisposition(formName string, path string) string {

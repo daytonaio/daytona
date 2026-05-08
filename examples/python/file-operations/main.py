@@ -1,3 +1,4 @@
+import io
 import json
 import os
 from datetime import datetime
@@ -89,9 +90,25 @@ def main():
     config_content = sandbox.fs.download_file(os.path.join(new_dir, "config.json"))
     print("Config content:", config_content.decode("utf-8"))
 
-    # Stream download — process file content as chunks arrive
-    print("\nStreaming download example:")
-    streamed_chunks = list(sandbox.fs.download_file_stream(os.path.join(new_dir, "config.json")))
+    # Stream upload — push bytes straight to the Sandbox without buffering the
+    # whole payload, with live progress reporting.
+    print("\nStreaming upload with progress:")
+    generated_payload = b"streamed-upload-content-" * 2048  # ~48 KB
+    sandbox.fs.upload_file_stream(
+        io.BytesIO(generated_payload),
+        os.path.join(new_dir, "streamed.bin"),
+        on_progress=lambda p: print(f"  uploaded {p.bytes_sent} / {len(generated_payload)} bytes"),
+    )
+
+    # Stream download — process file content as chunks arrive, with progress.
+    # Pass a threading.Event as cancel_event to abort a long-running transfer.
+    print("\nStreaming download with progress:")
+    streamed_chunks = list(
+        sandbox.fs.download_file_stream(
+            os.path.join(new_dir, "config.json"),
+            on_progress=lambda p: print(f"  downloaded {p.bytes_received} / {p.total_bytes} bytes"),
+        )
+    )
     print("Streamed content:", b"".join(streamed_chunks).decode("utf-8"))
 
     # Create a report of all operations

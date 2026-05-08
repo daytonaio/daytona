@@ -4,6 +4,7 @@
  */
 
 import * as pathe from 'pathe'
+import axios from 'axios'
 import {
   Configuration,
   FileInfo,
@@ -18,9 +19,12 @@ import { RUNTIME, Runtime } from './utils/Runtime'
 import { createDaytonaError, DaytonaError } from './errors/DaytonaError'
 import type { Readable } from 'stream'
 import {
+  coerceUploadSource,
+  createAbortError,
   normalizeResponseStream,
   processDownloadFilesResponseWithBusboy,
   processDownloadFilesResponseWithBuffered,
+  wrapWithUploadProgress,
 } from './utils/FileTransfer'
 import { WithInstrumentation } from './utils/otel.decorator'
 
@@ -121,6 +125,59 @@ export interface DownloadMetadata {
   error?: string
   errorDetails?: FileDownloadErrorDetails
   result?: Buffer | string | Uint8Array
+}
+
+export type DownloadProgress = {
+  /** Cumulative bytes received so far. */
+  bytesReceived: number
+  /** Total bytes expected, if known. Undefined if unavailable. */
+  totalBytes?: number
+}
+
+export type UploadProgress = {
+  /** Cumulative bytes sent so far. */
+  bytesSent: number
+}
+
+/**
+ * Options for streaming file downloads.
+ *
+ * @interface
+ * @property {number} [timeout] - Timeout in seconds. 0 means no timeout. Default is 30 minutes.
+ * @property {AbortSignal} [signal] - AbortSignal for cancelling the download.
+ * @property {(progress: DownloadProgress) => void} [onProgress] - Callback invoked with cumulative progress information.
+ */
+export type DownloadStreamOptions = {
+  /** Callback invoked with cumulative progress information as the download progresses. */
+  onProgress?: (progress: DownloadProgress) => void
+  /** AbortSignal for cancelling the download. */
+  signal?: AbortSignal
+  /** Timeout in seconds. 0 means no timeout. Default is 30 minutes. */
+  timeout?: number
+}
+
+/**
+ * Source for a streaming file upload. The same input shapes accepted by
+ * {@link FileSystem.uploadFile} are also valid here, plus Node `Readable`
+ * streams and Web `ReadableStream` instances.
+ */
+export type UploadSource = Buffer | Uint8Array | string | Readable | ReadableStream<Uint8Array>
+
+/**
+ * Options for streaming file uploads.
+ *
+ * @interface
+ * @property {number} [timeout] - Timeout in seconds. 0 means no timeout. Default is 30 minutes.
+ * @property {AbortSignal} [signal] - AbortSignal for cancelling the upload.
+ * @property {(progress: UploadProgress) => void} [onProgress] - Callback invoked with cumulative progress information.
+ */
+export type UploadStreamOptions = {
+  /** Callback invoked with cumulative progress information as the upload progresses. */
+  onProgress?: (progress: UploadProgress) => void
+  /** AbortSignal for cancelling the upload. */
+  signal?: AbortSignal
+  /** Timeout in seconds. 0 means no timeout. Default is 30 minutes. */
+  timeout?: number
 }
 
 function createFileDownloadError(error: string, errorDetails?: FileDownloadErrorDetails): DaytonaError {
@@ -241,7 +298,9 @@ export class FileSystem {
    *
    * @param {string} remotePath - Path to the file in the Sandbox. Relative paths are
    *   resolved based on the sandbox working directory.
-   * @param {number} [timeout] - Timeout in seconds. 0 means no timeout. Default is 30 minutes.
+   * @param {number | DownloadStreamOptions} [timeoutOrOptions] - Timeout in seconds, or an options
+   *   object with timeout, AbortSignal for cancellation, and/or onProgress callback.
+   *   Default timeout is 30 minutes.
    * @returns {Promise<Readable>} A Node.js Readable stream of the file content.
    *
    * @example
@@ -250,13 +309,24 @@ export class FileSystem {
    * stream.pipe(res);
    *
    * @example
-   * // Pipe to a local file
-   * import { createWriteStream } from 'fs';
-   * const stream = await sandbox.fs.downloadFileStream('outputs/data.csv');
-   * stream.pipe(createWriteStream('local-data.csv'));
+   * // Download with progress tracking and cancellation
+   * const controller = new AbortController();
+   * const stream = await sandbox.fs.downloadFileStream('outputs/large-file.bin', {
+   *   signal: controller.signal,
+   *   onProgress: ({ bytesReceived, totalBytes }) => console.log(bytesReceived, totalBytes),
+   * });
+   * stream.pipe(createWriteStream('local-file.bin'));
    */
+  public async downloadFileStream(remotePath: string, timeout?: number): Promise<Readable>
+  public async downloadFileStream(remotePath: string, options?: DownloadStreamOptions): Promise<Readable>
   @WithInstrumentation()
-  public async downloadFileStream(remotePath: string, timeout: number = 30 * 60): Promise<Readable> {
+  public async downloadFileStream(
+    remotePath: string,
+    timeoutOrOptions?: number | DownloadStreamOptions,
+  ): Promise<Readable> {
+    const options: DownloadStreamOptions =
+      typeof timeoutOrOptions === 'number' ? { timeout: timeoutOrOptions } : (timeoutOrOptions ?? {})
+    const timeout = options.timeout ?? 30 * 60
     const isNonStreamingRuntime = RUNTIME === Runtime.BROWSER || RUNTIME === Runtime.SERVERLESS
     if (isNonStreamingRuntime) {
       throw new DaytonaError(
@@ -264,13 +334,32 @@ export class FileSystem {
       )
     }
 
-    const response = await this.apiClient.downloadFiles(
-      { paths: [remotePath] },
-      {
-        responseType: 'stream',
-        timeout: timeout * 1000,
-      },
-    )
+    if (options.signal?.aborted) {
+      throw new DaytonaError('Download cancelled')
+    }
+
+    const toDownloadCancelledError = () => new DaytonaError('Download cancelled')
+    const isCanceledError = (err: unknown) => {
+      const error = err as { code?: string; name?: string }
+      return Boolean(axios.isCancel?.(err) || error?.name === 'CanceledError' || error?.code === 'ERR_CANCELED')
+    }
+
+    let response
+    try {
+      response = await this.apiClient.downloadFiles(
+        { paths: [remotePath] },
+        {
+          responseType: 'stream',
+          timeout: timeout * 1000,
+          signal: options.signal,
+        },
+      )
+    } catch (err) {
+      if (options.signal?.aborted || isCanceledError(err)) {
+        throw toDownloadCancelledError()
+      }
+      throw err
+    }
 
     const responseStream = normalizeResponseStream(response.data)
     const metadataMap = new Map<string, DownloadMetadata>()
@@ -283,8 +372,22 @@ export class FileSystem {
         responseStream,
         response.headers as Record<string, string>,
         metadataMap,
-        (_source, fileStream) => {
-          resolvedStream = fileStream as Readable
+        (_source, fileStream, totalBytes) => {
+          if (options.onProgress) {
+            const { Transform } = require('stream') as typeof import('stream')
+            let bytesReceived = 0
+            const progress = new Transform({
+              transform(chunk, _encoding, callback) {
+                bytesReceived += chunk.length
+                options.onProgress!({ bytesReceived, totalBytes })
+                callback(null, chunk)
+              },
+            })
+            fileStream.pipe(progress)
+            resolvedStream = progress
+          } else {
+            resolvedStream = fileStream as Readable
+          }
           resolve(resolvedStream)
         },
       )
@@ -299,10 +402,13 @@ export class FileSystem {
           }
         })
         .catch((err) => {
+          const normalizedError = options.signal?.aborted || isCanceledError(err) ? toDownloadCancelledError() : err
           if (!resolvedStream) {
-            reject(err)
+            reject(normalizedError)
           } else if (!resolvedStream.destroyed) {
-            resolvedStream.destroy(err instanceof Error ? err : new Error(String(err)))
+            resolvedStream.destroy(
+              normalizedError instanceof Error ? normalizedError : new Error(String(normalizedError)),
+            )
           }
         })
     })
@@ -562,6 +668,78 @@ export class FileSystem {
   @WithInstrumentation()
   public async uploadFile(src: string | Buffer, dst: string, timeout: number = 30 * 60): Promise<void> {
     await this.uploadFiles([{ source: src, destination: dst }], timeout)
+  }
+
+  /**
+   * Uploads a single file to the Sandbox using true streaming, with optional progress
+   * tracking and cancellation. Memory usage stays flat regardless of source size: the
+   * SDK pipes the source through a transform that counts bytes and forwards to the
+   * underlying multipart upload without buffering the whole payload. The HTTP layer
+   * uses chunked transfer encoding, so the source's natural EOF terminates the upload —
+   * no advance size is needed.
+   *
+   * @param {UploadSource} source - The data to upload. Accepts the same `Buffer | string`
+   *   inputs as {@link FileSystem.uploadFile}, plus Node `Readable` streams and Web
+   *   `ReadableStream` instances. When a string is passed, it is treated as a local
+   *   file path and read in streaming chunks.
+   * @param {string} remotePath - Destination path in the Sandbox. Relative paths are
+   *   resolved against the sandbox working directory.
+   * @param {UploadStreamOptions} [options] - Streaming options: AbortSignal, onProgress
+   *   callback, timeout.
+   * @returns {Promise<void>}
+   *
+   * @example
+   * // Upload a 2 GB file with progress tracking and the ability to cancel
+   * import { createReadStream } from 'fs';
+   * const controller = new AbortController();
+   * await sandbox.fs.uploadFileStream(createReadStream('big.bin'), 'tmp/big.bin', {
+   *   signal: controller.signal,
+   *   onProgress: ({ bytesSent }) => console.log(`${bytesSent} bytes sent`),
+   * });
+   */
+  @WithInstrumentation()
+  public async uploadFileStream(
+    source: UploadSource,
+    remotePath: string,
+    options: UploadStreamOptions = {},
+  ): Promise<void> {
+    const isNonStreamingRuntime =
+      RUNTIME === Runtime.DENO || RUNTIME === Runtime.BROWSER || RUNTIME === Runtime.SERVERLESS
+    if (isNonStreamingRuntime) {
+      throw new DaytonaError(
+        'uploadFileStream is not supported in browser, Deno, or serverless runtimes. Use uploadFile instead.',
+      )
+    }
+
+    if (options.signal?.aborted) {
+      throw createAbortError(remotePath)
+    }
+
+    const timeout = options.timeout ?? 30 * 60
+    const sourceStream = await coerceUploadSource(source)
+    const tracked = wrapWithUploadProgress(sourceStream, options.onProgress, options.signal)
+
+    const FormDataClass = (await dynamicImport('form-data', 'Uploading files is not supported: ')) as any
+    const form = new FormDataClass()
+    form.append('files[0].path', remotePath)
+    // No knownLength: form-data falls back to chunked transfer encoding, which the
+    // daemon's MultipartReader handles transparently. The source's EOF terminates
+    // the upload — no advance byte count needed.
+    form.append('files[0].file', tracked, { filename: remotePath })
+
+    try {
+      await this.apiClient.uploadFiles({
+        data: form,
+        maxRedirects: 0,
+        timeout: timeout * 1000,
+        signal: options.signal,
+      })
+    } catch (err) {
+      if (options.signal?.aborted) {
+        throw createAbortError(remotePath)
+      }
+      throw err
+    }
   }
 
   /**

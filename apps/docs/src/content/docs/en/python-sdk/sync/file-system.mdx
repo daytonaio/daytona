@@ -147,8 +147,11 @@ print(f"Size of the downloaded file {local_path}: {size_mb} MB")
 ```python
 @intercept_errors(message_prefix="Failed to download file: ")
 @with_instrumentation()
-def download_file_stream(remote_path: str,
-                         timeout: int = 30 * 60) -> Iterator[bytes]
+def download_file_stream(
+        remote_path: str,
+        timeout: int = 30 * 60,
+        on_progress: Callable[[DownloadProgress], None] | None = None,
+        cancel_event: CancelEvent | None = None) -> Iterator[bytes]
 ```
 
 Downloads a single file from the Sandbox as a stream without buffering the entire file
@@ -161,6 +164,12 @@ directly to an HTTP response, written to a file incrementally, or processed on t
   on the sandbox working directory.
 - `timeout` _int_ - Timeout for the download operation in seconds. 0 means no timeout.
   Default is 30 minutes.
+- `on_progress` _Callable[[DownloadProgress], None] | None_ - Optional callback invoked with
+  cumulative bytes received and total bytes, when known, as the download progresses.
+  Default is None.
+- `cancel_event` _CancelEvent | None_ - Optional ``threading.Event``-compatible token. When
+  set during streaming, the next chunk raises ``DaytonaError`` and the underlying
+  HTTP connection is closed.
   
 
 **Returns**:
@@ -170,7 +179,8 @@ directly to an HTTP response, written to a file incrementally, or processed on t
 
 **Raises**:
 
-- `DaytonaError` - If the file does not exist or access is denied.
+- `DaytonaError` - If the file does not exist, access is denied, or the download is
+  cancelled via ``cancel_event``.
   
 
 **Example**:
@@ -181,9 +191,12 @@ with open("local_copy.bin", "wb") as f:
     for chunk in sandbox.fs.download_file_stream("workspace/large-file.bin"):
         f.write(chunk)
 
-# Stream to an HTTP response (Flask)
-return Response(sandbox.fs.download_file_stream("workspace/report.pdf"),
-                mimetype="application/pdf")
+# Cancel an in-progress download from another thread
+import threading
+cancel = threading.Event()
+threading.Timer(5.0, cancel.set).start()
+for chunk in sandbox.fs.download_file_stream("workspace/big.bin", cancel_event=cancel):
+    process(chunk)
 ```
 
 #### FileSystem.download\_files
@@ -617,6 +630,69 @@ files = [
 sandbox.fs.upload_files(files)
 ```
 
+#### FileSystem.upload\_file\_stream
+
+```python
+@intercept_errors(message_prefix="Failed to upload file: ")
+@with_instrumentation()
+def upload_file_stream(source: bytes | bytearray | str | io.IOBase,
+                       remote_path: str,
+                       timeout: int = 30 * 60,
+                       on_progress: Callable[[UploadProgress], None]
+                       | None = None,
+                       cancel_event: CancelEvent | None = None) -> None
+```
+
+Uploads a single file to the Sandbox using true streaming, with optional progress
+tracking and cancellation. Memory usage stays flat regardless of source size. The
+HTTP layer uses chunked transfer encoding, so the source's natural EOF terminates
+the upload — no advance size is needed.
+
+**Arguments**:
+
+- `source` _bytes | bytearray | str | IOBase_ - Data to upload. ``bytes`` is uploaded
+  from memory; ``str`` is treated as a local file path and read in chunks; a
+  file-like object (anything implementing ``.read()``) is streamed as-is.
+- `remote_path` _str_ - Destination path in the Sandbox.
+- `timeout` _int_ - Timeout in seconds. 0 means no timeout. Default is 30 minutes.
+- `on_progress` _Callable[[UploadProgress], None] | None_ - Optional callback invoked
+  with cumulative bytes sent.
+- `cancel_event` _CancelEvent | None_ - Optional ``threading.Event``-compatible token.
+  When set during streaming, the next chunk read raises ``DaytonaError`` and
+  tears down the request.
+  
+
+**Raises**:
+
+- `DaytonaError` - If the upload fails or is cancelled via ``cancel_event``.
+  
+
+**Example**:
+
+```python
+import threading
+cancel = threading.Event()
+with open("large_dataset.csv", "rb") as f:
+    sandbox.fs.upload_file_stream(
+        f,
+        "tmp/dataset.csv",
+        on_progress=lambda p: print(f"{p.bytes_sent} bytes sent"),
+        cancel_event=cancel,
+    )
+```
+
+
+## CancelEvent
+
+```python
+@runtime_checkable
+class CancelEvent(Protocol)
+```
+
+Duck-typed cancellation token. Compatible with ``threading.Event`` and
+``asyncio.Event`` (both expose ``is_set()``). When supplied to a streaming
+download, the next chunk read after the event becomes set raises
+``DaytonaError``, closing the underlying HTTP connection.
 
 ## FileUpload
 
@@ -633,6 +709,33 @@ Represents a file to be uploaded to the Sandbox.
   make sure it fits into memory, otherwise use the local file path which content will be streamed to the Sandbox.
 - `destination` _str_ - Absolute destination path in the Sandbox. Relative paths are resolved based on
   the sandbox working directory.
+
+## DownloadProgress
+
+```python
+@dataclass
+class DownloadProgress()
+```
+
+Progress information for a streaming download.
+
+**Attributes**:
+
+- `bytes_received` _int_ - Cumulative bytes received so far.
+- `total_bytes` _int | None_ - Total bytes expected, if known.
+
+## UploadProgress
+
+```python
+@dataclass
+class UploadProgress()
+```
+
+Progress information for a streaming upload.
+
+**Attributes**:
+
+- `bytes_sent` _int_ - Cumulative bytes sent so far.
 
 ## FileDownloadRequest
 

@@ -8,14 +8,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.daytona.toolbox.client.ApiClient;
 import io.daytona.toolbox.client.api.FileSystemApi;
 import io.daytona.toolbox.client.model.FilesDownloadRequest;
+import okhttp3.Call;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import okio.BufferedSink;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -23,7 +28,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,7 +43,8 @@ final class FileTransfer {
     private FileTransfer() {
     }
 
-    static InputStream streamDownload(FileSystemApi fileSystemApi, String remotePath, int timeoutSeconds) throws io.daytona.sdk.exception.DaytonaException {
+    static InputStream streamDownload(FileSystemApi fileSystemApi, String remotePath, DownloadStreamOptions options) throws io.daytona.sdk.exception.DaytonaException {
+        int timeoutSeconds = options.getTimeoutSeconds();
         if (timeoutSeconds < 0) {
             throw new io.daytona.sdk.exception.DaytonaException("Timeout must be non-negative");
         }
@@ -55,16 +63,51 @@ final class FileTransfer {
                 .readTimeout(timeoutSeconds, TimeUnit.SECONDS)
                 .build();
 
+        Request request = buildDownloadFileStreamRequest(apiClient, remotePath);
+        Call call = streamingClient.newCall(request);
+        CancellationToken cancellationToken = options.getCancellationToken();
+        Runnable unregister = cancellationToken != null
+                ? cancellationToken.onCancel(call::cancel)
+                : () -> {};
+
         Response response = null;
+        boolean handedOff = false;
         try {
-            Request request = buildDownloadFileStreamRequest(apiClient, remotePath);
-            response = streamingClient.newCall(request).execute();
-            return extractDownloadFileStream(response);
+            response = call.execute();
+            InputStream stream = extractDownloadFileStream(response, options, call);
+            Runnable finalUnregister = unregister;
+            InputStream wrapped = new java.io.FilterInputStream(stream) {
+                private boolean closed = false;
+
+                @Override
+                public void close() throws IOException {
+                    if (closed) return;
+                    closed = true;
+                    try {
+                        super.close();
+                    } finally {
+                        finalUnregister.run();
+                    }
+                }
+            };
+            handedOff = true;
+            return wrapped;
         } catch (IOException e) {
-            if (response != null) {
-                response.close();
+            if (call.isCanceled()) {
+                throw new io.daytona.sdk.exception.DaytonaException("Download cancelled");
             }
             throw new io.daytona.sdk.exception.DaytonaException("Failed to download file stream", e);
+        } finally {
+            // On any failure path (IOException *or* RuntimeException / DaytonaException
+            // thrown by extractDownloadFileStream) we must deregister the cancel handler
+            // and close the response. On the success path handedOff=true skips this block
+            // because the FilterInputStream owns the cleanup.
+            if (!handedOff) {
+                unregister.run();
+                if (response != null) {
+                    response.close();
+                }
+            }
         }
     }
 
@@ -91,7 +134,7 @@ final class FileTransfer {
         }
     }
 
-    private static InputStream extractDownloadFileStream(Response response) throws IOException {
+    private static InputStream extractDownloadFileStream(Response response, DownloadStreamOptions options, Call call) throws IOException {
         ResponseBody responseBody = response.body();
         if (responseBody == null) {
             response.close();
@@ -115,19 +158,27 @@ final class FileTransfer {
             moveToFirstPart(bufferedStream, boundary);
             Map<String, String> partHeaders = readPartHeaders(bufferedStream);
             String partName = extractPartName(partHeaders.get("content-disposition"));
+            long totalBytes = parsePartContentLength(partHeaders.get("content-length"));
             if ("file".equals(partName)) {
-                return new MultipartPartInputStream(bufferedStream, response, boundary);
+                InputStream result = new MultipartPartInputStream(bufferedStream, response, boundary, call, "Download cancelled");
+                return withProgress(result, options, totalBytes);
             }
 
             if ("error".equals(partName)) {
-                try (InputStream errorStream = new MultipartPartInputStream(bufferedStream, response, boundary)) {
+                try (InputStream errorStream = new MultipartPartInputStream(bufferedStream, response, boundary, call, "Download cancelled")) {
                     throw parseDownloadError(errorStream.readAllBytes(), response.code());
                 }
             }
 
             response.close();
             throw new io.daytona.sdk.exception.DaytonaException("File stream not found in download response");
-        } catch (IOException | RuntimeException e) {
+        } catch (IOException e) {
+            response.close();
+            if (call.isCanceled()) {
+                throw new io.daytona.sdk.exception.DaytonaException("Download cancelled");
+            }
+            throw e;
+        } catch (RuntimeException e) {
             response.close();
             throw e;
         }
@@ -238,12 +289,82 @@ final class FileTransfer {
         return ExceptionMapper.map(statusCode, responseBody);
     }
 
+    private static long parsePartContentLength(String contentLengthHeader) {
+        if (contentLengthHeader == null) {
+            return -1;
+        }
+        try {
+            long parsed = Long.parseLong(contentLengthHeader.trim());
+            return parsed >= 0 ? parsed : -1;
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    private static InputStream withProgress(InputStream inputStream, DownloadStreamOptions options, long totalBytes) {
+        if (options.getOnProgress() == null) {
+            return inputStream;
+        }
+        return new ProgressInputStream(inputStream, options.getOnProgress(), totalBytes);
+    }
+
+    private static final class ProgressInputStream extends FilterInputStream {
+        // Coarse cadence for the byte-at-a-time read() overload: emit at most
+        // once per 8 KiB. Bulk reads still emit per call (chunks already coalesce
+        // bytes), so typical consumers see one event per network chunk.
+        private static final long SINGLE_BYTE_REPORT_INTERVAL = 8192;
+
+        private final Consumer<DownloadProgress> onProgress;
+        private final OptionalLong totalBytes;
+        private long total;
+        private long lastReported;
+
+        private ProgressInputStream(InputStream in, Consumer<DownloadProgress> onProgress, long totalBytesValue) {
+            super(in);
+            this.onProgress = onProgress;
+            this.totalBytes = totalBytesValue >= 0 ? OptionalLong.of(totalBytesValue) : OptionalLong.empty();
+        }
+
+        @Override
+        public int read() throws IOException {
+            int b = super.read();
+            if (b != -1) {
+                total++;
+                if (total - lastReported >= SINGLE_BYTE_REPORT_INTERVAL) {
+                    emit();
+                }
+            } else if (total > lastReported) {
+                emit();
+            }
+            return b;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            int n = super.read(b, off, len);
+            if (n > 0) {
+                total += n;
+                emit();
+            } else if (n < 0 && total > lastReported) {
+                emit();
+            }
+            return n;
+        }
+
+        private void emit() {
+            onProgress.accept(new DownloadProgress(total, totalBytes));
+            lastReported = total;
+        }
+    }
+
     private static final class MultipartPartInputStream extends InputStream {
         private static final int BUF_SIZE = 8192;
 
         private final InputStream source;
         private final Response response;
         private final byte[] delimiter;
+        private final Call call;
+        private final String cancelledMessage;
 
         private byte[] buf = new byte[BUF_SIZE];
         private int pos;
@@ -253,10 +374,12 @@ final class FileTransfer {
         private boolean finished;
         private boolean closed;
 
-        private MultipartPartInputStream(InputStream source, Response response, String boundary) {
+        private MultipartPartInputStream(InputStream source, Response response, String boundary, Call call, String cancelledMessage) {
             this.source = source;
             this.response = response;
             this.delimiter = ("\r\n--" + boundary).getBytes(StandardCharsets.ISO_8859_1);
+            this.call = call;
+            this.cancelledMessage = cancelledMessage;
         }
 
         @Override
@@ -331,7 +454,15 @@ final class FileTransfer {
             compact();
             if (sourceEnded) return limit > 0;
 
-            int read = source.read(buf, limit, buf.length - limit);
+            int read;
+            try {
+                read = source.read(buf, limit, buf.length - limit);
+            } catch (IOException e) {
+                if (call.isCanceled()) {
+                    throw new io.daytona.sdk.exception.DaytonaException(cancelledMessage);
+                }
+                throw e;
+            }
             if (read == -1) {
                 sourceEnded = true;
                 return limit > 0;
@@ -370,6 +501,134 @@ final class FileTransfer {
                 if (buf[offset + j] != delimiter[j]) return false;
             }
             return true;
+        }
+    }
+
+    /**
+     * Streams an upload to {@code /files/bulk-upload}. The body is constructed as a
+     * multipart envelope whose file part is a {@link StreamingRequestBody} — OkHttp
+     * pulls bytes from the user's {@link InputStream} via {@code BufferedSink} and
+     * writes them straight to the wire, with no intermediate buffering. The wrapper
+     * meters bytes as they flow and invokes the optional progress callback.
+     *
+     * <p>Cancellation flows through OkHttp's call timeout. The daemon owns atomicity
+     * (writes to a sibling temp file then renames), so a client-side abort just
+     * leaves no destination file at all — partial uploads are never visible.
+     */
+    static void streamUpload(FileSystemApi fileSystemApi, InputStream source, String remotePath, UploadStreamOptions options) {
+        int timeoutSeconds = options.getTimeoutSeconds();
+        if (timeoutSeconds < 0) {
+            throw new io.daytona.sdk.exception.DaytonaException("Timeout must be non-negative");
+        }
+        if (source == null) {
+            throw new io.daytona.sdk.exception.DaytonaException("Upload source must not be null");
+        }
+        if (remotePath == null || remotePath.isEmpty()) {
+            throw new io.daytona.sdk.exception.DaytonaException("remotePath must not be empty");
+        }
+
+        ApiClient apiClient = fileSystemApi.getApiClient();
+        if (apiClient == null || apiClient.getBasePath() == null || apiClient.getBasePath().isEmpty()) {
+            throw new io.daytona.sdk.exception.DaytonaException("Toolbox client is not configured");
+        }
+
+        OkHttpClient httpClient = apiClient.getHttpClient();
+        if (httpClient == null) {
+            throw new io.daytona.sdk.exception.DaytonaException("Toolbox client is not configured");
+        }
+
+        OkHttpClient streamingClient = httpClient.newBuilder()
+                .writeTimeout(timeoutSeconds, TimeUnit.SECONDS)
+                .callTimeout(timeoutSeconds, TimeUnit.SECONDS)
+                .build();
+
+        StreamingRequestBody fileBody = new StreamingRequestBody(source,
+                options.getOnProgress(), MediaType.parse("application/octet-stream"));
+
+        MultipartBody multipart = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("files[0].path", remotePath)
+                .addFormDataPart("files[0].file", remotePath, fileBody)
+                .build();
+
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(apiClient.getBasePath().replaceAll("/+$", "") + "/files/bulk-upload")
+                .post(multipart);
+        Map<String, String> headerParams = new HashMap<String, String>();
+        headerParams.put("Accept", "*/*");
+        apiClient.processHeaderParams(headerParams, requestBuilder);
+        apiClient.processCookieParams(new HashMap<String, String>(), requestBuilder);
+
+        Request request = requestBuilder.build();
+        Call call = streamingClient.newCall(request);
+        CancellationToken cancellationToken = options.getCancellationToken();
+        Runnable unregister = cancellationToken != null
+                ? cancellationToken.onCancel(call::cancel)
+                : () -> {};
+
+        try (Response response = call.execute()) {
+            if (!response.isSuccessful()) {
+                ResponseBody body = response.body();
+                byte[] bodyBytes = body == null ? new byte[0] : body.bytes();
+                throw parseDownloadError(bodyBytes, response.code());
+            }
+        } catch (IOException e) {
+            if (call.isCanceled()) {
+                throw new io.daytona.sdk.exception.DaytonaException("Upload cancelled");
+            }
+            throw new io.daytona.sdk.exception.DaytonaException("Failed to upload file stream", e);
+        } finally {
+            unregister.run();
+        }
+    }
+
+    /**
+     * RequestBody that streams from a caller-provided InputStream straight into OkHttp's
+     * BufferedSink. Bytes are forwarded a chunk at a time so heap usage is bounded by
+     * the buffer size, not the upload size. When supplied, the progress callback fires
+     * once per chunk written.
+     *
+     * <p>{@link #contentLength()} returns {@code -1} (unknown), which makes OkHttp use
+     * chunked transfer encoding. The source's natural EOF terminates the upload — no
+     * advance byte count is needed.
+     */
+    private static final class StreamingRequestBody extends RequestBody {
+        private static final int CHUNK_SIZE = 64 * 1024;
+
+        private final InputStream source;
+        private final Consumer<UploadProgress> onProgress;
+        private final MediaType mediaType;
+
+        private StreamingRequestBody(InputStream source,
+                                     Consumer<UploadProgress> onProgress,
+                                     MediaType mediaType) {
+            this.source = source;
+            this.onProgress = onProgress;
+            this.mediaType = mediaType;
+        }
+
+        @Override
+        public MediaType contentType() {
+            return mediaType;
+        }
+
+        @Override
+        public long contentLength() {
+            return -1L;
+        }
+
+        @Override
+        public void writeTo(BufferedSink sink) throws IOException {
+            byte[] buf = new byte[CHUNK_SIZE];
+            long sent = 0;
+            int n;
+            while ((n = source.read(buf)) != -1) {
+                sink.write(buf, 0, n);
+                sent += n;
+                if (onProgress != null) {
+                    onProgress.accept(new UploadProgress(sent));
+                }
+            }
         }
     }
 }

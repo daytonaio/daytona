@@ -61,7 +61,7 @@ RSpec.describe Daytona::Config do
       expect(config.api_key).to eq('explicit-key')
     end
 
-    it 'reads .env and .env.local without mutating ENV and prefers .env.local' do
+    it 'reads .env and .env.local without mutating ENV and prefers .env.local', :real_dotenv do
       Dir.mktmpdir do |dir|
         File.write(File.join(dir, '.env'), <<~ENVFILE)
           DAYTONA_API_KEY=env-file-key

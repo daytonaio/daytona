@@ -15,12 +15,14 @@ from daytona import (
     CreateSandboxFromImageParams,
     CreateSandboxFromSnapshotParams,
     Daytona,
+    DownloadProgress,
     FileDownloadRequest,
     FileUpload,
     Image,
     PtySize,
-    Resources,
+    Sandbox,
     SessionExecuteRequest,
+    UploadProgress,
 )
 from daytona.common.errors import DaytonaError
 
@@ -227,7 +229,7 @@ def test_download_files_batch(sandbox):
 
 def test_download_file_stream_returns_exact_content(sandbox):
     expected = b"streamed content\nsecond line\n"
-    path = f"{FS_TEST_DIR}/streamed.txt"
+    path = f"{FS_TEST_DIR}/streamed-{uuid.uuid4().hex}.txt"
     sandbox.fs.upload_file(expected, path)
 
     content = b"".join(sandbox.fs.download_file_stream(path))
@@ -235,9 +237,51 @@ def test_download_file_stream_returns_exact_content(sandbox):
     assert content == expected
 
 
+def test_download_file_stream_on_progress(sandbox: Sandbox):
+    run_id = uuid.uuid4().hex
+    expected = ("progress-check-" + run_id).encode("utf-8") * 512
+    # Use a run-unique path to avoid interference when multiple E2E suites
+    # run concurrently against the same sandbox (e.g. nx run-many in CI).
+    path = f"{FS_TEST_DIR}/streamed-progress-{run_id}.txt"
+    sandbox.fs.upload_file(expected, path)
+    progress_updates: list[DownloadProgress] = []
+
+    content = b"".join(sandbox.fs.download_file_stream(path, on_progress=progress_updates.append))
+
+    assert content == expected
+    assert progress_updates
+    assert progress_updates[-1].bytes_received == len(expected)
+    assert progress_updates[-1].total_bytes == len(expected)
+    assert [progress.bytes_received for progress in progress_updates] == sorted(
+        progress.bytes_received for progress in progress_updates
+    )
+    assert all(progress.total_bytes == len(expected) for progress in progress_updates)
+
+
 def test_download_file_stream_nonexistent_file_raises(sandbox):
     with pytest.raises(DaytonaError):
         b"".join(sandbox.fs.download_file_stream(f"{FS_TEST_DIR}/stream-does-not-exist.txt"))
+
+
+def test_upload_file_stream_with_progress(sandbox: Sandbox):
+    import io as _io
+
+    run_id = uuid.uuid4().hex
+    payload = ("upload-stream-content-" + run_id).encode("utf-8") * 512
+    path = f"{FS_TEST_DIR}/upload-stream-{run_id}.bin"
+    progress: list[UploadProgress] = []
+
+    sandbox.fs.upload_file_stream(
+        _io.BytesIO(payload),
+        path,
+        on_progress=progress.append,
+    )
+
+    downloaded = b"".join(sandbox.fs.download_file_stream(path))
+    assert downloaded == payload
+    assert progress, "expected at least one progress event"
+    assert progress[-1].bytes_sent == len(payload)
+    assert [p.bytes_sent for p in progress] == sorted(p.bytes_sent for p in progress)
 
 
 def test_find_files_finds_text_content(sandbox):

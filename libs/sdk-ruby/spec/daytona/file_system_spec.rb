@@ -4,6 +4,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Daytona::FileSystem do
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def multipart_response(parts, boundary: 'DAYTONA-FILE-BOUNDARY')
     body = String.new.b
 
@@ -12,16 +13,18 @@ RSpec.describe Daytona::FileSystem do
       body << %(Content-Disposition: form-data; name="#{part.fetch(:name)}")
       body << %(; filename="#{part[:filename]}") if part[:filename]
       body << "\r\n"
-      body << "Content-Type: #{part.fetch(:content_type, 'application/octet-stream')}\r\n\r\n"
-      body << part.fetch(:body)
+      part_body = part.fetch(:body)
+      body << "Content-Type: #{part.fetch(:content_type, 'application/octet-stream')}\r\n"
+      body << "Content-Length: #{part_body.bytesize}\r\n\r\n"
+      body << part_body
       body << "\r\n"
     end
 
     body << "--#{boundary}--\r\n"
   end
 
-  def stub_streaming_request(chunks:, headers: { 'Content-Type' => 'multipart/form-data; boundary=DAYTONA-FILE-BOUNDARY' },
-                             success: true, code: 200, body: nil)
+  def stub_streaming_request(chunks:, headers: nil, success: true, code: 200, body: nil)
+    headers ||= { 'Content-Type' => 'multipart/form-data; boundary=DAYTONA-FILE-BOUNDARY' }
     request = instance_double(Typhoeus::Request)
     callbacks = {}
 
@@ -37,6 +40,47 @@ RSpec.describe Daytona::FileSystem do
 
     request
   end
+
+  def build_cancel_event
+    Class.new do
+      def initialize
+        @set = false
+      end
+
+      def set!
+        @set = true
+      end
+
+      def set?
+        @set
+      end
+    end.new
+  end
+
+  def stub_upload_request(success: true, code: 200, body: '', return_code: :ok, timed_out: false, &block)
+    request = instance_double(Typhoeus::Request)
+    request_options = nil
+    response = instance_double(
+      Typhoeus::Response,
+      success?: success,
+      code: code,
+      body: body,
+      return_code: return_code,
+      timed_out?: timed_out
+    )
+
+    allow(Typhoeus::Request).to receive(:new) do |_url, options|
+      request_options = options
+      request
+    end
+    allow(request).to receive(:run) do
+      block&.call(request_options)
+      response
+    end
+
+    [request, response, -> { request_options }]
+  end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   let(:toolbox_api) { instance_double(DaytonaToolboxApiClient::FileSystemApi) }
   let(:toolbox_api_config) { double('ToolboxConfig', base_url: 'https://toolbox.example.com', verify_ssl: true, verify_ssl_host: true) }
@@ -187,6 +231,18 @@ RSpec.describe Daytona::FileSystem do
       expect(enumerator.to_a.join).to eq('enumerated content')
     end
 
+    it 'calls on_progress with bytes_received and total_bytes' do
+      body = multipart_response([{ name: 'file', filename: 'remote.txt', body: 'hello world' }])
+      stub_streaming_request(chunks: [body])
+
+      progress_calls = []
+      fs.download_file_stream('/remote.txt', on_progress: ->(progress) { progress_calls << progress }) { |_chunk| nil }
+
+      expect(progress_calls).not_to be_empty
+      expect(progress_calls.last.bytes_received).to eq('hello world'.bytesize)
+      expect(progress_calls.last.total_bytes).to eq('hello world'.bytesize)
+    end
+
     it 'raises error when file not found' do
       body = multipart_response([
                                   { name: 'error', content_type: 'application/json',
@@ -196,6 +252,15 @@ RSpec.describe Daytona::FileSystem do
 
       expect { fs.download_file_stream('/missing.txt') { |_chunk| nil } }
         .to raise_error(Daytona::Sdk::Error, /Failed to download file: file not found/)
+    end
+
+    it 'aborts when cancel_event is set before the first chunk' do
+      body = multipart_response([{ name: 'file', filename: 'remote.txt', body: 'hello world' }])
+      stub_streaming_request(chunks: [body])
+      cancel = double('CancelEvent', set?: true)
+
+      expect { fs.download_file_stream('/remote.txt', cancel_event: cancel) { |_chunk| nil } }
+        .to raise_error(Daytona::Sdk::Error, /Failed to download file: Download cancelled/)
     end
   end
 
@@ -234,6 +299,57 @@ RSpec.describe Daytona::FileSystem do
       allow(toolbox_api).to receive(:upload_file).and_raise(StandardError, 'err')
 
       expect { fs.upload_file('data', '/x') }.to raise_error(Daytona::Sdk::Error, /Failed to upload file: err/)
+    end
+  end
+
+  describe '#upload_file_stream' do
+    it 'aborts when cancel_event is set before the upload starts' do
+      cancel = double('CancelEvent', set?: true)
+      io = StringIO.new('streamed-bytes')
+
+      expect { fs.upload_file_stream(io, '/remote.bin', cancel_event: cancel) }
+        .to raise_error(Daytona::Sdk::Error, /Failed to upload file: Upload cancelled/)
+    end
+
+    it 'cancels mid-upload from the libcurl progress callback' do
+      cancel = build_cancel_event
+      progress_calls = []
+      stub_upload_request(success: false, code: 0, return_code: :aborted_by_callback) do |options|
+        progress = options.fetch(:xferinfofunction)
+
+        expect(progress.call(nil, 0, 0, 128, 32)).to eq(0)
+        cancel.set!
+        expect(progress.call(nil, 0, 0, 128, 64)).to eq(1)
+      end
+
+      expect do
+        fs.upload_file_stream(
+          StringIO.new('streamed-bytes'),
+          '/remote.bin',
+          cancel_event: cancel,
+          on_progress: ->(p) { progress_calls << p }
+        )
+      end.to raise_error(Daytona::Sdk::Error, /Failed to upload file: Upload cancelled/)
+
+      expect(progress_calls.map(&:bytes_sent)).to eq([32])
+    end
+
+    it 'closes the upload file handle after the request completes' do
+      uploaded_file = nil
+      stub_upload_request do |options|
+        uploaded_file = options.dig(:body, 'files[0].file')
+        expect(uploaded_file).to be_a(File)
+        expect(uploaded_file.closed?).to be(false)
+      end
+
+      Dir.mktmpdir do |dir|
+        source_path = File.join(dir, 'upload.bin')
+        File.binwrite(source_path, 'payload')
+
+        fs.upload_file_stream(source_path, '/remote.bin')
+      end
+
+      expect(uploaded_file.closed?).to be(true)
     end
   end
 
