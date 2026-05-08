@@ -5,7 +5,7 @@ description: Use your own infrastructure to provision and scale compute within c
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Customer Managed Compute enables you to run sandbox workloads on your own infrastructure while using Daytona's control plane to manage them. Daytona uses regions for grouping runner nodes: instances running the sandbox workloads. Each sandbox is assigned to a single region. 
+Customer Managed Compute enables you to run sandbox workloads on your own infrastructure while using Daytona's control plane to manage them. Daytona uses regions for grouping runner nodes: instances running the sandbox workloads. Each sandbox is assigned to a single region.
 
 Daytona provides two [built-in regions](/docs/en/regions) (**US** and **EU**) for shared compute resources and handling provisioning, maintenance, monitoring, and scaling on your behalf.
 
@@ -219,16 +219,6 @@ services:
 helm install my-region ./charts/daytona-region -f my-values.yaml
 ```
 
-#### Uninstallation
-
-```bash
-helm uninstall my-region
-```
-
-:::note
-Uninstalling the chart does not automatically deregister the region from the Daytona API. You may need to manually remove the region through the Daytona dashboard or API.
-:::
-
 #### Configuration
 
 **Required Configuration**
@@ -251,19 +241,19 @@ Uninstalling the chart does not automatically deregister the region from the Day
 
 **Proxy Service Configuration**
 
-| Parameter                                | Description                | Default                                    |
-| ---------------------------------------- | -------------------------- | ------------------------------------------ |
-| **`services.proxy.image.repository`**    | Proxy image repository     | **`daytonaio/daytona-proxy`**              |
-| **`services.proxy.image.tag`**           | Proxy image tag            | **`""`** <small>(Chart.AppVersion)</small> |
-| **`services.proxy.service.type`**        | Service type               | **`ClusterIP`**                            |
-| **`services.proxy.service.port`**        | Service port               | **`4000`**                                 |
-| **`services.proxy.ingress.enabled`**     | Enable ingress             | **`true`**                                 |
-| **`services.proxy.ingress.className`**   | Ingress class              | **`nginx`**                                |
-| **`services.proxy.ingress.tls`**         | Enable TLS                 | **`true`**                                 |
-| **`services.proxy.ingress.selfSigned`**  | Generate self-signed certs | **`false`**                                |
-| **`services.proxy.replicaCount`**        | Number of replicas         | **`1`**                                    |
-| **`services.proxy.autoscaling.enabled`** | Enable HPA                 | **`false`**                                |
-| **`services.proxy.resources`**           | Resource limits/requests   | See values.yaml                            |
+| Parameter                                | Description                | Default                                                                                                                            |
+| ---------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **`services.proxy.image.repository`**    | Proxy image repository     | **`daytonaio/daytona-proxy`**                                                                                                      |
+| **`services.proxy.image.tag`**           | Proxy image tag            | **`""`** <small>(Chart.AppVersion)</small>                                                                                         |
+| **`services.proxy.service.type`**        | Service type               | **`ClusterIP`**                                                                                                                    |
+| **`services.proxy.service.port`**        | Service port               | **`4000`**                                                                                                                         |
+| **`services.proxy.ingress.enabled`**     | Enable ingress             | **`true`**                                                                                                                         |
+| **`services.proxy.ingress.className`**   | Ingress class              | **`nginx`**                                                                                                                        |
+| **`services.proxy.ingress.tls`**         | Enable TLS                 | **`true`**                                                                                                                         |
+| **`services.proxy.ingress.selfSigned`**  | Generate self-signed certs | **`false`**                                                                                                                        |
+| **`services.proxy.replicaCount`**        | Number of replicas         | **`1`**                                                                                                                            |
+| **`services.proxy.autoscaling.enabled`** | Enable HPA                 | **`false`**                                                                                                                        |
+| **`services.proxy.resources`**           | Resource limits/requests   | See [**<u>values.yaml</u>**](https://raw.githubusercontent.com/daytonaio/helm-charts/refs/heads/main/charts/daytona-region/values.yaml) |
 
 **Snapshot Manager Configuration**
 
@@ -283,12 +273,12 @@ Uninstalling the chart does not automatically deregister the region from the Day
 
 **Registration Configuration**
 
-| Parameter                           | Description                     | Default                 |
-| ----------------------------------- | ------------------------------- | ----------------------- |
-| **`registration.enabled`**          | Enable region registration hook | **`true`**              |
-| **`registration.existingSecret`**   | Use existing secret for API key | **`""`**                |
-| **`registration.image.repository`** | Job image                       | **`daytonaio/kubectl`** |
-| **`registration.resources`**        | Job resource limits             | See values.yaml         |
+| Parameter                           | Description                     | Default                                                                                                                            |
+| ----------------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **`registration.enabled`**          | Enable region registration hook | **`true`**                                                                                                                         |
+| **`registration.existingSecret`**   | Use existing secret for API key | **`""`**                                                                                                                           |
+| **`registration.image.repository`** | Job image                       | **`daytonaio/kubectl`**                                                                                                            |
+| **`registration.resources`**        | Job resource limits             | See [**<u>values.yaml</u>**](https://raw.githubusercontent.com/daytonaio/helm-charts/refs/heads/main/charts/daytona-region/values.yaml) |
 
 **URL Derivation**
 
