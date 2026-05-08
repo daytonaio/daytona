@@ -1,0 +1,2532 @@
+---
+title: Mount External Storage
+description: Mount external object storage (Amazon S3, Cloudflare R2, Google Cloud Storage, Azure Blob) and filesystems into Daytona sandboxes using FUSE.
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Mount object storage (Amazon S3, Cloudflare R2, Google Cloud Storage, Azure Blob) and filesystems like MesaFS into a Daytona sandbox as a regular directory. The sandbox reads and writes the bucket like local files, so existing tools, scripts, and agents work without changes. This is useful for bringing in datasets, model weights, or build artifacts that already live in your own cloud account.
+
+External storage mounts and [Daytona Volumes](/docs/en/volumes/) are complementary FUSE-based mechanisms — both expose remote object storage as a regular sandbox directory, both can be shared across sandboxes, and both persist beyond any individual sandbox's lifetime. The main distinction is **where the data physically lives**: Daytona Volumes are hosted on Daytona's own S3-compatible object store, while external mounts attach a bucket or filesystem hosted on another provider (Amazon S3, Cloudflare R2, GCS, Azure Blob, MesaFS).
+
+## How it works
+
+External storage is mounted using FUSE. Daytona supports two approaches and you can pick whichever fits your workflow:
+
+- **Pre-baked snapshot** — build a [snapshot](/docs/en/snapshots/) once with the FUSE tool (`mount-s3`, `gcsfuse`, `blobfuse2`) baked in, then launch every sandbox from that snapshot. Cold starts are fast and predictable. Best for production.
+- **Runtime install** — launch a default sandbox and `apt-get install` the FUSE tool when the sandbox starts. Adds time to sandbox startup, but you don't manage snapshots. Best for quick experiments.
+
+Both approaches end with the same mount command and the same usage — the only difference is when the FUSE tool gets installed.
+
+Each provider section below shows both approaches.
+
+## Prerequisites
+
+- The [Daytona SDK](/docs/en/getting-started/) installed for the language you're using
+- Provider credentials (AWS keys, GCS service account JSON, Azure account key, etc.)
+
+## Mount an Amazon S3 bucket
+
+Mount an S3 bucket using [Mountpoint for Amazon S3 ↗](https://github.com/awslabs/mountpoint-s3) — AWS's official FUSE client, optimized for high throughput on S3.
+
+### Pre-baked snapshot
+
+Build a snapshot once with `mount-s3` installed, then launch sandboxes from it.
+
+#### Build the snapshot
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+from daytona import CreateSnapshotParams, Daytona, Image
+
+daytona = Daytona()
+
+image = (
+  Image.base("daytonaio/sandbox")
+  .run_commands(
+    "sudo apt-get update "
+    "&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget",
+    'arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" '
+    '&& wget -O /tmp/mount-s3.deb '
+    '"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" '
+    "&& sudo apt-get install -y /tmp/mount-s3.deb "
+    "&& rm /tmp/mount-s3.deb",
+  )
+)
+
+daytona.snapshot.create(
+    CreateSnapshotParams(name="fuse-s3", image=image),
+    on_logs=print,
+)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona, Image } from '@daytona/sdk'
+
+const daytona = new Daytona()
+
+const image = Image.base('daytonaio/sandbox').runCommands(
+  'sudo apt-get update ' +
+    '&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget',
+  'arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" ' +
+    '&& wget -O /tmp/mount-s3.deb ' +
+    '"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" ' +
+    '&& sudo apt-get install -y /tmp/mount-s3.deb ' +
+    '&& rm /tmp/mount-s3.deb',
+)
+
+await daytona.snapshot.create(
+  { name: 'fuse-s3', image },
+  { onLogs: console.log },
+)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+image = Daytona::Image
+  .base('daytonaio/sandbox')
+  .run_commands(
+    'sudo apt-get update ' \
+    '&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget',
+    'arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" ' \
+    '&& wget -O /tmp/mount-s3.deb ' \
+    '"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" ' \
+    '&& sudo apt-get install -y /tmp/mount-s3.deb ' \
+    '&& rm /tmp/mount-s3.deb'
+  )
+
+daytona.snapshot.create(
+  Daytona::CreateSnapshotParams.new(name: 'fuse-s3', image: image),
+  on_logs: proc { |chunk| print(chunk) }
+)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+image := daytona.Base("daytonaio/sandbox").
+	Run("sudo apt-get update && sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget").
+	Run(`arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" && ` +
+		`wget -O /tmp/mount-s3.deb "https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" && ` +
+		`sudo apt-get install -y /tmp/mount-s3.deb && rm /tmp/mount-s3.deb`)
+
+_, logChan, err := client.Snapshot.Create(ctx, &types.CreateSnapshotParams{
+	Name:  "fuse-s3",
+	Image: image,
+})
+if err != nil {
+	log.Fatal(err)
+}
+for line := range logChan {
+	fmt.Print(line)
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Image;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            Image image = Image.base("daytonaio/sandbox")
+                .runCommands(
+                    "sudo apt-get update "
+                        + "&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget",
+                    "arch=\"$(dpkg --print-architecture | sed s/amd64/x86_64/)\" "
+                        + "&& wget -O /tmp/mount-s3.deb "
+                        + "\"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb\" "
+                        + "&& sudo apt-get install -y /tmp/mount-s3.deb "
+                        + "&& rm /tmp/mount-s3.deb"
+                );
+
+            daytona.snapshot().create("fuse-s3", image, System.out::println);
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+#### Launch and mount
+
+Pass AWS credentials as environment variables on sandbox creation. `mount-s3` reads them automatically.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+import os
+from daytona import CreateSandboxFromSnapshotParams, Daytona
+
+daytona = Daytona()
+
+sandbox = daytona.create(
+    CreateSandboxFromSnapshotParams(
+        snapshot="fuse-s3",
+        env_vars={
+            "AWS_ACCESS_KEY_ID": os.environ["AWS_ACCESS_KEY_ID"],
+            "AWS_SECRET_ACCESS_KEY": os.environ["AWS_SECRET_ACCESS_KEY"],
+        },
+    )
+)
+
+mount_path = "/home/daytona/s3"
+
+# mount-s3 daemonizes by default and reads AWS_* from the environment
+sandbox.process.exec(f"mkdir -p {mount_path}")
+sandbox.process.exec(f"mount-s3 my-bucket {mount_path}")
+
+# Read and write through the mount as if it were a local directory
+sandbox.process.exec(f"echo 'hello from Daytona' > {mount_path}/hello.txt")
+response = sandbox.process.exec(f"cat {mount_path}/hello.txt")
+print(response.result)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytona/sdk'
+
+const daytona = new Daytona()
+
+const sandbox = await daytona.create({
+  snapshot: 'fuse-s3',
+  envVars: {
+    AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID!,
+    AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+})
+
+const mountPath = '/home/daytona/s3'
+
+// mount-s3 daemonizes by default and reads AWS_* from the environment
+await sandbox.process.executeCommand(`mkdir -p ${mountPath}`)
+await sandbox.process.executeCommand(`mount-s3 my-bucket ${mountPath}`)
+
+// Read and write through the mount as if it were a local directory
+await sandbox.process.executeCommand(`echo 'hello from Daytona' > ${mountPath}/hello.txt`)
+const response = await sandbox.process.executeCommand(`cat ${mountPath}/hello.txt`)
+console.log(response.result)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+sandbox = daytona.create(
+  Daytona::CreateSandboxFromSnapshotParams.new(
+    snapshot: 'fuse-s3',
+    env_vars: {
+      'AWS_ACCESS_KEY_ID' => ENV.fetch('AWS_ACCESS_KEY_ID'),
+      'AWS_SECRET_ACCESS_KEY' => ENV.fetch('AWS_SECRET_ACCESS_KEY')
+    }
+  )
+)
+
+mount_path = '/home/daytona/s3'
+
+# mount-s3 daemonizes by default and reads AWS_* from the environment
+sandbox.process.exec(command: "mkdir -p #{mount_path}")
+sandbox.process.exec(command: "mount-s3 my-bucket #{mount_path}")
+
+# Read and write through the mount as if it were a local directory
+sandbox.process.exec(command: "echo 'hello from Daytona' > #{mount_path}/hello.txt")
+response = sandbox.process.exec(command: "cat #{mount_path}/hello.txt")
+puts response.result
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+sandbox, err := client.Create(ctx, types.SnapshotParams{
+	Snapshot: "fuse-s3",
+	SandboxBaseParams: types.SandboxBaseParams{
+		EnvVars: map[string]string{
+			"AWS_ACCESS_KEY_ID":     os.Getenv("AWS_ACCESS_KEY_ID"),
+			"AWS_SECRET_ACCESS_KEY": os.Getenv("AWS_SECRET_ACCESS_KEY"),
+		},
+	},
+})
+if err != nil {
+	log.Fatal(err)
+}
+
+mountPath := "/home/daytona/s3"
+
+// mount-s3 daemonizes by default and reads AWS_* from the environment
+if _, err := sandbox.Process.ExecuteCommand(ctx, "mkdir -p "+mountPath); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx, "mount-s3 my-bucket "+mountPath); err != nil {
+	log.Fatal(err)
+}
+
+// Read and write through the mount as if it were a local directory
+if _, err := sandbox.Process.ExecuteCommand(ctx, "echo 'hello from Daytona' > "+mountPath+"/hello.txt"); err != nil {
+	log.Fatal(err)
+}
+response, err := sandbox.Process.ExecuteCommand(ctx, "cat "+mountPath+"/hello.txt")
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(response.Result)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+import io.daytona.sdk.model.ExecuteResponse;
+
+import java.util.Map;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
+            params.setSnapshot("fuse-s3");
+            params.setEnvVars(Map.of(
+                "AWS_ACCESS_KEY_ID", System.getenv("AWS_ACCESS_KEY_ID"),
+                "AWS_SECRET_ACCESS_KEY", System.getenv("AWS_SECRET_ACCESS_KEY")
+            ));
+            Sandbox sandbox = daytona.create(params);
+
+            String mountPath = "/home/daytona/s3";
+
+            // mount-s3 daemonizes by default and reads AWS_* from the environment
+            sandbox.getProcess().executeCommand("mkdir -p " + mountPath);
+            sandbox.getProcess().executeCommand("mount-s3 my-bucket " + mountPath);
+
+            // Read and write through the mount as if it were a local directory
+            sandbox.getProcess().executeCommand(
+                "echo 'hello from Daytona' > " + mountPath + "/hello.txt");
+            ExecuteResponse response = sandbox.getProcess().executeCommand(
+                "cat " + mountPath + "/hello.txt");
+            System.out.println(response.getResult());
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Runtime install
+
+Skip the snapshot and install `mount-s3` when the sandbox starts. Same end result, slower cold start.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+import os
+from daytona import CreateSandboxBaseParams, Daytona
+
+daytona = Daytona()
+
+sandbox = daytona.create(
+    CreateSandboxBaseParams(
+        env_vars={
+            "AWS_ACCESS_KEY_ID": os.environ["AWS_ACCESS_KEY_ID"],
+            "AWS_SECRET_ACCESS_KEY": os.environ["AWS_SECRET_ACCESS_KEY"],
+        },
+    )
+)
+
+# Install mount-s3 at runtime
+sandbox.process.exec(
+    "sudo apt-get update "
+    "&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget"
+)
+sandbox.process.exec(
+    'arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" '
+    '&& wget -O /tmp/mount-s3.deb '
+    '"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" '
+    "&& sudo apt-get install -y /tmp/mount-s3.deb"
+)
+
+# Mount and use
+mount_path = "/home/daytona/s3"
+sandbox.process.exec(f"mkdir -p {mount_path} && mount-s3 my-bucket {mount_path}")
+response = sandbox.process.exec(f"ls {mount_path}")
+print(response.result)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytona/sdk'
+
+const daytona = new Daytona()
+
+const sandbox = await daytona.create({
+  envVars: {
+    AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID!,
+    AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+})
+
+// Install mount-s3 at runtime
+await sandbox.process.executeCommand(
+  'sudo apt-get update ' +
+    '&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget',
+)
+await sandbox.process.executeCommand(
+  'arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" ' +
+    '&& wget -O /tmp/mount-s3.deb ' +
+    '"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" ' +
+    '&& sudo apt-get install -y /tmp/mount-s3.deb',
+)
+
+// Mount and use
+const mountPath = '/home/daytona/s3'
+await sandbox.process.executeCommand(`mkdir -p ${mountPath} && mount-s3 my-bucket ${mountPath}`)
+const response = await sandbox.process.executeCommand(`ls ${mountPath}`)
+console.log(response.result)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+sandbox = daytona.create(
+  Daytona::CreateSandboxBaseParams.new(
+    env_vars: {
+      'AWS_ACCESS_KEY_ID' => ENV.fetch('AWS_ACCESS_KEY_ID'),
+      'AWS_SECRET_ACCESS_KEY' => ENV.fetch('AWS_SECRET_ACCESS_KEY')
+    }
+  )
+)
+
+# Install mount-s3 at runtime
+sandbox.process.exec(
+  command: 'sudo apt-get update ' \
+           '&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget'
+)
+sandbox.process.exec(
+  command: 'arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" ' \
+           '&& wget -O /tmp/mount-s3.deb ' \
+           '"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" ' \
+           '&& sudo apt-get install -y /tmp/mount-s3.deb'
+)
+
+# Mount and use
+mount_path = '/home/daytona/s3'
+sandbox.process.exec(command: "mkdir -p #{mount_path} && mount-s3 my-bucket #{mount_path}")
+response = sandbox.process.exec(command: "ls #{mount_path}")
+puts response.result
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+sandbox, err := client.Create(ctx, types.SnapshotParams{
+	SandboxBaseParams: types.SandboxBaseParams{
+		EnvVars: map[string]string{
+			"AWS_ACCESS_KEY_ID":     os.Getenv("AWS_ACCESS_KEY_ID"),
+			"AWS_SECRET_ACCESS_KEY": os.Getenv("AWS_SECRET_ACCESS_KEY"),
+		},
+	},
+})
+if err != nil {
+	log.Fatal(err)
+}
+
+// Install mount-s3 at runtime
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	"sudo apt-get update && sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget"); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	`arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" && `+
+		`wget -O /tmp/mount-s3.deb "https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" && `+
+		`sudo apt-get install -y /tmp/mount-s3.deb`); err != nil {
+	log.Fatal(err)
+}
+
+// Mount and use
+mountPath := "/home/daytona/s3"
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	"mkdir -p "+mountPath+" && mount-s3 my-bucket "+mountPath); err != nil {
+	log.Fatal(err)
+}
+response, err := sandbox.Process.ExecuteCommand(ctx, "ls "+mountPath)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(response.Result)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+import io.daytona.sdk.model.ExecuteResponse;
+
+import java.util.Map;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
+            params.setEnvVars(Map.of(
+                "AWS_ACCESS_KEY_ID", System.getenv("AWS_ACCESS_KEY_ID"),
+                "AWS_SECRET_ACCESS_KEY", System.getenv("AWS_SECRET_ACCESS_KEY")
+            ));
+            Sandbox sandbox = daytona.create(params);
+
+            // Install mount-s3 at runtime
+            sandbox.getProcess().executeCommand(
+                "sudo apt-get update "
+                    + "&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget");
+            sandbox.getProcess().executeCommand(
+                "arch=\"$(dpkg --print-architecture | sed s/amd64/x86_64/)\" "
+                    + "&& wget -O /tmp/mount-s3.deb "
+                    + "\"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb\" "
+                    + "&& sudo apt-get install -y /tmp/mount-s3.deb");
+
+            // Mount and use
+            String mountPath = "/home/daytona/s3";
+            sandbox.getProcess().executeCommand(
+                "mkdir -p " + mountPath + " && mount-s3 my-bucket " + mountPath);
+            ExecuteResponse response = sandbox.getProcess().executeCommand("ls " + mountPath);
+            System.out.println(response.getResult());
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+## Mount a Cloudflare R2 bucket
+
+Cloudflare R2 is S3-compatible, so the same `mount-s3` tool works. Pass an explicit `--endpoint-url` pointing at your R2 account.
+
+### Pre-baked snapshot
+
+R2 reuses the `fuse-s3` snapshot built in the [S3 section](#build-the-snapshot). If you already have it, skip straight to launch and mount.
+
+#### Launch and mount
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+import os
+from daytona import CreateSandboxFromSnapshotParams, Daytona
+
+daytona = Daytona()
+
+# R2 credentials live in your Cloudflare dashboard under R2 > Manage API Tokens
+account_id = os.environ["R2_ACCOUNT_ID"]
+
+sandbox = daytona.create(
+    CreateSandboxFromSnapshotParams(
+        snapshot="fuse-s3",
+        env_vars={
+            "AWS_ACCESS_KEY_ID": os.environ["R2_ACCESS_KEY_ID"],
+            "AWS_SECRET_ACCESS_KEY": os.environ["R2_SECRET_ACCESS_KEY"],
+        },
+    )
+)
+
+mount_path = "/home/daytona/r2"
+
+sandbox.process.exec(f"mkdir -p {mount_path}")
+sandbox.process.exec(
+    f"mount-s3 --endpoint-url https://{account_id}.r2.cloudflarestorage.com "
+    f"my-r2-bucket {mount_path}"
+)
+
+response = sandbox.process.exec(f"ls {mount_path}")
+print(response.result)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytona/sdk'
+
+const daytona = new Daytona()
+
+// R2 credentials live in your Cloudflare dashboard under R2 > Manage API Tokens
+const accountId = process.env.R2_ACCOUNT_ID!
+
+const sandbox = await daytona.create({
+  snapshot: 'fuse-s3',
+  envVars: {
+    AWS_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID!,
+    AWS_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY!,
+  },
+})
+
+const mountPath = '/home/daytona/r2'
+
+await sandbox.process.executeCommand(`mkdir -p ${mountPath}`)
+await sandbox.process.executeCommand(
+  `mount-s3 --endpoint-url https://${accountId}.r2.cloudflarestorage.com ` +
+    `my-r2-bucket ${mountPath}`,
+)
+
+const response = await sandbox.process.executeCommand(`ls ${mountPath}`)
+console.log(response.result)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+# R2 credentials live in your Cloudflare dashboard under R2 > Manage API Tokens
+account_id = ENV.fetch('R2_ACCOUNT_ID')
+
+sandbox = daytona.create(
+  Daytona::CreateSandboxFromSnapshotParams.new(
+    snapshot: 'fuse-s3',
+    env_vars: {
+      'AWS_ACCESS_KEY_ID' => ENV.fetch('R2_ACCESS_KEY_ID'),
+      'AWS_SECRET_ACCESS_KEY' => ENV.fetch('R2_SECRET_ACCESS_KEY')
+    }
+  )
+)
+
+mount_path = '/home/daytona/r2'
+
+sandbox.process.exec(command: "mkdir -p #{mount_path}")
+sandbox.process.exec(
+  command: "mount-s3 --endpoint-url https://#{account_id}.r2.cloudflarestorage.com " \
+           "my-r2-bucket #{mount_path}"
+)
+
+response = sandbox.process.exec(command: "ls #{mount_path}")
+puts response.result
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+// R2 credentials live in your Cloudflare dashboard under R2 > Manage API Tokens
+accountID := os.Getenv("R2_ACCOUNT_ID")
+
+sandbox, err := client.Create(ctx, types.SnapshotParams{
+	Snapshot: "fuse-s3",
+	SandboxBaseParams: types.SandboxBaseParams{
+		EnvVars: map[string]string{
+			"AWS_ACCESS_KEY_ID":     os.Getenv("R2_ACCESS_KEY_ID"),
+			"AWS_SECRET_ACCESS_KEY": os.Getenv("R2_SECRET_ACCESS_KEY"),
+		},
+	},
+})
+if err != nil {
+	log.Fatal(err)
+}
+
+mountPath := "/home/daytona/r2"
+
+if _, err := sandbox.Process.ExecuteCommand(ctx, "mkdir -p "+mountPath); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	"mount-s3 --endpoint-url https://"+accountID+".r2.cloudflarestorage.com "+
+		"my-r2-bucket "+mountPath); err != nil {
+	log.Fatal(err)
+}
+
+response, err := sandbox.Process.ExecuteCommand(ctx, "ls "+mountPath)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(response.Result)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+import io.daytona.sdk.model.ExecuteResponse;
+
+import java.util.Map;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            // R2 credentials live in your Cloudflare dashboard under R2 > Manage API Tokens
+            String accountId = System.getenv("R2_ACCOUNT_ID");
+
+            CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
+            params.setSnapshot("fuse-s3");
+            params.setEnvVars(Map.of(
+                "AWS_ACCESS_KEY_ID", System.getenv("R2_ACCESS_KEY_ID"),
+                "AWS_SECRET_ACCESS_KEY", System.getenv("R2_SECRET_ACCESS_KEY")
+            ));
+            Sandbox sandbox = daytona.create(params);
+
+            String mountPath = "/home/daytona/r2";
+
+            sandbox.getProcess().executeCommand("mkdir -p " + mountPath);
+            sandbox.getProcess().executeCommand(
+                "mount-s3 --endpoint-url https://" + accountId + ".r2.cloudflarestorage.com "
+                    + "my-r2-bucket " + mountPath);
+
+            ExecuteResponse response = sandbox.getProcess().executeCommand("ls " + mountPath);
+            System.out.println(response.getResult());
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Runtime install
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+import os
+from daytona import CreateSandboxBaseParams, Daytona
+
+daytona = Daytona()
+
+account_id = os.environ["R2_ACCOUNT_ID"]
+
+sandbox = daytona.create(
+    CreateSandboxBaseParams(
+        env_vars={
+            "AWS_ACCESS_KEY_ID": os.environ["R2_ACCESS_KEY_ID"],
+            "AWS_SECRET_ACCESS_KEY": os.environ["R2_SECRET_ACCESS_KEY"],
+        },
+    )
+)
+
+# Install mount-s3
+sandbox.process.exec(
+    "sudo apt-get update "
+    "&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget"
+)
+sandbox.process.exec(
+    'arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" '
+    '&& wget -O /tmp/mount-s3.deb '
+    '"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" '
+    "&& sudo apt-get install -y /tmp/mount-s3.deb"
+)
+
+# Mount with R2 endpoint
+mount_path = "/home/daytona/r2"
+sandbox.process.exec(
+    f"mkdir -p {mount_path} && "
+    f"mount-s3 --endpoint-url https://{account_id}.r2.cloudflarestorage.com "
+    f"my-r2-bucket {mount_path}"
+)
+response = sandbox.process.exec(f"ls {mount_path}")
+print(response.result)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytona/sdk'
+
+const daytona = new Daytona()
+
+const accountId = process.env.R2_ACCOUNT_ID!
+
+const sandbox = await daytona.create({
+  envVars: {
+    AWS_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID!,
+    AWS_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY!,
+  },
+})
+
+// Install mount-s3
+await sandbox.process.executeCommand(
+  'sudo apt-get update ' +
+    '&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget',
+)
+await sandbox.process.executeCommand(
+  'arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" ' +
+    '&& wget -O /tmp/mount-s3.deb ' +
+    '"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" ' +
+    '&& sudo apt-get install -y /tmp/mount-s3.deb',
+)
+
+// Mount with R2 endpoint
+const mountPath = '/home/daytona/r2'
+await sandbox.process.executeCommand(
+  `mkdir -p ${mountPath} && ` +
+    `mount-s3 --endpoint-url https://${accountId}.r2.cloudflarestorage.com ` +
+    `my-r2-bucket ${mountPath}`,
+)
+const response = await sandbox.process.executeCommand(`ls ${mountPath}`)
+console.log(response.result)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+account_id = ENV.fetch('R2_ACCOUNT_ID')
+
+sandbox = daytona.create(
+  Daytona::CreateSandboxBaseParams.new(
+    env_vars: {
+      'AWS_ACCESS_KEY_ID' => ENV.fetch('R2_ACCESS_KEY_ID'),
+      'AWS_SECRET_ACCESS_KEY' => ENV.fetch('R2_SECRET_ACCESS_KEY')
+    }
+  )
+)
+
+# Install mount-s3
+sandbox.process.exec(
+  command: 'sudo apt-get update ' \
+           '&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget'
+)
+sandbox.process.exec(
+  command: 'arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" ' \
+           '&& wget -O /tmp/mount-s3.deb ' \
+           '"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" ' \
+           '&& sudo apt-get install -y /tmp/mount-s3.deb'
+)
+
+# Mount with R2 endpoint
+mount_path = '/home/daytona/r2'
+sandbox.process.exec(
+  command: "mkdir -p #{mount_path} && " \
+           "mount-s3 --endpoint-url https://#{account_id}.r2.cloudflarestorage.com " \
+           "my-r2-bucket #{mount_path}"
+)
+response = sandbox.process.exec(command: "ls #{mount_path}")
+puts response.result
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+accountID := os.Getenv("R2_ACCOUNT_ID")
+
+sandbox, err := client.Create(ctx, types.SnapshotParams{
+	SandboxBaseParams: types.SandboxBaseParams{
+		EnvVars: map[string]string{
+			"AWS_ACCESS_KEY_ID":     os.Getenv("R2_ACCESS_KEY_ID"),
+			"AWS_SECRET_ACCESS_KEY": os.Getenv("R2_SECRET_ACCESS_KEY"),
+		},
+	},
+})
+if err != nil {
+	log.Fatal(err)
+}
+
+// Install mount-s3
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	"sudo apt-get update && sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget"); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	`arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" && `+
+		`wget -O /tmp/mount-s3.deb "https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" && `+
+		`sudo apt-get install -y /tmp/mount-s3.deb`); err != nil {
+	log.Fatal(err)
+}
+
+// Mount with R2 endpoint
+mountPath := "/home/daytona/r2"
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	"mkdir -p "+mountPath+" && "+
+		"mount-s3 --endpoint-url https://"+accountID+".r2.cloudflarestorage.com "+
+		"my-r2-bucket "+mountPath); err != nil {
+	log.Fatal(err)
+}
+response, err := sandbox.Process.ExecuteCommand(ctx, "ls "+mountPath)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(response.Result)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+import io.daytona.sdk.model.ExecuteResponse;
+
+import java.util.Map;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            String accountId = System.getenv("R2_ACCOUNT_ID");
+
+            CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
+            params.setEnvVars(Map.of(
+                "AWS_ACCESS_KEY_ID", System.getenv("R2_ACCESS_KEY_ID"),
+                "AWS_SECRET_ACCESS_KEY", System.getenv("R2_SECRET_ACCESS_KEY")
+            ));
+            Sandbox sandbox = daytona.create(params);
+
+            // Install mount-s3
+            sandbox.getProcess().executeCommand(
+                "sudo apt-get update "
+                    + "&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget");
+            sandbox.getProcess().executeCommand(
+                "arch=\"$(dpkg --print-architecture | sed s/amd64/x86_64/)\" "
+                    + "&& wget -O /tmp/mount-s3.deb "
+                    + "\"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb\" "
+                    + "&& sudo apt-get install -y /tmp/mount-s3.deb");
+
+            // Mount with R2 endpoint
+            String mountPath = "/home/daytona/r2";
+            sandbox.getProcess().executeCommand(
+                "mkdir -p " + mountPath + " && "
+                    + "mount-s3 --endpoint-url https://" + accountId + ".r2.cloudflarestorage.com "
+                    + "my-r2-bucket " + mountPath);
+
+            ExecuteResponse response = sandbox.getProcess().executeCommand("ls " + mountPath);
+            System.out.println(response.getResult());
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+## Mount a Google Cloud Storage bucket
+
+Mount a GCS bucket using [gcsfuse ↗](https://github.com/GoogleCloudPlatform/gcsfuse) — Google's official FUSE client.
+
+:::note
+Daytona's base image is Debian Trixie, but Google has not published a Trixie-specific gcsfuse repository yet. The `gcsfuse-bookworm` repo packages run cleanly on Trixie, so we use them in the snippets below.
+:::
+
+### Pre-baked snapshot
+
+#### Build the snapshot
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+from daytona import CreateSnapshotParams, Daytona, Image
+
+daytona = Daytona()
+
+image = (
+  Image.base("daytonaio/sandbox")
+  .run_commands(
+    "sudo apt-get update "
+    "&& sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg",
+    "sudo mkdir -p /etc/apt/keyrings "
+    "&& curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg "
+    "| sudo gpg --dearmor -o /etc/apt/keyrings/gcsfuse.gpg",
+    'echo "deb [signed-by=/etc/apt/keyrings/gcsfuse.gpg] '
+    'https://packages.cloud.google.com/apt gcsfuse-bookworm main" '
+    "| sudo tee /etc/apt/sources.list.d/gcsfuse.list",
+    "sudo apt-get update && sudo apt-get install -y gcsfuse",
+  )
+)
+
+daytona.snapshot.create(
+    CreateSnapshotParams(name="fuse-gcs", image=image),
+    on_logs=print,
+)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona, Image } from '@daytona/sdk'
+
+const daytona = new Daytona()
+
+const image = Image.base('daytonaio/sandbox').runCommands(
+  'sudo apt-get update ' +
+    '&& sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg',
+  'sudo mkdir -p /etc/apt/keyrings ' +
+    '&& curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg ' +
+    '| sudo gpg --dearmor -o /etc/apt/keyrings/gcsfuse.gpg',
+  'echo "deb [signed-by=/etc/apt/keyrings/gcsfuse.gpg] ' +
+    'https://packages.cloud.google.com/apt gcsfuse-bookworm main" ' +
+    '| sudo tee /etc/apt/sources.list.d/gcsfuse.list',
+  'sudo apt-get update && sudo apt-get install -y gcsfuse',
+)
+
+await daytona.snapshot.create(
+  { name: 'fuse-gcs', image },
+  { onLogs: console.log },
+)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+image = Daytona::Image
+  .base('daytonaio/sandbox')
+  .run_commands(
+    'sudo apt-get update ' \
+    '&& sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg',
+    'sudo mkdir -p /etc/apt/keyrings ' \
+    '&& curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg ' \
+    '| sudo gpg --dearmor -o /etc/apt/keyrings/gcsfuse.gpg',
+    'echo "deb [signed-by=/etc/apt/keyrings/gcsfuse.gpg] ' \
+    'https://packages.cloud.google.com/apt gcsfuse-bookworm main" ' \
+    '| sudo tee /etc/apt/sources.list.d/gcsfuse.list',
+    'sudo apt-get update && sudo apt-get install -y gcsfuse'
+  )
+
+daytona.snapshot.create(
+  Daytona::CreateSnapshotParams.new(name: 'fuse-gcs', image: image),
+  on_logs: proc { |chunk| print(chunk) }
+)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+image := daytona.Base("daytonaio/sandbox").
+	Run("sudo apt-get update && sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg").
+	Run("sudo mkdir -p /etc/apt/keyrings && " +
+		"curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | " +
+		"sudo gpg --dearmor -o /etc/apt/keyrings/gcsfuse.gpg").
+	Run(`echo "deb [signed-by=/etc/apt/keyrings/gcsfuse.gpg] ` +
+		`https://packages.cloud.google.com/apt gcsfuse-bookworm main" | ` +
+		`sudo tee /etc/apt/sources.list.d/gcsfuse.list`).
+	Run("sudo apt-get update && sudo apt-get install -y gcsfuse")
+
+_, logChan, err := client.Snapshot.Create(ctx, &types.CreateSnapshotParams{
+	Name:  "fuse-gcs",
+	Image: image,
+})
+if err != nil {
+	log.Fatal(err)
+}
+for line := range logChan {
+	fmt.Print(line)
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Image;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            Image image = Image.base("daytonaio/sandbox")
+                .runCommands(
+                    "sudo apt-get update "
+                        + "&& sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg",
+                    "sudo mkdir -p /etc/apt/keyrings "
+                        + "&& curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg "
+                        + "| sudo gpg --dearmor -o /etc/apt/keyrings/gcsfuse.gpg",
+                    "echo \"deb [signed-by=/etc/apt/keyrings/gcsfuse.gpg] "
+                        + "https://packages.cloud.google.com/apt gcsfuse-bookworm main\" "
+                        + "| sudo tee /etc/apt/sources.list.d/gcsfuse.list",
+                    "sudo apt-get update && sudo apt-get install -y gcsfuse"
+                );
+
+            daytona.snapshot().create("fuse-gcs", image, System.out::println);
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+#### Launch and mount
+
+GCS authenticates with a service account JSON key. Upload it into the sandbox via `sandbox.fs` and point `gcsfuse` at it with `--key-file`.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+import os
+from daytona import CreateSandboxFromSnapshotParams, Daytona
+
+daytona = Daytona()
+
+# GCS_SERVICE_ACCOUNT_KEY holds the full service account JSON as a string
+service_account_key = os.environ["GCS_SERVICE_ACCOUNT_KEY"].encode()
+
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(snapshot="fuse-gcs"))
+
+mount_path = "/home/daytona/gcs"
+key_path = "/home/daytona/.gcs-key.json"
+
+# Upload the key file into the sandbox
+sandbox.fs.upload_file(service_account_key, key_path)
+sandbox.process.exec(f"chmod 600 {key_path}")
+
+# Mount the bucket
+sandbox.process.exec(f"mkdir -p {mount_path}")
+sandbox.process.exec(f"gcsfuse --key-file={key_path} my-gcs-bucket {mount_path}")
+
+# Use the mount
+response = sandbox.process.exec(f"ls {mount_path}")
+print(response.result)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytona/sdk'
+
+const daytona = new Daytona()
+
+// GCS_SERVICE_ACCOUNT_KEY holds the full service account JSON as a string
+const serviceAccountKey = Buffer.from(process.env.GCS_SERVICE_ACCOUNT_KEY!)
+
+const sandbox = await daytona.create({ snapshot: 'fuse-gcs' })
+
+const mountPath = '/home/daytona/gcs'
+const keyPath = '/home/daytona/.gcs-key.json'
+
+// Upload the key file into the sandbox
+await sandbox.fs.uploadFile(serviceAccountKey, keyPath)
+await sandbox.process.executeCommand(`chmod 600 ${keyPath}`)
+
+// Mount the bucket
+await sandbox.process.executeCommand(`mkdir -p ${mountPath}`)
+await sandbox.process.executeCommand(`gcsfuse --key-file=${keyPath} my-gcs-bucket ${mountPath}`)
+
+// Use the mount
+const response = await sandbox.process.executeCommand(`ls ${mountPath}`)
+console.log(response.result)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+# GCS_SERVICE_ACCOUNT_KEY holds the full service account JSON as a string
+service_account_key = ENV.fetch('GCS_SERVICE_ACCOUNT_KEY')
+
+sandbox = daytona.create(
+  Daytona::CreateSandboxFromSnapshotParams.new(snapshot: 'fuse-gcs')
+)
+
+mount_path = '/home/daytona/gcs'
+key_path = '/home/daytona/.gcs-key.json'
+
+# Upload the key file into the sandbox
+sandbox.fs.upload_file(service_account_key, key_path)
+sandbox.process.exec(command: "chmod 600 #{key_path}")
+
+# Mount the bucket
+sandbox.process.exec(command: "mkdir -p #{mount_path}")
+sandbox.process.exec(command: "gcsfuse --key-file=#{key_path} my-gcs-bucket #{mount_path}")
+
+# Use the mount
+response = sandbox.process.exec(command: "ls #{mount_path}")
+puts response.result
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+// GCS_SERVICE_ACCOUNT_KEY holds the full service account JSON as a string
+serviceAccountKey := []byte(os.Getenv("GCS_SERVICE_ACCOUNT_KEY"))
+
+sandbox, err := client.Create(ctx, types.SnapshotParams{
+	Snapshot: "fuse-gcs",
+})
+if err != nil {
+	log.Fatal(err)
+}
+
+mountPath := "/home/daytona/gcs"
+keyPath := "/home/daytona/.gcs-key.json"
+
+// Upload the key file into the sandbox
+if err := sandbox.FileSystem.UploadFile(ctx, serviceAccountKey, keyPath); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx, "chmod 600 "+keyPath); err != nil {
+	log.Fatal(err)
+}
+
+// Mount the bucket
+if _, err := sandbox.Process.ExecuteCommand(ctx, "mkdir -p "+mountPath); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	"gcsfuse --key-file="+keyPath+" my-gcs-bucket "+mountPath); err != nil {
+	log.Fatal(err)
+}
+
+// Use the mount
+response, err := sandbox.Process.ExecuteCommand(ctx, "ls "+mountPath)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(response.Result)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+import io.daytona.sdk.model.ExecuteResponse;
+
+import java.nio.charset.StandardCharsets;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            // GCS_SERVICE_ACCOUNT_KEY holds the full service account JSON as a string
+            byte[] serviceAccountKey = System.getenv("GCS_SERVICE_ACCOUNT_KEY")
+                .getBytes(StandardCharsets.UTF_8);
+
+            CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
+            params.setSnapshot("fuse-gcs");
+            Sandbox sandbox = daytona.create(params);
+
+            String mountPath = "/home/daytona/gcs";
+            String keyPath = "/home/daytona/.gcs-key.json";
+
+            // Upload the key file into the sandbox
+            sandbox.fs.uploadFile(serviceAccountKey, keyPath);
+            sandbox.getProcess().executeCommand("chmod 600 " + keyPath);
+
+            // Mount the bucket
+            sandbox.getProcess().executeCommand("mkdir -p " + mountPath);
+            sandbox.getProcess().executeCommand(
+                "gcsfuse --key-file=" + keyPath + " my-gcs-bucket " + mountPath);
+
+            // Use the mount
+            ExecuteResponse response = sandbox.getProcess().executeCommand("ls " + mountPath);
+            System.out.println(response.getResult());
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Runtime install
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+import os
+from daytona import CreateSandboxBaseParams, Daytona
+
+daytona = Daytona()
+
+# GCS_SERVICE_ACCOUNT_KEY holds the full service account JSON as a string
+service_account_key = os.environ["GCS_SERVICE_ACCOUNT_KEY"].encode()
+
+sandbox = daytona.create(CreateSandboxBaseParams())
+
+# Install gcsfuse from the bookworm repo (works on Trixie)
+sandbox.process.exec(
+    "sudo apt-get update "
+    "&& sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg"
+)
+sandbox.process.exec(
+    "sudo mkdir -p /etc/apt/keyrings "
+    "&& curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg "
+    "| sudo gpg --dearmor -o /etc/apt/keyrings/gcsfuse.gpg"
+)
+sandbox.process.exec(
+    'echo "deb [signed-by=/etc/apt/keyrings/gcsfuse.gpg] '
+    'https://packages.cloud.google.com/apt gcsfuse-bookworm main" '
+    "| sudo tee /etc/apt/sources.list.d/gcsfuse.list "
+    "&& sudo apt-get update && sudo apt-get install -y gcsfuse"
+)
+
+# Upload the key and mount
+mount_path = "/home/daytona/gcs"
+key_path = "/home/daytona/.gcs-key.json"
+sandbox.fs.upload_file(service_account_key, key_path)
+sandbox.process.exec(f"chmod 600 {key_path}")
+sandbox.process.exec(f"mkdir -p {mount_path}")
+sandbox.process.exec(f"gcsfuse --key-file={key_path} my-gcs-bucket {mount_path}")
+
+response = sandbox.process.exec(f"ls {mount_path}")
+print(response.result)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytona/sdk'
+
+const daytona = new Daytona()
+
+// GCS_SERVICE_ACCOUNT_KEY holds the full service account JSON as a string
+const serviceAccountKey = Buffer.from(process.env.GCS_SERVICE_ACCOUNT_KEY!)
+
+const sandbox = await daytona.create()
+
+// Install gcsfuse from the bookworm repo (works on Trixie)
+await sandbox.process.executeCommand(
+  'sudo apt-get update ' +
+    '&& sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg',
+)
+await sandbox.process.executeCommand(
+  'sudo mkdir -p /etc/apt/keyrings ' +
+    '&& curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg ' +
+    '| sudo gpg --dearmor -o /etc/apt/keyrings/gcsfuse.gpg',
+)
+await sandbox.process.executeCommand(
+  'echo "deb [signed-by=/etc/apt/keyrings/gcsfuse.gpg] ' +
+    'https://packages.cloud.google.com/apt gcsfuse-bookworm main" ' +
+    '| sudo tee /etc/apt/sources.list.d/gcsfuse.list ' +
+    '&& sudo apt-get update && sudo apt-get install -y gcsfuse',
+)
+
+// Upload the key and mount
+const mountPath = '/home/daytona/gcs'
+const keyPath = '/home/daytona/.gcs-key.json'
+await sandbox.fs.uploadFile(serviceAccountKey, keyPath)
+await sandbox.process.executeCommand(`chmod 600 ${keyPath}`)
+await sandbox.process.executeCommand(`mkdir -p ${mountPath}`)
+await sandbox.process.executeCommand(`gcsfuse --key-file=${keyPath} my-gcs-bucket ${mountPath}`)
+
+const response = await sandbox.process.executeCommand(`ls ${mountPath}`)
+console.log(response.result)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+# GCS_SERVICE_ACCOUNT_KEY holds the full service account JSON as a string
+service_account_key = ENV.fetch('GCS_SERVICE_ACCOUNT_KEY')
+
+sandbox = daytona.create(Daytona::CreateSandboxBaseParams.new)
+
+# Install gcsfuse from the bookworm repo (works on Trixie)
+sandbox.process.exec(
+  command: 'sudo apt-get update ' \
+           '&& sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg'
+)
+sandbox.process.exec(
+  command: 'sudo mkdir -p /etc/apt/keyrings ' \
+           '&& curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg ' \
+           '| sudo gpg --dearmor -o /etc/apt/keyrings/gcsfuse.gpg'
+)
+sandbox.process.exec(
+  command: 'echo "deb [signed-by=/etc/apt/keyrings/gcsfuse.gpg] ' \
+           'https://packages.cloud.google.com/apt gcsfuse-bookworm main" ' \
+           '| sudo tee /etc/apt/sources.list.d/gcsfuse.list ' \
+           '&& sudo apt-get update && sudo apt-get install -y gcsfuse'
+)
+
+# Upload the key and mount
+mount_path = '/home/daytona/gcs'
+key_path = '/home/daytona/.gcs-key.json'
+sandbox.fs.upload_file(service_account_key, key_path)
+sandbox.process.exec(command: "chmod 600 #{key_path}")
+sandbox.process.exec(command: "mkdir -p #{mount_path}")
+sandbox.process.exec(command: "gcsfuse --key-file=#{key_path} my-gcs-bucket #{mount_path}")
+
+response = sandbox.process.exec(command: "ls #{mount_path}")
+puts response.result
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+// GCS_SERVICE_ACCOUNT_KEY holds the full service account JSON as a string
+serviceAccountKey := []byte(os.Getenv("GCS_SERVICE_ACCOUNT_KEY"))
+
+sandbox, err := client.Create(ctx, types.SnapshotParams{})
+if err != nil {
+	log.Fatal(err)
+}
+
+// Install gcsfuse from the bookworm repo (works on Trixie)
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	"sudo apt-get update && sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg"); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	"sudo mkdir -p /etc/apt/keyrings && "+
+		"curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | "+
+		"sudo gpg --dearmor -o /etc/apt/keyrings/gcsfuse.gpg"); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	`echo "deb [signed-by=/etc/apt/keyrings/gcsfuse.gpg] `+
+		`https://packages.cloud.google.com/apt gcsfuse-bookworm main" | `+
+		`sudo tee /etc/apt/sources.list.d/gcsfuse.list && `+
+		`sudo apt-get update && sudo apt-get install -y gcsfuse`); err != nil {
+	log.Fatal(err)
+}
+
+// Upload the key and mount
+mountPath := "/home/daytona/gcs"
+keyPath := "/home/daytona/.gcs-key.json"
+if err := sandbox.FileSystem.UploadFile(ctx, serviceAccountKey, keyPath); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx, "chmod 600 "+keyPath); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx, "mkdir -p "+mountPath); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	"gcsfuse --key-file="+keyPath+" my-gcs-bucket "+mountPath); err != nil {
+	log.Fatal(err)
+}
+
+response, err := sandbox.Process.ExecuteCommand(ctx, "ls "+mountPath)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(response.Result)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+import io.daytona.sdk.model.ExecuteResponse;
+
+import java.nio.charset.StandardCharsets;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            // GCS_SERVICE_ACCOUNT_KEY holds the full service account JSON as a string
+            byte[] serviceAccountKey = System.getenv("GCS_SERVICE_ACCOUNT_KEY")
+                .getBytes(StandardCharsets.UTF_8);
+
+            Sandbox sandbox = daytona.create(new CreateSandboxFromSnapshotParams());
+
+            // Install gcsfuse from the bookworm repo (works on Trixie)
+            sandbox.getProcess().executeCommand(
+                "sudo apt-get update "
+                    + "&& sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg");
+            sandbox.getProcess().executeCommand(
+                "sudo mkdir -p /etc/apt/keyrings "
+                    + "&& curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg "
+                    + "| sudo gpg --dearmor -o /etc/apt/keyrings/gcsfuse.gpg");
+            sandbox.getProcess().executeCommand(
+                "echo \"deb [signed-by=/etc/apt/keyrings/gcsfuse.gpg] "
+                    + "https://packages.cloud.google.com/apt gcsfuse-bookworm main\" "
+                    + "| sudo tee /etc/apt/sources.list.d/gcsfuse.list "
+                    + "&& sudo apt-get update && sudo apt-get install -y gcsfuse");
+
+            // Upload the key and mount
+            String mountPath = "/home/daytona/gcs";
+            String keyPath = "/home/daytona/.gcs-key.json";
+            sandbox.fs.uploadFile(serviceAccountKey, keyPath);
+            sandbox.getProcess().executeCommand("chmod 600 " + keyPath);
+            sandbox.getProcess().executeCommand("mkdir -p " + mountPath);
+            sandbox.getProcess().executeCommand(
+                "gcsfuse --key-file=" + keyPath + " my-gcs-bucket " + mountPath);
+
+            ExecuteResponse response = sandbox.getProcess().executeCommand("ls " + mountPath);
+            System.out.println(response.getResult());
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+## Mount an Azure Blob container
+
+Mount an Azure Blob container using [blobfuse2 ↗](https://github.com/Azure/azure-storage-fuse) — Microsoft's official FUSE client.
+
+:::caution
+Daytona's base image is Debian Trixie. Microsoft's `blobfuse2` Bookworm binary links against `libfuse3.so.3`, but Trixie's `fuse3` package bumped the SONAME to `.4`, so `libfuse3.so.3` is missing on disk. The snapshot recipe below creates a compatibility symlink. Without it, `blobfuse2` fails with `libfuse3.so.3: cannot open shared object file`.
+:::
+
+### Pre-baked snapshot
+
+#### Build the snapshot
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+from daytona import CreateSnapshotParams, Daytona, Image
+
+daytona = Daytona()
+
+image = (
+  Image.base("daytonaio/sandbox")
+  .run_commands(
+    "sudo apt-get update "
+    "&& sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg wget",
+    # Microsoft's apt repo (use bookworm packages on Trixie)
+    "wget -qO- https://packages.microsoft.com/keys/microsoft.asc "
+    "| sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg",
+    'echo "deb [arch=$(dpkg --print-architecture) '
+    'signed-by=/etc/apt/trusted.gpg.d/microsoft.gpg] '
+    'https://packages.microsoft.com/debian/12/prod bookworm main" '
+    "| sudo tee /etc/apt/sources.list.d/microsoft-prod.list",
+    "sudo apt-get update && sudo apt-get install -y blobfuse2 fuse3",
+    # libfuse3.so.3 compat symlink for Trixie (see :::caution above)
+    'src=$(find /usr/lib /lib -name "libfuse3.so.3.*" -type f 2>/dev/null '
+    "| sort -V | tail -1) "
+    '&& sudo ln -sfn "$src" "$(dirname "$src")/libfuse3.so.3" '
+    "&& sudo ldconfig",
+    "sudo touch /etc/fuse.conf "
+    '&& grep -qxF "user_allow_other" /etc/fuse.conf '
+    '|| echo "user_allow_other" | sudo tee -a /etc/fuse.conf',
+  )
+)
+
+daytona.snapshot.create(
+    CreateSnapshotParams(name="fuse-azure", image=image),
+    on_logs=print,
+)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona, Image } from '@daytona/sdk'
+
+const daytona = new Daytona()
+
+const image = Image.base('daytonaio/sandbox').runCommands(
+  'sudo apt-get update ' +
+    '&& sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg wget',
+  // Microsoft's apt repo (use bookworm packages on Trixie)
+  'wget -qO- https://packages.microsoft.com/keys/microsoft.asc ' +
+    '| sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg',
+  'echo "deb [arch=$(dpkg --print-architecture) ' +
+    'signed-by=/etc/apt/trusted.gpg.d/microsoft.gpg] ' +
+    'https://packages.microsoft.com/debian/12/prod bookworm main" ' +
+    '| sudo tee /etc/apt/sources.list.d/microsoft-prod.list',
+  'sudo apt-get update && sudo apt-get install -y blobfuse2 fuse3',
+  // libfuse3.so.3 compat symlink for Trixie (see :::caution above)
+  'src=$(find /usr/lib /lib -name "libfuse3.so.3.*" -type f 2>/dev/null ' +
+    '| sort -V | tail -1) ' +
+    '&& sudo ln -sfn "$src" "$(dirname "$src")/libfuse3.so.3" ' +
+    '&& sudo ldconfig',
+  'sudo touch /etc/fuse.conf ' +
+    '&& grep -qxF "user_allow_other" /etc/fuse.conf ' +
+    '|| echo "user_allow_other" | sudo tee -a /etc/fuse.conf',
+)
+
+await daytona.snapshot.create(
+  { name: 'fuse-azure', image },
+  { onLogs: console.log },
+)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+image = Daytona::Image
+  .base('daytonaio/sandbox')
+  .run_commands(
+    'sudo apt-get update ' \
+    '&& sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg wget',
+    # Microsoft's apt repo (use bookworm packages on Trixie)
+    'wget -qO- https://packages.microsoft.com/keys/microsoft.asc ' \
+    '| sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg',
+    'echo "deb [arch=$(dpkg --print-architecture) ' \
+    'signed-by=/etc/apt/trusted.gpg.d/microsoft.gpg] ' \
+    'https://packages.microsoft.com/debian/12/prod bookworm main" ' \
+    '| sudo tee /etc/apt/sources.list.d/microsoft-prod.list',
+    'sudo apt-get update && sudo apt-get install -y blobfuse2 fuse3',
+    # libfuse3.so.3 compat symlink for Trixie
+    'src=$(find /usr/lib /lib -name "libfuse3.so.3.*" -type f 2>/dev/null ' \
+    '| sort -V | tail -1) ' \
+    '&& sudo ln -sfn "$src" "$(dirname "$src")/libfuse3.so.3" ' \
+    '&& sudo ldconfig',
+    'sudo touch /etc/fuse.conf ' \
+    '&& grep -qxF "user_allow_other" /etc/fuse.conf ' \
+    '|| echo "user_allow_other" | sudo tee -a /etc/fuse.conf'
+  )
+
+daytona.snapshot.create(
+  Daytona::CreateSnapshotParams.new(name: 'fuse-azure', image: image),
+  on_logs: proc { |chunk| print(chunk) }
+)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+image := daytona.Base("daytonaio/sandbox").
+	Run("sudo apt-get update && sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg wget").
+	// Microsoft's apt repo (use bookworm packages on Trixie)
+	Run("wget -qO- https://packages.microsoft.com/keys/microsoft.asc | " +
+		"sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg").
+	Run(`echo "deb [arch=$(dpkg --print-architecture) ` +
+		`signed-by=/etc/apt/trusted.gpg.d/microsoft.gpg] ` +
+		`https://packages.microsoft.com/debian/12/prod bookworm main" | ` +
+		`sudo tee /etc/apt/sources.list.d/microsoft-prod.list`).
+	Run("sudo apt-get update && sudo apt-get install -y blobfuse2 fuse3").
+	// libfuse3.so.3 compat symlink for Trixie
+	Run(`src=$(find /usr/lib /lib -name "libfuse3.so.3.*" -type f 2>/dev/null | sort -V | tail -1) && ` +
+		`sudo ln -sfn "$src" "$(dirname "$src")/libfuse3.so.3" && sudo ldconfig`).
+	Run(`sudo touch /etc/fuse.conf && grep -qxF "user_allow_other" /etc/fuse.conf || ` +
+		`echo "user_allow_other" | sudo tee -a /etc/fuse.conf`)
+
+_, logChan, err := client.Snapshot.Create(ctx, &types.CreateSnapshotParams{
+	Name:  "fuse-azure",
+	Image: image,
+})
+if err != nil {
+	log.Fatal(err)
+}
+for line := range logChan {
+	fmt.Print(line)
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Image;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            Image image = Image.base("daytonaio/sandbox")
+                .runCommands(
+                    "sudo apt-get update "
+                        + "&& sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg wget",
+                    // Microsoft's apt repo (use bookworm packages on Trixie)
+                    "wget -qO- https://packages.microsoft.com/keys/microsoft.asc "
+                        + "| sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg",
+                    "echo \"deb [arch=$(dpkg --print-architecture) "
+                        + "signed-by=/etc/apt/trusted.gpg.d/microsoft.gpg] "
+                        + "https://packages.microsoft.com/debian/12/prod bookworm main\" "
+                        + "| sudo tee /etc/apt/sources.list.d/microsoft-prod.list",
+                    "sudo apt-get update && sudo apt-get install -y blobfuse2 fuse3",
+                    // libfuse3.so.3 compat symlink for Trixie
+                    "src=$(find /usr/lib /lib -name \"libfuse3.so.3.*\" -type f 2>/dev/null "
+                        + "| sort -V | tail -1) "
+                        + "&& sudo ln -sfn \"$src\" \"$(dirname \"$src\")/libfuse3.so.3\" "
+                        + "&& sudo ldconfig",
+                    "sudo touch /etc/fuse.conf "
+                        + "&& grep -qxF \"user_allow_other\" /etc/fuse.conf "
+                        + "|| echo \"user_allow_other\" | sudo tee -a /etc/fuse.conf"
+                );
+
+            daytona.snapshot().create("fuse-azure", image, System.out::println);
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+#### Launch and mount
+
+`blobfuse2` reads its configuration from a YAML file. Build it with your account credentials and upload it into the sandbox.
+
+The YAML below tells `blobfuse2` three things: **where to connect** (the `azstorage:` block — your storage account, the container you want to mount, the endpoint URL, and the auth method), **what to enable** (the `components:` list — the FUSE interface itself, a content cache, a metadata cache, and the Azure backend), and **how to log**. The cache components use sensible defaults when listed without their own top-level config blocks; add explicit `block_cache:` / `attr_cache:` blocks later if you need to tune cache sizes or timeouts. Note that in Azure terminology a "container" is the equivalent of an S3 bucket — it's specified inside the YAML rather than passed as a command-line argument.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+import os
+from daytona import CreateSandboxFromSnapshotParams, Daytona
+
+daytona = Daytona()
+
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(snapshot="fuse-azure"))
+
+mount_path = "/home/daytona/azure"
+config_path = "/home/daytona/.blobfuse2.yaml"
+
+account = os.environ["AZURE_STORAGE_ACCOUNT"]
+container = os.environ["AZURE_STORAGE_CONTAINER"]
+account_key = os.environ["AZURE_STORAGE_ACCOUNT_KEY"]
+
+config = f"""\
+allow-other: true
+logging:
+  type: syslog
+  level: log_warning
+components:
+  - libfuse
+  - block_cache
+  - attr_cache
+  - azstorage
+azstorage:
+  type: block
+  account-name: {account}
+  container: {container}
+  endpoint: https://{account}.blob.core.windows.net
+  auth-type: key
+  account-key: {account_key}
+"""
+
+sandbox.fs.upload_file(config.encode(), config_path)
+sandbox.process.exec(f"chmod 600 {config_path}")
+
+# Mount the container
+sandbox.process.exec(f"mkdir -p {mount_path}")
+sandbox.process.exec(f"blobfuse2 mount --config-file={config_path} {mount_path}")
+
+# Use the mount
+response = sandbox.process.exec(f"ls {mount_path}")
+print(response.result)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytona/sdk'
+
+const daytona = new Daytona()
+
+const sandbox = await daytona.create({ snapshot: 'fuse-azure' })
+
+const mountPath = '/home/daytona/azure'
+const configPath = '/home/daytona/.blobfuse2.yaml'
+
+const account = process.env.AZURE_STORAGE_ACCOUNT!
+const container = process.env.AZURE_STORAGE_CONTAINER!
+const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY!
+
+const config = `allow-other: true
+logging:
+  type: syslog
+  level: log_warning
+components:
+  - libfuse
+  - block_cache
+  - attr_cache
+  - azstorage
+azstorage:
+  type: block
+  account-name: ${account}
+  container: ${container}
+  endpoint: https://${account}.blob.core.windows.net
+  auth-type: key
+  account-key: ${accountKey}
+`
+
+await sandbox.fs.uploadFile(Buffer.from(config), configPath)
+await sandbox.process.executeCommand(`chmod 600 ${configPath}`)
+
+// Mount the container
+await sandbox.process.executeCommand(`mkdir -p ${mountPath}`)
+await sandbox.process.executeCommand(`blobfuse2 mount --config-file=${configPath} ${mountPath}`)
+
+// Use the mount
+const response = await sandbox.process.executeCommand(`ls ${mountPath}`)
+console.log(response.result)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+sandbox = daytona.create(
+  Daytona::CreateSandboxFromSnapshotParams.new(snapshot: 'fuse-azure')
+)
+
+mount_path = '/home/daytona/azure'
+config_path = '/home/daytona/.blobfuse2.yaml'
+
+account = ENV.fetch('AZURE_STORAGE_ACCOUNT')
+container = ENV.fetch('AZURE_STORAGE_CONTAINER')
+account_key = ENV.fetch('AZURE_STORAGE_ACCOUNT_KEY')
+
+config = <<~YAML
+  allow-other: true
+  logging:
+    type: syslog
+    level: log_warning
+  components:
+    - libfuse
+    - block_cache
+    - attr_cache
+    - azstorage
+  azstorage:
+    type: block
+    account-name: #{account}
+    container: #{container}
+    endpoint: https://#{account}.blob.core.windows.net
+    auth-type: key
+    account-key: #{account_key}
+YAML
+
+sandbox.fs.upload_file(config, config_path)
+sandbox.process.exec(command: "chmod 600 #{config_path}")
+
+# Mount the container
+sandbox.process.exec(command: "mkdir -p #{mount_path}")
+sandbox.process.exec(command: "blobfuse2 mount --config-file=#{config_path} #{mount_path}")
+
+# Use the mount
+response = sandbox.process.exec(command: "ls #{mount_path}")
+puts response.result
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+sandbox, err := client.Create(ctx, types.SnapshotParams{
+	Snapshot: "fuse-azure",
+})
+if err != nil {
+	log.Fatal(err)
+}
+
+mountPath := "/home/daytona/azure"
+configPath := "/home/daytona/.blobfuse2.yaml"
+
+account := os.Getenv("AZURE_STORAGE_ACCOUNT")
+container := os.Getenv("AZURE_STORAGE_CONTAINER")
+accountKey := os.Getenv("AZURE_STORAGE_ACCOUNT_KEY")
+
+config := fmt.Sprintf(`allow-other: true
+logging:
+  type: syslog
+  level: log_warning
+components:
+  - libfuse
+  - block_cache
+  - attr_cache
+  - azstorage
+azstorage:
+  type: block
+  account-name: %s
+  container: %s
+  endpoint: https://%s.blob.core.windows.net
+  auth-type: key
+  account-key: %s
+`, account, container, account, accountKey)
+
+if err := sandbox.FileSystem.UploadFile(ctx, []byte(config), configPath); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx, "chmod 600 "+configPath); err != nil {
+	log.Fatal(err)
+}
+
+// Mount the container
+if _, err := sandbox.Process.ExecuteCommand(ctx, "mkdir -p "+mountPath); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	"blobfuse2 mount --config-file="+configPath+" "+mountPath); err != nil {
+	log.Fatal(err)
+}
+
+// Use the mount
+response, err := sandbox.Process.ExecuteCommand(ctx, "ls "+mountPath)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(response.Result)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+import io.daytona.sdk.model.ExecuteResponse;
+
+import java.nio.charset.StandardCharsets;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
+            params.setSnapshot("fuse-azure");
+            Sandbox sandbox = daytona.create(params);
+
+            String mountPath = "/home/daytona/azure";
+            String configPath = "/home/daytona/.blobfuse2.yaml";
+
+            String account = System.getenv("AZURE_STORAGE_ACCOUNT");
+            String container = System.getenv("AZURE_STORAGE_CONTAINER");
+            String accountKey = System.getenv("AZURE_STORAGE_ACCOUNT_KEY");
+
+            String config = "allow-other: true\n"
+                + "logging:\n"
+                + "  type: syslog\n"
+                + "  level: log_warning\n"
+                + "components:\n"
+                + "  - libfuse\n"
+                + "  - block_cache\n"
+                + "  - attr_cache\n"
+                + "  - azstorage\n"
+                + "azstorage:\n"
+                + "  type: block\n"
+                + "  account-name: " + account + "\n"
+                + "  container: " + container + "\n"
+                + "  endpoint: https://" + account + ".blob.core.windows.net\n"
+                + "  auth-type: key\n"
+                + "  account-key: " + accountKey + "\n";
+
+            sandbox.fs.uploadFile(config.getBytes(StandardCharsets.UTF_8), configPath);
+            sandbox.getProcess().executeCommand("chmod 600 " + configPath);
+
+            // Mount the container
+            sandbox.getProcess().executeCommand("mkdir -p " + mountPath);
+            sandbox.getProcess().executeCommand(
+                "blobfuse2 mount --config-file=" + configPath + " " + mountPath);
+
+            // Use the mount
+            ExecuteResponse response = sandbox.getProcess().executeCommand("ls " + mountPath);
+            System.out.println(response.getResult());
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Runtime install
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+import os
+from daytona import CreateSandboxBaseParams, Daytona
+
+daytona = Daytona()
+
+sandbox = daytona.create(CreateSandboxBaseParams())
+
+# Install blobfuse2
+sandbox.process.exec(
+    "sudo apt-get update "
+    "&& sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg wget"
+)
+sandbox.process.exec(
+    "wget -qO- https://packages.microsoft.com/keys/microsoft.asc "
+    "| sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg"
+)
+sandbox.process.exec(
+    'echo "deb [arch=$(dpkg --print-architecture) '
+    'signed-by=/etc/apt/trusted.gpg.d/microsoft.gpg] '
+    'https://packages.microsoft.com/debian/12/prod bookworm main" '
+    "| sudo tee /etc/apt/sources.list.d/microsoft-prod.list "
+    "&& sudo apt-get update && sudo apt-get install -y blobfuse2 fuse3"
+)
+# libfuse3.so.3 compat symlink for Trixie
+sandbox.process.exec(
+    'src=$(find /usr/lib /lib -name "libfuse3.so.3.*" -type f 2>/dev/null '
+    "| sort -V | tail -1) "
+    '&& sudo ln -sfn "$src" "$(dirname "$src")/libfuse3.so.3" '
+    "&& sudo ldconfig"
+)
+
+# Build config and mount
+mount_path = "/home/daytona/azure"
+config_path = "/home/daytona/.blobfuse2.yaml"
+account = os.environ["AZURE_STORAGE_ACCOUNT"]
+container = os.environ["AZURE_STORAGE_CONTAINER"]
+account_key = os.environ["AZURE_STORAGE_ACCOUNT_KEY"]
+
+config = f"""\
+allow-other: true
+components:
+  - libfuse
+  - block_cache
+  - attr_cache
+  - azstorage
+azstorage:
+  type: block
+  account-name: {account}
+  container: {container}
+  endpoint: https://{account}.blob.core.windows.net
+  auth-type: key
+  account-key: {account_key}
+"""
+
+sandbox.fs.upload_file(config.encode(), config_path)
+sandbox.process.exec(f"chmod 600 {config_path}")
+sandbox.process.exec(f"mkdir -p {mount_path}")
+sandbox.process.exec(f"blobfuse2 mount --config-file={config_path} {mount_path}")
+
+response = sandbox.process.exec(f"ls {mount_path}")
+print(response.result)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytona/sdk'
+
+const daytona = new Daytona()
+
+const sandbox = await daytona.create()
+
+// Install blobfuse2
+await sandbox.process.executeCommand(
+  'sudo apt-get update ' +
+    '&& sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg wget',
+)
+await sandbox.process.executeCommand(
+  'wget -qO- https://packages.microsoft.com/keys/microsoft.asc ' +
+    '| sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg',
+)
+await sandbox.process.executeCommand(
+  'echo "deb [arch=$(dpkg --print-architecture) ' +
+    'signed-by=/etc/apt/trusted.gpg.d/microsoft.gpg] ' +
+    'https://packages.microsoft.com/debian/12/prod bookworm main" ' +
+    '| sudo tee /etc/apt/sources.list.d/microsoft-prod.list ' +
+    '&& sudo apt-get update && sudo apt-get install -y blobfuse2 fuse3',
+)
+// libfuse3.so.3 compat symlink for Trixie
+await sandbox.process.executeCommand(
+  'src=$(find /usr/lib /lib -name "libfuse3.so.3.*" -type f 2>/dev/null ' +
+    '| sort -V | tail -1) ' +
+    '&& sudo ln -sfn "$src" "$(dirname "$src")/libfuse3.so.3" ' +
+    '&& sudo ldconfig',
+)
+
+// Build config and mount
+const mountPath = '/home/daytona/azure'
+const configPath = '/home/daytona/.blobfuse2.yaml'
+const account = process.env.AZURE_STORAGE_ACCOUNT!
+const container = process.env.AZURE_STORAGE_CONTAINER!
+const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY!
+
+const config = `allow-other: true
+components:
+  - libfuse
+  - block_cache
+  - attr_cache
+  - azstorage
+azstorage:
+  type: block
+  account-name: ${account}
+  container: ${container}
+  endpoint: https://${account}.blob.core.windows.net
+  auth-type: key
+  account-key: ${accountKey}
+`
+
+await sandbox.fs.uploadFile(Buffer.from(config), configPath)
+await sandbox.process.executeCommand(`chmod 600 ${configPath}`)
+await sandbox.process.executeCommand(`mkdir -p ${mountPath}`)
+await sandbox.process.executeCommand(`blobfuse2 mount --config-file=${configPath} ${mountPath}`)
+
+const response = await sandbox.process.executeCommand(`ls ${mountPath}`)
+console.log(response.result)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+sandbox = daytona.create(Daytona::CreateSandboxBaseParams.new)
+
+# Install blobfuse2
+sandbox.process.exec(
+  command: 'sudo apt-get update ' \
+           '&& sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg wget'
+)
+sandbox.process.exec(
+  command: 'wget -qO- https://packages.microsoft.com/keys/microsoft.asc ' \
+           '| sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg'
+)
+sandbox.process.exec(
+  command: 'echo "deb [arch=$(dpkg --print-architecture) ' \
+           'signed-by=/etc/apt/trusted.gpg.d/microsoft.gpg] ' \
+           'https://packages.microsoft.com/debian/12/prod bookworm main" ' \
+           '| sudo tee /etc/apt/sources.list.d/microsoft-prod.list ' \
+           '&& sudo apt-get update && sudo apt-get install -y blobfuse2 fuse3'
+)
+# libfuse3.so.3 compat symlink for Trixie
+sandbox.process.exec(
+  command: 'src=$(find /usr/lib /lib -name "libfuse3.so.3.*" -type f 2>/dev/null ' \
+           '| sort -V | tail -1) ' \
+           '&& sudo ln -sfn "$src" "$(dirname "$src")/libfuse3.so.3" ' \
+           '&& sudo ldconfig'
+)
+
+# Build config and mount
+mount_path = '/home/daytona/azure'
+config_path = '/home/daytona/.blobfuse2.yaml'
+account = ENV.fetch('AZURE_STORAGE_ACCOUNT')
+container = ENV.fetch('AZURE_STORAGE_CONTAINER')
+account_key = ENV.fetch('AZURE_STORAGE_ACCOUNT_KEY')
+
+config = <<~YAML
+  allow-other: true
+  components:
+    - libfuse
+    - block_cache
+    - attr_cache
+    - azstorage
+  azstorage:
+    type: block
+    account-name: #{account}
+    container: #{container}
+    endpoint: https://#{account}.blob.core.windows.net
+    auth-type: key
+    account-key: #{account_key}
+YAML
+
+sandbox.fs.upload_file(config, config_path)
+sandbox.process.exec(command: "chmod 600 #{config_path}")
+sandbox.process.exec(command: "mkdir -p #{mount_path}")
+sandbox.process.exec(command: "blobfuse2 mount --config-file=#{config_path} #{mount_path}")
+
+response = sandbox.process.exec(command: "ls #{mount_path}")
+puts response.result
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+sandbox, err := client.Create(ctx, types.SnapshotParams{})
+if err != nil {
+	log.Fatal(err)
+}
+
+// Install blobfuse2
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	"sudo apt-get update && sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg wget"); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	"wget -qO- https://packages.microsoft.com/keys/microsoft.asc | "+
+		"sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg"); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	`echo "deb [arch=$(dpkg --print-architecture) `+
+		`signed-by=/etc/apt/trusted.gpg.d/microsoft.gpg] `+
+		`https://packages.microsoft.com/debian/12/prod bookworm main" | `+
+		`sudo tee /etc/apt/sources.list.d/microsoft-prod.list && `+
+		`sudo apt-get update && sudo apt-get install -y blobfuse2 fuse3`); err != nil {
+	log.Fatal(err)
+}
+// libfuse3.so.3 compat symlink for Trixie
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	`src=$(find /usr/lib /lib -name "libfuse3.so.3.*" -type f 2>/dev/null | sort -V | tail -1) && `+
+		`sudo ln -sfn "$src" "$(dirname "$src")/libfuse3.so.3" && sudo ldconfig`); err != nil {
+	log.Fatal(err)
+}
+
+// Build config and mount
+mountPath := "/home/daytona/azure"
+configPath := "/home/daytona/.blobfuse2.yaml"
+account := os.Getenv("AZURE_STORAGE_ACCOUNT")
+container := os.Getenv("AZURE_STORAGE_CONTAINER")
+accountKey := os.Getenv("AZURE_STORAGE_ACCOUNT_KEY")
+
+config := fmt.Sprintf(`allow-other: true
+components:
+  - libfuse
+  - block_cache
+  - attr_cache
+  - azstorage
+azstorage:
+  type: block
+  account-name: %s
+  container: %s
+  endpoint: https://%s.blob.core.windows.net
+  auth-type: key
+  account-key: %s
+`, account, container, account, accountKey)
+
+if err := sandbox.FileSystem.UploadFile(ctx, []byte(config), configPath); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx, "chmod 600 "+configPath); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx, "mkdir -p "+mountPath); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	"blobfuse2 mount --config-file="+configPath+" "+mountPath); err != nil {
+	log.Fatal(err)
+}
+
+response, err := sandbox.Process.ExecuteCommand(ctx, "ls "+mountPath)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(response.Result)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+import io.daytona.sdk.model.ExecuteResponse;
+
+import java.nio.charset.StandardCharsets;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            Sandbox sandbox = daytona.create(new CreateSandboxFromSnapshotParams());
+
+            // Install blobfuse2
+            sandbox.getProcess().executeCommand(
+                "sudo apt-get update "
+                    + "&& sudo apt-get install -y --no-install-recommends ca-certificates curl gnupg wget");
+            sandbox.getProcess().executeCommand(
+                "wget -qO- https://packages.microsoft.com/keys/microsoft.asc "
+                    + "| sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg");
+            sandbox.getProcess().executeCommand(
+                "echo \"deb [arch=$(dpkg --print-architecture) "
+                    + "signed-by=/etc/apt/trusted.gpg.d/microsoft.gpg] "
+                    + "https://packages.microsoft.com/debian/12/prod bookworm main\" "
+                    + "| sudo tee /etc/apt/sources.list.d/microsoft-prod.list "
+                    + "&& sudo apt-get update && sudo apt-get install -y blobfuse2 fuse3");
+            // libfuse3.so.3 compat symlink for Trixie
+            sandbox.getProcess().executeCommand(
+                "src=$(find /usr/lib /lib -name \"libfuse3.so.3.*\" -type f 2>/dev/null "
+                    + "| sort -V | tail -1) "
+                    + "&& sudo ln -sfn \"$src\" \"$(dirname \"$src\")/libfuse3.so.3\" "
+                    + "&& sudo ldconfig");
+
+            // Build config and mount
+            String mountPath = "/home/daytona/azure";
+            String configPath = "/home/daytona/.blobfuse2.yaml";
+            String account = System.getenv("AZURE_STORAGE_ACCOUNT");
+            String container = System.getenv("AZURE_STORAGE_CONTAINER");
+            String accountKey = System.getenv("AZURE_STORAGE_ACCOUNT_KEY");
+
+            String config = "allow-other: true\n"
+                + "components:\n"
+                + "  - libfuse\n"
+                + "  - block_cache\n"
+                + "  - attr_cache\n"
+                + "  - azstorage\n"
+                + "azstorage:\n"
+                + "  type: block\n"
+                + "  account-name: " + account + "\n"
+                + "  container: " + container + "\n"
+                + "  endpoint: https://" + account + ".blob.core.windows.net\n"
+                + "  auth-type: key\n"
+                + "  account-key: " + accountKey + "\n";
+
+            sandbox.fs.uploadFile(config.getBytes(StandardCharsets.UTF_8), configPath);
+            sandbox.getProcess().executeCommand("chmod 600 " + configPath);
+            sandbox.getProcess().executeCommand("mkdir -p " + mountPath);
+            sandbox.getProcess().executeCommand(
+                "blobfuse2 mount --config-file=" + configPath + " " + mountPath);
+
+            ExecuteResponse response = sandbox.getProcess().executeCommand("ls " + mountPath);
+            System.out.println(response.getResult());
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+## Mount a MesaFS filesystem
+
+[MesaFS ↗](https://mesa.dev) is an agent-native filesystem designed for the same workloads Daytona sandboxes run — multi-agent setups, shared working memory, structured artifacts, and long-lived state across runs.
+
+A dedicated **MesaFS + Daytona guide** is in the works that walks through a real use case end-to-end. In the meantime, the mounting pattern follows the same shape as the providers above:
+
+1. Pre-install the MesaFS client in your snapshot via `Image.base("daytonaio/sandbox").runCommands(...)`, or install it at runtime through `sandbox.process`.
+2. Launch a sandbox and pass MesaFS credentials in `envVars` (or upload a credential file via `sandbox.fs.uploadFile`).
+3. Run the MesaFS mount command via `sandbox.process`.
+
+See the [MesaFS documentation ↗](https://mesa.dev) for the install steps and credential setup.
+
+## Tips
+
+- **Snapshot versioning** — name snapshots like `fuse-s3-v1`. Bump the suffix to force a rebuild whenever you upgrade the FUSE tool.
+- **Credential security** — pass credentials via `env_vars` / `envVars` on sandbox creation rather than committing them into the snapshot. Env vars stay scoped to the sandbox lifetime and rotate without rebuilding the image.
+- **Manual unmount** — to unmount during a sandbox's lifetime (for example, before remounting with different credentials), use `fusermount -u <path>` for `mount-s3` mounts (which links against FUSE 2) or `fusermount3 -u <path>` for `gcsfuse` and `blobfuse2` mounts (FUSE 3) via `sandbox.process`. When the sandbox itself is deleted, the container teardown removes any FUSE mounts.
+
+## See also
+
+- [Daytona Volumes](/docs/en/volumes/) — first-party FUSE-backed shared storage hosted by Daytona
+- [Declarative Builder](/docs/en/declarative-builder/) — programmatic image and snapshot definitions
+- [Snapshots](/docs/en/snapshots/) — pre-built sandbox templates
+- [File system operations](/docs/en/file-system-operations/) — uploading and downloading files in the sandbox

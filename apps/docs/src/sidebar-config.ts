@@ -196,6 +196,15 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath('/docs/mount-external-storage', locale),
+          label: t('sidebarconfig.mountExternalStorage'),
+          description: t('sidebarconfig.mountExternalStorageDescription'),
+          attrs: {
+            icon: 'folder-symlink.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/regions', locale),
           label: t('sidebarconfig.regions'),
           description: t('sidebarconfig.regionsDescription'),

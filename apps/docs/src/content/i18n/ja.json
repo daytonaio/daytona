@@ -44,6 +44,8 @@
   "sidebarconfig.declarativeBuilderDescription": "Daytona SDK を使用して、Docker/OCI 互換イメージからスナップショット（サンドボックス作成に使用する事前設定済みの再利用可能なイメージ/テンプレート）を動的に構築する方法を学びます。",
   "sidebarconfig.volumes": "ボリューム（S3互換オブジェクトストレージをバックエンドとするFUSEベースの共有ストレージ）",
   "sidebarconfig.volumesDescription": "Daytonaのサンドボックス（Daytonaが管理する隔離された一時的な実行環境）でボリューム（S3互換オブジェクトストレージをバックエンドとするFUSEベースの共有ストレージ）を管理する方法を学びましょう。",
+  "sidebarconfig.mountExternalStorage": "外部ストレージのマウント",
+  "sidebarconfig.mountExternalStorageDescription": "FUSEを使用して、外部オブジェクトストレージ（Amazon S3、Cloudflare R2、GCS、Azure Blob）やファイルシステムをDaytonaのサンドボックス（Daytonaが管理する隔離された一時的な実行環境）にマウントする方法を学びましょう。",
   "sidebarconfig.accountManagement": "アカウント管理",
   "sidebarconfig.apiKeys": "APIキー",
   "sidebarconfig.apiKeysDescription": "Daytona APIキーの管理とスコープ。",

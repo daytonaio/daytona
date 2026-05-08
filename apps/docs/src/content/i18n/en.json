@@ -63,6 +63,8 @@
   "sidebarconfig.declarativeBuilderDescription": "Learn how to dynamically build Snapshots from Docker/OCI compatible images using the Daytona SDK.",
   "sidebarconfig.volumes": "Volumes",
   "sidebarconfig.volumesDescription": "Learn how to manage volumes in your Daytona Sandboxes.",
+  "sidebarconfig.mountExternalStorage": "Mount External Storage",
+  "sidebarconfig.mountExternalStorageDescription": "Mount external object storage (Amazon S3, Cloudflare R2, GCS, Azure Blob) and filesystems into Daytona Sandboxes using FUSE.",
   "sidebarconfig.accountManagement": "Account management",
   "sidebarconfig.apiKeys": "API Keys",
   "sidebarconfig.apiKeysDescription": "Daytona API Key management and scopes.",
