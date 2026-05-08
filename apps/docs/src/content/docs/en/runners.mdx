@@ -51,30 +51,6 @@ curl https://app.daytona.io/api/regions \
 </TabItem>
 </Tabs>
 
-The response includes the region ID and credentials for any optional services you configured:
-
-```json
-{
-  "id": "region_12345",
-  "proxyApiKey": "proxy-api-key-xyz",
-  "sshGatewayApiKey": "ssh-gateway-api-key-abc",
-  "snapshotManagerUsername": "daytona",
-  "snapshotManagerPassword": "generated-password"
-}
-```
-
-### Custom region credentials
-
-When you create a custom region, Daytona will provide credentials for any optional services you configure:
-
-- An API key that should be used by your proxy service to authenticate with Daytona
-- An API key that should be used by your SSH gateway service to authenticate with Daytona
-- Basic authentication credentials that Daytona uses to access your snapshot manager service
-
-:::note
-If needed, these credentials can always be regenerated, but you will need to redeploy the corresponding services with the updated credentials.
-:::
-
 ### List custom regions
 
 Daytona provides methods to list all available regions for your organization using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions) or programmatically using the [API](/docs/en/tools/api#daytona/tag/organizations/GET/regions).
@@ -129,11 +105,12 @@ Daytona provides methods to update the configuration of an existing custom regio
 2. Click the region you want to update the configuration of
 3. Click the three dots menu (**⋮**) next to the region and select the **Edit** icon
 4. Enter the new **proxy URL**, **SSH gateway URL**, and **snapshot manager URL**
-5. Click **Update** to update the region configuration
 
-- **Proxy URL** (optional): the new URL of the custom proxy for this region
-- **SSH gateway URL** (optional): the new URL of the custom SSH gateway for this region
-- **Snapshot manager URL** (optional): the new URL of the custom snapshot manager for this region
+- **Proxy URL** (optional): the new URL of the custom proxy
+- **SSH gateway URL** (optional): the new URL of the custom SSH gateway
+- **Snapshot manager URL** (optional): the new URL of the custom snapshot manager
+
+5. Click **Update** to update the region configuration
 
 <Tabs>
 <TabItem label="API" icon="seti:json">
