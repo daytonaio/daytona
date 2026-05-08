@@ -39,7 +39,7 @@ Daytona provides methods to create a custom region using the [Daytona Dashboard 
 curl https://app.daytona.io/api/regions \
   --request POST \
   --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{
     "name": "my-custom-region",
     "proxyUrl": "https://proxy.example.com",
@@ -67,7 +67,7 @@ Daytona provides methods to list all available regions for your organization usi
 
 ```bash
 curl https://app.daytona.io/api/regions \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -91,7 +91,7 @@ Daytona provides methods to get the details of a specific region using the [Dayt
 
 ```bash
 curl https://app.daytona.io/api/regions/{regionId} \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -119,7 +119,7 @@ Daytona provides methods to update the configuration of an existing custom regio
 curl https://app.daytona.io/api/regions/{regionId} \
   --request PATCH \
   --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{
     "proxyUrl": "https://new-proxy.example.com",
     "sshGatewayUrl": "ssh://new-ssh-gateway.example.com",
@@ -145,7 +145,7 @@ Daytona provides methods to delete a custom region using the [Daytona Dashboard 
 ```bash
 curl https://app.daytona.io/api/regions/{regionId} \
   --request DELETE \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
