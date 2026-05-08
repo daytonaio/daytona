@@ -43,6 +43,7 @@ import io.daytona.api.client.model.OrganizationUser;
 import io.daytona.api.client.model.OtelConfig;
 import io.daytona.api.client.model.RegenerateApiKeyResponse;
 import io.daytona.api.client.model.Region;
+import io.daytona.api.client.model.SandboxClass;
 import io.daytona.api.client.model.SnapshotManagerCredentials;
 import io.daytona.api.client.model.UpdateOrganizationDefaultRegion;
 import io.daytona.api.client.model.UpdateOrganizationInvitation;
@@ -4754,6 +4755,7 @@ public class OrganizationsApi {
      * Build call for updateOrganizationRegionQuota
      * @param organizationId Organization ID (required)
      * @param regionId ID of the region where the updated quota will be applied (required)
+     * @param sandboxClass Sandbox class the updated quota applies to (required)
      * @param updateOrganizationRegionQuota  (required)
      * @param _callback Callback for upload/download progress
      * @return Call to execute
@@ -4765,7 +4767,7 @@ public class OrganizationsApi {
         <tr><td> 204 </td><td> Region quota updated successfully </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call updateOrganizationRegionQuotaCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull UpdateOrganizationRegionQuota updateOrganizationRegionQuota, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call updateOrganizationRegionQuotaCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, @javax.annotation.Nonnull UpdateOrganizationRegionQuota updateOrganizationRegionQuota, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -4782,9 +4784,10 @@ public class OrganizationsApi {
         Object localVarPostBody = updateOrganizationRegionQuota;
 
         // create path and map variables
-        String localVarPath = "/organizations/{organizationId}/quota/{regionId}"
+        String localVarPath = "/organizations/{organizationId}/quota/{regionId}/{sandboxClass}"
             .replace("{" + "organizationId" + "}", localVarApiClient.escapeString(organizationId.toString()))
-            .replace("{" + "regionId" + "}", localVarApiClient.escapeString(regionId.toString()));
+            .replace("{" + "regionId" + "}", localVarApiClient.escapeString(regionId.toString()))
+            .replace("{" + "sandboxClass" + "}", localVarApiClient.escapeString(sandboxClass.toString()));
 
         List<Pair> localVarQueryParams = new ArrayList<Pair>();
         List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
@@ -4812,7 +4815,7 @@ public class OrganizationsApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call updateOrganizationRegionQuotaValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull UpdateOrganizationRegionQuota updateOrganizationRegionQuota, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call updateOrganizationRegionQuotaValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, @javax.annotation.Nonnull UpdateOrganizationRegionQuota updateOrganizationRegionQuota, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'organizationId' is set
         if (organizationId == null) {
             throw new ApiException("Missing the required parameter 'organizationId' when calling updateOrganizationRegionQuota(Async)");
@@ -4823,12 +4826,17 @@ public class OrganizationsApi {
             throw new ApiException("Missing the required parameter 'regionId' when calling updateOrganizationRegionQuota(Async)");
         }
 
+        // verify the required parameter 'sandboxClass' is set
+        if (sandboxClass == null) {
+            throw new ApiException("Missing the required parameter 'sandboxClass' when calling updateOrganizationRegionQuota(Async)");
+        }
+
         // verify the required parameter 'updateOrganizationRegionQuota' is set
         if (updateOrganizationRegionQuota == null) {
             throw new ApiException("Missing the required parameter 'updateOrganizationRegionQuota' when calling updateOrganizationRegionQuota(Async)");
         }
 
-        return updateOrganizationRegionQuotaCall(organizationId, regionId, updateOrganizationRegionQuota, _callback);
+        return updateOrganizationRegionQuotaCall(organizationId, regionId, sandboxClass, updateOrganizationRegionQuota, _callback);
 
     }
 
@@ -4837,6 +4845,7 @@ public class OrganizationsApi {
      * 
      * @param organizationId Organization ID (required)
      * @param regionId ID of the region where the updated quota will be applied (required)
+     * @param sandboxClass Sandbox class the updated quota applies to (required)
      * @param updateOrganizationRegionQuota  (required)
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
@@ -4846,8 +4855,8 @@ public class OrganizationsApi {
         <tr><td> 204 </td><td> Region quota updated successfully </td><td>  -  </td></tr>
      </table>
      */
-    public void updateOrganizationRegionQuota(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull UpdateOrganizationRegionQuota updateOrganizationRegionQuota) throws ApiException {
-        updateOrganizationRegionQuotaWithHttpInfo(organizationId, regionId, updateOrganizationRegionQuota);
+    public void updateOrganizationRegionQuota(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, @javax.annotation.Nonnull UpdateOrganizationRegionQuota updateOrganizationRegionQuota) throws ApiException {
+        updateOrganizationRegionQuotaWithHttpInfo(organizationId, regionId, sandboxClass, updateOrganizationRegionQuota);
     }
 
     /**
@@ -4855,6 +4864,7 @@ public class OrganizationsApi {
      * 
      * @param organizationId Organization ID (required)
      * @param regionId ID of the region where the updated quota will be applied (required)
+     * @param sandboxClass Sandbox class the updated quota applies to (required)
      * @param updateOrganizationRegionQuota  (required)
      * @return ApiResponse&lt;Void&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -4865,8 +4875,8 @@ public class OrganizationsApi {
         <tr><td> 204 </td><td> Region quota updated successfully </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> updateOrganizationRegionQuotaWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull UpdateOrganizationRegionQuota updateOrganizationRegionQuota) throws ApiException {
-        okhttp3.Call localVarCall = updateOrganizationRegionQuotaValidateBeforeCall(organizationId, regionId, updateOrganizationRegionQuota, null);
+    public ApiResponse<Void> updateOrganizationRegionQuotaWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, @javax.annotation.Nonnull UpdateOrganizationRegionQuota updateOrganizationRegionQuota) throws ApiException {
+        okhttp3.Call localVarCall = updateOrganizationRegionQuotaValidateBeforeCall(organizationId, regionId, sandboxClass, updateOrganizationRegionQuota, null);
         return localVarApiClient.execute(localVarCall);
     }
 
@@ -4875,6 +4885,7 @@ public class OrganizationsApi {
      * 
      * @param organizationId Organization ID (required)
      * @param regionId ID of the region where the updated quota will be applied (required)
+     * @param sandboxClass Sandbox class the updated quota applies to (required)
      * @param updateOrganizationRegionQuota  (required)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
@@ -4886,9 +4897,9 @@ public class OrganizationsApi {
         <tr><td> 204 </td><td> Region quota updated successfully </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call updateOrganizationRegionQuotaAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull UpdateOrganizationRegionQuota updateOrganizationRegionQuota, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call updateOrganizationRegionQuotaAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, @javax.annotation.Nonnull UpdateOrganizationRegionQuota updateOrganizationRegionQuota, final ApiCallback<Void> _callback) throws ApiException {
 
-        okhttp3.Call localVarCall = updateOrganizationRegionQuotaValidateBeforeCall(organizationId, regionId, updateOrganizationRegionQuota, _callback);
+        okhttp3.Call localVarCall = updateOrganizationRegionQuotaValidateBeforeCall(organizationId, regionId, sandboxClass, updateOrganizationRegionQuota, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
         return localVarCall;
     }

@@ -148,9 +148,8 @@ export interface Workspace {
     'lastActivityAt'?: string;
     /**
      * The class of the sandbox
-     * @deprecated
      */
-    'class'?: WorkspaceClassEnum;
+    'sandboxClass'?: WorkspaceSandboxClassEnum;
     /**
      * The version of the daemon running in the sandbox
      */
@@ -191,14 +190,13 @@ export const WorkspaceBackupStateEnum = {
 } as const;
 
 export type WorkspaceBackupStateEnum = typeof WorkspaceBackupStateEnum[keyof typeof WorkspaceBackupStateEnum];
-export const WorkspaceClassEnum = {
-    SMALL: 'small',
-    MEDIUM: 'medium',
-    LARGE: 'large',
+export const WorkspaceSandboxClassEnum = {
+    LINUX_VM: 'linux-vm',
+    CONTAINER: 'container',
     UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
-export type WorkspaceClassEnum = typeof WorkspaceClassEnum[keyof typeof WorkspaceClassEnum];
+export type WorkspaceSandboxClassEnum = typeof WorkspaceSandboxClassEnum[keyof typeof WorkspaceSandboxClassEnum];
 export const WorkspaceSnapshotStateEnum = {
     NONE: 'None',
     PENDING: 'Pending',

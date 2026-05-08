@@ -12,6 +12,7 @@ import {
   HttpCode,
   NotFoundException,
   Param,
+  ParseEnumPipe,
   Patch,
   Post,
   Put,
@@ -47,6 +48,7 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-region-quota.dto'
 import { UpdateOrganizationDefaultRegionDto } from '../dto/update-organization-default-region.dto'
+import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
 import { OtelCollectorAuthContextGuard } from '../guards/otel-collector-auth-context.guard'
 import { OtelConfigDto } from '../dto/otel-config.dto'
@@ -372,7 +374,7 @@ export class OrganizationController {
     await this.organizationService.updateQuota(organizationId, updateDto)
   }
 
-  @Patch('/:organizationId/quota/:regionId')
+  @Patch('/:organizationId/quota/:regionId/:sandboxClass')
   @HttpCode(204)
   @ApiOperation({
     summary: 'Update organization region quota',
@@ -388,6 +390,12 @@ export class OrganizationController {
     description: 'ID of the region where the updated quota will be applied',
     type: 'string',
   })
+  @ApiParam({
+    name: 'sandboxClass',
+    description: 'Sandbox class the updated quota applies to',
+    enum: SandboxClass,
+    enumName: 'SandboxClass',
+  })
   @ApiResponse({
     status: 204,
     description: 'Region quota updated successfully',
@@ -401,20 +409,26 @@ export class OrganizationController {
     requestMetadata: {
       params: (req) => ({
         regionId: req.params.regionId,
+        sandboxClass: req.params.sandboxClass,
       }),
       body: (req: TypedRequest<UpdateOrganizationRegionQuotaDto>) => ({
         totalCpuQuota: req.body?.totalCpuQuota,
         totalMemoryQuota: req.body?.totalMemoryQuota,
         totalDiskQuota: req.body?.totalDiskQuota,
+        maxCpuPerSandbox: req.body?.maxCpuPerSandbox,
+        maxMemoryPerSandbox: req.body?.maxMemoryPerSandbox,
+        maxDiskPerSandbox: req.body?.maxDiskPerSandbox,
+        maxDiskPerNonEphemeralSandbox: req.body?.maxDiskPerNonEphemeralSandbox,
       }),
     },
   })
   async updateOrganizationRegionQuota(
     @Param('organizationId') organizationId: string,
     @Param('regionId') regionId: string,
+    @Param('sandboxClass', new ParseEnumPipe(SandboxClass)) sandboxClass: SandboxClass,
     @Body() updateDto: UpdateOrganizationRegionQuotaDto,
   ): Promise<void> {
-    await this.organizationService.updateRegionQuota(organizationId, regionId, updateDto)
+    await this.organizationService.updateRegionQuota(organizationId, regionId, sandboxClass, updateDto)
   }
 
   @Post('/:organizationId/leave')

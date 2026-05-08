@@ -40,6 +40,7 @@ import { CreateWorkspaceDto } from '../sandbox/dto/create-workspace.deprecated.d
 import { WorkspaceDto } from '../sandbox/dto/workspace.deprecated.dto'
 import { TypedConfigService } from '../config/typed-config.service'
 import { UpdateOrganizationRegionQuotaDto } from '../organization/dto/update-organization-region-quota.dto'
+import { SandboxClass } from '../sandbox/enums/sandbox-class.enum'
 import { UpdateOrganizationDefaultRegionDto } from '../organization/dto/update-organization-default-region.dto'
 import { getAuthContext } from '../common/utils/get-auth-context'
 
@@ -323,11 +324,12 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
           case '/api/organizations/:organizationId/quota':
             this.captureUpdateOrganizationQuota(props, request.params.organizationId, request.body)
             break
-          case '/api/organizations/:organizationId/quota/:regionId':
+          case '/api/organizations/:organizationId/quota/:regionId/:sandboxClass':
             this.captureUpdateOrganizationRegionQuota(
               props,
               request.params.organizationId,
               request.params.regionId,
+              request.params.sandboxClass as SandboxClass,
               request.body,
             )
             break
@@ -821,11 +823,13 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     props: CommonCaptureProps,
     organizationId: string,
     regionId: string,
+    sandboxClass: SandboxClass,
     request: UpdateOrganizationRegionQuotaDto,
   ) {
     this.capture('api_organization_region_quota_updated', props, 'api_organization_region_quota_update_failed', {
       organization_id: organizationId,
       organization_region_id: regionId,
+      organization_region_sandbox_class: sandboxClass,
       organization_region_total_cpu_quota: request.totalCpuQuota,
       organization_region_total_memory_quota_mb: request.totalMemoryQuota ? request.totalMemoryQuota * 1024 : null,
       organization_region_total_disk_quota_gb: request.totalDiskQuota,

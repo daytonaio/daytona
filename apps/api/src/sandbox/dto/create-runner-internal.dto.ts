@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { SandboxClass } from '../enums/sandbox-class.enum'
+
 export type CreateRunnerV0InternalDto = {
   domain: string
   apiUrl: string
@@ -15,6 +17,7 @@ export type CreateRunnerV0InternalDto = {
   apiKey?: string
   apiVersion: '0'
   appVersion?: string
+  sandboxClass?: SandboxClass
 }
 
 export type CreateRunnerV2InternalDto = {
@@ -23,6 +26,7 @@ export type CreateRunnerV2InternalDto = {
   name: string
   apiVersion: '2'
   appVersion?: string
+  sandboxClass?: SandboxClass
 }
 
 export type CreateRunnerInternalDto = CreateRunnerV0InternalDto | CreateRunnerV2InternalDto

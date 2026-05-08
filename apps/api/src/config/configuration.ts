@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { SandboxClass } from '../sandbox/enums/sandbox-class.enum'
+
 const configuration = {
   production: process.env.NODE_ENV === 'production',
   version: process.env.VERSION || '0.0.0-dev',
@@ -61,6 +63,7 @@ const configuration = {
     from: process.env.SMTP_EMAIL_FROM || 'noreply@mail.daytona.io',
   },
   defaultSnapshot: process.env.DEFAULT_SNAPSHOT,
+  defaultSandboxClass: (process.env.DEFAULT_SANDBOX_CLASS || SandboxClass.CONTAINER) as SandboxClass,
   dashboardUrl: process.env.DASHBOARD_URL,
   // Default to empty string - dashboard will then hit '/api'
   dashboardBaseApiUrl: process.env.DASHBOARD_BASE_API_URL || '',

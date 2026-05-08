@@ -75,14 +75,14 @@ export class RunnerDto {
   @IsOptional()
   gpuType?: string
 
-  @ApiProperty({
-    description: 'The class of the runner',
+  @ApiPropertyOptional({
+    description: 'The sandbox class supported by this runner',
     enum: SandboxClass,
     enumName: 'SandboxClass',
-    example: SandboxClass.SMALL,
+    example: SandboxClass.LINUX_VM,
   })
   @IsEnum(SandboxClass)
-  class: SandboxClass
+  sandboxClass?: SandboxClass
 
   @ApiPropertyOptional({
     description: 'Current CPU usage percentage',
@@ -227,7 +227,7 @@ export class RunnerDto {
       disk: runner.diskGiB,
       gpu: runner.gpu,
       gpuType: runner.gpuType,
-      class: runner.class,
+      sandboxClass: runner.sandboxClass,
       runnerClass: runner.runnerClass,
       currentCpuUsagePercentage: runner.currentCpuUsagePercentage,
       currentMemoryUsagePercentage: runner.currentMemoryUsagePercentage,

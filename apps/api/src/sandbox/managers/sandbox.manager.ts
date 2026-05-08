@@ -340,6 +340,8 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                 try {
                   const startScoreThreshold = this.configService.get('runnerScore.thresholds.start') || 0
                   const targetRunner = await this.runnerService.getRandomAvailableRunner({
+                    regions: [sandbox.region],
+                    sandboxClass: sandbox.sandboxClass,
                     snapshotRef: sandbox.backupSnapshot,
                     excludedRunnerIds: [runner.id],
                     availabilityScoreThreshold: startScoreThreshold,
@@ -527,6 +529,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           const result = await this.organizationUsageService.incrementPendingSandboxUsage(
             sandbox.organizationId,
             sandbox.region,
+            sandbox.sandboxClass,
             0,
             0,
             sandbox.disk,
@@ -568,7 +571,14 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         } catch (e) {
           if (diskIncremented) {
             await this.organizationUsageService
-              .decrementPendingSandboxUsage(sandbox.organizationId, sandbox.region, undefined, undefined, sandbox.disk)
+              .decrementPendingSandboxUsage(
+                sandbox.organizationId,
+                sandbox.region,
+                sandbox.sandboxClass,
+                undefined,
+                undefined,
+                sandbox.disk,
+              )
               .catch(() => undefined)
           }
           await this.redis.set(redisKey, '1', 'EX', SandboxManager.DRAINING_RECOVER_TTL_SECONDS)

@@ -4,11 +4,15 @@
  */
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
+import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
 
 @ApiSchema({ name: 'RegionUsageOverview' })
 export class RegionUsageOverviewDto {
   @ApiProperty()
   regionId: string
+
+  @ApiProperty({ enum: SandboxClass, enumName: 'SandboxClass' })
+  sandboxClass: SandboxClass
 
   @ApiProperty()
   totalCpuQuota: number

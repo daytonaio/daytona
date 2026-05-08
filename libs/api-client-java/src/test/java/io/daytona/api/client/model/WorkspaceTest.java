@@ -280,11 +280,11 @@ public class WorkspaceTest {
     }
 
     /**
-     * Test the property 'propertyClass'
+     * Test the property 'sandboxClass'
      */
     @Test
-    public void propertyClassTest() {
-        // TODO: test propertyClass
+    public void sandboxClassTest() {
+        // TODO: test sandboxClass
     }
 
     /**

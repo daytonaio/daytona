@@ -42,10 +42,6 @@ export interface CreateWorkspace {
      */
     'public'?: boolean;
     /**
-     * The workspace class type
-     */
-    'class'?: CreateWorkspaceClassEnum;
-    /**
      * The target (region) where the workspace will be created
      */
     'target'?: CreateWorkspaceTargetEnum;
@@ -83,14 +79,6 @@ export interface CreateWorkspace {
     'buildInfo'?: CreateBuildInfo;
 }
 
-export const CreateWorkspaceClassEnum = {
-    SMALL: 'small',
-    MEDIUM: 'medium',
-    LARGE: 'large',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809',
-} as const;
-
-export type CreateWorkspaceClassEnum = typeof CreateWorkspaceClassEnum[keyof typeof CreateWorkspaceClassEnum];
 export const CreateWorkspaceTargetEnum = {
     EU: 'eu',
     US: 'us',

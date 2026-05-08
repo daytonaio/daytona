@@ -18,12 +18,13 @@ import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizati
 import { useTiersQuery } from '@/hooks/queries/useTiersQuery'
 import { useConfig } from '@/hooks/useConfig'
 import { useRegions } from '@/hooks/useRegions'
+import { useRegionClassSelection } from '@/hooks/useRegionClassSelection'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
-import type { RegionUsageOverview } from '@daytona/api-client'
+import type { SandboxClass } from '@daytona/api-client'
 import { keepPreviousData } from '@tanstack/react-query'
 import { RefreshCcw } from 'lucide-react'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useEffect } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { useNavigate } from 'react-router-dom'
 
@@ -39,7 +40,6 @@ export default function Limits() {
   const wallet = walletQuery.data
 
   const { getRegionName } = useRegions()
-  const [selectedRegionId, setSelectedRegionId] = useState<string | undefined>(undefined)
   const config = useConfig()
   const navigate = useNavigate()
 
@@ -61,20 +61,16 @@ export default function Limits() {
     },
   )
 
-  useEffect(() => {
-    if (usageOverview && usageOverview.regionUsage.length > 0 && !selectedRegionId) {
-      const regionIds = usageOverview.regionUsage.map((usage) => usage.regionId)
-      const regionId = regionIds.find((regionId) => regionId === selectedOrganization?.defaultRegionId) || regionIds[0]
-      setSelectedRegionId(regionId)
-    }
-  }, [usageOverview, selectedOrganization?.defaultRegionId, selectedRegionId])
-
-  const currentRegionUsageOverview = useMemo<RegionUsageOverview | null>(() => {
-    if (!usageOverview || !selectedRegionId) {
-      return null
-    }
-    return usageOverview.regionUsage.find((usage) => usage.regionId === selectedRegionId) || null
-  }, [usageOverview, selectedRegionId])
+  const {
+    regionIds,
+    selectedRegionId,
+    setSelectedRegionId,
+    classesForSelectedRegion,
+    selectedSandboxClass,
+    setSelectedSandboxClass,
+    showClassSelector,
+    currentEntry: currentRegionUsageOverview,
+  } = useRegionClassSelection(usageOverview?.regionUsage, selectedOrganization?.defaultRegionId)
 
   const isLoading = organizationTierQuery.isLoading || tiersQuery.isLoading || walletQuery.isLoading
   const isError =
@@ -122,25 +118,45 @@ export default function Limits() {
                       )}
                     </div>
                   </CardTitle>
-                  {usageOverview && usageOverview.regionUsage.length > 0 && (
+                  {regionIds.length > 0 && (
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">Region:</span>
                       <Select value={selectedRegionId} onValueChange={setSelectedRegionId}>
                         <SelectTrigger
                           size="xs"
-                          disabled={usageOverview.regionUsage.length === 1}
-                          className={`uppercase w-auto min-w-12 max-w-48 gap-x-2 ${usageOverview.regionUsage.length === 1 ? 'pointer-events-none select-none [&>svg]:hidden min-w-10 disabled:opacity-100' : ''}`}
+                          disabled={regionIds.length === 1}
+                          className={`uppercase w-auto min-w-12 max-w-48 gap-x-2 ${regionIds.length === 1 ? 'pointer-events-none select-none [&>svg]:hidden min-w-10 disabled:opacity-100' : ''}`}
                         >
                           <SelectValue placeholder="Select region" />
                         </SelectTrigger>
                         <SelectContent className="min-w-24 max-w-48" align="end">
-                          {usageOverview.regionUsage.map((usage) => (
-                            <SelectItem key={usage.regionId} value={usage.regionId} className="uppercase">
-                              {getRegionName(usage.regionId) ?? usage.regionId}
+                          {regionIds.map((regionId) => (
+                            <SelectItem key={regionId} value={regionId} className="uppercase">
+                              {getRegionName(regionId) ?? regionId}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
+                      {showClassSelector && (
+                        <>
+                          <span className="text-sm text-muted-foreground">Class:</span>
+                          <Select
+                            value={selectedSandboxClass}
+                            onValueChange={(value) => setSelectedSandboxClass(value as SandboxClass)}
+                          >
+                            <SelectTrigger size="xs" className="uppercase w-auto min-w-12 max-w-48 gap-x-2">
+                              <SelectValue placeholder="Select class" />
+                            </SelectTrigger>
+                            <SelectContent className="min-w-24 max-w-48" align="end">
+                              {classesForSelectedRegion.map((usage) => (
+                                <SelectItem key={usage.sandboxClass} value={usage.sandboxClass} className="uppercase">
+                                  {usage.sandboxClass}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>

@@ -34,6 +34,7 @@ from daytona_api_client.models.organization_user import OrganizationUser
 from daytona_api_client.models.otel_config import OtelConfig
 from daytona_api_client.models.regenerate_api_key_response import RegenerateApiKeyResponse
 from daytona_api_client.models.region import Region
+from daytona_api_client.models.sandbox_class import SandboxClass
 from daytona_api_client.models.snapshot_manager_credentials import SnapshotManagerCredentials
 from daytona_api_client.models.update_organization_default_region import UpdateOrganizationDefaultRegion
 from daytona_api_client.models.update_organization_invitation import UpdateOrganizationInvitation
@@ -9690,6 +9691,7 @@ class OrganizationsApi:
         self,
         organization_id: Annotated[StrictStr, Field(description="Organization ID")],
         region_id: Annotated[StrictStr, Field(description="ID of the region where the updated quota will be applied")],
+        sandbox_class: Annotated[SandboxClass, Field(description="Sandbox class the updated quota applies to")],
         update_organization_region_quota: UpdateOrganizationRegionQuota,
         _request_timeout: Union[
             None,
@@ -9711,6 +9713,8 @@ class OrganizationsApi:
         :type organization_id: str
         :param region_id: ID of the region where the updated quota will be applied (required)
         :type region_id: str
+        :param sandbox_class: Sandbox class the updated quota applies to (required)
+        :type sandbox_class: SandboxClass
         :param update_organization_region_quota: (required)
         :type update_organization_region_quota: UpdateOrganizationRegionQuota
         :param _request_timeout: timeout setting for this request. If one
@@ -9738,6 +9742,7 @@ class OrganizationsApi:
         _param = self._update_organization_region_quota_serialize(
             organization_id=organization_id,
             region_id=region_id,
+            sandbox_class=sandbox_class,
             update_organization_region_quota=update_organization_region_quota,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -9764,6 +9769,7 @@ class OrganizationsApi:
         self,
         organization_id: Annotated[StrictStr, Field(description="Organization ID")],
         region_id: Annotated[StrictStr, Field(description="ID of the region where the updated quota will be applied")],
+        sandbox_class: Annotated[SandboxClass, Field(description="Sandbox class the updated quota applies to")],
         update_organization_region_quota: UpdateOrganizationRegionQuota,
         _request_timeout: Union[
             None,
@@ -9785,6 +9791,8 @@ class OrganizationsApi:
         :type organization_id: str
         :param region_id: ID of the region where the updated quota will be applied (required)
         :type region_id: str
+        :param sandbox_class: Sandbox class the updated quota applies to (required)
+        :type sandbox_class: SandboxClass
         :param update_organization_region_quota: (required)
         :type update_organization_region_quota: UpdateOrganizationRegionQuota
         :param _request_timeout: timeout setting for this request. If one
@@ -9812,6 +9820,7 @@ class OrganizationsApi:
         _param = self._update_organization_region_quota_serialize(
             organization_id=organization_id,
             region_id=region_id,
+            sandbox_class=sandbox_class,
             update_organization_region_quota=update_organization_region_quota,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -9838,6 +9847,7 @@ class OrganizationsApi:
         self,
         organization_id: Annotated[StrictStr, Field(description="Organization ID")],
         region_id: Annotated[StrictStr, Field(description="ID of the region where the updated quota will be applied")],
+        sandbox_class: Annotated[SandboxClass, Field(description="Sandbox class the updated quota applies to")],
         update_organization_region_quota: UpdateOrganizationRegionQuota,
         _request_timeout: Union[
             None,
@@ -9859,6 +9869,8 @@ class OrganizationsApi:
         :type organization_id: str
         :param region_id: ID of the region where the updated quota will be applied (required)
         :type region_id: str
+        :param sandbox_class: Sandbox class the updated quota applies to (required)
+        :type sandbox_class: SandboxClass
         :param update_organization_region_quota: (required)
         :type update_organization_region_quota: UpdateOrganizationRegionQuota
         :param _request_timeout: timeout setting for this request. If one
@@ -9886,6 +9898,7 @@ class OrganizationsApi:
         _param = self._update_organization_region_quota_serialize(
             organization_id=organization_id,
             region_id=region_id,
+            sandbox_class=sandbox_class,
             update_organization_region_quota=update_organization_region_quota,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -9907,6 +9920,7 @@ class OrganizationsApi:
         self,
         organization_id,
         region_id,
+        sandbox_class,
         update_organization_region_quota,
         _request_auth,
         _content_type,
@@ -9933,6 +9947,8 @@ class OrganizationsApi:
             _path_params['organizationId'] = organization_id
         if region_id is not None:
             _path_params['regionId'] = region_id
+        if sandbox_class is not None:
+            _path_params['sandboxClass'] = sandbox_class.value
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -9964,7 +9980,7 @@ class OrganizationsApi:
 
         return self.api_client.param_serialize(
             method='PATCH',
-            resource_path='/organizations/{organizationId}/quota/{regionId}',
+            resource_path='/organizations/{organizationId}/quota/{regionId}/{sandboxClass}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

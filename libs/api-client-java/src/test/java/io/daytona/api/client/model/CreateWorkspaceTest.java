@@ -84,14 +84,6 @@ public class CreateWorkspaceTest {
     }
 
     /**
-     * Test the property 'propertyClass'
-     */
-    @Test
-    public void propertyClassTest() {
-        // TODO: test propertyClass
-    }
-
-    /**
      * Test the property 'target'
      */
     @Test

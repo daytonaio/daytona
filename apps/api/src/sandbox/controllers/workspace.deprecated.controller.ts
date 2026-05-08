@@ -143,7 +143,6 @@ export class WorkspaceController {
           : undefined,
         labels: req.body?.labels,
         public: req.body?.public,
-        class: req.body?.class,
         target: req.body?.target,
         cpu: req.body?.cpu,
         gpu: req.body?.gpu,

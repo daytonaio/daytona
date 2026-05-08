@@ -30,9 +30,6 @@ module DaytonaApiClient
     # Whether the workspace http preview is publicly accessible
     attr_accessor :public
 
-    # The workspace class type
-    attr_accessor :_class
-
     # The target (region) where the workspace will be created
     attr_accessor :target
 
@@ -90,7 +87,6 @@ module DaytonaApiClient
         :'env' => :'env',
         :'labels' => :'labels',
         :'public' => :'public',
-        :'_class' => :'class',
         :'target' => :'target',
         :'cpu' => :'cpu',
         :'gpu' => :'gpu',
@@ -121,7 +117,6 @@ module DaytonaApiClient
         :'env' => :'Hash<String, String>',
         :'labels' => :'Hash<String, String>',
         :'public' => :'Boolean',
-        :'_class' => :'String',
         :'target' => :'String',
         :'cpu' => :'Integer',
         :'gpu' => :'Integer',
@@ -180,10 +175,6 @@ module DaytonaApiClient
         self.public = attributes[:'public']
       end
 
-      if attributes.key?(:'_class')
-        self._class = attributes[:'_class']
-      end
-
       if attributes.key?(:'target')
         self.target = attributes[:'target']
       end
@@ -235,21 +226,9 @@ module DaytonaApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      _class_validator = EnumAttributeValidator.new('String', ["small", "medium", "large", "unknown_default_open_api"])
-      return false unless _class_validator.valid?(@_class)
       target_validator = EnumAttributeValidator.new('String', ["eu", "us", "asia", "unknown_default_open_api"])
       return false unless target_validator.valid?(@target)
       true
-    end
-
-    # Custom attribute writer method checking allowed values (enum).
-    # @param [Object] _class Object to be assigned
-    def _class=(_class)
-      validator = EnumAttributeValidator.new('String', ["small", "medium", "large", "unknown_default_open_api"])
-      unless validator.valid?(_class)
-        fail ArgumentError, "invalid value for \"_class\", must be one of #{validator.allowable_values}."
-      end
-      @_class = _class
     end
 
     # Custom attribute writer method checking allowed values (enum).
@@ -272,7 +251,6 @@ module DaytonaApiClient
           env == o.env &&
           labels == o.labels &&
           public == o.public &&
-          _class == o._class &&
           target == o.target &&
           cpu == o.cpu &&
           gpu == o.gpu &&
@@ -293,7 +271,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [image, user, env, labels, public, _class, target, cpu, gpu, memory, disk, auto_stop_interval, auto_archive_interval, volumes, build_info].hash
+      [image, user, env, labels, public, target, cpu, gpu, memory, disk, auto_stop_interval, auto_archive_interval, volumes, build_info].hash
     end
 
     # Builds the object from hash

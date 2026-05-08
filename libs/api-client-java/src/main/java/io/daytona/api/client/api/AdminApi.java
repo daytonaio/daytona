@@ -30,16 +30,20 @@ import java.io.IOException;
 import io.daytona.api.client.model.AdminCreateRunner;
 import io.daytona.api.client.model.AdminGetWebhookStatus200Response;
 import java.math.BigDecimal;
+import io.daytona.api.client.model.CreateOrganizationRegionQuota;
 import io.daytona.api.client.model.CreateRunnerResponse;
 import io.daytona.api.client.model.CreateUser;
 import io.daytona.api.client.model.DockerRegistry;
 import java.time.OffsetDateTime;
 import io.daytona.api.client.model.PaginatedAuditLogs;
+import io.daytona.api.client.model.RegionQuota;
 import io.daytona.api.client.model.RunnerFull;
 import io.daytona.api.client.model.Sandbox;
+import io.daytona.api.client.model.SandboxClass;
 import io.daytona.api.client.model.SendWebhookDto;
 import io.daytona.api.client.model.SetSnapshotGeneralStatusDto;
 import io.daytona.api.client.model.SnapshotDto;
+import io.daytona.api.client.model.UpdateOrganizationRegionQuota;
 import io.daytona.api.client.model.User;
 
 import java.lang.reflect.Type;
@@ -212,6 +216,163 @@ public class AdminApi {
 
         okhttp3.Call localVarCall = adminCanCleanupImageValidateBeforeCall(imageName, _callback);
         Type localVarReturnType = new TypeToken<Boolean>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for adminCreateOrganizationRegionQuota
+     * @param organizationId Organization ID (required)
+     * @param regionId ID of the region the new quota applies to (required)
+     * @param sandboxClass Sandbox class the new quota applies to (required)
+     * @param createOrganizationRegionQuota  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Region quota created successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminCreateOrganizationRegionQuotaCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, @javax.annotation.Nonnull CreateOrganizationRegionQuota createOrganizationRegionQuota, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = createOrganizationRegionQuota;
+
+        // create path and map variables
+        String localVarPath = "/admin/organizations/{organizationId}/quota/{regionId}/{sandboxClass}"
+            .replace("{" + "organizationId" + "}", localVarApiClient.escapeString(organizationId.toString()))
+            .replace("{" + "regionId" + "}", localVarApiClient.escapeString(regionId.toString()))
+            .replace("{" + "sandboxClass" + "}", localVarApiClient.escapeString(sandboxClass.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call adminCreateOrganizationRegionQuotaValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, @javax.annotation.Nonnull CreateOrganizationRegionQuota createOrganizationRegionQuota, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'organizationId' is set
+        if (organizationId == null) {
+            throw new ApiException("Missing the required parameter 'organizationId' when calling adminCreateOrganizationRegionQuota(Async)");
+        }
+
+        // verify the required parameter 'regionId' is set
+        if (regionId == null) {
+            throw new ApiException("Missing the required parameter 'regionId' when calling adminCreateOrganizationRegionQuota(Async)");
+        }
+
+        // verify the required parameter 'sandboxClass' is set
+        if (sandboxClass == null) {
+            throw new ApiException("Missing the required parameter 'sandboxClass' when calling adminCreateOrganizationRegionQuota(Async)");
+        }
+
+        // verify the required parameter 'createOrganizationRegionQuota' is set
+        if (createOrganizationRegionQuota == null) {
+            throw new ApiException("Missing the required parameter 'createOrganizationRegionQuota' when calling adminCreateOrganizationRegionQuota(Async)");
+        }
+
+        return adminCreateOrganizationRegionQuotaCall(organizationId, regionId, sandboxClass, createOrganizationRegionQuota, _callback);
+
+    }
+
+    /**
+     * Create organization region quota
+     * 
+     * @param organizationId Organization ID (required)
+     * @param regionId ID of the region the new quota applies to (required)
+     * @param sandboxClass Sandbox class the new quota applies to (required)
+     * @param createOrganizationRegionQuota  (required)
+     * @return RegionQuota
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Region quota created successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public RegionQuota adminCreateOrganizationRegionQuota(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, @javax.annotation.Nonnull CreateOrganizationRegionQuota createOrganizationRegionQuota) throws ApiException {
+        ApiResponse<RegionQuota> localVarResp = adminCreateOrganizationRegionQuotaWithHttpInfo(organizationId, regionId, sandboxClass, createOrganizationRegionQuota);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Create organization region quota
+     * 
+     * @param organizationId Organization ID (required)
+     * @param regionId ID of the region the new quota applies to (required)
+     * @param sandboxClass Sandbox class the new quota applies to (required)
+     * @param createOrganizationRegionQuota  (required)
+     * @return ApiResponse&lt;RegionQuota&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Region quota created successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<RegionQuota> adminCreateOrganizationRegionQuotaWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, @javax.annotation.Nonnull CreateOrganizationRegionQuota createOrganizationRegionQuota) throws ApiException {
+        okhttp3.Call localVarCall = adminCreateOrganizationRegionQuotaValidateBeforeCall(organizationId, regionId, sandboxClass, createOrganizationRegionQuota, null);
+        Type localVarReturnType = new TypeToken<RegionQuota>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Create organization region quota (asynchronously)
+     * 
+     * @param organizationId Organization ID (required)
+     * @param regionId ID of the region the new quota applies to (required)
+     * @param sandboxClass Sandbox class the new quota applies to (required)
+     * @param createOrganizationRegionQuota  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Region quota created successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminCreateOrganizationRegionQuotaAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, @javax.annotation.Nonnull CreateOrganizationRegionQuota createOrganizationRegionQuota, final ApiCallback<RegionQuota> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = adminCreateOrganizationRegionQuotaValidateBeforeCall(organizationId, regionId, sandboxClass, createOrganizationRegionQuota, _callback);
+        Type localVarReturnType = new TypeToken<RegionQuota>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }
@@ -461,6 +622,148 @@ public class AdminApi {
     public okhttp3.Call adminCreateUserAsync(@javax.annotation.Nonnull CreateUser createUser, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = adminCreateUserValidateBeforeCall(createUser, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for adminDeleteOrganizationRegionQuota
+     * @param organizationId Organization ID (required)
+     * @param regionId Region ID (required)
+     * @param sandboxClass Sandbox class (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Region quota deleted successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminDeleteOrganizationRegionQuotaCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/admin/organizations/{organizationId}/quota/{regionId}/{sandboxClass}"
+            .replace("{" + "organizationId" + "}", localVarApiClient.escapeString(organizationId.toString()))
+            .replace("{" + "regionId" + "}", localVarApiClient.escapeString(regionId.toString()))
+            .replace("{" + "sandboxClass" + "}", localVarApiClient.escapeString(sandboxClass.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "DELETE", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call adminDeleteOrganizationRegionQuotaValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'organizationId' is set
+        if (organizationId == null) {
+            throw new ApiException("Missing the required parameter 'organizationId' when calling adminDeleteOrganizationRegionQuota(Async)");
+        }
+
+        // verify the required parameter 'regionId' is set
+        if (regionId == null) {
+            throw new ApiException("Missing the required parameter 'regionId' when calling adminDeleteOrganizationRegionQuota(Async)");
+        }
+
+        // verify the required parameter 'sandboxClass' is set
+        if (sandboxClass == null) {
+            throw new ApiException("Missing the required parameter 'sandboxClass' when calling adminDeleteOrganizationRegionQuota(Async)");
+        }
+
+        return adminDeleteOrganizationRegionQuotaCall(organizationId, regionId, sandboxClass, _callback);
+
+    }
+
+    /**
+     * Delete organization region quota
+     * 
+     * @param organizationId Organization ID (required)
+     * @param regionId Region ID (required)
+     * @param sandboxClass Sandbox class (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Region quota deleted successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public void adminDeleteOrganizationRegionQuota(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass) throws ApiException {
+        adminDeleteOrganizationRegionQuotaWithHttpInfo(organizationId, regionId, sandboxClass);
+    }
+
+    /**
+     * Delete organization region quota
+     * 
+     * @param organizationId Organization ID (required)
+     * @param regionId Region ID (required)
+     * @param sandboxClass Sandbox class (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Region quota deleted successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> adminDeleteOrganizationRegionQuotaWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass) throws ApiException {
+        okhttp3.Call localVarCall = adminDeleteOrganizationRegionQuotaValidateBeforeCall(organizationId, regionId, sandboxClass, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Delete organization region quota (asynchronously)
+     * 
+     * @param organizationId Organization ID (required)
+     * @param regionId Region ID (required)
+     * @param sandboxClass Sandbox class (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Region quota deleted successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminDeleteOrganizationRegionQuotaAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = adminDeleteOrganizationRegionQuotaValidateBeforeCall(organizationId, regionId, sandboxClass, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
         return localVarCall;
     }
@@ -877,6 +1180,153 @@ public class AdminApi {
 
         okhttp3.Call localVarCall = adminGetMessageAttemptsValidateBeforeCall(organizationId, messageId, _callback);
         Type localVarReturnType = new TypeToken<List<Object>>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for adminGetOrganizationRegionQuota
+     * @param organizationId Organization ID (required)
+     * @param regionId Region ID (required)
+     * @param sandboxClass Sandbox class (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Region quota </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminGetOrganizationRegionQuotaCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/admin/organizations/{organizationId}/quota/{regionId}/{sandboxClass}"
+            .replace("{" + "organizationId" + "}", localVarApiClient.escapeString(organizationId.toString()))
+            .replace("{" + "regionId" + "}", localVarApiClient.escapeString(regionId.toString()))
+            .replace("{" + "sandboxClass" + "}", localVarApiClient.escapeString(sandboxClass.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call adminGetOrganizationRegionQuotaValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'organizationId' is set
+        if (organizationId == null) {
+            throw new ApiException("Missing the required parameter 'organizationId' when calling adminGetOrganizationRegionQuota(Async)");
+        }
+
+        // verify the required parameter 'regionId' is set
+        if (regionId == null) {
+            throw new ApiException("Missing the required parameter 'regionId' when calling adminGetOrganizationRegionQuota(Async)");
+        }
+
+        // verify the required parameter 'sandboxClass' is set
+        if (sandboxClass == null) {
+            throw new ApiException("Missing the required parameter 'sandboxClass' when calling adminGetOrganizationRegionQuota(Async)");
+        }
+
+        return adminGetOrganizationRegionQuotaCall(organizationId, regionId, sandboxClass, _callback);
+
+    }
+
+    /**
+     * Get organization region quota
+     * 
+     * @param organizationId Organization ID (required)
+     * @param regionId Region ID (required)
+     * @param sandboxClass Sandbox class (required)
+     * @return RegionQuota
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Region quota </td><td>  -  </td></tr>
+     </table>
+     */
+    public RegionQuota adminGetOrganizationRegionQuota(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass) throws ApiException {
+        ApiResponse<RegionQuota> localVarResp = adminGetOrganizationRegionQuotaWithHttpInfo(organizationId, regionId, sandboxClass);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Get organization region quota
+     * 
+     * @param organizationId Organization ID (required)
+     * @param regionId Region ID (required)
+     * @param sandboxClass Sandbox class (required)
+     * @return ApiResponse&lt;RegionQuota&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Region quota </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<RegionQuota> adminGetOrganizationRegionQuotaWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass) throws ApiException {
+        okhttp3.Call localVarCall = adminGetOrganizationRegionQuotaValidateBeforeCall(organizationId, regionId, sandboxClass, null);
+        Type localVarReturnType = new TypeToken<RegionQuota>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Get organization region quota (asynchronously)
+     * 
+     * @param organizationId Organization ID (required)
+     * @param regionId Region ID (required)
+     * @param sandboxClass Sandbox class (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Region quota </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminGetOrganizationRegionQuotaAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, final ApiCallback<RegionQuota> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = adminGetOrganizationRegionQuotaValidateBeforeCall(organizationId, regionId, sandboxClass, _callback);
+        Type localVarReturnType = new TypeToken<RegionQuota>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }
@@ -2257,6 +2707,158 @@ public class AdminApi {
         okhttp3.Call localVarCall = adminSetSnapshotGeneralStatusValidateBeforeCall(id, setSnapshotGeneralStatusDto, _callback);
         Type localVarReturnType = new TypeToken<SnapshotDto>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for adminUpdateOrganizationRegionQuota
+     * @param organizationId Organization ID (required)
+     * @param regionId Region ID (required)
+     * @param sandboxClass Sandbox class the updated quota applies to (required)
+     * @param updateOrganizationRegionQuota  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Region quota updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminUpdateOrganizationRegionQuotaCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, @javax.annotation.Nonnull UpdateOrganizationRegionQuota updateOrganizationRegionQuota, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = updateOrganizationRegionQuota;
+
+        // create path and map variables
+        String localVarPath = "/admin/organizations/{organizationId}/quota/{regionId}/{sandboxClass}"
+            .replace("{" + "organizationId" + "}", localVarApiClient.escapeString(organizationId.toString()))
+            .replace("{" + "regionId" + "}", localVarApiClient.escapeString(regionId.toString()))
+            .replace("{" + "sandboxClass" + "}", localVarApiClient.escapeString(sandboxClass.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PATCH", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call adminUpdateOrganizationRegionQuotaValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, @javax.annotation.Nonnull UpdateOrganizationRegionQuota updateOrganizationRegionQuota, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'organizationId' is set
+        if (organizationId == null) {
+            throw new ApiException("Missing the required parameter 'organizationId' when calling adminUpdateOrganizationRegionQuota(Async)");
+        }
+
+        // verify the required parameter 'regionId' is set
+        if (regionId == null) {
+            throw new ApiException("Missing the required parameter 'regionId' when calling adminUpdateOrganizationRegionQuota(Async)");
+        }
+
+        // verify the required parameter 'sandboxClass' is set
+        if (sandboxClass == null) {
+            throw new ApiException("Missing the required parameter 'sandboxClass' when calling adminUpdateOrganizationRegionQuota(Async)");
+        }
+
+        // verify the required parameter 'updateOrganizationRegionQuota' is set
+        if (updateOrganizationRegionQuota == null) {
+            throw new ApiException("Missing the required parameter 'updateOrganizationRegionQuota' when calling adminUpdateOrganizationRegionQuota(Async)");
+        }
+
+        return adminUpdateOrganizationRegionQuotaCall(organizationId, regionId, sandboxClass, updateOrganizationRegionQuota, _callback);
+
+    }
+
+    /**
+     * Update organization region quota
+     * 
+     * @param organizationId Organization ID (required)
+     * @param regionId Region ID (required)
+     * @param sandboxClass Sandbox class the updated quota applies to (required)
+     * @param updateOrganizationRegionQuota  (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Region quota updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public void adminUpdateOrganizationRegionQuota(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, @javax.annotation.Nonnull UpdateOrganizationRegionQuota updateOrganizationRegionQuota) throws ApiException {
+        adminUpdateOrganizationRegionQuotaWithHttpInfo(organizationId, regionId, sandboxClass, updateOrganizationRegionQuota);
+    }
+
+    /**
+     * Update organization region quota
+     * 
+     * @param organizationId Organization ID (required)
+     * @param regionId Region ID (required)
+     * @param sandboxClass Sandbox class the updated quota applies to (required)
+     * @param updateOrganizationRegionQuota  (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Region quota updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> adminUpdateOrganizationRegionQuotaWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, @javax.annotation.Nonnull UpdateOrganizationRegionQuota updateOrganizationRegionQuota) throws ApiException {
+        okhttp3.Call localVarCall = adminUpdateOrganizationRegionQuotaValidateBeforeCall(organizationId, regionId, sandboxClass, updateOrganizationRegionQuota, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Update organization region quota (asynchronously)
+     * 
+     * @param organizationId Organization ID (required)
+     * @param regionId Region ID (required)
+     * @param sandboxClass Sandbox class the updated quota applies to (required)
+     * @param updateOrganizationRegionQuota  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Region quota updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminUpdateOrganizationRegionQuotaAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull String regionId, @javax.annotation.Nonnull SandboxClass sandboxClass, @javax.annotation.Nonnull UpdateOrganizationRegionQuota updateOrganizationRegionQuota, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = adminUpdateOrganizationRegionQuotaValidateBeforeCall(organizationId, regionId, sandboxClass, updateOrganizationRegionQuota, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
         return localVarCall;
     }
     /**

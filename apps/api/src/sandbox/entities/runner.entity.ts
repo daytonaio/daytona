@@ -11,6 +11,7 @@ import { RunnerServiceInfo } from '../common/runner-service-info'
 
 @Entity()
 @Unique(['region', 'name'])
+// TODO: extend with `sandboxClass` once multi-class runner pools become common.
 @Index(['state', 'unschedulable', 'region'])
 export class Runner {
   @PrimaryGeneratedColumn('uuid')
@@ -63,18 +64,17 @@ export class Runner {
   gpuType: string | null
 
   @Column({
-    type: 'enum',
-    enum: SandboxClass,
-    default: SandboxClass.SMALL,
+    type: 'character varying',
+    default: SandboxClass.CONTAINER,
   })
-  class: SandboxClass
+  sandboxClass: SandboxClass = SandboxClass.CONTAINER
 
   @Column({
     type: 'enum',
     enum: RunnerClass,
     default: RunnerClass.CONTAINER,
   })
-  runnerClass: RunnerClass
+  runnerClass = RunnerClass.CONTAINER
 
   @Column({
     type: 'float',
@@ -202,6 +202,7 @@ export class Runner {
     apiUrl?: string
     proxyUrl?: string
     appVersion?: string | null
+    sandboxClass?: SandboxClass
   }) {
     this.region = params.region
     this.name = params.name
@@ -212,7 +213,7 @@ export class Runner {
     this.domain = params.domain ?? null
     this.apiUrl = params.apiUrl
     this.proxyUrl = params.proxyUrl
-    this.class = SandboxClass.SMALL
+    this.sandboxClass = params.sandboxClass ?? SandboxClass.CONTAINER
     this.apiVersion = params.apiVersion
     this.appVersion = params.appVersion ?? null
     this.gpu = null

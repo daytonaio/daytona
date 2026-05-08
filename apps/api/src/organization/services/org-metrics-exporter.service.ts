@@ -93,6 +93,7 @@ export class OrgMetricsExporterService {
       regionQuotas.push({
         organizationId: organization.id,
         regionId: organization.defaultRegionId || 'default',
+        sandboxClass: this.configService.getOrThrow('defaultSandboxClass'),
         totalCpuQuota: -1,
         totalMemoryQuota: -1,
         totalDiskQuota: -1,
@@ -107,21 +108,28 @@ export class OrgMetricsExporterService {
     const metrics: OtlpMetric[] = this.createMetricDefinitions()
 
     for (const rq of regionQuotas) {
-      const usage = await this.organizationUsageService.getSandboxUsageOverview(organization.id, rq.regionId)
+      const usage = await this.organizationUsageService.getSandboxUsageOverview(
+        organization.id,
+        rq.regionId,
+        rq.sandboxClass,
+      )
 
-      const regionAttrs: OtlpAttribute[] = [{ key: 'region.id', value: { stringValue: rq.regionId } }]
+      const attrs: OtlpAttribute[] = [
+        { key: 'region.id', value: { stringValue: rq.regionId } },
+        { key: 'sandbox.class', value: { stringValue: rq.sandboxClass } },
+      ]
 
-      this.addDataPoint(metrics, 'daytona.sandbox.used_cpu', regionAttrs, usage.currentCpuUsage, nowNano)
-      this.addDataPoint(metrics, 'daytona.sandbox.used_ram', regionAttrs, usage.currentMemoryUsage, nowNano)
-      this.addDataPoint(metrics, 'daytona.sandbox.used_storage', regionAttrs, usage.currentDiskUsage, nowNano)
+      this.addDataPoint(metrics, 'daytona.sandbox.used_cpu', attrs, usage.currentCpuUsage, nowNano)
+      this.addDataPoint(metrics, 'daytona.sandbox.used_ram', attrs, usage.currentMemoryUsage, nowNano)
+      this.addDataPoint(metrics, 'daytona.sandbox.used_storage', attrs, usage.currentDiskUsage, nowNano)
       if (rq.totalCpuQuota > 0) {
-        this.addDataPoint(metrics, 'daytona.sandbox.total_cpu', regionAttrs, rq.totalCpuQuota, nowNano)
+        this.addDataPoint(metrics, 'daytona.sandbox.total_cpu', attrs, rq.totalCpuQuota, nowNano)
       }
       if (rq.totalMemoryQuota > 0) {
-        this.addDataPoint(metrics, 'daytona.sandbox.total_ram', regionAttrs, rq.totalMemoryQuota, nowNano)
+        this.addDataPoint(metrics, 'daytona.sandbox.total_ram', attrs, rq.totalMemoryQuota, nowNano)
       }
       if (rq.totalDiskQuota > 0) {
-        this.addDataPoint(metrics, 'daytona.sandbox.total_storage', regionAttrs, rq.totalDiskQuota, nowNano)
+        this.addDataPoint(metrics, 'daytona.sandbox.total_storage', attrs, rq.totalDiskQuota, nowNano)
       }
     }
 

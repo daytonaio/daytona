@@ -30,6 +30,7 @@ import io.daytona.api.client.model.OrganizationUser;
 import io.daytona.api.client.model.OtelConfig;
 import io.daytona.api.client.model.RegenerateApiKeyResponse;
 import io.daytona.api.client.model.Region;
+import io.daytona.api.client.model.SandboxClass;
 import io.daytona.api.client.model.SnapshotManagerCredentials;
 import io.daytona.api.client.model.UpdateOrganizationDefaultRegion;
 import io.daytona.api.client.model.UpdateOrganizationInvitation;
@@ -512,8 +513,9 @@ public class OrganizationsApiTest {
     public void updateOrganizationRegionQuotaTest() throws ApiException {
         String organizationId = null;
         String regionId = null;
+        SandboxClass sandboxClass = null;
         UpdateOrganizationRegionQuota updateOrganizationRegionQuota = null;
-        api.updateOrganizationRegionQuota(organizationId, regionId, updateOrganizationRegionQuota);
+        api.updateOrganizationRegionQuota(organizationId, regionId, sandboxClass, updateOrganizationRegionQuota);
         // TODO: test validations
     }
 

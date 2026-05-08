@@ -77,6 +77,7 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.create_organization import CreateOrganization
     from daytona_api_client_async.models.create_organization_invitation import CreateOrganizationInvitation
     from daytona_api_client_async.models.create_organization_quota import CreateOrganizationQuota
+    from daytona_api_client_async.models.create_organization_region_quota import CreateOrganizationRegionQuota
     from daytona_api_client_async.models.create_organization_role import CreateOrganizationRole
     from daytona_api_client_async.models.create_region import CreateRegion
     from daytona_api_client_async.models.create_region_response import CreateRegionResponse
@@ -291,6 +292,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "CreateOrganization": "daytona_api_client_async.models.create_organization",
     "CreateOrganizationInvitation": "daytona_api_client_async.models.create_organization_invitation",
     "CreateOrganizationQuota": "daytona_api_client_async.models.create_organization_quota",
+    "CreateOrganizationRegionQuota": "daytona_api_client_async.models.create_organization_region_quota",
     "CreateOrganizationRole": "daytona_api_client_async.models.create_organization_role",
     "CreateRegion": "daytona_api_client_async.models.create_region",
     "CreateRegionResponse": "daytona_api_client_async.models.create_region_response",
@@ -519,6 +521,7 @@ __all__ = [
     "CreateOrganization",
     "CreateOrganizationInvitation",
     "CreateOrganizationQuota",
+    "CreateOrganizationRegionQuota",
     "CreateOrganizationRole",
     "CreateRegion",
     "CreateRegionResponse",

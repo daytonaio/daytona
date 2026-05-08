@@ -36,8 +36,6 @@ type CreateSandbox struct {
 	NetworkBlockAll *bool `json:"networkBlockAll,omitempty"`
 	// Comma-separated list of allowed CIDR network addresses for the sandbox
 	NetworkAllowList *string `json:"networkAllowList,omitempty"`
-	// The sandbox class type
-	Class *string `json:"class,omitempty"`
 	// The target (region) where the sandbox will be created
 	Target *string `json:"target,omitempty"`
 	// CPU cores allocated to the sandbox
@@ -334,38 +332,6 @@ func (o *CreateSandbox) HasNetworkAllowList() bool {
 // SetNetworkAllowList gets a reference to the given string and assigns it to the NetworkAllowList field.
 func (o *CreateSandbox) SetNetworkAllowList(v string) {
 	o.NetworkAllowList = &v
-}
-
-// GetClass returns the Class field value if set, zero value otherwise.
-func (o *CreateSandbox) GetClass() string {
-	if o == nil || IsNil(o.Class) {
-		var ret string
-		return ret
-	}
-	return *o.Class
-}
-
-// GetClassOk returns a tuple with the Class field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *CreateSandbox) GetClassOk() (*string, bool) {
-	if o == nil || IsNil(o.Class) {
-		return nil, false
-	}
-	return o.Class, true
-}
-
-// HasClass returns a boolean if a field has been set.
-func (o *CreateSandbox) HasClass() bool {
-	if o != nil && !IsNil(o.Class) {
-		return true
-	}
-
-	return false
-}
-
-// SetClass gets a reference to the given string and assigns it to the Class field.
-func (o *CreateSandbox) SetClass(v string) {
-	o.Class = &v
 }
 
 // GetTarget returns the Target field value if set, zero value otherwise.
@@ -722,9 +688,6 @@ func (o CreateSandbox) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.NetworkAllowList) {
 		toSerialize["networkAllowList"] = o.NetworkAllowList
 	}
-	if !IsNil(o.Class) {
-		toSerialize["class"] = o.Class
-	}
 	if !IsNil(o.Target) {
 		toSerialize["target"] = o.Target
 	}
@@ -785,7 +748,6 @@ func (o *CreateSandbox) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "public")
 		delete(additionalProperties, "networkBlockAll")
 		delete(additionalProperties, "networkAllowList")
-		delete(additionalProperties, "class")
 		delete(additionalProperties, "target")
 		delete(additionalProperties, "cpu")
 		delete(additionalProperties, "gpu")

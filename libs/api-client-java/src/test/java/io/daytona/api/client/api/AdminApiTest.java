@@ -17,16 +17,20 @@ import io.daytona.api.client.ApiException;
 import io.daytona.api.client.model.AdminCreateRunner;
 import io.daytona.api.client.model.AdminGetWebhookStatus200Response;
 import java.math.BigDecimal;
+import io.daytona.api.client.model.CreateOrganizationRegionQuota;
 import io.daytona.api.client.model.CreateRunnerResponse;
 import io.daytona.api.client.model.CreateUser;
 import io.daytona.api.client.model.DockerRegistry;
 import java.time.OffsetDateTime;
 import io.daytona.api.client.model.PaginatedAuditLogs;
+import io.daytona.api.client.model.RegionQuota;
 import io.daytona.api.client.model.RunnerFull;
 import io.daytona.api.client.model.Sandbox;
+import io.daytona.api.client.model.SandboxClass;
 import io.daytona.api.client.model.SendWebhookDto;
 import io.daytona.api.client.model.SetSnapshotGeneralStatusDto;
 import io.daytona.api.client.model.SnapshotDto;
+import io.daytona.api.client.model.UpdateOrganizationRegionQuota;
 import io.daytona.api.client.model.User;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -57,6 +61,21 @@ public class AdminApiTest {
     }
 
     /**
+     * Create organization region quota
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void adminCreateOrganizationRegionQuotaTest() throws ApiException {
+        String organizationId = null;
+        String regionId = null;
+        SandboxClass sandboxClass = null;
+        CreateOrganizationRegionQuota createOrganizationRegionQuota = null;
+        RegionQuota response = api.adminCreateOrganizationRegionQuota(organizationId, regionId, sandboxClass, createOrganizationRegionQuota);
+        // TODO: test validations
+    }
+
+    /**
      * Create runner
      *
      * @throws ApiException if the Api call fails
@@ -77,6 +96,20 @@ public class AdminApiTest {
     public void adminCreateUserTest() throws ApiException {
         CreateUser createUser = null;
         api.adminCreateUser(createUser);
+        // TODO: test validations
+    }
+
+    /**
+     * Delete organization region quota
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void adminDeleteOrganizationRegionQuotaTest() throws ApiException {
+        String organizationId = null;
+        String regionId = null;
+        SandboxClass sandboxClass = null;
+        api.adminDeleteOrganizationRegionQuota(organizationId, regionId, sandboxClass);
         // TODO: test validations
     }
 
@@ -118,6 +151,20 @@ public class AdminApiTest {
         String organizationId = null;
         String messageId = null;
         List<Object> response = api.adminGetMessageAttempts(organizationId, messageId);
+        // TODO: test validations
+    }
+
+    /**
+     * Get organization region quota
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void adminGetOrganizationRegionQuotaTest() throws ApiException {
+        String organizationId = null;
+        String regionId = null;
+        SandboxClass sandboxClass = null;
+        RegionQuota response = api.adminGetOrganizationRegionQuota(organizationId, regionId, sandboxClass);
         // TODO: test validations
     }
 
@@ -250,6 +297,21 @@ public class AdminApiTest {
         String id = null;
         SetSnapshotGeneralStatusDto setSnapshotGeneralStatusDto = null;
         SnapshotDto response = api.adminSetSnapshotGeneralStatus(id, setSnapshotGeneralStatusDto);
+        // TODO: test validations
+    }
+
+    /**
+     * Update organization region quota
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void adminUpdateOrganizationRegionQuotaTest() throws ApiException {
+        String organizationId = null;
+        String regionId = null;
+        SandboxClass sandboxClass = null;
+        UpdateOrganizationRegionQuota updateOrganizationRegionQuota = null;
+        api.adminUpdateOrganizationRegionQuota(organizationId, regionId, sandboxClass, updateOrganizationRegionQuota);
         // TODO: test validations
     }
 
