@@ -278,6 +278,8 @@ export class RunnerService {
   }
 
   async findAvailableRunners(params: GetRunnerParams): Promise<Runner[]> {
+    const isGpuRequest = (params.gpu ?? 0) > 0
+
     const runnerFilter: FindOptionsWhere<Runner> = {
       state: RunnerState.READY,
       unschedulable: Not(true),
@@ -287,9 +289,20 @@ export class RunnerService {
         : MoreThanOrEqual(this.configService.getOrThrow('runnerScore.thresholds.availability')),
     }
 
-    const excludedRunnerIds = params.excludedRunnerIds?.length
-      ? params.excludedRunnerIds.filter((id) => !!id)
-      : undefined
+    if (isGpuRequest) {
+      runnerFilter.gpu = MoreThanOrEqual(params.gpu)
+    }
+
+    const excludedRunnerIds = new Set((params.excludedRunnerIds ?? []).filter((id): id is string => !!id))
+
+    // GPU sandboxes get exclusive ownership of a runner: skip any runner that
+    // already hosts an active sandbox, regardless of whether that sandbox uses GPU.
+    if (isGpuRequest) {
+      const occupiedRunnerIds = await this.getRunnersWithActiveSandbox()
+      for (const id of occupiedRunnerIds) {
+        excludedRunnerIds.add(id)
+      }
+    }
 
     if (params.snapshotRef !== undefined) {
       const snapshotRunners = await this.snapshotRunnerRepository.find({
@@ -299,19 +312,17 @@ export class RunnerService {
         },
       })
 
-      let runnerIds = snapshotRunners.map((snapshotRunner) => snapshotRunner.runnerId)
-
-      if (excludedRunnerIds?.length) {
-        runnerIds = runnerIds.filter((id) => !excludedRunnerIds.includes(id))
-      }
+      const runnerIds = snapshotRunners
+        .map((snapshotRunner) => snapshotRunner.runnerId)
+        .filter((id) => !excludedRunnerIds.has(id))
 
       if (!runnerIds.length) {
         return []
       }
 
       runnerFilter.id = In(runnerIds)
-    } else if (excludedRunnerIds?.length) {
-      runnerFilter.id = Not(In(excludedRunnerIds))
+    } else if (excludedRunnerIds.size) {
+      runnerFilter.id = Not(In(Array.from(excludedRunnerIds)))
     }
 
     if (params.regions?.length) {
@@ -860,6 +871,37 @@ export class RunnerService {
     return runners.map((item) => item.runnerId).filter((id): id is string => !!id)
   }
 
+  /**
+   * Returns runner IDs that currently host at least one sandbox in a
+   * non-terminal state. Used by the GPU scheduler to enforce
+   * one-sandbox-per-runner exclusivity.
+   */
+  async getRunnersWithActiveSandbox(): Promise<string[]> {
+    const activeStates: SandboxState[] = [
+      SandboxState.CREATING,
+      SandboxState.RESTORING,
+      SandboxState.STARTED,
+      SandboxState.STARTING,
+      SandboxState.STOPPING,
+      SandboxState.STOPPED,
+      SandboxState.BUILDING_SNAPSHOT,
+      SandboxState.PULLING_SNAPSHOT,
+      SandboxState.UNKNOWN,
+      SandboxState.RESIZING,
+      SandboxState.SNAPSHOTTING,
+      SandboxState.FORKING,
+    ]
+
+    const rows = await this.sandboxRepository
+      .createQueryBuilder('sandbox')
+      .select('DISTINCT sandbox.runnerId', 'runnerId')
+      .where('sandbox.runnerId IS NOT NULL')
+      .andWhere('sandbox.state IN (:...states)', { states: activeStates })
+      .getRawMany()
+
+    return rows.map((r) => r.runnerId).filter((id): id is string => !!id)
+  }
+
   async getRunnersBySnapshotRef(ref: string): Promise<RunnerSnapshotDto[]> {
     const snapshotRunners = await this.snapshotRunnerRepository.find({
       where: {
@@ -1079,6 +1121,9 @@ export class GetRunnerParams {
   snapshotRef?: string
   excludedRunnerIds?: string[]
   availabilityScoreThreshold?: number
+  // When > 0, only consider runners that have at least this much GPU capacity
+  // and do not currently host any active sandbox (one-GPU-sandbox-per-runner rule).
+  gpu?: number
 }
 
 interface AvailabilityScoreParams {
