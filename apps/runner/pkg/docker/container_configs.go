@@ -161,6 +161,23 @@ func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, v
 		}
 	}
 
+	if d.gpuEnabled {
+		nvidiaDevices := []string{
+			"/dev/nvidia0",
+			"/dev/nvidiactl",
+			"/dev/nvidia-uvm",
+			"/dev/nvidia-uvm-tools",
+			"/dev/nvidia-modeset",
+		}
+		for _, dev := range nvidiaDevices {
+			hostConfig.Devices = append(hostConfig.Devices, container.DeviceMapping{
+				PathOnHost:        dev,
+				PathInContainer:   dev,
+				CgroupPermissions: "rwm",
+			})
+		}
+	}
+
 	return hostConfig, nil
 }
 
