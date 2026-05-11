@@ -38,6 +38,7 @@ import { runnerLookupCacheKeyById, RUNNER_LOOKUP_CACHE_TTL_MS } from '../utils/r
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { RunnerServiceInfo } from '../common/runner-service-info'
+import { SANDBOX_STATES_CONSUMING_COMPUTE } from '../../organization/constants/sandbox-states-consuming-compute.constant'
 
 @Injectable()
 export class RunnerService {
@@ -278,8 +279,6 @@ export class RunnerService {
   }
 
   async findAvailableRunners(params: GetRunnerParams): Promise<Runner[]> {
-    const isGpuRequest = (params.gpu ?? 0) > 0
-
     const runnerFilter: FindOptionsWhere<Runner> = {
       state: RunnerState.READY,
       unschedulable: Not(true),
@@ -289,7 +288,7 @@ export class RunnerService {
         : MoreThanOrEqual(this.configService.getOrThrow('runnerScore.thresholds.availability')),
     }
 
-    if (isGpuRequest) {
+    if (params.gpu) {
       runnerFilter.gpu = MoreThanOrEqual(params.gpu)
     }
 
@@ -297,7 +296,7 @@ export class RunnerService {
 
     // GPU sandboxes get exclusive ownership of a runner: skip any runner that
     // already hosts an active sandbox, regardless of whether that sandbox uses GPU.
-    if (isGpuRequest) {
+    if (params.gpu) {
       const occupiedRunnerIds = await this.getRunnersWithActiveSandbox()
       for (const id of occupiedRunnerIds) {
         excludedRunnerIds.add(id)
@@ -872,31 +871,17 @@ export class RunnerService {
   }
 
   /**
-   * Returns runner IDs that currently host at least one sandbox in a
+   * Returns runner IDs that currently host at least one GPU sandbox in a
    * non-terminal state. Used by the GPU scheduler to enforce
-   * one-sandbox-per-runner exclusivity.
+   * one-gpu-sandbox-per-runner exclusivity.
    */
   async getRunnersWithActiveSandbox(): Promise<string[]> {
-    const activeStates: SandboxState[] = [
-      SandboxState.CREATING,
-      SandboxState.RESTORING,
-      SandboxState.STARTED,
-      SandboxState.STARTING,
-      SandboxState.STOPPING,
-      SandboxState.STOPPED,
-      SandboxState.BUILDING_SNAPSHOT,
-      SandboxState.PULLING_SNAPSHOT,
-      SandboxState.UNKNOWN,
-      SandboxState.RESIZING,
-      SandboxState.SNAPSHOTTING,
-      SandboxState.FORKING,
-    ]
-
     const rows = await this.sandboxRepository
       .createQueryBuilder('sandbox')
       .select('DISTINCT sandbox.runnerId', 'runnerId')
       .where('sandbox.runnerId IS NOT NULL')
-      .andWhere('sandbox.state IN (:...states)', { states: activeStates })
+      .andWhere('sandbox.gpu > 0')
+      .andWhere('sandbox.state IN (:...states)', { states: SANDBOX_STATES_CONSUMING_COMPUTE })
       .getRawMany()
 
     return rows.map((r) => r.runnerId).filter((id): id is string => !!id)
