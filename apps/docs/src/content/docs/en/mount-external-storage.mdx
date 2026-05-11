@@ -2508,21 +2508,799 @@ public class App {
 
 ## Mount a MesaFS filesystem
 
-[MesaFS ↗](https://mesa.dev) is an agent-native filesystem designed for the same workloads Daytona sandboxes run — multi-agent setups, shared working memory, structured artifacts, and long-lived state across runs.
+[MesaFS ↗](https://mesa.dev) is an agent-native versioned filesystem from Mesa, purpose-built for the same workloads Daytona sandboxes run — parallel agent swarms, shared working memory, structured artifacts, and long-lived state across runs. Unlike the cloud-bucket providers above, you mount a Mesa **repository**: a Git-compatible versioned working directory with sub-50ms reads/writes, instant fork/branch operations, and unlimited concurrent writers.
 
-A dedicated **MesaFS + Daytona guide** is in the works that walks through a real use case end-to-end. In the meantime, the mounting pattern follows the same shape as the providers above:
+The Mesa setup follows the same shape as the bucket providers but uses the Mesa CLI rather than a FUSE-specific tool: install the CLI in your sandbox, authenticate with your API key, and run `mesa mount --daemonize` to mount your repos at `/home/daytona/mesa/mnt/<org>/<repo>`.
 
-1. Pre-install the MesaFS client in your snapshot via `Image.base("daytonaio/sandbox").runCommands(...)`, or install it at runtime through `sandbox.process`.
-2. Launch a sandbox and pass MesaFS credentials in `envVars` (or upload a credential file via `sandbox.fs.uploadFile`).
-3. Run the MesaFS mount command via `sandbox.process`.
+### Pre-baked snapshot
 
-See the [MesaFS documentation ↗](https://mesa.dev) for the install steps and credential setup.
+#### Build the snapshot
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+from daytona import CreateSnapshotParams, Daytona, Image
+
+daytona = Daytona()
+
+image = (
+  Image.base("daytonaio/sandbox")
+  .run_commands(
+    "sudo apt-get update "
+    "&& sudo apt-get install -y --no-install-recommends "
+    "ca-certificates fuse3 libssl3 openssl "
+    "&& sudo update-ca-certificates",
+    "curl -fsSL https://mesa.dev/install.sh | sh "
+    "&& sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa",
+    "sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf",
+  )
+)
+
+daytona.snapshot.create(
+    CreateSnapshotParams(name="fuse-mesa", image=image),
+    on_logs=lambda chunk: print(chunk, end="", flush=True),
+)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona, Image } from '@daytona/sdk'
+
+const daytona = new Daytona()
+
+const image = Image.base('daytonaio/sandbox').runCommands(
+  'sudo apt-get update ' +
+    '&& sudo apt-get install -y --no-install-recommends ' +
+    'ca-certificates fuse3 libssl3 openssl ' +
+    '&& sudo update-ca-certificates',
+  'curl -fsSL https://mesa.dev/install.sh | sh ' +
+    '&& sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa',
+  "sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf",
+)
+
+await daytona.snapshot.create(
+  { name: 'fuse-mesa', image },
+  { onLogs: console.log },
+)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+image = Daytona::Image
+  .base('daytonaio/sandbox')
+  .run_commands(
+    'sudo apt-get update ' \
+    '&& sudo apt-get install -y --no-install-recommends ' \
+    'ca-certificates fuse3 libssl3 openssl ' \
+    '&& sudo update-ca-certificates',
+    'curl -fsSL https://mesa.dev/install.sh | sh ' \
+    '&& sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa',
+    "sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf"
+  )
+
+daytona.snapshot.create(
+  Daytona::CreateSnapshotParams.new(name: 'fuse-mesa', image: image),
+  on_logs: proc { |chunk| print(chunk) }
+)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+image := daytona.Base("daytonaio/sandbox").
+	Run("sudo apt-get update && sudo apt-get install -y --no-install-recommends " +
+		"ca-certificates fuse3 libssl3 openssl && sudo update-ca-certificates").
+	Run("curl -fsSL https://mesa.dev/install.sh | sh && " +
+		"sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa").
+	Run(`sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf`)
+
+_, logChan, err := client.Snapshot.Create(ctx, &types.CreateSnapshotParams{
+	Name:  "fuse-mesa",
+	Image: image,
+})
+if err != nil {
+	log.Fatal(err)
+}
+for line := range logChan {
+	fmt.Print(line)
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Image;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            Image image = Image.base("daytonaio/sandbox")
+                .runCommands(
+                    "sudo apt-get update "
+                        + "&& sudo apt-get install -y --no-install-recommends "
+                        + "ca-certificates fuse3 libssl3 openssl "
+                        + "&& sudo update-ca-certificates",
+                    "curl -fsSL https://mesa.dev/install.sh | sh "
+                        + "&& sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa",
+                    "sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf"
+                );
+
+            daytona.snapshot().create("fuse-mesa", image, System.out::println);
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+#### Launch and mount
+
+Pass `MESA_API_KEY` and your Mesa organization slug to the sandbox via `envVars`. The sandbox writes a TOML config, authenticates the Mesa CLI, and mounts your repos at `/home/daytona/mesa/mnt/<org>/<repo>`.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+import os
+from daytona import CreateSandboxFromSnapshotParams, Daytona
+
+daytona = Daytona()
+
+org = os.environ["MESA_ORG"]
+repo = "my-workspace"
+mount_path = f"/home/daytona/mesa/mnt/{org}/{repo}"
+config_path = "/home/daytona/.config/mesa/config.toml"
+
+sandbox = daytona.create(
+    CreateSandboxFromSnapshotParams(
+        snapshot="fuse-mesa",
+        env_vars={
+            "MESA_API_KEY": os.environ["MESA_API_KEY"],
+            "MESA_ORG": org,
+        },
+    )
+)
+
+config = f'''mount-point = "/home/daytona/mesa/mnt"
+
+[secrets]
+backend = "plaintext-file"
+
+[organizations.{org}]
+'''
+
+sandbox.process.exec(f"mkdir -p $(dirname {config_path})")
+sandbox.fs.upload_file(config.encode(), config_path)
+
+sandbox.process.exec("mesa auth set-key --org $MESA_ORG $MESA_API_KEY")
+sandbox.process.exec("mesa mount --daemonize")
+
+response = sandbox.process.exec(f"ls {mount_path}")
+print(response.result)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytona/sdk'
+
+const daytona = new Daytona()
+
+const org = process.env.MESA_ORG!
+const repo = 'my-workspace'
+const mountPath = `/home/daytona/mesa/mnt/${org}/${repo}`
+const configPath = '/home/daytona/.config/mesa/config.toml'
+
+const sandbox = await daytona.create({
+  snapshot: 'fuse-mesa',
+  envVars: {
+    MESA_API_KEY: process.env.MESA_API_KEY!,
+    MESA_ORG: org,
+  },
+})
+
+const config = `mount-point = "/home/daytona/mesa/mnt"
+
+[secrets]
+backend = "plaintext-file"
+
+[organizations.${org}]
+`
+
+await sandbox.process.executeCommand(`mkdir -p $(dirname ${configPath})`)
+await sandbox.fs.uploadFile(Buffer.from(config), configPath)
+
+await sandbox.process.executeCommand('mesa auth set-key --org $MESA_ORG $MESA_API_KEY')
+await sandbox.process.executeCommand('mesa mount --daemonize')
+
+const response = await sandbox.process.executeCommand(`ls ${mountPath}`)
+console.log(response.result)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+org = ENV.fetch('MESA_ORG')
+repo = 'my-workspace'
+mount_path = "/home/daytona/mesa/mnt/#{org}/#{repo}"
+config_path = '/home/daytona/.config/mesa/config.toml'
+
+sandbox = daytona.create(
+  Daytona::CreateSandboxFromSnapshotParams.new(
+    snapshot: 'fuse-mesa',
+    env_vars: {
+      'MESA_API_KEY' => ENV.fetch('MESA_API_KEY'),
+      'MESA_ORG' => org
+    }
+  )
+)
+
+config = <<~TOML
+  mount-point = "/home/daytona/mesa/mnt"
+
+  [secrets]
+  backend = "plaintext-file"
+
+  [organizations.#{org}]
+TOML
+
+sandbox.process.exec(command: "mkdir -p $(dirname #{config_path})")
+sandbox.fs.upload_file(config, config_path)
+
+sandbox.process.exec(command: 'mesa auth set-key --org $MESA_ORG $MESA_API_KEY')
+sandbox.process.exec(command: 'mesa mount --daemonize')
+
+response = sandbox.process.exec(command: "ls #{mount_path}")
+puts response.result
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+org := os.Getenv("MESA_ORG")
+repo := "my-workspace"
+mountPath := fmt.Sprintf("/home/daytona/mesa/mnt/%s/%s", org, repo)
+configPath := "/home/daytona/.config/mesa/config.toml"
+
+sandbox, err := client.Create(ctx, types.SnapshotParams{
+	Snapshot: "fuse-mesa",
+	SandboxBaseParams: types.SandboxBaseParams{
+		EnvVars: map[string]string{
+			"MESA_API_KEY": os.Getenv("MESA_API_KEY"),
+			"MESA_ORG":     org,
+		},
+	},
+})
+if err != nil {
+	log.Fatal(err)
+}
+
+config := fmt.Sprintf(`mount-point = "/home/daytona/mesa/mnt"
+
+[secrets]
+backend = "plaintext-file"
+
+[organizations.%s]
+`, org)
+
+if _, err := sandbox.Process.ExecuteCommand(ctx, "mkdir -p $(dirname "+configPath+")"); err != nil {
+	log.Fatal(err)
+}
+if err := sandbox.FileSystem.UploadFile(ctx, []byte(config), configPath); err != nil {
+	log.Fatal(err)
+}
+
+if _, err := sandbox.Process.ExecuteCommand(ctx, "mesa auth set-key --org $MESA_ORG $MESA_API_KEY"); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx, "mesa mount --daemonize"); err != nil {
+	log.Fatal(err)
+}
+
+response, err := sandbox.Process.ExecuteCommand(ctx, "ls "+mountPath)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(response.Result)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+import io.daytona.sdk.model.ExecuteResponse;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            String org = System.getenv("MESA_ORG");
+            String repo = "my-workspace";
+            String mountPath = "/home/daytona/mesa/mnt/" + org + "/" + repo;
+            String configPath = "/home/daytona/.config/mesa/config.toml";
+
+            CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
+            params.setSnapshot("fuse-mesa");
+            params.setEnvVars(Map.of(
+                "MESA_API_KEY", System.getenv("MESA_API_KEY"),
+                "MESA_ORG", org
+            ));
+            Sandbox sandbox = daytona.create(params);
+
+            String config = "mount-point = \"/home/daytona/mesa/mnt\"\n\n"
+                + "[secrets]\n"
+                + "backend = \"plaintext-file\"\n\n"
+                + "[organizations." + org + "]\n";
+
+            sandbox.getProcess().executeCommand("mkdir -p $(dirname " + configPath + ")");
+            sandbox.fs.uploadFile(config.getBytes(StandardCharsets.UTF_8), configPath);
+
+            sandbox.getProcess().executeCommand(
+                "mesa auth set-key --org $MESA_ORG $MESA_API_KEY");
+            sandbox.getProcess().executeCommand("mesa mount --daemonize");
+
+            ExecuteResponse response = sandbox.getProcess().executeCommand("ls " + mountPath);
+            System.out.println(response.getResult());
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Runtime install
+
+Skip the snapshot and install the Mesa CLI when the sandbox starts. Same end result, slower cold start.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+import os
+from daytona import CreateSandboxBaseParams, Daytona
+
+daytona = Daytona()
+
+org = os.environ["MESA_ORG"]
+repo = "my-workspace"
+mount_path = f"/home/daytona/mesa/mnt/{org}/{repo}"
+config_path = "/home/daytona/.config/mesa/config.toml"
+
+sandbox = daytona.create(
+    CreateSandboxBaseParams(
+        env_vars={
+            "MESA_API_KEY": os.environ["MESA_API_KEY"],
+            "MESA_ORG": org,
+        },
+    )
+)
+
+sandbox.process.exec(
+    "sudo apt-get update "
+    "&& sudo apt-get install -y --no-install-recommends "
+    "ca-certificates fuse3 libssl3 openssl "
+    "&& sudo update-ca-certificates"
+)
+sandbox.process.exec(
+    "curl -fsSL https://mesa.dev/install.sh | sh "
+    "&& sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa"
+)
+sandbox.process.exec(
+    "sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf"
+)
+
+config = f'''mount-point = "/home/daytona/mesa/mnt"
+
+[secrets]
+backend = "plaintext-file"
+
+[organizations.{org}]
+'''
+
+sandbox.process.exec(f"mkdir -p $(dirname {config_path})")
+sandbox.fs.upload_file(config.encode(), config_path)
+
+sandbox.process.exec("mesa auth set-key --org $MESA_ORG $MESA_API_KEY")
+sandbox.process.exec("mesa mount --daemonize")
+
+response = sandbox.process.exec(f"ls {mount_path}")
+print(response.result)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytona/sdk'
+
+const daytona = new Daytona()
+
+const org = process.env.MESA_ORG!
+const repo = 'my-workspace'
+const mountPath = `/home/daytona/mesa/mnt/${org}/${repo}`
+const configPath = '/home/daytona/.config/mesa/config.toml'
+
+const sandbox = await daytona.create({
+  envVars: {
+    MESA_API_KEY: process.env.MESA_API_KEY!,
+    MESA_ORG: org,
+  },
+})
+
+await sandbox.process.executeCommand(
+  'sudo apt-get update ' +
+    '&& sudo apt-get install -y --no-install-recommends ' +
+    'ca-certificates fuse3 libssl3 openssl ' +
+    '&& sudo update-ca-certificates',
+)
+await sandbox.process.executeCommand(
+  'curl -fsSL https://mesa.dev/install.sh | sh ' +
+    '&& sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa',
+)
+await sandbox.process.executeCommand(
+  "sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf",
+)
+
+const config = `mount-point = "/home/daytona/mesa/mnt"
+
+[secrets]
+backend = "plaintext-file"
+
+[organizations.${org}]
+`
+
+await sandbox.process.executeCommand(`mkdir -p $(dirname ${configPath})`)
+await sandbox.fs.uploadFile(Buffer.from(config), configPath)
+
+await sandbox.process.executeCommand('mesa auth set-key --org $MESA_ORG $MESA_API_KEY')
+await sandbox.process.executeCommand('mesa mount --daemonize')
+
+const response = await sandbox.process.executeCommand(`ls ${mountPath}`)
+console.log(response.result)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+org = ENV.fetch('MESA_ORG')
+repo = 'my-workspace'
+mount_path = "/home/daytona/mesa/mnt/#{org}/#{repo}"
+config_path = '/home/daytona/.config/mesa/config.toml'
+
+sandbox = daytona.create(
+  Daytona::CreateSandboxBaseParams.new(
+    env_vars: {
+      'MESA_API_KEY' => ENV.fetch('MESA_API_KEY'),
+      'MESA_ORG' => org
+    }
+  )
+)
+
+sandbox.process.exec(
+  command: 'sudo apt-get update ' \
+           '&& sudo apt-get install -y --no-install-recommends ' \
+           'ca-certificates fuse3 libssl3 openssl ' \
+           '&& sudo update-ca-certificates'
+)
+sandbox.process.exec(
+  command: 'curl -fsSL https://mesa.dev/install.sh | sh ' \
+           '&& sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa'
+)
+sandbox.process.exec(
+  command: "sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf"
+)
+
+config = <<~TOML
+  mount-point = "/home/daytona/mesa/mnt"
+
+  [secrets]
+  backend = "plaintext-file"
+
+  [organizations.#{org}]
+TOML
+
+sandbox.process.exec(command: "mkdir -p $(dirname #{config_path})")
+sandbox.fs.upload_file(config, config_path)
+
+sandbox.process.exec(command: 'mesa auth set-key --org $MESA_ORG $MESA_API_KEY')
+sandbox.process.exec(command: 'mesa mount --daemonize')
+
+response = sandbox.process.exec(command: "ls #{mount_path}")
+puts response.result
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+org := os.Getenv("MESA_ORG")
+repo := "my-workspace"
+mountPath := fmt.Sprintf("/home/daytona/mesa/mnt/%s/%s", org, repo)
+configPath := "/home/daytona/.config/mesa/config.toml"
+
+sandbox, err := client.Create(ctx, types.SnapshotParams{
+	SandboxBaseParams: types.SandboxBaseParams{
+		EnvVars: map[string]string{
+			"MESA_API_KEY": os.Getenv("MESA_API_KEY"),
+			"MESA_ORG":     org,
+		},
+	},
+})
+if err != nil {
+	log.Fatal(err)
+}
+
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	"sudo apt-get update && sudo apt-get install -y --no-install-recommends "+
+		"ca-certificates fuse3 libssl3 openssl && sudo update-ca-certificates"); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	"curl -fsSL https://mesa.dev/install.sh | sh && "+
+		"sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa"); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	`sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf`); err != nil {
+	log.Fatal(err)
+}
+
+config := fmt.Sprintf(`mount-point = "/home/daytona/mesa/mnt"
+
+[secrets]
+backend = "plaintext-file"
+
+[organizations.%s]
+`, org)
+
+if _, err := sandbox.Process.ExecuteCommand(ctx, "mkdir -p $(dirname "+configPath+")"); err != nil {
+	log.Fatal(err)
+}
+if err := sandbox.FileSystem.UploadFile(ctx, []byte(config), configPath); err != nil {
+	log.Fatal(err)
+}
+
+if _, err := sandbox.Process.ExecuteCommand(ctx, "mesa auth set-key --org $MESA_ORG $MESA_API_KEY"); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx, "mesa mount --daemonize"); err != nil {
+	log.Fatal(err)
+}
+
+response, err := sandbox.Process.ExecuteCommand(ctx, "ls "+mountPath)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(response.Result)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+import io.daytona.sdk.model.ExecuteResponse;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            String org = System.getenv("MESA_ORG");
+            String repo = "my-workspace";
+            String mountPath = "/home/daytona/mesa/mnt/" + org + "/" + repo;
+            String configPath = "/home/daytona/.config/mesa/config.toml";
+
+            CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
+            params.setEnvVars(Map.of(
+                "MESA_API_KEY", System.getenv("MESA_API_KEY"),
+                "MESA_ORG", org
+            ));
+            Sandbox sandbox = daytona.create(params);
+
+            sandbox.getProcess().executeCommand(
+                "sudo apt-get update "
+                    + "&& sudo apt-get install -y --no-install-recommends "
+                    + "ca-certificates fuse3 libssl3 openssl "
+                    + "&& sudo update-ca-certificates");
+            sandbox.getProcess().executeCommand(
+                "curl -fsSL https://mesa.dev/install.sh | sh "
+                    + "&& sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa");
+            sandbox.getProcess().executeCommand(
+                "sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf");
+
+            String config = "mount-point = \"/home/daytona/mesa/mnt\"\n\n"
+                + "[secrets]\n"
+                + "backend = \"plaintext-file\"\n\n"
+                + "[organizations." + org + "]\n";
+
+            sandbox.getProcess().executeCommand("mkdir -p $(dirname " + configPath + ")");
+            sandbox.fs.uploadFile(config.getBytes(StandardCharsets.UTF_8), configPath);
+
+            sandbox.getProcess().executeCommand(
+                "mesa auth set-key --org $MESA_ORG $MESA_API_KEY");
+            sandbox.getProcess().executeCommand("mesa mount --daemonize");
+
+            ExecuteResponse response = sandbox.getProcess().executeCommand("ls " + mountPath);
+            System.out.println(response.getResult());
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Production: scoped ephemeral keys
+
+For non-test workloads, Mesa recommends minting a **short-lived, scoped API key per sandbox session** rather than passing your long-lived `MESA_API_KEY` into the sandbox. Use the [Mesa SDK ↗](https://docs.mesa.dev) on your trusted host to derive an ephemeral key from your long-lived one — the long-lived key never leaves your host process. Mesa SDKs are available for TypeScript, Python, and Rust; for other languages, use the [Mesa REST API ↗](https://docs.mesa.dev/content/api-reference/overview) directly.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+import asyncio
+import os
+from daytona import CreateSandboxFromSnapshotParams, Daytona
+from mesa_sdk import Mesa
+
+
+async def mint_ephemeral_key() -> str:
+    async with Mesa(api_key=os.environ["MESA_API_KEY"], org=os.environ["MESA_ORG"]) as mesa:
+        key = await mesa.api_keys.create(
+            name="sandbox-session",
+            scopes=["read", "write"],
+            expires_in_seconds=3600,
+        )
+        return key.key
+
+
+ephemeral_key = asyncio.run(mint_ephemeral_key())
+
+daytona = Daytona()
+sandbox = daytona.create(
+    CreateSandboxFromSnapshotParams(
+        snapshot="fuse-mesa",
+        env_vars={
+            "MESA_API_KEY": ephemeral_key,
+            "MESA_ORG": os.environ["MESA_ORG"],
+        },
+    )
+)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytona/sdk'
+import { Mesa } from '@mesadev/sdk'
+
+const mesa = new Mesa({ apiKey: process.env.MESA_API_KEY!, org: process.env.MESA_ORG! })
+
+const ephemeralKey = await mesa.apiKeys.create({
+  name: 'sandbox-session',
+  scopes: ['read', 'write'],
+  expires_in_seconds: 3600,
+})
+
+const daytona = new Daytona()
+const sandbox = await daytona.create({
+  snapshot: 'fuse-mesa',
+  envVars: {
+    MESA_API_KEY: ephemeralKey.key,
+    MESA_ORG: process.env.MESA_ORG!,
+  },
+})
+```
+
+</TabItem>
+</Tabs>
+
+The rest of the launch flow (writing the TOML config, `mesa auth set-key`, `mesa mount --daemonize`) is unchanged — the sandbox doesn't know whether the key it received is long-lived or ephemeral.
+
+For repo-scoped or path-scoped keys, see Mesa's [auth and permissions guide ↗](https://docs.mesa.dev/content/getting-started/auth-and-permissions). For the full integration recipe, see Mesa's [Daytona guide ↗](https://docs.mesa.dev/content/integration-guides/daytona).
+
+## Unmounting
+
+When a sandbox is deleted via `daytona.delete(sandbox)`, the container teardown automatically removes any active FUSE mounts and shuts down their daemons. For normal cleanup this is all you need — no manual unmount required.
+
+To free a mount path **during** a sandbox's lifetime (for example, to remount with different credentials or before persisting a workspace archive), relocate the mount onto a throwaway path:
+
+```bash
+sudo mkdir -p /tmp/.fuse-defunct-$$
+sudo mount --move <your-mount-path> /tmp/.fuse-defunct-$$
+```
+
+After this, your original mount path is free for re-mounting. The FUSE daemon stays alive serving the mount at the new path; both the relocated mount and the daemon are cleaned up automatically when the sandbox is deleted.
+
+This works for any FUSE-based mount; verified against `mount-s3`, `gcsfuse`, and `blobfuse2`.
 
 ## Tips
 
 - **Snapshot versioning** — name snapshots like `fuse-s3-v1`. Bump the suffix to force a rebuild whenever you upgrade the FUSE tool.
 - **Credential security** — pass credentials via `env_vars` / `envVars` on sandbox creation rather than committing them into the snapshot. Env vars stay scoped to the sandbox lifetime and rotate without rebuilding the image.
-- **Manual unmount** — to unmount during a sandbox's lifetime (for example, before remounting with different credentials), use `fusermount -u <path>` for `mount-s3` mounts (which links against FUSE 2) or `fusermount3 -u <path>` for `gcsfuse` and `blobfuse2` mounts (FUSE 3) via `sandbox.process`. When the sandbox itself is deleted, the container teardown removes any FUSE mounts.
 
 ## See also
 
