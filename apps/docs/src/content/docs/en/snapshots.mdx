@@ -406,6 +406,10 @@ Amazon ECR authorization tokens expire after **12 hours**. Update the registry p
 
 ### GPU Snapshots
 
+:::caution[Experimental]
+This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
+:::
+
 Daytona provides methods to create GPU snapshots using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots) or programmatically using the Daytona [Python](/docs/en/python-sdk/sync/snapshot), [TypeScript](/docs/en/typescript-sdk/snapshot), [Ruby](/docs/en/ruby-sdk/snapshot), [Go](/docs/en/go-sdk/daytona#SnapshotService), [Java](/docs/en/java-sdk/snapshot) **SDKs**, or [API](/docs/en/tools/api#daytona/tag/snapshots).
 
 GPU snapshots fit into the same snapshot creation flow as other snapshots, but with the additional option to enable the GPU. Create a GPU snapshot first, then use it as the source when creating a [GPU sandbox](/docs/en/sandboxes#gpu-sandboxes).
