@@ -180,6 +180,7 @@ const configuration = {
       declarativeBuild: parseInt(process.env.RUNNER_DECLARATIVE_BUILD_SCORE_THRESHOLD || '10', 10),
       availability: parseInt(process.env.RUNNER_AVAILABILITY_SCORE_THRESHOLD || '10', 10),
       start: parseInt(process.env.RUNNER_START_SCORE_THRESHOLD || '3', 10),
+      initialRunnerScoreAddon: parseInt(process.env.RUNNER_INITIAL_RUNNER_SCORE_ADDON || '20', 10),
     },
     weights: {
       cpuUsage: parseFloat(process.env.RUNNER_CPU_USAGE_WEIGHT || '0.25'),
