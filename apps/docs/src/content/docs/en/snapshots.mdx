@@ -414,7 +414,7 @@ GPU snapshots fit into the same snapshot creation flow as other snapshots, but w
 2. Click the **Create Snapshot** button
 3. Configure snapshot details and enable the GPU option
 
-To create a GPU-enabled snapshot programmatically, set GPU resources for the snapshot:
+To create a GPU-enabled snapshot programmatically, set GPU resources for the snapshot. The `gpu` value defines how many GPU units each sandbox created from this snapshot will request. If `gpu` is not set, it defaults to `0`, which creates a non-GPU snapshot.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
