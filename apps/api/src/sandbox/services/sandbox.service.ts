@@ -1933,11 +1933,11 @@ export class SandboxService {
         ? ((await this.dockerRegistryService.findOne(sandbox.backupRegistryId)) ?? undefined)
         : undefined
 
-    if (sandbox.backupRegistryId && !backupRegistry) {
-      this.logger.warn(
-        `Backup registry ${sandbox.backupRegistryId} not found for sandbox ${sandbox.id}; proceeding without registry credentials`,
-      )
-    }
+      if (sandbox.backupRegistryId && !backupRegistry) {
+        this.logger.warn(
+          `Backup registry ${sandbox.backupRegistryId} not found for sandbox ${sandbox.id}; proceeding without registry credentials`,
+        )
+      }
 
       try {
         await runnerAdapter.recoverSandbox(sandbox, backupRegistry, skipStart)
