@@ -97,7 +97,6 @@ const (
 	// (AT-SPI uses 2x uint32 = 64 bit-slots; ~44 are defined today).
 	stateActive = 1 // used for focus-scoped root resolution
 
-	a11yHealthTimeout = time.Second
 	a11yStatusTimeout = 100 * time.Millisecond
 	a11yStatusTTL     = 2 * time.Second
 )
@@ -211,10 +210,6 @@ func (c *ComputerUse) connectA11yContext(ctx context.Context) (*dbus.Conn, error
 
 	c.atspiConn = conn
 	return conn, nil
-}
-
-func (c *ComputerUse) isA11yAvailable() bool {
-	return c.checkA11yAvailable(a11yHealthTimeout)
 }
 
 func (c *ComputerUse) cachedA11yAvailable() bool {
@@ -385,17 +380,6 @@ func getStringProp(obj dbus.BusObject, prop string) string {
 	return ""
 }
 
-func getInt32Prop(obj dbus.BusObject, prop string) (int32, bool) {
-	v, err := obj.GetProperty(prop)
-	if err != nil {
-		return 0, false
-	}
-	if i, ok := v.Value().(int32); ok {
-		return i, true
-	}
-	return 0, false
-}
-
 func getChildren(conn *dbus.Conn, sender string, path dbus.ObjectPath) ([]accessibleRef, error) {
 	return getChildrenContext(context.Background(), conn, sender, path)
 }
@@ -444,18 +428,24 @@ func getExtents(obj dbus.BusObject) (A11yBounds, bool) {
 	return A11yBounds{X: int(ext.X), Y: int(ext.Y), Width: int(ext.W), Height: int(ext.H)}, true
 }
 
-func getActionNames(obj dbus.BusObject) []string {
-	var actions []struct {
-		Name, Description, KeyBinding string
+func getActionNames(obj dbus.BusObject) ([]string, error) {
+	v, err := obj.GetProperty(ifaceAction + ".NActions")
+	if err != nil {
+		return nil, classifyDbusError(err)
 	}
-	if err := obj.Call(ifaceAction+".GetActions", 0).Store(&actions); err != nil {
-		return nil
+	count, ok := v.Value().(int32)
+	if !ok || count <= 0 {
+		return nil, nil
 	}
-	out := make([]string, 0, len(actions))
-	for _, a := range actions {
-		out = append(out, a.Name)
+	out := make([]string, 0, count)
+	for i := int32(0); i < count; i++ {
+		var name string
+		if err := obj.Call(ifaceAction+".GetName", 0, i).Store(&name); err != nil {
+			return nil, classifyDbusError(err)
+		}
+		out = append(out, name)
 	}
-	return out
+	return out, nil
 }
 
 // fetchNodeMeta reads every per-node field other than children. interfaces is
@@ -488,7 +478,9 @@ func fetchNodeMeta(conn *dbus.Conn, sender string, path dbus.ObjectPath) (*A11yN
 	}
 
 	if containsStr(ifaces, ifaceAction) {
-		node.Actions = getActionNames(obj)
+		if actions, err := getActionNames(obj); err == nil {
+			node.Actions = actions
+		}
 	}
 
 	return node, ifaces, nil
@@ -549,8 +541,17 @@ func appHasActiveWindow(conn *dbus.Conn, app accessibleRef) bool {
 	return false
 }
 
-// getAppRootByPID matches by the Application.Id property, which AT-SPI wires
-// to the app's OS process id.
+func getConnectionUnixProcessID(bus dbus.BusObject, sender string) (int, error) {
+	var pid uint32
+	if err := bus.Call("org.freedesktop.DBus.GetConnectionUnixProcessID", 0, sender).Store(&pid); err != nil {
+		return 0, classifyDbusError(err)
+	}
+	return int(pid), nil
+}
+
+// getAppRootByPID resolves scope=pid by matching the owning D-Bus
+// connection's Unix process id. Application.Id is registry-assigned and is not
+// the OS pid.
 func (c *ComputerUse) getAppRootByPID(conn *dbus.Conn, pid int) (accessibleRef, error) {
 	if pid <= 0 {
 		return accessibleRef{}, fmt.Errorf("%w: pid must be positive", ErrInvalidRequest)
@@ -559,12 +560,17 @@ func (c *ComputerUse) getAppRootByPID(conn *dbus.Conn, pid int) (accessibleRef, 
 	if err != nil {
 		return accessibleRef{}, err
 	}
+	bus := conn.BusObject()
 	for _, app := range apps {
-		obj := conn.Object(app.Sender, app.Path)
-		if id, ok := getInt32Prop(obj, ifaceApplication+".Id"); ok {
-			if int(id) == pid {
-				return app, nil
+		appPID, err := getConnectionUnixProcessID(bus, app.Sender)
+		if err != nil {
+			if errors.Is(err, ErrNodeNotFound) {
+				continue
 			}
+			return accessibleRef{}, err
+		}
+		if appPID == pid {
+			return app, nil
 		}
 	}
 	return accessibleRef{}, ErrNoAccessibleRoot
@@ -615,8 +621,10 @@ func walkNode(conn *dbus.Conn, sender string, path dbus.ObjectPath, maxDepth int
 
 	refs, err := getChildren(conn, sender, path)
 	if err != nil {
-		// Missing children list isn't fatal for the walk; log implicitly by
-		// returning the node without children.
+		if !isDisappearingNodeError(err) {
+			return nil, err
+		}
+		// A node disappearing between metadata and child-list reads isn't fatal.
 		return node, nil
 	}
 
@@ -632,7 +640,7 @@ func walkNode(conn *dbus.Conn, sender string, path dbus.ObjectPath, maxDepth int
 		child, err := walkNode(conn, r.Sender, r.Path, nextDepth, budget)
 		if err != nil {
 			// A child disappearing mid-walk shouldn't abort the walk.
-			if errors.Is(err, ErrNodeNotFound) {
+			if isDisappearingNodeError(err) {
 				continue
 			}
 			return nil, err
@@ -696,7 +704,7 @@ func findWalk(conn *dbus.Conn, sender string, path dbus.ObjectPath, match func(*
 
 	node, _, err := fetchNodeMeta(conn, sender, path)
 	if err != nil {
-		if ignoreMissing && errors.Is(err, ErrNodeNotFound) {
+		if ignoreMissing && isDisappearingNodeError(err) {
 			return false, nil
 		}
 		return false, err
@@ -714,7 +722,7 @@ func findWalk(conn *dbus.Conn, sender string, path dbus.ObjectPath, match func(*
 
 	refs, err := getChildren(conn, sender, path)
 	if err != nil {
-		if ignoreMissing && errors.Is(err, ErrNodeNotFound) {
+		if ignoreMissing && isDisappearingNodeError(err) {
 			return false, nil
 		}
 		return false, err
@@ -826,27 +834,12 @@ func (c *ComputerUse) invokeAccessibilityNode(id string, action string) error {
 	}
 	obj := conn.Object(sender, path)
 
-	var actions []struct {
-		Name, Description, KeyBinding string
-	}
-	if err := obj.Call(ifaceAction+".GetActions", 0).Store(&actions); err != nil {
-		return classifyDbusError(err)
+	actions, err := getActionNames(obj)
+	if err != nil {
+		return err
 	}
 
-	idx := -1
-	if action == "" {
-		if len(actions) == 0 {
-			return ErrActionNotSupported
-		}
-		idx = 0
-	} else {
-		for i, a := range actions {
-			if strings.EqualFold(a.Name, action) {
-				idx = i
-				break
-			}
-		}
-	}
+	idx := actionIndex(actions, action)
 	if idx < 0 {
 		return ErrActionNotSupported
 	}
@@ -859,6 +852,25 @@ func (c *ComputerUse) invokeAccessibilityNode(id string, action string) error {
 		return fmt.Errorf("%w: DoAction(%d) returned false", ErrActionNotSupported, idx)
 	}
 	return nil
+}
+
+func actionIndex(actions []string, action string) int {
+	if len(actions) == 0 {
+		return -1
+	}
+	if action == "" {
+		return 0
+	}
+	for i, name := range actions {
+		if strings.EqualFold(name, action) {
+			return i
+		}
+	}
+	return -1
+}
+
+func isDisappearingNodeError(err error) bool {
+	return errors.Is(err, ErrNodeNotFound)
 }
 
 func (c *ComputerUse) setAccessibilityNodeValue(id string, value string) error {

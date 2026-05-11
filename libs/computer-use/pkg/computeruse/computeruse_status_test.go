@@ -45,8 +45,8 @@ func TestAtspiStatusUsesA11yHealth(t *testing.T) {
 	if !running {
 		t.Fatal("IsProcessRunning(atspi) should use the AT-SPI health check")
 	}
-	if healthCalls != 2 {
-		t.Fatalf("health check calls = %d, want 2", healthCalls)
+	if healthCalls != 1 {
+		t.Fatalf("health check calls = %d, want 1 cached probe shared by both status endpoints", healthCalls)
 	}
 }
 
@@ -73,6 +73,42 @@ func TestAtspiStatusCachesA11yHealth(t *testing.T) {
 	}
 	if healthCalls != 1 {
 		t.Fatalf("health check calls = %d, want 1", healthCalls)
+	}
+}
+
+func TestAtspiStatusRechecksAfterTTL(t *testing.T) {
+	healthCalls := 0
+	c := &ComputerUse{
+		processes: map[string]*Process{
+			"atspi": {Name: "atspi", Priority: 250, AutoRestart: false},
+		},
+		a11yHealth: func() bool {
+			healthCalls++
+			return healthCalls == 1
+		},
+	}
+
+	status, err := c.GetProcessStatus()
+	if err != nil {
+		t.Fatalf("GetProcessStatus() error = %v", err)
+	}
+	if !status["atspi"].Running {
+		t.Fatal("first status probe should report running")
+	}
+
+	c.a11yStatusMu.Lock()
+	c.a11yStatusCheckedAt = time.Now().Add(-a11yStatusTTL - time.Second)
+	c.a11yStatusMu.Unlock()
+
+	running, err := c.IsProcessRunning(&toolbox.ProcessRequest{ProcessName: "atspi"})
+	if err != nil {
+		t.Fatalf("IsProcessRunning() error = %v", err)
+	}
+	if running {
+		t.Fatal("expired cached status should be refreshed")
+	}
+	if healthCalls != 2 {
+		t.Fatalf("health check calls = %d, want 2 after TTL expiry", healthCalls)
 	}
 }
 

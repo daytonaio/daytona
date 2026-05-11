@@ -80,6 +80,36 @@ func TestWriteA11yError(t *testing.T) {
 			wantCode:   "A11Y_INVALID_REQUEST",
 		},
 		{
+			name:       "invalid request containing unavailable text still -> 400",
+			err:        fmt.Errorf(`%s: invalid node id %q`, a11yMsgInvalidRequest, a11yMsgUnavailable),
+			wantStatus: http.StatusBadRequest,
+			wantCode:   "A11Y_INVALID_REQUEST",
+		},
+		{
+			name:       "invalid request containing node-not-found text still -> 400",
+			err:        fmt.Errorf(`%s: invalid node id %q`, a11yMsgInvalidRequest, a11yMsgNodeNotFound),
+			wantStatus: http.StatusBadRequest,
+			wantCode:   "A11Y_INVALID_REQUEST",
+		},
+		{
+			name:       "invalid request containing action-not-supported text still -> 400",
+			err:        fmt.Errorf(`%s: invalid node id %q`, a11yMsgInvalidRequest, a11yMsgActionNotSupported),
+			wantStatus: http.StatusBadRequest,
+			wantCode:   "A11Y_INVALID_REQUEST",
+		},
+		{
+			name:       "invalid request containing invalid-scope text still -> 400",
+			err:        fmt.Errorf(`%s: invalid node id %q`, a11yMsgInvalidRequest, a11yMsgInvalidScope),
+			wantStatus: http.StatusBadRequest,
+			wantCode:   "A11Y_INVALID_REQUEST",
+		},
+		{
+			name:       "invalid scope containing unavailable text still -> 400 invalid scope",
+			err:        fmt.Errorf(`%s: got %q`, a11yMsgInvalidScope, a11yMsgUnavailable),
+			wantStatus: http.StatusBadRequest,
+			wantCode:   "A11Y_INVALID_SCOPE",
+		},
+		{
 			name:       "unknown error -> 500 with A11Y_INTERNAL",
 			err:        errors.New("something unmapped blew up deep in the plugin"),
 			wantStatus: http.StatusInternalServerError,

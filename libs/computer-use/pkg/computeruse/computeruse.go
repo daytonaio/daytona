@@ -535,7 +535,7 @@ func (c *ComputerUse) IsProcessRunning(req *computeruse.ProcessRequest) (bool, e
 		return false, fmt.Errorf("process %s not found", req.ProcessName)
 	}
 	if req.ProcessName == "atspi" {
-		return c.isA11yAvailable(), nil
+		return c.cachedA11yAvailable(), nil
 	}
 
 	process.mu.Lock()

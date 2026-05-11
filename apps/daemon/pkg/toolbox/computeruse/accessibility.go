@@ -18,20 +18,20 @@ import (
 
 // Sentinel error messages mirrored from the plugin's
 // libs/computer-use/pkg/computeruse/accessibility.go. They are matched here by
-// substring rather than errors.Is because the plugin package imports the
-// daemon's wire types (for the IComputerUse interface shape), so a direct
-// import of the plugin package from the daemon would create a cycle.
+// leading sentinel text rather than errors.Is because the plugin package
+// imports the daemon's wire types (for the IComputerUse interface shape), so a
+// direct import of the plugin package from the daemon would create a cycle.
 //
 // Errors from the plugin reach this file via two paths:
 //   - In-process (same binary compiled for tests): the original sentinel
 //     object is preserved, so errors.Is would also work.
 //   - go-plugin RPC: net/rpc flattens errors to plain strings (error value is
 //     *rpc.ServerError with Error() == original message), which defeats
-//     errors.Is but keeps substring matching reliable.
+//     errors.Is but preserves the leading sentinel text.
 //
-// Substring matching is robust here because the plugin always wraps its
-// sentinels with fmt.Errorf("%w: ...context", ErrX, ...), so the canonical
-// message text is always a substring of the final error.
+// The boundary check intentionally accepts only the exact sentinel or
+// "sentinel: ..." prefix. User-controlled context can contain sentinel text, so
+// whole-message substring matching would misclassify some validation failures.
 const (
 	a11yMsgUnavailable        = "accessibility bus not reachable"
 	a11yMsgNoAccessibleRoot   = "no accessible root for focused window"
@@ -49,6 +49,15 @@ func writeA11yInvalidRequest(c *gin.Context, msg string) {
 	})
 }
 
+// hasA11ySentinel matches only the leading sentinel text the plugin returns
+// across net/rpc string-flattening. User-controlled context can contain other
+// sentinel strings, so whole-message substring matching would misclassify some
+// validation failures. A future transport cleanup should carry structured
+// error codes across the RPC boundary instead of parsing error text here.
+func hasA11ySentinel(msg, sentinel string) bool {
+	return msg == sentinel || strings.HasPrefix(msg, sentinel+":")
+}
+
 // writeA11yError maps the plugin sentinel errors to HTTP responses. Unknown
 // errors fall through to 500. The translation is kept here (not baked into
 // the plugin) so the plugin package stays transport-agnostic.
@@ -64,32 +73,32 @@ func writeA11yInvalidRequest(c *gin.Context, msg string) {
 func writeA11yError(c *gin.Context, err error) {
 	msg := err.Error()
 	switch {
-	case strings.Contains(msg, a11yMsgUnavailable):
+	case hasA11ySentinel(msg, a11yMsgUnavailable):
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"error": msg,
 			"code":  "A11Y_UNAVAILABLE",
 		})
-	case strings.Contains(msg, a11yMsgNodeNotFound):
+	case hasA11ySentinel(msg, a11yMsgNodeNotFound):
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": msg,
 			"code":  "A11Y_NODE_NOT_FOUND",
 		})
-	case strings.Contains(msg, a11yMsgNoAccessibleRoot):
+	case hasA11ySentinel(msg, a11yMsgNoAccessibleRoot):
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": msg,
 			"code":  "A11Y_NO_ACCESSIBLE_ROOT",
 		})
-	case strings.Contains(msg, a11yMsgActionNotSupported):
+	case hasA11ySentinel(msg, a11yMsgActionNotSupported):
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": msg,
 			"code":  "A11Y_ACTION_NOT_SUPPORTED",
 		})
-	case strings.Contains(msg, a11yMsgInvalidScope):
+	case hasA11ySentinel(msg, a11yMsgInvalidScope):
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": msg,
 			"code":  "A11Y_INVALID_SCOPE",
 		})
-	case strings.Contains(msg, a11yMsgInvalidRequest):
+	case hasA11ySentinel(msg, a11yMsgInvalidRequest):
 		writeA11yInvalidRequest(c, msg)
 	default:
 		c.JSON(http.StatusInternalServerError, gin.H{

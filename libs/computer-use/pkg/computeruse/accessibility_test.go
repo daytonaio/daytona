@@ -4,6 +4,7 @@
 package computeruse
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"testing"
@@ -282,6 +283,139 @@ func TestStateBitSet(t *testing.T) {
 	}
 }
 
+func TestGetActionNamesUsesCanonicalNames(t *testing.T) {
+	obj := &fakeBusObject{
+		properties: map[string]dbus.Variant{
+			ifaceAction + ".NActions": dbus.MakeVariant(int32(2)),
+		},
+		call: func(method string, args ...interface{}) *dbus.Call {
+			if method == ifaceAction+".GetActions" {
+				t.Fatal("GetActions returns localized labels; canonical action names must come from GetName(index)")
+			}
+			if method != ifaceAction+".GetName" {
+				return failedCall(errors.New("unexpected method: " + method))
+			}
+			switch args[0].(int32) {
+			case 0:
+				return completedCall("show-menu")
+			case 1:
+				return completedCall("click")
+			default:
+				return failedCall(errors.New("unexpected action index"))
+			}
+		},
+	}
+
+	got, err := getActionNames(obj)
+	if err != nil {
+		t.Fatalf("getActionNames() error = %v", err)
+	}
+	want := []string{"show-menu", "click"}
+	if len(got) != len(want) {
+		t.Fatalf("actions = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("actions = %v, want %v", got, want)
+		}
+	}
+}
+
+func TestGetActionNamesPropagatesLookupErrors(t *testing.T) {
+	obj := &fakeBusObject{
+		properties: map[string]dbus.Variant{
+			ifaceAction + ".NActions": dbus.MakeVariant(int32(1)),
+		},
+		call: func(method string, args ...interface{}) *dbus.Call {
+			if method != ifaceAction+".GetName" {
+				return failedCall(errors.New("unexpected method: " + method))
+			}
+			return failedCall(dbus.NewError(
+				"org.freedesktop.DBus.Error.UnknownObject",
+				[]interface{}{"node disappeared"},
+			))
+		},
+	}
+
+	_, err := getActionNames(obj)
+	if !errors.Is(err, ErrNodeNotFound) {
+		t.Fatalf("getActionNames() error = %v, want ErrNodeNotFound", err)
+	}
+}
+
+func TestGetActionNamesPropagatesNActionsErrors(t *testing.T) {
+	obj := &fakeBusObject{
+		getProperty: func(prop string) (dbus.Variant, error) {
+			if prop != ifaceAction+".NActions" {
+				return dbus.Variant{}, errors.New("unexpected property: " + prop)
+			}
+			return dbus.Variant{}, dbus.NewError(
+				"org.freedesktop.DBus.Error.NameHasNoOwner",
+				[]interface{}{"provider exited"},
+			)
+		},
+	}
+
+	_, err := getActionNames(obj)
+	if !errors.Is(err, ErrNodeNotFound) {
+		t.Fatalf("getActionNames() error = %v, want ErrNodeNotFound", err)
+	}
+}
+
+func TestActionIndexUsesCanonicalNames(t *testing.T) {
+	actions := []string{"show-menu", "click"}
+
+	if got := actionIndex(actions, "show-menu"); got != 0 {
+		t.Fatalf("canonical show-menu index = %d, want 0", got)
+	}
+	if got := actionIndex(actions, "SHOW-MENU"); got != 0 {
+		t.Fatalf("case-insensitive canonical show-menu index = %d, want 0", got)
+	}
+	if got := actionIndex(actions, "Show menu"); got != -1 {
+		t.Fatalf("localized Show menu index = %d, want -1", got)
+	}
+	if got := actionIndex(actions, ""); got != 0 {
+		t.Fatalf("empty action index = %d, want default index 0", got)
+	}
+	if got := actionIndex(nil, "click"); got != -1 {
+		t.Fatalf("missing actions index = %d, want -1", got)
+	}
+}
+
+func TestGetConnectionUnixProcessID(t *testing.T) {
+	obj := &fakeBusObject{
+		call: func(method string, args ...interface{}) *dbus.Call {
+			if method != "org.freedesktop.DBus.GetConnectionUnixProcessID" {
+				return failedCall(errors.New("unexpected method: " + method))
+			}
+			if args[0] != ":1.42" {
+				return failedCall(errors.New("unexpected sender"))
+			}
+			return completedCall(uint32(4242))
+		},
+	}
+
+	got, err := getConnectionUnixProcessID(obj, ":1.42")
+	if err != nil {
+		t.Fatalf("getConnectionUnixProcessID() error = %v", err)
+	}
+	if got != 4242 {
+		t.Fatalf("pid = %d, want 4242", got)
+	}
+}
+
+func TestDisappearingNodeErrorIsNarrow(t *testing.T) {
+	if !isDisappearingNodeError(ErrNodeNotFound) {
+		t.Fatal("ErrNodeNotFound should be treated as a disappearing node")
+	}
+	if isDisappearingNodeError(ErrA11yUnavailable) {
+		t.Fatal("ErrA11yUnavailable should propagate, not be swallowed as a disappearing node")
+	}
+	if isDisappearingNodeError(errors.New("random D-Bus failure")) {
+		t.Fatal("unknown errors should propagate, not be swallowed as disappearing nodes")
+	}
+}
+
 func TestParseWireScope(t *testing.T) {
 	cases := []struct {
 		in      string
@@ -339,6 +473,7 @@ func TestToWireNodeRecursive(t *testing.T) {
 	out := toWireNode(in)
 	if out == nil {
 		t.Fatal("toWireNode returned nil for non-nil input")
+		return
 	}
 	if out.ID != "a" || out.Role != "frame" {
 		t.Errorf("top-level fields not copied: %+v", out)
@@ -359,6 +494,77 @@ func TestToWireNodeRecursive(t *testing.T) {
 	if nilOut := toWireNode(nil); nilOut != nil {
 		t.Errorf("toWireNode(nil) should return nil, got %+v", nilOut)
 	}
+}
+
+type fakeBusObject struct {
+	properties  map[string]dbus.Variant
+	getProperty func(prop string) (dbus.Variant, error)
+	call        func(method string, args ...interface{}) *dbus.Call
+}
+
+func (f *fakeBusObject) Call(method string, _ dbus.Flags, args ...interface{}) *dbus.Call {
+	if f.call == nil {
+		return failedCall(errors.New("unexpected method: " + method))
+	}
+	return f.call(method, args...)
+}
+
+func (f *fakeBusObject) CallWithContext(_ context.Context, method string, flags dbus.Flags, args ...interface{}) *dbus.Call {
+	return f.Call(method, flags, args...)
+}
+
+func (f *fakeBusObject) Go(method string, flags dbus.Flags, ch chan *dbus.Call, args ...interface{}) *dbus.Call {
+	call := f.Call(method, flags, args...)
+	if ch != nil {
+		ch <- call
+	}
+	return call
+}
+
+func (f *fakeBusObject) GoWithContext(_ context.Context, method string, flags dbus.Flags, ch chan *dbus.Call, args ...interface{}) *dbus.Call {
+	return f.Go(method, flags, ch, args...)
+}
+
+func (f *fakeBusObject) AddMatchSignal(string, string, ...dbus.MatchOption) *dbus.Call {
+	return completedCall()
+}
+
+func (f *fakeBusObject) RemoveMatchSignal(string, string, ...dbus.MatchOption) *dbus.Call {
+	return completedCall()
+}
+
+func (f *fakeBusObject) GetProperty(prop string) (dbus.Variant, error) {
+	if f.getProperty != nil {
+		return f.getProperty(prop)
+	}
+	if f.properties == nil {
+		return dbus.Variant{}, errors.New("unexpected property: " + prop)
+	}
+	v, ok := f.properties[prop]
+	if !ok {
+		return dbus.Variant{}, errors.New("unexpected property: " + prop)
+	}
+	return v, nil
+}
+
+func (f *fakeBusObject) StoreProperty(prop string, value interface{}) error {
+	v, err := f.GetProperty(prop)
+	if err != nil {
+		return err
+	}
+	return dbus.Store([]interface{}{v.Value()}, value)
+}
+
+func (f *fakeBusObject) SetProperty(string, interface{}) error { return nil }
+func (f *fakeBusObject) Destination() string                   { return "fake.destination" }
+func (f *fakeBusObject) Path() dbus.ObjectPath                 { return "/fake/path" }
+
+func completedCall(body ...interface{}) *dbus.Call {
+	return &dbus.Call{Body: body, Done: make(chan *dbus.Call, 1)}
+}
+
+func failedCall(err error) *dbus.Call {
+	return &dbus.Call{Err: err, Done: make(chan *dbus.Call, 1)}
 }
 
 func TestToWireNodesFlat(t *testing.T) {
