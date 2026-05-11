@@ -752,7 +752,7 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath('/docs/runners', locale),
+          href: localizePath('/docs/customer-managed-compute', locale),
           label: t('sidebarconfig.customerManagedCompute'),
           description: t('sidebarconfig.customerManagedComputeDescription'),
           disablePagination: true,

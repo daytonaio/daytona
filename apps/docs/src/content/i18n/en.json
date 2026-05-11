@@ -124,7 +124,7 @@
   "sidebarconfig.runners": "Runners",
   "sidebarconfig.runnersDescription": "Runner types and custom infrastructure.",
   "sidebarconfig.customerManagedCompute": "Customer Managed Compute",
-  "sidebarconfig.customerManagedComputeDescription": "Customer managed compute for Daytona Sandboxes.",
+  "sidebarconfig.customerManagedComputeDescription": "Bring your own compute (BYOC) infrastructure to provision and scale Daytona sandboxes.",
   "sidebarconfig.mcpServer": "MCP Server",
   "sidebarconfig.daytona": "Daytona",
   "sidebarconfig.sandbox": "Sandbox",
