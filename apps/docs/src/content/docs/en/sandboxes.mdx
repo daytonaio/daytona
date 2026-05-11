@@ -301,22 +301,9 @@ curl 'https://app.daytona.io/api/sandbox' \
 This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
 :::
 
-Daytona supports NVIDIA GPU devices for snapshot-based sandbox creation. This allows you to run GPU workloads such as model inference, fine-tuning, and CUDA-accelerated compute inside a sandbox created from a GPU-ready snapshot.
+Daytona supports NVIDIA GPU devices for snapshot-based sandbox creation. This allows you to run GPU workloads such as model inference, fine-tuning, and CUDA-accelerated compute inside a sandbox created from a GPU-ready snapshot. GPU sandboxes must be ephemeral.
 
-##### GPU runner prerequisites
-
-To run GPU sandboxes, the target runner must expose NVIDIA devices to sandbox containers and use a compatible userspace stack inside the sandbox image. Configure the runner and image with the following requirements:
-
-- Enable `GPU_ENABLED=true` on the runner.
-- Use a runtime that supports NVIDIA device passthrough (for example `sysbox-runc`)
-- Use a sandbox image that includes `libnvidia-compute` compatible with the host NVIDIA driver
-
-GPU sandboxes have the following behavior:
-
-- scheduled only to runners with enough GPU capacity
-- runner scheduling is exclusive: a GPU runner can host only one active sandbox at a time
-- warm-pool lookup is skipped; Daytona always provisions a fresh sandbox container
-- `autoDeleteInterval` is forced to `0`; the sandbox is deleted on first stop
+When creating a snapshot in the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots), enable the **GPU** option to create a GPU-ready snapshot.
 
 Use the `gpu` parameter when creating a sandbox from a snapshot:
 
@@ -331,6 +318,7 @@ sandbox = daytona.create(
     CreateSandboxFromSnapshotParams(
         snapshot="my-gpu-snapshot",
         gpu=1,
+        ephemeral=True,
     )
 )
 ```
@@ -345,14 +333,8 @@ const daytona = new Daytona();
 const sandbox = await daytona.create({
   snapshot: "my-gpu-snapshot",
   gpu: 1,
+  ephemeral: true,
 });
-```
-
-</TabItem>
-<TabItem label="CLI" icon="seti:shell">
-
-```bash
-daytona create --snapshot my-gpu-snapshot --gpu 1
 ```
 
 </TabItem>
@@ -365,7 +347,8 @@ curl 'https://app.daytona.io/api/sandbox' \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{
   "snapshot": "my-gpu-snapshot",
-  "gpu": 1
+  "gpu": 1,
+  "autoDeleteInterval": 0
 }'
 ```
 
