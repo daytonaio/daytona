@@ -19,6 +19,8 @@ model_accessibility_node_request.go
 model_accessibility_nodes_response.go
 model_accessibility_set_value_request.go
 model_accessibility_tree_response.go
+model_browser_cdp_response.go
+model_browser_status_response.go
 model_chart.go
 model_chart_element.go
 model_code_run_artifacts.go

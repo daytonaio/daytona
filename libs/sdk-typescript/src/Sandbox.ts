@@ -138,7 +138,8 @@ export class Sandbox implements SandboxDto {
     if (!baseUrl.endsWith('/')) {
       baseUrl += '/'
     }
-    this.axiosInstance.defaults.baseURL = baseUrl + this.id
+    const toolboxBaseUrl = baseUrl + this.id
+    this.axiosInstance.defaults.baseURL = toolboxBaseUrl
     this.clientConfig.basePath = this.axiosInstance.defaults.baseURL
 
     // Initialize Services
@@ -158,7 +159,7 @@ export class Sandbox implements SandboxDto {
       new InterpreterApi(this.clientConfig, '', this.axiosInstance),
       getPreviewToken,
     )
-    this.computerUse = new ComputerUse(new ComputerUseApi(this.clientConfig, '', this.axiosInstance))
+    this.computerUse = new ComputerUse(new ComputerUseApi(this.clientConfig, '', this.axiosInstance), toolboxBaseUrl)
     this.infoApi = new InfoApi(this.clientConfig, '', this.axiosInstance)
   }
 

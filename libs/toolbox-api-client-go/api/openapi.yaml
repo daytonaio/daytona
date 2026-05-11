@@ -292,6 +292,48 @@ paths:
       summary: Get accessibility tree
       tags:
       - computer-use
+  /computeruse/browser/cdp:
+    get:
+      description: Lazily start managed Chromium and return a CDP WebSocket URL
+      operationId: GetBrowserCDP
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserCDPResponse'
+          description: OK
+      summary: Get browser CDP URL
+      tags:
+      - computer-use
+  /computeruse/browser/status:
+    get:
+      description: Get the managed Chromium process status
+      operationId: GetBrowserStatus
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserStatusResponse'
+          description: OK
+      summary: Get browser status
+      tags:
+      - computer-use
+  /computeruse/browser/stop:
+    post:
+      description: Stop the managed Chromium process
+      operationId: StopBrowser
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Empty'
+          description: OK
+      summary: Stop browser
+      tags:
+      - computer-use
   /computeruse/display/info:
     get:
       description: Get information about all available displays
@@ -2454,6 +2496,47 @@ components:
           $ref: "#/components/schemas/computeruse.AccessibilityNode"
         truncated:
           type: boolean
+      type: object
+    BrowserCDPResponse:
+      example:
+        port: 0
+        localWebSocketDebuggerUrl: localWebSocketDebuggerUrl
+        proxyPath: proxyPath
+        webSocketDebuggerUrl: webSocketDebuggerUrl
+      properties:
+        localWebSocketDebuggerUrl:
+          type: string
+        port:
+          type: integer
+        proxyPath:
+          type: string
+        webSocketDebuggerUrl:
+          type: string
+      type: object
+    BrowserStatusResponse:
+      example:
+        running: true
+        port: 6
+        pid: 0
+        localWebSocketDebuggerUrl: localWebSocketDebuggerUrl
+        proxyPath: proxyPath
+        webSocketDebuggerUrl: webSocketDebuggerUrl
+        status: status
+      properties:
+        localWebSocketDebuggerUrl:
+          type: string
+        pid:
+          type: integer
+        port:
+          type: integer
+        proxyPath:
+          type: string
+        running:
+          type: boolean
+        status:
+          type: string
+        webSocketDebuggerUrl:
+          type: string
       type: object
     Chart:
       example:

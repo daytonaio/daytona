@@ -10,7 +10,14 @@ if TYPE_CHECKING:
     from daytona_api_client import SandboxState
     from daytona_toolbox_api_client import SessionExecuteResponse
 
-    from ._async.computer_use import AsyncComputerUse, AsyncDisplay, AsyncKeyboard, AsyncMouse, AsyncScreenshot
+    from ._async.computer_use import (
+        AsyncBrowser,
+        AsyncComputerUse,
+        AsyncDisplay,
+        AsyncKeyboard,
+        AsyncMouse,
+        AsyncScreenshot,
+    )
     from ._async.daytona import AsyncDaytona
     from ._async.sandbox import AsyncPaginatedSandboxes, AsyncSandbox
     from ._sync.daytona import Daytona
@@ -89,6 +96,7 @@ __all__ = [
     "AsyncKeyboard",
     "AsyncScreenshot",
     "AsyncDisplay",
+    "AsyncBrowser",
     "ScreenshotRegion",
     "ScreenshotOptions",
     "Image",
@@ -132,6 +140,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "AsyncKeyboard": "_async.computer_use",
     "AsyncScreenshot": "_async.computer_use",
     "AsyncDisplay": "_async.computer_use",
+    "AsyncBrowser": "_async.computer_use",
     # common.charts
     "BarChart": "common.charts",
     "BoxAndWhiskerChart": "common.charts",

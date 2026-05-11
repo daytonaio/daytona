@@ -54,6 +54,11 @@ type IComputerUse interface {
 	InvokeAccessibilityNode(*AccessibilityInvokeRequest) (*Empty, error)
 	SetAccessibilityNodeValue(*AccessibilitySetValueRequest) (*Empty, error)
 
+	// Browser methods
+	GetBrowserCDP(*BrowserCDPRequest) (*BrowserCDPResponse, error)
+	GetBrowserStatus() (*BrowserStatusResponse, error)
+	StopBrowser() (*Empty, error)
+
 	// Status method
 	GetStatus() (*ComputerUseStatusResponse, error)
 }
@@ -201,6 +206,27 @@ type ComputerUseStopResponse struct {
 	Message string                   `json:"message"`
 	Status  map[string]ProcessStatus `json:"status"`
 } //	@name	ComputerUseStopResponse
+
+type BrowserCDPRequest struct {
+	ExternalBaseURL string `json:"externalBaseUrl,omitempty"`
+} //	@name	BrowserCDPRequest
+
+type BrowserCDPResponse struct {
+	WebSocketDebuggerURL      string `json:"webSocketDebuggerUrl"`
+	LocalWebSocketDebuggerURL string `json:"localWebSocketDebuggerUrl,omitempty"`
+	ProxyPath                 string `json:"proxyPath,omitempty"`
+	Port                      int    `json:"port"`
+} //	@name	BrowserCDPResponse
+
+type BrowserStatusResponse struct {
+	Status                    string `json:"status"`
+	Running                   bool   `json:"running"`
+	Pid                       *int   `json:"pid,omitempty"`
+	WebSocketDebuggerURL      string `json:"webSocketDebuggerUrl,omitempty"`
+	LocalWebSocketDebuggerURL string `json:"localWebSocketDebuggerUrl,omitempty"`
+	ProxyPath                 string `json:"proxyPath,omitempty"`
+	Port                      int    `json:"port,omitempty"`
+} //	@name	BrowserStatusResponse
 
 type ProcessStatus struct {
 	Running     bool

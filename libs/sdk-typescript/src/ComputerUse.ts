@@ -22,6 +22,8 @@ import {
   ComputerUseStartResponse,
   ComputerUseStopResponse,
   ComputerUseStatusResponse,
+  BrowserCDPResponse,
+  BrowserStatusResponse,
   ProcessStatusResponse,
   ProcessRestartResponse,
   ProcessLogsResponse,
@@ -603,6 +605,62 @@ export class RecordingService {
 }
 
 /**
+ * Browser operations for the managed Chromium process.
+ */
+export class Browser {
+  constructor(
+    private readonly apiClient: ComputerUseApi,
+    private readonly cdpBaseUrl?: string,
+  ) {}
+
+  /**
+   * Lazily starts Chromium and returns a CDP WebSocket URL.
+   *
+   * @returns {Promise<string>} Externally connectable CDP WebSocket URL
+   */
+  @WithInstrumentation()
+  public async getCdpUrl(): Promise<string> {
+    const response = await this.apiClient.getBrowserCDP()
+    return browserCDPUrl(response.data, this.cdpBaseUrl)
+  }
+
+  /**
+   * Gets the managed Chromium process status.
+   */
+  @WithInstrumentation()
+  public async getStatus(): Promise<BrowserStatusResponse> {
+    const response = await this.apiClient.getBrowserStatus()
+    return response.data
+  }
+
+  /**
+   * Stops the managed Chromium process.
+   */
+  @WithInstrumentation()
+  public async stop(): Promise<void> {
+    await this.apiClient.stopBrowser()
+  }
+}
+
+function browserCDPUrl(response: BrowserCDPResponse, cdpBaseUrl?: string): string {
+  const url = response.webSocketDebuggerUrl
+  if (!cdpBaseUrl || !response.proxyPath || !isLocalCDPUrl(url)) {
+    return url ?? ''
+  }
+
+  const base = new URL(cdpBaseUrl)
+  base.protocol = base.protocol === 'http:' ? 'ws:' : 'wss:'
+  base.pathname = `${base.pathname.replace(/\/$/, '')}${response.proxyPath}`
+  base.search = ''
+  base.hash = ''
+  return base.toString()
+}
+
+function isLocalCDPUrl(value?: string): boolean {
+  return !value || value.includes('://127.0.0.1:') || value.includes('://localhost:')
+}
+
+/**
  * Computer Use functionality for interacting with the desktop environment.
  *
  * Provides access to mouse, keyboard, screenshot, display, and recording operations
@@ -612,6 +670,7 @@ export class RecordingService {
  * @property {Keyboard} keyboard - Keyboard operations interface
  * @property {Screenshot} screenshot - Screenshot operations interface
  * @property {Display} display - Display operations interface
+ * @property {Browser} browser - Managed Chromium browser operations
  * @property {RecordingService} recording - Screen recording operations interface
  *
  * @class
@@ -621,13 +680,18 @@ export class ComputerUse {
   public readonly keyboard: Keyboard
   public readonly screenshot: Screenshot
   public readonly display: Display
+  public readonly browser: Browser
   public readonly recording: RecordingService
 
-  constructor(private readonly apiClient: ComputerUseApi) {
+  constructor(
+    private readonly apiClient: ComputerUseApi,
+    cdpBaseUrl?: string,
+  ) {
     this.mouse = new Mouse(apiClient)
     this.keyboard = new Keyboard(apiClient)
     this.screenshot = new Screenshot(apiClient)
     this.display = new Display(apiClient)
+    this.browser = new Browser(apiClient, cdpBaseUrl)
     this.recording = new RecordingService(apiClient)
   }
 
