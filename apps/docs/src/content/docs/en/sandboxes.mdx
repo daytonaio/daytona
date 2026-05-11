@@ -295,13 +295,20 @@ curl 'https://app.daytona.io/api/sandbox' \
 </TabItem>
 </Tabs>
 
-### GPU sandboxes
+### GPU Sandboxes
 
 :::caution[Experimental]
 This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
 :::
 
-Daytona supports NVIDIA GPU devices for snapshot-based sandbox creation. This allows you to run GPU workloads such as model inference, fine-tuning, and CUDA-accelerated compute inside a sandbox created from a GPU-ready snapshot. GPU sandboxes must be ephemeral.
+Daytona provides methods to create GPU sandboxes using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/sandboxes) or programmatically using the Daytona [Python](/docs/en/python-sdk/sync/sandbox), [TypeScript](/docs/en/typescript-sdk/sandbox), [Ruby](/docs/en/ruby-sdk/sandbox), [Go](/docs/en/go-sdk/daytona#type-sandbox), [Java](/docs/en/java-sdk/sandbox) **SDKs**, [CLI](/docs/en/tools/cli#daytona-create), or [API](/docs/en/tools/api#daytona/tag/sandbox).
+
+Daytona supports NVIDIA GPU devices for snapshot-based sandbox creation. This allows you to run GPU workloads such as model inference, fine-tuning, and CUDA-accelerated compute inside a sandbox created from a [GPU snapshot](/docs/en/snapshots#gpu-snapshots). GPU sandboxes must be ephemeral.
+
+1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
+2. Click **Create Sandbox**
+3. Select the [GPU snapshot](/docs/en/snapshots#gpu-snapshots) as the source for the sandbox or enable the GPU option
+4. Click **Create** to create a GPU sandbox
 
 When creating a snapshot in the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots), enable the **GPU** option to create a GPU-ready snapshot.
 
@@ -570,7 +577,7 @@ curl 'https://app.daytona.io/api/sandbox' \
 </TabItem>
 </Tabs>
 
-### Sandbox details page
+##### Sandbox details page
 
 [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) provides a sandbox details page to view detailed information about a sandbox and interact with it directly.
 
@@ -772,7 +779,7 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/recover' \
 </TabItem>
 </Tabs>
 
-### Recover from error state
+##### Recover from error state
 
 When a sandbox enters an error state, it can sometimes be recovered using the `recover` method, depending on the underlying error reason. The `recoverable` flag indicates whether the error state can be resolved through an automated recovery procedure.
 
@@ -975,7 +982,7 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/fork' \
 </TabItem>
 </Tabs>
 
-### View Forks
+##### View Forks
 
 Daytona provides methods to view forks. You can view the fork tree for a sandbox and all its related sandboxes.
 
@@ -1221,7 +1228,7 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autostop/{interval}' 
 </TabItem>
 </Tabs>
 
-#### What resets the timer
+##### What resets the timer
 
 The inactivity timer resets only for specific external interactions:
 
@@ -1230,7 +1237,7 @@ The inactivity timer resets only for specific external interactions:
 - Active [SSH connections](/docs/en/ssh-access)
 - API requests to the [Daytona Toolbox SDK](/docs/en/tools/api/#daytona-toolbox)
 
-#### What does not reset the timer
+##### What does not reset the timer
 
 The following do not reset the timer:
 
