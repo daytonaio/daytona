@@ -317,7 +317,6 @@ daytona = Daytona()
 sandbox = daytona.create(
     CreateSandboxFromSnapshotParams(
         snapshot="my-gpu-snapshot",
-        gpu=1,
         ephemeral=True,
     )
 )
@@ -332,7 +331,6 @@ import { Daytona } from "@daytona/sdk";
 const daytona = new Daytona();
 const sandbox = await daytona.create({
   snapshot: "my-gpu-snapshot",
-  gpu: 1,
   ephemeral: true,
 });
 ```
@@ -347,7 +345,6 @@ curl 'https://app.daytona.io/api/sandbox' \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{
   "snapshot": "my-gpu-snapshot",
-  "gpu": 1,
   "autoDeleteInterval": 0
 }'
 ```
