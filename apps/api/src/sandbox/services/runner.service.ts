@@ -297,7 +297,7 @@ export class RunnerService {
     // GPU sandboxes get exclusive ownership of a runner: skip any runner that
     // already hosts an active sandbox, regardless of whether that sandbox uses GPU.
     if (params.gpu) {
-      const occupiedRunnerIds = await this.getRunnersWithActiveSandbox()
+      const occupiedRunnerIds = await this.getRunnersWithActiveGpuSandbox()
       for (const id of occupiedRunnerIds) {
         excludedRunnerIds.add(id)
       }
@@ -875,7 +875,7 @@ export class RunnerService {
    * non-terminal state. Used by the GPU scheduler to enforce
    * one-gpu-sandbox-per-runner exclusivity.
    */
-  async getRunnersWithActiveSandbox(): Promise<string[]> {
+  async getRunnersWithActiveGpuSandbox(): Promise<string[]> {
     const rows = await this.sandboxRepository
       .createQueryBuilder('sandbox')
       .select('DISTINCT sandbox.runnerId', 'runnerId')
