@@ -33,6 +33,7 @@ class AdminCreateRunner(BaseModel):
     """ # noqa: E501
     region_id: StrictStr = Field(serialization_alias="regionId")
     name: StrictStr
+    tags: Optional[List[StrictStr]] = Field(default=None, description="Tags to associate with the runner")
     api_key: StrictStr = Field(serialization_alias="apiKey")
     api_version: Annotated[str, Field(strict=True)] = Field(description="The api version of the runner to create", serialization_alias="apiVersion")
     domain: Optional[StrictStr] = Field(default=None, description="The domain of the runner")
@@ -42,7 +43,7 @@ class AdminCreateRunner(BaseModel):
     memory_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The memory capacity of the runner in GiB", serialization_alias="memoryGiB")
     disk_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The disk capacity of the runner in GiB", serialization_alias="diskGiB")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["regionId", "name", "apiKey", "apiVersion", "domain", "apiUrl", "proxyUrl", "cpu", "memoryGiB", "diskGiB"]
+    __properties: ClassVar[List[str]] = ["regionId", "name", "tags", "apiKey", "apiVersion", "domain", "apiUrl", "proxyUrl", "cpu", "memoryGiB", "diskGiB"]
 
     @field_validator('api_version')
     def api_version_validate_regular_expression(cls, value):
@@ -110,6 +111,7 @@ class AdminCreateRunner(BaseModel):
         _obj = cls.model_validate({
             "region_id": obj.get("regionId"),
             "name": obj.get("name"),
+            "tags": obj.get("tags"),
             "api_key": obj.get("apiKey"),
             "api_version": obj.get("apiVersion"),
             "domain": obj.get("domain"),

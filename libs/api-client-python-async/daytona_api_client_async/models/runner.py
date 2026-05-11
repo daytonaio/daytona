@@ -57,6 +57,7 @@ class Runner(BaseModel):
     state: RunnerState = Field(description="The state of the runner")
     last_checked: Optional[StrictStr] = Field(default=None, description="The last time the runner was checked", serialization_alias="lastChecked")
     unschedulable: StrictBool = Field(description="Whether the runner is unschedulable")
+    tags: List[StrictStr] = Field(description="Tags associated with the runner")
     created_at: StrictStr = Field(description="The creation timestamp of the runner", serialization_alias="createdAt")
     updated_at: StrictStr = Field(description="The last update timestamp of the runner", serialization_alias="updatedAt")
     version: StrictStr = Field(description="The version of the runner (deprecated in favor of apiVersion)")
@@ -64,7 +65,7 @@ class Runner(BaseModel):
     runner_class: RunnerClass = Field(description="The class of the runner", serialization_alias="runnerClass")
     app_version: Optional[StrictStr] = Field(default=None, description="The app version of the runner", serialization_alias="appVersion")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version", "apiVersion", "runnerClass", "appVersion"]
+    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "tags", "createdAt", "updatedAt", "version", "apiVersion", "runnerClass", "appVersion"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -147,6 +148,7 @@ class Runner(BaseModel):
             "state": obj.get("state"),
             "last_checked": obj.get("lastChecked"),
             "unschedulable": obj.get("unschedulable"),
+            "tags": obj.get("tags"),
             "created_at": obj.get("createdAt"),
             "updated_at": obj.get("updatedAt"),
             "version": obj.get("version"),

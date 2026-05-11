@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { IsString } from 'class-validator'
-import { ApiProperty, ApiSchema } from '@nestjs/swagger'
+import { IsArray, IsOptional, IsString } from 'class-validator'
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { IsSafeDisplayString } from '../../common/validators'
 
 @ApiSchema({ name: 'CreateRunner' })
@@ -17,4 +17,14 @@ export class CreateRunnerDto {
   @IsSafeDisplayString()
   @ApiProperty()
   name: string
+
+  @ApiPropertyOptional({
+    description: 'Tags to associate with the runner',
+    example: ['gpu', 'us-east'],
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[]
 }

@@ -20,7 +20,9 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -60,6 +62,11 @@ public class CreateRunner {
   @javax.annotation.Nonnull
   private String name;
 
+  public static final String SERIALIZED_NAME_TAGS = "tags";
+  @SerializedName(SERIALIZED_NAME_TAGS)
+  @javax.annotation.Nullable
+  private List<String> tags = new ArrayList<>();
+
   public CreateRunner() {
   }
 
@@ -98,6 +105,33 @@ public class CreateRunner {
 
   public void setName(@javax.annotation.Nonnull String name) {
     this.name = name;
+  }
+
+
+  public CreateRunner tags(@javax.annotation.Nullable List<String> tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  public CreateRunner addTagsItem(String tagsItem) {
+    if (this.tags == null) {
+      this.tags = new ArrayList<>();
+    }
+    this.tags.add(tagsItem);
+    return this;
+  }
+
+  /**
+   * Tags to associate with the runner
+   * @return tags
+   */
+  @javax.annotation.Nullable
+  public List<String> getTags() {
+    return tags;
+  }
+
+  public void setTags(@javax.annotation.Nullable List<String> tags) {
+    this.tags = tags;
   }
 
   /**
@@ -156,13 +190,14 @@ public class CreateRunner {
     }
     CreateRunner createRunner = (CreateRunner) o;
     return Objects.equals(this.regionId, createRunner.regionId) &&
-        Objects.equals(this.name, createRunner.name)&&
+        Objects.equals(this.name, createRunner.name) &&
+        Objects.equals(this.tags, createRunner.tags)&&
         Objects.equals(this.additionalProperties, createRunner.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(regionId, name, additionalProperties);
+    return Objects.hash(regionId, name, tags, additionalProperties);
   }
 
   @Override
@@ -171,6 +206,7 @@ public class CreateRunner {
     sb.append("class CreateRunner {\n");
     sb.append("    regionId: ").append(toIndentedString(regionId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -190,7 +226,7 @@ public class CreateRunner {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("regionId", "name"));
+    openapiFields = new HashSet<String>(Arrays.asList("regionId", "name", "tags"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("regionId", "name"));
@@ -221,6 +257,10 @@ public class CreateRunner {
       }
       if (!jsonObj.get("name").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("name").toString()));
+      }
+      // ensure the optional json data is an array if present
+      if (jsonObj.get("tags") != null && !jsonObj.get("tags").isJsonNull() && !jsonObj.get("tags").isJsonArray()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `tags` to be an array in the JSON string but got `%s`", jsonObj.get("tags").toString()));
       }
   }
 

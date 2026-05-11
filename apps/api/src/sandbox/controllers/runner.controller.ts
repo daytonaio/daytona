@@ -116,6 +116,7 @@ export class RunnerController {
       regionId: createRunnerDto.regionId,
       name: createRunnerDto.name,
       apiVersion: '2',
+      tags: createRunnerDto.tags,
     })
 
     return CreateRunnerResponseDto.fromRunner(runner, apiKey)

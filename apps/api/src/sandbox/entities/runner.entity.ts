@@ -12,6 +12,7 @@ import { RunnerServiceInfo } from '../common/runner-service-info'
 @Entity()
 @Unique(['region', 'name'])
 @Index(['state', 'unschedulable', 'region'])
+@Index('runner_tags_gin_idx', { synchronize: false })
 export class Runner {
   @PrimaryGeneratedColumn('uuid')
   id: string
@@ -174,6 +175,13 @@ export class Runner {
   draining: boolean
 
   @Column({
+    type: 'text',
+    array: true,
+    default: () => "'{}'",
+  })
+  tags: string[]
+
+  @Column({
     type: 'jsonb',
     nullable: true,
     default: null,
@@ -202,6 +210,7 @@ export class Runner {
     apiUrl?: string
     proxyUrl?: string
     appVersion?: string | null
+    tags?: string[]
   }) {
     this.region = params.region
     this.name = params.name
@@ -217,6 +226,7 @@ export class Runner {
     this.appVersion = params.appVersion ?? null
     this.gpu = null
     this.gpuType = null
+    this.tags = params.tags ?? []
 
     if (this.apiVersion === '0') {
       if (!this.apiUrl) {

@@ -20,7 +20,9 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -52,6 +54,14 @@ public class AdminCreateRunnerTest {
     @Test
     public void nameTest() {
         // TODO: test name
+    }
+
+    /**
+     * Test the property 'tags'
+     */
+    @Test
+    public void tagsTest() {
+        // TODO: test tags
     }
 
     /**

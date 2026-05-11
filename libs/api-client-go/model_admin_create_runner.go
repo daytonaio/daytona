@@ -23,6 +23,8 @@ var _ MappedNullable = &AdminCreateRunner{}
 type AdminCreateRunner struct {
 	RegionId string `json:"regionId"`
 	Name string `json:"name"`
+	// Tags to associate with the runner
+	Tags []string `json:"tags,omitempty"`
 	ApiKey string `json:"apiKey"`
 	// The api version of the runner to create
 	ApiVersion string `json:"apiVersion" validate:"regexp=^(0|2)$"`
@@ -110,6 +112,38 @@ func (o *AdminCreateRunner) GetNameOk() (*string, bool) {
 // SetName sets field value
 func (o *AdminCreateRunner) SetName(v string) {
 	o.Name = v
+}
+
+// GetTags returns the Tags field value if set, zero value otherwise.
+func (o *AdminCreateRunner) GetTags() []string {
+	if o == nil || IsNil(o.Tags) {
+		var ret []string
+		return ret
+	}
+	return o.Tags
+}
+
+// GetTagsOk returns a tuple with the Tags field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *AdminCreateRunner) GetTagsOk() ([]string, bool) {
+	if o == nil || IsNil(o.Tags) {
+		return nil, false
+	}
+	return o.Tags, true
+}
+
+// HasTags returns a boolean if a field has been set.
+func (o *AdminCreateRunner) HasTags() bool {
+	if o != nil && !IsNil(o.Tags) {
+		return true
+	}
+
+	return false
+}
+
+// SetTags gets a reference to the given []string and assigns it to the Tags field.
+func (o *AdminCreateRunner) SetTags(v []string) {
+	o.Tags = v
 }
 
 // GetApiKey returns the ApiKey field value
@@ -364,6 +398,9 @@ func (o AdminCreateRunner) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["regionId"] = o.RegionId
 	toSerialize["name"] = o.Name
+	if !IsNil(o.Tags) {
+		toSerialize["tags"] = o.Tags
+	}
 	toSerialize["apiKey"] = o.ApiKey
 	toSerialize["apiVersion"] = o.ApiVersion
 	if !IsNil(o.Domain) {
@@ -432,6 +469,7 @@ func (o *AdminCreateRunner) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "regionId")
 		delete(additionalProperties, "name")
+		delete(additionalProperties, "tags")
 		delete(additionalProperties, "apiKey")
 		delete(additionalProperties, "apiVersion")
 		delete(additionalProperties, "domain")

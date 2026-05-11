@@ -19,6 +19,9 @@ module DaytonaApiClient
 
     attr_accessor :name
 
+    # Tags to associate with the runner
+    attr_accessor :tags
+
     attr_accessor :api_key
 
     # The api version of the runner to create
@@ -47,6 +50,7 @@ module DaytonaApiClient
       {
         :'region_id' => :'regionId',
         :'name' => :'name',
+        :'tags' => :'tags',
         :'api_key' => :'apiKey',
         :'api_version' => :'apiVersion',
         :'domain' => :'domain',
@@ -73,6 +77,7 @@ module DaytonaApiClient
       {
         :'region_id' => :'String',
         :'name' => :'String',
+        :'tags' => :'Array<String>',
         :'api_key' => :'String',
         :'api_version' => :'String',
         :'domain' => :'String',
@@ -116,6 +121,12 @@ module DaytonaApiClient
         self.name = attributes[:'name']
       else
         self.name = nil
+      end
+
+      if attributes.key?(:'tags')
+        if (value = attributes[:'tags']).is_a?(Array)
+          self.tags = value
+        end
       end
 
       if attributes.key?(:'api_key')
@@ -248,6 +259,7 @@ module DaytonaApiClient
       self.class == o.class &&
           region_id == o.region_id &&
           name == o.name &&
+          tags == o.tags &&
           api_key == o.api_key &&
           api_version == o.api_version &&
           domain == o.domain &&
@@ -267,7 +279,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [region_id, name, api_key, api_version, domain, api_url, proxy_url, cpu, memory_gi_b, disk_gi_b].hash
+      [region_id, name, tags, api_key, api_version, domain, api_url, proxy_url, cpu, memory_gi_b, disk_gi_b].hash
     end
 
     # Builds the object from hash

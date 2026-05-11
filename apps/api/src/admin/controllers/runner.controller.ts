@@ -90,6 +90,7 @@ export class AdminRunnerController {
       cpu: createRunnerDto.cpu,
       memoryGiB: createRunnerDto.memoryGiB,
       diskGiB: createRunnerDto.diskGiB,
+      tags: createRunnerDto.tags,
     })
 
     return CreateRunnerResponseDto.fromRunner(runner, apiKey)

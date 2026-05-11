@@ -25,7 +25,9 @@ import io.daytona.api.client.model.RunnerState;
 import io.daytona.api.client.model.SandboxClass;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -174,6 +176,11 @@ public class RunnerFull {
   @SerializedName(SERIALIZED_NAME_UNSCHEDULABLE)
   @javax.annotation.Nonnull
   private Boolean unschedulable;
+
+  public static final String SERIALIZED_NAME_TAGS = "tags";
+  @SerializedName(SERIALIZED_NAME_TAGS)
+  @javax.annotation.Nonnull
+  private List<String> tags = new ArrayList<>();
 
   public static final String SERIALIZED_NAME_CREATED_AT = "createdAt";
   @SerializedName(SERIALIZED_NAME_CREATED_AT)
@@ -677,6 +684,33 @@ public class RunnerFull {
   }
 
 
+  public RunnerFull tags(@javax.annotation.Nonnull List<String> tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  public RunnerFull addTagsItem(String tagsItem) {
+    if (this.tags == null) {
+      this.tags = new ArrayList<>();
+    }
+    this.tags.add(tagsItem);
+    return this;
+  }
+
+  /**
+   * Tags associated with the runner
+   * @return tags
+   */
+  @javax.annotation.Nonnull
+  public List<String> getTags() {
+    return tags;
+  }
+
+  public void setTags(@javax.annotation.Nonnull List<String> tags) {
+    this.tags = tags;
+  }
+
+
   public RunnerFull createdAt(@javax.annotation.Nonnull String createdAt) {
     this.createdAt = createdAt;
     return this;
@@ -919,6 +953,7 @@ public class RunnerFull {
         Objects.equals(this.state, runnerFull.state) &&
         Objects.equals(this.lastChecked, runnerFull.lastChecked) &&
         Objects.equals(this.unschedulable, runnerFull.unschedulable) &&
+        Objects.equals(this.tags, runnerFull.tags) &&
         Objects.equals(this.createdAt, runnerFull.createdAt) &&
         Objects.equals(this.updatedAt, runnerFull.updatedAt) &&
         Objects.equals(this.version, runnerFull.version) &&
@@ -932,7 +967,7 @@ public class RunnerFull {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, domain, apiUrl, proxyUrl, cpu, memory, disk, gpu, gpuType, propertyClass, currentCpuUsagePercentage, currentMemoryUsagePercentage, currentDiskUsagePercentage, currentAllocatedCpu, currentAllocatedMemoryGiB, currentAllocatedDiskGiB, currentSnapshotCount, currentStartedSandboxes, availabilityScore, region, name, state, lastChecked, unschedulable, createdAt, updatedAt, version, apiVersion, runnerClass, appVersion, apiKey, regionType, additionalProperties);
+    return Objects.hash(id, domain, apiUrl, proxyUrl, cpu, memory, disk, gpu, gpuType, propertyClass, currentCpuUsagePercentage, currentMemoryUsagePercentage, currentDiskUsagePercentage, currentAllocatedCpu, currentAllocatedMemoryGiB, currentAllocatedDiskGiB, currentSnapshotCount, currentStartedSandboxes, availabilityScore, region, name, state, lastChecked, unschedulable, tags, createdAt, updatedAt, version, apiVersion, runnerClass, appVersion, apiKey, regionType, additionalProperties);
   }
 
   @Override
@@ -963,6 +998,7 @@ public class RunnerFull {
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    lastChecked: ").append(toIndentedString(lastChecked)).append("\n");
     sb.append("    unschedulable: ").append(toIndentedString(unschedulable)).append("\n");
+    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    createdAt: ").append(toIndentedString(createdAt)).append("\n");
     sb.append("    updatedAt: ").append(toIndentedString(updatedAt)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
@@ -990,10 +1026,10 @@ public class RunnerFull {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version", "apiVersion", "runnerClass", "appVersion", "apiKey", "regionType"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "tags", "createdAt", "updatedAt", "version", "apiVersion", "runnerClass", "appVersion", "apiKey", "regionType"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "cpu", "memory", "disk", "class", "region", "name", "state", "unschedulable", "createdAt", "updatedAt", "version", "apiVersion", "runnerClass", "apiKey"));
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "cpu", "memory", "disk", "class", "region", "name", "state", "unschedulable", "tags", "createdAt", "updatedAt", "version", "apiVersion", "runnerClass", "apiKey"));
   }
 
   /**
@@ -1043,6 +1079,12 @@ public class RunnerFull {
       RunnerState.validateJsonElement(jsonObj.get("state"));
       if ((jsonObj.get("lastChecked") != null && !jsonObj.get("lastChecked").isJsonNull()) && !jsonObj.get("lastChecked").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `lastChecked` to be a primitive type in the JSON string but got `%s`", jsonObj.get("lastChecked").toString()));
+      }
+      // ensure the required json array is present
+      if (jsonObj.get("tags") == null) {
+        throw new IllegalArgumentException("Expected the field `linkedContent` to be an array in the JSON string but got `null`");
+      } else if (!jsonObj.get("tags").isJsonArray()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `tags` to be an array in the JSON string but got `%s`", jsonObj.get("tags").toString()));
       }
       if (!jsonObj.get("createdAt").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `createdAt` to be a primitive type in the JSON string but got `%s`", jsonObj.get("createdAt").toString()));

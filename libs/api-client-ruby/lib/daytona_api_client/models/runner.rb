@@ -87,6 +87,9 @@ module DaytonaApiClient
     # Whether the runner is unschedulable
     attr_accessor :unschedulable
 
+    # Tags associated with the runner
+    attr_accessor :tags
+
     # The creation timestamp of the runner
     attr_accessor :created_at
 
@@ -154,6 +157,7 @@ module DaytonaApiClient
         :'state' => :'state',
         :'last_checked' => :'lastChecked',
         :'unschedulable' => :'unschedulable',
+        :'tags' => :'tags',
         :'created_at' => :'createdAt',
         :'updated_at' => :'updatedAt',
         :'version' => :'version',
@@ -200,6 +204,7 @@ module DaytonaApiClient
         :'state' => :'RunnerState',
         :'last_checked' => :'String',
         :'unschedulable' => :'Boolean',
+        :'tags' => :'Array<String>',
         :'created_at' => :'String',
         :'updated_at' => :'String',
         :'version' => :'String',
@@ -345,6 +350,14 @@ module DaytonaApiClient
         self.unschedulable = nil
       end
 
+      if attributes.key?(:'tags')
+        if (value = attributes[:'tags']).is_a?(Array)
+          self.tags = value
+        end
+      else
+        self.tags = nil
+      end
+
       if attributes.key?(:'created_at')
         self.created_at = attributes[:'created_at']
       else
@@ -421,6 +434,10 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "unschedulable", unschedulable cannot be nil.')
       end
 
+      if @tags.nil?
+        invalid_properties.push('invalid value for "tags", tags cannot be nil.')
+      end
+
       if @created_at.nil?
         invalid_properties.push('invalid value for "created_at", created_at cannot be nil.')
       end
@@ -457,6 +474,7 @@ module DaytonaApiClient
       return false if @name.nil?
       return false if @state.nil?
       return false if @unschedulable.nil?
+      return false if @tags.nil?
       return false if @created_at.nil?
       return false if @updated_at.nil?
       return false if @version.nil?
@@ -556,6 +574,16 @@ module DaytonaApiClient
     end
 
     # Custom attribute writer method with validation
+    # @param [Object] tags Value to be assigned
+    def tags=(tags)
+      if tags.nil?
+        fail ArgumentError, 'tags cannot be nil'
+      end
+
+      @tags = tags
+    end
+
+    # Custom attribute writer method with validation
     # @param [Object] created_at Value to be assigned
     def created_at=(created_at)
       if created_at.nil?
@@ -634,6 +662,7 @@ module DaytonaApiClient
           state == o.state &&
           last_checked == o.last_checked &&
           unschedulable == o.unschedulable &&
+          tags == o.tags &&
           created_at == o.created_at &&
           updated_at == o.updated_at &&
           version == o.version &&
@@ -651,7 +680,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, domain, api_url, proxy_url, cpu, memory, disk, gpu, gpu_type, _class, current_cpu_usage_percentage, current_memory_usage_percentage, current_disk_usage_percentage, current_allocated_cpu, current_allocated_memory_gi_b, current_allocated_disk_gi_b, current_snapshot_count, current_started_sandboxes, availability_score, region, name, state, last_checked, unschedulable, created_at, updated_at, version, api_version, runner_class, app_version].hash
+      [id, domain, api_url, proxy_url, cpu, memory, disk, gpu, gpu_type, _class, current_cpu_usage_percentage, current_memory_usage_percentage, current_disk_usage_percentage, current_allocated_cpu, current_allocated_memory_gi_b, current_allocated_disk_gi_b, current_snapshot_count, current_started_sandboxes, availability_score, region, name, state, last_checked, unschedulable, tags, created_at, updated_at, version, api_version, runner_class, app_version].hash
     end
 
     # Builds the object from hash

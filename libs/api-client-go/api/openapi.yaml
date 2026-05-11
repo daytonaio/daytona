@@ -11497,11 +11497,22 @@ components:
       example:
         regionId: regionId
         name: name
+        tags:
+        - gpu
+        - us-east
       properties:
         regionId:
           type: string
         name:
           type: string
+        tags:
+          description: Tags to associate with the runner
+          example:
+          - gpu
+          - us-east
+          items:
+            type: string
+          type: array
       required:
       - name
       - regionId
@@ -11573,6 +11584,9 @@ components:
         gpu: 1
         currentSnapshotCount: 12
         version: "0"
+        tags:
+        - gpu
+        - us-east
         disk: 100
         domain: runner1.example.com
         name: runner1
@@ -11677,6 +11691,14 @@ components:
           description: Whether the runner is unschedulable
           example: false
           type: boolean
+        tags:
+          description: Tags associated with the runner
+          example:
+          - gpu
+          - us-east
+          items:
+            type: string
+          type: array
         createdAt:
           description: The creation timestamp of the runner
           example: 2023-10-01T12:00:00Z
@@ -11727,6 +11749,7 @@ components:
       - region
       - runnerClass
       - state
+      - tags
       - unschedulable
       - updatedAt
       - version
@@ -11779,6 +11802,9 @@ components:
         gpu: 1
         currentSnapshotCount: 12
         version: "0"
+        tags:
+        - gpu
+        - us-east
         disk: 100
         domain: runner1.example.com
         name: runner1
@@ -11883,6 +11909,14 @@ components:
           description: Whether the runner is unschedulable
           example: false
           type: boolean
+        tags:
+          description: Tags associated with the runner
+          example:
+          - gpu
+          - us-east
+          items:
+            type: string
+          type: array
         createdAt:
           description: The creation timestamp of the runner
           example: 2023-10-01T12:00:00Z
@@ -11923,6 +11957,7 @@ components:
       - region
       - runnerClass
       - state
+      - tags
       - unschedulable
       - updatedAt
       - version
@@ -14548,11 +14583,22 @@ components:
         domain: runner1.example.com
         name: name
         cpu: 8
+        tags:
+        - gpu
+        - us-east
       properties:
         regionId:
           type: string
         name:
           type: string
+        tags:
+          description: Tags to associate with the runner
+          example:
+          - gpu
+          - us-east
+          items:
+            type: string
+          type: array
         apiKey:
           type: string
         apiVersion:

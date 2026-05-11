@@ -174,6 +174,13 @@ export class RunnerDto {
   unschedulable: boolean
 
   @ApiProperty({
+    description: 'Tags associated with the runner',
+    example: ['gpu', 'us-east'],
+    type: [String],
+  })
+  tags: string[]
+
+  @ApiProperty({
     description: 'The creation timestamp of the runner',
     example: '2023-10-01T12:00:00Z',
   })
@@ -243,6 +250,7 @@ export class RunnerDto {
       state: runner.state,
       lastChecked: runner.lastChecked?.toISOString(),
       unschedulable: runner.unschedulable,
+      tags: runner.tags ?? [],
       createdAt: runner.createdAt.toISOString(),
       updatedAt: runner.updatedAt.toISOString(),
       version: runner.apiVersion,

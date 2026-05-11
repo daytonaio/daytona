@@ -17,6 +17,10 @@
 export interface AdminCreateRunner {
     'regionId': string;
     'name': string;
+    /**
+     * Tags to associate with the runner
+     */
+    'tags'?: Array<string>;
     'apiKey': string;
     /**
      * The api version of the runner to create

@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
@@ -32,8 +32,9 @@ class CreateRunner(BaseModel):
     """ # noqa: E501
     region_id: StrictStr = Field(serialization_alias="regionId")
     name: StrictStr
+    tags: Optional[List[StrictStr]] = Field(default=None, description="Tags to associate with the runner")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["regionId", "name"]
+    __properties: ClassVar[List[str]] = ["regionId", "name", "tags"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -93,7 +94,8 @@ class CreateRunner(BaseModel):
 
         _obj = cls.model_validate({
             "region_id": obj.get("regionId"),
-            "name": obj.get("name")
+            "name": obj.get("name"),
+            "tags": obj.get("tags")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

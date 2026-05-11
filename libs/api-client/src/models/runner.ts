@@ -121,6 +121,10 @@ export interface Runner {
      */
     'unschedulable': boolean;
     /**
+     * Tags associated with the runner
+     */
+    'tags': Array<string>;
+    /**
      * The creation timestamp of the runner
      */
     'createdAt': string;

@@ -23,6 +23,8 @@ var _ MappedNullable = &CreateRunner{}
 type CreateRunner struct {
 	RegionId string `json:"regionId"`
 	Name string `json:"name"`
+	// Tags to associate with the runner
+	Tags []string `json:"tags,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -95,6 +97,38 @@ func (o *CreateRunner) SetName(v string) {
 	o.Name = v
 }
 
+// GetTags returns the Tags field value if set, zero value otherwise.
+func (o *CreateRunner) GetTags() []string {
+	if o == nil || IsNil(o.Tags) {
+		var ret []string
+		return ret
+	}
+	return o.Tags
+}
+
+// GetTagsOk returns a tuple with the Tags field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateRunner) GetTagsOk() ([]string, bool) {
+	if o == nil || IsNil(o.Tags) {
+		return nil, false
+	}
+	return o.Tags, true
+}
+
+// HasTags returns a boolean if a field has been set.
+func (o *CreateRunner) HasTags() bool {
+	if o != nil && !IsNil(o.Tags) {
+		return true
+	}
+
+	return false
+}
+
+// SetTags gets a reference to the given []string and assigns it to the Tags field.
+func (o *CreateRunner) SetTags(v []string) {
+	o.Tags = v
+}
+
 func (o CreateRunner) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -107,6 +141,9 @@ func (o CreateRunner) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["regionId"] = o.RegionId
 	toSerialize["name"] = o.Name
+	if !IsNil(o.Tags) {
+		toSerialize["tags"] = o.Tags
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -153,6 +190,7 @@ func (o *CreateRunner) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "regionId")
 		delete(additionalProperties, "name")
+		delete(additionalProperties, "tags")
 		o.AdditionalProperties = additionalProperties
 	}
 

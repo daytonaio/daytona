@@ -69,6 +69,8 @@ type RunnerFull struct {
 	LastChecked *string `json:"lastChecked,omitempty"`
 	// Whether the runner is unschedulable
 	Unschedulable bool `json:"unschedulable"`
+	// Tags associated with the runner
+	Tags []string `json:"tags"`
 	// The creation timestamp of the runner
 	CreatedAt string `json:"createdAt"`
 	// The last update timestamp of the runner
@@ -97,7 +99,7 @@ type _RunnerFull RunnerFull
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunnerFull(id string, cpu float32, memory float32, disk float32, class SandboxClass, region string, name string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string, apiVersion string, runnerClass RunnerClass, apiKey string) *RunnerFull {
+func NewRunnerFull(id string, cpu float32, memory float32, disk float32, class SandboxClass, region string, name string, state RunnerState, unschedulable bool, tags []string, createdAt string, updatedAt string, version string, apiVersion string, runnerClass RunnerClass, apiKey string) *RunnerFull {
 	this := RunnerFull{}
 	this.Id = id
 	this.Cpu = cpu
@@ -108,6 +110,7 @@ func NewRunnerFull(id string, cpu float32, memory float32, disk float32, class S
 	this.Name = name
 	this.State = state
 	this.Unschedulable = unschedulable
+	this.Tags = tags
 	this.CreatedAt = createdAt
 	this.UpdatedAt = updatedAt
 	this.Version = version
@@ -821,6 +824,30 @@ func (o *RunnerFull) SetUnschedulable(v bool) {
 	o.Unschedulable = v
 }
 
+// GetTags returns the Tags field value
+func (o *RunnerFull) GetTags() []string {
+	if o == nil {
+		var ret []string
+		return ret
+	}
+
+	return o.Tags
+}
+
+// GetTagsOk returns a tuple with the Tags field value
+// and a boolean to check if the value has been set.
+func (o *RunnerFull) GetTagsOk() ([]string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Tags, true
+}
+
+// SetTags sets field value
+func (o *RunnerFull) SetTags(v []string) {
+	o.Tags = v
+}
+
 // GetCreatedAt returns the CreatedAt field value
 func (o *RunnerFull) GetCreatedAt() string {
 	if o == nil {
@@ -1102,6 +1129,7 @@ func (o RunnerFull) ToMap() (map[string]interface{}, error) {
 		toSerialize["lastChecked"] = o.LastChecked
 	}
 	toSerialize["unschedulable"] = o.Unschedulable
+	toSerialize["tags"] = o.Tags
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
 	toSerialize["version"] = o.Version
@@ -1136,6 +1164,7 @@ func (o *RunnerFull) UnmarshalJSON(data []byte) (err error) {
 		"name",
 		"state",
 		"unschedulable",
+		"tags",
 		"createdAt",
 		"updatedAt",
 		"version",
@@ -1195,6 +1224,7 @@ func (o *RunnerFull) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "state")
 		delete(additionalProperties, "lastChecked")
 		delete(additionalProperties, "unschedulable")
+		delete(additionalProperties, "tags")
 		delete(additionalProperties, "createdAt")
 		delete(additionalProperties, "updatedAt")
 		delete(additionalProperties, "version")

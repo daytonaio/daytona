@@ -19,11 +19,15 @@ module DaytonaApiClient
 
     attr_accessor :name
 
+    # Tags to associate with the runner
+    attr_accessor :tags
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
         :'region_id' => :'regionId',
-        :'name' => :'name'
+        :'name' => :'name',
+        :'tags' => :'tags'
       }
     end
 
@@ -41,7 +45,8 @@ module DaytonaApiClient
     def self.openapi_types
       {
         :'region_id' => :'String',
-        :'name' => :'String'
+        :'name' => :'String',
+        :'tags' => :'Array<String>'
       }
     end
 
@@ -77,6 +82,12 @@ module DaytonaApiClient
         self.name = attributes[:'name']
       else
         self.name = nil
+      end
+
+      if attributes.key?(:'tags')
+        if (value = attributes[:'tags']).is_a?(Array)
+          self.tags = value
+        end
       end
     end
 
@@ -131,7 +142,8 @@ module DaytonaApiClient
       return true if self.equal?(o)
       self.class == o.class &&
           region_id == o.region_id &&
-          name == o.name
+          name == o.name &&
+          tags == o.tags
     end
 
     # @see the `==` method
@@ -143,7 +155,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [region_id, name].hash
+      [region_id, name, tags].hash
     end
 
     # Builds the object from hash

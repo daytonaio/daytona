@@ -17,5 +17,9 @@
 export interface CreateRunner {
     'regionId': string;
     'name': string;
+    /**
+     * Tags to associate with the runner
+     */
+    'tags'?: Array<string>;
 }
 

@@ -23,7 +23,9 @@ import io.daytona.api.client.model.RunnerState;
 import io.daytona.api.client.model.SandboxClass;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -231,6 +233,14 @@ public class RunnerTest {
     @Test
     public void unschedulableTest() {
         // TODO: test unschedulable
+    }
+
+    /**
+     * Test the property 'tags'
+     */
+    @Test
+    public void tagsTest() {
+        // TODO: test tags
     }
 
     /**
