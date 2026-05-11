@@ -207,14 +207,14 @@ jobs:
           persist-credentials: false
 
       - name: Check AGPL License Headers
-        uses: apache/skywalking-eyes/header@e0cc16d0e47f446fbc456d0e670dc50dec09719e # main
+        uses: apache/skywalking-eyes/header@e910f72bae86171d727742c25f8a4555b7b83893 # main
         with:
           token: ${{ github.token }}
           config: .licenserc.yaml
           mode: 'check'
 
       - name: Check Apache License Headers
-        uses: apache/skywalking-eyes/header@e0cc16d0e47f446fbc456d0e670dc50dec09719e # main
+        uses: apache/skywalking-eyes/header@e910f72bae86171d727742c25f8a4555b7b83893 # main
         with:
           token: ${{ github.token }}
           config: .licenserc-clients.yaml
