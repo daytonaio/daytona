@@ -59,7 +59,7 @@ jobs:
             exit 1
           fi
           echo "Affected projects: $AFFECTED"
-          if echo "$AFFECTED" | grep -qE 'daytona-e2e|^api$|^runner$|^proxy$|^daemon$|^dashboard$|sdk-typescript|sdk-python|sdk-go|sdk-ruby|sdk-java|api-client|toolbox-api-client'; then
+          if echo "$AFFECTED" | grep -qE 'daytona-e2e|^api$|^runner$|^proxy$|^daemon$|^session-daemon$|^dashboard$|sdk-typescript|sdk-python|sdk-go|sdk-ruby|sdk-java|api-client|toolbox-api-client'; then
             echo "affected=true" >> $GITHUB_OUTPUT
           else
             echo "affected=false" >> $GITHUB_OUTPUT
@@ -87,6 +87,49 @@ jobs:
           docker compose -f apps/daytona-e2e/docker-compose.e2e.yaml up -d --wait
           docker compose -f apps/daytona-e2e/docker-compose.e2e.yaml ps
 
+      - name: Verify snapshot.Dockerfile renders cleanly
+        if: steps.affected.outputs.affected == 'true'
+        run: |
+          # apps/session-daemon/snapshot.Dockerfile is the self-contained variant we
+          # ship for users who want to install the session-runtime snapshot via the
+          # Daytona snapshot API (POST /api/snapshots) instead of running `docker
+          # build` locally. We don't actually use it in CI (the monorepo Dockerfile
+          # below builds faster from source), but we do want the file to stay valid:
+          # if envsubst can't render it, the API path is broken and we should fail
+          # the PR.
+          SESSION_DAEMON_URL='https://example.invalid/session-daemon-amd64' \
+          SESSION_DAEMON_SHA256='0000000000000000000000000000000000000000000000000000000000000000' \
+          envsubst '${SESSION_DAEMON_URL} ${SESSION_DAEMON_SHA256}' \
+            < apps/session-daemon/snapshot.Dockerfile \
+            > /tmp/snapshot.rendered.Dockerfile
+          # Anything left unsubstituted that isn't a Docker runtime ref (PATH,
+          # SESSION_DAEMON_PORT) is a placeholder we forgot to wire — fail loudly.
+          if grep -vE '\$\{(PATH|SESSION_DAEMON_PORT)\}' /tmp/snapshot.rendered.Dockerfile \
+             | grep -E '\$\{[A-Z_]+\}'; then
+            echo "snapshot.Dockerfile contains unrendered placeholders — update the envsubst allowlist or fix the Dockerfile"
+            exit 1
+          fi
+          echo "snapshot.Dockerfile renders cleanly"
+
+      - name: Build session-daemon runtime image
+        if: steps.affected.outputs.affected == 'true'
+        run: |
+          # Build the session-runtime image (Python venv + Node 22 + curated node_modules
+          # + session-daemon binary). The seed migration points the `python-default`
+          # template snapshot at `daytonaio/session-runtime:python-default-placeholder`,
+          # which we build here and push to the local registry so the runner can pull it.
+          #
+          # We use the monorepo-aware ./Dockerfile (not snapshot.Dockerfile) because in
+          # CI we already have all the build dependencies on disk and don't want to do
+          # the "build binary + host it + docker build --build-arg" dance.
+          # snapshot.Dockerfile is the variant users submit to the Daytona snapshot API
+          # in production; the render-check step above is what guards its validity.
+          docker build -f apps/session-daemon/Dockerfile \
+            --build-arg VERSION=v0.0.0-dev \
+            -t localhost:5000/daytonaio/session-runtime:python-default-placeholder \
+            .
+          docker push localhost:5000/daytonaio/session-runtime:python-default-placeholder
+
       - name: Build services needed for E2E
         if: steps.affected.outputs.affected == 'true'
         run: |
@@ -100,6 +143,23 @@ jobs:
       - name: Run DB migrations
         if: steps.affected.outputs.affected == 'true'
         run: yarn migration:run:init && yarn migration:run:pre-deploy
+
+      - name: Repoint python-default snapshot at local session-runtime image
+        if: steps.affected.outputs.affected == 'true'
+        run: |
+          # The seed migration creates the `python-default` snapshot with
+          # imageName=`daytonaio/session-runtime:python-default-placeholder` (a public
+          # name that doesn't exist yet). Point it at the local-registry tag we just
+          # built so the runner can actually pull it when the pool acquires a sandbox.
+          # `migration:run:init` includes the post-deploy seed, so the row exists by now.
+          UPDATED=$(docker compose -f apps/daytona-e2e/docker-compose.e2e.yaml exec -T db \
+            psql -U user -d application_ctx -tA -c \
+            "UPDATE snapshot SET \"imageName\"='localhost:5000/daytonaio/session-runtime:python-default-placeholder' WHERE name='python-default' AND general=true RETURNING id;")
+          if [ -z "$UPDATED" ]; then
+            echo "python-default snapshot row missing — seed migration did not run"
+            exit 1
+          fi
+          echo "Repointed python-default snapshot (id=$UPDATED) to local registry image"
 
       - name: Install gow (Go file watcher for serve targets)
         if: steps.affected.outputs.affected == 'true'
@@ -153,31 +213,59 @@ jobs:
       - name: Wait for default snapshot to be available
         if: steps.affected.outputs.affected == 'true'
         run: |
-          echo "Waiting for default snapshot (daytonaio/sandbox:0.6.0-slim) to become active..."
-          echo "Runner must boot, API creates snapshot (pending), cron job transitions it to active"
-          for i in $(seq 1 150); do
-            BODY=$(curl -s \
-              -H "Authorization: Bearer e2e_admin_api_key" \
-              "http://localhost:3001/api/snapshots/daytonaio%2Fsandbox%3A0.6.0-slim" 2>/dev/null || echo "")
-            STATE=$(echo "$BODY" | jq -r '.state // empty' 2>/dev/null || echo "")
-            if [ "$STATE" = "active" ]; then
-              echo "Default snapshot is active (attempt $i, elapsed ~$((i*2))s)"
-              exit 0
-            fi
-            if [ "$((i % 10))" = "0" ]; then
-              echo "Attempt $i: snapshot state='${STATE:-not found}' (elapsed ~$((i*2))s)"
-            fi
-            sleep 2
-          done
-          echo "Default snapshot not active after 300s"
-          echo "Last snapshot response:"
-          echo "$BODY" | jq . 2>/dev/null || echo "$BODY"
+          # Polls both snapshots the e2e suite depends on, in parallel:
+          #   * daytonaio/sandbox:0.6.0-slim       — backs the classic sandbox lifecycle suite
+          #   * python-default                     — backs the sessions suite (image was
+          #                                          repointed to localhost:5000 above)
+          # Both must reach state=active before tests run.
+          wait_snapshot() {
+            local label="$1"
+            local encoded="$2"
+            echo "Waiting for ${label} to become active..."
+            for i in $(seq 1 150); do
+              BODY=$(curl -s \
+                -H "Authorization: Bearer e2e_admin_api_key" \
+                "http://localhost:3001/api/snapshots/${encoded}" 2>/dev/null || echo "")
+              STATE=$(echo "$BODY" | jq -r '.state // empty' 2>/dev/null || echo "")
+              if [ "$STATE" = "active" ]; then
+                echo "${label} is active (attempt $i, elapsed ~$((i*2))s)"
+                return 0
+              fi
+              if [ "$((i % 10))" = "0" ]; then
+                echo "  ${label} attempt $i: state='${STATE:-not found}' (elapsed ~$((i*2))s)"
+              fi
+              sleep 2
+            done
+            echo "${label} not active after 300s"
+            echo "Last response:"
+            echo "$BODY" | jq . 2>/dev/null || echo "$BODY"
+            return 1
+          }
+
+          OK=true
+          wait_snapshot "daytonaio/sandbox:0.6.0-slim" "daytonaio%2Fsandbox%3A0.6.0-slim" &
+          pid_sandbox=$!
+          wait_snapshot "python-default" "python-default" &
+          pid_python=$!
+          wait "$pid_sandbox" || OK=false
+          wait "$pid_python" || OK=false
+
+          if [ "$OK" = true ]; then
+            exit 0
+          fi
+
           echo ""
           echo "=== Runner DB entry (state inspection) ==="
           docker compose -f apps/daytona-e2e/docker-compose.e2e.yaml exec -T db \
             psql -U user -d application_ctx -x -c \
             'SELECT id, domain, "apiUrl", "proxyUrl", region, name, state, "appVersion", "apiVersion", "lastChecked", unschedulable, draining, "availabilityScore", "currentSnapshotCount", "serviceHealth", "createdAt", "updatedAt" FROM runner;' \
             || echo "Failed to query runner table"
+          echo ""
+          echo "=== Snapshot table ==="
+          docker compose -f apps/daytona-e2e/docker-compose.e2e.yaml exec -T db \
+            psql -U user -d application_ctx -x -c \
+            'SELECT id, name, "imageName", state, "errorReason", general FROM snapshot WHERE name IN (''python-default'', ''daytonaio/sandbox:0.6.0-slim'');' \
+            || echo "Failed to query snapshot table"
           echo ""
           echo "=== Runner logs (full) ==="
           cat /tmp/runner.log 2>/dev/null || echo "No runner logs found"

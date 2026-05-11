@@ -56,6 +56,7 @@ from ..common.sandbox import ListSandboxesQuery
 from ..internal.pool_tracker import AsyncPoolSaturationTracker
 from ..internal.shared_session import SharedAiohttpSession
 from .sandbox import AsyncSandbox
+from .session import AsyncSessionService
 from .snapshot import AsyncSnapshotService
 from .volume import AsyncVolumeService
 
@@ -293,6 +294,13 @@ class AsyncDaytona:
             self._object_storage_api,
             self._target,
             self._shared_session,
+        )
+        # AsyncSessionService is a thin aiohttp wrapper today; once
+        # `yarn generate:api-client` produces an SessionsApi for the async client,
+        # the service swaps to it without changing the public surface.
+        self.session: AsyncSessionService = AsyncSessionService(
+            base_url=self._api_url,
+            headers=dict(cast("dict[str, str]", self._api_client.default_headers)),
         )
 
         # Initialize OpenTelemetry if enabled

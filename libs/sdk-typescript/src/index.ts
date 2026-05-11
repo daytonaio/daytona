@@ -43,6 +43,21 @@ export {
   DaytonaValidationError,
 } from './errors/DaytonaError'
 export { Image } from './Image'
+export { SessionExpiredError, SessionInvalidatedError, SessionService } from './Session'
+export type {
+  CreateSessionOptions,
+  SessionAccess,
+  SessionContext,
+  SessionPackage,
+  SessionRef,
+  SessionDisplay,
+  SessionExecutionError,
+  SessionFrameType,
+  SessionRunOptions,
+  SessionRunResult,
+  SessionRunStreamOptions,
+  SessionTemplate,
+} from './Session'
 export { Sandbox } from './Sandbox'
 export type { ListSandboxesQuery } from './Sandbox'
 export type { CreateSnapshotParams } from './Snapshot'

@@ -14,8 +14,10 @@ if TYPE_CHECKING:
     from ._async.computer_use import AsyncComputerUse, AsyncDisplay, AsyncKeyboard, AsyncMouse, AsyncScreenshot
     from ._async.daytona import AsyncDaytona
     from ._async.sandbox import AsyncSandbox
+    from ._async.session import AsyncSessionService
     from ._sync.daytona import Daytona
     from ._sync.sandbox import Sandbox
+    from ._sync.session import SessionService
     from .common.charts import (
         BarChart,
         BoxAndWhiskerChart,
@@ -60,6 +62,16 @@ if TYPE_CHECKING:
     from .common.process import CodeRunParams, ExecuteResponse, ExecutionArtifacts, OutputHandler, SessionExecuteRequest
     from .common.pty import PtySize
     from .common.sandbox import ListSandboxesQuery, Resources
+    from .common.session import (
+        SessionAccess,
+        SessionDisplay,
+        SessionExecutionError,
+        SessionExpiredError,
+        SessionInvalidatedError,
+        SessionRef,
+        SessionRunOptions,
+        SessionRunResult,
+    )
     from .common.snapshot import CreateSnapshotParams
     from .common.volume import VolumeMount
 
@@ -108,6 +120,16 @@ __all__ = [
     "ScreenshotRegion",
     "ScreenshotOptions",
     "Image",
+    "SessionAccess",
+    "SessionExpiredError",
+    "SessionInvalidatedError",
+    "SessionRef",
+    "SessionDisplay",
+    "SessionExecutionError",
+    "SessionRunOptions",
+    "SessionRunResult",
+    "SessionService",
+    "AsyncSessionService",
     "CreateSandboxBaseParams",
     "CreateSandboxFromImageParams",
     "CreateSandboxFromSnapshotParams",
@@ -196,6 +218,19 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "FileUpload": "common.filesystem",
     # common.image
     "Image": "common.image",
+    # common.session
+    "SessionAccess": "common.session",
+    "SessionExpiredError": "common.session",
+    "SessionInvalidatedError": "common.session",
+    "SessionRef": "common.session",
+    "SessionDisplay": "common.session",
+    "SessionExecutionError": "common.session",
+    "SessionRunOptions": "common.session",
+    "SessionRunResult": "common.session",
+    # _sync.session
+    "SessionService": "_sync.session",
+    # _async.session
+    "AsyncSessionService": "_async.session",
     # common.lsp_server
     "LspCompletionPosition": "common.lsp_server",
     "LspLanguageId": "common.lsp_server",

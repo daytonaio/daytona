@@ -49,6 +49,7 @@ const SKIP_LAST_ACTIVITY_UPDATE_HEADER = "X-Daytona-Skip-Last-Activity-Update"
 const ACTIVITY_POLL_STOP_KEY = "daytona-activity-poll-stop"
 const TERMINAL_PORT = "22222"
 const TOOLBOX_PORT = "2280"
+const SESSION_DAEMON_PORT = "2281"
 const RECORDING_DASHBOARD_PORT = "33333"
 const IS_TOOLBOX_REQUEST_KEY = "is-toolbox-request"
 

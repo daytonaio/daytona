@@ -9097,6 +9097,326 @@ paths:
       summary: Get sandbox metrics
       tags:
       - sandbox
+  /sessions/code-run:
+    post:
+      operationId: SessionController_codeRun
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionCodeRunRequestDto"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionCodeRunResponseDto"
+          description: ""
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Run code synchronously and return aggregated stdout/stderr/displays.
+      tags:
+      - sessions
+  /sessions/connect:
+    post:
+      operationId: SessionController_connect
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionConnectRequestDto"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionConnectResponseDto"
+          description: ""
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Mint a signed WebSocket URL for streaming code execution against a
+        session.
+      tags:
+      - sessions
+  /sessions/transients:
+    post:
+      description: "Returns the SDK a stable (template, language) transient session\
+        \ bound to a warm-pool sandbox so subsequent run() calls bypass the API on\
+        \ the hot path. Idempotent — the same (template, language) pair returns the\
+        \ same daemon-side session until the warm instance is recycled."
+      operationId: SessionController_createTransient
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSessionTransientDto"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionDto"
+          description: ""
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Mint a deterministic one-shot session handle with a direct-to-sandbox
+        access bundle.
+      tags:
+      - sessions
+  /sessions/templates:
+    get:
+      operationId: SessionController_listTemplates
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/SessionTemplateDto"
+                type: array
+          description: ""
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: List available session templates for the current organization.
+      tags:
+      - sessions
+  /sessions/templates/{name}/packages:
+    get:
+      operationId: SessionController_listPackages
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: name
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: language
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/SessionPackageDto"
+                type: array
+          description: ""
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: List preinstalled packages for a template.
+      tags:
+      - sessions
+  /sessions:
+    get:
+      operationId: SessionController_listSessions
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: template
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/SessionDto"
+                type: array
+          description: ""
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: List active sessions in the current organization.
+      tags:
+      - sessions
+    post:
+      operationId: SessionController_createSession
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSessionDto"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionDto"
+          description: ""
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Create a persistent execution session.
+      tags:
+      - sessions
+  /sessions/{id}/access:
+    get:
+      description: Used by the SDK to refresh the short-lived signed proxy URL before
+        it expires. Also bumps the session's lastUsedAt as a keep-alive.
+      operationId: SessionController_getSessionAccess
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionAccessDto"
+          description: ""
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Mint or refresh the SDK direct-to-sandbox access bundle for a session.
+      tags:
+      - sessions
+  /sessions/{id}:
+    delete:
+      operationId: SessionController_deleteSession
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: ""
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Delete a session.
+      tags:
+      - sessions
 components:
   schemas:
     Announcement:
@@ -15454,6 +15774,308 @@ components:
           type: array
       required:
       - series
+      type: object
+    SessionRefDto:
+      example:
+        id: id
+      properties:
+        id:
+          description: The id returned by createSession (or by connect/runStream auto-create).
+          type: string
+      required:
+      - id
+      type: object
+    SessionCodeRunRequestDto:
+      example:
+        template: template
+        code: code
+        context:
+          id: id
+        language: python
+        env:
+          key: env
+        timeout: 0.8008281904610115
+      properties:
+        code:
+          type: string
+        language:
+          enum:
+          - python
+          - typescript
+          - javascript
+          - bash
+          type: string
+        template:
+          type: string
+        context:
+          $ref: "#/components/schemas/SessionRefDto"
+        env:
+          additionalProperties:
+            type: string
+          type: object
+        timeout:
+          description: Per-call timeout in seconds; 0 means unlimited.
+          type: number
+      required:
+      - code
+      type: object
+    ExecutionErrorDto:
+      example:
+        name: name
+        value: value
+        traceback: traceback
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+        traceback:
+          type: string
+      required:
+      - name
+      type: object
+    DisplayDataDto:
+      example:
+        formats:
+        - formats
+        - formats
+        data:
+          key: data
+      properties:
+        formats:
+          items:
+            type: string
+          type: array
+        data:
+          additionalProperties:
+            type: string
+          description: Mime → payload (base64 for binary).
+          type: object
+      required:
+      - data
+      - formats
+      type: object
+    SessionCodeRunResponseDto:
+      example:
+        stdout: stdout
+        stderr: stderr
+        error:
+          name: name
+          value: value
+          traceback: traceback
+        displays:
+        - formats:
+          - formats
+          - formats
+          data:
+            key: data
+        - formats:
+          - formats
+          - formats
+          data:
+            key: data
+        durationMs: 0.8008281904610115
+      properties:
+        stdout:
+          type: string
+        stderr:
+          type: string
+        error:
+          $ref: "#/components/schemas/ExecutionErrorDto"
+        displays:
+          items:
+            $ref: "#/components/schemas/DisplayDataDto"
+          type: array
+        durationMs:
+          type: number
+      required:
+      - durationMs
+      - stderr
+      - stdout
+      type: object
+    SessionConnectRequestDto:
+      example:
+        template: template
+        context:
+          id: id
+        language: python
+        timeout: 0.8008281904610115
+      properties:
+        context:
+          $ref: "#/components/schemas/SessionRefDto"
+        template:
+          type: string
+        language:
+          enum:
+          - python
+          - typescript
+          - javascript
+          - bash
+          type: string
+        timeout:
+          type: number
+      type: object
+    SessionConnectResponseDto:
+      example:
+        wsUrl: wsUrl
+        sessionId: sessionId
+        expiresAt: expiresAt
+        token: token
+      properties:
+        wsUrl:
+          type: string
+        token:
+          type: string
+        sessionId:
+          type: string
+        expiresAt:
+          description: When this signed connect URL stops being valid (separate from
+            context idle/absolute TTL).
+          type: string
+      required:
+      - expiresAt
+      - sessionId
+      - token
+      - wsUrl
+      type: object
+    CreateSessionTransientDto:
+      example:
+        template: template
+        language: python
+      properties:
+        template:
+          type: string
+        language:
+          enum:
+          - python
+          - typescript
+          - javascript
+          - bash
+          type: string
+      type: object
+    SessionAccessDto:
+      example:
+        wsUrl: wsUrl
+        httpUrl: httpUrl
+        tokenExpiresAt: tokenExpiresAt
+        token: token
+      properties:
+        httpUrl:
+          description: Signed http(s) base URL into the daemon (no trailing slash).
+          type: string
+        wsUrl:
+          description: Signed ws(s) URL for /sessions/:id/execute on the daemon.
+          type: string
+        token:
+          description: "Signed-URL token; embedded in the URL subdomain — informational,\
+            \ do not send as a header."
+          type: string
+        tokenExpiresAt:
+          description: When this signed URL stops being valid. The SDK refreshes via
+            GET /sessions/:id/access before this point.
+          type: string
+      required:
+      - httpUrl
+      - token
+      - tokenExpiresAt
+      - wsUrl
+      type: object
+    SessionDto:
+      example:
+        cwd: cwd
+        createdAt: createdAt
+        access: ""
+        lastUsedAt: lastUsedAt
+        language: language
+        id: id
+        expiresAt: expiresAt
+      properties:
+        id:
+          type: string
+        language:
+          type: string
+        cwd:
+          type: string
+        createdAt:
+          type: string
+        lastUsedAt:
+          type: string
+        expiresAt:
+          description: "Computed expiry: min(lastUsedAt + idleTtl, createdAt + absoluteTtl).\
+            \ After this point the context will surface as SessionExpiredError."
+          type: string
+        access:
+          allOf:
+          - $ref: "#/components/schemas/SessionAccessDto"
+          description: Direct-to-sandbox access bundle. Present on createSession /
+            POST /sessions/transients responses and refreshable via GET /sessions/:id/access.
+            Omitted on listSessions to keep payloads small.
+      required:
+      - createdAt
+      - expiresAt
+      - id
+      - language
+      type: object
+    SessionTemplateDto:
+      example:
+        languages:
+        - languages
+        - languages
+        name: name
+        description: description
+        packages:
+        - packages
+        - packages
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        languages:
+          items:
+            type: string
+          type: array
+        packages:
+          items:
+            type: string
+          type: array
+      required:
+      - languages
+      - name
+      type: object
+    SessionPackageDto:
+      example:
+        hasNativeBindings: true
+        name: name
+        version: version
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+        hasNativeBindings:
+          type: boolean
+      required:
+      - name
+      - version
+      type: object
+    CreateSessionDto:
+      example:
+        template: template
+        cwd: cwd
+        language: python
+      properties:
+        template:
+          type: string
+        language:
+          enum:
+          - python
+          - typescript
+          - javascript
+          - bash
+          type: string
+        cwd:
+          type: string
       type: object
     uploadFile_deprecated_request:
       properties:

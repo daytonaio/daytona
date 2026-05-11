@@ -36,6 +36,7 @@ if TYPE_CHECKING:
     from daytona_api_client_async.api.regions_api import RegionsApi
     from daytona_api_client_async.api.runners_api import RunnersApi
     from daytona_api_client_async.api.sandbox_api import SandboxApi
+    from daytona_api_client_async.api.sessions_api import SessionsApi
     from daytona_api_client_async.api.snapshots_api import SnapshotsApi
     from daytona_api_client_async.api.toolbox_api import ToolboxApi
     from daytona_api_client_async.api.users_api import UsersApi
@@ -84,16 +85,20 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.create_runner_response import CreateRunnerResponse
     from daytona_api_client_async.models.create_sandbox import CreateSandbox
     from daytona_api_client_async.models.create_sandbox_snapshot import CreateSandboxSnapshot
+    from daytona_api_client_async.models.create_session_dto import CreateSessionDto
     from daytona_api_client_async.models.create_session_request import CreateSessionRequest
+    from daytona_api_client_async.models.create_session_transient_dto import CreateSessionTransientDto
     from daytona_api_client_async.models.create_snapshot import CreateSnapshot
     from daytona_api_client_async.models.create_user import CreateUser
     from daytona_api_client_async.models.create_volume import CreateVolume
     from daytona_api_client_async.models.daytona_configuration import DaytonaConfiguration
+    from daytona_api_client_async.models.display_data_dto import DisplayDataDto
     from daytona_api_client_async.models.display_info_response import DisplayInfoResponse
     from daytona_api_client_async.models.docker_registry import DockerRegistry
     from daytona_api_client_async.models.download_files import DownloadFiles
     from daytona_api_client_async.models.execute_request import ExecuteRequest
     from daytona_api_client_async.models.execute_response import ExecuteResponse
+    from daytona_api_client_async.models.execution_error_dto import ExecutionErrorDto
     from daytona_api_client_async.models.file_info import FileInfo
     from daytona_api_client_async.models.file_status import FileStatus
     from daytona_api_client_async.models.fork_sandbox import ForkSandbox
@@ -201,8 +206,17 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.search_files_response import SearchFilesResponse
     from daytona_api_client_async.models.send_webhook_dto import SendWebhookDto
     from daytona_api_client_async.models.session import Session
+    from daytona_api_client_async.models.session_access_dto import SessionAccessDto
+    from daytona_api_client_async.models.session_code_run_request_dto import SessionCodeRunRequestDto
+    from daytona_api_client_async.models.session_code_run_response_dto import SessionCodeRunResponseDto
+    from daytona_api_client_async.models.session_connect_request_dto import SessionConnectRequestDto
+    from daytona_api_client_async.models.session_connect_response_dto import SessionConnectResponseDto
+    from daytona_api_client_async.models.session_dto import SessionDto
     from daytona_api_client_async.models.session_execute_request import SessionExecuteRequest
     from daytona_api_client_async.models.session_execute_response import SessionExecuteResponse
+    from daytona_api_client_async.models.session_package_dto import SessionPackageDto
+    from daytona_api_client_async.models.session_ref_dto import SessionRefDto
+    from daytona_api_client_async.models.session_template_dto import SessionTemplateDto
     from daytona_api_client_async.models.set_snapshot_general_status_dto import SetSnapshotGeneralStatusDto
     from daytona_api_client_async.models.signed_port_preview_url import SignedPortPreviewUrl
     from daytona_api_client_async.models.snapshot_dto import SnapshotDto
@@ -252,6 +266,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "RegionsApi": "daytona_api_client_async.api.regions_api",
     "RunnersApi": "daytona_api_client_async.api.runners_api",
     "SandboxApi": "daytona_api_client_async.api.sandbox_api",
+    "SessionsApi": "daytona_api_client_async.api.sessions_api",
     "SnapshotsApi": "daytona_api_client_async.api.snapshots_api",
     "ToolboxApi": "daytona_api_client_async.api.toolbox_api",
     "UsersApi": "daytona_api_client_async.api.users_api",
@@ -299,16 +314,20 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "CreateRunnerResponse": "daytona_api_client_async.models.create_runner_response",
     "CreateSandbox": "daytona_api_client_async.models.create_sandbox",
     "CreateSandboxSnapshot": "daytona_api_client_async.models.create_sandbox_snapshot",
+    "CreateSessionDto": "daytona_api_client_async.models.create_session_dto",
     "CreateSessionRequest": "daytona_api_client_async.models.create_session_request",
+    "CreateSessionTransientDto": "daytona_api_client_async.models.create_session_transient_dto",
     "CreateSnapshot": "daytona_api_client_async.models.create_snapshot",
     "CreateUser": "daytona_api_client_async.models.create_user",
     "CreateVolume": "daytona_api_client_async.models.create_volume",
     "DaytonaConfiguration": "daytona_api_client_async.models.daytona_configuration",
+    "DisplayDataDto": "daytona_api_client_async.models.display_data_dto",
     "DisplayInfoResponse": "daytona_api_client_async.models.display_info_response",
     "DockerRegistry": "daytona_api_client_async.models.docker_registry",
     "DownloadFiles": "daytona_api_client_async.models.download_files",
     "ExecuteRequest": "daytona_api_client_async.models.execute_request",
     "ExecuteResponse": "daytona_api_client_async.models.execute_response",
+    "ExecutionErrorDto": "daytona_api_client_async.models.execution_error_dto",
     "FileInfo": "daytona_api_client_async.models.file_info",
     "FileStatus": "daytona_api_client_async.models.file_status",
     "ForkSandbox": "daytona_api_client_async.models.fork_sandbox",
@@ -416,8 +435,17 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "SearchFilesResponse": "daytona_api_client_async.models.search_files_response",
     "SendWebhookDto": "daytona_api_client_async.models.send_webhook_dto",
     "Session": "daytona_api_client_async.models.session",
+    "SessionAccessDto": "daytona_api_client_async.models.session_access_dto",
+    "SessionCodeRunRequestDto": "daytona_api_client_async.models.session_code_run_request_dto",
+    "SessionCodeRunResponseDto": "daytona_api_client_async.models.session_code_run_response_dto",
+    "SessionConnectRequestDto": "daytona_api_client_async.models.session_connect_request_dto",
+    "SessionConnectResponseDto": "daytona_api_client_async.models.session_connect_response_dto",
+    "SessionDto": "daytona_api_client_async.models.session_dto",
     "SessionExecuteRequest": "daytona_api_client_async.models.session_execute_request",
     "SessionExecuteResponse": "daytona_api_client_async.models.session_execute_response",
+    "SessionPackageDto": "daytona_api_client_async.models.session_package_dto",
+    "SessionRefDto": "daytona_api_client_async.models.session_ref_dto",
+    "SessionTemplateDto": "daytona_api_client_async.models.session_template_dto",
     "SetSnapshotGeneralStatusDto": "daytona_api_client_async.models.set_snapshot_general_status_dto",
     "SignedPortPreviewUrl": "daytona_api_client_async.models.signed_port_preview_url",
     "SnapshotDto": "daytona_api_client_async.models.snapshot_dto",
@@ -492,6 +520,7 @@ __all__ = [
     "RegionsApi",
     "RunnersApi",
     "SandboxApi",
+    "SessionsApi",
     "SnapshotsApi",
     "ToolboxApi",
     "UsersApi",
@@ -528,16 +557,20 @@ __all__ = [
     "CreateRunnerResponse",
     "CreateSandbox",
     "CreateSandboxSnapshot",
+    "CreateSessionDto",
     "CreateSessionRequest",
+    "CreateSessionTransientDto",
     "CreateSnapshot",
     "CreateUser",
     "CreateVolume",
     "DaytonaConfiguration",
+    "DisplayDataDto",
     "DisplayInfoResponse",
     "DockerRegistry",
     "DownloadFiles",
     "ExecuteRequest",
     "ExecuteResponse",
+    "ExecutionErrorDto",
     "FileInfo",
     "FileStatus",
     "ForkSandbox",
@@ -645,8 +678,17 @@ __all__ = [
     "SearchFilesResponse",
     "SendWebhookDto",
     "Session",
+    "SessionAccessDto",
+    "SessionCodeRunRequestDto",
+    "SessionCodeRunResponseDto",
+    "SessionConnectRequestDto",
+    "SessionConnectResponseDto",
+    "SessionDto",
     "SessionExecuteRequest",
     "SessionExecuteResponse",
+    "SessionPackageDto",
+    "SessionRefDto",
+    "SessionTemplateDto",
     "SetSnapshotGeneralStatusDto",
     "SignedPortPreviewUrl",
     "SnapshotDto",

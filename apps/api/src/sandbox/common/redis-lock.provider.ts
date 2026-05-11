@@ -32,7 +32,22 @@ export class RedisLockProvider {
     return keyValue ? new LockCode(keyValue) : null
   }
 
-  async unlock(key: string): Promise<void> {
+  /**
+   * Release a lock. When `code` is provided the delete is ownership-aware: it only removes the key
+   * if its stored value still matches the token from this acquisition (compare-and-delete via Lua),
+   * so a lock that already expired and was re-acquired by another owner is never deleted. Callers
+   * that don't pass a token keep the legacy unconditional delete.
+   */
+  async unlock(key: string, code?: LockCode | null): Promise<void> {
+    if (code) {
+      await this.redis.eval(
+        "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end",
+        1,
+        key,
+        code.getCode(),
+      )
+      return
+    }
     await this.redis.del(key)
   }
 

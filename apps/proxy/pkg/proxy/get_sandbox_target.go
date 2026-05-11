@@ -63,7 +63,7 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 		return nil, nil, fmt.Errorf("failed to get sandbox public status: %w", err)
 	}
 
-	if !*isPublic || targetPort == TERMINAL_PORT || targetPort == TOOLBOX_PORT || targetPort == RECORDING_DASHBOARD_PORT {
+	if !*isPublic || targetPort == TERMINAL_PORT || targetPort == TOOLBOX_PORT || targetPort == SESSION_DAEMON_PORT || targetPort == RECORDING_DASHBOARD_PORT {
 		portFloat, err := strconv.ParseFloat(targetPort, 64)
 		if err != nil {
 			ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to parse target port: %w", err)))
@@ -292,12 +292,18 @@ func (p *Proxy) parseHost(host string) (targetPort string, sandboxIdOrSignedToke
 		return "", "", "", errors.New("invalid host format: port and sandbox ID not found")
 	}
 
-	targetPort = before
-
-	// Check that port is numeric
-	if _, err := strconv.Atoi(targetPort); err != nil {
-		return "", "", "", fmt.Errorf("invalid port '%s': must be numeric", targetPort)
+	// Check that port is numeric and canonicalize it. Canonicalization is
+	// security-critical: the auth gate compares targetPort against the gated
+	// port string constants (e.g. SESSION_DAEMON_PORT) by raw string equality.
+	// Without it, a non-canonical form like "02281" or "+2281" would not match
+	// the constant "2281" (skipping the auth check on a public sandbox) yet still
+	// dial the real numeric port downstream. Normalizing here makes the gate,
+	// the warning-page gate, and the target URL all agree on one canonical form.
+	parsedPort, err := strconv.Atoi(before)
+	if err != nil {
+		return "", "", "", fmt.Errorf("invalid port '%s': must be numeric", before)
 	}
+	targetPort = strconv.Itoa(parsedPort)
 
 	sandboxIdOrSignedToken = after
 	// Join remaining parts to form the base domain (e.g., "proxy.domain")

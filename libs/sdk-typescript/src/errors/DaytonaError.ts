@@ -35,13 +35,16 @@ export class DaytonaError extends Error {
   public errorCode?: string
   /** Response headers if available */
   public headers?: ResponseHeaders
+  /** Raw response body if available (preserved so callers can inspect error envelopes) */
+  public data?: unknown
 
-  constructor(message: string, statusCode?: number, headers?: ResponseHeaders, errorCode?: string) {
+  constructor(message: string, statusCode?: number, headers?: ResponseHeaders, errorCode?: string, data?: unknown) {
     super(message)
     this.name = new.target.name
     this.statusCode = statusCode
     this.headers = headers
     this.errorCode = errorCode
+    this.data = data
   }
 }
 
@@ -205,9 +208,10 @@ export function createDaytonaError(
   statusCode?: number,
   headers?: ResponseHeaders,
   errorCode?: string,
+  data?: unknown,
 ): DaytonaError {
   const ErrorClass = errorClassFromStatusCode(statusCode)
-  return new ErrorClass(message, statusCode, headers, errorCode)
+  return new ErrorClass(message, statusCode, headers, errorCode, data)
 }
 
 function isAxiosTimeoutError(error: AxiosError): boolean {
@@ -267,14 +271,15 @@ export function createAxiosDaytonaError(error: AxiosError): DaytonaError {
   const headers = error.response?.headers as ResponseHeaders | undefined
   const responseData = getAxiosResponseDataObject(error)
   const errorCode = extractAxiosErrorCode(responseData)
+  const rawData = error.response?.data
 
   if (isAxiosTimeoutError(error)) {
-    return new DaytonaTimeoutError(message, statusCode, headers, errorCode)
+    return new DaytonaTimeoutError(message, statusCode, headers, errorCode, rawData)
   }
 
   if (!error.response && (error.request || error.code)) {
-    return new DaytonaConnectionError(message, statusCode, headers, errorCode)
+    return new DaytonaConnectionError(message, statusCode, headers, errorCode, rawData)
   }
 
-  return createDaytonaError(message, statusCode, headers, errorCode)
+  return createDaytonaError(message, statusCode, headers, errorCode, rawData)
 }

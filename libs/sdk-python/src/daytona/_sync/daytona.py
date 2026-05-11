@@ -46,6 +46,7 @@ from ..common.sandbox import ListSandboxesQuery
 from ..internal.http_client import build_sync_http_client
 from ..internal.urllib3_retry import RemoteDisconnectedRetry
 from .sandbox import Sandbox
+from .session import SessionService
 from .snapshot import SnapshotService
 from .volume import VolumeService
 
@@ -232,6 +233,12 @@ class Daytona:
         self.volume: VolumeService = VolumeService(VolumesApi(self._api_client))
         self.snapshot: SnapshotService = SnapshotService(
             SnapshotsApi(self._api_client), self._object_storage_api, self._target
+        )
+        # SessionService is a thin requests/websocket-client wrapper today; it will
+        # switch to a generated SessionsApi once `yarn generate:api-client` is run.
+        self.session: SessionService = SessionService(
+            base_url=self._api_url,
+            headers=dict(cast("dict[str, str]", self._api_client.default_headers)),
         )
 
         # Initialize OpenTelemetry if enabled

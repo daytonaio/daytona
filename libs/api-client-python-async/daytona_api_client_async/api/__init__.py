@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from daytona_api_client_async.api.regions_api import RegionsApi
     from daytona_api_client_async.api.runners_api import RunnersApi
     from daytona_api_client_async.api.sandbox_api import SandboxApi
+    from daytona_api_client_async.api.sessions_api import SessionsApi
     from daytona_api_client_async.api.snapshots_api import SnapshotsApi
     from daytona_api_client_async.api.toolbox_api import ToolboxApi
     from daytona_api_client_async.api.users_api import UsersApi
@@ -41,6 +42,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "RegionsApi": "daytona_api_client_async.api.regions_api",
     "RunnersApi": "daytona_api_client_async.api.runners_api",
     "SandboxApi": "daytona_api_client_async.api.sandbox_api",
+    "SessionsApi": "daytona_api_client_async.api.sessions_api",
     "SnapshotsApi": "daytona_api_client_async.api.snapshots_api",
     "ToolboxApi": "daytona_api_client_async.api.toolbox_api",
     "UsersApi": "daytona_api_client_async.api.users_api",

@@ -23,8 +23,8 @@ import {
   DaytonaValidationError,
 } from './errors/DaytonaError'
 import { Image } from './Image'
-import { Sandbox } from './Sandbox'
-import type { ListSandboxesQuery } from './Sandbox'
+import { SessionService } from './Session'
+import { Sandbox, ListSandboxesQuery } from './Sandbox'
 import { SnapshotService } from './Snapshot'
 import { VolumeService } from './Volume'
 import { getPackageInfo, dynamicRequire } from './utils/Import'
@@ -238,6 +238,7 @@ export class Daytona implements AsyncDisposable {
   private otelSdk?: NodeSDK
   public readonly volume: VolumeService
   public readonly snapshot: SnapshotService
+  public readonly session: SessionService
 
   /**
    * Creates a new Daytona client instance.
@@ -332,6 +333,24 @@ export class Daytona implements AsyncDisposable {
       this.objectStorageApi,
       this.target,
     )
+    // The SessionService is a thin axios client today; once `yarn generate:api-client`
+    // produces an SessionsApi the service will switch to it without an SDK API change.
+    // We give it a child axios instance with the API baseURL + auth headers baked in,
+    // since unlike the generated APIs it doesn't take a Configuration param at every call.
+    const sessionAxios = Daytona.attachAxiosInterceptors(
+      axios.create({
+        baseURL: this.apiUrl,
+        timeout: 5 * 60 * 1000,
+        headers: {
+          Authorization: `Bearer ${this.apiKey || this.jwtToken}`,
+          'X-Daytona-Source': sdkLabel,
+          'X-Daytona-SDK-Version': packageJson.version,
+          'User-Agent': `${sdkLabel}/${packageJson.version}`,
+          ...orgHeader,
+        },
+      }),
+    )
+    this.session = new SessionService(sessionAxios)
     this.clientConfig = configuration
 
     const env = envReader()
@@ -834,6 +853,18 @@ export class Daytona implements AsyncDisposable {
       timeout: 24 * 60 * 60 * 1000, // 24 hours
     })
 
+    return Daytona.attachAxiosInterceptors(axiosInstance)
+  }
+
+  /**
+   * Attaches the shared Daytona interceptors (W3C trace propagation, error
+   * normalization via createAxiosDaytonaError, and span metrics) to an existing
+   * axios instance. Used by both createAxiosInstance() and the SessionService's
+   * pre-configured axios client so every SDK HTTP call gets identical handling.
+   *
+   * @hidden
+   */
+  public static attachAxiosInterceptors(axiosInstance: AxiosInstance): AxiosInstance {
     // Request interceptor: Inject trace context into headers
     axiosInstance.interceptors.request.use(
       (requestConfig: InternalAxiosRequestConfig) => {
@@ -854,19 +885,12 @@ export class Daytona implements AsyncDisposable {
       },
     )
 
-    axiosInstance.interceptors.response.use(
-      (response) => {
-        return response
-      },
-      (error) => {
-        if (error instanceof AxiosError) {
-          throw createAxiosDaytonaError(error)
-        }
-
-        throw new DaytonaError(error instanceof Error ? error.message : String(error))
-      },
-    )
-
+    // Metrics interceptor is registered BEFORE the error-normalization interceptor.
+    // Axios runs response interceptors in registration order (FIFO) on both the
+    // fulfilled and rejected paths, so this guarantees the metrics handler observes
+    // the still-raw AxiosError (with its `config` and `response`) before the
+    // normalizer converts it into a DaytonaError, which does not preserve those
+    // fields. Otherwise the failure-span metrics would be silently skipped.
     axiosInstance.interceptors.response.use(
       (response) => {
         const startTime = (response.config as any).metadata?.startTime
@@ -918,6 +942,19 @@ export class Daytona implements AsyncDisposable {
         }
 
         return Promise.reject(error)
+      },
+    )
+
+    axiosInstance.interceptors.response.use(
+      (response) => {
+        return response
+      },
+      (error) => {
+        if (error instanceof AxiosError) {
+          throw createAxiosDaytonaError(error)
+        }
+
+        throw new DaytonaError(error instanceof Error ? error.message : String(error))
       },
     )
 

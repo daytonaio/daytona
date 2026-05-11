@@ -10,6 +10,8 @@ Error thrown when authentication fails (HTTP 401).
 
 **Properties**:
 
+- `data?` _unknown_ - Raw response body if available (preserved so callers can inspect error envelopes)
+    - _Inherited from_: `DaytonaError.data`
 - `errorCode?` _string_ - Machine-readable error code if available
     - _Inherited from_: `DaytonaError.errorCode`
 - `headers?` _AxiosHeaders_ - Response headers if available
@@ -48,7 +50,8 @@ new DaytonaAuthenticationError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaAuthenticationError
+   errorCode?: string, 
+   data?: unknown): DaytonaAuthenticationError
 ```
 
 **Parameters**:
@@ -57,6 +60,7 @@ new DaytonaAuthenticationError(
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
 - `errorCode?` _string_
+- `data?` _unknown_
 
 
 **Returns**:
@@ -72,6 +76,8 @@ Error thrown when the request is forbidden (HTTP 403).
 
 **Properties**:
 
+- `data?` _unknown_ - Raw response body if available (preserved so callers can inspect error envelopes)
+    - _Inherited from_: `DaytonaError.data`
 - `errorCode?` _string_ - Machine-readable error code if available
     - _Inherited from_: `DaytonaError.errorCode`
 - `headers?` _AxiosHeaders_ - Response headers if available
@@ -108,7 +114,8 @@ new DaytonaAuthorizationError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaAuthorizationError
+   errorCode?: string, 
+   data?: unknown): DaytonaAuthorizationError
 ```
 
 **Parameters**:
@@ -117,6 +124,7 @@ new DaytonaAuthorizationError(
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
 - `errorCode?` _string_
+- `data?` _unknown_
 
 
 **Returns**:
@@ -132,6 +140,8 @@ Error thrown when a resource conflict occurs (HTTP 409).
 
 **Properties**:
 
+- `data?` _unknown_ - Raw response body if available (preserved so callers can inspect error envelopes)
+    - _Inherited from_: `DaytonaError.data`
 - `errorCode?` _string_ - Machine-readable error code if available
     - _Inherited from_: `DaytonaError.errorCode`
 - `headers?` _AxiosHeaders_ - Response headers if available
@@ -168,7 +178,8 @@ new DaytonaConflictError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaConflictError
+   errorCode?: string, 
+   data?: unknown): DaytonaConflictError
 ```
 
 **Parameters**:
@@ -177,6 +188,7 @@ new DaytonaConflictError(
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
 - `errorCode?` _string_
+- `data?` _unknown_
 
 
 **Returns**:
@@ -192,6 +204,8 @@ Error thrown when a network connection fails.
 
 **Properties**:
 
+- `data?` _unknown_ - Raw response body if available (preserved so callers can inspect error envelopes)
+    - _Inherited from_: `DaytonaError.data`
 - `errorCode?` _string_ - Machine-readable error code if available
     - _Inherited from_: `DaytonaError.errorCode`
 - `headers?` _AxiosHeaders_ - Response headers if available
@@ -228,7 +242,8 @@ new DaytonaConnectionError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaConnectionError
+   errorCode?: string, 
+   data?: unknown): DaytonaConnectionError
 ```
 
 **Parameters**:
@@ -237,6 +252,7 @@ new DaytonaConnectionError(
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
 - `errorCode?` _string_
+- `data?` _unknown_
 
 
 **Returns**:
@@ -252,6 +268,7 @@ Base error for Daytona SDK.
 
 **Properties**:
 
+- `data?` _unknown_ - Raw response body if available (preserved so callers can inspect error envelopes)
 - `errorCode?` _string_ - Machine-readable error code if available
 - `headers?` _AxiosHeaders_ - Response headers if available
 - `statusCode?` _number_ - HTTP status code if available
@@ -280,6 +297,8 @@ try {
 
 ### Extended by
 
+- `SessionInvalidatedError`
+- `SessionExpiredError`
 - `DaytonaNotFoundError`
 - `DaytonaRateLimitError`
 - `DaytonaAuthenticationError`
@@ -298,7 +317,8 @@ new DaytonaError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaError
+   errorCode?: string, 
+   data?: unknown): DaytonaError
 ```
 
 **Parameters**:
@@ -307,6 +327,7 @@ new DaytonaError(
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
 - `errorCode?` _string_
+- `data?` _unknown_
 
 
 **Returns**:
@@ -324,6 +345,8 @@ Error thrown when a resource is not found (HTTP 404).
 
 **Properties**:
 
+- `data?` _unknown_ - Raw response body if available (preserved so callers can inspect error envelopes)
+    - _Inherited from_: `DaytonaError.data`
 - `errorCode?` _string_ - Machine-readable error code if available
     - _Inherited from_: `DaytonaError.errorCode`
 - `headers?` _AxiosHeaders_ - Response headers if available
@@ -360,7 +383,8 @@ new DaytonaNotFoundError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaNotFoundError
+   errorCode?: string, 
+   data?: unknown): DaytonaNotFoundError
 ```
 
 **Parameters**:
@@ -369,6 +393,7 @@ new DaytonaNotFoundError(
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
 - `errorCode?` _string_
+- `data?` _unknown_
 
 
 **Returns**:
@@ -384,6 +409,8 @@ Error thrown when rate limit is exceeded.
 
 **Properties**:
 
+- `data?` _unknown_ - Raw response body if available (preserved so callers can inspect error envelopes)
+    - _Inherited from_: `DaytonaError.data`
 - `errorCode?` _string_ - Machine-readable error code if available
     - _Inherited from_: `DaytonaError.errorCode`
 - `headers?` _AxiosHeaders_ - Response headers if available
@@ -422,7 +449,8 @@ new DaytonaRateLimitError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaRateLimitError
+   errorCode?: string, 
+   data?: unknown): DaytonaRateLimitError
 ```
 
 **Parameters**:
@@ -431,6 +459,7 @@ new DaytonaRateLimitError(
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
 - `errorCode?` _string_
+- `data?` _unknown_
 
 
 **Returns**:
@@ -446,6 +475,8 @@ Error thrown when a timeout occurs.
 
 **Properties**:
 
+- `data?` _unknown_ - Raw response body if available (preserved so callers can inspect error envelopes)
+    - _Inherited from_: `DaytonaError.data`
 - `errorCode?` _string_ - Machine-readable error code if available
     - _Inherited from_: `DaytonaError.errorCode`
 - `headers?` _AxiosHeaders_ - Response headers if available
@@ -482,7 +513,8 @@ new DaytonaTimeoutError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaTimeoutError
+   errorCode?: string, 
+   data?: unknown): DaytonaTimeoutError
 ```
 
 **Parameters**:
@@ -491,6 +523,7 @@ new DaytonaTimeoutError(
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
 - `errorCode?` _string_
+- `data?` _unknown_
 
 
 **Returns**:
@@ -506,6 +539,8 @@ Error thrown when input validation fails (HTTP 400 or client-side validation).
 
 **Properties**:
 
+- `data?` _unknown_ - Raw response body if available (preserved so callers can inspect error envelopes)
+    - _Inherited from_: `DaytonaError.data`
 - `errorCode?` _string_ - Machine-readable error code if available
     - _Inherited from_: `DaytonaError.errorCode`
 - `headers?` _AxiosHeaders_ - Response headers if available
@@ -542,7 +577,8 @@ new DaytonaValidationError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaValidationError
+   errorCode?: string, 
+   data?: unknown): DaytonaValidationError
 ```
 
 **Parameters**:
@@ -551,6 +587,7 @@ new DaytonaValidationError(
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
 - `errorCode?` _string_
+- `data?` _unknown_
 
 
 **Returns**:
@@ -587,7 +624,8 @@ function createDaytonaError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaError
+   errorCode?: string, 
+   data?: unknown): DaytonaError
 ```
 
 Creates the appropriate Daytona error subclass from structured error metadata.
@@ -598,6 +636,7 @@ Creates the appropriate Daytona error subclass from structured error metadata.
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
 - `errorCode?` _string_
+- `data?` _unknown_
 
 
 **Returns**:

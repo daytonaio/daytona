@@ -4,7 +4,7 @@
   "projectType": "application",
   "sourceRoot": "apps/daytona-e2e",
   "tags": [],
-  "implicitDependencies": ["api", "runner", "proxy", "dashboard"],
+  "implicitDependencies": ["api", "runner", "proxy", "dashboard", "session-daemon"],
   "targets": {
     "e2e": {
       "executor": "nx:run-commands",
@@ -27,6 +27,30 @@
         "cwd": "{projectRoot}",
         "command": "go test -tags e2e -run TestCleanupStaleSandboxes -v -timeout 60s ./..."
       }
+    },
+    "e2e:sessions": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "go test -tags e2e -run TestSession -v -count=1 -timeout 600s ./..."
+      },
+      "cache": false
+    },
+    "e2e:scaleout": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "go test -tags 'e2e scaleout' -run TestSessionScaleOut -v -count=1 -timeout 1200s ./..."
+      },
+      "cache": false
+    },
+    "e2e:workloads": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "go test -tags 'e2e workloads' -run TestSessionWorkload -v -count=1 -timeout 1200s ./..."
+      },
+      "cache": false
     }
   }
 }
