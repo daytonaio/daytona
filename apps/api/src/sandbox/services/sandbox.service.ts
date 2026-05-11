@@ -446,7 +446,7 @@ export class SandboxService {
       let gpu = snapshot.gpu
 
       // GPU sandboxes are always ephemeral - delete on first stop.
-      if (gpu > 0 && createSandboxDto.autoDeleteInterval !== 0) {
+      if (gpu > 0 && !isEphemeral(createSandboxDto)) {
         throw new BadRequestError('GPU sandboxes must be ephemeral - set autoDeleteInterval to 0')
       }
 
