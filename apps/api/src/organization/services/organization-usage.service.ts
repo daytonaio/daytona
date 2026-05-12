@@ -177,7 +177,7 @@ export class OrganizationUsageService {
       }
 
       // cache miss, fetch from db
-      const usageOverview = (await this.fetchSandboxUsageFromDb(organizationId, regionId))[sandboxClass]
+      const usageOverview = await this.fetchSandboxUsageFromDb(organizationId, regionId, sandboxClass)
 
       // get pending usage separately since it's not stored in DB
       const pendingUsageOverview = await this.getCachedPendingSandboxUsageOverview(
@@ -369,7 +369,7 @@ export class OrganizationUsageService {
     }
 
     // Check cache staleness for current usage
-    const isStale = await this.isCacheStale(organizationId, 'sandbox', regionId)
+    const isStale = await this.isCacheStale(organizationId, 'sandbox', regionId, sandboxClass)
 
     if (isStale) {
       return null
@@ -625,72 +625,58 @@ export class OrganizationUsageService {
    *
    * @param organizationId
    * @param regionId
+   * @param sandboxClass
    */
-  async fetchSandboxUsageFromDb(
+  private async fetchSandboxUsageFromDb(
     organizationId: string,
     regionId: string,
-  ): Promise<Record<SandboxClass, SandboxUsageOverviewInternalDto>> {
+    sandboxClass: SandboxClass,
+  ): Promise<SandboxUsageOverviewInternalDto> {
     // For CPU/memory, we need to also count RESIZING sandboxes that were hot resizing (desiredState = 'started')
     // since they are still running and consuming compute resources
-    const rows: Array<{
-      sandbox_class: SandboxClass
+    const sandboxUsageMetrics: {
       used_cpu: number
       used_mem: number
       used_disk: number
-    }> = await this.sandboxRepository
+    } = await this.sandboxRepository
       .createQueryBuilder('sandbox')
       .select([
-        'sandbox."sandboxClass" as sandbox_class',
         `SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) OR (sandbox.state IN (:...statesConditionallyConsumingCompute) AND sandbox."desiredState" = :startedDesiredState) THEN sandbox.cpu ELSE 0 END) as used_cpu`,
         `SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) OR (sandbox.state IN (:...statesConditionallyConsumingCompute) AND sandbox."desiredState" = :startedDesiredState) THEN sandbox.mem ELSE 0 END) as used_mem`,
         'SUM(CASE WHEN sandbox.state IN (:...statesConsumingDisk) THEN sandbox.disk ELSE 0 END) as used_disk',
       ])
       .where('sandbox.organizationId = :organizationId', { organizationId })
       .andWhere('sandbox.region = :regionId', { regionId })
-      .groupBy('sandbox."sandboxClass"')
+      .andWhere('sandbox."sandboxClass" = :sandboxClass', { sandboxClass })
       .setParameter('statesConsumingCompute', SANDBOX_STATES_CONSUMING_COMPUTE)
       .setParameter('statesConsumingDisk', SANDBOX_STATES_CONSUMING_DISK)
       .setParameter('statesConditionallyConsumingCompute', SANDBOX_STATES_CONDITIONALLY_CONSUMING_COMPUTE)
       .setParameter('startedDesiredState', SandboxDesiredState.STARTED)
-      .getRawMany()
+      .getRawOne()
 
-    const rowsByClass = new Map(rows.map((row) => [row.sandbox_class, row]))
-    const result = {} as Record<SandboxClass, SandboxUsageOverviewInternalDto>
-    const pipeline = this.redis.multi()
+    const cpuUsage = Number(sandboxUsageMetrics.used_cpu) || 0
+    const memoryUsage = Number(sandboxUsageMetrics.used_mem) || 0
+    const diskUsage = Number(sandboxUsageMetrics.used_disk) || 0
 
-    for (const sandboxClass of Object.values(SandboxClass)) {
-      const row = rowsByClass.get(sandboxClass)
-      const cpuUsage = row ? Number(row.used_cpu) || 0 : 0
-      const memUsage = row ? Number(row.used_mem) || 0 : 0
-      const diskUsage = row ? Number(row.used_disk) || 0 : 0
+    // cache the results
+    const cpuCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, 'cpu', regionId, sandboxClass)
+    const memoryCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, 'memory', regionId, sandboxClass)
+    const diskCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, 'disk', regionId, sandboxClass)
 
-      result[sandboxClass] = {
-        currentCpuUsage: cpuUsage,
-        currentMemoryUsage: memUsage,
-        currentDiskUsage: diskUsage,
-      }
+    await this.redis
+      .multi()
+      .setex(cpuCacheKey, this.CACHE_TTL_SECONDS, cpuUsage)
+      .setex(memoryCacheKey, this.CACHE_TTL_SECONDS, memoryUsage)
+      .setex(diskCacheKey, this.CACHE_TTL_SECONDS, diskUsage)
+      .exec()
 
-      pipeline.setex(
-        this.getCurrentQuotaUsageCacheKey(organizationId, 'cpu', regionId, sandboxClass),
-        this.CACHE_TTL_SECONDS,
-        cpuUsage,
-      )
-      pipeline.setex(
-        this.getCurrentQuotaUsageCacheKey(organizationId, 'memory', regionId, sandboxClass),
-        this.CACHE_TTL_SECONDS,
-        memUsage,
-      )
-      pipeline.setex(
-        this.getCurrentQuotaUsageCacheKey(organizationId, 'disk', regionId, sandboxClass),
-        this.CACHE_TTL_SECONDS,
-        diskUsage,
-      )
+    await this.resetCacheStaleness(organizationId, 'sandbox', regionId, sandboxClass)
+
+    return {
+      currentCpuUsage: cpuUsage,
+      currentMemoryUsage: memoryUsage,
+      currentDiskUsage: diskUsage,
     }
-
-    await pipeline.exec()
-    await this.resetCacheStaleness(organizationId, 'sandbox', regionId)
-
-    return result
   }
 
   /**
@@ -1191,26 +1177,34 @@ export class OrganizationUsageService {
    * @param organizationId
    * @param resourceType
    * @param regionId
+   * @param sandboxClass
    */
   private getCacheStalenessKey(
     organizationId: string,
     resourceType: OrganizationUsageResourceType,
     regionId?: string,
+    sandboxClass?: SandboxClass,
   ): string {
-    return `org:${organizationId}${regionId ? `:region:${regionId}` : ''}:resource:${resourceType}:usage:fetched_at`
+    return `org:${organizationId}${regionId ? `:region:${regionId}` : ''}${sandboxClass ? `:class:${sandboxClass}` : ''}:resource:${resourceType}:usage:fetched_at`
   }
 
   /**
    * Reset the timestamp of the last time the cached usage of organization quotas for a given resource type was populated from the database.
    */
-  private resetCacheStaleness(organizationId: string, resourceType: 'sandbox', regionId: string): Promise<void>
+  private resetCacheStaleness(
+    organizationId: string,
+    resourceType: 'sandbox',
+    regionId: string,
+    sandboxClass: SandboxClass,
+  ): Promise<void>
   private resetCacheStaleness(organizationId: string, resourceType: 'snapshot' | 'volume'): Promise<void>
   private async resetCacheStaleness(
     organizationId: string,
     resourceType: OrganizationUsageResourceType,
     regionId?: string,
+    sandboxClass?: SandboxClass,
   ): Promise<void> {
-    const cacheKey = this.getCacheStalenessKey(organizationId, resourceType, regionId)
+    const cacheKey = this.getCacheStalenessKey(organizationId, resourceType, regionId, sandboxClass)
     await this.redis.set(cacheKey, Date.now())
   }
 
@@ -1219,14 +1213,20 @@ export class OrganizationUsageService {
    *
    * @returns `true` if the cached usage is stale, `false` otherwise
    */
-  private async isCacheStale(organizationId: string, resourceType: 'sandbox', regionId: string): Promise<boolean>
+  private async isCacheStale(
+    organizationId: string,
+    resourceType: 'sandbox',
+    regionId: string,
+    sandboxClass: SandboxClass,
+  ): Promise<boolean>
   private async isCacheStale(organizationId: string, resourceType: 'snapshot' | 'volume'): Promise<boolean>
   private async isCacheStale(
     organizationId: string,
     resourceType: OrganizationUsageResourceType,
     regionId?: string,
+    sandboxClass?: SandboxClass,
   ): Promise<boolean> {
-    const cacheKey = this.getCacheStalenessKey(organizationId, resourceType, regionId)
+    const cacheKey = this.getCacheStalenessKey(organizationId, resourceType, regionId, sandboxClass)
     const cachedData = await this.redis.get(cacheKey)
 
     if (!cachedData) {
