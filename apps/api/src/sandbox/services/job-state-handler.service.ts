@@ -801,6 +801,7 @@ export class JobStateHandlerService {
                 ref: snapshotRef,
                 runnerId: job.runnerId,
                 regionId: sandbox.region,
+                sandboxClass: sandbox.sandboxClass,
                 cpu: sandbox.cpu,
                 gpu: sandbox.gpu,
                 mem: sandbox.mem,

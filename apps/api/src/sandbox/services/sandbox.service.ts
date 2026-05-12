@@ -1248,6 +1248,7 @@ export class SandboxService {
         ref: result.ref,
         runnerId: runner.id,
         regionId: sandbox.region,
+        sandboxClass: sandbox.sandboxClass,
         cpu: sandbox.cpu,
         gpu: sandbox.gpu,
         mem: sandbox.mem,
