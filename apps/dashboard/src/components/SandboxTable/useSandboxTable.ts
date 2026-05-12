@@ -16,11 +16,13 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  PaginationState,
   SortingState,
+  Updater,
   useReactTable,
   VisibilityState,
 } from '@tanstack/react-table'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { getColumns } from './columns'
 import { FacetedFilterOption } from './types'
 
@@ -43,6 +45,7 @@ interface UseSandboxTableProps {
   handleCreateSnapshot: (id: string) => void
   handleFork: (id: string) => void
   handleViewForks: (id: string) => void
+  handleOpenTerminal: (sandbox: Sandbox) => void
 }
 
 export function useSandboxTable({
@@ -64,6 +67,7 @@ export function useSandboxTable({
   handleCreateSnapshot,
   handleFork,
   handleViewForks,
+  handleOpenTerminal,
 }: UseSandboxTableProps) {
   // Column visibility state management with persistence
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
@@ -90,6 +94,38 @@ export function useSandboxTable({
   ])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState('')
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: DEFAULT_PAGE_SIZE,
+  })
+
+  const resetPageIndex = useCallback(() => {
+    setPagination((current) => (current.pageIndex === 0 ? current : { ...current, pageIndex: 0 }))
+  }, [])
+
+  const handleSortingChange = useCallback(
+    (updater: Updater<SortingState>) => {
+      setSorting(updater)
+      resetPageIndex()
+    },
+    [resetPageIndex],
+  )
+
+  const handleColumnFiltersChange = useCallback(
+    (updater: Updater<ColumnFiltersState>) => {
+      setColumnFilters(updater)
+      resetPageIndex()
+    },
+    [resetPageIndex],
+  )
+
+  const handleGlobalFilterChange = useCallback(
+    (updater: Updater<string>) => {
+      setGlobalFilter(updater)
+      resetPageIndex()
+    },
+    [resetPageIndex],
+  )
 
   const labelOptions: FacetedFilterOption[] = useMemo(() => {
     const labels = new Set<string>()
@@ -127,6 +163,7 @@ export function useSandboxTable({
         handleCreateSnapshot,
         handleFork,
         handleViewForks,
+        handleOpenTerminal,
       }),
     [
       handleStart,
@@ -145,17 +182,19 @@ export function useSandboxTable({
       handleCreateSnapshot,
       handleFork,
       handleViewForks,
+      handleOpenTerminal,
     ],
   )
 
   const table = useReactTable({
     data,
     columns,
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
+    autoResetPageIndex: false,
+    onColumnFiltersChange: handleColumnFiltersChange,
+    onGlobalFilterChange: handleGlobalFilterChange,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
+    onSortingChange: handleSortingChange,
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
@@ -182,23 +221,30 @@ export function useSandboxTable({
       sorting,
       columnFilters,
       columnVisibility,
+      pagination,
       columnPinning: {
         left: ['select', 'name'],
         right: ['actions'],
       },
     },
+    onPaginationChange: setPagination,
     onColumnVisibilityChange: setColumnVisibility,
     defaultColumn: {
       minSize: 0,
     },
     enableRowSelection: deletePermitted,
     getRowId: (row) => row.id,
-    initialState: {
-      pagination: {
-        pageSize: DEFAULT_PAGE_SIZE,
-      },
-    },
   })
+
+  const filteredPageCount = Math.max(Math.ceil(table.getFilteredRowModel().rows.length / pagination.pageSize), 1)
+
+  useEffect(() => {
+    setPagination((current) => {
+      const maxPageIndex = filteredPageCount - 1
+
+      return current.pageIndex > maxPageIndex ? { ...current, pageIndex: maxPageIndex } : current
+    })
+  }, [filteredPageCount])
 
   return {
     table,

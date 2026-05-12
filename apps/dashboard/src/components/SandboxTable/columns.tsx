@@ -72,6 +72,7 @@ interface GetColumnsProps {
   handleCreateSnapshot: (id: string) => void
   handleFork: (id: string) => void
   handleViewForks: (id: string) => void
+  handleOpenTerminal: (sandbox: Sandbox) => void
 }
 
 export function getColumns({
@@ -91,6 +92,7 @@ export function getColumns({
   handleCreateSnapshot,
   handleFork,
   handleViewForks,
+  handleOpenTerminal,
 }: GetColumnsProps): ColumnDef<Sandbox>[] {
   const columns: ColumnDef<Sandbox>[] = [
     {
@@ -348,9 +350,9 @@ export function getColumns({
     },
     {
       id: 'actions',
-      size: 88,
-      minSize: 88,
-      maxSize: 88,
+      size: 136,
+      maxSize: 136,
+      minSize: 136,
       enableHiding: false,
       cell: ({ row }) => (
         <div className="w-full flex justify-end">
@@ -371,6 +373,7 @@ export function getColumns({
             onCreateSnapshot={() => handleCreateSnapshot(row.original.id)}
             onFork={() => handleFork(row.original.id)}
             onViewForks={() => handleViewForks(row.original.id)}
+            onOpenTerminal={() => handleOpenTerminal(row.original)}
           />
         </div>
       ),

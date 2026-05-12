@@ -44,6 +44,7 @@ type DockerClientConfig struct {
 	BuildMemoryGB                int64
 	InitializeDaemonTelemetry    bool
 	InterSandboxNetworkEnabled   bool
+	GpuEnabled                   bool
 }
 
 func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerClient, error) {
@@ -141,6 +142,7 @@ func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerCli
 		buildMemoryGB:                config.BuildMemoryGB,
 		initializeDaemonTelemetry:    config.InitializeDaemonTelemetry,
 		interSandboxNetworkEnabled:   config.InterSandboxNetworkEnabled,
+		gpuEnabled:                   config.GpuEnabled,
 		filesystem:                   filesystem,
 	}, nil
 }
@@ -182,4 +184,5 @@ type DockerClient struct {
 	initializeDaemonTelemetry    bool
 	filesystem                   string
 	interSandboxNetworkEnabled   bool
+	gpuEnabled                   bool
 }

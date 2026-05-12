@@ -84,7 +84,7 @@ cp .env.example .env
 | `DAYTONA_API_KEY` | yes | [Daytona Dashboard](https://app.daytona.io/dashboard/keys) |
 | `ANTHROPIC_API_KEY` | yes | For this agent's default model, `anthropic/claude-sonnet-4-6`. Required only if you don't override `MODEL`. (Flue itself has no default; `bug-fix.ts` picks one.) |
 | `GITHUB_TOKEN` | yes | A Personal Access Token with `repo` scope ([create one](https://github.com/settings/tokens)) |
-| `MODEL` | no | Override this agent's default model. Any `provider/model-id` recognized by [`@mariozechner/pi-ai`](https://www.npmjs.com/package/@mariozechner/pi-ai). Examples: `anthropic/claude-opus-4-7`, `openai/gpt-5.5`, `openrouter/moonshotai/kimi-k2.6` |
+| `MODEL` | no | Override this agent's default model. Any `provider/model-id` recognized by [`@mariozechner/pi-ai`](https://www.npmjs.com/package/@mariozechner/pi-ai). Examples: `anthropic/claude-opus-4-7`, `openai/gpt-5.5` |
 | `DEMO_REPO` | no¹ | Default target fork in `<owner>/<repo>` form (e.g. `your-username/your-fork`). Used when the webhook payload omits `repo` |
 | `DEMO_ISSUE` | no¹ | Default issue number (e.g. `284`). Used when the webhook payload omits `issueNumber` |
 | `ISSUE_REPO` | no | Override the issue source, in `<owner>/<repo>` form. By default the agent auto-detects the upstream parent of `DEMO_REPO`; set this if `DEMO_REPO` is not a fork or you want to point at a different repo |
@@ -118,8 +118,16 @@ npm run dev
 Flue boots a webhook server on port `3583` and discovers the `bug-fix` agent automatically:
 
 ```
-Flue dev server listening on http://localhost:3583
-  POST /agents/bug-fix/<session-id>
+[flue] Starting dev server (target: node)
+[flue] Target: node
+[flue] Found 1 role(s): test-driven-developer
+[flue] Found 1 agent(s): bug-fix
+[flue] Webhook agents: bug-fix
+[flue] Built: dist/server.mjs
+[flue] Server: http://localhost:3583
+[flue] Try: curl -X POST http://localhost:3583/agents/bug-fix/test-1 \
+         -H 'Content-Type: application/json' -d '{}'
+[flue] Press Ctrl+C to stop
 ```
 
 #### Trigger the Agent
@@ -191,7 +199,7 @@ guides/typescript/flue/
             └── SKILL.md              # actual TDD workflow logic
 ```
 
-So `session.skill('bug-fix', { ... })` in our agent code maps directly to `.agents/skills/bug-fix/SKILL.md`: Flue resolves the skill by folder name (or by the `name:` field in the file's frontmatter, whichever you prefer).
+So `session.skill('bug-fix', { ... })` in our agent code maps directly to `.agents/skills/bug-fix/SKILL.md`: Flue resolves the skill by folder name by default. If you set a `name:` field in the file's frontmatter, that takes precedence over the folder name — useful when you want to keep the directory layout but rename the skill.
 
 #### The Daytona Connector
 
@@ -201,6 +209,8 @@ Daytona is a first-class Flue connector. The canonical way to install it is to p
 flue add daytona | claude
 # or: opencode | codex | cursor-agent | pi
 ```
+
+This requires an AI coding-agent CLI to already be installed and authenticated locally — pick whichever one you already use (`claude`, `opencode`, `codex`, `cursor-agent`, `pi`, etc.). If you don't have any installed yet, this guide ships the resulting connector pre-built so you can skip the `flue add` step entirely.
 
 `flue add daytona` fetches the official installation instructions from `https://flueframework.com/cli/connectors/daytona.md` and writes them to stdout. Your AI agent reads those instructions and writes the connector adapter (`.flue/connectors/daytona.ts`) into your project automatically. No manual file copying, no version drift.
 
@@ -214,6 +224,8 @@ const client = new Daytona({ apiKey: env.DAYTONA_API_KEY })
 const sandbox = await client.create()
 
 const agent = await init({
+  // cleanup: true arms sandbox.delete() to fire on agent.destroy()
+  // Flue does NOT auto-destroy on handler return; see Section 5.
   sandbox: daytona(sandbox, { cleanup: true }),
   model: 'anthropic/claude-sonnet-4-6',
 })
@@ -254,7 +266,7 @@ return await session.skill('bug-fix', {
 
 A few details worth highlighting:
 
-- **Two agents, one sandbox.** The setup agent installs `gh`, configures auth, clones the repo, and installs dependencies. A second agent (given a different `id` and `cwd`) operates inside the cloned repo and discovers our `bug-fix` skill from `.agents/skills/bug-fix/SKILL.md`, which the orchestrator uploads into the cloned worktree just before init. Both agents share the same Daytona sandbox.
+- **Two agents, one sandbox.** The setup agent installs `gh`, configures auth, clones the repo, and installs dependencies. A second agent (given a different `id` and `cwd`) operates inside the cloned repo and discovers our `bug-fix` skill from `.agents/skills/bug-fix/SKILL.md`, which the orchestrator uploads into the cloned worktree just before init. Both agents share the same Daytona sandbox. The distinct `id` matters: a fresh `id` opens a fresh Flue session — see [What `<id>` actually means: sessions](#what-id-actually-means-sessions) for the full lifecycle.
 - **No `AGENTS.md` upload.** Flue would happily read an `AGENTS.md` from the session cwd and prepend it to every system prompt, but that file lives at the cloned repo's root and uploading our own would overwrite the target's `AGENTS.md` if it has one. Every guardrail we'd put there (TDD discipline, minimal change, match host code style) is already covered by the `test-driven-developer` role and the `bug-fix` skill body, so the harness ships nothing at the worktree root.
 - **`.git/info/exclude` keeps the worktree clean.** After uploading `SKILL.md` to `.agents/skills/bug-fix/`, the orchestrator appends `.agents/` to the cloned repo's `.git/info/exclude` (git's local-only ignore — does NOT modify the target's `.gitignore`). The harness scaffolding stays invisible to `git status` and never accidentally lands in a commit.
 - **Two repos, one workflow.** `repo` is the user's fork (where branches and the PR land); `issueRepo` is where the issue lives (the upstream parent, auto-detected via `gh repo view --json parent` because GitHub disables issues on forks).
@@ -300,8 +312,8 @@ Nothing in our code calls our agent's default export directly; Flue's CLI does. 
 **Build time (`flue dev` startup):**
 
 1. `flue dev --target node` calls `dev()` from `@flue/sdk`, which runs `build()`.
-2. `build()` does `fs.readdirSync('.flue/agents')` and matches files with the regex `/^([a-zA-Z0-9_-]+)\.(ts|js|mts|mjs)$/`. Our `bug-fix.ts` matches → agent name is `bug-fix` (filename without extension).
-3. For each agent file, the build regex-parses `export const triggers = {...}` to know how to expose it. Our `triggers = { webhook: true }` registers the agent for HTTP access.
+2. `build()` does `fs.readdirSync('.flue/agents')` and keeps any entry matching `/\.(ts|js|mts|mjs)$/`. Our `bug-fix.ts` matches → agent name is `bug-fix` (filename without extension).
+3. For each agent file, Flue uses the TypeScript AST to find the static `export const triggers = {...}` declaration, validating that `webhook` is `true` or `false`. Our `triggers = { webhook: true }` registers the agent for HTTP access.
 4. The build generates a [Hono](https://hono.dev/) server entry that imports each agent's default export, then esbuilds it to `dist/server.mjs`.
 5. The dev server spawns `node dist/server.mjs` with `PORT=3583` and `FLUE_MODE=local`.
 
@@ -316,8 +328,10 @@ The generated server mounts a single dynamic route, `POST /agents/:name/:id`. Wh
    | Headers sent by client | Server behavior | Status |
    |---|---|---|
    | `Content-Type: application/json` (default) | Wait for handler, return `{ "result": <handlerReturn> }` | `200` |
-   | `Accept: text/event-stream` | Stream SSE events (`tool_start`, `text_delta`, …, then `result`) | `200` |
-   | `X-Webhook: true` | Fire-and-forget; run handler in background | `202` |
+   | `Accept: text/event-stream` | Stream SSE events (channel names are `tool_start`, `text_delta`, …, finally `result`) | `200` |
+   | `x-webhook: true` | Fire-and-forget; run handler in background | `202` |
+
+   The CLI's pretty-print form (`[flue] tool:start`, `[flue] tool:done`) you see in `flue run` output is `flue run`'s own decoration; the underlying SSE channel names use underscores (`tool_start`, `tool_end`). If you're consuming the SSE stream from your own client, listen for the underscore form.
 
 4. Construct a `FlueContext` (`{ id, payload, env, init }`) and invoke our default export: `handler(ctx)`.
 5. Return whatever the handler resolves with, in whichever mode was selected.
@@ -530,7 +544,7 @@ The HTTP response body returned to your `curl` wraps the handler's return value 
 Open the PR URL in your browser to review the diff and merge, exactly as you would for a human-authored contribution.
 
 :::tip[Commit attribution]
-Both the commit and the PR are authored under the GitHub account that owns your `GITHUB_TOKEN`. The agent calls `gh api user` at startup to resolve your login + numeric ID, then sets `git config user.email` to the GitHub-recommended `<id>+<login>@users.noreply.github.com` noreply format. GitHub recognizes that email and attaches the commit to your profile (avatar and all). The PR body still has a small `Generated by a Flue + Daytona bug-fix agent.` footer for transparency.
+Both the commit and the PR are authored under the GitHub account that owns your `GITHUB_TOKEN`. The agent calls `gh api user` at startup to resolve your login + numeric ID, then sets `git config user.email` to the GitHub-recommended `<id>+<login>@users.noreply.github.com` noreply format. GitHub recognizes that email and attaches the commit to your profile (avatar and all). The PR body still has a small `Generated by a Flue + Daytona bug-fix agent.` footer for transparency — if you'd rather drop it (some maintainers prefer not to have third-party tags on contributions), edit the PR-body template at the bottom of `.agents/skills/bug-fix/SKILL.md` and remove that line.
 :::
 
 ### 5. Cleanup
@@ -556,7 +570,7 @@ try {
 }
 ```
 
-Order matters: the **project** agent is destroyed first (closes its session, no sandbox impact since it doesn't have `cleanup: true`), then the **setup** agent's destroy fires the registered `sandbox.delete()` callback. The fallback `else` branch handles the edge case where `init()` itself threw before `setupAgent` was created — in that scenario nothing armed `cleanup: true`, so the orchestrator deletes the sandbox directly.
+Order matters: the **project** agent is destroyed first (closes its session, no sandbox impact since it doesn't have `cleanup: true`), then the **setup** agent's destroy fires the registered `sandbox.delete()` callback. The fallback `else` branch handles the case where `init()` itself threw before `setupAgent` was created — in that scenario nothing armed `cleanup: true`, so the orchestrator calls `sandbox.delete()` directly on the already-created sandbox. (If `client.create()` itself fails earlier, no sandbox object exists at all, so there's nothing to leak.)
 
 This covers the common failure paths: successful runs, caught LLM errors, and exceptions thrown during the workflow. Cleanup is best-effort — if `destroy()` or `sandbox.delete()` itself throws (transient API error, network drop), the failure is logged but the sandbox is not retried. Confirm in your [Daytona Dashboard](https://app.daytona.io/dashboard) after each run, and clean up any orphans manually if you spot them.
 

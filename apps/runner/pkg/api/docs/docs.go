@@ -625,6 +625,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/sandboxes/{sandboxId}/snapshot-from-sandbox": {
+            "post": {
+                "description": "Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sandbox"
+                ],
+                "summary": "Snapshot a running sandbox",
+                "operationId": "SnapshotFromSandbox",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Sandbox ID",
+                        "name": "sandboxId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Snapshot from sandbox",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateSnapshotFromSandboxRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/SnapshotInfoResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/sandboxes/{sandboxId}/start": {
             "post": {
                 "description": "Start sandbox",
@@ -1562,6 +1631,25 @@ const docTemplate = `{
                 }
             }
         },
+        "CreateSnapshotFromSandboxRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "registry"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "my-snapshot:latest"
+                },
+                "organizationId": {
+                    "type": "string"
+                },
+                "registry": {
+                    "$ref": "#/definitions/RegistryDTO"
+                }
+            }
+        },
         "ErrorResponse": {
             "description": "Error response",
             "type": "object",
@@ -1699,6 +1787,9 @@ const docTemplate = `{
                 "osUser": {
                     "type": "string"
                 },
+                "registry": {
+                    "$ref": "#/definitions/RegistryDTO"
+                },
                 "snapshot": {
                     "type": "string"
                 },
@@ -1755,6 +1846,9 @@ const docTemplate = `{
                 "memory": {
                     "type": "integer",
                     "minimum": 1
+                },
+                "registry": {
+                    "$ref": "#/definitions/RegistryDTO"
                 }
             }
         },

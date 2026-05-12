@@ -542,7 +542,11 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             })
           }
 
-          await runnerAdapter.recoverSandbox(sandbox, true)
+          const backupRegistry = sandbox.backupRegistryId
+            ? ((await this.dockerRegistryService.findOne(sandbox.backupRegistryId)) ?? undefined)
+            : undefined
+
+          await runnerAdapter.recoverSandbox(sandbox, backupRegistry, true)
 
           if (runner.apiVersion !== '2') {
             await this.sandboxRepository.updateWhere(sandbox.id, {

@@ -16,6 +16,9 @@
 // May contain unused imports in some cases
 // @ts-ignore
 import type { DtoVolumeDTO } from './dto-volume-dto';
+// May contain unused imports in some cases
+// @ts-ignore
+import type { RegistryDTO } from './registry-dto';
 
 export interface RecoverSandboxDTO {
     'backupErrorReason'?: string;
@@ -28,6 +31,7 @@ export interface RecoverSandboxDTO {
     'networkAllowList'?: string;
     'networkBlockAll'?: boolean;
     'osUser': string;
+    'registry'?: RegistryDTO;
     'snapshot'?: string;
     'storageQuota'?: number;
     'userId': string;

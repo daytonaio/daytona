@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/daemon/pkg/git"
 	"github.com/gin-gonic/gin"
 	go_git "github.com/go-git/go-git/v5"
@@ -28,7 +29,7 @@ import (
 func PushChanges(c *gin.Context) {
 	var req GitRepoRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
+		_ = c.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("invalid request body: %w", err)))
 		return
 	}
 
@@ -46,7 +47,7 @@ func PushChanges(c *gin.Context) {
 
 	err := gitService.Push(auth)
 	if err != nil && err != go_git.NoErrAlreadyUpToDate {
-		c.AbortWithError(http.StatusBadRequest, err)
+		abortWithGitError(c, err)
 		return
 	}
 

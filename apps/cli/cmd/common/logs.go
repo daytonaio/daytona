@@ -91,10 +91,16 @@ func ReadBuildLogs(ctx context.Context, params ReadLogParams) {
 					}
 					return
 				}
-				// Don't log context.Canceled as it's an expected case when streaming is stopped
-				if err != context.Canceled {
-					log.Errorf("Error reading from stream: %v", err)
+				if err == context.Canceled {
+					return
 				}
+				// In follow mode the upstream proxy can reset long-lived streams; the
+				// build itself is unaffected and the caller still polls for completion.
+				if params.Follow != nil && *params.Follow {
+					log.Warnf("Build log stream interrupted (%v); the build is still running, waiting for it to complete...", err)
+					return
+				}
+				log.Errorf("Error reading from stream: %v", err)
 				return
 			}
 		}

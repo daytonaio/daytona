@@ -1,6 +1,7 @@
 export * from './build-snapshot-request-dto';
 export * from './create-backup-dto';
 export * from './create-sandbox-dto';
+export * from './create-snapshot-from-sandbox-request';
 export * from './dto-volume-dto';
 export * from './enums-backup-state';
 export * from './enums-sandbox-state';

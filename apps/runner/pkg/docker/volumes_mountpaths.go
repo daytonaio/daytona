@@ -29,28 +29,55 @@ func getVolumeMountBasePath() string {
 }
 
 func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []dto.VolumeDTO) ([]string, error) {
-	volumeMountPathBinds := make([]string, 0)
-
-	// Tracks volumes with FUSE mounts already ensured in this call,
-	// preventing duplicate mount attempts and mutex deadlocks when
-	// multiple subpaths reference the same volume.
-	fuseMountedVolumes := make(map[string]bool)
-
+	// Phase 1: fan out FUSE mounts for unique volumes in parallel. Each
+	// ensureVolumeFuseMounted runs mount-s3 and then waits up to 5s for the
+	// mount to become ready; doing them sequentially made create-time scale
+	// linearly with the number of mounted volumes.
+	uniqueMounts := make(map[string]string, len(volumes)) // volumeIdPrefixed -> baseMountPath
 	for _, vol := range volumes {
 		volumeIdPrefixed := fmt.Sprintf("%s%s", volumeMountPrefix, vol.VolumeId)
-		baseMountPath := filepath.Join(getVolumeMountBasePath(), volumeIdPrefixed)
+		if _, ok := uniqueMounts[volumeIdPrefixed]; !ok {
+			uniqueMounts[volumeIdPrefixed] = filepath.Join(getVolumeMountBasePath(), volumeIdPrefixed)
+		}
+	}
+
+	mountCtx, cancelMounts := context.WithCancel(ctx)
+	defer cancelMounts()
+
+	var (
+		wg       sync.WaitGroup
+		errMu    sync.Mutex
+		firstErr error
+	)
+	for volumeIdPrefixed, baseMountPath := range uniqueMounts {
+		wg.Add(1)
+		go func(volumeId, mountPath string) {
+			defer wg.Done()
+			if err := d.ensureVolumeFuseMounted(mountCtx, volumeId, mountPath); err != nil {
+				errMu.Lock()
+				if firstErr == nil {
+					firstErr = err
+					cancelMounts()
+				}
+				errMu.Unlock()
+			}
+		}(volumeIdPrefixed, baseMountPath)
+	}
+	wg.Wait()
+	if firstErr != nil {
+		return nil, firstErr
+	}
+
+	// Phase 2: build bind strings in input order. Subpath mkdir is cheap and
+	// kept sequential so the returned slice order matches volumes.
+	volumeMountPathBinds := make([]string, 0, len(volumes))
+	for _, vol := range volumes {
+		volumeIdPrefixed := fmt.Sprintf("%s%s", volumeMountPrefix, vol.VolumeId)
+		baseMountPath := uniqueMounts[volumeIdPrefixed]
 
 		subpathStr := ""
 		if vol.Subpath != nil {
 			subpathStr = *vol.Subpath
-		}
-
-		if !fuseMountedVolumes[volumeIdPrefixed] {
-			err := d.ensureVolumeFuseMounted(ctx, volumeIdPrefixed, baseMountPath)
-			if err != nil {
-				return nil, err
-			}
-			fuseMountedVolumes[volumeIdPrefixed] = true
 		}
 
 		bindSource := baseMountPath
@@ -195,7 +222,9 @@ func (d *DockerClient) getMountCmd(ctx context.Context, volume string, path stri
 	}
 
 	// No systemd (containerized) — daemon orphan survives runner restarts naturally.
-	cmd := exec.Command("mount-s3", args...)
+	// CommandContext is used so ctx cancellation can stop a slow mount-s3 startup;
+	// once mount-s3 daemonizes (no --foreground), cmd.Run returns and ctx no longer has a leash.
+	cmd := exec.CommandContext(ctx, "mount-s3", args...)
 	cmd.Env = envVars
 
 	_, err := os.Stat("/run/systemd/system")

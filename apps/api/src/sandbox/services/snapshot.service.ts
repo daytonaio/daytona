@@ -56,8 +56,13 @@ import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SnapshotActivatedEvent } from '../events/snapshot-activated.event'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import {
+  persistSnapshotFromSandbox,
+  PersistSnapshotFromSandboxParams,
+} from '../utils/persist-snapshot-from-sandbox.util'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
+
 @Injectable()
 export class SnapshotService {
   private readonly logger = new Logger(SnapshotService.name)
@@ -338,6 +343,17 @@ export class SnapshotService {
       await this.rollbackPendingUsage(organization.id, pendingSnapshotCountIncrement)
       throw error
     }
+  }
+
+  async persistSnapshotFromSandbox(params: PersistSnapshotFromSandboxParams): Promise<Snapshot> {
+    return persistSnapshotFromSandbox(
+      {
+        snapshotRepository: this.snapshotRepository,
+        snapshotRunnerRepository: this.snapshotRunnerRepository,
+        eventEmitter: this.eventEmitter,
+      },
+      params,
+    )
   }
 
   async removeSnapshot(snapshotId: string) {

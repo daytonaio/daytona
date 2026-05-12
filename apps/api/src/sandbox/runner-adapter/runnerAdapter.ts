@@ -36,6 +36,17 @@ export interface SnapshotDigestResponse {
   sizeGB: number
 }
 
+// Result returned when the runner finished a snapshot-from-sandbox operation
+// synchronously (v0 path). v2 dispatches the work as an async job and returns
+// `undefined`; the API job-state handler picks up the result later.
+export interface CreateSandboxSnapshotResult {
+  ref: string
+  hash: string
+  sizeGB?: number
+  entrypoint?: string[]
+  cmd?: string[]
+}
+
 export interface RunnerMetrics {
   currentAllocatedCpu?: number
   currentAllocatedDiskGiB?: number
@@ -117,11 +128,17 @@ export interface RunnerAdapter {
     snapshotName: string,
     organizationId: string,
     registry?: DockerRegistry,
+  ): Promise<CreateSandboxSnapshotResult | undefined>
+
+  recoverSandbox(sandbox: Sandbox, registry?: DockerRegistry, skipStart?: boolean): Promise<void>
+
+  resizeSandbox(
+    sandboxId: string,
+    cpu?: number,
+    memory?: number,
+    disk?: number,
+    registry?: DockerRegistry,
   ): Promise<void>
-
-  recoverSandbox(sandbox: Sandbox, skipStart?: boolean): Promise<void>
-
-  resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void>
 }
 
 @Injectable()

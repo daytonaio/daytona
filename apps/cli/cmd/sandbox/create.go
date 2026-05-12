@@ -145,7 +145,13 @@ var CreateCmd = &cobra.Command{
 				return err
 			}
 
-			err = common.AwaitSandboxState(ctx, apiClient, sandbox.Id, apiclient.SANDBOXSTATE_BUILDING_SNAPSHOT)
+			// Accept any post-pending state — transient states can be skipped between polls.
+			err = common.AwaitSandboxState(ctx, apiClient, sandbox.Id,
+				apiclient.SANDBOXSTATE_BUILDING_SNAPSHOT,
+				apiclient.SANDBOXSTATE_PULLING_SNAPSHOT,
+				apiclient.SANDBOXSTATE_STARTING,
+				apiclient.SANDBOXSTATE_STARTED,
+			)
 			if err != nil {
 				return err
 			}

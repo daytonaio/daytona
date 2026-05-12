@@ -12,7 +12,7 @@ import { useSandboxSessionContext } from '@/hooks/useSandboxSessionContext'
 import { isStoppable } from '@/lib/utils/sandbox'
 import { Sandbox } from '@daytona/api-client'
 import { Spinner } from '@/components/ui/spinner'
-import { Play, RefreshCw, TerminalSquare } from 'lucide-react'
+import { ArrowUpRight, RefreshCw, TerminalSquare } from 'lucide-react'
 
 export function SandboxTerminalTab({ sandbox }: { sandbox: Sandbox }) {
   const running = isStoppable(sandbox)
@@ -29,6 +29,13 @@ export function SandboxTerminalTab({ sandbox }: { sandbox: Sandbox }) {
     reset,
   } = useTerminalSessionQuery(sandbox.id, running && activated)
 
+  useEffect(() => {
+    if (!running || activated) return
+
+    activateTerminal(sandbox.id)
+    setActivated(true)
+  }, [activateTerminal, activated, running, sandbox.id])
+
   // Auto-reconnect: if activated and session is expired, refetch
   useEffect(() => {
     if (!activated || !existingSession) return
@@ -36,11 +43,6 @@ export function SandboxTerminalTab({ sandbox }: { sandbox: Sandbox }) {
       reset()
     }
   }, [activated, existingSession, reset])
-
-  const handleConnect = () => {
-    activateTerminal(sandbox.id)
-    setActivated(true)
-  }
 
   if (!running) {
     return (
@@ -66,37 +68,7 @@ export function SandboxTerminalTab({ sandbox }: { sandbox: Sandbox }) {
     )
   }
 
-  // Not yet activated — show connect button
-  if (!activated) {
-    return (
-      <div className="flex-1 flex flex-col p-4">
-        <div className="flex-1 min-h-0 rounded-md border border-border flex">
-          <Empty className="border-0">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <TerminalSquare className="size-4" />
-              </EmptyMedia>
-              <EmptyTitle>Terminal</EmptyTitle>
-              <EmptyDescription>
-                Connect to an interactive terminal session in your sandbox.{' '}
-                <a href={`${DAYTONA_DOCS_URL}/en/web-terminal`} target="_blank" rel="noopener noreferrer">
-                  Learn more
-                </a>
-                .
-              </EmptyDescription>
-            </EmptyHeader>
-            <Button onClick={handleConnect}>
-              <Play className="size-4" />
-              Connect
-            </Button>
-          </Empty>
-        </div>
-      </div>
-    )
-  }
-
-  // Loading / fetching
-  if (isLoading || isFetching) {
+  if (!activated || isLoading || isFetching) {
     return (
       <div className="flex-1 flex flex-col p-4">
         <div className="flex-1 min-h-0 rounded-md border border-border flex items-center justify-center gap-2 text-muted-foreground">
@@ -130,6 +102,14 @@ export function SandboxTerminalTab({ sandbox }: { sandbox: Sandbox }) {
   // Active session
   return (
     <div className="flex-1 flex flex-col p-4">
+      <div className="mb-2 flex shrink-0 justify-end">
+        <Button variant="link" size="sm" className="h-auto px-0 py-0" asChild>
+          <a href={session.url} target="_blank" rel="noopener noreferrer">
+            Open in new tab
+            <ArrowUpRight className="size-4" />
+          </a>
+        </Button>
+      </div>
       <div className="flex-1 min-h-0 rounded-md border border-border bg-black overflow-hidden p-1">
         <iframe title="Sandbox terminal" src={session.url} className="w-full h-full border-0" />
       </div>

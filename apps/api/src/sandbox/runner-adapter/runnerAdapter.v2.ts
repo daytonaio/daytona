@@ -223,7 +223,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     this.logger.debug(`Created DESTROY_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }
 
-  async recoverSandbox(sandbox: Sandbox, skipStart = false): Promise<void> {
+  async recoverSandbox(sandbox: Sandbox, registry?: DockerRegistry, skipStart = false): Promise<void> {
     const recoverSandboxDTO: RecoverSandboxDTO = {
       userId: sandbox.organizationId,
       snapshot: sandbox.snapshot,
@@ -242,6 +242,14 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       networkAllowList: sandbox.networkAllowList,
       errorReason: sandbox.errorReason,
       backupErrorReason: sandbox.backupErrorReason,
+      registry: registry
+        ? {
+            project: registry.project,
+            url: registry.url.replace(/^(https?:\/\/)/, ''),
+            username: registry.username,
+            password: registry.password,
+          }
+        : undefined,
     }
     // skipStart is API-side metadata for the job-completion handler; the runner ignores extra fields.
     await this.jobService.createJob(null, JobType.RECOVER_SANDBOX, this.runner.id, ResourceType.SANDBOX, sandbox.id, {
@@ -548,12 +556,16 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     )
   }
 
+  // v2 dispatches snapshot-from-sandbox as an async job; the actual
+  // CreateSandboxSnapshotResult arrives via the job state handler when the
+  // runner finishes the work, so this method intentionally resolves to
+  // `undefined`.
   async createSnapshotFromSandbox(
     sandboxId: string,
     snapshotName: string,
     organizationId: string,
     registry?: DockerRegistry,
-  ): Promise<void> {
+  ): Promise<undefined> {
     const payload = toJson(
       SnapshotSandboxPayloadSchema,
       create(SnapshotSandboxPayloadSchema, {
@@ -583,11 +595,25 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     this.logger.debug(`Created SNAPSHOT_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }
 
-  async resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void> {
+  async resizeSandbox(
+    sandboxId: string,
+    cpu?: number,
+    memory?: number,
+    disk?: number,
+    registry?: DockerRegistry,
+  ): Promise<void> {
     await this.jobService.createJob(null, JobType.RESIZE_SANDBOX, this.runner.id, ResourceType.SANDBOX, sandboxId, {
       cpu,
       memory,
       disk,
+      registry: registry
+        ? {
+            project: registry.project,
+            url: registry.url.replace(/^(https?:\/\/)/, ''),
+            username: registry.username,
+            password: registry.password,
+          }
+        : undefined,
     })
 
     this.logger.debug(`Created RESIZE_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)

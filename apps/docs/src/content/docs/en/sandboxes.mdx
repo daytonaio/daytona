@@ -295,6 +295,61 @@ curl 'https://app.daytona.io/api/sandbox' \
 </TabItem>
 </Tabs>
 
+### GPU sandboxes
+
+:::caution[Experimental]
+This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
+:::
+
+Daytona supports NVIDIA GPU devices for snapshot-based sandbox creation. This allows you to run GPU workloads such as model inference, fine-tuning, and CUDA-accelerated compute inside a sandbox created from a GPU-ready snapshot. GPU sandboxes must be ephemeral.
+
+When creating a snapshot in the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots), enable the **GPU** option to create a GPU-ready snapshot.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+daytona = Daytona()
+sandbox = daytona.create(
+    CreateSandboxFromSnapshotParams(
+        snapshot="my-gpu-snapshot",
+        ephemeral=True,
+    )
+)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from "@daytona/sdk";
+
+const daytona = new Daytona();
+const sandbox = await daytona.create({
+  snapshot: "my-gpu-snapshot",
+  ephemeral: true,
+});
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "snapshot": "my-gpu-snapshot",
+  "autoDeleteInterval": 0
+}'
+```
+
+</TabItem>
+</Tabs>
+
 ### Ephemeral Sandboxes
 
 Ephemeral sandboxes are automatically deleted once they are stopped. They are useful for short-lived tasks or testing purposes.

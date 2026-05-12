@@ -23,6 +23,16 @@ type InspectSnapshotInRegistryRequestDTO struct {
 	Registry *RegistryDTO `json:"registry,omitempty"`
 } //	@name	InspectSnapshotInRegistryRequest
 
+// CreateSnapshotFromSandboxRequestDTO is the body sent by the API to ask the
+// runner to commit the given sandbox container, push the resulting image to
+// the supplied internal registry under the canonical
+// `daytona-{hash}:daytona` tag, and return the resulting image metadata.
+type CreateSnapshotFromSandboxRequestDTO struct {
+	Name           string       `json:"name" validate:"required" example:"my-snapshot:latest"`
+	OrganizationId string       `json:"organizationId,omitempty"`
+	Registry       *RegistryDTO `json:"registry" validate:"required"`
+} //	@name	CreateSnapshotFromSandboxRequest
+
 func HashWithoutPrefix(hash string) string {
 	return strings.TrimPrefix(hash, "sha256:")
 }

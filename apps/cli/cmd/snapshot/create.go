@@ -104,7 +104,13 @@ var CreateCmd = &cobra.Command{
 				ResourceType:         common.ResourceTypeSnapshot,
 			})
 
-			err = common.AwaitSnapshotState(ctx, apiClient, snapshotName, apiclient.SNAPSHOTSTATE_PENDING)
+			// Accept any post-build state — transient states can be skipped between polls.
+			err = common.AwaitSnapshotState(ctx, apiClient, snapshotName,
+				apiclient.SNAPSHOTSTATE_PENDING,
+				apiclient.SNAPSHOTSTATE_PULLING,
+				apiclient.SNAPSHOTSTATE_ACTIVE,
+				apiclient.SNAPSHOTSTATE_INACTIVE,
+			)
 			if err != nil {
 				return err
 			}

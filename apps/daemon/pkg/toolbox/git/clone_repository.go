@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/daemon/pkg/git"
 	"github.com/daytonaio/daemon/pkg/gitprovider"
 	"github.com/gin-gonic/gin"
@@ -28,7 +29,7 @@ import (
 func CloneRepository(c *gin.Context) {
 	var req GitCloneRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
+		_ = c.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("invalid request body: %w", err)))
 		return
 	}
 
@@ -63,7 +64,7 @@ func CloneRepository(c *gin.Context) {
 
 	err := gitService.CloneRepository(&repo, auth)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		abortWithGitError(c, err)
 		return
 	}
 

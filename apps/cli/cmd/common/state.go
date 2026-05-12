@@ -12,16 +12,20 @@ import (
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 )
 
-func AwaitSnapshotState(ctx context.Context, apiClient *apiclient.APIClient, name string, state apiclient.SnapshotState) error {
+func AwaitSnapshotState(ctx context.Context, apiClient *apiclient.APIClient, name string, states ...apiclient.SnapshotState) error {
 	for {
 		snapshot, res, err := apiClient.SnapshotsAPI.GetSnapshot(ctx, name).Execute()
 		if err != nil {
 			return apiclient_cli.HandleErrorResponse(res, err)
 		}
 
+		for _, s := range states {
+			if snapshot.State == s {
+				return nil
+			}
+		}
+
 		switch snapshot.State {
-		case state:
-			return nil
 		case apiclient.SNAPSHOTSTATE_ERROR, apiclient.SNAPSHOTSTATE_BUILD_FAILED:
 			if !snapshot.ErrorReason.IsSet() {
 				return fmt.Errorf("snapshot processing failed")
@@ -33,20 +37,25 @@ func AwaitSnapshotState(ctx context.Context, apiClient *apiclient.APIClient, nam
 	}
 }
 
-func AwaitSandboxState(ctx context.Context, apiClient *apiclient.APIClient, targetSandbox string, state apiclient.SandboxState) error {
+func AwaitSandboxState(ctx context.Context, apiClient *apiclient.APIClient, targetSandbox string, states ...apiclient.SandboxState) error {
 	for {
 		sandbox, res, err := apiClient.SandboxAPI.GetSandbox(ctx, targetSandbox).Execute()
 		if err != nil {
 			return apiclient_cli.HandleErrorResponse(res, err)
 		}
 
-		if sandbox.State != nil && *sandbox.State == state {
-			return nil
-		} else if sandbox.State != nil && (*sandbox.State == apiclient.SANDBOXSTATE_ERROR || *sandbox.State == apiclient.SANDBOXSTATE_BUILD_FAILED) {
-			if sandbox.ErrorReason == nil {
-				return fmt.Errorf("sandbox processing failed")
+		if sandbox.State != nil {
+			for _, s := range states {
+				if *sandbox.State == s {
+					return nil
+				}
 			}
-			return fmt.Errorf("sandbox processing failed: %s", *sandbox.ErrorReason)
+			if *sandbox.State == apiclient.SANDBOXSTATE_ERROR || *sandbox.State == apiclient.SANDBOXSTATE_BUILD_FAILED {
+				if sandbox.ErrorReason == nil {
+					return fmt.Errorf("sandbox processing failed")
+				}
+				return fmt.Errorf("sandbox processing failed: %s", *sandbox.ErrorReason)
+			}
 		}
 
 		time.Sleep(time.Second)

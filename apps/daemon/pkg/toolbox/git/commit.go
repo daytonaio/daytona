@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/daemon/pkg/git"
 	"github.com/gin-gonic/gin"
 	go_git "github.com/go-git/go-git/v5"
@@ -29,7 +30,7 @@ import (
 func CommitChanges(c *gin.Context) {
 	var req GitCommitRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
+		_ = c.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("invalid request body: %w", err)))
 		return
 	}
 
@@ -47,7 +48,7 @@ func CommitChanges(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		abortWithGitError(c, err)
 		return
 	}
 

@@ -5,8 +5,14 @@
 
 import { Region, Sandbox, SandboxState, SnapshotDto } from '@daytona/api-client'
 import { Table } from '@tanstack/react-table'
+import type { Ref } from 'react'
+
+export interface SandboxTableRef {
+  table: Table<Sandbox>
+}
 
 export interface SandboxTableProps {
+  ref?: Ref<SandboxTableRef>
   data: Sandbox[]
   sandboxIsLoading: Record<string, boolean>
   sandboxStateIsTransitioning: Record<string, boolean>
@@ -28,12 +34,13 @@ export interface SandboxTableProps {
   handleVnc: (id: string) => void
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
-  onRowClick?: (sandbox: Sandbox, orderedSandboxes: Sandbox[]) => void
+  onRowClick?: (sandbox: Sandbox) => void
   handleRecover: (id: string) => void
   handleScreenRecordings: (id: string) => void
   handleCreateSnapshot: (id: string) => void
   handleFork: (id: string) => void
   handleViewForks: (id: string) => void
+  handleOpenTerminal: (sandbox: Sandbox) => void
 }
 
 export interface SandboxTableActionsProps {
@@ -52,6 +59,7 @@ export interface SandboxTableActionsProps {
   onFork?: () => void
   onCreateSnapshot?: () => void
   onViewForks?: () => void
+  onOpenTerminal?: () => void
   onRecover: (id: string) => void
   onScreenRecordings: (id: string) => void
 }

@@ -17,11 +17,9 @@
 // @ts-ignore
 import type { RegistryDTO } from './registry-dto';
 
-export interface ResizeSandboxDTO {
-    'cpu'?: number;
-    'disk'?: number;
-    'gpu'?: number;
-    'memory'?: number;
-    'registry'?: RegistryDTO;
+export interface CreateSnapshotFromSandboxRequest {
+    'name': string;
+    'organizationId'?: string;
+    'registry': RegistryDTO;
 }
 

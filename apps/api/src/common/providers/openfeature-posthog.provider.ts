@@ -39,6 +39,27 @@ export class OpenFeaturePostHogProvider implements Provider {
     }
   }
 
+  /**
+   * Returns true if the given flag key is listed in the
+   * `OPENFEATURE_FORCE_ENABLED_FLAGS` env var (comma-separated). Used by the
+   * E2E setup to force-enable feature-flag-gated endpoints (e.g.
+   * `sandbox_linux_vm`) when no real flag provider (PostHog) is configured.
+   *
+   * Production deployments configure PostHog and never hit the unconfigured
+   * code path that consults this list, so this is a no-op in production.
+   */
+  private static isForceEnabled(flagKey: string): boolean {
+    const raw = process.env.OPENFEATURE_FORCE_ENABLED_FLAGS
+    if (!raw) {
+      return false
+    }
+    return raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .includes(flagKey)
+  }
+
   async resolveBooleanEvaluation(
     flagKey: string,
     defaultValue: boolean,
@@ -148,6 +169,15 @@ export class OpenFeaturePostHogProvider implements Provider {
   ): Promise<ResolutionDetails<any>> {
     // If PostHog is not configured, return default value
     if (!this.isConfigured || !this.client) {
+      // Only override Boolean flags - forcing a non-boolean to `true`
+      // would cause the resolver to throw TypeMismatchError downstream.
+      if (typeof defaultValue === 'boolean' && OpenFeaturePostHogProvider.isForceEnabled(flagKey)) {
+        logger.debug(`Force-enabling flag ${flagKey} via OPENFEATURE_FORCE_ENABLED_FLAGS`)
+        return {
+          value: true,
+          reason: StandardResolutionReasons.STATIC,
+        }
+      }
       logger.debug(`PostHog not configured, returning default value for flag ${flagKey}`)
       return {
         value: defaultValue,

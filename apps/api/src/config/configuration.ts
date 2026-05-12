@@ -328,6 +328,7 @@ const configuration = {
     key: process.env.ENCRYPTION_KEY,
     salt: process.env.ENCRYPTION_SALT,
   },
+  sandboxSnapshottingTimeoutMin: parseInt(process.env.SANDBOX_SNAPSHOTTING_TIMEOUT_MIN || '60', 10),
   failedSnapshotRunnerRetentionHours: parseInt(process.env.FAILED_SNAPSHOT_RUNNER_RETENTION_HOURS || '3', 10),
   buildInfoSnapshotRunnerStalenessDays: parseInt(process.env.BUILDINFO_SNAPSHOT_RUNNER_STALENESS_DAYS || '7', 10),
 }

@@ -14,6 +14,7 @@ import { CreateSshAccessSheet } from '@/components/sandboxes/CreateSshAccessShee
 import { RevokeSshAccessDialog } from '@/components/sandboxes/RevokeSshAccessDialog'
 import SandboxDetailsSheet, { type SandboxDetailsSheetTabValue } from '@/components/sandboxes/SandboxDetailsSheet'
 import { SandboxTable } from '@/components/SandboxTable'
+import type { SandboxTableRef } from '@/components/SandboxTable/types'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -123,6 +124,7 @@ const Sandboxes: React.FC = () => {
   const [showRevokeSshDialog, setShowRevokeSshDialog] = useState(false)
   const [sshSandboxId, setSshSandboxId] = useState<string>('')
   const createSandboxSheetRef = useRef<{ open: () => void }>(null)
+  const sandboxTableRef = useRef<SandboxTableRef>(null)
 
   // Region Filter
 
@@ -750,17 +752,23 @@ const Sandboxes: React.FC = () => {
     }
   }
 
-  const openSandboxDetails = (sandbox: Sandbox, orderedSandboxes: Sandbox[] | null) => {
-    setOrderedSandboxItems(orderedSandboxes)
+  const openSandboxDetails = (sandbox: Sandbox, initialTab: SandboxDetailsSheetTabValue = 'overview') => {
+    const orderedSandboxes =
+      sandboxTableRef.current?.table.getPrePaginationRowModel().rows.map((row) => row.original) ?? []
+    setOrderedSandboxItems(orderedSandboxes.some((item) => item.id === sandbox.id) ? orderedSandboxes : null)
     setSelectedSandbox(sandbox)
-    setSandboxDetailsInitialTab('overview')
+    setSandboxDetailsInitialTab(initialTab)
     setSandboxIdParam(sandbox.id)
-    setSandboxTabParam('overview')
+    setSandboxTabParam(initialTab)
     setShowSandboxDetails(true)
   }
 
-  const handleSandboxRowClick = (sandbox: Sandbox, orderedSandboxes: Sandbox[]) => {
-    openSandboxDetails(sandbox, orderedSandboxes)
+  const handleSandboxRowClick = (sandbox: Sandbox) => {
+    openSandboxDetails(sandbox)
+  }
+
+  const handleOpenTerminal = (sandbox: Sandbox) => {
+    openSandboxDetails(sandbox, 'terminal')
   }
 
   const handleSandboxCreated = (sandbox: CreatedSandbox) => {
@@ -771,7 +779,7 @@ const Sandboxes: React.FC = () => {
         ? prev.map((existingSandbox) => (existingSandbox.id === createdSandbox.id ? createdSandbox : existingSandbox))
         : [createdSandbox, ...prev],
     )
-    openSandboxDetails(createdSandbox, null)
+    openSandboxDetails(createdSandbox)
   }
 
   const writePermitted = useMemo(
@@ -852,6 +860,7 @@ const Sandboxes: React.FC = () => {
       </PageHeader>
       <PageContent size="full" className="overflow-hidden">
         <SandboxTable
+          ref={sandboxTableRef}
           sandboxIsLoading={loadingSandboxes}
           sandboxStateIsTransitioning={transitioningSandboxes}
           activeSandboxId={showSandboxDetails ? selectedSandbox?.id : undefined}
@@ -879,6 +888,7 @@ const Sandboxes: React.FC = () => {
           handleCreateSnapshot={handleCreateSnapshot}
           handleFork={handleFork}
           handleViewForks={handleViewForks}
+          handleOpenTerminal={handleOpenTerminal}
         />
 
         {sandboxToDelete && (
