@@ -35,7 +35,6 @@ import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { SandboxService } from '../services/sandbox.service'
 import { SandboxRepository } from '../repositories/sandbox.repository'
-import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 
 @Injectable()
 export class BackupManager implements TrackableJobExecutions, OnApplicationShutdown {

@@ -1863,7 +1863,7 @@ export class SandboxService {
 
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
-        if (!sandbox.recoverable) {
+    if (!sandbox.recoverable) {
       throw new BadRequestError('Sandbox is not in a recoverable state')
     }
 
@@ -1976,7 +1976,7 @@ export class SandboxService {
 
       const updatedSandbox = await this.sandboxRepository.updateWhere(sandbox.id, {
         updateData,
-        whereCondition: { recoverable: true, pending: false, state: sandbox.state  },
+        whereCondition: { recoverable: true, pending: false, state: sandbox.state },
       })
 
       if (skipStart) {
