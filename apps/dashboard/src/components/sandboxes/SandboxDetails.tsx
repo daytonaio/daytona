@@ -60,7 +60,6 @@ export default function SandboxDetails() {
     useSelectedOrganization()
   const { getRegionName } = useRegions()
 
-  const filesystemEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_FILESYSTEM)
   const spendingEnabled = useFeatureFlagEnabled(FeatureFlags.SANDBOX_SPENDING)
   const spendingTabAvailable = spendingEnabled && !!config.analyticsApiUrl
 
@@ -82,12 +81,6 @@ export default function SandboxDetails() {
       setTab('terminal')
     }
   }, [spendingTabAvailable, tab, setTab])
-
-  useEffect(() => {
-    if (filesystemEnabled === false && tab === 'filesystem') {
-      setTab('terminal')
-    }
-  }, [filesystemEnabled, tab, setTab])
 
   const { data: sandbox, isLoading, isError, error, refetch, isFetching } = useSandboxQuery(sandboxId ?? '')
   const isNotFound = isError && isAxiosError(error.cause) && error.cause?.status === 404
@@ -273,7 +266,6 @@ export default function SandboxDetails() {
                 sandbox={sandbox}
                 isLoading={isLoading}
                 spendingTabAvailable={!!spendingTabAvailable}
-                filesystemEnabled={filesystemEnabled}
                 tab={tab}
                 onTabChange={setTab}
               />

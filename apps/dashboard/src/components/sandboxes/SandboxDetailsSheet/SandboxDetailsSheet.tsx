@@ -125,7 +125,6 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   const [internalActiveTab, setInternalActiveTab] = useState<SandboxDetailsSheetTabValue>('overview')
   const activeTab = activeTabProp ?? internalActiveTab
   const [viewportWidth, setViewportWidth] = useState(() => getViewportWidth())
-  const filesystemEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_FILESYSTEM)
   const spendingEnabled = useFeatureFlagEnabled(FeatureFlags.SANDBOX_SPENDING)
   const config = useConfig()
   const spendingTabAvailable = spendingEnabled && !!config.analyticsApiUrl
@@ -231,11 +230,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
     if (!spendingTabAvailable && activeTab === 'spending') {
       handleTabChange('logs')
     }
-
-    if (filesystemEnabled === false && activeTab === 'filesystem') {
-      handleTabChange('terminal')
-    }
-  }, [activeTab, filesystemEnabled, handleTabChange, resetToOverview, spendingTabAvailable])
+  }, [activeTab, handleTabChange, spendingTabAvailable])
 
   if (!sandbox) return null
 
@@ -334,11 +329,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
             {isDesktop ? (
               activeTab === 'overview' ? (
                 <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-                  <SandboxDetailsTabsList
-                    filesystemEnabled={filesystemEnabled}
-                    spendingTabAvailable={spendingTabAvailable}
-                    showOverview
-                  />
+                  <SandboxDetailsTabsList spendingTabAvailable={spendingTabAvailable} showOverview />
                   <div className="flex min-h-0 flex-1 max-w-[450px] flex-col">
                     <SandboxDetailsHeader sandbox={sandbox} actions={sandboxHeaderActions} />
                     {sandboxInfoPanel}
@@ -354,7 +345,6 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                   <div className="flex min-w-0 min-h-0 flex-1 flex-col overflow-hidden">
                     <div className="animate-in fade-in slide-in-from-left-3 duration-500 ease-out">
                       <SandboxDetailsTabsList
-                        filesystemEnabled={filesystemEnabled}
                         spendingTabAvailable={spendingTabAvailable}
                         showOverview={false}
                         leadingContent={
@@ -377,11 +367,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                     </div>
                     <div className="flex min-w-0 min-h-0 flex-1 flex-col overflow-hidden">
                       <div className="flex min-h-0 flex-1 flex-col animate-in fade-in slide-in-from-right-20 duration-300 ease-out">
-                        <SandboxDetailsTabContent
-                          sandbox={sandbox}
-                          filesystemEnabled={filesystemEnabled}
-                          spendingTabAvailable={spendingTabAvailable}
-                        />
+                        <SandboxDetailsTabContent sandbox={sandbox} spendingTabAvailable={spendingTabAvailable} />
                       </div>
                     </div>
                   </div>
@@ -391,22 +377,14 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
               <>
                 <div className="flex min-h-0 shrink-0 flex-col">
                   <SandboxDetailsHeader sandbox={sandbox} actions={sandboxHeaderActions} />
-                  <SandboxDetailsTabsList
-                    filesystemEnabled={filesystemEnabled}
-                    spendingTabAvailable={spendingTabAvailable}
-                    showOverview
-                  />
+                  <SandboxDetailsTabsList spendingTabAvailable={spendingTabAvailable} showOverview />
                 </div>
 
                 <TabsContent value="overview" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col">
                   {sandboxInfoPanel}
                 </TabsContent>
 
-                <SandboxDetailsTabContent
-                  sandbox={sandbox}
-                  filesystemEnabled={filesystemEnabled}
-                  spendingTabAvailable={spendingTabAvailable}
-                />
+                <SandboxDetailsTabContent sandbox={sandbox} spendingTabAvailable={spendingTabAvailable} />
               </>
             )}
           </Tabs>

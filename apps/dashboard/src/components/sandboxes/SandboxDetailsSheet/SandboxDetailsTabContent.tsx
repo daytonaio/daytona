@@ -15,11 +15,9 @@ import { SandboxVncTab } from '../SandboxVncTab'
 
 export function SandboxDetailsTabContent({
   sandbox,
-  filesystemEnabled,
   spendingTabAvailable,
 }: {
   sandbox: Sandbox
-  filesystemEnabled: boolean | undefined
   spendingTabAvailable: boolean | undefined
 }) {
   return (
@@ -42,14 +40,9 @@ export function SandboxDetailsTabContent({
       <TabsContent value="terminal" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden">
         <SandboxTerminalTab sandbox={sandbox} />
       </TabsContent>
-      {filesystemEnabled && (
-        <TabsContent
-          value="filesystem"
-          className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden"
-        >
-          <SandboxFileSystemTab sandbox={sandbox} />
-        </TabsContent>
-      )}
+      <TabsContent value="filesystem" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden">
+        <SandboxFileSystemTab sandbox={sandbox} />
+      </TabsContent>
       <TabsContent value="vnc" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden">
         <SandboxVncTab sandbox={sandbox} />
       </TabsContent>

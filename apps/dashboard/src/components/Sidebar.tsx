@@ -24,8 +24,6 @@ import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 import { useTheme } from '@/contexts/ThemeContext'
 import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
-import { useWebhookAppPortalAccessQuery } from '@/hooks/queries/useWebhookAppPortalAccessQuery'
-import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
 import { useWebhooks } from '@/hooks/useWebhooks'
@@ -110,7 +108,6 @@ const useNavCommands = (items: { label: string; path: RoutePath | string; onClic
 
 export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarProps) {
   const posthog = usePostHog()
-  const config = useConfig()
   const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
   const { pathname } = useLocation()
@@ -119,10 +116,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     useSelectedOrganization()
   const { count: organizationInvitationsCount } = useUserOrganizationInvitations()
   const { isInitialized: webhooksInitialized } = useWebhooks()
-  const webhooksAccess = useWebhookAppPortalAccessQuery(selectedOrganization?.id)
   const orgInfraEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_INFRASTRUCTURE)
-  const playgroundEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_PLAYGROUND)
-  const webhooksEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_WEBHOOKS)
 
   const sidebarItems = useMemo(() => {
     const arr: SidebarItem[] = [
@@ -171,24 +165,12 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       { icon: <KeyRound size={16} strokeWidth={1.5} />, label: 'API Keys', path: RoutePath.KEYS },
     ]
 
-    // Add Webhooks link if webhooks are initialized
     if (webhooksInitialized) {
-      if (webhooksEnabled) {
-        arr.push({
-          icon: <Mail size={16} strokeWidth={1.5} />,
-          label: 'Webhooks',
-          path: RoutePath.WEBHOOKS,
-        })
-      } else {
-        arr.push({
-          icon: <Mail size={16} strokeWidth={1.5} />,
-          label: 'Webhooks',
-          path: '#webhooks' as any, // This will be handled by onClick
-          onClick: () => {
-            window.open(webhooksAccess.data?.url, '_blank', 'noopener,noreferrer')
-          },
-        })
-      }
+      arr.push({
+        icon: <Mail size={16} strokeWidth={1.5} />,
+        label: 'Webhooks',
+        path: RoutePath.WEBHOOKS,
+      })
     }
 
     if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
@@ -211,13 +193,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     }
 
     return arr
-  }, [
-    authenticatedUserOrganizationMember?.role,
-    selectedOrganization?.personal,
-    webhooksInitialized,
-    webhooksAccess.data?.url,
-    webhooksEnabled,
-  ])
+  }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal, webhooksInitialized])
 
   const billingItems = useMemo(() => {
     if (!billingEnabled || authenticatedUserOrganizationMember?.role !== OrganizationUserRoleEnum.OWNER) {
@@ -268,18 +244,14 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
   }
 
   const miscItems = useMemo(() => {
-    if (!playgroundEnabled) {
-      return []
-    }
-
     return [
-      playgroundEnabled && {
+      {
         icon: <Joystick size={16} strokeWidth={1.5} />,
         label: 'Playground',
         path: RoutePath.PLAYGROUND,
       },
     ]
-  }, [playgroundEnabled])
+  }, [])
 
   const sidebarGroups: { label: string; items: SidebarItem[] }[] = useMemo(() => {
     return [

@@ -21,7 +21,6 @@ import {
 } from '@/components/ui/sheet'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { FeatureFlags } from '@/enums/FeatureFlags'
 import { useCreateSandboxMutation } from '@/hooks/mutations/useCreateSandboxMutation'
 import { useSetOrganizationDefaultRegionMutation } from '@/hooks/mutations/useSetOrganizationDefaultRegionMutation'
 import { useSnapshotsQuery } from '@/hooks/queries/useSnapshotsQuery'
@@ -37,7 +36,6 @@ import { Sandbox } from '@daytona/sdk'
 import { useForm } from '@tanstack/react-form'
 import { isAxiosError } from 'axios'
 import { Info, Minus, Plus, Upload } from 'lucide-react'
-import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { ComponentProps, Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { toast } from 'sonner'
@@ -157,7 +155,6 @@ export const CreateSandboxSheet = ({
   ref?: Ref<{ open: () => void }>
   onSandboxCreated?: (sandbox: Sandbox) => void
 }) => {
-  const createSandboxEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_CREATE_SANDBOX)
   const [open, setOpen] = useState(false)
 
   const config = useConfig()
@@ -360,10 +357,6 @@ export const CreateSandboxSheet = ({
     if (form.getFieldValue('regionId')) return
     form.setFieldValue('regionId', regions[0].id)
   }, [open, loadingRegions, regions, selectedOrganization?.defaultRegionId, form])
-
-  if (!createSandboxEnabled) {
-    return null
-  }
 
   return (
     <Sheet

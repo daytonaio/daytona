@@ -8,12 +8,10 @@ import React from 'react'
 import { FadeTabList } from './FadeTabList'
 
 export function SandboxDetailsTabsList({
-  filesystemEnabled,
   spendingTabAvailable,
   showOverview,
   leadingContent,
 }: {
-  filesystemEnabled: boolean | undefined
   spendingTabAvailable: boolean | undefined
   showOverview: boolean
   leadingContent?: React.ReactNode
@@ -42,11 +40,9 @@ export function SandboxDetailsTabsList({
       <TabsTrigger value="terminal" className="h-[41px] border-b py-0">
         Terminal
       </TabsTrigger>
-      {filesystemEnabled && (
-        <TabsTrigger value="filesystem" className="h-[41px] border-b py-0">
-          Filesystem
-        </TabsTrigger>
-      )}
+      <TabsTrigger value="filesystem" className="h-[41px] border-b py-0">
+        Filesystem
+      </TabsTrigger>
       <TabsTrigger value="vnc" className="h-[41px] border-b py-0">
         VNC
       </TabsTrigger>

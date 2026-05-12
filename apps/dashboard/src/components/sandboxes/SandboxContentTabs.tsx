@@ -23,7 +23,6 @@ interface SandboxContentTabsProps {
   sandbox: Sandbox | undefined
   isLoading: boolean
   spendingTabAvailable: boolean
-  filesystemEnabled: boolean | undefined
   tab: TabValue
   onTabChange: (tab: TabValue) => void
 }
@@ -32,7 +31,6 @@ export function SandboxContentTabs({
   sandbox,
   isLoading,
   spendingTabAvailable,
-  filesystemEnabled,
   tab,
   onTabChange,
 }: SandboxContentTabsProps) {
@@ -76,7 +74,7 @@ export function SandboxContentTabs({
           <TabsTrigger value="metrics">Metrics</TabsTrigger>
           {spendingTabAvailable && <TabsTrigger value="spending">Spending</TabsTrigger>}
           <TabsTrigger value="terminal">Terminal</TabsTrigger>
-          {filesystemEnabled && <TabsTrigger value="filesystem">Filesystem</TabsTrigger>}
+          <TabsTrigger value="filesystem">Filesystem</TabsTrigger>
           <TabsTrigger value="vnc">VNC</TabsTrigger>
         </TabsList>
       </ScrollArea>
@@ -101,14 +99,9 @@ export function SandboxContentTabs({
       <TabsContent value="terminal" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
         <SandboxTerminalTab sandbox={sandbox} />
       </TabsContent>
-      {filesystemEnabled && (
-        <TabsContent
-          value="filesystem"
-          className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
-        >
-          <SandboxFileSystemTab sandbox={sandbox} />
-        </TabsContent>
-      )}
+      <TabsContent value="filesystem" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
+        <SandboxFileSystemTab sandbox={sandbox} />
+      </TabsContent>
       <TabsContent value="vnc" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
         <SandboxVncTab sandbox={sandbox} />
       </TabsContent>
