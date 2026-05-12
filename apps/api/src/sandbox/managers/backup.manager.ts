@@ -493,7 +493,8 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   @WithInstrumentation()
   async checkStaleInProgressBackups(): Promise<void> {
     const lockKey = 'check-stale-in-progress-backups'
-    const hasLock = await this.redisLockProvider.lock(lockKey, 60)
+    const lockTtlSeconds = 5 * 60
+    const hasLock = await this.redisLockProvider.lock(lockKey, lockTtlSeconds)
     if (!hasLock) {
       return
     }
