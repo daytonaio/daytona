@@ -532,6 +532,54 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     }
   }
 
+  @Cron(CronExpression.EVERY_MINUTE, { name: 'check-stale-in-progress-backups' })
+  @TrackJobExecution()
+  @LogExecution('check-stale-in-progress-backups')
+  @WithInstrumentation()
+  async checkStaleInProgressBackups(): Promise<void> {
+    const lockKey = 'check-stale-in-progress-backups'
+    const lockTtlSeconds = 5 * 60
+    const hasLock = await this.redisLockProvider.lock(lockKey, lockTtlSeconds)
+    if (!hasLock) {
+      return
+    }
+
+    try {
+      const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000)
+
+      const staleSandboxes = await this.sandboxRepository.find({
+        where: {
+          backupState: BackupState.IN_PROGRESS,
+          desiredState: Not(SandboxDesiredState.DESTROYED),
+          updatedAt: LessThan(twoHoursAgo),
+        },
+        order: {
+          updatedAt: 'ASC',
+        },
+        take: 100,
+      })
+
+      for (const sandbox of staleSandboxes) {
+        try {
+          await this.sandboxService.updateSandboxBackupState(
+            sandbox.id,
+            BackupState.ERROR,
+            undefined,
+            undefined,
+            'Backup timed out after 2 hours',
+          )
+          this.logger.warn(`Backup for sandbox ${sandbox.id} timed out after 2 hours`)
+        } catch (error) {
+          this.logger.error(`Failed to mark stale backup as errored for sandbox ${sandbox.id}:`, error)
+        }
+      }
+    } catch (error) {
+      this.logger.error('Error checking for stale in-progress backups:', error)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
+  }
+
   async setBackupPending(sandbox: Sandbox): Promise<void> {
     if (sandbox.backupState === BackupState.COMPLETED) {
       return
