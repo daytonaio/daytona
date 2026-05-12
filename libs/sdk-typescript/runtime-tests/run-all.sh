@@ -18,7 +18,7 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 DIST="$(cd "$ROOT/../../../dist/libs/sdk-typescript" 2>/dev/null && pwd || true)"
 
 if [ -z "$DIST" ] || [ ! -f "$DIST/package.json" ]; then
-  echo "ERROR: SDK not built. Run: npx nx build sdk-typescript" >&2
+  echo "ERROR: SDK not built. Run: yarn nx build sdk-typescript" >&2
   exit 1
 fi
 
@@ -32,7 +32,7 @@ API_CLIENT_DIST="$DIST_LIBS/api-client"
 TOOLBOX_DIST="$DIST_LIBS/toolbox-api-client"
 
 if [ ! -f "$API_CLIENT_DIST/package.json" ] || [ ! -f "$TOOLBOX_DIST/package.json" ]; then
-  echo "ERROR: api-client or toolbox-api-client not built. Run: npx nx build sdk-typescript" >&2
+  echo "ERROR: api-client or toolbox-api-client not built. Run: yarn nx build sdk-typescript" >&2
   exit 1
 fi
 

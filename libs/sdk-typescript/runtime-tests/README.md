@@ -12,7 +12,7 @@ End-to-end smoke tests that prove `@daytona/sdk` builds and runs in every suppor
 Build the SDK first, then run the orchestrator:
 
 ```bash
-npx nx build sdk-typescript
+yarn nx build sdk-typescript
 
 DAYTONA_API_KEY=<your-key> \
 DAYTONA_API_URL=https://app.daytona.io/api \
