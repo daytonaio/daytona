@@ -299,10 +299,10 @@ export class OrganizationUsageService {
     sandboxClass: SandboxClass,
   ): Promise<T> {
     const excludedSandbox = await this.sandboxRepository.findOne({
-      where: { id: excludeSandboxId },
+      where: { id: excludeSandboxId, sandboxClass },
     })
 
-    if (!excludedSandbox || excludedSandbox.sandboxClass !== sandboxClass) {
+    if (!excludedSandbox) {
       return usageOverview
     }
 
@@ -875,10 +875,10 @@ export class OrganizationUsageService {
 
     if (excludeSandboxId) {
       const excludedSandbox = await this.sandboxRepository.findOne({
-        where: { id: excludeSandboxId },
+        where: { id: excludeSandboxId, sandboxClass },
       })
 
-      if (excludedSandbox && excludedSandbox.sandboxClass === sandboxClass) {
+      if (excludedSandbox) {
         if (SANDBOX_STATES_CONSUMING_COMPUTE.includes(excludedSandbox.state)) {
           shouldIncrementCpu = false
           shouldIncrementMemory = false
