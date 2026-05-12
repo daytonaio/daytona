@@ -24,18 +24,20 @@ type HeaderEntry = { key: string; value: string }
 
 const emptyHeader = (): HeaderEntry => ({ key: '', value: '' })
 
-const headerRowIsComplete = (headers: HeaderEntry[]) =>
-  headers.every(({ key, value }) => {
-    const hasKey = !!key.trim()
-    const hasValue = !!value.trim()
-    return hasKey === hasValue
-  })
-
 const noDuplicateHeaderKeys = (headers: HeaderEntry[]) => {
   const keys = headers.map(({ key }) => key.trim().toLowerCase()).filter(Boolean)
 
   return new Set(keys).size === keys.length
 }
+
+const headersSchema = z
+  .array(
+    z.object({
+      key: z.string().trim().min(1, 'Header key is required'),
+      value: z.string().trim(),
+    }),
+  )
+  .refine(noDuplicateHeaderKeys, 'Header keys must be unique')
 
 const formSchema = z.object({
   endpoint: z
@@ -49,16 +51,12 @@ const formSchema = z.object({
         return false
       }
     }, 'A valid OTLP endpoint URL is required'),
-  headers: z
-    .array(
-      z.object({
-        key: z.string().trim(),
-        value: z.string().trim(),
-      }),
-    )
-    .refine(headerRowIsComplete, 'Header rows need both a key and a value')
-    .refine(noDuplicateHeaderKeys, 'Header keys must be unique'),
+  headers: headersSchema,
 })
+
+const headersValidators = {
+  onSubmit: headersSchema,
+}
 
 type FormValues = z.infer<typeof formSchema>
 
@@ -75,46 +73,8 @@ const endpointFromOrganization = (organization: Organization | null | undefined)
 
 const valuesFromOrganization = (organization: Organization | null | undefined): FormValues => ({
   endpoint: endpointFromOrganization(organization),
-  headers: headersFromOrganization(organization).length ? headersFromOrganization(organization) : [emptyHeader()],
+  headers: headersFromOrganization(organization),
 })
-
-const getHeaderRowErrors = (headers: HeaderEntry[]) => {
-  const errors: Record<number, { key?: string; value?: string }> = {}
-  const keys = new Map<string, number>()
-
-  headers.forEach(({ key, value }, index) => {
-    const trimmedKey = key.trim()
-    const normalizedKey = trimmedKey.toLowerCase()
-    const trimmedValue = value.trim()
-
-    if (!trimmedKey && !trimmedValue) {
-      return
-    }
-
-    if (!trimmedKey) {
-      errors[index] = { ...errors[index], key: 'Header key is required' }
-    }
-
-    if (!trimmedValue) {
-      errors[index] = { ...errors[index], value: 'Header value is required' }
-    }
-
-    if (!trimmedKey || !trimmedValue) {
-      return
-    }
-
-    const duplicateIndex = keys.get(normalizedKey)
-    if (duplicateIndex != null) {
-      errors[index] = { ...errors[index], key: 'Header keys must be unique' }
-      errors[duplicateIndex] = { ...errors[duplicateIndex], key: 'Header keys must be unique' }
-      return
-    }
-
-    keys.set(normalizedKey, index)
-  })
-
-  return errors
-}
 
 export const OtelConfigCard: React.FC = () => {
   const { selectedOrganization } = useSelectedOrganization()
@@ -179,7 +139,7 @@ export const OtelConfigCard: React.FC = () => {
 
     try {
       await deleteOtelConfigMutation.mutateAsync({ organizationId: selectedOrganization.id })
-      form.reset({ endpoint: '', headers: [emptyHeader()] })
+      form.reset({ endpoint: '', headers: [] })
       toast.success('OpenTelemetry configuration disabled')
     } catch (error) {
       handleApiError(error, 'Failed to disable OpenTelemetry configuration')
@@ -241,67 +201,59 @@ export const OtelConfigCard: React.FC = () => {
           </div>
 
           <div className="border-b border-border p-4 last:border-b-0">
-            <form.Field name="headers">
+            <form.Field name="headers" validators={headersValidators}>
               {(field) => {
-                return (
-                  <form.Subscribe
-                    selector={(state) => state.submissionAttempts}
-                    children={(submissionAttempts) => {
-                      const headerErrors = getHeaderRowErrors(field.state.value)
-                      const showErrors = submissionAttempts > 0 && Object.keys(headerErrors).length > 0
+                const hasErrors = field.state.meta.errors.length > 0
 
-                      return (
-                        <Field data-invalid={showErrors} className="gap-3">
-                          <FieldContent>
-                            <FieldLabel>Headers</FieldLabel>
-                            <FieldDescription>
-                              Optional headers to send with OTLP requests. Existing values are stored encrypted and
-                              shown as <code>******</code>.
-                            </FieldDescription>
-                          </FieldContent>
-                          <div className="space-y-2">
-                            {field.state.value.map((header, index) => (
-                              <HeaderInput
-                                key={index}
-                                keyInputRef={(element) => {
-                                  headerKeyInputRefs.current[index] = element
-                                }}
-                                headerKey={header.key}
-                                headerValue={header.value}
-                                errors={showErrors ? headerErrors[index] : undefined}
-                                onChangeKey={(key) => {
-                                  const next = [...field.state.value]
-                                  next[index] = { ...next[index], key }
-                                  field.handleChange(next)
-                                }}
-                                onChangeValue={(value) => {
-                                  const next = [...field.state.value]
-                                  next[index] = { ...next[index], value }
-                                  field.handleChange(next)
-                                }}
-                                onRemove={() => field.handleChange(field.state.value.filter((_, i) => i !== index))}
-                              />
-                            ))}
-                            <div className="flex justify-start">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  const nextIndex = field.state.value.length
-                                  field.handleChange([...field.state.value, emptyHeader()])
-                                  setTimeout(() => headerKeyInputRefs.current[nextIndex]?.focus())
-                                }}
-                              >
-                                <Plus className="size-4" />
-                                Add Header
-                              </Button>
-                            </div>
-                          </div>
-                        </Field>
-                      )
-                    }}
-                  />
+                return (
+                  <Field data-invalid={hasErrors} className="gap-3">
+                    <FieldContent>
+                      <FieldLabel>Headers</FieldLabel>
+                      <FieldDescription>
+                        Optional headers to send with OTLP requests. Existing values are stored encrypted and shown as{' '}
+                        <code>******</code>.
+                      </FieldDescription>
+                    </FieldContent>
+                    <div className="space-y-2">
+                      {field.state.value.map((header, index) => (
+                        <HeaderInput
+                          key={index}
+                          keyInputRef={(element) => {
+                            headerKeyInputRefs.current[index] = element
+                          }}
+                          headerKey={header.key}
+                          headerValue={header.value}
+                          onChangeKey={(key) => {
+                            const next = [...field.state.value]
+                            next[index] = { ...next[index], key }
+                            field.handleChange(next)
+                          }}
+                          onChangeValue={(value) => {
+                            const next = [...field.state.value]
+                            next[index] = { ...next[index], value }
+                            field.handleChange(next)
+                          }}
+                          onRemove={() => field.handleChange(field.state.value.filter((_, i) => i !== index))}
+                        />
+                      ))}
+                      <div className="flex justify-start">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const nextIndex = field.state.value.length
+                            field.handleChange([...field.state.value, emptyHeader()])
+                            setTimeout(() => headerKeyInputRefs.current[nextIndex]?.focus())
+                          }}
+                        >
+                          <Plus className="size-4" />
+                          Add Header
+                        </Button>
+                      </div>
+                    </div>
+                    {hasErrors && <FieldError errors={field.state.meta.errors} />}
+                  </Field>
                 )
               }}
             </form.Field>
@@ -343,7 +295,6 @@ const HeaderInput = ({
   keyInputRef,
   headerKey,
   headerValue,
-  errors,
   onChangeKey,
   onChangeValue,
   onRemove,
@@ -351,7 +302,6 @@ const HeaderInput = ({
   keyInputRef: (element: HTMLInputElement | null) => void
   headerKey: string
   headerValue: string
-  errors?: { key?: string; value?: string }
   onChangeKey: (value: string) => void
   onChangeValue: (value: string) => void
   onRemove: () => void
@@ -360,17 +310,11 @@ const HeaderInput = ({
     <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2rem] gap-2">
       <Input
         ref={keyInputRef}
-        aria-invalid={!!errors?.key}
         placeholder="Header key"
         value={headerKey}
         onChange={(e) => onChangeKey(e.target.value)}
       />
-      <Input
-        aria-invalid={!!errors?.value}
-        placeholder="Header value"
-        value={headerValue}
-        onChange={(e) => onChangeValue(e.target.value)}
-      />
+      <Input placeholder="Header value" value={headerValue} onChange={(e) => onChangeValue(e.target.value)} />
       <TooltipButton
         type="button"
         tooltipText="Remove header"
@@ -382,6 +326,5 @@ const HeaderInput = ({
         <Minus className="size-4" />
       </TooltipButton>
     </div>
-    {(errors?.key || errors?.value) && <FieldError>{[errors.key, errors.value].filter(Boolean).join('. ')}</FieldError>}
   </div>
 )
