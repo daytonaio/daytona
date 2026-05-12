@@ -12,7 +12,7 @@ Sandbox class for Daytona SDK.
 #### new Sandbox()
 
 ```ruby
-def initialize(sandbox_dto:, config:, sandbox_api:, otel_state:)
+def initialize(sandbox_dto:, config:, sandbox_api:, otel_state: nil)
 
 ```
 
@@ -473,7 +473,7 @@ The Sandbox will automatically delete after being continuously stopped for the s
 #### update_network_settings()
 
 ```ruby
-def update_network_settings(network_block_all:, network_allow_list:)
+def update_network_settings(network_block_all: nil, network_allow_list: nil)
 
 ```
 
@@ -626,7 +626,7 @@ to the URL.
 #### create_signed_preview_url()
 
 ```ruby
-def create_signed_preview_url(port, expires_in_seconds)
+def create_signed_preview_url(port, expires_in_seconds = nil)
 
 ```
 
@@ -732,7 +732,7 @@ Revokes an SSH access token for the sandbox.
 #### start()
 
 ```ruby
-def start(timeout)
+def start(timeout = DEFAULT_TIMEOUT)
 
 ```
 
@@ -749,7 +749,7 @@ Starts the Sandbox and waits for it to be ready.
 #### recover()
 
 ```ruby
-def recover(timeout)
+def recover(timeout = DEFAULT_TIMEOUT)
 
 ```
 
@@ -775,7 +775,7 @@ puts 'Sandbox recovered successfully'
 #### stop()
 
 ```ruby
-def stop(timeout, force:)
+def stop(timeout = DEFAULT_TIMEOUT, force: false)
 
 ```
 
@@ -793,7 +793,7 @@ Stops the Sandbox and waits for it to be stopped.
 #### resize()
 
 ```ruby
-def resize(resources, timeout)
+def resize(resources, timeout = DEFAULT_TIMEOUT)
 
 ```
 
@@ -832,7 +832,7 @@ sandbox.resize(Daytona::Resources.new(cpu: 2, memory: 4, disk: 30))
 #### wait_for_resize_complete()
 
 ```ruby
-def wait_for_resize_complete(_timeout)
+def wait_for_resize_complete(_timeout = DEFAULT_TIMEOUT)
 
 ```
 
@@ -888,7 +888,7 @@ Validates an SSH access token for the sandbox.
 #### wait_for_sandbox_start()
 
 ```ruby
-def wait_for_sandbox_start(_timeout)
+def wait_for_sandbox_start(_timeout = DEFAULT_TIMEOUT)
 
 ```
 
@@ -906,7 +906,7 @@ reaches the 'started' state or encounters an error.
 #### wait_for_sandbox_stop()
 
 ```ruby
-def wait_for_sandbox_stop(_timeout)
+def wait_for_sandbox_stop(_timeout = DEFAULT_TIMEOUT)
 
 ```
 
@@ -925,7 +925,7 @@ Treats destroyed as stopped to cover ephemeral sandboxes that are automatically 
 #### experimental_fork()
 
 ```ruby
-def experimental_fork(name:, timeout:)
+def experimental_fork(name: nil, timeout: DEFAULT_TIMEOUT)
 
 ```
 
@@ -945,7 +945,7 @@ with the same disk contents but operates independently from that point on.
 #### experimental_create_snapshot()
 
 ```ruby
-def experimental_create_snapshot(name:, timeout:)
+def experimental_create_snapshot(name:, timeout: DEFAULT_TIMEOUT)
 
 ```
 
