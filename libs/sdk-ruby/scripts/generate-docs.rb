@@ -68,13 +68,6 @@ def clean_description(description)
   cleaned.strip
 end
 
-def format_parameter(parameter)
-  name, default = parameter
-  return name if default.nil? || default.empty?
-
-  name.end_with?(':') ? "#{name} #{default}" : "#{name} = #{default}"
-end
-
 def extract_class_description(obj)
   description = clean_description(obj.docstring)
 
@@ -181,7 +174,7 @@ def generate_markdown_for_object(obj)
 
       # Method signature
       content << '```ruby'
-      params_str = constructor.parameters.map { |p| format_parameter(p) }.join(', ')
+      params_str = constructor.parameters.map { |p| p[0] }.join(', ')
       content << "def initialize(#{params_str})"
       content << '```'
       content << ''
@@ -250,7 +243,7 @@ def generate_markdown_for_object(obj)
 
         # Method signature
         content << '```ruby'
-        params_str = method.parameters.map { |p| format_parameter(p) }.join(', ')
+        params_str = method.parameters.map { |p| p[0] }.join(', ')
         content << "def #{method.name}(#{params_str})"
         content << '```'
         content << ''
@@ -345,7 +338,7 @@ def post_process_markdown(content)
   content.strip + "\n"
 end
 
-def generate_docs_for_class(file_path, output_filename, class_name, written_output_files)
+def generate_docs_for_class(file_path, output_filename, class_name)
   full_path = File.join(LIB_DIR, file_path)
 
   unless File.exist?(full_path)
@@ -379,11 +372,10 @@ def generate_docs_for_class(file_path, output_filename, class_name, written_outp
 
     # Write to output file
     output_path = File.join(DOCS_OUTPUT_DIR, output_filename)
-    if written_output_files[output_path]
+    if File.exist?(output_path)
       File.write(output_path, "#{File.read(output_path).rstrip}\n\n#{markdown_content}")
     else
       File.write(output_path, final_content)
-      written_output_files[output_path] = true
     end
 
     puts "✅ Generated: #{output_filename}"
@@ -402,9 +394,8 @@ puts ''
 FileUtils.mkdir_p(DOCS_OUTPUT_DIR)
 
 # Generate docs for each class
-written_output_files = {}
 CLASSES_TO_DOCUMENT.each do |file_path, output_filename, class_name|
-  generate_docs_for_class(file_path, output_filename, class_name, written_output_files)
+  generate_docs_for_class(file_path, output_filename, class_name)
 end
 
 puts ''

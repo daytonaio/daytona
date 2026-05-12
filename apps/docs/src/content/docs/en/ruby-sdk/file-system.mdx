@@ -12,7 +12,7 @@ Main class for a new FileSystem instance.
 #### new FileSystem()
 
 ```ruby
-def initialize(sandbox_id:, toolbox_api:, otel_state: nil)
+def initialize(sandbox_id:, toolbox_api:, otel_state:)
 
 ```
 
@@ -90,7 +90,7 @@ sandbox.fs.create_folder("workspace/secrets", "700")
 #### delete_file()
 
 ```ruby
-def delete_file(path, recursive: false)
+def delete_file(path, recursive:)
 
 ```
 
@@ -200,7 +200,7 @@ puts "Subdirectories: #{dirs.map(&:name).join(', ')}"
 #### download_file()
 
 ```ruby
-def download_file(remote_path, local_path = nil)
+def download_file(remote_path, local_path)
 
 ```
 
@@ -239,7 +239,7 @@ puts "Size of the downloaded file: #{size_mb} MB"
 #### download_file_stream()
 
 ```ruby
-def download_file_stream(remote_path, timeout: 30 * 60, on_progress: nil, cancel_event: nil)
+def download_file_stream(remote_path, timeout:, on_progress:, cancel_event:)
 
 ```
 
@@ -327,7 +327,7 @@ sandbox.fs.upload_file(data, "tmp/config.json")
 #### upload_file_stream()
 
 ```ruby
-def upload_file_stream(source, remote_path, timeout: 30 * 60, on_progress: nil, cancel_event: nil)
+def upload_file_stream(source, remote_path, timeout:, on_progress:, cancel_event:)
 
 ```
 
@@ -569,7 +569,7 @@ end
 #### set_file_permissions()
 
 ```ruby
-def set_file_permissions(path:, mode: nil, owner: nil, group: nil)
+def set_file_permissions(path:, mode:, owner:, group:)
 
 ```
 

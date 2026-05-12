@@ -12,7 +12,7 @@ Main class for a new Git handler instance.
 #### new Git()
 
 ```ruby
-def initialize(sandbox_id:, toolbox_api:, otel_state: nil)
+def initialize(sandbox_id:, toolbox_api:, otel_state:)
 
 ```
 
@@ -124,7 +124,7 @@ puts "Branches: #{response.branches}"
 #### clone()
 
 ```ruby
-def clone(url:, path:, branch: nil, commit_id: nil, username: nil, password: nil)
+def clone(url:, path:, branch:, commit_id:, username:, password:)
 
 ```
 
@@ -182,7 +182,7 @@ sandbox.git.clone(
 #### commit()
 
 ```ruby
-def commit(path:, message:, author:, email:, allow_empty: false)
+def commit(path:, message:, author:, email:, allow_empty:)
 
 ```
 
@@ -225,7 +225,7 @@ puts "Commit SHA: #{commit_response.sha}"
 #### push()
 
 ```ruby
-def push(path:, username: nil, password: nil)
+def push(path:, username:, password:)
 
 ```
 
@@ -266,7 +266,7 @@ sandbox.git.push(
 #### pull()
 
 ```ruby
-def pull(path:, username: nil, password: nil)
+def pull(path:, username:, password:)
 
 ```
 

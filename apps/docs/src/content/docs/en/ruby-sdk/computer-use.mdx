@@ -12,7 +12,7 @@ Initialize a new ComputerUse instance.
 #### new ComputerUse()
 
 ```ruby
-def initialize(sandbox_id:, toolbox_api:, otel_state: nil)
+def initialize(sandbox_id:, toolbox_api:, otel_state:)
 
 ```
 
@@ -318,7 +318,7 @@ Accessibility operations for computer use functionality.
 #### new Accessibility()
 
 ```ruby
-def initialize(sandbox_id:, toolbox_api:, otel_state: nil)
+def initialize(sandbox_id:, toolbox_api:, otel_state:)
 
 ```
 
@@ -359,7 +359,7 @@ def toolbox_api()
 #### get_tree()
 
 ```ruby
-def get_tree(scope: nil, pid: nil, max_depth: nil)
+def get_tree(scope:, pid:, max_depth:)
 
 ```
 
@@ -390,7 +390,7 @@ puts tree.root.name
 #### find_nodes()
 
 ```ruby
-def find_nodes(scope: nil, pid: nil, role: nil, name: nil, name_match: nil, states: nil, limit: nil)
+def find_nodes(scope:, pid:, role:, name:, name_match:, states:, limit:)
 
 ```
 
@@ -454,7 +454,7 @@ sandbox.computer_use.accessibility.focus_node(id: node.id)
 #### invoke_node()
 
 ```ruby
-def invoke_node(id:, action: nil)
+def invoke_node(id:, action:)
 
 ```
 

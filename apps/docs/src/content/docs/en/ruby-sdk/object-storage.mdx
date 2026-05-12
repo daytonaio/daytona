@@ -12,7 +12,7 @@ Initialize ObjectStorage with S3-compatible credentials
 #### new ObjectStorage()
 
 ```ruby
-def initialize(endpoint_url:, aws_access_key_id:, aws_secret_access_key:, aws_session_token:, bucket_name: DEFAULT_BUCKET_NAME, region: DEFAULT_REGION)
+def initialize(endpoint_url:, aws_access_key_id:, aws_secret_access_key:, aws_session_token:, bucket_name:, region:)
 
 ```
 
@@ -58,7 +58,7 @@ def s3_client()
 #### upload()
 
 ```ruby
-def upload(path, organization_id, archive_base_path = nil)
+def upload(path, organization_id, archive_base_path)
 
 ```
 
