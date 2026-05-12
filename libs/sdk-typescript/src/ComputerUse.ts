@@ -28,6 +28,12 @@ import {
   ProcessErrorsResponse,
   Recording,
   ListRecordingsResponse,
+  AccessibilityTreeResponse,
+  AccessibilityNodesResponse,
+  AccessibilityNodeRequest,
+  AccessibilityInvokeRequest,
+  AccessibilitySetValueRequest,
+  FindAccessibilityNodesRequest,
 } from '@daytona/toolbox-api-client'
 import { dynamicImport } from './utils/Import'
 import { WithInstrumentation } from './utils/otel.decorator'
@@ -51,6 +57,23 @@ export interface ScreenshotOptions {
   quality?: number
   scale?: number
 }
+
+/**
+ * Options for fetching the AT-SPI accessibility tree.
+ */
+export interface AccessibilityTreeOptions {
+  /** Tree scope to inspect: 'focused', 'pid', or 'all'. */
+  scope?: string
+  /** Process ID when scope is 'pid'. */
+  pid?: number
+  /** Maximum depth to descend. Use 0 for the root only. */
+  maxDepth?: number
+}
+
+/**
+ * Options for finding AT-SPI accessibility nodes.
+ */
+export type AccessibilityFindOptions = FindAccessibilityNodesRequest
 
 /**
  * Mouse operations for computer use functionality
@@ -603,9 +626,118 @@ export class RecordingService {
 }
 
 /**
+ * Accessibility operations for computer use functionality.
+ */
+export class Accessibility {
+  constructor(private readonly apiClient: ComputerUseApi) {}
+
+  /**
+   * Fetches the AT-SPI accessibility tree.
+   *
+   * @param {AccessibilityTreeOptions} [options] - Scope and depth options
+   * @returns {Promise<AccessibilityTreeResponse>} Accessibility tree response
+   *
+   * @example
+   * ```typescript
+   * const tree = await sandbox.computerUse.accessibility.getTree({ scope: 'all', maxDepth: 3 });
+   * console.log(tree.root?.name);
+   * ```
+   */
+  @WithInstrumentation()
+  public async getTree(options: AccessibilityTreeOptions = {}): Promise<AccessibilityTreeResponse> {
+    const response = await this.apiClient.getAccessibilityTree(options.scope, options.pid, options.maxDepth)
+    return response.data
+  }
+
+  /**
+   * Finds AT-SPI accessibility nodes matching the provided filters.
+   *
+   * @param {AccessibilityFindOptions} [options] - Search scope, node filters, and result limit
+   * @returns {Promise<AccessibilityNodesResponse>} Matching accessibility nodes
+   *
+   * @example
+   * ```typescript
+   * const buttons = await sandbox.computerUse.accessibility.findNodes({
+   *   scope: 'all',
+   *   role: 'button',
+   *   name: 'Submit',
+   *   nameMatch: 'substring',
+   * });
+   * console.log(buttons.matches?.length);
+   * ```
+   */
+  @WithInstrumentation()
+  public async findNodes(options: AccessibilityFindOptions = {}): Promise<AccessibilityNodesResponse> {
+    const response = await this.apiClient.findAccessibilityNodes(options)
+    return response.data
+  }
+
+  /**
+   * Focuses an AT-SPI accessibility node.
+   *
+   * @param {string} id - Accessibility node ID returned by getTree or findNodes
+   *
+   * @example
+   * ```typescript
+   * const node = (await sandbox.computerUse.accessibility.findNodes({ scope: 'all', limit: 1 })).matches?.[0];
+   * if (node?.id) {
+   *   await sandbox.computerUse.accessibility.focusNode(node.id);
+   * }
+   * ```
+   */
+  @WithInstrumentation()
+  public async focusNode(id: string): Promise<void> {
+    const request: AccessibilityNodeRequest = { id }
+    await this.apiClient.focusAccessibilityNode(request)
+  }
+
+  /**
+   * Invokes an AT-SPI accessibility node action.
+   *
+   * @param {string} id - Accessibility node ID returned by getTree or findNodes
+   * @param {string} [action] - Action name to invoke. If omitted, the API invokes the primary action
+   *
+   * @example
+   * ```typescript
+   * const button = (await sandbox.computerUse.accessibility.findNodes({ scope: 'all', role: 'button', limit: 1 }))
+   *   .matches?.[0];
+   * if (button?.id) {
+   *   await sandbox.computerUse.accessibility.invokeNode(button.id, 'click');
+   * }
+   * ```
+   */
+  @WithInstrumentation()
+  public async invokeNode(id: string, action?: string): Promise<void> {
+    const request: AccessibilityInvokeRequest = { id, action }
+    await this.apiClient.invokeAccessibilityNode(request)
+  }
+
+  /**
+   * Sets an AT-SPI accessibility node value.
+   *
+   * @param {string} id - Accessibility node ID returned by getTree or findNodes
+   * @param {string} value - Value to write to the node
+   *
+   * @example
+   * ```typescript
+   * const field = (await sandbox.computerUse.accessibility.findNodes({ scope: 'all', role: 'entry', limit: 1 }))
+   *   .matches?.[0];
+   * if (field?.id) {
+   *   await sandbox.computerUse.accessibility.setNodeValue(field.id, 'hello');
+   * }
+   * ```
+   */
+  @WithInstrumentation()
+  public async setNodeValue(id: string, value: string): Promise<void> {
+    const request: AccessibilitySetValueRequest = { id, value }
+    await this.apiClient.setAccessibilityNodeValue(request)
+  }
+}
+
+/**
  * Computer Use functionality for interacting with the desktop environment.
  *
- * Provides access to mouse, keyboard, screenshot, display, and recording operations
+ * Provides access to mouse, keyboard, screenshot, display, recording, and accessibility operations
  * for automating desktop interactions within a sandbox.
  *
  * @property {Mouse} mouse - Mouse operations interface
@@ -613,6 +745,7 @@ export class RecordingService {
  * @property {Screenshot} screenshot - Screenshot operations interface
  * @property {Display} display - Display operations interface
  * @property {RecordingService} recording - Screen recording operations interface
+ * @property {Accessibility} accessibility - Accessibility operations interface
  *
  * @class
  */
@@ -622,6 +755,7 @@ export class ComputerUse {
   public readonly screenshot: Screenshot
   public readonly display: Display
   public readonly recording: RecordingService
+  public readonly accessibility: Accessibility
 
   constructor(private readonly apiClient: ComputerUseApi) {
     this.mouse = new Mouse(apiClient)
@@ -629,6 +763,7 @@ export class ComputerUse {
     this.screenshot = new Screenshot(apiClient)
     this.display = new Display(apiClient)
     this.recording = new RecordingService(apiClient)
+    this.accessibility = new Accessibility(apiClient)
   }
 
   /**

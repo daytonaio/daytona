@@ -40,6 +40,11 @@ describe('ComputerUse', () => {
     restartProcess: jest.fn(),
     getProcessLogs: jest.fn(),
     getProcessErrors: jest.fn(),
+    getAccessibilityTree: jest.fn(),
+    findAccessibilityNodes: jest.fn(),
+    focusAccessibilityNode: jest.fn(),
+    invokeAccessibilityNode: jest.fn(),
+    setAccessibilityNodeValue: jest.fn(),
   }
 
   const computerUse = new ComputerUse(apiClient as unknown as never)
@@ -218,5 +223,48 @@ describe('ComputerUse', () => {
     expect(apiClient.restartProcess).toHaveBeenCalledWith('novnc')
     expect(apiClient.getProcessLogs).toHaveBeenCalledWith('novnc')
     expect(apiClient.getProcessErrors).toHaveBeenCalledWith('novnc')
+  })
+
+  it('delegates accessibility operations and preserves optional values', async () => {
+    apiClient.getAccessibilityTree.mockResolvedValue(createApiResponse({ root: { id: 'root' } }))
+    apiClient.findAccessibilityNodes.mockResolvedValue(createApiResponse({ matches: [{ id: 'node-1' }] }))
+    apiClient.focusAccessibilityNode.mockResolvedValue(createApiResponse(undefined))
+    apiClient.invokeAccessibilityNode.mockResolvedValue(createApiResponse(undefined))
+    apiClient.setAccessibilityNodeValue.mockResolvedValue(createApiResponse(undefined))
+
+    await expect(computerUse.accessibility.getTree()).resolves.toEqual({ root: { id: 'root' } })
+    await expect(computerUse.accessibility.getTree({ scope: 'pid', pid: 123, maxDepth: 0 })).resolves.toEqual({
+      root: { id: 'root' },
+    })
+    await expect(
+      computerUse.accessibility.findNodes({
+        scope: 'all',
+        role: 'button',
+        name: 'Submit',
+        nameMatch: 'exact',
+        states: ['visible'],
+        limit: 0,
+      }),
+    ).resolves.toEqual({ matches: [{ id: 'node-1' }] })
+
+    await computerUse.accessibility.focusNode('node-1')
+    await computerUse.accessibility.invokeNode('node-1')
+    await computerUse.accessibility.invokeNode('node-2', 'click')
+    await computerUse.accessibility.setNodeValue('node-3', 'hello')
+
+    expect(apiClient.getAccessibilityTree).toHaveBeenNthCalledWith(1, undefined, undefined, undefined)
+    expect(apiClient.getAccessibilityTree).toHaveBeenNthCalledWith(2, 'pid', 123, 0)
+    expect(apiClient.findAccessibilityNodes).toHaveBeenCalledWith({
+      scope: 'all',
+      role: 'button',
+      name: 'Submit',
+      nameMatch: 'exact',
+      states: ['visible'],
+      limit: 0,
+    })
+    expect(apiClient.focusAccessibilityNode).toHaveBeenCalledWith({ id: 'node-1' })
+    expect(apiClient.invokeAccessibilityNode).toHaveBeenNthCalledWith(1, { id: 'node-1', action: undefined })
+    expect(apiClient.invokeAccessibilityNode).toHaveBeenNthCalledWith(2, { id: 'node-2', action: 'click' })
+    expect(apiClient.setAccessibilityNodeValue).toHaveBeenCalledWith({ id: 'node-3', value: 'hello' })
   })
 })

@@ -46,11 +46,12 @@ type ComputerUseService struct {
 	toolboxClient *toolbox.APIClient
 	otel          *otelState
 
-	mouse      *MouseService
-	keyboard   *KeyboardService
-	screenshot *ScreenshotService
-	display    *DisplayService
-	recording  *RecordingService
+	mouse         *MouseService
+	keyboard      *KeyboardService
+	screenshot    *ScreenshotService
+	display       *DisplayService
+	recording     *RecordingService
+	accessibility *AccessibilityService
 }
 
 // NewComputerUseService creates a new ComputerUseService.
@@ -113,6 +114,16 @@ func (c *ComputerUseService) Recording() *RecordingService {
 		c.recording = NewRecordingService(c.toolboxClient)
 	}
 	return c.recording
+}
+
+// Accessibility returns the [AccessibilityService] for AT-SPI accessibility operations.
+//
+// The service is lazily initialized on first access.
+func (c *ComputerUseService) Accessibility() *AccessibilityService {
+	if c.accessibility == nil {
+		c.accessibility = NewAccessibilityService(c.toolboxClient, c.otel)
+	}
+	return c.accessibility
 }
 
 // Start initializes and starts the desktop environment.
@@ -677,6 +688,148 @@ func (d *DisplayService) GetWindows(ctx context.Context) (map[string]any, error)
 		return map[string]any{
 			"windows": windows.GetWindows(),
 		}, nil
+	})
+}
+
+// AccessibilityTreeOptions configures an accessibility tree request.
+type AccessibilityTreeOptions struct {
+	Scope    *string
+	PID      *int
+	MaxDepth *int
+}
+
+// AccessibilityFindOptions configures an accessibility node search.
+type AccessibilityFindOptions struct {
+	Scope     *string
+	PID       *int
+	Role      *string
+	Name      *string
+	NameMatch *string
+	States    []string
+	Limit     *int
+}
+
+// AccessibilityService provides AT-SPI accessibility operations.
+//
+// AccessibilityService exposes thin SDK wrappers over the toolbox accessibility
+// endpoints. Access through [ComputerUseService.Accessibility].
+type AccessibilityService struct {
+	toolboxClient *toolbox.APIClient
+	otel          *otelState
+}
+
+// NewAccessibilityService creates a new AccessibilityService.
+func NewAccessibilityService(toolboxClient *toolbox.APIClient, otel *otelState) *AccessibilityService {
+	return &AccessibilityService{
+		toolboxClient: toolboxClient,
+		otel:          otel,
+	}
+}
+
+// GetTree fetches the AT-SPI accessibility tree.
+func (a *AccessibilityService) GetTree(ctx context.Context, opts *AccessibilityTreeOptions) (*toolbox.AccessibilityTreeResponse, error) {
+	return withInstrumentation(ctx, a.otel, "Accessibility", "GetTree", func(ctx context.Context) (*toolbox.AccessibilityTreeResponse, error) {
+		req := a.toolboxClient.ComputerUseAPI.GetAccessibilityTree(ctx)
+		if opts != nil {
+			if opts.Scope != nil {
+				req = req.Scope(*opts.Scope)
+			}
+			if opts.PID != nil {
+				req = req.Pid(int32(*opts.PID))
+			}
+			if opts.MaxDepth != nil {
+				req = req.MaxDepth(int32(*opts.MaxDepth))
+			}
+		}
+
+		result, httpResp, err := req.Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
+
+		return result, nil
+	})
+}
+
+// FindNodes finds AT-SPI accessibility nodes matching the provided filters.
+func (a *AccessibilityService) FindNodes(ctx context.Context, opts *AccessibilityFindOptions) (*toolbox.AccessibilityNodesResponse, error) {
+	return withInstrumentation(ctx, a.otel, "Accessibility", "FindNodes", func(ctx context.Context) (*toolbox.AccessibilityNodesResponse, error) {
+		req := toolbox.NewFindAccessibilityNodesRequest()
+		if opts != nil {
+			if opts.Scope != nil {
+				req.SetScope(*opts.Scope)
+			}
+			if opts.PID != nil {
+				req.SetPid(int32(*opts.PID))
+			}
+			if opts.Role != nil {
+				req.SetRole(*opts.Role)
+			}
+			if opts.Name != nil {
+				req.SetName(*opts.Name)
+			}
+			if opts.NameMatch != nil {
+				req.SetNameMatch(*opts.NameMatch)
+			}
+			if opts.States != nil {
+				req.SetStates(opts.States)
+			}
+			if opts.Limit != nil {
+				req.SetLimit(int32(*opts.Limit))
+			}
+		}
+
+		result, httpResp, err := a.toolboxClient.ComputerUseAPI.FindAccessibilityNodes(ctx).Request(*req).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
+
+		return result, nil
+	})
+}
+
+// FocusNode focuses an AT-SPI accessibility node.
+func (a *AccessibilityService) FocusNode(ctx context.Context, id string) error {
+	return withInstrumentationVoid(ctx, a.otel, "Accessibility", "FocusNode", func(ctx context.Context) error {
+		req := toolbox.NewAccessibilityNodeRequest(id)
+		_, httpResp, err := a.toolboxClient.ComputerUseAPI.FocusAccessibilityNode(ctx).Request(*req).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
+
+		return nil
+	})
+}
+
+// InvokeNode invokes an AT-SPI accessibility node action.
+func (a *AccessibilityService) InvokeNode(ctx context.Context, id string, action *string) error {
+	return withInstrumentationVoid(ctx, a.otel, "Accessibility", "InvokeNode", func(ctx context.Context) error {
+		req := toolbox.NewAccessibilityInvokeRequest(id)
+		if action != nil {
+			req.SetAction(*action)
+		}
+
+		_, httpResp, err := a.toolboxClient.ComputerUseAPI.InvokeAccessibilityNode(ctx).Request(*req).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
+
+		return nil
+	})
+}
+
+// SetNodeValue sets an AT-SPI accessibility node value.
+func (a *AccessibilityService) SetNodeValue(ctx context.Context, id string, value string) error {
+	return withInstrumentationVoid(ctx, a.otel, "Accessibility", "SetNodeValue", func(ctx context.Context) error {
+		req := toolbox.NewAccessibilitySetValueRequest(id)
+		req.SetValue(value)
+
+		_, httpResp, err := a.toolboxClient.ComputerUseAPI.SetAccessibilityNodeValue(ctx).Request(*req).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
+
+		return nil
 	})
 }
 

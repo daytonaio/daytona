@@ -40,7 +40,7 @@ export {
 export { Image } from './Image'
 export { Sandbox } from './Sandbox'
 export type { CreateSnapshotParams } from './Snapshot'
-export { ComputerUse, Mouse, Keyboard, Screenshot, Display } from './ComputerUse'
+export { ComputerUse, Mouse, Keyboard, Screenshot, Display, Accessibility } from './ComputerUse'
 export type {
   BarChart,
   BarData,
@@ -70,7 +70,12 @@ export type {
   SearchFilesResponse,
 } from '@daytona/toolbox-api-client'
 
-export type { ScreenshotRegion, ScreenshotOptions } from './ComputerUse'
+export type {
+  ScreenshotRegion,
+  ScreenshotOptions,
+  AccessibilityTreeOptions,
+  AccessibilityFindOptions,
+} from './ComputerUse'
 
 export * from './Process'
 export * from './PtyHandle'

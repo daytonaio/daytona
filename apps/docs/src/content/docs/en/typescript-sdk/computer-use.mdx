@@ -10,6 +10,7 @@ Computer Use functionality for interacting with the desktop environment.
 
 **Properties**:
 
+- `accessibility` _Accessibility_ - Accessibility operations interface
 - `display` _Display_ - Display operations interface
 - `keyboard` _Keyboard_ - Keyboard operations interface
 - `mouse` _Mouse_ - Mouse operations interface
@@ -20,7 +21,7 @@ Computer Use functionality for interacting with the desktop environment.
 
 
 
-Provides access to mouse, keyboard, screenshot, display, and recording operations
+Provides access to mouse, keyboard, screenshot, display, recording, and accessibility operations
 for automating desktop interactions within a sandbox.
 
 ### Constructors
@@ -206,6 +207,118 @@ Stops all computer use processes
 const result = await sandbox.computerUse.stop();
 console.log('Computer use processes stopped:', result.message);
 ```
+## Accessibility
+
+Accessibility operations for computer use functionality.
+
+### Constructors
+
+#### new Accessibility()
+
+```ts
+new Accessibility(apiClient: ComputerUseApi): Accessibility
+```
+
+**Parameters**:
+
+- `apiClient` _ComputerUseApi_
+
+### Methods
+
+#### getTree()
+
+```ts
+getTree(options?: AccessibilityTreeOptions): Promise<AccessibilityTreeResponse>
+```
+
+Fetches the AT-SPI accessibility tree.
+
+**Parameters**:
+
+- `options` _AccessibilityTreeOptions_ - Optional `scope`, `pid`, and `maxDepth` filters.
+
+**Returns**:
+
+- `Promise<AccessibilityTreeResponse>` - Accessibility tree response
+
+**Example:**
+
+```typescript
+const tree = await sandbox.computerUse.accessibility.getTree({ scope: 'focused', maxDepth: 2 });
+```
+
+***
+
+#### findNodes()
+
+```ts
+findNodes(options?: AccessibilityFindOptions): Promise<AccessibilityNodesResponse>
+```
+
+Finds AT-SPI accessibility nodes matching the provided filters.
+
+**Parameters**:
+
+- `options` _AccessibilityFindOptions_ - Optional `scope`, `pid`, `role`, `name`, `nameMatch`, `states`, and `limit` filters.
+
+**Returns**:
+
+- `Promise<AccessibilityNodesResponse>` - Matching accessibility nodes
+
+**Example:**
+
+```typescript
+const buttons = await sandbox.computerUse.accessibility.findNodes({
+  role: 'push button',
+  name: 'Submit',
+  nameMatch: 'substring',
+});
+```
+
+***
+
+#### focusNode()
+
+```ts
+focusNode(id: string): Promise<void>
+```
+
+Focuses an AT-SPI accessibility node.
+
+**Parameters**:
+
+- `id` _string_ - Accessibility node ID
+
+***
+
+#### invokeNode()
+
+```ts
+invokeNode(id: string, action?: string): Promise<void>
+```
+
+Invokes an AT-SPI accessibility node action. Omit `action` to invoke the node's primary action.
+
+**Parameters**:
+
+- `id` _string_ - Accessibility node ID
+- `action` _string_ - Optional action name
+
+***
+
+#### setNodeValue()
+
+```ts
+setNodeValue(id: string, value: string): Promise<void>
+```
+
+Sets an AT-SPI accessibility node value.
+
+**Parameters**:
+
+- `id` _string_ - Accessibility node ID
+- `value` _string_ - Value to write
+
 ## Display
 
 Display operations for computer use functionality

@@ -8,7 +8,8 @@ hideTitleOnPage: true
 Desktop automation operations for a Sandbox.
 
 Provides a Java facade for computer-use features including desktop session management,
-screenshots, mouse and keyboard automation, display/window inspection, and screen recording.
+screenshots, mouse and keyboard automation, display/window inspection, screen recording,
+and AT-SPI accessibility.
 
 ### Methods
 
@@ -44,6 +45,127 @@ Returns current computer-use status.
 **Returns**:
 
 - `ComputerUseStatusResponse` - overall computer-use status
+
+#### getAccessibilityTree()
+```java
+public AccessibilityTreeResponse getAccessibilityTree()
+```
+
+Fetches the focused AT-SPI accessibility tree.
+
+**Returns**:
+
+- `AccessibilityTreeResponse` - accessibility tree response
+
+#### getAccessibilityTree()
+```java
+public AccessibilityTreeResponse getAccessibilityTree(String scope, Integer pid, Integer maxDepth)
+```
+
+Fetches an AT-SPI accessibility tree.
+
+**Parameters**:
+
+- `scope` _String_ - scope to inspect (`focused`, `pid`, or `all`)
+- `pid` _Integer_ - process ID when `scope` is `pid`
+- `maxDepth` _Integer_ - max tree depth (`0` for root only)
+
+**Returns**:
+
+- `AccessibilityTreeResponse` - accessibility tree response
+
+#### findAccessibilityNodes()
+```java
+public AccessibilityNodesResponse findAccessibilityNodes()
+```
+
+Finds AT-SPI accessibility nodes without filters.
+
+**Returns**:
+
+- `AccessibilityNodesResponse` - matching accessibility nodes
+
+#### findAccessibilityNodes()
+```java
+public AccessibilityNodesResponse findAccessibilityNodes(String scope, Integer pid, String role, String name, String nameMatch, List<String> states, Integer limit)
+```
+
+Finds AT-SPI accessibility nodes matching the provided filters.
+
+**Parameters**:
+
+- `scope` _String_ - optional scope (`focused`, `pid`, or `all`)
+- `pid` _Integer_ - process ID when `scope` is `pid`
+- `role` _String_ - optional node role filter
+- `name` _String_ - optional accessible name filter
+- `nameMatch` _String_ - optional name match mode (`exact`, `substring`, or `regex`)
+- `states` `List<String>` - optional state filters
+- `limit` _Integer_ - optional result limit
+
+**Returns**:
+
+- `AccessibilityNodesResponse` - matching accessibility nodes
+
+#### findAccessibilityNodes()
+```java
+public AccessibilityNodesResponse findAccessibilityNodes(FindAccessibilityNodesRequest request)
+```
+
+Finds AT-SPI accessibility nodes using a generated toolbox request.
+
+**Parameters**:
+
+- `request` _FindAccessibilityNodesRequest_ - generated accessibility find request
+
+**Returns**:
+
+- `AccessibilityNodesResponse` - matching accessibility nodes
+
+#### focusAccessibilityNode()
+```java
+public void focusAccessibilityNode(String id)
+```
+
+Focuses an AT-SPI accessibility node.
+
+**Parameters**:
+
+- `id` _String_ - accessibility node ID
+
+#### invokeAccessibilityNode()
+```java
+public void invokeAccessibilityNode(String id)
+```
+
+Invokes an AT-SPI accessibility node's primary action.
+
+**Parameters**:
+
+- `id` _String_ - accessibility node ID
+
+#### invokeAccessibilityNode()
+```java
+public void invokeAccessibilityNode(String id, String action)
+```
+
+Invokes an AT-SPI accessibility node action.
+
+**Parameters**:
+
+- `id` _String_ - accessibility node ID
+- `action` _String_ - action name, or `null` for the primary action
+
+#### setAccessibilityNodeValue()
+```java
+public void setAccessibilityNodeValue(String id, String value)
+```
+
+Sets an AT-SPI accessibility node value.
+
+**Parameters**:
+
+- `id` _String_ - accessibility node ID
+- `value` _String_ - value to write
 
 #### takeScreenshot()
 ```java

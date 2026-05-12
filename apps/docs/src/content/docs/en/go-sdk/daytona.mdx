@@ -77,6 +77,15 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
 ## Index
 
 - [Variables](<#variables>)
+- [type AccessibilityFindOptions](<#AccessibilityFindOptions>)
+- [type AccessibilityService](<#AccessibilityService>)
+  - [func NewAccessibilityService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*AccessibilityService](<#NewAccessibilityService>)
+  - [func \(a \*AccessibilityService\) FindNodes\(ctx context.Context, opts \*AccessibilityFindOptions\) \(\*toolbox.AccessibilityNodesResponse, error\)](<#AccessibilityService.FindNodes>)
+  - [func \(a \*AccessibilityService\) FocusNode\(ctx context.Context, id string\) error](<#AccessibilityService.FocusNode>)
+  - [func \(a \*AccessibilityService\) GetTree\(ctx context.Context, opts \*AccessibilityTreeOptions\) \(\*toolbox.AccessibilityTreeResponse, error\)](<#AccessibilityService.GetTree>)
+  - [func \(a \*AccessibilityService\) InvokeNode\(ctx context.Context, id string, action \*string\) error](<#AccessibilityService.InvokeNode>)
+  - [func \(a \*AccessibilityService\) SetNodeValue\(ctx context.Context, id string, value string\) error](<#AccessibilityService.SetNodeValue>)
+- [type AccessibilityTreeOptions](<#AccessibilityTreeOptions>)
 - [type Client](<#Client>)
   - [func NewClient\(\) \(\*Client, error\)](<#NewClient>)
   - [func NewClientWithConfig\(config \*types.DaytonaConfig\) \(\*Client, error\)](<#NewClientWithConfig>)
@@ -92,6 +101,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(c \*CodeInterpreterService\) RunCode\(ctx context.Context, code string, opts ...func\(\*options.RunCode\)\) \(\*OutputChannels, error\)](<#CodeInterpreterService.RunCode>)
 - [type ComputerUseService](<#ComputerUseService>)
   - [func NewComputerUseService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*ComputerUseService](<#NewComputerUseService>)
+  - [func \(c \*ComputerUseService\) Accessibility\(\) \*AccessibilityService](<#ComputerUseService.Accessibility>)
   - [func \(c \*ComputerUseService\) Display\(\) \*DisplayService](<#ComputerUseService.Display>)
   - [func \(c \*ComputerUseService\) GetStatus\(ctx context.Context\) \(map\[string\]any, error\)](<#ComputerUseService.GetStatus>)
   - [func \(c \*ComputerUseService\) Keyboard\(\) \*KeyboardService](<#ComputerUseService.Keyboard>)
@@ -281,6 +291,103 @@ fmt.Printf("Daytona SDK version: %s\n", daytona.Version)
 
 ```go
 var Version = strings.TrimSpace(version)
+```
+
+<a name="AccessibilityFindOptions"></a>
+## type AccessibilityFindOptions
+
+AccessibilityFindOptions configures an accessibility node search.
+
+```go
+type AccessibilityFindOptions struct {
+    Scope     *string
+    PID       *int
+    Role      *string
+    Name      *string
+    NameMatch *string
+    States    []string
+    Limit     *int
+}
+```
+
+<a name="AccessibilityService"></a>
+## type AccessibilityService
+
+AccessibilityService provides AT-SPI accessibility operations.
+
+AccessibilityService exposes thin SDK wrappers over the toolbox accessibility endpoints. Access through [ComputerUseService.Accessibility](<#ComputerUseService.Accessibility>).
+
+```go
+type AccessibilityService struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewAccessibilityService"></a>
+### func NewAccessibilityService
+
+```go
+func NewAccessibilityService(toolboxClient *toolbox.APIClient, otel *otelState) *AccessibilityService
+```
+
+NewAccessibilityService creates a new AccessibilityService.
+
+<a name="AccessibilityService.FindNodes"></a>
+### func \(\*AccessibilityService\) FindNodes
+
+```go
+func (a *AccessibilityService) FindNodes(ctx context.Context, opts *AccessibilityFindOptions) (*toolbox.AccessibilityNodesResponse, error)
+```
+
+FindNodes finds AT-SPI accessibility nodes matching the provided filters.
+
+<a name="AccessibilityService.FocusNode"></a>
+### func \(\*AccessibilityService\) FocusNode
+
+```go
+func (a *AccessibilityService) FocusNode(ctx context.Context, id string) error
+```
+
+FocusNode focuses an AT-SPI accessibility node.
+
+<a name="AccessibilityService.GetTree"></a>
+### func \(\*AccessibilityService\) GetTree
+
+```go
+func (a *AccessibilityService) GetTree(ctx context.Context, opts *AccessibilityTreeOptions) (*toolbox.AccessibilityTreeResponse, error)
+```
+
+GetTree fetches the AT-SPI accessibility tree.
+
+<a name="AccessibilityService.InvokeNode"></a>
+### func \(\*AccessibilityService\) InvokeNode
+
+```go
+func (a *AccessibilityService) InvokeNode(ctx context.Context, id string, action *string) error
+```
+
+InvokeNode invokes an AT-SPI accessibility node action.
+
+<a name="AccessibilityService.SetNodeValue"></a>
+### func \(\*AccessibilityService\) SetNodeValue
+
+```go
+func (a *AccessibilityService) SetNodeValue(ctx context.Context, id string, value string) error
+```
+
+SetNodeValue sets an AT-SPI accessibility node value.
+
+<a name="AccessibilityTreeOptions"></a>
+## type AccessibilityTreeOptions
+
+AccessibilityTreeOptions configures an accessibility tree request.
+
+```go
+type AccessibilityTreeOptions struct {
+    Scope    *string
+    PID      *int
+    MaxDepth *int
+}
 ```
 
 <a name="Client"></a>
@@ -651,7 +758,7 @@ Returns [OutputChannels](<#OutputChannels>) for receiving streamed output, or an
 
 ComputerUseService provides desktop automation operations for a sandbox.
 
-ComputerUseService enables GUI automation including mouse control, keyboard input, screenshots, display management, and screen recording. The desktop environment must be started before using these features. Access through \[Sandbox.ComputerUse\].
+ComputerUseService enables GUI automation including mouse control, keyboard input, screenshots, display management, screen recording, and AT-SPI accessibility. The desktop environment must be started before using these features. Access through \[Sandbox.ComputerUse\].
 
 Example:
 
@@ -675,6 +782,10 @@ cu.Mouse().Click(ctx, 100, 200, nil, nil)
 
 // Type text
 cu.Keyboard().Type(ctx, "Hello, World!", nil)
+
+// Find accessibility nodes
+role := "push button"
+cu.Accessibility().FindNodes(ctx, &daytona.AccessibilityFindOptions{Role: &role})
 ```
 
 ```go
@@ -693,6 +804,17 @@ func NewComputerUseService(toolboxClient *toolbox.APIClient, otel *otelState) *C
 NewComputerUseService creates a new ComputerUseService.
 
 This is typically called internally by the SDK when creating a [Sandbox](<#Sandbox>). Users should access ComputerUseService through \[Sandbox.ComputerUse\] rather than creating it directly.
+
+<a name="ComputerUseService.Accessibility"></a>
+### func \(\*ComputerUseService\) Accessibility
+
+```go
+func (c *ComputerUseService) Accessibility() *AccessibilityService
+```
+
+Accessibility returns the [AccessibilityService](<#AccessibilityService>) for AT-SPI accessibility operations.
+
+The service is lazily initialized on first access.
 
 <a name="ComputerUseService.Display"></a>
 ### func \(\*ComputerUseService\) Display
@@ -4740,4 +4862,3 @@ if err != nil {
 ```
 
 Returns the updated \[types.Volume\] when ready, or an error if the timeout expires or the volume enters an error state.
-

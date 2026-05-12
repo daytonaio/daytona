@@ -4,10 +4,16 @@
 package io.daytona.sdk;
 
 import io.daytona.toolbox.client.api.ComputerUseApi;
+import io.daytona.toolbox.client.model.AccessibilityInvokeRequest;
+import io.daytona.toolbox.client.model.AccessibilityNodeRequest;
+import io.daytona.toolbox.client.model.AccessibilityNodesResponse;
+import io.daytona.toolbox.client.model.AccessibilitySetValueRequest;
+import io.daytona.toolbox.client.model.AccessibilityTreeResponse;
 import io.daytona.toolbox.client.model.ComputerUseStartResponse;
 import io.daytona.toolbox.client.model.ComputerUseStatusResponse;
 import io.daytona.toolbox.client.model.ComputerUseStopResponse;
 import io.daytona.toolbox.client.model.DisplayInfoResponse;
+import io.daytona.toolbox.client.model.FindAccessibilityNodesRequest;
 import io.daytona.toolbox.client.model.KeyboardHotkeyRequest;
 import io.daytona.toolbox.client.model.KeyboardPressRequest;
 import io.daytona.toolbox.client.model.KeyboardTypeRequest;
@@ -29,6 +35,7 @@ import io.daytona.toolbox.client.model.WindowsResponse;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Desktop automation operations for a Sandbox.
@@ -68,6 +75,119 @@ public class ComputerUse {
      */
     public ComputerUseStatusResponse getStatus() {
         return ExceptionMapper.callToolbox(computerUseApi::getComputerUseStatus);
+    }
+
+    /**
+     * Fetches the focused AT-SPI accessibility tree.
+     *
+     * @return accessibility tree response
+     */
+    public AccessibilityTreeResponse getAccessibilityTree() {
+        return getAccessibilityTree(null, null, null);
+    }
+
+    /**
+     * Fetches an AT-SPI accessibility tree.
+     *
+     * @param scope scope to inspect ({@code focused}, {@code pid}, or {@code all})
+     * @param pid process ID when {@code scope} is {@code pid}
+     * @param maxDepth max tree depth ({@code 0} for root only)
+     * @return accessibility tree response
+     */
+    public AccessibilityTreeResponse getAccessibilityTree(String scope, Integer pid, Integer maxDepth) {
+        return ExceptionMapper.callToolbox(() -> computerUseApi.getAccessibilityTree(scope, pid, maxDepth));
+    }
+
+    /**
+     * Finds AT-SPI accessibility nodes without filters.
+     *
+     * @return matching accessibility nodes
+     */
+    public AccessibilityNodesResponse findAccessibilityNodes() {
+        return findAccessibilityNodes(null, null, null, null, null, null, null);
+    }
+
+    /**
+     * Finds AT-SPI accessibility nodes matching the provided filters.
+     *
+     * @param scope search scope ({@code focused}, {@code pid}, or {@code all})
+     * @param pid process ID when {@code scope} is {@code pid}
+     * @param role accessibility role to match, such as {@code button}
+     * @param name accessible name to match
+     * @param nameMatch name match mode, such as {@code exact} or {@code substring}
+     * @param states required accessibility states
+     * @param limit maximum number of matches
+     * @return matching accessibility nodes
+     */
+    public AccessibilityNodesResponse findAccessibilityNodes(
+            String scope,
+            Integer pid,
+            String role,
+            String name,
+            String nameMatch,
+            List<String> states,
+            Integer limit
+    ) {
+        FindAccessibilityNodesRequest request = new FindAccessibilityNodesRequest()
+                .scope(scope)
+                .pid(pid)
+                .role(role)
+                .name(name)
+                .nameMatch(nameMatch)
+                .states(states)
+                .limit(limit);
+        return findAccessibilityNodes(request);
+    }
+
+    /**
+     * Finds AT-SPI accessibility nodes using a generated toolbox request.
+     *
+     * @param request generated accessibility find request
+     * @return matching accessibility nodes
+     */
+    public AccessibilityNodesResponse findAccessibilityNodes(FindAccessibilityNodesRequest request) {
+        return ExceptionMapper.callToolbox(() -> computerUseApi.findAccessibilityNodes(request));
+    }
+
+    /**
+     * Focuses an AT-SPI accessibility node.
+     *
+     * @param id accessibility node ID
+     */
+    public void focusAccessibilityNode(String id) {
+        AccessibilityNodeRequest request = new AccessibilityNodeRequest().id(id);
+        ExceptionMapper.callToolbox(() -> computerUseApi.focusAccessibilityNode(request));
+    }
+
+    /**
+     * Invokes an AT-SPI accessibility node's primary action.
+     *
+     * @param id accessibility node ID
+     */
+    public void invokeAccessibilityNode(String id) {
+        invokeAccessibilityNode(id, null);
+    }
+
+    /**
+     * Invokes an AT-SPI accessibility node action.
+     *
+     * @param id accessibility node ID
+     * @param action action name, or {@code null} for the primary action
+     */
+    public void invokeAccessibilityNode(String id, String action) {
+        AccessibilityInvokeRequest request = new AccessibilityInvokeRequest().id(id).action(action);
+        ExceptionMapper.callToolbox(() -> computerUseApi.invokeAccessibilityNode(request));
+    }
+
+    /**
+     * Sets an AT-SPI accessibility node value.
+     *
+     * @param id accessibility node ID
+     * @param value value to write
+     */
+    public void setAccessibilityNodeValue(String id, String value) {
+        AccessibilitySetValueRequest request = new AccessibilitySetValueRequest().id(id).value(value);
+        ExceptionMapper.callToolbox(() -> computerUseApi.setAccessibilityNodeValue(request));
     }
 
     /**

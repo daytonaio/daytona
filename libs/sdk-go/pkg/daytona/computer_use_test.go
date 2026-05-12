@@ -35,12 +35,14 @@ func TestComputerUseLazyInit(t *testing.T) {
 	assert.NotNil(t, cu.Screenshot())
 	assert.NotNil(t, cu.Display())
 	assert.NotNil(t, cu.Recording())
+	assert.NotNil(t, cu.Accessibility())
 
 	assert.Same(t, cu.Mouse(), cu.Mouse())
 	assert.Same(t, cu.Keyboard(), cu.Keyboard())
 	assert.Same(t, cu.Screenshot(), cu.Screenshot())
 	assert.Same(t, cu.Display(), cu.Display())
 	assert.Same(t, cu.Recording(), cu.Recording())
+	assert.Same(t, cu.Accessibility(), cu.Accessibility())
 }
 
 func TestComputerUseStart(t *testing.T) {
@@ -402,4 +404,134 @@ func TestRecordingServiceOperations(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "video-data", string(data))
 	require.NoError(t, recording.Delete(ctx, "rec-1"))
+}
+
+func newAccessibilityTestService(t *testing.T, handler http.HandlerFunc) (*AccessibilityService, func()) {
+	t.Helper()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler(w, r)
+	}))
+	return NewAccessibilityService(createTestToolboxClient(server), nil), server.Close
+}
+
+func readJSONBody(t *testing.T, r *http.Request) map[string]any {
+	t.Helper()
+	var body map[string]any
+	require.NoError(t, json.NewDecoder(r.Body).Decode(&body))
+	return body
+}
+
+func TestAccessibilityServiceGetTree(t *testing.T) {
+	var requests int
+	accessibility, cleanup := newAccessibilityTestService(t, func(w http.ResponseWriter, r *http.Request) {
+		require.Equal(t, http.MethodGet, r.Method)
+		require.Equal(t, "/computeruse/a11y/tree", r.URL.Path)
+
+		requests++
+		if requests == 1 {
+			assert.Empty(t, r.URL.RawQuery)
+		} else {
+			assert.Equal(t, "pid", r.URL.Query().Get("scope"))
+			assert.Equal(t, "123", r.URL.Query().Get("pid"))
+			assert.Equal(t, "0", r.URL.Query().Get("maxDepth"))
+		}
+		writeJSONResponse(t, w, http.StatusOK, map[string]any{"root": map[string]any{"id": "root"}})
+	})
+	defer cleanup()
+
+	ctx := context.Background()
+
+	tree, err := accessibility.GetTree(ctx, nil)
+	require.NoError(t, err)
+	root := tree.GetRoot()
+	assert.Equal(t, "root", root.GetId())
+
+	scope := "pid"
+	pid := 123
+	maxDepth := 0
+	tree, err = accessibility.GetTree(ctx, &AccessibilityTreeOptions{Scope: &scope, PID: &pid, MaxDepth: &maxDepth})
+	require.NoError(t, err)
+	root = tree.GetRoot()
+	assert.Equal(t, "root", root.GetId())
+	assert.Equal(t, 2, requests)
+}
+
+func TestAccessibilityServiceFindNodes(t *testing.T) {
+	var requests int
+	accessibility, cleanup := newAccessibilityTestService(t, func(w http.ResponseWriter, r *http.Request) {
+		require.Equal(t, http.MethodPost, r.Method)
+		require.Equal(t, "/computeruse/a11y/find", r.URL.Path)
+
+		requests++
+		body := readJSONBody(t, r)
+		if requests == 1 {
+			assert.Empty(t, body)
+		} else {
+			assert.Equal(t, "all", body["scope"])
+			assert.Equal(t, "button", body["role"])
+			assert.Equal(t, "Submit", body["name"])
+			assert.Equal(t, "exact", body["nameMatch"])
+			assert.Equal(t, float64(0), body["limit"])
+			assert.Equal(t, []any{"visible"}, body["states"])
+		}
+		writeJSONResponse(t, w, http.StatusOK, map[string]any{"matches": []map[string]any{{"id": "node-1"}}})
+	})
+	defer cleanup()
+
+	ctx := context.Background()
+
+	nodes, err := accessibility.FindNodes(ctx, nil)
+	require.NoError(t, err)
+	require.Len(t, nodes.GetMatches(), 1)
+	assert.Equal(t, "node-1", nodes.GetMatches()[0].GetId())
+
+	scope := "all"
+	role := "button"
+	name := "Submit"
+	nameMatch := "exact"
+	limit := 0
+	nodes, err = accessibility.FindNodes(ctx, &AccessibilityFindOptions{
+		Scope:     &scope,
+		Role:      &role,
+		Name:      &name,
+		NameMatch: &nameMatch,
+		States:    []string{"visible"},
+		Limit:     &limit,
+	})
+	require.NoError(t, err)
+	require.Len(t, nodes.GetMatches(), 1)
+	assert.Equal(t, "node-1", nodes.GetMatches()[0].GetId())
+	assert.Equal(t, 2, requests)
+}
+
+func TestAccessibilityServiceNodeActions(t *testing.T) {
+	var requests int
+	accessibility, cleanup := newAccessibilityTestService(t, func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		switch {
+		case r.Method == http.MethodPost && r.URL.Path == "/computeruse/a11y/node/focus":
+			body := readJSONBody(t, r)
+			assert.Equal(t, "node-1", body["id"])
+		case r.Method == http.MethodPost && r.URL.Path == "/computeruse/a11y/node/invoke":
+			body := readJSONBody(t, r)
+			assert.Equal(t, "node-2", body["id"])
+			assert.Equal(t, "click", body["action"])
+		case r.Method == http.MethodPost && r.URL.Path == "/computeruse/a11y/node/value":
+			body := readJSONBody(t, r)
+			assert.Equal(t, "node-3", body["id"])
+			assert.Equal(t, "hello", body["value"])
+		default:
+			t.Fatalf("unexpected request %s %s", r.Method, r.URL.String())
+		}
+		writeJSONResponse(t, w, http.StatusOK, map[string]any{})
+	})
+	defer cleanup()
+
+	action := "click"
+	ctx := context.Background()
+
+	require.NoError(t, accessibility.FocusNode(ctx, "node-1"))
+	require.NoError(t, accessibility.InvokeNode(ctx, "node-2", &action))
+	require.NoError(t, accessibility.SetNodeValue(ctx, "node-3", "hello"))
+	assert.Equal(t, 3, requests)
 }

@@ -14,6 +14,7 @@ RSpec.describe Daytona::ComputerUse do
       expect(computer_use.screenshot).to be_a(described_class::Screenshot)
       expect(computer_use.display).to be_a(described_class::Display)
       expect(computer_use.recording).to be_a(described_class::Recording)
+      expect(computer_use.accessibility).to be_a(described_class::Accessibility)
     end
   end
 
@@ -364,6 +365,71 @@ RSpec.describe Daytona::ComputerUse do
       allow(toolbox_api).to receive(:get_windows).and_raise(StandardError, 'err')
 
       expect { display.windows }.to raise_error(Daytona::Sdk::Error, /Failed to get windows: err/)
+    end
+  end
+
+  describe Daytona::ComputerUse::Accessibility do
+    let(:accessibility) { described_class.new(sandbox_id: 'sandbox-123', toolbox_api: toolbox_api) }
+
+    it 'gets the accessibility tree with optional query values' do
+      result = double('AccessibilityTreeResponse')
+      allow(toolbox_api).to receive(:get_accessibility_tree).and_return(result)
+
+      expect(accessibility.get_tree).to eq(result)
+      expect(accessibility.get_tree(scope: 'pid', pid: 123, max_depth: 0)).to eq(result)
+      expect(toolbox_api).to have_received(:get_accessibility_tree).with({})
+      expect(toolbox_api).to have_received(:get_accessibility_tree).with(scope: 'pid', pid: 123, max_depth: 0)
+    end
+
+    it 'finds accessibility nodes with generated request fields' do
+      result = double('AccessibilityNodesResponse')
+      allow(toolbox_api).to receive(:find_accessibility_nodes).and_return(result)
+
+      expect(accessibility.find_nodes(
+               scope: 'all',
+               role: 'button',
+               name: 'Submit',
+               name_match: 'exact',
+               states: ['visible'],
+               limit: 0
+             )).to eq(result)
+      expect(toolbox_api).to have_received(:find_accessibility_nodes) do |req|
+        expect(req.scope).to eq('all')
+        expect(req.role).to eq('button')
+        expect(req.name).to eq('Submit')
+        expect(req.name_match).to eq('exact')
+        expect(req.states).to eq(['visible'])
+        expect(req.limit).to eq(0)
+      end
+    end
+
+    it 'delegates accessibility node actions' do
+      allow(toolbox_api).to receive(:focus_accessibility_node)
+      allow(toolbox_api).to receive(:invoke_accessibility_node)
+      allow(toolbox_api).to receive(:set_accessibility_node_value)
+
+      accessibility.focus_node(id: 'node-1')
+      accessibility.invoke_node(id: 'node-2', action: 'click')
+      accessibility.set_node_value(id: 'node-3', value: 'hello')
+
+      expect(toolbox_api).to have_received(:focus_accessibility_node) do |req|
+        expect(req.id).to eq('node-1')
+      end
+      expect(toolbox_api).to have_received(:invoke_accessibility_node) do |req|
+        expect(req.id).to eq('node-2')
+        expect(req.action).to eq('click')
+      end
+      expect(toolbox_api).to have_received(:set_accessibility_node_value) do |req|
+        expect(req.id).to eq('node-3')
+        expect(req.value).to eq('hello')
+      end
+    end
+
+    it 'wraps accessibility errors' do
+      allow(toolbox_api).to receive(:get_accessibility_tree).and_raise(StandardError, 'err')
+
+      expect { accessibility.get_tree }
+        .to raise_error(Daytona::Sdk::Error, /Failed to get accessibility tree: err/)
     end
   end
 

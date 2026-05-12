@@ -409,6 +409,139 @@ module Daytona
       attr_reader :otel_state
     end
 
+    # Accessibility operations for computer use functionality.
+    class Accessibility
+      include Instrumentation
+
+      # @return [String] The ID of the sandbox
+      attr_reader :sandbox_id
+
+      # @return [DaytonaToolboxApiClient::ComputerUseApi] API client for sandbox operations
+      attr_reader :toolbox_api
+
+      # @param sandbox_id [String] The ID of the sandbox
+      # @param toolbox_api [DaytonaToolboxApiClient::ComputerUseApi] API client for sandbox operations
+      # @param otel_state [Daytona::OtelState, nil]
+      def initialize(sandbox_id:, toolbox_api:, otel_state: nil)
+        @sandbox_id = sandbox_id
+        @toolbox_api = toolbox_api
+        @otel_state = otel_state
+      end
+
+      # Fetches the AT-SPI accessibility tree.
+      #
+      # @param scope [String, nil] Tree scope to inspect: "focused", "pid", or "all"
+      # @param pid [Integer, nil] Process ID when scope is "pid"
+      # @param max_depth [Integer, nil] Maximum depth to descend; 0 returns only the root
+      # @return [DaytonaToolboxApiClient::AccessibilityTreeResponse] Accessibility tree response
+      # @raise [Daytona::Sdk::Error] If the operation fails
+      #
+      # @example
+      #   tree = sandbox.computer_use.accessibility.get_tree(scope: "all", max_depth: 3)
+      #   puts tree.root.name
+      def get_tree(scope: nil, pid: nil, max_depth: nil)
+        opts = {}
+        opts[:scope] = scope unless scope.nil?
+        opts[:pid] = pid unless pid.nil?
+        opts[:max_depth] = max_depth unless max_depth.nil?
+
+        toolbox_api.get_accessibility_tree(opts)
+      rescue StandardError => e
+        raise Sdk::Error, "Failed to get accessibility tree: #{e.message}"
+      end
+
+      # Finds AT-SPI accessibility nodes matching the provided filters.
+      #
+      # @param scope [String, nil] Search scope: "focused", "pid", or "all"
+      # @param pid [Integer, nil] Process ID when scope is "pid"
+      # @param role [String, nil] Accessibility role to match, such as "button"
+      # @param name [String, nil] Accessible name to match
+      # @param name_match [String, nil] Name match mode, such as "exact" or "substring"
+      # @param states [Array<String>, nil] Required accessibility states
+      # @param limit [Integer, nil] Maximum number of matches
+      # @return [DaytonaToolboxApiClient::AccessibilityNodesResponse] Matching accessibility nodes
+      # @raise [Daytona::Sdk::Error] If the operation fails
+      #
+      # @example
+      #   buttons = sandbox.computer_use.accessibility.find_nodes(
+      #     scope: "all",
+      #     role: "button",
+      #     name: "Submit",
+      #     name_match: "substring"
+      #   )
+      #   puts buttons.matches.length
+      def find_nodes(scope: nil, pid: nil, role: nil, name: nil, name_match: nil, states: nil, limit: nil)
+        attrs = {}
+        attrs[:scope] = scope unless scope.nil?
+        attrs[:pid] = pid unless pid.nil?
+        attrs[:role] = role unless role.nil?
+        attrs[:name] = name unless name.nil?
+        attrs[:name_match] = name_match unless name_match.nil?
+        attrs[:states] = states unless states.nil?
+        attrs[:limit] = limit unless limit.nil?
+
+        request = DaytonaToolboxApiClient::FindAccessibilityNodesRequest.new(attrs)
+        toolbox_api.find_accessibility_nodes(request)
+      rescue StandardError => e
+        raise Sdk::Error, "Failed to find accessibility nodes: #{e.message}"
+      end
+
+      # Focuses an AT-SPI accessibility node.
+      #
+      # @param id [String] Accessibility node ID returned by get_tree or find_nodes
+      # @raise [Daytona::Sdk::Error] If the operation fails
+      #
+      # @example
+      #   sandbox.computer_use.accessibility.focus_node(id: node.id)
+      def focus_node(id:)
+        request = DaytonaToolboxApiClient::AccessibilityNodeRequest.new(id:)
+        toolbox_api.focus_accessibility_node(request)
+      rescue StandardError => e
+        raise Sdk::Error, "Failed to focus accessibility node: #{e.message}"
+      end
+
+      # Invokes an AT-SPI accessibility node action.
+      #
+      # @param id [String] Accessibility node ID returned by get_tree or find_nodes
+      # @param action [String, nil] Action name to invoke, or nil for the primary action
+      # @raise [Daytona::Sdk::Error] If the operation fails
+      #
+      # @example
+      #   sandbox.computer_use.accessibility.invoke_node(id: node.id, action: "click")
+      def invoke_node(id:, action: nil)
+        attrs = { id: }
+        attrs[:action] = action unless action.nil?
+
+        request = DaytonaToolboxApiClient::AccessibilityInvokeRequest.new(attrs)
+        toolbox_api.invoke_accessibility_node(request)
+      rescue StandardError => e
+        raise Sdk::Error, "Failed to invoke accessibility node: #{e.message}"
+      end
+
+      # Sets an AT-SPI accessibility node value.
+      #
+      # @param id [String] Accessibility node ID returned by get_tree or find_nodes
+      # @param value [String] Value to write to the node
+      # @raise [Daytona::Sdk::Error] If the operation fails
+      #
+      # @example
+      #   sandbox.computer_use.accessibility.set_node_value(id: node.id, value: "hello")
+      def set_node_value(id:, value:)
+        request = DaytonaToolboxApiClient::AccessibilitySetValueRequest.new(id:, value:)
+        toolbox_api.set_accessibility_node_value(request)
+      rescue StandardError => e
+        raise Sdk::Error, "Failed to set accessibility node value: #{e.message}"
+      end
+
+      instrument :get_tree, :find_nodes, :focus_node, :invoke_node, :set_node_value,
+                 component: 'Accessibility'
+
+      private
+
+      # @return [Daytona::OtelState, nil]
+      attr_reader :otel_state
+    end
+
     # Region coordinates for screenshot operations.
     class ScreenshotRegion
       # @return [Integer] X coordinate of the region
@@ -652,6 +785,9 @@ module Daytona
     # @return [Recording] Screen recording operations interface
     attr_reader :recording
 
+    # @return [Accessibility] Accessibility operations interface
+    attr_reader :accessibility
+
     # Initialize a new ComputerUse instance.
     #
     # @param sandbox_id [String] The ID of the sandbox
@@ -666,6 +802,7 @@ module Daytona
       @screenshot = Screenshot.new(sandbox_id:, toolbox_api:, otel_state:)
       @display = Display.new(sandbox_id:, toolbox_api:, otel_state:)
       @recording = Recording.new(sandbox_id:, toolbox_api:, otel_state:)
+      @accessibility = Accessibility.new(sandbox_id:, toolbox_api:, otel_state:)
     end
 
     # Starts all computer use processes (Xvfb, xfce4, x11vnc, novnc).

@@ -25,6 +25,7 @@ class TestComputerUse:
         assert computer_use.screenshot is not None
         assert computer_use.display is not None
         assert computer_use.recording is not None
+        assert computer_use.accessibility is not None
 
     def test_mouse_methods_delegate_to_api(self):
         computer_use, api_client = _make_computer_use()
@@ -167,3 +168,48 @@ class TestComputerUse:
 
         api_client.get_process_status.assert_called_once_with(process_name="xvfb")
         api_client.restart_process.assert_called_once_with(process_name="xvfb")
+
+    def test_accessibility_methods_delegate_to_api(self):
+        computer_use, api_client = _make_computer_use()
+        api_client.get_accessibility_tree.return_value = MagicMock(root=MagicMock(id="root"))
+        api_client.find_accessibility_nodes.return_value = MagicMock(matches=[MagicMock(id="node-1")])
+
+        assert computer_use.accessibility.get_tree().root.id == "root"
+        assert computer_use.accessibility.get_tree(scope="pid", pid=123, max_depth=0).root.id == "root"
+        assert (
+            computer_use.accessibility.find_nodes(
+                scope="all",
+                role="button",
+                name="Submit",
+                name_match="exact",
+                states=["visible"],
+                limit=0,
+            )
+            .matches[0]
+            .id
+            == "node-1"
+        )
+        computer_use.accessibility.focus_node("node-1")
+        computer_use.accessibility.invoke_node("node-1")
+        computer_use.accessibility.invoke_node("node-2", action="click")
+        computer_use.accessibility.set_node_value("node-3", "hello")
+
+        api_client.get_accessibility_tree.assert_any_call(scope=None, pid=None, max_depth=None)
+        api_client.get_accessibility_tree.assert_any_call(scope="pid", pid=123, max_depth=0)
+        find_request = api_client.find_accessibility_nodes.call_args.kwargs["request"]
+        assert find_request.to_dict() == {
+            "scope": "all",
+            "role": "button",
+            "name": "Submit",
+            "nameMatch": "exact",
+            "states": ["visible"],
+            "limit": 0,
+        }
+        focus_request = api_client.focus_accessibility_node.call_args.kwargs["request"]
+        assert focus_request.id == "node-1"
+        first_invoke = api_client.invoke_accessibility_node.call_args_list[0].kwargs["request"]
+        second_invoke = api_client.invoke_accessibility_node.call_args_list[1].kwargs["request"]
+        assert first_invoke.to_dict() == {"id": "node-1"}
+        assert second_invoke.to_dict() == {"action": "click", "id": "node-2"}
+        value_request = api_client.set_accessibility_node_value.call_args.kwargs["request"]
+        assert value_request.to_dict() == {"id": "node-3", "value": "hello"}

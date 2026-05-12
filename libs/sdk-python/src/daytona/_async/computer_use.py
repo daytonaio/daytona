@@ -9,11 +9,17 @@ import aiofiles
 import httpx
 
 from daytona_toolbox_api_client_async import (
+    AccessibilityInvokeRequest,
+    AccessibilityNodeRequest,
+    AccessibilityNodesResponse,
+    AccessibilitySetValueRequest,
+    AccessibilityTreeResponse,
     ComputerUseApi,
     ComputerUseStartResponse,
     ComputerUseStatusResponse,
     ComputerUseStopResponse,
     DisplayInfoResponse,
+    FindAccessibilityNodesRequest,
     KeyboardHotkeyRequest,
     KeyboardPressRequest,
     KeyboardTypeRequest,
@@ -616,10 +622,154 @@ class AsyncRecordingService:
                         _ = await f.write(chunk)
 
 
+class AsyncAccessibility:
+    """Accessibility operations for computer use functionality.
+
+    This service exposes thin wrappers over the toolbox AT-SPI accessibility
+    API. Start computer use before calling these methods.
+    """
+
+    def __init__(self, api_client: ComputerUseApi):
+        self._api_client: ComputerUseApi = api_client
+
+    @intercept_errors(message_prefix="Failed to get accessibility tree: ")
+    @with_instrumentation()
+    async def get_tree(
+        self,
+        scope: str | None = None,
+        pid: int | None = None,
+        max_depth: int | None = None,
+    ) -> AccessibilityTreeResponse:
+        """Fetches the AT-SPI accessibility tree.
+
+        Args:
+            scope (str | None): Tree scope to inspect: ``focused``, ``pid``, or ``all``.
+            pid (int | None): Process ID when ``scope`` is ``pid``.
+            max_depth (int | None): Maximum depth to descend. Use ``0`` for the root only.
+
+        Returns:
+            AccessibilityTreeResponse: Accessibility tree rooted at the requested scope.
+
+        Example:
+            ```python
+            tree = await sandbox.computer_use.accessibility.get_tree(scope="all", max_depth=3)
+            print(tree.root.name)
+            ```
+        """
+        return await self._api_client.get_accessibility_tree(scope=scope, pid=pid, max_depth=max_depth)
+
+    @intercept_errors(message_prefix="Failed to find accessibility nodes: ")
+    @with_instrumentation()
+    async def find_nodes(
+        self,
+        scope: str | None = None,
+        pid: int | None = None,
+        role: str | None = None,
+        name: str | None = None,
+        name_match: str | None = None,
+        states: list[str] | None = None,
+        limit: int | None = None,
+    ) -> AccessibilityNodesResponse:
+        """Finds AT-SPI accessibility nodes matching the provided filters.
+
+        Args:
+            scope (str | None): Search scope: ``focused``, ``pid``, or ``all``.
+            pid (int | None): Process ID when ``scope`` is ``pid``.
+            role (str | None): Accessibility role to match, such as ``button``.
+            name (str | None): Accessible name to match.
+            name_match (str | None): Name match mode, such as ``exact`` or ``substring``.
+            states (list[str] | None): Required accessibility states.
+            limit (int | None): Maximum number of matches. Use ``0`` to let the API apply its default.
+
+        Returns:
+            AccessibilityNodesResponse: Matching accessibility nodes.
+
+        Example:
+            ```python
+            buttons = await sandbox.computer_use.accessibility.find_nodes(
+                scope="all",
+                role="button",
+                name="Submit",
+                name_match="substring",
+            )
+            print(len(buttons.matches))
+            ```
+        """
+        request = FindAccessibilityNodesRequest(
+            scope=scope,
+            pid=pid,
+            role=role,
+            name=name,
+            name_match=name_match,
+            states=states,
+            limit=limit,
+        )
+        return await self._api_client.find_accessibility_nodes(request=request)
+
+    @intercept_errors(message_prefix="Failed to focus accessibility node: ")
+    @with_instrumentation()
+    async def focus_node(self, node_id: str) -> None:
+        """Focuses an AT-SPI accessibility node.
+
+        Args:
+            node_id (str): Accessibility node ID returned by ``get_tree`` or ``find_nodes``.
+
+        Raises:
+            DaytonaError: If the focus operation fails. API failures may use a more specific subclass.
+
+        Example:
+            ```python
+            await sandbox.computer_use.accessibility.focus_node(node.id)
+            ```
+        """
+        request = AccessibilityNodeRequest(id=node_id)
+        _ = await self._api_client.focus_accessibility_node(request=request)
+
+    @intercept_errors(message_prefix="Failed to invoke accessibility node: ")
+    @with_instrumentation()
+    async def invoke_node(self, node_id: str, action: str | None = None) -> None:
+        """Invokes an AT-SPI accessibility node action.
+
+        Args:
+            node_id (str): Accessibility node ID returned by ``get_tree`` or ``find_nodes``.
+            action (str | None): Action name to invoke. If omitted, the API invokes the primary action.
+
+        Raises:
+            DaytonaError: If the invoke operation fails. API failures may use a more specific subclass.
+
+        Example:
+            ```python
+            await sandbox.computer_use.accessibility.invoke_node(node.id, action="click")
+            ```
+        """
+        request = AccessibilityInvokeRequest(id=node_id, action=action)
+        _ = await self._api_client.invoke_accessibility_node(request=request)
+
+    @intercept_errors(message_prefix="Failed to set accessibility node value: ")
+    @with_instrumentation()
+    async def set_node_value(self, node_id: str, value: str) -> None:
+        """Sets an AT-SPI accessibility node value.
+
+        Args:
+            node_id (str): Accessibility node ID returned by ``get_tree`` or ``find_nodes``.
+            value (str): Value to write to the node.
+
+        Raises:
+            DaytonaError: If the value update fails. API failures may use a more specific subclass.
+
+        Example:
+            ```python
+            await sandbox.computer_use.accessibility.set_node_value(node.id, "hello")
+            ```
+        """
+        request = AccessibilitySetValueRequest(id=node_id, value=value)
+        _ = await self._api_client.set_accessibility_node_value(request=request)
+
+
 class AsyncComputerUse:
     """Computer Use functionality for interacting with the desktop environment.
 
-    Provides access to mouse, keyboard, screenshot, display, and recording operations
+    Provides access to mouse, keyboard, screenshot, display, recording, and accessibility operations
     for automating desktop interactions within a sandbox.
 
     Attributes:
@@ -628,6 +778,7 @@ class AsyncComputerUse:
         screenshot (AsyncScreenshot): Screenshot operations interface.
         display (AsyncDisplay): Display operations interface.
         recording (AsyncRecordingService): Screen recording operations interface.
+        accessibility (AsyncAccessibility): Accessibility operations interface.
     """
 
     def __init__(
@@ -641,6 +792,7 @@ class AsyncComputerUse:
         self.screenshot: AsyncScreenshot = AsyncScreenshot(api_client)
         self.display: AsyncDisplay = AsyncDisplay(api_client)
         self.recording: AsyncRecordingService = AsyncRecordingService(api_client)
+        self.accessibility: AsyncAccessibility = AsyncAccessibility(api_client)
 
     @intercept_errors(message_prefix="Failed to start computer use: ")
     @with_instrumentation()

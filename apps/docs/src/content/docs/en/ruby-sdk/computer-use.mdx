@@ -107,6 +107,17 @@ def recording()
 
 - `Recording` - Screen recording operations interface
 
+#### accessibility()
+
+```ruby
+def accessibility()
+
+```
+
+**Returns**:
+
+- `Accessibility` - Accessibility operations interface
+
 #### start()
 
 ```ruby
@@ -297,3 +308,130 @@ errors = sandbox.computer_use.get_process_errors("x11vnc")
 puts "X11VNC errors: #{errors}"
 
 ```
+
+## Accessibility
+
+Accessibility operations for computer use functionality.
+
+### Methods
+
+#### get_tree()
+
+```ruby
+def get_tree(scope: nil, pid: nil, max_depth: nil)
+
+```
+
+Fetches the AT-SPI accessibility tree.
+
+**Parameters**:
+
+- `scope` _String, nil_ - Optional scope (`focused`, `pid`, or `all`)
+- `pid` _Integer, nil_ - Process ID when `scope` is `pid`
+- `max_depth` _Integer, nil_ - Optional max tree depth. Use `0` for the root only
+
+**Returns**:
+
+- `DaytonaToolboxApiClient::AccessibilityTreeResponse` - Accessibility tree response
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Examples:**
+
+```ruby
+tree = sandbox.computer_use.accessibility.get_tree(scope: "focused", max_depth: 2)
+
+```
+
+#### find_nodes()
+
+```ruby
+def find_nodes(scope: nil, pid: nil, role: nil, name: nil, name_match: nil, states: nil, limit: nil)
+
+```
+
+Finds AT-SPI accessibility nodes matching the provided filters.
+
+**Parameters**:
+
+- `scope` _String, nil_ - Optional scope (`focused`, `pid`, or `all`)
+- `pid` _Integer, nil_ - Process ID when `scope` is `pid`
+- `role` _String, nil_ - Optional node role filter
+- `name` _String, nil_ - Optional accessible name filter
+- `name_match` _String, nil_ - Optional name match mode (`exact`, `substring`, or `regex`)
+- `states` `Array<String>, nil` - Optional state filters
+- `limit` _Integer, nil_ - Optional result limit
+
+**Returns**:
+
+- `DaytonaToolboxApiClient::AccessibilityNodesResponse` - Matching accessibility nodes
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Examples:**
+
+```ruby
+buttons = sandbox.computer_use.accessibility.find_nodes(
+  role: "push button",
+  name: "Submit",
+  name_match: "substring"
+)
+
+```
+
+#### focus_node()
+
+```ruby
+def focus_node(id:)
+
+```
+
+Focuses an AT-SPI accessibility node.
+
+**Parameters**:
+
+- `id` _String_ - Accessibility node ID
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+#### invoke_node()
+
+```ruby
+def invoke_node(id:, action: nil)
+
+```
+
+Invokes an AT-SPI accessibility node action. Omit `action` to invoke the node's primary action.
+
+**Parameters**:
+
+- `id` _String_ - Accessibility node ID
+- `action` _String, nil_ - Optional action name
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+#### set_node_value()
+
+```ruby
+def set_node_value(id:, value:)
+
+```
+
+Sets an AT-SPI accessibility node value.
+
+**Parameters**:
+
+- `id` _String_ - Accessibility node ID
+- `value` _String_ - Value to write
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails

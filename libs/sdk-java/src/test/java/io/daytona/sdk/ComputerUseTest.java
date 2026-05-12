@@ -4,6 +4,11 @@
 package io.daytona.sdk;
 
 import io.daytona.toolbox.client.api.ComputerUseApi;
+import io.daytona.toolbox.client.model.AccessibilityInvokeRequest;
+import io.daytona.toolbox.client.model.AccessibilityNodeRequest;
+import io.daytona.toolbox.client.model.AccessibilityNodesResponse;
+import io.daytona.toolbox.client.model.AccessibilitySetValueRequest;
+import io.daytona.toolbox.client.model.AccessibilityTreeResponse;
 import io.daytona.toolbox.client.model.ListRecordingsResponse;
 import io.daytona.toolbox.client.model.MouseDragResponse;
 import io.daytona.toolbox.client.model.MousePositionResponse;
@@ -11,6 +16,7 @@ import io.daytona.toolbox.client.model.Recording;
 import io.daytona.toolbox.client.model.ScreenshotResponse;
 import io.daytona.toolbox.client.model.ComputerUseStatusResponse;
 import io.daytona.toolbox.client.model.DisplayInfoResponse;
+import io.daytona.toolbox.client.model.FindAccessibilityNodesRequest;
 import io.daytona.toolbox.client.model.KeyboardHotkeyRequest;
 import io.daytona.toolbox.client.model.MouseClickRequest;
 import io.daytona.toolbox.client.model.MouseClickResponse;
@@ -26,6 +32,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.File;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,6 +63,55 @@ class ComputerUseTest {
 
         verify(computerUseApi).startComputerUse();
         verify(computerUseApi).stopComputerUse();
+    }
+
+    @Test
+    void accessibilityOperationsDelegate() {
+        AccessibilityTreeResponse tree = new AccessibilityTreeResponse();
+        AccessibilityNodesResponse nodes = new AccessibilityNodesResponse();
+        when(computerUseApi.getAccessibilityTree(null, null, null)).thenReturn(tree);
+        when(computerUseApi.getAccessibilityTree("pid", 123, 0)).thenReturn(tree);
+        when(computerUseApi.findAccessibilityNodes(any())).thenReturn(nodes);
+
+        assertThat(computerUse.getAccessibilityTree()).isSameAs(tree);
+        assertThat(computerUse.getAccessibilityTree("pid", 123, 0)).isSameAs(tree);
+        assertThat(computerUse.findAccessibilityNodes()).isSameAs(nodes);
+        assertThat(computerUse.findAccessibilityNodes(
+                "all",
+                null,
+                "button",
+                "Submit",
+                "exact",
+                List.of("visible"),
+                0
+        )).isSameAs(nodes);
+        computerUse.focusAccessibilityNode("node-1");
+        computerUse.invokeAccessibilityNode("node-2", "click");
+        computerUse.setAccessibilityNodeValue("node-3", "hello");
+
+        ArgumentCaptor<FindAccessibilityNodesRequest> findCaptor = ArgumentCaptor.forClass(FindAccessibilityNodesRequest.class);
+        verify(computerUseApi, org.mockito.Mockito.times(2)).findAccessibilityNodes(findCaptor.capture());
+        assertThat(findCaptor.getAllValues().get(0).getStates()).isNull();
+        assertThat(findCaptor.getAllValues().get(1).getScope()).isEqualTo("all");
+        assertThat(findCaptor.getAllValues().get(1).getRole()).isEqualTo("button");
+        assertThat(findCaptor.getAllValues().get(1).getName()).isEqualTo("Submit");
+        assertThat(findCaptor.getAllValues().get(1).getNameMatch()).isEqualTo("exact");
+        assertThat(findCaptor.getAllValues().get(1).getStates()).containsExactly("visible");
+        assertThat(findCaptor.getAllValues().get(1).getLimit()).isZero();
+
+        ArgumentCaptor<AccessibilityNodeRequest> focusCaptor = ArgumentCaptor.forClass(AccessibilityNodeRequest.class);
+        verify(computerUseApi).focusAccessibilityNode(focusCaptor.capture());
+        assertThat(focusCaptor.getValue().getId()).isEqualTo("node-1");
+
+        ArgumentCaptor<AccessibilityInvokeRequest> invokeCaptor = ArgumentCaptor.forClass(AccessibilityInvokeRequest.class);
+        verify(computerUseApi).invokeAccessibilityNode(invokeCaptor.capture());
+        assertThat(invokeCaptor.getValue().getId()).isEqualTo("node-2");
+        assertThat(invokeCaptor.getValue().getAction()).isEqualTo("click");
+
+        ArgumentCaptor<AccessibilitySetValueRequest> valueCaptor = ArgumentCaptor.forClass(AccessibilitySetValueRequest.class);
+        verify(computerUseApi).setAccessibilityNodeValue(valueCaptor.capture());
+        assertThat(valueCaptor.getValue().getId()).isEqualTo("node-3");
+        assertThat(valueCaptor.getValue().getValue()).isEqualTo("hello");
     }
 
     @Test
