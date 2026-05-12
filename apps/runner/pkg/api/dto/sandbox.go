@@ -30,10 +30,11 @@ type CreateSandboxDTO struct {
 } //	@name	CreateSandboxDTO
 
 type ResizeSandboxDTO struct {
-	Cpu    int64 `json:"cpu,omitempty" validate:"omitempty,min=1"`
-	Gpu    int64 `json:"gpu,omitempty" validate:"omitempty,min=0"`
-	Memory int64 `json:"memory,omitempty" validate:"omitempty,min=1"`
-	Disk   int64 `json:"disk,omitempty" validate:"omitempty,min=1"`
+	Cpu      int64        `json:"cpu,omitempty" validate:"omitempty,min=1"`
+	Gpu      int64        `json:"gpu,omitempty" validate:"omitempty,min=0"`
+	Memory   int64        `json:"memory,omitempty" validate:"omitempty,min=1"`
+	Disk     int64        `json:"disk,omitempty" validate:"omitempty,min=1"`
+	Registry *RegistryDTO `json:"registry,omitempty"`
 } //	@name	ResizeSandboxDTO
 
 type UpdateNetworkSettingsDTO struct {
@@ -57,6 +58,7 @@ type RecoverSandboxDTO struct {
 	NetworkAllowList  *string           `json:"networkAllowList,omitempty"`
 	ErrorReason       string            `json:"errorReason" validate:"required"`
 	BackupErrorReason string            `json:"backupErrorReason,omitempty"`
+	Registry          *RegistryDTO      `json:"registry,omitempty"`
 } //	@name	RecoverSandboxDTO
 
 type IsRecoverableDTO struct {

@@ -445,6 +445,11 @@ export class SandboxService {
       let disk = snapshot.disk
       let gpu = snapshot.gpu
 
+      // GPU sandboxes are always ephemeral - delete on first stop.
+      if (gpu > 0 && !isEphemeral(createSandboxDto)) {
+        throw new BadRequestError('GPU sandboxes must be ephemeral - set autoDeleteInterval to 0')
+      }
+
       // Remove the deprecated behavior in a future release
       if (useSandboxResourceParams_deprecated) {
         if (createSandboxDto.cpu) {
@@ -476,7 +481,16 @@ export class SandboxService {
         pendingDiskIncrement = disk
       }
 
-      if (!createSandboxDto.volumes || createSandboxDto.volumes.length === 0) {
+      // GPU sandboxes are always ephemeral: they get exclusive ownership of a
+      // runner for their lifetime and are auto-deleted on first stop. Skip the
+      // warm-pool path entirely so we always provision a fresh container on a
+      // currently-unoccupied GPU runner.
+      if (gpu > 0) {
+        const volumeIdOrNames = (createSandboxDto.volumes ?? []).map((v) => v.volumeId)
+        if (volumeIdOrNames.length > 0) {
+          await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
+        }
+      } else if (!createSandboxDto.volumes || createSandboxDto.volumes.length === 0) {
         const skipWarmPool = (await this.redis.exists(`warm-pool:skip:${snapshot.id}`)) === 1
 
         if (!skipWarmPool) {
@@ -507,6 +521,7 @@ export class SandboxService {
         regions: [region.id],
         sandboxClass,
         snapshotRef: snapshot.ref,
+        gpu: gpu > 0 ? gpu : undefined,
       })
 
       const sandbox = new Sandbox(region.id, createSandboxDto.name)
@@ -1914,8 +1929,18 @@ export class SandboxService {
 
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
+      const backupRegistry = sandbox.backupRegistryId
+        ? ((await this.dockerRegistryService.findOne(sandbox.backupRegistryId)) ?? undefined)
+        : undefined
+
+      if (sandbox.backupRegistryId && !backupRegistry) {
+        this.logger.warn(
+          `Backup registry ${sandbox.backupRegistryId} not found for sandbox ${sandbox.id}; proceeding without registry credentials`,
+        )
+      }
+
       try {
-        await runnerAdapter.recoverSandbox(sandbox, skipStart)
+        await runnerAdapter.recoverSandbox(sandbox, backupRegistry, skipStart)
       } catch (error) {
         if (error instanceof Error && error.message.includes('storage cannot be further expanded')) {
           throw new ForbiddenException(
@@ -2121,7 +2146,17 @@ export class SandboxService {
       try {
         const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-        await runnerAdapter.resizeSandbox(sandbox.id, resizeDto.cpu, resizeDto.memory, resizeDto.disk)
+        const backupRegistry = sandbox.backupRegistryId
+          ? ((await this.dockerRegistryService.findOne(sandbox.backupRegistryId)) ?? undefined)
+          : undefined
+
+        if (sandbox.backupRegistryId && !backupRegistry) {
+          this.logger.warn(
+            `Backup registry ${sandbox.backupRegistryId} not found for sandbox ${sandbox.id}; proceeding without registry credentials`,
+          )
+        }
+
+        await runnerAdapter.resizeSandbox(sandbox.id, resizeDto.cpu, resizeDto.memory, resizeDto.disk, backupRegistry)
 
         // For V0 runners, update resources immediately (subscriber emits STATE_UPDATED)
         // For V2 runners, job handler will update resources on completion

@@ -3,11 +3,13 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from daytona.common.errors import DaytonaError
+from daytona.common.filesystem import DownloadProgress, UploadProgress
 
 
 def _build_multipart_body(
@@ -17,16 +19,38 @@ def _build_multipart_body(
     filename: str,
     payload: bytes,
     content_type: str = "application/octet-stream",
+    content_length: int | None = None,
 ) -> bytes:
+    headers = [
+        f'Content-Disposition: form-data; name="{name}"; filename="{filename}"\r\n'.encode("utf-8"),
+        f"Content-Type: {content_type}\r\n".encode("utf-8"),
+    ]
+    if content_length is not None:
+        headers.append(f"Content-Length: {content_length}\r\n".encode("utf-8"))
+
     return b"".join(
         [
             b"--" + boundary + b"\r\n",
-            f'Content-Disposition: form-data; name="{name}"; filename="{filename}"\r\n'.encode("utf-8"),
-            f"Content-Type: {content_type}\r\n\r\n".encode("utf-8"),
+            *headers,
+            b"\r\n",
             payload,
             b"\r\n--" + boundary + b"--\r\n",
         ]
     )
+
+
+class _Response:
+    """Minimal stand-in for httpx.Response — only the bits the upload path checks."""
+
+    def __init__(self, status_code: int, text: str):
+        self.status_code = status_code
+        self.text = text
+        self.is_success = 200 <= status_code < 300
+
+    def json(self):
+        import json as _json
+
+        return _json.loads(self.text)
 
 
 class _SyncStreamResponse:
@@ -52,11 +76,13 @@ class _SyncStreamClient:
         self._response = response
         self.stream_args: tuple[object, ...] | None = None
         self.stream_kwargs: dict[str, object] | None = None
+        self.closed = False
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc, tb):
+        self.close()
         return False
 
     def stream(self, *args, **kwargs):
@@ -64,11 +90,24 @@ class _SyncStreamClient:
         self.stream_kwargs = kwargs
         return self._response
 
+    def close(self):
+        self.closed = True
+
+
+class _AsyncStreamContent:
+    def __init__(self, chunks: list[bytes]):
+        self._chunks = chunks
+
+    async def iter_chunked(self, _chunk_size):
+        for chunk in self._chunks:
+            yield chunk
+
 
 class _AsyncStreamResponse:
     def __init__(self, chunks: list[bytes], boundary: bytes):
         self._chunks = chunks
         self.headers = {"Content-Type": f'multipart/form-data; boundary={boundary.decode("utf-8")}'}
+        self.content = _AsyncStreamContent(chunks)
 
     async def __aenter__(self):
         return self
@@ -79,27 +118,28 @@ class _AsyncStreamResponse:
     def raise_for_status(self):
         return None
 
-    async def aiter_bytes(self, _chunk_size):
-        for chunk in self._chunks:
-            yield chunk
-
 
 class _AsyncStreamClient:
     def __init__(self, response: _AsyncStreamResponse):
         self._response = response
         self.stream_args: tuple[object, ...] | None = None
         self.stream_kwargs: dict[str, object] | None = None
+        self.closed = False
 
     async def __aenter__(self):
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
+        await self.close()
         return False
 
-    def stream(self, *args, **kwargs):
+    def request(self, *args, **kwargs):
         self.stream_args = args
         self.stream_kwargs = kwargs
         return self._response
+
+    async def close(self):
+        self.closed = True
 
 
 class TestSyncFileSystem:
@@ -107,7 +147,7 @@ class TestSyncFileSystem:
         from daytona._sync.filesystem import FileSystem
 
         mock_api = MagicMock()
-        return FileSystem(mock_api), mock_api
+        return FileSystem(mock_api, http_client=MagicMock()), mock_api
 
     def test_create_folder(self):
         fs, api = self._make_fs()
@@ -203,7 +243,9 @@ class TestSyncFileSystem:
             fs.download_file("workspace/file.txt")
 
     def test_download_file_stream_yields_chunks(self):
-        fs, api = self._make_fs()
+        from daytona._sync.filesystem import FileSystem
+
+        mock_api = MagicMock()
         remote_path = "workspace/file.txt"
         boundary = b"sync-boundary"
         payload = b"hello world"
@@ -215,7 +257,7 @@ class TestSyncFileSystem:
             multipart_body[payload_start + 9 :],
         ]
         client = _SyncStreamClient(_SyncStreamResponse(chunks, boundary))
-        api._download_files_serialize = MagicMock(
+        mock_api._download_files_serialize = MagicMock(
             return_value=(
                 "POST",
                 "https://download",
@@ -223,19 +265,65 @@ class TestSyncFileSystem:
                 {"paths": [remote_path]},
             )
         )
+        fs = FileSystem(mock_api, http_client=client)
 
-        with patch("daytona._sync.filesystem.httpx.Client", return_value=client):
-            streamed_chunks = list(fs.download_file_stream(remote_path))
+        streamed_chunks = list(fs.download_file_stream(remote_path))
 
         assert streamed_chunks == [b"hello", b" wor", b"ld"]
         assert client.stream_args == ("POST", "https://download")
+        from daytona.internal.http_client import request_timeout
+
         assert client.stream_kwargs == {
             "json": {"paths": [remote_path]},
             "headers": {"Authorization": "Bearer token"},
+            "timeout": request_timeout(30 * 60),
         }
 
+    def test_download_file_stream_calls_on_progress_with_total(self):
+        from daytona._sync.filesystem import FileSystem
+
+        mock_api = MagicMock()
+        remote_path = "workspace/file.txt"
+        boundary = b"sync-boundary"
+        payload = b"hello world"
+        multipart_body = _build_multipart_body(
+            boundary,
+            name="file",
+            filename=remote_path,
+            payload=payload,
+            content_length=len(payload),
+        )
+        payload_start = multipart_body.index(payload)
+        chunks = [
+            multipart_body[: payload_start + 5],
+            multipart_body[payload_start + 5 : payload_start + 9],
+            multipart_body[payload_start + 9 :],
+        ]
+        client = _SyncStreamClient(_SyncStreamResponse(chunks, boundary))
+        mock_api._download_files_serialize = MagicMock(
+            return_value=(
+                "POST",
+                "https://download",
+                {"Authorization": "Bearer token"},
+                {"paths": [remote_path]},
+            )
+        )
+        progress_updates: list[DownloadProgress] = []
+        fs = FileSystem(mock_api, http_client=client)
+
+        streamed_chunks = list(fs.download_file_stream(remote_path, on_progress=progress_updates.append))
+
+        assert streamed_chunks == [b"hello", b" wor", b"ld"]
+        assert progress_updates == [
+            DownloadProgress(bytes_received=5, total_bytes=11),
+            DownloadProgress(bytes_received=9, total_bytes=11),
+            DownloadProgress(bytes_received=11, total_bytes=11),
+        ]
+
     def test_download_file_stream_raises_on_error_part(self):
-        fs, api = self._make_fs()
+        from daytona._sync.filesystem import FileSystem
+
+        mock_api = MagicMock()
         remote_path = "workspace/missing.txt"
         boundary = b"sync-boundary"
         error_payload = b'{"message":"missing","statusCode":404,"code":"not_found"}'
@@ -247,7 +335,7 @@ class TestSyncFileSystem:
             content_type="application/json",
         )
         client = _SyncStreamClient(_SyncStreamResponse([multipart_body], boundary))
-        api._download_files_serialize = MagicMock(
+        mock_api._download_files_serialize = MagicMock(
             return_value=(
                 "POST",
                 "https://download",
@@ -255,13 +343,41 @@ class TestSyncFileSystem:
                 {"paths": [remote_path]},
             )
         )
+        fs = FileSystem(mock_api, http_client=client)
 
-        with patch("daytona._sync.filesystem.httpx.Client", return_value=client):
-            with pytest.raises(DaytonaError, match="missing") as exc_info:
-                list(fs.download_file_stream(remote_path))
+        with pytest.raises(DaytonaError, match="missing") as exc_info:
+            list(fs.download_file_stream(remote_path))
 
         assert exc_info.value.status_code == 404
         assert exc_info.value.error_code == "not_found"
+
+    def test_download_file_stream_cancel_event_aborts(self):
+        import threading
+
+        from daytona._sync.filesystem import FileSystem
+
+        mock_api = MagicMock()
+        remote_path = "workspace/file.txt"
+        boundary = b"sync-boundary"
+        payload = b"hello world"
+        multipart_body = _build_multipart_body(
+            boundary, name="file", filename=remote_path, payload=payload, content_length=len(payload)
+        )
+        payload_start = multipart_body.index(payload)
+        chunks = [multipart_body[: payload_start + 5], multipart_body[payload_start + 5 :]]
+        client = _SyncStreamClient(_SyncStreamResponse(chunks, boundary))
+        mock_api._download_files_serialize = MagicMock(
+            return_value=("POST", "https://download", {}, {"paths": [remote_path]})
+        )
+        cancel = threading.Event()
+        fs = FileSystem(mock_api, http_client=client)
+
+        stream = fs.download_file_stream(remote_path, cancel_event=cancel)
+        first = next(stream)
+        assert first == b"hello"
+        cancel.set()
+        with pytest.raises(DaytonaError, match="cancelled"):
+            next(stream)
 
 
 class TestAsyncFileSystem:
@@ -344,7 +460,9 @@ class TestAsyncFileSystem:
 
     @pytest.mark.asyncio
     async def test_download_file_stream_yields_chunks(self):
-        fs, api = self._make_fs()
+        from daytona._async.filesystem import AsyncFileSystem
+
+        mock_api = AsyncMock()
         remote_path = "workspace/file.txt"
         boundary = b"async-boundary"
         payload = b"hello world"
@@ -356,7 +474,7 @@ class TestAsyncFileSystem:
             multipart_body[payload_start + 9 :],
         ]
         client = _AsyncStreamClient(_AsyncStreamResponse(chunks, boundary))
-        api._download_files_serialize = MagicMock(
+        mock_api._download_files_serialize = MagicMock(
             return_value=(
                 "POST",
                 "https://download",
@@ -364,20 +482,71 @@ class TestAsyncFileSystem:
                 {"paths": [remote_path]},
             )
         )
+        mock_api.api_client.http_session = client
+        fs = AsyncFileSystem(mock_api)
 
-        with patch("daytona._async.filesystem.httpx.AsyncClient", return_value=client):
-            streamed_chunks = [chunk async for chunk in await fs.download_file_stream(remote_path)]
+        streamed_chunks = [chunk async for chunk in await fs.download_file_stream(remote_path)]
 
         assert streamed_chunks == [b"hello", b" wor", b"ld"]
         assert client.stream_args == ("POST", "https://download")
+        from daytona.internal.http_client import aiohttp_request_timeout
+
         assert client.stream_kwargs == {
             "json": {"paths": [remote_path]},
             "headers": {"Authorization": "Bearer token"},
+            "timeout": aiohttp_request_timeout(30 * 60),
         }
 
     @pytest.mark.asyncio
+    async def test_download_file_stream_calls_on_progress_with_total_async(self):
+        from daytona._async.filesystem import AsyncFileSystem
+
+        mock_api = AsyncMock()
+        remote_path = "workspace/file.txt"
+        boundary = b"async-boundary"
+        payload = b"hello world"
+        multipart_body = _build_multipart_body(
+            boundary,
+            name="file",
+            filename=remote_path,
+            payload=payload,
+            content_length=len(payload),
+        )
+        payload_start = multipart_body.index(payload)
+        chunks = [
+            multipart_body[: payload_start + 5],
+            multipart_body[payload_start + 5 : payload_start + 9],
+            multipart_body[payload_start + 9 :],
+        ]
+        client = _AsyncStreamClient(_AsyncStreamResponse(chunks, boundary))
+        mock_api._download_files_serialize = MagicMock(
+            return_value=(
+                "POST",
+                "https://download",
+                {"Authorization": "Bearer token"},
+                {"paths": [remote_path]},
+            )
+        )
+        mock_api.api_client.http_session = client
+        fs = AsyncFileSystem(mock_api)
+        progress_updates: list[DownloadProgress] = []
+
+        streamed_chunks = [
+            chunk async for chunk in await fs.download_file_stream(remote_path, on_progress=progress_updates.append)
+        ]
+
+        assert streamed_chunks == [b"hello", b" wor", b"ld"]
+        assert progress_updates == [
+            DownloadProgress(bytes_received=5, total_bytes=11),
+            DownloadProgress(bytes_received=9, total_bytes=11),
+            DownloadProgress(bytes_received=11, total_bytes=11),
+        ]
+
+    @pytest.mark.asyncio
     async def test_download_file_stream_raises_on_error_part(self):
-        fs, api = self._make_fs()
+        from daytona._async.filesystem import AsyncFileSystem
+
+        mock_api = AsyncMock()
         remote_path = "workspace/missing.txt"
         boundary = b"async-boundary"
         error_payload = b'{"message":"missing","statusCode":404,"code":"not_found"}'
@@ -389,7 +558,7 @@ class TestAsyncFileSystem:
             content_type="application/json",
         )
         client = _AsyncStreamClient(_AsyncStreamResponse([multipart_body], boundary))
-        api._download_files_serialize = MagicMock(
+        mock_api._download_files_serialize = MagicMock(
             return_value=(
                 "POST",
                 "https://download",
@@ -397,10 +566,224 @@ class TestAsyncFileSystem:
                 {"paths": [remote_path]},
             )
         )
+        mock_api.api_client.http_session = client
+        fs = AsyncFileSystem(mock_api)
 
-        with patch("daytona._async.filesystem.httpx.AsyncClient", return_value=client):
-            with pytest.raises(DaytonaError, match="missing") as exc_info:
-                [chunk async for chunk in await fs.download_file_stream(remote_path)]
+        with pytest.raises(DaytonaError, match="missing") as exc_info:
+            [chunk async for chunk in await fs.download_file_stream(remote_path)]
 
         assert exc_info.value.status_code == 404
         assert exc_info.value.error_code == "not_found"
+
+    @pytest.mark.asyncio
+    async def test_download_file_stream_cancel_event_aborts(self):
+        import asyncio
+
+        from daytona._async.filesystem import AsyncFileSystem
+
+        mock_api = AsyncMock()
+        remote_path = "workspace/file.txt"
+        boundary = b"async-boundary"
+        payload = b"hello world"
+        multipart_body = _build_multipart_body(
+            boundary, name="file", filename=remote_path, payload=payload, content_length=len(payload)
+        )
+        payload_start = multipart_body.index(payload)
+        chunks = [multipart_body[: payload_start + 5], multipart_body[payload_start + 5 :]]
+        client = _AsyncStreamClient(_AsyncStreamResponse(chunks, boundary))
+        mock_api._download_files_serialize = MagicMock(
+            return_value=("POST", "https://download", {}, {"paths": [remote_path]})
+        )
+        cancel = asyncio.Event()
+        mock_api.api_client.http_session = client
+        fs = AsyncFileSystem(mock_api)
+
+        stream = await fs.download_file_stream(remote_path, cancel_event=cancel)
+        first = await stream.__anext__()
+        assert first == b"hello"
+        cancel.set()
+        with pytest.raises(DaytonaError, match="cancelled"):
+            await stream.__anext__()
+
+    @pytest.mark.asyncio
+    async def test_upload_file_stream_accepts_async_iterable(self):
+        # AsyncIterable[bytes] sources go through the manual multipart path; we
+        # capture the request body and assert the chunks land verbatim between
+        # the multipart envelope, with progress firing once per source chunk.
+        fs, api = self._make_fs()
+        api._upload_files_serialize = MagicMock(return_value=(None, "https://upload", {}, None, None))
+
+        chunks_in = [b"chunk-one-", b"chunk-two-", b"chunk-three"]
+
+        async def source():
+            for chunk in chunks_in:
+                yield chunk
+
+        captured = {}
+
+        async def fake_post(url, content=None, headers=None, **kwargs):
+            collected = bytearray()
+            async for piece in content:
+                collected.extend(piece)
+            captured["body"] = bytes(collected)
+            captured["headers"] = headers
+            return _Response(200, "")
+
+        client = MagicMock()
+        client.__aenter__ = AsyncMock(return_value=client)
+        client.__aexit__ = AsyncMock(return_value=None)
+        client.post = fake_post
+
+        progress: list[UploadProgress] = []
+        with patch("daytona._async.filesystem.httpx.AsyncClient", return_value=client):
+            await fs.upload_file_stream(
+                source(),
+                "/remote/path.bin",
+                on_progress=progress.append,
+            )
+
+        body = captured["body"]
+        assert b'name="files[0].path"' in body
+        assert b'name="files[0].file"' in body
+        assert b"".join(chunks_in) in body
+        assert captured["headers"]["Content-Type"].startswith("multipart/form-data; boundary=")
+        assert [p.bytes_sent for p in progress] == [10, 20, 31]
+
+    @pytest.mark.asyncio
+    async def test_upload_file_stream_accepts_async_filelike(self):
+        # An object whose .read is a coroutine (mirrors aiofiles) is detected
+        # via inspect.iscoroutinefunction and pulled in 64 KiB chunks.
+        fs, api = self._make_fs()
+        api._upload_files_serialize = MagicMock(return_value=(None, "https://upload", {}, None, None))
+
+        payload = b"async-filelike-payload-" * 8
+
+        class FakeAioFile:
+            def __init__(self, data: bytes) -> None:
+                self._buf = data
+                self._pos = 0
+
+            async def read(self, n: int) -> bytes:
+                chunk = self._buf[self._pos : self._pos + n]
+                self._pos += len(chunk)
+                return chunk
+
+        captured = {}
+
+        async def fake_post(url, content=None, headers=None, **kwargs):
+            collected = bytearray()
+            async for piece in content:
+                collected.extend(piece)
+            captured["body"] = bytes(collected)
+            return _Response(200, "")
+
+        client = MagicMock()
+        client.__aenter__ = AsyncMock(return_value=client)
+        client.__aexit__ = AsyncMock(return_value=None)
+        client.post = fake_post
+
+        progress: list[UploadProgress] = []
+        with patch("daytona._async.filesystem.httpx.AsyncClient", return_value=client):
+            await fs.upload_file_stream(
+                FakeAioFile(payload),
+                "/remote/aiof.bin",
+                on_progress=progress.append,
+            )
+
+        assert payload in captured["body"]
+        assert progress
+        assert progress[-1].bytes_sent == len(payload)
+
+    @pytest.mark.asyncio
+    async def test_upload_file_stream_awaits_async_on_progress(self):
+        # Async on_progress is awaited so async work (e.g. DB writes) actually
+        # runs before the next chunk is yielded — passing an async callback
+        # should never silently drop a coroutine.
+        fs, api = self._make_fs()
+        api._upload_files_serialize = MagicMock(return_value=(None, "https://upload", {}, None, None))
+
+        observed: list[UploadProgress] = []
+
+        async def on_progress(p: UploadProgress) -> None:
+            # Real async work — yields control to the loop, proving the await
+            # is actually happening rather than the callback being a coroutine
+            # function that we synchronously called and abandoned.
+            await asyncio.sleep(0)
+            observed.append(p)
+
+        async def source():
+            yield b"async-callback-chunk-one"
+            yield b"async-callback-chunk-two"
+
+        async def fake_post(url, content=None, headers=None, **kwargs):
+            collected = bytearray()
+            async for piece in content:
+                collected.extend(piece)
+            return _Response(200, "")
+
+        client = MagicMock()
+        client.__aenter__ = AsyncMock(return_value=client)
+        client.__aexit__ = AsyncMock(return_value=None)
+        client.post = fake_post
+
+        with patch("daytona._async.filesystem.httpx.AsyncClient", return_value=client):
+            await fs.upload_file_stream(
+                source(),
+                "/remote/awaited.bin",
+                on_progress=on_progress,
+            )
+
+        assert [p.bytes_sent for p in observed] == [24, 48]
+
+    @pytest.mark.asyncio
+    async def test_upload_file_stream_rejects_async_on_progress_with_sync_source(self):
+        # Sync sources flow through httpx's sync .read() pull, so an async
+        # on_progress can't be awaited. Fail loudly rather than silently
+        # dropping the coroutine the user passed.
+        fs, api = self._make_fs()
+        api._upload_files_serialize = MagicMock(return_value=(None, "https://upload", {}, None, None))
+
+        async def on_progress(p: UploadProgress) -> None:
+            pass
+
+        with pytest.raises(DaytonaError, match="async source"):
+            await fs.upload_file_stream(
+                b"sync-bytes",
+                "/remote/sync.bin",
+                on_progress=on_progress,
+            )
+
+    @pytest.mark.asyncio
+    async def test_download_file_stream_awaits_async_on_progress(self):
+        from daytona._async.filesystem import AsyncFileSystem
+
+        mock_api = AsyncMock()
+        remote_path = "workspace/file.txt"
+        boundary = b"async-boundary"
+        payload = b"hello async progress"
+        multipart_body = _build_multipart_body(
+            boundary,
+            name="file",
+            filename=remote_path,
+            payload=payload,
+            content_length=len(payload),
+        )
+        client = _AsyncStreamClient(_AsyncStreamResponse([multipart_body], boundary))
+        mock_api._download_files_serialize = MagicMock(
+            return_value=("POST", "https://download", {}, {"paths": [remote_path]})
+        )
+        mock_api.api_client.http_session = client
+        fs = AsyncFileSystem(mock_api)
+
+        observed: list[DownloadProgress] = []
+
+        async def on_progress(p: DownloadProgress) -> None:
+            await asyncio.sleep(0)
+            observed.append(p)
+
+        chunks = [c async for c in await fs.download_file_stream(remote_path, on_progress=on_progress)]
+
+        assert b"".join(chunks) == payload
+        assert observed
+        assert observed[-1].bytes_received == len(payload)
+        assert observed[-1].total_bytes == len(payload)

@@ -67,6 +67,81 @@ func NewDaytonaRateLimitError(message string, headers http.Header) *DaytonaRateL
 	}
 }
 
+// DaytonaAuthenticationError represents an authentication error (401)
+type DaytonaAuthenticationError struct {
+	*DaytonaError
+}
+
+func (e *DaytonaAuthenticationError) Error() string {
+	return fmt.Sprintf("Authentication failed: %s", e.Message)
+}
+
+func NewDaytonaAuthenticationError(message string, headers http.Header) *DaytonaAuthenticationError {
+	return &DaytonaAuthenticationError{
+		DaytonaError: NewDaytonaError(message, http.StatusUnauthorized, headers),
+	}
+}
+
+// DaytonaForbiddenError represents a forbidden/authorization error (403)
+type DaytonaForbiddenError struct {
+	*DaytonaError
+}
+
+func (e *DaytonaForbiddenError) Error() string {
+	return fmt.Sprintf("Forbidden: %s", e.Message)
+}
+
+func NewDaytonaForbiddenError(message string, headers http.Header) *DaytonaForbiddenError {
+	return &DaytonaForbiddenError{
+		DaytonaError: NewDaytonaError(message, http.StatusForbidden, headers),
+	}
+}
+
+// DaytonaConflictError represents a conflict error (409)
+type DaytonaConflictError struct {
+	*DaytonaError
+}
+
+func (e *DaytonaConflictError) Error() string {
+	return fmt.Sprintf("Conflict: %s", e.Message)
+}
+
+func NewDaytonaConflictError(message string, headers http.Header) *DaytonaConflictError {
+	return &DaytonaConflictError{
+		DaytonaError: NewDaytonaError(message, http.StatusConflict, headers),
+	}
+}
+
+// DaytonaValidationError represents a validation/bad request error (400)
+type DaytonaValidationError struct {
+	*DaytonaError
+}
+
+func (e *DaytonaValidationError) Error() string {
+	return fmt.Sprintf("Validation error: %s", e.Message)
+}
+
+func NewDaytonaValidationError(message string, headers http.Header) *DaytonaValidationError {
+	return &DaytonaValidationError{
+		DaytonaError: NewDaytonaError(message, http.StatusBadRequest, headers),
+	}
+}
+
+// DaytonaServerError represents a server error (5xx)
+type DaytonaServerError struct {
+	*DaytonaError
+}
+
+func (e *DaytonaServerError) Error() string {
+	return fmt.Sprintf("Server error: %s", e.Message)
+}
+
+func NewDaytonaServerError(message string, statusCode int, headers http.Header) *DaytonaServerError {
+	return &DaytonaServerError{
+		DaytonaError: NewDaytonaError(message, statusCode, headers),
+	}
+}
+
 // DaytonaTimeoutError represents a timeout error
 type DaytonaTimeoutError struct {
 	*DaytonaError
@@ -76,7 +151,6 @@ func (e *DaytonaTimeoutError) Error() string {
 	return fmt.Sprintf("Operation timed out: %s", e.Message)
 }
 
-// NewDaytonaTimeoutError creates a new DaytonaTimeoutError
 func NewDaytonaTimeoutError(message string) *DaytonaTimeoutError {
 	return &DaytonaTimeoutError{
 		DaytonaError: NewDaytonaError(message, 0, nil),
@@ -169,18 +243,7 @@ func ConvertAPIError(err error, httpResp *http.Response) error {
 		message = err.Error()
 	}
 
-	// Map status codes to SDK error types
-	switch statusCode {
-	case http.StatusNotFound:
-		return NewDaytonaNotFoundError(message, headers)
-	case http.StatusTooManyRequests:
-		return NewDaytonaRateLimitError(message, headers)
-	case 0:
-		// Network or client error (no HTTP response)
-		return NewDaytonaError(message, 0, nil)
-	default:
-		return NewDaytonaError(message, statusCode, headers)
-	}
+	return mapStatusCodeToError(statusCode, message, headers)
 }
 
 // ConvertToolboxError converts toolbox-api-client-go errors to SDK error types
@@ -229,14 +292,26 @@ func ConvertToolboxError(err error, httpResp *http.Response) error {
 		message = err.Error()
 	}
 
-	// Map status codes to SDK error types
-	switch statusCode {
-	case http.StatusNotFound:
+	return mapStatusCodeToError(statusCode, message, headers)
+}
+
+func mapStatusCodeToError(statusCode int, message string, headers http.Header) error {
+	switch {
+	case statusCode == http.StatusBadRequest:
+		return NewDaytonaValidationError(message, headers)
+	case statusCode == http.StatusUnauthorized:
+		return NewDaytonaAuthenticationError(message, headers)
+	case statusCode == http.StatusForbidden:
+		return NewDaytonaForbiddenError(message, headers)
+	case statusCode == http.StatusNotFound:
 		return NewDaytonaNotFoundError(message, headers)
-	case http.StatusTooManyRequests:
+	case statusCode == http.StatusConflict:
+		return NewDaytonaConflictError(message, headers)
+	case statusCode == http.StatusTooManyRequests:
 		return NewDaytonaRateLimitError(message, headers)
-	case 0:
-		// Network or client error (no HTTP response)
+	case statusCode >= 500 && statusCode <= 599:
+		return NewDaytonaServerError(message, statusCode, headers)
+	case statusCode == 0:
 		return NewDaytonaError(message, 0, nil)
 	default:
 		return NewDaytonaError(message, statusCode, headers)

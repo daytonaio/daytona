@@ -3,13 +3,22 @@
 
 from __future__ import annotations
 
-from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from httpx_ws import WebSocketDisconnect
+from wsproto.events import BytesMessage, CloseConnection, TextMessage
 
 from daytona.common.errors import DaytonaConnectionError, DaytonaError, DaytonaTimeoutError
 from daytona.common.pty import PtySize
+
+
+def _text(data: str) -> TextMessage:
+    return TextMessage(data=data, frame_finished=True, message_finished=True)
+
+
+def _binary(data: bytes) -> BytesMessage:
+    return BytesMessage(data=data, frame_finished=True, message_finished=True)
 
 
 class TestPtyHandle:
@@ -33,7 +42,7 @@ class TestPtyHandle:
 
         handle.wait_for_connection()
 
-        ws.recv.assert_not_called()
+        ws.receive.assert_not_called()
 
     def test_wait_for_connection_raises_when_websocket_missing(self):
         handle, _ws = self._make_handle()
@@ -44,7 +53,7 @@ class TestPtyHandle:
 
     def test_wait_for_connection_processes_connected_control_message(self):
         handle, ws = self._make_handle()
-        ws.recv.side_effect = ['{"type":"control","status":"connected"}']
+        ws.receive.side_effect = [_text('{"type":"control","status":"connected"}')]
 
         handle.wait_for_connection(timeout=0.2)
 
@@ -52,14 +61,14 @@ class TestPtyHandle:
 
     def test_wait_for_connection_raises_when_error_message_received(self):
         handle, ws = self._make_handle()
-        ws.recv.side_effect = ['{"type":"control","status":"error","error":"boom"}']
+        ws.receive.side_effect = [_text('{"type":"control","status":"error","error":"boom"}')]
 
         with pytest.raises(DaytonaConnectionError, match="boom"):
             handle.wait_for_connection(timeout=0.2)
 
     def test_wait_for_connection_times_out(self, monkeypatch):
         handle, ws = self._make_handle()
-        ws.recv.side_effect = TimeoutError()
+        ws.receive.side_effect = TimeoutError()
         times = iter([0.0, 0.2])
         monkeypatch.setattr("daytona.handle.pty_handle.time.time", lambda: next(times))
 
@@ -71,14 +80,14 @@ class TestPtyHandle:
 
         handle.send_input("echo hi\n")
 
-        ws.send.assert_called_once_with(b"echo hi\n")
+        ws.send_bytes.assert_called_once_with(b"echo hi\n")
 
     def test_send_input_passes_bytes_through(self):
         handle, ws = self._make_handle()
 
         handle.send_input(b"raw")
 
-        ws.send.assert_called_once_with(b"raw")
+        ws.send_bytes.assert_called_once_with(b"raw")
 
     def test_send_input_raises_when_disconnected(self):
         handle, _ws = self._make_handle()
@@ -115,14 +124,23 @@ class TestPtyHandle:
 
     def test_iterator_yields_text_and_bytes_but_skips_control_messages(self):
         handle, ws = self._make_handle()
-        ws.__iter__.return_value = iter(['{"type":"control","status":"connected"}', "hello", b"world"])
+        ws.receive.side_effect = [
+            _text('{"type":"control","status":"connected"}'),
+            _text("hello"),
+            _binary(b"world"),
+            CloseConnection(code=1000, reason=None),
+        ]
 
         assert list(handle) == [b"hello", b"world"]
         assert handle.exit_code == 0
 
     def test_wait_forwards_data_to_callback(self):
         handle, ws = self._make_handle()
-        ws.__iter__.return_value = iter(["hello", b"world"])
+        ws.receive.side_effect = [
+            _text("hello"),
+            _binary(b"world"),
+            CloseConnection(code=1000, reason=None),
+        ]
         received: list[bytes] = []
 
         result = handle.wait(on_data=received.append)
@@ -130,6 +148,16 @@ class TestPtyHandle:
         assert received == [b"hello", b"world"]
         assert result.exit_code == 0
         assert result.error is None
+
+    def test_iterator_terminates_on_websocket_disconnect(self):
+        handle, ws = self._make_handle()
+        ws.receive.side_effect = [
+            _text("hello"),
+            WebSocketDisconnect(code=1000, reason='{"exitCode":0}'),
+        ]
+
+        assert list(handle) == [b"hello"]
+        assert handle.exit_code == 0
 
     def test_disconnect_closes_websocket_and_marks_disconnected(self):
         handle, ws = self._make_handle()
@@ -140,10 +168,24 @@ class TestPtyHandle:
         assert handle._ws is None
         assert handle.is_connected() is False
 
+    def test_disconnect_uses_context_manager_when_provided(self):
+        from daytona.handle.pty_handle import PtyHandle
+
+        ws = MagicMock()
+        ws_cm = MagicMock()
+        ws_cm.__exit__ = MagicMock(return_value=False)
+        handle = PtyHandle(ws, "session-1", ws_context_manager=ws_cm)
+
+        handle.disconnect()
+
+        ws_cm.__exit__.assert_called_once_with(None, None, None)
+        ws.close.assert_not_called()
+        assert handle._ws is None
+
     def test_handle_close_parses_structured_exit_payload(self):
         handle, _ws = self._make_handle()
 
-        handle._handle_close(SimpleNamespace(code=1000, reason='{"exitCode":2,"exitReason":"failed","error":"boom"}'))
+        handle._handle_close(1000, '{"exitCode":2,"exitReason":"failed","error":"boom"}')
 
         assert handle.exit_code == 2
         assert handle.error == "boom"
@@ -151,7 +193,7 @@ class TestPtyHandle:
     def test_handle_close_defaults_exit_code_zero_for_normal_close(self):
         handle, _ws = self._make_handle()
 
-        handle._handle_close(SimpleNamespace(code=1000, reason="plain reason"))
+        handle._handle_close(1000, "plain reason")
 
         assert handle.exit_code == 0
 
@@ -166,6 +208,7 @@ class TestAsyncPtyHandle:
         monkeypatch.setattr(AsyncPtyHandle, "_handle_websocket", noop)
         ws = ws or AsyncMock()
         ws.close_code = None
+        ws.closed = False
         return AsyncPtyHandle(ws, session_id="session-1"), ws
 
     @pytest.mark.asyncio
@@ -202,7 +245,7 @@ class TestAsyncPtyHandle:
 
         await handle.send_input("echo hi\n")
 
-        ws.send.assert_awaited_once_with(b"echo hi\n")
+        ws.send_bytes.assert_awaited_once_with(b"echo hi\n")
         await handle.disconnect()
 
     @pytest.mark.asyncio
@@ -284,9 +327,7 @@ class TestAsyncPtyHandle:
     async def test_handle_close_parses_structured_exit_payload(self, monkeypatch):
         handle, _ws = await self._build_handle(monkeypatch)
 
-        await handle._handle_close(
-            SimpleNamespace(code=1000, reason='{"exitCode":5,"exitReason":"failed","error":"boom"}')
-        )
+        await handle._handle_close(1000, '{"exitCode":5,"exitReason":"failed","error":"boom"}')
 
         assert handle.exit_code == 5
         assert handle.error == "boom"
@@ -296,7 +337,7 @@ class TestAsyncPtyHandle:
     async def test_handle_close_defaults_exit_code_zero_for_normal_close(self, monkeypatch):
         handle, _ws = await self._build_handle(monkeypatch)
 
-        await handle._handle_close(SimpleNamespace(code=1000, reason="plain reason"))
+        await handle._handle_close(1000, "plain reason")
 
         assert handle.exit_code == 0
         await handle.disconnect()

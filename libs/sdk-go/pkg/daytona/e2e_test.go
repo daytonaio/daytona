@@ -230,6 +230,49 @@ func TestE2E(t *testing.T) {
 		assert.Equal(t, "hello world", string(data))
 	})
 
+	t.Run("FileSystem/DownloadFileStreamProgress", func(t *testing.T) {
+		var lastProgress DownloadProgress
+		stream, err := sandbox.FileSystem.DownloadFileStream(ctx, helloPath, WithDownloadProgress(func(progress DownloadProgress) {
+			lastProgress = progress
+		}))
+		require.NoError(t, err)
+		defer stream.Close()
+
+		data, err := io.ReadAll(stream)
+		require.NoError(t, err)
+		assert.Equal(t, "hello world", string(data))
+		assert.Equal(t, int64(len(data)), lastProgress.BytesReceived)
+		assert.Equal(t, int64(len(data)), lastProgress.TotalBytes)
+	})
+
+	t.Run("FileSystem/UploadFileStream", func(t *testing.T) {
+		streamPath := textDir + "/upload-stream.bin"
+		payload := strings.Repeat("upload-stream-content-", 1024)
+		var lastProgress UploadProgress
+
+		err := sandbox.FileSystem.UploadFileStream(
+			ctx,
+			strings.NewReader(payload),
+			streamPath,
+			WithUploadProgress(func(p UploadProgress) { lastProgress = p }),
+		)
+		require.NoError(t, err)
+
+		data, err := sandbox.FileSystem.DownloadFile(ctx, streamPath, nil)
+		require.NoError(t, err)
+		assert.Equal(t, payload, string(data))
+		assert.Equal(t, int64(len(payload)), lastProgress.BytesSent)
+	})
+
+	t.Run("FileSystem/UploadFileStreamCancellation", func(t *testing.T) {
+		cancelCtx, cancel := context.WithCancel(ctx)
+		time.AfterFunc(100*time.Millisecond, cancel)
+
+		err := sandbox.FileSystem.UploadFileStream(cancelCtx, endlessReader{}, textDir+"/upload-stream-cancel.bin")
+		require.Error(t, err)
+		assert.True(t, containsAny(strings.ToLower(err.Error()), "context canceled", "context deadline exceeded"))
+	})
+
 	t.Run("FileSystem/FindFiles", func(t *testing.T) {
 		findResult, findErr := sandbox.FileSystem.FindFiles(ctx, textDir, "hello")
 		require.NoError(t, findErr)

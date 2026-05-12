@@ -48,27 +48,6 @@ Represents a Daytona Sandbox.
 - `network_block_all` _bool_ - Whether to block all network access for the Sandbox.
 - `network_allow_list` _str_ - Comma-separated list of allowed CIDR network addresses for the Sandbox.
 
-#### AsyncSandbox.\_\_init\_\_
-
-```python
-def __init__(sandbox_dto: SandboxDto,
-             toolbox_api: ApiClient,
-             sandbox_api: SandboxApi,
-             language: str,
-             pool_tracker: AsyncPoolSaturationTracker | None = None,
-             ws_handshake_semaphore: asyncio.Semaphore | None = None)
-```
-
-Initialize a new Sandbox instance.
-
-**Arguments**:
-
-- `sandbox_dto` _SandboxDto_ - The sandbox data from the API.
-- `toolbox_api` _ApiClient_ - API client for toolbox operations.
-- `sandbox_api` _SandboxApi_ - API client for Sandbox operations.
-- `language` _str_ - Language code for the Sandbox code_run.
-- `pool_tracker` _AsyncPoolSaturationTracker | None_ - Tracker for connection pool saturation.
-
 #### AsyncSandbox.refresh\_data
 
 ```python

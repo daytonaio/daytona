@@ -3,9 +3,9 @@
 
 from __future__ import annotations
 
-import threading
 import time
 
+import httpx
 from deprecated import deprecated
 from pydantic import ConfigDict, PrivateAttr
 
@@ -105,7 +105,7 @@ class Sandbox(SandboxDto):
         toolbox_api: ApiClient,
         sandbox_api: SandboxApi,
         language: str,
-        ws_handshake_semaphore: threading.Semaphore | None = None,
+        http_client: httpx.Client,
     ):
         """Initialize a new Sandbox instance.
 
@@ -113,20 +113,29 @@ class Sandbox(SandboxDto):
             sandbox_dto (SandboxDto): The sandbox data from the API.
             toolbox_api (ApiClient): API client for toolbox operations.
             sandbox_api (SandboxApi): API client for Sandbox operations.
+            http_client (httpx.Client): Shared pooled client for file transfers.
         """
         super().__init__(**sandbox_dto.model_dump())
         self.__process_sandbox_dto(sandbox_dto)
         self._sandbox_api: SandboxApi = sandbox_api
+        self._http_client: httpx.Client = http_client
         # Wrap the toolbox API client to inject the sandbox ID into the resource path
         self._toolbox_api: ToolboxApiClientProxy[ApiClient] = ToolboxApiClientProxy(
             toolbox_api, self.id, self.toolbox_proxy_url
         )
 
-        self._fs = FileSystem(FileSystemApi(self._toolbox_api))
+        self._fs = FileSystem(FileSystemApi(self._toolbox_api), http_client=http_client)
         self._git = Git(GitApi(self._toolbox_api))
-        self._process = Process(language, ProcessApi(self._toolbox_api), ws_handshake_semaphore)
-        self._computer_use = ComputerUse(ComputerUseApi(self._toolbox_api))
-        self._code_interpreter = CodeInterpreter(InterpreterApi(self._toolbox_api), ws_handshake_semaphore)
+        self._process = Process(
+            language,
+            ProcessApi(self._toolbox_api),
+            http_client=http_client,
+        )
+        self._computer_use = ComputerUse(ComputerUseApi(self._toolbox_api), http_client=http_client)
+        self._code_interpreter = CodeInterpreter(
+            InterpreterApi(self._toolbox_api),
+            http_client=http_client,
+        )
         self._info_api: InfoApi = InfoApi(self._toolbox_api)
 
     @property
@@ -754,7 +763,7 @@ class Sandbox(SandboxDto):
             self._toolbox_api._api_client,
             self._sandbox_api,
             language,
-            ws_handshake_semaphore=self._process._ws_handshake_semaphore,
+            http_client=self._http_client,
         )
         forked.wait_for_sandbox_start(timeout=0)
         return forked

@@ -17,7 +17,7 @@ from .conftest import make_sandbox_dto
 def make_sandbox(sandbox_dto, mock_toolbox_api_client, mock_sandbox_api):
     from daytona._sync.sandbox import Sandbox
 
-    return Sandbox(sandbox_dto, mock_toolbox_api_client, mock_sandbox_api, "python")
+    return Sandbox(sandbox_dto, mock_toolbox_api_client, mock_sandbox_api, "python", http_client=MagicMock())
 
 
 class TestSandboxInit:

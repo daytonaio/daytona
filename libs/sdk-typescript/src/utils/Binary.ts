@@ -3,8 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Buffer } from 'buffer'
 import { DaytonaError } from '../errors/DaytonaError'
+import { dynamicRequire } from './Import'
+
+let _BufferCtor: typeof Buffer | null = null
+function getBufferCtor(): typeof Buffer {
+  if (!_BufferCtor) _BufferCtor = (dynamicRequire('buffer', '"Buffer" is not supported: ') as any).Buffer
+  return _BufferCtor
+}
 
 /**
  * Converts various data types to Uint8Array
@@ -40,7 +46,7 @@ export function concatUint8Arrays(parts: Uint8Array[]): Uint8Array {
  * Converts Uint8Array to Buffer (uses polyfill in non-Node environments)
  */
 export function toBuffer(data: Uint8Array): Buffer {
-  return Buffer.from(data)
+  return getBufferCtor().from(data)
 }
 
 /**

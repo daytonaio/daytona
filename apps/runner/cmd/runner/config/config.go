@@ -33,6 +33,7 @@ type Config struct {
 	ContainerRuntime                   string        `envconfig:"CONTAINER_RUNTIME"`
 	ContainerNetwork                   string        `envconfig:"CONTAINER_NETWORK"`
 	InterSandboxNetworkEnabled         bool          `envconfig:"INTER_SANDBOX_NETWORK_ENABLED" default:"true"`
+	GpuEnabled                         bool          `envconfig:"GPU_ENABLED" default:"false"`
 	LogFilePath                        string        `envconfig:"LOG_FILE_PATH"`
 	AWSRegion                          string        `envconfig:"AWS_REGION"`
 	AWSEndpointUrl                     string        `envconfig:"AWS_ENDPOINT_URL"`

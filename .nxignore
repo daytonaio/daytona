@@ -1,2 +1,7 @@
 .claude/
 examples/
+# SDK runtime tests are self-contained mini-projects whose deps are installed
+# lazily by libs/sdk-typescript/runtime-tests/run-all.sh into temp dirs at test
+# time. Including them in the Nx graph fails because @nx/vite/plugin tries to
+# load their vite.config.js files before those deps exist.
+libs/sdk-typescript/runtime-tests/

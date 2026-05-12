@@ -5,9 +5,20 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import Any, cast
+from typing import Any, Protocol, cast, runtime_checkable
 
 from .errors import DaytonaError, DaytonaValidationError, create_daytona_error
+
+
+@runtime_checkable
+class CancelEvent(Protocol):
+    """Duck-typed cancellation token. Compatible with ``threading.Event`` and
+    ``asyncio.Event`` (both expose ``is_set()``). When supplied to a streaming
+    download, the next chunk read after the event becomes set raises
+    ``DaytonaError``, closing the underlying HTTP connection."""
+
+    def is_set(self) -> bool:
+        ...
 
 
 @dataclass
@@ -23,6 +34,30 @@ class FileUpload:
 
     source: bytes | str
     destination: str
+
+
+@dataclass
+class DownloadProgress:
+    """Progress information for a streaming download.
+
+    Attributes:
+        bytes_received (int): Cumulative bytes received so far.
+        total_bytes (int | None): Total bytes expected, if known.
+    """
+
+    bytes_received: int
+    total_bytes: int | None = None
+
+
+@dataclass
+class UploadProgress:
+    """Progress information for a streaming upload.
+
+    Attributes:
+        bytes_sent (int): Cumulative bytes sent so far.
+    """
+
+    bytes_sent: int
 
 
 @dataclass

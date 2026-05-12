@@ -91,9 +91,28 @@ async def main():
         config_content = await sandbox.fs.download_file(os.path.join(new_dir, "config.json"))
         print("Config content:", config_content.decode("utf-8"))
 
-        # Stream download — process file content as chunks arrive
-        print("\nStreaming download example:")
-        stream = await sandbox.fs.download_file_stream(os.path.join(new_dir, "config.json"))
+        # Stream upload — accepts bytes, sync IOBase, async file-likes (e.g. aiofiles),
+        # or AsyncIterable[bytes]. Progress fires once per chunk pulled from the source.
+        print("\nStreaming upload with progress:")
+        generated_payload = b"streamed-upload-content-" * 2048  # ~48 KB
+
+        async def chunked_source():
+            for i in range(0, len(generated_payload), 8192):
+                yield generated_payload[i : i + 8192]
+
+        await sandbox.fs.upload_file_stream(
+            chunked_source(),
+            os.path.join(new_dir, "streamed.bin"),
+            on_progress=lambda p: print(f"  uploaded {p.bytes_sent} / {len(generated_payload)} bytes"),
+        )
+
+        # Stream download — process file content as chunks arrive, with progress.
+        # Pass an asyncio.Event as cancel_event to abort a long-running transfer.
+        print("\nStreaming download with progress:")
+        stream = await sandbox.fs.download_file_stream(
+            os.path.join(new_dir, "config.json"),
+            on_progress=lambda p: print(f"  downloaded {p.bytes_received} / {p.total_bytes} bytes"),
+        )
         streamed_chunks = [chunk async for chunk in stream]
         print("Streamed content:", b"".join(streamed_chunks).decode("utf-8"))
 

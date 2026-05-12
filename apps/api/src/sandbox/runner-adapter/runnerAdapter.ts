@@ -130,9 +130,15 @@ export interface RunnerAdapter {
     registry?: DockerRegistry,
   ): Promise<CreateSandboxSnapshotResult | undefined>
 
-  recoverSandbox(sandbox: Sandbox, skipStart?: boolean): Promise<void>
+  recoverSandbox(sandbox: Sandbox, registry?: DockerRegistry, skipStart?: boolean): Promise<void>
 
-  resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void>
+  resizeSandbox(
+    sandboxId: string,
+    cpu?: number,
+    memory?: number,
+    disk?: number,
+    registry?: DockerRegistry,
+  ): Promise<void>
 }
 
 @Injectable()

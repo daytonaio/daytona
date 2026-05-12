@@ -37,6 +37,7 @@ Snapshots can be created using:
 - [local images](#using-local-images)
 - [images from private registries](#using-images-from-private-registries)
 - [the declarative builder](#using-the-declarative-builder)
+- [GPU snapshots](#gpu-snapshots) (for [GPU sandboxes](/docs/en/sandboxes#gpu-sandboxes))
 
 1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 2. Click the **Create Snapshot** button
@@ -46,6 +47,7 @@ Snapshots can be created using:
 - **Image**: Base image for the snapshot. Must include either a tag or a digest (e.g., **`ubuntu:22.04`**). The **`latest`** tag is not allowed. Since images tagged `latest` get frequent updates, only specific tags are supported. Same applies to tags such as `lts` or `stable`, and we recommend avoiding those when defining an image to prevent unexpected behavior.
 - **Entrypoint** (optional): The entrypoint command for the snapshot. Ensure that the entrypoint is a long-running command. If not provided, or if the snapshot does not have an entrypoint, `sleep infinity` will be used as the default.
 - [**Resources**](/docs/en/sandboxes#resources) (optional): The resources you want the underlying Sandboxes to have. By default, Daytona Sandboxes use **1 vCPU**, **1GiB memory**, and **3GiB storage**.
+- **GPU** (optional): Enable the **GPU** option to create a GPU snapshot for [GPU sandboxes](/docs/en/sandboxes#gpu-sandboxes).
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
@@ -401,6 +403,164 @@ Amazon ECR authorization tokens expire after **12 hours**. Update the registry p
 ### Using the declarative builder
 
 [Declarative Builder](/docs/en/declarative-builder) provides a powerful, code-first approach to defining dependencies for Daytona Sandboxes. Instead of importing images from a container registry, you can programmatically define them using the Daytona [SDKs](/docs/en/getting-started#sdks).
+
+### GPU Snapshots
+
+:::caution[Experimental]
+This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
+:::
+
+Daytona provides methods to create GPU snapshots using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots) or programmatically using the Daytona [Python](/docs/en/python-sdk/sync/snapshot), [TypeScript](/docs/en/typescript-sdk/snapshot), [Ruby](/docs/en/ruby-sdk/snapshot), [Go](/docs/en/go-sdk/daytona#SnapshotService), [Java](/docs/en/java-sdk/snapshot) **SDKs**, or [API](/docs/en/tools/api#daytona/tag/snapshots).
+
+GPU snapshots fit into the same snapshot creation flow as other snapshots, but with the additional option to enable the GPU. Create a GPU snapshot first, then use it as the source when creating a [GPU sandbox](/docs/en/sandboxes#gpu-sandboxes).
+
+1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
+2. Click the **Create Snapshot** button
+3. Configure snapshot details and enable the GPU option
+
+To create a GPU-enabled snapshot programmatically, set GPU resources for the snapshot. The `gpu` value defines how many GPU units each sandbox created from this snapshot will request. If `gpu` is not set, it defaults to `0`, which creates a non-GPU snapshot.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+from daytona import Daytona, CreateSnapshotParams, Resources
+
+daytona = Daytona()
+snapshot = daytona.snapshot.create(
+    CreateSnapshotParams(
+        name="my-gpu-snapshot",
+        image="python:3.12",
+        resources=Resources(gpu=1),
+    ),
+)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from "@daytona/sdk";
+
+const daytona = new Daytona();
+const snapshot = await daytona.snapshot.create({
+  name: "my-gpu-snapshot",
+  image: "python:3.12",
+  resources: { gpu: 1 },
+});
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+snapshot = daytona.snapshot.create(
+  Daytona::CreateSnapshotParams.new(
+    name: 'my-gpu-snapshot',
+    image: 'python:3.12',
+    resources: Daytona::Resources.new(gpu: 1)
+  )
+)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+package main
+
+import (
+	"context"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+	client, _ := daytona.NewClient()
+	ctx := context.Background()
+	snapshot, logCh, _ := client.Snapshot.Create(ctx, &types.CreateSnapshotParams{
+		Name:  "my-gpu-snapshot",
+		Image: "python:3.12",
+		Resources: &types.Resources{
+			GPU: 1,
+		},
+	})
+	for range logCh {
+	}
+	_ = snapshot
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Image;
+import io.daytona.sdk.model.Resources;
+import io.daytona.sdk.model.Snapshot;
+
+final class CreateGpuSnapshot {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            Resources resources = new Resources();
+            resources.setGpu(1);
+            Snapshot snapshot = daytona.snapshot().create(
+                "my-gpu-snapshot",
+                Image.base("python:3.12"),
+                resources,
+                null
+            );
+        }
+    }
+}
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/snapshots \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{
+    "name": "my-gpu-snapshot",
+    "imageName": "python:3.12",
+    "gpu": 1
+  }'
+```
+
+</TabItem>
+</Tabs>
+
+##### GPU Snapshot requirements
+
+Building a custom image for a GPU snapshot requires Ubuntu 24.04 and compatible NVIDIA userspace packages. Include the following in your snapshot Dockerfile:
+
+```dockerfile
+ARG NVIDIA_DRIVER_VERSION=580.126.20
+ARG UBUNTU_PKG_SUFFIX=0ubuntu0.24.04.2
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update -qq \
+ && apt-get install -y -qq --no-install-recommends \
+      nvidia-utils-580-server=${NVIDIA_DRIVER_VERSION}-${UBUNTU_PKG_SUFFIX} \
+      libnvidia-compute-580-server=${NVIDIA_DRIVER_VERSION}-${UBUNTU_PKG_SUFFIX} \
+      python3 \
+      ca-certificates \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY verify-cuda.sh /verify-cuda.sh
+RUN chmod +x /verify-cuda.sh
+
+LABEL nvidia.driver.version="${NVIDIA_DRIVER_VERSION}"
+```
 
 ### Resources
 
@@ -852,11 +1012,11 @@ Agents can seamlessly interact with these services since they run within the sam
 Docker-in-Docker Sandboxes require additional resources due to the Docker daemon overhead. Consider allocating at least 2 vCPU and 4GiB of memory for optimal performance.
 :::
 
-### Create a Docker-in-Docker Snapshot
+#### Create a Docker-in-Docker Snapshot
 
 Daytona provides an option to create a snapshot with Docker support using pre-built Docker-in-Docker images as a base or by manually installing Docker in a custom image.
 
-#### Using pre-built images
+##### Using pre-built images
 
 The following base images are widely used for creating Docker-in-Docker snapshots or can be used as a base for a custom Dockerfile:
 
@@ -864,7 +1024,7 @@ The following base images are widely used for creating Docker-in-Docker snapshot
 - `docker:28.3.3-dind-rootless`: rootless Docker-in-Docker for enhanced security
 - `docker:28.3.2-dind-alpine3.22`: Docker-in-Docker image with Alpine 3.22
 
-#### Using manual installation
+##### Using manual installation
 
 Alternatively, install Docker manually in a custom Dockerfile:
 
@@ -874,7 +1034,7 @@ FROM ubuntu:22.04
 RUN curl -fsSL https://get.docker.com | VERSION=28.3.3 sh -
 ```
 
-### Run Docker Compose in a Sandbox
+#### Run Docker Compose in a Sandbox
 
 Docker Compose allows you to define and run multi-container applications. With Docker-in-Docker enabled in a Daytona Sandbox, you can use Docker Compose to orchestrate services like databases, caches, and application containers.
 
@@ -1037,7 +1197,7 @@ services:
 
 Daytona Sandboxes can run a Kubernetes cluster inside the sandbox. Kubernetes runs entirely inside the sandbox and is removed when the sandbox is deleted, keeping environments secure and reproducible.
 
-### Run k3s in a Sandbox
+##### Run k3s in a Sandbox
 
 The following snippet installs and starts a k3s cluster inside a sandbox and lists all running pods.
 

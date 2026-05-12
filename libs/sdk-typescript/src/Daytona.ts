@@ -25,19 +25,14 @@ import { Image } from './Image'
 import { Sandbox, PaginatedSandboxes } from './Sandbox'
 import { SnapshotService } from './Snapshot'
 import { VolumeService } from './Volume'
-import * as packageJson from '../package.json'
+import { getPackageInfo, dynamicRequire } from './utils/Import'
+
+const packageJson = getPackageInfo()
 import { processStreamingResponse } from './utils/Stream'
 import { DaytonaEnvReader, RUNTIME, Runtime } from './utils/Runtime'
 import { WithInstrumentation } from './utils/otel.decorator'
 import { context, trace, propagation, SpanStatusCode } from '@opentelemetry/api'
-import { NodeSDK } from '@opentelemetry/sdk-node'
-import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
-import { CompressionAlgorithm } from '@opentelemetry/otlp-exporter-base'
-import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
-import { resourceFromAttributes } from '@opentelemetry/resources'
-import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api'
+import type { NodeSDK } from '@opentelemetry/sdk-node'
 
 export const CODE_TOOLBOX_LANGUAGE_LABEL = 'code-toolbox-language'
 
@@ -343,6 +338,16 @@ export class Daytona implements AsyncDisposable {
     if (!otelEnabled) {
       return
     }
+
+    const errPrefix = 'OpenTelemetry instrumentation is not supported: '
+    const { diag, DiagConsoleLogger, DiagLogLevel } = dynamicRequire('@opentelemetry/api', errPrefix)
+    const { NodeSDK } = dynamicRequire('@opentelemetry/sdk-node', errPrefix)
+    const { HttpInstrumentation } = dynamicRequire('@opentelemetry/instrumentation-http', errPrefix)
+    const { BatchSpanProcessor } = dynamicRequire('@opentelemetry/sdk-trace-base', errPrefix)
+    const { OTLPTraceExporter } = dynamicRequire('@opentelemetry/exporter-trace-otlp-http', errPrefix)
+    const { CompressionAlgorithm } = dynamicRequire('@opentelemetry/otlp-exporter-base', errPrefix)
+    const { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } = dynamicRequire('@opentelemetry/semantic-conventions', errPrefix)
+    const { resourceFromAttributes } = dynamicRequire('@opentelemetry/resources', errPrefix)
 
     diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO)
 

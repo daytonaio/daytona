@@ -104,9 +104,24 @@ async function main() {
     const reportBuffer = await sandbox.fs.downloadFile(path.join(newDir, 'config.json'))
     console.log('Config content:', reportBuffer.toString())
 
-    //  stream download — process file content as chunks arrive
-    console.log('\nStreaming download example:')
-    const stream = await sandbox.fs.downloadFileStream(path.join(newDir, 'config.json'))
+    //  stream upload — push a Readable straight to the Sandbox without
+    //  buffering the whole payload in memory, with live progress.
+    console.log('\nStreaming upload with progress:')
+    const { Readable } = await import('stream')
+    const generatedPayload = Buffer.from('streamed-upload-content-'.repeat(2048)) // ~48 KB
+    await sandbox.fs.uploadFileStream(Readable.from(generatedPayload), path.join(newDir, 'streamed.bin'), {
+      onProgress: ({ bytesSent }) => console.log(`  uploaded ${bytesSent} / ${generatedPayload.length} bytes`),
+    })
+
+    //  stream download — process file content as chunks arrive, with progress.
+    //  Use an AbortController if you need to cancel a long-running transfer.
+    console.log('\nStreaming download with progress:')
+    const downloadController = new AbortController()
+    const stream = await sandbox.fs.downloadFileStream(path.join(newDir, 'config.json'), {
+      signal: downloadController.signal,
+      onProgress: ({ bytesReceived, totalBytes }) =>
+        console.log(`  downloaded ${bytesReceived} / ${totalBytes ?? '?'} bytes`),
+    })
     const chunks: Buffer[] = []
     await new Promise<void>((resolve, reject) => {
       stream.on('data', (chunk: Buffer) => chunks.push(chunk))

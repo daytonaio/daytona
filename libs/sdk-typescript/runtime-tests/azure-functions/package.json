@@ -1,0 +1,14 @@
+{
+  "name": "runtime-test-azure-functions",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.5.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

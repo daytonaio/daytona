@@ -1,0 +1,5 @@
+{
+  "name": "runtime-test-node-esm",
+  "private": true,
+  "type": "module"
+}

@@ -14,9 +14,7 @@ Handles process and code execution within a Sandbox.
 #### Process.\_\_init\_\_
 
 ```python
-def __init__(language: str,
-             api_client: ProcessApi,
-             ws_handshake_semaphore: threading.Semaphore | None = None)
+def __init__(language: str, api_client: ProcessApi, http_client: httpx.Client)
 ```
 
 Initialize a new Process instance.
@@ -24,6 +22,7 @@ Initialize a new Process instance.
 **Arguments**:
 
 - `api_client` _ProcessApi_ - API client for process operations.
+- `http_client` - Shared httpx.Client whose connection pool the WS upgrade reuses.
 
 #### Process.exec
 

@@ -4,9 +4,12 @@
 package io.daytona.examples;
 
 import io.daytona.sdk.Daytona;
+import io.daytona.sdk.DownloadStreamOptions;
 import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.UploadStreamOptions;
 import io.daytona.sdk.model.FileInfo;
 
+import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -33,9 +36,27 @@ public class FileOperations {
                 byte[] downloaded = sandbox.getFs().downloadFile("test-dir/hello.txt");
                 System.out.println("Content: " + new String(downloaded, StandardCharsets.UTF_8));
 
-                // Stream download — process file content as chunks arrive
-                System.out.println("Streaming download hello.txt");
-                try (java.io.InputStream stream = sandbox.getFs().downloadFileStream("test-dir/hello.txt")) {
+                // Stream upload — push an InputStream to the Sandbox with live
+                // progress reporting. (This example builds the payload in a byte[]
+                // for brevity; real-world code should pass a FileInputStream or
+                // similar to avoid loading the whole file into memory.)
+                System.out.println("Streaming upload streamed.bin with progress");
+                byte[] generatedPayload = ("streamed-upload-content-").repeat(2048)
+                        .getBytes(StandardCharsets.UTF_8);
+                sandbox.getFs().uploadFileStream(
+                        new ByteArrayInputStream(generatedPayload),
+                        "test-dir/streamed.bin",
+                        new UploadStreamOptions().setOnProgress(p -> System.out.println(
+                                "  uploaded " + p.getBytesSent() + " / " + generatedPayload.length + " bytes")));
+
+                // Stream download — process file content as chunks arrive, with progress.
+                System.out.println("Streaming download hello.txt with progress");
+                try (java.io.InputStream stream = sandbox.getFs().downloadFileStream(
+                        "test-dir/hello.txt",
+                        new DownloadStreamOptions().setOnProgress(p -> System.out.println(
+                                "  downloaded " + p.getBytesReceived() + " / "
+                                        + p.getTotalBytes().stream().boxed().findFirst().map(String::valueOf).orElse("?")
+                                        + " bytes")))) {
                     byte[] streamed = stream.readAllBytes();
                     System.out.println("Streamed content: " + new String(streamed, StandardCharsets.UTF_8));
                 } catch (java.io.IOException e) {

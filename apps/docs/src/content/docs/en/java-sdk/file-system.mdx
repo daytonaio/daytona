@@ -108,6 +108,26 @@ The caller is responsible for closing the returned stream.
 
 - `io.daytona.sdk.exception.DaytonaException` - if the file does not exist or access is denied
 
+#### downloadFileStream()
+```java
+public InputStream downloadFileStream(String remotePath, DownloadStreamOptions options) throws io.daytona.sdk.exception.DaytonaException
+```
+
+Downloads a single file from the Sandbox as a stream with configurable options.
+
+**Parameters**:
+
+- `remotePath` _String_ - source file path in the Sandbox
+- `options` _DownloadStreamOptions_ - download options including timeout and progress callback
+
+**Returns**:
+
+- `InputStream` - an InputStream streaming the file content
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if download fails
+
 #### uploadFile()
 ```java
 public void uploadFile(byte[] content, String remotePath)
@@ -123,6 +143,37 @@ Uploads in-memory file content to a Sandbox path.
 **Throws**:
 
 - `io.daytona.sdk.exception.DaytonaException` - if upload fails
+
+#### uploadFileStream()
+```java
+public void uploadFileStream(InputStream source, String remotePath, UploadStreamOptions options)
+```
+
+Streams an upload to a Sandbox path without buffering the source. The bytes are
+piped through a progress-counting wrapper directly into a streaming multipart
+request, so heap usage stays flat regardless of source size.
+
+**Parameters**:
+
+- `source` _InputStream_ - the data source; the caller retains ownership and is responsible for closing it
+- `remotePath` _String_ - destination file path in the Sandbox
+- `options` _UploadStreamOptions_ - upload options including timeout, cancellation, and progress callback
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if upload fails
+
+#### uploadFileStream()
+```java
+public void uploadFileStream(InputStream source, String remotePath)
+```
+
+Convenience overload using default options.
+
+**Parameters**:
+
+- `source` _InputStream_ -
+- `remotePath` _String_ -
 
 #### listFiles()
 ```java

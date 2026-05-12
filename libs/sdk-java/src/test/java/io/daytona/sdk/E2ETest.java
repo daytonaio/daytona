@@ -47,6 +47,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.OptionalLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -263,6 +265,87 @@ class E2ETest {
         try (InputStream stream = sandbox.getFs().downloadFileStream(fsDir + "/stream.txt")) {
             assertThat(new String(stream.readAllBytes(), StandardCharsets.UTF_8)).isEqualTo("stream content");
         }
+    }
+
+    @Test
+    @Order(16)
+    void downloadFileStreamWithProgress() throws Exception {
+        sandbox.getFs().uploadFile("progress test".getBytes(StandardCharsets.UTF_8), fsDir + "/progress.txt");
+        AtomicReference<DownloadProgress> lastProgress = new AtomicReference<DownloadProgress>();
+
+        try (InputStream stream = sandbox.getFs().downloadFileStream(
+                fsDir + "/progress.txt",
+                new DownloadStreamOptions().setOnProgress(lastProgress::set))) {
+            byte[] content = stream.readAllBytes();
+            assertThat(new String(content, StandardCharsets.UTF_8)).isEqualTo("progress test");
+            assertThat(lastProgress.get().getBytesReceived()).isEqualTo(content.length);
+            assertThat(lastProgress.get().getTotalBytes()).satisfies(totalBytes -> {
+                if (totalBytes.isPresent()) {
+                    assertThat(totalBytes.getAsLong()).isEqualTo(content.length);
+                }
+            });
+        }
+    }
+
+    @Test
+    @Order(17)
+    void downloadFileStreamCancellationCancelsRequest() {
+        String remotePath = fsDir + "/cancel-stream.bin";
+        ExecuteResponse createFile = sandbox.getProcess().executeCommand(
+                "python - <<'PY'\n"
+                        + "with open('" + remotePath + "', 'wb') as f:\n"
+                        + "    chunk = b'x' * (1024 * 1024)\n"
+                        + "    for _ in range(16):\n"
+                        + "        f.write(chunk)\n"
+                        + "PY"
+        );
+        assertThat(createFile.getExitCode()).isEqualTo(0);
+
+        CancellationToken token = new CancellationToken();
+        Thread canceller = cancelAfter(token, 50L);
+
+        try {
+            assertThatThrownBy(() -> {
+                try (InputStream stream = sandbox.getFs().downloadFileStream(
+                        remotePath,
+                        new DownloadStreamOptions().setCancellationToken(token))) {
+                    byte[] buffer = new byte[1024];
+                    while (stream.read(buffer) != -1) {
+                        Thread.sleep(10L);
+                    }
+                }
+            })
+                    .isInstanceOf(DaytonaException.class)
+                    .hasMessageContaining("cancel");
+        } finally {
+            try {
+                canceller.join(1000L);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    @Test
+    @Order(17)
+    void uploadFileStreamWithProgress() throws Exception {
+        byte[] payload = ("upload-stream-content-" + java.util.UUID.randomUUID()).repeat(512).getBytes(StandardCharsets.UTF_8);
+        java.util.List<UploadProgress> updates = new java.util.ArrayList<UploadProgress>();
+
+        sandbox.getFs().uploadFileStream(
+                new java.io.ByteArrayInputStream(payload),
+                fsDir + "/upload-stream.bin",
+                new UploadStreamOptions().setOnProgress(updates::add));
+
+        try (InputStream stream = sandbox.getFs().downloadFileStream(fsDir + "/upload-stream.bin")) {
+            byte[] roundTripped = stream.readAllBytes();
+            assertThat(roundTripped).isEqualTo(payload);
+        }
+
+        assertThat(updates).isNotEmpty();
+        UploadProgress last = updates.get(updates.size() - 1);
+        assertThat(last.getBytesSent()).isEqualTo(payload.length);
+        assertThat(updates).extracting(UploadProgress::getBytesSent).isSorted();
     }
 
     @Test
@@ -581,6 +664,19 @@ class E2ETest {
 
     private String messageOf(Throwable error) {
         return error == null ? "" : String.valueOf(error.getMessage());
+    }
+
+    private Thread cancelAfter(CancellationToken token, long delayMillis) {
+        Thread thread = new Thread(() -> {
+            try {
+                Thread.sleep(delayMillis);
+                token.cancel();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        thread.start();
+        return thread;
     }
 
     private String fileUri(String path) {

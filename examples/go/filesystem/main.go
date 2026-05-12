@@ -4,9 +4,11 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
@@ -66,8 +68,32 @@ func main() {
 	}
 	log.Printf("✓ Downloaded file content: %s\n", string(downloadedContent))
 
-	// Stream download — process file content as chunks arrive
-	stream, err := sandbox.FileSystem.DownloadFileStream(ctx, testPath)
+	// Stream upload — push any io.Reader straight to the sandbox without
+	// buffering the whole payload, with live progress reporting.
+	streamedPath := "/tmp/streamed.bin"
+	generatedPayload := []byte(strings.Repeat("streamed-upload-content-", 2048)) // ~48 KB
+	uploadErr := sandbox.FileSystem.UploadFileStream(
+		ctx,
+		bytes.NewReader(generatedPayload),
+		streamedPath,
+		daytona.WithUploadProgress(func(p daytona.UploadProgress) {
+			log.Printf("  uploaded %d / %d bytes\n", p.BytesSent, len(generatedPayload))
+		}),
+	)
+	if uploadErr != nil {
+		log.Fatalf("Failed to stream upload: %v", uploadErr)
+	}
+	log.Printf("✓ Streamed upload to %s (%d bytes)\n", streamedPath, len(generatedPayload))
+
+	// Stream download — process file content as chunks arrive, with progress.
+	// Cancel a long-running transfer by cancelling the context.
+	stream, err := sandbox.FileSystem.DownloadFileStream(
+		ctx,
+		testPath,
+		daytona.WithDownloadProgress(func(p daytona.DownloadProgress) {
+			log.Printf("  downloaded %d / %d bytes\n", p.BytesReceived, p.TotalBytes)
+		}),
+	)
 	if err != nil {
 		log.Fatalf("Failed to stream download file: %v", err)
 	}

@@ -2,12 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
-import asyncio
 import re
 from collections.abc import Awaitable, Callable
 
-import websockets
-from websockets.asyncio.client import connect
+import aiohttp
 
 from daytona_toolbox_api_client_async import (
     CodeRunRequest,
@@ -24,7 +22,7 @@ from daytona_toolbox_api_client_async import (
 
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
-from .._utils.stream import std_demux_stream
+from .._utils.stream import std_demux_stream_aio
 from .._utils.timeout import http_timeout
 from ..common.charts import parse_chart
 from ..common.process import (
@@ -38,6 +36,7 @@ from ..common.process import (
 )
 from ..common.pty import PtySize
 from ..handle.async_pty_handle import AsyncPtyHandle
+from ..internal.shared_session import http_session_of
 
 
 class AsyncProcess:
@@ -47,7 +46,6 @@ class AsyncProcess:
         self,
         language: str,
         api_client: ProcessApi,
-        ws_handshake_semaphore: asyncio.Semaphore | None = None,
     ):
         """Initialize a new Process instance.
 
@@ -56,7 +54,28 @@ class AsyncProcess:
         """
         self._language: str = language
         self._api_client: ProcessApi = api_client
-        self._ws_handshake_semaphore: asyncio.Semaphore | None = ws_handshake_semaphore
+
+    async def _open_ws(
+        self,
+        url: str,
+        headers: dict[str, str],
+    ) -> aiohttp.ClientWebSocketResponse:
+        return await http_session_of(self._api_client.api_client).ws_connect(url, headers=headers)
+
+    async def _consume_log_websocket(
+        self,
+        url: str,
+        headers: dict[str, str],
+        on_stdout: OutputHandler[str],
+        on_stderr: OutputHandler[str],
+    ) -> None:
+        """Open a log-streaming WebSocket, demultiplex stdout/stderr until EOF, then close."""
+        ws = await self._open_ws(url, headers)
+        try:
+            await std_demux_stream_aio(ws, on_stdout, on_stderr)
+        finally:
+            if not ws.closed:
+                _ = await ws.close()
 
     @intercept_errors(message_prefix="Failed to execute command: ")
     @with_instrumentation()
@@ -433,18 +452,7 @@ class AsyncProcess:
 
         url = re.sub(r"^http", "ws", url)
 
-        if self._ws_handshake_semaphore is not None:
-            _ = await self._ws_handshake_semaphore.acquire()
-        _sem_released = False
-        try:
-            async with websockets.connect(url, additional_headers=headers) as ws:
-                if self._ws_handshake_semaphore is not None:
-                    self._ws_handshake_semaphore.release()
-                    _sem_released = True
-                await std_demux_stream(ws, on_stdout, on_stderr)
-        finally:
-            if self._ws_handshake_semaphore is not None and not _sem_released:
-                self._ws_handshake_semaphore.release()
+        await self._consume_log_websocket(url, headers, on_stdout, on_stderr)
 
     @intercept_errors(message_prefix="Failed to get entrypoint logs: ")
     @with_instrumentation()
@@ -495,18 +503,7 @@ class AsyncProcess:
 
         url = re.sub(r"^http", "ws", url)
 
-        if self._ws_handshake_semaphore is not None:
-            _ = await self._ws_handshake_semaphore.acquire()
-        _sem_released = False
-        try:
-            async with websockets.connect(url, additional_headers=headers) as ws:
-                if self._ws_handshake_semaphore is not None:
-                    self._ws_handshake_semaphore.release()
-                    _sem_released = True
-                await std_demux_stream(ws, on_stdout, on_stderr)
-        finally:
-            if self._ws_handshake_semaphore is not None and not _sem_released:
-                self._ws_handshake_semaphore.release()
+        await self._consume_log_websocket(url, headers, on_stdout, on_stderr)
 
     @intercept_errors(message_prefix="Failed to send session command input: ")
     async def send_session_command_input(self, session_id: str, command_id: str, data: str) -> None:
@@ -637,15 +634,8 @@ class AsyncProcess:
         )
         url = re.sub(r"^http", "ws", url)
 
-        if self._ws_handshake_semaphore is not None:
-            _ = await self._ws_handshake_semaphore.acquire()
-        try:
-            ws = await connect(url, additional_headers=headers)
-        finally:
-            if self._ws_handshake_semaphore is not None:
-                self._ws_handshake_semaphore.release()
+        ws = await self._open_ws(url, headers)
 
-        # Create resize and kill handlers
         async def resize_handler(pty_size: PtySize) -> PtySessionInfo:
             return await self.resize_pty_session(session_id, pty_size)
 
@@ -659,7 +649,14 @@ class AsyncProcess:
             handle_resize=resize_handler,
             handle_kill=kill_handler,
         )
-        await handle.wait_for_connection()
+        # If wait_for_connection() raises (handshake timeout / server-side error / cancel),
+        # the caller never sees the handle and cannot call disconnect(), so we MUST close
+        # the websocket and the per-call session ourselves before propagating the error.
+        try:
+            await handle.wait_for_connection()
+        except BaseException:
+            await handle.disconnect()
+            raise
         return handle
 
     @intercept_errors(message_prefix="Failed to list PTY sessions: ")

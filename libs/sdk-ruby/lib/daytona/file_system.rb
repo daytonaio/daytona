@@ -162,10 +162,17 @@ module Daytona
     #   based on the sandbox working directory.
     # @param timeout [Integer] Timeout for the download operation in seconds. 0 means no timeout.
     #   Default is 30 minutes.
+    # @param on_progress [Proc, nil] Optional callback invoked with a Daytona::DownloadProgress
+    #   struct containing bytes_received (Integer) and total_bytes (Integer or nil).
+    # @param cancel_event [#set?, nil] Optional cancellation token (anything responding to +set?+;
+    #   the standard library's +Concurrent::Event+ or a small ad-hoc object both work). When set
+    #   during streaming, the next chunk raises Daytona::Sdk::Error and the underlying HTTP
+    #   connection is torn down.
     # @yield [chunk] Yields each chunk of file content as it arrives
     # @yieldparam chunk [String] A binary string chunk of file content
     # @return [Enumerator, nil] An Enumerator yielding chunks if no block given, nil otherwise
-    # @raise [Daytona::Sdk::Error] If the file does not exist or the operation fails
+    # @raise [Daytona::Sdk::Error] If the file does not exist, the operation fails, or
+    #   +cancel_event+ is set during streaming
     #
     # @example Stream to a local file without loading into memory
     #   File.open("local_copy.bin", "wb") do |f|
@@ -175,11 +182,12 @@ module Daytona
     # @example Collect chunks with an Enumerator
     #   content = sandbox.fs.download_file_stream("workspace/data.json").reduce(:+)
     #   puts content
-    def download_file_stream(remote_path, timeout: 30 * 60, &)
-      return enum_for(__method__, remote_path, timeout:) unless block_given?
+    def download_file_stream(remote_path, timeout: 30 * 60, on_progress: nil, cancel_event: nil, &)
+      return enum_for(__method__, remote_path, timeout:, on_progress:, cancel_event:) unless block_given?
 
       FileTransfer.stream_download(api_client: toolbox_api.api_client, remote_path: remote_path,
-                                   timeout: timeout, &)
+                                   timeout: timeout, on_progress: on_progress,
+                                   cancel_event: cancel_event, &)
       nil
     rescue StandardError => e
       raise Sdk::Error, "Failed to download file: #{e.message}"
@@ -221,6 +229,36 @@ module Daytona
           toolbox_api.upload_file(remote_path, file)
         end
       end
+    rescue StandardError => e
+      raise Sdk::Error, "Failed to upload file: #{e.message}"
+    end
+
+    # Streams +source+ to the Sandbox without buffering its contents in memory, with
+    # optional progress reporting.
+    #
+    # @param source [String, IO] A local file path or any IO-like object responding to
+    #   +read(n)+. Strings that don't reference an existing file are uploaded as their
+    #   raw bytes (still streamed, just from memory).
+    # @param remote_path [String] Destination path in the Sandbox.
+    # @param timeout [Integer] Timeout in seconds. 0 means no timeout. Default 30 minutes.
+    # @param on_progress [Proc, nil] Optional callback invoked with a
+    #   +Daytona::UploadProgress+ struct as libcurl reports bytes actually uploaded.
+    # @param cancel_event [#set?, nil] Optional cancellation token. When set while
+    #   staging a non-file source or during the libcurl upload, the operation raises
+    #   Daytona::Sdk::Error and the in-progress upload is aborted (no destination file
+    #   is left on the sandbox thanks to the daemon's atomic-rename behaviour).
+    # @return [void]
+    # @raise [Daytona::Sdk::Error] If the operation fails or +cancel_event+ is set.
+    #
+    # @example
+    #   File.open("large.bin", "rb") do |f|
+    #     sandbox.fs.upload_file_stream(f, "tmp/large.bin",
+    #       on_progress: ->(p) { puts "#{p.bytes_sent} bytes sent" })
+    #   end
+    def upload_file_stream(source, remote_path, timeout: 30 * 60, on_progress: nil, cancel_event: nil)
+      FileTransfer.stream_upload(api_client: toolbox_api.api_client, remote_path: remote_path,
+                                 source: source, timeout: timeout, on_progress: on_progress,
+                                 cancel_event: cancel_event)
     rescue StandardError => e
       raise Sdk::Error, "Failed to upload file: #{e.message}"
     end

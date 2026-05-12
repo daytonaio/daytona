@@ -6,14 +6,18 @@ import asyncio
 import codecs
 import inspect
 from collections.abc import AsyncIterator, Awaitable, Callable
-from typing import TypeVar, cast
+from typing import TYPE_CHECKING, TypeVar, cast
 
-import httpx
-import websockets
-from websockets.asyncio.connection import Connection
+import aiohttp
+from httpx_ws import WebSocketDisconnect
+from wsproto.events import BytesMessage, CloseConnection, TextMessage
 
 from ..common.errors import DaytonaError
 from ..common.process import MAX_PREFIX_LEN, STDERR_PREFIX, STDOUT_PREFIX, OutputHandler
+
+if TYPE_CHECKING:
+    from aiohttp import ClientSession, ClientWebSocketResponse
+    from httpx_ws import WebSocketSession
 
 T = TypeVar("T")
 
@@ -38,10 +42,15 @@ async def process_streaming_response(
     method: str = "GET",
     chunk_timeout: float = 2.0,
     require_consecutive_termination: bool = True,
+    session: "ClientSession | None" = None,
 ) -> None:
     """
-    Process a streaming response from a URL. Stream will terminate if the server-side stream
-    ends or if the should_terminate function returns True.
+    Process a streaming response from a URL using aiohttp. Stream will terminate if the
+    server-side stream ends or if the should_terminate function returns True.
+
+    When *session* is provided, the request reuses the caller's pooled aiohttp.ClientSession
+    so this stream shares the SDK's single TCP/TLS pool. When *session* is None (sync code
+    invoking via asyncio.run, or stand-alone use) a throwaway session is created per call.
 
     Args:
         url: The URL to stream from.
@@ -52,14 +61,24 @@ async def process_streaming_response(
         chunk_timeout: The timeout for each chunk.
         require_consecutive_termination: Whether to require two consecutive termination signals
         to terminate the stream.
+        session: Optional shared aiohttp session. When None, a per-call session is created.
     """
-    async with httpx.AsyncClient(timeout=None) as client:
-        async with client.stream(method, url, headers=headers) as response:
-            stream: AsyncIterator[bytes] = response.aiter_bytes()
+    owned_session: ClientSession | None = None
+    if session is None:
+        # No shared session means we're called from sync code (asyncio.run wrapper) or a
+        # caller that wants a per-call session. Use a fresh aiohttp.ClientSession.
+        owned_session = aiohttp.ClientSession(trust_env=True)
+        active_session = owned_session
+    else:
+        active_session = session
+
+    try:
+        async with active_session.request(method, url, headers=headers) as response:
+            response.raise_for_status()
+            stream = response.content.iter_any()
             next_chunk: asyncio.Task[bytes | None] | None = None
             timeout_task: asyncio.Task[None] | None = None
             exit_check_streak = 0
-            # Use incremental decoder to properly handle UTF-8 sequences split across chunks
             decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
 
             try:
@@ -72,11 +91,9 @@ async def process_streaming_response(
                     assert timeout_task is not None
 
                     done, pending = await asyncio.wait({next_chunk, timeout_task}, return_when=asyncio.FIRST_COMPLETED)
-                    # Pending tasks remain active for the next loop iteration, so keep references intact
                     _ = pending
 
                     if next_chunk in done:
-                        # Cancel timeout task and handle any cancellation errors
                         _ = timeout_task.cancel()
                         try:
                             await timeout_task
@@ -87,19 +104,20 @@ async def process_streaming_response(
 
                         try:
                             chunk = cast(bytes | None, next_chunk.result())
-                        except httpx.RemoteProtocolError as e:
-                            if "peer closed connection without sending complete message body" in str(e):
+                        except aiohttp.ClientPayloadError as e:
+                            # Match the prior httpx.RemoteProtocolError compatibility — daemon
+                            # closing the stream mid-flight is an expected end-of-logs signal.
+                            if "Response payload is not completed" in str(e) or "TransferEncoding" in str(e):
                                 break
-                            raise e
+                            raise
 
                         next_chunk = None
 
-                        if chunk is None:
+                        if not chunk:
                             break
 
-                        # Use final=False to buffer incomplete UTF-8 sequences for the next chunk
                         await _invoke(on_chunk, decoder.decode(chunk, final=False))
-                        exit_check_streak = 0  # Reset on activity
+                        exit_check_streak = 0
 
                     elif timeout_task in done:
                         timeout_task = None
@@ -114,12 +132,10 @@ async def process_streaming_response(
                         else:
                             exit_check_streak = 0
             finally:
-                # Flush any remaining buffered bytes from the decoder
                 remaining = decoder.decode(b"", final=True)
                 if remaining:
                     await _invoke(on_chunk, remaining)
 
-                # Final cleanup - ensure any remaining tasks are cancelled
                 if timeout_task is not None:
                     _ = timeout_task.cancel()
                     try:
@@ -134,9 +150,12 @@ async def process_streaming_response(
                         await next_chunk
                     except asyncio.CancelledError:
                         pass
-                    except httpx.RemoteProtocolError as e:
-                        if "peer closed connection without sending complete message body" not in str(e):
-                            raise e
+                    except aiohttp.ClientPayloadError as e:
+                        if "Response payload is not completed" not in str(e):
+                            raise
+    finally:
+        if owned_session is not None:
+            await owned_session.close()
 
 
 async def _invoke(handler: OutputHandler[str], text: str) -> None:
@@ -146,55 +165,138 @@ async def _invoke(handler: OutputHandler[str], text: str) -> None:
         await result
 
 
-async def std_demux_stream(
-    connection: Connection,
+async def std_demux_stream_aio(
+    ws: "ClientWebSocketResponse",
     on_stdout: OutputHandler[str],
     on_stderr: OutputHandler[str],
 ) -> None:
     """
-    Demultiplex a WebSocket stream into separate stdout and stderr streams.
+    Demultiplex an aiohttp websocket stream into stdout/stderr.
 
-    Accepts both sync and async callbacks. Async callbacks are awaited.
-    Blocking operations inside sync callbacks may cause WebSocket
-    disconnections — use async callbacks or async libraries to avoid this.
+    aiohttp returns WSMessage objects with a *type* that we normalize at this single
+    boundary: TEXT/BINARY → bytes; ERROR → raise; CLOSE/CLOSED/CLOSING with code in
+    {None, 1000} → clean EOF; any other close code → raise (so log/PTY consumers don't
+    silently swallow daemon-side failures).
+
+    Accepts both sync and async callbacks. Async callbacks are awaited. Blocking
+    operations inside sync callbacks may delay WebSocket reads — use async callbacks
+    or async libraries to avoid this.
 
     Args:
-        connection: The WebSocket connection to demultiplex.
+        ws: The aiohttp ClientWebSocketResponse to demultiplex.
         on_stdout: Callback function for stdout messages (sync or async).
         on_stderr: Callback function for stderr messages (sync or async).
 
     Raises:
-        DaytonaError: If the WebSocket connection closed error occurs.
+        DaytonaError: If the WebSocket emits an ERROR frame or closes with a non-1000 code.
+    """
+
+    async def recv() -> bytes | str | None:
+        msg = await ws.receive()
+        msg_type = msg.type
+        if msg_type == aiohttp.WSMsgType.BINARY:
+            return cast(bytes, msg.data)
+        if msg_type == aiohttp.WSMsgType.TEXT:
+            return cast(str, msg.data)
+        if msg_type == aiohttp.WSMsgType.ERROR:
+            exc = ws.exception()
+            raise DaytonaError(f"WebSocket error: {exc}") from exc
+        if msg_type == aiohttp.WSMsgType.CLOSE:
+            # Server-sent close: code in msg.data, reason in msg.extra. Treat 1000/None as
+            # clean EOF; surface anything else (e.g. 1011 server error) so log streams
+            # don't silently swallow daemon-side failures.
+            close_code = cast(int, msg.data) if msg.data is not None else None
+            close_reason = msg.extra if msg.extra else None
+            if close_code in (None, 1000):
+                return None
+            detail = close_reason or "WebSocket closed unexpectedly"
+            raise DaytonaError(f"{detail} (close code {close_code})")
+        if msg_type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.CLOSING):
+            close_code = ws.close_code
+            if close_code in (None, 1000):
+                return None
+            raise DaytonaError(f"WebSocket closed unexpectedly (close code {close_code})")
+        return None
+
+    await _std_demux_loop(recv, on_stdout, on_stderr)
+
+
+async def std_demux_stream_httpx_ws(
+    ws: "WebSocketSession",
+    on_stdout: OutputHandler[str],
+    on_stderr: OutputHandler[str],
+) -> None:
+    """
+    Demultiplex a sync httpx_ws WebSocketSession from inside an ``async def`` caller.
+
+    Used by the *sync* SDK's ``async def`` log-streaming methods, which want to share the
+    sync httpx.Client connection pool but still need to be awaited (so user-supplied
+    callbacks can themselves be ``async def``). The blocking ``ws.receive()`` call runs
+    via :func:`asyncio.to_thread` so it doesn't stall the event loop while waiting on
+    the network.
+
+    Close-code handling matches :func:`std_demux_stream_aio`: ``None`` / ``1000`` is clean
+    EOF, anything else raises ``DaytonaError`` so daemon-side failures don't get swallowed.
+    """
+
+    async def recv() -> bytes | str | None:
+        while True:
+            try:
+                event = await asyncio.to_thread(ws.receive)
+            except WebSocketDisconnect as e:
+                if e.code in (None, 1000):
+                    return None
+                raise DaytonaError(f"{e.reason or 'WebSocket closed unexpectedly'} (close code {e.code})") from e
+
+            if isinstance(event, TextMessage):
+                return event.data
+            if isinstance(event, BytesMessage):
+                # wsproto's data is bytes | bytearray; coerce for the typed return.
+                return bytes(event.data)
+            if isinstance(event, CloseConnection):
+                if event.code in (None, 1000):
+                    return None
+                raise DaytonaError(f"{event.reason or 'WebSocket closed unexpectedly'} (close code {event.code})")
+            # Ping / Pong / fragmentary frames — wsproto handles ping auto-reply for us;
+            # keep looping until we get real payload or a close.
+
+    await _std_demux_loop(recv, on_stdout, on_stderr)
+
+
+async def _std_demux_loop(
+    recv: Callable[[], Awaitable[bytes | str | None]],
+    on_stdout: OutputHandler[str],
+    on_stderr: OutputHandler[str],
+) -> None:
+    """Shared stdout/stderr demultiplexer body.
+
+    Callers normalize their transport into a single ``recv()`` coroutine that yields
+    bytes / str / None. This loop owns the binary framing protocol (STDOUT_PREFIX /
+    STDERR_PREFIX markers, partial-prefix safe regions, and incremental UTF-8 decoding)
+    so the transport adapter (currently only aiohttp) doesn't have to duplicate it.
     """
     buf = bytearray()
-    current_data_type = None  # None | "stdout" | "stderr"
+    current_data_type: str | None = None
 
-    # Separate incremental decoders for stdout and stderr to maintain independent UTF-8 decoding state
     stdout_decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
     stderr_decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
 
     async def emit(payload: bytes):
         if not payload:
             return
-        # Use final=False to buffer incomplete UTF-8 sequences for the next chunk
         if current_data_type == "stdout":
             text = stdout_decoder.decode(payload, final=False)
             await _invoke(on_stdout, text)
         elif current_data_type == "stderr":
             text = stderr_decoder.decode(payload, final=False)
             await _invoke(on_stderr, text)
-        # If current is None, drop unlabeled bytes (shouldn't happen with proper labeling)
 
     try:
         while True:
-            try:
-                chunk = await connection.recv()
-            except websockets.exceptions.ConnectionClosedOK:
+            chunk = await recv()
+            if chunk is None:
                 break
-            except websockets.exceptions.ConnectionClosedError as e:
-                raise DaytonaError(f"WebSocket error: {e}") from e
 
-            # WS server sends text frames; convert to bytes so we can match control markers.
             if isinstance(chunk, str):
                 chunk = chunk.encode("utf-8", "ignore")
 
@@ -203,44 +305,32 @@ async def std_demux_stream(
 
             buf += chunk
 
-            # Process as much as we can, preserving only bytes that could be part of a prefix
             while True:
-                # Calculate how many bytes we can safely process
-                # We need to keep bytes that could potentially be the start of a prefix marker
                 safe_len = len(buf)
 
-                # Check if the last few bytes could be part of a prefix marker
                 if len(buf) >= MAX_PREFIX_LEN:
-                    # Check if the last byte could be part of a prefix (must be \x01 or \x02)
                     last_byte = buf[-1]
                     if last_byte not in (0x01, 0x02):
-                        # Last byte can't be part of any prefix, safe to process everything
                         safe_len = len(buf)
                     elif len(buf) >= MAX_PREFIX_LEN + 1:
-                        # Check second-to-last byte if buffer is long enough
                         second_last_byte = buf[-2]
                         if second_last_byte not in (0x01, 0x02):
-                            # Second-to-last byte can't be part of any prefix, safe to process all but last byte
                             safe_len = len(buf) - 1
                         else:
-                            # Both last bytes could be part of prefix, keep MAX_PREFIX_LEN - 1 bytes
                             safe_len = len(buf) - (MAX_PREFIX_LEN - 1)
                     else:
-                        # Buffer is exactly MAX_PREFIX_LEN, keep MAX_PREFIX_LEN - 1 bytes
                         safe_len = len(buf) - (MAX_PREFIX_LEN - 1)
                 else:
-                    # Buffer shorter than MAX_PREFIX_LEN, keep MAX_PREFIX_LEN - 1 bytes
                     safe_len = len(buf) - (MAX_PREFIX_LEN - 1)
 
                 if safe_len <= 0:
                     break
 
-                # Find earliest next marker within the safe region
                 si = buf.find(STDOUT_PREFIX, 0, safe_len)
                 ei = buf.find(STDERR_PREFIX, 0, safe_len)
 
                 next_idx = -1
-                next_kind = None
+                next_kind: str | None = None
                 next_len = 0
 
                 if si != -1 and (ei == -1 or si < ei):
@@ -249,33 +339,27 @@ async def std_demux_stream(
                     next_idx, next_kind, next_len = ei, "stderr", len(STDERR_PREFIX)
 
                 if next_idx == -1:
-                    # No full marker in safe region: emit everything we safely can as payload
                     to_emit = bytes(buf[:safe_len])
                     await emit(to_emit)
                     del buf[:safe_len]
-                    break  # wait for more data to resolve any partial marker at the end
+                    break
 
-                # We found a marker. Emit preceding bytes (if any) under the current stream.
                 if next_idx > 0:
                     to_emit = bytes(buf[:next_idx])
                     await emit(to_emit)
 
-                # Advance past the marker and switch current stream
                 del buf[: next_idx + next_len]
                 current_data_type = next_kind
 
     finally:
-        # Flush any remaining buffered payload on clean close
         if buf and current_data_type in ("stdout", "stderr"):
             if current_data_type == "stdout":
-                # Use final=True to flush any buffered incomplete UTF-8 sequences
                 text = stdout_decoder.decode(bytes(buf), final=True)
                 await _invoke(on_stdout, text)
             else:
                 text = stderr_decoder.decode(bytes(buf), final=True)
                 await _invoke(on_stderr, text)
         else:
-            # Flush any remaining bytes in the decoders even if buf is empty
             stdout_flushed = stdout_decoder.decode(b"", final=True)
             stderr_flushed = stderr_decoder.decode(b"", final=True)
             if stdout_flushed:

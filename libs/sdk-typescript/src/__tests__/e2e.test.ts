@@ -1,7 +1,10 @@
 // Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
+import { randomUUID } from 'node:crypto'
+
 import { Daytona } from '../Daytona'
+import { DaytonaError } from '../errors/DaytonaError'
 import { Image } from '../Image'
 import { Sandbox } from '../Sandbox'
 import { PtyHandle } from '../PtyHandle'
@@ -225,6 +228,100 @@ describe('TypeScript SDK E2E (real Daytona API)', () => {
 
     test('rejects stream download for non-existent file', async () => {
       await expect(sandbox.fs.downloadFileStream('fs-test/does-not-exist.txt')).rejects.toThrow()
+    })
+
+    test('stream download with onProgress tracks bytes', async () => {
+      const content = ('progress-tracking-content-' + randomUUID()).repeat(512)
+      await sandbox.fs.uploadFile(Buffer.from(content), 'fs-test/progress-test.txt')
+
+      const progressUpdates: { bytesReceived: number }[] = []
+      const stream = await sandbox.fs.downloadFileStream('fs-test/progress-test.txt', {
+        onProgress: (progress) => {
+          progressUpdates.push(progress)
+        },
+      })
+      const chunks: Buffer[] = []
+      await new Promise<void>((resolve, reject) => {
+        stream.on('data', (chunk: Buffer) => chunks.push(chunk))
+        stream.on('end', resolve)
+        stream.on('error', reject)
+      })
+
+      expect(Buffer.concat(chunks).toString()).toBe(content)
+      expect(progressUpdates.length).toBeGreaterThan(0)
+      const last = progressUpdates[progressUpdates.length - 1]
+      expect(last.bytesReceived).toBe(content.length)
+      const bytesReceivedValues = progressUpdates.map((p) => p.bytesReceived)
+      expect(bytesReceivedValues).toEqual([...bytesReceivedValues].sort((a, b) => a - b))
+    })
+
+    test('stream download with aborted signal rejects with DaytonaError', async () => {
+      const controller = new AbortController()
+      controller.abort()
+      const error = await sandbox.fs
+        .downloadFileStream('fs-test/stream-test.txt', { signal: controller.signal })
+        .catch((err) => err)
+
+      expect(error).toBeInstanceOf(DaytonaError)
+      expect((error as Error).message).toMatch(/cancel/i)
+    })
+
+    test('download abort surfaces DaytonaError', async () => {
+      // Large enough to require multiple network chunks so abort fires mid-stream.
+      const content = Buffer.from(('download-abort-' + randomUUID()).repeat(1024 * 16))
+      await sandbox.fs.uploadFile(content, 'fs-test/download-abort.bin')
+
+      const controller = new AbortController()
+      const stream = await sandbox.fs.downloadFileStream('fs-test/download-abort.bin', { signal: controller.signal })
+
+      const error = await new Promise<unknown>((resolve, reject) => {
+        stream.once('data', () => controller.abort())
+        stream.once('error', resolve)
+        stream.once('end', () => reject(new Error('Expected download to be aborted')))
+        stream.resume()
+      })
+
+      expect(error).toBeInstanceOf(DaytonaError)
+      expect((error as Error).message).toMatch(/cancel/i)
+    })
+
+    test('uploadFileStream from a Readable source streams with progress', async () => {
+      const { Readable } = require('stream') as typeof import('stream')
+      const content = ('streamed-upload-' + randomUUID()).repeat(512)
+      const source = Readable.from(Buffer.from(content))
+      const progressUpdates: { bytesSent: number }[] = []
+
+      await sandbox.fs.uploadFileStream(source, 'fs-test/upload-stream.txt', {
+        onProgress: (p) => progressUpdates.push(p),
+      })
+
+      const downloaded = await sandbox.fs.downloadFile('fs-test/upload-stream.txt')
+      expect(downloaded.toString()).toBe(content)
+      expect(progressUpdates.length).toBeGreaterThan(0)
+      const last = progressUpdates[progressUpdates.length - 1]
+      expect(last.bytesSent).toBe(Buffer.byteLength(content))
+      const sent = progressUpdates.map((p) => p.bytesSent)
+      expect(sent).toEqual([...sent].sort((a, b) => a - b))
+    })
+
+    test('uploadFileStream with Buffer source reports bytesSent in progress', async () => {
+      const content = Buffer.from(('buffer-upload-progress-' + randomUUID()).repeat(1024))
+      const progressUpdates: { bytesSent: number }[] = []
+
+      await sandbox.fs.uploadFileStream(content, 'fs-test/upload-buffer-progress.txt', {
+        onProgress: (progress) => progressUpdates.push(progress),
+      })
+
+      expect(progressUpdates.length).toBeGreaterThan(0)
+      expect(progressUpdates[progressUpdates.length - 1]).toEqual({ bytesSent: content.length })
+    })
+
+    test('uploadFileStream rejects with a pre-aborted signal', async () => {
+      const controller = new AbortController()
+      controller.abort()
+      await expect(
+        sandbox.fs.uploadFileStream(Buffer.from('x'), 'fs-test/upload-aborted.txt', { signal: controller.signal }),
+      ).rejects.toThrow(/cancelled/i)
     })
 
     test('downloadFiles batch returns multiple files', async () => {

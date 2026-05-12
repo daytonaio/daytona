@@ -55,6 +55,31 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
     error.is_a?(StandardError) ? error.message : error.to_s
   end
 
+  def build_cancel_event
+    Class.new do
+      def initialize
+        @set = false
+      end
+
+      def set!
+        @set = true
+      end
+
+      def set?
+        @set
+      end
+    end.new
+  end
+
+  def with_large_upload_file(size_mb)
+    Dir.mktmpdir do |dir|
+      path = File.join(dir, "upload-#{size_mb}mb.bin")
+      File.open(path, 'wb') { |file| file.truncate(size_mb * 1024 * 1024) }
+
+      yield path
+    end
+  end
+
   context 'Sandbox Lifecycle', order: :defined do
     it 'has a valid non-empty id' do
       expect(@sandbox.id).to be_a(String)
@@ -221,6 +246,86 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
       @sandbox.fs.download_file_stream("#{@fs_dir}/stream.txt") { |chunk| chunks << chunk }
 
       expect(chunks.join).to eq('stream test content')
+    end
+
+    it 'calls on_progress during stream download' do
+      content = 'progress test content'
+      @sandbox.fs.upload_file(content.b, "#{@fs_dir}/progress.txt")
+
+      progress_calls = []
+      @sandbox.fs.download_file_stream(
+        "#{@fs_dir}/progress.txt",
+        on_progress: ->(progress) { progress_calls << progress }
+      ) { |_chunk| nil }
+
+      expect(progress_calls).not_to be_empty
+      expect(progress_calls.last.bytes_received).to eq(content.bytesize)
+      expect(progress_calls.last.total_bytes).to eq(content.bytesize)
+    end
+
+    it 'streams upload from an IO with progress' do
+      content = ('upload-stream-content-' * 512).b
+      progress_calls = []
+
+      io = StringIO.new(content)
+      @sandbox.fs.upload_file_stream(
+        io,
+        "#{@fs_dir}/upload-stream.bin",
+        on_progress: ->(p) { progress_calls << p }
+      )
+
+      chunks = []
+      @sandbox.fs.download_file_stream("#{@fs_dir}/upload-stream.bin") { |chunk| chunks << chunk }
+      expect(chunks.join.b).to eq(content)
+      expect(progress_calls).not_to be_empty
+      expect(progress_calls.last.bytes_sent).to be >= content.bytesize
+    end
+
+    it 'reports upload progress multiple times with increasing bytes_sent', timeout: 300 do
+      progress_values = []
+
+      with_large_upload_file(256) do |local_path|
+        @sandbox.fs.upload_file_stream(
+          local_path,
+          "#{@fs_dir}/upload-progress-large.bin",
+          timeout: 180,
+          on_progress: ->(progress) { progress_values << progress.bytes_sent }
+        )
+
+        unique_progress = progress_values.each_with_object([]) do |bytes_sent, memo|
+          memo << bytes_sent if bytes_sent.positive? && memo.last != bytes_sent
+        end
+
+        expect(unique_progress.length).to be > 1
+        expect(unique_progress).to eq(unique_progress.sort)
+        expect(unique_progress.last).to be >= File.size(local_path)
+      end
+    end
+
+    it 'cancels upload mid-transfer', timeout: 300 do
+      cancel_event = build_cancel_event
+      started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
+      with_large_upload_file(512) do |local_path|
+        cancel_thread = Thread.new do
+          sleep 0.1
+          cancel_event.set!
+        end
+
+        expect do
+          @sandbox.fs.upload_file_stream(
+            local_path,
+            "#{@fs_dir}/upload-cancelled.bin",
+            timeout: 180,
+            cancel_event: cancel_event
+          )
+        end.to raise_error(Daytona::Sdk::Error, /Failed to upload file: Upload cancelled/)
+
+        cancel_thread.join
+      end
+
+      elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - started_at
+      expect(elapsed).to be >= 0.1
     end
 
     it 'finds text content in files' do

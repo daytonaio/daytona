@@ -9,8 +9,7 @@ import json
 from collections.abc import Awaitable, Callable
 from typing import Any, cast
 
-import websockets
-from websockets.asyncio.connection import Connection
+import aiohttp
 
 from daytona_toolbox_api_client_async import PtySessionInfo
 
@@ -59,23 +58,13 @@ class AsyncPtyHandle:
 
     def __init__(
         self,
-        ws: Connection,
+        ws: aiohttp.ClientWebSocketResponse,
         on_data: Callable[[bytes], None] | Callable[[bytes], Awaitable[None]] | None = None,
         session_id: str | None = None,
         handle_resize: Callable[[PtySize], Awaitable[PtySessionInfo]] | None = None,
         handle_kill: Callable[[], Awaitable[None]] | None = None,
     ):
-        """
-        Initialize the PTY handle.
-
-        Args:
-            ws: WebSocket connection to the PTY session
-            on_data: Optional callback function to handle PTY output data
-            session_id: Optional session ID for resize/kill operations
-            handle_resize: Optional callback for resizing the PTY
-            handle_kill: Optional callback for killing the PTY
-        """
-        self._ws: Connection = ws
+        self._ws: aiohttp.ClientWebSocketResponse = ws
         self._on_data: Callable[[bytes], None] | Callable[[bytes], Awaitable[None]] | None = on_data
         self._session_id: str | None = session_id
         self._handle_resize: Callable[[PtySize], Awaitable[PtySessionInfo]] | None = handle_resize
@@ -105,12 +94,7 @@ class AsyncPtyHandle:
 
     def is_connected(self) -> bool:
         """Check if connected to the PTY session"""
-        # For websockets ClientConnection, check if the connection is not closed
-        try:
-            return self._connected and not self._ws.close_code
-        except AttributeError:
-            # Fallback if close_code is not available
-            return self._connected
+        return self._connected and not self._ws.closed
 
     async def wait_for_connection(self) -> None:
         """
@@ -130,15 +114,7 @@ class AsyncPtyHandle:
             if asyncio.get_event_loop().time() - start_time > timeout:
                 raise DaytonaTimeoutError("PTY connection timeout")
 
-            # Check if WebSocket is closed (handle different websocket implementations)
-            is_closed = False
-            try:
-                is_closed = bool(self._ws.close_code)
-            except AttributeError:
-                # Fallback - assume not closed if we can't check
-                pass
-
-            if is_closed or self._error:
+            if self._ws.closed or self._error:
                 raise DaytonaConnectionError(self._error or "Connection failed")
 
             await asyncio.sleep(0.1)
@@ -159,9 +135,9 @@ class AsyncPtyHandle:
 
         try:
             if isinstance(data, str):
-                await self._ws.send(data.encode("utf-8"))
+                await self._ws.send_bytes(data.encode("utf-8"))
             else:
-                await self._ws.send(data)
+                await self._ws.send_bytes(data)
         except Exception as e:
             raise DaytonaConnectionError(f"Failed to send input to PTY: {e}") from e
 
@@ -221,38 +197,53 @@ class AsyncPtyHandle:
             except asyncio.CancelledError:
                 pass
 
-        # Close WebSocket if not already closed
-        try:
-            if not self._ws.close_code:
-                await self._ws.close()
-        except AttributeError:
-            # Fallback - try to close anyway
+        if not self._ws.closed:
             try:
-                await self._ws.close()
+                _ = await self._ws.close()
             except Exception:
-                pass  # Ignore close errors
+                pass
 
     async def _handle_websocket(self) -> None:
-        """Handle WebSocket messages and connection lifecycle"""
+        """Handle WebSocket messages and connection lifecycle."""
+        # We use ws.receive() rather than `async for` because aiohttp's iterator silently
+        # stops on CLOSE without exposing the close code/reason — but the daytona daemon
+        # encodes the PTY exit code in the close frame's reason payload, so we must
+        # inspect every WSMessage including CLOSE/CLOSED to extract the exit data.
         try:
             self._connected = True
 
-            async for message in self._ws:
-                await self._handle_message(message)
+            close_code: int | None = None
+            close_reason: str | None = None
+            close_frame_seen = False
 
-            # If we exit the loop normally, the connection was closed gracefully
-            # Simulate a close event with normal close code
-            class CloseEvent:
-                def __init__(self, code: int = 1000, reason: str = ""):
-                    self.code: int = code
-                    self.reason: str = reason
+            while True:
+                msg = await self._ws.receive()
 
-            await self._handle_close(CloseEvent())
+                if msg.type == aiohttp.WSMsgType.TEXT:
+                    await self._handle_message(cast(str, msg.data))
+                    continue
+                if msg.type == aiohttp.WSMsgType.BINARY:
+                    await self._handle_message(cast(bytes, msg.data))
+                    continue
+                if msg.type == aiohttp.WSMsgType.CLOSE:
+                    # Server-initiated close: code is in msg.data, reason is in msg.extra.
+                    close_code = cast(int, msg.data) if msg.data is not None else None
+                    close_reason = msg.extra if msg.extra else None
+                    close_frame_seen = True
+                    break
+                if msg.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.CLOSING):
+                    break
+                if msg.type == aiohttp.WSMsgType.ERROR:
+                    exc = self._ws.exception()
+                    self._error = f"WebSocket error: {exc}" if exc else "WebSocket error"
+                    break
 
-        except websockets.exceptions.ConnectionClosedOK as e:
-            await self._handle_close(e)
-        except websockets.exceptions.ConnectionClosedError as e:
-            await self._handle_close(e)
+            # Fall back to ws.close_code when we exited via CLOSED rather than CLOSE.
+            if not close_frame_seen and self._ws.close_code is not None:
+                close_code = self._ws.close_code
+
+            await self._handle_close(close_code, close_reason)
+
         except Exception as e:
             self._error = f"Unexpected error: {e}"
         finally:
@@ -294,16 +285,12 @@ class AsyncPtyHandle:
             self._error = cast(str, control_msg.get("error", "Unknown connection error"))
             self._connected = False
 
-    async def _handle_close(self, close_event: object) -> None:
-        """Handle WebSocket close event"""
+    async def _handle_close(self, close_code: int | None, close_reason: str | None) -> None:
+        """Handle WebSocket close event."""
         self._connected = False
 
-        # In websockets library, the close event is a ConnectionClosed exception
-        # The close code is available as close_event.code and reason as close_event.reason
-        close_code = getattr(close_event, "code", None)
-        close_reason = getattr(close_event, "reason", None)
-
-        # Parse structured exit data from close reason
+        # Parse structured exit data from close reason (daemon encodes exit_code/error in
+        # the close frame so the client doesn't need a separate roundtrip to learn them).
         if close_reason:
             try:
                 exit_data = json.loads(close_reason)

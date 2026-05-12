@@ -8,6 +8,8 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
+from httpx_ws import WebSocketDisconnect
+from wsproto.events import CloseConnection, TextMessage
 
 from daytona.common.errors import DaytonaConnectionError, DaytonaTimeoutError
 
@@ -22,12 +24,20 @@ def _make_interpreter():
         {"Authorization": "Bearer token"},
         None,
     )
-    return CodeInterpreter(api_client), api_client
+    return CodeInterpreter(api_client, http_client=MagicMock()), api_client
 
 
-def _close_event(code: int | None = None, reason: str | None = None, *, use_sent: bool = False):
-    payload = SimpleNamespace(code=code, reason=reason)
-    return SimpleNamespace(rcvd=None if use_sent else payload, sent=payload if use_sent else None)
+def _text(payload: dict) -> TextMessage:
+    return TextMessage(data=json.dumps(payload), frame_finished=True, message_finished=True)
+
+
+def _make_ws_cm(events):
+    websocket = MagicMock()
+    websocket.receive.side_effect = events
+    websocket_cm = MagicMock()
+    websocket_cm.__enter__.return_value = websocket
+    websocket_cm.__exit__.return_value = False
+    return websocket, websocket_cm
 
 
 class TestCodeInterpreterRunCode:
@@ -37,29 +47,17 @@ class TestCodeInterpreterRunCode:
         stderr_messages: list[str] = []
         error_names: list[str] = []
 
-        class FakeConnectionClosed(Exception):
-            pass
+        ws, ws_cm = _make_ws_cm(
+            [
+                _text({"type": "stdout", "text": "hello "}),
+                _text({"type": "stderr", "text": "warn"}),
+                _text({"type": "error", "name": "ValueError", "value": "bad", "traceback": "tb"}),
+                _text({"type": "stdout", "text": "world"}),
+                CloseConnection(code=1000, reason=None),
+            ]
+        )
 
-        class FakeConnectionClosedOK(FakeConnectionClosed):
-            pass
-
-        websocket = MagicMock()
-        websocket.recv.side_effect = [
-            json.dumps({"type": "stdout", "text": "hello "}),
-            json.dumps({"type": "stderr", "text": "warn"}),
-            json.dumps({"type": "error", "name": "ValueError", "value": "bad", "traceback": "tb"}),
-            json.dumps({"type": "stdout", "text": "world"}),
-            FakeConnectionClosedOK(),
-        ]
-        websocket_cm = MagicMock()
-        websocket_cm.__enter__.return_value = websocket
-        websocket_cm.__exit__.return_value = False
-
-        with (
-            patch("daytona._sync.code_interpreter.connect", return_value=websocket_cm),
-            patch("daytona._sync.code_interpreter.ConnectionClosed", FakeConnectionClosed),
-            patch("daytona._sync.code_interpreter.ConnectionClosedOK", FakeConnectionClosedOK),
-        ):
+        with patch("daytona._sync.code_interpreter.httpx_ws.connect_ws", return_value=ws_cm):
             result = interpreter.run_code(
                 "print('hi')",
                 on_stdout=lambda msg: stdout_messages.append(msg.output),
@@ -67,7 +65,7 @@ class TestCodeInterpreterRunCode:
                 on_error=lambda err: error_names.append(err.name),
             )
 
-        sent_payload = json.loads(websocket.send.call_args.args[0])
+        sent_payload = json.loads(ws.send_text.call_args.args[0])
         assert sent_payload == {"code": "print('hi')"}
         assert result.stdout == "hello world"
         assert result.stderr == "warn"
@@ -80,24 +78,10 @@ class TestCodeInterpreterRunCode:
     def test_run_code_includes_context_envs_and_timeout(self):
         interpreter, _api_client = _make_interpreter()
 
-        class FakeConnectionClosed(Exception):
-            pass
-
-        class FakeConnectionClosedOK(FakeConnectionClosed):
-            pass
-
-        websocket = MagicMock()
-        websocket.recv.side_effect = [FakeConnectionClosedOK()]
-        websocket_cm = MagicMock()
-        websocket_cm.__enter__.return_value = websocket
-        websocket_cm.__exit__.return_value = False
+        ws, ws_cm = _make_ws_cm([CloseConnection(code=1000, reason=None)])
         context = SimpleNamespace(id="ctx-1")
 
-        with (
-            patch("daytona._sync.code_interpreter.connect", return_value=websocket_cm),
-            patch("daytona._sync.code_interpreter.ConnectionClosed", FakeConnectionClosed),
-            patch("daytona._sync.code_interpreter.ConnectionClosedOK", FakeConnectionClosedOK),
-        ):
+        with patch("daytona._sync.code_interpreter.httpx_ws.connect_ws", return_value=ws_cm):
             interpreter.run_code(
                 "print('hi')",
                 context=context,
@@ -105,7 +89,7 @@ class TestCodeInterpreterRunCode:
                 timeout=15,
             )
 
-        assert json.loads(websocket.send.call_args.args[0]) == {
+        assert json.loads(ws.send_text.call_args.args[0]) == {
             "code": "print('hi')",
             "contextId": "ctx-1",
             "envs": {"DEBUG": "1"},
@@ -115,52 +99,52 @@ class TestCodeInterpreterRunCode:
     def test_run_code_ignores_unknown_chunk_types(self):
         interpreter, _api_client = _make_interpreter()
 
-        class FakeConnectionClosed(Exception):
-            pass
+        _ws, ws_cm = _make_ws_cm(
+            [
+                _text({"type": "unknown", "text": "ignored"}),
+                CloseConnection(code=1000, reason=None),
+            ]
+        )
 
-        class FakeConnectionClosedOK(FakeConnectionClosed):
-            pass
-
-        websocket = MagicMock()
-        websocket.recv.side_effect = [json.dumps({"type": "unknown", "text": "ignored"}), FakeConnectionClosedOK()]
-        websocket_cm = MagicMock()
-        websocket_cm.__enter__.return_value = websocket
-        websocket_cm.__exit__.return_value = False
-
-        with (
-            patch("daytona._sync.code_interpreter.connect", return_value=websocket_cm),
-            patch("daytona._sync.code_interpreter.ConnectionClosed", FakeConnectionClosed),
-            patch("daytona._sync.code_interpreter.ConnectionClosedOK", FakeConnectionClosedOK),
-        ):
+        with patch("daytona._sync.code_interpreter.httpx_ws.connect_ws", return_value=ws_cm):
             result = interpreter.run_code("print('hi')")
 
         assert result.stdout == ""
         assert result.stderr == ""
         assert result.error is None
 
-    def test_run_code_raises_timeout_for_timeout_close_code(self):
+    def test_run_code_raises_timeout_when_disconnect_has_code_4008(self):
         interpreter, _api_client = _make_interpreter()
 
-        with pytest.raises(DaytonaTimeoutError, match="Execution timed out"):
-            interpreter._raise_from_ws_close(_close_event(4008, "timed out"))
+        _ws, ws_cm = _make_ws_cm([WebSocketDisconnect(code=4008, reason="timed out")])
 
-    def test_run_code_raises_connection_error_with_received_close_code(self):
+        with patch("daytona._sync.code_interpreter.httpx_ws.connect_ws", return_value=ws_cm):
+            with pytest.raises(DaytonaTimeoutError, match="Execution timed out"):
+                interpreter.run_code("print('hi')")
+
+    def test_run_code_raises_connection_error_on_unexpected_disconnect(self):
         interpreter, _api_client = _make_interpreter()
 
-        with pytest.raises(DaytonaConnectionError, match=r"socket ended \(close code 4001\)"):
-            interpreter._raise_from_ws_close(_close_event(4001, "socket ended"))
+        _ws, ws_cm = _make_ws_cm([WebSocketDisconnect(code=4001, reason="socket ended")])
 
-    def test_run_code_raises_connection_error_from_sent_close_event(self):
+        with patch("daytona._sync.code_interpreter.httpx_ws.connect_ws", return_value=ws_cm):
+            with pytest.raises(DaytonaConnectionError, match=r"socket ended \(close code 4001\)"):
+                interpreter.run_code("print('hi')")
+
+    def test_run_code_raises_connection_error_via_close_frame(self):
         interpreter, _api_client = _make_interpreter()
 
-        with pytest.raises(DaytonaConnectionError, match=r"writer closed \(close code 4100\)"):
-            interpreter._raise_from_ws_close(_close_event(4100, "writer closed", use_sent=True))
+        _ws, ws_cm = _make_ws_cm([CloseConnection(code=4100, reason="writer closed")])
 
-    def test_run_code_raises_generic_connection_error_without_reason(self):
+        with patch("daytona._sync.code_interpreter.httpx_ws.connect_ws", return_value=ws_cm):
+            with pytest.raises(DaytonaConnectionError, match=r"writer closed \(close code 4100\)"):
+                interpreter.run_code("print('hi')")
+
+    def test_maybe_raise_from_close_normal_close_does_not_raise(self):
         interpreter, _api_client = _make_interpreter()
 
-        with pytest.raises(DaytonaConnectionError, match="WebSocket connection closed unexpectedly"):
-            interpreter._raise_from_ws_close(_close_event())
+        interpreter._maybe_raise_from_close(1000, None)
+        interpreter._maybe_raise_from_close(None, None)
 
 
 class TestCodeInterpreterContextManagement:

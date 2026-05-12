@@ -28,6 +28,7 @@ const DEFAULT_STALE_TIMEOUT_MINUTES = 10
  */
 const JOB_STALE_TIMEOUT_MINUTES: Partial<Record<JobType, number>> = {
   [JobType.BUILD_SNAPSHOT]: 120,
+  [JobType.CREATE_BACKUP]: 120,
   [JobType.PULL_SNAPSHOT]: 120,
   [JobType.SNAPSHOT_SANDBOX]: 120,
 }

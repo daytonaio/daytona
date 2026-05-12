@@ -1116,9 +1116,14 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
           throw new Error('No regions found for snapshot')
         }
 
+        const availabilityThreshold =
+          this.configService.getOrThrow('runnerScore.thresholds.availability') +
+          this.configService.getOrThrow('runnerScore.thresholds.initialRunnerScoreAddon')
+
         initialRunner = await this.runnerService.getRandomAvailableRunner({
           regions: regions.map((region) => region.id),
           excludedRunnerIds: excludedRunnerIds,
+          availabilityScoreThreshold: availabilityThreshold,
         })
       } catch (error) {
         this.logger.warn(`Failed to get initial runner: ${fromAxiosError(error)}`)

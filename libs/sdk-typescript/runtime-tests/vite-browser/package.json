@@ -1,0 +1,10 @@
+{
+  "name": "runtime-test-vite-browser",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "vite": "^5.4.0",
+    "vite-plugin-node-polyfills": "^0.22.0",
+    "playwright": "^1.48.0"
+  }
+}

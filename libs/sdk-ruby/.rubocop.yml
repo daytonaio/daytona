@@ -14,3 +14,9 @@ Style/Documentation:
 
 Style/AccessorGrouping:
   EnforcedStyle: separated
+
+# RSpec describe / context blocks naturally span the whole file; the
+# stock 25-line cap forces noise instead of catching real complexity.
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'

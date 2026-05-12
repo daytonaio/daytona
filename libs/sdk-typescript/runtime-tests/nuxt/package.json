@@ -1,0 +1,11 @@
+{
+  "name": "runtime-test-nuxt",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build"
+  },
+  "dependencies": {
+    "nuxt": "^3.13.0"
+  }
+}

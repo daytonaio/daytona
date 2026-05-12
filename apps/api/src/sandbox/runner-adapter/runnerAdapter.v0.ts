@@ -457,7 +457,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
   }
 
   // skipStart is a v2-only signal (carried in the job payload); v0's sync API has no equivalent.
-  async recoverSandbox(sandbox: Sandbox, _skipStart?: boolean): Promise<void> {
+  async recoverSandbox(sandbox: Sandbox, registry?: DockerRegistry, _skipStart?: boolean): Promise<void> {
     const recoverSandboxDTO: RecoverSandboxDTO = {
       userId: sandbox.organizationId,
       snapshot: sandbox.snapshot,
@@ -476,11 +476,37 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       networkAllowList: sandbox.networkAllowList,
       errorReason: sandbox.errorReason,
       backupErrorReason: sandbox.backupErrorReason,
+      registry: registry
+        ? {
+            project: registry.project,
+            url: registry.url.replace(/^(https?:\/\/)/, ''),
+            username: registry.username,
+            password: registry.password,
+          }
+        : undefined,
     }
     await this.sandboxApiClient.recover(sandbox.id, recoverSandboxDTO)
   }
 
-  async resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void> {
-    await this.sandboxApiClient.resize(sandboxId, { cpu, memory, disk })
+  async resizeSandbox(
+    sandboxId: string,
+    cpu?: number,
+    memory?: number,
+    disk?: number,
+    registry?: DockerRegistry,
+  ): Promise<void> {
+    await this.sandboxApiClient.resize(sandboxId, {
+      cpu,
+      memory,
+      disk,
+      registry: registry
+        ? {
+            project: registry.project,
+            url: registry.url.replace(/^(https?:\/\/)/, ''),
+            username: registry.username,
+            password: registry.password,
+          }
+        : undefined,
+    })
   }
 }

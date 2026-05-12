@@ -118,6 +118,122 @@ class TestAsyncDaytonaContextManager:
         daytona._toolbox_api_client.close.assert_awaited_once()
 
 
+class TestAsyncDaytonaSharedSession:
+    """Guards the SharedAiohttpSession contract: a single session shared across both
+    rest_clients regardless of which one fires first."""
+
+    @pytest.mark.asyncio
+    async def test_first_request_propagates_session_to_other_rest_client(self):
+        """The first lazy-created session is propagated to every attached rest_client."""
+        import aiohttp
+
+        from daytona.internal.shared_session import SharedAiohttpSession
+
+        fake_session = MagicMock(spec=aiohttp.ClientSession)
+        fake_session.closed = False
+
+        rc_main = MagicMock(spec=["request", "pool_manager"])
+        rc_main.pool_manager = None
+        rc_tb = MagicMock(spec=["request", "pool_manager"])
+        rc_tb.pool_manager = None
+
+        # Stub mimics generated rest_client.request: assigns pool_manager then returns.
+        async def stub_request(*_args, **_kwargs):
+            rc_main.pool_manager = fake_session
+            return None
+
+        rc_main.request = stub_request
+
+        coordinator = SharedAiohttpSession()
+        coordinator.attach(rc_main)
+        coordinator.attach(rc_tb)
+
+        await rc_main.request("GET", "/anything")
+
+        assert coordinator.session is fake_session
+        assert rc_main.pool_manager is fake_session
+        assert rc_tb.pool_manager is fake_session
+
+    @pytest.mark.asyncio
+    async def test_wrapper_does_not_override_callers_request_timeout(self):
+        """Wrapper passes ``_request_timeout`` through verbatim and never injects a
+        default — calls without one fall through to aiohttp's session timeout."""
+        from daytona.internal.shared_session import SharedAiohttpSession
+
+        seen_kwargs: dict = {}
+        rc = MagicMock(spec=["request", "pool_manager"])
+        rc.pool_manager = None
+
+        async def stub_request(*_args, **kwargs):
+            seen_kwargs.update(kwargs)
+            return None
+
+        rc.request = stub_request
+
+        coordinator = SharedAiohttpSession()
+        coordinator.attach(rc)
+
+        # No timeout supplied — wrapper must NOT inject one.
+        await rc.request("GET", "/anything")
+        assert "_request_timeout" not in seen_kwargs or seen_kwargs.get("_request_timeout") is None
+
+        # Caller-supplied timeout — wrapper must pass it through verbatim.
+        sentinel = object()
+        await rc.request("GET", "/anything", _request_timeout=sentinel)
+        assert seen_kwargs.get("_request_timeout") is sentinel
+
+    @pytest.mark.asyncio
+    async def test_toolbox_first_propagates_to_main(self):
+        """If the toolbox rest_client fires first, adoption still propagates to main."""
+        import aiohttp
+
+        from daytona.internal.shared_session import SharedAiohttpSession
+
+        rc_main = MagicMock(spec=["request", "pool_manager"])
+        rc_main.pool_manager = None
+        rc_tb = MagicMock(spec=["request", "pool_manager"])
+        rc_tb.pool_manager = None
+
+        coordinator = SharedAiohttpSession()
+        coordinator.attach(rc_main)
+        coordinator.attach(rc_tb)
+
+        fake_session = MagicMock(spec=aiohttp.ClientSession)
+        fake_session.closed = False
+        rc_tb.pool_manager = fake_session
+        coordinator._adopt(fake_session)
+
+        assert rc_main.pool_manager is fake_session
+        assert rc_tb.pool_manager is fake_session
+
+    @pytest.mark.asyncio
+    async def test_first_writer_wins_under_race(self):
+        """First adopted session sticks while it's open; later candidates are ignored."""
+        import aiohttp
+
+        from daytona.internal.shared_session import SharedAiohttpSession
+
+        coordinator = SharedAiohttpSession()
+        first = MagicMock(spec=aiohttp.ClientSession)
+        first.closed = False
+        second = MagicMock(spec=aiohttp.ClientSession)
+        second.closed = False
+
+        coordinator._adopt(first)
+        coordinator._adopt(second)
+
+        assert coordinator.session is first
+
+    @pytest.mark.asyncio
+    async def test_attach_rejects_invalid_rest_client(self):
+        """Attach fails loudly at init if the rest_client surface changes."""
+        from daytona.internal.shared_session import SharedAiohttpSession
+
+        coordinator = SharedAiohttpSession()
+        with pytest.raises(RuntimeError, match="rest_client API surface changed"):
+            coordinator.attach(object())
+
+
 class TestAsyncDaytonaCreateValidation:
     @pytest.mark.asyncio
     async def test_negative_timeout_raises(self, env_with_api_key):

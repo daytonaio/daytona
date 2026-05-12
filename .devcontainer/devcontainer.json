@@ -74,7 +74,7 @@
     },
     "ghcr.io/devcontainers/features/java:1.8.0": {
       "jdkDistro": "tem",
-      "version": "21.0.10",
+      "version": "21.0.11",
       "installMaven": true,
       "installGradle": true,
       "installAnt": true

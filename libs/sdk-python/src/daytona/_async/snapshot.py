@@ -21,6 +21,7 @@ from .._utils.timeout import with_timeout
 from ..common.errors import DaytonaError, DaytonaValidationError
 from ..common.image import Image
 from ..common.snapshot import CreateSnapshotParams, PaginatedSnapshots, Snapshot
+from ..internal.shared_session import SharedAiohttpSession
 from .object_storage import AsyncObjectStorage
 
 
@@ -28,11 +29,16 @@ class AsyncSnapshotService:
     """Service for managing Daytona Snapshots. Can be used to list, get, create and delete Snapshots."""
 
     def __init__(
-        self, snapshots_api: SnapshotsApi, object_storage_api: ObjectStorageApi, default_region_id: str | None = None
+        self,
+        snapshots_api: SnapshotsApi,
+        object_storage_api: ObjectStorageApi,
+        default_region_id: str | None = None,
+        shared_session: SharedAiohttpSession | None = None,
     ):
         self.__snapshots_api = snapshots_api
         self.__object_storage_api = object_storage_api
         self.__default_region_id = default_region_id
+        self.__shared_session = shared_session
 
     @intercept_errors(message_prefix="Failed to list snapshots: ")
     @with_instrumentation()
@@ -172,6 +178,7 @@ class AsyncSnapshotService:
                 headers=cast(dict[str, str], self.__snapshots_api.api_client.default_headers),
                 on_chunk=lambda chunk: on_logs(chunk.rstrip()) if on_logs else None,
                 should_terminate=should_terminate,
+                session=self.__shared_session.session if self.__shared_session is not None else None,
             )
 
         log_task = None

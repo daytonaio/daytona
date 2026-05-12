@@ -1,0 +1,21 @@
+{
+  "name": "runtime-test-remix",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "remix vite:build"
+  },
+  "dependencies": {
+    "@remix-run/node": "^2.13.0",
+    "@remix-run/react": "^2.13.0",
+    "@remix-run/serve": "^2.13.0",
+    "isbot": "^4.4.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@remix-run/dev": "^2.13.0",
+    "vite": "^5.4.0",
+    "vite-tsconfig-paths": "^4.3.2"
+  }
+}
