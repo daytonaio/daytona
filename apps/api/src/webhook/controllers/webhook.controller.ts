@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Controller, Post, Get, Param, UseGuards, HttpStatus, NotFoundException } from '@nestjs/common'
+import { Controller, Post, Get, Param, UseGuards, HttpCode, HttpStatus, NotFoundException } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiOAuth2, ApiHeader } from '@nestjs/swagger'
 import { WebhookService } from '../services/webhook.service'
 import { OrganizationAuthContextGuard } from '../../organization/guards/organization-auth-context.guard'
@@ -55,5 +55,20 @@ export class WebhookController {
       throw new NotFoundException('Webhook initialization status not found')
     }
     return WebhookInitializationStatusDto.fromWebhookInitialization(status)
+  }
+
+  @Post('organizations/:organizationId/refresh-endpoints')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Refresh cached endpoint presence flag for an organization' })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Endpoint flag refreshed',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Webhook initialization status not found',
+  })
+  async refreshEndpoints(@Param('organizationId') organizationId: string): Promise<void> {
+    await this.webhookService.refreshEndpointFlagByOrg(organizationId)
   }
 }

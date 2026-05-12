@@ -28,7 +28,9 @@ import {
 } from '@/components/ui/sheet'
 import { Spinner } from '@/components/ui/spinner'
 import { WEBHOOK_EVENT_CATEGORIES, WEBHOOK_EVENTS } from '@/constants/webhook-events'
+import { useRefreshWebhookEndpointFlagMutation } from '@/hooks/mutations/useRefreshWebhookEndpointFlagMutation'
 import { useUpdateWebhookEndpointMutation } from '@/hooks/mutations/useUpdateWebhookEndpointMutation'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { cn } from '@/lib/utils'
 import { useForm } from '@tanstack/react-form'
@@ -88,6 +90,8 @@ export const UpsertEndpointSheet = ({
 
   const formRef = useRef<HTMLFormElement>(null)
   const { svix, appId } = useSvix()
+  const { selectedOrganization } = useSelectedOrganization()
+  const refreshEndpointFlag = useRefreshWebhookEndpointFlagMutation()
   const { reset: resetUpdateEndpointMutation, ...updateEndpointMutation } = useUpdateWebhookEndpointMutation()
   const { reset: resetCreateEndpointMutation, ...createEndpointMutation } = useMutation({
     mutationFn: async (value: FormValues) => {
@@ -96,6 +100,9 @@ export const UpsertEndpointSheet = ({
         description: value.description?.trim() || undefined,
         filterTypes: value.filterTypes.length > 0 ? value.filterTypes : undefined,
       })
+      if (selectedOrganization?.id) {
+        refreshEndpointFlag.mutate(selectedOrganization.id)
+      }
     },
   })
 

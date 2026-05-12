@@ -27,6 +27,18 @@ export class WebhookInitialization {
   })
   retryCount: number
 
+  @Column({
+    type: 'boolean',
+    default: false,
+  })
+  hasEndpoints: boolean
+
+  @Column({
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
+  endpointsCheckedAt?: Date
+
   @CreateDateColumn({
     type: 'timestamp with time zone',
   })

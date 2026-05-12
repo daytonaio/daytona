@@ -108,6 +108,39 @@ export class WebhookService implements OnModuleInit {
     }
   }
 
+  private static readonly ENDPOINT_FLAG_TTL_MS = 60_000
+
+  /**
+   * Refresh hasEndpoints by counting endpoints in Svix.
+   * On error, returns the row unchanged — we'd rather try to send than silently drop during a Svix transient issue.
+   */
+  private async refreshEndpointFlag(init: WebhookInitialization): Promise<WebhookInitialization> {
+    if (!this.svix) {
+      return init
+    }
+
+    try {
+      const result = await this.svix.endpoint.list(init.organizationId, { limit: 1 })
+      init.hasEndpoints = result.data.length > 0
+      init.endpointsCheckedAt = new Date()
+      return await this.webhookInitializationRepository.save(init)
+    } catch (error) {
+      this.logger.error(`Failed to refresh endpoint flag for organization ${init.organizationId}:`, error)
+      return init
+    }
+  }
+
+  /**
+   * Public wrapper for the refresh used by the controller ping route.
+   */
+  async refreshEndpointFlagByOrg(organizationId: string): Promise<void> {
+    const init = await this.getInitializationStatus(organizationId)
+    if (!init) {
+      throw new NotFoundException('Webhook initialization status not found')
+    }
+    await this.refreshEndpointFlag(init)
+  }
+
   /**
    * Send a webhook message to all endpoints of an organization
    */
@@ -119,15 +152,21 @@ export class WebhookService implements OnModuleInit {
 
     try {
       // Check if webhooks are initialized for this organization
-      const isInitialized = await this.getInitializationStatus(organizationId)
+      let init = await this.getInitializationStatus(organizationId)
 
-      if (!isInitialized) {
-        this.logger.log(`Webhooks not initialized for organization ${organizationId}, creating Svix application now...`)
-        // For now, we'll just log that initialization is needed
-        // The actual initialization should be done through the API or event handler
-        this.logger.warn(
-          `Organization ${organizationId} needs webhook initialization. Please use the initialization API endpoint.`,
-        )
+      if (!init) {
+        this.logger.debug(`Skipping webhook ${eventType} for organization ${organizationId}: webhooks not initialized`)
+        return
+      }
+
+      const stale =
+        !init.endpointsCheckedAt || Date.now() - init.endpointsCheckedAt.getTime() > WebhookService.ENDPOINT_FLAG_TTL_MS
+      if (stale) {
+        init = await this.refreshEndpointFlag(init)
+      }
+
+      if (!init.hasEndpoints) {
+        this.logger.debug(`Skipping webhook ${eventType} for organization ${organizationId}: no endpoints`)
         return
       }
 
