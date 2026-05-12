@@ -6,8 +6,9 @@
 import { FeatureFlags } from '@/enums/FeatureFlags'
 import { useRegions } from '@/hooks/useRegions'
 import { SandboxState } from '@daytona/api-client'
+import { Loader2, MoreHorizontal, Play, Square, Terminal, Wrench } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
-import { MoreHorizontal, Play, Square, Loader2, Wrench } from 'lucide-react'
+import { useMemo } from 'react'
 import TooltipButton from '../TooltipButton'
 import { Button } from '../ui/button'
 import {
@@ -18,7 +19,6 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
 import { SandboxTableActionsProps } from './types'
-import { useMemo } from 'react'
 
 export function SandboxTableActions({
   sandbox,
@@ -38,6 +38,7 @@ export function SandboxTableActions({
   onScreenRecordings,
   onFork,
   onViewForks,
+  onOpenTerminal,
 }: SandboxTableActionsProps) {
   const linuxVmEnabled = useFeatureFlagEnabled(FeatureFlags.SANDBOX_LINUX_VM)
   const { getRegionName } = useRegions()
@@ -201,7 +202,6 @@ export function SandboxTableActions({
       <TooltipButton
         variant="ghost"
         size="icon-sm"
-        className="text-muted-foreground"
         tooltipText={primaryActionTooltip}
         aria-label={primaryActionTooltip}
         onClick={(e) => {
@@ -226,9 +226,21 @@ export function SandboxTableActions({
         )}
       </TooltipButton>
 
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        aria-label="Open terminal"
+        onClick={(e) => {
+          e.stopPropagation()
+          onOpenTerminal?.()
+        }}
+      >
+        <Terminal className="w-4 h-4" />
+      </Button>
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon-sm" className="text-muted-foreground" aria-label="Open menu">
+          <Button variant="ghost" size="icon-sm" aria-label="Open menu">
             <MoreHorizontal className="w-4 h-4" />
           </Button>
         </DropdownMenuTrigger>
