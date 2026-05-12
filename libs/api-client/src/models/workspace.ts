@@ -159,6 +159,10 @@ export interface Workspace {
      */
     'runnerId'?: string;
     /**
+     * ID of the sandbox this sandbox is linked to. When set, the sandbox is co-located on the same runner as the linked sandbox.
+     */
+    'linkedSandboxId'?: string;
+    /**
      * The toolbox proxy URL for the sandbox
      */
     'toolboxProxyUrl': string;

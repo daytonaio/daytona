@@ -120,6 +120,13 @@ Represents a Daytona Sandbox.
     ```ts
     SandboxDto.lastActivityAt
     ```
+- `linkedSandboxId?` _string_ - ID of the Sandbox this Sandbox is linked to. When set, the Sandbox is co-located on the same runner as the linked Sandbox.
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.linkedSandboxId
+    ```
 - `memory` _number_ - Amount of memory allocated to the Sandbox in GiB
     
     ##### Implementation of

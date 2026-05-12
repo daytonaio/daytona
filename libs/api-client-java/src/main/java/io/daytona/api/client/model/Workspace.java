@@ -334,6 +334,11 @@ public class Workspace {
   @javax.annotation.Nullable
   private String runnerId;
 
+  public static final String SERIALIZED_NAME_LINKED_SANDBOX_ID = "linkedSandboxId";
+  @SerializedName(SERIALIZED_NAME_LINKED_SANDBOX_ID)
+  @javax.annotation.Nullable
+  private String linkedSandboxId;
+
   public static final String SERIALIZED_NAME_TOOLBOX_PROXY_URL = "toolboxProxyUrl";
   @SerializedName(SERIALIZED_NAME_TOOLBOX_PROXY_URL)
   @javax.annotation.Nonnull
@@ -1054,6 +1059,25 @@ public class Workspace {
   }
 
 
+  public Workspace linkedSandboxId(@javax.annotation.Nullable String linkedSandboxId) {
+    this.linkedSandboxId = linkedSandboxId;
+    return this;
+  }
+
+  /**
+   * ID of the sandbox this sandbox is linked to. When set, the sandbox is co-located on the same runner as the linked sandbox.
+   * @return linkedSandboxId
+   */
+  @javax.annotation.Nullable
+  public String getLinkedSandboxId() {
+    return linkedSandboxId;
+  }
+
+  public void setLinkedSandboxId(@javax.annotation.Nullable String linkedSandboxId) {
+    this.linkedSandboxId = linkedSandboxId;
+  }
+
+
   public Workspace toolboxProxyUrl(@javax.annotation.Nonnull String toolboxProxyUrl) {
     this.toolboxProxyUrl = toolboxProxyUrl;
     return this;
@@ -1235,6 +1259,7 @@ public class Workspace {
         Objects.equals(this.sandboxClass, workspace.sandboxClass) &&
         Objects.equals(this.daemonVersion, workspace.daemonVersion) &&
         Objects.equals(this.runnerId, workspace.runnerId) &&
+        Objects.equals(this.linkedSandboxId, workspace.linkedSandboxId) &&
         Objects.equals(this.toolboxProxyUrl, workspace.toolboxProxyUrl) &&
         Objects.equals(this.image, workspace.image) &&
         Objects.equals(this.snapshotState, workspace.snapshotState) &&
@@ -1245,7 +1270,7 @@ public class Workspace {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, organizationId, name, snapshot, user, env, labels, _public, networkBlockAll, networkAllowList, target, cpu, gpu, memory, disk, state, desiredState, errorReason, recoverable, backupState, backupCreatedAt, autoStopInterval, autoArchiveInterval, autoDeleteInterval, volumes, buildInfo, createdAt, updatedAt, lastActivityAt, sandboxClass, daemonVersion, runnerId, toolboxProxyUrl, image, snapshotState, snapshotCreatedAt, info, additionalProperties);
+    return Objects.hash(id, organizationId, name, snapshot, user, env, labels, _public, networkBlockAll, networkAllowList, target, cpu, gpu, memory, disk, state, desiredState, errorReason, recoverable, backupState, backupCreatedAt, autoStopInterval, autoArchiveInterval, autoDeleteInterval, volumes, buildInfo, createdAt, updatedAt, lastActivityAt, sandboxClass, daemonVersion, runnerId, linkedSandboxId, toolboxProxyUrl, image, snapshotState, snapshotCreatedAt, info, additionalProperties);
   }
 
   @Override
@@ -1284,6 +1309,7 @@ public class Workspace {
     sb.append("    sandboxClass: ").append(toIndentedString(sandboxClass)).append("\n");
     sb.append("    daemonVersion: ").append(toIndentedString(daemonVersion)).append("\n");
     sb.append("    runnerId: ").append(toIndentedString(runnerId)).append("\n");
+    sb.append("    linkedSandboxId: ").append(toIndentedString(linkedSandboxId)).append("\n");
     sb.append("    toolboxProxyUrl: ").append(toIndentedString(toolboxProxyUrl)).append("\n");
     sb.append("    image: ").append(toIndentedString(image)).append("\n");
     sb.append("    snapshotState: ").append(toIndentedString(snapshotState)).append("\n");
@@ -1308,7 +1334,7 @@ public class Workspace {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "recoverable", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "lastActivityAt", "sandboxClass", "daemonVersion", "runnerId", "toolboxProxyUrl", "image", "snapshotState", "snapshotCreatedAt", "info"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "recoverable", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "lastActivityAt", "sandboxClass", "daemonVersion", "runnerId", "linkedSandboxId", "toolboxProxyUrl", "image", "snapshotState", "snapshotCreatedAt", "info"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "organizationId", "name", "user", "env", "labels", "public", "networkBlockAll", "target", "cpu", "gpu", "memory", "disk", "toolboxProxyUrl"));
@@ -1415,6 +1441,9 @@ public class Workspace {
       }
       if ((jsonObj.get("runnerId") != null && !jsonObj.get("runnerId").isJsonNull()) && !jsonObj.get("runnerId").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `runnerId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("runnerId").toString()));
+      }
+      if ((jsonObj.get("linkedSandboxId") != null && !jsonObj.get("linkedSandboxId").isJsonNull()) && !jsonObj.get("linkedSandboxId").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `linkedSandboxId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("linkedSandboxId").toString()));
       }
       if (!jsonObj.get("toolboxProxyUrl").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `toolboxProxyUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("toolboxProxyUrl").toString()));

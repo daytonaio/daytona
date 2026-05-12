@@ -85,6 +85,8 @@ type Sandbox struct {
 	DaemonVersion *string `json:"daemonVersion,omitempty"`
 	// The runner ID of the sandbox
 	RunnerId *string `json:"runnerId,omitempty"`
+	// ID of the sandbox this sandbox is linked to. When set, the sandbox is co-located on the same runner as the linked sandbox.
+	LinkedSandboxId *string `json:"linkedSandboxId,omitempty"`
 	// The toolbox proxy URL for the sandbox
 	ToolboxProxyUrl string `json:"toolboxProxyUrl"`
 	AdditionalProperties map[string]interface{}
@@ -1043,6 +1045,38 @@ func (o *Sandbox) SetRunnerId(v string) {
 	o.RunnerId = &v
 }
 
+// GetLinkedSandboxId returns the LinkedSandboxId field value if set, zero value otherwise.
+func (o *Sandbox) GetLinkedSandboxId() string {
+	if o == nil || IsNil(o.LinkedSandboxId) {
+		var ret string
+		return ret
+	}
+	return *o.LinkedSandboxId
+}
+
+// GetLinkedSandboxIdOk returns a tuple with the LinkedSandboxId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Sandbox) GetLinkedSandboxIdOk() (*string, bool) {
+	if o == nil || IsNil(o.LinkedSandboxId) {
+		return nil, false
+	}
+	return o.LinkedSandboxId, true
+}
+
+// HasLinkedSandboxId returns a boolean if a field has been set.
+func (o *Sandbox) HasLinkedSandboxId() bool {
+	if o != nil && !IsNil(o.LinkedSandboxId) {
+		return true
+	}
+
+	return false
+}
+
+// SetLinkedSandboxId gets a reference to the given string and assigns it to the LinkedSandboxId field.
+func (o *Sandbox) SetLinkedSandboxId(v string) {
+	o.LinkedSandboxId = &v
+}
+
 // GetToolboxProxyUrl returns the ToolboxProxyUrl field value
 func (o *Sandbox) GetToolboxProxyUrl() string {
 	if o == nil {
@@ -1147,6 +1181,9 @@ func (o Sandbox) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.RunnerId) {
 		toSerialize["runnerId"] = o.RunnerId
 	}
+	if !IsNil(o.LinkedSandboxId) {
+		toSerialize["linkedSandboxId"] = o.LinkedSandboxId
+	}
 	toSerialize["toolboxProxyUrl"] = o.ToolboxProxyUrl
 
 	for key, value := range o.AdditionalProperties {
@@ -1236,6 +1273,7 @@ func (o *Sandbox) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "sandboxClass")
 		delete(additionalProperties, "daemonVersion")
 		delete(additionalProperties, "runnerId")
+		delete(additionalProperties, "linkedSandboxId")
 		delete(additionalProperties, "toolboxProxyUrl")
 		o.AdditionalProperties = additionalProperties
 	}

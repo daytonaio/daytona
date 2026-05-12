@@ -277,6 +277,15 @@ export class SandboxDto {
   @IsOptional()
   runnerId?: string
 
+  @ApiPropertyOptional({
+    description:
+      'ID of the sandbox this sandbox is linked to. When set, the sandbox is co-located on the same runner as the linked sandbox.',
+    example: 'sandbox123',
+    required: false,
+  })
+  @IsOptional()
+  linkedSandboxId?: string
+
   @ApiProperty({
     description: 'The toolbox proxy URL for the sandbox',
     example: 'https://proxy.app.daytona.io/toolbox',
@@ -327,6 +336,7 @@ export class SandboxDto {
         : undefined,
       daemonVersion: sandbox.daemonVersion,
       runnerId: sandbox.runnerId,
+      linkedSandboxId: sandbox.linkedSandboxId ?? undefined,
       toolboxProxyUrl,
     }
   }

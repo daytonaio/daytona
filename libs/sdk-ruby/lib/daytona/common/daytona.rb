@@ -46,6 +46,12 @@ module Daytona
     # @return [Boolean, nil] Whether the Sandbox should be ephemeral
     attr_accessor :ephemeral
 
+    # @return [String, nil] ID or name of an existing Sandbox to link the new Sandbox to. The new
+    #   Sandbox will be scheduled on the same runner as the linked Sandbox so a local network can be
+    #   established between them. Linked Sandboxes must be
+    #   ephemeral (auto_delete_interval=0) and cannot themselves be linked to another Sandbox.
+    attr_accessor :linked_sandbox
+
     # Initialize CreateSandboxBaseParams
     #
     # @param language [Symbol, nil] Programming language for the Sandbox
@@ -61,6 +67,7 @@ module Daytona
     # @param network_block_all [Boolean, nil] Whether to block all network access for the Sandbox
     # @param network_allow_list [String, nil] Comma-separated list of allowed CIDR network addresses for the Sandbox
     # @param ephemeral [Boolean, nil] Whether the Sandbox should be ephemeral
+    # @param linked_sandbox [String, nil] ID or name of an existing Sandbox to link the new Sandbox to
     def initialize( # rubocop:disable Metrics/MethodLength, Metrics/ParameterLists
       language: nil,
       os_user: nil,
@@ -74,7 +81,8 @@ module Daytona
       volumes: nil,
       network_block_all: nil,
       network_allow_list: nil,
-      ephemeral: nil
+      ephemeral: nil,
+      linked_sandbox: nil
     )
       @language = language
       @os_user = os_user
@@ -89,6 +97,7 @@ module Daytona
       @network_block_all = network_block_all
       @network_allow_list = network_allow_list
       @ephemeral = ephemeral
+      @linked_sandbox = linked_sandbox
 
       # Handle ephemeral and auto_delete_interval conflict
       handle_ephemeral_auto_delete_conflict
@@ -111,7 +120,8 @@ module Daytona
         volumes:,
         network_block_all:,
         network_allow_list:,
-        ephemeral:
+        ephemeral:,
+        linked_sandbox:
       }.compact
     end
 
