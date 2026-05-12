@@ -20,6 +20,7 @@ import { BackupState } from '../enums/backup-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { sanitizeSandboxError } from '../utils/sanitize-error.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
+import { RunnerService } from './runner.service'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { Sandbox } from '../entities/sandbox.entity'
 import { RedisLockProvider } from '../common/redis-lock.provider'
@@ -46,6 +47,7 @@ export class JobStateHandlerService {
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly eventEmitter: EventEmitter2,
+    private readonly runnerService: RunnerService,
     @InjectRepository(Runner)
     private readonly runnerRepository: Repository<Runner>,
   ) {}
@@ -633,47 +635,59 @@ export class JobStateHandlerService {
       const memDeltaForQuota = isHotResize ? (payload.memory ?? sandbox.mem) - sandbox.mem : 0
       const diskDeltaForQuota = (payload.disk ?? sandbox.disk) - sandbox.disk // Disk only increases
 
-      const updateData: Partial<Sandbox> = {}
+      try {
+        const updateData: Partial<Sandbox> = {}
 
-      if (job.status === JobStatus.COMPLETED) {
-        this.logger.debug(`RESIZE_SANDBOX job ${job.id} completed successfully for sandbox ${sandboxId}`)
+        if (job.status === JobStatus.COMPLETED) {
+          this.logger.debug(`RESIZE_SANDBOX job ${job.id} completed successfully for sandbox ${sandboxId}`)
 
-        // Update sandbox resources
-        updateData.cpu = payload.cpu ?? sandbox.cpu
-        updateData.mem = payload.memory ?? sandbox.mem
-        updateData.disk = payload.disk ?? sandbox.disk
-        updateData.state = previousState
+          // Update sandbox resources
+          updateData.cpu = payload.cpu ?? sandbox.cpu
+          updateData.mem = payload.memory ?? sandbox.mem
+          updateData.disk = payload.disk ?? sandbox.disk
+          updateData.state = previousState
 
-        // Apply usage change (handles both positive and negative deltas).
-        // Resize never changes GPU allocation — always pass 0.
-        await this.organizationUsageService.applyResizeUsageChange(
-          sandbox.organizationId,
-          sandbox.region,
-          sandbox.sandboxClass,
+          // Apply usage change (handles both positive and negative deltas).
+          // Resize never changes GPU allocation — always pass 0.
+          await this.organizationUsageService.applyResizeUsageChange(
+            sandbox.organizationId,
+            sandbox.region,
+            sandbox.sandboxClass,
+            cpuDeltaForQuota,
+            memDeltaForQuota,
+            diskDeltaForQuota,
+            0,
+          )
+        } else if (job.status === JobStatus.FAILED) {
+          this.logger.error(`RESIZE_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
+
+          // Rollback pending usage (all deltas were tracked, including negative).
+          // Resize never changes GPU allocation — always pass undefined for gpu.
+          await this.organizationUsageService.decrementPendingSandboxUsage(
+            sandbox.organizationId,
+            sandbox.region,
+            sandbox.sandboxClass,
+            cpuDeltaForQuota !== 0 ? cpuDeltaForQuota : undefined,
+            memDeltaForQuota !== 0 ? memDeltaForQuota : undefined,
+            diskDeltaForQuota !== 0 ? diskDeltaForQuota : undefined,
+            undefined,
+          )
+
+          updateData.state = previousState
+        }
+
+        await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
+      } finally {
+        // Release the per-runner pending allocation slot regardless of COMPLETED vs FAILED —
+        // either way the runner has finished with this resize. Safe-wrapped so a Redis blip
+        // doesn't shadow the original error; 60s TTL is the safety net for any swallow.
+        await this.runnerService.safeDecrementPendingRunnerAllocation(
+          job.runnerId,
           cpuDeltaForQuota,
           memDeltaForQuota,
           diskDeltaForQuota,
-          0,
         )
-      } else if (job.status === JobStatus.FAILED) {
-        this.logger.error(`RESIZE_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-
-        // Rollback pending usage (all deltas were tracked, including negative).
-        // Resize never changes GPU allocation — always pass undefined for gpu.
-        await this.organizationUsageService.decrementPendingSandboxUsage(
-          sandbox.organizationId,
-          sandbox.region,
-          sandbox.sandboxClass,
-          cpuDeltaForQuota !== 0 ? cpuDeltaForQuota : undefined,
-          memDeltaForQuota !== 0 ? memDeltaForQuota : undefined,
-          diskDeltaForQuota !== 0 ? diskDeltaForQuota : undefined,
-          undefined,
-        )
-
-        updateData.state = previousState
       }
-
-      await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
     } catch (error) {
       this.logger.error(`Error handling RESIZE_SANDBOX job completion for sandbox ${sandboxId}:`, error)
     }

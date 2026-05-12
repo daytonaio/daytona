@@ -2351,6 +2351,7 @@ export class SandboxService {
     let pendingCpuIncrement: number | undefined
     let pendingMemoryIncrement: number | undefined
     let pendingDiskIncrement: number | undefined
+    let admittedRunnerAllocation: { runnerId: string; cpu: number; memory: number; disk: number } | undefined
     let pendingGpuIncrement: number | undefined
 
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
@@ -2501,6 +2502,39 @@ export class SandboxService {
         throw new BadRequestError('Sandbox must be in started or stopped state to resize')
       }
 
+      // Per-runner admission gate: reject (409) if pending allocations + this resize would
+      // drop the runner's projected score below the threshold. Locked against stale-view
+      // races. Cold cpu/mem resizes are gated too, as a proxy until start is also gated.
+      const allocationLockKey = `runner-${runner.id}-pending-allocation-lock`
+      await this.redisLockProvider.waitForLock(allocationLockKey, 10)
+      try {
+        const projectedScore = await this.runnerService.getProjectedAvailabilityScore(runner, {
+          cpu: cpuDeltaForQuota,
+          memory: memDeltaForQuota,
+          disk: diskDeltaForQuota,
+        })
+        const resizeScoreThreshold = this.configService.getOrThrow('runnerScore.thresholds.resize')
+        if (projectedScore < resizeScoreThreshold) {
+          throw new ConflictException(
+            `Runner load would exceed resize threshold (projected score ${projectedScore} < ${resizeScoreThreshold}). Please retry shortly.`,
+          )
+        }
+        await this.runnerService.incrementPendingRunnerAllocation(
+          runner.id,
+          cpuDeltaForQuota,
+          memDeltaForQuota,
+          diskDeltaForQuota,
+        )
+        admittedRunnerAllocation = {
+          runnerId: runner.id,
+          cpu: cpuDeltaForQuota,
+          memory: memDeltaForQuota,
+          disk: diskDeltaForQuota,
+        }
+      } finally {
+        await this.redisLockProvider.unlock(allocationLockKey)
+      }
+
       // Now transition to RESIZING state
       const updateData: Partial<Sandbox> = {
         state: SandboxState.RESIZING,
@@ -2553,11 +2587,25 @@ export class SandboxService {
             diskDeltaForQuota,
             0,
           )
-        }
 
-        return await this.findOneByIdOrName(sandbox.id, organization.id)
+          // Release the per-runner pending allocation slot — runner has applied the resize
+          // synchronously on the V0 path. (Brief under-counting until the next healthcheck
+          // refreshes runner.currentAllocatedCpu is documented and accepted.)
+          await this.runnerService.safeDecrementPendingRunnerAllocation(
+            runner.id,
+            cpuDeltaForQuota,
+            memDeltaForQuota,
+            diskDeltaForQuota,
+          )
+          admittedRunnerAllocation = undefined
+        } else {
+          // V2: job enqueued — handler now owns state + slot release; clear to avoid a
+          // double-release in the outer catch.
+          admittedRunnerAllocation = undefined
+        }
       } catch (error) {
-        // Return to previous state on error
+        // resize failed — revert RESIZING. Excludes the findOneByIdOrName below, which
+        // must not revert state for an in-flight V2 job.
         const updateData: Partial<Sandbox> = {
           state: previousState,
         }
@@ -2569,6 +2617,8 @@ export class SandboxService {
 
         throw error
       }
+
+      return await this.findOneByIdOrName(sandbox.id, organization.id)
     } catch (error) {
       await this.rollbackPendingUsage(
         organization.id,
@@ -2579,6 +2629,14 @@ export class SandboxService {
         pendingDiskIncrement,
         pendingGpuIncrement,
       )
+      if (admittedRunnerAllocation) {
+        await this.runnerService.safeDecrementPendingRunnerAllocation(
+          admittedRunnerAllocation.runnerId,
+          admittedRunnerAllocation.cpu,
+          admittedRunnerAllocation.memory,
+          admittedRunnerAllocation.disk,
+        )
+      }
       throw error
     }
   }
