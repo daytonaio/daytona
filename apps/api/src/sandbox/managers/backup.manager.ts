@@ -504,6 +504,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
       const staleSandboxes = await this.sandboxRepository.find({
         where: {
           backupState: BackupState.IN_PROGRESS,
+          desiredState: Not(SandboxDesiredState.DESTROYED),
           updatedAt: LessThan(twoHoursAgo),
         },
         order: {
