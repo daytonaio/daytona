@@ -197,6 +197,7 @@ const configuration = {
       availability: parseInt(process.env.RUNNER_AVAILABILITY_SCORE_THRESHOLD || '10', 10),
       start: parseInt(process.env.RUNNER_START_SCORE_THRESHOLD || '3', 10),
       initialRunnerScoreAddon: parseInt(process.env.RUNNER_INITIAL_RUNNER_SCORE_ADDON || '20', 10),
+      resize: parseInt(process.env.RUNNER_RESIZE_SCORE_THRESHOLD || '10', 10),
     },
     weights: {
       cpuUsage: parseFloat(process.env.RUNNER_CPU_USAGE_WEIGHT || '0.25'),
