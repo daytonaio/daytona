@@ -24,6 +24,9 @@ import (
 //	@Produce		json
 //	@Param			request	body		GitCommitRequest	true	"Commit request"
 //	@Success		200		{object}	GitCommitResponse
+//	@Failure		400		{object}	GitErrorResponse
+//	@Failure		409		{object}	GitErrorResponse
+//	@Failure		500		{object}	GitErrorResponse
 //	@Router			/git/commit [post]
 //
 //	@id				CommitChanges

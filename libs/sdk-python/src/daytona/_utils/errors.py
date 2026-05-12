@@ -37,18 +37,43 @@ from daytona_toolbox_api_client_async.exceptions import NotFoundException as Not
 from daytona_toolbox_api_client_async.exceptions import OpenApiException as OpenApiExceptionToolboxAsync
 from daytona_toolbox_api_client_async.exceptions import UnauthorizedException as UnauthorizedExceptionToolboxAsync
 
+from daytona_toolbox_api_client.models.daemon_error_code import DaemonErrorCode
+
 from ..common.errors import (
     DaytonaAuthenticationError,
     DaytonaAuthorizationError,
     DaytonaConflictError,
     DaytonaConnectionError,
     DaytonaError,
+    DaytonaGitAuthenticationError,
+    DaytonaGitAuthorizationError,
+    DaytonaGitBranchExistsError,
+    DaytonaGitBranchNotFoundError,
+    DaytonaGitDirtyWorktreeError,
+    DaytonaGitEmptyRepoError,
+    DaytonaGitMergeConflictError,
+    DaytonaGitPushRejectedError,
+    DaytonaGitRefNotFoundError,
+    DaytonaGitRepoNotFoundError,
     DaytonaNotFoundError,
     DaytonaTimeoutError,
     DaytonaValidationError,
 )
 from ..common.errors import create_daytona_error as create_daytona_error_from_status_code
 from ..common.errors import error_class_from_status_code
+
+_DAEMON_CODE_TO_EXCEPTION: dict[str, type[DaytonaError]] = {
+    DaemonErrorCode.CodeGitAuthFailed.value: DaytonaGitAuthenticationError,
+    DaemonErrorCode.CodeGitAuthForbidden.value: DaytonaGitAuthorizationError,
+    DaemonErrorCode.CodeGitRepoNotFound.value: DaytonaGitRepoNotFoundError,
+    DaemonErrorCode.CodeGitBranchNotFound.value: DaytonaGitBranchNotFoundError,
+    DaemonErrorCode.CodeGitRefNotFound.value: DaytonaGitRefNotFoundError,
+    DaemonErrorCode.CodeGitEmptyRepo.value: DaytonaGitEmptyRepoError,
+    DaemonErrorCode.CodeGitPushRejected.value: DaytonaGitPushRejectedError,
+    DaemonErrorCode.CodeGitBranchExists.value: DaytonaGitBranchExistsError,
+    DaemonErrorCode.CodeGitDirtyWorktree.value: DaytonaGitDirtyWorktreeError,
+    DaemonErrorCode.CodeGitMergeConflict.value: DaytonaGitMergeConflictError,
+}
 from .types import has_body
 
 SESSION_IS_CLOSED_ERROR_MESSAGE = "Session is closed"
@@ -188,9 +213,14 @@ def intercept_errors(
 def _map_api_exception_to_error(
     e: OpenApiDaytonaException,
     status_code: int | None,
+    error_code: str | None = None,
 ) -> type[DaytonaError]:
     """Map an OpenAPI exception to the appropriate DaytonaError subclass."""
-    # Map by exception type first (most reliable)
+    # Check daemon-specific codes first for precise git exceptions
+    if error_code and error_code in _DAEMON_CODE_TO_EXCEPTION:
+        return _DAEMON_CODE_TO_EXCEPTION[error_code]
+
+    # Fall back to HTTP-status-based mapping
     if isinstance(e, NOT_FOUND_EXCEPTIONS):
         return DaytonaNotFoundError
 
@@ -226,7 +256,7 @@ def create_daytona_error(
             error_code=error_code,
         )
 
-    error_cls = _map_api_exception_to_error(exception, status_code)
+    error_cls = _map_api_exception_to_error(exception, status_code, error_code=error_code)
     return error_cls(message, status_code=status_code, headers=headers, error_code=error_code)
 
 

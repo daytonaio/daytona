@@ -380,7 +380,8 @@ class SnapshotsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SnapshotDto",
-            '400': None,
+            '400': "ApiErrorResponseDto",
+            '401': "ApiErrorResponseDto",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -451,7 +452,8 @@ class SnapshotsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SnapshotDto",
-            '400': None,
+            '400': "ApiErrorResponseDto",
+            '401': "ApiErrorResponseDto",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -522,7 +524,8 @@ class SnapshotsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SnapshotDto",
-            '400': None,
+            '400': "ApiErrorResponseDto",
+            '401': "ApiErrorResponseDto",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1281,7 +1284,8 @@ class SnapshotsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SnapshotDto",
-            '404': None,
+            '403': "SnapshotAccessDeniedError",
+            '404': "SnapshotNotFoundError",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1352,7 +1356,8 @@ class SnapshotsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SnapshotDto",
-            '404': None,
+            '403': "SnapshotAccessDeniedError",
+            '404': "SnapshotNotFoundError",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1423,7 +1428,8 @@ class SnapshotsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SnapshotDto",
-            '404': None,
+            '403': "SnapshotAccessDeniedError",
+            '404': "SnapshotNotFoundError",
         }
         response_data = self.api_client.call_api(
             *_param,

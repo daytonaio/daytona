@@ -180,27 +180,27 @@ func multipartContentDisposition(formName string, path string) string {
 		formName, toLatin1(path), encodeRFC5987(path))
 }
 
-func classifyPathStatError(path string, err error) (int, string, string) {
+func classifyPathStatError(path string, err error) (int, common.DaemonErrorCode, string) {
 	// Preserve a specific not-found classification for missing files.
 	if errors.Is(err, os.ErrNotExist) {
-		return http.StatusNotFound, "FILE_NOT_FOUND", fmt.Sprintf("file not found: %s", path)
+		return http.StatusNotFound, common.CodeFileNotFound, fmt.Sprintf("file not found: %s", path)
 	}
 
 	if errors.Is(err, os.ErrPermission) {
-		return http.StatusForbidden, "FILE_ACCESS_DENIED", fmt.Sprintf("permission denied: %s", path)
+		return http.StatusForbidden, common.CodeFileAccessDenied, fmt.Sprintf("permission denied: %s", path)
 	}
 
 	if errors.Is(err, os.ErrInvalid) {
-		return http.StatusBadRequest, "INVALID_FILE_PATH", fmt.Sprintf("invalid file path: %s", path)
+		return http.StatusBadRequest, common.CodeInvalidFilePath, fmt.Sprintf("invalid file path: %s", path)
 	}
 
-	return http.StatusInternalServerError, "FILE_READ_FAILED", fmt.Sprintf("failed to access file: %v", err)
+	return http.StatusInternalServerError, common.CodeFileReadFailed, fmt.Sprintf("failed to access file: %v", err)
 }
 
 func classifyOpenFileError(ctx *gin.Context, path string, err error) common.ErrorResponse {
 	statusCode, errorCode, message := classifyPathStatError(path, err)
 	// Use a more specific fallback message for open errors.
-	if errorCode == "FILE_READ_FAILED" {
+	if errorCode == common.CodeFileReadFailed {
 		message = fmt.Sprintf("failed to open file: %v", err)
 	}
 	return newFileDownloadErrorResponse(ctx, path, statusCode, errorCode, message)
@@ -210,12 +210,13 @@ func newFileDownloadErrorResponse(
 	ctx *gin.Context,
 	path string,
 	statusCode int,
-	code string,
+	code common.DaemonErrorCode,
 	message string,
 ) common.ErrorResponse {
 	return common.ErrorResponse{
 		StatusCode: statusCode,
 		Message:    message,
+		Source:     "DAYTONA_DAEMON",
 		Code:       code,
 		Timestamp:  time.Now().UTC(),
 		Path:       path,

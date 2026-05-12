@@ -57,6 +57,7 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client.models.computer_use_stop_response import ComputerUseStopResponse
     from daytona_toolbox_api_client.models.create_context_request import CreateContextRequest
     from daytona_toolbox_api_client.models.create_session_request import CreateSessionRequest
+    from daytona_toolbox_api_client.models.daemon_error_code import DaemonErrorCode
     from daytona_toolbox_api_client.models.display_info import DisplayInfo
     from daytona_toolbox_api_client.models.display_info_response import DisplayInfoResponse
     from daytona_toolbox_api_client.models.execute_request import ExecuteRequest
@@ -72,8 +73,12 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client.models.git_commit_request import GitCommitRequest
     from daytona_toolbox_api_client.models.git_commit_response import GitCommitResponse
     from daytona_toolbox_api_client.models.git_delete_branch_request import GitDeleteBranchRequest
+    from daytona_toolbox_api_client.models.git_error_response import GitErrorResponse
     from daytona_toolbox_api_client.models.git_repo_request import GitRepoRequest
     from daytona_toolbox_api_client.models.git_status import GitStatus
+    from daytona_toolbox_api_client.models.git_status_error_code import GitStatusErrorCode
+    from daytona_toolbox_api_client.models.git_status_internal_error import GitStatusInternalError
+    from daytona_toolbox_api_client.models.git_status_not_found_error import GitStatusNotFoundError
     from daytona_toolbox_api_client.models.initialize_request import InitializeRequest
     from daytona_toolbox_api_client.models.interpreter_context import InterpreterContext
     from daytona_toolbox_api_client.models.is_port_in_use_response import IsPortInUseResponse
@@ -165,6 +170,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "ComputerUseStopResponse": "daytona_toolbox_api_client.models.computer_use_stop_response",
     "CreateContextRequest": "daytona_toolbox_api_client.models.create_context_request",
     "CreateSessionRequest": "daytona_toolbox_api_client.models.create_session_request",
+    "DaemonErrorCode": "daytona_toolbox_api_client.models.daemon_error_code",
     "DisplayInfo": "daytona_toolbox_api_client.models.display_info",
     "DisplayInfoResponse": "daytona_toolbox_api_client.models.display_info_response",
     "ExecuteRequest": "daytona_toolbox_api_client.models.execute_request",
@@ -180,8 +186,12 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "GitCommitRequest": "daytona_toolbox_api_client.models.git_commit_request",
     "GitCommitResponse": "daytona_toolbox_api_client.models.git_commit_response",
     "GitDeleteBranchRequest": "daytona_toolbox_api_client.models.git_delete_branch_request",
+    "GitErrorResponse": "daytona_toolbox_api_client.models.git_error_response",
     "GitRepoRequest": "daytona_toolbox_api_client.models.git_repo_request",
     "GitStatus": "daytona_toolbox_api_client.models.git_status",
+    "GitStatusErrorCode": "daytona_toolbox_api_client.models.git_status_error_code",
+    "GitStatusInternalError": "daytona_toolbox_api_client.models.git_status_internal_error",
+    "GitStatusNotFoundError": "daytona_toolbox_api_client.models.git_status_not_found_error",
     "InitializeRequest": "daytona_toolbox_api_client.models.initialize_request",
     "InterpreterContext": "daytona_toolbox_api_client.models.interpreter_context",
     "IsPortInUseResponse": "daytona_toolbox_api_client.models.is_port_in_use_response",
@@ -287,6 +297,7 @@ __all__ = [
     "ComputerUseStopResponse",
     "CreateContextRequest",
     "CreateSessionRequest",
+    "DaemonErrorCode",
     "DisplayInfo",
     "DisplayInfoResponse",
     "ExecuteRequest",
@@ -302,8 +313,12 @@ __all__ = [
     "GitCommitRequest",
     "GitCommitResponse",
     "GitDeleteBranchRequest",
+    "GitErrorResponse",
     "GitRepoRequest",
     "GitStatus",
+    "GitStatusErrorCode",
+    "GitStatusInternalError",
+    "GitStatusNotFoundError",
     "InitializeRequest",
     "InterpreterContext",
     "IsPortInUseResponse",

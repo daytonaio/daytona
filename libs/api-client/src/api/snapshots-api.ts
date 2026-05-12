@@ -22,11 +22,17 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
+import type { ApiErrorResponseDto } from '../models';
+// @ts-ignore
 import type { CreateSnapshot } from '../models';
 // @ts-ignore
 import type { PaginatedSnapshots } from '../models';
 // @ts-ignore
+import type { SnapshotAccessDeniedError } from '../models';
+// @ts-ignore
 import type { SnapshotDto } from '../models';
+// @ts-ignore
+import type { SnapshotNotFoundError } from '../models';
 // @ts-ignore
 import type { Url } from '../models';
 /**

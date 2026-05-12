@@ -22,7 +22,8 @@ func ErrorMiddleware() gin.HandlerFunc {
 			errorResponse := common.ErrorResponse{
 				StatusCode: statusCode,
 				Message:    err.Error(),
-				Code:       http.StatusText(statusCode),
+				Source:     "DAYTONA_DAEMON",
+				Code:       common.DaemonErrorCode(http.StatusText(statusCode)),
 				Timestamp:  time.Now(),
 				Path:       ctx.Request.URL.Path,
 				Method:     ctx.Request.Method,

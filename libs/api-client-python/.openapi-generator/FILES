@@ -29,6 +29,8 @@ daytona_api_client/models/account_provider.py
 daytona_api_client/models/admin_create_runner.py
 daytona_api_client/models/admin_get_webhook_status200_response.py
 daytona_api_client/models/announcement.py
+daytona_api_client/models/api_error_code.py
+daytona_api_client/models/api_error_response_dto.py
 daytona_api_client/models/api_key_list.py
 daytona_api_client/models/api_key_response.py
 daytona_api_client/models/audit_log.py
@@ -173,8 +175,10 @@ daytona_api_client/models/session_execute_request.py
 daytona_api_client/models/session_execute_response.py
 daytona_api_client/models/set_snapshot_general_status_dto.py
 daytona_api_client/models/signed_port_preview_url.py
+daytona_api_client/models/snapshot_access_denied_error.py
 daytona_api_client/models/snapshot_dto.py
 daytona_api_client/models/snapshot_manager_credentials.py
+daytona_api_client/models/snapshot_not_found_error.py
 daytona_api_client/models/snapshot_state.py
 daytona_api_client/models/ssh_access_dto.py
 daytona_api_client/models/ssh_access_validation_dto.py

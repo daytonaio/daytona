@@ -18,8 +18,10 @@ import (
 //	@Description	Get the commit history of the Git repository
 //	@Tags			git
 //	@Produce		json
-//	@Param			path	query	string	true	"Repository path"
-//	@Success		200		{array}	git.GitCommitInfo
+//	@Param			path	query		string	true	"Repository path"
+//	@Success		200		{array}		git.GitCommitInfo
+//	@Failure		404		{object}	GitErrorResponse
+//	@Failure		500		{object}	GitErrorResponse
 //	@Router			/git/history [get]
 //
 //	@id				GetCommitHistory

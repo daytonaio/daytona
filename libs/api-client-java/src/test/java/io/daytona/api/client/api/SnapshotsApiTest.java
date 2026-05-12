@@ -14,10 +14,13 @@
 package io.daytona.api.client.api;
 
 import io.daytona.api.client.ApiException;
+import io.daytona.api.client.model.ApiErrorResponseDto;
 import java.math.BigDecimal;
 import io.daytona.api.client.model.CreateSnapshot;
 import io.daytona.api.client.model.PaginatedSnapshots;
+import io.daytona.api.client.model.SnapshotAccessDeniedError;
 import io.daytona.api.client.model.SnapshotDto;
+import io.daytona.api.client.model.SnapshotNotFoundError;
 import io.daytona.api.client.model.Url;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

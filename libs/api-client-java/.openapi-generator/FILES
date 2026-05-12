@@ -45,6 +45,8 @@ src/main/java/io/daytona/api/client/model/AccountProvider.java
 src/main/java/io/daytona/api/client/model/AdminCreateRunner.java
 src/main/java/io/daytona/api/client/model/AdminGetWebhookStatus200Response.java
 src/main/java/io/daytona/api/client/model/Announcement.java
+src/main/java/io/daytona/api/client/model/ApiErrorCode.java
+src/main/java/io/daytona/api/client/model/ApiErrorResponseDto.java
 src/main/java/io/daytona/api/client/model/ApiKeyList.java
 src/main/java/io/daytona/api/client/model/ApiKeyResponse.java
 src/main/java/io/daytona/api/client/model/AuditLog.java
@@ -189,8 +191,10 @@ src/main/java/io/daytona/api/client/model/SessionExecuteRequest.java
 src/main/java/io/daytona/api/client/model/SessionExecuteResponse.java
 src/main/java/io/daytona/api/client/model/SetSnapshotGeneralStatusDto.java
 src/main/java/io/daytona/api/client/model/SignedPortPreviewUrl.java
+src/main/java/io/daytona/api/client/model/SnapshotAccessDeniedError.java
 src/main/java/io/daytona/api/client/model/SnapshotDto.java
 src/main/java/io/daytona/api/client/model/SnapshotManagerCredentials.java
+src/main/java/io/daytona/api/client/model/SnapshotNotFoundError.java
 src/main/java/io/daytona/api/client/model/SnapshotState.java
 src/main/java/io/daytona/api/client/model/SshAccessDto.java
 src/main/java/io/daytona/api/client/model/SshAccessValidationDto.java
@@ -245,6 +249,8 @@ src/test/java/io/daytona/api/client/model/AccountProviderTest.java
 src/test/java/io/daytona/api/client/model/AdminCreateRunnerTest.java
 src/test/java/io/daytona/api/client/model/AdminGetWebhookStatus200ResponseTest.java
 src/test/java/io/daytona/api/client/model/AnnouncementTest.java
+src/test/java/io/daytona/api/client/model/ApiErrorCodeTest.java
+src/test/java/io/daytona/api/client/model/ApiErrorResponseDtoTest.java
 src/test/java/io/daytona/api/client/model/ApiKeyListTest.java
 src/test/java/io/daytona/api/client/model/ApiKeyResponseTest.java
 src/test/java/io/daytona/api/client/model/AuditLogTest.java
@@ -389,8 +395,10 @@ src/test/java/io/daytona/api/client/model/SessionExecuteResponseTest.java
 src/test/java/io/daytona/api/client/model/SessionTest.java
 src/test/java/io/daytona/api/client/model/SetSnapshotGeneralStatusDtoTest.java
 src/test/java/io/daytona/api/client/model/SignedPortPreviewUrlTest.java
+src/test/java/io/daytona/api/client/model/SnapshotAccessDeniedErrorTest.java
 src/test/java/io/daytona/api/client/model/SnapshotDtoTest.java
 src/test/java/io/daytona/api/client/model/SnapshotManagerCredentialsTest.java
+src/test/java/io/daytona/api/client/model/SnapshotNotFoundErrorTest.java
 src/test/java/io/daytona/api/client/model/SnapshotStateTest.java
 src/test/java/io/daytona/api/client/model/SshAccessDtoTest.java
 src/test/java/io/daytona/api/client/model/SshAccessValidationDtoTest.java

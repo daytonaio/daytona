@@ -17,6 +17,7 @@ import (
 type ErrorResponse struct {
 	StatusCode int       `json:"statusCode" example:"400" binding:"required"`
 	Message    string    `json:"message" example:"Bad request" binding:"required"`
+	Source     string    `json:"source,omitempty" example:"DAYTONA_DAEMON"`
 	Code       string    `json:"code,omitempty" example:"BAD_REQUEST"`
 	Timestamp  time.Time `json:"timestamp" example:"2023-01-01T12:00:00Z" binding:"required"`
 	Path       string    `json:"path" example:"/api/resource" binding:"required"`

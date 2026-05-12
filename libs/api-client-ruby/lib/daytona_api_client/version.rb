@@ -11,5 +11,5 @@ Generator version: 7.21.0
 =end
 
 module DaytonaApiClient
-  VERSION = '0.0.0.pre.dev'
+  VERSION = '0.0.0.dev'
 end

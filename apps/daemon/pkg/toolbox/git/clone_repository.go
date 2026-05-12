@@ -23,6 +23,11 @@ import (
 //	@Produce		json
 //	@Param			request	body	GitCloneRequest	true	"Clone repository request"
 //	@Success		200
+//	@Failure		400	{object}	GitErrorResponse
+//	@Failure		401	{object}	GitErrorResponse
+//	@Failure		403	{object}	GitErrorResponse
+//	@Failure		404	{object}	GitErrorResponse
+//	@Failure		500	{object}	GitErrorResponse
 //	@Router			/git/clone [post]
 //
 //	@id				CloneRepository

@@ -128,6 +128,50 @@ class DaytonaValidationError(DaytonaError):
     """
 
 
+class DaytonaGitError(DaytonaError):
+    """Base error for all git operation failures."""
+
+
+class DaytonaGitAuthenticationError(DaytonaGitError, DaytonaAuthenticationError):
+    """Git authentication failed — bad credentials (HTTP 401, code GIT_AUTH_FAILED)."""
+
+
+class DaytonaGitAuthorizationError(DaytonaGitError, DaytonaAuthorizationError):
+    """Git access denied — credentials valid but not authorized (HTTP 403, code GIT_AUTH_FORBIDDEN)."""
+
+
+class DaytonaGitRepoNotFoundError(DaytonaGitError, DaytonaNotFoundError):
+    """Remote repository not found (HTTP 404, code GIT_REPO_NOT_FOUND)."""
+
+
+class DaytonaGitBranchNotFoundError(DaytonaGitError, DaytonaNotFoundError):
+    """Branch not found (HTTP 404, code GIT_BRANCH_NOT_FOUND)."""
+
+
+class DaytonaGitRefNotFoundError(DaytonaGitError, DaytonaNotFoundError):
+    """Git ref (tag, remote, object) not found (HTTP 404, code GIT_REF_NOT_FOUND)."""
+
+
+class DaytonaGitEmptyRepoError(DaytonaGitError, DaytonaNotFoundError):
+    """Remote repository is empty (HTTP 404, code GIT_EMPTY_REPO)."""
+
+
+class DaytonaGitPushRejectedError(DaytonaGitError, DaytonaConflictError):
+    """Push rejected — non-fast-forward update (HTTP 409, code GIT_PUSH_REJECTED)."""
+
+
+class DaytonaGitBranchExistsError(DaytonaGitError, DaytonaConflictError):
+    """Branch already exists (HTTP 409, code GIT_BRANCH_EXISTS)."""
+
+
+class DaytonaGitDirtyWorktreeError(DaytonaGitError, DaytonaConflictError):
+    """Working tree has uncommitted changes (HTTP 409, code GIT_DIRTY_WORKTREE)."""
+
+
+class DaytonaGitMergeConflictError(DaytonaGitError, DaytonaConflictError):
+    """Merge conflict — cannot fast-forward (HTTP 409, code GIT_MERGE_CONFLICT)."""
+
+
 class DaytonaTimeoutError(DaytonaError):
     """Error for when a timeout occurs.
 

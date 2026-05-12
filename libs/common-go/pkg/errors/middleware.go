@@ -15,7 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) ErrorResponse) gin.HandlerFunc {
+func NewErrorMiddleware(source string, defaultErrorHandler func(ctx *gin.Context, err error) ErrorResponse) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctx.Next()
 
@@ -34,6 +34,7 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 				errorResponse = ErrorResponse{
 					StatusCode: e.StatusCode,
 					Message:    e.Message,
+					Source:     source,
 					Code:       e.Code,
 					Timestamp:  time.Now(),
 					Path:       ctx.Request.URL.Path,
@@ -43,6 +44,7 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 				errorResponse = ErrorResponse{
 					StatusCode: http.StatusNotFound,
 					Message:    err.Err.Error(),
+					Source:     source,
 					Code:       "NOT_FOUND",
 					Timestamp:  time.Now(),
 					Path:       ctx.Request.URL.Path,
@@ -52,6 +54,7 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 				errorResponse = ErrorResponse{
 					StatusCode: http.StatusUnauthorized,
 					Message:    err.Err.Error(),
+					Source:     source,
 					Code:       "UNAUTHORIZED",
 					Timestamp:  time.Now(),
 					Path:       ctx.Request.URL.Path,
@@ -61,6 +64,7 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 				errorResponse = ErrorResponse{
 					StatusCode: http.StatusBadRequest,
 					Message:    err.Err.Error(),
+					Source:     source,
 					Code:       "INVALID_REQUEST_BODY",
 					Timestamp:  time.Now(),
 					Path:       ctx.Request.URL.Path,
@@ -70,6 +74,7 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 				errorResponse = ErrorResponse{
 					StatusCode: http.StatusConflict,
 					Message:    err.Err.Error(),
+					Source:     source,
 					Code:       "CONFLICT",
 					Timestamp:  time.Now(),
 					Path:       ctx.Request.URL.Path,
@@ -79,6 +84,7 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 				errorResponse = ErrorResponse{
 					StatusCode: http.StatusBadRequest,
 					Message:    ExtractErrorPart(err.Err.Error()),
+					Source:     source,
 					Code:       "BAD_REQUEST",
 					Timestamp:  time.Now(),
 					Path:       ctx.Request.URL.Path,
@@ -88,6 +94,7 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 				errorResponse = ErrorResponse{
 					StatusCode: http.StatusForbidden,
 					Message:    err.Err.Error(),
+					Source:     source,
 					Code:       "FORBIDDEN",
 					Timestamp:  time.Now(),
 					Path:       ctx.Request.URL.Path,
@@ -97,6 +104,7 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 				errorResponse = ErrorResponse{
 					StatusCode: http.StatusRequestTimeout,
 					Message:    err.Err.Error(),
+					Source:     source,
 					Code:       "REQUEST_TIMEOUT",
 					Timestamp:  time.Now(),
 					Path:       ctx.Request.URL.Path,
@@ -106,6 +114,7 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 				errorResponse = ErrorResponse{
 					StatusCode: http.StatusGone,
 					Message:    err.Err.Error(),
+					Source:     source,
 					Code:       "GONE",
 					Timestamp:  time.Now(),
 					Path:       ctx.Request.URL.Path,
@@ -115,6 +124,7 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 				errorResponse = ErrorResponse{
 					StatusCode: http.StatusInternalServerError,
 					Message:    err.Err.Error(),
+					Source:     source,
 					Code:       "INTERNAL_SERVER_ERROR",
 					Timestamp:  time.Now(),
 					Path:       ctx.Request.URL.Path,
@@ -124,6 +134,7 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 				errorResponse = ErrorResponse{
 					StatusCode: http.StatusUnprocessableEntity,
 					Message:    err.Err.Error(),
+					Source:     source,
 					Code:       "UNPROCESSABLE_ENTITY",
 					Timestamp:  time.Now(),
 					Path:       ctx.Request.URL.Path,

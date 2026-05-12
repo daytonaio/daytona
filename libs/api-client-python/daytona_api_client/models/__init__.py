@@ -24,6 +24,8 @@ if TYPE_CHECKING:
     from daytona_api_client.models.admin_create_runner import AdminCreateRunner
     from daytona_api_client.models.admin_get_webhook_status200_response import AdminGetWebhookStatus200Response
     from daytona_api_client.models.announcement import Announcement
+    from daytona_api_client.models.api_error_code import ApiErrorCode
+    from daytona_api_client.models.api_error_response_dto import ApiErrorResponseDto
     from daytona_api_client.models.api_key_list import ApiKeyList
     from daytona_api_client.models.api_key_response import ApiKeyResponse
     from daytona_api_client.models.audit_log import AuditLog
@@ -168,8 +170,10 @@ if TYPE_CHECKING:
     from daytona_api_client.models.session_execute_response import SessionExecuteResponse
     from daytona_api_client.models.set_snapshot_general_status_dto import SetSnapshotGeneralStatusDto
     from daytona_api_client.models.signed_port_preview_url import SignedPortPreviewUrl
+    from daytona_api_client.models.snapshot_access_denied_error import SnapshotAccessDeniedError
     from daytona_api_client.models.snapshot_dto import SnapshotDto
     from daytona_api_client.models.snapshot_manager_credentials import SnapshotManagerCredentials
+    from daytona_api_client.models.snapshot_not_found_error import SnapshotNotFoundError
     from daytona_api_client.models.snapshot_state import SnapshotState
     from daytona_api_client.models.ssh_access_dto import SshAccessDto
     from daytona_api_client.models.ssh_access_validation_dto import SshAccessValidationDto
@@ -207,6 +211,8 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "AdminCreateRunner": "daytona_api_client.models.admin_create_runner",
     "AdminGetWebhookStatus200Response": "daytona_api_client.models.admin_get_webhook_status200_response",
     "Announcement": "daytona_api_client.models.announcement",
+    "ApiErrorCode": "daytona_api_client.models.api_error_code",
+    "ApiErrorResponseDto": "daytona_api_client.models.api_error_response_dto",
     "ApiKeyList": "daytona_api_client.models.api_key_list",
     "ApiKeyResponse": "daytona_api_client.models.api_key_response",
     "AuditLog": "daytona_api_client.models.audit_log",
@@ -351,8 +357,10 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "SessionExecuteResponse": "daytona_api_client.models.session_execute_response",
     "SetSnapshotGeneralStatusDto": "daytona_api_client.models.set_snapshot_general_status_dto",
     "SignedPortPreviewUrl": "daytona_api_client.models.signed_port_preview_url",
+    "SnapshotAccessDeniedError": "daytona_api_client.models.snapshot_access_denied_error",
     "SnapshotDto": "daytona_api_client.models.snapshot_dto",
     "SnapshotManagerCredentials": "daytona_api_client.models.snapshot_manager_credentials",
+    "SnapshotNotFoundError": "daytona_api_client.models.snapshot_not_found_error",
     "SnapshotState": "daytona_api_client.models.snapshot_state",
     "SshAccessDto": "daytona_api_client.models.ssh_access_dto",
     "SshAccessValidationDto": "daytona_api_client.models.ssh_access_validation_dto",

@@ -20,6 +20,8 @@ import (
 //	@Produce		json
 //	@Param			path	query		string	true	"Repository path"
 //	@Success		200		{object}	ListBranchResponse
+//	@Failure		404		{object}	GitErrorResponse
+//	@Failure		500		{object}	GitErrorResponse
 //	@Router			/git/branches [get]
 //
 //	@id				ListBranches

@@ -23,6 +23,12 @@ import (
 //	@Produce		json
 //	@Param			request	body	GitRepoRequest	true	"Pull request"
 //	@Success		200
+//	@Failure		400	{object}	GitErrorResponse
+//	@Failure		401	{object}	GitErrorResponse
+//	@Failure		403	{object}	GitErrorResponse
+//	@Failure		404	{object}	GitErrorResponse
+//	@Failure		409	{object}	GitErrorResponse
+//	@Failure		500	{object}	GitErrorResponse
 //	@Router			/git/pull [post]
 //
 //	@id				PullChanges

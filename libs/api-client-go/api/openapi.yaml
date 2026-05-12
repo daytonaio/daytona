@@ -6737,7 +6737,17 @@ paths:
                 $ref: "#/components/schemas/SnapshotDto"
           description: The snapshot has been successfully created.
         "400":
-          description: Bad request - Snapshots with tag ":latest" are not allowed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponseDto"
+          description: Bad request — validation failed
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponseDto"
+          description: Unauthorized
       security:
       - bearer: []
       - oauth2:
@@ -6805,8 +6815,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/SnapshotDto"
           description: The snapshot
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SnapshotAccessDeniedError"
+          description: "Access denied — Approach B typed schema, code constrained\
+            \ to SNAPSHOT_ACCESS_DENIED"
         "404":
-          description: Snapshot not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SnapshotNotFoundError"
+          description: "Not found — Approach B typed schema, code constrained to SNAPSHOT_NOT_FOUND"
       security:
       - bearer: []
       - oauth2:
@@ -13655,6 +13676,144 @@ components:
       - size
       - state
       - updatedAt
+      type: object
+    ApiErrorCode:
+      enum:
+      - BAD_REQUEST
+      - UNAUTHORIZED
+      - FORBIDDEN
+      - NOT_FOUND
+      - CONFLICT
+      - RATE_LIMIT_EXCEEDED
+      - INTERNAL_SERVER_ERROR
+      - SNAPSHOT_NOT_FOUND
+      - SNAPSHOT_ACCESS_DENIED
+      - SANDBOX_NOT_FOUND
+      type: string
+    ApiErrorResponseDto:
+      example:
+        path: /api/snapshots/abc-123
+        code: NOT_FOUND
+        method: GET
+        source: DAYTONA_API
+        message: Snapshot not found
+        statusCode: 404
+        timestamp: 2026-01-01T00:00:00.000Z
+      properties:
+        statusCode:
+          example: 404
+          type: number
+        source:
+          example: DAYTONA_API
+          type: string
+        code:
+          allOf:
+          - $ref: "#/components/schemas/ApiErrorCode"
+          example: NOT_FOUND
+        message:
+          example: Snapshot not found
+          type: string
+        timestamp:
+          example: 2026-01-01T00:00:00.000Z
+          type: string
+        path:
+          example: /api/snapshots/abc-123
+          type: string
+        method:
+          example: GET
+          type: string
+      required:
+      - code
+      - message
+      - method
+      - path
+      - source
+      - statusCode
+      - timestamp
+      type: object
+    SnapshotNotFoundError:
+      example:
+        path: /api/snapshots/abc-123
+        code: SNAPSHOT_NOT_FOUND
+        method: GET
+        source: DAYTONA_API
+        message: Snapshot "abc-123" not found
+        statusCode: 404
+        timestamp: 2026-01-01T00:00:00.000Z
+      properties:
+        statusCode:
+          example: 404
+          type: number
+        source:
+          example: DAYTONA_API
+          type: string
+        code:
+          enum:
+          - SNAPSHOT_NOT_FOUND
+          example: SNAPSHOT_NOT_FOUND
+          type: string
+        message:
+          example: Snapshot "abc-123" not found
+          type: string
+        timestamp:
+          example: 2026-01-01T00:00:00.000Z
+          type: string
+        path:
+          example: /api/snapshots/abc-123
+          type: string
+        method:
+          example: GET
+          type: string
+      required:
+      - code
+      - message
+      - method
+      - path
+      - source
+      - statusCode
+      - timestamp
+      type: object
+    SnapshotAccessDeniedError:
+      example:
+        path: /api/snapshots/abc-123
+        code: SNAPSHOT_ACCESS_DENIED
+        method: GET
+        source: DAYTONA_API
+        message: You do not have access to this snapshot
+        statusCode: 403
+        timestamp: 2026-01-01T00:00:00.000Z
+      properties:
+        statusCode:
+          example: 403
+          type: number
+        source:
+          example: DAYTONA_API
+          type: string
+        code:
+          enum:
+          - SNAPSHOT_ACCESS_DENIED
+          example: SNAPSHOT_ACCESS_DENIED
+          type: string
+        message:
+          example: You do not have access to this snapshot
+          type: string
+        timestamp:
+          example: 2026-01-01T00:00:00.000Z
+          type: string
+        path:
+          example: /api/snapshots/abc-123
+          type: string
+        method:
+          example: GET
+          type: string
+      required:
+      - code
+      - message
+      - method
+      - path
+      - source
+      - statusCode
+      - timestamp
       type: object
     PaginatedSnapshots:
       example:

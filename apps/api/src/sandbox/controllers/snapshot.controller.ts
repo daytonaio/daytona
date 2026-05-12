@@ -35,9 +35,13 @@ import {
   ApiQuery,
   ApiHeader,
   ApiBearerAuth,
+  ApiExtraModels,
+  getSchemaPath,
 } from '@nestjs/swagger'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
 import { SnapshotDto } from '../dto/snapshot.dto'
+import { ApiErrorResponseDto } from '../../common/errors/api-error-response.dto'
+import { SnapshotNotFoundErrorDto, SnapshotAccessDeniedErrorDto } from '../dto/errors/snapshot-error.dto'
 import { PaginatedSnapshotsDto } from '../dto/paginated-snapshots.dto'
 import { SnapshotAccessGuard } from '../guards/snapshot-access.guard'
 import { SnapshotReadAccessGuard } from '../guards/snapshot-read-access.guard'
@@ -88,7 +92,13 @@ export class SnapshotController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad request - Snapshots with tag ":latest" are not allowed',
+    description: 'Bad request — validation failed',
+    type: ApiErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+    type: ApiErrorResponseDto,
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
   @Audit({
@@ -132,6 +142,12 @@ export class SnapshotController {
     return SnapshotDto.fromSnapshot(snapshot)
   }
 
+  /**
+   * Approach B demo endpoint.
+   * Each error status is documented with its own typed schema (SnapshotNotFoundErrorDto,
+   * SnapshotAccessDeniedErrorDto). Generated clients expose these as typed models on e.data
+   * (Python/Go), allowing `isinstance(e.data, SnapshotNotFoundError)` without any SDK wrapper.
+   */
   @Get(':id')
   @ApiOperation({
     summary: 'Get snapshot by ID or name',
@@ -141,22 +157,43 @@ export class SnapshotController {
     name: 'id',
     description: 'Snapshot ID or name',
   })
+  @ApiExtraModels(SnapshotNotFoundErrorDto, SnapshotAccessDeniedErrorDto)
   @ApiResponse({
     status: 200,
     description: 'The snapshot',
     type: SnapshotDto,
   })
   @ApiResponse({
+    status: 403,
+    description: 'Access denied — Approach B typed schema, code constrained to SNAPSHOT_ACCESS_DENIED',
+    schema: { $ref: getSchemaPath(SnapshotAccessDeniedErrorDto) },
+  })
+  @ApiResponse({
     status: 404,
-    description: 'Snapshot not found',
+    description: 'Not found — Approach B typed schema, code constrained to SNAPSHOT_NOT_FOUND',
+    schema: { $ref: getSchemaPath(SnapshotNotFoundErrorDto) },
   })
   @UseGuards(SnapshotReadAccessGuard)
   async getSnapshot(
     @Param('id') snapshotIdOrName: string,
     @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
   ): Promise<SnapshotDto> {
-    const snapshot = await this.snapshotService.getSnapshotWithRegions(snapshotIdOrName, authContext.organizationId)
-    return SnapshotDto.fromSnapshot(snapshot)
+    // Approach B: throw HttpException with a typed body that matches the documented schema.
+    // The AllExceptionsFilter detects the `code` field and passes the body through unchanged,
+    // only adding `source` and top-level fields. The generated client deserialises the 404
+    // body as SnapshotNotFoundErrorDto and surfaces it in e.data (Python) / err.Model() (Go).
+    try {
+      const snapshot = await this.snapshotService.getSnapshotWithRegions(snapshotIdOrName, authContext.organizationId)
+      return SnapshotDto.fromSnapshot(snapshot)
+    } catch (e) {
+      if (e instanceof NotFoundException) {
+        throw new NotFoundException({
+          code: 'SNAPSHOT_NOT_FOUND',
+          message: `Snapshot "${snapshotIdOrName}" not found`,
+        })
+      }
+      throw e
+    }
   }
 
   @Delete(':id')

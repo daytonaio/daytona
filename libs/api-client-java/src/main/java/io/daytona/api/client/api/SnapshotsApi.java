@@ -27,10 +27,13 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 
 
+import io.daytona.api.client.model.ApiErrorResponseDto;
 import java.math.BigDecimal;
 import io.daytona.api.client.model.CreateSnapshot;
 import io.daytona.api.client.model.PaginatedSnapshots;
+import io.daytona.api.client.model.SnapshotAccessDeniedError;
 import io.daytona.api.client.model.SnapshotDto;
+import io.daytona.api.client.model.SnapshotNotFoundError;
 import io.daytona.api.client.model.Url;
 
 import java.lang.reflect.Type;
@@ -232,7 +235,8 @@ public class SnapshotsApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> The snapshot has been successfully created. </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> Bad request - Snapshots with tag \&quot;:latest\&quot; are not allowed </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad request — validation failed </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> Unauthorized </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call createSnapshotCall(@javax.annotation.Nonnull CreateSnapshot createSnapshot, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
@@ -308,7 +312,8 @@ public class SnapshotsApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> The snapshot has been successfully created. </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> Bad request - Snapshots with tag \&quot;:latest\&quot; are not allowed </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad request — validation failed </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> Unauthorized </td><td>  -  </td></tr>
      </table>
      */
     public SnapshotDto createSnapshot(@javax.annotation.Nonnull CreateSnapshot createSnapshot, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
@@ -328,7 +333,8 @@ public class SnapshotsApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> The snapshot has been successfully created. </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> Bad request - Snapshots with tag \&quot;:latest\&quot; are not allowed </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad request — validation failed </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> Unauthorized </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<SnapshotDto> createSnapshotWithHttpInfo(@javax.annotation.Nonnull CreateSnapshot createSnapshot, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
@@ -350,7 +356,8 @@ public class SnapshotsApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> The snapshot has been successfully created. </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> Bad request - Snapshots with tag \&quot;:latest\&quot; are not allowed </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad request — validation failed </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> Unauthorized </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call createSnapshotAsync(@javax.annotation.Nonnull CreateSnapshot createSnapshot, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<SnapshotDto> _callback) throws ApiException {
@@ -669,7 +676,8 @@ public class SnapshotsApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> The snapshot </td><td>  -  </td></tr>
-        <tr><td> 404 </td><td> Snapshot not found </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> Access denied — Approach B typed schema, code constrained to SNAPSHOT_ACCESS_DENIED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not found — Approach B typed schema, code constrained to SNAPSHOT_NOT_FOUND </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getSnapshotCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
@@ -745,7 +753,8 @@ public class SnapshotsApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> The snapshot </td><td>  -  </td></tr>
-        <tr><td> 404 </td><td> Snapshot not found </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> Access denied — Approach B typed schema, code constrained to SNAPSHOT_ACCESS_DENIED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not found — Approach B typed schema, code constrained to SNAPSHOT_NOT_FOUND </td><td>  -  </td></tr>
      </table>
      */
     public SnapshotDto getSnapshot(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
@@ -765,7 +774,8 @@ public class SnapshotsApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> The snapshot </td><td>  -  </td></tr>
-        <tr><td> 404 </td><td> Snapshot not found </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> Access denied — Approach B typed schema, code constrained to SNAPSHOT_ACCESS_DENIED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not found — Approach B typed schema, code constrained to SNAPSHOT_NOT_FOUND </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<SnapshotDto> getSnapshotWithHttpInfo(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
@@ -787,7 +797,8 @@ public class SnapshotsApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> The snapshot </td><td>  -  </td></tr>
-        <tr><td> 404 </td><td> Snapshot not found </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> Access denied — Approach B typed schema, code constrained to SNAPSHOT_ACCESS_DENIED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not found — Approach B typed schema, code constrained to SNAPSHOT_NOT_FOUND </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getSnapshotAsync(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<SnapshotDto> _callback) throws ApiException {

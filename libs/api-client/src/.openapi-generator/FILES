@@ -28,6 +28,8 @@ models/account-provider.ts
 models/admin-create-runner.ts
 models/admin-get-webhook-status200-response.ts
 models/announcement.ts
+models/api-error-code.ts
+models/api-error-response-dto.ts
 models/api-key-list.ts
 models/api-key-response.ts
 models/audit-log.ts
@@ -173,8 +175,10 @@ models/session-execute-response.ts
 models/session.ts
 models/set-snapshot-general-status-dto.ts
 models/signed-port-preview-url.ts
+models/snapshot-access-denied-error.ts
 models/snapshot-dto.ts
 models/snapshot-manager-credentials.ts
+models/snapshot-not-found-error.ts
 models/snapshot-state.ts
 models/ssh-access-dto.ts
 models/ssh-access-validation-dto.ts

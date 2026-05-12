@@ -4,6 +4,7 @@
  */
 
 import { Injectable, ExecutionContext, ForbiddenException, Logger, NotFoundException } from '@nestjs/common'
+import { EntityNotFoundError } from 'typeorm'
 import { ResourceAccessGuard } from '../../common/guards/resource-access.guard'
 import { SnapshotService } from '../services/snapshot.service'
 import { isBaseAuthContext } from '../../common/interfaces/base-auth-context.interface'
@@ -35,10 +36,14 @@ export class SnapshotReadAccessGuard extends ResourceAccessGuard {
       snapshot = await this.snapshotService.getSnapshot(snapshotId)
     } catch {
       if (!isOrganizationAuthContext(authContext)) {
-        throw new NotFoundException(`Snapshot with ID ${snapshotId} not found`)
+        throw new NotFoundException({ code: 'SNAPSHOT_NOT_FOUND', message: `Snapshot with ID ${snapshotId} not found` })
       }
 
-      snapshot = await this.snapshotService.getSnapshotByName(snapshotId, authContext.organizationId)
+      try {
+        snapshot = await this.snapshotService.getSnapshotByName(snapshotId, authContext.organizationId)
+      } catch {
+        throw new NotFoundException({ code: 'SNAPSHOT_NOT_FOUND', message: `Snapshot with ID or name ${snapshotId} not found` })
+      }
     }
 
     try {
@@ -46,7 +51,7 @@ export class SnapshotReadAccessGuard extends ResourceAccessGuard {
         case isRegionAuthContext(authContext): {
           const isAvailable = await this.snapshotService.isAvailableInRegion(snapshot.id, authContext.regionId)
           if (!isAvailable) {
-            throw new NotFoundException(`Snapshot is not available in region ${authContext.regionId}`)
+            throw new NotFoundException({ code: 'SNAPSHOT_NOT_FOUND', message: `Snapshot is not available in region ${authContext.regionId}` })
           }
           break
         }
@@ -55,7 +60,7 @@ export class SnapshotReadAccessGuard extends ResourceAccessGuard {
           break
         case isOrganizationAuthContext(authContext): {
           if (snapshot.organizationId !== authContext.organizationId && !snapshot.general) {
-            throw new ForbiddenException('Request organization ID does not match resource organization ID')
+            throw new ForbiddenException({ code: 'SNAPSHOT_ACCESS_DENIED', message: 'Request organization ID does not match resource organization ID' })
           }
           break
         }
@@ -68,5 +73,19 @@ export class SnapshotReadAccessGuard extends ResourceAccessGuard {
     } catch (error) {
       this.handleResourceAccessError(error, this.logger, `Snapshot with ID or name ${snapshotId} not found`)
     }
+  }
+
+  // Preserve typed error bodies (code field set by guard) instead of collapsing to plain string.
+  protected handleResourceAccessError(error: unknown, logger: Logger, notFoundMessage: string): never {
+    if (error instanceof ForbiddenException || error instanceof NotFoundException) {
+      const body = error.getResponse()
+      if (typeof body === 'object' && body !== null && 'code' in body) {
+        throw error // already typed — pass through as-is
+      }
+    }
+    if (!(error instanceof NotFoundException) && !(error instanceof EntityNotFoundError)) {
+      logger.error(error)
+    }
+    throw new NotFoundException({ code: 'SNAPSHOT_NOT_FOUND', message: notFoundMessage })
   }
 }

@@ -21,6 +21,9 @@ import (
 //	@Produce		json
 //	@Param			request	body	GitBranchRequest	true	"Create branch request"
 //	@Success		201
+//	@Failure		400	{object}	GitErrorResponse
+//	@Failure		409	{object}	GitErrorResponse
+//	@Failure		500	{object}	GitErrorResponse
 //	@Router			/git/branches [post]
 //
 //	@id				CreateBranch

@@ -1479,6 +1479,24 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
                     }
                 }
             }
@@ -1508,6 +1526,18 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/ListBranchResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
                         }
                     }
                 }
@@ -1539,6 +1569,24 @@ const docTemplate = `{
                 "responses": {
                     "201": {
                         "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
                     }
                 }
             },
@@ -1569,6 +1617,24 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
                     }
                 }
             }
@@ -1601,6 +1667,30 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
                     }
                 }
             }
@@ -1633,6 +1723,36 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
                     }
                 }
             }
@@ -1668,6 +1788,24 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/GitCommitResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
                     }
                 }
             }
@@ -1701,6 +1839,18 @@ const docTemplate = `{
                                 "$ref": "#/definitions/GitCommitInfo"
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
                     }
                 }
             }
@@ -1733,6 +1883,42 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
                     }
                 }
             }
@@ -1765,6 +1951,36 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/GitErrorResponse"
+                        }
                     }
                 }
             }
@@ -1794,6 +2010,18 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/GitStatus"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/GitStatusNotFoundError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/GitStatusInternalError"
                         }
                     }
                 }
@@ -3256,6 +3484,57 @@ const docTemplate = `{
                 }
             }
         },
+        "DaemonErrorCode": {
+            "type": "string",
+            "enum": [
+                "BAD_REQUEST",
+                "UNAUTHORIZED",
+                "FORBIDDEN",
+                "NOT_FOUND",
+                "CONFLICT",
+                "INVALID_REQUEST_BODY",
+                "INTERNAL_SERVER_ERROR",
+                "GIT_AUTH_FAILED",
+                "GIT_AUTH_FORBIDDEN",
+                "GIT_REPO_NOT_FOUND",
+                "GIT_BRANCH_NOT_FOUND",
+                "GIT_REF_NOT_FOUND",
+                "GIT_EMPTY_REPO",
+                "GIT_PUSH_REJECTED",
+                "GIT_DIRTY_WORKTREE",
+                "GIT_BRANCH_EXISTS",
+                "GIT_MERGE_CONFLICT",
+                "GIT_REPO_EXISTS",
+                "FILE_NOT_FOUND",
+                "FILE_ACCESS_DENIED",
+                "INVALID_FILE_PATH",
+                "FILE_READ_FAILED"
+            ],
+            "x-enum-varnames": [
+                "CodeBadRequest",
+                "CodeUnauthorized",
+                "CodeForbidden",
+                "CodeNotFound",
+                "CodeConflict",
+                "CodeInvalidRequestBody",
+                "CodeInternalServerError",
+                "CodeGitAuthFailed",
+                "CodeGitAuthForbidden",
+                "CodeGitRepoNotFound",
+                "CodeGitBranchNotFound",
+                "CodeGitRefNotFound",
+                "CodeGitEmptyRepo",
+                "CodeGitPushRejected",
+                "CodeGitDirtyWorktree",
+                "CodeGitBranchExists",
+                "CodeGitMergeConflict",
+                "CodeGitRepoExists",
+                "CodeFileNotFound",
+                "CodeFileAccessDenied",
+                "CodeInvalidFilePath",
+                "CodeFileReadFailed"
+            ]
+        },
         "DisplayInfo": {
             "type": "object",
             "properties": {
@@ -3564,6 +3843,53 @@ const docTemplate = `{
                 }
             }
         },
+        "GitErrorResponse": {
+            "description": "Error response",
+            "type": "object",
+            "required": [
+                "code",
+                "message",
+                "method",
+                "path",
+                "source",
+                "statusCode",
+                "timestamp"
+            ],
+            "properties": {
+                "code": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/DaemonErrorCode"
+                        }
+                    ],
+                    "example": "GIT_REPO_NOT_FOUND"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Bad request"
+                },
+                "method": {
+                    "type": "string",
+                    "example": "GET"
+                },
+                "path": {
+                    "type": "string",
+                    "example": "/api/resource"
+                },
+                "source": {
+                    "type": "string",
+                    "example": "DAYTONA_DAEMON"
+                },
+                "statusCode": {
+                    "type": "integer",
+                    "example": 400
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2023-01-01T12:00:00Z"
+                }
+            }
+        },
         "GitRepoRequest": {
             "type": "object",
             "required": [
@@ -3605,6 +3931,87 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/FileStatus"
                     }
+                }
+            }
+        },
+        "GitStatusErrorCode": {
+            "type": "string",
+            "enum": [
+                "GIT_REPO_NOT_FOUND",
+                "INTERNAL_SERVER_ERROR"
+            ],
+            "x-enum-varnames": [
+                "GitStatusCodeRepoNotFound",
+                "GitStatusCodeInternalError"
+            ]
+        },
+        "GitStatusInternalError": {
+            "description": "Returned for unexpected errors in GET /git/status",
+            "type": "object",
+            "properties": {
+                "code": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/GitStatusErrorCode"
+                        }
+                    ],
+                    "example": "INTERNAL_SERVER_ERROR"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "internal server error"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string",
+                    "example": "DAYTONA_DAEMON"
+                },
+                "statusCode": {
+                    "type": "integer",
+                    "example": 500
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitStatusNotFoundError": {
+            "description": "Returned when no git repository exists at the given path",
+            "type": "object",
+            "properties": {
+                "code": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/GitStatusErrorCode"
+                        }
+                    ],
+                    "example": "GIT_REPO_NOT_FOUND"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "repository does not exist"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string",
+                    "example": "DAYTONA_DAEMON"
+                },
+                "statusCode": {
+                    "type": "integer",
+                    "example": 404
+                },
+                "timestamp": {
+                    "type": "string"
                 }
             }
         },
