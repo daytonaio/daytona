@@ -118,6 +118,49 @@ export const WebhooksApiAxiosParamCreator = function (configuration?: Configurat
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * 
+         * @summary Refresh cached endpoint presence flag for an organization
+         * @param {string} organizationId 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        webhookControllerRefreshEndpoints: async (organizationId: string, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('webhookControllerRefreshEndpoints', 'organizationId', organizationId)
+            const localVarPath = `/webhooks/organizations/{organizationId}/refresh-endpoints`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -155,6 +198,20 @@ export const WebhooksApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['WebhooksApi.webhookControllerGetInitializationStatus']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * 
+         * @summary Refresh cached endpoint presence flag for an organization
+         * @param {string} organizationId 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async webhookControllerRefreshEndpoints(organizationId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.webhookControllerRefreshEndpoints(organizationId, xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['WebhooksApi.webhookControllerRefreshEndpoints']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -186,6 +243,17 @@ export const WebhooksApiFactory = function (configuration?: Configuration, baseP
         webhookControllerGetInitializationStatus(organizationId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<WebhookInitializationStatus> {
             return localVarFp.webhookControllerGetInitializationStatus(organizationId, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
         },
+        /**
+         * 
+         * @summary Refresh cached endpoint presence flag for an organization
+         * @param {string} organizationId 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        webhookControllerRefreshEndpoints(organizationId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.webhookControllerRefreshEndpoints(organizationId, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
     };
 };
 
@@ -215,6 +283,18 @@ export class WebhooksApi extends BaseAPI {
      */
     public webhookControllerGetInitializationStatus(organizationId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return WebhooksApiFp(this.configuration).webhookControllerGetInitializationStatus(organizationId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Refresh cached endpoint presence flag for an organization
+     * @param {string} organizationId 
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public webhookControllerRefreshEndpoints(organizationId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return WebhooksApiFp(this.configuration).webhookControllerRefreshEndpoints(organizationId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

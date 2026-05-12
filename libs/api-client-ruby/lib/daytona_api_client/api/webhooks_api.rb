@@ -146,5 +146,67 @@ module DaytonaApiClient
       end
       return data, status_code, headers
     end
+
+    # Refresh cached endpoint presence flag for an organization
+    # @param organization_id [String] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [nil]
+    def webhook_controller_refresh_endpoints(organization_id, opts = {})
+      webhook_controller_refresh_endpoints_with_http_info(organization_id, opts)
+      nil
+    end
+
+    # Refresh cached endpoint presence flag for an organization
+    # @param organization_id [String] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def webhook_controller_refresh_endpoints_with_http_info(organization_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: WebhooksApi.webhook_controller_refresh_endpoints ...'
+      end
+      # verify the required parameter 'organization_id' is set
+      if @api_client.config.client_side_validation && organization_id.nil?
+        fail ArgumentError, "Missing the required parameter 'organization_id' when calling WebhooksApi.webhook_controller_refresh_endpoints"
+      end
+      # resource path
+      local_var_path = '/webhooks/organizations/{organizationId}/refresh-endpoints'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"WebhooksApi.webhook_controller_refresh_endpoints",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: WebhooksApi#webhook_controller_refresh_endpoints\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
   end
 end

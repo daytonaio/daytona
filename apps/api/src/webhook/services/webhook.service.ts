@@ -112,7 +112,9 @@ export class WebhookService implements OnModuleInit {
 
   /**
    * Refresh hasEndpoints by counting endpoints in Svix.
-   * On error, returns the row unchanged — we'd rather try to send than silently drop during a Svix transient issue.
+   * On error, returns the input row untouched. Callers distinguish a freshly-refreshed row
+   * from a stale one via endpointsCheckedAt and fall back to attempting delivery rather than
+   * treating a never-confirmed false as authoritative.
    */
   private async refreshEndpointFlag(init: WebhookInitialization): Promise<WebhookInitialization> {
     if (!this.svix) {
@@ -121,9 +123,11 @@ export class WebhookService implements OnModuleInit {
 
     try {
       const result = await this.svix.endpoint.list(init.organizationId, { limit: 1 })
-      init.hasEndpoints = result.data.length > 0
-      init.endpointsCheckedAt = new Date()
-      return await this.webhookInitializationRepository.save(init)
+      return await this.webhookInitializationRepository.save({
+        ...init,
+        hasEndpoints: result.data.length > 0,
+        endpointsCheckedAt: new Date(),
+      })
     } catch (error) {
       this.logger.error(`Failed to refresh endpoint flag for organization ${init.organizationId}:`, error)
       return init
@@ -159,13 +163,18 @@ export class WebhookService implements OnModuleInit {
         return
       }
 
-      const stale =
-        !init.endpointsCheckedAt || Date.now() - init.endpointsCheckedAt.getTime() > WebhookService.ENDPOINT_FLAG_TTL_MS
-      if (stale) {
+      const isFresh = (checkedAt?: Date) =>
+        checkedAt !== undefined &&
+        checkedAt !== null &&
+        Date.now() - checkedAt.getTime() <= WebhookService.ENDPOINT_FLAG_TTL_MS
+      if (!isFresh(init.endpointsCheckedAt)) {
         init = await this.refreshEndpointFlag(init)
       }
 
-      if (!init.hasEndpoints) {
+      // Only treat hasEndpoints=false as authoritative when we have a recent confirmation;
+      // if the refresh failed and the flag is stale, fall through to message.create rather
+      // than silently dropping (a Svix outage should surface as a send failure, not a quiet skip).
+      if (!init.hasEndpoints && isFresh(init.endpointsCheckedAt)) {
         this.logger.debug(`Skipping webhook ${eventType} for organization ${organizationId}: no endpoints`)
         return
       }

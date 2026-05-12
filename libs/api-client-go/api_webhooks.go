@@ -48,6 +48,18 @@ type WebhooksAPI interface {
 	// WebhookControllerGetInitializationStatusExecute executes the request
 	//  @return WebhookInitializationStatus
 	WebhookControllerGetInitializationStatusExecute(r WebhooksAPIWebhookControllerGetInitializationStatusRequest) (*WebhookInitializationStatus, *http.Response, error)
+
+	/*
+	WebhookControllerRefreshEndpoints Refresh cached endpoint presence flag for an organization
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId
+	@return WebhooksAPIWebhookControllerRefreshEndpointsRequest
+	*/
+	WebhookControllerRefreshEndpoints(ctx context.Context, organizationId string) WebhooksAPIWebhookControllerRefreshEndpointsRequest
+
+	// WebhookControllerRefreshEndpointsExecute executes the request
+	WebhookControllerRefreshEndpointsExecute(r WebhooksAPIWebhookControllerRefreshEndpointsRequest) (*http.Response, error)
 }
 
 // WebhooksAPIService WebhooksAPI service
@@ -273,4 +285,104 @@ func (a *WebhooksAPIService) WebhookControllerGetInitializationStatusExecute(r W
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type WebhooksAPIWebhookControllerRefreshEndpointsRequest struct {
+	ctx context.Context
+	ApiService WebhooksAPI
+	organizationId string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r WebhooksAPIWebhookControllerRefreshEndpointsRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) WebhooksAPIWebhookControllerRefreshEndpointsRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r WebhooksAPIWebhookControllerRefreshEndpointsRequest) Execute() (*http.Response, error) {
+	return r.ApiService.WebhookControllerRefreshEndpointsExecute(r)
+}
+
+/*
+WebhookControllerRefreshEndpoints Refresh cached endpoint presence flag for an organization
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param organizationId
+ @return WebhooksAPIWebhookControllerRefreshEndpointsRequest
+*/
+func (a *WebhooksAPIService) WebhookControllerRefreshEndpoints(ctx context.Context, organizationId string) WebhooksAPIWebhookControllerRefreshEndpointsRequest {
+	return WebhooksAPIWebhookControllerRefreshEndpointsRequest{
+		ApiService: a,
+		ctx: ctx,
+		organizationId: organizationId,
+	}
+}
+
+// Execute executes the request
+func (a *WebhooksAPIService) WebhookControllerRefreshEndpointsExecute(r WebhooksAPIWebhookControllerRefreshEndpointsRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WebhooksAPIService.WebhookControllerRefreshEndpoints")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/webhooks/organizations/{organizationId}/refresh-endpoints"
+	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
 }
