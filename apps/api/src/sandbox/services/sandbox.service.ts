@@ -1989,6 +1989,7 @@ export class SandboxService {
     let pendingCpuIncrement: number | undefined
     let pendingMemoryIncrement: number | undefined
     let pendingDiskIncrement: number | undefined
+    let admittedRunnerAllocation: { runnerId: string; cpu: number; memory: number; disk: number } | undefined
 
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
@@ -2133,6 +2134,40 @@ export class SandboxService {
         throw new BadRequestError('Sandbox must be in started or stopped state to resize')
       }
 
+      // Per-runner admission gate: project the runner's availabilityScore as it would be
+      // after the existing pending allocations + this resize are applied, and reject with
+      // 409 if it would drop below the configured threshold. Lock the per-runner key for
+      // the read+check+increment so two concurrent admissions cannot both pass on a stale view.
+      const allocationLockKey = `runner-${runner.id}-pending-allocation-lock`
+      await this.redisLockProvider.waitForLock(allocationLockKey, 10)
+      try {
+        const projectedScore = await this.runnerService.getProjectedAvailabilityScore(runner, {
+          cpu: cpuDeltaForQuota,
+          memory: memDeltaForQuota,
+          disk: diskDeltaForQuota,
+        })
+        const resizeScoreThreshold = this.configService.getOrThrow('runnerScore.thresholds.resize')
+        if (projectedScore < resizeScoreThreshold) {
+          throw new ConflictException(
+            `Runner load would exceed resize threshold (projected score ${projectedScore} < ${resizeScoreThreshold}). Please retry shortly.`,
+          )
+        }
+        await this.runnerService.incrementPendingRunnerAllocation(
+          runner.id,
+          cpuDeltaForQuota,
+          memDeltaForQuota,
+          diskDeltaForQuota,
+        )
+        admittedRunnerAllocation = {
+          runnerId: runner.id,
+          cpu: cpuDeltaForQuota,
+          memory: memDeltaForQuota,
+          disk: diskDeltaForQuota,
+        }
+      } finally {
+        await this.redisLockProvider.unlock(allocationLockKey)
+      }
+
       // Now transition to RESIZING state
       const updateData: Partial<Sandbox> = {
         state: SandboxState.RESIZING,
@@ -2182,6 +2217,17 @@ export class SandboxService {
             memDeltaForQuota,
             diskDeltaForQuota,
           )
+
+          // Release the per-runner pending allocation slot — runner has applied the resize
+          // synchronously on the V0 path. (Brief under-counting until the next healthcheck
+          // refreshes runner.currentAllocatedCpu is documented and accepted.)
+          await this.runnerService.safeDecrementPendingRunnerAllocation(
+            runner.id,
+            cpuDeltaForQuota,
+            memDeltaForQuota,
+            diskDeltaForQuota,
+          )
+          admittedRunnerAllocation = undefined
         }
 
         return await this.findOneByIdOrName(sandbox.id, organization.id)
@@ -2206,6 +2252,14 @@ export class SandboxService {
         pendingMemoryIncrement,
         pendingDiskIncrement,
       )
+      if (admittedRunnerAllocation) {
+        await this.runnerService.safeDecrementPendingRunnerAllocation(
+          admittedRunnerAllocation.runnerId,
+          admittedRunnerAllocation.cpu,
+          admittedRunnerAllocation.memory,
+          admittedRunnerAllocation.disk,
+        )
+      }
       throw error
     }
   }

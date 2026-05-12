@@ -45,6 +45,7 @@ export class RunnerService {
   private readonly logger = new Logger(RunnerService.name)
   private readonly serviceStartTime = new Date()
   private readonly scoreConfig: AvailabilityScoreConfig
+  private readonly PENDING_ALLOCATION_TTL_S = 60
 
   constructor(
     @InjectRepository(Runner)
@@ -1097,6 +1098,90 @@ export class RunnerService {
         ],
       },
     }
+  }
+
+  private getPendingAllocationKey(runnerId: string): string {
+    return `runner:${runnerId}:allocation:pending`
+  }
+
+  /**
+   * Atomically increments the per-runner pending allocation counters (cpu/memory/disk)
+   * and refreshes their TTL. Used to reserve a slot for an in-flight on-runner action
+   * (e.g. a resize). Deltas are signed; HINCRBY by 0 is a harmless no-op.
+   */
+  async incrementPendingRunnerAllocation(runnerId: string, cpu: number, memory: number, disk: number): Promise<void> {
+    const script = `
+      redis.call("HINCRBY", KEYS[1], "cpu",    ARGV[1])
+      redis.call("HINCRBY", KEYS[1], "memory", ARGV[2])
+      redis.call("HINCRBY", KEYS[1], "disk",   ARGV[3])
+      redis.call("EXPIRE",  KEYS[1], ARGV[4])
+    `
+    await this.redis.eval(
+      script,
+      1,
+      this.getPendingAllocationKey(runnerId),
+      cpu.toString(),
+      memory.toString(),
+      disk.toString(),
+      this.PENDING_ALLOCATION_TTL_S.toString(),
+    )
+  }
+
+  /**
+   * Releases a pending allocation slot. Symmetric with incrementPendingRunnerAllocation —
+   * passes negatives through the same Lua so behavior (incl. TTL refresh) stays identical.
+   */
+  async decrementPendingRunnerAllocation(runnerId: string, cpu: number, memory: number, disk: number): Promise<void> {
+    return this.incrementPendingRunnerAllocation(runnerId, -cpu, -memory, -disk)
+  }
+
+  /**
+   * Wraps decrementPendingRunnerAllocation in try/catch + warn so a Redis blip during a
+   * terminal hook never shadows the user-facing or original error. The 60s TTL on the
+   * pending hash is the safety net for any swallowed failure.
+   */
+  async safeDecrementPendingRunnerAllocation(
+    runnerId: string,
+    cpu: number,
+    memory: number,
+    disk: number,
+  ): Promise<void> {
+    try {
+      await this.decrementPendingRunnerAllocation(runnerId, cpu, memory, disk)
+    } catch (e) {
+      this.logger.warn(`Failed to decrement pending runner allocation for ${runnerId}: ${e}`)
+    }
+  }
+
+  /**
+   * Computes the runner's availabilityScore as it would be after the currently-cached
+   * pending allocations *and* the caller-supplied extra deltas are applied on top of
+   * the runner's last reported metrics. Used as an admission gate before accepting
+   * new on-runner work.
+   */
+  async getProjectedAvailabilityScore(
+    runner: Runner,
+    extra: { cpu: number; memory: number; disk: number },
+  ): Promise<number> {
+    const [cpuPending, memoryPending, diskPending] = await this.redis.hmget(
+      this.getPendingAllocationKey(runner.id),
+      'cpu',
+      'memory',
+      'disk',
+    )
+    return this.calculateAvailabilityScore(runner.id, {
+      cpuLoadAverage: runner.currentCpuLoadAverage,
+      cpuUsage: runner.currentCpuUsagePercentage,
+      memoryUsage: runner.currentMemoryUsagePercentage,
+      diskUsage: runner.currentDiskUsagePercentage,
+      allocatedCpu: runner.currentAllocatedCpu + Number(cpuPending ?? 0) + extra.cpu,
+      allocatedMemoryGiB: runner.currentAllocatedMemoryGiB + Number(memoryPending ?? 0) + extra.memory,
+      allocatedDiskGiB: runner.currentAllocatedDiskGiB + Number(diskPending ?? 0) + extra.disk,
+      runnerCpu: runner.cpu,
+      runnerMemoryGiB: runner.memoryGiB,
+      runnerDiskGiB: runner.diskGiB,
+      startedSandboxes: runner.currentStartedSandboxes,
+    })
   }
 }
 
