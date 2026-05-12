@@ -8,8 +8,7 @@ hideTitleOnPage: true
 Desktop automation operations for a Sandbox.
 
 Provides a Java facade for computer-use features including desktop session management,
-screenshots, mouse and keyboard automation, display/window inspection, screen recording,
-and AT-SPI accessibility.
+screenshots, mouse and keyboard automation, display/window inspection, and screen recording.
 
 ### Methods
 
@@ -80,27 +79,6 @@ public AccessibilityNodesResponse findAccessibilityNodes()
 ```
 
 Finds AT-SPI accessibility nodes without filters.
-
-**Returns**:
-
-- `AccessibilityNodesResponse` - matching accessibility nodes
-
-#### findAccessibilityNodes()
-```java
-public AccessibilityNodesResponse findAccessibilityNodes(String scope, Integer pid, String role, String name, String nameMatch, List<String> states, Integer limit)
-```
-
-Finds AT-SPI accessibility nodes matching the provided filters.
-
-**Parameters**:
-
-- `scope` _String_ - optional scope (`focused`, `pid`, or `all`)
-- `pid` _Integer_ - process ID when `scope` is `pid`
-- `role` _String_ - optional node role filter
-- `name` _String_ - optional accessible name filter
-- `nameMatch` _String_ - optional name match mode (`exact`, `substring`, or `regex`)
-- `states` `List<String>` - optional state filters
-- `limit` _Integer_ - optional result limit
 
 **Returns**:
 

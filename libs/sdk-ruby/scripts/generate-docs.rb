@@ -23,6 +23,7 @@ CLASSES_TO_DOCUMENT = [
   ['volume.rb', 'volume.mdx', 'Daytona::Volume'],
   ['object_storage.rb', 'object-storage.mdx', 'Daytona::ObjectStorage'],
   ['computer_use.rb', 'computer-use.mdx', 'Daytona::ComputerUse'],
+  ['computer_use.rb', 'computer-use.mdx', 'Daytona::ComputerUse::Accessibility'],
   ['snapshot_service.rb', 'snapshot.mdx', 'Daytona::SnapshotService'],
   ['volume_service.rb', 'volume-service.mdx', 'Daytona::VolumeService'],
   ['common/charts.rb', 'charts.mdx', 'Daytona::Chart'],
@@ -371,7 +372,11 @@ def generate_docs_for_class(file_path, output_filename, class_name)
 
     # Write to output file
     output_path = File.join(DOCS_OUTPUT_DIR, output_filename)
-    File.write(output_path, final_content)
+    if File.exist?(output_path)
+      File.write(output_path, "#{File.read(output_path).rstrip}\n\n#{markdown_content}")
+    else
+      File.write(output_path, final_content)
+    end
 
     puts "✅ Generated: #{output_filename}"
   rescue StandardError => e

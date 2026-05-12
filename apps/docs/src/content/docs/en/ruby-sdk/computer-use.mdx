@@ -313,12 +313,53 @@ puts "X11VNC errors: #{errors}"
 
 Accessibility operations for computer use functionality.
 
+### Constructors
+
+#### new Accessibility()
+
+```ruby
+def initialize(sandbox_id:, toolbox_api:, otel_state:)
+
+```
+
+**Parameters**:
+
+- `sandbox_id` _String_ - The ID of the sandbox
+- `toolbox_api` _DaytonaToolboxApiClient:ComputerUseApi_ - API client for sandbox operations
+- `otel_state` _Daytona:OtelState, nil_ -
+
+**Returns**:
+
+- `Accessibility` - a new instance of Accessibility
+
 ### Methods
+
+#### sandbox_id()
+
+```ruby
+def sandbox_id()
+
+```
+
+**Returns**:
+
+- `String` - The ID of the sandbox
+
+#### toolbox_api()
+
+```ruby
+def toolbox_api()
+
+```
+
+**Returns**:
+
+- `DaytonaToolboxApiClient:ComputerUseApi` - API client for sandbox operations
 
 #### get_tree()
 
 ```ruby
-def get_tree(scope: nil, pid: nil, max_depth: nil)
+def get_tree(scope:, pid:, max_depth:)
 
 ```
 
@@ -326,29 +367,30 @@ Fetches the AT-SPI accessibility tree.
 
 **Parameters**:
 
-- `scope` _String, nil_ - Optional scope (`focused`, `pid`, or `all`)
-- `pid` _Integer, nil_ - Process ID when `scope` is `pid`
-- `max_depth` _Integer, nil_ - Optional max tree depth. Use `0` for the root only
+- `scope` _String, nil_ - Tree scope to inspect: "focused", "pid", or "all"
+- `pid` _Integer, nil_ - Process ID when scope is "pid"
+- `max_depth` _Integer, nil_ - Maximum depth to descend; 0 returns only the root
 
 **Returns**:
 
-- `DaytonaToolboxApiClient::AccessibilityTreeResponse` - Accessibility tree response
+- `DaytonaToolboxApiClient:AccessibilityTreeResponse` - Accessibility tree response
 
 **Raises**:
 
-- `Daytona::Sdk::Error` - If the operation fails
+- `Daytona:Sdk:Error` - If the operation fails
 
 **Examples:**
 
 ```ruby
-tree = sandbox.computer_use.accessibility.get_tree(scope: "focused", max_depth: 2)
+tree = sandbox.computer_use.accessibility.get_tree(scope: "all", max_depth: 3)
+puts tree.root.name
 
 ```
 
 #### find_nodes()
 
 ```ruby
-def find_nodes(scope: nil, pid: nil, role: nil, name: nil, name_match: nil, states: nil, limit: nil)
+def find_nodes(scope:, pid:, role:, name:, name_match:, states:, limit:)
 
 ```
 
@@ -356,30 +398,32 @@ Finds AT-SPI accessibility nodes matching the provided filters.
 
 **Parameters**:
 
-- `scope` _String, nil_ - Optional scope (`focused`, `pid`, or `all`)
-- `pid` _Integer, nil_ - Process ID when `scope` is `pid`
-- `role` _String, nil_ - Optional node role filter
-- `name` _String, nil_ - Optional accessible name filter
-- `name_match` _String, nil_ - Optional name match mode (`exact`, `substring`, or `regex`)
-- `states` `Array<String>, nil` - Optional state filters
-- `limit` _Integer, nil_ - Optional result limit
+- `scope` _String, nil_ - Search scope: "focused", "pid", or "all"
+- `pid` _Integer, nil_ - Process ID when scope is "pid"
+- `role` _String, nil_ - Accessibility role to match, such as "button"
+- `name` _String, nil_ - Accessible name to match
+- `name_match` _String, nil_ - Name match mode, such as "exact" or "substring"
+- `states` _Array\<String\>, nil_ - Required accessibility states
+- `limit` _Integer, nil_ - Maximum number of matches
 
 **Returns**:
 
-- `DaytonaToolboxApiClient::AccessibilityNodesResponse` - Matching accessibility nodes
+- `DaytonaToolboxApiClient:AccessibilityNodesResponse` - Matching accessibility nodes
 
 **Raises**:
 
-- `Daytona::Sdk::Error` - If the operation fails
+- `Daytona:Sdk:Error` - If the operation fails
 
 **Examples:**
 
 ```ruby
 buttons = sandbox.computer_use.accessibility.find_nodes(
-  role: "push button",
+  scope: "all",
+  role: "button",
   name: "Submit",
   name_match: "substring"
 )
+puts buttons.matches.length
 
 ```
 
@@ -394,29 +438,43 @@ Focuses an AT-SPI accessibility node.
 
 **Parameters**:
 
-- `id` _String_ - Accessibility node ID
+- `id` _String_ - Accessibility node ID returned by get_tree or find_nodes
 
 **Raises**:
 
-- `Daytona::Sdk::Error` - If the operation fails
+- `Daytona:Sdk:Error` - If the operation fails
+
+**Examples:**
+
+```ruby
+sandbox.computer_use.accessibility.focus_node(id: node.id)
+
+```
 
 #### invoke_node()
 
 ```ruby
-def invoke_node(id:, action: nil)
+def invoke_node(id:, action:)
 
 ```
 
-Invokes an AT-SPI accessibility node action. Omit `action` to invoke the node's primary action.
+Invokes an AT-SPI accessibility node action.
 
 **Parameters**:
 
-- `id` _String_ - Accessibility node ID
-- `action` _String, nil_ - Optional action name
+- `id` _String_ - Accessibility node ID returned by get_tree or find_nodes
+- `action` _String, nil_ - Action name to invoke, or nil for the primary action
 
 **Raises**:
 
-- `Daytona::Sdk::Error` - If the operation fails
+- `Daytona:Sdk:Error` - If the operation fails
+
+**Examples:**
+
+```ruby
+sandbox.computer_use.accessibility.invoke_node(id: node.id, action: "click")
+
+```
 
 #### set_node_value()
 
@@ -429,9 +487,16 @@ Sets an AT-SPI accessibility node value.
 
 **Parameters**:
 
-- `id` _String_ - Accessibility node ID
-- `value` _String_ - Value to write
+- `id` _String_ - Accessibility node ID returned by get_tree or find_nodes
+- `value` _String_ - Value to write to the node
 
 **Raises**:
 
-- `Daytona::Sdk::Error` - If the operation fails
+- `Daytona:Sdk:Error` - If the operation fails
+
+**Examples:**
+
+```ruby
+sandbox.computer_use.accessibility.set_node_value(id: node.id, value: "hello")
+
+```

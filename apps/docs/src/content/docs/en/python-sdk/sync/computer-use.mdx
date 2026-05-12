@@ -197,103 +197,6 @@ errors = sandbox.computer_use.get_process_errors("x11vnc")
 print("X11VNC errors:", errors)
 ```
 
-## Accessibility
-
-```python
-class Accessibility()
-```
-
-Accessibility operations for computer use functionality.
-
-#### Accessibility.get\_tree
-
-```python
-@intercept_errors(message_prefix="Failed to get accessibility tree: ")
-@with_instrumentation()
-def get_tree(scope: str | None = None, pid: int | None = None, max_depth: int | None = None) -> AccessibilityTreeResponse
-```
-
-Fetches the AT-SPI accessibility tree.
-
-**Arguments**:
-
-- `scope` _str | None_ - Optional scope (`focused`, `pid`, or `all`).
-- `pid` _int | None_ - Process ID when `scope` is `pid`.
-- `max_depth` _int | None_ - Optional max tree depth. Use `0` for the root only.
-
-**Returns**:
-
-- `AccessibilityTreeResponse` - Accessibility tree response.
-
-**Example**:
-
-```python
-tree = sandbox.computer_use.accessibility.get_tree(scope="focused", max_depth=2)
-```
-
-#### Accessibility.find\_nodes
-
-```python
-@intercept_errors(message_prefix="Failed to find accessibility nodes: ")
-@with_instrumentation()
-def find_nodes(scope: str | None = None, pid: int | None = None, role: str | None = None, name: str | None = None, name_match: str | None = None, states: list[str] | None = None, limit: int | None = None) -> AccessibilityNodesResponse
-```
-
-Finds AT-SPI accessibility nodes matching the provided filters.
-
-**Arguments**:
-
-- `scope` _str | None_ - Optional scope (`focused`, `pid`, or `all`).
-- `pid` _int | None_ - Process ID when `scope` is `pid`.
-- `role` _str | None_ - Optional node role filter.
-- `name` _str | None_ - Optional accessible name filter.
-- `name_match` _str | None_ - Optional name match mode (`exact`, `substring`, or `regex`).
-- `states` _list[str] | None_ - Optional state filters.
-- `limit` _int | None_ - Optional result limit.
-
-**Returns**:
-
-- `AccessibilityNodesResponse` - Matching accessibility nodes.
-
-**Example**:
-
-```python
-buttons = sandbox.computer_use.accessibility.find_nodes(
-    role="push button",
-    name="Submit",
-    name_match="substring",
-)
-```
-
-#### Accessibility.focus\_node
-
-```python
-@intercept_errors(message_prefix="Failed to focus accessibility node: ")
-@with_instrumentation()
-def focus_node(node_id: str) -> None
-```
-
-Focuses an AT-SPI accessibility node.
-
-#### Accessibility.invoke\_node
-
-```python
-@intercept_errors(message_prefix="Failed to invoke accessibility node: ")
-@with_instrumentation()
-def invoke_node(node_id: str, action: str | None = None) -> None
-```
-
-Invokes an AT-SPI accessibility node action. Omit `action` to invoke the node's primary action.
-
-#### Accessibility.set\_node\_value
-
-```python
-@intercept_errors(message_prefix="Failed to set accessibility node value: ")
-@with_instrumentation()
-def set_node_value(node_id: str, value: str) -> None
-```
-
-Sets an AT-SPI accessibility node value.
 
 ## Mouse
 
@@ -967,6 +870,172 @@ sandbox.computer_use.recording.download(recording_id, "local_recording.mp4")
 print("Recording downloaded")
 ```
 
+## Accessibility
+
+```python
+class Accessibility()
+```
+
+Accessibility operations for computer use functionality.
+
+This service exposes thin wrappers over the toolbox AT-SPI accessibility
+API. Start computer use before calling these methods.
+
+#### Accessibility.get\_tree
+
+```python
+@intercept_errors(message_prefix="Failed to get accessibility tree: ")
+@with_instrumentation()
+def get_tree(scope: str | None = None,
+             pid: int | None = None,
+             max_depth: int | None = None) -> AccessibilityTreeResponse
+```
+
+Fetches the AT-SPI accessibility tree.
+
+**Arguments**:
+
+- `scope` _str | None_ - Tree scope to inspect: ``focused``, ``pid``, or ``all``.
+- `pid` _int | None_ - Process ID when ``scope`` is ``pid``.
+- `max_depth` _int | None_ - Maximum depth to descend. Use ``0`` for the root only.
+  
+
+**Returns**:
+
+- `AccessibilityTreeResponse` - Accessibility tree rooted at the requested scope.
+  
+
+**Example**:
+
+```python
+tree = sandbox.computer_use.accessibility.get_tree(scope="all", max_depth=3)
+print(tree.root.name)
+```
+
+#### Accessibility.find\_nodes
+
+```python
+@intercept_errors(message_prefix="Failed to find accessibility nodes: ")
+@with_instrumentation()
+def find_nodes(scope: str | None = None,
+               pid: int | None = None,
+               role: str | None = None,
+               name: str | None = None,
+               name_match: str | None = None,
+               states: list[str] | None = None,
+               limit: int | None = None) -> AccessibilityNodesResponse
+```
+
+Finds AT-SPI accessibility nodes matching the provided filters.
+
+**Arguments**:
+
+- `scope` _str | None_ - Search scope: ``focused``, ``pid``, or ``all``.
+- `pid` _int | None_ - Process ID when ``scope`` is ``pid``.
+- `role` _str | None_ - Accessibility role to match, such as ``button``.
+- `name` _str | None_ - Accessible name to match.
+- `name_match` _str | None_ - Name match mode, such as ``exact`` or ``substring``.
+- `states` _list[str] | None_ - Required accessibility states.
+- `limit` _int | None_ - Maximum number of matches. Use ``0`` to let the API apply its default.
+  
+
+**Returns**:
+
+- `AccessibilityNodesResponse` - Matching accessibility nodes.
+  
+
+**Example**:
+
+```python
+buttons = sandbox.computer_use.accessibility.find_nodes(
+    scope="all",
+    role="button",
+    name="Submit",
+    name_match="substring",
+)
+print(len(buttons.matches))
+```
+
+#### Accessibility.focus\_node
+
+```python
+@intercept_errors(message_prefix="Failed to focus accessibility node: ")
+@with_instrumentation()
+def focus_node(node_id: str) -> None
+```
+
+Focuses an AT-SPI accessibility node.
+
+**Arguments**:
+
+- `node_id` _str_ - Accessibility node ID returned by ``get_tree`` or ``find_nodes``.
+  
+
+**Raises**:
+
+- `DaytonaError` - If the focus operation fails. API failures may use a more specific subclass.
+  
+
+**Example**:
+
+```python
+sandbox.computer_use.accessibility.focus_node(node.id)
+```
+
+#### Accessibility.invoke\_node
+
+```python
+@intercept_errors(message_prefix="Failed to invoke accessibility node: ")
+@with_instrumentation()
+def invoke_node(node_id: str, action: str | None = None) -> None
+```
+
+Invokes an AT-SPI accessibility node action.
+
+**Arguments**:
+
+- `node_id` _str_ - Accessibility node ID returned by ``get_tree`` or ``find_nodes``.
+- `action` _str | None_ - Action name to invoke. If omitted, the API invokes the primary action.
+  
+
+**Raises**:
+
+- `DaytonaError` - If the invoke operation fails. API failures may use a more specific subclass.
+  
+
+**Example**:
+
+```python
+sandbox.computer_use.accessibility.invoke_node(node.id, action="click")
+```
+
+#### Accessibility.set\_node\_value
+
+```python
+@intercept_errors(message_prefix="Failed to set accessibility node value: ")
+@with_instrumentation()
+def set_node_value(node_id: str, value: str) -> None
+```
+
+Sets an AT-SPI accessibility node value.
+
+**Arguments**:
+
+- `node_id` _str_ - Accessibility node ID returned by ``get_tree`` or ``find_nodes``.
+- `value` _str_ - Value to write to the node.
+  
+
+**Raises**:
+
+- `DaytonaError` - If the value update fails. API failures may use a more specific subclass.
+  
+
+**Example**:
+
+```python
+sandbox.computer_use.accessibility.set_node_value(node.id, "hello")
+```
+
 ## ScreenshotRegion
 
 ```python
@@ -996,3 +1065,4 @@ Options for screenshot compression and display.
 - `fmt` _str | None_ - Image format (e.g., 'png', 'jpeg', 'webp').
 - `quality` _int | None_ - Compression quality (0-100).
 - `scale` _float | None_ - Scale factor for the screenshot.
+
