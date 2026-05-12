@@ -754,13 +754,10 @@ export class SandboxService {
 
       try {
         const declarativeBuildScoreThreshold = this.configService.get('runnerScore.thresholds.declarativeBuild')
-        const maxSandboxesPerRunner = this.configService.getOrThrow('buildInfo.maxSandboxesPerRunner')
+        const maxCpuPerRunner = this.configService.getOrThrow('buildInfo.maxCpuPerRunner')
         const excludedRunnerIds =
-          maxSandboxesPerRunner > 0
-            ? await this.runnerService.getRunnersWithMaxBuildInfoSnapshotRefSandboxes(
-                buildInfoSnapshotRef,
-                maxSandboxesPerRunner,
-              )
+          maxCpuPerRunner > 0
+            ? await this.runnerService.getRunnersWithMaxBuildInfoSnapshotRefCpu(buildInfoSnapshotRef, maxCpuPerRunner)
             : []
         runner = await this.runnerService.getRandomAvailableRunner({
           regions: [sandbox.region],

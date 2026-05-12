@@ -292,11 +292,11 @@ export class SandboxStartAction extends SandboxAction {
   }
 
   private async getBuildInfoOverloadedRunnerIds(snapshotRef: string): Promise<string[]> {
-    const maxSandboxesPerRunner = this.configService.getOrThrow('buildInfo.maxSandboxesPerRunner')
-    if (!(maxSandboxesPerRunner > 0) || !snapshotRef) {
+    const maxCpuPerRunner = this.configService.getOrThrow('buildInfo.maxCpuPerRunner')
+    if (!(maxCpuPerRunner > 0) || !snapshotRef) {
       return []
     }
-    return this.runnerService.getRunnersWithMaxBuildInfoSnapshotRefSandboxes(snapshotRef, maxSandboxesPerRunner)
+    return this.runnerService.getRunnersWithMaxBuildInfoSnapshotRefCpu(snapshotRef, maxCpuPerRunner)
   }
 
   async pullSnapshotToRunner(snapshot: Snapshot, runner: Runner) {

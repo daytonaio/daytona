@@ -173,7 +173,7 @@ const configuration = {
     name: process.env.DEFAULT_RUNNER_NAME,
   },
   buildInfo: {
-    maxSandboxesPerRunner: parseInt(process.env.BUILD_INFO_MAX_SANDBOXES_PER_RUNNER || '30', 10),
+    maxCpuPerRunner: parseInt(process.env.BUILD_INFO_MAX_CPU_PER_RUNNER || '40', 10),
   },
   runnerScore: {
     thresholds: {

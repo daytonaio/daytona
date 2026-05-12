@@ -830,16 +830,13 @@ export class RunnerService {
   }
 
   /**
-   * Returns the IDs of runners that already host at least `maxCount` sandboxes
-   * with the given `buildInfoSnapshotRef` in an active (non-terminal) state.
-   * Useful to avoid piling up too many sandboxes for the same declarative build
+   * Returns the IDs of runners where the total allocated CPUs across active
+   * sandboxes with the given `buildInfoSnapshotRef` exceeds `maxCpu`.
+   * Useful to avoid piling up too many resources for the same declarative build
    * on the same runner.
    */
-  async getRunnersWithMaxBuildInfoSnapshotRefSandboxes(
-    buildInfoSnapshotRef: string,
-    maxCount: number,
-  ): Promise<string[]> {
-    if (!buildInfoSnapshotRef || maxCount <= 0) {
+  async getRunnersWithMaxBuildInfoSnapshotRefCpu(buildInfoSnapshotRef: string, maxCpu: number): Promise<string[]> {
+    if (!buildInfoSnapshotRef || maxCpu <= 0) {
       return []
     }
 
@@ -864,7 +861,7 @@ export class RunnerService {
       .andWhere('sandbox.runnerId IS NOT NULL')
       .andWhere('sandbox.state IN (:...states)', { states: activeStates })
       .groupBy('sandbox.runnerId')
-      .having('COUNT(*) >= :maxCount', { maxCount })
+      .having('SUM(sandbox.cpu) > :maxCpu', { maxCpu })
       .getRawMany()
 
     return runners.map((item) => item.runnerId).filter((id): id is string => !!id)
