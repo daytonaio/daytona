@@ -384,6 +384,9 @@ export class FileSystem {
               },
             })
             fileStream.pipe(progress)
+            fileStream.on('error', (err: Error) => {
+              if (!progress.destroyed) progress.destroy(err)
+            })
             resolvedStream = progress
           } else {
             resolvedStream = fileStream as Readable
@@ -405,11 +408,13 @@ export class FileSystem {
           const normalizedError = options.signal?.aborted || isCanceledError(err) ? toDownloadCancelledError() : err
           if (!resolvedStream) {
             reject(normalizedError)
-          } else if (!resolvedStream.destroyed) {
-            resolvedStream.destroy(
-              normalizedError instanceof Error ? normalizedError : new Error(String(normalizedError)),
-            )
+            return
           }
+          const stream = resolvedStream as Readable & { readableEnded?: boolean }
+          if (stream.destroyed || stream.readableEnded) {
+            return
+          }
+          stream.destroy(normalizedError instanceof Error ? normalizedError : new Error(String(normalizedError)))
         })
     })
   }

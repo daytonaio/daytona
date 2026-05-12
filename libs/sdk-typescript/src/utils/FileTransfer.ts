@@ -214,7 +214,13 @@ function parseContentLength(headersBlock: Buffer): number | undefined {
 }
 
 /**
- * Processes multipart response using busboy (Node.js path)
+ * Processes multipart response using busboy (Node.js path).
+ *
+ * Once the file stream has been handed off via `onFileStream`, errors from the
+ * busboy stream are the consumer's concern — they arrive via the file stream's
+ * own 'error' event. The inner Promise resolves cleanly in that case to avoid
+ * surfacing late teardown errors (busboy's `_final`, premature pipe close)
+ * after the caller has already started consuming the file.
  */
 export async function processDownloadFilesResponseWithBusboy(
   stream: any,
@@ -232,6 +238,8 @@ export async function processDownloadFilesResponseWithBusboy(
       headers,
       preservePath: true,
     })
+
+    let consumerHandedOff = false
 
     bb.on('file', (fieldName: string, fileStream: any, fileInfo: { filename?: string; mimeType?: string }) => {
       // Pop one queued Content-Length for every emitted part to keep the
@@ -264,6 +272,10 @@ export async function processDownloadFilesResponseWithBusboy(
         })
       } else if (fieldName === 'file') {
         if (onFileStream) {
+          consumerHandedOff = true
+          fileStream.on('error', () => {
+            return
+          })
           onFileStream(source, fileStream, totalBytes)
         } else if (metadata.destination) {
           // Stream to file
@@ -306,6 +318,10 @@ export async function processDownloadFilesResponseWithBusboy(
     })
 
     bb.on('error', (err: any) => {
+      if (consumerHandedOff) {
+        resolve()
+        return
+      }
       abortStream(stream)
       reject(err)
     })
