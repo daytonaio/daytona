@@ -16,6 +16,7 @@ import { BackupState } from '../enums/backup-state.enum'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/sandbox.constants'
+import { BACKUP_RETRY_ERROR_SUBSTRINGS } from '../constants/errors-for-backup-retry'
 import { fromAxiosError } from '../../common/utils/from-axios-error'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { OnEvent } from '@nestjs/event-emitter'
@@ -656,6 +657,56 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
         fromAxiosError(error).message,
       )
       throw error
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE, { name: 'retry-errored-backups' })
+  @TrackJobExecution()
+  @LogExecution('retry-errored-backups')
+  @WithInstrumentation()
+  async retryErroredBackups(): Promise<void> {
+    const retryIntervalHours = this.configService.getOrThrow('backupRetryIntervalHours')
+    if (retryIntervalHours <= 0) {
+      return
+    }
+
+    const lockKey = 'retry-errored-backups'
+    const hasLock = await this.redisLockProvider.lock(lockKey, 60)
+    if (!hasLock) {
+      return
+    }
+
+    try {
+      const cutoff = new Date(Date.now() - retryIntervalHours * 60 * 60 * 1000)
+
+      const sandboxes = await this.sandboxRepository
+        .createQueryBuilder('sandbox')
+        .addSelect('RANDOM()', 'rand')
+        .where('sandbox.backupState = :error', { error: BackupState.ERROR })
+        .andWhere('sandbox.desiredState != :destroyed', { destroyed: SandboxDesiredState.DESTROYED })
+        .andWhere('sandbox.updatedAt < :cutoff', { cutoff })
+        .orderBy('rand')
+        .take(100)
+        .getMany()
+
+      const retryable = sandboxes.filter(
+        (sandbox) =>
+          sandbox.backupErrorReason &&
+          BACKUP_RETRY_ERROR_SUBSTRINGS.some((substring) =>
+            sandbox.backupErrorReason.toLowerCase().includes(substring.toLowerCase()),
+          ),
+      )
+
+      await Promise.allSettled(
+        retryable.map(async (sandbox) => {
+          this.logger.log(`Retrying backup for sandbox ${sandbox.id} (error: ${sandbox.backupErrorReason})`)
+          await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.NONE)
+        }),
+      )
+    } catch (error) {
+      this.logger.error('Error retrying errored backups:', error)
     } finally {
       await this.redisLockProvider.unlock(lockKey)
     }

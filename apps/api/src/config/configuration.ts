@@ -143,6 +143,7 @@ const configuration = {
   },
   cronTimeZone: process.env.CRON_TIMEZONE,
   maxConcurrentBackupsPerRunner: parseInt(process.env.MAX_CONCURRENT_BACKUPS_PER_RUNNER || '6', 10),
+  backupRetryIntervalHours: parseInt(process.env.BACKUP_RETRY_INTERVAL_HOURS || '6', 10),
   webhook: {
     authToken: process.env.SVIX_AUTH_TOKEN,
     serverUrl: process.env.SVIX_SERVER_URL,
