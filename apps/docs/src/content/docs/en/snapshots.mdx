@@ -537,6 +537,31 @@ curl https://app.daytona.io/api/snapshots \
 </TabItem>
 </Tabs>
 
+##### GPU Snapshot requirements
+
+Building a custom image for a GPU snapshot requires Ubuntu 24.04 and compatible NVIDIA userspace packages. Include the following in your snapshot Dockerfile:
+
+```dockerfile
+ARG NVIDIA_DRIVER_VERSION=580.126.20
+ARG UBUNTU_PKG_SUFFIX=0ubuntu0.24.04.2
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update -qq \
+ && apt-get install -y -qq --no-install-recommends \
+      nvidia-utils-580-server=${NVIDIA_DRIVER_VERSION}-${UBUNTU_PKG_SUFFIX} \
+      libnvidia-compute-580-server=${NVIDIA_DRIVER_VERSION}-${UBUNTU_PKG_SUFFIX} \
+      python3 \
+      ca-certificates \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY verify-cuda.sh /verify-cuda.sh
+RUN chmod +x /verify-cuda.sh
+
+LABEL nvidia.driver.version="${NVIDIA_DRIVER_VERSION}"
+```
+
 ### Resources
 
 Snapshots can be customized with specific [sandbox resources](/docs/en/sandboxes#resources). By default, Daytona sandboxes use **1 vCPU**, **1GB RAM**, and **3GiB disk**. To view your available resources and limits, see [limits](/docs/en/limits) or navigate to [Daytona Limits ↗](https://app.daytona.io/dashboard/limits).
