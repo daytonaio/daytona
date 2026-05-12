@@ -7,7 +7,6 @@ import { Logo, LogoText } from '@/assets/Logo'
 import {
   Sidebar as SidebarComponent,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarInset,
   SidebarProvider,
@@ -51,13 +50,6 @@ const LoadingFallback = () => {
             </div>
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter>
-          <div className="flex flex-col gap-2">
-            <Skeleton className="w-full h-8" />
-            <Skeleton className="w-full h-8" />
-            <Skeleton className="w-full h-8" />
-          </div>
-        </SidebarFooter>
       </SidebarComponent>
       <SidebarInset className="overflow-hidden">
         <div className="absolute inset-0 p-6 bg-background z-[3]">

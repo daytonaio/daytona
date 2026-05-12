@@ -347,7 +347,7 @@ const getStateBadgeVariant = (state: VolumeState): BadgeProps['variant'] => {
 }
 
 const getStateLabel = (state: VolumeState) => {
-  return state
+  return String(state)
     .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ')

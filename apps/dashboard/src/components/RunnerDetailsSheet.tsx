@@ -46,7 +46,7 @@ const getStateBadgeVariant = (state: RunnerState): BadgeProps['variant'] => {
 }
 
 const getStateLabel = (state: RunnerState) => {
-  return state
+  return String(state)
     .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ')

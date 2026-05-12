@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 import { useTheme } from '@/contexts/ThemeContext'
 import { RoutePath } from '@/enums/RoutePath'
 import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
@@ -15,6 +16,7 @@ import {
   Mail,
   MoonIcon,
   Settings,
+  SlackIcon,
   SquareUserRound,
   SunIcon,
 } from 'lucide-react'
@@ -62,11 +64,29 @@ function PageHeader({ className, children, ...props }: ComponentProps<'header'>)
 
 function PageHeaderGlobalActions() {
   return (
-    <div className="flex shrink-0 items-center gap-1">
+    <div className="flex shrink-0 items-center">
       <FeedbackSheet />
+      <PageHeaderExternalAction label="Slack" href={DAYTONA_SLACK_URL} icon={<SlackIcon className="size-4" />} />
       <PageHeaderMockAction label="Support" icon={<LifeBuoyIcon className="size-4" />} />
       <PageHeaderProfileMenu />
     </div>
+  )
+}
+
+function PageHeaderExternalAction({ label, href, icon }: { label: string; href: string; icon: ReactNode }) {
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="px-2 text-muted-foreground hover:text-foreground md:px-3"
+      aria-label={label}
+      asChild
+    >
+      <a href={href} target="_blank" rel="noopener noreferrer">
+        {icon}
+        <span className="hidden md:inline">{label}</span>
+      </a>
+    </Button>
   )
 }
 
@@ -76,11 +96,11 @@ function PageHeaderMockAction({ label, icon }: { label: string; icon: ReactNode 
       type="button"
       variant="ghost"
       size="sm"
-      className="px-2 text-muted-foreground hover:text-foreground sm:px-3"
+      className="px-2 text-muted-foreground hover:text-foreground md:px-3"
       aria-label={label}
     >
       {icon}
-      <span className="hidden sm:inline">{label}</span>
+      <span className="hidden md:inline">{label}</span>
     </Button>
   )
 }
@@ -103,7 +123,7 @@ function PageHeaderProfileMenu() {
           type="button"
           variant="outline"
           size="sm"
-          className="ml-1 h-8 max-w-44 gap-2 bg-input/50 px-2 text-muted-foreground hover:text-foreground sm:px-2.5"
+          className="ml-1 h-8 max-w-44 gap-2 bg-input/50 px-2 text-muted-foreground hover:text-foreground md:px-2.5"
           aria-label="Profile"
         >
           {user?.profile.picture ? (
@@ -115,10 +135,10 @@ function PageHeaderProfileMenu() {
           ) : (
             <SquareUserRound className="size-4 shrink-0" />
           )}
-          <span className="hidden min-w-0 truncate sm:block">
+          <span className="hidden min-w-0 truncate md:block">
             {user?.profile.name || user?.profile.email || 'Profile'}
           </span>
-          <ChevronsUpDown className="hidden size-4 shrink-0 opacity-50 sm:block" />
+          <ChevronsUpDown className="hidden size-4 shrink-0 opacity-50 md:block" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="bottom" align="end" className="w-64">

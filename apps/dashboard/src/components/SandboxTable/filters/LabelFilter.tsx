@@ -54,35 +54,41 @@ export function LabelFilter({ value, onFilterChange, options }: LabelFilterProps
       </div>
       <CommandList>
         <CommandGroup>
-          {options.map((option) => (
-            <CommandItem
-              key={option.value}
-              onSelect={() => {
-                const newValue = value.includes(option.value)
-                  ? value.filter((v) => v !== option.value)
-                  : [...value, option.value]
-                onFilterChange(newValue.length > 0 ? newValue : undefined)
-              }}
-            >
-              <div className="flex items-center">
-                <div
-                  className={cn(
-                    'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                    value.includes(option.value)
-                      ? 'bg-primary text-primary-foreground'
-                      : 'opacity-50 [&_svg]:invisible',
-                  )}
-                >
-                  <Check className={cn('h-4 w-4')} />
-                </div>
-                <div className="truncate max-w-md rounded-sm bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-200 px-1">
-                  {option.label.split(':')[0]}
-                </div>
+          {options.map((option) => {
+            const label = String(option.label ?? option.value)
+            const [name, ...detailParts] = label.split(':')
+            const detail = detailParts.join(':')
 
-                <span className="ml-2 text-muted-foreground">{option.label.split(':')[1]}</span>
-              </div>
-            </CommandItem>
-          ))}
+            return (
+              <CommandItem
+                key={option.value}
+                onSelect={() => {
+                  const newValue = value.includes(option.value)
+                    ? value.filter((v) => v !== option.value)
+                    : [...value, option.value]
+                  onFilterChange(newValue.length > 0 ? newValue : undefined)
+                }}
+              >
+                <div className="flex items-center">
+                  <div
+                    className={cn(
+                      'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                      value.includes(option.value)
+                        ? 'bg-primary text-primary-foreground'
+                        : 'opacity-50 [&_svg]:invisible',
+                    )}
+                  >
+                    <Check className={cn('h-4 w-4')} />
+                  </div>
+                  <div className="truncate max-w-md rounded-sm bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-200 px-1">
+                    {name}
+                  </div>
+
+                  {detail ? <span className="ml-2 text-muted-foreground">{detail}</span> : null}
+                </div>
+              </CommandItem>
+            )
+          })}
         </CommandGroup>
       </CommandList>
     </Command>

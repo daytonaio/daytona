@@ -115,11 +115,11 @@ export function FeedbackSheet({ children }: { children?: ReactNode }) {
             type="button"
             variant="ghost"
             size="sm"
-            className="px-2 text-muted-foreground hover:text-foreground sm:px-3"
+            className="px-2 text-muted-foreground hover:text-foreground md:px-3"
             aria-label="Feedback"
           >
             <MessageSquareText className="size-4" />
-            <span className="hidden sm:inline">Feedback</span>
+            <span className="hidden md:inline">Feedback</span>
           </Button>
         )}
       </SheetTrigger>
