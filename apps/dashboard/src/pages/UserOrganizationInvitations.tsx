@@ -3,14 +3,17 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { OrganizationInvitationActionDialog } from '@/components/UserOrganizationInvitations/OrganizationInvitationActionDialog'
 import { UserOrganizationInvitationTable } from '@/components/UserOrganizationInvitations/UserOrganizationInvitationTable'
+import { Button } from '@/components/ui/button'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { useApi } from '@/hooks/useApi'
 import { useOrganizations } from '@/hooks/useOrganizations'
 import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
 import { handleApiError } from '@/lib/error-handling'
 import { OrganizationInvitation } from '@daytona/api-client'
+import { BookOpen } from 'lucide-react'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -102,11 +105,25 @@ const UserOrganizationInvitations: React.FC = () => {
 
   return (
     <PageLayout contained>
-      <PageHeader>
-        <PageTitle>Invitations</PageTitle>
-      </PageHeader>
+      <PageHeader />
 
       <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="Invitations"
+          actions={
+            <Button
+              variant="link"
+              size="sm"
+              className="w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+              asChild
+            >
+              <a href={`${DAYTONA_DOCS_URL}/en/organizations/`} target="_blank" rel="noopener noreferrer">
+                <BookOpen className="size-4" />
+                <span className="sr-only xs:not-sr-only">Docs</span>
+              </a>
+            </Button>
+          }
+        />
         <UserOrganizationInvitationTable
           data={invitations}
           loadingData={loadingInvitations}

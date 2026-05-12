@@ -4,13 +4,16 @@
  */
 
 import { AuditLogTable } from '@/components/AuditLogTable'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { RefreshSegmentedButton } from '@/components/RefreshSegmentedButton'
+import { Button } from '@/components/ui/button'
 import { DateRangePicker, QuickRangesConfig } from '@/components/ui/date-range-picker'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useAuditLogsQuery, type AuditLogsQueryParams } from '@/hooks/queries/useAuditLogsQuery'
 import { handleApiError } from '@/lib/error-handling'
 import { PaginatedAuditLogs } from '@daytona/api-client'
+import { BookOpen } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { DateRange } from 'react-day-picker'
 
@@ -228,44 +231,61 @@ const AuditLogs: React.FC = () => {
 
   return (
     <PageLayout contained>
-      <PageHeader>
-        <PageTitle>Audit Logs</PageTitle>
-      </PageHeader>
+      <PageHeader />
 
-      <PageContent size="full" className="overflow-hidden gap-3">
-        <div className="flex gap-2 flex-wrap justify-between">
-          <DateRangePicker
-            className="max-w-[380px] truncate"
-            value={dateRange}
-            onChange={handleDateRangeChange}
-            quickRangesEnabled
-            quickRanges={AUDIT_LOG_QUICK_RANGES}
-            timeSelection
-            disabled={isLoading}
-          />
-          <RefreshSegmentedButton
-            value={refreshInterval}
-            onChange={setRefreshInterval}
-            onRefresh={refetch}
-            isRefreshing={isRefetching}
-            lastUpdatedAt={dataUpdatedAt}
+      <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="Audit Logs"
+          actions={
+            <Button
+              variant="link"
+              size="sm"
+              className="w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+              asChild
+            >
+              <a href={`${DAYTONA_DOCS_URL}/en/audit-logs/`} target="_blank" rel="noopener noreferrer">
+                <BookOpen className="size-4" />
+                <span className="sr-only xs:not-sr-only">Docs</span>
+              </a>
+            </Button>
+          }
+        />
+        <div className="flex min-h-0 flex-1 flex-col gap-4">
+          <AuditLogTable
+            data={data.items}
+            loading={isLoading}
+            isRefetching={isRefetching}
+            hasFilters={hasFilters}
+            onClearFilters={handleClearFilters}
+            pageCount={data.totalPages}
+            totalItems={data.total}
+            onPaginationChange={handlePaginationChange}
+            pagination={{
+              pageIndex: pagination.pageIndex,
+              pageSize: pagination.pageSize,
+            }}
+            toolbar={
+              <>
+                <DateRangePicker
+                  className="max-w-[380px] truncate"
+                  value={dateRange}
+                  onChange={handleDateRangeChange}
+                  quickRangesEnabled
+                  quickRanges={AUDIT_LOG_QUICK_RANGES}
+                  timeSelection
+                  disabled={isLoading}
+                />
+                <RefreshSegmentedButton
+                  value={refreshInterval}
+                  onChange={setRefreshInterval}
+                  onRefresh={refetch}
+                  isRefreshing={isRefetching}
+                  lastUpdatedAt={dataUpdatedAt}
+                />
+              </>
+            }
           />
         </div>
-
-        <AuditLogTable
-          data={data.items}
-          loading={isLoading}
-          isRefetching={isRefetching}
-          hasFilters={hasFilters}
-          onClearFilters={handleClearFilters}
-          pageCount={data.totalPages}
-          totalItems={data.total}
-          onPaginationChange={handlePaginationChange}
-          pagination={{
-            pageIndex: pagination.pageIndex,
-            pageSize: pagination.pageSize,
-          }}
-        />
       </PageContent>
       <PageFooter />
     </PageLayout>

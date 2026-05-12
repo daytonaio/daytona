@@ -18,15 +18,9 @@ interface PaginationProps<TData> {
   totalItems?: number
 }
 
-export function Pagination<TData>({
-  table,
-  selectionEnabled,
-  className,
-  entityName,
-  totalItems,
-}: PaginationProps<TData>) {
+export function Pagination<TData>({ table, className, entityName, totalItems }: PaginationProps<TData>) {
   return (
-    <div className={cn('flex flex-col sm:flex-row gap-4 sm:items-center justify-between w-full', className)}>
+    <div className={cn('flex items-center justify-between gap-4 w-full', className)}>
       <div className="flex items-center gap-4">
         <Select
           value={`${table.getState().pagination.pageSize}`}
@@ -45,17 +39,6 @@ export function Pagination<TData>({
             ))}
           </SelectContent>
         </Select>
-
-        {selectionEnabled ? (
-          <div className="flex-1 text-sm text-muted-foreground">
-            {table.getFilteredSelectedRowModel().rows.length} of {totalItems ?? table.getFilteredRowModel().rows.length}{' '}
-            item(s) selected.
-          </div>
-        ) : (
-          <div className="flex-1 text-sm text-muted-foreground">
-            {totalItems ?? table.getFilteredRowModel().rows.length} total item(s)
-          </div>
-        )}
       </div>
       <div className="flex items-center gap-4">
         <div className="flex items-center justify-end text-sm font-medium text-muted-foreground">

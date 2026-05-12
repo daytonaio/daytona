@@ -6,13 +6,13 @@
 import { OrganizationSuspendedError } from '@/api/errors'
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { ForkTreeDialog } from '@/components/ForkTreeDialog'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { RecursiveDeleteDialog } from '@/components/RecursiveDeleteDialog'
 import { CreateSandboxSheet } from '@/components/Sandbox/CreateSandboxSheet'
-import { tabParser } from '@/components/sandboxes/SearchParams'
+import SandboxDetailsSheet, { type SandboxDetailsSheetTabValue } from '@/components/SandboxDetailsSheet'
 import { CreateSshAccessSheet } from '@/components/sandboxes/CreateSshAccessSheet'
 import { RevokeSshAccessDialog } from '@/components/sandboxes/RevokeSshAccessDialog'
-import SandboxDetailsSheet, { type SandboxDetailsSheetTabValue } from '@/components/sandboxes/SandboxDetailsSheet'
+import { tabParser } from '@/components/sandboxes/SearchParams'
 import { SandboxTable } from '@/components/SandboxTable'
 import type { SandboxTableRef } from '@/components/SandboxTable/types'
 import {
@@ -38,7 +38,8 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { createBulkActionToast } from '@/lib/bulk-action-toast'
 import { handleApiError } from '@/lib/error-handling'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
-import { formatDuration, pluralize } from '@/lib/utils'
+import { cn, formatDuration, pluralize } from '@/lib/utils'
+import { isTransitioning as isSandboxTransitioning } from '@/lib/utils/sandbox'
 import {
   OrganizationRolePermissionsEnum,
   OrganizationUserRoleEnum,
@@ -48,12 +49,100 @@ import {
   SnapshotDto,
 } from '@daytona/api-client'
 import type { Sandbox as CreatedSandbox } from '@daytona/sdk'
-import { PlusIcon } from 'lucide-react'
+import { BookOpen, PlusIcon } from 'lucide-react'
 import { parseAsString, useQueryState } from 'nuqs'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+
+const SANDBOX_STATE_MARKER_COLORS: Partial<Record<SandboxState, string>> = {
+  [SandboxState.STARTED]: 'bg-green-600',
+  [SandboxState.STOPPED]: 'bg-muted-foreground/50',
+  [SandboxState.ERROR]: 'bg-destructive',
+  [SandboxState.BUILD_FAILED]: 'bg-destructive',
+  [SandboxState.UNKNOWN]: 'bg-muted-foreground/20',
+  [SandboxState.UNKNOWN_DEFAULT_OPEN_API]: 'bg-muted-foreground/20',
+  [SandboxState.ARCHIVED]: 'bg-muted-foreground/20',
+  [SandboxState.DESTROYED]: 'bg-muted-foreground/20',
+  [SandboxState.PENDING_BUILD]: 'bg-muted-foreground/20',
+}
+
+function SandboxStatusStrip({ sandboxes, loading }: { sandboxes: Sandbox[]; loading: boolean }) {
+  const stats = useMemo(() => {
+    const total = sandboxes.length
+    const running = sandboxes.filter((sandbox) => sandbox.state === SandboxState.STARTED).length
+    const stopped = sandboxes.filter((sandbox) => sandbox.state === SandboxState.STOPPED).length
+    const archived = sandboxes.filter((sandbox) => sandbox.state === SandboxState.ARCHIVED).length
+    const transitioning = sandboxes.filter(isSandboxTransitioning).length
+    const issueStates = [SandboxState.ERROR, SandboxState.BUILD_FAILED] as SandboxState[]
+    const issues = sandboxes.filter((sandbox) => issueStates.includes(sandbox.state ?? SandboxState.UNKNOWN)).length
+
+    return {
+      archived,
+      issues,
+      running,
+      runningPercent: total > 0 ? Math.round((running / total) * 100) : 0,
+      stopped,
+      total,
+      transitioning,
+    }
+  }, [sandboxes])
+
+  const items = [
+    {
+      label: 'Total',
+      value: stats.total,
+      detail: pluralize(stats.total, 'sandbox', 'sandboxes'),
+      markerClassName: 'bg-muted-foreground/50',
+    },
+    {
+      label: 'Running',
+      value: stats.running,
+      detail: `${stats.runningPercent}% active`,
+      markerClassName: SANDBOX_STATE_MARKER_COLORS[SandboxState.STARTED],
+    },
+    {
+      label: 'Stopped',
+      value: stats.stopped,
+      detail:
+        stats.archived > 0 ? pluralize(stats.archived, 'archived sandbox', 'archived sandboxes') : 'Ready to start',
+      markerClassName: SANDBOX_STATE_MARKER_COLORS[SandboxState.STOPPED],
+    },
+    {
+      label: 'In progress',
+      value: stats.transitioning,
+      detail: 'State changes',
+      markerClassName: 'bg-[hsl(var(--chart-2))]',
+    },
+    {
+      label: 'Issues',
+      value: stats.issues,
+      detail: 'Need attention',
+      markerClassName: SANDBOX_STATE_MARKER_COLORS[SandboxState.ERROR],
+    },
+  ]
+
+  return (
+    <section
+      aria-label="Sandbox status summary"
+      className="hidden mb-2 shrink-0 grid-cols-2 gap-px overflow-hidden rounded-md border bg-border sm:grid-cols-3 xl:grid-cols-5"
+    >
+      {items.map((item) => (
+        <div key={item.label} className="flex h-9 min-w-0 items-center gap-2 bg-background px-3">
+          <span className={cn('size-2 shrink-0 rounded-full', item.markerClassName)} />
+          <span className="truncate text-xs font-medium text-muted-foreground">{item.label}</span>
+          <span className="shrink-0 text-sm font-semibold tabular-nums leading-none">
+            {loading ? '--' : item.value}
+          </span>
+          <span className="ml-auto hidden truncate text-[11px] text-muted-foreground 2xl:block">
+            {loading ? 'Loading' : item.detail}
+          </span>
+        </div>
+      ))}
+    </section>
+  )
+}
 
 const Sandboxes: React.FC = () => {
   const { sandboxApi, apiKeyApi, toolboxApi, snapshotApi } = useApi()
@@ -838,27 +927,30 @@ const Sandboxes: React.FC = () => {
 
   return (
     <PageLayout contained>
-      <PageHeader>
-        <PageTitle>Sandboxes</PageTitle>
-        <div className="flex items-center gap-2 ml-auto">
-          {!loadingTable && sandboxes.length === 0 && (
+      <PageHeader />
+      <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="Sandboxes"
+          actions={
             <>
-              <Button variant="link" className="text-primary" onClick={() => navigate(RoutePath.ONBOARDING)} size="sm">
-                Onboarding guide
-              </Button>
-              <Button variant="link" className="text-primary" asChild size="sm">
-                <a href={DAYTONA_DOCS_URL} target="_blank" rel="noopener noreferrer" className="text-primary">
-                  Docs
+              <Button
+                variant="link"
+                size="sm"
+                className="w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+                asChild
+              >
+                <a href={`${DAYTONA_DOCS_URL}/en/sandboxes/`} target="_blank" rel="noopener noreferrer">
+                  <BookOpen className="size-4" />
+                  <span className="sr-only xs:not-sr-only">Docs</span>
                 </a>
               </Button>
+              {canCreateSandbox && (
+                <CreateSandboxSheet ref={createSandboxSheetRef} onSandboxCreated={handleSandboxCreated} />
+              )}
             </>
-          )}
-          {canCreateSandbox && (
-            <CreateSandboxSheet ref={createSandboxSheetRef} onSandboxCreated={handleSandboxCreated} />
-          )}
-        </div>
-      </PageHeader>
-      <PageContent size="full" className="overflow-hidden">
+          }
+        />
+        <SandboxStatusStrip sandboxes={sandboxes} loading={loadingTable} />
         <SandboxTable
           ref={sandboxTableRef}
           sandboxIsLoading={loadingSandboxes}

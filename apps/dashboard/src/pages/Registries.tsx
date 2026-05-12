@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { UpsertRegistrySheet } from '@/components/UpsertRegistrySheet'
-import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { useRegisterCommands, type CommandConfig } from '@/components/CommandPalette'
+import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { RegistryTable } from '@/components/RegistryTable'
 import { Button } from '@/components/ui/button'
 import {
@@ -17,12 +16,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { UpsertRegistrySheet } from '@/components/UpsertRegistrySheet'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { useDeleteRegistryMutation } from '@/hooks/mutations/useDeleteRegistryMutation'
 import { useRegistriesQuery } from '@/hooks/queries/useRegistriesQuery'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { OrganizationRolePermissionsEnum, type DockerRegistry } from '@daytona/api-client'
-import { PlusIcon } from 'lucide-react'
+import { BookOpen, PlusIcon } from 'lucide-react'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -80,12 +81,32 @@ const Registries: React.FC = () => {
 
   return (
     <PageLayout contained>
-      <PageHeader>
-        <PageTitle>Registries</PageTitle>
-        {writePermitted && <UpsertRegistrySheet className="ml-auto" disabled={loading} ref={addRegistrySheetRef} />}
-      </PageHeader>
+      <PageHeader />
 
       <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="Registries"
+          actions={
+            <>
+              <Button
+                variant="link"
+                size="sm"
+                className="w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+                asChild
+              >
+                <a
+                  href={`${DAYTONA_DOCS_URL}/en/snapshots/#using-images-from-private-registries`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <BookOpen className="size-4" />
+                  <span className="sr-only xs:not-sr-only">Docs</span>
+                </a>
+              </Button>
+              {writePermitted && <UpsertRegistrySheet disabled={loading} ref={addRegistrySheetRef} />}
+            </>
+          }
+        />
         <RegistryTable
           data={registries}
           loading={loading}

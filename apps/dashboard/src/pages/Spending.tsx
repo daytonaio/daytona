@@ -4,18 +4,19 @@
  */
 
 import { BillableMetricCode, OrganizationUsage } from '@/billing-api/types/OrganizationUsage'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { AggregatedUsageChart, ResourceUsageBreakdown, UsageSummary } from '@/components/spending/AggregatedUsageChart'
 import { CostBreakdown } from '@/components/spending/CostBreakdown'
 import { UsageChartData } from '@/components/spending/ResourceUsageChart'
 import { SandboxUsageTable } from '@/components/spending/SandboxUsageTable'
+import { UsageTimelineChart } from '@/components/spending/UsageTimelineChart'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { DateRangePicker, QuickRangesConfig } from '@/components/ui/date-range-picker'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Separator } from '@/components/ui/separator'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { FeatureFlags } from '@/enums/FeatureFlags'
-import { UsageTimelineChart } from '@/components/spending/UsageTimelineChart'
 import { useAggregatedUsage, useSandboxesUsage, useUsageChart } from '@/hooks/queries/useAnalyticsUsage'
 import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
 import { useOrganizationUsageQuery } from '@/hooks/queries/useOrganizationUsageQuery'
@@ -23,7 +24,7 @@ import { usePastOrganizationUsageQuery } from '@/hooks/queries/usePastOrganizati
 import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { addDays, differenceInCalendarDays, subDays } from 'date-fns'
-import { AlertCircle, BarChart3, RefreshCw } from 'lucide-react'
+import { AlertCircle, BarChart3, BookOpen, RefreshCw } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DateRange } from 'react-day-picker'
@@ -134,11 +135,25 @@ const Spending = () => {
 
   return (
     <PageLayout>
-      <PageHeader>
-        <PageTitle>Spending</PageTitle>
-      </PageHeader>
+      <PageHeader />
 
       <PageContent>
+        <PageIntro
+          title="Spending"
+          actions={
+            <Button
+              variant="link"
+              size="sm"
+              className="w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+              asChild
+            >
+              <a href={`${DAYTONA_DOCS_URL}/en/billing/#spending`} target="_blank" rel="noopener noreferrer">
+                <BookOpen className="size-4" />
+                <span className="sr-only xs:not-sr-only">Docs</span>
+              </a>
+            </Button>
+          }
+        />
         {analyticsAvailable && (
           <Card>
             <CardHeader className="flex flex-row items-center gap-2 space-y-0 border-b p-4">

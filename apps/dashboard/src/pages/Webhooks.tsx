@@ -4,17 +4,18 @@
  */
 
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { UpsertEndpointSheet } from '@/components/Webhooks/UpsertEndpointSheet'
 import { WebhooksEndpointTable } from '@/components/Webhooks/WebhooksEndpointTable'
 import { WebhooksMessagesTable } from '@/components/Webhooks/WebhooksMessagesTable/WebhooksMessagesTable'
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { useDeleteWebhookEndpointMutation } from '@/hooks/mutations/useDeleteWebhookEndpointMutation'
 import { useUpdateWebhookEndpointMutation } from '@/hooks/mutations/useUpdateWebhookEndpointMutation'
 import { handleApiError } from '@/lib/error-handling'
-import { AlertCircle, PlusIcon, RefreshCw } from 'lucide-react'
+import { AlertCircle, BookOpen, PlusIcon, RefreshCw } from 'lucide-react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { EndpointOut } from 'svix'
@@ -98,10 +99,24 @@ const Webhooks: React.FC = () => {
   if (endpoints.error) {
     return (
       <PageLayout>
-        <PageHeader>
-          <PageTitle>Webhooks</PageTitle>
-        </PageHeader>
+        <PageHeader />
         <PageContent>
+          <PageIntro
+            title="Webhooks"
+            actions={
+              <Button
+                variant="link"
+                size="sm"
+                className="w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+                asChild
+              >
+                <a href={`${DAYTONA_DOCS_URL}/en/webhooks/`} target="_blank" rel="noopener noreferrer">
+                  <BookOpen className="size-4" />
+                  <span className="sr-only xs:not-sr-only">Docs</span>
+                </a>
+              </Button>
+            }
+          />
           <Empty className="py-12 max-h-64 border" variant="destructive">
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -124,26 +139,32 @@ const Webhooks: React.FC = () => {
 
   return (
     <PageLayout contained>
-      <PageHeader>
-        <PageTitle>Webhooks</PageTitle>
-        <a
-          href="https://www.daytona.io/docs/en/tools/api/#daytona/webhook/undefined/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="ml-auto"
-        >
-          <Button variant="link" size="sm">
-            Docs
-          </Button>
-        </a>
-        <UpsertEndpointSheet
-          onSuccess={handleSuccess}
-          ref={createEndpointSheetRef}
-          className={activeTab === 'endpoints' ? '' : 'hidden'}
-        />
-      </PageHeader>
+      <PageHeader />
 
-      <PageContent size="full" className="p-0 overflow-hidden">
+      <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="Webhooks"
+          actions={
+            <>
+              <Button
+                variant="link"
+                size="sm"
+                className="w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+                asChild
+              >
+                <a href={`${DAYTONA_DOCS_URL}/en/webhooks/`} target="_blank" rel="noopener noreferrer">
+                  <BookOpen className="size-4" />
+                  <span className="sr-only xs:not-sr-only">Docs</span>
+                </a>
+              </Button>
+              <UpsertEndpointSheet
+                onSuccess={handleSuccess}
+                ref={createEndpointSheetRef}
+                className={activeTab === 'endpoints' ? '' : 'hidden'}
+              />
+            </>
+          }
+        />
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col gap-0">
           <TabsList
             className="shadow-none bg-transparent w-auto p-0 pb-0 justify-start rounded-none"

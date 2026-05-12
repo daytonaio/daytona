@@ -11,6 +11,9 @@ import { Copy, Info, Pencil, Trash, X } from 'lucide-react'
 import React from 'react'
 import { toast } from 'sonner'
 
+const detailSectionLabelClassName = 'font-mono text-xs uppercase tracking-widest text-muted-foreground'
+const detailKeyLabelClassName = 'text-sm text-muted-foreground'
+
 interface RegionDetailsSheetProps {
   region: Region | null
   open: boolean
@@ -57,7 +60,7 @@ const RegionDetailsSheet: React.FC<RegionDetailsSheetProps> = ({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-dvw sm:w-[800px] p-0 flex flex-col gap-0 [&>button]:hidden">
         <SheetHeader className="space-y-0 flex flex-row justify-between items-center p-6">
-          <SheetTitle className="text-2xl font-medium">Region Details</SheetTitle>
+          <SheetTitle>Region Details</SheetTitle>
           <div className="flex items-center">
             {writePermitted && isCustomRegion && (
               <Button variant="outline" className="w-8 h-8" onClick={() => onUpdate(region)} disabled={isLoading}>
@@ -78,7 +81,7 @@ const RegionDetailsSheet: React.FC<RegionDetailsSheetProps> = ({
         <div className="flex-1 p-6 space-y-10 overflow-y-auto min-h-0">
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <h3 className="text-sm text-muted-foreground">Name</h3>
+              <h3 className={detailKeyLabelClassName}>Name</h3>
               <div className="mt-1 flex items-center gap-2">
                 <p className="text-sm font-medium truncate">{region.name}</p>
                 <button
@@ -91,7 +94,7 @@ const RegionDetailsSheet: React.FC<RegionDetailsSheetProps> = ({
               </div>
             </div>
             <div>
-              <h3 className="text-sm text-muted-foreground">ID</h3>
+              <h3 className={detailKeyLabelClassName}>ID</h3>
               <div className="mt-1 flex items-center gap-2">
                 <p className="text-sm font-medium truncate">{region.id}</p>
                 <button
@@ -107,16 +110,16 @@ const RegionDetailsSheet: React.FC<RegionDetailsSheetProps> = ({
 
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <h3 className="text-sm text-muted-foreground">Created</h3>
+              <h3 className={detailKeyLabelClassName}>Created</h3>
               <p className="mt-1 text-sm font-medium">{formatTimestamp(region.createdAt)}</p>
             </div>
           </div>
 
           <div>
-            <h3 className="text-lg font-medium">URLs</h3>
+            <h3 className={detailSectionLabelClassName}>URLs</h3>
             <div className="mt-3 space-y-4">
               <div>
-                <h4 className="text-sm text-muted-foreground">Proxy URL</h4>
+                <h4 className={detailKeyLabelClassName}>Proxy URL</h4>
                 <div className="mt-1 flex items-center gap-2">
                   <p className="text-sm font-medium truncate">{region.proxyUrl || '-'}</p>
                   {region.proxyUrl && (
@@ -131,7 +134,7 @@ const RegionDetailsSheet: React.FC<RegionDetailsSheetProps> = ({
                 </div>
               </div>
               <div>
-                <h4 className="text-sm text-muted-foreground">SSH Gateway URL</h4>
+                <h4 className={detailKeyLabelClassName}>SSH Gateway URL</h4>
                 <div className="mt-1 flex items-center gap-2">
                   <p className="text-sm font-medium truncate">{region.sshGatewayUrl || '-'}</p>
                   {region.sshGatewayUrl && (
@@ -146,7 +149,7 @@ const RegionDetailsSheet: React.FC<RegionDetailsSheetProps> = ({
                 </div>
               </div>
               <div>
-                <h4 className="text-sm text-muted-foreground">Snapshot Manager URL</h4>
+                <h4 className={detailKeyLabelClassName}>Snapshot Manager URL</h4>
                 <div className="mt-1 flex items-center gap-2">
                   <p className="text-sm font-medium truncate">{region.snapshotManagerUrl || '-'}</p>
                   {region.snapshotManagerUrl && (
@@ -167,7 +170,7 @@ const RegionDetailsSheet: React.FC<RegionDetailsSheetProps> = ({
             writePermitted &&
             (region.proxyUrl || region.sshGatewayUrl || region.snapshotManagerUrl) && (
               <div>
-                <h3 className="text-lg font-medium">Credentials</h3>
+                <h3 className={detailSectionLabelClassName}>Credentials</h3>
                 <div className="mt-3 space-y-3">
                   {region.proxyUrl && (
                     <Button

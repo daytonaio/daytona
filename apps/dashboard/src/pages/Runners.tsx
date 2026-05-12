@@ -5,7 +5,7 @@
 
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { CreateRunnerSheet } from '@/components/CreateRunnerSheet'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { RefreshIntervalValue } from '@/components/RefreshSegmentedButton'
 import RunnerDetailsSheet from '@/components/RunnerDetailsSheet'
 import { RunnerTable } from '@/components/RunnerTable'
@@ -19,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { useApi } from '@/hooks/useApi'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { useRegions } from '@/hooks/useRegions'
@@ -31,7 +32,7 @@ import {
   Runner,
   RunnerState,
 } from '@daytona/api-client'
-import { PlusIcon } from 'lucide-react'
+import { BookOpen, PlusIcon } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -238,16 +239,30 @@ const Runners: React.FC = () => {
 
   return (
     <PageLayout contained>
-      <PageHeader>
-        <PageTitle>Runners</PageTitle>
-        {writePermitted && regions.length > 0 && (
-          <div className="ml-auto">
-            <CreateRunnerSheet regions={regions} onCreateRunner={handleCreateRunner} ref={createRunnerSheetRef} />
-          </div>
-        )}
-      </PageHeader>
+      <PageHeader />
 
       <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="Runners"
+          actions={
+            <>
+              <Button
+                variant="link"
+                size="sm"
+                className="w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+                asChild
+              >
+                <a href={`${DAYTONA_DOCS_URL}/en/runners/`} target="_blank" rel="noopener noreferrer">
+                  <BookOpen className="size-4" />
+                  <span className="sr-only xs:not-sr-only">Docs</span>
+                </a>
+              </Button>
+              {writePermitted && regions.length > 0 && (
+                <CreateRunnerSheet regions={regions} onCreateRunner={handleCreateRunner} ref={createRunnerSheetRef} />
+              )}
+            </>
+          }
+        />
         <RunnerTable
           data={runners}
           regions={regions}
@@ -338,6 +353,7 @@ const Runners: React.FC = () => {
           setDeleteRunnerDialogIsOpen(true)
           setShowRunnerDetails(false)
         }}
+        onToggleEnabled={handleToggleEnabled}
         getRegionName={getRegionName}
       />
     </PageLayout>

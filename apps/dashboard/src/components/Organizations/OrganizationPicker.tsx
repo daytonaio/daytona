@@ -10,26 +10,32 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
 import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
 import { useApi } from '@/hooks/useApi'
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { useOrganizations } from '@/hooks/useOrganizations'
 import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
+import { cn } from '@/lib/utils'
 import { Organization } from '@daytona/api-client'
 import { Building2, ChevronsUpDown, Copy, PlusCircle, SquareUserRound } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { CommandHighlight, useRegisterCommands, type CommandConfig } from '../CommandPalette'
 import { CreateOrganizationSheet } from './CreateOrganizationSheet'
 
-function useOrganizationCommands() {
+function useOrganizationCommands(enabled: boolean) {
   const { organizations } = useOrganizations()
   const { selectedOrganization, onSelectOrganization } = useSelectedOrganization()
   const [, copyToClipboard] = useCopyToClipboard()
 
   const commands: CommandConfig[] = useMemo(() => {
+    if (!enabled) {
+      return []
+    }
+
     const cmds: CommandConfig[] = []
 
     if (selectedOrganization) {
@@ -61,12 +67,12 @@ function useOrganizationCommands() {
     }
 
     return cmds
-  }, [organizations, selectedOrganization, copyToClipboard, onSelectOrganization])
+  }, [enabled, organizations, selectedOrganization, copyToClipboard, onSelectOrganization])
 
   useRegisterCommands(commands, { groupId: 'organization', groupLabel: 'Organization', groupOrder: 5 })
 }
 
-export const OrganizationPicker: React.FC = () => {
+export const OrganizationPicker: React.FC<{ variant?: 'sidebar' | 'breadcrumb' }> = ({ variant = 'sidebar' }) => {
   const { organizationsApi } = useApi()
 
   const { organizations, refreshOrganizations } = useOrganizations()
@@ -76,7 +82,7 @@ export const OrganizationPicker: React.FC = () => {
   const [optimisticSelectedOrganization, setOptimisticSelectedOrganization] = useState(selectedOrganization)
   const [loadingSelectOrganization, setLoadingSelectOrganization] = useState(false)
 
-  useOrganizationCommands()
+  useOrganizationCommands(variant === 'sidebar')
 
   useEffect(() => {
     setOptimisticSelectedOrganization(selectedOrganization)
@@ -140,23 +146,36 @@ export const OrganizationPicker: React.FC = () => {
     return null
   }
 
-  return (
-    <SidebarMenuItem>
+  const trigger =
+    variant === 'breadcrumb' ? (
+      <Button
+        variant="ghost"
+        size="sm"
+        disabled={loadingSelectOrganization}
+        className="h-7 min-w-0 max-w-48 px-1.5 text-muted-foreground hover:text-foreground"
+      >
+        <OrganizationAvatar>{optimisticSelectedOrganization.name[0].toUpperCase()}</OrganizationAvatar>
+        <span className="truncate">{optimisticSelectedOrganization.name}</span>
+        <ChevronsUpDown className="size-3.5 opacity-50" />
+      </Button>
+    ) : (
+      <SidebarMenuButton
+        variant="outline"
+        disabled={loadingSelectOrganization}
+        className="mb-2 bg-input/50"
+        tooltip={optimisticSelectedOrganization.name}
+      >
+        <OrganizationAvatar>{optimisticSelectedOrganization.name[0].toUpperCase()}</OrganizationAvatar>
+        <span className="truncate text-foreground">{optimisticSelectedOrganization.name}</span>
+        <ChevronsUpDown className="ml-auto w-4 h-4 opacity-50" />
+      </SidebarMenuButton>
+    )
+
+  const picker = (
+    <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <SidebarMenuButton
-            disabled={loadingSelectOrganization}
-            className="outline outline-1 outline-border outline-offset-0 mb-2 bg-muted"
-            tooltip={optimisticSelectedOrganization.name}
-          >
-            <div className="w-4 h-4 flex-shrink-0 bg-black rounded-full text-white flex items-center justify-center text-[10px] font-bold">
-              {optimisticSelectedOrganization.name[0].toUpperCase()}
-            </div>
-            <span className="truncate text-foreground">{optimisticSelectedOrganization.name}</span>
-            <ChevronsUpDown className="ml-auto w-4 h-4 opacity-50" />
-          </SidebarMenuButton>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[--radix-popper-anchor-width]">
+        <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+        <DropdownMenuContent className={cn('w-[--radix-popper-anchor-width]', variant === 'breadcrumb' && 'min-w-56')}>
           <div className="max-h-44 overflow-y-auto">
             {sortedOrganizations.map((org) => (
               <DropdownMenuItem
@@ -189,6 +208,20 @@ export const OrganizationPicker: React.FC = () => {
         loadingRegions={loadingRegions}
         onCreateOrganization={handleCreateOrganization}
       />
-    </SidebarMenuItem>
+    </>
+  )
+
+  if (variant === 'breadcrumb') {
+    return picker
+  }
+
+  return <SidebarMenuItem>{picker}</SidebarMenuItem>
+}
+
+function OrganizationAvatar({ children }: { children: ReactNode }) {
+  return (
+    <div className="w-4 h-4 flex-shrink-0 rounded-full bg-black text-white flex items-center justify-center text-[10px] font-bold">
+      {children}
+    </div>
   )
 }

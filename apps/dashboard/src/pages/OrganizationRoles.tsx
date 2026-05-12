@@ -6,13 +6,15 @@
 import { CreateOrganizationRoleSheet } from '@/components/OrganizationRoles/CreateOrganizationRoleSheet'
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { OrganizationRoleTable } from '@/components/OrganizationRoles/OrganizationRoleTable'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
+import { Button } from '@/components/ui/button'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { useApi } from '@/hooks/useApi'
 import { useOrganizationRoles } from '@/hooks/useOrganizationRoles'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { OrganizationRolePermissionsEnum } from '@daytona/api-client'
-import { PlusIcon } from 'lucide-react'
+import { BookOpen, PlusIcon } from 'lucide-react'
 import React, { useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -109,12 +111,28 @@ const OrganizationRoles: React.FC = () => {
 
   return (
     <PageLayout>
-      <PageHeader>
-        <PageTitle>Roles</PageTitle>
-        <CreateOrganizationRoleSheet className="ml-auto" onCreateRole={handleCreateRole} ref={createRoleSheetRef} />
-      </PageHeader>
+      <PageHeader />
 
       <PageContent>
+        <PageIntro
+          title="Roles"
+          actions={
+            <>
+              <Button
+                variant="link"
+                size="sm"
+                className="w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+                asChild
+              >
+                <a href={`${DAYTONA_DOCS_URL}/en/organizations/`} target="_blank" rel="noopener noreferrer">
+                  <BookOpen className="size-4" />
+                  <span className="sr-only xs:not-sr-only">Docs</span>
+                </a>
+              </Button>
+              <CreateOrganizationRoleSheet onCreateRole={handleCreateRole} ref={createRoleSheetRef} />
+            </>
+          }
+        />
         <OrganizationRoleTable
           data={roles}
           loadingData={loadingRoles}

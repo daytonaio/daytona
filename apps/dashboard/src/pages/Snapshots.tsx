@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { CreateSnapshotSheet } from '@/components/snapshots/CreateSnapshotSheet'
-import { SnapshotSheet } from '@/components/snapshots/SnapshotSheet'
+import { SnapshotSheet, type SnapshotSheetRef } from '@/components/snapshots/SnapshotSheet'
 import { SnapshotTable } from '@/components/snapshots/SnapshotTable'
 import { Button } from '@/components/ui/button'
 import {
@@ -18,6 +18,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Spinner } from '@/components/ui/spinner'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useActivateSnapshotMutation } from '@/hooks/mutations/useActivateSnapshotMutation'
 import { useDeactivateSnapshotMutation } from '@/hooks/mutations/useDeactivateSnapshotMutation'
@@ -37,9 +38,12 @@ import { handleApiError } from '@/lib/error-handling'
 import { pluralize } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, PaginatedSnapshots, SnapshotDto, SnapshotState } from '@daytona/api-client'
 import { useQueryClient } from '@tanstack/react-query'
+import { BookOpen } from 'lucide-react'
 import { parseAsString, useQueryState } from 'nuqs'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
+
+const SNAPSHOT_SHEET_CLOSE_ANIMATION_MS = 200
 
 const Snapshots: React.FC = () => {
   const queryClient = useQueryClient()
@@ -53,6 +57,8 @@ const Snapshots: React.FC = () => {
   const [orderedSnapshotItems, setOrderedSnapshotItems] = useState<SnapshotDto[] | null>(null)
   const [showSnapshotSheet, setShowSnapshotSheet] = useState(false)
   const [snapshotIdParam, setSnapshotIdParam] = useQueryState('snapshotId', parseAsString)
+  const snapshotSheetRef = useRef<SnapshotSheetRef>(null)
+  const snapshotSheetCleanupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
   const deleteSnapshotMutation = useDeleteSnapshotMutation({ invalidateOnSuccess: false })
@@ -115,8 +121,7 @@ const Snapshots: React.FC = () => {
 
   useEffect(() => {
     if (!snapshotIdParam) {
-      setSelectedSnapshot(null)
-      setOrderedSnapshotItems(null)
+      snapshotSheetRef.current?.close()
       setShowSnapshotSheet(false)
       return
     }
@@ -133,6 +138,24 @@ const Snapshots: React.FC = () => {
     setSelectedSnapshot(snapshotFromLoadedResults)
     setOrderedSnapshotItems(snapshotsData?.items ?? null)
   }, [selectedSnapshot?.id, snapshotIdParam, snapshotFromLoadedResults, snapshotsData?.items])
+
+  useEffect(() => {
+    if (!showSnapshotSheet || !snapshotIdParam) return
+
+    const frameId = requestAnimationFrame(() => {
+      snapshotSheetRef.current?.open()
+    })
+
+    return () => cancelAnimationFrame(frameId)
+  }, [showSnapshotSheet, snapshotIdParam])
+
+  useEffect(() => {
+    return () => {
+      if (snapshotSheetCleanupTimeoutRef.current) {
+        clearTimeout(snapshotSheetCleanupTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const updateSnapshotInCache = useCallback(
     (snapshotId: string, updates: Partial<SnapshotDto>) => {
@@ -415,12 +438,20 @@ const Snapshots: React.FC = () => {
   }
 
   const handleSnapshotSheetOpenChange = (isOpen: boolean) => {
+    if (snapshotSheetCleanupTimeoutRef.current) {
+      clearTimeout(snapshotSheetCleanupTimeoutRef.current)
+      snapshotSheetCleanupTimeoutRef.current = null
+    }
+
     setShowSnapshotSheet(isOpen)
 
     if (!isOpen) {
-      setSelectedSnapshot(null)
-      setOrderedSnapshotItems(null)
-      setSnapshotIdParam(null)
+      snapshotSheetCleanupTimeoutRef.current = setTimeout(() => {
+        setSelectedSnapshot(null)
+        setOrderedSnapshotItems(null)
+        setSnapshotIdParam(null)
+        snapshotSheetCleanupTimeoutRef.current = null
+      }, SNAPSHOT_SHEET_CLOSE_ANIMATION_MS)
     }
   }
 
@@ -439,14 +470,28 @@ const Snapshots: React.FC = () => {
 
   return (
     <PageLayout contained>
-      <PageHeader>
-        <PageTitle>Snapshots</PageTitle>
-        {writePermitted && (
-          <CreateSnapshotSheet className="ml-auto" onSnapshotCreated={handleSnapshotCreated} ref={dialogRef} />
-        )}
-      </PageHeader>
+      <PageHeader />
 
       <PageContent size="full" className="flex-1 overflow-hidden">
+        <PageIntro
+          title="Snapshots"
+          actions={
+            <>
+              <Button
+                variant="link"
+                size="sm"
+                className="w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+                asChild
+              >
+                <a href={`${DAYTONA_DOCS_URL}/en/snapshots/`} target="_blank" rel="noopener noreferrer">
+                  <BookOpen className="size-4" />
+                  <span className="sr-only xs:not-sr-only">Docs</span>
+                </a>
+              </Button>
+              {writePermitted && <CreateSnapshotSheet ref={dialogRef} onSnapshotCreated={handleSnapshotCreated} />}
+            </>
+          }
+        />
         <SnapshotTable
           data={filteredItems}
           loading={snapshotsDataIsLoading}
@@ -483,9 +528,9 @@ const Snapshots: React.FC = () => {
         />
 
         <SnapshotSheet
+          ref={snapshotSheetRef}
           snapshotId={snapshotIdParam}
           snapshot={selectedSnapshot}
-          open={showSnapshotSheet}
           onOpenChange={handleSnapshotSheetOpenChange}
           getRegionName={getRegionName}
           onNavigate={handleSnapshotSheetNavigate}

@@ -8,6 +8,7 @@ import { PageFooterPortal } from '@/components/PageLayout'
 import { SearchInput } from '@/components/SearchInput'
 import { SelectionToast } from '@/components/SelectionToast'
 import { Button } from '@/components/ui/button'
+import type { FacetedFilterOption } from '@/components/ui/data-table-faceted-filter'
 import { FacetFilter } from '@/components/ui/facet-filter'
 import { Skeleton } from '@/components/ui/skeleton'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
@@ -20,7 +21,7 @@ import { OrganizationRolePermissionsEnum, SnapshotDto, SnapshotState } from '@da
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { Box } from 'lucide-react'
 import { AnimatePresence } from 'motion/react'
-import { useCallback, useMemo, useState } from 'react'
+import { type ReactNode, useCallback, useMemo, useState } from 'react'
 import { Pagination } from '../../Pagination'
 import {
   Table,
@@ -70,16 +71,47 @@ interface DataTableProps {
   onSortingChange: (sorting: SnapshotSorting) => void
   stateFilter: Set<string>
   onStateFilterChange: (values: Set<string>) => void
+  toolbarActions?: ReactNode
 }
 
-const SNAPSHOT_STATE_OPTIONS = [
-  { label: 'Active', value: SnapshotState.ACTIVE },
-  { label: 'Inactive', value: SnapshotState.INACTIVE },
-  { label: 'Building', value: SnapshotState.BUILDING },
-  { label: 'Pending', value: SnapshotState.PENDING },
-  { label: 'Pulling', value: SnapshotState.PULLING },
-  { label: 'Error', value: SnapshotState.ERROR },
-  { label: 'Build Failed', value: SnapshotState.BUILD_FAILED },
+function SnapshotStateFilterLabel({ colorClassName, label }: { colorClassName: string; label: string }) {
+  return (
+    <span className="inline-flex min-w-0 items-center gap-2">
+      <span className={cn('size-2 shrink-0 rounded-full', colorClassName)} aria-hidden="true" />
+      <span className="truncate">{label}</span>
+    </span>
+  )
+}
+
+const SNAPSHOT_STATE_OPTIONS: FacetedFilterOption[] = [
+  {
+    label: <SnapshotStateFilterLabel colorClassName="bg-success-foreground" label="Active" />,
+    value: SnapshotState.ACTIVE,
+  },
+  {
+    label: <SnapshotStateFilterLabel colorClassName="bg-muted-foreground/50" label="Inactive" />,
+    value: SnapshotState.INACTIVE,
+  },
+  {
+    label: <SnapshotStateFilterLabel colorClassName="bg-warning-foreground" label="Building" />,
+    value: SnapshotState.BUILDING,
+  },
+  {
+    label: <SnapshotStateFilterLabel colorClassName="bg-warning-foreground" label="Pending" />,
+    value: SnapshotState.PENDING,
+  },
+  {
+    label: <SnapshotStateFilterLabel colorClassName="bg-warning-foreground" label="Pulling" />,
+    value: SnapshotState.PULLING,
+  },
+  {
+    label: <SnapshotStateFilterLabel colorClassName="bg-destructive" label="Error" />,
+    value: SnapshotState.ERROR,
+  },
+  {
+    label: <SnapshotStateFilterLabel colorClassName="bg-destructive" label="Build Failed" />,
+    value: SnapshotState.BUILD_FAILED,
+  },
 ]
 
 export function SnapshotTable({
@@ -106,6 +138,7 @@ export function SnapshotTable({
   onSortingChange,
   stateFilter,
   onStateFilterChange,
+  toolbarActions,
 }: DataTableProps) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -256,20 +289,23 @@ export function SnapshotTable({
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
       <div className="flex items-center gap-2">
-        <SearchInput
-          debounced
-          value={searchValue}
-          onValueChange={onSearchChange}
-          placeholder="Search by Name"
-          containerClassName="max-w-sm"
-        />
-        <FacetFilter
-          title="State"
-          className="h-8"
-          options={SNAPSHOT_STATE_OPTIONS}
-          selectedValues={stateFilter}
-          setSelectedValues={onStateFilterChange}
-        />
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <SearchInput
+            debounced
+            value={searchValue}
+            onValueChange={onSearchChange}
+            placeholder="Search by Name"
+            containerClassName="min-w-0 flex-1 sm:max-w-sm"
+          />
+          <FacetFilter
+            title="State"
+            className="h-8"
+            options={SNAPSHOT_STATE_OPTIONS}
+            selectedValues={stateFilter}
+            setSelectedValues={onStateFilterChange}
+          />
+        </div>
+        {toolbarActions ? <div className="flex shrink-0 items-center gap-2 sm:ml-auto">{toolbarActions}</div> : null}
       </div>
       <TableContainer
         className={isEmpty ? 'min-h-[26rem]' : undefined}

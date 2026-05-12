@@ -20,7 +20,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { MapPinned, MoreHorizontal } from 'lucide-react'
-import { useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import { CopyButton } from './CopyButton'
 import { PageFooterPortal } from './PageLayout'
 import { Pagination } from './Pagination'
@@ -66,6 +66,7 @@ interface DataTableProps {
   writePermitted: boolean
   onDelete: (region: Region) => void
   onOpenDetails: (region: Region) => void
+  toolbarActions?: ReactNode
 }
 
 export function RegionTable({
@@ -76,6 +77,7 @@ export function RegionTable({
   writePermitted,
   onDelete,
   onOpenDetails,
+  toolbarActions,
 }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
@@ -133,8 +135,9 @@ export function RegionTable({
           value={globalFilter ?? ''}
           onValueChange={handleChangeFilter}
           placeholder="Search by Name or ID"
-          containerClassName="max-w-sm"
+          containerClassName="min-w-0 flex-1 sm:max-w-sm"
         />
+        {toolbarActions ? <div className="flex shrink-0 items-center gap-2 sm:ml-auto">{toolbarActions}</div> : null}
       </div>
       <TableContainer
         className={isEmpty ? 'min-h-[26rem]' : undefined}

@@ -21,32 +21,22 @@ const transition = {
 } as const
 
 const QuotaLine: React.FC<QuotaLineProps> = ({ current, total, className }) => {
-  const percentage = Math.min(Math.max((current / total) * 100, 0), 100)
-
-  const greenWidth = Math.min(percentage, 60)
-  const yellowWidth = Math.min(Math.max(percentage - 60, 0), 30)
-  const redWidth = Math.min(Math.max(percentage - 90, 0), 10)
+  const percentage = total > 0 ? Math.min(Math.max((current / total) * 100, 0), 100) : 0
+  const fillGradientWidth = percentage > 0 ? `${10000 / percentage}%` : '100%'
 
   return (
-    <div className={cn('w-full h-2 bg-muted rounded-full overflow-clip flex relative', className)}>
+    <div className={cn('relative h-2 w-full overflow-clip rounded-full bg-muted', className)}>
       <motion.div
-        className="h-full bg-green-500"
+        className="h-full overflow-hidden rounded-full"
         initial={{ width: 0 }}
-        animate={{ width: `${greenWidth}%` }}
+        animate={{ width: `${percentage}%` }}
         transition={transition}
-      />
-      <motion.div
-        className="h-full bg-yellow-400"
-        initial={{ width: 0 }}
-        animate={{ width: `${yellowWidth}%` }}
-        transition={transition}
-      />
-      <motion.div
-        className="h-full bg-red-500"
-        initial={{ width: 0 }}
-        animate={{ width: `${redWidth}%` }}
-        transition={transition}
-      />
+      >
+        <div
+          className="h-full bg-[linear-gradient(to_right,hsl(var(--success-foreground))_0%,hsl(var(--success-foreground))_36%,hsl(var(--warning-foreground))_64%,hsl(var(--destructive-foreground))_100%)]"
+          style={{ width: fillGradientWidth }}
+        />
+      </motion.div>
     </div>
   )
 }

@@ -60,7 +60,7 @@ body {
     --destructive-foreground: 0 71% 49%;
     --destructive-separator: 2 95% 90%;
 
-    --sidebar-background: 0 0% 99.5%;
+    --sidebar-background: 0 0% 98.5%;
     --sidebar-foreground: 0 0% 26.1%;
     --sidebar-primary: 0 0% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
@@ -78,23 +78,23 @@ body {
   }
 
   .dark {
-    --background: 0 0% 2%;
+    --background: 0 0% 1%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 4%;
+    --card: 150 0% 4%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
+    --popover: 150 0% 6%;
     --popover-foreground: 0 0% 98%;
     --primary: 0 0% 98%;
     --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
+    --secondary: 150 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
+    --muted-foreground: 0 0% 60%;
     --accent: 0 0% 16%;
     --accent-foreground: 0 0% 98%;
 
-    --border: 0 0% 10%;
-    --input: 0 0% 14.9%;
+    --border: 0 0% 12%;
+    --input: 150 0% 17%;
     --ring: 0 0% 83.1%;
 
     --info-background: 218 39% 10%;
@@ -116,11 +116,11 @@ body {
     --destructive-foreground: 0 92% 71%;
     --destructive-separator: 2 44% 15%;
 
-    --sidebar-background: 0 0% 10%;
-    --sidebar-foreground: 0 0% 95.9%;
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 0 0% 50.9%;
     --sidebar-primary: 0 0% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15.9%;
+    --sidebar-accent: 0 0% 10.9%;
     --sidebar-accent-foreground: 0 0% 95.9%;
     --sidebar-border: 0 0% 15.9%;
     --sidebar-ring: 0 0% 59.8%;
@@ -241,5 +241,31 @@ body {
     transition: all 0.25s;
     background-color: hsl(var(--foreground) / 1);
     background-position: 200% top;
+  }
+}
+
+.marquee-scroll-y {
+  --duration: 10s;
+  --delay: calc((var(--duration) / var(--count)) * (var(--index) - var(--count)));
+  animation: marquee-scroll-y-anim var(--duration) var(--delay) infinite linear;
+  translate: 0 calc((var(--count) - var(--index)) * 100%);
+}
+
+@keyframes marquee-scroll-y-anim {
+  100% {
+    translate: 0 calc(var(--index) * -100%);
+  }
+}
+
+.marquee-scroll-x {
+  --duration: 10s;
+  --delay: calc((var(--duration) / var(--count)) * (var(--index) - var(--count)));
+  animation: marquee-scroll-x-anim var(--duration) var(--delay) infinite linear;
+  translate: calc((var(--count) - var(--index)) * 100%) 0;
+}
+
+@keyframes marquee-scroll-x-anim {
+  100% {
+    translate: calc(var(--index) * -100%) 0;
   }
 }

@@ -5,7 +5,7 @@
 
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { CreateApiKeySheet } from '@/components/CreateApiKeySheet'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -17,13 +17,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Spinner } from '@/components/ui/spinner'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { useRevokeApiKeyMutation } from '@/hooks/mutations/useRevokeApiKeyMutation'
 import { useApiKeysQuery } from '@/hooks/queries/useApiKeysQuery'
 import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { ApiKeyList, CreateApiKeyPermissionsEnum, OrganizationUserRoleEnum } from '@daytona/api-client'
-import { PlusIcon } from 'lucide-react'
+import { BookOpen, PlusIcon } from 'lucide-react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { ApiKeyTable } from '../components/ApiKeyTable'
@@ -102,18 +103,33 @@ const Keys: React.FC = () => {
 
   return (
     <PageLayout contained>
-      <PageHeader>
-        <PageTitle>API Keys</PageTitle>
-        <CreateApiKeySheet
-          className="ml-auto"
-          availablePermissions={availablePermissions}
-          apiUrl={apiUrl}
-          organizationId={selectedOrganization?.id}
-          ref={createApiKeySheetRef}
-        />
-      </PageHeader>
+      <PageHeader />
 
       <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="API Keys"
+          actions={
+            <>
+              <Button
+                variant="link"
+                size="sm"
+                className="w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+                asChild
+              >
+                <a href={`${DAYTONA_DOCS_URL}/en/api-keys/`} target="_blank" rel="noopener noreferrer">
+                  <BookOpen className="size-4" />
+                  <span className="sr-only xs:not-sr-only">Docs</span>
+                </a>
+              </Button>
+              <CreateApiKeySheet
+                availablePermissions={availablePermissions}
+                apiUrl={apiUrl}
+                organizationId={selectedOrganization?.id}
+                ref={createApiKeySheetRef}
+              />
+            </>
+          }
+        />
         <ApiKeyTable
           data={apiKeysQuery.data ?? []}
           loading={apiKeysQuery.isLoading}

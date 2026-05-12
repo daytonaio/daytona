@@ -31,6 +31,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import DeliveryStatsLine from '@/components/Webhooks/DeliveryStatsLine'
 import { EndpointEventsTable } from '@/components/Webhooks/EndpointEventsTable'
 import { UpsertEndpointSheet } from '@/components/Webhooks/UpsertEndpointSheet'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { RoutePath } from '@/enums/RoutePath'
 import { useDeleteWebhookEndpointMutation } from '@/hooks/mutations/useDeleteWebhookEndpointMutation'
 import { useReplayWebhookEventMutation } from '@/hooks/mutations/useReplayWebhookEventMutation'
@@ -38,7 +39,7 @@ import { useRotateWebhookSecretMutation } from '@/hooks/mutations/useRotateWebho
 import { useUpdateWebhookEndpointMutation } from '@/hooks/mutations/useUpdateWebhookEndpointMutation'
 import { handleApiError } from '@/lib/error-handling'
 import { getMaskedToken, getRelativeTimeString } from '@/lib/utils'
-import { ArrowLeft, Eye, EyeOff, Loader2, MoreHorizontal, RefreshCcw } from 'lucide-react'
+import { ArrowLeft, BookOpen, Eye, EyeOff, Loader2, MoreHorizontal, RefreshCcw } from 'lucide-react'
 import React, { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -139,6 +140,17 @@ const WebhookEndpointDetails: React.FC = () => {
     <PageLayout>
       <PageHeader>
         <PageTitle>Webhooks</PageTitle>
+        <Button
+          variant="link"
+          size="sm"
+          className="ml-auto w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+          asChild
+        >
+          <a href={`${DAYTONA_DOCS_URL}/en/webhooks/`} target="_blank" rel="noopener noreferrer">
+            <BookOpen className="size-4" />
+            <span className="sr-only xs:not-sr-only">Docs</span>
+          </a>
+        </Button>
       </PageHeader>
 
       <PageContent className="gap-6">

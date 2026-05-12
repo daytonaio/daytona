@@ -4,7 +4,7 @@
  */
 
 import { LiveIndicator } from '@/components/LiveIndicator'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { TierComparisonTable, TierComparisonTableSkeleton } from '@/components/TierComparisonTable'
 import { TierUpgradeCard } from '@/components/TierUpgradeCard'
 import { Badge } from '@/components/ui/badge'
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { UsageOverview, UsageOverviewSkeleton } from '@/components/UsageOverview'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { RoutePath } from '@/enums/RoutePath'
 import { useOwnerTierQuery, useOwnerWalletQuery } from '@/hooks/queries/billingQueries'
 import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
@@ -22,7 +23,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
 import type { RegionUsageOverview } from '@daytona/api-client'
 import { keepPreviousData } from '@tanstack/react-query'
-import { RefreshCcw } from 'lucide-react'
+import { BookOpen, RefreshCcw } from 'lucide-react'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { useNavigate } from 'react-router-dom'
@@ -89,11 +90,25 @@ export default function Limits() {
 
   return (
     <PageLayout>
-      <PageHeader>
-        <PageTitle>Limits</PageTitle>
-      </PageHeader>
+      <PageHeader />
 
       <PageContent>
+        <PageIntro
+          title="Limits"
+          actions={
+            <Button
+              variant="link"
+              size="sm"
+              className="w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+              asChild
+            >
+              <a href={`${DAYTONA_DOCS_URL}/en/limits/`} target="_blank" rel="noopener noreferrer">
+                <BookOpen className="size-4" />
+                <span className="sr-only xs:not-sr-only">Docs</span>
+              </a>
+            </Button>
+          }
+        />
         {isError ? (
           <Card>
             <CardHeader>

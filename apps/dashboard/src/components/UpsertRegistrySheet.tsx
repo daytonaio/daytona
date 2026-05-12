@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { CreateResourceButton } from '@/components/CreateResourceButton'
 import { Button } from '@/components/ui/button'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -24,7 +25,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { DockerRegistry } from '@daytona/api-client'
 import { useForm } from '@tanstack/react-form'
-import { EyeIcon, EyeOffIcon, Plus } from 'lucide-react'
+import { EyeIcon, EyeOffIcon } from 'lucide-react'
 import { Ref, type ReactNode, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -196,23 +197,22 @@ export const UpsertRegistrySheet = ({
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       {trigger === undefined ? (
         <SheetTrigger asChild>
-          <Button
-            variant="default"
-            size="sm"
-            disabled={disabled}
-            className={className}
-            title={isEditMode ? 'Edit Registry' : 'Add Registry'}
-          >
-            {!isEditMode && <Plus className="w-4 h-4" />}
-            {isEditMode ? 'Edit Registry' : 'Add Registry'}
-          </Button>
+          {isEditMode ? (
+            <Button variant="default" size="sm" disabled={disabled} className={className} title="Edit Registry">
+              Edit Registry
+            </Button>
+          ) : (
+            <CreateResourceButton resource="Registry" disabled={disabled} className={className} title="Add Registry">
+              Registry
+            </CreateResourceButton>
+          )}
         </SheetTrigger>
       ) : (
         trigger
       )}
       <SheetContent className="w-dvw sm:w-[460px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle className="text-2xl">{isEditMode ? 'Edit Registry' : 'Add Registry'}</SheetTitle>
+          <SheetTitle>{isEditMode ? 'Edit Registry' : 'Add Registry'}</SheetTitle>
           <SheetDescription className="sr-only">
             Registry details must be provided for images that are not publicly available.
           </SheetDescription>

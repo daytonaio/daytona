@@ -6,7 +6,7 @@
 import { Invoice } from '@/billing-api/types/Invoice'
 import { AutomaticTopUp } from '@/billing-api/types/OrganizationWallet'
 import { InvoicesTable } from '@/components/Invoices'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -15,6 +15,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { useCreateInvoicePaymentUrlMutation } from '@/hooks/mutations/useCreateInvoicePaymentUrlMutation'
 import { useRedeemCouponMutation } from '@/hooks/mutations/useRedeemCouponMutation'
 import { useSetAutomaticTopUpMutation } from '@/hooks/mutations/useSetAutomaticTopUpMutation'
@@ -29,7 +30,7 @@ import {
 } from '@/hooks/queries/billingQueries'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { formatAmount } from '@/lib/utils'
-import { ArrowUpRight, CheckCircleIcon, InfoIcon, SparklesIcon, TriangleAlertIcon } from 'lucide-react'
+import { ArrowUpRight, BookOpen, CheckCircleIcon, InfoIcon, SparklesIcon, TriangleAlertIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { useAuth } from 'react-oidc-context'
@@ -243,11 +244,25 @@ const Wallet = () => {
 
   return (
     <PageLayout>
-      <PageHeader>
-        <PageTitle>Wallet</PageTitle>
-      </PageHeader>
+      <PageHeader />
 
       <PageContent>
+        <PageIntro
+          title="Wallet"
+          actions={
+            <Button
+              variant="link"
+              size="sm"
+              className="w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+              asChild
+            >
+              <a href={`${DAYTONA_DOCS_URL}/en/billing/#wallet`} target="_blank" rel="noopener noreferrer">
+                <BookOpen className="size-4" />
+                <span className="sr-only xs:not-sr-only">Docs</span>
+              </a>
+            </Button>
+          }
+        />
         {isBillingLoading && (
           <div className="flex flex-col gap-6">
             <Card className="flex flex-col gap-4">

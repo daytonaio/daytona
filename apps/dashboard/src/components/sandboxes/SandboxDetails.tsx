@@ -20,6 +20,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { useArchiveSandboxMutation } from '@/hooks/mutations/useArchiveSandboxMutation'
 import { useDeleteSandboxMutation } from '@/hooks/mutations/useDeleteSandboxMutation'
 import { useRecoverSandboxMutation } from '@/hooks/mutations/useRecoverSandboxMutation'
@@ -37,7 +38,7 @@ import { isStoppable, isTransitioning } from '@/lib/utils/sandbox'
 import { SandboxSessionProvider } from '@/providers/SandboxSessionProvider'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytona/api-client'
 import { isAxiosError } from 'axios'
-import { Container, GripVertical, RefreshCw } from 'lucide-react'
+import { BookOpen, Container, GripVertical, RefreshCw } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { useEffect, useState } from 'react'
@@ -191,6 +192,17 @@ export default function SandboxDetails() {
       <PageLayout className="max-h-screen overflow-hidden">
         <PageHeader>
           <PageTitle>Sandboxes</PageTitle>
+          <Button
+            variant="link"
+            size="sm"
+            className="ml-auto w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+            asChild
+          >
+            <a href={`${DAYTONA_DOCS_URL}/en/sandboxes/`} target="_blank" rel="noopener noreferrer">
+              <BookOpen className="size-4" />
+              <span className="sr-only xs:not-sr-only">Docs</span>
+            </a>
+          </Button>
         </PageHeader>
 
         <SandboxHeader

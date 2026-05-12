@@ -7,9 +7,10 @@ import { type CommandConfig, useRegisterCommands } from '@/components/CommandPal
 import { OrganizationInvitationTable } from '@/components/OrganizationMembers/OrganizationInvitationTable'
 import { OrganizationMemberTable } from '@/components/OrganizationMembers/OrganizationMemberTable'
 import { UpsertOrganizationAccessSheet } from '@/components/OrganizationMembers/UpsertOrganizationAccessSheet'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { mutationKeys } from '@/hooks/mutations/mutationKeys'
 import { useCancelOrganizationInvitationMutation } from '@/hooks/mutations/useCancelOrganizationInvitationMutation'
 import { useCreateOrganizationInvitationMutation } from '@/hooks/mutations/useCreateOrganizationInvitationMutation'
@@ -27,7 +28,7 @@ import {
   OrganizationUserRoleEnum,
   UpdateOrganizationInvitationRoleEnum,
 } from '@daytona/api-client'
-import { AlertCircle, PlusIcon, RefreshCw } from 'lucide-react'
+import { AlertCircle, BookOpen, PlusIcon, RefreshCw } from 'lucide-react'
 import React, { useMemo, useRef } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { toast } from 'sonner'
@@ -198,19 +199,34 @@ const OrganizationMembers: React.FC = () => {
 
   return (
     <PageLayout>
-      <PageHeader>
-        <PageTitle>Members</PageTitle>
-        {authenticatedUserIsOwner && (
-          <UpsertOrganizationAccessSheet
-            mode="create"
-            className="ml-auto"
-            onSubmit={({ email, role, assignedRoleIds }) => handleCreateInvitation(email, role, assignedRoleIds)}
-            ref={createInvitationSheetRef}
-          />
-        )}
-      </PageHeader>
+      <PageHeader />
 
-      <PageContent className="gap-14">
+      <PageContent>
+        <PageIntro
+          title="Members"
+          actions={
+            <>
+              <Button
+                variant="link"
+                size="sm"
+                className="w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+                asChild
+              >
+                <a href={`${DAYTONA_DOCS_URL}/en/organizations/`} target="_blank" rel="noopener noreferrer">
+                  <BookOpen className="size-4" />
+                  <span className="sr-only xs:not-sr-only">Docs</span>
+                </a>
+              </Button>
+              {authenticatedUserIsOwner && (
+                <UpsertOrganizationAccessSheet
+                  mode="create"
+                  onSubmit={({ email, role, assignedRoleIds }) => handleCreateInvitation(email, role, assignedRoleIds)}
+                  ref={createInvitationSheetRef}
+                />
+              )}
+            </>
+          }
+        />
         <OrganizationMemberTable
           data={organizationMembers}
           loadingData={loadingMembers}

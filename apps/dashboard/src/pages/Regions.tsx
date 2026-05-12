@@ -3,31 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useMemo, useRef, useState } from 'react'
-import { useApi } from '@/hooks/useApi'
-import {
-  Region,
-  OrganizationRolePermissionsEnum,
-  CreateRegion,
-  CreateRegionResponse,
-  SnapshotManagerCredentials,
-  UpdateRegion,
-} from '@daytona/api-client'
-import { RegionTable } from '@/components/RegionTable'
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { CreateRegionSheet } from '@/components/CreateRegionSheet'
-import { UpdateRegionDialog } from '@/components/UpdateRegionDialog'
+import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import RegionDetailsSheet from '@/components/RegionDetailsSheet'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { RegionTable } from '@/components/RegionTable'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,12 +19,33 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { toast } from 'sonner'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { UpdateRegionDialog } from '@/components/UpdateRegionDialog'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
+import { useApi } from '@/hooks/useApi'
+import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
-import { useRegions } from '@/hooks/useRegions'
 import { getMaskedToken } from '@/lib/utils'
-import { Copy, PlusIcon } from 'lucide-react'
+import {
+  CreateRegion,
+  CreateRegionResponse,
+  OrganizationRolePermissionsEnum,
+  Region,
+  SnapshotManagerCredentials,
+  UpdateRegion,
+} from '@daytona/api-client'
+import { BookOpen, Copy, PlusIcon } from 'lucide-react'
+import React, { useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 const Regions: React.FC = () => {
   const { organizationsApi } = useApi()
@@ -270,19 +271,33 @@ const Regions: React.FC = () => {
 
   return (
     <PageLayout contained>
-      <PageHeader>
-        <PageTitle>Regions</PageTitle>
-        <div className="ml-auto">
-          <CreateRegionSheet
-            onCreateRegion={handleCreateRegion}
-            writePermitted={writePermitted}
-            loadingData={loadingRegions}
-            ref={createRegionSheetRef}
-          />
-        </div>
-      </PageHeader>
+      <PageHeader />
 
       <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="Regions"
+          actions={
+            <>
+              <Button
+                variant="link"
+                size="sm"
+                className="w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+                asChild
+              >
+                <a href={`${DAYTONA_DOCS_URL}/en/runners/`} target="_blank" rel="noopener noreferrer">
+                  <BookOpen className="size-4" />
+                  <span className="sr-only xs:not-sr-only">Docs</span>
+                </a>
+              </Button>
+              <CreateRegionSheet
+                onCreateRegion={handleCreateRegion}
+                writePermitted={writePermitted}
+                loadingData={loadingRegions}
+                ref={createRegionSheetRef}
+              />
+            </>
+          }
+        />
         <RegionTable
           data={regions}
           loading={loadingRegions}

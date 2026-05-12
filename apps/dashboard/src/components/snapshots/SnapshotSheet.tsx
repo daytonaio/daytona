@@ -20,12 +20,17 @@ import { cn, getRelativeTimeString } from '@/lib/utils'
 import { SnapshotDto, SnapshotState } from '@daytona/api-client'
 import { MagnifyingGlassIcon } from '@phosphor-icons/react'
 import { ChevronDown, ChevronUp, CircleAlert, Pause, Play, Trash2, X } from 'lucide-react'
-import React from 'react'
+import React, { Ref, useCallback, useImperativeHandle, useState } from 'react'
+
+export interface SnapshotSheetRef {
+  open: () => unknown
+  close: () => unknown
+}
 
 export interface SnapshotSheetProps {
+  ref?: Ref<SnapshotSheetRef>
   snapshotId?: string | null
   snapshot: SnapshotDto | null
-  open: boolean
   onOpenChange: (open: boolean) => void
   getRegionName: (regionId: string) => string | undefined
   onNavigate: (direction: 'prev' | 'next') => void
@@ -204,9 +209,9 @@ function SnapshotSheetEmptyState({ error }: { error: boolean }) {
 }
 
 export function SnapshotSheet({
+  ref,
   snapshotId,
   snapshot,
-  open,
   onOpenChange,
   getRegionName,
   onNavigate,
@@ -219,6 +224,43 @@ export function SnapshotSheet({
   onDeactivate,
   onDelete,
 }: SnapshotSheetProps) {
+  const [open, setOpen] = useState(false)
+
+  const handleOpenChange = useCallback(
+    (isOpen: boolean) => {
+      setOpen(isOpen)
+      onOpenChange(isOpen)
+    },
+    [onOpenChange],
+  )
+
+  const openSheet = useCallback(() => {
+    setOpen((wasOpen) => {
+      if (!wasOpen) {
+        onOpenChange(true)
+      }
+      return true
+    })
+  }, [onOpenChange])
+
+  const closeSheet = useCallback(() => {
+    setOpen((wasOpen) => {
+      if (wasOpen) {
+        onOpenChange(false)
+      }
+      return false
+    })
+  }, [onOpenChange])
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      open: openSheet,
+      close: closeSheet,
+    }),
+    [closeSheet, openSheet],
+  )
+
   const {
     data: fetchedSnapshot,
     isLoading: snapshotIsLoading,
@@ -241,7 +283,7 @@ export function SnapshotSheet({
   if (!snapshotId && !activeSnapshot) return null
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent
         side="right"
         showCloseButton={false}
@@ -260,7 +302,7 @@ export function SnapshotSheet({
               <ChevronDown className="size-4" />
               <span className="sr-only">Next snapshot</span>
             </Button>
-            <Button variant="ghost" size="icon-sm" onClick={() => onOpenChange(false)}>
+            <Button variant="ghost" size="icon-sm" onClick={closeSheet}>
               <X className="size-4" />
               <span className="sr-only">Close</span>
             </Button>

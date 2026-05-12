@@ -24,6 +24,7 @@ import { getColumnSizeStyles } from '@/lib/utils/table'
 import { AuditLog } from '@daytona/api-client'
 import { Column, ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { TextSearch } from 'lucide-react'
+import { type ReactNode } from 'react'
 
 interface Props {
   data: AuditLog[]
@@ -38,6 +39,7 @@ interface Props {
   onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
   hasFilters?: boolean
   onClearFilters?: () => void
+  toolbar?: ReactNode
 }
 
 export function AuditLogTable({
@@ -50,6 +52,7 @@ export function AuditLogTable({
   totalItems,
   hasFilters = false,
   onClearFilters,
+  toolbar,
 }: Props) {
   const table = useReactTable({
     data,
@@ -76,6 +79,7 @@ export function AuditLogTable({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
+      {toolbar ? <div className="flex items-center justify-between gap-2">{toolbar}</div> : null}
       <TableContainer
         className={isEmpty ? 'min-h-[26rem]' : undefined}
         empty={

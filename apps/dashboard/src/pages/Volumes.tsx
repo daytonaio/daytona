@@ -4,7 +4,7 @@
  */
 
 import { CreateVolumeSheet } from '@/components/CreateVolumeSheet'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dialog'
 import { Spinner } from '@/components/ui/spinner'
 import { VolumeTable } from '@/components/VolumeTable'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { useDeleteVolumeMutation } from '@/hooks/mutations/useDeleteVolumeMutation'
 import { queryKeys } from '@/hooks/queries/queryKeys'
 import { useVolumesQuery } from '@/hooks/queries/useVolumesQuery'
@@ -27,6 +28,7 @@ import { handleApiError } from '@/lib/error-handling'
 import { pluralize } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytona/api-client'
 import { useQueryClient } from '@tanstack/react-query'
+import { BookOpen } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -155,14 +157,28 @@ const Volumes: React.FC = () => {
 
   return (
     <PageLayout contained>
-      <PageHeader>
-        <PageTitle>Volumes</PageTitle>
-        {writePermitted && (
-          <CreateVolumeSheet className="ml-auto" disabled={loadingVolumes} ref={createVolumeSheetRef} />
-        )}
-      </PageHeader>
+      <PageHeader />
 
       <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="Volumes"
+          actions={
+            <>
+              <Button
+                variant="link"
+                size="sm"
+                className="w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+                asChild
+              >
+                <a href={`${DAYTONA_DOCS_URL}/en/volumes/`} target="_blank" rel="noopener noreferrer">
+                  <BookOpen className="size-4" />
+                  <span className="sr-only xs:not-sr-only">Docs</span>
+                </a>
+              </Button>
+              {writePermitted && <CreateVolumeSheet disabled={loadingVolumes} ref={createVolumeSheetRef} />}
+            </>
+          }
+        />
         <VolumeTable
           data={volumes}
           loading={loadingVolumes}

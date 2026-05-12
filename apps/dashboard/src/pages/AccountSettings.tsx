@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { PrivacyPreferencesDialog } from '@/components/PrivacyPreferencesDialog'
 import { usePrivacyConsent } from '@/hooks/usePrivacyConsent'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
+import { BookOpen } from 'lucide-react'
 import React, { useState } from 'react'
 import LinkedAccounts from './LinkedAccounts'
 
@@ -17,11 +19,25 @@ const AccountSettings: React.FC<{ linkedAccountsEnabled: boolean }> = ({ linkedA
 
   return (
     <PageLayout>
-      <PageHeader>
-        <PageTitle>Account Settings</PageTitle>
-      </PageHeader>
+      <PageHeader />
 
       <PageContent>
+        <PageIntro
+          title="Account Settings"
+          actions={
+            <Button
+              variant="link"
+              size="sm"
+              className="w-8 gap-0 px-0 text-muted-foreground hover:text-foreground xs:w-auto xs:gap-1.5 xs:px-3"
+              asChild
+            >
+              <a href={`${DAYTONA_DOCS_URL}/en/linked-accounts/`} target="_blank" rel="noopener noreferrer">
+                <BookOpen className="size-4" />
+                <span className="sr-only xs:not-sr-only">Docs</span>
+              </a>
+            </Button>
+          }
+        />
         <div className="flex flex-col gap-6">
           {linkedAccountsEnabled && <LinkedAccounts />}
 
