@@ -7,6 +7,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr'
+import { STSClient, GetCallerIdentityCommand } from '@aws-sdk/client-sts'
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers'
 import { TypedConfigService } from '../../config/typed-config.service'
 
@@ -22,14 +23,13 @@ const REFRESH_BUFFER_SEC = 30 * 60
 @Injectable()
 export class EcrCredentialsService {
   private readonly logger = new Logger(EcrCredentialsService.name)
-  private readonly apiIdentityRoleArn: string
   private readonly brokerRoleArn: string
+  private apiArn = ''
 
   constructor(
     @InjectRedis() private readonly redis: Redis,
     configService: TypedConfigService,
   ) {
-    this.apiIdentityRoleArn = configService.get('ecr.apiIdentityRoleArn')?.trim() ?? ''
     this.brokerRoleArn = configService.get('ecr.brokerRoleArn')?.trim() ?? ''
   }
 
@@ -39,9 +39,10 @@ export class EcrCredentialsService {
 
   /**
    * Resolves a fresh `AWS:<token>` Docker auth pair for an ECR registry.
-   * AssumeRoles the supplied ARN, except when it matches the operator-declared
-   * `ECR_API_IDENTITY_ROLE_ARN` — then the API's own AWS identity is used.
-   * Cached in Redis with TTL derived from AWS's `expiresAt`.
+   * AssumeRoles the supplied ARN, unless it matches the API's own identity
+   * (auto-detected via STS) — then the API's creds are used directly.
+   * Optionally hops through a broker role first when set. Cached in Redis
+   * with TTL derived from AWS's `expiresAt`.
    */
   async resolveEcrCredentials(url: string, roleArn: string, externalId: string): Promise<EcrAuth> {
     const match = ECR_HOST_REGEX.exec(stripScheme(url))
@@ -50,7 +51,9 @@ export class EcrCredentialsService {
     }
     const region = match[1]
     const normalizedArn = roleArn.trim()
-    const useApiIdentity = this.apiIdentityRoleArn !== '' && normalizedArn === this.apiIdentityRoleArn
+
+    const apiArn = await this.getApiArn()
+    const useApiIdentity = apiArn !== '' && apiArn === normalizedArn
 
     const cacheKey = useApiIdentity
       ? `ecr:token:default:${region}`
@@ -64,13 +67,10 @@ export class EcrCredentialsService {
       }
     }
 
-    // When set, hop through a broker role so neither ECR nor customer trust policies see the pod's IRSA identity.
+    // When set, broker creds are used as the source identity for the customer AssumeRole below.
     const baseCredentials = this.brokerRoleArn
       ? fromTemporaryCredentials({
-          params: {
-            RoleArn: this.brokerRoleArn,
-            RoleSessionName: `daytona-${externalId}-broker`,
-          },
+          params: { RoleArn: this.brokerRoleArn, RoleSessionName: `daytona-${externalId}-broker` },
         })
       : undefined
 
@@ -115,6 +115,14 @@ export class EcrCredentialsService {
       `Resolved ECR credentials for region=${region} role=${useApiIdentity ? '(API identity)' : normalizedArn}${this.brokerRoleArn ? ' via broker' : ''}`,
     )
     return auth
+  }
+
+  // STS returns `arn:aws:sts::N:assumed-role/X/sess`; convert to the IAM role form `arn:aws:iam::N:role/X` so it can be compared against the user-supplied role ARN.
+  private async getApiArn(): Promise<string> {
+    if (this.apiArn) return this.apiArn
+    const { Arn } = await new STSClient({}).send(new GetCallerIdentityCommand({})).catch(() => ({ Arn: '' }))
+    this.apiArn = Arn?.replace(/^arn:aws:sts::(\d+):assumed-role\/([^/]+)\/.+$/, 'arn:aws:iam::$1:role/$2') ?? ''
+    return this.apiArn
   }
 }
 

@@ -77,7 +77,6 @@ const configuration = {
     projectId: process.env.INTERNAL_REGISTRY_PROJECT_ID,
   },
   ecr: {
-    apiIdentityRoleArn: process.env.ECR_API_IDENTITY_ROLE_ARN,
     brokerRoleArn: process.env.ECR_BROKER_ROLE_ARN,
   },
   s3: {
