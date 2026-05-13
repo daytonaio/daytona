@@ -15,8 +15,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SnapshotDto } from '@daytona/api-client'
-import { Loader2, X } from 'lucide-react'
-import { useState } from 'react'
+import { X } from 'lucide-react'
 
 interface SnapshotFilterProps {
   value: string[]
@@ -60,15 +59,15 @@ export function SnapshotFilter({ value, onFilterChange, snapshots, loadingSnapsh
 
   return (
     <Command>
-      <div className="flex items-center gap-2 justify-between p-2">
-        <CommandInput placeholder="Filter by snapshot..." className="border border-border rounded-md h-8" />
-        <button
+      <CommandInput placeholder="Search...">
+        <CommandInputButton
           className="text-sm text-muted-foreground hover:text-primary px-2"
           onClick={() => onFilterChange(undefined)}
         >
           Clear
-        </button>
-      </div>
+        </CommandInputButton>
+      </CommandInput>
+
       <CommandList>
         {loadingSnapshots ? (
           <div className="p-1">

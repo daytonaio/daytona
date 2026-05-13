@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { CreateResourceButton } from '@/components/CreateResourceButton'
 import { Button } from '@/components/ui/button'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -26,7 +27,6 @@ import { imageNameSchema } from '@/lib/schema'
 import { getRegionFullDisplayName } from '@/lib/utils'
 import type { SnapshotDto } from '@daytona/api-client'
 import { useForm } from '@tanstack/react-form'
-import { Plus } from 'lucide-react'
 import { Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -148,14 +148,11 @@ export const CreateSnapshotSheet = ({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="default" size="sm" className="ml-auto">
-          <Plus className="w-4 h-4" />
-          Create Snapshot
-        </Button>
+        <CreateResourceButton resource="Snapshot" />
       </SheetTrigger>
       <SheetContent className={`w-dvw sm:w-[500px] p-0 flex flex-col gap-0 ${className ?? ''}`}>
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle className="text-2xl">Create New Snapshot</SheetTitle>
+          <SheetTitle>Create New Snapshot</SheetTitle>
           <SheetDescription className="sr-only">
             Register a new snapshot to be used for spinning up sandboxes in your organization.
           </SheetDescription>

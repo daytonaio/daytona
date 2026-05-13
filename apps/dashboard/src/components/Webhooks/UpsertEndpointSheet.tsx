@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { CreateResourceButton } from '@/components/CreateResourceButton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -35,7 +36,7 @@ import { handleApiError } from '@/lib/error-handling'
 import { cn } from '@/lib/utils'
 import { useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
-import { ChevronsUpDown, Plus } from 'lucide-react'
+import { ChevronsUpDown } from 'lucide-react'
 import { Ref, type ReactNode, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { EndpointOut } from 'svix'
@@ -208,23 +209,22 @@ export const UpsertEndpointSheet = ({
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       {trigger === undefined ? (
         <SheetTrigger asChild>
-          <Button
-            variant="default"
-            size="sm"
-            disabled={disabled}
-            className={className}
-            title={isEditMode ? 'Edit Endpoint' : 'Add Endpoint'}
-          >
-            {!isEditMode && <Plus className="w-4 h-4" />}
-            {isEditMode ? 'Edit Endpoint' : 'Add Endpoint'}
-          </Button>
+          {isEditMode ? (
+            <Button variant="default" size="sm" disabled={disabled} className={className} title="Edit Endpoint">
+              Edit Endpoint
+            </Button>
+          ) : (
+            <CreateResourceButton resource="Endpoint" disabled={disabled} className={className} title="Add Endpoint">
+              Endpoint
+            </CreateResourceButton>
+          )}
         </SheetTrigger>
       ) : (
         trigger
       )}
       <SheetContent className="w-dvw sm:w-[500px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle className="text-2xl">{isEditMode ? 'Edit Webhook Endpoint' : 'Add Webhook Endpoint'}</SheetTitle>
+          <SheetTitle>{isEditMode ? 'Edit Webhook Endpoint' : 'Add Webhook Endpoint'}</SheetTitle>
           <SheetDescription className="sr-only">
             {isEditMode ? 'Update the endpoint configuration.' : 'Configure a new endpoint to receive webhook events.'}
           </SheetDescription>

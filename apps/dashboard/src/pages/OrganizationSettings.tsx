@@ -11,7 +11,7 @@ import {
   SetDefaultRegionDialog,
   type SetDefaultRegionDialogRef,
 } from '@/components/Organizations/SetDefaultRegionDialog'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Field, FieldContent, FieldDescription, FieldLabel } from '@/components/ui/field'
@@ -68,11 +68,10 @@ const OrganizationSettings: React.FC = () => {
 
   return (
     <PageLayout>
-      <PageHeader>
-        <PageTitle>Settings</PageTitle>
-      </PageHeader>
+      <PageHeader />
 
       <PageContent>
+        <PageIntro title="Settings" />
         <Card>
           <CardHeader className="p-4">
             <CardTitle>Organization Details</CardTitle>

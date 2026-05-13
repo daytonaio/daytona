@@ -106,7 +106,7 @@ export const CreateOrganizationSheet: React.FC<CreateOrganizationSheetProps> = (
     >
       <SheetContent className="w-dvw sm:w-[560px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle className="text-2xl">Create New Organization</SheetTitle>
+          <SheetTitle>Create New Organization</SheetTitle>
           <SheetDescription className="sr-only">
             Create a new organization to share resources and collaborate with others.
           </SheetDescription>

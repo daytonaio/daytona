@@ -3,9 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
-import { Logo, LogoText } from '@/assets/Logo'
-import { OrganizationPicker } from '@/components/Organizations/OrganizationPicker'
+import { Logo } from '@/assets/Logo'
 import {
   Sidebar as SidebarComponent,
   SidebarContent,
@@ -20,58 +18,44 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
-import { useTheme } from '@/contexts/ThemeContext'
 import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
+import { useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
 import { useWebhooks } from '@/hooks/useWebhooks'
 import { cn, getMetaKey } from '@/lib/utils'
-import { usePylon, usePylonCommands } from '@/vendor/pylon'
+import { usePylonCommands } from '@/vendor/pylon'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytona/api-client'
 import {
   ArrowRightIcon,
-  BookOpen,
   Box,
   ChartColumn,
-  ChevronsUpDown,
   Container,
   CreditCard,
   HardDrive,
   Joystick,
   KeyRound,
-  LifeBuoyIcon,
   ListChecks,
   LockKeyhole,
-  LogOut,
   Mail,
   MapPinned,
-  MoonIcon,
   PackageOpen,
   SearchIcon,
   Server,
   Settings,
-  Slack,
-  SquareUserRound,
-  SunIcon,
   TextSearch,
   Users,
 } from 'lucide-react'
-import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
+import { AnimatePresence } from 'motion/react'
+import { useFeatureFlagEnabled } from 'posthog-js/react'
 import React, { useMemo } from 'react'
-import { useAuth } from 'react-oidc-context'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { AnimatedLogo } from './AnimatedLogo'
 import { CommandConfig, useCommandPaletteActions, useRegisterCommands } from './CommandPalette'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu'
+import { OrganizationPicker } from './Organizations/OrganizationPicker'
 import { Kbd } from './ui/kbd'
 import { ScrollArea } from './ui/scroll-area'
+import { Separator } from './ui/separator'
 
 interface SidebarProps {
   isBannerVisible: boolean
@@ -107,14 +91,11 @@ const useNavCommands = (items: { label: string; path: RoutePath | string; onClic
 }
 
 export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarProps) {
-  const posthog = usePostHog()
-  const { theme, setTheme } = useTheme()
-  const { user, signoutRedirect } = useAuth()
-  const { pathname } = useLocation()
+  const { pathname, search } = useLocation()
   const sidebar = useSidebar()
+  const { isMobile, setOpenMobile } = sidebar
   const { selectedOrganization, authenticatedUserOrganizationMember, authenticatedUserHasPermission } =
     useSelectedOrganization()
-  const { count: organizationInvitationsCount } = useUserOrganizationInvitations()
   const { isInitialized: webhooksInitialized } = useWebhooks()
   const orgInfraEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_INFRASTRUCTURE)
 
@@ -157,11 +138,6 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
 
   const settingsItems = useMemo(() => {
     const arr: SidebarItem[] = [
-      {
-        icon: <Settings size={16} strokeWidth={1.5} />,
-        label: 'Settings',
-        path: RoutePath.SETTINGS,
-      },
       { icon: <KeyRound size={16} strokeWidth={1.5} />, label: 'API Keys', path: RoutePath.KEYS },
     ]
 
@@ -180,6 +156,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
         path: RoutePath.LIMITS,
       })
     }
+
     if (!selectedOrganization?.personal) {
       arr.push({
         icon: <Users size={16} strokeWidth={1.5} />,
@@ -191,6 +168,12 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       //   arr.push({ icon: <UserCog className="w-5 h-5" />, label: 'Roles', path: RoutePath.ROLES })
       // }
     }
+
+    arr.push({
+      icon: <Settings size={16} strokeWidth={1.5} />,
+      label: 'Settings',
+      path: RoutePath.SETTINGS,
+    })
 
     return arr
   }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal, webhooksInitialized])
@@ -238,11 +221,6 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     return arr
   }, [authenticatedUserHasPermission, orgInfraEnabled])
 
-  const handleSignOut = () => {
-    posthog?.reset()
-    signoutRedirect()
-  }
-
   const miscItems = useMemo(() => {
     return [
       {
@@ -288,52 +266,78 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       )
   }, [sidebarGroups])
 
-  const { unreadCount: pylonUnreadCount, toggle: togglePylon, isEnabled: pylonEnabled } = usePylon()
   usePylonCommands()
-
-  const commandPaletteActions = useCommandPaletteActions()
-  const { trackOpened } = useCommandPaletteAnalytics()
 
   useNavCommands(commandItems)
 
+  const commandPaletteActions = useCommandPaletteActions()
+  const { trackOpened } = useCommandPaletteAnalytics()
   const metaKey = getMetaKey()
+
+  React.useEffect(() => {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }, [isMobile, pathname, search, setOpenMobile])
+
+  const sidebarExpanded = sidebar.open || sidebar.openMobile
 
   return (
     <SidebarComponent isBannerVisible={isBannerVisible} collapsible="icon">
       <SidebarHeader>
         <div
-          className={cn('flex justify-between items-center gap-2 px-2 mb-2 h-12', {
-            'justify-center px-0': !sidebar.open,
+          className={cn('flex h-[46px] items-center justify-between gap-2 px-2 pt-2', {
+            'justify-center px-0': !sidebarExpanded,
           })}
         >
           <div className="flex items-center gap-2 group-data-[state=collapsed]:hidden text-primary">
-            <Logo />
-            <LogoText />
+            <AnimatePresence initial={false}>
+              {sidebarExpanded && <AnimatedLogo className={cn('w-[117px]')} key={String(sidebar.open)} />}
+            </AnimatePresence>
           </div>
-          <SidebarTrigger className="p-2 [&_svg]:size-5" />
+          <div className="relative">
+            <SidebarTrigger
+              className={cn(
+                'p-2 [&_svg]:size-5 group-hover:opacity-100 opacity-0 transition-all peer focus-visible:opacity-100',
+                {
+                  'opacity-100': sidebarExpanded,
+                },
+              )}
+            />
+            <Logo
+              className={cn(
+                'w-6 h-6 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none group-hover:opacity-0 transition-all peer-focus-visible:opacity-0',
+                {
+                  'opacity-0': sidebarExpanded,
+                },
+              )}
+            />
+          </div>
         </div>
-        <SidebarMenu>
+      </SidebarHeader>
+      <Separator className="mx-0 w-full" />
+      <SidebarContent className="pt-4">
+        <SidebarMenu className="px-2 pb-2 gap-2">
           <OrganizationPicker />
-          <SidebarMenuItem className="mb-1">
+          <SidebarMenuItem>
             <SidebarMenuButton
               tooltip={`Search ${metaKey}+K`}
               variant="outline"
-              className="flex items-center gap-2 justify-between dark:bg-input/30 dark:hover:bg-sidebar-accent hover:shadow-[0_0_0_1px_hsl(var(--sidebar-border))]"
+              className="justify-between bg-input/50"
               onClick={() => {
                 trackOpened('sidebar_search')
                 commandPaletteActions.setIsOpen(true)
               }}
             >
-              <span className="flex items-center gap-2">
-                <SearchIcon className="w-4 h-4" /> Search
+              <span className="flex min-w-0 items-center gap-2">
+                <SearchIcon className="size-4" />
+                <span className="truncate group-data-[collapsible=icon]:hidden">Search</span>
               </span>
-              <Kbd className="whitespace-nowrap">{metaKey} K</Kbd>
+              <Kbd className="ml-auto whitespace-nowrap group-data-[collapsible=icon]:hidden">{metaKey} K</Kbd>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <ScrollArea fade="shadow" className="overflow-auto flex-1">
+        <ScrollArea fade="mask" className="overflow-auto flex-1">
           {sidebarGroups.map((group, i) => (
             <React.Fragment key={group.label}>
               {i > 0 && <SidebarSeparator />}
@@ -370,116 +374,9 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
         </ScrollArea>
       </SidebarContent>
       <SidebarFooter className="pb-4">
-        <SidebarMenu>
-          {pylonEnabled && (
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                tooltip="Support"
-                onClick={() => {
-                  togglePylon()
-                }}
-              >
-                <LifeBuoyIcon className="size-4" strokeWidth={1.5} />
-                Support
-                {pylonUnreadCount > 0 && (
-                  <div className={cn('w-2 h-2 bg-green-500 rounded-full transition-all')}>
-                    <div className={cn('w-full h-full bg-green-500 rounded-full animate-ping')} />
-                  </div>
-                )}
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )}
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Slack">
-              <a href={DAYTONA_SLACK_URL} className=" h-8 py-0" target="_blank" rel="noopener noreferrer">
-                <Slack size={16} strokeWidth={1.5} />
-                <span>Slack</span>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Docs">
-              <a href={DAYTONA_DOCS_URL} className=" h-8 py-0" target="_blank" rel="noopener noreferrer">
-                <BookOpen size={16} strokeWidth={1.5} />
-                <span>Docs</span>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  className={cn(
-                    'flex flex-shrink-0 items-center outline outline-1 outline-border outline-offset-0 bg-muted font-medium mt-2',
-                    {
-                      'h-12': sidebar.open,
-                    },
-                  )}
-                  tooltip="Profile"
-                >
-                  {user?.profile.picture ? (
-                    <img
-                      src={user.profile.picture}
-                      alt={user.profile.name || 'Profile picture'}
-                      className="h-4 w-4 rounded-sm flex-shrink-0"
-                    />
-                  ) : (
-                    <SquareUserRound className="!w-4 !h-4  flex-shrink-0" />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <span className="truncate block">{user?.profile.name || ''}</span>
-                    <span className="truncate block text-muted-foreground text-xs">{user?.profile.email || ''}</span>
-                  </div>
-                  <ChevronsUpDown className="w-4 h-4 opacity-50 flex-shrink-0" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent side="top" align="start" className="w-[--radix-popper-anchor-width] min-w-[12rem]">
-                <DropdownMenuItem asChild>
-                  <Link to={RoutePath.ACCOUNT_SETTINGS}>
-                    <Settings className="size-4" />
-                    Account Settings
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-                  {theme === 'dark' ? <SunIcon className="size-4" /> : <MoonIcon className="size-4" />}
-                  {theme === 'dark' ? 'Light mode' : 'Dark mode'}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to={RoutePath.USER_INVITATIONS}>
-                    <Mail className="size-4" />
-                    Invitations
-                    {organizationInvitationsCount > 0 && (
-                      <span className="ml-auto px-2 py-0.5 text-xs font-medium bg-secondary rounded-full">
-                        {organizationInvitationsCount}
-                      </span>
-                    )}
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to={RoutePath.ONBOARDING}>
-                    <ListChecks className="size-4" />
-                    Onboarding
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
-                  <LogOut className="size-4" />
-                  Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-          <SidebarMenuItem key="version">
-            <div
-              className={cn(
-                'flex items-center w-full justify-center gap-2 mt-2 overflow-auto min-h-4 whitespace-nowrap',
-              )}
-            >
-              {sidebar.open && <span className="text-xs text-muted-foreground">Version {version}</span>}
-            </div>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <div className="px-2 text-left text-xs text-muted-foreground group-data-[collapsible=icon]:hidden overflow-hidden whitespace-nowrap">
+          Version {version}
+        </div>
       </SidebarFooter>
     </SidebarComponent>
   )

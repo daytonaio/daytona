@@ -7,7 +7,7 @@ import { type CommandConfig, useRegisterCommands } from '@/components/CommandPal
 import { OrganizationInvitationTable } from '@/components/OrganizationMembers/OrganizationInvitationTable'
 import { OrganizationMemberTable } from '@/components/OrganizationMembers/OrganizationMemberTable'
 import { UpsertOrganizationAccessSheet } from '@/components/OrganizationMembers/UpsertOrganizationAccessSheet'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { mutationKeys } from '@/hooks/mutations/mutationKeys'
@@ -198,62 +198,66 @@ const OrganizationMembers: React.FC = () => {
 
   return (
     <PageLayout>
-      <PageHeader>
-        <PageTitle>Members</PageTitle>
-        {authenticatedUserIsOwner && (
-          <UpsertOrganizationAccessSheet
-            mode="create"
-            className="ml-auto"
-            onSubmit={({ email, role, assignedRoleIds }) => handleCreateInvitation(email, role, assignedRoleIds)}
-            ref={createInvitationSheetRef}
-          />
-        )}
-      </PageHeader>
+      <PageHeader />
 
-      <PageContent className="gap-14">
-        <OrganizationMemberTable
-          data={organizationMembers}
-          loadingData={loadingMembers}
-          onUpdateMemberAccess={handleUpdateMemberAccess}
-          onRemoveMember={handleRemoveMember}
-          pendingMemberIds={pendingMemberIds}
-          ownerMode={authenticatedUserIsOwner}
-          currentUserId={user?.profile.sub}
-        />
-
-        {authenticatedUserIsOwner && (
-          <div>
-            <h1 className="text-2xl font-medium mb-3">Invitations</h1>
-
-            {invitationsError ? (
-              <Empty className="py-12 rounded-md border">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
-                    <AlertCircle />
-                  </EmptyMedia>
-                  <EmptyTitle className="text-destructive">Failed to load invitations</EmptyTitle>
-                  <EmptyDescription>
-                    Something went wrong while fetching organization invitations. Please try again.
-                  </EmptyDescription>
-                </EmptyHeader>
-                <EmptyContent>
-                  <Button variant="secondary" size="sm" onClick={() => refetchInvitations()}>
-                    <RefreshCw />
-                    Retry
-                  </Button>
-                </EmptyContent>
-              </Empty>
-            ) : (
-              <OrganizationInvitationTable
-                data={invitations}
-                loadingData={loadingInvitations}
-                onCancelInvitation={handleCancelInvitation}
-                onUpdateInvitation={handleUpdateInvitation}
-                pendingInvitationIds={pendingInvitationIds}
+      <PageContent>
+        <PageIntro
+          title="Members"
+          actions={
+            authenticatedUserIsOwner ? (
+              <UpsertOrganizationAccessSheet
+                mode="create"
+                onSubmit={({ email, role, assignedRoleIds }) => handleCreateInvitation(email, role, assignedRoleIds)}
+                ref={createInvitationSheetRef}
               />
-            )}
-          </div>
-        )}
+            ) : undefined
+          }
+        />
+        <div className="flex flex-col gap-14">
+          <OrganizationMemberTable
+            data={organizationMembers}
+            loadingData={loadingMembers}
+            onUpdateMemberAccess={handleUpdateMemberAccess}
+            onRemoveMember={handleRemoveMember}
+            pendingMemberIds={pendingMemberIds}
+            ownerMode={authenticatedUserIsOwner}
+            currentUserId={user?.profile.sub}
+          />
+
+          {authenticatedUserIsOwner && (
+            <div>
+              <h1 className="text-2xl font-medium mb-3">Invitations</h1>
+
+              {invitationsError ? (
+                <Empty className="py-12 rounded-md border">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
+                      <AlertCircle />
+                    </EmptyMedia>
+                    <EmptyTitle className="text-destructive">Failed to load invitations</EmptyTitle>
+                    <EmptyDescription>
+                      Something went wrong while fetching organization invitations. Please try again.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                  <EmptyContent>
+                    <Button variant="secondary" size="sm" onClick={() => refetchInvitations()}>
+                      <RefreshCw />
+                      Retry
+                    </Button>
+                  </EmptyContent>
+                </Empty>
+              ) : (
+                <OrganizationInvitationTable
+                  data={invitations}
+                  loadingData={loadingInvitations}
+                  onCancelInvitation={handleCancelInvitation}
+                  onUpdateInvitation={handleUpdateInvitation}
+                  pendingInvitationIds={pendingInvitationIds}
+                />
+              )}
+            </div>
+          )}
+        </div>
       </PageContent>
     </PageLayout>
   )

@@ -303,7 +303,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
       >
         <SheetHeader className="flex flex-row items-start justify-between p-4 px-5 space-y-0 border-b border-border">
           <div className="min-w-0">
-            <SheetTitle className="text-2xl font-medium">Sandbox Details</SheetTitle>
+            <SheetTitle>Sandbox Details</SheetTitle>
           </div>
           <div className="flex flex-wrap items-center justify-end shrink-0">
             <Button variant="ghost" size="icon-sm" disabled={!hasPrev} onClick={() => handleNavigate('prev')}>
