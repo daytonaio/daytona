@@ -69,6 +69,7 @@ export class AdminRunnerController {
         name: req.body?.name,
         apiKey: MASKED_AUDIT_VALUE,
         apiVersion: req.body?.apiVersion,
+        tags: req.body?.tags,
       }),
     },
   })

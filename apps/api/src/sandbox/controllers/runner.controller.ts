@@ -93,6 +93,7 @@ export class RunnerController {
       body: (req: TypedRequest<CreateRunnerDto>) => ({
         regionId: req.body?.regionId,
         name: req.body?.name,
+        tags: req.body?.tags,
       }),
     },
   })
