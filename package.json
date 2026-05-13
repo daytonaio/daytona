@@ -213,7 +213,7 @@
     "tar": "^7.5.11",
     "typeorm": "^0.3.20",
     "usehooks-ts": "^3.1.1",
-    "uuid": "^11.0.3",
+    "uuid": "^14.0.0",
     "vaul": "^1.1.2",
     "vite-plugin-svgr": "^4.3.0",
     "xdg-basedir": "^5.1.0",
