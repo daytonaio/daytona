@@ -83,11 +83,10 @@ export class Sandbox {
   prevRunnerId?: string
 
   @Column({
-    type: 'enum',
-    enum: SandboxClass,
-    default: SandboxClass.SMALL,
+    type: 'character varying',
+    default: SandboxClass.CONTAINER,
   })
-  class = SandboxClass.SMALL
+  sandboxClass: SandboxClass = SandboxClass.CONTAINER
 
   @Column({
     type: 'enum',

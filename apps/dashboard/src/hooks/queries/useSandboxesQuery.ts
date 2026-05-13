@@ -25,6 +25,7 @@ export interface SandboxFilters {
   states?: SandboxState[]
   snapshots?: string[]
   regions?: string[]
+  sandboxClasses?: SandboxClass[]
   minCpu?: number
   maxCpu?: number
   minMemoryGib?: number
@@ -98,6 +99,7 @@ export function useSandboxesQuery(params: SandboxQueryParams) {
         filters.states,
         filters.snapshots,
         filters.regions,
+        filters.sandboxClasses,
         filters.minCpu,
         filters.maxCpu,
         filters.minMemoryGib,

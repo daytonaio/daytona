@@ -137,12 +137,12 @@ export function UsageTimelineChart({
 
   const limits = useMemo(() => {
     if (!selectedRegion || !regionUsage) return null
-    const region = regionUsage.find((r) => r.regionId === selectedRegion)
-    if (!region) return null
+    const matching = regionUsage.filter((r) => r.regionId === selectedRegion)
+    if (matching.length === 0) return null
     return {
-      cpu: region.totalCpuQuota,
-      ram: region.totalMemoryQuota,
-      disk: region.totalDiskQuota,
+      cpu: matching.reduce((s, r) => s + r.totalCpuQuota, 0),
+      ram: matching.reduce((s, r) => s + r.totalMemoryQuota, 0),
+      disk: matching.reduce((s, r) => s + r.totalDiskQuota, 0),
     }
   }, [selectedRegion, regionUsage])
 
@@ -238,9 +238,9 @@ export function UsageTimelineChart({
               <SelectValue placeholder="Select region" />
             </SelectTrigger>
             <SelectContent className="rounded-xl">
-              {regionUsage?.map((usage) => (
-                <SelectItem key={usage.regionId} value={usage.regionId}>
-                  {getRegionName(usage.regionId) ?? usage.regionId}
+              {[...new Set(regionUsage?.map((u) => u.regionId))].map((regionId) => (
+                <SelectItem key={regionId} value={regionId}>
+                  {getRegionName(regionId) ?? regionId}
                 </SelectItem>
               ))}
             </SelectContent>

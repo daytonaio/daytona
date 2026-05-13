@@ -47,6 +47,7 @@ daytona_api_client_async/models/create_linked_account.py
 daytona_api_client_async/models/create_organization.py
 daytona_api_client_async/models/create_organization_invitation.py
 daytona_api_client_async/models/create_organization_quota.py
+daytona_api_client_async/models/create_organization_region_quota.py
 daytona_api_client_async/models/create_organization_role.py
 daytona_api_client_async/models/create_region.py
 daytona_api_client_async/models/create_region_response.py

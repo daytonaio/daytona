@@ -16,6 +16,9 @@
 // May contain unused imports in some cases
 // @ts-ignore
 import type { CreateBuildInfo } from './create-build-info';
+// May contain unused imports in some cases
+// @ts-ignore
+import type { SandboxClass } from './sandbox-class';
 
 export interface CreateSnapshot {
     /**
@@ -54,5 +57,11 @@ export interface CreateSnapshot {
      * ID of the region where the snapshot will be available. Defaults to organization default region if not specified.
      */
     'regionId'?: string;
+    /**
+     * Target sandbox class. Determines which runners can host sandboxes created from this snapshot.
+     */
+    'sandboxClass'?: SandboxClass;
 }
+
+
 

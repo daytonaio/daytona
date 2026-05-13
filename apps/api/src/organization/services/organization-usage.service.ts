@@ -50,6 +50,7 @@ import { SandboxState } from '../../sandbox/enums/sandbox-state.enum'
 import { OrganizationService } from './organization.service'
 import { SandboxRepository } from '../../sandbox/repositories/sandbox.repository'
 import { SnapshotRepository } from '../../sandbox/repositories/snapshot.repository'
+import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
 
 @Injectable()
 export class OrganizationUsageService {
@@ -100,10 +101,11 @@ export class OrganizationUsageService {
 
     const regionUsage: RegionUsageOverviewDto[] = await Promise.all(
       regionQuotas.map(async (rq) => {
-        const sandboxUsage = await this.getSandboxUsageOverview(organizationId, rq.regionId)
+        const sandboxUsage = await this.getSandboxUsageOverview(organizationId, rq.regionId, rq.sandboxClass)
 
         const usage: RegionUsageOverviewDto = {
           regionId: rq.regionId,
+          sandboxClass: rq.sandboxClass,
           totalCpuQuota: rq.totalCpuQuota,
           totalMemoryQuota: rq.totalMemoryQuota,
           totalDiskQuota: rq.totalDiskQuota,
@@ -138,23 +140,25 @@ export class OrganizationUsageService {
   }
 
   /**
-   * Get the current and pending usage overview for sandbox-related organization quotas in a specific region.
+   * Get the current and pending usage overview for sandbox-related organization quotas in a specific (region, sandbox class).
    *
    * @param organizationId
    * @param regionId
+   * @param sandboxClass
    * @param excludeSandboxId - If provided, the usage overview will exclude the current usage of the sandbox with the given ID
    */
   async getSandboxUsageOverview(
     organizationId: string,
     regionId: string,
+    sandboxClass: SandboxClass,
     excludeSandboxId?: string,
   ): Promise<SandboxUsageOverviewWithPendingInternalDto> {
-    let cachedUsageOverview = await this.getCachedSandboxUsageOverview(organizationId, regionId)
+    let cachedUsageOverview = await this.getCachedSandboxUsageOverview(organizationId, regionId, sandboxClass)
 
     // cache hit
     if (cachedUsageOverview) {
       if (excludeSandboxId) {
-        return await this.excludeSandboxFromUsageOverview(cachedUsageOverview, excludeSandboxId)
+        return await this.excludeSandboxFromUsageOverview(cachedUsageOverview, excludeSandboxId, sandboxClass)
       }
 
       return cachedUsageOverview
@@ -166,22 +170,26 @@ export class OrganizationUsageService {
 
     try {
       // check if cache was updated while waiting for lock
-      cachedUsageOverview = await this.getCachedSandboxUsageOverview(organizationId, regionId)
+      cachedUsageOverview = await this.getCachedSandboxUsageOverview(organizationId, regionId, sandboxClass)
 
       // cache hit
       if (cachedUsageOverview) {
         if (excludeSandboxId) {
-          return await this.excludeSandboxFromUsageOverview(cachedUsageOverview, excludeSandboxId)
+          return await this.excludeSandboxFromUsageOverview(cachedUsageOverview, excludeSandboxId, sandboxClass)
         }
 
         return cachedUsageOverview
       }
 
       // cache miss, fetch from db
-      const usageOverview = await this.fetchSandboxUsageFromDb(organizationId, regionId)
+      const usageOverview = await this.fetchSandboxUsageFromDb(organizationId, regionId, sandboxClass)
 
       // get pending usage separately since it's not stored in DB
-      const pendingUsageOverview = await this.getCachedPendingSandboxUsageOverview(organizationId, regionId)
+      const pendingUsageOverview = await this.getCachedPendingSandboxUsageOverview(
+        organizationId,
+        regionId,
+        sandboxClass,
+      )
 
       const combinedUsageOverview: SandboxUsageOverviewWithPendingInternalDto = {
         ...usageOverview,
@@ -189,7 +197,7 @@ export class OrganizationUsageService {
       }
 
       if (excludeSandboxId) {
-        return await this.excludeSandboxFromUsageOverview(combinedUsageOverview, excludeSandboxId)
+        return await this.excludeSandboxFromUsageOverview(combinedUsageOverview, excludeSandboxId, sandboxClass)
       }
 
       return combinedUsageOverview
@@ -283,15 +291,20 @@ export class OrganizationUsageService {
   /**
    * Exclude the current usage of a specific sandbox from the usage overview.
    *
+   * Only subtracts when the excluded sandbox belongs to the SAME `sandboxClass` as the overview
+   * (different classes are tracked in separate quota buckets).
+   *
    * @param usageOverview
    * @param excludeSandboxId
+   * @param sandboxClass
    */
   private async excludeSandboxFromUsageOverview<T extends SandboxUsageOverviewInternalDto>(
     usageOverview: T,
     excludeSandboxId: string,
+    sandboxClass: SandboxClass,
   ): Promise<T> {
     const excludedSandbox = await this.sandboxRepository.findOne({
-      where: { id: excludeSandboxId },
+      where: { id: excludeSandboxId, sandboxClass },
     })
 
     if (!excludedSandbox) {
@@ -323,14 +336,16 @@ export class OrganizationUsageService {
   }
 
   /**
-   * Get the cached current and pending usage overview for sandbox-related organization quotas in a specific region.
+   * Get the cached current and pending usage overview for sandbox-related organization quotas in a specific (region, sandbox class).
    *
    * @param organizationId
    * @param regionId
+   * @param sandboxClass
    */
   private async getCachedSandboxUsageOverview(
     organizationId: string,
     regionId: string,
+    sandboxClass: SandboxClass,
   ): Promise<SandboxUsageOverviewWithPendingInternalDto | null> {
     const script = `
       return {
@@ -348,14 +363,14 @@ export class OrganizationUsageService {
     const result = (await this.redis.eval(
       script,
       8,
-      this.getCurrentQuotaUsageCacheKey(organizationId, 'cpu', regionId),
-      this.getCurrentQuotaUsageCacheKey(organizationId, 'memory', regionId),
-      this.getCurrentQuotaUsageCacheKey(organizationId, 'disk', regionId),
-      this.getCurrentQuotaUsageCacheKey(organizationId, 'gpu', regionId),
-      this.getPendingQuotaUsageCacheKey(organizationId, 'cpu', regionId),
-      this.getPendingQuotaUsageCacheKey(organizationId, 'memory', regionId),
-      this.getPendingQuotaUsageCacheKey(organizationId, 'disk', regionId),
-      this.getPendingQuotaUsageCacheKey(organizationId, 'gpu', regionId),
+      this.getCurrentQuotaUsageCacheKey(organizationId, 'cpu', regionId, sandboxClass),
+      this.getCurrentQuotaUsageCacheKey(organizationId, 'memory', regionId, sandboxClass),
+      this.getCurrentQuotaUsageCacheKey(organizationId, 'disk', regionId, sandboxClass),
+      this.getCurrentQuotaUsageCacheKey(organizationId, 'gpu', regionId, sandboxClass),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'cpu', regionId, sandboxClass),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'memory', regionId, sandboxClass),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'disk', regionId, sandboxClass),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'gpu', regionId, sandboxClass),
     )) as (string | null)[]
 
     const [
@@ -375,7 +390,7 @@ export class OrganizationUsageService {
     }
 
     // Check cache staleness for current usage
-    const isStale = await this.isCacheStale(organizationId, 'sandbox', regionId)
+    const isStale = await this.isCacheStale(organizationId, 'sandbox', regionId, sandboxClass)
 
     if (isStale) {
       return null
@@ -410,14 +425,16 @@ export class OrganizationUsageService {
   }
 
   /**
-   * Get the cached pending usage overview for sandbox-related organization quotas in a specific region.
+   * Get the cached pending usage overview for sandbox-related organization quotas in a specific (region, sandbox class).
    *
    * @param organizationId
    * @param regionId
+   * @param sandboxClass
    */
   private async getCachedPendingSandboxUsageOverview(
     organizationId: string,
     regionId: string,
+    sandboxClass: SandboxClass,
   ): Promise<PendingSandboxUsageOverviewInternalDto> {
     const script = `
       return {
@@ -430,10 +447,10 @@ export class OrganizationUsageService {
     const result = (await this.redis.eval(
       script,
       4,
-      this.getPendingQuotaUsageCacheKey(organizationId, 'cpu', regionId),
-      this.getPendingQuotaUsageCacheKey(organizationId, 'memory', regionId),
-      this.getPendingQuotaUsageCacheKey(organizationId, 'disk', regionId),
-      this.getPendingQuotaUsageCacheKey(organizationId, 'gpu', regionId),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'cpu', regionId, sandboxClass),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'memory', regionId, sandboxClass),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'disk', regionId, sandboxClass),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'gpu', regionId, sandboxClass),
     )) as (string | null)[]
 
     const [pendingCpuUsage, pendingMemoryUsage, pendingDiskUsage, pendingGpuUsage] = result
@@ -633,21 +650,28 @@ export class OrganizationUsageService {
   }
 
   /**
-   * Fetch the current usage overview for sandbox-related organization quotas in a specific region from the database and cache the results.
+   * Fetch the current usage overview for sandbox-related organization quotas in a specific (region, sandbox class) from the database and cache the results.
    *
    * @param organizationId
    * @param regionId
+   * @param sandboxClass
    */
-  async fetchSandboxUsageFromDb(organizationId: string, regionId: string): Promise<SandboxUsageOverviewInternalDto> {
+  async fetchSandboxUsageFromDb(
+    organizationId: string,
+    regionId: string,
+    sandboxClass: SandboxClass,
+  ): Promise<SandboxUsageOverviewInternalDto> {
     // fetch from db
     // For CPU/memory/GPU, we need to also count RESIZING sandboxes that were hot resizing (desiredState = 'started')
     // since they are still running and consuming compute resources
-    const sandboxUsageMetrics: {
-      used_cpu: number
-      used_mem: number
-      used_disk: number
-      used_gpu: number
-    } = await this.sandboxRepository
+    const sandboxUsageMetrics:
+      | {
+          used_cpu: number
+          used_mem: number
+          used_disk: number
+          used_gpu: number
+        }
+      | undefined = await this.sandboxRepository
       .createQueryBuilder('sandbox')
       .select([
         `SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) OR (sandbox.state IN (:...statesConditionallyConsumingCompute) AND sandbox."desiredState" = :startedDesiredState) THEN sandbox.cpu ELSE 0 END) as used_cpu`,
@@ -657,22 +681,23 @@ export class OrganizationUsageService {
       ])
       .where('sandbox.organizationId = :organizationId', { organizationId })
       .andWhere('sandbox.region = :regionId', { regionId })
+      .andWhere('sandbox."sandboxClass" = :sandboxClass', { sandboxClass })
       .setParameter('statesConsumingCompute', SANDBOX_STATES_CONSUMING_COMPUTE)
       .setParameter('statesConsumingDisk', SANDBOX_STATES_CONSUMING_DISK)
       .setParameter('statesConditionallyConsumingCompute', SANDBOX_STATES_CONDITIONALLY_CONSUMING_COMPUTE)
       .setParameter('startedDesiredState', SandboxDesiredState.STARTED)
       .getRawOne()
 
-    const cpuUsage = Number(sandboxUsageMetrics.used_cpu) || 0
-    const memoryUsage = Number(sandboxUsageMetrics.used_mem) || 0
-    const diskUsage = Number(sandboxUsageMetrics.used_disk) || 0
-    const gpuUsage = Number(sandboxUsageMetrics.used_gpu) || 0
+    const cpuUsage = sandboxUsageMetrics ? Number(sandboxUsageMetrics.used_cpu) || 0 : 0
+    const memoryUsage = sandboxUsageMetrics ? Number(sandboxUsageMetrics.used_mem) || 0 : 0
+    const diskUsage = sandboxUsageMetrics ? Number(sandboxUsageMetrics.used_disk) || 0 : 0
+    const gpuUsage = sandboxUsageMetrics ? Number(sandboxUsageMetrics.used_gpu) || 0 : 0
 
     // cache the results
-    const cpuCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, 'cpu', regionId)
-    const memoryCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, 'memory', regionId)
-    const diskCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, 'disk', regionId)
-    const gpuCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, 'gpu', regionId)
+    const cpuCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, 'cpu', regionId, sandboxClass)
+    const memoryCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, 'memory', regionId, sandboxClass)
+    const diskCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, 'disk', regionId, sandboxClass)
+    const gpuCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, 'gpu', regionId, sandboxClass)
 
     await this.redis
       .multi()
@@ -682,7 +707,7 @@ export class OrganizationUsageService {
       .setex(gpuCacheKey, this.CACHE_TTL_SECONDS, gpuUsage)
       .exec()
 
-    await this.resetCacheStaleness(organizationId, 'sandbox', regionId)
+    await this.resetCacheStaleness(organizationId, 'sandbox', regionId, sandboxClass)
 
     return {
       currentCpuUsage: cpuUsage,
@@ -749,14 +774,16 @@ export class OrganizationUsageService {
     organizationId: string,
     quotaType: 'cpu' | 'memory' | 'disk' | 'gpu',
     regionId: string,
+    sandboxClass: SandboxClass,
   ): string
   private getCurrentQuotaUsageCacheKey(organizationId: string, quotaType: 'snapshot_count' | 'volume_count'): string
   private getCurrentQuotaUsageCacheKey(
     organizationId: string,
     quotaType: OrganizationUsageQuotaType,
     regionId?: string,
+    sandboxClass?: SandboxClass,
   ): string {
-    return `org:${organizationId}${regionId ? `:region:${regionId}` : ''}:quota:${quotaType}:usage`
+    return `org:${organizationId}${regionId ? `:region:${regionId}` : ''}${sandboxClass ? `:class:${sandboxClass}` : ''}:quota:${quotaType}:usage`
   }
 
   /**
@@ -766,14 +793,16 @@ export class OrganizationUsageService {
     organizationId: string,
     quotaType: 'cpu' | 'memory' | 'disk' | 'gpu',
     regionId: string,
+    sandboxClass: SandboxClass,
   ): string
   private getPendingQuotaUsageCacheKey(organizationId: string, quotaType: 'snapshot_count' | 'volume_count'): string
   private getPendingQuotaUsageCacheKey(
     organizationId: string,
     quotaType: OrganizationUsageQuotaType,
     regionId?: string,
+    sandboxClass?: SandboxClass,
   ): string {
-    return `org:${organizationId}${regionId ? `:region:${regionId}` : ''}:quota:${quotaType}:pending`
+    return `org:${organizationId}${regionId ? `:region:${regionId}` : ''}${sandboxClass ? `:class:${sandboxClass}` : ''}:quota:${quotaType}:pending`
   }
 
   /**
@@ -786,6 +815,7 @@ export class OrganizationUsageService {
     quotaType: 'cpu' | 'memory' | 'disk' | 'gpu',
     delta: number,
     regionId: string,
+    sandboxClass: SandboxClass,
   ): Promise<void>
   private async updateCurrentQuotaUsage(
     organizationId: string,
@@ -797,6 +827,7 @@ export class OrganizationUsageService {
     quotaType: OrganizationUsageQuotaType,
     delta: number,
     regionId?: string,
+    sandboxClass?: SandboxClass,
   ): Promise<void> {
     const script = `
       local cacheKey = KEYS[1]
@@ -823,8 +854,8 @@ export class OrganizationUsageService {
       case 'memory':
       case 'disk':
       case 'gpu':
-        currentQuotaUsageCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, quotaType, regionId)
-        pendingQuotaUsageCacheKey = this.getPendingQuotaUsageCacheKey(organizationId, quotaType, regionId)
+        currentQuotaUsageCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, quotaType, regionId, sandboxClass)
+        pendingQuotaUsageCacheKey = this.getPendingQuotaUsageCacheKey(organizationId, quotaType, regionId, sandboxClass)
         break
       case 'snapshot_count':
       case 'volume_count':
@@ -844,7 +875,7 @@ export class OrganizationUsageService {
   }
 
   /**
-   * Increments the pending usage for sandbox-related organization quotas in a specific region.
+   * Increments the pending usage for sandbox-related organization quotas in a specific (region, sandbox class).
    *
    * Pending usage is used to protect against race conditions to prevent quota abuse.
    *
@@ -856,6 +887,7 @@ export class OrganizationUsageService {
    *
    * @param organizationId
    * @param regionId
+   * @param sandboxClass
    * @param cpu - The amount of CPU to increment.
    * @param memory - The amount of memory to increment.
    * @param disk - The amount of disk to increment.
@@ -865,6 +897,7 @@ export class OrganizationUsageService {
   async incrementPendingSandboxUsage(
     organizationId: string,
     regionId: string,
+    sandboxClass: SandboxClass,
     cpu: number,
     memory: number,
     disk: number,
@@ -884,7 +917,7 @@ export class OrganizationUsageService {
 
     if (excludeSandboxId) {
       const excludedSandbox = await this.sandboxRepository.findOne({
-        where: { id: excludeSandboxId },
+        where: { id: excludeSandboxId, sandboxClass },
       })
 
       if (excludedSandbox) {
@@ -943,10 +976,10 @@ export class OrganizationUsageService {
     await this.redis.eval(
       script,
       4,
-      this.getPendingQuotaUsageCacheKey(organizationId, 'cpu', regionId),
-      this.getPendingQuotaUsageCacheKey(organizationId, 'memory', regionId),
-      this.getPendingQuotaUsageCacheKey(organizationId, 'disk', regionId),
-      this.getPendingQuotaUsageCacheKey(organizationId, 'gpu', regionId),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'cpu', regionId, sandboxClass),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'memory', regionId, sandboxClass),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'disk', regionId, sandboxClass),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'gpu', regionId, sandboxClass),
       shouldIncrementCpu.toString(),
       shouldIncrementMemory.toString(),
       shouldIncrementDisk.toString(),
@@ -967,7 +1000,7 @@ export class OrganizationUsageService {
   }
 
   /**
-   * Decrements the pending usage for sandbox-related organization quotas in a specific region.
+   * Decrements the pending usage for sandbox-related organization quotas in a specific (region, sandbox class).
    *
    * Use this method to roll back pending usage after incrementing it for an action that was subsequently rejected.
    *
@@ -979,6 +1012,7 @@ export class OrganizationUsageService {
    *
    * @param organizationId
    * @param regionId
+   * @param sandboxClass
    * @param cpu - If provided, the amount of CPU to decrement.
    * @param memory - If provided, the amount of memory to decrement.
    * @param disk - If provided, the amount of disk to decrement.
@@ -986,6 +1020,7 @@ export class OrganizationUsageService {
   async decrementPendingSandboxUsage(
     organizationId: string,
     regionId: string,
+    sandboxClass: SandboxClass,
     cpu?: number,
     memory?: number,
     disk?: number,
@@ -1023,10 +1058,10 @@ export class OrganizationUsageService {
     await this.redis.eval(
       script,
       4,
-      this.getPendingQuotaUsageCacheKey(organizationId, 'cpu', regionId),
-      this.getPendingQuotaUsageCacheKey(organizationId, 'memory', regionId),
-      this.getPendingQuotaUsageCacheKey(organizationId, 'disk', regionId),
-      this.getPendingQuotaUsageCacheKey(organizationId, 'gpu', regionId),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'cpu', regionId, sandboxClass),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'memory', regionId, sandboxClass),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'disk', regionId, sandboxClass),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'gpu', regionId, sandboxClass),
       cpu?.toString() ?? '0',
       memory?.toString() ?? '0',
       disk?.toString() ?? '0',
@@ -1176,6 +1211,7 @@ export class OrganizationUsageService {
    * Supports both positive (increase) and negative (decrease) deltas.
    * @param organizationId
    * @param regionId
+   * @param sandboxClass
    * @param cpuDelta
    * @param memDelta
    * @param diskDelta
@@ -1183,22 +1219,23 @@ export class OrganizationUsageService {
   async applyResizeUsageChange(
     organizationId: string,
     regionId: string,
+    sandboxClass: SandboxClass,
     cpuDelta: number,
     memDelta: number,
     diskDelta: number,
     gpuDelta: number,
   ): Promise<void> {
     if (cpuDelta !== 0) {
-      await this.updateCurrentQuotaUsage(organizationId, 'cpu', cpuDelta, regionId)
+      await this.updateCurrentQuotaUsage(organizationId, 'cpu', cpuDelta, regionId, sandboxClass)
     }
     if (memDelta !== 0) {
-      await this.updateCurrentQuotaUsage(organizationId, 'memory', memDelta, regionId)
+      await this.updateCurrentQuotaUsage(organizationId, 'memory', memDelta, regionId, sandboxClass)
     }
     if (diskDelta !== 0) {
-      await this.updateCurrentQuotaUsage(organizationId, 'disk', diskDelta, regionId)
+      await this.updateCurrentQuotaUsage(organizationId, 'disk', diskDelta, regionId, sandboxClass)
     }
     if (gpuDelta !== 0) {
-      await this.updateCurrentQuotaUsage(organizationId, 'gpu', gpuDelta, regionId)
+      await this.updateCurrentQuotaUsage(organizationId, 'gpu', gpuDelta, regionId, sandboxClass)
     }
   }
 
@@ -1208,26 +1245,34 @@ export class OrganizationUsageService {
    * @param organizationId
    * @param resourceType
    * @param regionId
+   * @param sandboxClass
    */
   private getCacheStalenessKey(
     organizationId: string,
     resourceType: OrganizationUsageResourceType,
     regionId?: string,
+    sandboxClass?: SandboxClass,
   ): string {
-    return `org:${organizationId}${regionId ? `:region:${regionId}` : ''}:resource:${resourceType}:usage:fetched_at`
+    return `org:${organizationId}${regionId ? `:region:${regionId}` : ''}${sandboxClass ? `:class:${sandboxClass}` : ''}:resource:${resourceType}:usage:fetched_at`
   }
 
   /**
    * Reset the timestamp of the last time the cached usage of organization quotas for a given resource type was populated from the database.
    */
-  private resetCacheStaleness(organizationId: string, resourceType: 'sandbox', regionId: string): Promise<void>
+  private resetCacheStaleness(
+    organizationId: string,
+    resourceType: 'sandbox',
+    regionId: string,
+    sandboxClass: SandboxClass,
+  ): Promise<void>
   private resetCacheStaleness(organizationId: string, resourceType: 'snapshot' | 'volume'): Promise<void>
   private async resetCacheStaleness(
     organizationId: string,
     resourceType: OrganizationUsageResourceType,
     regionId?: string,
+    sandboxClass?: SandboxClass,
   ): Promise<void> {
-    const cacheKey = this.getCacheStalenessKey(organizationId, resourceType, regionId)
+    const cacheKey = this.getCacheStalenessKey(organizationId, resourceType, regionId, sandboxClass)
     await this.redis.set(cacheKey, Date.now())
   }
 
@@ -1236,14 +1281,20 @@ export class OrganizationUsageService {
    *
    * @returns `true` if the cached usage is stale, `false` otherwise
    */
-  private async isCacheStale(organizationId: string, resourceType: 'sandbox', regionId: string): Promise<boolean>
+  private async isCacheStale(
+    organizationId: string,
+    resourceType: 'sandbox',
+    regionId: string,
+    sandboxClass: SandboxClass,
+  ): Promise<boolean>
   private async isCacheStale(organizationId: string, resourceType: 'snapshot' | 'volume'): Promise<boolean>
   private async isCacheStale(
     organizationId: string,
     resourceType: OrganizationUsageResourceType,
     regionId?: string,
+    sandboxClass?: SandboxClass,
   ): Promise<boolean> {
-    const cacheKey = this.getCacheStalenessKey(organizationId, resourceType, regionId)
+    const cacheKey = this.getCacheStalenessKey(organizationId, resourceType, regionId, sandboxClass)
     const cachedData = await this.redis.get(cacheKey)
 
     if (!cachedData) {
@@ -1264,18 +1315,37 @@ export class OrganizationUsageService {
     await this.redisLockProvider.waitForLock(lockKey, 60)
 
     try {
-      await this.updateCurrentQuotaUsage(event.sandbox.organizationId, 'cpu', event.sandbox.cpu, event.sandbox.region)
+      await this.updateCurrentQuotaUsage(
+        event.sandbox.organizationId,
+        'cpu',
+        event.sandbox.cpu,
+        event.sandbox.region,
+        event.sandbox.sandboxClass,
+      )
       await this.updateCurrentQuotaUsage(
         event.sandbox.organizationId,
         'memory',
         event.sandbox.mem,
         event.sandbox.region,
+        event.sandbox.sandboxClass,
       )
-      await this.updateCurrentQuotaUsage(event.sandbox.organizationId, 'disk', event.sandbox.disk, event.sandbox.region)
-      await this.updateCurrentQuotaUsage(event.sandbox.organizationId, 'gpu', event.sandbox.gpu, event.sandbox.region)
+      await this.updateCurrentQuotaUsage(
+        event.sandbox.organizationId,
+        'disk',
+        event.sandbox.disk,
+        event.sandbox.region,
+        event.sandbox.sandboxClass,
+      )
+      await this.updateCurrentQuotaUsage(
+        event.sandbox.organizationId,
+        'gpu',
+        event.sandbox.gpu,
+        event.sandbox.region,
+        event.sandbox.sandboxClass,
+      )
     } catch (error) {
       this.logger.warn(
-        `Error updating cached sandbox quota usage for organization ${event.sandbox.organizationId} in region ${event.sandbox.region}`,
+        `Error updating cached sandbox quota usage for organization ${event.sandbox.organizationId} in region ${event.sandbox.region} class ${event.sandbox.sandboxClass}`,
         error,
       )
     } finally {
@@ -1298,24 +1368,38 @@ export class OrganizationUsageService {
     // Special case for warm pool sandboxes (otherwise the quota usage deltas would be 0 due to the "unchanged" state)
     if (event.oldState === event.newState && event.newState === SandboxState.STARTED) {
       try {
-        await this.updateCurrentQuotaUsage(event.sandbox.organizationId, 'cpu', event.sandbox.cpu, event.sandbox.region)
+        await this.updateCurrentQuotaUsage(
+          event.sandbox.organizationId,
+          'cpu',
+          event.sandbox.cpu,
+          event.sandbox.region,
+          event.sandbox.sandboxClass,
+        )
         await this.updateCurrentQuotaUsage(
           event.sandbox.organizationId,
           'memory',
           event.sandbox.mem,
           event.sandbox.region,
+          event.sandbox.sandboxClass,
         )
         await this.updateCurrentQuotaUsage(
           event.sandbox.organizationId,
           'disk',
           event.sandbox.disk,
           event.sandbox.region,
+          event.sandbox.sandboxClass,
         )
-        await this.updateCurrentQuotaUsage(event.sandbox.organizationId, 'gpu', event.sandbox.gpu, event.sandbox.region)
+        await this.updateCurrentQuotaUsage(
+          event.sandbox.organizationId,
+          'gpu',
+          event.sandbox.gpu,
+          event.sandbox.region,
+          event.sandbox.sandboxClass,
+        )
         return
       } catch (error) {
         this.logger.warn(
-          `Error updating cached sandbox quota usage for organization ${event.sandbox.organizationId} in region ${event.sandbox.region}`,
+          `Error updating cached sandbox quota usage for organization ${event.sandbox.organizationId} in region ${event.sandbox.region} class ${event.sandbox.sandboxClass}`,
           error,
         )
         return
@@ -1354,23 +1438,47 @@ export class OrganizationUsageService {
       )
 
       if (cpuDelta !== 0) {
-        await this.updateCurrentQuotaUsage(event.sandbox.organizationId, 'cpu', cpuDelta, event.sandbox.region)
+        await this.updateCurrentQuotaUsage(
+          event.sandbox.organizationId,
+          'cpu',
+          cpuDelta,
+          event.sandbox.region,
+          event.sandbox.sandboxClass,
+        )
       }
 
       if (memDelta !== 0) {
-        await this.updateCurrentQuotaUsage(event.sandbox.organizationId, 'memory', memDelta, event.sandbox.region)
+        await this.updateCurrentQuotaUsage(
+          event.sandbox.organizationId,
+          'memory',
+          memDelta,
+          event.sandbox.region,
+          event.sandbox.sandboxClass,
+        )
       }
 
       if (diskDelta !== 0) {
-        await this.updateCurrentQuotaUsage(event.sandbox.organizationId, 'disk', diskDelta, event.sandbox.region)
+        await this.updateCurrentQuotaUsage(
+          event.sandbox.organizationId,
+          'disk',
+          diskDelta,
+          event.sandbox.region,
+          event.sandbox.sandboxClass,
+        )
       }
 
       if (gpuDelta !== 0) {
-        await this.updateCurrentQuotaUsage(event.sandbox.organizationId, 'gpu', gpuDelta, event.sandbox.region)
+        await this.updateCurrentQuotaUsage(
+          event.sandbox.organizationId,
+          'gpu',
+          gpuDelta,
+          event.sandbox.region,
+          event.sandbox.sandboxClass,
+        )
       }
     } catch (error) {
       this.logger.warn(
-        `Error updating cached sandbox quota usage for organization ${event.sandbox.organizationId} in region ${event.sandbox.region}`,
+        `Error updating cached sandbox quota usage for organization ${event.sandbox.organizationId} in region ${event.sandbox.region} class ${event.sandbox.sandboxClass}`,
         error,
       )
     } finally {

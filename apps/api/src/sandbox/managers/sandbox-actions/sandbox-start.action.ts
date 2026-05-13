@@ -186,7 +186,7 @@ export class SandboxStartAction extends SandboxAction {
     try {
       const runner = await this.runnerService.getRandomAvailableRunner({
         regions: [sandbox.region],
-        sandboxClass: sandbox.class,
+        sandboxClass: sandbox.sandboxClass,
         snapshotRef: snapshotRef,
         gpu: sandbox.gpu,
         ...(buildInfoOverloadedRunnerIds.length > 0 && { excludedRunnerIds: buildInfoOverloadedRunnerIds }),
@@ -263,7 +263,7 @@ export class SandboxStartAction extends SandboxAction {
     try {
       runner = await this.runnerService.getRandomAvailableRunner({
         regions: [sandbox.region],
-        sandboxClass: sandbox.class,
+        sandboxClass: sandbox.sandboxClass,
         gpu: sandbox.gpu,
         excludedRunnerIds: excludedRunnerIds,
         ...(isBuild &&
@@ -482,7 +482,7 @@ export class SandboxStartAction extends SandboxAction {
         if (runner.availabilityScore < this.configService.getOrThrow('runnerScore.thresholds.availability')) {
           const availableRunners = await this.runnerService.findAvailableRunners({
             regions: [sandbox.region],
-            sandboxClass: sandbox.class,
+            sandboxClass: sandbox.sandboxClass,
             gpu: sandbox.gpu,
           })
           const lessUsedRunners = availableRunners.filter((runner) => runner.id !== originalRunnerId)
@@ -760,7 +760,7 @@ export class SandboxStartAction extends SandboxAction {
     const runnersWithBaseSnapshot: Runner[] = snapshotRef
       ? await this.runnerService.findAvailableRunners({
           regions: [sandbox.region],
-          sandboxClass: sandbox.class,
+          sandboxClass: sandbox.sandboxClass,
           snapshotRef,
           excludedRunnerIds,
           gpu: sandbox.gpu,
@@ -772,6 +772,7 @@ export class SandboxStartAction extends SandboxAction {
       //  if no runner has the base snapshot, get all available runners
       availableRunners = await this.runnerService.findAvailableRunners({
         regions: [sandbox.region],
+        sandboxClass: sandbox.sandboxClass,
         excludedRunnerIds,
         gpu: sandbox.gpu,
       })

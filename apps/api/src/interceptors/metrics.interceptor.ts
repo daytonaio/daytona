@@ -753,6 +753,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     this.capture('api_organization_region_quota_updated', props, 'api_organization_region_quota_update_failed', {
       organization_id: organizationId,
       organization_region_id: regionId,
+      organization_region_sandbox_class: request.sandboxClass,
       organization_region_total_cpu_quota: request.totalCpuQuota,
       organization_region_total_memory_quota_mb: request.totalMemoryQuota ? request.totalMemoryQuota * 1024 : null,
       organization_region_total_disk_quota_gb: request.totalDiskQuota,

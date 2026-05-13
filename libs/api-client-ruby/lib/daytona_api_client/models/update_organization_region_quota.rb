@@ -15,6 +15,8 @@ require 'time'
 
 module DaytonaApiClient
   class UpdateOrganizationRegionQuota < ApiModelBase
+    attr_accessor :sandbox_class
+
     attr_accessor :total_cpu_quota
 
     attr_accessor :total_memory_quota
@@ -37,9 +39,32 @@ module DaytonaApiClient
 
     attr_accessor :max_disk_per_gpu_sandbox
 
+    class EnumAttributeValidator
+      attr_reader :datatype
+      attr_reader :allowable_values
+
+      def initialize(datatype, allowable_values)
+        @allowable_values = allowable_values.map do |value|
+          case datatype.to_s
+          when /Integer/i
+            value.to_i
+          when /Float/i
+            value.to_f
+          else
+            value
+          end
+        end
+      end
+
+      def valid?(value)
+        !value || allowable_values.include?(value)
+      end
+    end
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
+        :'sandbox_class' => :'sandboxClass',
         :'total_cpu_quota' => :'totalCpuQuota',
         :'total_memory_quota' => :'totalMemoryQuota',
         :'total_disk_quota' => :'totalDiskQuota',
@@ -67,6 +92,7 @@ module DaytonaApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
+        :'sandbox_class' => :'SandboxClass',
         :'total_cpu_quota' => :'Float',
         :'total_memory_quota' => :'Float',
         :'total_disk_quota' => :'Float',
@@ -113,6 +139,10 @@ module DaytonaApiClient
         end
         h[k.to_sym] = v
       }
+
+      if attributes.key?(:'sandbox_class')
+        self.sandbox_class = attributes[:'sandbox_class']
+      end
 
       if attributes.key?(:'total_cpu_quota')
         self.total_cpu_quota = attributes[:'total_cpu_quota']
@@ -187,6 +217,7 @@ module DaytonaApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
+          sandbox_class == o.sandbox_class &&
           total_cpu_quota == o.total_cpu_quota &&
           total_memory_quota == o.total_memory_quota &&
           total_disk_quota == o.total_disk_quota &&
@@ -209,7 +240,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [total_cpu_quota, total_memory_quota, total_disk_quota, total_gpu_quota, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, max_disk_per_non_ephemeral_sandbox, max_cpu_per_gpu_sandbox, max_memory_per_gpu_sandbox, max_disk_per_gpu_sandbox].hash
+      [sandbox_class, total_cpu_quota, total_memory_quota, total_disk_quota, total_gpu_quota, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, max_disk_per_non_ephemeral_sandbox, max_cpu_per_gpu_sandbox, max_memory_per_gpu_sandbox, max_disk_per_gpu_sandbox].hash
     end
 
     # Builds the object from hash

@@ -114,6 +114,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
     this.logger.log(`Creating default runner: ${this.configService.getOrThrow('defaultRunner.name')}`)
 
     const runnerVersion = this.configService.getOrThrow('defaultRunner.apiVersion')
+    const runnerSandboxClass = this.configService.getOrThrow('defaultSandboxClass')
 
     if (runnerVersion === '0') {
       const { runner } = await this.runnerService.create({
@@ -127,6 +128,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
         domain: this.configService.getOrThrow('defaultRunner.domain'),
         apiVersion: runnerVersion,
         name: this.configService.getOrThrow('defaultRunner.name'),
+        sandboxClass: runnerSandboxClass,
       })
 
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
@@ -148,6 +150,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
         regionId: this.configService.getOrThrow('defaultRegion.id'),
         apiVersion: runnerVersion,
         name: this.configService.getOrThrow('defaultRunner.name'),
+        sandboxClass: runnerSandboxClass,
       })
 
       this.logger.log(`Waiting for runner ${runner.name} to be healthy...`)

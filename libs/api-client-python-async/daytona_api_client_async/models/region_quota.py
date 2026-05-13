@@ -20,6 +20,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
+from daytona_api_client_async.models.sandbox_class import SandboxClass
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
@@ -32,6 +33,7 @@ class RegionQuota(BaseModel):
     """ # noqa: E501
     organization_id: StrictStr = Field(serialization_alias="organizationId")
     region_id: StrictStr = Field(serialization_alias="regionId")
+    sandbox_class: SandboxClass = Field(serialization_alias="sandboxClass")
     total_cpu_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalCpuQuota")
     total_memory_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalMemoryQuota")
     total_disk_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalDiskQuota")
@@ -44,7 +46,7 @@ class RegionQuota(BaseModel):
     max_memory_per_gpu_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxMemoryPerGpuSandbox")
     max_disk_per_gpu_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxDiskPerGpuSandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["organizationId", "regionId", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalGpuQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox"]
+    __properties: ClassVar[List[str]] = ["organizationId", "regionId", "sandboxClass", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalGpuQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -140,6 +142,7 @@ class RegionQuota(BaseModel):
         _obj = cls.model_validate({
             "organization_id": obj.get("organizationId"),
             "region_id": obj.get("regionId"),
+            "sandbox_class": obj.get("sandboxClass"),
             "total_cpu_quota": obj.get("totalCpuQuota"),
             "total_memory_quota": obj.get("totalMemoryQuota"),
             "total_disk_quota": obj.get("totalDiskQuota"),

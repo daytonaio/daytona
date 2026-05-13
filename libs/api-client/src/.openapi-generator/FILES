@@ -45,6 +45,7 @@ models/create-docker-registry.ts
 models/create-linked-account.ts
 models/create-organization-invitation.ts
 models/create-organization-quota.ts
+models/create-organization-region-quota.ts
 models/create-organization-role.ts
 models/create-organization.ts
 models/create-region-response.ts

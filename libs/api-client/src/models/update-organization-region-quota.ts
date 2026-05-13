@@ -13,8 +13,12 @@
  */
 
 
+// May contain unused imports in some cases
+// @ts-ignore
+import type { SandboxClass } from './sandbox-class';
 
 export interface UpdateOrganizationRegionQuota {
+    'sandboxClass'?: SandboxClass;
     'totalCpuQuota': number | null;
     'totalMemoryQuota': number | null;
     'totalDiskQuota': number | null;
@@ -27,4 +31,6 @@ export interface UpdateOrganizationRegionQuota {
     'maxMemoryPerGpuSandbox'?: number | null;
     'maxDiskPerGpuSandbox'?: number | null;
 }
+
+
 

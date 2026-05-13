@@ -29,6 +29,7 @@ import io.daytona.api.client.model.PortPreviewUrl;
 import io.daytona.api.client.model.RegionQuota;
 import io.daytona.api.client.model.ResizeSandbox;
 import io.daytona.api.client.model.Sandbox;
+import io.daytona.api.client.model.SandboxClass;
 import io.daytona.api.client.model.SandboxLabels;
 import io.daytona.api.client.model.SandboxListSortDirection;
 import io.daytona.api.client.model.SandboxListSortField;
@@ -424,6 +425,7 @@ public class SandboxApiTest {
         List<SandboxState> states = null;
         List<String> snapshots = null;
         List<String> regionIds = null;
+        List<SandboxClass> sandboxClasses = null;
         BigDecimal minCpu = null;
         BigDecimal maxCpu = null;
         BigDecimal minMemoryGiB = null;
@@ -438,7 +440,7 @@ public class SandboxApiTest {
         OffsetDateTime lastEventBefore = null;
         SandboxListSortField sort = null;
         SandboxListSortDirection order = null;
-        ListSandboxesResponse response = api.listSandboxes(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order);
+        ListSandboxesResponse response = api.listSandboxes(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, sandboxClasses, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order);
         // TODO: test validations
     }
 

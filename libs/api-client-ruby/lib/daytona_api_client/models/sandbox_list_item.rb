@@ -415,7 +415,7 @@ module DaytonaApiClient
       return false if @organization_id.nil?
       return false if @name.nil?
       return false if @target.nil?
-      sandbox_class_validator = EnumAttributeValidator.new('String', ["small", "medium", "large", "unknown_default_open_api"])
+      sandbox_class_validator = EnumAttributeValidator.new('String', ["linux-vm", "container", "unknown_default_open_api"])
       return false unless sandbox_class_validator.valid?(@sandbox_class)
       return false if @user.nil?
       return false if @public.nil?
@@ -473,7 +473,7 @@ module DaytonaApiClient
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] sandbox_class Object to be assigned
     def sandbox_class=(sandbox_class)
-      validator = EnumAttributeValidator.new('String', ["small", "medium", "large", "unknown_default_open_api"])
+      validator = EnumAttributeValidator.new('String', ["linux-vm", "container", "unknown_default_open_api"])
       unless validator.valid?(sandbox_class)
         fail ArgumentError, "invalid value for \"sandbox_class\", must be one of #{validator.allowable_values}."
       end

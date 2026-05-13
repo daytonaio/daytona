@@ -42,6 +42,7 @@ import io.daytona.api.client.model.PortPreviewUrl;
 import io.daytona.api.client.model.RegionQuota;
 import io.daytona.api.client.model.ResizeSandbox;
 import io.daytona.api.client.model.Sandbox;
+import io.daytona.api.client.model.SandboxClass;
 import io.daytona.api.client.model.SandboxLabels;
 import io.daytona.api.client.model.SandboxListSortDirection;
 import io.daytona.api.client.model.SandboxListSortField;
@@ -3623,6 +3624,7 @@ public class SandboxApi {
      * @param states List of states to filter by. (optional)
      * @param snapshots List of snapshot names to filter by (optional)
      * @param regionIds List of regions IDs to filter by (optional)
+     * @param sandboxClasses List of sandbox classes to filter by (optional)
      * @param minCpu Minimum CPU (optional)
      * @param maxCpu Maximum CPU (optional)
      * @param minMemoryGiB Minimum memory in GiB (optional)
@@ -3647,7 +3649,7 @@ public class SandboxApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listSandboxesCall(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String cursor, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String id, @javax.annotation.Nullable String name, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted, @javax.annotation.Nullable List<SandboxState> states, @javax.annotation.Nullable List<String> snapshots, @javax.annotation.Nullable List<String> regionIds, @javax.annotation.Nullable BigDecimal minCpu, @javax.annotation.Nullable BigDecimal maxCpu, @javax.annotation.Nullable BigDecimal minMemoryGiB, @javax.annotation.Nullable BigDecimal maxMemoryGiB, @javax.annotation.Nullable BigDecimal minDiskGiB, @javax.annotation.Nullable BigDecimal maxDiskGiB, @javax.annotation.Nullable Boolean isPublic, @javax.annotation.Nullable Boolean isRecoverable, @javax.annotation.Nullable OffsetDateTime createdAtAfter, @javax.annotation.Nullable OffsetDateTime createdAtBefore, @javax.annotation.Nullable OffsetDateTime lastEventAfter, @javax.annotation.Nullable OffsetDateTime lastEventBefore, @javax.annotation.Nullable SandboxListSortField sort, @javax.annotation.Nullable SandboxListSortDirection order, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listSandboxesCall(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String cursor, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String id, @javax.annotation.Nullable String name, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted, @javax.annotation.Nullable List<SandboxState> states, @javax.annotation.Nullable List<String> snapshots, @javax.annotation.Nullable List<String> regionIds, @javax.annotation.Nullable List<SandboxClass> sandboxClasses, @javax.annotation.Nullable BigDecimal minCpu, @javax.annotation.Nullable BigDecimal maxCpu, @javax.annotation.Nullable BigDecimal minMemoryGiB, @javax.annotation.Nullable BigDecimal maxMemoryGiB, @javax.annotation.Nullable BigDecimal minDiskGiB, @javax.annotation.Nullable BigDecimal maxDiskGiB, @javax.annotation.Nullable Boolean isPublic, @javax.annotation.Nullable Boolean isRecoverable, @javax.annotation.Nullable OffsetDateTime createdAtAfter, @javax.annotation.Nullable OffsetDateTime createdAtBefore, @javax.annotation.Nullable OffsetDateTime lastEventAfter, @javax.annotation.Nullable OffsetDateTime lastEventBefore, @javax.annotation.Nullable SandboxListSortField sort, @javax.annotation.Nullable SandboxListSortDirection order, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3706,6 +3708,10 @@ public class SandboxApi {
 
         if (regionIds != null) {
             localVarCollectionQueryParams.addAll(localVarApiClient.parameterToPairs("multi", "regionIds", regionIds));
+        }
+
+        if (sandboxClasses != null) {
+            localVarCollectionQueryParams.addAll(localVarApiClient.parameterToPairs("multi", "sandboxClasses", sandboxClasses));
         }
 
         if (minCpu != null) {
@@ -3789,8 +3795,8 @@ public class SandboxApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listSandboxesValidateBeforeCall(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String cursor, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String id, @javax.annotation.Nullable String name, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted, @javax.annotation.Nullable List<SandboxState> states, @javax.annotation.Nullable List<String> snapshots, @javax.annotation.Nullable List<String> regionIds, @javax.annotation.Nullable BigDecimal minCpu, @javax.annotation.Nullable BigDecimal maxCpu, @javax.annotation.Nullable BigDecimal minMemoryGiB, @javax.annotation.Nullable BigDecimal maxMemoryGiB, @javax.annotation.Nullable BigDecimal minDiskGiB, @javax.annotation.Nullable BigDecimal maxDiskGiB, @javax.annotation.Nullable Boolean isPublic, @javax.annotation.Nullable Boolean isRecoverable, @javax.annotation.Nullable OffsetDateTime createdAtAfter, @javax.annotation.Nullable OffsetDateTime createdAtBefore, @javax.annotation.Nullable OffsetDateTime lastEventAfter, @javax.annotation.Nullable OffsetDateTime lastEventBefore, @javax.annotation.Nullable SandboxListSortField sort, @javax.annotation.Nullable SandboxListSortDirection order, final ApiCallback _callback) throws ApiException {
-        return listSandboxesCall(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order, _callback);
+    private okhttp3.Call listSandboxesValidateBeforeCall(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String cursor, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String id, @javax.annotation.Nullable String name, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted, @javax.annotation.Nullable List<SandboxState> states, @javax.annotation.Nullable List<String> snapshots, @javax.annotation.Nullable List<String> regionIds, @javax.annotation.Nullable List<SandboxClass> sandboxClasses, @javax.annotation.Nullable BigDecimal minCpu, @javax.annotation.Nullable BigDecimal maxCpu, @javax.annotation.Nullable BigDecimal minMemoryGiB, @javax.annotation.Nullable BigDecimal maxMemoryGiB, @javax.annotation.Nullable BigDecimal minDiskGiB, @javax.annotation.Nullable BigDecimal maxDiskGiB, @javax.annotation.Nullable Boolean isPublic, @javax.annotation.Nullable Boolean isRecoverable, @javax.annotation.Nullable OffsetDateTime createdAtAfter, @javax.annotation.Nullable OffsetDateTime createdAtBefore, @javax.annotation.Nullable OffsetDateTime lastEventAfter, @javax.annotation.Nullable OffsetDateTime lastEventBefore, @javax.annotation.Nullable SandboxListSortField sort, @javax.annotation.Nullable SandboxListSortDirection order, final ApiCallback _callback) throws ApiException {
+        return listSandboxesCall(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, sandboxClasses, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order, _callback);
 
     }
 
@@ -3807,6 +3813,7 @@ public class SandboxApi {
      * @param states List of states to filter by. (optional)
      * @param snapshots List of snapshot names to filter by (optional)
      * @param regionIds List of regions IDs to filter by (optional)
+     * @param sandboxClasses List of sandbox classes to filter by (optional)
      * @param minCpu Minimum CPU (optional)
      * @param maxCpu Maximum CPU (optional)
      * @param minMemoryGiB Minimum memory in GiB (optional)
@@ -3830,8 +3837,8 @@ public class SandboxApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ListSandboxesResponse listSandboxes(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String cursor, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String id, @javax.annotation.Nullable String name, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted, @javax.annotation.Nullable List<SandboxState> states, @javax.annotation.Nullable List<String> snapshots, @javax.annotation.Nullable List<String> regionIds, @javax.annotation.Nullable BigDecimal minCpu, @javax.annotation.Nullable BigDecimal maxCpu, @javax.annotation.Nullable BigDecimal minMemoryGiB, @javax.annotation.Nullable BigDecimal maxMemoryGiB, @javax.annotation.Nullable BigDecimal minDiskGiB, @javax.annotation.Nullable BigDecimal maxDiskGiB, @javax.annotation.Nullable Boolean isPublic, @javax.annotation.Nullable Boolean isRecoverable, @javax.annotation.Nullable OffsetDateTime createdAtAfter, @javax.annotation.Nullable OffsetDateTime createdAtBefore, @javax.annotation.Nullable OffsetDateTime lastEventAfter, @javax.annotation.Nullable OffsetDateTime lastEventBefore, @javax.annotation.Nullable SandboxListSortField sort, @javax.annotation.Nullable SandboxListSortDirection order) throws ApiException {
-        ApiResponse<ListSandboxesResponse> localVarResp = listSandboxesWithHttpInfo(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order);
+    public ListSandboxesResponse listSandboxes(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String cursor, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String id, @javax.annotation.Nullable String name, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted, @javax.annotation.Nullable List<SandboxState> states, @javax.annotation.Nullable List<String> snapshots, @javax.annotation.Nullable List<String> regionIds, @javax.annotation.Nullable List<SandboxClass> sandboxClasses, @javax.annotation.Nullable BigDecimal minCpu, @javax.annotation.Nullable BigDecimal maxCpu, @javax.annotation.Nullable BigDecimal minMemoryGiB, @javax.annotation.Nullable BigDecimal maxMemoryGiB, @javax.annotation.Nullable BigDecimal minDiskGiB, @javax.annotation.Nullable BigDecimal maxDiskGiB, @javax.annotation.Nullable Boolean isPublic, @javax.annotation.Nullable Boolean isRecoverable, @javax.annotation.Nullable OffsetDateTime createdAtAfter, @javax.annotation.Nullable OffsetDateTime createdAtBefore, @javax.annotation.Nullable OffsetDateTime lastEventAfter, @javax.annotation.Nullable OffsetDateTime lastEventBefore, @javax.annotation.Nullable SandboxListSortField sort, @javax.annotation.Nullable SandboxListSortDirection order) throws ApiException {
+        ApiResponse<ListSandboxesResponse> localVarResp = listSandboxesWithHttpInfo(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, sandboxClasses, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order);
         return localVarResp.getData();
     }
 
@@ -3848,6 +3855,7 @@ public class SandboxApi {
      * @param states List of states to filter by. (optional)
      * @param snapshots List of snapshot names to filter by (optional)
      * @param regionIds List of regions IDs to filter by (optional)
+     * @param sandboxClasses List of sandbox classes to filter by (optional)
      * @param minCpu Minimum CPU (optional)
      * @param maxCpu Maximum CPU (optional)
      * @param minMemoryGiB Minimum memory in GiB (optional)
@@ -3871,8 +3879,8 @@ public class SandboxApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ListSandboxesResponse> listSandboxesWithHttpInfo(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String cursor, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String id, @javax.annotation.Nullable String name, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted, @javax.annotation.Nullable List<SandboxState> states, @javax.annotation.Nullable List<String> snapshots, @javax.annotation.Nullable List<String> regionIds, @javax.annotation.Nullable BigDecimal minCpu, @javax.annotation.Nullable BigDecimal maxCpu, @javax.annotation.Nullable BigDecimal minMemoryGiB, @javax.annotation.Nullable BigDecimal maxMemoryGiB, @javax.annotation.Nullable BigDecimal minDiskGiB, @javax.annotation.Nullable BigDecimal maxDiskGiB, @javax.annotation.Nullable Boolean isPublic, @javax.annotation.Nullable Boolean isRecoverable, @javax.annotation.Nullable OffsetDateTime createdAtAfter, @javax.annotation.Nullable OffsetDateTime createdAtBefore, @javax.annotation.Nullable OffsetDateTime lastEventAfter, @javax.annotation.Nullable OffsetDateTime lastEventBefore, @javax.annotation.Nullable SandboxListSortField sort, @javax.annotation.Nullable SandboxListSortDirection order) throws ApiException {
-        okhttp3.Call localVarCall = listSandboxesValidateBeforeCall(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order, null);
+    public ApiResponse<ListSandboxesResponse> listSandboxesWithHttpInfo(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String cursor, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String id, @javax.annotation.Nullable String name, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted, @javax.annotation.Nullable List<SandboxState> states, @javax.annotation.Nullable List<String> snapshots, @javax.annotation.Nullable List<String> regionIds, @javax.annotation.Nullable List<SandboxClass> sandboxClasses, @javax.annotation.Nullable BigDecimal minCpu, @javax.annotation.Nullable BigDecimal maxCpu, @javax.annotation.Nullable BigDecimal minMemoryGiB, @javax.annotation.Nullable BigDecimal maxMemoryGiB, @javax.annotation.Nullable BigDecimal minDiskGiB, @javax.annotation.Nullable BigDecimal maxDiskGiB, @javax.annotation.Nullable Boolean isPublic, @javax.annotation.Nullable Boolean isRecoverable, @javax.annotation.Nullable OffsetDateTime createdAtAfter, @javax.annotation.Nullable OffsetDateTime createdAtBefore, @javax.annotation.Nullable OffsetDateTime lastEventAfter, @javax.annotation.Nullable OffsetDateTime lastEventBefore, @javax.annotation.Nullable SandboxListSortField sort, @javax.annotation.Nullable SandboxListSortDirection order) throws ApiException {
+        okhttp3.Call localVarCall = listSandboxesValidateBeforeCall(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, sandboxClasses, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order, null);
         Type localVarReturnType = new TypeToken<ListSandboxesResponse>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
     }
@@ -3890,6 +3898,7 @@ public class SandboxApi {
      * @param states List of states to filter by. (optional)
      * @param snapshots List of snapshot names to filter by (optional)
      * @param regionIds List of regions IDs to filter by (optional)
+     * @param sandboxClasses List of sandbox classes to filter by (optional)
      * @param minCpu Minimum CPU (optional)
      * @param maxCpu Maximum CPU (optional)
      * @param minMemoryGiB Minimum memory in GiB (optional)
@@ -3914,9 +3923,9 @@ public class SandboxApi {
         <tr><td> 200 </td><td>  </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listSandboxesAsync(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String cursor, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String id, @javax.annotation.Nullable String name, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted, @javax.annotation.Nullable List<SandboxState> states, @javax.annotation.Nullable List<String> snapshots, @javax.annotation.Nullable List<String> regionIds, @javax.annotation.Nullable BigDecimal minCpu, @javax.annotation.Nullable BigDecimal maxCpu, @javax.annotation.Nullable BigDecimal minMemoryGiB, @javax.annotation.Nullable BigDecimal maxMemoryGiB, @javax.annotation.Nullable BigDecimal minDiskGiB, @javax.annotation.Nullable BigDecimal maxDiskGiB, @javax.annotation.Nullable Boolean isPublic, @javax.annotation.Nullable Boolean isRecoverable, @javax.annotation.Nullable OffsetDateTime createdAtAfter, @javax.annotation.Nullable OffsetDateTime createdAtBefore, @javax.annotation.Nullable OffsetDateTime lastEventAfter, @javax.annotation.Nullable OffsetDateTime lastEventBefore, @javax.annotation.Nullable SandboxListSortField sort, @javax.annotation.Nullable SandboxListSortDirection order, final ApiCallback<ListSandboxesResponse> _callback) throws ApiException {
+    public okhttp3.Call listSandboxesAsync(@javax.annotation.Nullable String xDaytonaOrganizationID, @javax.annotation.Nullable String cursor, @javax.annotation.Nullable BigDecimal limit, @javax.annotation.Nullable String id, @javax.annotation.Nullable String name, @javax.annotation.Nullable String labels, @javax.annotation.Nullable Boolean includeErroredDeleted, @javax.annotation.Nullable List<SandboxState> states, @javax.annotation.Nullable List<String> snapshots, @javax.annotation.Nullable List<String> regionIds, @javax.annotation.Nullable List<SandboxClass> sandboxClasses, @javax.annotation.Nullable BigDecimal minCpu, @javax.annotation.Nullable BigDecimal maxCpu, @javax.annotation.Nullable BigDecimal minMemoryGiB, @javax.annotation.Nullable BigDecimal maxMemoryGiB, @javax.annotation.Nullable BigDecimal minDiskGiB, @javax.annotation.Nullable BigDecimal maxDiskGiB, @javax.annotation.Nullable Boolean isPublic, @javax.annotation.Nullable Boolean isRecoverable, @javax.annotation.Nullable OffsetDateTime createdAtAfter, @javax.annotation.Nullable OffsetDateTime createdAtBefore, @javax.annotation.Nullable OffsetDateTime lastEventAfter, @javax.annotation.Nullable OffsetDateTime lastEventBefore, @javax.annotation.Nullable SandboxListSortField sort, @javax.annotation.Nullable SandboxListSortDirection order, final ApiCallback<ListSandboxesResponse> _callback) throws ApiException {
 
-        okhttp3.Call localVarCall = listSandboxesValidateBeforeCall(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order, _callback);
+        okhttp3.Call localVarCall = listSandboxesValidateBeforeCall(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, sandboxClasses, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order, _callback);
         Type localVarReturnType = new TypeToken<ListSandboxesResponse>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;

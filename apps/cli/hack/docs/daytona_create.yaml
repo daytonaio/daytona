@@ -13,8 +13,6 @@ options:
   - name: auto-stop
     default_value: '15'
     usage: Auto-stop interval in minutes (0 means disabled)
-  - name: class
-    usage: Sandbox class type (small, medium, large)
   - name: context
     shorthand: c
     default_value: '[]'

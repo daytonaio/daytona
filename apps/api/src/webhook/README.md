@@ -121,7 +121,7 @@ All webhooks include event-specific data relevant to the resource being updated.
   "id": "sandbox-uuid",
   "organizationId": "org-uuid",
   "state": "STARTED",
-  "class": "SMALL",
+  "sandboxClass": "linux-vm",
   "createdAt": "2025-01-01T00:00:00.000Z"
 }
 ```

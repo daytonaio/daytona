@@ -5,6 +5,7 @@
 
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 import { SandboxUsagePeriod } from './sandbox-usage-period.entity'
+import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
 
 // Duplicate of SandboxUsagePeriod
 // Used to archive usage periods and keep the original table lightweight
@@ -42,6 +43,12 @@ export class SandboxUsagePeriodArchive {
   @Column()
   region: string
 
+  @Column({
+    type: 'character varying',
+    default: SandboxClass.CONTAINER,
+  })
+  sandboxClass: SandboxClass = SandboxClass.CONTAINER
+
   public static fromUsagePeriod(usagePeriod: SandboxUsagePeriod) {
     const usagePeriodEntity = new SandboxUsagePeriodArchive()
     usagePeriodEntity.sandboxId = usagePeriod.sandboxId
@@ -53,6 +60,7 @@ export class SandboxUsagePeriodArchive {
     usagePeriodEntity.mem = usagePeriod.mem
     usagePeriodEntity.disk = usagePeriod.disk
     usagePeriodEntity.region = usagePeriod.region
+    usagePeriodEntity.sandboxClass = usagePeriod.sandboxClass
     return usagePeriodEntity
   }
 }

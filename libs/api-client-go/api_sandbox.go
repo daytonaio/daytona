@@ -3519,6 +3519,7 @@ type SandboxAPIListSandboxesRequest struct {
 	states *[]SandboxState
 	snapshots *[]string
 	regionIds *[]string
+	sandboxClasses *[]SandboxClass
 	minCpu *float32
 	maxCpu *float32
 	minMemoryGiB *float32
@@ -3592,6 +3593,12 @@ func (r SandboxAPIListSandboxesRequest) Snapshots(snapshots []string) SandboxAPI
 // List of regions IDs to filter by
 func (r SandboxAPIListSandboxesRequest) RegionIds(regionIds []string) SandboxAPIListSandboxesRequest {
 	r.regionIds = &regionIds
+	return r
+}
+
+// List of sandbox classes to filter by
+func (r SandboxAPIListSandboxesRequest) SandboxClasses(sandboxClasses []SandboxClass) SandboxAPIListSandboxesRequest {
+	r.sandboxClasses = &sandboxClasses
 	return r
 }
 
@@ -3776,6 +3783,17 @@ func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesReques
 			}
 		} else {
 			parameterAddToHeaderOrQuery(localVarQueryParams, "regionIds", t, "form", "multi")
+		}
+	}
+	if r.sandboxClasses != nil {
+		t := *r.sandboxClasses
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "sandboxClasses", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "sandboxClasses", t, "form", "multi")
 		}
 	}
 	if r.minCpu != nil {

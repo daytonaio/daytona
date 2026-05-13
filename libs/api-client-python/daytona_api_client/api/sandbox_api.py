@@ -33,6 +33,7 @@ from daytona_api_client.models.port_preview_url import PortPreviewUrl
 from daytona_api_client.models.region_quota import RegionQuota
 from daytona_api_client.models.resize_sandbox import ResizeSandbox
 from daytona_api_client.models.sandbox import Sandbox
+from daytona_api_client.models.sandbox_class import SandboxClass
 from daytona_api_client.models.sandbox_labels import SandboxLabels
 from daytona_api_client.models.sandbox_list_sort_direction import SandboxListSortDirection
 from daytona_api_client.models.sandbox_list_sort_field import SandboxListSortField
@@ -7182,6 +7183,7 @@ class SandboxApi:
         states: Annotated[Optional[List[SandboxState]], Field(description="List of states to filter by.")] = None,
         snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
         region_ids: Annotated[Optional[List[StrictStr]], Field(description="List of regions IDs to filter by")] = None,
+        sandbox_classes: Annotated[Optional[List[SandboxClass]], Field(description="List of sandbox classes to filter by")] = None,
         min_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum CPU")] = None,
         max_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum CPU")] = None,
         min_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
@@ -7233,6 +7235,8 @@ class SandboxApi:
         :type snapshots: List[str]
         :param region_ids: List of regions IDs to filter by
         :type region_ids: List[str]
+        :param sandbox_classes: List of sandbox classes to filter by
+        :type sandbox_classes: List[SandboxClass]
         :param min_cpu: Minimum CPU
         :type min_cpu: float
         :param max_cpu: Maximum CPU
@@ -7294,6 +7298,7 @@ class SandboxApi:
             states=states,
             snapshots=snapshots,
             region_ids=region_ids,
+            sandbox_classes=sandbox_classes,
             min_cpu=min_cpu,
             max_cpu=max_cpu,
             min_memory_gi_b=min_memory_gi_b,
@@ -7341,6 +7346,7 @@ class SandboxApi:
         states: Annotated[Optional[List[SandboxState]], Field(description="List of states to filter by.")] = None,
         snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
         region_ids: Annotated[Optional[List[StrictStr]], Field(description="List of regions IDs to filter by")] = None,
+        sandbox_classes: Annotated[Optional[List[SandboxClass]], Field(description="List of sandbox classes to filter by")] = None,
         min_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum CPU")] = None,
         max_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum CPU")] = None,
         min_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
@@ -7392,6 +7398,8 @@ class SandboxApi:
         :type snapshots: List[str]
         :param region_ids: List of regions IDs to filter by
         :type region_ids: List[str]
+        :param sandbox_classes: List of sandbox classes to filter by
+        :type sandbox_classes: List[SandboxClass]
         :param min_cpu: Minimum CPU
         :type min_cpu: float
         :param max_cpu: Maximum CPU
@@ -7453,6 +7461,7 @@ class SandboxApi:
             states=states,
             snapshots=snapshots,
             region_ids=region_ids,
+            sandbox_classes=sandbox_classes,
             min_cpu=min_cpu,
             max_cpu=max_cpu,
             min_memory_gi_b=min_memory_gi_b,
@@ -7500,6 +7509,7 @@ class SandboxApi:
         states: Annotated[Optional[List[SandboxState]], Field(description="List of states to filter by.")] = None,
         snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
         region_ids: Annotated[Optional[List[StrictStr]], Field(description="List of regions IDs to filter by")] = None,
+        sandbox_classes: Annotated[Optional[List[SandboxClass]], Field(description="List of sandbox classes to filter by")] = None,
         min_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum CPU")] = None,
         max_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum CPU")] = None,
         min_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
@@ -7551,6 +7561,8 @@ class SandboxApi:
         :type snapshots: List[str]
         :param region_ids: List of regions IDs to filter by
         :type region_ids: List[str]
+        :param sandbox_classes: List of sandbox classes to filter by
+        :type sandbox_classes: List[SandboxClass]
         :param min_cpu: Minimum CPU
         :type min_cpu: float
         :param max_cpu: Maximum CPU
@@ -7612,6 +7624,7 @@ class SandboxApi:
             states=states,
             snapshots=snapshots,
             region_ids=region_ids,
+            sandbox_classes=sandbox_classes,
             min_cpu=min_cpu,
             max_cpu=max_cpu,
             min_memory_gi_b=min_memory_gi_b,
@@ -7654,6 +7667,7 @@ class SandboxApi:
         states,
         snapshots,
         region_ids,
+        sandbox_classes,
         min_cpu,
         max_cpu,
         min_memory_gi_b,
@@ -7680,6 +7694,7 @@ class SandboxApi:
             'states': 'multi',
             'snapshots': 'multi',
             'regionIds': 'multi',
+            'sandboxClasses': 'multi',
         }
 
         _path_params: Dict[str, str] = {}
@@ -7728,6 +7743,10 @@ class SandboxApi:
         if region_ids is not None:
             
             _query_params.append(('regionIds', region_ids))
+            
+        if sandbox_classes is not None:
+            
+            _query_params.append(('sandboxClasses', sandbox_classes))
             
         if min_cpu is not None:
             

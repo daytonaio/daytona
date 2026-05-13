@@ -246,7 +246,7 @@ class DaytonaTest {
         doReturn(response).when(sandboxApi).listSandboxes(
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any());
+                any(), any(), any(), any(), any());
 
         ListSandboxesQuery query = new ListSandboxesQuery();
         query.setLabels(Collections.singletonMap("team", "sdk"));
@@ -267,7 +267,7 @@ class DaytonaTest {
                 isNull(),                                  // name
                 eq("{\"team\":\"sdk\"}"),                  // labels JSON
                 isNull(),                                  // includeErroredDeleted
-                isNull(), isNull(), isNull(),              // states, snapshots, regionIds
+                isNull(), isNull(), isNull(), isNull(),    // states, snapshots, regionIds, sandboxClasses
                 isNull(), isNull(),                        // minCpu, maxCpu
                 isNull(), isNull(),                        // minMemoryGiB, maxMemoryGiB
                 isNull(), isNull(),                        // minDiskGiB, maxDiskGiB
@@ -285,7 +285,7 @@ class DaytonaTest {
         doReturn(response).when(sandboxApi).listSandboxes(
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any());
+                any(), any(), any(), any(), any());
 
         Iterator<Sandbox> iter = daytona.list().iterator();
         // Drive the iterator so the API call actually happens.
@@ -295,7 +295,7 @@ class DaytonaTest {
                 isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
                 isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
                 isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-                isNull(), isNull(), isNull(), isNull());
+                isNull(), isNull(), isNull(), isNull(), isNull());
     }
 
     @Test
@@ -307,7 +307,7 @@ class DaytonaTest {
         doReturn(response).when(sandboxApi).listSandboxes(
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any());
+                any(), any(), any(), any(), any());
 
         Iterator<Sandbox> iter = daytona.list(new ListSandboxesQuery()).iterator();
 
@@ -330,7 +330,7 @@ class DaytonaTest {
         doReturn(page1, page2).when(sandboxApi).listSandboxes(
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any());
+                any(), any(), any(), any(), any());
 
         List<String> ids = new ArrayList<>();
         for (Sandbox sandbox : daytona.list()) {
@@ -341,7 +341,7 @@ class DaytonaTest {
         org.mockito.Mockito.verify(sandboxApi, org.mockito.Mockito.times(2)).listSandboxes(
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any());
+                any(), any(), any(), any(), any());
     }
 
     @ParameterizedTest
