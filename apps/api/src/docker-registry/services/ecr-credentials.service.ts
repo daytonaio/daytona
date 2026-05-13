@@ -120,8 +120,13 @@ export class EcrCredentialsService {
   // STS returns `arn:aws:sts::N:assumed-role/X/sess`; convert to the IAM role form `arn:aws:iam::N:role/X` so it can be compared against the user-supplied role ARN.
   private async getApiArn(): Promise<string> {
     if (this.apiArn) return this.apiArn
-    const { Arn } = await new STSClient({}).send(new GetCallerIdentityCommand({})).catch(() => ({ Arn: '' }))
-    this.apiArn = Arn?.replace(/^arn:aws:sts::(\d+):assumed-role\/([^/]+)\/.+$/, 'arn:aws:iam::$1:role/$2') ?? ''
+    try {
+      const { Arn } = await new STSClient({}).send(new GetCallerIdentityCommand({}))
+      this.apiArn = Arn?.replace(/^arn:aws:sts::(\d+):assumed-role\/([^/]+)\/.+$/, 'arn:aws:iam::$1:role/$2') ?? ''
+      this.logger.log(`Resolved API identity: ${this.apiArn || `(empty STS response, raw=${Arn ?? 'undefined'})`}`)
+    } catch (err) {
+      this.logger.warn(`STS GetCallerIdentity failed: ${(err as Error).message}`)
+    }
     return this.apiArn
   }
 }
