@@ -15,7 +15,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@daytona/sdk": "^0.163.0",
-    "@opencode-ai/plugin": "^1.4.11"
+    "@opencode-ai/plugin": "^1.14.33"
   },
   "devDependencies": {
     "@opencode-ai/sdk": "^1.14.33"
