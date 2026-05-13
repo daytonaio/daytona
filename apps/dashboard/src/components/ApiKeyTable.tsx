@@ -22,7 +22,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { KeyRound, Loader2, MoreHorizontal } from 'lucide-react'
-import { type ReactNode, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { PageFooterPortal } from './PageLayout'
 import { Pagination } from './Pagination'
 import { SearchInput } from './SearchInput'
@@ -63,10 +63,9 @@ interface DataTableProps {
   loading: boolean
   isLoadingKey: (key: ApiKeyList) => boolean
   onRevokeRequest: (key: ApiKeyList) => void
-  toolbarActions?: ReactNode
 }
 
-export function ApiKeyTable({ data, loading, isLoadingKey, onRevokeRequest, toolbarActions }: DataTableProps) {
+export function ApiKeyTable({ data, loading, isLoadingKey, onRevokeRequest }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
   const table = useReactTable({
@@ -126,7 +125,6 @@ export function ApiKeyTable({ data, loading, isLoadingKey, onRevokeRequest, tool
           placeholder="Search by Name or Permission"
           containerClassName="min-w-0 flex-1 sm:max-w-sm"
         />
-        <div className="flex shrink-0 items-center gap-2 empty:hidden sm:ml-auto">{toolbarActions}</div>
       </div>
       <TableContainer
         className={isEmpty ? 'min-h-[26rem]' : undefined}
