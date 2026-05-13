@@ -32,6 +32,7 @@ type Config struct {
 	ToolboxOnlyMode       bool               `envconfig:"TOOLBOX_ONLY_MODE"`
 	PreviewWarningEnabled bool               `envconfig:"PREVIEW_WARNING_ENABLED"`
 	ShutdownTimeoutSec    int                `envconfig:"SHUTDOWN_TIMEOUT_SEC"`
+	ApiClientTimeoutSec   int                `envconfig:"API_CLIENT_TIMEOUT_SEC"`
 	ApiClient             *apiclient.APIClient
 }
 
@@ -80,6 +81,10 @@ func GetConfig() (*Config, error) {
 		config.ShutdownTimeoutSec = 60 * 60 // default to 1 hour
 	}
 
+	if config.ApiClientTimeoutSec == 0 {
+		config.ApiClientTimeoutSec = 60
+	}
+
 	if config.Redis != nil {
 		if config.Redis.Host == nil || *config.Redis.Host == "" {
 			config.Redis = nil
@@ -99,6 +104,7 @@ func GetConfig() (*Config, error) {
 
 	config.ApiClient.GetConfig().HTTPClient = &http.Client{
 		Transport: http.DefaultTransport,
+		Timeout:   time.Duration(config.ApiClientTimeoutSec) * time.Second,
 	}
 
 	ctx := context.Background()
