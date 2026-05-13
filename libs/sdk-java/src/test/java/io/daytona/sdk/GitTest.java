@@ -73,6 +73,46 @@ class GitTest {
     }
 
     @Test
+    void cloneBuildsAdvancedRequest() {
+        git.clone("https://example.com/repo.git", "/workspace/repo", new GitCloneOptions()
+                .branch("main")
+                .commitId("abc123")
+                .username("user")
+                .password("pass")
+                .depth(1)
+                .singleBranch(false)
+                .shallowSince("2025-01-01")
+                .noTags(true)
+                .filter("blob:none")
+                .sparse(true)
+                .sparsePaths(Arrays.asList("src", "README.md"))
+                .referencePath("/cache/repo.git")
+                .dissociate(true)
+                .recurseSubmodules(true)
+                .shallowSubmodules(true)
+                .filterSubmodules(true));
+
+        ArgumentCaptor<io.daytona.toolbox.client.model.GitCloneRequest> captor = ArgumentCaptor.forClass(io.daytona.toolbox.client.model.GitCloneRequest.class);
+        verify(gitApi).cloneRepository(captor.capture());
+        assertThat(captor.getValue().getBranch()).isEqualTo("main");
+        assertThat(captor.getValue().getCommitId()).isEqualTo("abc123");
+        assertThat(captor.getValue().getUsername()).isEqualTo("user");
+        assertThat(captor.getValue().getPassword()).isEqualTo("pass");
+        assertThat(captor.getValue().getDepth()).isEqualTo(1);
+        assertThat(captor.getValue().getSingleBranch()).isFalse();
+        assertThat(captor.getValue().getShallowSince()).isEqualTo("2025-01-01");
+        assertThat(captor.getValue().getNoTags()).isTrue();
+        assertThat(captor.getValue().getFilter()).isEqualTo("blob:none");
+        assertThat(captor.getValue().getSparse()).isTrue();
+        assertThat(captor.getValue().getSparsePaths()).containsExactly("src", "README.md");
+        assertThat(captor.getValue().getReferencePath()).isEqualTo("/cache/repo.git");
+        assertThat(captor.getValue().getDissociate()).isTrue();
+        assertThat(captor.getValue().getRecurseSubmodules()).isTrue();
+        assertThat(captor.getValue().getShallowSubmodules()).isTrue();
+        assertThat(captor.getValue().getFilterSubmodules()).isTrue();
+    }
+
+    @Test
     void branchesReturnsResponseData() {
         when(gitApi.listBranches("/repo")).thenReturn(new ListBranchResponse().branches(Arrays.asList("main", "feature")));
 

@@ -17,8 +17,20 @@
 export interface GitCloneRequest {
     'branch'?: string;
     'commit_id'?: string;
+    'depth'?: number;
+    'dissociate'?: boolean;
+    'filter'?: string;
+    'filter_submodules'?: boolean;
+    'no_tags'?: boolean;
     'password'?: string;
     'path': string;
+    'recurse_submodules'?: boolean;
+    'reference_path'?: string;
+    'shallow_since'?: string;
+    'shallow_submodules'?: boolean;
+    'single_branch'?: boolean;
+    'sparse'?: boolean;
+    'sparse_paths'?: Array<string>;
     'url': string;
     'username'?: string;
 }

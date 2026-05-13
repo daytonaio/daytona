@@ -2878,21 +2878,61 @@ components:
       type: object
     GitCloneRequest:
       example:
+        dissociate: true
+        shallow_submodules: true
+        recurse_submodules: true
+        reference_path: reference_path
+        single_branch: true
+        branch: branch
+        url: url
+        filter: filter
+        filter_submodules: true
         path: path
         password: password
-        branch: branch
+        depth: 0
+        sparse: true
+        sparse_paths:
+        - sparse_paths
+        - sparse_paths
+        shallow_since: shallow_since
         commit_id: commit_id
-        url: url
+        no_tags: true
         username: username
       properties:
         branch:
           type: string
         commit_id:
           type: string
+        depth:
+          type: integer
+        dissociate:
+          type: boolean
+        filter:
+          type: string
+        filter_submodules:
+          type: boolean
+        no_tags:
+          type: boolean
         password:
           type: string
         path:
           type: string
+        recurse_submodules:
+          type: boolean
+        reference_path:
+          type: string
+        shallow_since:
+          type: string
+        shallow_submodules:
+          type: boolean
+        single_branch:
+          type: boolean
+        sparse:
+          type: boolean
+        sparse_paths:
+          items:
+            type: string
+          type: array
         url:
           type: string
         username:

@@ -75,6 +75,48 @@ RSpec.describe Daytona::Git do
       end
     end
 
+    it 'passes advanced clone options' do
+      allow(toolbox_api).to receive(:clone_repository)
+
+      git.clone(
+        url: 'https://github.com/user/repo.git',
+        path: '/repo',
+        branch: 'main',
+        commit_id: 'abc123',
+        username: 'user',
+        password: 'token',
+        depth: 1,
+        single_branch: false,
+        shallow_since: '2025-01-01',
+        no_tags: true,
+        filter: 'blob:none',
+        sparse: true,
+        sparse_paths: ['src', 'README.md'],
+        reference_path: '/cache/repo.git',
+        dissociate: true,
+        recurse_submodules: true,
+        shallow_submodules: true,
+        filter_submodules: true
+      )
+
+      expect(toolbox_api).to have_received(:clone_repository) do |req|
+        expect(req.branch).to eq('main')
+        expect(req.commit_id).to eq('abc123')
+        expect(req.depth).to eq(1)
+        expect(req.single_branch).to be(false)
+        expect(req.shallow_since).to eq('2025-01-01')
+        expect(req.no_tags).to be(true)
+        expect(req.filter).to eq('blob:none')
+        expect(req.sparse).to be(true)
+        expect(req.sparse_paths).to eq(['src', 'README.md'])
+        expect(req.reference_path).to eq('/cache/repo.git')
+        expect(req.dissociate).to be(true)
+        expect(req.recurse_submodules).to be(true)
+        expect(req.shallow_submodules).to be(true)
+        expect(req.filter_submodules).to be(true)
+      end
+    end
+
     it 'wraps errors' do
       allow(toolbox_api).to receive(:clone_repository).and_raise(StandardError, 'err')
 

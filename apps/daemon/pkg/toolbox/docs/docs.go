@@ -3471,11 +3471,50 @@ const docTemplate = `{
                 "commit_id": {
                     "type": "string"
                 },
+                "depth": {
+                    "type": "integer"
+                },
+                "dissociate": {
+                    "type": "boolean"
+                },
+                "filter": {
+                    "type": "string"
+                },
+                "filter_submodules": {
+                    "type": "boolean"
+                },
+                "no_tags": {
+                    "type": "boolean"
+                },
                 "password": {
                     "type": "string"
                 },
                 "path": {
                     "type": "string"
+                },
+                "recurse_submodules": {
+                    "type": "boolean"
+                },
+                "reference_path": {
+                    "type": "string"
+                },
+                "shallow_since": {
+                    "type": "string"
+                },
+                "shallow_submodules": {
+                    "type": "boolean"
+                },
+                "single_branch": {
+                    "type": "boolean"
+                },
+                "sparse": {
+                    "type": "boolean"
+                },
+                "sparse_paths": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "url": {
                     "type": "string"

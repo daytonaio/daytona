@@ -11,8 +11,8 @@ API version: v0.0.0-dev
 package toolbox
 
 import (
-	"encoding/json"
 	"bytes"
+	"encoding/json"
 	"fmt"
 )
 
@@ -21,12 +21,24 @@ var _ MappedNullable = &GitCloneRequest{}
 
 // GitCloneRequest struct for GitCloneRequest
 type GitCloneRequest struct {
-	Branch *string `json:"branch,omitempty"`
-	CommitId *string `json:"commit_id,omitempty"`
-	Password *string `json:"password,omitempty"`
-	Path string `json:"path"`
-	Url string `json:"url"`
-	Username *string `json:"username,omitempty"`
+	Branch            *string  `json:"branch,omitempty"`
+	CommitId          *string  `json:"commit_id,omitempty"`
+	Depth             *int32   `json:"depth,omitempty"`
+	Dissociate        *bool    `json:"dissociate,omitempty"`
+	Filter            *string  `json:"filter,omitempty"`
+	FilterSubmodules  *bool    `json:"filter_submodules,omitempty"`
+	NoTags            *bool    `json:"no_tags,omitempty"`
+	Password          *string  `json:"password,omitempty"`
+	Path              string   `json:"path"`
+	RecurseSubmodules *bool    `json:"recurse_submodules,omitempty"`
+	ReferencePath     *string  `json:"reference_path,omitempty"`
+	ShallowSince      *string  `json:"shallow_since,omitempty"`
+	ShallowSubmodules *bool    `json:"shallow_submodules,omitempty"`
+	SingleBranch      *bool    `json:"single_branch,omitempty"`
+	Sparse            *bool    `json:"sparse,omitempty"`
+	SparsePaths       []string `json:"sparse_paths,omitempty"`
+	Url               string   `json:"url"`
+	Username          *string  `json:"username,omitempty"`
 }
 
 type _GitCloneRequest GitCloneRequest
@@ -114,6 +126,166 @@ func (o *GitCloneRequest) SetCommitId(v string) {
 	o.CommitId = &v
 }
 
+// GetDepth returns the Depth field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetDepth() int32 {
+	if o == nil || IsNil(o.Depth) {
+		var ret int32
+		return ret
+	}
+	return *o.Depth
+}
+
+// GetDepthOk returns a tuple with the Depth field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetDepthOk() (*int32, bool) {
+	if o == nil || IsNil(o.Depth) {
+		return nil, false
+	}
+	return o.Depth, true
+}
+
+// HasDepth returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasDepth() bool {
+	if o != nil && !IsNil(o.Depth) {
+		return true
+	}
+
+	return false
+}
+
+// SetDepth gets a reference to the given int32 and assigns it to the Depth field.
+func (o *GitCloneRequest) SetDepth(v int32) {
+	o.Depth = &v
+}
+
+// GetDissociate returns the Dissociate field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetDissociate() bool {
+	if o == nil || IsNil(o.Dissociate) {
+		var ret bool
+		return ret
+	}
+	return *o.Dissociate
+}
+
+// GetDissociateOk returns a tuple with the Dissociate field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetDissociateOk() (*bool, bool) {
+	if o == nil || IsNil(o.Dissociate) {
+		return nil, false
+	}
+	return o.Dissociate, true
+}
+
+// HasDissociate returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasDissociate() bool {
+	if o != nil && !IsNil(o.Dissociate) {
+		return true
+	}
+
+	return false
+}
+
+// SetDissociate gets a reference to the given bool and assigns it to the Dissociate field.
+func (o *GitCloneRequest) SetDissociate(v bool) {
+	o.Dissociate = &v
+}
+
+// GetFilter returns the Filter field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetFilter() string {
+	if o == nil || IsNil(o.Filter) {
+		var ret string
+		return ret
+	}
+	return *o.Filter
+}
+
+// GetFilterOk returns a tuple with the Filter field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetFilterOk() (*string, bool) {
+	if o == nil || IsNil(o.Filter) {
+		return nil, false
+	}
+	return o.Filter, true
+}
+
+// HasFilter returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasFilter() bool {
+	if o != nil && !IsNil(o.Filter) {
+		return true
+	}
+
+	return false
+}
+
+// SetFilter gets a reference to the given string and assigns it to the Filter field.
+func (o *GitCloneRequest) SetFilter(v string) {
+	o.Filter = &v
+}
+
+// GetFilterSubmodules returns the FilterSubmodules field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetFilterSubmodules() bool {
+	if o == nil || IsNil(o.FilterSubmodules) {
+		var ret bool
+		return ret
+	}
+	return *o.FilterSubmodules
+}
+
+// GetFilterSubmodulesOk returns a tuple with the FilterSubmodules field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetFilterSubmodulesOk() (*bool, bool) {
+	if o == nil || IsNil(o.FilterSubmodules) {
+		return nil, false
+	}
+	return o.FilterSubmodules, true
+}
+
+// HasFilterSubmodules returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasFilterSubmodules() bool {
+	if o != nil && !IsNil(o.FilterSubmodules) {
+		return true
+	}
+
+	return false
+}
+
+// SetFilterSubmodules gets a reference to the given bool and assigns it to the FilterSubmodules field.
+func (o *GitCloneRequest) SetFilterSubmodules(v bool) {
+	o.FilterSubmodules = &v
+}
+
+// GetNoTags returns the NoTags field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetNoTags() bool {
+	if o == nil || IsNil(o.NoTags) {
+		var ret bool
+		return ret
+	}
+	return *o.NoTags
+}
+
+// GetNoTagsOk returns a tuple with the NoTags field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetNoTagsOk() (*bool, bool) {
+	if o == nil || IsNil(o.NoTags) {
+		return nil, false
+	}
+	return o.NoTags, true
+}
+
+// HasNoTags returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasNoTags() bool {
+	if o != nil && !IsNil(o.NoTags) {
+		return true
+	}
+
+	return false
+}
+
+// SetNoTags gets a reference to the given bool and assigns it to the NoTags field.
+func (o *GitCloneRequest) SetNoTags(v bool) {
+	o.NoTags = &v
+}
+
 // GetPassword returns the Password field value if set, zero value otherwise.
 func (o *GitCloneRequest) GetPassword() string {
 	if o == nil || IsNil(o.Password) {
@@ -168,6 +340,230 @@ func (o *GitCloneRequest) GetPathOk() (*string, bool) {
 // SetPath sets field value
 func (o *GitCloneRequest) SetPath(v string) {
 	o.Path = v
+}
+
+// GetRecurseSubmodules returns the RecurseSubmodules field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetRecurseSubmodules() bool {
+	if o == nil || IsNil(o.RecurseSubmodules) {
+		var ret bool
+		return ret
+	}
+	return *o.RecurseSubmodules
+}
+
+// GetRecurseSubmodulesOk returns a tuple with the RecurseSubmodules field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetRecurseSubmodulesOk() (*bool, bool) {
+	if o == nil || IsNil(o.RecurseSubmodules) {
+		return nil, false
+	}
+	return o.RecurseSubmodules, true
+}
+
+// HasRecurseSubmodules returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasRecurseSubmodules() bool {
+	if o != nil && !IsNil(o.RecurseSubmodules) {
+		return true
+	}
+
+	return false
+}
+
+// SetRecurseSubmodules gets a reference to the given bool and assigns it to the RecurseSubmodules field.
+func (o *GitCloneRequest) SetRecurseSubmodules(v bool) {
+	o.RecurseSubmodules = &v
+}
+
+// GetReferencePath returns the ReferencePath field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetReferencePath() string {
+	if o == nil || IsNil(o.ReferencePath) {
+		var ret string
+		return ret
+	}
+	return *o.ReferencePath
+}
+
+// GetReferencePathOk returns a tuple with the ReferencePath field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetReferencePathOk() (*string, bool) {
+	if o == nil || IsNil(o.ReferencePath) {
+		return nil, false
+	}
+	return o.ReferencePath, true
+}
+
+// HasReferencePath returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasReferencePath() bool {
+	if o != nil && !IsNil(o.ReferencePath) {
+		return true
+	}
+
+	return false
+}
+
+// SetReferencePath gets a reference to the given string and assigns it to the ReferencePath field.
+func (o *GitCloneRequest) SetReferencePath(v string) {
+	o.ReferencePath = &v
+}
+
+// GetShallowSince returns the ShallowSince field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetShallowSince() string {
+	if o == nil || IsNil(o.ShallowSince) {
+		var ret string
+		return ret
+	}
+	return *o.ShallowSince
+}
+
+// GetShallowSinceOk returns a tuple with the ShallowSince field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetShallowSinceOk() (*string, bool) {
+	if o == nil || IsNil(o.ShallowSince) {
+		return nil, false
+	}
+	return o.ShallowSince, true
+}
+
+// HasShallowSince returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasShallowSince() bool {
+	if o != nil && !IsNil(o.ShallowSince) {
+		return true
+	}
+
+	return false
+}
+
+// SetShallowSince gets a reference to the given string and assigns it to the ShallowSince field.
+func (o *GitCloneRequest) SetShallowSince(v string) {
+	o.ShallowSince = &v
+}
+
+// GetShallowSubmodules returns the ShallowSubmodules field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetShallowSubmodules() bool {
+	if o == nil || IsNil(o.ShallowSubmodules) {
+		var ret bool
+		return ret
+	}
+	return *o.ShallowSubmodules
+}
+
+// GetShallowSubmodulesOk returns a tuple with the ShallowSubmodules field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetShallowSubmodulesOk() (*bool, bool) {
+	if o == nil || IsNil(o.ShallowSubmodules) {
+		return nil, false
+	}
+	return o.ShallowSubmodules, true
+}
+
+// HasShallowSubmodules returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasShallowSubmodules() bool {
+	if o != nil && !IsNil(o.ShallowSubmodules) {
+		return true
+	}
+
+	return false
+}
+
+// SetShallowSubmodules gets a reference to the given bool and assigns it to the ShallowSubmodules field.
+func (o *GitCloneRequest) SetShallowSubmodules(v bool) {
+	o.ShallowSubmodules = &v
+}
+
+// GetSingleBranch returns the SingleBranch field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetSingleBranch() bool {
+	if o == nil || IsNil(o.SingleBranch) {
+		var ret bool
+		return ret
+	}
+	return *o.SingleBranch
+}
+
+// GetSingleBranchOk returns a tuple with the SingleBranch field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetSingleBranchOk() (*bool, bool) {
+	if o == nil || IsNil(o.SingleBranch) {
+		return nil, false
+	}
+	return o.SingleBranch, true
+}
+
+// HasSingleBranch returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasSingleBranch() bool {
+	if o != nil && !IsNil(o.SingleBranch) {
+		return true
+	}
+
+	return false
+}
+
+// SetSingleBranch gets a reference to the given bool and assigns it to the SingleBranch field.
+func (o *GitCloneRequest) SetSingleBranch(v bool) {
+	o.SingleBranch = &v
+}
+
+// GetSparse returns the Sparse field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetSparse() bool {
+	if o == nil || IsNil(o.Sparse) {
+		var ret bool
+		return ret
+	}
+	return *o.Sparse
+}
+
+// GetSparseOk returns a tuple with the Sparse field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetSparseOk() (*bool, bool) {
+	if o == nil || IsNil(o.Sparse) {
+		return nil, false
+	}
+	return o.Sparse, true
+}
+
+// HasSparse returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasSparse() bool {
+	if o != nil && !IsNil(o.Sparse) {
+		return true
+	}
+
+	return false
+}
+
+// SetSparse gets a reference to the given bool and assigns it to the Sparse field.
+func (o *GitCloneRequest) SetSparse(v bool) {
+	o.Sparse = &v
+}
+
+// GetSparsePaths returns the SparsePaths field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetSparsePaths() []string {
+	if o == nil || IsNil(o.SparsePaths) {
+		var ret []string
+		return ret
+	}
+	return o.SparsePaths
+}
+
+// GetSparsePathsOk returns a tuple with the SparsePaths field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetSparsePathsOk() ([]string, bool) {
+	if o == nil || IsNil(o.SparsePaths) {
+		return nil, false
+	}
+	return o.SparsePaths, true
+}
+
+// HasSparsePaths returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasSparsePaths() bool {
+	if o != nil && !IsNil(o.SparsePaths) {
+		return true
+	}
+
+	return false
+}
+
+// SetSparsePaths gets a reference to the given []string and assigns it to the SparsePaths field.
+func (o *GitCloneRequest) SetSparsePaths(v []string) {
+	o.SparsePaths = v
 }
 
 // GetUrl returns the Url field value
@@ -227,7 +623,7 @@ func (o *GitCloneRequest) SetUsername(v string) {
 }
 
 func (o GitCloneRequest) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -242,10 +638,46 @@ func (o GitCloneRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.CommitId) {
 		toSerialize["commit_id"] = o.CommitId
 	}
+	if !IsNil(o.Depth) {
+		toSerialize["depth"] = o.Depth
+	}
+	if !IsNil(o.Dissociate) {
+		toSerialize["dissociate"] = o.Dissociate
+	}
+	if !IsNil(o.Filter) {
+		toSerialize["filter"] = o.Filter
+	}
+	if !IsNil(o.FilterSubmodules) {
+		toSerialize["filter_submodules"] = o.FilterSubmodules
+	}
+	if !IsNil(o.NoTags) {
+		toSerialize["no_tags"] = o.NoTags
+	}
 	if !IsNil(o.Password) {
 		toSerialize["password"] = o.Password
 	}
 	toSerialize["path"] = o.Path
+	if !IsNil(o.RecurseSubmodules) {
+		toSerialize["recurse_submodules"] = o.RecurseSubmodules
+	}
+	if !IsNil(o.ReferencePath) {
+		toSerialize["reference_path"] = o.ReferencePath
+	}
+	if !IsNil(o.ShallowSince) {
+		toSerialize["shallow_since"] = o.ShallowSince
+	}
+	if !IsNil(o.ShallowSubmodules) {
+		toSerialize["shallow_submodules"] = o.ShallowSubmodules
+	}
+	if !IsNil(o.SingleBranch) {
+		toSerialize["single_branch"] = o.SingleBranch
+	}
+	if !IsNil(o.Sparse) {
+		toSerialize["sparse"] = o.Sparse
+	}
+	if !IsNil(o.SparsePaths) {
+		toSerialize["sparse_paths"] = o.SparsePaths
+	}
 	toSerialize["url"] = o.Url
 	if !IsNil(o.Username) {
 		toSerialize["username"] = o.Username
@@ -267,10 +699,10 @@ func (o *GitCloneRequest) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err;
+		return err
 	}
 
-	for _, requiredProperty := range(requiredProperties) {
+	for _, requiredProperty := range requiredProperties {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -326,5 +758,3 @@ func (v *NullableGitCloneRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
