@@ -263,7 +263,7 @@ GEM
       event_emitter
       mutex_m
       websocket
-    yard (0.9.38)
+    yard (0.9.42)
     yard-activesupport-concern (0.0.1)
       yard (>= 0.8)
     yard-markdown (0.5.0)
