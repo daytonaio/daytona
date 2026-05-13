@@ -366,16 +366,16 @@ Daytona supports creating snapshots from images from GitHub Container Registry.
 
 #### Amazon Elastic Container Registry (ECR)
 
-Daytona pulls private ECR images via cross-account IAM role assumption — you create a role in your AWS account that trusts Daytona's runner principal, and Daytona assumes it on every pull to fetch a short-lived ECR token. No long-lived AWS credentials are shared, and no manual token rotation is needed.
+Daytona pulls private ECR images via cross-account IAM role assumption — you create a role in your AWS account that trusts Daytona's broker principal, and Daytona assumes it on every pull to fetch a short-lived ECR token. No long-lived AWS credentials are shared, and no manual token rotation is needed.
 
 You'll need two values:
 
-- **Daytona Broker ARN**: `arn:aws:iam::<DAYTONA_AWS_ACCOUNT>:role/<broker-role-name>` — the IAM principal Daytona's runners use. Self-hosted: this is the IAM role your runner pods assume (e.g. via IRSA).
+- **Daytona Broker ARN**: `arn:aws:iam::967657494466:role/DaytonaEcrCredentialBroker` — the IAM principal Daytona uses to assume into your role. Self-hosted: substitute the IAM role your API pods assume (e.g. via IRSA).
 - **External ID**: your Daytona organization ID, visible in the dashboard URL (`/dashboard/<orgId>/...`) and on your organization settings page.
 
 ##### 1. Create an IAM role in your AWS account
 
-Create an IAM role with the trust and permissions policies below. Replace `<DAYTONA_BROKER_ARN>` and `<YOUR_EXTERNAL_ID>` with the values above.
+Create an IAM role with the trust and permissions policies below. Replace `<YOUR_EXTERNAL_ID>` with your organization ID.
 
 Trust policy:
 
@@ -384,7 +384,7 @@ Trust policy:
   "Version": "2012-10-17",
   "Statement": [{
     "Effect": "Allow",
-    "Principal": { "AWS": "<DAYTONA_BROKER_ARN>" },
+    "Principal": { "AWS": "arn:aws:iam::967657494466:role/DaytonaEcrCredentialBroker" },
     "Action": "sts:AssumeRole",
     "Condition": {
       "StringEquals": {

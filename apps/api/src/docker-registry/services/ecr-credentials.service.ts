@@ -23,12 +23,14 @@ const REFRESH_BUFFER_SEC = 30 * 60
 export class EcrCredentialsService {
   private readonly logger = new Logger(EcrCredentialsService.name)
   private readonly apiIdentityRoleArn: string
+  private readonly brokerRoleArn: string
 
   constructor(
     @InjectRedis() private readonly redis: Redis,
     configService: TypedConfigService,
   ) {
     this.apiIdentityRoleArn = configService.get('ecr.apiIdentityRoleArn')?.trim() ?? ''
+    this.brokerRoleArn = configService.get('ecr.brokerRoleArn')?.trim() ?? ''
   }
 
   isEcrUrl(url: string): boolean {
@@ -62,16 +64,27 @@ export class EcrCredentialsService {
       }
     }
 
+    // When set, hop through a broker role so neither ECR nor customer trust policies see the pod's IRSA identity.
+    const baseCredentials = this.brokerRoleArn
+      ? fromTemporaryCredentials({
+          params: {
+            RoleArn: this.brokerRoleArn,
+            RoleSessionName: `daytona-${externalId}-broker`,
+          },
+        })
+      : undefined
+
     const ecr = new ECRClient({
       region,
       credentials: useApiIdentity
-        ? undefined
+        ? baseCredentials
         : fromTemporaryCredentials({
             params: {
               RoleArn: normalizedArn,
               RoleSessionName: `daytona-${externalId}-pull`,
               ExternalId: externalId,
             },
+            masterCredentials: baseCredentials,
           }),
     })
 
@@ -99,7 +112,7 @@ export class EcrCredentialsService {
     }
 
     this.logger.log(
-      `Resolved ECR credentials for region=${region} role=${useApiIdentity ? '(API identity)' : normalizedArn}`,
+      `Resolved ECR credentials for region=${region} role=${useApiIdentity ? '(API identity)' : normalizedArn}${this.brokerRoleArn ? ' via broker' : ''}`,
     )
     return auth
   }

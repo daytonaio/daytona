@@ -78,6 +78,7 @@ const configuration = {
   },
   ecr: {
     apiIdentityRoleArn: process.env.ECR_API_IDENTITY_ROLE_ARN,
+    brokerRoleArn: process.env.ECR_BROKER_ROLE_ARN,
   },
   s3: {
     endpoint: process.env.S3_ENDPOINT,
