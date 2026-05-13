@@ -21,6 +21,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from daytona_api_client_async.models.create_build_info import CreateBuildInfo
+from daytona_api_client_async.models.sandbox_class import SandboxClass
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
@@ -40,8 +41,9 @@ class CreateSnapshot(BaseModel):
     disk: Optional[StrictInt] = Field(default=None, description="Disk space allocated to the sandbox in GB")
     build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the snapshot", serialization_alias="buildInfo")
     region_id: Optional[StrictStr] = Field(default=None, description="ID of the region where the snapshot will be available. Defaults to organization default region if not specified.", serialization_alias="regionId")
+    sandbox_class: Optional[SandboxClass] = Field(default=None, description="Target sandbox class. Determines which runners can host sandboxes created from this snapshot.", serialization_alias="sandboxClass")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "imageName", "entrypoint", "cpu", "gpu", "memory", "disk", "buildInfo", "regionId"]
+    __properties: ClassVar[List[str]] = ["name", "imageName", "entrypoint", "cpu", "gpu", "memory", "disk", "buildInfo", "regionId", "sandboxClass"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -111,7 +113,8 @@ class CreateSnapshot(BaseModel):
             "memory": obj.get("memory"),
             "disk": obj.get("disk"),
             "build_info": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
-            "region_id": obj.get("regionId")
+            "region_id": obj.get("regionId"),
+            "sandbox_class": obj.get("sandboxClass")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

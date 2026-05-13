@@ -403,9 +403,14 @@ export class OrganizationController {
         regionId: req.params.regionId,
       }),
       body: (req: TypedRequest<UpdateOrganizationRegionQuotaDto>) => ({
+        sandboxClass: req.body?.sandboxClass,
         totalCpuQuota: req.body?.totalCpuQuota,
         totalMemoryQuota: req.body?.totalMemoryQuota,
         totalDiskQuota: req.body?.totalDiskQuota,
+        maxCpuPerSandbox: req.body?.maxCpuPerSandbox,
+        maxMemoryPerSandbox: req.body?.maxMemoryPerSandbox,
+        maxDiskPerSandbox: req.body?.maxDiskPerSandbox,
+        maxDiskPerNonEphemeralSandbox: req.body?.maxDiskPerNonEphemeralSandbox,
       }),
     },
   })

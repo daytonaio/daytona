@@ -99,10 +99,10 @@ public class Runner {
   @javax.annotation.Nullable
   private String gpuType;
 
-  public static final String SERIALIZED_NAME_PROPERTY_CLASS = "class";
-  @SerializedName(SERIALIZED_NAME_PROPERTY_CLASS)
-  @javax.annotation.Nonnull
-  private SandboxClass propertyClass;
+  public static final String SERIALIZED_NAME_SANDBOX_CLASS = "sandboxClass";
+  @SerializedName(SERIALIZED_NAME_SANDBOX_CLASS)
+  @javax.annotation.Nullable
+  private SandboxClass sandboxClass;
 
   public static final String SERIALIZED_NAME_CURRENT_CPU_USAGE_PERCENTAGE = "currentCpuUsagePercentage";
   @SerializedName(SERIALIZED_NAME_CURRENT_CPU_USAGE_PERCENTAGE)
@@ -381,22 +381,22 @@ public class Runner {
   }
 
 
-  public Runner propertyClass(@javax.annotation.Nonnull SandboxClass propertyClass) {
-    this.propertyClass = propertyClass;
+  public Runner sandboxClass(@javax.annotation.Nullable SandboxClass sandboxClass) {
+    this.sandboxClass = sandboxClass;
     return this;
   }
 
   /**
-   * The class of the runner
-   * @return propertyClass
+   * The sandbox class supported by this runner
+   * @return sandboxClass
    */
-  @javax.annotation.Nonnull
-  public SandboxClass getPropertyClass() {
-    return propertyClass;
+  @javax.annotation.Nullable
+  public SandboxClass getSandboxClass() {
+    return sandboxClass;
   }
 
-  public void setPropertyClass(@javax.annotation.Nonnull SandboxClass propertyClass) {
-    this.propertyClass = propertyClass;
+  public void setSandboxClass(@javax.annotation.Nullable SandboxClass sandboxClass) {
+    this.sandboxClass = sandboxClass;
   }
 
 
@@ -855,7 +855,7 @@ public class Runner {
         Objects.equals(this.disk, runner.disk) &&
         Objects.equals(this.gpu, runner.gpu) &&
         Objects.equals(this.gpuType, runner.gpuType) &&
-        Objects.equals(this.propertyClass, runner.propertyClass) &&
+        Objects.equals(this.sandboxClass, runner.sandboxClass) &&
         Objects.equals(this.currentCpuUsagePercentage, runner.currentCpuUsagePercentage) &&
         Objects.equals(this.currentMemoryUsagePercentage, runner.currentMemoryUsagePercentage) &&
         Objects.equals(this.currentDiskUsagePercentage, runner.currentDiskUsagePercentage) &&
@@ -881,7 +881,7 @@ public class Runner {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, domain, apiUrl, proxyUrl, cpu, memory, disk, gpu, gpuType, propertyClass, currentCpuUsagePercentage, currentMemoryUsagePercentage, currentDiskUsagePercentage, currentAllocatedCpu, currentAllocatedMemoryGiB, currentAllocatedDiskGiB, currentSnapshotCount, currentStartedSandboxes, availabilityScore, region, name, state, lastChecked, unschedulable, createdAt, updatedAt, version, apiVersion, runnerClass, appVersion, additionalProperties);
+    return Objects.hash(id, domain, apiUrl, proxyUrl, cpu, memory, disk, gpu, gpuType, sandboxClass, currentCpuUsagePercentage, currentMemoryUsagePercentage, currentDiskUsagePercentage, currentAllocatedCpu, currentAllocatedMemoryGiB, currentAllocatedDiskGiB, currentSnapshotCount, currentStartedSandboxes, availabilityScore, region, name, state, lastChecked, unschedulable, createdAt, updatedAt, version, apiVersion, runnerClass, appVersion, additionalProperties);
   }
 
   @Override
@@ -897,7 +897,7 @@ public class Runner {
     sb.append("    disk: ").append(toIndentedString(disk)).append("\n");
     sb.append("    gpu: ").append(toIndentedString(gpu)).append("\n");
     sb.append("    gpuType: ").append(toIndentedString(gpuType)).append("\n");
-    sb.append("    propertyClass: ").append(toIndentedString(propertyClass)).append("\n");
+    sb.append("    sandboxClass: ").append(toIndentedString(sandboxClass)).append("\n");
     sb.append("    currentCpuUsagePercentage: ").append(toIndentedString(currentCpuUsagePercentage)).append("\n");
     sb.append("    currentMemoryUsagePercentage: ").append(toIndentedString(currentMemoryUsagePercentage)).append("\n");
     sb.append("    currentDiskUsagePercentage: ").append(toIndentedString(currentDiskUsagePercentage)).append("\n");
@@ -937,10 +937,10 @@ public class Runner {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version", "apiVersion", "runnerClass", "appVersion"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "sandboxClass", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version", "apiVersion", "runnerClass", "appVersion"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "cpu", "memory", "disk", "class", "region", "name", "state", "unschedulable", "createdAt", "updatedAt", "version", "apiVersion", "runnerClass"));
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "cpu", "memory", "disk", "region", "name", "state", "unschedulable", "createdAt", "updatedAt", "version", "apiVersion", "runnerClass"));
   }
 
   /**
@@ -978,8 +978,10 @@ public class Runner {
       if ((jsonObj.get("gpuType") != null && !jsonObj.get("gpuType").isJsonNull()) && !jsonObj.get("gpuType").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `gpuType` to be a primitive type in the JSON string but got `%s`", jsonObj.get("gpuType").toString()));
       }
-      // validate the required field `class`
-      SandboxClass.validateJsonElement(jsonObj.get("class"));
+      // validate the optional field `sandboxClass`
+      if (jsonObj.get("sandboxClass") != null && !jsonObj.get("sandboxClass").isJsonNull()) {
+        SandboxClass.validateJsonElement(jsonObj.get("sandboxClass"));
+      }
       if (!jsonObj.get("region").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `region` to be a primitive type in the JSON string but got `%s`", jsonObj.get("region").toString()));
       }

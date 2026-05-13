@@ -19,6 +19,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.daytona.api.client.model.CreateBuildInfo;
+import io.daytona.api.client.model.SandboxClass;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -110,6 +111,14 @@ public class CreateSnapshotTest {
     @Test
     public void regionIdTest() {
         // TODO: test regionId
+    }
+
+    /**
+     * Test the property 'sandboxClass'
+     */
+    @Test
+    public void sandboxClassTest() {
+        // TODO: test sandboxClass
     }
 
 }

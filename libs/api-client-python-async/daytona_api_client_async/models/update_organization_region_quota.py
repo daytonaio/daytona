@@ -20,6 +20,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
 from typing import Any, ClassVar, Dict, List, Optional, Union
+from daytona_api_client_async.models.sandbox_class import SandboxClass
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
@@ -30,6 +31,7 @@ class UpdateOrganizationRegionQuota(BaseModel):
     """
     UpdateOrganizationRegionQuota
     """ # noqa: E501
+    sandbox_class: Optional[SandboxClass] = Field(default=None, serialization_alias="sandboxClass")
     total_cpu_quota: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="totalCpuQuota")
     total_memory_quota: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="totalMemoryQuota")
     total_disk_quota: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="totalDiskQuota")
@@ -38,7 +40,7 @@ class UpdateOrganizationRegionQuota(BaseModel):
     max_disk_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxDiskPerSandbox")
     max_disk_per_non_ephemeral_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxDiskPerNonEphemeralSandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"]
+    __properties: ClassVar[List[str]] = ["sandboxClass", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -132,6 +134,7 @@ class UpdateOrganizationRegionQuota(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "sandbox_class": obj.get("sandboxClass"),
             "total_cpu_quota": obj.get("totalCpuQuota"),
             "total_memory_quota": obj.get("totalMemoryQuota"),
             "total_disk_quota": obj.get("totalDiskQuota"),

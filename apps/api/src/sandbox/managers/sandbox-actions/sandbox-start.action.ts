@@ -184,7 +184,7 @@ export class SandboxStartAction extends SandboxAction {
     try {
       const runner = await this.runnerService.getRandomAvailableRunner({
         regions: [sandbox.region],
-        sandboxClass: sandbox.class,
+        sandboxClass: sandbox.sandboxClass,
         snapshotRef: snapshotRef,
         ...(buildInfoOverloadedRunnerIds.length > 0 && { excludedRunnerIds: buildInfoOverloadedRunnerIds }),
         ...(isBuild &&
@@ -250,7 +250,7 @@ export class SandboxStartAction extends SandboxAction {
     try {
       runner = await this.runnerService.getRandomAvailableRunner({
         regions: [sandbox.region],
-        sandboxClass: sandbox.class,
+        sandboxClass: sandbox.sandboxClass,
         excludedRunnerIds: excludedRunnerIds,
         ...(isBuild &&
           declarativeBuildScoreThreshold !== undefined && {
@@ -468,7 +468,7 @@ export class SandboxStartAction extends SandboxAction {
         if (runner.availabilityScore < this.configService.getOrThrow('runnerScore.thresholds.availability')) {
           const availableRunners = await this.runnerService.findAvailableRunners({
             regions: [sandbox.region],
-            sandboxClass: sandbox.class,
+            sandboxClass: sandbox.sandboxClass,
           })
           const lessUsedRunners = availableRunners.filter((runner) => runner.id !== originalRunnerId)
 
@@ -745,7 +745,7 @@ export class SandboxStartAction extends SandboxAction {
     const runnersWithBaseSnapshot: Runner[] = snapshotRef
       ? await this.runnerService.findAvailableRunners({
           regions: [sandbox.region],
-          sandboxClass: sandbox.class,
+          sandboxClass: sandbox.sandboxClass,
           snapshotRef,
           excludedRunnerIds,
         })
@@ -756,6 +756,7 @@ export class SandboxStartAction extends SandboxAction {
       //  if no runner has the base snapshot, get all available runners
       availableRunners = await this.runnerService.findAvailableRunners({
         regions: [sandbox.region],
+        sandboxClass: sandbox.sandboxClass,
         excludedRunnerIds,
       })
     }

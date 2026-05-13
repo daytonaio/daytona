@@ -64,9 +64,9 @@ export interface RunnerFull {
      */
     'gpuType'?: string;
     /**
-     * The class of the runner
+     * The sandbox class supported by this runner
      */
-    'class': SandboxClass;
+    'sandboxClass'?: SandboxClass;
     /**
      * Current CPU usage percentage
      */

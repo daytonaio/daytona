@@ -19,7 +19,6 @@ import { ConfigService } from '@nestjs/config'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
-import { SandboxClass } from '../enums/sandbox-class.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { Runner } from '../entities/runner.entity'
@@ -35,7 +34,6 @@ import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 export type FetchWarmPoolSandboxParams = {
   snapshot: string | Snapshot
   target: string
-  class: SandboxClass
   cpu: number
   mem: number
   disk: number
@@ -104,7 +102,6 @@ export class SandboxWarmPoolService {
       where: {
         snapshot: snapshot.name,
         target: params.target,
-        class: params.class,
         cpu: params.cpu,
         mem: params.mem,
         disk: params.disk,
@@ -126,8 +123,7 @@ export class SandboxWarmPoolService {
 
       const queryBuilder = this.sandboxRepository
         .createQueryBuilder('sandbox')
-        .where('sandbox.class = :class', { class: warmPoolItem.class })
-        .andWhere('sandbox.cpu = :cpu', { cpu: warmPoolItem.cpu })
+        .where('sandbox.cpu = :cpu', { cpu: warmPoolItem.cpu })
         .andWhere('sandbox.mem = :mem', { mem: warmPoolItem.mem })
         .andWhere('sandbox.disk = :disk', { disk: warmPoolItem.disk })
         .andWhere('sandbox.snapshot = :snapshot', { snapshot: snapshot.name })
@@ -186,7 +182,6 @@ export class SandboxWarmPoolService {
           where: {
             snapshot: warmPoolItem.snapshot,
             organizationId: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
-            class: warmPoolItem.class,
             osUser: warmPoolItem.osUser,
             env: warmPoolItem.env,
             region: warmPoolItem.target,
@@ -227,7 +222,6 @@ export class SandboxWarmPoolService {
     const warmPoolItem = await this.warmPoolRepository.findOne({
       where: {
         snapshot: event.sandbox.snapshot,
-        class: event.sandbox.class,
         cpu: event.sandbox.cpu,
         mem: event.sandbox.mem,
         disk: event.sandbox.disk,
@@ -246,7 +240,6 @@ export class SandboxWarmPoolService {
       where: {
         snapshot: warmPoolItem.snapshot,
         organizationId: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
-        class: warmPoolItem.class,
         osUser: warmPoolItem.osUser,
         env: warmPoolItem.env,
         region: warmPoolItem.target,

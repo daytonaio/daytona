@@ -4,6 +4,7 @@
  */
 
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
+import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
 
 @Entity('sandbox_usage_periods')
 @Index('idx_sandbox_usage_periods_sandbox_end', ['sandboxId', 'endAt'])
@@ -39,6 +40,12 @@ export class SandboxUsagePeriod {
   @Column()
   region: string
 
+  @Column({
+    type: 'character varying',
+    default: SandboxClass.CONTAINER,
+  })
+  sandboxClass: SandboxClass = SandboxClass.CONTAINER
+
   public static fromUsagePeriod(usagePeriod: SandboxUsagePeriod) {
     const usagePeriodEntity = new SandboxUsagePeriod()
     usagePeriodEntity.sandboxId = usagePeriod.sandboxId
@@ -50,6 +57,7 @@ export class SandboxUsagePeriod {
     usagePeriodEntity.mem = usagePeriod.mem
     usagePeriodEntity.disk = usagePeriod.disk
     usagePeriodEntity.region = usagePeriod.region
+    usagePeriodEntity.sandboxClass = usagePeriod.sandboxClass
     return usagePeriodEntity
   }
 }

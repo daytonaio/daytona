@@ -19,6 +19,7 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import io.daytona.api.client.model.SandboxClass;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -60,6 +61,11 @@ public class RegionQuota {
   @SerializedName(SERIALIZED_NAME_REGION_ID)
   @javax.annotation.Nonnull
   private String regionId;
+
+  public static final String SERIALIZED_NAME_SANDBOX_CLASS = "sandboxClass";
+  @SerializedName(SERIALIZED_NAME_SANDBOX_CLASS)
+  @javax.annotation.Nonnull
+  private SandboxClass sandboxClass;
 
   public static final String SERIALIZED_NAME_TOTAL_CPU_QUOTA = "totalCpuQuota";
   @SerializedName(SERIALIZED_NAME_TOTAL_CPU_QUOTA)
@@ -134,6 +140,25 @@ public class RegionQuota {
 
   public void setRegionId(@javax.annotation.Nonnull String regionId) {
     this.regionId = regionId;
+  }
+
+
+  public RegionQuota sandboxClass(@javax.annotation.Nonnull SandboxClass sandboxClass) {
+    this.sandboxClass = sandboxClass;
+    return this;
+  }
+
+  /**
+   * Get sandboxClass
+   * @return sandboxClass
+   */
+  @javax.annotation.Nonnull
+  public SandboxClass getSandboxClass() {
+    return sandboxClass;
+  }
+
+  public void setSandboxClass(@javax.annotation.Nonnull SandboxClass sandboxClass) {
+    this.sandboxClass = sandboxClass;
   }
 
 
@@ -326,6 +351,7 @@ public class RegionQuota {
     RegionQuota regionQuota = (RegionQuota) o;
     return Objects.equals(this.organizationId, regionQuota.organizationId) &&
         Objects.equals(this.regionId, regionQuota.regionId) &&
+        Objects.equals(this.sandboxClass, regionQuota.sandboxClass) &&
         Objects.equals(this.totalCpuQuota, regionQuota.totalCpuQuota) &&
         Objects.equals(this.totalMemoryQuota, regionQuota.totalMemoryQuota) &&
         Objects.equals(this.totalDiskQuota, regionQuota.totalDiskQuota) &&
@@ -338,7 +364,7 @@ public class RegionQuota {
 
   @Override
   public int hashCode() {
-    return Objects.hash(organizationId, regionId, totalCpuQuota, totalMemoryQuota, totalDiskQuota, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, additionalProperties);
+    return Objects.hash(organizationId, regionId, sandboxClass, totalCpuQuota, totalMemoryQuota, totalDiskQuota, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, additionalProperties);
   }
 
   @Override
@@ -347,6 +373,7 @@ public class RegionQuota {
     sb.append("class RegionQuota {\n");
     sb.append("    organizationId: ").append(toIndentedString(organizationId)).append("\n");
     sb.append("    regionId: ").append(toIndentedString(regionId)).append("\n");
+    sb.append("    sandboxClass: ").append(toIndentedString(sandboxClass)).append("\n");
     sb.append("    totalCpuQuota: ").append(toIndentedString(totalCpuQuota)).append("\n");
     sb.append("    totalMemoryQuota: ").append(toIndentedString(totalMemoryQuota)).append("\n");
     sb.append("    totalDiskQuota: ").append(toIndentedString(totalDiskQuota)).append("\n");
@@ -373,10 +400,10 @@ public class RegionQuota {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("organizationId", "regionId", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
+    openapiFields = new HashSet<String>(Arrays.asList("organizationId", "regionId", "sandboxClass", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>(Arrays.asList("organizationId", "regionId", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("organizationId", "regionId", "sandboxClass", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
   }
 
   /**
@@ -405,6 +432,8 @@ public class RegionQuota {
       if (!jsonObj.get("regionId").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `regionId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("regionId").toString()));
       }
+      // validate the required field `sandboxClass`
+      SandboxClass.validateJsonElement(jsonObj.get("sandboxClass"));
   }
 
   public static class CustomTypeAdapterFactory implements TypeAdapterFactory {

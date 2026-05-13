@@ -509,6 +509,7 @@ export class JobStateHandlerService {
         await this.organizationUsageService.decrementPendingSandboxUsage(
           sandbox.organizationId,
           sandbox.region,
+          sandbox.sandboxClass,
           skipStart ? undefined : sandbox.cpu,
           skipStart ? undefined : sandbox.mem,
           sandbox.disk,
@@ -538,6 +539,7 @@ export class JobStateHandlerService {
         await this.organizationUsageService.decrementPendingSandboxUsage(
           sandbox.organizationId,
           sandbox.region,
+          sandbox.sandboxClass,
           skipStart ? undefined : sandbox.cpu,
           skipStart ? undefined : sandbox.mem,
           sandbox.disk,
@@ -612,6 +614,7 @@ export class JobStateHandlerService {
         await this.organizationUsageService.applyResizeUsageChange(
           sandbox.organizationId,
           sandbox.region,
+          sandbox.sandboxClass,
           cpuDeltaForQuota,
           memDeltaForQuota,
           diskDeltaForQuota,
@@ -623,6 +626,7 @@ export class JobStateHandlerService {
         await this.organizationUsageService.decrementPendingSandboxUsage(
           sandbox.organizationId,
           sandbox.region,
+          sandbox.sandboxClass,
           cpuDeltaForQuota !== 0 ? cpuDeltaForQuota : undefined,
           memDeltaForQuota !== 0 ? memDeltaForQuota : undefined,
           diskDeltaForQuota !== 0 ? diskDeltaForQuota : undefined,
@@ -797,6 +801,7 @@ export class JobStateHandlerService {
                 ref: snapshotRef,
                 runnerId: job.runnerId,
                 regionId: sandbox.region,
+                sandboxClass: sandbox.sandboxClass,
                 cpu: sandbox.cpu,
                 gpu: sandbox.gpu,
                 mem: sandbox.mem,

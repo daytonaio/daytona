@@ -88,7 +88,7 @@ export class WorkspaceDto extends SandboxDto {
         providerMetadata: JSON.stringify({
           state: sandboxDto.state,
           region: sandboxDto.target,
-          class: sandboxDto.class,
+          class: sandboxDto.sandboxClass,
           updatedAt: sandboxDto.updatedAt,
           lastSnapshot: sandboxDto.backupCreatedAt,
           cpu: sandboxDto.cpu,

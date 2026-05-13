@@ -20,6 +20,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
+from daytona_api_client.models.sandbox_class import SandboxClass
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
@@ -31,6 +32,7 @@ class RegionUsageOverview(BaseModel):
     RegionUsageOverview
     """ # noqa: E501
     region_id: StrictStr = Field(serialization_alias="regionId")
+    sandbox_class: SandboxClass = Field(serialization_alias="sandboxClass")
     total_cpu_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalCpuQuota")
     current_cpu_usage: Union[StrictFloat, StrictInt] = Field(serialization_alias="currentCpuUsage")
     total_memory_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalMemoryQuota")
@@ -42,7 +44,7 @@ class RegionUsageOverview(BaseModel):
     max_disk_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxDiskPerSandbox")
     max_disk_per_non_ephemeral_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxDiskPerNonEphemeralSandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["regionId", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"]
+    __properties: ClassVar[List[str]] = ["regionId", "sandboxClass", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -122,6 +124,7 @@ class RegionUsageOverview(BaseModel):
 
         _obj = cls.model_validate({
             "region_id": obj.get("regionId"),
+            "sandbox_class": obj.get("sandboxClass"),
             "total_cpu_quota": obj.get("totalCpuQuota"),
             "current_cpu_usage": obj.get("currentCpuUsage"),
             "total_memory_quota": obj.get("totalMemoryQuota"),

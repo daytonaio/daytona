@@ -115,7 +115,6 @@ __Flags__
 | `--auto-archive` |  | Auto-archive interval in minutes (0 means the maximum interval will be used) |
 | `--auto-delete` |  | Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) |
 | `--auto-stop` |  | Auto-stop interval in minutes (0 means disabled) |
-| `--class` |  | Sandbox class type (small, medium, large) |
 | `--context` | `-c` | Files or directories to include in the build context (can be specified multiple times) |
 | `--cpu` |  | CPU cores allocated to the sandbox |
 | `--disk` |  | Disk space allocated to the sandbox in GB |
@@ -406,7 +405,7 @@ __Flags__
 Delete a snapshot
 
 ```shell
-daytona snapshot delete [SNAPSHOT_ID] [flags]
+daytona snapshot delete [SNAPSHOT_ID | SNAPSHOT_NAME] [flags]
 ```
 
 __Flags__
@@ -488,6 +487,7 @@ daytona stop [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
+| `--force` | `-f` | Force stop the sandbox using SIGKILL |
 | `--help` |  | help for daytona |
 
 

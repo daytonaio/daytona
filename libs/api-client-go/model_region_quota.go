@@ -23,6 +23,7 @@ var _ MappedNullable = &RegionQuota{}
 type RegionQuota struct {
 	OrganizationId string `json:"organizationId"`
 	RegionId string `json:"regionId"`
+	SandboxClass SandboxClass `json:"sandboxClass"`
 	TotalCpuQuota float32 `json:"totalCpuQuota"`
 	TotalMemoryQuota float32 `json:"totalMemoryQuota"`
 	TotalDiskQuota float32 `json:"totalDiskQuota"`
@@ -39,10 +40,11 @@ type _RegionQuota RegionQuota
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRegionQuota(organizationId string, regionId string, totalCpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, maxCpuPerSandbox NullableFloat32, maxMemoryPerSandbox NullableFloat32, maxDiskPerSandbox NullableFloat32, maxDiskPerNonEphemeralSandbox NullableFloat32) *RegionQuota {
+func NewRegionQuota(organizationId string, regionId string, sandboxClass SandboxClass, totalCpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, maxCpuPerSandbox NullableFloat32, maxMemoryPerSandbox NullableFloat32, maxDiskPerSandbox NullableFloat32, maxDiskPerNonEphemeralSandbox NullableFloat32) *RegionQuota {
 	this := RegionQuota{}
 	this.OrganizationId = organizationId
 	this.RegionId = regionId
+	this.SandboxClass = sandboxClass
 	this.TotalCpuQuota = totalCpuQuota
 	this.TotalMemoryQuota = totalMemoryQuota
 	this.TotalDiskQuota = totalDiskQuota
@@ -107,6 +109,30 @@ func (o *RegionQuota) GetRegionIdOk() (*string, bool) {
 // SetRegionId sets field value
 func (o *RegionQuota) SetRegionId(v string) {
 	o.RegionId = v
+}
+
+// GetSandboxClass returns the SandboxClass field value
+func (o *RegionQuota) GetSandboxClass() SandboxClass {
+	if o == nil {
+		var ret SandboxClass
+		return ret
+	}
+
+	return o.SandboxClass
+}
+
+// GetSandboxClassOk returns a tuple with the SandboxClass field value
+// and a boolean to check if the value has been set.
+func (o *RegionQuota) GetSandboxClassOk() (*SandboxClass, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.SandboxClass, true
+}
+
+// SetSandboxClass sets field value
+func (o *RegionQuota) SetSandboxClass(v SandboxClass) {
+	o.SandboxClass = v
 }
 
 // GetTotalCpuQuota returns the TotalCpuQuota field value
@@ -297,6 +323,7 @@ func (o RegionQuota) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["organizationId"] = o.OrganizationId
 	toSerialize["regionId"] = o.RegionId
+	toSerialize["sandboxClass"] = o.SandboxClass
 	toSerialize["totalCpuQuota"] = o.TotalCpuQuota
 	toSerialize["totalMemoryQuota"] = o.TotalMemoryQuota
 	toSerialize["totalDiskQuota"] = o.TotalDiskQuota
@@ -319,6 +346,7 @@ func (o *RegionQuota) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"organizationId",
 		"regionId",
+		"sandboxClass",
 		"totalCpuQuota",
 		"totalMemoryQuota",
 		"totalDiskQuota",
@@ -357,6 +385,7 @@ func (o *RegionQuota) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "organizationId")
 		delete(additionalProperties, "regionId")
+		delete(additionalProperties, "sandboxClass")
 		delete(additionalProperties, "totalCpuQuota")
 		delete(additionalProperties, "totalMemoryQuota")
 		delete(additionalProperties, "totalDiskQuota")

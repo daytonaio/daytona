@@ -19,13 +19,15 @@ import {
 } from '@/components/ui/sheet'
 import { Spinner } from '@/components/ui/spinner'
 import { useCreateSnapshotMutation } from '@/hooks/mutations/useCreateSnapshotMutation'
+import { useAvailableSandboxClasses } from '@/hooks/useAvailableSandboxClasses'
 import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { imageNameSchema } from '@/lib/schema'
 import { getRegionFullDisplayName } from '@/lib/utils'
 import type { SnapshotDto } from '@daytona/api-client'
-import { useForm } from '@tanstack/react-form'
+import { SandboxClass } from '@daytona/api-client'
+import { useForm, useStore } from '@tanstack/react-form'
 import { Plus } from 'lucide-react'
 import { Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -39,6 +41,11 @@ const snapshotNameSchema = z
   .min(1, 'Snapshot name is required')
   .refine((name) => IMAGE_NAME_REGEX.test(name), 'Only letters, digits, dots, colons, slashes and dashes are allowed')
 
+const SANDBOX_CLASS_OPTIONS: { value: SandboxClass; label: string }[] = [
+  { value: SandboxClass.CONTAINER, label: 'Container' },
+  { value: SandboxClass.LINUX_VM, label: 'Linux VM' },
+]
+
 const formSchema = z.object({
   name: snapshotNameSchema,
   imageName: imageNameSchema,
@@ -47,6 +54,7 @@ const formSchema = z.object({
   memory: z.number().min(1).optional(),
   disk: z.number().min(1).optional(),
   regionId: z.string().optional(),
+  sandboxClass: z.nativeEnum(SandboxClass).optional(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -59,6 +67,7 @@ const defaultValues: FormValues = {
   memory: undefined,
   disk: undefined,
   regionId: undefined,
+  sandboxClass: SandboxClass.CONTAINER,
 }
 
 export const CreateSnapshotSheet = ({
@@ -120,6 +129,7 @@ export const CreateSnapshotSheet = ({
             memory: value.memory,
             disk: value.disk,
             regionId: value.regionId,
+            sandboxClass: value.sandboxClass,
           },
           organizationId: selectedOrganization.id,
         })
@@ -144,6 +154,19 @@ export const CreateSnapshotSheet = ({
       resetState()
     }
   }, [open, resetState])
+
+  const selectedRegionId = useStore(form.store, (state) => state.values.regionId)
+  const availableSandboxClasses = useAvailableSandboxClasses(selectedRegionId)
+
+  useEffect(() => {
+    if (availableSandboxClasses.length === 0) return
+    const current = form.getFieldValue('sandboxClass')
+    if (current && availableSandboxClasses.includes(current)) return
+    const preferred = availableSandboxClasses.includes(SandboxClass.CONTAINER)
+      ? SandboxClass.CONTAINER
+      : availableSandboxClasses[0]
+    form.setFieldValue('sandboxClass', preferred)
+  }, [availableSandboxClasses, form])
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -240,6 +263,35 @@ export const CreateSnapshotSheet = ({
                     </SelectContent>
                   </Select>
                   <FieldDescription>The region where the snapshot will be available.</FieldDescription>
+                </Field>
+              )}
+            </form.Field>
+
+            <form.Field name="sandboxClass">
+              {(field) => (
+                <Field>
+                  <FieldLabel htmlFor={field.name}>Sandbox Class</FieldLabel>
+                  <Select
+                    value={field.state.value ?? SandboxClass.CONTAINER}
+                    onValueChange={(value) => field.handleChange(value as SandboxClass)}
+                    disabled={!selectedRegionId}
+                  >
+                    <SelectTrigger className="h-8" id={field.name}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SANDBOX_CLASS_OPTIONS.filter((option) => availableSandboxClasses.includes(option.value)).map(
+                        (option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ),
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <FieldDescription>
+                    The target platform sandboxes created from this snapshot will run on.
+                  </FieldDescription>
                 </Field>
               )}
             </form.Field>

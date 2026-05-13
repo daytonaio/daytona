@@ -82,67 +82,6 @@ public class CreateWorkspace {
   private Boolean _public;
 
   /**
-   * The workspace class type
-   */
-  @JsonAdapter(PropertyClassEnum.Adapter.class)
-  public enum PropertyClassEnum {
-    SMALL("small"),
-    
-    MEDIUM("medium"),
-    
-    LARGE("large"),
-    
-    UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
-
-    private String value;
-
-    PropertyClassEnum(String value) {
-      this.value = value;
-    }
-
-    public String getValue() {
-      return value;
-    }
-
-    @Override
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    public static PropertyClassEnum fromValue(String value) {
-      for (PropertyClassEnum b : PropertyClassEnum.values()) {
-        if (b.value.equals(value)) {
-          return b;
-        }
-      }
-      return UNKNOWN_DEFAULT_OPEN_API;
-    }
-
-    public static class Adapter extends TypeAdapter<PropertyClassEnum> {
-      @Override
-      public void write(final JsonWriter jsonWriter, final PropertyClassEnum enumeration) throws IOException {
-        jsonWriter.value(enumeration.getValue());
-      }
-
-      @Override
-      public PropertyClassEnum read(final JsonReader jsonReader) throws IOException {
-        String value =  jsonReader.nextString();
-        return PropertyClassEnum.fromValue(value);
-      }
-    }
-
-    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
-      String value = jsonElement.getAsString();
-      PropertyClassEnum.fromValue(value);
-    }
-  }
-
-  public static final String SERIALIZED_NAME_PROPERTY_CLASS = "class";
-  @SerializedName(SERIALIZED_NAME_PROPERTY_CLASS)
-  @javax.annotation.Nullable
-  private PropertyClassEnum propertyClass;
-
-  /**
    * The target (region) where the workspace will be created
    */
   @JsonAdapter(TargetEnum.Adapter.class)
@@ -354,25 +293,6 @@ public class CreateWorkspace {
 
   public void setPublic(@javax.annotation.Nullable Boolean _public) {
     this._public = _public;
-  }
-
-
-  public CreateWorkspace propertyClass(@javax.annotation.Nullable PropertyClassEnum propertyClass) {
-    this.propertyClass = propertyClass;
-    return this;
-  }
-
-  /**
-   * The workspace class type
-   * @return propertyClass
-   */
-  @javax.annotation.Nullable
-  public PropertyClassEnum getPropertyClass() {
-    return propertyClass;
-  }
-
-  public void setPropertyClass(@javax.annotation.Nullable PropertyClassEnum propertyClass) {
-    this.propertyClass = propertyClass;
   }
 
 
@@ -614,7 +534,6 @@ public class CreateWorkspace {
         Objects.equals(this.env, createWorkspace.env) &&
         Objects.equals(this.labels, createWorkspace.labels) &&
         Objects.equals(this._public, createWorkspace._public) &&
-        Objects.equals(this.propertyClass, createWorkspace.propertyClass) &&
         Objects.equals(this.target, createWorkspace.target) &&
         Objects.equals(this.cpu, createWorkspace.cpu) &&
         Objects.equals(this.gpu, createWorkspace.gpu) &&
@@ -629,7 +548,7 @@ public class CreateWorkspace {
 
   @Override
   public int hashCode() {
-    return Objects.hash(image, user, env, labels, _public, propertyClass, target, cpu, gpu, memory, disk, autoStopInterval, autoArchiveInterval, volumes, buildInfo, additionalProperties);
+    return Objects.hash(image, user, env, labels, _public, target, cpu, gpu, memory, disk, autoStopInterval, autoArchiveInterval, volumes, buildInfo, additionalProperties);
   }
 
   @Override
@@ -641,7 +560,6 @@ public class CreateWorkspace {
     sb.append("    env: ").append(toIndentedString(env)).append("\n");
     sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
     sb.append("    _public: ").append(toIndentedString(_public)).append("\n");
-    sb.append("    propertyClass: ").append(toIndentedString(propertyClass)).append("\n");
     sb.append("    target: ").append(toIndentedString(target)).append("\n");
     sb.append("    cpu: ").append(toIndentedString(cpu)).append("\n");
     sb.append("    gpu: ").append(toIndentedString(gpu)).append("\n");
@@ -670,7 +588,7 @@ public class CreateWorkspace {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("image", "user", "env", "labels", "public", "class", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "volumes", "buildInfo"));
+    openapiFields = new HashSet<String>(Arrays.asList("image", "user", "env", "labels", "public", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "volumes", "buildInfo"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(0);
@@ -694,13 +612,6 @@ public class CreateWorkspace {
       }
       if ((jsonObj.get("user") != null && !jsonObj.get("user").isJsonNull()) && !jsonObj.get("user").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `user` to be a primitive type in the JSON string but got `%s`", jsonObj.get("user").toString()));
-      }
-      if ((jsonObj.get("class") != null && !jsonObj.get("class").isJsonNull()) && !jsonObj.get("class").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `class` to be a primitive type in the JSON string but got `%s`", jsonObj.get("class").toString()));
-      }
-      // validate the optional field `class`
-      if (jsonObj.get("class") != null && !jsonObj.get("class").isJsonNull()) {
-        PropertyClassEnum.validateJsonElement(jsonObj.get("class"));
       }
       if ((jsonObj.get("target") != null && !jsonObj.get("target").isJsonNull()) && !jsonObj.get("target").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `target` to be a primitive type in the JSON string but got `%s`", jsonObj.get("target").toString()));

@@ -37,7 +37,6 @@ class CreateWorkspace(BaseModel):
     env: Optional[Dict[str, StrictStr]] = Field(default=None, description="Environment variables for the workspace")
     labels: Optional[Dict[str, StrictStr]] = Field(default=None, description="Labels for the workspace")
     public: Optional[StrictBool] = Field(default=None, description="Whether the workspace http preview is publicly accessible")
-    var_class: Optional[StrictStr] = Field(default=None, description="The workspace class type", serialization_alias="class")
     target: Optional[StrictStr] = Field(default=None, description="The target (region) where the workspace will be created")
     cpu: Optional[StrictInt] = Field(default=None, description="CPU cores allocated to the workspace")
     gpu: Optional[StrictInt] = Field(default=None, description="GPU units allocated to the workspace")
@@ -48,7 +47,7 @@ class CreateWorkspace(BaseModel):
     volumes: Optional[List[SandboxVolume]] = Field(default=None, description="Array of volumes to attach to the workspace")
     build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the workspace", serialization_alias="buildInfo")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["image", "user", "env", "labels", "public", "class", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "volumes", "buildInfo"]
+    __properties: ClassVar[List[str]] = ["image", "user", "env", "labels", "public", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "volumes", "buildInfo"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -122,7 +121,6 @@ class CreateWorkspace(BaseModel):
             "env": obj.get("env"),
             "labels": obj.get("labels"),
             "public": obj.get("public"),
-            "var_class": obj.get("class"),
             "target": obj.get("target"),
             "cpu": obj.get("cpu"),
             "gpu": obj.get("gpu"),

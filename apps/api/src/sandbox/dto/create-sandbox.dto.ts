@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { IsEnum, IsObject, IsOptional, IsString, IsNumber, IsBoolean, IsArray } from 'class-validator'
+import { IsObject, IsOptional, IsString, IsNumber, IsBoolean, IsArray } from 'class-validator'
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { SandboxClass } from '../enums/sandbox-class.enum'
 import { SandboxVolume } from './sandbox.dto'
 import { CreateBuildInfoDto } from './create-build-info.dto'
 import { IsSafeDisplayString } from '../../common/validators'
@@ -80,15 +79,6 @@ export class CreateSandboxDto {
   @IsOptional()
   @IsString()
   networkAllowList?: string
-
-  @ApiPropertyOptional({
-    description: 'The sandbox class type',
-    enum: SandboxClass,
-    example: Object.values(SandboxClass)[0],
-  })
-  @IsOptional()
-  @IsEnum(SandboxClass)
-  class?: SandboxClass
 
   @ApiPropertyOptional({
     description: 'The target (region) where the sandbox will be created',
