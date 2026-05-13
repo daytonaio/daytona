@@ -5,35 +5,28 @@ description: Mount external object storage (Amazon S3, Cloudflare R2, Google Clo
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Mount object storage (Amazon S3, Cloudflare R2, Google Cloud Storage, Azure Blob) and filesystems like MesaFS into a Daytona sandbox as a regular directory. The sandbox reads and writes the bucket like local files, so existing tools, scripts, and agents work without changes. This is useful for bringing in datasets, model weights, or build artifacts that already live in your own cloud account.
+Mount object storage (Amazon S3, Cloudflare R2, Google Cloud Storage, Azure Blob) and filesystems like MesaFS into a Daytona sandbox as a regular directory. The sandbox reads from and writes to the bucket as if it were a local directory, so existing tools, scripts, and agents work without changes. This is useful for bringing in datasets, model weights, or build artifacts that already live in your own cloud account.
 
-External storage mounts and [Daytona Volumes](/docs/en/volumes/) are complementary FUSE-based mechanisms — both expose remote object storage as a regular sandbox directory, both can be shared across sandboxes, and both persist beyond any individual sandbox's lifetime. The main distinction is **where the data physically lives**: Daytona Volumes are hosted on Daytona's own S3-compatible object store, while external mounts attach a bucket or filesystem hosted on another provider (Amazon S3, Cloudflare R2, GCS, Azure Blob, MesaFS).
+External storage mounts and [Daytona Volumes](/docs/en/volumes/) are complementary FUSE-based mechanisms — both expose remote object storage as a regular sandbox directory, both can be shared across sandboxes, and both persist beyond any individual sandbox's lifetime. The main distinction is **where the data physically lives**: Daytona Volumes are hosted on Daytona's own S3-compatible object store, while external mounts connect to a bucket or filesystem hosted on another provider (Amazon S3, Cloudflare R2, GCS, Azure Blob, MesaFS).
 
-## How it works
-
-External storage is mounted using FUSE. Daytona supports two approaches and you can pick whichever fits your workflow:
+External storage is mounted using FUSE. Daytona supports two approaches, and each provider section below shows both — pick whichever fits your workflow:
 
 - **Pre-baked snapshot** — build a [snapshot](/docs/en/snapshots/) once with the FUSE tool (`mount-s3`, `gcsfuse`, `blobfuse2`) baked in, then launch every sandbox from that snapshot. Cold starts are fast and predictable. Best for production.
 - **Runtime install** — launch a default sandbox and `apt-get install` the FUSE tool when the sandbox starts. Adds time to sandbox startup, but you don't manage snapshots. Best for quick experiments.
 
 Both approaches end with the same mount command and the same usage — the only difference is when the FUSE tool gets installed.
 
-Each provider section below shows both approaches.
-
-## Prerequisites
-
-- The [Daytona SDK](/docs/en/getting-started/) installed for the language you're using
-- Provider credentials (AWS keys, GCS service account JSON, Azure account key, etc.)
-
 ## Mount an Amazon S3 bucket
 
 Mount an S3 bucket using [Mountpoint for Amazon S3 ↗](https://github.com/awslabs/mountpoint-s3) — AWS's official FUSE client, optimized for high throughput on S3.
+
+**Credentials** — set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in your local environment. The snippets below pass them into the sandbox via `envVars`, and `mount-s3` reads them from there.
 
 ### Pre-baked snapshot
 
 Build a snapshot once with `mount-s3` installed, then launch sandboxes from it.
 
-#### Build the snapshot
+#### Build a snapshot
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -585,9 +578,157 @@ public class App {
 
 Cloudflare R2 is S3-compatible, so the same `mount-s3` tool works. Pass an explicit `--endpoint-url` pointing at your R2 account.
 
+**Credentials** — set `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, and `R2_SECRET_ACCESS_KEY` in your local environment. R2 is S3-compatible, so the snippets below pass your R2 keys into the sandbox via `envVars` under the `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` names that `mount-s3` expects.
+
 ### Pre-baked snapshot
 
-R2 reuses the `fuse-s3` snapshot built in the [S3 section](#build-the-snapshot). If you already have it, skip straight to launch and mount.
+Build a snapshot once with `mount-s3` installed (the same FUSE tool used for S3), then launch sandboxes from it.
+
+#### Build a snapshot
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+from daytona import CreateSnapshotParams, Daytona, Image
+
+daytona = Daytona()
+
+image = (
+  Image.base("daytonaio/sandbox")
+  .run_commands(
+    "sudo apt-get update "
+    "&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget",
+    'arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" '
+    '&& wget -O /tmp/mount-s3.deb '
+    '"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" '
+    "&& sudo apt-get install -y /tmp/mount-s3.deb "
+    "&& rm /tmp/mount-s3.deb",
+  )
+)
+
+daytona.snapshot.create(
+    CreateSnapshotParams(name="fuse-r2", image=image),
+    on_logs=print,
+)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona, Image } from '@daytona/sdk'
+
+const daytona = new Daytona()
+
+const image = Image.base('daytonaio/sandbox').runCommands(
+  'sudo apt-get update ' +
+    '&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget',
+  'arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" ' +
+    '&& wget -O /tmp/mount-s3.deb ' +
+    '"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" ' +
+    '&& sudo apt-get install -y /tmp/mount-s3.deb ' +
+    '&& rm /tmp/mount-s3.deb',
+)
+
+await daytona.snapshot.create(
+  { name: 'fuse-r2', image },
+  { onLogs: console.log },
+)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+image = Daytona::Image
+  .base('daytonaio/sandbox')
+  .run_commands(
+    'sudo apt-get update ' \
+    '&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget',
+    'arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" ' \
+    '&& wget -O /tmp/mount-s3.deb ' \
+    '"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" ' \
+    '&& sudo apt-get install -y /tmp/mount-s3.deb ' \
+    '&& rm /tmp/mount-s3.deb'
+  )
+
+daytona.snapshot.create(
+  Daytona::CreateSnapshotParams.new(name: 'fuse-r2', image: image),
+  on_logs: proc { |chunk| print(chunk) }
+)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+image := daytona.Base("daytonaio/sandbox").
+	Run("sudo apt-get update && sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget").
+	Run(`arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" && ` +
+		`wget -O /tmp/mount-s3.deb "https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" && ` +
+		`sudo apt-get install -y /tmp/mount-s3.deb && rm /tmp/mount-s3.deb`)
+
+_, logChan, err := client.Snapshot.Create(ctx, &types.CreateSnapshotParams{
+	Name:  "fuse-r2",
+	Image: image,
+})
+if err != nil {
+	log.Fatal(err)
+}
+for line := range logChan {
+	fmt.Print(line)
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Image;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            Image image = Image.base("daytonaio/sandbox")
+                .runCommands(
+                    "sudo apt-get update "
+                        + "&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget",
+                    "arch=\"$(dpkg --print-architecture | sed s/amd64/x86_64/)\" "
+                        + "&& wget -O /tmp/mount-s3.deb "
+                        + "\"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb\" "
+                        + "&& sudo apt-get install -y /tmp/mount-s3.deb "
+                        + "&& rm /tmp/mount-s3.deb"
+                );
+
+            daytona.snapshot().create("fuse-r2", image, System.out::println);
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
 
 #### Launch and mount
 
@@ -605,7 +746,7 @@ account_id = os.environ["R2_ACCOUNT_ID"]
 
 sandbox = daytona.create(
     CreateSandboxFromSnapshotParams(
-        snapshot="fuse-s3",
+        snapshot="fuse-r2",
         env_vars={
             "AWS_ACCESS_KEY_ID": os.environ["R2_ACCESS_KEY_ID"],
             "AWS_SECRET_ACCESS_KEY": os.environ["R2_SECRET_ACCESS_KEY"],
@@ -637,7 +778,7 @@ const daytona = new Daytona()
 const accountId = process.env.R2_ACCOUNT_ID!
 
 const sandbox = await daytona.create({
-  snapshot: 'fuse-s3',
+  snapshot: 'fuse-r2',
   envVars: {
     AWS_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID!,
     AWS_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY!,
@@ -669,7 +810,7 @@ account_id = ENV.fetch('R2_ACCOUNT_ID')
 
 sandbox = daytona.create(
   Daytona::CreateSandboxFromSnapshotParams.new(
-    snapshot: 'fuse-s3',
+    snapshot: 'fuse-r2',
     env_vars: {
       'AWS_ACCESS_KEY_ID' => ENV.fetch('R2_ACCESS_KEY_ID'),
       'AWS_SECRET_ACCESS_KEY' => ENV.fetch('R2_SECRET_ACCESS_KEY')
@@ -713,7 +854,7 @@ if err != nil {
 accountID := os.Getenv("R2_ACCOUNT_ID")
 
 sandbox, err := client.Create(ctx, types.SnapshotParams{
-	Snapshot: "fuse-s3",
+	Snapshot: "fuse-r2",
 	SandboxBaseParams: types.SandboxBaseParams{
 		EnvVars: map[string]string{
 			"AWS_ACCESS_KEY_ID":     os.Getenv("R2_ACCESS_KEY_ID"),
@@ -761,7 +902,7 @@ public class App {
             String accountId = System.getenv("R2_ACCOUNT_ID");
 
             CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
-            params.setSnapshot("fuse-s3");
+            params.setSnapshot("fuse-r2");
             params.setEnvVars(Map.of(
                 "AWS_ACCESS_KEY_ID", System.getenv("R2_ACCESS_KEY_ID"),
                 "AWS_SECRET_ACCESS_KEY", System.getenv("R2_SECRET_ACCESS_KEY")
@@ -1027,13 +1168,15 @@ public class App {
 
 Mount a GCS bucket using [gcsfuse ↗](https://github.com/GoogleCloudPlatform/gcsfuse) — Google's official FUSE client.
 
+**Credentials** — `gcsfuse` reads a service account JSON key file. The snippets below read the key from a local path on your host and upload it into the sandbox via `sandbox.fs`.
+
 :::note
 Daytona's base image is Debian Trixie, but Google has not published a Trixie-specific gcsfuse repository yet. The `gcsfuse-bookworm` repo packages run cleanly on Trixie, so we use them in the snippets below.
 :::
 
 ### Pre-baked snapshot
 
-#### Build the snapshot
+#### Build a snapshot
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -1193,7 +1336,7 @@ public class App {
 
 #### Launch and mount
 
-GCS authenticates with a service account JSON key. Upload it into the sandbox via `sandbox.fs` and point `gcsfuse` at it with `--key-file`.
+`gcsfuse` authenticates to GCS with a service account JSON key. Upload it into the sandbox via `sandbox.fs` and point `gcsfuse` at it with `--key-file`.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -1645,13 +1788,15 @@ public class App {
 
 Mount an Azure Blob container using [blobfuse2 ↗](https://github.com/Azure/azure-storage-fuse) — Microsoft's official FUSE client.
 
+**Credentials** — set `AZURE_STORAGE_ACCOUNT`, `AZURE_STORAGE_CONTAINER`, and `AZURE_STORAGE_ACCOUNT_KEY` in your local environment. The snippets below pass them into the sandbox via `envVars`, and `blobfuse2` reads them from its YAML config.
+
 :::caution
 Daytona's base image is Debian Trixie. Microsoft's `blobfuse2` Bookworm binary links against `libfuse3.so.3`, but Trixie's `fuse3` package bumped the SONAME to `.4`, so `libfuse3.so.3` is missing on disk. The snapshot recipe below creates a compatibility symlink. Without it, `blobfuse2` fails with `libfuse3.so.3: cannot open shared object file`.
 :::
 
 ### Pre-baked snapshot
 
-#### Build the snapshot
+#### Build a snapshot
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -1855,7 +2000,7 @@ public class App {
 
 `blobfuse2` reads its configuration from a YAML file. Build it with your account credentials and upload it into the sandbox.
 
-The YAML below tells `blobfuse2` three things: **where to connect** (the `azstorage:` block — your storage account, the container you want to mount, the endpoint URL, and the auth method), **what to enable** (the `components:` list — the FUSE interface itself, a content cache, a metadata cache, and the Azure backend), and **how to log**. The cache components use sensible defaults when listed without their own top-level config blocks; add explicit `block_cache:` / `attr_cache:` blocks later if you need to tune cache sizes or timeouts. Note that in Azure terminology a "container" is the equivalent of an S3 bucket — it's specified inside the YAML rather than passed as a command-line argument.
+The YAML below tells `blobfuse2` three things: **where to connect** (the `azstorage:` block — your storage account, the container you want to mount, the endpoint URL, and the auth method), **what to enable** (the `components:` list — the FUSE interface itself, a content cache, a metadata cache, and the Azure backend), and **how to log**. The cache components use sensible defaults when listed without their own top-level config blocks; add explicit `block_cache:` / `attr_cache:` blocks later if you need to tune cache sizes or timeouts. Note that in Azure terminology, a "container" is the equivalent of an S3 bucket — it's specified inside the YAML rather than passed as a command-line argument.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -2508,13 +2653,15 @@ public class App {
 
 ## Mount a MesaFS filesystem
 
-[MesaFS ↗](https://mesa.dev) is an agent-native versioned filesystem from Mesa, purpose-built for the same workloads Daytona sandboxes run — parallel agent swarms, shared working memory, structured artifacts, and long-lived state across runs. Unlike the cloud-bucket providers above, you mount a Mesa **repository**: a Git-compatible versioned working directory with sub-50ms reads/writes, instant fork/branch operations, and unlimited concurrent writers.
+[MesaFS ↗](https://mesa.dev) is an agent-native versioned filesystem from Mesa, purpose-built for the same workloads Daytona sandboxes run — parallel agent swarms, shared working memory, structured artifacts, and long-lived state across runs. With MesaFS, instead of mounting a cloud bucket, you mount a Mesa **repository**: a Git-compatible versioned working directory with sub-50ms reads/writes, instant fork/branch operations, and unlimited concurrent writers.
 
-The Mesa setup follows the same shape as the bucket providers but uses the Mesa CLI rather than a FUSE-specific tool: install the CLI in your sandbox, authenticate with your API key, and run `mesa mount --daemonize` to mount your repos at `/home/daytona/mesa/mnt/<org>/<repo>`.
+The Mesa setup follows the same pattern as the bucket providers but uses the Mesa CLI rather than a FUSE-specific tool: install the CLI in your sandbox, authenticate with your API key, and run `mesa mount --daemonize` to mount your repos at `/home/daytona/mesa/mnt/<org>/<repo>`.
+
+**Credentials** — set `MESA_API_KEY` and `MESA_ORG` (your Mesa organization slug) in your local environment. The snippets below pass them into the sandbox via `envVars`, and the Mesa CLI reads them from there.
 
 ### Pre-baked snapshot
 
-#### Build the snapshot
+#### Build a snapshot
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -2527,12 +2674,7 @@ daytona = Daytona()
 image = (
   Image.base("daytonaio/sandbox")
   .run_commands(
-    "sudo apt-get update "
-    "&& sudo apt-get install -y --no-install-recommends "
-    "ca-certificates fuse3 libssl3 openssl "
-    "&& sudo update-ca-certificates",
-    "curl -fsSL https://mesa.dev/install.sh | sh "
-    "&& sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa",
+    "curl -fsSL https://mesa.dev/install.sh | sh",
     "sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf",
   )
 )
@@ -2552,12 +2694,7 @@ import { Daytona, Image } from '@daytona/sdk'
 const daytona = new Daytona()
 
 const image = Image.base('daytonaio/sandbox').runCommands(
-  'sudo apt-get update ' +
-    '&& sudo apt-get install -y --no-install-recommends ' +
-    'ca-certificates fuse3 libssl3 openssl ' +
-    '&& sudo update-ca-certificates',
-  'curl -fsSL https://mesa.dev/install.sh | sh ' +
-    '&& sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa',
+  'curl -fsSL https://mesa.dev/install.sh | sh',
   "sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf",
 )
 
@@ -2578,12 +2715,7 @@ daytona = Daytona::Daytona.new
 image = Daytona::Image
   .base('daytonaio/sandbox')
   .run_commands(
-    'sudo apt-get update ' \
-    '&& sudo apt-get install -y --no-install-recommends ' \
-    'ca-certificates fuse3 libssl3 openssl ' \
-    '&& sudo update-ca-certificates',
-    'curl -fsSL https://mesa.dev/install.sh | sh ' \
-    '&& sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa',
+    'curl -fsSL https://mesa.dev/install.sh | sh',
     "sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf"
   )
 
@@ -2613,10 +2745,7 @@ if err != nil {
 }
 
 image := daytona.Base("daytonaio/sandbox").
-	Run("sudo apt-get update && sudo apt-get install -y --no-install-recommends " +
-		"ca-certificates fuse3 libssl3 openssl && sudo update-ca-certificates").
-	Run("curl -fsSL https://mesa.dev/install.sh | sh && " +
-		"sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa").
+	Run("curl -fsSL https://mesa.dev/install.sh | sh").
 	Run(`sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf`)
 
 _, logChan, err := client.Snapshot.Create(ctx, &types.CreateSnapshotParams{
@@ -2643,12 +2772,7 @@ public class App {
         try (Daytona daytona = new Daytona()) {
             Image image = Image.base("daytonaio/sandbox")
                 .runCommands(
-                    "sudo apt-get update "
-                        + "&& sudo apt-get install -y --no-install-recommends "
-                        + "ca-certificates fuse3 libssl3 openssl "
-                        + "&& sudo update-ca-certificates",
-                    "curl -fsSL https://mesa.dev/install.sh | sh "
-                        + "&& sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa",
+                    "curl -fsSL https://mesa.dev/install.sh | sh",
                     "sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf"
                 );
 
@@ -2663,7 +2787,7 @@ public class App {
 
 #### Launch and mount
 
-Pass `MESA_API_KEY` and your Mesa organization slug to the sandbox via `envVars`. The sandbox writes a TOML config, authenticates the Mesa CLI, and mounts your repos at `/home/daytona/mesa/mnt/<org>/<repo>`.
+Pass `MESA_API_KEY` and your Mesa organization slug to the sandbox via `envVars`. Your code then writes a TOML config into the sandbox, authenticates the Mesa CLI, and mounts your repos at `/home/daytona/mesa/mnt/<org>/<repo>`.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -2932,16 +3056,7 @@ sandbox = daytona.create(
     )
 )
 
-sandbox.process.exec(
-    "sudo apt-get update "
-    "&& sudo apt-get install -y --no-install-recommends "
-    "ca-certificates fuse3 libssl3 openssl "
-    "&& sudo update-ca-certificates"
-)
-sandbox.process.exec(
-    "curl -fsSL https://mesa.dev/install.sh | sh "
-    "&& sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa"
-)
+sandbox.process.exec("curl -fsSL https://mesa.dev/install.sh | sh")
 sandbox.process.exec(
     "sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf"
 )
@@ -2984,16 +3099,7 @@ const sandbox = await daytona.create({
   },
 })
 
-await sandbox.process.executeCommand(
-  'sudo apt-get update ' +
-    '&& sudo apt-get install -y --no-install-recommends ' +
-    'ca-certificates fuse3 libssl3 openssl ' +
-    '&& sudo update-ca-certificates',
-)
-await sandbox.process.executeCommand(
-  'curl -fsSL https://mesa.dev/install.sh | sh ' +
-    '&& sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa',
-)
+await sandbox.process.executeCommand('curl -fsSL https://mesa.dev/install.sh | sh')
 await sandbox.process.executeCommand(
   "sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf",
 )
@@ -3038,16 +3144,7 @@ sandbox = daytona.create(
   )
 )
 
-sandbox.process.exec(
-  command: 'sudo apt-get update ' \
-           '&& sudo apt-get install -y --no-install-recommends ' \
-           'ca-certificates fuse3 libssl3 openssl ' \
-           '&& sudo update-ca-certificates'
-)
-sandbox.process.exec(
-  command: 'curl -fsSL https://mesa.dev/install.sh | sh ' \
-           '&& sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa'
-)
+sandbox.process.exec(command: 'curl -fsSL https://mesa.dev/install.sh | sh')
 sandbox.process.exec(
   command: "sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf"
 )
@@ -3109,13 +3206,7 @@ if err != nil {
 }
 
 if _, err := sandbox.Process.ExecuteCommand(ctx,
-	"sudo apt-get update && sudo apt-get install -y --no-install-recommends "+
-		"ca-certificates fuse3 libssl3 openssl && sudo update-ca-certificates"); err != nil {
-	log.Fatal(err)
-}
-if _, err := sandbox.Process.ExecuteCommand(ctx,
-	"curl -fsSL https://mesa.dev/install.sh | sh && "+
-		"sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa"); err != nil {
+	"curl -fsSL https://mesa.dev/install.sh | sh"); err != nil {
 	log.Fatal(err)
 }
 if _, err := sandbox.Process.ExecuteCommand(ctx,
@@ -3180,13 +3271,7 @@ public class App {
             Sandbox sandbox = daytona.create(params);
 
             sandbox.getProcess().executeCommand(
-                "sudo apt-get update "
-                    + "&& sudo apt-get install -y --no-install-recommends "
-                    + "ca-certificates fuse3 libssl3 openssl "
-                    + "&& sudo update-ca-certificates");
-            sandbox.getProcess().executeCommand(
-                "curl -fsSL https://mesa.dev/install.sh | sh "
-                    + "&& sudo ln -sf $HOME/.mesa/bin/mesa /usr/local/bin/mesa");
+                "curl -fsSL https://mesa.dev/install.sh | sh");
             sandbox.getProcess().executeCommand(
                 "sudo sed -i 's/^#user_allow_other/user_allow_other/' /etc/fuse.conf");
 
@@ -3282,9 +3367,9 @@ The rest of the launch flow (writing the TOML config, `mesa auth set-key`, `mesa
 
 For repo-scoped or path-scoped keys, see Mesa's [auth and permissions guide ↗](https://docs.mesa.dev/content/getting-started/auth-and-permissions). For the full integration recipe, see Mesa's [Daytona guide ↗](https://docs.mesa.dev/content/integration-guides/daytona).
 
-## Unmounting
+## Unmount
 
-When a sandbox is deleted via `daytona.delete(sandbox)`, the container teardown automatically removes any active FUSE mounts and shuts down their daemons. For normal cleanup this is all you need — no manual unmount required.
+When a sandbox is deleted via `daytona.delete(sandbox)`, the container teardown automatically removes any active FUSE mounts and shuts down their daemons. For normal cleanup, this is all you need — no manual unmount required.
 
 To free a mount path **during** a sandbox's lifetime (for example, to remount with different credentials or before persisting a workspace archive), relocate the mount onto a throwaway path:
 
@@ -3293,18 +3378,10 @@ sudo mkdir -p /tmp/.fuse-defunct-$$
 sudo mount --move <your-mount-path> /tmp/.fuse-defunct-$$
 ```
 
-After this, your original mount path is free for re-mounting. The FUSE daemon stays alive serving the mount at the new path; both the relocated mount and the daemon are cleaned up automatically when the sandbox is deleted.
+After this, your original mount path is free for remounting. The FUSE daemon stays alive serving the mount at the new path; both the relocated mount and the daemon are cleaned up automatically when the sandbox is deleted.
 
-This works for any FUSE-based mount; verified against `mount-s3`, `gcsfuse`, and `blobfuse2`.
+This works for any FUSE-based mount — verified against `mount-s3`, `gcsfuse`, and `blobfuse2`.
 
 ## Tips
 
 - **Snapshot versioning** — name snapshots like `fuse-s3-v1`. Bump the suffix to force a rebuild whenever you upgrade the FUSE tool.
-- **Credential security** — pass credentials via `env_vars` / `envVars` on sandbox creation rather than committing them into the snapshot. Env vars stay scoped to the sandbox lifetime and rotate without rebuilding the image.
-
-## See also
-
-- [Daytona Volumes](/docs/en/volumes/) — first-party FUSE-backed shared storage hosted by Daytona
-- [Declarative Builder](/docs/en/declarative-builder/) — programmatic image and snapshot definitions
-- [Snapshots](/docs/en/snapshots/) — pre-built sandbox templates
-- [File system operations](/docs/en/file-system-operations/) — uploading and downloading files in the sandbox
