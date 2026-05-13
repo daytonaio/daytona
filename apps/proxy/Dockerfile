@@ -17,7 +17,7 @@ COPY package.json yarn.lock .yarnrc.yml ./
 RUN yarn install --immutable
 
 # Nx config
-COPY nx.json ./
+COPY nx.json .nxignore ./
 
 # Go dependency layer (cached unless go.mod/go.sum change)
 COPY go.work go.work.sum ./

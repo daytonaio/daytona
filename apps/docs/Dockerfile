@@ -11,7 +11,7 @@ COPY package.json yarn.lock .yarnrc.yml ./
 RUN yarn install --immutable
 
 # Nx + TS config
-COPY nx.json tsconfig.base.json ./
+COPY nx.json tsconfig.base.json .nxignore ./
 
 # App source (docs + api for openapi generation)
 COPY apps/docs/ apps/docs/
