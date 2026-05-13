@@ -11,10 +11,8 @@ Daytona provides process and code execution capabilities through the `process` m
 
 Daytona provides methods to execute code in sandboxes. You can run code snippets in multiple languages with support for both stateless execution and stateful interpretation with persistent contexts.
 
-:::note
-
-Stateless execution inherits the sandbox language that you choose at [sandbox creation](/docs/en/sandboxes#create-sandboxes) time. The stateful interpreter supports only Python.
-  :::
+- [Run code (stateless)](#run-code-stateless): run independent code snippets where each execution starts from a clean interpreter state; inherits the sandbox language that you choose at [sandbox creation](/docs/en/sandboxes#create-sandboxes).
+- [Run code (stateful)](#run-code-stateful): run code in a persistent interpreter context with variables, imports, and state to carry across executions; executes Python code and is available for every SDK.
 
 ### Run code (stateless)
 
@@ -254,22 +252,35 @@ main()
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
-# Ruby SDK uses process.code_run for code execution
-# Stateful contexts are managed through the code interpreter API
-
 require 'daytona'
 
 daytona = Daytona::Daytona.new
 sandbox = daytona.create
 
-# Run code (stateless in Ruby SDK)
-response = sandbox.process.code_run(code: <<~PYTHON)
+# Shared default context
+sandbox.code_interpreter.run_code(
+  <<~PYTHON,
   counter = 1
   print(f'Counter initialized at {counter}')
-PYTHON
+  PYTHON
+  on_stdout: ->(msg) { print "[STDOUT] #{msg.output}" }
+)
 
-puts response.result
+# Isolated context
+ctx = sandbox.code_interpreter.create_context
+begin
+  sandbox.code_interpreter.run_code("value = 'stored in ctx'", context: ctx)
+  sandbox.code_interpreter.run_code(
+    "print(value)",
+    context: ctx,
+    on_stdout: ->(msg) { print "[STDOUT] #{msg.output}" }
+  )
+ensure
+  sandbox.code_interpreter.delete_context(ctx)
+end
 ```
+
+Use `sandbox.process.exec` for one-shot shell commands. Use `sandbox.process.create_session` with `sandbox.process.execute_session_command` for persistent shell state, and stream output with `sandbox.process.get_session_command_logs_async`.
 </TabItem>
 <TabItem label="Go" icon="seti:go">
 ```go
