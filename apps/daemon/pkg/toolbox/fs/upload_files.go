@@ -151,10 +151,24 @@ func resolveSymlink(path string) (string, error) {
 		}
 		return "", err
 	}
-	if fi.Mode()&os.ModeSymlink != 0 {
-		return filepath.EvalSymlinks(path)
+	if fi.Mode()&os.ModeSymlink == 0 {
+		return path, nil
 	}
-	return path, nil
+	resolved, err := filepath.EvalSymlinks(path)
+	if err == nil {
+		return resolved, nil
+	}
+	if !os.IsNotExist(err) {
+		return "", err
+	}
+	target, err := os.Readlink(path)
+	if err != nil {
+		return "", err
+	}
+	if !filepath.IsAbs(target) {
+		target = filepath.Join(filepath.Dir(path), target)
+	}
+	return target, nil
 }
 
 func copyAndRemove(src, dst string) error {

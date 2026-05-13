@@ -6,6 +6,7 @@
 package daytona
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -200,19 +201,19 @@ func TestE2E(t *testing.T) {
 		assert.Equal(t, binary, downloaded)
 	})
 
-	t.Run("FileSystem/UploadFilePermissions", func(t *testing.T) {
-		require.NoError(t, sandbox.FileSystem.UploadFile(ctx, []byte("perm check"), permTestPath))
+	t.Run("FileSystem/UploadStreamPermissions", func(t *testing.T) {
+		require.NoError(t, sandbox.FileSystem.UploadFileStream(ctx, bytes.NewReader([]byte("perm check")), permTestPath))
 		res, execErr := sandbox.Process.ExecuteCommand(ctx, "stat -c '%a' "+permTestPath)
 		require.NoError(t, execErr)
 		assert.Contains(t, strings.TrimSpace(res.Result), "644")
 	})
 
-	t.Run("FileSystem/UploadFileSymlinkWriteThrough", func(t *testing.T) {
+	t.Run("FileSystem/UploadStreamSymlinkWriteThrough", func(t *testing.T) {
 		_, execErr := sandbox.Process.ExecuteCommand(ctx,
 			fmt.Sprintf("echo 'original' > %s && ln -s %s %s", symlinkRealPath, symlinkRealPath, symlinkPath))
 		require.NoError(t, execErr)
 
-		require.NoError(t, sandbox.FileSystem.UploadFile(ctx, []byte("via symlink"), symlinkPath))
+		require.NoError(t, sandbox.FileSystem.UploadFileStream(ctx, bytes.NewReader([]byte("via symlink")), symlinkPath))
 
 		isSymlink, execErr := sandbox.Process.ExecuteCommand(ctx,
 			"test -L "+symlinkPath+" && echo SYMLINK_OK || echo NOT_SYMLINK")
@@ -224,9 +225,28 @@ func TestE2E(t *testing.T) {
 		assert.Equal(t, "via symlink", string(content))
 	})
 
-	t.Run("FileSystem/UploadFileOverwritePreservesContent", func(t *testing.T) {
-		require.NoError(t, sandbox.FileSystem.UploadFile(ctx, []byte("version1"), overwritePath))
-		require.NoError(t, sandbox.FileSystem.UploadFile(ctx, []byte("version2"), overwritePath))
+	t.Run("FileSystem/UploadStreamDanglingSymlink", func(t *testing.T) {
+		danglingTarget := textDir + "/dangling-target.txt"
+		danglingLink := textDir + "/dangling-link.txt"
+		_, execErr := sandbox.Process.ExecuteCommand(ctx,
+			fmt.Sprintf("ln -s %s %s", danglingTarget, danglingLink))
+		require.NoError(t, execErr)
+
+		require.NoError(t, sandbox.FileSystem.UploadFileStream(ctx, bytes.NewReader([]byte("created via dangling")), danglingLink))
+
+		isSymlink, execErr := sandbox.Process.ExecuteCommand(ctx,
+			"test -L "+danglingLink+" && echo SYMLINK_OK || echo NOT_SYMLINK")
+		require.NoError(t, execErr)
+		assert.Contains(t, isSymlink.Result, "SYMLINK_OK")
+
+		content, downloadErr := sandbox.FileSystem.DownloadFile(ctx, danglingTarget, nil)
+		require.NoError(t, downloadErr)
+		assert.Equal(t, "created via dangling", string(content))
+	})
+
+	t.Run("FileSystem/UploadStreamOverwritePreservesContent", func(t *testing.T) {
+		require.NoError(t, sandbox.FileSystem.UploadFileStream(ctx, bytes.NewReader([]byte("version1")), overwritePath))
+		require.NoError(t, sandbox.FileSystem.UploadFileStream(ctx, bytes.NewReader([]byte("version2")), overwritePath))
 
 		content, downloadErr := sandbox.FileSystem.DownloadFile(ctx, overwritePath, nil)
 		require.NoError(t, downloadErr)
@@ -237,8 +257,8 @@ func TestE2E(t *testing.T) {
 		assert.Contains(t, strings.TrimSpace(res.Result), "644")
 	})
 
-	t.Run("FileSystem/UploadFileNestedDirCreation", func(t *testing.T) {
-		require.NoError(t, sandbox.FileSystem.UploadFile(ctx, []byte("deep"), deepPath))
+	t.Run("FileSystem/UploadStreamNestedDirCreation", func(t *testing.T) {
+		require.NoError(t, sandbox.FileSystem.UploadFileStream(ctx, bytes.NewReader([]byte("deep")), deepPath))
 
 		content, downloadErr := sandbox.FileSystem.DownloadFile(ctx, deepPath, nil)
 		require.NoError(t, downloadErr)
@@ -249,8 +269,8 @@ func TestE2E(t *testing.T) {
 		assert.Contains(t, res.Result, "DIR_OK")
 	})
 
-	t.Run("FileSystem/UploadFileNoTempFileLeftovers", func(t *testing.T) {
-		require.NoError(t, sandbox.FileSystem.UploadFile(ctx, []byte("clean"), cleanPath))
+	t.Run("FileSystem/UploadStreamNoTempFileLeftovers", func(t *testing.T) {
+		require.NoError(t, sandbox.FileSystem.UploadFileStream(ctx, bytes.NewReader([]byte("clean")), cleanPath))
 
 		res, execErr := sandbox.Process.ExecuteCommand(ctx,
 			"ls -la "+textDir+"/ | grep daytona-upload || echo NO_LEFTOVERS")
@@ -258,18 +278,15 @@ func TestE2E(t *testing.T) {
 		assert.Contains(t, res.Result, "NO_LEFTOVERS")
 	})
 
-	t.Run("FileSystem/UploadFileRenameFailureNoLeftovers", func(t *testing.T) {
-		// Place a directory at the destination path so rename(file, dir) fails
-		// with EISDIR (even for root). Verifies the temp file is cleaned up and
-		// a neighbouring file is unaffected.
+	t.Run("FileSystem/UploadStreamRenameFailureNoLeftovers", func(t *testing.T) {
 		dirDest := textDir + "/dir-as-dest"
 		neighborPath := textDir + "/failure-neighbor.txt"
 
-		require.NoError(t, sandbox.FileSystem.UploadFile(ctx, []byte("neighbor ok"), neighborPath))
+		require.NoError(t, sandbox.FileSystem.UploadFileStream(ctx, bytes.NewReader([]byte("neighbor ok")), neighborPath))
 		_, execErr := sandbox.Process.ExecuteCommand(ctx, "mkdir "+dirDest)
 		require.NoError(t, execErr)
 
-		err := sandbox.FileSystem.UploadFile(ctx, []byte("must not win"), dirDest)
+		err := sandbox.FileSystem.UploadFileStream(ctx, bytes.NewReader([]byte("must not win")), dirDest)
 		require.Error(t, err)
 
 		leftovers, execErr := sandbox.Process.ExecuteCommand(ctx,

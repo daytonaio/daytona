@@ -411,6 +411,62 @@ func TestUploadFilesWritesThroughSymlink(t *testing.T) {
 	}
 }
 
+func TestUploadFilesWritesThroughDanglingSymlink(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	tempDir := t.TempDir()
+	target := filepath.Join(tempDir, "not-yet.txt")
+	link := filepath.Join(tempDir, "dangling.txt")
+	if err := os.Symlink(target, link); err != nil {
+		t.Fatalf("symlink: %v", err)
+	}
+
+	content := "created via dangling symlink"
+	body := &bytes.Buffer{}
+	mw := multipart.NewWriter(body)
+	if err := mw.WriteField("files[0].path", link); err != nil {
+		t.Fatalf("write path: %v", err)
+	}
+	part, err := mw.CreateFormFile("files[0].file", "dangling.txt")
+	if err != nil {
+		t.Fatalf("form file: %v", err)
+	}
+	if _, err := part.Write([]byte(content)); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	if err := mw.Close(); err != nil {
+		t.Fatalf("close: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/files/bulk-upload", body)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	rec := httptest.NewRecorder()
+
+	_, engine := gin.CreateTestContext(rec)
+	engine.POST("/files/bulk-upload", UploadFiles)
+	engine.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d (body: %s)", rec.Code, rec.Body.String())
+	}
+
+	fi, err := os.Lstat(link)
+	if err != nil {
+		t.Fatalf("lstat link: %v", err)
+	}
+	if fi.Mode()&os.ModeSymlink == 0 {
+		t.Fatalf("symlink was replaced instead of written through")
+	}
+
+	got, err := os.ReadFile(target)
+	if err != nil {
+		t.Fatalf("target should have been created: %v", err)
+	}
+	if string(got) != content {
+		t.Fatalf("expected %q at target, got %q", content, string(got))
+	}
+}
+
 func formField(idx int, suffix string) string {
 	switch idx {
 	case 0:
