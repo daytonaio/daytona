@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y \
     libxss1 \
     libxtst6 \
     libxi6 \
+    x11-utils \
     # XCB libraries for screen recording
     libxcb1 \
     libxcb-shm0 \
@@ -30,6 +31,7 @@ RUN apt-get update && apt-get install -y \
     xvfb \
     x11vnc \
     novnc \
+    websockify \
     xfce4 \
     xfce4-terminal \
     dbus-x11 \

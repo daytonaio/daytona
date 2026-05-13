@@ -50,6 +50,7 @@ RUN apt-get update && apt-get install -y \
     xfonts-scalable \
     x11vnc \
     novnc \
+    websockify \
     supervisor \
     net-tools \
     locales \
@@ -88,20 +89,11 @@ RUN mkdir -p /home/daytona/.vnc && \
     chown -R daytona:daytona /home/daytona/.vnc
 
 # NoVNC setup
-RUN ln -sf /usr/share/novnc/vnc.html /usr/share/novnc/index.html && \
-    sed -i 's/websockify =/websockify = --heartbeat 30/' /usr/share/novnc/utils/launch.sh
+RUN ln -sf /usr/share/novnc/vnc.html /usr/share/novnc/index.html
 ```
 
-### Launch Script
-
-The NoVNC launch script (`/usr/share/novnc/utils/launch.sh`) is used to start the web-based VNC client. The Dockerfile modifies this script to add heartbeat support:
-
-```bash
-# Add heartbeat to websockify for better connection stability
-sed -i 's/websockify =/websockify = --heartbeat 30/' /usr/share/novnc/utils/launch.sh
-```
-
-This ensures that the WebSocket connection remains stable during long-running sessions.
+Computer-use supervises `websockify` directly so process status and restart
+behavior track the long-running noVNC listener instead of a wrapper script.
 
 ### Additional Tools
 
@@ -171,7 +163,7 @@ The processes are configured with the following settings based on environment va
 | xfce4   | `/usr/bin/startxfce4`                                                              | 200      | Yes          | Yes       | `DISPLAY`, `HOME`, `USER`, `DBUS_SESSION_BUS_ADDRESS` |
 | atspi   | `/usr/libexec/at-spi-bus-launcher --launch-immediately`                            | 250      | No           | Yes       | `DISPLAY`, `HOME`, `USER`, `DBUS_SESSION_BUS_ADDRESS` |
 | x11vnc  | `/usr/bin/x11vnc -display $DISPLAY -forever -shared -rfbport $VNC_PORT`            | 300      | Yes          | No        | `DISPLAY`                                             |
-| novnc   | `/usr/share/novnc/utils/launch.sh --vnc localhost:$VNC_PORT --listen $NO_VNC_PORT` | 400      | Yes          | No        | `DISPLAY`                                             |
+| novnc   | `websockify --web=/usr/share/novnc/ $NO_VNC_PORT localhost:$VNC_PORT`             | 400      | Yes          | No        | `DISPLAY`                                             |
 
 **Default Values:**
 
