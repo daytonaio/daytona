@@ -70,8 +70,8 @@ func getTableRowData(sandbox apiclient.Sandbox) *RowData {
 	}
 
 	rowData.Region = sandbox.Target
-	if sandbox.Class != nil {
-		rowData.Class = *sandbox.Class
+	if sandbox.SandboxClass != nil {
+		rowData.Class = *sandbox.SandboxClass
 	}
 
 	if sandbox.LastActivityAt != nil {

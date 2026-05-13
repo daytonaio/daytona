@@ -4,9 +4,10 @@
  */
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { IsArray, IsObject, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator'
+import { IsArray, IsEnum, IsObject, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator'
 import { CreateBuildInfoDto } from './create-build-info.dto'
 import { IsSafeDisplayString } from '../../common/validators'
+import { SandboxClass } from '../enums/sandbox-class.enum'
 
 @ApiSchema({ name: 'CreateSnapshot' })
 export class CreateSnapshotDto {
@@ -93,4 +94,14 @@ export class CreateSnapshotDto {
   @IsOptional()
   @IsString()
   regionId?: string
+
+  @ApiPropertyOptional({
+    description: 'Target sandbox class. Determines which runners can host sandboxes created from this snapshot.',
+    enum: SandboxClass,
+    enumName: 'SandboxClass',
+    example: SandboxClass.LINUX_VM,
+  })
+  @IsOptional()
+  @IsEnum(SandboxClass)
+  sandboxClass?: SandboxClass
 }

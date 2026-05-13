@@ -39,8 +39,8 @@ type RunnerFull struct {
 	Gpu *float32 `json:"gpu,omitempty"`
 	// The type of GPU
 	GpuType *string `json:"gpuType,omitempty"`
-	// The class of the runner
-	Class SandboxClass `json:"class"`
+	// The sandbox class supported by this runner
+	SandboxClass *SandboxClass `json:"sandboxClass,omitempty"`
 	// Current CPU usage percentage
 	CurrentCpuUsagePercentage *float32 `json:"currentCpuUsagePercentage,omitempty"`
 	// Current RAM usage percentage
@@ -99,13 +99,12 @@ type _RunnerFull RunnerFull
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunnerFull(id string, cpu float32, memory float32, disk float32, class SandboxClass, region string, name string, state RunnerState, unschedulable bool, tags []string, createdAt string, updatedAt string, version string, apiVersion string, runnerClass RunnerClass, apiKey string) *RunnerFull {
+func NewRunnerFull(id string, cpu float32, memory float32, disk float32, region string, name string, state RunnerState, unschedulable bool, tags []string, createdAt string, updatedAt string, version string, apiVersion string, runnerClass RunnerClass, apiKey string) *RunnerFull {
 	this := RunnerFull{}
 	this.Id = id
 	this.Cpu = cpu
 	this.Memory = memory
 	this.Disk = disk
-	this.Class = class
 	this.Region = region
 	this.Name = name
 	this.State = state
@@ -384,28 +383,36 @@ func (o *RunnerFull) SetGpuType(v string) {
 	o.GpuType = &v
 }
 
-// GetClass returns the Class field value
-func (o *RunnerFull) GetClass() SandboxClass {
-	if o == nil {
+// GetSandboxClass returns the SandboxClass field value if set, zero value otherwise.
+func (o *RunnerFull) GetSandboxClass() SandboxClass {
+	if o == nil || IsNil(o.SandboxClass) {
 		var ret SandboxClass
 		return ret
 	}
-
-	return o.Class
+	return *o.SandboxClass
 }
 
-// GetClassOk returns a tuple with the Class field value
+// GetSandboxClassOk returns a tuple with the SandboxClass field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *RunnerFull) GetClassOk() (*SandboxClass, bool) {
-	if o == nil {
+func (o *RunnerFull) GetSandboxClassOk() (*SandboxClass, bool) {
+	if o == nil || IsNil(o.SandboxClass) {
 		return nil, false
 	}
-	return &o.Class, true
+	return o.SandboxClass, true
 }
 
-// SetClass sets field value
-func (o *RunnerFull) SetClass(v SandboxClass) {
-	o.Class = v
+// HasSandboxClass returns a boolean if a field has been set.
+func (o *RunnerFull) HasSandboxClass() bool {
+	if o != nil && !IsNil(o.SandboxClass) {
+		return true
+	}
+
+	return false
+}
+
+// SetSandboxClass gets a reference to the given SandboxClass and assigns it to the SandboxClass field.
+func (o *RunnerFull) SetSandboxClass(v SandboxClass) {
+	o.SandboxClass = &v
 }
 
 // GetCurrentCpuUsagePercentage returns the CurrentCpuUsagePercentage field value if set, zero value otherwise.
@@ -1094,7 +1101,9 @@ func (o RunnerFull) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.GpuType) {
 		toSerialize["gpuType"] = o.GpuType
 	}
-	toSerialize["class"] = o.Class
+	if !IsNil(o.SandboxClass) {
+		toSerialize["sandboxClass"] = o.SandboxClass
+	}
 	if !IsNil(o.CurrentCpuUsagePercentage) {
 		toSerialize["currentCpuUsagePercentage"] = o.CurrentCpuUsagePercentage
 	}
@@ -1159,7 +1168,6 @@ func (o *RunnerFull) UnmarshalJSON(data []byte) (err error) {
 		"cpu",
 		"memory",
 		"disk",
-		"class",
 		"region",
 		"name",
 		"state",
@@ -1209,7 +1217,7 @@ func (o *RunnerFull) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "disk")
 		delete(additionalProperties, "gpu")
 		delete(additionalProperties, "gpuType")
-		delete(additionalProperties, "class")
+		delete(additionalProperties, "sandboxClass")
 		delete(additionalProperties, "currentCpuUsagePercentage")
 		delete(additionalProperties, "currentMemoryUsagePercentage")
 		delete(additionalProperties, "currentDiskUsagePercentage")

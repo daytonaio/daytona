@@ -115,8 +115,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     const snapshots = await this.snapshotRepository
       .createQueryBuilder('snapshot')
       .innerJoin('organization', 'org', 'org.id = snapshot.organizationId')
-      .innerJoin('region_quota', 'rq', 'rq."organizationId" = org.id AND rq."regionId" = org."defaultRegionId"')
-      .select(['snapshot.*', 'rq.total_cpu_quota'])
+      .select(['snapshot.*'])
       .where('snapshot.state = :snapshotState', { snapshotState: SnapshotState.ACTIVE })
       .andWhere('org.suspended = false')
       .orderBy('snapshot.createdAt', 'ASC')
@@ -342,6 +341,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
           state: RunnerState.READY,
           unschedulable: Not(true),
           region: In([...sharedRegionIds, ...organizationRegionIds]),
+          sandboxClass: snapshot.sandboxClass,
         },
       })
 
@@ -657,7 +657,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
                   // Get an available runner in the same region with the same class
                   const targetRunner = await this.runnerService.getRandomAvailableRunner({
                     regions: [sandbox.region],
-                    sandboxClass: sandbox.class,
+                    sandboxClass: sandbox.sandboxClass,
                     excludedRunnerIds: [runner.id],
                     gpu: sandbox.gpu,
                   })
@@ -1128,6 +1128,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
         initialRunner = await this.runnerService.getRandomAvailableRunner({
           regions: regions.map((region) => region.id),
+          sandboxClass: snapshot.sandboxClass,
           excludedRunnerIds: excludedRunnerIds,
           availabilityScoreThreshold: availabilityThreshold,
           gpu: snapshot.gpu,

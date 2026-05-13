@@ -22,6 +22,7 @@ var _ MappedNullable = &RegionUsageOverview{}
 // RegionUsageOverview struct for RegionUsageOverview
 type RegionUsageOverview struct {
 	RegionId string `json:"regionId"`
+	SandboxClass SandboxClass `json:"sandboxClass"`
 	TotalCpuQuota float32 `json:"totalCpuQuota"`
 	CurrentCpuUsage float32 `json:"currentCpuUsage"`
 	TotalMemoryQuota float32 `json:"totalMemoryQuota"`
@@ -46,9 +47,10 @@ type _RegionUsageOverview RegionUsageOverview
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRegionUsageOverview(regionId string, totalCpuQuota float32, currentCpuUsage float32, totalMemoryQuota float32, currentMemoryUsage float32, totalDiskQuota float32, currentDiskUsage float32, totalGpuQuota float32, currentGpuUsage float32, maxCpuPerSandbox NullableFloat32, maxMemoryPerSandbox NullableFloat32, maxDiskPerSandbox NullableFloat32, maxDiskPerNonEphemeralSandbox NullableFloat32, maxCpuPerGpuSandbox NullableFloat32, maxMemoryPerGpuSandbox NullableFloat32, maxDiskPerGpuSandbox NullableFloat32) *RegionUsageOverview {
+func NewRegionUsageOverview(regionId string, sandboxClass SandboxClass, totalCpuQuota float32, currentCpuUsage float32, totalMemoryQuota float32, currentMemoryUsage float32, totalDiskQuota float32, currentDiskUsage float32, totalGpuQuota float32, currentGpuUsage float32, maxCpuPerSandbox NullableFloat32, maxMemoryPerSandbox NullableFloat32, maxDiskPerSandbox NullableFloat32, maxDiskPerNonEphemeralSandbox NullableFloat32, maxCpuPerGpuSandbox NullableFloat32, maxMemoryPerGpuSandbox NullableFloat32, maxDiskPerGpuSandbox NullableFloat32) *RegionUsageOverview {
 	this := RegionUsageOverview{}
 	this.RegionId = regionId
+	this.SandboxClass = sandboxClass
 	this.TotalCpuQuota = totalCpuQuota
 	this.CurrentCpuUsage = currentCpuUsage
 	this.TotalMemoryQuota = totalMemoryQuota
@@ -97,6 +99,30 @@ func (o *RegionUsageOverview) GetRegionIdOk() (*string, bool) {
 // SetRegionId sets field value
 func (o *RegionUsageOverview) SetRegionId(v string) {
 	o.RegionId = v
+}
+
+// GetSandboxClass returns the SandboxClass field value
+func (o *RegionUsageOverview) GetSandboxClass() SandboxClass {
+	if o == nil {
+		var ret SandboxClass
+		return ret
+	}
+
+	return o.SandboxClass
+}
+
+// GetSandboxClassOk returns a tuple with the SandboxClass field value
+// and a boolean to check if the value has been set.
+func (o *RegionUsageOverview) GetSandboxClassOk() (*SandboxClass, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.SandboxClass, true
+}
+
+// SetSandboxClass sets field value
+func (o *RegionUsageOverview) SetSandboxClass(v SandboxClass) {
+	o.SandboxClass = v
 }
 
 // GetTotalCpuQuota returns the TotalCpuQuota field value
@@ -484,6 +510,7 @@ func (o RegionUsageOverview) MarshalJSON() ([]byte, error) {
 func (o RegionUsageOverview) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["regionId"] = o.RegionId
+	toSerialize["sandboxClass"] = o.SandboxClass
 	toSerialize["totalCpuQuota"] = o.TotalCpuQuota
 	toSerialize["currentCpuUsage"] = o.CurrentCpuUsage
 	toSerialize["totalMemoryQuota"] = o.TotalMemoryQuota
@@ -513,6 +540,7 @@ func (o *RegionUsageOverview) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"regionId",
+		"sandboxClass",
 		"totalCpuQuota",
 		"currentCpuUsage",
 		"totalMemoryQuota",
@@ -558,6 +586,7 @@ func (o *RegionUsageOverview) UnmarshalJSON(data []byte) (err error) {
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "regionId")
+		delete(additionalProperties, "sandboxClass")
 		delete(additionalProperties, "totalCpuQuota")
 		delete(additionalProperties, "currentCpuUsage")
 		delete(additionalProperties, "totalMemoryQuota")

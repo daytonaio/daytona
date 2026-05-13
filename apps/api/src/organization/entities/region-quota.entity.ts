@@ -5,6 +5,7 @@
 
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm'
 import { Organization } from './organization.entity'
+import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
 
 @Entity()
 export class RegionQuota {
@@ -13,6 +14,9 @@ export class RegionQuota {
 
   @PrimaryColumn()
   regionId: string
+
+  @PrimaryColumn({ type: 'character varying', default: SandboxClass.CONTAINER })
+  sandboxClass: SandboxClass
 
   @ManyToOne(() => Organization, (organization) => organization.regionQuotas, {
     onDelete: 'CASCADE',
@@ -127,6 +131,7 @@ export class RegionQuota {
   constructor(
     organizationId: string,
     regionId: string,
+    sandboxClass: SandboxClass,
     totalCpuQuota: number,
     totalMemoryQuota: number,
     totalDiskQuota: number,
@@ -141,6 +146,7 @@ export class RegionQuota {
   ) {
     this.organizationId = organizationId
     this.regionId = regionId
+    this.sandboxClass = sandboxClass
     this.totalCpuQuota = totalCpuQuota
     this.totalMemoryQuota = totalMemoryQuota
     this.totalDiskQuota = totalDiskQuota

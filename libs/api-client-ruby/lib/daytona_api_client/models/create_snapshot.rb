@@ -42,6 +42,31 @@ module DaytonaApiClient
     # ID of the region where the snapshot will be available. Defaults to organization default region if not specified.
     attr_accessor :region_id
 
+    # Target sandbox class. Determines which runners can host sandboxes created from this snapshot.
+    attr_accessor :sandbox_class
+
+    class EnumAttributeValidator
+      attr_reader :datatype
+      attr_reader :allowable_values
+
+      def initialize(datatype, allowable_values)
+        @allowable_values = allowable_values.map do |value|
+          case datatype.to_s
+          when /Integer/i
+            value.to_i
+          when /Float/i
+            value.to_f
+          else
+            value
+          end
+        end
+      end
+
+      def valid?(value)
+        !value || allowable_values.include?(value)
+      end
+    end
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
@@ -53,7 +78,8 @@ module DaytonaApiClient
         :'memory' => :'memory',
         :'disk' => :'disk',
         :'build_info' => :'buildInfo',
-        :'region_id' => :'regionId'
+        :'region_id' => :'regionId',
+        :'sandbox_class' => :'sandboxClass'
       }
     end
 
@@ -78,7 +104,8 @@ module DaytonaApiClient
         :'memory' => :'Integer',
         :'disk' => :'Integer',
         :'build_info' => :'CreateBuildInfo',
-        :'region_id' => :'String'
+        :'region_id' => :'String',
+        :'sandbox_class' => :'SandboxClass'
       }
     end
 
@@ -143,6 +170,10 @@ module DaytonaApiClient
       if attributes.key?(:'region_id')
         self.region_id = attributes[:'region_id']
       end
+
+      if attributes.key?(:'sandbox_class')
+        self.sandbox_class = attributes[:'sandbox_class']
+      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -188,7 +219,8 @@ module DaytonaApiClient
           memory == o.memory &&
           disk == o.disk &&
           build_info == o.build_info &&
-          region_id == o.region_id
+          region_id == o.region_id &&
+          sandbox_class == o.sandbox_class
     end
 
     # @see the `==` method
@@ -200,7 +232,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [name, image_name, entrypoint, cpu, gpu, memory, disk, build_info, region_id].hash
+      [name, image_name, entrypoint, cpu, gpu, memory, disk, build_info, region_id, sandbox_class].hash
     end
 
     # Builds the object from hash

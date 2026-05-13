@@ -14,6 +14,7 @@ import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { SnapshotEvents } from '../constants/snapshot-events'
 import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
+import { SandboxClass } from '../enums/sandbox-class.enum'
 
 export interface PersistSnapshotFromSandboxDeps {
   snapshotRepository: SnapshotRepository
@@ -27,6 +28,7 @@ export interface PersistSnapshotFromSandboxParams {
   ref: string
   runnerId?: string | null
   regionId: string
+  sandboxClass: SandboxClass
   cpu: number
   gpu: number
   mem: number
@@ -60,6 +62,7 @@ export async function persistSnapshotFromSandbox(
     name: params.name,
     ref: params.ref,
     state: SnapshotState.ACTIVE,
+    sandboxClass: params.sandboxClass,
     cpu: params.cpu,
     gpu: params.gpu,
     mem: params.mem,

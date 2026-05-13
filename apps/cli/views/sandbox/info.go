@@ -32,8 +32,8 @@ func RenderInfo(sandbox *apiclient.Sandbox, forceUnstyled bool) {
 
 	output += getInfoLine("Region", sandbox.Target) + "\n"
 
-	if sandbox.Class != nil {
-		output += getInfoLine("Class", *sandbox.Class) + "\n"
+	if sandbox.SandboxClass != nil {
+		output += getInfoLine("Class", *sandbox.SandboxClass) + "\n"
 	}
 
 	if sandbox.CreatedAt != nil {

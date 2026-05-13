@@ -268,19 +268,17 @@ public class Workspace {
   /**
    * The class of the sandbox
    */
-  @JsonAdapter(PropertyClassEnum.Adapter.class)
-  public enum PropertyClassEnum {
-    SMALL("small"),
+  @JsonAdapter(SandboxClassEnum.Adapter.class)
+  public enum SandboxClassEnum {
+    LINUX_VM("linux-vm"),
     
-    MEDIUM("medium"),
-    
-    LARGE("large"),
+    CONTAINER("container"),
     
     UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 
     private String value;
 
-    PropertyClassEnum(String value) {
+    SandboxClassEnum(String value) {
       this.value = value;
     }
 
@@ -293,8 +291,8 @@ public class Workspace {
       return String.valueOf(value);
     }
 
-    public static PropertyClassEnum fromValue(String value) {
-      for (PropertyClassEnum b : PropertyClassEnum.values()) {
+    public static SandboxClassEnum fromValue(String value) {
+      for (SandboxClassEnum b : SandboxClassEnum.values()) {
         if (b.value.equals(value)) {
           return b;
         }
@@ -302,30 +300,29 @@ public class Workspace {
       return UNKNOWN_DEFAULT_OPEN_API;
     }
 
-    public static class Adapter extends TypeAdapter<PropertyClassEnum> {
+    public static class Adapter extends TypeAdapter<SandboxClassEnum> {
       @Override
-      public void write(final JsonWriter jsonWriter, final PropertyClassEnum enumeration) throws IOException {
+      public void write(final JsonWriter jsonWriter, final SandboxClassEnum enumeration) throws IOException {
         jsonWriter.value(enumeration.getValue());
       }
 
       @Override
-      public PropertyClassEnum read(final JsonReader jsonReader) throws IOException {
+      public SandboxClassEnum read(final JsonReader jsonReader) throws IOException {
         String value =  jsonReader.nextString();
-        return PropertyClassEnum.fromValue(value);
+        return SandboxClassEnum.fromValue(value);
       }
     }
 
     public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       String value = jsonElement.getAsString();
-      PropertyClassEnum.fromValue(value);
+      SandboxClassEnum.fromValue(value);
     }
   }
 
-  public static final String SERIALIZED_NAME_PROPERTY_CLASS = "class";
-  @Deprecated
-  @SerializedName(SERIALIZED_NAME_PROPERTY_CLASS)
+  public static final String SERIALIZED_NAME_SANDBOX_CLASS = "sandboxClass";
+  @SerializedName(SERIALIZED_NAME_SANDBOX_CLASS)
   @javax.annotation.Nullable
-  private PropertyClassEnum propertyClass;
+  private SandboxClassEnum sandboxClass;
 
   public static final String SERIALIZED_NAME_DAEMON_VERSION = "daemonVersion";
   @SerializedName(SERIALIZED_NAME_DAEMON_VERSION)
@@ -1000,26 +997,22 @@ public class Workspace {
   }
 
 
-  @Deprecated
-  public Workspace propertyClass(@javax.annotation.Nullable PropertyClassEnum propertyClass) {
-    this.propertyClass = propertyClass;
+  public Workspace sandboxClass(@javax.annotation.Nullable SandboxClassEnum sandboxClass) {
+    this.sandboxClass = sandboxClass;
     return this;
   }
 
   /**
    * The class of the sandbox
-   * @return propertyClass
-   * @deprecated
+   * @return sandboxClass
    */
-  @Deprecated
   @javax.annotation.Nullable
-  public PropertyClassEnum getPropertyClass() {
-    return propertyClass;
+  public SandboxClassEnum getSandboxClass() {
+    return sandboxClass;
   }
 
-  @Deprecated
-  public void setPropertyClass(@javax.annotation.Nullable PropertyClassEnum propertyClass) {
-    this.propertyClass = propertyClass;
+  public void setSandboxClass(@javax.annotation.Nullable SandboxClassEnum sandboxClass) {
+    this.sandboxClass = sandboxClass;
   }
 
 
@@ -1239,7 +1232,7 @@ public class Workspace {
         Objects.equals(this.createdAt, workspace.createdAt) &&
         Objects.equals(this.updatedAt, workspace.updatedAt) &&
         Objects.equals(this.lastActivityAt, workspace.lastActivityAt) &&
-        Objects.equals(this.propertyClass, workspace.propertyClass) &&
+        Objects.equals(this.sandboxClass, workspace.sandboxClass) &&
         Objects.equals(this.daemonVersion, workspace.daemonVersion) &&
         Objects.equals(this.runnerId, workspace.runnerId) &&
         Objects.equals(this.toolboxProxyUrl, workspace.toolboxProxyUrl) &&
@@ -1252,7 +1245,7 @@ public class Workspace {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, organizationId, name, snapshot, user, env, labels, _public, networkBlockAll, networkAllowList, target, cpu, gpu, memory, disk, state, desiredState, errorReason, recoverable, backupState, backupCreatedAt, autoStopInterval, autoArchiveInterval, autoDeleteInterval, volumes, buildInfo, createdAt, updatedAt, lastActivityAt, propertyClass, daemonVersion, runnerId, toolboxProxyUrl, image, snapshotState, snapshotCreatedAt, info, additionalProperties);
+    return Objects.hash(id, organizationId, name, snapshot, user, env, labels, _public, networkBlockAll, networkAllowList, target, cpu, gpu, memory, disk, state, desiredState, errorReason, recoverable, backupState, backupCreatedAt, autoStopInterval, autoArchiveInterval, autoDeleteInterval, volumes, buildInfo, createdAt, updatedAt, lastActivityAt, sandboxClass, daemonVersion, runnerId, toolboxProxyUrl, image, snapshotState, snapshotCreatedAt, info, additionalProperties);
   }
 
   @Override
@@ -1288,7 +1281,7 @@ public class Workspace {
     sb.append("    createdAt: ").append(toIndentedString(createdAt)).append("\n");
     sb.append("    updatedAt: ").append(toIndentedString(updatedAt)).append("\n");
     sb.append("    lastActivityAt: ").append(toIndentedString(lastActivityAt)).append("\n");
-    sb.append("    propertyClass: ").append(toIndentedString(propertyClass)).append("\n");
+    sb.append("    sandboxClass: ").append(toIndentedString(sandboxClass)).append("\n");
     sb.append("    daemonVersion: ").append(toIndentedString(daemonVersion)).append("\n");
     sb.append("    runnerId: ").append(toIndentedString(runnerId)).append("\n");
     sb.append("    toolboxProxyUrl: ").append(toIndentedString(toolboxProxyUrl)).append("\n");
@@ -1315,7 +1308,7 @@ public class Workspace {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "recoverable", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "lastActivityAt", "class", "daemonVersion", "runnerId", "toolboxProxyUrl", "image", "snapshotState", "snapshotCreatedAt", "info"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "recoverable", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "lastActivityAt", "sandboxClass", "daemonVersion", "runnerId", "toolboxProxyUrl", "image", "snapshotState", "snapshotCreatedAt", "info"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "organizationId", "name", "user", "env", "labels", "public", "networkBlockAll", "target", "cpu", "gpu", "memory", "disk", "toolboxProxyUrl"));
@@ -1410,12 +1403,12 @@ public class Workspace {
       if ((jsonObj.get("lastActivityAt") != null && !jsonObj.get("lastActivityAt").isJsonNull()) && !jsonObj.get("lastActivityAt").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `lastActivityAt` to be a primitive type in the JSON string but got `%s`", jsonObj.get("lastActivityAt").toString()));
       }
-      if ((jsonObj.get("class") != null && !jsonObj.get("class").isJsonNull()) && !jsonObj.get("class").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `class` to be a primitive type in the JSON string but got `%s`", jsonObj.get("class").toString()));
+      if ((jsonObj.get("sandboxClass") != null && !jsonObj.get("sandboxClass").isJsonNull()) && !jsonObj.get("sandboxClass").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `sandboxClass` to be a primitive type in the JSON string but got `%s`", jsonObj.get("sandboxClass").toString()));
       }
-      // validate the optional field `class`
-      if (jsonObj.get("class") != null && !jsonObj.get("class").isJsonNull()) {
-        PropertyClassEnum.validateJsonElement(jsonObj.get("class"));
+      // validate the optional field `sandboxClass`
+      if (jsonObj.get("sandboxClass") != null && !jsonObj.get("sandboxClass").isJsonNull()) {
+        SandboxClassEnum.validateJsonElement(jsonObj.get("sandboxClass"));
       }
       if ((jsonObj.get("daemonVersion") != null && !jsonObj.get("daemonVersion").isJsonNull()) && !jsonObj.get("daemonVersion").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `daemonVersion` to be a primitive type in the JSON string but got `%s`", jsonObj.get("daemonVersion").toString()));

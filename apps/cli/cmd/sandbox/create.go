@@ -69,9 +69,6 @@ var CreateCmd = &cobra.Command{
 		if publicFlag {
 			createSandbox.SetPublic(true)
 		}
-		if classFlag != "" {
-			createSandbox.SetClass(classFlag)
-		}
 		if targetFlag != "" {
 			createSandbox.SetTarget(targetFlag)
 		}
@@ -199,7 +196,6 @@ var (
 	envFlag              []string
 	labelsFlag           []string
 	publicFlag           bool
-	classFlag            string
 	targetFlag           string
 	cpuFlag              int32
 	gpuFlag              int32
@@ -222,7 +218,6 @@ func init() {
 	CreateCmd.Flags().StringArrayVarP(&envFlag, "env", "e", []string{}, "Environment variables (format: KEY=VALUE)")
 	CreateCmd.Flags().StringArrayVarP(&labelsFlag, "label", "l", []string{}, "Labels (format: KEY=VALUE)")
 	CreateCmd.Flags().BoolVar(&publicFlag, "public", false, "Make sandbox publicly accessible")
-	CreateCmd.Flags().StringVar(&classFlag, "class", "", "Sandbox class type (small, medium, large)")
 	CreateCmd.Flags().StringVar(&targetFlag, "target", "", "Target region (eu, us)")
 	CreateCmd.Flags().Int32Var(&cpuFlag, "cpu", 0, "CPU cores allocated to the sandbox")
 	CreateCmd.Flags().Int32Var(&gpuFlag, "gpu", 0, "GPU units allocated to the sandbox")

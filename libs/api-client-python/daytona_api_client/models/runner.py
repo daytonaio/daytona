@@ -42,7 +42,7 @@ class Runner(BaseModel):
     disk: Union[StrictFloat, StrictInt] = Field(description="The disk capacity of the runner in GiB")
     gpu: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The GPU capacity of the runner")
     gpu_type: Optional[StrictStr] = Field(default=None, description="The type of GPU", serialization_alias="gpuType")
-    var_class: SandboxClass = Field(description="The class of the runner", serialization_alias="class")
+    sandbox_class: Optional[SandboxClass] = Field(default=None, description="The sandbox class supported by this runner", serialization_alias="sandboxClass")
     current_cpu_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current CPU usage percentage", serialization_alias="currentCpuUsagePercentage")
     current_memory_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current RAM usage percentage", serialization_alias="currentMemoryUsagePercentage")
     current_disk_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current disk usage percentage", serialization_alias="currentDiskUsagePercentage")
@@ -65,7 +65,7 @@ class Runner(BaseModel):
     runner_class: RunnerClass = Field(description="The class of the runner", serialization_alias="runnerClass")
     app_version: Optional[StrictStr] = Field(default=None, description="The app version of the runner", serialization_alias="appVersion")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "tags", "createdAt", "updatedAt", "version", "apiVersion", "runnerClass", "appVersion"]
+    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "sandboxClass", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "tags", "createdAt", "updatedAt", "version", "apiVersion", "runnerClass", "appVersion"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -133,7 +133,7 @@ class Runner(BaseModel):
             "disk": obj.get("disk"),
             "gpu": obj.get("gpu"),
             "gpu_type": obj.get("gpuType"),
-            "var_class": obj.get("class"),
+            "sandbox_class": obj.get("sandboxClass"),
             "current_cpu_usage_percentage": obj.get("currentCpuUsagePercentage"),
             "current_memory_usage_percentage": obj.get("currentMemoryUsagePercentage"),
             "current_disk_usage_percentage": obj.get("currentDiskUsagePercentage"),

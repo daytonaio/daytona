@@ -17,6 +17,7 @@ import {
 } from 'typeorm'
 import { SnapshotRunner } from './snapshot-runner.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
+import { SandboxClass } from '../enums/sandbox-class.enum'
 import { BuildInfo } from './build-info.entity'
 import { SnapshotRegion } from './snapshot-region.entity'
 
@@ -77,6 +78,12 @@ export class Snapshot {
 
   @Column({ type: 'boolean', default: false })
   hideFromUsers = false
+
+  @Column({
+    type: 'character varying',
+    default: SandboxClass.CONTAINER,
+  })
+  sandboxClass: SandboxClass = SandboxClass.CONTAINER
 
   @OneToMany(() => SnapshotRunner, (runner) => runner.snapshotRef)
   runners: SnapshotRunner[]

@@ -145,9 +145,8 @@ export interface Sandbox {
     'lastActivityAt'?: string;
     /**
      * The class of the sandbox
-     * @deprecated
      */
-    'class'?: SandboxClassEnum;
+    'sandboxClass'?: SandboxSandboxClassEnum;
     /**
      * The version of the daemon running in the sandbox
      */
@@ -172,13 +171,12 @@ export const SandboxBackupStateEnum = {
 } as const;
 
 export type SandboxBackupStateEnum = typeof SandboxBackupStateEnum[keyof typeof SandboxBackupStateEnum];
-export const SandboxClassEnum = {
-    SMALL: 'small',
-    MEDIUM: 'medium',
-    LARGE: 'large',
+export const SandboxSandboxClassEnum = {
+    LINUX_VM: 'linux-vm',
+    CONTAINER: 'container',
     UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
-export type SandboxClassEnum = typeof SandboxClassEnum[keyof typeof SandboxClassEnum];
+export type SandboxSandboxClassEnum = typeof SandboxSandboxClassEnum[keyof typeof SandboxSandboxClassEnum];
 
 

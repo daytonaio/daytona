@@ -24,16 +24,14 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 /**
- * The class of the runner
+ * Gets or Sets SandboxClass
  */
 @JsonAdapter(SandboxClass.Adapter.class)
 public enum SandboxClass {
   
-  SMALL("small"),
+  LINUX_VM("linux-vm"),
   
-  MEDIUM("medium"),
-  
-  LARGE("large"),
+  CONTAINER("container"),
   
   UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 

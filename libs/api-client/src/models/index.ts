@@ -21,6 +21,7 @@ export * from './create-linked-account';
 export * from './create-organization';
 export * from './create-organization-invitation';
 export * from './create-organization-quota';
+export * from './create-organization-region-quota';
 export * from './create-organization-role';
 export * from './create-region';
 export * from './create-region-response';

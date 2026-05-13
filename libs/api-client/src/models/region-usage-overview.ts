@@ -13,9 +13,13 @@
  */
 
 
+// May contain unused imports in some cases
+// @ts-ignore
+import type { SandboxClass } from './sandbox-class';
 
 export interface RegionUsageOverview {
     'regionId': string;
+    'sandboxClass': SandboxClass;
     'totalCpuQuota': number;
     'currentCpuUsage': number;
     'totalMemoryQuota': number;
@@ -32,4 +36,6 @@ export interface RegionUsageOverview {
     'maxMemoryPerGpuSandbox': number | null;
     'maxDiskPerGpuSandbox': number | null;
 }
+
+
 

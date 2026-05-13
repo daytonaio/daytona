@@ -42,8 +42,8 @@ module DaytonaApiClient
     # The type of GPU
     attr_accessor :gpu_type
 
-    # The class of the runner
-    attr_accessor :_class
+    # The sandbox class supported by this runner
+    attr_accessor :sandbox_class
 
     # Current CPU usage percentage
     attr_accessor :current_cpu_usage_percentage
@@ -142,7 +142,7 @@ module DaytonaApiClient
         :'disk' => :'disk',
         :'gpu' => :'gpu',
         :'gpu_type' => :'gpuType',
-        :'_class' => :'class',
+        :'sandbox_class' => :'sandboxClass',
         :'current_cpu_usage_percentage' => :'currentCpuUsagePercentage',
         :'current_memory_usage_percentage' => :'currentMemoryUsagePercentage',
         :'current_disk_usage_percentage' => :'currentDiskUsagePercentage',
@@ -189,7 +189,7 @@ module DaytonaApiClient
         :'disk' => :'Float',
         :'gpu' => :'Float',
         :'gpu_type' => :'String',
-        :'_class' => :'SandboxClass',
+        :'sandbox_class' => :'SandboxClass',
         :'current_cpu_usage_percentage' => :'Float',
         :'current_memory_usage_percentage' => :'Float',
         :'current_disk_usage_percentage' => :'Float',
@@ -280,10 +280,8 @@ module DaytonaApiClient
         self.gpu_type = attributes[:'gpu_type']
       end
 
-      if attributes.key?(:'_class')
-        self._class = attributes[:'_class']
-      else
-        self._class = nil
+      if attributes.key?(:'sandbox_class')
+        self.sandbox_class = attributes[:'sandbox_class']
       end
 
       if attributes.key?(:'current_cpu_usage_percentage')
@@ -414,10 +412,6 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "disk", disk cannot be nil.')
       end
 
-      if @_class.nil?
-        invalid_properties.push('invalid value for "_class", _class cannot be nil.')
-      end
-
       if @region.nil?
         invalid_properties.push('invalid value for "region", region cannot be nil.')
       end
@@ -469,7 +463,6 @@ module DaytonaApiClient
       return false if @cpu.nil?
       return false if @memory.nil?
       return false if @disk.nil?
-      return false if @_class.nil?
       return false if @region.nil?
       return false if @name.nil?
       return false if @state.nil?
@@ -521,16 +514,6 @@ module DaytonaApiClient
       end
 
       @disk = disk
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] _class Value to be assigned
-    def _class=(_class)
-      if _class.nil?
-        fail ArgumentError, '_class cannot be nil'
-      end
-
-      @_class = _class
     end
 
     # Custom attribute writer method with validation
@@ -647,7 +630,7 @@ module DaytonaApiClient
           disk == o.disk &&
           gpu == o.gpu &&
           gpu_type == o.gpu_type &&
-          _class == o._class &&
+          sandbox_class == o.sandbox_class &&
           current_cpu_usage_percentage == o.current_cpu_usage_percentage &&
           current_memory_usage_percentage == o.current_memory_usage_percentage &&
           current_disk_usage_percentage == o.current_disk_usage_percentage &&
@@ -680,7 +663,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, domain, api_url, proxy_url, cpu, memory, disk, gpu, gpu_type, _class, current_cpu_usage_percentage, current_memory_usage_percentage, current_disk_usage_percentage, current_allocated_cpu, current_allocated_memory_gi_b, current_allocated_disk_gi_b, current_snapshot_count, current_started_sandboxes, availability_score, region, name, state, last_checked, unschedulable, tags, created_at, updated_at, version, api_version, runner_class, app_version].hash
+      [id, domain, api_url, proxy_url, cpu, memory, disk, gpu, gpu_type, sandbox_class, current_cpu_usage_percentage, current_memory_usage_percentage, current_disk_usage_percentage, current_allocated_cpu, current_allocated_memory_gi_b, current_allocated_disk_gi_b, current_snapshot_count, current_started_sandboxes, availability_score, region, name, state, last_checked, unschedulable, tags, created_at, updated_at, version, api_version, runner_class, app_version].hash
     end
 
     # Builds the object from hash
