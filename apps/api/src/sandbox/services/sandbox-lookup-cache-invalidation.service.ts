@@ -38,12 +38,13 @@ export class SandboxLookupCacheInvalidationService {
     }
 
     if ('authToken' in args) {
+      const tokenPrefix = `${args.authToken.slice(0, 6)}...`
       cache
         .remove([sandboxLookupCacheKeyByAuthToken({ authToken: args.authToken })])
-        .then(() => this.logger.debug(`Invalidated sandbox lookup cache for authToken ${args.authToken}`))
+        .then(() => this.logger.debug(`Invalidated sandbox lookup cache for authToken ${tokenPrefix}`))
         .catch((error) =>
           this.logger.warn(
-            `Failed to invalidate sandbox lookup cache for authToken ${args.authToken}: ${error instanceof Error ? error.message : String(error)}`,
+            `Failed to invalidate sandbox lookup cache for authToken ${tokenPrefix}: ${error instanceof Error ? error.message : String(error)}`,
           ),
         )
       return
