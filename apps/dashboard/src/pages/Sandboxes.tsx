@@ -9,10 +9,10 @@ import { ForkTreeDialog } from '@/components/ForkTreeDialog'
 import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { RecursiveDeleteDialog } from '@/components/RecursiveDeleteDialog'
 import { CreateSandboxSheet } from '@/components/Sandbox/CreateSandboxSheet'
-import { tabParser } from '@/components/sandboxes/SearchParams'
 import { CreateSshAccessSheet } from '@/components/sandboxes/CreateSshAccessSheet'
 import { RevokeSshAccessDialog } from '@/components/sandboxes/RevokeSshAccessDialog'
 import SandboxDetailsSheet, { type SandboxDetailsSheetTabValue } from '@/components/sandboxes/SandboxDetailsSheet'
+import { tabParser } from '@/components/sandboxes/SearchParams'
 import { SandboxTable } from '@/components/SandboxTable'
 import type { SandboxTableRef } from '@/components/SandboxTable/types'
 import {
@@ -30,6 +30,7 @@ import { Input } from '@/components/ui/input'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { RoutePath } from '@/enums/RoutePath'
+import { queryKeys } from '@/hooks/queries/queryKeys'
 import { useApi } from '@/hooks/useApi'
 import { useConfig } from '@/hooks/useConfig'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
@@ -48,6 +49,7 @@ import {
   SnapshotDto,
 } from '@daytona/api-client'
 import type { Sandbox as CreatedSandbox } from '@daytona/sdk'
+import { useQueryClient } from '@tanstack/react-query'
 import { PlusIcon } from 'lucide-react'
 import { parseAsString, useQueryState } from 'nuqs'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -57,6 +59,7 @@ import { toast } from 'sonner'
 
 const Sandboxes: React.FC = () => {
   const { sandboxApi, apiKeyApi, toolboxApi, snapshotApi } = useApi()
+  const queryClient = useQueryClient()
   const { user } = useAuth()
   const { notificationSocket } = useNotificationSocket()
   const config = useConfig()
@@ -114,7 +117,7 @@ const Sandboxes: React.FC = () => {
 
   // Sandbox Details Drawer
 
-  const [selectedSandbox, setSelectedSandbox] = useState<Sandbox | null>(null)
+  const [selectedSandboxId, setSelectedSandboxId] = useState<string | null>(null)
   const [orderedSandboxItems, setOrderedSandboxItems] = useState<Sandbox[] | null>(null)
   const [showSandboxDetails, setShowSandboxDetails] = useState(false)
   const [sandboxDetailsInitialTab, setSandboxDetailsInitialTab] = useState<SandboxDetailsSheetTabValue>('overview')
@@ -134,6 +137,19 @@ const Sandboxes: React.FC = () => {
 
   const { selectedOrganization, authenticatedUserOrganizationMember, authenticatedUserHasPermission } =
     useSelectedOrganization()
+
+  const seedSandboxDetailsCache = useCallback(
+    (sandbox: Sandbox) => {
+      if (!selectedOrganization?.id) {
+        return
+      }
+
+      queryClient.setQueryData<Sandbox>(queryKeys.sandboxes.detail(selectedOrganization.id, sandbox.id), (oldData) =>
+        oldData ? { ...oldData, ...sandbox } : sandbox,
+      )
+    },
+    [queryClient, selectedOrganization?.id],
+  )
 
   const fetchSnapshots = useCallback(async () => {
     if (!selectedOrganization) {
@@ -180,38 +196,22 @@ const Sandboxes: React.FC = () => {
   useEffect(() => {
     if (!sandboxIdParam) {
       setShowSandboxDetails(false)
+      setSelectedSandboxId(null)
+      setOrderedSandboxItems(null)
       return
     }
 
-    const sandboxFromUrl = sandboxes.find((sandbox) => sandbox.id === sandboxIdParam)
-    if (!sandboxFromUrl) {
-      return
+    const sandboxFromList = sandboxes.find((sandbox) => sandbox.id === sandboxIdParam)
+    if (sandboxFromList) {
+      seedSandboxDetailsCache(sandboxFromList)
     }
 
-    setSelectedSandbox(sandboxFromUrl)
-    if (!showSandboxDetails || selectedSandbox?.id !== sandboxFromUrl.id) {
-      setSandboxDetailsInitialTab(sandboxTabParam as SandboxDetailsSheetTabValue)
+    setSelectedSandboxId(sandboxIdParam)
+    if (!showSandboxDetails || selectedSandboxId !== sandboxIdParam) {
+      setSandboxDetailsInitialTab(sandboxTabParam ?? 'overview')
     }
     setShowSandboxDetails(true)
-  }, [sandboxIdParam, sandboxTabParam, sandboxes, selectedSandbox?.id, showSandboxDetails])
-
-  useEffect(() => {
-    if (selectedSandbox) {
-      const updatedSandbox = sandboxes.find((s) => s.id === selectedSandbox.id)
-      if (updatedSandbox && updatedSandbox !== selectedSandbox) {
-        setSelectedSandbox(updatedSandbox)
-      }
-    }
-  }, [sandboxes, selectedSandbox])
-
-  useEffect(() => {
-    if (selectedSandbox && !sandboxes.some((s) => s.id === selectedSandbox.id)) {
-      setSelectedSandbox(null)
-      setShowSandboxDetails(false)
-      setSandboxIdParam(null)
-      setSandboxTabParam(null)
-    }
-  }, [sandboxes, selectedSandbox, setSandboxIdParam, setSandboxTabParam])
+  }, [sandboxIdParam, sandboxTabParam, sandboxes, seedSandboxDetailsCache, selectedSandboxId, showSandboxDetails])
 
   useEffect(() => {
     const handleSandboxCreatedEvent = (sandbox: Sandbox) => {
@@ -272,10 +272,6 @@ const Sandboxes: React.FC = () => {
 
     setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.STARTING } : s)))
 
-    if (selectedSandbox?.id === id) {
-      setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.STARTING } : null))
-    }
-
     try {
       await sandboxApi.startSandbox(id, selectedOrganization?.id)
       toast.success(`Starting sandbox with ID: ${id}`)
@@ -291,9 +287,6 @@ const Sandboxes: React.FC = () => {
           ) : null,
       })
       setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
-      if (selectedSandbox?.id === id && previousState) {
-        setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
-      }
     } finally {
       setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
       setTimeout(() => {
@@ -334,10 +327,6 @@ const Sandboxes: React.FC = () => {
 
     setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.STOPPING } : s)))
 
-    if (selectedSandbox?.id === id) {
-      setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.STOPPING } : null))
-    }
-
     try {
       await sandboxApi.stopSandbox(id, selectedOrganization?.id)
       toast.success(
@@ -351,9 +340,6 @@ const Sandboxes: React.FC = () => {
     } catch (error) {
       handleApiError(error, 'Failed to stop sandbox')
       setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
-      if (selectedSandbox?.id === id && previousState) {
-        setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
-      }
     } finally {
       setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
       setTimeout(() => {
@@ -370,18 +356,14 @@ const Sandboxes: React.FC = () => {
 
     setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.DESTROYING } : s)))
 
-    if (selectedSandbox?.id === id) {
-      setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.DESTROYING } : null))
-    }
-
     try {
       await sandboxApi.deleteSandbox(id, selectedOrganization?.id)
       setSandboxToDelete(null)
       setShowDeleteDialog(false)
 
-      if (selectedSandbox?.id === id) {
+      if (selectedSandboxId === id) {
         setShowSandboxDetails(false)
-        setSelectedSandbox(null)
+        setSelectedSandboxId(null)
         setSandboxIdParam(null)
         setSandboxTabParam(null)
       }
@@ -390,9 +372,6 @@ const Sandboxes: React.FC = () => {
     } catch (error) {
       handleApiError(error, 'Failed to delete sandbox')
       setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
-      if (selectedSandbox?.id === id && previousState) {
-        setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
-      }
     } finally {
       setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
     }
@@ -406,45 +385,28 @@ const Sandboxes: React.FC = () => {
 
     setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.ARCHIVING } : s)))
 
-    if (selectedSandbox?.id === id) {
-      setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.ARCHIVING } : null))
-    }
-
     try {
       await sandboxApi.archiveSandbox(id, selectedOrganization?.id)
       toast.success(`Archiving sandbox with ID: ${id}`)
     } catch (error) {
       handleApiError(error, 'Failed to archive sandbox')
       setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
-      if (selectedSandbox?.id === id && previousState) {
-        setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
-      }
     } finally {
       setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
     }
   }
 
-  const performSandboxStateOptimisticUpdate = useCallback(
-    (sandboxId: string, newState: SandboxState) => {
-      if (selectedSandbox?.id === sandboxId) {
-        setSelectedSandbox((prev) => (prev ? { ...prev, state: newState } : null))
-      }
-    },
-    [selectedSandbox?.id],
-  )
+  const performSandboxStateOptimisticUpdate = useCallback((sandboxId: string, newState: SandboxState) => {
+    setSandboxes((prev) => prev.map((s) => (s.id === sandboxId ? { ...s, state: newState } : s)))
+  }, [])
 
-  const revertSandboxStateOptimisticUpdate = useCallback(
-    (sandboxId: string, previousState?: SandboxState) => {
-      if (!previousState) {
-        return
-      }
+  const revertSandboxStateOptimisticUpdate = useCallback((sandboxId: string, previousState?: SandboxState) => {
+    if (!previousState) {
+      return
+    }
 
-      if (selectedSandbox?.id === sandboxId) {
-        setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
-      }
-    },
-    [selectedSandbox?.id],
-  )
+    setSandboxes((prev) => prev.map((s) => (s.id === sandboxId ? { ...s, state: previousState } : s)))
+  }, [])
 
   // todo(rpavlini): we should refactor this and move to react-query mutations
   const executeBulkAction = useCallback(
@@ -566,7 +528,7 @@ const Sandboxes: React.FC = () => {
     })
 
   const handleBulkDelete = async (ids: string[]) => {
-    const selectedSandboxInBulk = selectedSandbox && ids.includes(selectedSandbox.id)
+    const selectedSandboxInBulk = selectedSandboxId ? ids.includes(selectedSandboxId) : false
 
     await executeBulkAction({
       ids,
@@ -583,7 +545,9 @@ const Sandboxes: React.FC = () => {
 
     if (selectedSandboxInBulk) {
       setShowSandboxDetails(false)
-      setSelectedSandbox(null)
+      setSelectedSandboxId(null)
+      setSandboxIdParam(null)
+      setSandboxTabParam(null)
     }
   }
 
@@ -725,8 +689,8 @@ const Sandboxes: React.FC = () => {
 
   const sandboxItems = useMemo(() => orderedSandboxItems ?? sandboxes ?? [], [orderedSandboxItems, sandboxes])
   const selectedSandboxIndex = useMemo(
-    () => sandboxItems.findIndex((sandbox) => sandbox.id === selectedSandbox?.id),
-    [sandboxItems, selectedSandbox?.id],
+    () => sandboxItems.findIndex((sandbox) => sandbox.id === selectedSandboxId),
+    [sandboxItems, selectedSandboxId],
   )
 
   const handleSandboxSheetNavigate = (direction: 'prev' | 'next') => {
@@ -738,7 +702,8 @@ const Sandboxes: React.FC = () => {
     const nextSandbox = sandboxItems[nextIndex]
 
     if (nextSandbox) {
-      setSelectedSandbox(nextSandbox)
+      seedSandboxDetailsCache(nextSandbox)
+      setSelectedSandboxId(nextSandbox.id)
       setSandboxIdParam(nextSandbox.id)
     }
   }
@@ -755,8 +720,9 @@ const Sandboxes: React.FC = () => {
   const openSandboxDetails = (sandbox: Sandbox, initialTab: SandboxDetailsSheetTabValue = 'overview') => {
     const orderedSandboxes =
       sandboxTableRef.current?.table.getPrePaginationRowModel().rows.map((row) => row.original) ?? []
+    seedSandboxDetailsCache(sandbox)
     setOrderedSandboxItems(orderedSandboxes.some((item) => item.id === sandbox.id) ? orderedSandboxes : null)
-    setSelectedSandbox(sandbox)
+    setSelectedSandboxId(sandbox.id)
     setSandboxDetailsInitialTab(initialTab)
     setSandboxIdParam(sandbox.id)
     setSandboxTabParam(initialTab)
@@ -863,7 +829,7 @@ const Sandboxes: React.FC = () => {
           ref={sandboxTableRef}
           sandboxIsLoading={loadingSandboxes}
           sandboxStateIsTransitioning={transitioningSandboxes}
-          activeSandboxId={showSandboxDetails ? selectedSandbox?.id : undefined}
+          activeSandboxId={showSandboxDetails ? selectedSandboxId : undefined}
           handleStart={handleStart}
           handleStop={handleStop}
           handleDelete={openDeleteDialog}
@@ -1004,7 +970,7 @@ const Sandboxes: React.FC = () => {
         />
 
         <SandboxDetailsSheet
-          sandbox={selectedSandbox}
+          sandboxId={selectedSandboxId}
           open={showSandboxDetails}
           onOpenChange={handleSandboxDetailsOpenChange}
           sandboxIsLoading={loadingSandboxes}
@@ -1025,7 +991,7 @@ const Sandboxes: React.FC = () => {
           hasPrev={selectedSandboxIndex > 0}
           hasNext={selectedSandboxIndex >= 0 && selectedSandboxIndex < sandboxItems.length - 1}
           initialTab={sandboxDetailsInitialTab}
-          activeTab={sandboxTabParam as SandboxDetailsSheetTabValue}
+          activeTab={sandboxTabParam ?? undefined}
           onTabChange={setSandboxTabParam}
         />
 
