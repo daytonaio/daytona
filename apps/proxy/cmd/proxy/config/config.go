@@ -32,7 +32,12 @@ type Config struct {
 	ToolboxOnlyMode       bool               `envconfig:"TOOLBOX_ONLY_MODE"`
 	PreviewWarningEnabled bool               `envconfig:"PREVIEW_WARNING_ENABLED"`
 	ShutdownTimeoutSec    int                `envconfig:"SHUTDOWN_TIMEOUT_SEC"`
+	ApiClientTimeoutSec   int                `envconfig:"API_CLIENT_TIMEOUT_SEC"`
 	ApiClient             *apiclient.APIClient
+	// ApiHTTPTransport is the shared transport for HTTP clients that talk to the
+	// Daytona API. Tighter IdleConnTimeout than http.DefaultTransport so we
+	// don't reuse a connection the API server has already closed.
+	ApiHTTPTransport http.RoundTripper
 }
 
 type OidcConfig struct {
@@ -80,6 +85,10 @@ func GetConfig() (*Config, error) {
 		config.ShutdownTimeoutSec = 60 * 60 // default to 1 hour
 	}
 
+	if config.ApiClientTimeoutSec <= 0 {
+		config.ApiClientTimeoutSec = 60
+	}
+
 	if config.Redis != nil {
 		if config.Redis.Host == nil || *config.Redis.Host == "" {
 			config.Redis = nil
@@ -97,8 +106,15 @@ func GetConfig() (*Config, error) {
 
 	config.ApiClient = apiclient.NewAPIClient(clientConfig)
 
+	// Clone http.DefaultTransport so we inherit its dial/TLS/H2 defaults, then
+	// shorten IdleConnTimeout so we don't race the API server closing idle keep-alives.
+	apiTransport := http.DefaultTransport.(*http.Transport).Clone()
+	apiTransport.IdleConnTimeout = 30 * time.Second
+	config.ApiHTTPTransport = apiTransport
+
 	config.ApiClient.GetConfig().HTTPClient = &http.Client{
-		Transport: http.DefaultTransport,
+		Transport: config.ApiHTTPTransport,
+		Timeout:   time.Duration(config.ApiClientTimeoutSec) * time.Second,
 	}
 
 	ctx := context.Background()
