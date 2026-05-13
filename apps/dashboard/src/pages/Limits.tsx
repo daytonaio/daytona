@@ -4,7 +4,7 @@
  */
 
 import { LiveIndicator } from '@/components/LiveIndicator'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { TierComparisonTable, TierComparisonTableSkeleton } from '@/components/TierComparisonTable'
 import { TierUpgradeCard } from '@/components/TierUpgradeCard'
 import { Badge } from '@/components/ui/badge'
@@ -89,11 +89,10 @@ export default function Limits() {
 
   return (
     <PageLayout>
-      <PageHeader>
-        <PageTitle>Limits</PageTitle>
-      </PageHeader>
+      <PageHeader />
 
       <PageContent>
+        <PageIntro title="Limits" />
         {isError ? (
           <Card>
             <CardHeader>

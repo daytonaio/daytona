@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { CreateResourceButton } from '@/components/CreateResourceButton'
 import { Button } from '@/components/ui/button'
 import { DatePicker } from '@/components/ui/date-picker'
 import {
@@ -30,7 +31,6 @@ import { handleApiError } from '@/lib/error-handling'
 import { getMaskedToken } from '@/lib/utils'
 import { ApiKeyResponse, CreateApiKeyPermissionsEnum } from '@daytona/api-client'
 import { useForm } from '@tanstack/react-form'
-import { Plus } from 'lucide-react'
 import React, { Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -143,15 +143,12 @@ export const CreateApiKeySheet: React.FC<CreateApiKeySheetProps> = ({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="default" size="sm" className={className}>
-          <Plus className="w-4 h-4" />
-          Create Key
-        </Button>
+        <CreateResourceButton resource="API Key" className={className} />
       </SheetTrigger>
 
       <SheetContent className="w-dvw sm:w-[500px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle className="text-2xl">{createdKey ? 'API Key Created' : 'Create New API Key'}</SheetTitle>
+          <SheetTitle>{createdKey ? 'API Key Created' : 'Create New API Key'}</SheetTitle>
           <SheetDescription className="sr-only">
             {createdKey
               ? 'Your API key has been created successfully.'

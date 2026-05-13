@@ -405,7 +405,7 @@ const getStateLabel = (state: SnapshotState) => {
   if (state === SnapshotState.REMOVING) {
     return 'Deleting'
   }
-  return state
+  return String(state)
     .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ')

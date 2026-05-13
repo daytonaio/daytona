@@ -5,7 +5,7 @@
 
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { CreateApiKeySheet } from '@/components/CreateApiKeySheet'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -102,18 +102,20 @@ const Keys: React.FC = () => {
 
   return (
     <PageLayout contained>
-      <PageHeader>
-        <PageTitle>API Keys</PageTitle>
-        <CreateApiKeySheet
-          className="ml-auto"
-          availablePermissions={availablePermissions}
-          apiUrl={apiUrl}
-          organizationId={selectedOrganization?.id}
-          ref={createApiKeySheetRef}
-        />
-      </PageHeader>
+      <PageHeader />
 
       <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="API Keys"
+          actions={
+            <CreateApiKeySheet
+              availablePermissions={availablePermissions}
+              apiUrl={apiUrl}
+              organizationId={selectedOrganization?.id}
+              ref={createApiKeySheetRef}
+            />
+          }
+        />
         <ApiKeyTable
           data={apiKeysQuery.data ?? []}
           loading={apiKeysQuery.isLoading}

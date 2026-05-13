@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
 import { useApi } from '@/hooks/useApi'
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { useOrganizations } from '@/hooks/useOrganizations'
 import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
@@ -20,7 +21,6 @@ import { Organization } from '@daytona/api-client'
 import { Building2, ChevronsUpDown, Copy, PlusCircle, SquareUserRound } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { CommandHighlight, useRegisterCommands, type CommandConfig } from '../CommandPalette'
 import { CreateOrganizationSheet } from './CreateOrganizationSheet'
 
@@ -145,11 +145,12 @@ export const OrganizationPicker: React.FC = () => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <SidebarMenuButton
+            variant="outline"
             disabled={loadingSelectOrganization}
-            className="outline outline-1 outline-border outline-offset-0 mb-2 bg-muted"
+            className="bg-input/50"
             tooltip={optimisticSelectedOrganization.name}
           >
-            <div className="w-4 h-4 flex-shrink-0 bg-black rounded-full text-white flex items-center justify-center text-[10px] font-bold">
+            <div className="w-4 h-4 flex-shrink-0 rounded-full bg-black text-white flex items-center justify-center text-[10px] font-bold">
               {optimisticSelectedOrganization.name[0].toUpperCase()}
             </div>
             <span className="truncate text-foreground">{optimisticSelectedOrganization.name}</span>

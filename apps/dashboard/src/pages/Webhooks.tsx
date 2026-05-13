@@ -4,7 +4,7 @@
  */
 
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { UpsertEndpointSheet } from '@/components/Webhooks/UpsertEndpointSheet'
 import { WebhooksEndpointTable } from '@/components/Webhooks/WebhooksEndpointTable'
 import { WebhooksMessagesTable } from '@/components/Webhooks/WebhooksMessagesTable/WebhooksMessagesTable'
@@ -98,10 +98,9 @@ const Webhooks: React.FC = () => {
   if (endpoints.error) {
     return (
       <PageLayout>
-        <PageHeader>
-          <PageTitle>Webhooks</PageTitle>
-        </PageHeader>
+        <PageHeader />
         <PageContent>
+          <PageIntro title="Webhooks" />
           <Empty className="py-12 max-h-64 border" variant="destructive">
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -124,38 +123,37 @@ const Webhooks: React.FC = () => {
 
   return (
     <PageLayout contained>
-      <PageHeader>
-        <PageTitle>Webhooks</PageTitle>
-        <a
-          href="https://www.daytona.io/docs/en/tools/api/#daytona/webhook/undefined/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="ml-auto"
-        >
-          <Button variant="link" size="sm">
-            Docs
-          </Button>
-        </a>
-        <UpsertEndpointSheet
-          onSuccess={handleSuccess}
-          ref={createEndpointSheetRef}
-          className={activeTab === 'endpoints' ? '' : 'hidden'}
-        />
-      </PageHeader>
+      <PageHeader />
 
-      <PageContent size="full" className="p-0 overflow-hidden">
+      <PageContent size="full" className="!p-0 overflow-hidden">
+        <PageIntro
+          title="Webhooks"
+          className="mb-8 px-4 pt-4"
+          actions={
+            <UpsertEndpointSheet
+              onSuccess={handleSuccess}
+              ref={createEndpointSheetRef}
+              className={activeTab === 'endpoints' ? '' : 'hidden'}
+            />
+          }
+        />
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col gap-0">
-          <TabsList
-            className="shadow-none bg-transparent w-auto p-0 pb-0 justify-start rounded-none"
-            variant="underline"
-          >
-            <TabsTrigger value="endpoints" className="-mb-0.5 pb-1.5">
-              Endpoints
-            </TabsTrigger>
-            <TabsTrigger value="messages" className="-mb-0.5 pb-1.5">
-              Messages
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex items-center justify-between shadow-[inset_0_-1px] shadow-border">
+            <TabsList className="px-2 shadow-none bg-transparent w-auto pb-0">
+              <TabsTrigger
+                value="endpoints"
+                className="data-[state=inactive]:border-b-transparent data-[state=active]:border-b-foreground border-b rounded-none !shadow-none -mb-0.5 pb-1.5"
+              >
+                Endpoints
+              </TabsTrigger>
+              <TabsTrigger
+                value="messages"
+                className="data-[state=inactive]:border-b-transparent data-[state=active]:border-b-foreground border-b rounded-none !shadow-none -mb-0.5 pb-1.5"
+              >
+                Messages
+              </TabsTrigger>
+            </TabsList>
+          </div>
           <TabsContent
             value="endpoints"
             className="min-h-0 p-4 data-[state=active]:flex data-[state=active]:flex-1 flex-col"

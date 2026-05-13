@@ -39,7 +39,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { MoreHorizontal, Shield } from 'lucide-react'
-import { useState } from 'react'
+import { type ReactNode, useState } from 'react'
 
 type OrganizationRoleTableMeta = {
   onDelete: (roleId: string) => void
@@ -67,6 +67,7 @@ interface DataTableProps {
   ) => Promise<boolean>
   onDeleteRole: (roleId: string) => Promise<boolean>
   loadingRoleAction: Record<string, boolean>
+  toolbarActions?: ReactNode
 }
 
 export function OrganizationRoleTable({
@@ -75,6 +76,7 @@ export function OrganizationRoleTable({
   onUpdateRole,
   onDeleteRole,
   loadingRoleAction,
+  toolbarActions,
 }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
@@ -166,15 +168,16 @@ export function OrganizationRoleTable({
 
   return (
     <>
-      <div className="flex min-h-0 flex-1 flex-col pt-2">
-        <div className="mb-3">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 pt-2">
+        <div className="flex items-center gap-2">
           <SearchInput
             debounced
             value={globalFilter}
             onValueChange={handleChangeFilter}
             placeholder="Search by Name, Description, or Permission"
-            containerClassName="max-w-sm"
+            containerClassName="min-w-0 flex-1 sm:max-w-sm"
           />
+          <div className="flex shrink-0 items-center gap-2 empty:hidden sm:ml-auto">{toolbarActions}</div>
         </div>
         <TableContainer
           className={cn('max-h-[550px]', {

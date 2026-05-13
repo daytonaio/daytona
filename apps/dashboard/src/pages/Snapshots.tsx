@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { CreateSnapshotSheet } from '@/components/snapshots/CreateSnapshotSheet'
 import { SnapshotSheet } from '@/components/snapshots/SnapshotSheet'
 import { SnapshotTable } from '@/components/snapshots/SnapshotTable'
@@ -439,14 +439,17 @@ const Snapshots: React.FC = () => {
 
   return (
     <PageLayout contained>
-      <PageHeader>
-        <PageTitle>Snapshots</PageTitle>
-        {writePermitted && (
-          <CreateSnapshotSheet className="ml-auto" onSnapshotCreated={handleSnapshotCreated} ref={dialogRef} />
-        )}
-      </PageHeader>
+      <PageHeader />
 
       <PageContent size="full" className="flex-1 overflow-hidden">
+        <PageIntro
+          title="Snapshots"
+          actions={
+            writePermitted ? (
+              <CreateSnapshotSheet ref={dialogRef} onSnapshotCreated={handleSnapshotCreated} />
+            ) : undefined
+          }
+        />
         <SnapshotTable
           data={filteredItems}
           loading={snapshotsDataIsLoading}
