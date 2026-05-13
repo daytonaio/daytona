@@ -18,7 +18,6 @@ import {
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
 import { useArchiveSandboxMutation } from '@/hooks/mutations/useArchiveSandboxMutation'
 import { useDeleteSandboxMutation } from '@/hooks/mutations/useDeleteSandboxMutation'
@@ -39,7 +38,6 @@ import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@dayt
 import { isAxiosError } from 'axios'
 import { Container, GripVertical, RefreshCw } from 'lucide-react'
 import { useQueryState } from 'nuqs'
-import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { useEffect, useState } from 'react'
 import { Group, Panel, Separator } from 'react-resizable-panels'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -60,8 +58,7 @@ export default function SandboxDetails() {
     useSelectedOrganization()
   const { getRegionName } = useRegions()
 
-  const spendingEnabled = useFeatureFlagEnabled(FeatureFlags.SANDBOX_SPENDING)
-  const spendingTabAvailable = spendingEnabled && !!config.analyticsApiUrl
+  const spendingTabAvailable = !!config.analyticsApiUrl
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [createSshDialogOpen, setCreateSshDialogOpen] = useState(false)

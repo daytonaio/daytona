@@ -15,12 +15,10 @@ import {
 import { useSidebar } from '@/components/ui/sidebar'
 import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { FeatureFlags } from '@/enums/FeatureFlags'
 import { useConfig } from '@/hooks/useConfig'
 import { SandboxSessionProvider } from '@/providers/SandboxSessionProvider'
 import type { Sandbox } from '@daytona/api-client'
 import { ChevronDown, ChevronUp, ChevronsRight, X } from 'lucide-react'
-import { useFeatureFlagEnabled } from 'posthog-js/react'
 import React, { useCallback, useEffect, useState } from 'react'
 import { SandboxActionsSegmented } from '../SandboxActionsSegmented'
 import { SandboxInfoPanel } from '../SandboxInfoPanel'
@@ -125,9 +123,8 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   const [internalActiveTab, setInternalActiveTab] = useState<SandboxDetailsSheetTabValue>('overview')
   const activeTab = activeTabProp ?? internalActiveTab
   const [viewportWidth, setViewportWidth] = useState(() => getViewportWidth())
-  const spendingEnabled = useFeatureFlagEnabled(FeatureFlags.SANDBOX_SPENDING)
   const config = useConfig()
-  const spendingTabAvailable = spendingEnabled && !!config.analyticsApiUrl
+  const spendingTabAvailable = !!config.analyticsApiUrl
   const isDesktop = viewportWidth >= MOBILE_BREAKPOINT
 
   useEffect(() => {

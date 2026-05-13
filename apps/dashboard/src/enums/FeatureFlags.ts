@@ -6,6 +6,5 @@
 export enum FeatureFlags {
   ORGANIZATION_INFRASTRUCTURE = 'organization_infrastructure',
   ORGANIZATION_EXPERIMENTS = 'organization_experiments',
-  SANDBOX_SPENDING = 'sandbox_spending',
   SANDBOX_LINUX_VM = 'sandbox_linux_vm',
 }

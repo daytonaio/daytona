@@ -9,13 +9,12 @@ import { AggregatedUsageChart, ResourceUsageBreakdown, UsageSummary } from '@/co
 import { CostBreakdown } from '@/components/spending/CostBreakdown'
 import { UsageChartData } from '@/components/spending/ResourceUsageChart'
 import { SandboxUsageTable } from '@/components/spending/SandboxUsageTable'
+import { UsageTimelineChart } from '@/components/spending/UsageTimelineChart'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { DateRangePicker, QuickRangesConfig } from '@/components/ui/date-range-picker'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Separator } from '@/components/ui/separator'
-import { FeatureFlags } from '@/enums/FeatureFlags'
-import { UsageTimelineChart } from '@/components/spending/UsageTimelineChart'
 import { useAggregatedUsage, useSandboxesUsage, useUsageChart } from '@/hooks/queries/useAnalyticsUsage'
 import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
 import { useOrganizationUsageQuery } from '@/hooks/queries/useOrganizationUsageQuery'
@@ -24,7 +23,6 @@ import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { addDays, differenceInCalendarDays, subDays } from 'date-fns'
 import { AlertCircle, BarChart3, RefreshCw } from 'lucide-react'
-import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DateRange } from 'react-day-picker'
 
@@ -36,8 +34,7 @@ const analyticsQuickRanges: QuickRangesConfig = {
 const Spending = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const config = useConfig()
-  const spendingEnabled = useFeatureFlagEnabled(FeatureFlags.SANDBOX_SPENDING)
-  const analyticsAvailable = spendingEnabled && !!config.analyticsApiUrl
+  const analyticsAvailable = !!config.analyticsApiUrl
 
   const [analyticsDateRange, setAnalyticsDateRange] = useState<DateRange>(() => {
     const now = new Date()
