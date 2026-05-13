@@ -12,4 +12,5 @@ export enum FeatureFlags {
   SANDBOX_SPENDING = 'sandbox_spending',
   DASHBOARD_CREATE_SANDBOX = 'dashboard_create-sandbox',
   SANDBOX_LINUX_VM = 'sandbox_linux_vm',
+  VOLUME_BACKEND_PICKER = 'volume_backend_picker',
 }

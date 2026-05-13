@@ -757,6 +757,36 @@ paths:
       summary: Update sandbox default limited network egress
       tags:
       - organizations
+  /organizations/{organizationId}/default-volume-backend:
+    put:
+      operationId: setDefaultVolumeBackend
+      parameters:
+      - description: Organization ID
+        explode: false
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrganizationDefaultVolumeBackend'
+        required: true
+      responses:
+        "204":
+          description: Default volume backend updated successfully
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Set default volume backend
+      tags:
+      - organizations
   /organizations/{organizationId}/experimental-config:
     put:
       operationId: updateExperimentalConfig
@@ -7788,6 +7818,54 @@ paths:
       summary: Get volume details
       tags:
       - volumes
+  /volumes/{volumeId}/backend:
+    put:
+      description: Switches an existing volume between the s3fuse and experimental
+        backends in place. The volume's S3 bucket and data are preserved; only the
+        mount strategy changes. Refuses to switch while any sandbox referencing the
+        volume is running.
+      operationId: changeVolumeBackend
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: ID of the volume
+        explode: false
+        in: path
+        name: volumeId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeVolumeBackend'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VolumeDto'
+          description: Volume's backend has been switched
+        "409":
+          description: Volume is in use by a running sandbox
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Change a volume's backend
+      tags:
+      - volumes
   /volumes/by-name/{name}:
     get:
       operationId: getVolumeByName
@@ -9757,6 +9835,7 @@ components:
         defaultRegionId: defaultRegionId
         sandboxCreateRateLimitTtlSeconds: 2.027123023002322
         suspensionReason: suspensionReason
+        defaultVolumeBackend: s3fuse
         sandboxLifecycleRateLimit: 9.301444243932576
         suspendedAt: 2000-01-23T04:56:07.000+00:00
         personal: true
@@ -9825,6 +9904,13 @@ components:
         defaultRegionId:
           description: Default region ID
           type: string
+        defaultVolumeBackend:
+          description: Default volume backend for sandbox volumes
+          enum:
+          - s3fuse
+          - experimental
+          example: s3fuse
+          type: string
         authenticatedRateLimit:
           description: Authenticated rate limit per minute
           nullable: true
@@ -9862,6 +9948,7 @@ components:
       - authenticatedRateLimitTtlSeconds
       - createdAt
       - createdBy
+      - defaultVolumeBackend
       - experimentalConfig
       - id
       - maxCpuPerSandbox
@@ -10133,6 +10220,22 @@ components:
           type: boolean
       required:
       - sandboxDefaultLimitedNetworkEgress
+      type: object
+    UpdateOrganizationDefaultVolumeBackend:
+      example:
+        defaultVolumeBackend: s3fuse
+      properties:
+        defaultVolumeBackend:
+          description: The default volume backend for the organization. `s3fuse` mounts
+            on the runner host (existing behavior). `experimental` mounts inside the
+            sandbox via Archil using a per-volume mount token.
+          enum:
+          - s3fuse
+          - experimental
+          example: s3fuse
+          type: string
+      required:
+      - defaultVolumeBackend
       type: object
     CreateOrganizationRole:
       example:
@@ -10674,6 +10777,7 @@ components:
         mountPath: /data
         volumeId: volume123
         subpath: users/alice
+        readOnly: false
       properties:
         volumeId:
           description: The ID of the volume
@@ -10689,6 +10793,14 @@ components:
             \ is mounted."
           example: users/alice
           type: string
+        readOnly:
+          default: false
+          description: "Mount the volume read-only inside this sandbox. The volume\
+            \ itself is unchanged; this is a per-mount attribute, so the same volume\
+            \ can be mounted read-write in one sandbox and read-only in another. Defaults\
+            \ to false."
+          example: false
+          type: boolean
       required:
       - mountPath
       - volumeId
@@ -10753,9 +10865,11 @@ components:
         - mountPath: /data
           volumeId: volume123
           subpath: users/alice
+          readOnly: false
         - mountPath: /data
           volumeId: volume123
           subpath: users/alice
+          readOnly: false
         cpu: 2
         recoverable: true
         env:
@@ -10971,9 +11085,11 @@ components:
           - mountPath: /data
             volumeId: volume123
             subpath: users/alice
+            readOnly: false
           - mountPath: /data
             volumeId: volume123
             subpath: users/alice
+            readOnly: false
           cpu: 2
           recoverable: true
           env:
@@ -11012,9 +11128,11 @@ components:
           - mountPath: /data
             volumeId: volume123
             subpath: users/alice
+            readOnly: false
           - mountPath: /data
             volumeId: volume123
             subpath: users/alice
+            readOnly: false
           cpu: 2
           recoverable: true
           env:
@@ -11079,9 +11197,11 @@ components:
         - mountPath: /data
           volumeId: volume123
           subpath: users/alice
+          readOnly: false
         - mountPath: /data
           volumeId: volume123
           subpath: users/alice
+          readOnly: false
         cpu: 2
         env:
           NODE_ENV: production
@@ -13774,9 +13894,11 @@ components:
         - mountPath: /data
           volumeId: volume123
           subpath: users/alice
+          readOnly: false
         - mountPath: /data
           volumeId: volume123
           subpath: users/alice
+          readOnly: false
         cpu: 2
         recoverable: true
         env:
@@ -13996,9 +14118,11 @@ components:
         - mountPath: /data
           volumeId: volume123
           subpath: users/alice
+          readOnly: false
         - mountPath: /data
           volumeId: volume123
           subpath: users/alice
+          readOnly: false
         cpu: 2
         env:
           NODE_ENV: production
@@ -14125,6 +14249,7 @@ components:
         lastUsedAt: 2023-01-01T00:00:00.000Z
         errorReason: Error processing volume
         name: my-volume
+        backend: s3fuse
         id: vol-12345678
         state: ready
         updatedAt: 2023-01-01T00:00:00.000Z
@@ -14164,7 +14289,16 @@ components:
           example: Error processing volume
           nullable: true
           type: string
+        backend:
+          description: Backend that physically stores the volume. Set when the volume
+            is created from the organization default and immutable afterwards.
+          enum:
+          - s3fuse
+          - experimental
+          example: s3fuse
+          type: string
       required:
+      - backend
       - createdAt
       - errorReason
       - id
@@ -14181,6 +14315,23 @@ components:
           type: string
       required:
       - name
+      type: object
+    ChangeVolumeBackend:
+      example:
+        backend: experimental
+      properties:
+        backend:
+          description: The backend to switch the volume to. `s3fuse` mounts the volume's
+            bucket on the runner host; `experimental` exposes the same bucket through
+            an Archil disk that is mounted inside the sandbox. The volume's data (its
+            S3 bucket) is preserved across the switch - only the mount strategy changes.
+          enum:
+          - s3fuse
+          - experimental
+          example: experimental
+          type: string
+      required:
+      - backend
       type: object
     JobStatus:
       enum:

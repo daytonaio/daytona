@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from pydantic import TypeAdapter
 from typing import Optional, Set
@@ -33,8 +33,9 @@ class SandboxVolume(BaseModel):
     volume_id: StrictStr = Field(description="The ID of the volume", serialization_alias="volumeId")
     mount_path: StrictStr = Field(description="The mount path for the volume", serialization_alias="mountPath")
     subpath: Optional[StrictStr] = Field(default=None, description="Optional subpath within the volume to mount. When specified, only this S3 prefix will be accessible. When omitted, the entire volume is mounted.")
+    read_only: Optional[StrictBool] = Field(default=False, description="Mount the volume read-only inside this sandbox. The volume itself is unchanged; this is a per-mount attribute, so the same volume can be mounted read-write in one sandbox and read-only in another. Defaults to false.", serialization_alias="readOnly")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["volumeId", "mountPath", "subpath"]
+    __properties: ClassVar[List[str]] = ["volumeId", "mountPath", "subpath", "readOnly"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -95,7 +96,8 @@ class SandboxVolume(BaseModel):
         _obj = cls.model_validate({
             "volume_id": obj.get("volumeId"),
             "mount_path": obj.get("mountPath"),
-            "subpath": obj.get("subpath")
+            "subpath": obj.get("subpath"),
+            "read_only": obj.get("readOnly") if obj.get("readOnly") is not None else False
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -4,10 +4,13 @@
 package docker
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/daytonaio/common-go/pkg/timer"
@@ -15,6 +18,7 @@ import (
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/strslice"
+	"github.com/docker/docker/pkg/stdcopy"
 )
 
 func (d *DockerClient) Start(ctx context.Context, containerId string, authToken *string, metadata map[string]string) (*container.InspectResponse, string, error) {
@@ -49,7 +53,8 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, authToken 
 	if volumesJSON, ok := metadata["volumes"]; ok {
 		var volumes []dto.VolumeDTO
 		if err := json.Unmarshal([]byte(volumesJSON), &volumes); err == nil && len(volumes) > 0 {
-			_, err = d.getVolumesMountPathBinds(ctx, volumes)
+			mounter := d.resolveVolumeMounter(metadata)
+			_, err = d.getVolumesMountPathBinds(ctx, volumes, mounter)
 			if err != nil {
 				d.logger.ErrorContext(ctx, "Failed to ensure volume FUSE mounts", "error", err)
 			}
@@ -125,6 +130,77 @@ func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId 
 			if c.State.Running {
 				return c, nil
 			}
+
+			// Detect a container that started but exited before becoming
+			// healthy. Without this we'd burn the whole sandbox-start
+			// timeout polling for a Running state that will never come,
+			// and surface a generic "please ensure your entrypoint is
+			// long-running" message that hides the real reason
+			// (e.g. volume mount failure in the daemon's startup path).
+			if c.State.Status == container.StateExited && c.State.ExitCode != 0 {
+				return nil, d.formatEarlyExitError(ctx, containerId, c)
+			}
 		}
 	}
+}
+
+// formatEarlyExitError returns a user-facing error describing why a
+// container exited before reaching the Running state. It includes the
+// docker-level exit code/error and the last few lines of the container's
+// combined stdout/stderr so the user gets actionable signal (e.g.
+// "daytona-daemon: volume mount failed: ...") rather than just an exit
+// code.
+func (d *DockerClient) formatEarlyExitError(ctx context.Context, containerId string, c *container.InspectResponse) error {
+	tail := d.tailContainerLogs(ctx, containerId, 25)
+	tail = strings.TrimSpace(tail)
+
+	// Build the error message lazily — keep it short when there's no log
+	// content and verbose when there is, so users get the most useful
+	// signal without dumping noise on every premature exit.
+	parts := []string{
+		fmt.Sprintf("sandbox exited prematurely with code %d", c.State.ExitCode),
+	}
+	if c.State.Error != "" {
+		parts = append(parts, fmt.Sprintf("docker reason: %s", c.State.Error))
+	}
+	if tail != "" {
+		parts = append(parts, fmt.Sprintf("last container logs:\n%s", tail))
+	} else {
+		parts = append(parts, "no container logs available — check the runner host's docker logs")
+	}
+	return errors.New(strings.Join(parts, "; "))
+}
+
+// tailContainerLogs returns up to `tail` lines of combined stdout/stderr
+// from the container, best-effort. Errors are swallowed because this only
+// runs on the failure path and a missing log tail shouldn't mask the
+// original error.
+func (d *DockerClient) tailContainerLogs(ctx context.Context, containerId string, tail int) string {
+	rdr, err := d.apiClient.ContainerLogs(ctx, containerId, container.LogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		Tail:       fmt.Sprintf("%d", tail),
+	})
+	if err != nil {
+		return ""
+	}
+	defer rdr.Close()
+
+	var stdout, stderr bytes.Buffer
+	if _, err := stdcopy.StdCopy(&stdout, &stderr, rdr); err != nil {
+		// stdcopy returns the bytes written so far even on error; keep
+		// what we have.
+	}
+
+	var combined strings.Builder
+	if stderr.Len() > 0 {
+		combined.WriteString(strings.TrimRight(stderr.String(), "\n"))
+	}
+	if stdout.Len() > 0 {
+		if combined.Len() > 0 {
+			combined.WriteString("\n")
+		}
+		combined.WriteString(strings.TrimRight(stdout.String(), "\n"))
+	}
+	return combined.String()
 }

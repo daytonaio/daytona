@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from daytona_api_client.models.api_key_response import ApiKeyResponse
     from daytona_api_client.models.audit_log import AuditLog
     from daytona_api_client.models.build_info import BuildInfo
+    from daytona_api_client.models.change_volume_backend import ChangeVolumeBackend
     from daytona_api_client.models.command import Command
     from daytona_api_client.models.completion_context import CompletionContext
     from daytona_api_client.models.completion_item import CompletionItem
@@ -180,6 +181,7 @@ if TYPE_CHECKING:
     from daytona_api_client.models.update_docker_registry import UpdateDockerRegistry
     from daytona_api_client.models.update_job_status import UpdateJobStatus
     from daytona_api_client.models.update_organization_default_region import UpdateOrganizationDefaultRegion
+    from daytona_api_client.models.update_organization_default_volume_backend import UpdateOrganizationDefaultVolumeBackend
     from daytona_api_client.models.update_organization_invitation import UpdateOrganizationInvitation
     from daytona_api_client.models.update_organization_member_access import UpdateOrganizationMemberAccess
     from daytona_api_client.models.update_organization_quota import UpdateOrganizationQuota
@@ -211,6 +213,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "ApiKeyResponse": "daytona_api_client.models.api_key_response",
     "AuditLog": "daytona_api_client.models.audit_log",
     "BuildInfo": "daytona_api_client.models.build_info",
+    "ChangeVolumeBackend": "daytona_api_client.models.change_volume_backend",
     "Command": "daytona_api_client.models.command",
     "CompletionContext": "daytona_api_client.models.completion_context",
     "CompletionItem": "daytona_api_client.models.completion_item",
@@ -363,6 +366,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "UpdateDockerRegistry": "daytona_api_client.models.update_docker_registry",
     "UpdateJobStatus": "daytona_api_client.models.update_job_status",
     "UpdateOrganizationDefaultRegion": "daytona_api_client.models.update_organization_default_region",
+    "UpdateOrganizationDefaultVolumeBackend": "daytona_api_client.models.update_organization_default_volume_backend",
     "UpdateOrganizationInvitation": "daytona_api_client.models.update_organization_invitation",
     "UpdateOrganizationMemberAccess": "daytona_api_client.models.update_organization_member_access",
     "UpdateOrganizationQuota": "daytona_api_client.models.update_organization_quota",

@@ -87,6 +87,12 @@ export interface Organization {
      */
     'defaultRegionId'?: string;
     /**
+     * Default volume backend for sandbox volumes
+     * @type {string}
+     * @memberof Organization
+     */
+    'defaultVolumeBackend': OrganizationDefaultVolumeBackendEnum;
+    /**
      * Authenticated rate limit per minute
      */
     'authenticatedRateLimit': number | null;
@@ -119,4 +125,12 @@ export interface Organization {
      */
     'sandboxLifecycleRateLimitTtlSeconds': number | null;
 }
+
+export const OrganizationDefaultVolumeBackendEnum = {
+    S3FUSE: 's3fuse',
+    EXPERIMENTAL: 'experimental'
+} as const;
+
+export type OrganizationDefaultVolumeBackendEnum = typeof OrganizationDefaultVolumeBackendEnum[keyof typeof OrganizationDefaultVolumeBackendEnum];
+
 

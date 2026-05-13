@@ -49,6 +49,7 @@ src/main/java/io/daytona/api/client/model/ApiKeyList.java
 src/main/java/io/daytona/api/client/model/ApiKeyResponse.java
 src/main/java/io/daytona/api/client/model/AuditLog.java
 src/main/java/io/daytona/api/client/model/BuildInfo.java
+src/main/java/io/daytona/api/client/model/ChangeVolumeBackend.java
 src/main/java/io/daytona/api/client/model/Command.java
 src/main/java/io/daytona/api/client/model/CompletionContext.java
 src/main/java/io/daytona/api/client/model/CompletionItem.java
@@ -201,6 +202,7 @@ src/main/java/io/daytona/api/client/model/TraceSummary.java
 src/main/java/io/daytona/api/client/model/UpdateDockerRegistry.java
 src/main/java/io/daytona/api/client/model/UpdateJobStatus.java
 src/main/java/io/daytona/api/client/model/UpdateOrganizationDefaultRegion.java
+src/main/java/io/daytona/api/client/model/UpdateOrganizationDefaultVolumeBackend.java
 src/main/java/io/daytona/api/client/model/UpdateOrganizationInvitation.java
 src/main/java/io/daytona/api/client/model/UpdateOrganizationMemberAccess.java
 src/main/java/io/daytona/api/client/model/UpdateOrganizationQuota.java
@@ -249,6 +251,7 @@ src/test/java/io/daytona/api/client/model/ApiKeyListTest.java
 src/test/java/io/daytona/api/client/model/ApiKeyResponseTest.java
 src/test/java/io/daytona/api/client/model/AuditLogTest.java
 src/test/java/io/daytona/api/client/model/BuildInfoTest.java
+src/test/java/io/daytona/api/client/model/ChangeVolumeBackendTest.java
 src/test/java/io/daytona/api/client/model/CommandTest.java
 src/test/java/io/daytona/api/client/model/CompletionContextTest.java
 src/test/java/io/daytona/api/client/model/CompletionItemTest.java
@@ -401,6 +404,7 @@ src/test/java/io/daytona/api/client/model/TraceSummaryTest.java
 src/test/java/io/daytona/api/client/model/UpdateDockerRegistryTest.java
 src/test/java/io/daytona/api/client/model/UpdateJobStatusTest.java
 src/test/java/io/daytona/api/client/model/UpdateOrganizationDefaultRegionTest.java
+src/test/java/io/daytona/api/client/model/UpdateOrganizationDefaultVolumeBackendTest.java
 src/test/java/io/daytona/api/client/model/UpdateOrganizationInvitationTest.java
 src/test/java/io/daytona/api/client/model/UpdateOrganizationMemberAccessTest.java
 src/test/java/io/daytona/api/client/model/UpdateOrganizationQuotaTest.java

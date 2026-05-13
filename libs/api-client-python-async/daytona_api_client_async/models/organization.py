@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from daytona_api_client_async.models.otel_config import OtelConfig
 from pydantic import TypeAdapter
@@ -49,6 +49,7 @@ class Organization(BaseModel):
     snapshot_deactivation_timeout_minutes: Union[StrictFloat, StrictInt] = Field(description="Time in minutes before an unused snapshot is deactivated", serialization_alias="snapshotDeactivationTimeoutMinutes")
     sandbox_limited_network_egress: StrictBool = Field(description="Sandbox default network block all", serialization_alias="sandboxLimitedNetworkEgress")
     default_region_id: Optional[StrictStr] = Field(default=None, description="Default region ID", serialization_alias="defaultRegionId")
+    default_volume_backend: StrictStr = Field(description="Default volume backend for sandbox volumes", serialization_alias="defaultVolumeBackend")
     authenticated_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(description="Authenticated rate limit per minute", serialization_alias="authenticatedRateLimit")
     sandbox_create_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(description="Sandbox create rate limit per minute", serialization_alias="sandboxCreateRateLimit")
     sandbox_lifecycle_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(description="Sandbox lifecycle rate limit per minute", serialization_alias="sandboxLifecycleRateLimit")
@@ -58,7 +59,14 @@ class Organization(BaseModel):
     sandbox_create_rate_limit_ttl_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(description="Sandbox create rate limit TTL in seconds", serialization_alias="sandboxCreateRateLimitTtlSeconds")
     sandbox_lifecycle_rate_limit_ttl_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(description="Sandbox lifecycle rate limit TTL in seconds", serialization_alias="sandboxLifecycleRateLimitTtlSeconds")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "defaultRegionId", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "otelConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"]
+    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "defaultRegionId", "defaultVolumeBackend", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "otelConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"]
+
+    @field_validator('default_volume_backend')
+    def default_volume_backend_validate_enum(cls, value):
+        """Validates the enum"""
+        if value not in set(['s3fuse', 'experimental']):
+            raise ValueError("must be one of enum values ('s3fuse', 'experimental')")
+        return value
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -172,6 +180,7 @@ class Organization(BaseModel):
             "snapshot_deactivation_timeout_minutes": obj.get("snapshotDeactivationTimeoutMinutes") if obj.get("snapshotDeactivationTimeoutMinutes") is not None else 20160,
             "sandbox_limited_network_egress": obj.get("sandboxLimitedNetworkEgress"),
             "default_region_id": obj.get("defaultRegionId"),
+            "default_volume_backend": obj.get("defaultVolumeBackend"),
             "authenticated_rate_limit": obj.get("authenticatedRateLimit"),
             "sandbox_create_rate_limit": obj.get("sandboxCreateRateLimit"),
             "sandbox_lifecycle_rate_limit": obj.get("sandboxLifecycleRateLimit"),
