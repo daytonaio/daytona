@@ -68,16 +68,22 @@ func (s *SessionService) terminateSession(ctx context.Context, session *session)
 	return err
 }
 
-// reapSession waits on the session's exec.Cmd so the kernel releases the
-// zombie. Uses Reap (not Wait) because we don't read any output buffers
-// after this — only need to confirm the shell is collected. Wait would
-// block waiting for cmd.Wait's I/O drain, which can wedge after the
-// PID-1 reaper has already consumed the zombie.
+// reapSession runs cmd.Wait in the background to release parent-side
+// pipe descriptors and update cmd.ProcessState. Zombie collection itself
+// is handled by the PID-1 reaper installed in pkg/childreap, so we
+// don't need to block the Delete request path on this call — detaching
+// it keeps the DELETE response fast (HTTP clients with ~10s timeouts
+// can't afford 5s+ tails in the cleanup path).
+//
+// Uses Reap (not Wait) because there are no Stdout/Stderr buffers to
+// drain — session.cmd's std{in,out,err} are *os.File pipes (or unset).
 func (s *SessionService) reapSession(session *session) {
 	if session.cmd == nil {
 		return
 	}
-	_, _ = childreap.Reap(session.cmd)
+	go func() {
+		_, _ = childreap.Reap(session.cmd)
+	}()
 }
 
 func (s *SessionService) signalProcessTree(pid int, sig syscall.Signal) error {
