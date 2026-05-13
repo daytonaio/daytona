@@ -30,7 +30,9 @@ import java.io.IOException;
 import io.daytona.toolbox.client.model.GitAddRequest;
 import io.daytona.toolbox.client.model.GitBranchRequest;
 import io.daytona.toolbox.client.model.GitCheckoutRequest;
+import io.daytona.toolbox.client.model.GitCloneJobResponse;
 import io.daytona.toolbox.client.model.GitCloneRequest;
+import io.daytona.toolbox.client.model.GitCloneResponse;
 import io.daytona.toolbox.client.model.GitCommitInfo;
 import io.daytona.toolbox.client.model.GitCommitRequest;
 import io.daytona.toolbox.client.model.GitCommitResponse;
@@ -337,6 +339,7 @@ public class GitApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 202 </td><td> Accepted </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call cloneRepositoryCall(@javax.annotation.Nonnull GitCloneRequest request, final ApiCallback _callback) throws ApiException {
@@ -365,6 +368,7 @@ public class GitApi {
         Map<String, Object> localVarFormParams = new HashMap<String, Object>();
 
         final String[] localVarAccepts = {
+            "application/json"
         };
         final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
         if (localVarAccept != null) {
@@ -398,34 +402,39 @@ public class GitApi {
      * Clone a Git repository
      * Clone a Git repository to the specified path
      * @param request Clone repository request (required)
+     * @return GitCloneResponse
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
      <table border="1">
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 202 </td><td> Accepted </td><td>  -  </td></tr>
      </table>
      */
-    public void cloneRepository(@javax.annotation.Nonnull GitCloneRequest request) throws ApiException {
-        cloneRepositoryWithHttpInfo(request);
+    public GitCloneResponse cloneRepository(@javax.annotation.Nonnull GitCloneRequest request) throws ApiException {
+        ApiResponse<GitCloneResponse> localVarResp = cloneRepositoryWithHttpInfo(request);
+        return localVarResp.getData();
     }
 
     /**
      * Clone a Git repository
      * Clone a Git repository to the specified path
      * @param request Clone repository request (required)
-     * @return ApiResponse&lt;Void&gt;
+     * @return ApiResponse&lt;GitCloneResponse&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
      <table border="1">
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 202 </td><td> Accepted </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> cloneRepositoryWithHttpInfo(@javax.annotation.Nonnull GitCloneRequest request) throws ApiException {
+    public ApiResponse<GitCloneResponse> cloneRepositoryWithHttpInfo(@javax.annotation.Nonnull GitCloneRequest request) throws ApiException {
         okhttp3.Call localVarCall = cloneRepositoryValidateBeforeCall(request, null);
-        return localVarApiClient.execute(localVarCall);
+        Type localVarReturnType = new TypeToken<GitCloneResponse>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
     }
 
     /**
@@ -440,12 +449,14 @@ public class GitApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 202 </td><td> Accepted </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call cloneRepositoryAsync(@javax.annotation.Nonnull GitCloneRequest request, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call cloneRepositoryAsync(@javax.annotation.Nonnull GitCloneRequest request, final ApiCallback<GitCloneResponse> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = cloneRepositoryValidateBeforeCall(request, _callback);
-        localVarApiClient.executeAsync(localVarCall, _callback);
+        Type localVarReturnType = new TypeToken<GitCloneResponse>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }
     /**
@@ -817,6 +828,133 @@ public class GitApi {
 
         okhttp3.Call localVarCall = deleteBranchValidateBeforeCall(request, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for getCloneJob
+     * @param jobId Clone expansion job ID (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getCloneJobCall(@javax.annotation.Nonnull String jobId, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/git/clone/jobs/{jobId}"
+            .replace("{" + "jobId" + "}", localVarApiClient.escapeString(jobId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call getCloneJobValidateBeforeCall(@javax.annotation.Nonnull String jobId, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'jobId' is set
+        if (jobId == null) {
+            throw new ApiException("Missing the required parameter 'jobId' when calling getCloneJob(Async)");
+        }
+
+        return getCloneJobCall(jobId, _callback);
+
+    }
+
+    /**
+     * Get clone expansion job status
+     * Get the status of a background clone expansion job
+     * @param jobId Clone expansion job ID (required)
+     * @return GitCloneJobResponse
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public GitCloneJobResponse getCloneJob(@javax.annotation.Nonnull String jobId) throws ApiException {
+        ApiResponse<GitCloneJobResponse> localVarResp = getCloneJobWithHttpInfo(jobId);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Get clone expansion job status
+     * Get the status of a background clone expansion job
+     * @param jobId Clone expansion job ID (required)
+     * @return ApiResponse&lt;GitCloneJobResponse&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<GitCloneJobResponse> getCloneJobWithHttpInfo(@javax.annotation.Nonnull String jobId) throws ApiException {
+        okhttp3.Call localVarCall = getCloneJobValidateBeforeCall(jobId, null);
+        Type localVarReturnType = new TypeToken<GitCloneJobResponse>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Get clone expansion job status (asynchronously)
+     * Get the status of a background clone expansion job
+     * @param jobId Clone expansion job ID (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getCloneJobAsync(@javax.annotation.Nonnull String jobId, final ApiCallback<GitCloneJobResponse> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = getCloneJobValidateBeforeCall(jobId, _callback);
+        Type localVarReturnType = new TypeToken<GitCloneJobResponse>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }
     /**

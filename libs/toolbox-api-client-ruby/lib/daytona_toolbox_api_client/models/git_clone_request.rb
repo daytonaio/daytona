@@ -15,6 +15,14 @@ require 'time'
 
 module DaytonaToolboxApiClient
   class GitCloneRequest < ApiModelBase
+    attr_accessor :background_deepen
+
+    attr_accessor :background_expansion
+
+    attr_accessor :background_hydrate_paths
+
+    attr_accessor :background_unshallow
+
     attr_accessor :branch
 
     attr_accessor :commit_id
@@ -26,6 +34,10 @@ module DaytonaToolboxApiClient
     attr_accessor :filter
 
     attr_accessor :filter_submodules
+
+    attr_accessor :initial_sparse_paths
+
+    attr_accessor :no_checkout
 
     attr_accessor :no_tags
 
@@ -54,12 +66,18 @@ module DaytonaToolboxApiClient
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
+        :'background_deepen' => :'background_deepen',
+        :'background_expansion' => :'background_expansion',
+        :'background_hydrate_paths' => :'background_hydrate_paths',
+        :'background_unshallow' => :'background_unshallow',
         :'branch' => :'branch',
         :'commit_id' => :'commit_id',
         :'depth' => :'depth',
         :'dissociate' => :'dissociate',
         :'filter' => :'filter',
         :'filter_submodules' => :'filter_submodules',
+        :'initial_sparse_paths' => :'initial_sparse_paths',
+        :'no_checkout' => :'no_checkout',
         :'no_tags' => :'no_tags',
         :'password' => :'password',
         :'path' => :'path',
@@ -88,12 +106,18 @@ module DaytonaToolboxApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
+        :'background_deepen' => :'Integer',
+        :'background_expansion' => :'Boolean',
+        :'background_hydrate_paths' => :'Array<String>',
+        :'background_unshallow' => :'Boolean',
         :'branch' => :'String',
         :'commit_id' => :'String',
         :'depth' => :'Integer',
         :'dissociate' => :'Boolean',
         :'filter' => :'String',
         :'filter_submodules' => :'Boolean',
+        :'initial_sparse_paths' => :'Array<String>',
+        :'no_checkout' => :'Boolean',
         :'no_tags' => :'Boolean',
         :'password' => :'String',
         :'path' => :'String',
@@ -131,6 +155,24 @@ module DaytonaToolboxApiClient
         h[k.to_sym] = v
       }
 
+      if attributes.key?(:'background_deepen')
+        self.background_deepen = attributes[:'background_deepen']
+      end
+
+      if attributes.key?(:'background_expansion')
+        self.background_expansion = attributes[:'background_expansion']
+      end
+
+      if attributes.key?(:'background_hydrate_paths')
+        if (value = attributes[:'background_hydrate_paths']).is_a?(Array)
+          self.background_hydrate_paths = value
+        end
+      end
+
+      if attributes.key?(:'background_unshallow')
+        self.background_unshallow = attributes[:'background_unshallow']
+      end
+
       if attributes.key?(:'branch')
         self.branch = attributes[:'branch']
       end
@@ -153,6 +195,16 @@ module DaytonaToolboxApiClient
 
       if attributes.key?(:'filter_submodules')
         self.filter_submodules = attributes[:'filter_submodules']
+      end
+
+      if attributes.key?(:'initial_sparse_paths')
+        if (value = attributes[:'initial_sparse_paths']).is_a?(Array)
+          self.initial_sparse_paths = value
+        end
+      end
+
+      if attributes.key?(:'no_checkout')
+        self.no_checkout = attributes[:'no_checkout']
       end
 
       if attributes.key?(:'no_tags')
@@ -260,12 +312,18 @@ module DaytonaToolboxApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
+          background_deepen == o.background_deepen &&
+          background_expansion == o.background_expansion &&
+          background_hydrate_paths == o.background_hydrate_paths &&
+          background_unshallow == o.background_unshallow &&
           branch == o.branch &&
           commit_id == o.commit_id &&
           depth == o.depth &&
           dissociate == o.dissociate &&
           filter == o.filter &&
           filter_submodules == o.filter_submodules &&
+          initial_sparse_paths == o.initial_sparse_paths &&
+          no_checkout == o.no_checkout &&
           no_tags == o.no_tags &&
           password == o.password &&
           path == o.path &&
@@ -289,7 +347,7 @@ module DaytonaToolboxApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [branch, commit_id, depth, dissociate, filter, filter_submodules, no_tags, password, path, recurse_submodules, reference_path, shallow_since, shallow_submodules, single_branch, sparse, sparse_paths, url, username].hash
+      [background_deepen, background_expansion, background_hydrate_paths, background_unshallow, branch, commit_id, depth, dissociate, filter, filter_submodules, initial_sparse_paths, no_checkout, no_tags, password, path, recurse_submodules, reference_path, shallow_since, shallow_submodules, single_branch, sparse, sparse_paths, url, username].hash
     end
 
     # Builds the object from hash

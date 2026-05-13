@@ -52,6 +52,26 @@ import io.daytona.toolbox.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class GitCloneRequest {
+  public static final String SERIALIZED_NAME_BACKGROUND_DEEPEN = "background_deepen";
+  @SerializedName(SERIALIZED_NAME_BACKGROUND_DEEPEN)
+  @javax.annotation.Nullable
+  private Integer backgroundDeepen;
+
+  public static final String SERIALIZED_NAME_BACKGROUND_EXPANSION = "background_expansion";
+  @SerializedName(SERIALIZED_NAME_BACKGROUND_EXPANSION)
+  @javax.annotation.Nullable
+  private Boolean backgroundExpansion;
+
+  public static final String SERIALIZED_NAME_BACKGROUND_HYDRATE_PATHS = "background_hydrate_paths";
+  @SerializedName(SERIALIZED_NAME_BACKGROUND_HYDRATE_PATHS)
+  @javax.annotation.Nullable
+  private List<String> backgroundHydratePaths = new ArrayList<>();
+
+  public static final String SERIALIZED_NAME_BACKGROUND_UNSHALLOW = "background_unshallow";
+  @SerializedName(SERIALIZED_NAME_BACKGROUND_UNSHALLOW)
+  @javax.annotation.Nullable
+  private Boolean backgroundUnshallow;
+
   public static final String SERIALIZED_NAME_BRANCH = "branch";
   @SerializedName(SERIALIZED_NAME_BRANCH)
   @javax.annotation.Nullable
@@ -81,6 +101,16 @@ public class GitCloneRequest {
   @SerializedName(SERIALIZED_NAME_FILTER_SUBMODULES)
   @javax.annotation.Nullable
   private Boolean filterSubmodules;
+
+  public static final String SERIALIZED_NAME_INITIAL_SPARSE_PATHS = "initial_sparse_paths";
+  @SerializedName(SERIALIZED_NAME_INITIAL_SPARSE_PATHS)
+  @javax.annotation.Nullable
+  private List<String> initialSparsePaths = new ArrayList<>();
+
+  public static final String SERIALIZED_NAME_NO_CHECKOUT = "no_checkout";
+  @SerializedName(SERIALIZED_NAME_NO_CHECKOUT)
+  @javax.annotation.Nullable
+  private Boolean noCheckout;
 
   public static final String SERIALIZED_NAME_NO_TAGS = "no_tags";
   @SerializedName(SERIALIZED_NAME_NO_TAGS)
@@ -144,6 +174,90 @@ public class GitCloneRequest {
 
   public GitCloneRequest() {
   }
+
+  public GitCloneRequest backgroundDeepen(@javax.annotation.Nullable Integer backgroundDeepen) {
+    this.backgroundDeepen = backgroundDeepen;
+    return this;
+  }
+
+  /**
+   * Get backgroundDeepen
+   * @return backgroundDeepen
+   */
+  @javax.annotation.Nullable
+  public Integer getBackgroundDeepen() {
+    return backgroundDeepen;
+  }
+
+  public void setBackgroundDeepen(@javax.annotation.Nullable Integer backgroundDeepen) {
+    this.backgroundDeepen = backgroundDeepen;
+  }
+
+
+  public GitCloneRequest backgroundExpansion(@javax.annotation.Nullable Boolean backgroundExpansion) {
+    this.backgroundExpansion = backgroundExpansion;
+    return this;
+  }
+
+  /**
+   * Get backgroundExpansion
+   * @return backgroundExpansion
+   */
+  @javax.annotation.Nullable
+  public Boolean getBackgroundExpansion() {
+    return backgroundExpansion;
+  }
+
+  public void setBackgroundExpansion(@javax.annotation.Nullable Boolean backgroundExpansion) {
+    this.backgroundExpansion = backgroundExpansion;
+  }
+
+
+  public GitCloneRequest backgroundHydratePaths(@javax.annotation.Nullable List<String> backgroundHydratePaths) {
+    this.backgroundHydratePaths = backgroundHydratePaths;
+    return this;
+  }
+
+  public GitCloneRequest addBackgroundHydratePathsItem(String backgroundHydratePathsItem) {
+    if (this.backgroundHydratePaths == null) {
+      this.backgroundHydratePaths = new ArrayList<>();
+    }
+    this.backgroundHydratePaths.add(backgroundHydratePathsItem);
+    return this;
+  }
+
+  /**
+   * Get backgroundHydratePaths
+   * @return backgroundHydratePaths
+   */
+  @javax.annotation.Nullable
+  public List<String> getBackgroundHydratePaths() {
+    return backgroundHydratePaths;
+  }
+
+  public void setBackgroundHydratePaths(@javax.annotation.Nullable List<String> backgroundHydratePaths) {
+    this.backgroundHydratePaths = backgroundHydratePaths;
+  }
+
+
+  public GitCloneRequest backgroundUnshallow(@javax.annotation.Nullable Boolean backgroundUnshallow) {
+    this.backgroundUnshallow = backgroundUnshallow;
+    return this;
+  }
+
+  /**
+   * Get backgroundUnshallow
+   * @return backgroundUnshallow
+   */
+  @javax.annotation.Nullable
+  public Boolean getBackgroundUnshallow() {
+    return backgroundUnshallow;
+  }
+
+  public void setBackgroundUnshallow(@javax.annotation.Nullable Boolean backgroundUnshallow) {
+    this.backgroundUnshallow = backgroundUnshallow;
+  }
+
 
   public GitCloneRequest branch(@javax.annotation.Nullable String branch) {
     this.branch = branch;
@@ -256,6 +370,52 @@ public class GitCloneRequest {
 
   public void setFilterSubmodules(@javax.annotation.Nullable Boolean filterSubmodules) {
     this.filterSubmodules = filterSubmodules;
+  }
+
+
+  public GitCloneRequest initialSparsePaths(@javax.annotation.Nullable List<String> initialSparsePaths) {
+    this.initialSparsePaths = initialSparsePaths;
+    return this;
+  }
+
+  public GitCloneRequest addInitialSparsePathsItem(String initialSparsePathsItem) {
+    if (this.initialSparsePaths == null) {
+      this.initialSparsePaths = new ArrayList<>();
+    }
+    this.initialSparsePaths.add(initialSparsePathsItem);
+    return this;
+  }
+
+  /**
+   * Get initialSparsePaths
+   * @return initialSparsePaths
+   */
+  @javax.annotation.Nullable
+  public List<String> getInitialSparsePaths() {
+    return initialSparsePaths;
+  }
+
+  public void setInitialSparsePaths(@javax.annotation.Nullable List<String> initialSparsePaths) {
+    this.initialSparsePaths = initialSparsePaths;
+  }
+
+
+  public GitCloneRequest noCheckout(@javax.annotation.Nullable Boolean noCheckout) {
+    this.noCheckout = noCheckout;
+    return this;
+  }
+
+  /**
+   * Get noCheckout
+   * @return noCheckout
+   */
+  @javax.annotation.Nullable
+  public Boolean getNoCheckout() {
+    return noCheckout;
+  }
+
+  public void setNoCheckout(@javax.annotation.Nullable Boolean noCheckout) {
+    this.noCheckout = noCheckout;
   }
 
 
@@ -549,12 +709,18 @@ public class GitCloneRequest {
       return false;
     }
     GitCloneRequest gitCloneRequest = (GitCloneRequest) o;
-    return Objects.equals(this.branch, gitCloneRequest.branch) &&
+    return Objects.equals(this.backgroundDeepen, gitCloneRequest.backgroundDeepen) &&
+        Objects.equals(this.backgroundExpansion, gitCloneRequest.backgroundExpansion) &&
+        Objects.equals(this.backgroundHydratePaths, gitCloneRequest.backgroundHydratePaths) &&
+        Objects.equals(this.backgroundUnshallow, gitCloneRequest.backgroundUnshallow) &&
+        Objects.equals(this.branch, gitCloneRequest.branch) &&
         Objects.equals(this.commitId, gitCloneRequest.commitId) &&
         Objects.equals(this.depth, gitCloneRequest.depth) &&
         Objects.equals(this.dissociate, gitCloneRequest.dissociate) &&
         Objects.equals(this.filter, gitCloneRequest.filter) &&
         Objects.equals(this.filterSubmodules, gitCloneRequest.filterSubmodules) &&
+        Objects.equals(this.initialSparsePaths, gitCloneRequest.initialSparsePaths) &&
+        Objects.equals(this.noCheckout, gitCloneRequest.noCheckout) &&
         Objects.equals(this.noTags, gitCloneRequest.noTags) &&
         Objects.equals(this.password, gitCloneRequest.password) &&
         Objects.equals(this.path, gitCloneRequest.path) &&
@@ -572,19 +738,25 @@ public class GitCloneRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(branch, commitId, depth, dissociate, filter, filterSubmodules, noTags, password, path, recurseSubmodules, referencePath, shallowSince, shallowSubmodules, singleBranch, sparse, sparsePaths, url, username, additionalProperties);
+    return Objects.hash(backgroundDeepen, backgroundExpansion, backgroundHydratePaths, backgroundUnshallow, branch, commitId, depth, dissociate, filter, filterSubmodules, initialSparsePaths, noCheckout, noTags, password, path, recurseSubmodules, referencePath, shallowSince, shallowSubmodules, singleBranch, sparse, sparsePaths, url, username, additionalProperties);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class GitCloneRequest {\n");
+    sb.append("    backgroundDeepen: ").append(toIndentedString(backgroundDeepen)).append("\n");
+    sb.append("    backgroundExpansion: ").append(toIndentedString(backgroundExpansion)).append("\n");
+    sb.append("    backgroundHydratePaths: ").append(toIndentedString(backgroundHydratePaths)).append("\n");
+    sb.append("    backgroundUnshallow: ").append(toIndentedString(backgroundUnshallow)).append("\n");
     sb.append("    branch: ").append(toIndentedString(branch)).append("\n");
     sb.append("    commitId: ").append(toIndentedString(commitId)).append("\n");
     sb.append("    depth: ").append(toIndentedString(depth)).append("\n");
     sb.append("    dissociate: ").append(toIndentedString(dissociate)).append("\n");
     sb.append("    filter: ").append(toIndentedString(filter)).append("\n");
     sb.append("    filterSubmodules: ").append(toIndentedString(filterSubmodules)).append("\n");
+    sb.append("    initialSparsePaths: ").append(toIndentedString(initialSparsePaths)).append("\n");
+    sb.append("    noCheckout: ").append(toIndentedString(noCheckout)).append("\n");
     sb.append("    noTags: ").append(toIndentedString(noTags)).append("\n");
     sb.append("    password: ").append(toIndentedString(password)).append("\n");
     sb.append("    path: ").append(toIndentedString(path)).append("\n");
@@ -616,7 +788,7 @@ public class GitCloneRequest {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("branch", "commit_id", "depth", "dissociate", "filter", "filter_submodules", "no_tags", "password", "path", "recurse_submodules", "reference_path", "shallow_since", "shallow_submodules", "single_branch", "sparse", "sparse_paths", "url", "username"));
+    openapiFields = new HashSet<String>(Arrays.asList("background_deepen", "background_expansion", "background_hydrate_paths", "background_unshallow", "branch", "commit_id", "depth", "dissociate", "filter", "filter_submodules", "initial_sparse_paths", "no_checkout", "no_tags", "password", "path", "recurse_submodules", "reference_path", "shallow_since", "shallow_submodules", "single_branch", "sparse", "sparse_paths", "url", "username"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("path", "url"));
@@ -642,6 +814,10 @@ public class GitCloneRequest {
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
+      // ensure the optional json data is an array if present
+      if (jsonObj.get("background_hydrate_paths") != null && !jsonObj.get("background_hydrate_paths").isJsonNull() && !jsonObj.get("background_hydrate_paths").isJsonArray()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `background_hydrate_paths` to be an array in the JSON string but got `%s`", jsonObj.get("background_hydrate_paths").toString()));
+      }
       if ((jsonObj.get("branch") != null && !jsonObj.get("branch").isJsonNull()) && !jsonObj.get("branch").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `branch` to be a primitive type in the JSON string but got `%s`", jsonObj.get("branch").toString()));
       }
@@ -650,6 +826,10 @@ public class GitCloneRequest {
       }
       if ((jsonObj.get("filter") != null && !jsonObj.get("filter").isJsonNull()) && !jsonObj.get("filter").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `filter` to be a primitive type in the JSON string but got `%s`", jsonObj.get("filter").toString()));
+      }
+      // ensure the optional json data is an array if present
+      if (jsonObj.get("initial_sparse_paths") != null && !jsonObj.get("initial_sparse_paths").isJsonNull() && !jsonObj.get("initial_sparse_paths").isJsonArray()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `initial_sparse_paths` to be an array in the JSON string but got `%s`", jsonObj.get("initial_sparse_paths").toString()));
       }
       if ((jsonObj.get("password") != null && !jsonObj.get("password").isJsonNull()) && !jsonObj.get("password").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `password` to be a primitive type in the JSON string but got `%s`", jsonObj.get("password").toString()));

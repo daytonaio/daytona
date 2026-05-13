@@ -17,7 +17,9 @@ import io.daytona.toolbox.client.ApiException;
 import io.daytona.toolbox.client.model.GitAddRequest;
 import io.daytona.toolbox.client.model.GitBranchRequest;
 import io.daytona.toolbox.client.model.GitCheckoutRequest;
+import io.daytona.toolbox.client.model.GitCloneJobResponse;
 import io.daytona.toolbox.client.model.GitCloneRequest;
+import io.daytona.toolbox.client.model.GitCloneResponse;
 import io.daytona.toolbox.client.model.GitCommitInfo;
 import io.daytona.toolbox.client.model.GitCommitRequest;
 import io.daytona.toolbox.client.model.GitCommitResponse;
@@ -79,7 +81,7 @@ public class GitApiTest {
     @Test
     public void cloneRepositoryTest() throws ApiException {
         GitCloneRequest request = null;
-        api.cloneRepository(request);
+        GitCloneResponse response = api.cloneRepository(request);
         // TODO: test validations
     }
 
@@ -122,6 +124,20 @@ public class GitApiTest {
     public void deleteBranchTest() throws ApiException {
         GitDeleteBranchRequest request = null;
         api.deleteBranch(request);
+        // TODO: test validations
+    }
+
+    /**
+     * Get clone expansion job status
+     *
+     * Get the status of a background clone expansion job
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void getCloneJobTest() throws ApiException {
+        String jobId = null;
+        GitCloneJobResponse response = api.getCloneJob(jobId);
         // TODO: test validations
     }
 

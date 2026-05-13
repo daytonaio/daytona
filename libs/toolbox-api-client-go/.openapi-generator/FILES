@@ -37,7 +37,9 @@ model_files_download_request.go
 model_git_add_request.go
 model_git_branch_request.go
 model_git_checkout_request.go
+model_git_clone_job_response.go
 model_git_clone_request.go
+model_git_clone_response.go
 model_git_commit_info.go
 model_git_commit_request.go
 model_git_commit_response.go

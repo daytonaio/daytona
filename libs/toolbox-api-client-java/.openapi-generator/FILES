@@ -55,7 +55,9 @@ src/main/java/io/daytona/toolbox/client/model/FilesDownloadRequest.java
 src/main/java/io/daytona/toolbox/client/model/GitAddRequest.java
 src/main/java/io/daytona/toolbox/client/model/GitBranchRequest.java
 src/main/java/io/daytona/toolbox/client/model/GitCheckoutRequest.java
+src/main/java/io/daytona/toolbox/client/model/GitCloneJobResponse.java
 src/main/java/io/daytona/toolbox/client/model/GitCloneRequest.java
+src/main/java/io/daytona/toolbox/client/model/GitCloneResponse.java
 src/main/java/io/daytona/toolbox/client/model/GitCommitInfo.java
 src/main/java/io/daytona/toolbox/client/model/GitCommitRequest.java
 src/main/java/io/daytona/toolbox/client/model/GitCommitResponse.java
@@ -149,7 +151,9 @@ src/test/java/io/daytona/toolbox/client/model/FilesDownloadRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/GitAddRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/GitBranchRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/GitCheckoutRequestTest.java
+src/test/java/io/daytona/toolbox/client/model/GitCloneJobResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/GitCloneRequestTest.java
+src/test/java/io/daytona/toolbox/client/model/GitCloneResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/GitCommitInfoTest.java
 src/test/java/io/daytona/toolbox/client/model/GitCommitRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/GitCommitResponseTest.java

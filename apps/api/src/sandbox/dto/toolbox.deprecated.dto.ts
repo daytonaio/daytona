@@ -160,6 +160,24 @@ export class GitCloneRequestDto {
 
   @ApiPropertyOptional()
   filter_submodules?: boolean
+
+  @ApiPropertyOptional()
+  no_checkout?: boolean
+
+  @ApiPropertyOptional()
+  background_expansion?: boolean
+
+  @ApiPropertyOptional({ type: [String] })
+  initial_sparse_paths?: string[]
+
+  @ApiPropertyOptional()
+  background_deepen?: number
+
+  @ApiPropertyOptional()
+  background_unshallow?: boolean
+
+  @ApiPropertyOptional({ type: [String] })
+  background_hydrate_paths?: string[]
 }
 
 @ApiSchema({ name: 'GitCommitRequest' })

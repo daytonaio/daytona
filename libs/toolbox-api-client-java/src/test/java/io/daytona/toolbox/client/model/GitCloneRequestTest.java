@@ -40,6 +40,38 @@ public class GitCloneRequestTest {
     }
 
     /**
+     * Test the property 'backgroundDeepen'
+     */
+    @Test
+    public void backgroundDeepenTest() {
+        // TODO: test backgroundDeepen
+    }
+
+    /**
+     * Test the property 'backgroundExpansion'
+     */
+    @Test
+    public void backgroundExpansionTest() {
+        // TODO: test backgroundExpansion
+    }
+
+    /**
+     * Test the property 'backgroundHydratePaths'
+     */
+    @Test
+    public void backgroundHydratePathsTest() {
+        // TODO: test backgroundHydratePaths
+    }
+
+    /**
+     * Test the property 'backgroundUnshallow'
+     */
+    @Test
+    public void backgroundUnshallowTest() {
+        // TODO: test backgroundUnshallow
+    }
+
+    /**
      * Test the property 'branch'
      */
     @Test
@@ -85,6 +117,22 @@ public class GitCloneRequestTest {
     @Test
     public void filterSubmodulesTest() {
         // TODO: test filterSubmodules
+    }
+
+    /**
+     * Test the property 'initialSparsePaths'
+     */
+    @Test
+    public void initialSparsePathsTest() {
+        // TODO: test initialSparsePaths
+    }
+
+    /**
+     * Test the property 'noCheckout'
+     */
+    @Test
+    public void noCheckoutTest() {
+        // TODO: test noCheckout
     }
 
     /**

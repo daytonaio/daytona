@@ -243,6 +243,7 @@ func (s *server) Start() error {
 		gitController.POST("/checkout", git.CheckoutBranch)
 		gitController.DELETE("/branches", git.DeleteBranch)
 		gitController.POST("/clone", git.CloneRepository)
+		gitController.GET("/clone/jobs/:jobId", git.GetCloneJob)
 		gitController.POST("/commit", git.CommitChanges)
 		gitController.POST("/pull", git.PullChanges)
 		gitController.POST("/push", git.PushChanges)

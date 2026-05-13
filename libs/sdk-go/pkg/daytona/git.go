@@ -144,7 +144,7 @@ func (g *GitService) Clone(ctx context.Context, url, path string, opts ...func(*
 			req.SetFilterSubmodules(*cloneOpts.FilterSubmodules)
 		}
 
-		httpResp, err := g.toolboxClient.GitAPI.CloneRepository(ctx).Request(*req).Execute()
+		_, httpResp, err := g.toolboxClient.GitAPI.CloneRepository(ctx).Request(*req).Execute()
 		if err != nil {
 			return errors.ConvertToolboxError(err, httpResp)
 		}

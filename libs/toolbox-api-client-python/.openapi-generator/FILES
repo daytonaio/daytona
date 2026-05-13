@@ -39,7 +39,9 @@ daytona_toolbox_api_client/models/files_download_request.py
 daytona_toolbox_api_client/models/git_add_request.py
 daytona_toolbox_api_client/models/git_branch_request.py
 daytona_toolbox_api_client/models/git_checkout_request.py
+daytona_toolbox_api_client/models/git_clone_job_response.py
 daytona_toolbox_api_client/models/git_clone_request.py
+daytona_toolbox_api_client/models/git_clone_response.py
 daytona_toolbox_api_client/models/git_commit_info.py
 daytona_toolbox_api_client/models/git_commit_request.py
 daytona_toolbox_api_client/models/git_commit_response.py

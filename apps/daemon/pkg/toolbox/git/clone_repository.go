@@ -21,8 +21,9 @@ import (
 //	@Tags			git
 //	@Accept			json
 //	@Produce		json
-//	@Param			request	body	GitCloneRequest	true	"Clone repository request"
-//	@Success		200
+//	@Param			request	body		GitCloneRequest	true	"Clone repository request"
+//	@Success		200		{object}	GitCloneResponse
+//	@Success		202		{object}	GitCloneResponse
 //	@Router			/git/clone [post]
 //
 //	@id				CloneRepository
@@ -50,6 +51,13 @@ func CloneRepository(c *gin.Context) {
 		RecurseSubmodules: req.RecurseSubmodules,
 		ShallowSubmodules: req.ShallowSubmodules,
 		FilterSubmodules:  req.FilterSubmodules,
+		NoCheckout:        req.NoCheckout,
+
+		BackgroundExpansion:    req.BackgroundExpansion,
+		InitialSparsePaths:     req.InitialSparsePaths,
+		BackgroundDeepen:       req.BackgroundDeepen,
+		BackgroundUnshallow:    req.BackgroundUnshallow,
+		BackgroundHydratePaths: req.BackgroundHydratePaths,
 	}
 
 	if req.ShallowSince != nil {
@@ -60,6 +68,16 @@ func CloneRepository(c *gin.Context) {
 	}
 	if req.ReferencePath != nil {
 		repo.ReferencePath = *req.ReferencePath
+	}
+	if req.BackgroundExpansion != nil && *req.BackgroundExpansion {
+		if len(req.InitialSparsePaths) > 0 {
+			enabled := true
+			repo.Sparse = &enabled
+			repo.SparsePaths = req.InitialSparsePaths
+		} else if req.NoCheckout == nil {
+			enabled := true
+			repo.NoCheckout = &enabled
+		}
 	}
 
 	if req.CommitID != nil {
@@ -87,5 +105,39 @@ func CloneRepository(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	if req.BackgroundExpansion != nil && *req.BackgroundExpansion {
+		job := cloneJobs.create(req.Path)
+		go func() {
+			cloneJobs.finish(job.ID, gitService.ExpandCloneInBackground(&repo, auth))
+		}()
+
+		c.JSON(http.StatusAccepted, GitCloneResponse{
+			JobID:  job.ID,
+			Status: job.Status,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, GitCloneResponse{})
+}
+
+// GetCloneJob godoc
+//
+//	@Summary		Get clone expansion job status
+//	@Description	Get the status of a background clone expansion job
+//	@Tags			git
+//	@Produce		json
+//	@Param			jobId	path		string	true	"Clone expansion job ID"
+//	@Success		200		{object}	GitCloneJobResponse
+//	@Router			/git/clone/jobs/{jobId} [get]
+//
+//	@id				GetCloneJob
+func GetCloneJob(c *gin.Context) {
+	job, ok := cloneJobs.get(c.Param("jobId"))
+	if !ok {
+		abortWithGitError(c, errCloneJobNotFound)
+		return
+	}
+
+	c.JSON(http.StatusOK, job.response())
 }

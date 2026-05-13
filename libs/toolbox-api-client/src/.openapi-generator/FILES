@@ -38,7 +38,9 @@ models/files-download-request.ts
 models/git-add-request.ts
 models/git-branch-request.ts
 models/git-checkout-request.ts
+models/git-clone-job-response.ts
 models/git-clone-request.ts
+models/git-clone-response.ts
 models/git-commit-info.ts
 models/git-commit-request.ts
 models/git-commit-response.ts

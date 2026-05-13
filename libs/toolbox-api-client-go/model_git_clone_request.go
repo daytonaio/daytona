@@ -21,24 +21,30 @@ var _ MappedNullable = &GitCloneRequest{}
 
 // GitCloneRequest struct for GitCloneRequest
 type GitCloneRequest struct {
-	Branch            *string  `json:"branch,omitempty"`
-	CommitId          *string  `json:"commit_id,omitempty"`
-	Depth             *int32   `json:"depth,omitempty"`
-	Dissociate        *bool    `json:"dissociate,omitempty"`
-	Filter            *string  `json:"filter,omitempty"`
-	FilterSubmodules  *bool    `json:"filter_submodules,omitempty"`
-	NoTags            *bool    `json:"no_tags,omitempty"`
-	Password          *string  `json:"password,omitempty"`
-	Path              string   `json:"path"`
-	RecurseSubmodules *bool    `json:"recurse_submodules,omitempty"`
-	ReferencePath     *string  `json:"reference_path,omitempty"`
-	ShallowSince      *string  `json:"shallow_since,omitempty"`
-	ShallowSubmodules *bool    `json:"shallow_submodules,omitempty"`
-	SingleBranch      *bool    `json:"single_branch,omitempty"`
-	Sparse            *bool    `json:"sparse,omitempty"`
-	SparsePaths       []string `json:"sparse_paths,omitempty"`
-	Url               string   `json:"url"`
-	Username          *string  `json:"username,omitempty"`
+	BackgroundDeepen       *int32   `json:"background_deepen,omitempty"`
+	BackgroundExpansion    *bool    `json:"background_expansion,omitempty"`
+	BackgroundHydratePaths []string `json:"background_hydrate_paths,omitempty"`
+	BackgroundUnshallow    *bool    `json:"background_unshallow,omitempty"`
+	Branch                 *string  `json:"branch,omitempty"`
+	CommitId               *string  `json:"commit_id,omitempty"`
+	Depth                  *int32   `json:"depth,omitempty"`
+	Dissociate             *bool    `json:"dissociate,omitempty"`
+	Filter                 *string  `json:"filter,omitempty"`
+	FilterSubmodules       *bool    `json:"filter_submodules,omitempty"`
+	InitialSparsePaths     []string `json:"initial_sparse_paths,omitempty"`
+	NoCheckout             *bool    `json:"no_checkout,omitempty"`
+	NoTags                 *bool    `json:"no_tags,omitempty"`
+	Password               *string  `json:"password,omitempty"`
+	Path                   string   `json:"path"`
+	RecurseSubmodules      *bool    `json:"recurse_submodules,omitempty"`
+	ReferencePath          *string  `json:"reference_path,omitempty"`
+	ShallowSince           *string  `json:"shallow_since,omitempty"`
+	ShallowSubmodules      *bool    `json:"shallow_submodules,omitempty"`
+	SingleBranch           *bool    `json:"single_branch,omitempty"`
+	Sparse                 *bool    `json:"sparse,omitempty"`
+	SparsePaths            []string `json:"sparse_paths,omitempty"`
+	Url                    string   `json:"url"`
+	Username               *string  `json:"username,omitempty"`
 }
 
 type _GitCloneRequest GitCloneRequest
@@ -60,6 +66,134 @@ func NewGitCloneRequest(path string, url string) *GitCloneRequest {
 func NewGitCloneRequestWithDefaults() *GitCloneRequest {
 	this := GitCloneRequest{}
 	return &this
+}
+
+// GetBackgroundDeepen returns the BackgroundDeepen field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetBackgroundDeepen() int32 {
+	if o == nil || IsNil(o.BackgroundDeepen) {
+		var ret int32
+		return ret
+	}
+	return *o.BackgroundDeepen
+}
+
+// GetBackgroundDeepenOk returns a tuple with the BackgroundDeepen field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetBackgroundDeepenOk() (*int32, bool) {
+	if o == nil || IsNil(o.BackgroundDeepen) {
+		return nil, false
+	}
+	return o.BackgroundDeepen, true
+}
+
+// HasBackgroundDeepen returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasBackgroundDeepen() bool {
+	if o != nil && !IsNil(o.BackgroundDeepen) {
+		return true
+	}
+
+	return false
+}
+
+// SetBackgroundDeepen gets a reference to the given int32 and assigns it to the BackgroundDeepen field.
+func (o *GitCloneRequest) SetBackgroundDeepen(v int32) {
+	o.BackgroundDeepen = &v
+}
+
+// GetBackgroundExpansion returns the BackgroundExpansion field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetBackgroundExpansion() bool {
+	if o == nil || IsNil(o.BackgroundExpansion) {
+		var ret bool
+		return ret
+	}
+	return *o.BackgroundExpansion
+}
+
+// GetBackgroundExpansionOk returns a tuple with the BackgroundExpansion field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetBackgroundExpansionOk() (*bool, bool) {
+	if o == nil || IsNil(o.BackgroundExpansion) {
+		return nil, false
+	}
+	return o.BackgroundExpansion, true
+}
+
+// HasBackgroundExpansion returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasBackgroundExpansion() bool {
+	if o != nil && !IsNil(o.BackgroundExpansion) {
+		return true
+	}
+
+	return false
+}
+
+// SetBackgroundExpansion gets a reference to the given bool and assigns it to the BackgroundExpansion field.
+func (o *GitCloneRequest) SetBackgroundExpansion(v bool) {
+	o.BackgroundExpansion = &v
+}
+
+// GetBackgroundHydratePaths returns the BackgroundHydratePaths field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetBackgroundHydratePaths() []string {
+	if o == nil || IsNil(o.BackgroundHydratePaths) {
+		var ret []string
+		return ret
+	}
+	return o.BackgroundHydratePaths
+}
+
+// GetBackgroundHydratePathsOk returns a tuple with the BackgroundHydratePaths field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetBackgroundHydratePathsOk() ([]string, bool) {
+	if o == nil || IsNil(o.BackgroundHydratePaths) {
+		return nil, false
+	}
+	return o.BackgroundHydratePaths, true
+}
+
+// HasBackgroundHydratePaths returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasBackgroundHydratePaths() bool {
+	if o != nil && !IsNil(o.BackgroundHydratePaths) {
+		return true
+	}
+
+	return false
+}
+
+// SetBackgroundHydratePaths gets a reference to the given []string and assigns it to the BackgroundHydratePaths field.
+func (o *GitCloneRequest) SetBackgroundHydratePaths(v []string) {
+	o.BackgroundHydratePaths = v
+}
+
+// GetBackgroundUnshallow returns the BackgroundUnshallow field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetBackgroundUnshallow() bool {
+	if o == nil || IsNil(o.BackgroundUnshallow) {
+		var ret bool
+		return ret
+	}
+	return *o.BackgroundUnshallow
+}
+
+// GetBackgroundUnshallowOk returns a tuple with the BackgroundUnshallow field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetBackgroundUnshallowOk() (*bool, bool) {
+	if o == nil || IsNil(o.BackgroundUnshallow) {
+		return nil, false
+	}
+	return o.BackgroundUnshallow, true
+}
+
+// HasBackgroundUnshallow returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasBackgroundUnshallow() bool {
+	if o != nil && !IsNil(o.BackgroundUnshallow) {
+		return true
+	}
+
+	return false
+}
+
+// SetBackgroundUnshallow gets a reference to the given bool and assigns it to the BackgroundUnshallow field.
+func (o *GitCloneRequest) SetBackgroundUnshallow(v bool) {
+	o.BackgroundUnshallow = &v
 }
 
 // GetBranch returns the Branch field value if set, zero value otherwise.
@@ -252,6 +386,70 @@ func (o *GitCloneRequest) HasFilterSubmodules() bool {
 // SetFilterSubmodules gets a reference to the given bool and assigns it to the FilterSubmodules field.
 func (o *GitCloneRequest) SetFilterSubmodules(v bool) {
 	o.FilterSubmodules = &v
+}
+
+// GetInitialSparsePaths returns the InitialSparsePaths field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetInitialSparsePaths() []string {
+	if o == nil || IsNil(o.InitialSparsePaths) {
+		var ret []string
+		return ret
+	}
+	return o.InitialSparsePaths
+}
+
+// GetInitialSparsePathsOk returns a tuple with the InitialSparsePaths field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetInitialSparsePathsOk() ([]string, bool) {
+	if o == nil || IsNil(o.InitialSparsePaths) {
+		return nil, false
+	}
+	return o.InitialSparsePaths, true
+}
+
+// HasInitialSparsePaths returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasInitialSparsePaths() bool {
+	if o != nil && !IsNil(o.InitialSparsePaths) {
+		return true
+	}
+
+	return false
+}
+
+// SetInitialSparsePaths gets a reference to the given []string and assigns it to the InitialSparsePaths field.
+func (o *GitCloneRequest) SetInitialSparsePaths(v []string) {
+	o.InitialSparsePaths = v
+}
+
+// GetNoCheckout returns the NoCheckout field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetNoCheckout() bool {
+	if o == nil || IsNil(o.NoCheckout) {
+		var ret bool
+		return ret
+	}
+	return *o.NoCheckout
+}
+
+// GetNoCheckoutOk returns a tuple with the NoCheckout field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetNoCheckoutOk() (*bool, bool) {
+	if o == nil || IsNil(o.NoCheckout) {
+		return nil, false
+	}
+	return o.NoCheckout, true
+}
+
+// HasNoCheckout returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasNoCheckout() bool {
+	if o != nil && !IsNil(o.NoCheckout) {
+		return true
+	}
+
+	return false
+}
+
+// SetNoCheckout gets a reference to the given bool and assigns it to the NoCheckout field.
+func (o *GitCloneRequest) SetNoCheckout(v bool) {
+	o.NoCheckout = &v
 }
 
 // GetNoTags returns the NoTags field value if set, zero value otherwise.
@@ -632,6 +830,18 @@ func (o GitCloneRequest) MarshalJSON() ([]byte, error) {
 
 func (o GitCloneRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.BackgroundDeepen) {
+		toSerialize["background_deepen"] = o.BackgroundDeepen
+	}
+	if !IsNil(o.BackgroundExpansion) {
+		toSerialize["background_expansion"] = o.BackgroundExpansion
+	}
+	if !IsNil(o.BackgroundHydratePaths) {
+		toSerialize["background_hydrate_paths"] = o.BackgroundHydratePaths
+	}
+	if !IsNil(o.BackgroundUnshallow) {
+		toSerialize["background_unshallow"] = o.BackgroundUnshallow
+	}
 	if !IsNil(o.Branch) {
 		toSerialize["branch"] = o.Branch
 	}
@@ -649,6 +859,12 @@ func (o GitCloneRequest) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.FilterSubmodules) {
 		toSerialize["filter_submodules"] = o.FilterSubmodules
+	}
+	if !IsNil(o.InitialSparsePaths) {
+		toSerialize["initial_sparse_paths"] = o.InitialSparsePaths
+	}
+	if !IsNil(o.NoCheckout) {
+		toSerialize["no_checkout"] = o.NoCheckout
 	}
 	if !IsNil(o.NoTags) {
 		toSerialize["no_tags"] = o.NoTags

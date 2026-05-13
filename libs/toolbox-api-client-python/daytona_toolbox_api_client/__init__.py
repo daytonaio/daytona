@@ -67,7 +67,9 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client.models.git_add_request import GitAddRequest
     from daytona_toolbox_api_client.models.git_branch_request import GitBranchRequest
     from daytona_toolbox_api_client.models.git_checkout_request import GitCheckoutRequest
+    from daytona_toolbox_api_client.models.git_clone_job_response import GitCloneJobResponse
     from daytona_toolbox_api_client.models.git_clone_request import GitCloneRequest
+    from daytona_toolbox_api_client.models.git_clone_response import GitCloneResponse
     from daytona_toolbox_api_client.models.git_commit_info import GitCommitInfo
     from daytona_toolbox_api_client.models.git_commit_request import GitCommitRequest
     from daytona_toolbox_api_client.models.git_commit_response import GitCommitResponse
@@ -175,7 +177,9 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "GitAddRequest": "daytona_toolbox_api_client.models.git_add_request",
     "GitBranchRequest": "daytona_toolbox_api_client.models.git_branch_request",
     "GitCheckoutRequest": "daytona_toolbox_api_client.models.git_checkout_request",
+    "GitCloneJobResponse": "daytona_toolbox_api_client.models.git_clone_job_response",
     "GitCloneRequest": "daytona_toolbox_api_client.models.git_clone_request",
+    "GitCloneResponse": "daytona_toolbox_api_client.models.git_clone_response",
     "GitCommitInfo": "daytona_toolbox_api_client.models.git_commit_info",
     "GitCommitRequest": "daytona_toolbox_api_client.models.git_commit_request",
     "GitCommitResponse": "daytona_toolbox_api_client.models.git_commit_response",
@@ -297,7 +301,9 @@ __all__ = [
     "GitAddRequest",
     "GitBranchRequest",
     "GitCheckoutRequest",
+    "GitCloneJobResponse",
     "GitCloneRequest",
+    "GitCloneResponse",
     "GitCommitInfo",
     "GitCommitRequest",
     "GitCommitResponse",

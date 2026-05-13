@@ -28,7 +28,28 @@ type GitCloneRequest struct {
 	RecurseSubmodules *bool    `json:"recurse_submodules,omitempty" validate:"optional"`
 	ShallowSubmodules *bool    `json:"shallow_submodules,omitempty" validate:"optional"`
 	FilterSubmodules  *bool    `json:"filter_submodules,omitempty" validate:"optional"`
+	NoCheckout        *bool    `json:"no_checkout,omitempty" validate:"optional"`
+
+	BackgroundExpansion    *bool    `json:"background_expansion,omitempty" validate:"optional"`
+	InitialSparsePaths     []string `json:"initial_sparse_paths,omitempty" validate:"optional"`
+	BackgroundDeepen       *int     `json:"background_deepen,omitempty" validate:"optional"`
+	BackgroundUnshallow    *bool    `json:"background_unshallow,omitempty" validate:"optional"`
+	BackgroundHydratePaths []string `json:"background_hydrate_paths,omitempty" validate:"optional"`
 } //	@name	GitCloneRequest
+
+type GitCloneResponse struct {
+	JobID  string `json:"job_id,omitempty" validate:"optional"`
+	Status string `json:"status,omitempty" validate:"optional"`
+} //	@name	GitCloneResponse
+
+type GitCloneJobResponse struct {
+	JobID      string `json:"job_id" validate:"required"`
+	Status     string `json:"status" validate:"required"`
+	Path       string `json:"path" validate:"required"`
+	StartedAt  string `json:"started_at" validate:"required"`
+	FinishedAt string `json:"finished_at,omitempty" validate:"optional"`
+	Error      string `json:"error,omitempty" validate:"optional"`
+} //	@name	GitCloneJobResponse
 
 type GitCommitRequest struct {
 	Path       string `json:"path" validate:"required"`

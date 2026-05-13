@@ -143,6 +143,79 @@ func (s *Service) CloneRepositoryCLI(repo *gitprovider.GitRepository, auth *http
 	return nil
 }
 
+func (s *Service) ExpandCloneInBackground(repo *gitprovider.GitRepository, auth *http.BasicAuth) error {
+	gitBin, err := exec.LookPath("git")
+	if err != nil {
+		return fmt.Errorf("git binary not found in PATH: %w", err)
+	}
+
+	askDir, err := os.MkdirTemp("", "daytona-clone-expand-*")
+	if err != nil {
+		return fmt.Errorf("create askpass temp dir: %w", err)
+	}
+	defer os.RemoveAll(askDir)
+
+	askPath := filepath.Join(askDir, "askpass.sh")
+	if err := os.WriteFile(askPath, []byte(askpassScript), 0o700); err != nil {
+		return fmt.Errorf("write askpass helper: %w", err)
+	}
+
+	run := func(label string, args []string, needsAuth bool, tailSize int) error {
+		cmd := exec.Command(gitBin, args...)
+		if needsAuth {
+			cmd.Env = buildCloneEnv(os.Environ(), askPath, auth)
+		} else {
+			cmd.Env = buildCloneEnv(os.Environ(), askPath, nil)
+		}
+		tail := s.attachCmdOutput(cmd, tailSize)
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("git %s failed: %w\n--- git output (tail) ---\n%s", label, err, tail.String())
+		}
+		return nil
+	}
+
+	if repo.NoCheckout != nil && *repo.NoCheckout {
+		if err := run("checkout HEAD", buildCheckoutHeadArgs(s.WorkDir), true, 16*1024); err != nil {
+			return err
+		}
+	}
+
+	if len(repo.BackgroundHydratePaths) > 0 {
+		if len(repo.SparsePaths) > 0 {
+			if err := run("sparse-checkout add", buildSparseCheckoutAddArgs(s.WorkDir, repo.BackgroundHydratePaths), false, 16*1024); err != nil {
+				return err
+			}
+		}
+		if err := run("checkout paths", buildCheckoutPathsArgs(s.WorkDir, repo.BackgroundHydratePaths), true, 16*1024); err != nil {
+			return err
+		}
+	}
+
+	if len(repo.SparsePaths) > 0 {
+		if err := run("sparse-checkout disable", buildSparseCheckoutDisableArgs(s.WorkDir), true, 16*1024); err != nil {
+			return err
+		}
+	}
+
+	if repo.BackgroundDeepen != nil {
+		if err := run("fetch deepen", buildFetchDeepenArgs(s.WorkDir, *repo.BackgroundDeepen), true, 64*1024); err != nil {
+			return err
+		}
+	}
+
+	if repo.BackgroundUnshallow != nil && *repo.BackgroundUnshallow {
+		if err := run("fetch unshallow", buildFetchUnshallowArgs(s.WorkDir), true, 64*1024); err != nil {
+			return err
+		}
+	}
+
+	if err := run("maintenance prefetch", buildMaintenancePrefetchArgs(s.WorkDir), true, 64*1024); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 type InvalidCloneOptionsError struct {
 	Message string
 }
@@ -170,6 +243,16 @@ func validateCloneOptions(repo *gitprovider.GitRepository, useCLI bool) error {
 			return err
 		}
 	}
+	for _, sparsePath := range repo.InitialSparsePaths {
+		if err := validateSparsePath(sparsePath); err != nil {
+			return err
+		}
+	}
+	for _, hydratePath := range repo.BackgroundHydratePaths {
+		if err := validateSparsePath(hydratePath); err != nil {
+			return err
+		}
+	}
 
 	if hasOptimizedCloneOptions(repo) && !useCLI {
 		return &InvalidCloneOptionsError{Message: "optimized clone options require DAYTONA_EXPERIMENTAL_USE_GIT_CLONE_CLI=true"}
@@ -191,6 +274,23 @@ func validateCloneOptions(repo *gitprovider.GitRepository, useCLI bool) error {
 			return &InvalidCloneOptionsError{Message: "filter_submodules requires filter"}
 		}
 	}
+	if !boolValue(repo.BackgroundExpansion) {
+		if len(repo.InitialSparsePaths) > 0 {
+			return &InvalidCloneOptionsError{Message: "initial_sparse_paths requires background_expansion"}
+		}
+		if repo.BackgroundDeepen != nil {
+			return &InvalidCloneOptionsError{Message: "background_deepen requires background_expansion"}
+		}
+		if repo.BackgroundUnshallow != nil {
+			return &InvalidCloneOptionsError{Message: "background_unshallow requires background_expansion"}
+		}
+		if len(repo.BackgroundHydratePaths) > 0 {
+			return &InvalidCloneOptionsError{Message: "background_hydrate_paths requires background_expansion"}
+		}
+	}
+	if repo.BackgroundDeepen != nil && *repo.BackgroundDeepen < 1 {
+		return &InvalidCloneOptionsError{Message: "background_deepen must be greater than or equal to 1"}
+	}
 
 	return nil
 }
@@ -207,7 +307,13 @@ func hasOptimizedCloneOptions(repo *gitprovider.GitRepository) bool {
 		repo.Dissociate != nil ||
 		repo.RecurseSubmodules != nil ||
 		repo.ShallowSubmodules != nil ||
-		repo.FilterSubmodules != nil
+		repo.FilterSubmodules != nil ||
+		repo.NoCheckout != nil ||
+		repo.BackgroundExpansion != nil ||
+		len(repo.InitialSparsePaths) > 0 ||
+		repo.BackgroundDeepen != nil ||
+		repo.BackgroundUnshallow != nil ||
+		len(repo.BackgroundHydratePaths) > 0
 }
 
 func boolValue(value *bool) bool {
@@ -282,6 +388,9 @@ func buildCloneArgs(repo *gitprovider.GitRepository, workDir string) []string {
 	if (repo.Sparse != nil && *repo.Sparse) || len(repo.SparsePaths) > 0 {
 		args = append(args, "--sparse")
 	}
+	if repo.NoCheckout != nil && *repo.NoCheckout {
+		args = append(args, "--no-checkout")
+	}
 	if repo.ReferencePath != "" {
 		args = append(args, "--reference-if-able="+repo.ReferencePath)
 	}
@@ -342,6 +451,38 @@ func buildSparseCheckoutArgs(workDir string, sparsePaths []string) []string {
 	args := []string{"-C", workDir, "sparse-checkout", "set", "--cone", "--"}
 	args = append(args, sparsePaths...)
 	return args
+}
+
+func buildSparseCheckoutAddArgs(workDir string, sparsePaths []string) []string {
+	args := []string{"-C", workDir, "sparse-checkout", "add", "--"}
+	args = append(args, sparsePaths...)
+	return args
+}
+
+func buildSparseCheckoutDisableArgs(workDir string) []string {
+	return []string{"-C", workDir, "sparse-checkout", "disable"}
+}
+
+func buildFetchDeepenArgs(workDir string, deepen int) []string {
+	return []string{"-C", workDir, "fetch", "--deepen=" + strconv.Itoa(deepen)}
+}
+
+func buildFetchUnshallowArgs(workDir string) []string {
+	return []string{"-C", workDir, "fetch", "--unshallow"}
+}
+
+func buildCheckoutHeadArgs(workDir string) []string {
+	return []string{"-C", workDir, "checkout", "HEAD"}
+}
+
+func buildCheckoutPathsArgs(workDir string, paths []string) []string {
+	args := []string{"-C", workDir, "checkout", "HEAD", "--"}
+	args = append(args, paths...)
+	return args
+}
+
+func buildMaintenancePrefetchArgs(workDir string) []string {
+	return []string{"-C", workDir, "maintenance", "run", "--task=prefetch"}
 }
 
 // tailBuffer keeps only the last N bytes — lets us include git's final error

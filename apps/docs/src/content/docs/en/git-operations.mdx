@@ -502,6 +502,41 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/clone' \
 </TabItem>
 </Tabs>
 
+### Start a two-phase clone
+
+Use `background_expansion` when you want the first clone response to return after a minimal checkout, while Daytona continues expanding the repository in the background. If `initial_sparse_paths` is set, Daytona checks out only those paths first. If it is omitted, Daytona uses `--no-checkout` for the foreground clone and checks out `HEAD` in the expansion job.
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/clone' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "url": "https://github.com/llvm/llvm-project.git",
+  "path": "/home/daytona/llvm",
+  "depth": 1,
+  "filter": "blob:none",
+  "background_expansion": true,
+  "initial_sparse_paths": ["llvm", "clang"],
+  "background_deepen": 50,
+  "background_hydrate_paths": ["README.md"]
+}'
+```
+
+The response includes a clone expansion job ID:
+
+```json
+{
+  "job_id": "9a3d3f7b-4e79-4fd8-9490-5ef60266b1c0",
+  "status": "running"
+}
+```
+
+Poll the job while the repository expands:
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/clone/jobs/{jobId}'
+```
+
 ### Get repository status
 
 Daytona provides methods to check the status of Git repositories in sandboxes. You can get the current branch, modified files, number of commits ahead and behind main branch.

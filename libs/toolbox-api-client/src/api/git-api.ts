@@ -28,7 +28,11 @@ import type { GitBranchRequest } from '../models';
 // @ts-ignore
 import type { GitCheckoutRequest } from '../models';
 // @ts-ignore
+import type { GitCloneJobResponse } from '../models';
+// @ts-ignore
 import type { GitCloneRequest } from '../models';
+// @ts-ignore
+import type { GitCloneResponse } from '../models';
 // @ts-ignore
 import type { GitCommitInfo } from '../models';
 // @ts-ignore
@@ -139,6 +143,7 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
             const localVarQueryParameter = {} as any;
 
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -247,6 +252,40 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get the status of a background clone expansion job
+         * @summary Get clone expansion job status
+         * @param {string} jobId Clone expansion job ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getCloneJob: async (jobId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'jobId' is not null or undefined
+            assertParamExists('getCloneJob', 'jobId', jobId)
+            const localVarPath = `/git/clone/jobs/{jobId}`
+                .replace(`{${"jobId"}}`, encodeURIComponent(String(jobId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Accept'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -474,7 +513,7 @@ export const GitApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async cloneRepository(request: GitCloneRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async cloneRepository(request: GitCloneRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GitCloneResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.cloneRepository(request, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['GitApi.cloneRepository']?.[localVarOperationServerIndex]?.url;
@@ -517,6 +556,19 @@ export const GitApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteBranch(request, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['GitApi.deleteBranch']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get the status of a background clone expansion job
+         * @summary Get clone expansion job status
+         * @param {string} jobId Clone expansion job ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getCloneJob(jobId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GitCloneJobResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getCloneJob(jobId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GitApi.getCloneJob']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -620,7 +672,7 @@ export const GitApiFactory = function (configuration?: Configuration, basePath?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        cloneRepository(request: GitCloneRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+        cloneRepository(request: GitCloneRequest, options?: RawAxiosRequestConfig): AxiosPromise<GitCloneResponse> {
             return localVarFp.cloneRepository(request, options).then((request) => request(axios, basePath));
         },
         /**
@@ -652,6 +704,16 @@ export const GitApiFactory = function (configuration?: Configuration, basePath?:
          */
         deleteBranch(request: GitDeleteBranchRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.deleteBranch(request, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get the status of a background clone expansion job
+         * @summary Get clone expansion job status
+         * @param {string} jobId Clone expansion job ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getCloneJob(jobId: string, options?: RawAxiosRequestConfig): AxiosPromise<GitCloneJobResponse> {
+            return localVarFp.getCloneJob(jobId, options).then((request) => request(axios, basePath));
         },
         /**
          * Get the commit history of the Git repository
@@ -774,6 +836,17 @@ export class GitApi extends BaseAPI {
      */
     public deleteBranch(request: GitDeleteBranchRequest, options?: RawAxiosRequestConfig) {
         return GitApiFp(this.configuration).deleteBranch(request, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get the status of a background clone expansion job
+     * @summary Get clone expansion job status
+     * @param {string} jobId Clone expansion job ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public getCloneJob(jobId: string, options?: RawAxiosRequestConfig) {
+        return GitApiFp(this.configuration).getCloneJob(jobId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

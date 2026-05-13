@@ -155,17 +155,17 @@ module DaytonaToolboxApiClient
     # Clone a Git repository to the specified path
     # @param request [GitCloneRequest] Clone repository request
     # @param [Hash] opts the optional parameters
-    # @return [nil]
+    # @return [GitCloneResponse]
     def clone_repository(request, opts = {})
-      clone_repository_with_http_info(request, opts)
-      nil
+      data, _status_code, _headers = clone_repository_with_http_info(request, opts)
+      data
     end
 
     # Clone a Git repository
     # Clone a Git repository to the specified path
     # @param request [GitCloneRequest] Clone repository request
     # @param [Hash] opts the optional parameters
-    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    # @return [Array<(GitCloneResponse, Integer, Hash)>] GitCloneResponse data, response status code and response headers
     def clone_repository_with_http_info(request, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: GitApi.clone_repository ...'
@@ -182,6 +182,8 @@ module DaytonaToolboxApiClient
 
       # header parameters
       header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
       # HTTP header 'Content-Type'
       content_type = @api_client.select_header_content_type(['application/json'])
       if !content_type.nil?
@@ -195,7 +197,7 @@ module DaytonaToolboxApiClient
       post_body = opts[:debug_body] || @api_client.object_to_http_body(request)
 
       # return_type
-      return_type = opts[:debug_return_type]
+      return_type = opts[:debug_return_type] || 'GitCloneResponse'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || []
@@ -413,6 +415,69 @@ module DaytonaToolboxApiClient
       data, status_code, headers = @api_client.call_api(:DELETE, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: GitApi#delete_branch\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Get clone expansion job status
+    # Get the status of a background clone expansion job
+    # @param job_id [String] Clone expansion job ID
+    # @param [Hash] opts the optional parameters
+    # @return [GitCloneJobResponse]
+    def get_clone_job(job_id, opts = {})
+      data, _status_code, _headers = get_clone_job_with_http_info(job_id, opts)
+      data
+    end
+
+    # Get clone expansion job status
+    # Get the status of a background clone expansion job
+    # @param job_id [String] Clone expansion job ID
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(GitCloneJobResponse, Integer, Hash)>] GitCloneJobResponse data, response status code and response headers
+    def get_clone_job_with_http_info(job_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: GitApi.get_clone_job ...'
+      end
+      # verify the required parameter 'job_id' is set
+      if @api_client.config.client_side_validation && job_id.nil?
+        fail ArgumentError, "Missing the required parameter 'job_id' when calling GitApi.get_clone_job"
+      end
+      # resource path
+      local_var_path = '/git/clone/jobs/{jobId}'.sub('{' + 'jobId' + '}', CGI.escape(job_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'GitCloneJobResponse'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"GitApi.get_clone_job",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: GitApi#get_clone_job\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end

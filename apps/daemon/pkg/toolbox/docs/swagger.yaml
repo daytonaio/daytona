@@ -341,8 +341,38 @@ definitions:
       - branch
       - path
     type: object
+  GitCloneJobResponse:
+    properties:
+      error:
+        type: string
+      finished_at:
+        type: string
+      job_id:
+        type: string
+      path:
+        type: string
+      started_at:
+        type: string
+      status:
+        type: string
+    required:
+      - job_id
+      - path
+      - started_at
+      - status
+    type: object
   GitCloneRequest:
     properties:
+      background_deepen:
+        type: integer
+      background_expansion:
+        type: boolean
+      background_hydrate_paths:
+        items:
+          type: string
+        type: array
+      background_unshallow:
+        type: boolean
       branch:
         type: string
       commit_id:
@@ -354,6 +384,12 @@ definitions:
       filter:
         type: string
       filter_submodules:
+        type: boolean
+      initial_sparse_paths:
+        items:
+          type: string
+        type: array
+      no_checkout:
         type: boolean
       no_tags:
         type: boolean
@@ -384,6 +420,13 @@ definitions:
     required:
       - path
       - url
+    type: object
+  GitCloneResponse:
+    properties:
+      job_id:
+        type: string
+      status:
+        type: string
     type: object
   GitCommitInfo:
     properties:
@@ -2136,7 +2179,33 @@ paths:
       responses:
         '200':
           description: OK
+          schema:
+            $ref: '#/definitions/GitCloneResponse'
+        '202':
+          description: Accepted
+          schema:
+            $ref: '#/definitions/GitCloneResponse'
       summary: Clone a Git repository
+      tags:
+        - git
+  /git/clone/jobs/{jobId}:
+    get:
+      description: Get the status of a background clone expansion job
+      operationId: GetCloneJob
+      parameters:
+        - description: Clone expansion job ID
+          in: path
+          name: jobId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/GitCloneJobResponse'
+      summary: Get clone expansion job status
       tags:
         - git
   /git/commit:

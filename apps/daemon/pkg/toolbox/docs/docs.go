@@ -1632,7 +1632,46 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GitCloneResponse"
+                        }
+                    },
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/GitCloneResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/git/clone/jobs/{jobId}": {
+            "get": {
+                "description": "Get the status of a background clone expansion job",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "git"
+                ],
+                "summary": "Get clone expansion job status",
+                "operationId": "GetCloneJob",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Clone expansion job ID",
+                        "name": "jobId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GitCloneJobResponse"
+                        }
                     }
                 }
             }
@@ -3458,6 +3497,35 @@ const docTemplate = `{
                 }
             }
         },
+        "GitCloneJobResponse": {
+            "type": "object",
+            "required": [
+                "job_id",
+                "path",
+                "started_at",
+                "status"
+            ],
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "finished_at": {
+                    "type": "string"
+                },
+                "job_id": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "started_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "GitCloneRequest": {
             "type": "object",
             "required": [
@@ -3465,6 +3533,21 @@ const docTemplate = `{
                 "url"
             ],
             "properties": {
+                "background_deepen": {
+                    "type": "integer"
+                },
+                "background_expansion": {
+                    "type": "boolean"
+                },
+                "background_hydrate_paths": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "background_unshallow": {
+                    "type": "boolean"
+                },
                 "branch": {
                     "type": "string"
                 },
@@ -3481,6 +3564,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "filter_submodules": {
+                    "type": "boolean"
+                },
+                "initial_sparse_paths": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "no_checkout": {
                     "type": "boolean"
                 },
                 "no_tags": {
@@ -3520,6 +3612,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitCloneResponse": {
+            "type": "object",
+            "properties": {
+                "job_id": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 }
             }

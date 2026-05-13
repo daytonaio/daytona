@@ -179,6 +179,26 @@ func TestBuildCloneArgs_WithReferenceAndSubmoduleOptions(t *testing.T) {
 	}, got)
 }
 
+func TestBuildCloneArgs_WithNoCheckout(t *testing.T) {
+	noCheckout := true
+	repo := &gitprovider.GitRepository{
+		Url:        "https://github.com/daytonaio/daytona",
+		NoCheckout: &noCheckout,
+	}
+
+	got := buildCloneArgs(repo, "/work-dir")
+
+	require.Equal(t, []string{
+		"-c", "credential.helper=",
+		"-c", "http.sslVerify=false",
+		"clone",
+		"--single-branch",
+		"--progress",
+		"--no-checkout",
+		"--", "https://github.com/daytonaio/daytona", "/work-dir",
+	}, got)
+}
+
 func TestValidateCloneOptions(t *testing.T) {
 	depth := 0
 	repo := &gitprovider.GitRepository{Depth: &depth}
@@ -213,6 +233,14 @@ func TestValidateCloneOptions(t *testing.T) {
 	recurseSubmodules := true
 	repo = &gitprovider.GitRepository{FilterSubmodules: &filterSubmodules, RecurseSubmodules: &recurseSubmodules}
 	require.ErrorContains(t, validateCloneOptions(repo, true), "filter_submodules requires filter")
+
+	backgroundDeepen := 0
+	backgroundExpansion := true
+	repo = &gitprovider.GitRepository{BackgroundExpansion: &backgroundExpansion, BackgroundDeepen: &backgroundDeepen}
+	require.ErrorContains(t, validateCloneOptions(repo, true), "background_deepen must be greater than or equal to 1")
+
+	repo = &gitprovider.GitRepository{InitialSparsePaths: []string{"src"}}
+	require.ErrorContains(t, validateCloneOptions(repo, true), "initial_sparse_paths requires background_expansion")
 }
 
 func TestBuildSparseCheckoutArgs(t *testing.T) {
@@ -225,6 +253,16 @@ func TestBuildSparseCheckoutArgs(t *testing.T) {
 		"--",
 		"src", "docs/guides",
 	}, got)
+}
+
+func TestBuildBackgroundExpansionArgs(t *testing.T) {
+	require.Equal(t, []string{"-C", "/work-dir", "sparse-checkout", "add", "--", "src", "docs"}, buildSparseCheckoutAddArgs("/work-dir", []string{"src", "docs"}))
+	require.Equal(t, []string{"-C", "/work-dir", "sparse-checkout", "disable"}, buildSparseCheckoutDisableArgs("/work-dir"))
+	require.Equal(t, []string{"-C", "/work-dir", "fetch", "--deepen=50"}, buildFetchDeepenArgs("/work-dir", 50))
+	require.Equal(t, []string{"-C", "/work-dir", "fetch", "--unshallow"}, buildFetchUnshallowArgs("/work-dir"))
+	require.Equal(t, []string{"-C", "/work-dir", "checkout", "HEAD"}, buildCheckoutHeadArgs("/work-dir"))
+	require.Equal(t, []string{"-C", "/work-dir", "checkout", "HEAD", "--", "README.md"}, buildCheckoutPathsArgs("/work-dir", []string{"README.md"}))
+	require.Equal(t, []string{"-C", "/work-dir", "maintenance", "run", "--task=prefetch"}, buildMaintenancePrefetchArgs("/work-dir"))
 }
 
 func TestBuildCloneEnv_WithCreds(t *testing.T) {

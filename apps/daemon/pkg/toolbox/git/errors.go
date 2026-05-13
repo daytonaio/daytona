@@ -31,6 +31,7 @@ func classifyGitError(err error) error {
 	}
 
 	if errors.Is(err, transport.ErrRepositoryNotFound) ||
+		errors.Is(err, errCloneJobNotFound) ||
 		errors.Is(err, transport.ErrEmptyRemoteRepository) ||
 		errors.Is(err, go_git.ErrRepositoryNotExists) ||
 		errors.Is(err, go_git.ErrBranchNotFound) ||

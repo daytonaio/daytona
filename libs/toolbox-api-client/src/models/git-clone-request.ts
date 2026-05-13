@@ -15,12 +15,18 @@
 
 
 export interface GitCloneRequest {
+    'background_deepen'?: number;
+    'background_expansion'?: boolean;
+    'background_hydrate_paths'?: Array<string>;
+    'background_unshallow'?: boolean;
     'branch'?: string;
     'commit_id'?: string;
     'depth'?: number;
     'dissociate'?: boolean;
     'filter'?: string;
     'filter_submodules'?: boolean;
+    'initial_sparse_paths'?: Array<string>;
+    'no_checkout'?: boolean;
     'no_tags'?: boolean;
     'password'?: string;
     'path': string;

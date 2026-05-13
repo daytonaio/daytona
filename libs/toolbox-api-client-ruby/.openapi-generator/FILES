@@ -41,7 +41,9 @@ lib/daytona_toolbox_api_client/models/files_download_request.rb
 lib/daytona_toolbox_api_client/models/git_add_request.rb
 lib/daytona_toolbox_api_client/models/git_branch_request.rb
 lib/daytona_toolbox_api_client/models/git_checkout_request.rb
+lib/daytona_toolbox_api_client/models/git_clone_job_response.rb
 lib/daytona_toolbox_api_client/models/git_clone_request.rb
+lib/daytona_toolbox_api_client/models/git_clone_response.rb
 lib/daytona_toolbox_api_client/models/git_commit_info.rb
 lib/daytona_toolbox_api_client/models/git_commit_request.rb
 lib/daytona_toolbox_api_client/models/git_commit_response.rb

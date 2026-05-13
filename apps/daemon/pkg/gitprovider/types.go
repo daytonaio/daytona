@@ -58,6 +58,13 @@ type GitRepository struct {
 	RecurseSubmodules *bool       `json:"recurse_submodules,omitempty" validate:"optional"`
 	ShallowSubmodules *bool       `json:"shallow_submodules,omitempty" validate:"optional"`
 	FilterSubmodules  *bool       `json:"filter_submodules,omitempty" validate:"optional"`
+	NoCheckout        *bool       `json:"no_checkout,omitempty" validate:"optional"`
+
+	BackgroundExpansion    *bool    `json:"background_expansion,omitempty" validate:"optional"`
+	InitialSparsePaths     []string `json:"initial_sparse_paths,omitempty" validate:"optional"`
+	BackgroundDeepen       *int     `json:"background_deepen,omitempty" validate:"optional"`
+	BackgroundUnshallow    *bool    `json:"background_unshallow,omitempty" validate:"optional"`
+	BackgroundHydratePaths []string `json:"background_hydrate_paths,omitempty" validate:"optional"`
 } // @name GitRepository
 
 type GitNamespace struct {

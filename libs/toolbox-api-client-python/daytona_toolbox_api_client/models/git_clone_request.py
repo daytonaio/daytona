@@ -29,12 +29,18 @@ class GitCloneRequest(BaseModel):
     """
     GitCloneRequest
     """ # noqa: E501
+    background_deepen: Optional[StrictInt] = None
+    background_expansion: Optional[StrictBool] = None
+    background_hydrate_paths: Optional[List[StrictStr]] = None
+    background_unshallow: Optional[StrictBool] = None
     branch: Optional[StrictStr] = None
     commit_id: Optional[StrictStr] = None
     depth: Optional[StrictInt] = None
     dissociate: Optional[StrictBool] = None
     filter: Optional[StrictStr] = None
     filter_submodules: Optional[StrictBool] = None
+    initial_sparse_paths: Optional[List[StrictStr]] = None
+    no_checkout: Optional[StrictBool] = None
     no_tags: Optional[StrictBool] = None
     password: Optional[StrictStr] = None
     path: StrictStr
@@ -48,7 +54,7 @@ class GitCloneRequest(BaseModel):
     url: StrictStr
     username: Optional[StrictStr] = None
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["branch", "commit_id", "depth", "dissociate", "filter", "filter_submodules", "no_tags", "password", "path", "recurse_submodules", "reference_path", "shallow_since", "shallow_submodules", "single_branch", "sparse", "sparse_paths", "url", "username"]
+    __properties: ClassVar[List[str]] = ["background_deepen", "background_expansion", "background_hydrate_paths", "background_unshallow", "branch", "commit_id", "depth", "dissociate", "filter", "filter_submodules", "initial_sparse_paths", "no_checkout", "no_tags", "password", "path", "recurse_submodules", "reference_path", "shallow_since", "shallow_submodules", "single_branch", "sparse", "sparse_paths", "url", "username"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -107,12 +113,18 @@ class GitCloneRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "background_deepen": obj.get("background_deepen"),
+            "background_expansion": obj.get("background_expansion"),
+            "background_hydrate_paths": obj.get("background_hydrate_paths"),
+            "background_unshallow": obj.get("background_unshallow"),
             "branch": obj.get("branch"),
             "commit_id": obj.get("commit_id"),
             "depth": obj.get("depth"),
             "dissociate": obj.get("dissociate"),
             "filter": obj.get("filter"),
             "filter_submodules": obj.get("filter_submodules"),
+            "initial_sparse_paths": obj.get("initial_sparse_paths"),
+            "no_checkout": obj.get("no_checkout"),
             "no_tags": obj.get("no_tags"),
             "password": obj.get("password"),
             "path": obj.get("path"),
