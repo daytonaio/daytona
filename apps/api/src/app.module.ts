@@ -124,18 +124,13 @@ import { SandboxTelemetryModule } from './sandbox-telemetry/sandbox-telemetry.mo
     }),
     RedisModule.forRootAsync({
       inject: [TypedConfigService],
-      useFactory: (configService: TypedConfigService) => ({
-        type: 'single',
-        options: configService.getRedisConfig(),
-      }),
+      useFactory: (configService: TypedConfigService) => configService.getRedisModuleOptions(),
     }),
     RedisModule.forRootAsync(
       {
         inject: [TypedConfigService],
-        useFactory: (configService: TypedConfigService) => ({
-          type: 'single',
-          options: configService.getRedisConfig({ db: 1 }),
-        }),
+        useFactory: (configService: TypedConfigService) =>
+          configService.getRedisModuleOptions({ keyPrefix: 'throttler:' }),
       },
       'throttler',
     ),

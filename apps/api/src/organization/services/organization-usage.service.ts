@@ -50,6 +50,11 @@ import { SandboxState } from '../../sandbox/enums/sandbox-state.enum'
 import { OrganizationService } from './organization.service'
 import { SandboxRepository } from '../../sandbox/repositories/sandbox.repository'
 import { SnapshotRepository } from '../../sandbox/repositories/snapshot.repository'
+import {
+  getCurrentQuotaUsageCacheKey as buildCurrentQuotaUsageCacheKey,
+  getPendingQuotaUsageCacheKey as buildPendingQuotaUsageCacheKey,
+  getCacheStalenessKey as buildCacheStalenessKey,
+} from './organization-usage-cache-keys'
 
 @Injectable()
 export class OrganizationUsageService {
@@ -721,7 +726,9 @@ export class OrganizationUsageService {
     quotaType: OrganizationUsageQuotaType,
     regionId?: string,
   ): string {
-    return `org:${organizationId}${regionId ? `:region:${regionId}` : ''}:quota:${quotaType}:usage`
+    return regionId !== undefined
+      ? buildCurrentQuotaUsageCacheKey(organizationId, quotaType as 'cpu' | 'memory' | 'disk', regionId)
+      : buildCurrentQuotaUsageCacheKey(organizationId, quotaType as 'snapshot_count' | 'volume_count')
   }
 
   /**
@@ -738,7 +745,9 @@ export class OrganizationUsageService {
     quotaType: OrganizationUsageQuotaType,
     regionId?: string,
   ): string {
-    return `org:${organizationId}${regionId ? `:region:${regionId}` : ''}:quota:${quotaType}:pending`
+    return regionId !== undefined
+      ? buildPendingQuotaUsageCacheKey(organizationId, quotaType as 'cpu' | 'memory' | 'disk', regionId)
+      : buildPendingQuotaUsageCacheKey(organizationId, quotaType as 'snapshot_count' | 'volume_count')
   }
 
   /**
@@ -1149,7 +1158,7 @@ export class OrganizationUsageService {
     resourceType: OrganizationUsageResourceType,
     regionId?: string,
   ): string {
-    return `org:${organizationId}${regionId ? `:region:${regionId}` : ''}:resource:${resourceType}:usage:fetched_at`
+    return buildCacheStalenessKey(organizationId, resourceType, regionId)
   }
 
   /**

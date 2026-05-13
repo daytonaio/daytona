@@ -9,21 +9,25 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/redis/go-redis/v9"
 )
 
 type RedisConfig struct {
-	Host     *string `envconfig:"HOST" mapstructure:"host"`
-	Port     *int    `envconfig:"PORT" mapstructure:"port"`
-	Username *string `envconfig:"USERNAME" mapstructure:"username"`
-	Password *string `envconfig:"PASSWORD" mapstructure:"password"`
-	TLS      *bool   `envconfig:"TLS" mapstructure:"tls"`
+	Host         *string `envconfig:"HOST" mapstructure:"host"`
+	Port         *int    `envconfig:"PORT" mapstructure:"port"`
+	Username     *string `envconfig:"USERNAME" mapstructure:"username"`
+	Password     *string `envconfig:"PASSWORD" mapstructure:"password"`
+	TLS          *bool   `envconfig:"TLS" mapstructure:"tls"`
+	Mode         *string `envconfig:"MODE" mapstructure:"mode"`
+	ClusterNodes *string `envconfig:"CLUSTER_NODES" mapstructure:"cluster_nodes"`
 }
 
 type RedisCache[T any] struct {
-	redis     *redis.Client
+	redis     redis.Cmdable
 	keyPrefix string
 }
 
@@ -31,7 +35,27 @@ type ValueObject[T any] struct {
 	Value T `json:"value"`
 }
 
-var client *redis.Client
+var (
+	redisClient redis.Cmdable
+	redisOnce   sync.Once
+	redisErr    error
+)
+
+func parseClusterNodes(nodesStr string) []string {
+	parts := strings.Split(nodesStr, ",")
+	addrs := make([]string, 0, len(parts))
+	for _, p := range parts {
+		trimmed := strings.TrimSpace(p)
+		if trimmed == "" {
+			continue
+		}
+		if !strings.Contains(trimmed, ":") {
+			trimmed = trimmed + ":6379"
+		}
+		addrs = append(addrs, trimmed)
+	}
+	return addrs
+}
 
 func (c *RedisCache[T]) Set(ctx context.Context, key string, value T, expiration time.Duration) error {
 	jsonValue, err := json.Marshal(ValueObject[T]{Value: value})
@@ -72,8 +96,29 @@ func (c *RedisCache[T]) Delete(ctx context.Context, key string) error {
 }
 
 func NewRedisCache[T any](config *RedisConfig, keyPrefix string) (*RedisCache[T], error) {
-	if config.Host == nil || config.Port == nil {
-		return nil, errors.New("host and port are required")
+	redisOnce.Do(func() {
+		redisClient, redisErr = createClient(config)
+	})
+	if redisErr != nil {
+		return nil, redisErr
+	}
+
+	return &RedisCache[T]{
+		redis:     redisClient,
+		keyPrefix: keyPrefix,
+	}, nil
+}
+
+func createClient(config *RedisConfig) (redis.Cmdable, error) {
+	mode := "single"
+	if config.Mode != nil {
+		mode = strings.ToLower(strings.TrimSpace(*config.Mode))
+	}
+
+	switch mode {
+	case "single", "cluster":
+	default:
+		return nil, fmt.Errorf("unsupported redis mode %q: must be \"single\" or \"cluster\"", mode)
 	}
 
 	username := ""
@@ -86,20 +131,42 @@ func NewRedisCache[T any](config *RedisConfig, keyPrefix string) (*RedisCache[T]
 		password = *config.Password
 	}
 
-	if client == nil {
-		options := &redis.Options{
-			Addr:     fmt.Sprintf("%s:%d", *config.Host, *config.Port),
-			Username: username,
-			Password: password,
-		}
-		if config.TLS != nil && *config.TLS {
-			options.TLSConfig = &tls.Config{}
-		}
-		client = redis.NewClient(options)
+	var tlsConfig *tls.Config
+	if config.TLS != nil && *config.TLS {
+		tlsConfig = &tls.Config{}
 	}
 
-	return &RedisCache[T]{
-		redis:     client,
-		keyPrefix: keyPrefix,
-	}, nil
+	if mode == "cluster" {
+		if config.ClusterNodes == nil || *config.ClusterNodes == "" {
+			return nil, errors.New("cluster nodes are required when mode is cluster")
+		}
+		addrs := parseClusterNodes(*config.ClusterNodes)
+		if len(addrs) == 0 {
+			return nil, errors.New("cluster nodes are required when mode is cluster")
+		}
+		return redis.NewClusterClient(&redis.ClusterOptions{
+			Addrs:     addrs,
+			Username:  username,
+			Password:  password,
+			TLSConfig: tlsConfig,
+		}), nil
+	}
+
+	if config.Host == nil || config.Port == nil {
+		return nil, errors.New("host and port are required")
+	}
+
+	return redis.NewClient(&redis.Options{
+		Addr:      fmt.Sprintf("%s:%d", *config.Host, *config.Port),
+		Username:  username,
+		Password:  password,
+		TLSConfig: tlsConfig,
+	}), nil
+}
+
+// resetClient resets the global Redis client singleton. For testing only.
+func resetClient() {
+	redisClient = nil
+	redisErr = nil
+	redisOnce = sync.Once{}
 }

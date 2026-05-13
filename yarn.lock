@@ -5987,10 +5987,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ioredis/commands@npm:^1.3.0":
-  version: 1.4.0
-  resolution: "@ioredis/commands@npm:1.4.0"
-  checksum: 10c0/99afe21fba794f84a2b84cceabcc370a7622e7b8b97a6589456c07c9fa62a15d54c5546f6f7214fb9a2458b1fa87579d5c531aaf48e06cc9be156d5923892c8d
+"@ioredis/commands@npm:1.5.1":
+  version: 1.5.1
+  resolution: "@ioredis/commands@npm:1.5.1"
+  checksum: 10c0/cb8f6d13cff0753e3e7ef001fb895491985d9a623248192538f13bc2fd9bfdfde3c18cf2ba6f20ec8ceaa681b0771070d3a09b82eed044c798bcfef5e3ae54b3
   languageName: node
   linkType: hard
 
@@ -7629,11 +7629,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs-modules/ioredis@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "@nestjs-modules/ioredis@npm:2.0.2"
+"@nestjs-modules/ioredis@npm:^2.2.1":
+  version: 2.2.1
+  resolution: "@nestjs-modules/ioredis@npm:2.2.1"
   dependencies:
-    "@nestjs/terminus": "npm:10.2.0"
+    "@nestjs/terminus": "npm:11.1.1"
   peerDependencies:
     "@nestjs/common": ">=6.7.0"
     "@nestjs/core": ">=6.7.0"
@@ -7641,7 +7641,7 @@ __metadata:
   dependenciesMeta:
     "@nestjs/terminus":
       optional: true
-  checksum: 10c0/5f499a2c707d76a69c517dc1f98191522ec0eaa23997a3e8d0815b2e79f66e9153c5fc06e8747aae3f5168788cb8afebf9388cc0413494ab10f94ab37c08427b
+  checksum: 10c0/f4cb9d4ddc544fe4104ad0100a7e48aea6914d86f538da559129ba5d2e895ee95225377dbdfea38da02a184e062e1ed281e37209a508c552610372f16a03be69
   languageName: node
   linkType: hard
 
@@ -7989,9 +7989,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/terminus@npm:10.2.0":
-  version: 10.2.0
-  resolution: "@nestjs/terminus@npm:10.2.0"
+"@nestjs/terminus@npm:11.1.1":
+  version: 11.1.1
+  resolution: "@nestjs/terminus@npm:11.1.1"
   dependencies:
     boxen: "npm:5.1.2"
     check-disk-space: "npm:3.4.0"
@@ -8000,16 +8000,16 @@ __metadata:
     "@grpc/proto-loader": "*"
     "@mikro-orm/core": "*"
     "@mikro-orm/nestjs": "*"
-    "@nestjs/axios": ^1.0.0 || ^2.0.0 || ^3.0.0
-    "@nestjs/common": ^9.0.0 || ^10.0.0
-    "@nestjs/core": ^9.0.0 || ^10.0.0
-    "@nestjs/microservices": ^9.0.0 || ^10.0.0
-    "@nestjs/mongoose": ^9.0.0 || ^10.0.0
-    "@nestjs/sequelize": ^9.0.0 || ^10.0.0
-    "@nestjs/typeorm": ^9.0.0 || ^10.0.0
+    "@nestjs/axios": ^2.0.0 || ^3.0.0 || ^4.0.0
+    "@nestjs/common": ^10.0.0 || ^11.0.0
+    "@nestjs/core": ^10.0.0 || ^11.0.0
+    "@nestjs/microservices": ^10.0.0 || ^11.0.0
+    "@nestjs/mongoose": ^11.0.0
+    "@nestjs/sequelize": ^10.0.0 || ^11.0.0
+    "@nestjs/typeorm": ^10.0.0 || ^11.0.0
     "@prisma/client": "*"
     mongoose: "*"
-    reflect-metadata: 0.1.x
+    reflect-metadata: 0.1.x || 0.2.x
     rxjs: 7.x
     sequelize: "*"
     typeorm: "*"
@@ -8040,7 +8040,7 @@ __metadata:
       optional: true
     typeorm:
       optional: true
-  checksum: 10c0/83949827ba0afb28f50df176e53ab6b966c2549bd126e5e3a1e2c09914a1b2ffd4717e209ff28b0e431466451cd3ffce469c502a49b3131932d965015ebfee44
+  checksum: 10c0/4ec57d56b43b39496a13173f98aa4fa54847ae8401fedf5106adad4f0c4a41b187138f8e40196bcbd726ebc4ff97a30b854cc05e8c28a3691aa7bd0315b0b3bf
   languageName: node
   linkType: hard
 
@@ -20287,7 +20287,7 @@ __metadata:
     "@headless-tree/react": "npm:^1.6.3"
     "@iarna/toml": "npm:^2.2.5"
     "@nest-lab/throttler-storage-redis": "npm:^1.1.0"
-    "@nestjs-modules/ioredis": "npm:^2.0.2"
+    "@nestjs-modules/ioredis": "npm:^2.2.1"
     "@nestjs/axios": "npm:^4.0.0"
     "@nestjs/cache-manager": "npm:^3.0.0"
     "@nestjs/common": "npm:^11.1.8"
@@ -20441,7 +20441,7 @@ __metadata:
     gt-react: "npm:^10.0.8"
     gtx-cli: "npm:^2.6.24"
     husky: "npm:^9.1.7"
-    ioredis: "npm:^5.5.0"
+    ioredis: "npm:^5.10.1"
     is-ci: "npm:^4.1.0"
     isomorphic-ws: "npm:^5.0.0"
     jest: "npm:30.0.5"
@@ -25648,11 +25648,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ioredis@npm:^5.5.0":
-  version: 5.7.0
-  resolution: "ioredis@npm:5.7.0"
+"ioredis@npm:^5.10.1":
+  version: 5.10.1
+  resolution: "ioredis@npm:5.10.1"
   dependencies:
-    "@ioredis/commands": "npm:^1.3.0"
+    "@ioredis/commands": "npm:1.5.1"
     cluster-key-slot: "npm:^1.1.0"
     debug: "npm:^4.3.4"
     denque: "npm:^2.1.0"
@@ -25661,7 +25661,7 @@ __metadata:
     redis-errors: "npm:^1.2.0"
     redis-parser: "npm:^3.0.0"
     standard-as-callback: "npm:^2.1.0"
-  checksum: 10c0/c63c521a953bfaf29f8c8871b122af38e439328336fa238f83bfbb066556f64daf69ed7a4ec01fc7b9ee1f0862059dd188b8c684150125d362d36642399b30ee
+  checksum: 10c0/d0507b52520d3bdd5dacaa33aed9dd3133794d8633b43a6b7fc3199a5e73f92cb77409f6904abe68e3221a95a630d97073b8c1c9e2c0c7613124db67e97c0eb0
   languageName: node
   linkType: hard
 

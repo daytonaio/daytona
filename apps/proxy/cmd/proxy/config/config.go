@@ -5,7 +5,7 @@ package config
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -57,7 +57,7 @@ func GetConfig() (*Config, error) {
 	// Load .env files
 	err := godotenv.Overload(".env", ".env.local", ".env.production")
 	if err != nil {
-		log.Println("Warning: Error loading .env file:", err)
+		slog.Warn("Error loading .env file", "error", err)
 		// Continue anyway, as environment variables might be set directly
 	}
 
@@ -81,7 +81,16 @@ func GetConfig() (*Config, error) {
 	}
 
 	if config.Redis != nil {
-		if config.Redis.Host == nil || *config.Redis.Host == "" {
+		mode := ""
+		if config.Redis.Mode != nil {
+			mode = *config.Redis.Mode
+		}
+		if mode == "cluster" {
+			if config.Redis.ClusterNodes == nil || strings.TrimSpace(*config.Redis.ClusterNodes) == "" {
+				config.Redis = nil
+				slog.Warn("REDIS_CLUSTER_NODES is required when REDIS_MODE is cluster, falling back to in-memory cache")
+			}
+		} else if config.Redis.Host == nil || *config.Redis.Host == "" {
 			config.Redis = nil
 		}
 	}
