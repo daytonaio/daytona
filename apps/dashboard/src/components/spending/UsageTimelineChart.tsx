@@ -106,6 +106,17 @@ function formatTooltipLabel(value: string) {
   })
 }
 
+function formatCompactMoney(value: number) {
+  return Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    notation: 'compact',
+    compactDisplay: 'short',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value)
+}
+
 export function UsageTimelineChart({
   data,
   isLoading,
@@ -202,7 +213,7 @@ export function UsageTimelineChart({
   }, [isResourceMode, resourceFilter, limits])
 
   const yAxisFormatter = useMemo(() => {
-    if (!isResourceMode) return (value: number) => formatMoney(value)
+    if (!isResourceMode) return (value: number) => formatCompactMoney(value)
     if (resourceFilter === 'all') return (value: number) => `${value}%`
     return (value: number) => value.toLocaleString()
   }, [isResourceMode, resourceFilter])
@@ -291,7 +302,7 @@ export function UsageTimelineChart({
               axisLine={false}
               tickMargin={4}
               tickCount={5}
-              width={50}
+              width={isResourceMode ? 50 : 56}
               domain={yAxisDomain}
               tickFormatter={yAxisFormatter}
             />
