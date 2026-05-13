@@ -296,7 +296,7 @@
     "markdownlint-cli2": "^0.17.2",
     "nx": "21.4.1",
     "pino-pretty": "^13.1.2",
-    "postcss": "8.4.38",
+    "postcss": "8.5.10",
     "prettier": "^3.5.0",
     "prettier-plugin-astro": "^0.14.1",
     "run-script-webpack-plugin": "^0.2.2",
