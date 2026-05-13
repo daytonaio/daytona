@@ -69,14 +69,15 @@ func (s *SessionService) terminateSession(ctx context.Context, session *session)
 }
 
 // reapSession waits on the session's exec.Cmd so the kernel releases the
-// zombie. Routes through childreap so that even when the PID-1 reaper
-// claims the zombie first, we still resolve a status (we ignore it; the
-// session is already being torn down).
+// zombie. Uses Reap (not Wait) because we don't read any output buffers
+// after this — only need to confirm the shell is collected. Wait would
+// block waiting for cmd.Wait's I/O drain, which can wedge after the
+// PID-1 reaper has already consumed the zombie.
 func (s *SessionService) reapSession(session *session) {
 	if session.cmd == nil {
 		return
 	}
-	_, _ = childreap.Wait(session.cmd)
+	_, _ = childreap.Reap(session.cmd)
 }
 
 func (s *SessionService) signalProcessTree(pid int, sig syscall.Signal) error {

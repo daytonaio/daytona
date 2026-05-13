@@ -127,74 +127,110 @@ func sweepPending() {
 	}
 }
 
-// Wait waits for cmd to exit and returns its exit code.
+// Wait reaps cmd, ensures cmd.Wait completes (so any I/O copy goroutines
+// drain into bytes.Buffer/strings.Reader-style targets), and returns the
+// exit code.
 //
-// Unlike cmd.Wait(), Wait does not block on the kernel-level wait4 syscall
-// for the child PID. Instead it races cmd.Wait() (in a goroutine) against
-// the PID-1 reaper's status channel and returns as soon as EITHER resolves.
-// This matters because cmd.Wait() can block indefinitely when the reaper
-// has already consumed the zombie — the Go runtime's wait machinery does
-// not always handle externally-reaped children promptly. The reaper's
-// status channel is our own mechanism and is guaranteed to deliver.
+// Use Wait when the caller reads cmd.Stdout/Stderr buffers AFTER this
+// returns — typical for /process/execute and /process/code-run, which
+// set cmd.Stdout/Stderr to *bytes.Buffer. For non-*os.File targets Go
+// starts internal goroutines to copy from the child's pipes; those
+// goroutines only finish when cmd.Wait completes. Reading the buffer
+// before cmd.Wait drains leaves it empty or truncated.
+//
+// Long-running commands aren't penalized: the wait-for-status phase has
+// no timeout. Only the post-status I/O-drain phase has a hangTimeout
+// backstop, to prevent a wedged cmd.Wait from blocking forever.
 //
 // Returns the exit code matching os.ProcessState.ExitCode() semantics:
 // 0..255 for normal exit, -1 for signal-terminated processes. Returns a
-// non-nil error only when no exit status could be recovered within
-// hangTimeout (e.g., cmd was never started, or the reaper missed it).
-//
-// Safe for concurrent use across goroutines, each waiting on its own cmd.
+// non-nil error only when no exit status could be recovered.
 func Wait(cmd *exec.Cmd) (int, error) {
 	if cmd == nil || cmd.Process == nil {
 		return -1, errors.New("childreap.Wait: cmd not started")
 	}
 	pid := cmd.Process.Pid
 
-	// Register BEFORE doing anything else so a fast reaper routes our
-	// status into reg.ch instead of pending.
 	reg := register(pid)
 	defer unregister(pid)
 
-	// The reaper may have already published status before we registered.
+	waitCh := startCmdWaitGoroutine(cmd)
+
+	// Status may have arrived before we registered.
+	var reaperStatus *syscall.WaitStatus
 	if ws, ok := claimPending(pid); ok {
-		// Fire-and-forget cmd.Wait for pipe cleanup. We don't wait for it
-		// because cmd.Wait can hang in this case; the runtime/GC will
-		// eventually clean up file descriptors if the goroutine never
-		// returns.
+		reaperStatus = &ws
+	}
+
+	// Phase 1: wait for exit status. No timeout — long-running commands
+	// are legitimate. Returns when EITHER cmd.Wait or the reaper resolves.
+	if reaperStatus == nil {
+		select {
+		case r := <-waitCh:
+			// cmd.Wait completed; I/O goroutines drained.
+			if r.resolved {
+				return r.exitCode, nil
+			}
+			// cmd.Wait returned ECHILD. Cmd.Wait drains I/O goroutines
+			// regardless of Process.Wait's outcome, so I/O is already
+			// settled — only the status needs recovery.
+			if ws, ok := claimPending(pid); ok {
+				return ws.ExitStatus(), nil
+			}
+			select {
+			case ws := <-reg.ch:
+				return ws.ExitStatus(), nil
+			case <-time.After(recoveryTimeout):
+				return -1, fmt.Errorf("childreap.Wait: lost exit status for pid %d: %w", pid, r.err)
+			}
+		case ws := <-reg.ch:
+			reaperStatus = &ws
+		}
+	}
+
+	// Phase 2: we have status from the reaper, but cmd.Wait hasn't
+	// completed yet — I/O copy goroutines may still be running. Wait for
+	// cmd.Wait, bounded by hangTimeout so a wedged Go runtime doesn't
+	// hold the caller forever.
+	select {
+	case <-waitCh:
+	case <-time.After(hangTimeout):
+	}
+	return reaperStatus.ExitStatus(), nil
+}
+
+// Reap returns the exit code as soon as it's known. Does not wait for
+// cmd.Wait to fully complete, so internal I/O copy goroutines may still
+// be running when this returns.
+//
+// Use Reap on cleanup paths where the caller doesn't read
+// cmd.Stdout/Stderr after the call — e.g., session/PTY/interpreter
+// teardown. Faster than Wait when the PID-1 reaper consumed the zombie
+// before cmd.Wait could, and crucially avoids hanging if cmd.Wait itself
+// is wedged for unrelated reasons.
+func Reap(cmd *exec.Cmd) (int, error) {
+	if cmd == nil || cmd.Process == nil {
+		return -1, errors.New("childreap.Reap: cmd not started")
+	}
+	pid := cmd.Process.Pid
+
+	reg := register(pid)
+	defer unregister(pid)
+
+	if ws, ok := claimPending(pid); ok {
+		// Fire-and-forget cmd.Wait so file descriptors eventually close.
+		// The goroutine returns on its own (kernel ECHILD).
 		go func() { _ = cmd.Wait() }()
 		return ws.ExitStatus(), nil
 	}
 
-	// Race cmd.Wait against the reaper status channel. Each outcome path
-	// is independent — whichever arrives first wins.
-	type cmdResult struct {
-		exitCode int
-		err      error
-		// resolved is true for nil-error or *exec.ExitError outcomes;
-		// false means cmd.Wait failed in a way (likely ECHILD) that we
-		// should fall through to channel/pending recovery.
-		resolved bool
-	}
-	waitCh := make(chan cmdResult, 1)
-	go func() {
-		err := cmd.Wait()
-		if err == nil {
-			waitCh <- cmdResult{0, nil, true}
-			return
-		}
-		var ee *exec.ExitError
-		if errors.As(err, &ee) {
-			waitCh <- cmdResult{ee.ExitCode(), nil, true}
-			return
-		}
-		waitCh <- cmdResult{-1, err, false}
-	}()
+	waitCh := startCmdWaitGoroutine(cmd)
 
 	select {
 	case r := <-waitCh:
 		if r.resolved {
 			return r.exitCode, nil
 		}
-		// cmd.Wait returned ECHILD-ish. Wait briefly for the reaper.
 		if ws, ok := claimPending(pid); ok {
 			return ws.ExitStatus(), nil
 		}
@@ -202,29 +238,48 @@ func Wait(cmd *exec.Cmd) (int, error) {
 		case ws := <-reg.ch:
 			return ws.ExitStatus(), nil
 		case <-time.After(recoveryTimeout):
-			return -1, fmt.Errorf("childreap.Wait: lost exit status for pid %d: %w", pid, r.err)
+			return -1, fmt.Errorf("childreap.Reap: lost exit status for pid %d: %w", pid, r.err)
 		}
-
 	case ws := <-reg.ch:
-		// Reaper delivered status before cmd.Wait. We have the answer;
-		// don't block the caller on cmd.Wait completing.
 		return ws.ExitStatus(), nil
-
 	case <-time.After(hangTimeout):
-		// Both paths failed to resolve. Either the child never exited or
-		// something is wedged. Return what we can.
 		if ws, ok := claimPending(pid); ok {
 			return ws.ExitStatus(), nil
 		}
-		return -1, fmt.Errorf("childreap.Wait: timed out waiting for pid %d", pid)
+		return -1, fmt.Errorf("childreap.Reap: timed out waiting for pid %d", pid)
 	}
 }
 
-// hangTimeout is the upper bound on how long Wait will block. Above this,
-// we assume something is wedged (kernel-level wait stuck, lost SIGCHLD,
-// daemon not running as PID 1, etc.) and return an error rather than hang
-// the caller indefinitely. Sized to comfortably cover normal child exits
-// while still surfacing real hangs in API request handling.
+type cmdWaitResult struct {
+	exitCode int
+	err      error
+	// resolved is true for nil-error or *exec.ExitError outcomes; false
+	// means cmd.Wait failed in a way (likely ECHILD) that we should fall
+	// through to channel/pending recovery.
+	resolved bool
+}
+
+func startCmdWaitGoroutine(cmd *exec.Cmd) chan cmdWaitResult {
+	waitCh := make(chan cmdWaitResult, 1)
+	go func() {
+		err := cmd.Wait()
+		if err == nil {
+			waitCh <- cmdWaitResult{0, nil, true}
+			return
+		}
+		var ee *exec.ExitError
+		if errors.As(err, &ee) {
+			waitCh <- cmdWaitResult{ee.ExitCode(), nil, true}
+			return
+		}
+		waitCh <- cmdWaitResult{-1, err, false}
+	}()
+	return waitCh
+}
+
+// hangTimeout caps how long Wait/Reap will block AFTER the exit status
+// is known (Phase 2) waiting for cmd.Wait to drain. Phase 1 (waiting for
+// status itself) has no timeout — long-running children are legitimate.
 var hangTimeout = 30 * time.Second
 
 func register(pid int) *pidRegistration {

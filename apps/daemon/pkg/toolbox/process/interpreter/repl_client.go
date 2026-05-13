@@ -367,7 +367,9 @@ func getStringFromChunk(chunk map[string]any, key string) string {
 
 // monitorProcess monitors the worker process and cleans up on exit
 func (c *Context) monitorProcess() {
-	_, err := childreap.Wait(c.cmd)
+	// Reap (not Wait): stdin/stdout are *os.File pipes (StdinPipe /
+	// StdoutPipe) and stderr is os.Stderr; no Go I/O goroutines to drain.
+	_, err := childreap.Reap(c.cmd)
 
 	c.mu.Lock()
 	c.info.Active = false

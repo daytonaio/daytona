@@ -148,9 +148,11 @@ func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
 		done:      done,
 	})
 
-	// Start a goroutine to wait for the process and handle unexpected exits
+	// Start a goroutine to wait for the process and handle unexpected exits.
+	// Reap (not Wait): we don't read stdout/stderr; ffmpeg output goes to a
+	// file via -y target, so no Go I/O goroutines to drain.
 	go func() {
-		_, err := childreap.Wait(cmd)
+		_, err := childreap.Reap(cmd)
 		done <- err // Signal the done channel with the result
 
 		// Atomically remove from active recordings if still there

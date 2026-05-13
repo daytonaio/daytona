@@ -79,9 +79,11 @@ func (s *PTYSession) start() error {
 	// 2) clients -> PTY writer
 	go s.inputWriteLoop()
 
-	// Reap the process; mark inactive on exit and send exit event
+	// Reap the process; mark inactive on exit and send exit event.
+	// Uses Reap (not Wait) because pty.StartWithSize wires std{in,out,err}
+	// to *os.File slaves — no Go-level I/O goroutines to drain.
 	go func() {
-		exitCode, err := childreap.Wait(s.cmd)
+		exitCode, err := childreap.Reap(s.cmd)
 		var exitReason string
 
 		switch {
