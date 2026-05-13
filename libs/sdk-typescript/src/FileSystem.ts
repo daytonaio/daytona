@@ -384,7 +384,14 @@ export class FileSystem {
               },
             })
             fileStream.pipe(progress)
+            // busboy's teardown can emit 'error' on the file stream after 'end',
+            // even when every byte was delivered — ignore those late errors.
+            let fileStreamEnded = false
+            fileStream.once('end', () => {
+              fileStreamEnded = true
+            })
             fileStream.on('error', (err: Error) => {
+              if (fileStreamEnded) return
               if (!progress.destroyed) progress.destroy(err)
             })
             resolvedStream = progress
