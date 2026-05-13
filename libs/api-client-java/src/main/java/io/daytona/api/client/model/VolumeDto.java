@@ -99,7 +99,9 @@ public class VolumeDto {
   public enum BackendEnum {
     S3FUSE("s3fuse"),
     
-    EXPERIMENTAL("experimental");
+    LAYERED("layered"),
+    
+    UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 
     private String value;
 
@@ -122,7 +124,7 @@ public class VolumeDto {
           return b;
         }
       }
-      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+      return UNKNOWN_DEFAULT_OPEN_API;
     }
 
     public static class Adapter extends TypeAdapter<BackendEnum> {
@@ -487,7 +489,7 @@ public class VolumeDto {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `errorReason` to be a primitive type in the JSON string but got `%s`", jsonObj.get("errorReason").toString()));
       }
       if (!jsonObj.get("backend").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `backend` to be a primitive type in the JSON string but got `%s`", jsonObj.get("backend").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `backend` to be a primitive type in the JSON string but got `%s`", jsonObj.get("backend").toString()));
       }
       // validate the required field `backend`
       BackendEnum.validateJsonElement(jsonObj.get("backend"));

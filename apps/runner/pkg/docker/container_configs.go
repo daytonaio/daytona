@@ -45,13 +45,13 @@ func volumesToMounterSpec(in []dto.VolumeDTO) []volume.Volume {
 			subpath = *v.Subpath
 		}
 		out = append(out, volume.Volume{
-			VolumeID:         v.VolumeId,
-			MountPath:        v.MountPath,
-			Subpath:          subpath,
-			ReadOnly:         v.ReadOnly,
-			ArchilDisk:       v.ArchilDisk,
-			ArchilRegion:     v.ArchilRegion,
-			ArchilMountToken: v.ArchilMountToken,
+			VolumeID:          v.VolumeId,
+			MountPath:         v.MountPath,
+			Subpath:           subpath,
+			ReadOnly:          v.ReadOnly,
+			LayeredDisk:       v.LayeredDisk,
+			LayeredRegion:     v.LayeredRegion,
+			LayeredMountToken: v.LayeredMountToken,
 		})
 	}
 	return out

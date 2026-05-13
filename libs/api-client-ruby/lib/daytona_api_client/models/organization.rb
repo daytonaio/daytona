@@ -474,7 +474,7 @@ module DaytonaApiClient
       return false if @snapshot_deactivation_timeout_minutes.nil?
       return false if @sandbox_limited_network_egress.nil?
       return false if @default_volume_backend.nil?
-      default_volume_backend_validator = EnumAttributeValidator.new('String', ["s3fuse", "experimental"])
+      default_volume_backend_validator = EnumAttributeValidator.new('String', ["s3fuse", "layered", "unknown_default_open_api"])
       return false unless default_volume_backend_validator.valid?(@default_volume_backend)
       return false if @experimental_config.nil?
       true
@@ -643,7 +643,7 @@ module DaytonaApiClient
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] default_volume_backend Object to be assigned
     def default_volume_backend=(default_volume_backend)
-      validator = EnumAttributeValidator.new('String', ["s3fuse", "experimental"])
+      validator = EnumAttributeValidator.new('String', ["s3fuse", "layered", "unknown_default_open_api"])
       unless validator.valid?(default_volume_backend)
         fail ArgumentError, "invalid value for \"default_volume_backend\", must be one of #{validator.allowable_values}."
       end

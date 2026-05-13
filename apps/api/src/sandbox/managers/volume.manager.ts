@@ -9,7 +9,14 @@ import { Repository, In } from 'typeorm'
 import { Volume } from '../entities/volume.entity'
 import { VolumeState } from '../enums/volume-state.enum'
 import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule'
-import { S3Client, CreateBucketCommand, ListBucketsCommand, PutBucketTaggingCommand } from '@aws-sdk/client-s3'
+import {
+  S3Client,
+  CreateBucketCommand,
+  DeleteObjectsCommand,
+  ListBucketsCommand,
+  ListObjectsV2Command,
+  PutBucketTaggingCommand,
+} from '@aws-sdk/client-s3'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { RedisLockProvider } from '../common/redis-lock.provider'
@@ -21,9 +28,9 @@ import { TrackJobExecution } from '../../common/decorators/track-job-execution.d
 import { setTimeout } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
-import { ArchilClient, ArchilDiskMount } from '../services/archil/archil.client'
-import { EncryptionService } from '../../encryption/encryption.service'
-import { VOLUME_BACKEND_EXPERIMENTAL, VOLUME_BACKEND_S3FUSE } from '../services/volume.service'
+import { LayeredVolumeClient, LayeredDiskMount } from '../services/layered/layered-volume.client'
+import { VOLUME_BACKEND_LAYERED, VOLUME_BACKEND_S3FUSE } from '../services/volume.service'
+import { Organization } from '../../organization/entities/organization.entity'
 
 const VOLUME_STATE_LOCK_KEY = 'volume-state-'
 
@@ -41,12 +48,13 @@ export class VolumeManager
   constructor(
     @InjectRepository(Volume)
     private readonly volumeRepository: Repository<Volume>,
+    @InjectRepository(Organization)
+    private readonly organizationRepository: Repository<Organization>,
     private readonly configService: TypedConfigService,
     @InjectRedis() private readonly redis: Redis,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly schedulerRegistry: SchedulerRegistry,
-    private readonly archilClient: ArchilClient,
-    private readonly encryptionService: EncryptionService,
+    private readonly layeredClient: LayeredVolumeClient,
   ) {
     if (!this.configService.get('s3.endpoint')) {
       return
@@ -73,11 +81,11 @@ export class VolumeManager
   // long as at least one is configured; per-volume branching then routes to
   // the matching backend (and rejects volumes whose backend isn't set up).
   //
-  // Note: the experimental backend always provisions an S3 bucket *and* an
-  // Archil disk that mounts it, so it requires *both* services. Without S3
+  // Note: the layered backend always provisions an S3 bucket *and* a
+  // layered disk that mounts it, so it requires *both* services. Without S3
   // we still want the cron to run for s3fuse-only volumes, hence the OR.
   private get anyBackendConfigured(): boolean {
-    return Boolean(this.s3Client) || this.archilClient.isConfigured()
+    return Boolean(this.s3Client) || this.layeredClient.isConfigured()
   }
 
   async onModuleInit() {
@@ -205,8 +213,8 @@ export class VolumeManager
       })
 
       const backend = volume.backend || VOLUME_BACKEND_S3FUSE
-      if (backend === VOLUME_BACKEND_EXPERIMENTAL) {
-        await this.provisionArchilDisk(volume, lockKey)
+      if (backend === VOLUME_BACKEND_LAYERED) {
+        await this.provisionLayeredDisk(volume, lockKey)
       } else {
         await this.provisionS3Bucket(volume, lockKey)
       }
@@ -228,7 +236,7 @@ export class VolumeManager
       )
     }
 
-    await this.createAndTagS3Bucket(volume, lockKey)
+    await this.createAndTagPerVolumeS3Bucket(volume, lockKey)
 
     // Refresh lock before final state update
     await this.redis.setex(lockKey, 30, '1')
@@ -239,11 +247,11 @@ export class VolumeManager
     })
   }
 
-  // Creates the S3 bucket for `volume` and tags it. Idempotent enough for
-  // our retry path: if the bucket already exists and we own it, AWS
-  // returns BucketAlreadyOwnedByYou which we treat as success. Used by
-  // both the s3fuse and experimental backends.
-  private async createAndTagS3Bucket(volume: Volume, lockKey: string): Promise<void> {
+  // Creates the per-volume s3fuse bucket for `volume` and tags it.
+  // Idempotent enough for our retry path: if the bucket already exists and
+  // we own it, AWS returns BucketAlreadyOwnedByYou which we treat as
+  // success.
+  private async createAndTagPerVolumeS3Bucket(volume: Volume, lockKey: string): Promise<void> {
     // Refresh lock before S3 operation
     await this.redis.setex(lockKey, 30, '1')
 
@@ -260,34 +268,75 @@ export class VolumeManager
         Bucket: volume.getBucketName(),
         Tagging: {
           TagSet: [
-            {
-              Key: 'VolumeId',
-              Value: volume.id,
-            },
-            {
-              Key: 'OrganizationId',
-              Value: volume.organizationId,
-            },
-            {
-              Key: 'Environment',
-              Value: this.configService.get('environment'),
-            },
+            { Key: 'VolumeId', Value: volume.id },
+            { Key: 'OrganizationId', Value: volume.organizationId },
+            { Key: 'Environment', Value: this.configService.get('environment') },
           ],
         },
       }),
     )
   }
 
-  // Builds the Archil mount configuration that backs an experimental
-  // volume's disk with the Daytona-owned S3 bucket we just provisioned.
+  // Idempotent provisioning of the per-organization layered bucket. The
+  // first layered volume in an organization lazily creates the bucket and
+  // persists the chosen name on `organization.layeredBucketName`; later
+  // volumes reuse it.
+  private async ensureOrgLayeredBucket(volume: Volume): Promise<string> {
+    if (!this.s3Client) {
+      throw new Error(
+        `Volume ${volume.id} requires layered storage but S3 is not configured on this API. The layered backend stores volume data in a Daytona-owned S3 bucket and requires S3 to be configured.`,
+      )
+    }
+    if (!volume.organizationId) {
+      throw new Error(`Volume ${volume.id} has no organizationId; cannot provision a per-organization layered bucket.`)
+    }
+
+    const org = await this.organizationRepository.findOne({ where: { id: volume.organizationId } })
+    if (!org) {
+      throw new Error(`Organization ${volume.organizationId} not found while provisioning layered volume ${volume.id}`)
+    }
+
+    const bucketName = org.layeredBucketName || `daytona-org-volumes-${org.id}`
+
+    try {
+      await this.s3Client.send(new CreateBucketCommand({ Bucket: bucketName }))
+    } catch (error) {
+      if (error?.name !== 'BucketAlreadyOwnedByYou') {
+        throw error
+      }
+    }
+
+    await this.s3Client.send(
+      new PutBucketTaggingCommand({
+        Bucket: bucketName,
+        Tagging: {
+          TagSet: [
+            { Key: 'OrganizationId', Value: org.id },
+            { Key: 'Purpose', Value: 'layered-volumes' },
+            { Key: 'Environment', Value: this.configService.get('environment') },
+          ],
+        },
+      }),
+    )
+
+    if (org.layeredBucketName !== bucketName) {
+      org.layeredBucketName = bucketName
+      await this.organizationRepository.save(org)
+    }
+
+    return bucketName
+  }
+
+  // Builds the layered mount configuration that backs a volume's disk with
+  // the per-organization S3 bucket + the volume's prefix folder inside it.
   //
-  // We forward the *configured* S3 credentials to Archil. They grant access
-  // to the entire S3 endpoint, but Archil only mounts the one named bucket
-  // per disk so the practical blast radius is limited to that bucket. For
-  // production deployments we recommend provisioning a least-privilege IAM
-  // user scoped to `daytona-volume-*` and pointing `S3_ACCESS_KEY` /
-  // `S3_SECRET_KEY` at it.
-  private buildArchilMount(volume: Volume): ArchilDiskMount {
+  // We forward the *configured* S3 credentials to the control plane. They
+  // grant access to the entire S3 endpoint, but the disk is created with
+  // `bucketPrefix = <volumeId>/` so the practical blast radius is limited
+  // to that folder. For production deployments we recommend provisioning a
+  // least-privilege IAM user scoped to `daytona-org-volumes-*` and pointing
+  // `S3_ACCESS_KEY` / `S3_SECRET_KEY` at it.
+  private buildLayeredMount(bucketName: string, volume: Volume): LayeredDiskMount {
     const endpoint = this.configService.getOrThrow('s3.endpoint') as string
     const accessKeyId = this.configService.getOrThrow('s3.accessKey') as string
     const secretAccessKey = this.configService.getOrThrow('s3.secretKey') as string
@@ -298,145 +347,93 @@ export class VolumeManager
       isAws = /(^|\.)amazonaws\.com$/i.test(new URL(endpointWithProtocol).hostname)
     } catch {
       // Malformed endpoint — fall through to s3-compatible, which carries
-      // the raw URL and will surface the failure on Archil's side.
+      // the raw URL and will surface the failure on the control plane side.
     }
 
     if (isAws) {
       return {
         type: 's3',
-        bucketName: volume.getBucketName(),
+        bucketName,
+        bucketPrefix: volume.getLayeredBucketPrefix(),
         accessKeyId,
         secretAccessKey,
       }
     }
     return {
       type: 's3-compatible',
-      bucketName: volume.getBucketName(),
+      bucketName,
       bucketEndpoint: endpointWithProtocol,
+      bucketPrefix: volume.getLayeredBucketPrefix(),
       accessKeyId,
       secretAccessKey,
     }
   }
 
-  private async provisionArchilDisk(volume: Volume, lockKey: string): Promise<void> {
-    this.assertArchilProvisioningPossible(volume)
+  private async provisionLayeredDisk(volume: Volume, lockKey: string): Promise<void> {
+    this.assertLayeredProvisioningPossible(volume)
 
-    // Step 1: provision the S3 bucket that will back this disk. This is
-    // the same operation as the s3fuse path so we share the helper.
-    await this.createAndTagS3Bucket(volume, lockKey)
+    // Step 1: provision (or reuse) the per-org bucket that backs every
+    // layered volume in this organization.
+    await this.redis.setex(lockKey, 30, '1')
+    const bucketName = await this.ensureOrgLayeredBucket(volume)
 
-    // Step 2: ask Archil to create a disk that mounts the bucket. If this
-    // fails we delete the bucket we just created so retries start from a
-    // clean state (Archil's createDisk is idempotent on name, but we'd
-    // rather not leave dangling buckets around if the user gives up).
-    let withDisk: Volume
+    // Step 2: ask the control plane to create a disk that mounts the
+    // bucket scoped to this volume's prefix. The disk has its own
+    // generated token at creation; we throw it away — per-sandbox tokens
+    // are minted lazily on the `sandbox_volume` table. The org bucket is
+    // intentionally not rolled back on failure: it's a shared resource
+    // and the next volume create will reuse it.
+    await this.redis.setex(lockKey, 30, '1')
+    let updated: Volume
     try {
-      await this.redis.setex(lockKey, 30, '1')
-      withDisk = await this.ensureArchilDiskFor(volume)
+      updated = await this.ensureLayeredDiskFor(volume, bucketName)
     } catch (error) {
-      this.logger.error(
-        `Archil createDisk failed for volume ${volume.id}; rolling back the S3 bucket we just created`,
-        error,
-      )
-      try {
-        await deleteS3Bucket(this.s3Client, volume.getBucketName())
-      } catch (rollbackError) {
-        this.logger.error(
-          `Rollback failed for volume ${volume.id}: bucket ${volume.getBucketName()} could not be deleted. Manual cleanup required.`,
-          rollbackError,
-        )
-      }
+      this.logger.error(`Layered createDisk failed for volume ${volume.id}`, error)
       throw error
     }
 
     // Refresh lock before final state update
     await this.redis.setex(lockKey, 30, '1')
-    await this.volumeRepository.save({ ...withDisk, state: VolumeState.READY })
+    await this.volumeRepository.save({ ...updated, state: VolumeState.READY })
   }
 
-  // Idempotent provisioning of an Archil disk for the given volume. If the
-  // volume row already has an `archilDiskId` and an encrypted token we
-  // assume the disk exists and return as-is — useful both for retries on
-  // the create path and for the migrate path where the row is already
-  // READY but we're attaching an Archil disk on top of an existing bucket.
+  // Idempotent provisioning of a layered disk for the given volume. If the
+  // volume row already has a `layeredDiskId` we assume the disk exists and
+  // return as-is — useful for retries after a partial provision.
   //
-  // Caveat: Archil's createDisk is idempotent on (name, configuration),
-  // but mount tokens are one-time. If a previous attempt successfully
-  // created the disk on Archil's side but we lost the response (e.g. DB
-  // crash), the retry returns the same diskId without a new token and
-  // surfaces an error. Recovery is manual: delete the disk by name on
-  // Archil and retry. We never accept an empty token because that would
-  // produce an unmountable disk.
-  private async ensureArchilDiskFor(volume: Volume): Promise<Volume> {
-    if (volume.archilDiskId && volume.archilMountTokenEnc) {
+  // Caveat: the control plane's createDisk is idempotent on
+  // (name, configuration), but its initial token is one-time. We
+  // intentionally discard that initial token; per-sandbox tokens are
+  // minted on first attach via `LayeredVolumeClient.mintMountKey`.
+  private async ensureLayeredDiskFor(volume: Volume, bucketName: string): Promise<Volume> {
+    if (volume.layeredDiskId) {
       return volume
     }
-    this.assertArchilProvisioningPossible(volume)
 
-    const created = await this.archilClient.createDisk({
-      name: volume.getArchilDiskName(),
-      region: this.archilClient.getDefaultRegion(),
-      mount: this.buildArchilMount(volume),
+    const created = await this.layeredClient.createDisk({
+      name: volume.getLayeredDiskName(),
+      region: this.layeredClient.getDefaultRegion(),
+      mount: this.buildLayeredMount(bucketName, volume),
     })
-
-    const encryptedToken = await this.encryptionService.encrypt(created.mountToken)
 
     return await this.volumeRepository.save({
       ...volume,
-      archilDiskId: created.diskId,
-      archilRegion: created.region,
-      archilMountTokenEnc: encryptedToken,
+      layeredDiskId: created.diskId,
+      layeredRegion: created.region,
     })
   }
 
-  private assertArchilProvisioningPossible(volume: Volume): void {
-    if (!this.archilClient.isConfigured()) {
+  private assertLayeredProvisioningPossible(volume: Volume): void {
+    if (!this.layeredClient.isConfigured()) {
       throw new Error(
-        `Volume ${volume.id} requires Archil but the control plane is not configured on this API. Set ARCHIL_API_KEY.`,
+        `Volume ${volume.id} requires the layered backend but its control plane is not configured on this API. Set LAYERED_API_KEY.`,
       )
     }
     if (!this.s3Client) {
       throw new Error(
-        `Volume ${volume.id} requires Archil but S3 is not configured on this API. The experimental backend stores volume data in a Daytona-owned S3 bucket and requires S3 to be configured.`,
+        `Volume ${volume.id} requires the layered backend but S3 is not configured on this API. The layered backend stores volume data in a Daytona-owned S3 bucket and requires S3 to be configured.`,
       )
     }
-  }
-
-  // Attaches an Archil disk to a volume that doesn't have one yet — used
-  // by the migrate path to promote an existing s3fuse volume to the
-  // experimental backend without re-creating its bucket. The bucket is
-  // assumed to already exist from the volume's s3fuse era; we don't
-  // recreate or re-tag it.
-  //
-  // Idempotent: calling this on a volume that already has an Archil disk
-  // is a no-op.
-  async attachArchilDiskTo(volume: Volume): Promise<Volume> {
-    return await this.ensureArchilDiskFor(volume)
-  }
-
-  // Detaches and deletes the Archil disk associated with a volume — used
-  // by the migrate path to demote an experimental volume back to s3fuse.
-  // The S3 bucket is left intact so subsequent host-side mounts can read
-  // the same data. Idempotent: calling this on a volume without an
-  // Archil disk is a no-op.
-  async detachArchilDiskFrom(volume: Volume): Promise<Volume> {
-    if (volume.archilDiskId) {
-      if (!this.archilClient.isConfigured()) {
-        throw new Error(
-          `Volume ${volume.id} has an Archil disk but the control plane is not configured on this API. Set ARCHIL_API_KEY to retry the migration.`,
-        )
-      }
-      await this.archilClient.deleteDisk(
-        volume.archilDiskId,
-        volume.archilRegion || this.archilClient.getDefaultRegion(),
-      )
-    }
-    return await this.volumeRepository.save({
-      ...volume,
-      archilDiskId: null,
-      archilRegion: null,
-      archilMountTokenEnc: null,
-    })
   }
 
   private async handlePendingDelete(volume: Volume, lockKey: string): Promise<void> {
@@ -450,15 +447,13 @@ export class VolumeManager
         state: VolumeState.DELETING,
       })
 
-      // Deletion is driven by the resources actually provisioned on the
-      // row, not by `backend`. A volume that was migrated s3fuse →
-      // experimental → s3fuse can have only a bucket; a volume currently
-      // on `experimental` always has both. This way the migrate path
-      // can't leak an Archil disk if the operator forgets to detach.
-      if (volume.archilDiskId) {
-        await this.deleteArchilDisk(volume, lockKey)
+      const backend = volume.backend || VOLUME_BACKEND_S3FUSE
+      if (backend === VOLUME_BACKEND_LAYERED) {
+        await this.deleteLayeredDisk(volume, lockKey)
+        await this.deleteLayeredBucketPrefix(volume, lockKey)
+      } else {
+        await this.deletePerVolumeBucket(volume, lockKey)
       }
-      await this.deleteBackingBucket(volume, lockKey)
 
       // Refresh lock before final state update
       await this.redis.setex(lockKey, 30, '1')
@@ -470,17 +465,14 @@ export class VolumeManager
         state: VolumeState.DELETED,
       })
 
-      // Wipe the archil token from the row before marking it deleted so it
-      // never lingers in plaintext-encrypted form on a deleted volume.
       await this.volumeRepository.save({
         ...volume,
         state: VolumeState.DELETED,
         name: `${volume.name}-deleted`,
-        archilDiskId: null,
-        archilRegion: null,
-        archilMountTokenEnc: null,
+        layeredDiskId: null,
+        layeredRegion: null,
       })
-      this.logger.debug(`Volume ${volume.id} deleted successfully (backend=${volume.backend || VOLUME_BACKEND_S3FUSE})`)
+      this.logger.debug(`Volume ${volume.id} deleted successfully (backend=${backend})`)
     } catch (error) {
       this.logger.error(`Error deleting volume ${volume.id}:`, error)
       await this.volumeRepository.save({
@@ -491,25 +483,78 @@ export class VolumeManager
     }
   }
 
-  // Delete the volume's Archil disk. Always called *before*
-  // deleteBackingBucket so the disk stops syncing into S3 — otherwise an
-  // in-flight write could recreate objects right after we emptied the
-  // bucket. Idempotent on missing disks (Archil returns 404 which is
-  // treated as success in `archilClient.deleteDisk`).
-  private async deleteArchilDisk(volume: Volume, lockKey: string): Promise<void> {
-    if (!this.archilClient.isConfigured()) {
+  // Delete the volume's layered disk. Always called *before*
+  // deleteLayeredBucketPrefix so the disk stops syncing into S3 —
+  // otherwise an in-flight write could recreate objects right after we
+  // emptied the prefix. Idempotent on missing disks (the control plane
+  // returns 404 which is treated as success in `LayeredVolumeClient`).
+  private async deleteLayeredDisk(volume: Volume, lockKey: string): Promise<void> {
+    if (!volume.layeredDiskId) {
+      return
+    }
+    if (!this.layeredClient.isConfigured()) {
       throw new Error(
-        `Volume ${volume.id} has an Archil disk but the control plane is not configured on this API. Set ARCHIL_API_KEY to retry deletion.`,
+        `Volume ${volume.id} has a layered disk but the control plane is not configured on this API. Set LAYERED_API_KEY to retry deletion.`,
       )
     }
 
     await this.redis.setex(lockKey, 30, '1')
-    await this.archilClient.deleteDisk(volume.archilDiskId, volume.archilRegion || this.archilClient.getDefaultRegion())
+    await this.layeredClient.deleteDisk(
+      volume.layeredDiskId,
+      volume.layeredRegion || this.layeredClient.getDefaultRegion(),
+    )
   }
 
-  // Delete the volume's backing S3 bucket. Tolerates NoSuchBucket so
-  // retries after a partial delete are safe.
-  private async deleteBackingBucket(volume: Volume, lockKey: string): Promise<void> {
+  // Empties out the volume's prefix from the org's layered bucket. We do
+  // NOT delete the bucket itself — it's shared across every layered volume
+  // in the organization.
+  private async deleteLayeredBucketPrefix(volume: Volume, lockKey: string): Promise<void> {
+    if (!this.s3Client) {
+      throw new Error(
+        `Volume ${volume.id} has layered data but S3 is not configured on this API. Configure S3 to retry deletion.`,
+      )
+    }
+    if (!volume.organizationId) {
+      return
+    }
+
+    const org = await this.organizationRepository.findOne({ where: { id: volume.organizationId } })
+    if (!org?.layeredBucketName) {
+      // Nothing to delete: either the org bucket was never provisioned
+      // (volume errored before storage was created) or it was already
+      // cleared.
+      return
+    }
+
+    await this.redis.setex(lockKey, 30, '1')
+    const prefix = volume.getLayeredBucketPrefix()
+    let continuationToken: string | undefined
+    do {
+      const list = await this.s3Client.send(
+        new ListObjectsV2Command({
+          Bucket: org.layeredBucketName,
+          Prefix: prefix,
+          ContinuationToken: continuationToken,
+        }),
+      )
+      if (list.Contents && list.Contents.length > 0) {
+        await this.s3Client.send(
+          new DeleteObjectsCommand({
+            Bucket: org.layeredBucketName,
+            Delete: {
+              Objects: list.Contents.map((o) => ({ Key: o.Key })),
+              Quiet: true,
+            },
+          }),
+        )
+      }
+      continuationToken = list.NextContinuationToken
+    } while (continuationToken)
+  }
+
+  // Delete the volume's backing S3 bucket for legacy s3fuse volumes.
+  // Tolerates NoSuchBucket so retries after a partial delete are safe.
+  private async deletePerVolumeBucket(volume: Volume, lockKey: string): Promise<void> {
     if (!this.s3Client) {
       throw new Error(
         `Volume ${volume.id} has a backing S3 bucket but S3 is not configured on this API. Configure S3 to retry deletion.`,

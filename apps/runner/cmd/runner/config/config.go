@@ -41,17 +41,17 @@ type Config struct {
 	AWSSecretAccessKey         string        `envconfig:"AWS_SECRET_ACCESS_KEY"`
 	AWSDefaultBucket           string        `envconfig:"AWS_DEFAULT_BUCKET"`
 	VolumeBackend              string        `envconfig:"VOLUME_BACKEND" default:"s3"`
-	// ArchilBinaryPath is the host path to the `archil` CLI binary that will
-	// be bind-mounted read-only into sandboxes opting into the experimental
-	// in-container backend. When empty, the experimental backend is disabled
-	// and organizations that select it silently fall back to s3fuse.
+	// LayeredBinaryPath is the host path to the layered-volume mount CLI
+	// binary that will be bind-mounted read-only into sandboxes opting into
+	// the in-container layered backend. When empty, the layered backend is
+	// disabled and organizations that select it silently fall back to
+	// s3fuse.
 	//
-	// Install the binary on the runner host with:
-	//
-	//   curl -s https://archil.com/install | sh
-	//
-	// then point this at the resulting binary (typically /usr/local/bin/archil).
-	ArchilBinaryPath                   string        `envconfig:"ARCHIL_BINARY_PATH"`
+	// Install the binary on the runner host (the layered mount tool ships
+	// from the same vendor that backs the layered control plane) and point
+	// this at the resulting binary (typically /usr/local/bin/archil — the
+	// underlying CLI's name is unchanged; only our env var prefix is).
+	LayeredBinaryPath                  string        `envconfig:"LAYERED_BINARY_PATH"`
 	ResourceLimitsDisabled             bool          `envconfig:"RESOURCE_LIMITS_DISABLED"`
 	DaemonStartTimeoutSec              int           `envconfig:"DAEMON_START_TIMEOUT_SEC"`
 	SandboxStartTimeoutSec             int           `envconfig:"SANDBOX_START_TIMEOUT_SEC"`

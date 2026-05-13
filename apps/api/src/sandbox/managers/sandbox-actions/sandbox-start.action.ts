@@ -534,17 +534,17 @@ export class SandboxStartAction extends SandboxAction {
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
       const metadata: { [key: string]: string } = { ...organization?.sandboxMetadata }
-      if (sandbox.volumes?.length) {
-        // Resolve once so the runner gets the same backend selection and
-        // (for experimental volumes) Archil disk + decrypted mount token
-        // that createSandbox/recoverSandbox would have sent. Without this,
-        // start.go's "re-establish FUSE mounts on stopped containers" path
-        // would only see legacy s3fuse-shaped fields.
-        const prepared = await this.volumeService.prepareRunnerVolumes(sandbox.volumes)
+      // Resolve once so the runner gets the same backend selection and (for
+      // layered volumes) disk + freshly minted mount token that
+      // createSandbox/recoverSandbox would have sent. Without this,
+      // start.go's "re-establish FUSE mounts on stopped containers" path
+      // would only see legacy s3fuse-shaped fields.
+      const prepared = await this.volumeService.prepareRunnerVolumes(sandbox.id, sandbox.volumes)
+      if (prepared.volumes.length) {
         metadata['volumes'] = JSON.stringify(prepared.volumes)
-        if (prepared.backend) {
-          metadata['volumeBackend'] = prepared.backend
-        }
+      }
+      if (prepared.backend) {
+        metadata['volumeBackend'] = prepared.backend
       }
 
       try {

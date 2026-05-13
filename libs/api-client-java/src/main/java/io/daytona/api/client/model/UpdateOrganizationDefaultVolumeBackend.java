@@ -48,16 +48,18 @@ import io.daytona.api.client.JSON;
 /**
  * UpdateOrganizationDefaultVolumeBackend
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.12.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.21.0")
 public class UpdateOrganizationDefaultVolumeBackend {
   /**
-   * The default volume backend for the organization. &#x60;s3fuse&#x60; mounts on the runner host (existing behavior). &#x60;experimental&#x60; mounts inside the sandbox via Archil using a per-volume mount token.
+   * The default volume backend for the organization. &#x60;s3fuse&#x60; mounts on the runner host (existing behavior). &#x60;layered&#x60; mounts inside the sandbox via the layered control plane using a per-sandbox-volume mount token.
    */
   @JsonAdapter(DefaultVolumeBackendEnum.Adapter.class)
   public enum DefaultVolumeBackendEnum {
     S3FUSE("s3fuse"),
     
-    EXPERIMENTAL("experimental");
+    LAYERED("layered"),
+    
+    UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 
     private String value;
 
@@ -80,7 +82,7 @@ public class UpdateOrganizationDefaultVolumeBackend {
           return b;
         }
       }
-      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+      return UNKNOWN_DEFAULT_OPEN_API;
     }
 
     public static class Adapter extends TypeAdapter<DefaultVolumeBackendEnum> {
@@ -116,7 +118,7 @@ public class UpdateOrganizationDefaultVolumeBackend {
   }
 
   /**
-   * The default volume backend for the organization. &#x60;s3fuse&#x60; mounts on the runner host (existing behavior). &#x60;experimental&#x60; mounts inside the sandbox via Archil using a per-volume mount token.
+   * The default volume backend for the organization. &#x60;s3fuse&#x60; mounts on the runner host (existing behavior). &#x60;layered&#x60; mounts inside the sandbox via the layered control plane using a per-sandbox-volume mount token.
    * @return defaultVolumeBackend
    */
   @javax.annotation.Nonnull
@@ -207,10 +209,7 @@ public class UpdateOrganizationDefaultVolumeBackend {
    * (except the first line).
    */
   private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
+    return o == null ? "null" : o.toString().replace("\n", "\n    ");
   }
 
 
@@ -219,12 +218,10 @@ public class UpdateOrganizationDefaultVolumeBackend {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>();
-    openapiFields.add("defaultVolumeBackend");
+    openapiFields = new HashSet<String>(Arrays.asList("defaultVolumeBackend"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("defaultVolumeBackend");
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("defaultVolumeBackend"));
   }
 
   /**
@@ -236,19 +233,19 @@ public class UpdateOrganizationDefaultVolumeBackend {
   public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       if (jsonElement == null) {
         if (!UpdateOrganizationDefaultVolumeBackend.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
-          throw new IllegalArgumentException(String.format("The required field(s) %s in UpdateOrganizationDefaultVolumeBackend is not found in the empty JSON string", UpdateOrganizationDefaultVolumeBackend.openapiRequiredFields.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in UpdateOrganizationDefaultVolumeBackend is not found in the empty JSON string", UpdateOrganizationDefaultVolumeBackend.openapiRequiredFields.toString()));
         }
       }
 
       // check to make sure all required properties/fields are present in the JSON string
       for (String requiredField : UpdateOrganizationDefaultVolumeBackend.openapiRequiredFields) {
         if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
+          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("defaultVolumeBackend").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `defaultVolumeBackend` to be a primitive type in the JSON string but got `%s`", jsonObj.get("defaultVolumeBackend").toString()));
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `defaultVolumeBackend` to be a primitive type in the JSON string but got `%s`", jsonObj.get("defaultVolumeBackend").toString()));
       }
       // validate the required field `defaultVolumeBackend`
       DefaultVolumeBackendEnum.validateJsonElement(jsonObj.get("defaultVolumeBackend"));
@@ -311,7 +308,7 @@ public class UpdateOrganizationDefaultVolumeBackend {
                    else if (entry.getValue().getAsJsonPrimitive().isBoolean())
                      instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
                    else
-                     throw new IllegalArgumentException(String.format("The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
                  } else if (entry.getValue().isJsonArray()) {
                      instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
                  } else { // JSON object

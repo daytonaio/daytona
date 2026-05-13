@@ -28,7 +28,6 @@ if TYPE_CHECKING:
     from daytona_api_client.models.api_key_response import ApiKeyResponse
     from daytona_api_client.models.audit_log import AuditLog
     from daytona_api_client.models.build_info import BuildInfo
-    from daytona_api_client.models.change_volume_backend import ChangeVolumeBackend
     from daytona_api_client.models.command import Command
     from daytona_api_client.models.completion_context import CompletionContext
     from daytona_api_client.models.completion_item import CompletionItem
@@ -213,7 +212,6 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "ApiKeyResponse": "daytona_api_client.models.api_key_response",
     "AuditLog": "daytona_api_client.models.audit_log",
     "BuildInfo": "daytona_api_client.models.build_info",
-    "ChangeVolumeBackend": "daytona_api_client.models.change_volume_backend",
     "Command": "daytona_api_client.models.command",
     "CompletionContext": "daytona_api_client.models.completion_context",
     "CompletionItem": "daytona_api_client.models.completion_item",

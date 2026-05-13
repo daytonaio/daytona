@@ -228,7 +228,7 @@ module DaytonaApiClient
       return false if @created_at.nil?
       return false if @updated_at.nil?
       return false if @backend.nil?
-      backend_validator = EnumAttributeValidator.new('String', ["s3fuse", "experimental"])
+      backend_validator = EnumAttributeValidator.new('String', ["s3fuse", "layered", "unknown_default_open_api"])
       return false unless backend_validator.valid?(@backend)
       true
     end
@@ -296,7 +296,7 @@ module DaytonaApiClient
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] backend Object to be assigned
     def backend=(backend)
-      validator = EnumAttributeValidator.new('String', ["s3fuse", "experimental"])
+      validator = EnumAttributeValidator.new('String', ["s3fuse", "layered", "unknown_default_open_api"])
       unless validator.valid?(backend)
         fail ArgumentError, "invalid value for \"backend\", must be one of #{validator.allowable_values}."
       end

@@ -16,40 +16,22 @@
 
 export interface DtoVolumeDTO {
     /**
-     * ArchilDisk identifies the Archil disk to mount, in the form \"owner/disk-name\" or \"dsk-XXXXXXXXXXXXXXXX\". Required when the sandbox uses the experimental in-container backend.
-     * @type {string}
-     * @memberof DtoVolumeDTO
+     * LayeredDisk identifies the layered-volume disk to mount, in the form \"owner/disk-name\" or \"dsk-XXXXXXXXXXXXXXXX\". Required when the sandbox uses the in-container layered backend.
      */
-    'archilDisk'?: string;
+    'layeredDisk'?: string;
     /**
-     * ArchilMountToken is the per-disk mount token used as ARCHIL_MOUNT_TOKEN inside the sandbox. The runner forwards it to the daemon via env vars and never stores or logs it. Required when ArchilDisk is set.
-     * @type {string}
-     * @memberof DtoVolumeDTO
+     * LayeredMountToken is the per-(sandbox, volume) mount token used to authenticate the mount inside the sandbox. The runner forwards it to the daemon via env vars and never stores or logs it. Required when LayeredDisk is set.
      */
-    'archilMountToken'?: string;
+    'layeredMountToken'?: string;
     /**
-     * ArchilRegion is the Archil region the disk lives in (e.g. \"aws-us-east-1\"). Required when ArchilDisk is set.
-     * @type {string}
-     * @memberof DtoVolumeDTO
+     * LayeredRegion is the region the layered disk lives in (e.g. \"aws-us-east-1\"). Required when LayeredDisk is set.
      */
-    'archilRegion'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DtoVolumeDTO
-     */
+    'layeredRegion'?: string;
     'mountPath'?: string;
     /**
-     * ReadOnly mounts the volume read-only for this sandbox. It is a per-mount attribute (not a per-volume one), so the same volume can be mounted RW in one sandbox and RO in another. The s3fuse path enforces it via the Docker bind mode (\":ro\"); the experimental path forwards it to `archil mount --read-only`.
-     * @type {boolean}
-     * @memberof DtoVolumeDTO
+     * ReadOnly mounts the volume read-only for this sandbox. It is a per-mount attribute (not a per-volume one), so the same volume can be mounted RW in one sandbox and RO in another. The s3fuse path enforces it via the Docker bind mode (\":ro\"); the layered path forwards it to the in-container mount binary\'s `--read-only` flag.
      */
     'readOnly'?: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof DtoVolumeDTO
-     */
     'subpath'?: string;
     'volumeId'?: string;
 }

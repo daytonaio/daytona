@@ -5,16 +5,17 @@
 // inside the sandbox container instead of on the runner host. The runner's
 // responsibility is limited to:
 //
-//  1. Bind-mounting the `archil` CLI binary into the container (read-only).
+//  1. Bind-mounting the layered-volume mount binary into the container
+//     (read-only).
 //  2. Injecting an env payload describing each volume — disk identifier,
-//     region, and per-disk mount token — that the in-container daemon
-//     consumes to invoke `archil mount` at sandbox start.
+//     region, and per-(sandbox, volume) mount token — that the in-container
+//     daemon consumes to invoke the mount binary at sandbox start.
 //
-// Authentication is per-volume via Archil "disk tokens" (ARCHIL_MOUNT_TOKEN).
-// Each token is scoped to a single Archil disk, so a sandbox only ever holds
+// Authentication is per-volume via per-(sandbox, volume) tokens. Each token
+// is scoped to a single layered disk, so a sandbox only ever holds
 // credentials for the disks it actually mounts. The runner itself does not
-// need an Archil API key for this backend — it just shuttles the per-volume
-// tokens that the control plane already issued.
+// need a layered control-plane API key for this backend — it just shuttles
+// the per-volume tokens that the control plane already issued.
 package incontainer
 
 import (
@@ -25,33 +26,34 @@ import (
 	"github.com/daytonaio/runner/pkg/volume"
 )
 
-// ArchilBinaryContainerPath is the well-known path the runner bind-mounts the
-// `archil` CLI binary to inside every sandbox using the experimental
-// in-container backend. The in-container daemon execs this exact path.
-const ArchilBinaryContainerPath = "/usr/local/bin/daytona-archil"
+// LayeredBinaryContainerPath is the well-known path the runner bind-mounts
+// the layered-volume mount CLI to inside every sandbox using the
+// in-container layered backend. The in-container daemon execs this exact
+// path.
+const LayeredBinaryContainerPath = "/usr/local/bin/daytona-layered"
 
 // Env var names exchanged between the runner and the in-container daemon.
 // Namespaced under DAYTONA_INCONTAINER_ so they don't collide with anything
-// the user may set, and so secrets aren't dumped under the standard
-// ARCHIL_MOUNT_TOKEN name in `env` listings before the daemon translates and
+// the user may set, and so secrets aren't dumped under the third-party CLI's
+// own env var name in `env` listings before the daemon translates and
 // scrubs them.
 const (
 	// EnvVolumesJSON is a JSON-encoded []Volume describing every volume to
-	// mount, including its per-disk Archil mount token.
+	// mount, including its per-(sandbox, volume) mount token.
 	EnvVolumesJSON = "DAYTONA_INCONTAINER_VOLUMES"
-	// EnvArchilBinary is the absolute in-container path to the archil CLI
-	// binary. Always set to ArchilBinaryContainerPath when this backend is
-	// active.
-	EnvArchilBinary = "DAYTONA_INCONTAINER_ARCHIL_BINARY"
+	// EnvLayeredBinary is the absolute in-container path to the layered
+	// mount CLI. Always set to LayeredBinaryContainerPath when this
+	// backend is active.
+	EnvLayeredBinary = "DAYTONA_INCONTAINER_LAYERED_BINARY"
 )
 
 // Config controls how the runner-side mounter prepares sandboxes for the
-// experimental in-container (Archil) backend.
+// in-container layered backend.
 type Config struct {
-	// ArchilBinaryHostPath is the host path to the `archil` CLI binary that
-	// gets bind-mounted RO into each sandbox at ArchilBinaryContainerPath.
-	// Required for this backend to operate.
-	ArchilBinaryHostPath string
+	// LayeredBinaryHostPath is the host path to the layered mount CLI
+	// binary that gets bind-mounted RO into each sandbox at
+	// LayeredBinaryContainerPath. Required for this backend to operate.
+	LayeredBinaryHostPath string
 }
 
 // Mounter is a volume.Mounter whose host-side methods are deliberate no-ops.
@@ -74,17 +76,17 @@ func (m *Mounter) IsMounted(_ string) bool                           { return fa
 func (m *Mounter) WaitUntilReady(_ context.Context, _ string) error  { return nil }
 
 // ContainerBinds returns the RO binds every sandbox using this backend
-// needs regardless of volume count: just the `archil` CLI binary, mounted
-// at ArchilBinaryContainerPath.
+// needs regardless of volume count: just the layered mount CLI binary,
+// mounted at LayeredBinaryContainerPath.
 func (m *Mounter) ContainerBinds() []string {
-	if m.cfg.ArchilBinaryHostPath == "" {
+	if m.cfg.LayeredBinaryHostPath == "" {
 		return nil
 	}
-	return []string{fmt.Sprintf("%s:%s:ro", m.cfg.ArchilBinaryHostPath, ArchilBinaryContainerPath)}
+	return []string{fmt.Sprintf("%s:%s:ro", m.cfg.LayeredBinaryHostPath, LayeredBinaryContainerPath)}
 }
 
 // ContainerEnv serializes the volume list (including per-volume mount tokens)
-// and the in-container archil binary path into env vars for the daemon to
+// and the in-container layered binary path into env vars for the daemon to
 // consume at sandbox start. Returns nil when there are no volumes to mount.
 func (m *Mounter) ContainerEnv(_ context.Context, volumes []volume.Volume) ([]string, error) {
 	if len(volumes) == 0 {
@@ -92,14 +94,14 @@ func (m *Mounter) ContainerEnv(_ context.Context, volumes []volume.Volume) ([]st
 	}
 
 	for i, v := range volumes {
-		if v.ArchilDisk == "" {
-			return nil, fmt.Errorf("volume %d (%q) is missing archilDisk; the experimental backend requires Archil-shaped volumes", i, v.VolumeID)
+		if v.LayeredDisk == "" {
+			return nil, fmt.Errorf("volume %d (%q) is missing layeredDisk; the layered backend requires layered-shaped volumes", i, v.VolumeID)
 		}
-		if v.ArchilRegion == "" {
-			return nil, fmt.Errorf("volume %d (%q) is missing archilRegion", i, v.VolumeID)
+		if v.LayeredRegion == "" {
+			return nil, fmt.Errorf("volume %d (%q) is missing layeredRegion", i, v.VolumeID)
 		}
-		if v.ArchilMountToken == "" {
-			return nil, fmt.Errorf("volume %d (%q) is missing archilMountToken", i, v.VolumeID)
+		if v.LayeredMountToken == "" {
+			return nil, fmt.Errorf("volume %d (%q) is missing layeredMountToken", i, v.VolumeID)
 		}
 	}
 
@@ -110,7 +112,7 @@ func (m *Mounter) ContainerEnv(_ context.Context, volumes []volume.Volume) ([]st
 
 	return []string{
 		EnvVolumesJSON + "=" + string(volumesJSON),
-		EnvArchilBinary + "=" + ArchilBinaryContainerPath,
+		EnvLayeredBinary + "=" + LayeredBinaryContainerPath,
 	}, nil
 }
 

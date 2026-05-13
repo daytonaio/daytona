@@ -196,6 +196,17 @@ export class Organization {
   })
   defaultVolumeBackend: string
 
+  // Name of the per-organization S3 bucket that backs every layered volume
+  // for this org. Lazily created on first layered volume create and
+  // persisted here so subsequent volumes can reuse it (and so we can later
+  // switch the deterministic naming scheme without a hot migration). Null
+  // until the org provisions its first layered volume.
+  @Column({
+    nullable: true,
+    name: 'layeredBucketName',
+  })
+  layeredBucketName?: string | null
+
   @Column({
     type: 'jsonb',
     nullable: true,
@@ -215,7 +226,10 @@ export class Organization {
       organizationId: this.id,
       organizationName: this.name,
       limitNetworkEgress: String(this.sandboxLimitedNetworkEgress),
-      volumeBackend: this.defaultVolumeBackend,
+      // volumeBackend is intentionally NOT defaulted here. It is stamped
+      // per-sandbox from the resolved volume backend in
+      // `applyVolumeBackendMetadata`, so a sandbox with no volumes never
+      // carries a backend hint that could route it to the wrong mounter.
     }
   }
 

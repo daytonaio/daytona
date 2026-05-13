@@ -33,7 +33,10 @@ import { VolumeController } from './controllers/volume.controller'
 import { VolumeService } from './services/volume.service'
 import { VolumeManager } from './managers/volume.manager'
 import { Volume } from './entities/volume.entity'
-import { ArchilClient } from './services/archil/archil.client'
+import { SandboxVolumeMount } from './entities/sandbox-volume.entity'
+import { LayeredVolumeClient } from './services/layered/layered-volume.client'
+import { SandboxVolumeMountService } from './services/sandbox-volume-mount.service'
+import { Organization } from '../organization/entities/organization.entity'
 import { EncryptionModule } from '../encryption/encryption.module'
 import { BuildInfo } from './entities/build-info.entity'
 import { BackupManager } from './managers/backup.manager'
@@ -80,6 +83,8 @@ import { SandboxActivityService } from './services/sandbox-activity.service'
       DockerRegistry,
       WarmPool,
       Volume,
+      SandboxVolumeMount,
+      Organization,
       SshAccess,
       Region,
       Job,
@@ -109,7 +114,8 @@ import { SandboxActivityService } from './services/sandbox-activity.service'
     SandboxLookupCacheInvalidationService,
     SnapshotManager,
     RedisLockProvider,
-    ArchilClient,
+    LayeredVolumeClient,
+    SandboxVolumeMountService,
     VolumeService,
     VolumeManager,
     VolumeSubscriber,

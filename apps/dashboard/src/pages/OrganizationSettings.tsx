@@ -180,7 +180,7 @@ const OrganizationSettings: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="s3fuse">Standard</SelectItem>
-                    <SelectItem value="experimental">Experimental</SelectItem>
+                    <SelectItem value="layered">Layered</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>

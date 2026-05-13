@@ -147,10 +147,10 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     skipStart?: boolean,
   ): Promise<StartSandboxResponse | undefined> {
     // Resolve volumes once, decorating them with backend-specific data
-    // (Archil disk + decrypted mount token for the experimental backend).
+    // (layered disk + freshly minted mount token for the layered backend).
     // The resolved backend overrides whatever the organization default put
     // on `metadata.volumeBackend` so the runner picks the matching mounter.
-    const prepared = await this.volumeService.prepareRunnerVolumes(sandbox.volumes)
+    const prepared = await this.volumeService.prepareRunnerVolumes(sandbox.id, sandbox.volumes)
     const effectiveMetadata = applyVolumeBackendMetadata(metadata, prepared.backend)
 
     const payload: CreateSandboxDTO = {
@@ -229,7 +229,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
   }
 
   async recoverSandbox(sandbox: Sandbox, registry?: DockerRegistry, skipStart = false): Promise<void> {
-    const prepared = await this.volumeService.prepareRunnerVolumes(sandbox.volumes)
+    const prepared = await this.volumeService.prepareRunnerVolumes(sandbox.id, sandbox.volumes)
     const recoverSandboxDTO: RecoverSandboxDTO = {
       userId: sandbox.organizationId,
       snapshot: sandbox.snapshot,

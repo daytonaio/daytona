@@ -14,23 +14,17 @@
 
 
 
-/**
- * 
- * @export
- * @interface UpdateOrganizationDefaultVolumeBackend
- */
 export interface UpdateOrganizationDefaultVolumeBackend {
     /**
-     * The default volume backend for the organization. `s3fuse` mounts on the runner host (existing behavior). `experimental` mounts inside the sandbox via Archil using a per-volume mount token.
-     * @type {string}
-     * @memberof UpdateOrganizationDefaultVolumeBackend
+     * The default volume backend for the organization. `s3fuse` mounts on the runner host (existing behavior). `layered` mounts inside the sandbox via the layered control plane using a per-sandbox-volume mount token.
      */
     'defaultVolumeBackend': UpdateOrganizationDefaultVolumeBackendDefaultVolumeBackendEnum;
 }
 
 export const UpdateOrganizationDefaultVolumeBackendDefaultVolumeBackendEnum = {
     S3FUSE: 's3fuse',
-    EXPERIMENTAL: 'experimental'
+    LAYERED: 'layered',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type UpdateOrganizationDefaultVolumeBackendDefaultVolumeBackendEnum = typeof UpdateOrganizationDefaultVolumeBackendDefaultVolumeBackendEnum[keyof typeof UpdateOrganizationDefaultVolumeBackendDefaultVolumeBackendEnum];

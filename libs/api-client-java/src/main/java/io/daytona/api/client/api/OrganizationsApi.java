@@ -3699,7 +3699,7 @@ public class OrganizationsApi {
         <tr><td> 204 </td><td> Default volume backend updated successfully </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call setDefaultVolumeBackendCall(String organizationId, UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call setDefaultVolumeBackendCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -3745,7 +3745,7 @@ public class OrganizationsApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call setDefaultVolumeBackendValidateBeforeCall(String organizationId, UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call setDefaultVolumeBackendValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'organizationId' is set
         if (organizationId == null) {
             throw new ApiException("Missing the required parameter 'organizationId' when calling setDefaultVolumeBackend(Async)");
@@ -3773,7 +3773,7 @@ public class OrganizationsApi {
         <tr><td> 204 </td><td> Default volume backend updated successfully </td><td>  -  </td></tr>
      </table>
      */
-    public void setDefaultVolumeBackend(String organizationId, UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend) throws ApiException {
+    public void setDefaultVolumeBackend(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend) throws ApiException {
         setDefaultVolumeBackendWithHttpInfo(organizationId, updateOrganizationDefaultVolumeBackend);
     }
 
@@ -3791,7 +3791,7 @@ public class OrganizationsApi {
         <tr><td> 204 </td><td> Default volume backend updated successfully </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> setDefaultVolumeBackendWithHttpInfo(String organizationId, UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend) throws ApiException {
+    public ApiResponse<Void> setDefaultVolumeBackendWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend) throws ApiException {
         okhttp3.Call localVarCall = setDefaultVolumeBackendValidateBeforeCall(organizationId, updateOrganizationDefaultVolumeBackend, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -3811,7 +3811,7 @@ public class OrganizationsApi {
         <tr><td> 204 </td><td> Default volume backend updated successfully </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call setDefaultVolumeBackendAsync(String organizationId, UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call setDefaultVolumeBackendAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = setDefaultVolumeBackendValidateBeforeCall(organizationId, updateOrganizationDefaultVolumeBackend, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);

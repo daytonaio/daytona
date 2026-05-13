@@ -30,16 +30,9 @@ class UpdateOrganizationDefaultVolumeBackend(BaseModel):
     """
     UpdateOrganizationDefaultVolumeBackend
     """ # noqa: E501
-    default_volume_backend: StrictStr = Field(description="The default volume backend for the organization. `s3fuse` mounts on the runner host (existing behavior). `experimental` mounts inside the sandbox via Archil using a per-volume mount token.", serialization_alias="defaultVolumeBackend")
+    default_volume_backend: StrictStr = Field(description="The default volume backend for the organization. `s3fuse` mounts on the runner host (existing behavior). `layered` mounts inside the sandbox via the layered control plane using a per-sandbox-volume mount token.", serialization_alias="defaultVolumeBackend")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["defaultVolumeBackend"]
-
-    @field_validator('default_volume_backend')
-    def default_volume_backend_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['s3fuse', 'experimental']):
-            raise ValueError("must be one of enum values ('s3fuse', 'experimental')")
-        return value
 
     model_config = ConfigDict(
         populate_by_name=True,

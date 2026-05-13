@@ -10,12 +10,12 @@ import { IsIn, IsNotEmpty, IsString } from 'class-validator'
 export class UpdateOrganizationDefaultVolumeBackendDto {
   @ApiProperty({
     description:
-      'The default volume backend for the organization. `s3fuse` mounts on the runner host (existing behavior). `experimental` mounts inside the sandbox via Archil using a per-volume mount token.',
+      'The default volume backend for the organization. `s3fuse` mounts on the runner host (existing behavior). `layered` mounts inside the sandbox via the layered control plane using a per-sandbox-volume mount token.',
     example: 's3fuse',
-    enum: ['s3fuse', 'experimental'],
+    enum: ['s3fuse', 'layered'],
   })
   @IsString()
   @IsNotEmpty()
-  @IsIn(['s3fuse', 'experimental'])
+  @IsIn(['s3fuse', 'layered'])
   defaultVolumeBackend: string
 }

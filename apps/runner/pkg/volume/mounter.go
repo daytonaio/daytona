@@ -7,7 +7,7 @@ import "context"
 
 // Mounter abstracts how a volume is mounted onto the host filesystem.
 // The runner bind-mounts the resulting host path into the sandbox container.
-// Implementations may use different backends (e.g. S3 FUSE, experimental, etc.).
+// Implementations may use different backends (e.g. S3 FUSE, layered, etc.).
 type Mounter interface {
 	// Mount ensures the volume is accessible at mountPath on the host.
 	// volumeID is the backend-specific identifier (e.g. S3 bucket name).
@@ -30,8 +30,8 @@ type Mounter interface {
 // package-neutral shape so the volume package can stay free of cross-package
 // dependencies.
 //
-// The Archil* fields are only populated when the sandbox uses the experimental
-// in-container (Archil) backend; the host-side s3fuse path ignores them.
+// The Layered* fields are only populated when the sandbox uses the layered
+// in-container backend; the host-side s3fuse path ignores them.
 type Volume struct {
 	VolumeID  string `json:"volumeId"`
 	MountPath string `json:"mountPath"`
@@ -39,13 +39,13 @@ type Volume struct {
 
 	// ReadOnly mounts the volume read-only inside this sandbox. Honored
 	// by both backends; see Mounter implementations for how the flag is
-	// applied (Docker bind mode for s3fuse, `archil mount --read-only`
-	// for the experimental backend).
+	// applied (Docker bind mode for s3fuse, the in-container mount CLI's
+	// `--read-only` flag for the layered backend).
 	ReadOnly bool `json:"readOnly,omitempty"`
 
-	ArchilDisk       string `json:"archilDisk,omitempty"`
-	ArchilRegion     string `json:"archilRegion,omitempty"`
-	ArchilMountToken string `json:"archilMountToken,omitempty"`
+	LayeredDisk       string `json:"layeredDisk,omitempty"`
+	LayeredRegion     string `json:"layeredRegion,omitempty"`
+	LayeredMountToken string `json:"layeredMountToken,omitempty"`
 }
 
 // InContainerMounter is an optional extension implemented by mounters that

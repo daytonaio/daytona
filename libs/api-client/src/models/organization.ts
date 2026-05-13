@@ -88,8 +88,6 @@ export interface Organization {
     'defaultRegionId'?: string;
     /**
      * Default volume backend for sandbox volumes
-     * @type {string}
-     * @memberof Organization
      */
     'defaultVolumeBackend': OrganizationDefaultVolumeBackendEnum;
     /**
@@ -128,7 +126,8 @@ export interface Organization {
 
 export const OrganizationDefaultVolumeBackendEnum = {
     S3FUSE: 's3fuse',
-    EXPERIMENTAL: 'experimental'
+    LAYERED: 'layered',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type OrganizationDefaultVolumeBackendEnum = typeof OrganizationDefaultVolumeBackendEnum[keyof typeof OrganizationDefaultVolumeBackendEnum];

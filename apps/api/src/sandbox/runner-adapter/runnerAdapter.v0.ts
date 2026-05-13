@@ -198,7 +198,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     otelEndpoint?: string,
     skipStart?: boolean,
   ): Promise<StartSandboxResponse | undefined> {
-    const prepared = await this.volumeService.prepareRunnerVolumes(sandbox.volumes)
+    const prepared = await this.volumeService.prepareRunnerVolumes(sandbox.id, sandbox.volumes)
     const effectiveMetadata = applyVolumeBackendMetadataV0(metadata, prepared.backend)
 
     const createSandboxDto: CreateSandboxDTO = {
@@ -460,7 +460,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
 
   // skipStart is a v2-only signal (carried in the job payload); v0's sync API has no equivalent.
   async recoverSandbox(sandbox: Sandbox, registry?: DockerRegistry, _skipStart?: boolean): Promise<void> {
-    const prepared = await this.volumeService.prepareRunnerVolumes(sandbox.volumes)
+    const prepared = await this.volumeService.prepareRunnerVolumes(sandbox.id, sandbox.volumes)
     const recoverSandboxDTO: RecoverSandboxDTO = {
       userId: sandbox.organizationId,
       snapshot: sandbox.snapshot,

@@ -61,13 +61,6 @@ class Organization(BaseModel):
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "defaultRegionId", "defaultVolumeBackend", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "otelConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"]
 
-    @field_validator('default_volume_backend')
-    def default_volume_backend_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['s3fuse', 'experimental']):
-            raise ValueError("must be one of enum values ('s3fuse', 'experimental')")
-        return value
-
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,

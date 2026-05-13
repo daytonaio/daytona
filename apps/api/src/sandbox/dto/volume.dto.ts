@@ -66,7 +66,7 @@ export class VolumeDto {
     description:
       'Backend that physically stores the volume. Set when the volume is created from the organization default and immutable afterwards.',
     example: 's3fuse',
-    enum: ['s3fuse', 'experimental'],
+    enum: ['s3fuse', 'layered'],
   })
   backend: string
 

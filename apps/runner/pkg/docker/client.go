@@ -25,7 +25,7 @@ type DockerClientConfig struct {
 	BackupInfoCache              *cache.BackupInfoCache
 	Logger                       *slog.Logger
 	DefaultVolumeMounter         volume.Mounter
-	InContainerVolumeMounter     volume.Mounter // optional; when nil, the "experimental" backend silently falls back to s3fuse
+	InContainerVolumeMounter     volume.Mounter // optional; when nil, the "layered" backend silently falls back to s3fuse
 	DaemonPath                   string
 	ComputerUsePluginPath        string
 	NetRulesManager              *netrules.NetRulesManager
@@ -158,18 +158,18 @@ const (
 	// requested or for any unknown backend value.
 	volumeBackendS3Fuse = "s3fuse"
 
-	// volumeBackendExperimental routes to the in-container mounter, which
-	// mounts an Archil disk from inside the sandbox using a per-volume
-	// ARCHIL_MOUNT_TOKEN. Falls back to s3fuse if the runner has no
+	// volumeBackendLayered routes to the in-container mounter, which mounts
+	// a layered-volume disk from inside the sandbox using a per-(sandbox,
+	// volume) mount token. Falls back to s3fuse if the runner has no
 	// in-container mounter configured.
-	volumeBackendExperimental = "experimental"
+	volumeBackendLayered = "layered"
 )
 
 // resolveVolumeMounter selects the volume mounter based on the per-sandbox
-// metadata key. "experimental" routes to the in-container (Archil) mounter
-// when configured; everything else falls back to the host-side s3fuse default.
+// metadata key. "layered" routes to the in-container mounter when
+// configured; everything else falls back to the host-side s3fuse default.
 func (d *DockerClient) resolveVolumeMounter(metadata map[string]string) volume.Mounter {
-	if metadata[volumeBackendMetadataKey] == volumeBackendExperimental && d.inContainerVolumeMounter != nil {
+	if metadata[volumeBackendMetadataKey] == volumeBackendLayered && d.inContainerVolumeMounter != nil {
 		return d.inContainerVolumeMounter
 	}
 	return d.defaultVolumeMounter
@@ -183,7 +183,7 @@ type DockerClient struct {
 	pullTracker                  *common.Tracker[string]
 	logger                       *slog.Logger
 	defaultVolumeMounter         volume.Mounter
-	inContainerVolumeMounter     volume.Mounter // nil when the experimental backend is not configured
+	inContainerVolumeMounter     volume.Mounter // nil when the layered backend is not configured
 	volumeMutexes                map[string]*sync.Mutex
 	volumeMutexesMutex           sync.Mutex
 	daemonPath                   string

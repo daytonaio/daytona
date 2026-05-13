@@ -29,8 +29,6 @@ export interface SandboxVolume {
     'subpath'?: string;
     /**
      * Mount the volume read-only inside this sandbox. The volume itself is unchanged; this is a per-mount attribute, so the same volume can be mounted read-write in one sandbox and read-only in another. Defaults to false.
-     * @type {boolean}
-     * @memberof SandboxVolume
      */
     'readOnly'?: boolean;
 }

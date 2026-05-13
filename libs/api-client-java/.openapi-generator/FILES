@@ -49,7 +49,6 @@ src/main/java/io/daytona/api/client/model/ApiKeyList.java
 src/main/java/io/daytona/api/client/model/ApiKeyResponse.java
 src/main/java/io/daytona/api/client/model/AuditLog.java
 src/main/java/io/daytona/api/client/model/BuildInfo.java
-src/main/java/io/daytona/api/client/model/ChangeVolumeBackend.java
 src/main/java/io/daytona/api/client/model/Command.java
 src/main/java/io/daytona/api/client/model/CompletionContext.java
 src/main/java/io/daytona/api/client/model/CompletionItem.java
@@ -251,7 +250,6 @@ src/test/java/io/daytona/api/client/model/ApiKeyListTest.java
 src/test/java/io/daytona/api/client/model/ApiKeyResponseTest.java
 src/test/java/io/daytona/api/client/model/AuditLogTest.java
 src/test/java/io/daytona/api/client/model/BuildInfoTest.java
-src/test/java/io/daytona/api/client/model/ChangeVolumeBackendTest.java
 src/test/java/io/daytona/api/client/model/CommandTest.java
 src/test/java/io/daytona/api/client/model/CompletionContextTest.java
 src/test/java/io/daytona/api/client/model/CompletionItemTest.java

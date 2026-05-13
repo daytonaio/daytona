@@ -43,13 +43,6 @@ class VolumeDto(BaseModel):
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "state", "createdAt", "updatedAt", "lastUsedAt", "errorReason", "backend"]
 
-    @field_validator('backend')
-    def backend_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['s3fuse', 'experimental']):
-            raise ValueError("must be one of enum values ('s3fuse', 'experimental')")
-        return value
-
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,

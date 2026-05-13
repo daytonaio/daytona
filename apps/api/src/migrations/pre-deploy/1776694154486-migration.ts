@@ -12,9 +12,11 @@ export class Migration1776694154486 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "organization" ADD "defaultVolumeBackend" character varying NOT NULL DEFAULT 's3fuse'`,
     )
+    await queryRunner.query(`ALTER TABLE "organization" ADD "layeredBucketName" character varying`)
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`ALTER TABLE "organization" DROP COLUMN "layeredBucketName"`)
     await queryRunner.query(`ALTER TABLE "organization" DROP COLUMN "defaultVolumeBackend"`)
   }
 }

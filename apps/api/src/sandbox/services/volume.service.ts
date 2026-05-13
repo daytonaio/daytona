@@ -22,18 +22,17 @@ import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { SandboxVolume } from '../dto/sandbox.dto'
-import { EncryptionService } from '../../encryption/encryption.service'
 import { DtoVolumeDTO } from '@daytona/runner-api-client'
-import { VolumeManager } from '../managers/volume.manager'
+import { SandboxVolumeMountService } from './sandbox-volume-mount.service'
 
 export const VOLUME_BACKEND_S3FUSE = 's3fuse'
-export const VOLUME_BACKEND_EXPERIMENTAL = 'experimental'
+export const VOLUME_BACKEND_LAYERED = 'layered'
 
 export interface PreparedRunnerVolumes {
   volumes: DtoVolumeDTO[]
   // The single backend that all of the sandbox's volumes share. Sandbox start
   // sets `metadata.volumeBackend` to this so the runner picks the matching
-  // mounter (host-side s3fuse vs in-container Archil). Undefined when the
+  // mounter (host-side s3fuse vs in-container layered). Undefined when the
   // sandbox has no volumes at all.
   backend?: string
 }
@@ -50,8 +49,7 @@ export class VolumeService {
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly configService: TypedConfigService,
     private readonly redisLockProvider: RedisLockProvider,
-    private readonly encryptionService: EncryptionService,
-    private readonly volumeManager: VolumeManager,
+    private readonly sandboxVolumeMountService: SandboxVolumeMountService,
   ) {}
 
   private async validateOrganizationQuotas(
@@ -102,19 +100,19 @@ export class VolumeService {
     if (backend === VOLUME_BACKEND_S3FUSE && !this.configService.get('s3.endpoint')) {
       throw new ServiceUnavailableException('Object storage is not configured')
     }
-    if (backend === VOLUME_BACKEND_EXPERIMENTAL) {
-      // The experimental backend stores data in a Daytona-owned S3 bucket
-      // and exposes it through an Archil disk that mounts that bucket.
-      // Both services therefore have to be configured — there is no
-      // archil-managed-storage path.
+    if (backend === VOLUME_BACKEND_LAYERED) {
+      // The layered backend stores data in a per-organization S3 bucket
+      // and exposes each volume through a control-plane disk that mounts
+      // a `<volumeId>/` prefix of that bucket. Both services have to be
+      // configured.
       if (!this.configService.get('s3.endpoint')) {
         throw new ServiceUnavailableException(
-          'Experimental volume backend requires S3 to be configured (the Archil disk is backed by a Daytona-owned S3 bucket). Configure S3 or change the organization default to s3fuse.',
+          'Layered volume backend requires S3 to be configured (the layered disk is backed by a Daytona-owned S3 bucket). Configure S3 or change the organization default to s3fuse.',
         )
       }
-      if (!this.configService.get('archil.apiKey')) {
+      if (!this.configService.get('layered.apiKey')) {
         throw new ServiceUnavailableException(
-          'Experimental volume backend (Archil) is not configured. Set ARCHIL_API_KEY or change the organization default to s3fuse.',
+          'Layered volume backend is not configured. Set LAYERED_API_KEY or change the organization default to s3fuse.',
         )
       }
     }
@@ -158,7 +156,7 @@ export class VolumeService {
       volume.backend = backend
 
       const savedVolume = await this.volumeRepository.save(volume)
-      this.logger.debug(`Created volume ${savedVolume.id} for organization ${organization.id}`)
+      this.logger.debug(`Created volume ${savedVolume.id} for organization ${organization.id} (backend=${backend})`)
       return savedVolume
     } catch (error) {
       await this.rollbackPendingUsage(organization.id, pendingVolumeCountIncrement)
@@ -183,115 +181,51 @@ export class VolumeService {
       )
     }
 
-    // Check if any non-destroyed sandboxes are using this volume
-    const sandboxUsingVolume = await this.sandboxRepository
-      .createQueryBuilder('sandbox')
-      .where('sandbox.organizationId = :organizationId', {
-        organizationId: volume.organizationId,
-      })
-      .andWhere('sandbox.volumes @> :volFilter::jsonb', {
-        volFilter: JSON.stringify([{ volumeId }]),
-      })
-      .andWhere('sandbox.desiredState != :destroyed', {
-        destroyed: SandboxDesiredState.DESTROYED,
-      })
-      .select(['sandbox.id', 'sandbox.name'])
-      .getOne()
+    // Refuse if any non-destroyed sandbox is using this volume. For layered
+    // volumes we check `sandbox_volume`; for s3fuse the reference lives in
+    // the sandbox JSONB column.
+    if (volume.backend === VOLUME_BACKEND_LAYERED) {
+      const activeMounts = await this.sandboxVolumeMountService.findAllForVolume(volumeId)
+      if (activeMounts.length) {
+        const activeIds = activeMounts.map((m) => m.sandboxId)
+        const stillRunning = await this.sandboxRepository
+          .createQueryBuilder('sandbox')
+          .where('sandbox.id IN (:...ids)', { ids: activeIds })
+          .andWhere('sandbox.desiredState != :destroyed', { destroyed: SandboxDesiredState.DESTROYED })
+          .select(['sandbox.id', 'sandbox.name'])
+          .getOne()
+        if (stillRunning) {
+          throw new ConflictException(
+            `Volume cannot be deleted because it is in use by one or more sandboxes (e.g. ${stillRunning.name})`,
+          )
+        }
+      }
+    } else {
+      const sandboxUsingVolume = await this.sandboxRepository
+        .createQueryBuilder('sandbox')
+        .where('sandbox.organizationId = :organizationId', {
+          organizationId: volume.organizationId,
+        })
+        .andWhere('sandbox.volumes @> :volFilter::jsonb', {
+          volFilter: JSON.stringify([{ volumeId }]),
+        })
+        .andWhere('sandbox.desiredState != :destroyed', {
+          destroyed: SandboxDesiredState.DESTROYED,
+        })
+        .select(['sandbox.id', 'sandbox.name'])
+        .getOne()
 
-    if (sandboxUsingVolume) {
-      throw new ConflictException(
-        `Volume cannot be deleted because it is in use by one or more sandboxes (e.g. ${sandboxUsingVolume.name})`,
-      )
+      if (sandboxUsingVolume) {
+        throw new ConflictException(
+          `Volume cannot be deleted because it is in use by one or more sandboxes (e.g. ${sandboxUsingVolume.name})`,
+        )
+      }
     }
 
     // Update state to mark as deleting
     volume.state = VolumeState.PENDING_DELETE
     await this.volumeRepository.save(volume)
     this.logger.debug(`Marked volume ${volumeId} for deletion`)
-  }
-
-  // Switches a volume between the s3fuse and experimental backends in
-  // place. The volume's S3 bucket (and therefore its data) is preserved;
-  // we only attach or detach an Archil disk on top of it.
-  //
-  // Safety: refuses to switch if any sandbox referencing the volume is
-  // currently running (desiredState IN started, resized). A running
-  // sandbox is holding a mount via the *previous* backend, and starting a
-  // new sandbox after the switch would mount the same bucket through the
-  // *new* backend — two writers on the same bucket through different
-  // cache layers, which is unsafe. Stop the affected sandboxes and retry.
-  //
-  // Idempotent: switching to the backend a volume is already on returns
-  // the row unchanged.
-  async changeBackend(volumeId: string, target: string): Promise<Volume> {
-    if (target !== VOLUME_BACKEND_S3FUSE && target !== VOLUME_BACKEND_EXPERIMENTAL) {
-      throw new BadRequestError(
-        `Invalid volume backend '${target}'. Expected one of: ${VOLUME_BACKEND_S3FUSE}, ${VOLUME_BACKEND_EXPERIMENTAL}.`,
-      )
-    }
-
-    const volume = await this.findOne(volumeId)
-    const currentBackend = volume.backend || VOLUME_BACKEND_S3FUSE
-
-    if (currentBackend === target) {
-      return volume
-    }
-
-    if (volume.state !== VolumeState.READY) {
-      throw new BadRequestError(
-        `Volume must be in '${VolumeState.READY}' state to change its backend (currently '${volume.state}').`,
-      )
-    }
-
-    // Configuration prerequisites for the target backend.
-    if (!this.configService.get('s3.endpoint')) {
-      throw new ServiceUnavailableException(
-        'Object storage is not configured; cannot migrate the volume because both backends rely on its S3 bucket.',
-      )
-    }
-    if (target === VOLUME_BACKEND_EXPERIMENTAL && !this.configService.get('archil.apiKey')) {
-      throw new ServiceUnavailableException(
-        'Cannot migrate to the experimental backend: Archil is not configured on this API. Set ARCHIL_API_KEY.',
-      )
-    }
-
-    // Refuse if any sandbox referencing this volume is actively running
-    // or transitioning. A `STOPPED` / `ARCHIVED` / `DESTROYED` sandbox
-    // doesn't hold a mount, so switching is safe — it'll get the new
-    // backend on its next start.
-    const blockingSandbox = await this.sandboxRepository
-      .createQueryBuilder('sandbox')
-      .where('sandbox.organizationId = :organizationId', { organizationId: volume.organizationId })
-      .andWhere('sandbox.volumes @> :volFilter::jsonb', { volFilter: JSON.stringify([{ volumeId }]) })
-      .andWhere('sandbox.desiredState IN (:...active)', {
-        active: [SandboxDesiredState.STARTED, SandboxDesiredState.RESIZED],
-      })
-      .select(['sandbox.id', 'sandbox.name'])
-      .getOne()
-
-    if (blockingSandbox) {
-      throw new ConflictException(
-        `Volume backend cannot be changed because it is currently in use by sandbox '${blockingSandbox.name}'. ` +
-          `Stop the sandbox and retry.`,
-      )
-    }
-
-    // Delegate the resource ops to the manager, then persist the new
-    // `backend` value. We update `backend` last so a partial migration
-    // (e.g. Archil createDisk failed) leaves the row pointing at the
-    // backend whose resources are still intact, and the user's next
-    // sandbox start sees consistent state.
-    let updated: Volume
-    if (target === VOLUME_BACKEND_EXPERIMENTAL) {
-      updated = await this.volumeManager.attachArchilDiskTo(volume)
-    } else {
-      updated = await this.volumeManager.detachArchilDiskFrom(volume)
-    }
-    updated.backend = target
-    const saved = await this.volumeRepository.save(updated)
-
-    this.logger.debug(`Volume ${volume.id} backend changed: ${currentBackend} → ${target}`)
-    return saved
   }
 
   async findOne(volumeId: string): Promise<Volume> {
@@ -367,77 +301,77 @@ export class VolumeService {
     }
   }
 
-  // Builds the runner-facing volume DTOs for a sandbox by resolving each
-  // SandboxVolume reference to its persisted Volume and decorating it with
-  // backend-specific fields (e.g. Archil disk + region + decrypted mount
-  // token for the experimental backend). Also returns the single shared
-  // backend so sandbox-start can stamp it on the sandbox metadata.
+  // Resolves the per-sandbox volume DTOs that the runner expects, branching
+  // on storage layout:
   //
-  // Mixed backends within a single sandbox are explicitly rejected: the
-  // runner picks one mounter per sandbox, and silently dropping volumes is
-  // worse than failing fast.
-  async prepareRunnerVolumes(sandboxVolumes?: SandboxVolume[]): Promise<PreparedRunnerVolumes> {
-    if (!sandboxVolumes?.length) {
+  //  - sandboxes with rows in `sandbox_volume` (layered backend) — token is
+  //    minted on demand by `SandboxVolumeMountService.prepareForStart`.
+  //  - sandboxes with entries in `sandbox.volumes` JSONB (legacy s3fuse) —
+  //    DTOs are built straight from the JSONB references.
+  //
+  // The two paths are mutually exclusive by construction: layered volumes
+  // are never written to the JSONB column, and s3fuse volumes are never
+  // written to `sandbox_volume`. Sandboxes pre-dating the layered backend
+  // therefore continue to work bit-for-bit on the legacy path.
+  async prepareRunnerVolumes(sandboxId: string, sandboxVolumesJsonb?: SandboxVolume[]): Promise<PreparedRunnerVolumes> {
+    const layered = await this.sandboxVolumeMountService.prepareForStart(sandboxId)
+    if (layered.length > 0) {
+      if (sandboxVolumesJsonb?.length) {
+        // Should be impossible (we never persist both), but treat as a
+        // hard error so we surface the inconsistency instead of silently
+        // dropping mounts.
+        throw new BadRequestError(
+          `Sandbox ${sandboxId} has both legacy s3fuse volume references and layered sandbox_volume rows. ` +
+            `Refusing to start; one of the two must be cleaned up.`,
+        )
+      }
+      const dtos: DtoVolumeDTO[] = layered.map(({ mount, volume, mountToken }) => ({
+        volumeId: mount.volumeId,
+        mountPath: mount.mountPath,
+        subpath: mount.subpath ?? undefined,
+        readOnly: mount.readOnly,
+        layeredDisk: volume.layeredDiskId,
+        layeredRegion: volume.layeredRegion,
+        layeredMountToken: mountToken,
+      }))
+      return { volumes: dtos, backend: VOLUME_BACKEND_LAYERED }
+    }
+
+    if (!sandboxVolumesJsonb?.length) {
       return { volumes: [], backend: undefined }
     }
 
-    const volumeIds = sandboxVolumes.map((v) => v.volumeId)
+    const volumeIds = sandboxVolumesJsonb.map((v) => v.volumeId)
     const persisted = await this.volumeRepository.find({ where: { id: In(volumeIds) } })
     const persistedById = new Map(persisted.map((v) => [v.id, v]))
 
     const dtos: DtoVolumeDTO[] = []
-    let resolvedBackend: string | undefined
-
-    for (const ref of sandboxVolumes) {
+    for (const ref of sandboxVolumesJsonb) {
       const volume = persistedById.get(ref.volumeId)
       if (!volume) {
-        // Treat as s3fuse to preserve the historical behavior of allowing the
-        // runner to fail later with a clearer "volume not found" instead of
-        // crashing the start path here. Users immediately hit a NotFound on
-        // the sandbox.start call anyway.
         throw new NotFoundException(`Volume ${ref.volumeId} not found`)
       }
-
-      const backend = volume.backend || VOLUME_BACKEND_S3FUSE
-      if (resolvedBackend === undefined) {
-        resolvedBackend = backend
-      } else if (resolvedBackend !== backend) {
+      if ((volume.backend || VOLUME_BACKEND_S3FUSE) !== VOLUME_BACKEND_S3FUSE) {
+        // Defense-in-depth: the create path forbids putting layered
+        // volumes on the JSONB column, but if somehow one ended up here
+        // the runner would silently try to s3fuse-mount it. Fail loudly.
         throw new BadRequestError(
-          `Sandbox volumes must all share the same backend. Found '${resolvedBackend}' and '${backend}'.`,
+          `Volume ${volume.id} uses backend '${volume.backend}' but is referenced via the legacy s3fuse JSONB column.`,
         )
       }
-
-      const dto: DtoVolumeDTO = {
+      dtos.push({
         volumeId: ref.volumeId,
         mountPath: ref.mountPath,
         subpath: ref.subpath,
-        // Per-mount read-only flag. Honored by both backends:
-        //  - s3fuse: enforced via Docker bind mode (`:ro` on the bind spec)
-        //    so the host-side mount-s3 can stay shared and writable; only
-        //    the in-container view is read-only.
-        //  - experimental: passed as `--read-only` to `archil mount` inside
-        //    the sandbox. Archil RO mounts don't take a write delegation,
-        //    so multiple sandboxes can hold concurrent RO mounts of the
-        //    same disk while a separate RW mount is active elsewhere.
+        // Per-mount read-only flag honored by both backends. The s3fuse
+        // path enforces it via Docker bind mode (`:ro` on the bind spec)
+        // so the host-side mount-s3 can stay shared and writable; only
+        // the in-container view is read-only.
         readOnly: ref.readOnly,
-      }
-
-      if (backend === VOLUME_BACKEND_EXPERIMENTAL) {
-        if (!volume.archilDiskId || !volume.archilRegion || !volume.archilMountTokenEnc) {
-          throw new BadRequestError(
-            `Volume ${volume.id} uses the experimental backend but is missing Archil provisioning data. ` +
-              `It may still be in '${volume.state}' state; wait for it to reach '${VolumeState.READY}' or check the volume's errorReason.`,
-          )
-        }
-        dto.archilDisk = volume.archilDiskId
-        dto.archilRegion = volume.archilRegion
-        dto.archilMountToken = await this.encryptionService.decrypt(volume.archilMountTokenEnc)
-      }
-
-      dtos.push(dto)
+      })
     }
 
-    return { volumes: dtos, backend: resolvedBackend }
+    return { volumes: dtos, backend: VOLUME_BACKEND_S3FUSE }
   }
 
   async getOrganizationId(params: { id: string } | { name: string; organizationId: string }): Promise<string> {

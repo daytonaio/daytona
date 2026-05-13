@@ -6,13 +6,12 @@
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common'
 import { TypedConfigService } from '../../../config/typed-config.service'
 
-// Default per-region Archil control-plane URLs documented at
-// https://docs.archil.com/api-reference/introduction.
+// Default per-region control-plane URLs used by the layered volume backend.
 //
 // Each region has its own control-plane host; disks live in exactly one
 // region and must be created against the matching host. The mapping below
-// can be overridden per-region with `ARCHIL_CONTROL_URL_<REGION>` env vars
-// (with `-` replaced by `_`, e.g. `ARCHIL_CONTROL_URL_AWS_US_EAST_1`) when a
+// can be overridden per-region with `LAYERED_CONTROL_URL_<REGION>` env vars
+// (with `-` replaced by `_`, e.g. `LAYERED_CONTROL_URL_AWS_US_EAST_1`) when a
 // future region or staging endpoint becomes available.
 const DEFAULT_CONTROL_URLS: Record<string, string> = {
   'aws-us-east-1': 'https://control.green.us-east-1.aws.prod.archil.com',
@@ -21,25 +20,25 @@ const DEFAULT_CONTROL_URLS: Record<string, string> = {
   'gcp-us-central1': 'https://control.blue.us-central1.gcp.prod.archil.com',
 }
 
-export interface ArchilDisk {
+export interface LayeredDisk {
   diskId: string
   region: string
-  // One-time mount token returned by Archil at disk creation time. This is
-  // the only credential clients need to mount the disk; it grants full
-  // read/write access. Cannot be retrieved again from Archil — store it
-  // (encrypted) on first receipt.
+  // One-time mount token returned at disk creation time. This is the only
+  // credential clients need to mount the disk; it grants read/write access
+  // to the disk's bucket prefix. Cannot be retrieved again from the control
+  // plane — store it (encrypted) on first receipt.
   mountToken: string
 }
 
-// External storage backing for an Archil disk. Daytona always uses an
-// S3 bucket as the backing store for experimental volumes — Archil's
-// own managed storage is intentionally not exposed.
+// External storage backing for a layered disk. Daytona always uses an
+// S3 bucket as the backing store for layered volumes — vendor-managed
+// storage is intentionally not exposed.
 //
-// Use the `s3` variant for AWS S3 buckets (Archil resolves the endpoint
-// from the bucket's region). Use `s3-compatible` for non-AWS S3 endpoints
-// such as MinIO or Cloudflare R2 — those require an explicit
+// Use the `s3` variant for AWS S3 buckets (the control plane resolves the
+// endpoint from the bucket's region). Use `s3-compatible` for non-AWS S3
+// endpoints such as MinIO or Cloudflare R2 — those require an explicit
 // `bucketEndpoint` URL.
-export type ArchilDiskMount =
+export type LayeredDiskMount =
   | {
       type: 's3'
       bucketName: string
@@ -57,17 +56,17 @@ export type ArchilDiskMount =
       bucketPrefix?: string
     }
 
-export interface CreateDiskOptions {
+export interface CreateLayeredDiskOptions {
   // Stable, idempotent name for the disk. Reusing the exact same name with
   // the same configuration is a no-op (200 OK); reusing it with different
   // configuration is a 409 conflict.
   name: string
-  // Region the disk should live in. Defaults to `archil.defaultRegion`.
+  // Region the disk should live in. Defaults to `layered.defaultRegion`.
   region?: string
   // External storage backing for the disk. Required — Daytona never
-  // provisions Archil-managed storage; every experimental volume is
-  // backed by an S3 bucket we own.
-  mount: ArchilDiskMount
+  // provisions vendor-managed storage; every layered volume is backed by
+  // a Daytona-owned S3 bucket.
+  mount: LayeredDiskMount
 }
 
 interface ApiResponseEnvelope<T> {
@@ -86,19 +85,36 @@ interface CreateDiskResponseData {
   }>
 }
 
+interface AddAuthorizedUserResponseData {
+  // The new authorized user as returned by the control plane.
+  type?: string
+  token?: string
+  identifier?: string
+  nickname?: string
+}
+
+export interface MintMountKeyOptions {
+  diskId: string
+  region: string
+  // Optional human-readable nickname forwarded to the control plane for
+  // attribution (e.g. "sandbox-<id>"). Useful when debugging which sandbox
+  // a given token belongs to.
+  nickname?: string
+}
+
 @Injectable()
-export class ArchilClient {
-  private readonly logger = new Logger(ArchilClient.name)
+export class LayeredVolumeClient {
+  private readonly logger = new Logger(LayeredVolumeClient.name)
   private readonly apiKey?: string
   private readonly defaultRegion: string
 
   constructor(private readonly configService: TypedConfigService) {
-    this.apiKey = this.configService.get('archil.apiKey')
-    this.defaultRegion = this.configService.get('archil.defaultRegion') || 'aws-us-east-1'
+    this.apiKey = this.configService.get('layered.apiKey')
+    this.defaultRegion = this.configService.get('layered.defaultRegion') || 'aws-us-east-1'
   }
 
-  // Whether the Archil control-plane integration is configured. The
-  // experimental volume backend requires this; volumes scheduled for that
+  // Whether the layered control-plane integration is configured. The
+  // layered volume backend requires this; volumes scheduled for that
   // backend will fail with a clear error when it isn't.
   isConfigured(): boolean {
     return Boolean(this.apiKey)
@@ -108,13 +124,13 @@ export class ArchilClient {
     return this.defaultRegion
   }
 
-  // Creates an Archil disk and returns its ID, region, and the one-time
+  // Creates a layered disk and returns its ID, region, and the one-time
   // mount token generated by the control plane. Idempotent on `name`.
   //
-  // Each Daytona volume must map 1:1 to its own Archil disk so that the
-  // returned mount token (which grants full disk access) can serve as the
+  // Each Daytona volume maps 1:1 to its own layered disk so that the
+  // returned mount token (which grants disk access) can serve as the
   // isolation boundary between organizations and users.
-  async createDisk(opts: CreateDiskOptions): Promise<ArchilDisk> {
+  async createDisk(opts: CreateLayeredDiskOptions): Promise<LayeredDisk> {
     this.assertConfigured()
     const region = opts.region || this.defaultRegion
     const baseUrl = this.resolveControlUrl(region)
@@ -123,15 +139,16 @@ export class ArchilClient {
       method: 'POST',
       body: JSON.stringify({
         name: opts.name,
-        // Archil's API takes a list of mounts; we always provision exactly
-        // one S3 mount per disk so the disk is a 1:1 view of a Daytona-owned
-        // bucket. No archil-managed storage path is supported.
+        // The control plane takes a list of mounts; we always provision
+        // exactly one S3 mount per disk so the disk is a 1:1 view of a
+        // Daytona-owned bucket (optionally scoped to a prefix). No
+        // vendor-managed storage path is supported.
         mounts: [opts.mount],
       }),
     })
 
     if (!res.diskId) {
-      throw new Error('Archil createDisk response missing diskId')
+      throw new Error('createDisk response missing diskId')
     }
 
     // Pull the auto-generated token user the API provisions on disk
@@ -140,7 +157,7 @@ export class ArchilClient {
     const tokenUser = res.authorizedUsers?.find((u) => u.type === 'token' && u.token)
     if (!tokenUser?.token) {
       throw new Error(
-        `Archil createDisk response did not include a generated token (diskId=${res.diskId}). ` +
+        `createDisk response did not include a generated token (diskId=${res.diskId}). ` +
           `The disk exists but is not mountable; delete it manually or open a support ticket.`,
       )
     }
@@ -152,7 +169,7 @@ export class ArchilClient {
     }
   }
 
-  // Deletes an Archil disk and all its associated resources. Treats 404 as
+  // Deletes a layered disk and all its associated resources. Treats 404 as
   // success so that retries after a partial delete are safe.
   async deleteDisk(diskId: string, region: string): Promise<void> {
     this.assertConfigured()
@@ -164,16 +181,56 @@ export class ArchilClient {
     })
   }
 
+  // Adds a new token-based authorized user to an existing disk and returns
+  // its token. Used to mint per-(sandbox, volume) mount keys so a given
+  // sandbox can be granted access independently from others and revoked
+  // without invalidating the rest.
+  async mintMountKey(opts: MintMountKeyOptions): Promise<string> {
+    this.assertConfigured()
+    const baseUrl = this.resolveControlUrl(opts.region)
+
+    const res = await this.request<AddAuthorizedUserResponseData>(
+      `${baseUrl}/api/disks/${encodeURIComponent(opts.diskId)}/authorized-users`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'token',
+          ...(opts.nickname ? { nickname: opts.nickname } : {}),
+        }),
+      },
+    )
+
+    if (!res?.token) {
+      throw new Error(`mintMountKey response missing token for disk ${opts.diskId}`)
+    }
+    return res.token
+  }
+
+  // Revokes a previously minted token from a disk. Treats 404 as success so
+  // double-revokes (e.g. after partial sandbox destroy) are safe.
+  async revokeMountKey(diskId: string, region: string, token: string): Promise<void> {
+    this.assertConfigured()
+    const baseUrl = this.resolveControlUrl(region)
+
+    await this.request<unknown>(
+      `${baseUrl}/api/disks/${encodeURIComponent(diskId)}/authorized-users/${encodeURIComponent(token)}`,
+      {
+        method: 'DELETE',
+        treat404AsOk: true,
+      },
+    )
+  }
+
   private assertConfigured(): void {
     if (!this.apiKey) {
       throw new ServiceUnavailableException(
-        'Archil control plane is not configured. Set ARCHIL_API_KEY to enable the experimental volume backend.',
+        'Layered volume control plane is not configured. Set LAYERED_API_KEY to enable the layered volume backend.',
       )
     }
   }
 
   private resolveControlUrl(region: string): string {
-    const overrideKey = `ARCHIL_CONTROL_URL_${region.toUpperCase().replace(/-/g, '_')}`
+    const overrideKey = `LAYERED_CONTROL_URL_${region.toUpperCase().replace(/-/g, '_')}`
     const override = process.env[overrideKey]
     if (override) {
       return override.replace(/\/$/, '')
@@ -181,7 +238,7 @@ export class ArchilClient {
     const fallback = DEFAULT_CONTROL_URLS[region]
     if (!fallback) {
       throw new Error(
-        `Unknown Archil region "${region}". Set ${overrideKey} to its control-plane URL or pick a documented region.`,
+        `Unknown layered region "${region}". Set ${overrideKey} to its control-plane URL or pick a documented region.`,
       )
     }
     return fallback
@@ -210,13 +267,13 @@ export class ArchilClient {
       envelope = raw ? (JSON.parse(raw) as ApiResponseEnvelope<T>) : { success: response.ok }
     } catch {
       throw new Error(
-        `Archil ${init.method} ${url} returned non-JSON response (status ${response.status}): ${raw.slice(0, 200)}`,
+        `Layered ${init.method} ${url} returned non-JSON response (status ${response.status}): ${raw.slice(0, 200)}`,
       )
     }
 
     if (!response.ok || envelope.success === false) {
       const message = envelope.error || `${init.method} ${url} failed with status ${response.status}`
-      throw new Error(`Archil control plane error: ${message}`)
+      throw new Error(`Layered control plane error: ${message}`)
     }
 
     return envelope.data as T

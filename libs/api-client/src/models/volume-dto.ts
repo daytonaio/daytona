@@ -52,15 +52,14 @@ export interface VolumeDto {
     'errorReason': string | null;
     /**
      * Backend that physically stores the volume. Set when the volume is created from the organization default and immutable afterwards.
-     * @type {string}
-     * @memberof VolumeDto
      */
     'backend': VolumeDtoBackendEnum;
 }
 
 export const VolumeDtoBackendEnum = {
     S3FUSE: 's3fuse',
-    EXPERIMENTAL: 'experimental'
+    LAYERED: 'layered',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
 export type VolumeDtoBackendEnum = typeof VolumeDtoBackendEnum[keyof typeof VolumeDtoBackendEnum];

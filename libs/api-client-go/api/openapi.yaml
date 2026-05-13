@@ -773,7 +773,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateOrganizationDefaultVolumeBackend'
+              $ref: "#/components/schemas/UpdateOrganizationDefaultVolumeBackend"
         required: true
       responses:
         "204":
@@ -7818,54 +7818,6 @@ paths:
       summary: Get volume details
       tags:
       - volumes
-  /volumes/{volumeId}/backend:
-    put:
-      description: Switches an existing volume between the s3fuse and experimental
-        backends in place. The volume's S3 bucket and data are preserved; only the
-        mount strategy changes. Refuses to switch while any sandbox referencing the
-        volume is running.
-      operationId: changeVolumeBackend
-      parameters:
-      - description: Use with JWT to specify the organization ID
-        explode: false
-        in: header
-        name: X-Daytona-Organization-ID
-        required: false
-        schema:
-          type: string
-        style: simple
-      - description: ID of the volume
-        explode: false
-        in: path
-        name: volumeId
-        required: true
-        schema:
-          type: string
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChangeVolumeBackend'
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/VolumeDto'
-          description: Volume's backend has been switched
-        "409":
-          description: Volume is in use by a running sandbox
-      security:
-      - bearer: []
-      - oauth2:
-        - openid
-        - profile
-        - email
-      summary: Change a volume's backend
-      tags:
-      - volumes
   /volumes/by-name/{name}:
     get:
       operationId: getVolumeByName
@@ -9908,7 +9860,7 @@ components:
           description: Default volume backend for sandbox volumes
           enum:
           - s3fuse
-          - experimental
+          - layered
           example: s3fuse
           type: string
         authenticatedRateLimit:
@@ -10227,11 +10179,11 @@ components:
       properties:
         defaultVolumeBackend:
           description: The default volume backend for the organization. `s3fuse` mounts
-            on the runner host (existing behavior). `experimental` mounts inside the
-            sandbox via Archil using a per-volume mount token.
+            on the runner host (existing behavior). `layered` mounts inside the sandbox
+            via the layered control plane using a per-sandbox-volume mount token.
           enum:
           - s3fuse
-          - experimental
+          - layered
           example: s3fuse
           type: string
       required:
@@ -14294,7 +14246,7 @@ components:
             is created from the organization default and immutable afterwards.
           enum:
           - s3fuse
-          - experimental
+          - layered
           example: s3fuse
           type: string
       required:
@@ -14315,23 +14267,6 @@ components:
           type: string
       required:
       - name
-      type: object
-    ChangeVolumeBackend:
-      example:
-        backend: experimental
-      properties:
-        backend:
-          description: The backend to switch the volume to. `s3fuse` mounts the volume's
-            bucket on the runner host; `experimental` exposes the same bucket through
-            an Archil disk that is mounted inside the sandbox. The volume's data (its
-            S3 bucket) is preserved across the switch - only the mount strategy changes.
-          enum:
-          - s3fuse
-          - experimental
-          example: experimental
-          type: string
-      required:
-      - backend
       type: object
     JobStatus:
       enum:

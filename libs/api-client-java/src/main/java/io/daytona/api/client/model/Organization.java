@@ -145,7 +145,9 @@ public class Organization {
   public enum DefaultVolumeBackendEnum {
     S3FUSE("s3fuse"),
     
-    EXPERIMENTAL("experimental");
+    LAYERED("layered"),
+    
+    UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 
     private String value;
 
@@ -168,7 +170,7 @@ public class Organization {
           return b;
         }
       }
-      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+      return UNKNOWN_DEFAULT_OPEN_API;
     }
 
     public static class Adapter extends TypeAdapter<DefaultVolumeBackendEnum> {
@@ -910,15 +912,15 @@ public class Organization {
       if ((jsonObj.get("defaultRegionId") != null && !jsonObj.get("defaultRegionId").isJsonNull()) && !jsonObj.get("defaultRegionId").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `defaultRegionId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("defaultRegionId").toString()));
       }
+      if (!jsonObj.get("defaultVolumeBackend").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `defaultVolumeBackend` to be a primitive type in the JSON string but got `%s`", jsonObj.get("defaultVolumeBackend").toString()));
+      }
+      // validate the required field `defaultVolumeBackend`
+      DefaultVolumeBackendEnum.validateJsonElement(jsonObj.get("defaultVolumeBackend"));
       if (jsonObj.get("otelConfig") != null && !jsonObj.get("otelConfig").isJsonNull()) {
       // validate the required field `otelConfig`
       OtelConfig.validateJsonElement(jsonObj.get("otelConfig"));
       }
-      if (!jsonObj.get("defaultVolumeBackend").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `defaultVolumeBackend` to be a primitive type in the JSON string but got `%s`", jsonObj.get("defaultVolumeBackend").toString()));
-      }
-      // validate the required field `defaultVolumeBackend`
-      DefaultVolumeBackendEnum.validateJsonElement(jsonObj.get("defaultVolumeBackend"));
   }
 
   public static class CustomTypeAdapterFactory implements TypeAdapterFactory {

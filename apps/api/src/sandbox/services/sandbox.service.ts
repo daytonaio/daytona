@@ -60,7 +60,9 @@ import { validateNetworkAllowList } from '../utils/network-validation.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { SshAccess } from '../entities/ssh-access.entity'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
-import { VolumeService } from './volume.service'
+import { VolumeService, VOLUME_BACKEND_LAYERED } from './volume.service'
+import { SandboxVolumeMountService } from './sandbox-volume-mount.service'
+import { Volume } from '../entities/volume.entity'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 import {
   SandboxSortField,
@@ -144,6 +146,9 @@ export class SandboxService {
     private readonly dockerRegistryService: DockerRegistryService,
     @InjectRepository(SandboxFork)
     private readonly sandboxForkRepository: Repository<SandboxFork>,
+    @InjectRepository(Volume)
+    private readonly volumeRepository: Repository<Volume>,
+    private readonly sandboxVolumeMountService: SandboxVolumeMountService,
   ) {}
 
   protected getLockKey(id: string): string {
@@ -563,14 +568,28 @@ export class SandboxService {
         sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
       }
 
+      let layeredRefsToAttach: SandboxVolume[] = []
+      let layeredVolumesById = new Map<string, Volume>()
       if (createSandboxDto.volumes !== undefined) {
-        sandbox.volumes = this.resolveVolumes(createSandboxDto.volumes)
+        const validated = this.resolveVolumes(createSandboxDto.volumes)
+        const split = await this.splitVolumesByBackend(organization.id, validated)
+        sandbox.volumes = split.jsonbRefs
+        layeredRefsToAttach = split.layeredRefs
+        layeredVolumesById = split.volumesById
       }
 
       sandbox.runnerId = runner.id
       sandbox.pending = true
 
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
+
+      if (layeredRefsToAttach.length) {
+        await this.sandboxVolumeMountService.attachVolumesToSandbox(
+          insertedSandbox.id,
+          layeredRefsToAttach,
+          layeredVolumesById,
+        )
+      }
 
       this.eventEmitter
         .emitAsync(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox))
@@ -741,8 +760,14 @@ export class SandboxService {
         sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
       }
 
+      let layeredRefsToAttach: SandboxVolume[] = []
+      let layeredVolumesById = new Map<string, Volume>()
       if (createSandboxDto.volumes !== undefined) {
-        sandbox.volumes = this.resolveVolumes(createSandboxDto.volumes)
+        const validated = this.resolveVolumes(createSandboxDto.volumes)
+        const split = await this.splitVolumesByBackend(organization.id, validated)
+        sandbox.volumes = split.jsonbRefs
+        layeredRefsToAttach = split.layeredRefs
+        layeredVolumesById = split.volumesById
       }
 
       const buildInfoSnapshotRef = generateBuildSnapshotRef(
@@ -812,6 +837,14 @@ export class SandboxService {
       sandbox.pending = true
 
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
+
+      if (layeredRefsToAttach.length) {
+        await this.sandboxVolumeMountService.attachVolumesToSandbox(
+          insertedSandbox.id,
+          layeredRefsToAttach,
+          layeredVolumesById,
+        )
+      }
 
       this.eventEmitter
         .emitAsync(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox))
@@ -946,6 +979,29 @@ export class SandboxService {
 
       try {
         insertedForkedSandbox = await this.sandboxRepository.insert(forkedSandbox, sourceSandbox.id)
+
+        // Copy any layered mount records (sandbox_volume rows) from the
+        // source to the new sandbox so the fork sees the same volumes.
+        // Tokens are intentionally NOT copied — they're per-(sandbox,
+        // volume) by design and will be minted on the fork's first start.
+        const sourceMounts = await this.sandboxVolumeMountService.findAllForSandbox(sourceSandbox.id)
+        if (sourceMounts.length) {
+          const volumeRefs: SandboxVolume[] = sourceMounts.map((m) => ({
+            volumeId: m.volumeId,
+            mountPath: m.mountPath,
+            subpath: m.subpath ?? undefined,
+            readOnly: m.readOnly,
+          }))
+          const volumes = await this.volumeRepository.find({
+            where: { id: In(sourceMounts.map((m) => m.volumeId)) },
+          })
+          await this.sandboxVolumeMountService.attachVolumesToSandbox(
+            insertedForkedSandbox.id,
+            volumeRefs,
+            new Map(volumes.map((v) => [v.id, v])),
+          )
+        }
+
         const runnerAdapter = await this.runnerAdapterFactory.create(runner)
         await runnerAdapter.forkSandbox(sourceSandbox.id, insertedForkedSandbox.id)
       } catch (error) {
@@ -2816,6 +2872,82 @@ export class SandboxService {
     }
 
     return volumes
+  }
+
+  // Routes the user's volume references between the two storage layouts.
+  // Loads the underlying `Volume` rows to inspect each backend, then
+  // returns:
+  //
+  //  - `jsonbRefs`: legacy s3fuse mounts that should be persisted on
+  //    `sandbox.volumes` JSONB (and continue to flow through the existing
+  //    runner DTO path).
+  //  - `layeredRefs`: layered mounts that should be inserted into the
+  //    `sandbox_volume` table after the sandbox row exists. Caller must
+  //    call `sandboxVolumeMountService.attachVolumesToSandbox` post-insert.
+  //
+  // Mixed-backend sandboxes are rejected here, not at the runner: every
+  // mount in a single sandbox must share the same backend so the runner
+  // can pick a single mounter from `metadata.volumeBackend`.
+  private async splitVolumesByBackend(
+    organizationId: string,
+    volumes: SandboxVolume[],
+  ): Promise<{
+    jsonbRefs: SandboxVolume[]
+    layeredRefs: SandboxVolume[]
+    volumesById: Map<string, Volume>
+  }> {
+    if (!volumes?.length) {
+      return { jsonbRefs: [], layeredRefs: [], volumesById: new Map() }
+    }
+
+    const idOrNames = volumes.map((v) => v.volumeId)
+    // The caller's `volumeId` field can be either a UUID or a name.
+    // `validateVolumes` accepts both and is run before us; we replicate the
+    // same lookup here so the user-facing ID stays valid as a reference.
+    const resolved = await this.volumeRepository
+      .createQueryBuilder('volume')
+      .where('volume.organizationId = :organizationId', { organizationId })
+      .andWhere('(volume.id IN (:...ids) OR volume.name IN (:...ids))', { ids: idOrNames })
+      .getMany()
+
+    const byKey = new Map<string, Volume>()
+    for (const v of resolved) {
+      byKey.set(v.id, v)
+      byKey.set(v.name, v)
+    }
+
+    const jsonbRefs: SandboxVolume[] = []
+    const layeredRefs: SandboxVolume[] = []
+    const volumesById = new Map<string, Volume>()
+    const backendsSeen = new Set<string>()
+
+    for (const ref of volumes) {
+      const volume = byKey.get(ref.volumeId)
+      if (!volume) {
+        throw new NotFoundException(`Volume '${ref.volumeId}' not found`)
+      }
+      const backend = volume.backend || 's3fuse'
+      backendsSeen.add(backend)
+      volumesById.set(volume.id, volume)
+
+      // Always pin the ref to the canonical UUID so downstream code never
+      // has to reconcile name-vs-id.
+      const canonical: SandboxVolume = { ...ref, volumeId: volume.id }
+      if (backend === VOLUME_BACKEND_LAYERED) {
+        layeredRefs.push(canonical)
+      } else {
+        jsonbRefs.push(canonical)
+      }
+    }
+
+    if (backendsSeen.size > 1) {
+      throw new BadRequestError(
+        `Cannot mix volume backends in a single sandbox (saw: ${Array.from(backendsSeen).sort().join(', ')}). ` +
+          `Split the mounts into separate sandboxes or recreate the volumes with a consistent backend.`,
+      )
+    }
+
+    return { jsonbRefs, layeredRefs, volumesById }
   }
 
   async createSshAccess(

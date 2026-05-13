@@ -152,16 +152,16 @@ func run() int {
 		AWSSecretAccessKey: cfg.AWSSecretAccessKey,
 	}, logger))
 
-	// Experimental in-container mounter: registered only when the operator
-	// has installed the `archil` CLI binary on the host and pointed
-	// ARCHIL_BINARY_PATH at it. When unset, the "experimental" backend is
+	// Layered in-container mounter: registered only when the operator has
+	// installed the layered mount CLI binary on the host and pointed
+	// LAYERED_BINARY_PATH at it. When unset, the "layered" backend is
 	// disabled and organizations that select it silently fall back to
-	// "s3fuse" (host-side). Per-disk mount tokens are supplied by the
-	// control plane on each volume; the runner does not need an Archil
-	// API key.
+	// "s3fuse" (host-side). Per-(sandbox, volume) mount tokens are supplied
+	// by the control plane on each volume; the runner does not need a
+	// layered API key.
 	inContainerVolumeMounter, err := maybeBuildInContainerMounter(ctx, cfg, logger)
 	if err != nil {
-		logger.Error("Failed to initialize experimental in-container volume backend", "error", err)
+		logger.Error("Failed to initialize layered in-container volume backend", "error", err)
 		return 2
 	}
 
@@ -344,28 +344,28 @@ func run() int {
 	}
 }
 
-// maybeBuildInContainerMounter constructs the experimental in-container
-// (Archil) volume mounter when the operator has provided ARCHIL_BINARY_PATH,
-// or returns (nil, nil) to indicate the backend stays disabled. When disabled,
-// resolveVolumeMounter silently falls "experimental" sandboxes back to s3fuse.
+// maybeBuildInContainerMounter constructs the layered in-container volume
+// mounter when the operator has provided LAYERED_BINARY_PATH, or returns
+// (nil, nil) to indicate the backend stays disabled. When disabled,
+// resolveVolumeMounter silently falls "layered" sandboxes back to s3fuse.
 //
-// A non-nil error is returned only when ARCHIL_BINARY_PATH is set but invalid,
-// so the runner fails fast on operator misconfiguration.
+// A non-nil error is returned only when LAYERED_BINARY_PATH is set but
+// invalid, so the runner fails fast on operator misconfiguration.
 func maybeBuildInContainerMounter(_ context.Context, cfg *config.Config, logger *slog.Logger) (volume.Mounter, error) {
-	if cfg.ArchilBinaryPath == "" {
+	if cfg.LayeredBinaryPath == "" {
 		return nil, nil
 	}
-	if _, err := os.Stat(cfg.ArchilBinaryPath); err != nil {
-		return nil, fmt.Errorf("ARCHIL_BINARY_PATH not accessible: %w", err)
+	if _, err := os.Stat(cfg.LayeredBinaryPath); err != nil {
+		return nil, fmt.Errorf("LAYERED_BINARY_PATH not accessible: %w", err)
 	}
 
 	mounter := incontainer.NewMounter(incontainer.Config{
-		ArchilBinaryHostPath: cfg.ArchilBinaryPath,
+		LayeredBinaryHostPath: cfg.LayeredBinaryPath,
 	})
 
 	logger.Info(
-		"Experimental in-container (Archil) volume backend enabled",
-		"archilBinary", cfg.ArchilBinaryPath,
+		"Layered in-container volume backend enabled",
+		"layeredBinary", cfg.LayeredBinaryPath,
 	)
 	return mounter, nil
 }

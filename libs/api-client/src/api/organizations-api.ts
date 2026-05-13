@@ -1254,8 +1254,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
             // authentication oauth2 required
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -3151,7 +3149,6 @@ export class OrganizationsApi extends BaseAPI {
      * @param {UpdateOrganizationDefaultVolumeBackend} updateOrganizationDefaultVolumeBackend 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof OrganizationsApi
      */
     public setDefaultVolumeBackend(organizationId: string, updateOrganizationDefaultVolumeBackend: UpdateOrganizationDefaultVolumeBackend, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).setDefaultVolumeBackend(organizationId, updateOrganizationDefaultVolumeBackend, options).then((request) => request(this.axios, this.basePath));

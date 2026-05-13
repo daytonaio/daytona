@@ -6,7 +6,6 @@ export * from './api-key-list';
 export * from './api-key-response';
 export * from './audit-log';
 export * from './build-info';
-export * from './change-volume-backend';
 export * from './command';
 export * from './completion-context';
 export * from './completion-item';
