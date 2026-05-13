@@ -448,13 +448,13 @@ func buildCheckoutArgs(workDir, sha string) []string {
 }
 
 func buildSparseCheckoutArgs(workDir string, sparsePaths []string) []string {
-	args := []string{"-C", workDir, "sparse-checkout", "set", "--cone", "--"}
+	args := []string{"-C", workDir, "sparse-checkout", "set", "--cone", "--skip-checks", "--"}
 	args = append(args, sparsePaths...)
 	return args
 }
 
 func buildSparseCheckoutAddArgs(workDir string, sparsePaths []string) []string {
-	args := []string{"-C", workDir, "sparse-checkout", "add", "--"}
+	args := []string{"-C", workDir, "sparse-checkout", "add", "--skip-checks", "--"}
 	args = append(args, sparsePaths...)
 	return args
 }

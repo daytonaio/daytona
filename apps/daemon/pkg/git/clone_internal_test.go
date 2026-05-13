@@ -249,14 +249,14 @@ func TestBuildSparseCheckoutArgs(t *testing.T) {
 	require.Equal(t, []string{
 		"-C", "/work-dir",
 		"sparse-checkout", "set",
-		"--cone",
+		"--cone", "--skip-checks",
 		"--",
 		"src", "docs/guides",
 	}, got)
 }
 
 func TestBuildBackgroundExpansionArgs(t *testing.T) {
-	require.Equal(t, []string{"-C", "/work-dir", "sparse-checkout", "add", "--", "src", "docs"}, buildSparseCheckoutAddArgs("/work-dir", []string{"src", "docs"}))
+	require.Equal(t, []string{"-C", "/work-dir", "sparse-checkout", "add", "--skip-checks", "--", "src", "docs"}, buildSparseCheckoutAddArgs("/work-dir", []string{"src", "docs"}))
 	require.Equal(t, []string{"-C", "/work-dir", "sparse-checkout", "disable"}, buildSparseCheckoutDisableArgs("/work-dir"))
 	require.Equal(t, []string{"-C", "/work-dir", "fetch", "--deepen=50"}, buildFetchDeepenArgs("/work-dir", 50))
 	require.Equal(t, []string{"-C", "/work-dir", "fetch", "--unshallow"}, buildFetchUnshallowArgs("/work-dir"))
