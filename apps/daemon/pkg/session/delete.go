@@ -47,25 +47,35 @@ func (s *SessionService) terminateSession(ctx context.Context, session *session)
 
 	pid := session.cmd.Process.Pid
 
+	// Signal the whole process group (negative pid). Falls back to the tree
+	// walker for any descendants that escaped the group via setpgid/setsid.
+	_ = syscall.Kill(-pid, syscall.SIGTERM)
 	_ = s.signalProcessTree(pid, syscall.SIGTERM)
-
-	err := session.cmd.Process.Signal(syscall.SIGTERM)
-	if err != nil {
-		// If SIGTERM fails, try SIGKILL immediately
-		s.logger.WarnContext(ctx, "SIGTERM failed for session, trying SIGKILL", "sessionId", session.id, "error", err)
-		_ = s.signalProcessTree(pid, syscall.SIGKILL)
-		return session.cmd.Process.Kill()
-	}
 
 	// Wait for graceful termination
 	if s.waitForTermination(ctx, pid, s.terminationGracePeriod, s.terminationCheckInterval) {
 		s.logger.DebugContext(ctx, "Session terminated gracefully", "sessionId", session.id)
+		s.reapSession(session)
 		return nil
 	}
 
-	s.logger.DebugContext(ctx, "Session timeout, sending SIGKILL to process tree", "sessionId", session.id)
+	s.logger.DebugContext(ctx, "Session timeout, sending SIGKILL to process group", "sessionId", session.id)
+	_ = syscall.Kill(-pid, syscall.SIGKILL)
 	_ = s.signalProcessTree(pid, syscall.SIGKILL)
-	return session.cmd.Process.Kill()
+	err := session.cmd.Process.Kill()
+	s.reapSession(session)
+	return err
+}
+
+// reapSession waits on the session's exec.Cmd so the kernel releases the
+// zombie. Safe to call after Process.Kill; Wait blocks only until the kernel
+// reports exit. We ignore the wait error since the process has already been
+// signaled.
+func (s *SessionService) reapSession(session *session) {
+	if session.cmd == nil {
+		return
+	}
+	_ = session.cmd.Wait()
 }
 
 func (s *SessionService) signalProcessTree(pid int, sig syscall.Signal) error {

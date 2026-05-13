@@ -9,9 +9,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"syscall"
 
 	"github.com/creack/pty"
 	"github.com/daytonaio/daemon/pkg/common"
+	"github.com/shirou/gopsutil/v4/process"
 )
 
 // Info returns the current session information
@@ -135,12 +137,24 @@ func (s *PTYSession) kill() {
 	}
 
 	sessionID := s.info.ID
+	var pid int
+	if s.cmd != nil && s.cmd.Process != nil {
+		pid = s.cmd.Process.Pid
+	}
+
 	if s.cancel != nil {
 		s.cancel()
 	}
 	if s.ptmx != nil {
 		_ = s.ptmx.Close()
 		s.ptmx = nil
+	}
+	// SIGKILL the shell's descendants first. Interactive shells put
+	// backgrounded jobs in their own process groups (job control), so they
+	// would escape kill(-pgid). Walking the tree before reaping the shell
+	// catches those before they're reparented to PID 1.
+	if pid > 0 {
+		killProcessTree(pid)
 	}
 	if s.cmd != nil && s.cmd.Process != nil {
 		_ = s.cmd.Process.Kill()
@@ -153,6 +167,28 @@ func (s *PTYSession) kill() {
 
 	// Remove session from manager - manually killed
 	ptyManager.Delete(sessionID)
+}
+
+// killProcessTree sends SIGKILL to every descendant of pid, depth-first so
+// leaves die before their parents and don't get a chance to be reparented to
+// PID 1 mid-teardown.
+func killProcessTree(pid int) {
+	parent, err := process.NewProcess(int32(pid))
+	if err != nil {
+		return
+	}
+	descendants, err := parent.Children()
+	if err != nil {
+		return
+	}
+	for _, child := range descendants {
+		killProcessTree(int(child.Pid))
+	}
+	for _, child := range descendants {
+		if p, err := os.FindProcess(int(child.Pid)); err == nil {
+			_ = p.Signal(syscall.SIGKILL)
+		}
+	}
 }
 
 // ptyReadLoop reads from PTY and broadcasts to all clients

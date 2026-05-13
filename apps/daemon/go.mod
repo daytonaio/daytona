@@ -25,6 +25,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/pkg/sftp v1.13.6
+	github.com/ramr/go-reaper v0.3.1
 	github.com/samber/slog-gin v1.20.1
 	github.com/shirou/gopsutil/v4 v4.25.12
 	github.com/sourcegraph/jsonrpc2 v0.2.0

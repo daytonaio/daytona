@@ -26,6 +26,7 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox"
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-isatty"
+	reaper "github.com/ramr/go-reaper"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
@@ -220,6 +221,11 @@ func run() int {
 			errChan <- err
 		}
 	}()
+
+	// Reap zombie children. The daemon runs as PID 1 inside containers, so
+	// orphaned processes (e.g. from process.exec) get reparented here. Without
+	// reaping, they accumulate as zombies for the container's lifetime.
+	go reaper.Reap()
 
 	// Set up signal handling for graceful shutdown
 	sigChan := make(chan os.Signal, 1)
