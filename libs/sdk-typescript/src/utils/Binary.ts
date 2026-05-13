@@ -8,7 +8,18 @@ import { dynamicRequire } from './Import'
 
 let _BufferCtor: typeof Buffer | null = null
 function getBufferCtor(): typeof Buffer {
-  if (!_BufferCtor) _BufferCtor = (dynamicRequire('buffer', '"Buffer" is not supported: ') as any).Buffer
+  if (!_BufferCtor) {
+    // Priority: (1) globalThis.Buffer — Node.js native or polyfills that assign
+    // to globalThis; (2) bare Buffer — esbuild/Vite inject it as a module-scoped
+    // variable without touching globalThis; (3) dynamicRequire as last resort.
+    if (typeof (globalThis as any).Buffer !== 'undefined') {
+      _BufferCtor = (globalThis as any).Buffer as typeof Buffer
+    } else if (typeof Buffer !== 'undefined') {
+      _BufferCtor = Buffer
+    } else {
+      _BufferCtor = (dynamicRequire('buffer', '"Buffer" is not supported: ') as any).Buffer
+    }
+  }
   return _BufferCtor
 }
 
