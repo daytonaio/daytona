@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/daytonaio/daemon/pkg/childreap"
 	"github.com/google/uuid"
 )
 
@@ -149,7 +150,7 @@ func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
 
 	// Start a goroutine to wait for the process and handle unexpected exits
 	go func() {
-		err := cmd.Wait()
+		_, err := childreap.Wait(cmd)
 		done <- err // Signal the done channel with the result
 
 		// Atomically remove from active recordings if still there

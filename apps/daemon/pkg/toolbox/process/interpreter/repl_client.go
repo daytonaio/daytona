@@ -17,6 +17,7 @@ import (
 	"time"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/daemon/pkg/childreap"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
@@ -366,7 +367,7 @@ func getStringFromChunk(chunk map[string]any, key string) string {
 
 // monitorProcess monitors the worker process and cleans up on exit
 func (c *Context) monitorProcess() {
-	err := c.cmd.Wait()
+	_, err := childreap.Wait(c.cmd)
 
 	c.mu.Lock()
 	c.info.Active = false

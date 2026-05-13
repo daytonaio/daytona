@@ -15,6 +15,7 @@ import (
 	"time"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/daemon/pkg/childreap"
 	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
 )
@@ -80,34 +81,13 @@ func CodeRun(logger *slog.Logger) gin.HandlerFunc {
 			defer timer.Stop()
 		}
 
-		err = cmd.Wait()
+		exitCode, waitErr := childreap.Wait(cmd)
 		output := outputBuf.Bytes()
-		if err != nil {
-			if timeoutReached.Load() {
-				c.Error(common_errors.NewRequestTimeoutError(errors.New("command execution timeout")))
-				return
-			}
-
-			if exitError, ok := err.(*exec.ExitError); ok {
-				result, artifacts := ParseArtifacts(string(output))
-				c.JSON(http.StatusOK, CodeRunResponse{
-					ExitCode:  exitError.ExitCode(),
-					Result:    result,
-					Artifacts: artifacts,
-				})
-				return
-			}
-
-			result, artifacts := ParseArtifacts(string(output))
-			c.JSON(http.StatusOK, CodeRunResponse{
-				ExitCode:  -1,
-				Result:    result,
-				Artifacts: artifacts,
-			})
+		if timeoutReached.Load() {
+			c.Error(common_errors.NewRequestTimeoutError(errors.New("command execution timeout")))
 			return
 		}
-
-		if cmd.ProcessState == nil {
+		if waitErr != nil {
 			result, artifacts := ParseArtifacts(string(output))
 			c.JSON(http.StatusOK, CodeRunResponse{
 				ExitCode:  -1,
@@ -119,7 +99,7 @@ func CodeRun(logger *slog.Logger) gin.HandlerFunc {
 
 		result, artifacts := ParseArtifacts(string(output))
 		c.JSON(http.StatusOK, CodeRunResponse{
-			ExitCode:  cmd.ProcessState.ExitCode(),
+			ExitCode:  exitCode,
 			Result:    result,
 			Artifacts: artifacts,
 		})

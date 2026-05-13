@@ -18,6 +18,7 @@ import (
 	"github.com/daytonaio/common-go/pkg/log"
 	"github.com/daytonaio/daemon/cmd/daemon/config"
 	"github.com/daytonaio/daemon/internal/util"
+	"github.com/daytonaio/daemon/pkg/childreap"
 	"github.com/daytonaio/daemon/pkg/recording"
 	"github.com/daytonaio/daemon/pkg/recordingdashboard"
 	"github.com/daytonaio/daemon/pkg/session"
@@ -26,7 +27,6 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox"
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-isatty"
-	reaper "github.com/ramr/go-reaper"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
@@ -223,9 +223,11 @@ func run() int {
 	}()
 
 	// Reap zombie children. The daemon runs as PID 1 inside containers, so
-	// orphaned processes (e.g. from process.exec) get reparented here. Without
-	// reaping, they accumulate as zombies for the container's lifetime.
-	go reaper.Reap()
+	// orphaned processes (e.g. from process.exec) get reparented here.
+	// childreap installs the SIGCHLD reaper AND wires up cooperative status
+	// recovery so cmd.Wait callers still get the right exit code when the
+	// reaper claims a child before they do (see pkg/childreap).
+	childreap.Start()
 
 	// Set up signal handling for graceful shutdown
 	sigChan := make(chan os.Signal, 1)

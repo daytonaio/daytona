@@ -12,6 +12,7 @@ import (
 	"syscall"
 
 	"github.com/creack/pty"
+	"github.com/daytonaio/daemon/pkg/childreap"
 	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/shirou/gopsutil/v4/process"
 )
@@ -80,33 +81,25 @@ func (s *PTYSession) start() error {
 
 	// Reap the process; mark inactive on exit and send exit event
 	go func() {
-		err := s.cmd.Wait()
-		var exitCode int
+		exitCode, err := childreap.Wait(s.cmd)
 		var exitReason string
 
-		if err != nil {
-			if exitError, ok := err.(*exec.ExitError); ok {
-				exitCode = exitError.ExitCode()
-				// Analyze the exit code to provide meaningful context
-				if exitCode == 137 {
-					exitReason = " (SIGKILL)"
-				} else if exitCode == 130 {
-					exitReason = " (SIGINT - Ctrl+C)"
-				} else if exitCode == 143 {
-					exitReason = " (SIGTERM)"
-				} else if exitCode > 128 {
-					sigNum := exitCode - 128
-					exitReason = fmt.Sprintf(" (signal %d)", sigNum)
-				} else {
-					exitReason = " (non-zero exit)"
-				}
-			} else {
-				exitCode = 1
-				exitReason = " (process error)"
-			}
-		} else {
-			exitCode = 0
+		switch {
+		case err != nil:
+			exitCode = 1
+			exitReason = " (process error)"
+		case exitCode == 0:
 			exitReason = " (clean exit)"
+		case exitCode == 137:
+			exitReason = " (SIGKILL)"
+		case exitCode == 130:
+			exitReason = " (SIGINT - Ctrl+C)"
+		case exitCode == 143:
+			exitReason = " (SIGTERM)"
+		case exitCode > 128:
+			exitReason = fmt.Sprintf(" (signal %d)", exitCode-128)
+		default:
+			exitReason = " (non-zero exit)"
 		}
 
 		s.mu.Lock()

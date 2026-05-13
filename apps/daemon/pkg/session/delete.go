@@ -11,6 +11,7 @@ import (
 	"time"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/daemon/pkg/childreap"
 	"github.com/shirou/gopsutil/v4/process"
 )
 
@@ -68,14 +69,14 @@ func (s *SessionService) terminateSession(ctx context.Context, session *session)
 }
 
 // reapSession waits on the session's exec.Cmd so the kernel releases the
-// zombie. Safe to call after Process.Kill; Wait blocks only until the kernel
-// reports exit. We ignore the wait error since the process has already been
-// signaled.
+// zombie. Routes through childreap so that even when the PID-1 reaper
+// claims the zombie first, we still resolve a status (we ignore it; the
+// session is already being torn down).
 func (s *SessionService) reapSession(session *session) {
 	if session.cmd == nil {
 		return
 	}
-	_ = session.cmd.Wait()
+	_, _ = childreap.Wait(session.cmd)
 }
 
 func (s *SessionService) signalProcessTree(pid int, sig syscall.Signal) error {

@@ -4,6 +4,7 @@
 package process
 
 import (
+	"bytes"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 
+	"github.com/daytonaio/daemon/pkg/childreap"
 	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
 )
@@ -58,6 +60,21 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 		}
 		common.ApplyEnvs(cmd, request.Envs)
 
+		// Capture combined stdout+stderr ourselves so we can route through
+		// childreap.Wait (cmd.CombinedOutput would call cmd.Wait directly
+		// and race the PID-1 reaper).
+		var outBuf bytes.Buffer
+		cmd.Stdout = &outBuf
+		cmd.Stderr = &outBuf
+
+		if err := cmd.Start(); err != nil {
+			c.JSON(http.StatusOK, ExecuteResponse{
+				ExitCode: -1,
+				Result:   err.Error(),
+			})
+			return
+		}
+
 		// set maximum execution time
 		var timeoutReached atomic.Bool
 		if request.Timeout != nil && *request.Timeout > 0 {
@@ -74,20 +91,13 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 			defer timer.Stop()
 		}
 
-		output, err := cmd.CombinedOutput()
-		if err != nil {
-			if timeoutReached.Load() {
-				c.Error(common_errors.NewRequestTimeoutError(errors.New("command execution timeout")))
-				return
-			}
-			if exitError, ok := err.(*exec.ExitError); ok {
-				exitCode := exitError.ExitCode()
-				c.JSON(http.StatusOK, ExecuteResponse{
-					ExitCode: exitCode,
-					Result:   string(output),
-				})
-				return
-			}
+		exitCode, waitErr := childreap.Wait(cmd)
+		output := outBuf.Bytes()
+		if timeoutReached.Load() {
+			c.Error(common_errors.NewRequestTimeoutError(errors.New("command execution timeout")))
+			return
+		}
+		if waitErr != nil {
 			c.JSON(http.StatusOK, ExecuteResponse{
 				ExitCode: -1,
 				Result:   string(output),
@@ -95,15 +105,6 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 			return
 		}
 
-		if cmd.ProcessState == nil {
-			c.JSON(http.StatusOK, ExecuteResponse{
-				ExitCode: -1,
-				Result:   string(output),
-			})
-			return
-		}
-
-		exitCode := cmd.ProcessState.ExitCode()
 		c.JSON(http.StatusOK, ExecuteResponse{
 			ExitCode: exitCode,
 			Result:   string(output),
