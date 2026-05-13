@@ -60,6 +60,12 @@ func TestE2E(t *testing.T) {
 	helloPath := textDir + "/hello.txt"
 	binaryPath := textDir + "/binary.bin"
 	movedPath := textDir + "/moved.txt"
+	permTestPath := textDir + "/perm-test.txt"
+	symlinkRealPath := textDir + "/real-target.txt"
+	symlinkPath := textDir + "/sym-link.txt"
+	overwritePath := textDir + "/overwrite.txt"
+	deepPath := textDir + "/a/b/c/deep.txt"
+	cleanPath := textDir + "/clean.txt"
 	repoPath := baseDir + "/repo-default"
 	cloneBranchPath := baseDir + "/repo-branch"
 	sessionID := "test-session-" + suffix
@@ -192,6 +198,115 @@ func TestE2E(t *testing.T) {
 		downloaded, downloadErr := sandbox.FileSystem.DownloadFile(ctx, binaryPath, nil)
 		require.NoError(t, downloadErr)
 		assert.Equal(t, binary, downloaded)
+	})
+
+	t.Run("FileSystem/UploadFilePermissions", func(t *testing.T) {
+		require.NoError(t, sandbox.FileSystem.UploadFile(ctx, []byte("perm check"), permTestPath))
+		res, execErr := sandbox.Process.ExecuteCommand(ctx, "stat -c '%a' "+permTestPath)
+		require.NoError(t, execErr)
+		assert.Contains(t, strings.TrimSpace(res.Result), "644")
+	})
+
+	t.Run("FileSystem/UploadFileSymlinkWriteThrough", func(t *testing.T) {
+		_, execErr := sandbox.Process.ExecuteCommand(ctx,
+			fmt.Sprintf("echo 'original' > %s && ln -s %s %s", symlinkRealPath, symlinkRealPath, symlinkPath))
+		require.NoError(t, execErr)
+
+		require.NoError(t, sandbox.FileSystem.UploadFile(ctx, []byte("via symlink"), symlinkPath))
+
+		isSymlink, execErr := sandbox.Process.ExecuteCommand(ctx,
+			"test -L "+symlinkPath+" && echo SYMLINK_OK || echo NOT_SYMLINK")
+		require.NoError(t, execErr)
+		assert.Contains(t, isSymlink.Result, "SYMLINK_OK")
+
+		content, downloadErr := sandbox.FileSystem.DownloadFile(ctx, symlinkRealPath, nil)
+		require.NoError(t, downloadErr)
+		assert.Equal(t, "via symlink", string(content))
+	})
+
+	t.Run("FileSystem/UploadFileOverwritePreservesContent", func(t *testing.T) {
+		require.NoError(t, sandbox.FileSystem.UploadFile(ctx, []byte("version1"), overwritePath))
+		require.NoError(t, sandbox.FileSystem.UploadFile(ctx, []byte("version2"), overwritePath))
+
+		content, downloadErr := sandbox.FileSystem.DownloadFile(ctx, overwritePath, nil)
+		require.NoError(t, downloadErr)
+		assert.Equal(t, "version2", string(content))
+
+		res, execErr := sandbox.Process.ExecuteCommand(ctx, "stat -c '%a' "+overwritePath)
+		require.NoError(t, execErr)
+		assert.Contains(t, strings.TrimSpace(res.Result), "644")
+	})
+
+	t.Run("FileSystem/UploadFileNestedDirCreation", func(t *testing.T) {
+		require.NoError(t, sandbox.FileSystem.UploadFile(ctx, []byte("deep"), deepPath))
+
+		content, downloadErr := sandbox.FileSystem.DownloadFile(ctx, deepPath, nil)
+		require.NoError(t, downloadErr)
+		assert.Equal(t, "deep", string(content))
+
+		res, execErr := sandbox.Process.ExecuteCommand(ctx, "test -d "+textDir+"/a/b/c && echo DIR_OK")
+		require.NoError(t, execErr)
+		assert.Contains(t, res.Result, "DIR_OK")
+	})
+
+	t.Run("FileSystem/UploadFileNoTempFileLeftovers", func(t *testing.T) {
+		require.NoError(t, sandbox.FileSystem.UploadFile(ctx, []byte("clean"), cleanPath))
+
+		res, execErr := sandbox.Process.ExecuteCommand(ctx,
+			"ls -la "+textDir+"/ | grep daytona-upload || echo NO_LEFTOVERS")
+		require.NoError(t, execErr)
+		assert.Contains(t, res.Result, "NO_LEFTOVERS")
+	})
+
+	t.Run("FileSystem/UploadFileRenameFailureNoLeftovers", func(t *testing.T) {
+		// Place a directory at the destination path so rename(file, dir) fails
+		// with EISDIR (even for root). Verifies the temp file is cleaned up and
+		// a neighbouring file is unaffected.
+		dirDest := textDir + "/dir-as-dest"
+		neighborPath := textDir + "/failure-neighbor.txt"
+
+		require.NoError(t, sandbox.FileSystem.UploadFile(ctx, []byte("neighbor ok"), neighborPath))
+		_, execErr := sandbox.Process.ExecuteCommand(ctx, "mkdir "+dirDest)
+		require.NoError(t, execErr)
+
+		err := sandbox.FileSystem.UploadFile(ctx, []byte("must not win"), dirDest)
+		require.Error(t, err)
+
+		leftovers, execErr := sandbox.Process.ExecuteCommand(ctx,
+			"ls "+textDir+"/ | grep daytona-upload || echo NO_LEFTOVERS")
+		require.NoError(t, execErr)
+		assert.Contains(t, leftovers.Result, "NO_LEFTOVERS")
+
+		dirCheck, execErr := sandbox.Process.ExecuteCommand(ctx,
+			"test -d "+dirDest+" && echo DIR_OK")
+		require.NoError(t, execErr)
+		assert.Contains(t, dirCheck.Result, "DIR_OK")
+
+		neighbor, downloadErr := sandbox.FileSystem.DownloadFile(ctx, neighborPath, nil)
+		require.NoError(t, downloadErr)
+		assert.Equal(t, "neighbor ok", string(neighbor))
+	})
+
+	t.Run("FileSystem/UploadFileMidUploadAbortPreservesOriginal", func(t *testing.T) {
+		// Use UploadFileStream with a reader that errors on the second read.
+		// The first read succeeds and data is already in-flight to the server
+		// when the goroutine's io.Copy returns an error, causing the pipe to
+		// close with an error. The HTTP client drops the connection, the
+		// server's io.Copy returns an error, the temp file is removed, and
+		// the original content must be unchanged.
+		abortPath := textDir + "/abort-test.txt"
+		require.NoError(t, sandbox.FileSystem.UploadFile(ctx, []byte("original content"), abortPath))
+
+		_ = sandbox.FileSystem.UploadFileStream(ctx, &errorAfterFirstChunkReader{}, abortPath)
+
+		content, downloadErr := sandbox.FileSystem.DownloadFile(ctx, abortPath, nil)
+		require.NoError(t, downloadErr)
+		assert.Equal(t, "original content", string(content))
+
+		leftovers, execErr := sandbox.Process.ExecuteCommand(ctx,
+			"ls "+textDir+"/ | grep daytona-upload || echo NO_LEFTOVERS")
+		require.NoError(t, execErr)
+		assert.Contains(t, leftovers.Result, "NO_LEFTOVERS")
 	})
 
 	t.Run("FileSystem/ListFiles", func(t *testing.T) {
@@ -891,6 +1006,24 @@ PY`, options.WithExecuteTimeout(10*time.Second))
 	_ = sandbox.FileSystem.DeleteFile(ctx, baseDir, true)
 	_ = sandbox.Process.DeleteSession(ctx, sessionID)
 	_ = sandbox.StartWithTimeout(ctx, 60*time.Second)
+}
+
+// errorAfterFirstChunkReader returns one full chunk then errors on subsequent
+// reads, simulating a connection abort mid-upload. The first chunk is large
+// enough to be in-flight before the error is returned.
+type errorAfterFirstChunkReader struct {
+	fired bool
+}
+
+func (r *errorAfterFirstChunkReader) Read(p []byte) (int, error) {
+	if r.fired {
+		return 0, fmt.Errorf("simulated mid-upload abort")
+	}
+	for i := range p {
+		p[i] = 'X'
+	}
+	r.fired = true
+	return len(p), nil
 }
 
 func extractContextIDs(contexts []map[string]any) []string {

@@ -5,6 +5,7 @@ package fs
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -75,7 +76,6 @@ func TestUploadFilesStreamsToDisk(t *testing.T) {
 		if string(got) != w.body {
 			t.Fatalf("%s: expected %q, got %q", w.path, w.body, string(got))
 		}
-		// Atomic write should have left no temp file behind.
 		entries, err := os.ReadDir(filepath.Dir(w.path))
 		if err != nil {
 			t.Fatalf("readdir %s: %v", filepath.Dir(w.path), err)
@@ -88,17 +88,12 @@ func TestUploadFilesStreamsToDisk(t *testing.T) {
 	}
 }
 
-// Asserts that errors during the file-body copy do not leave a partial file on disk
-// at the destination — atomic-rename means we either commit a complete file or none.
-func TestUploadFilesAtomicCleanupOnTruncatedBody(t *testing.T) {
+func TestUploadFilesTruncatedBodyLeavesNoFiles(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	tempDir := t.TempDir()
 	dest := filepath.Join(tempDir, "partial.bin")
 
-	// Hand-craft a multipart body that opens a file part but truncates mid-stream.
-	// The reader will see an unexpected EOF inside io.Copy, surfacing as an error
-	// for that part. The destination must NOT exist after the request.
 	boundary := "DaytonaTestBoundary"
 	body := &bytes.Buffer{}
 	body.WriteString("--" + boundary + "\r\n")
@@ -108,7 +103,6 @@ func TestUploadFilesAtomicCleanupOnTruncatedBody(t *testing.T) {
 	body.WriteString("Content-Disposition: form-data; name=\"files[0].file\"; filename=\"partial.bin\"\r\n")
 	body.WriteString("Content-Type: application/octet-stream\r\n\r\n")
 	body.WriteString("partial-data-no-trailing-boundary")
-	// Note: intentionally missing the closing "\r\n--BOUNDARY--\r\n".
 
 	req := httptest.NewRequest(http.MethodPost, "/files/bulk-upload", body)
 	req.Header.Set("Content-Type", "multipart/form-data; boundary="+boundary)
@@ -211,6 +205,209 @@ func TestUploadFilesUsesStreamingMultipartReader(t *testing.T) {
 	}
 	if string(got) != payload {
 		t.Fatalf("payload mismatch: got %d bytes, want %d", len(got), len(payload))
+	}
+}
+
+// Verifies that uploaded files have 0644 permissions and the JSON response
+// contains accurate byte counts per file.
+func TestUploadFilesResponseBytesAndMode(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	tempDir := t.TempDir()
+	content := "hello, progress tracking!"
+	dest := filepath.Join(tempDir, "progress.txt")
+
+	body := &bytes.Buffer{}
+	mw := multipart.NewWriter(body)
+	if err := mw.WriteField("files[0].path", dest); err != nil {
+		t.Fatalf("write path: %v", err)
+	}
+	part, err := mw.CreateFormFile("files[0].file", "progress.txt")
+	if err != nil {
+		t.Fatalf("form file: %v", err)
+	}
+	if _, err := part.Write([]byte(content)); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	if err := mw.Close(); err != nil {
+		t.Fatalf("close: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/files/bulk-upload", body)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	rec := httptest.NewRecorder()
+
+	_, engine := gin.CreateTestContext(rec)
+	engine.POST("/files/bulk-upload", UploadFiles)
+	engine.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d (body: %s)", rec.Code, rec.Body.String())
+	}
+
+	var resp struct {
+		Files []struct {
+			Path  string `json:"path"`
+			Bytes int64  `json:"bytes"`
+		} `json:"files"`
+	}
+	if err := json.NewDecoder(rec.Body).Decode(&resp); err != nil {
+		t.Fatalf("decode response: %v", err)
+	}
+	if len(resp.Files) != 1 {
+		t.Fatalf("expected 1 file result, got %d", len(resp.Files))
+	}
+	if resp.Files[0].Path != dest {
+		t.Fatalf("expected path %q, got %q", dest, resp.Files[0].Path)
+	}
+	if resp.Files[0].Bytes != int64(len(content)) {
+		t.Fatalf("expected %d bytes, got %d", len(content), resp.Files[0].Bytes)
+	}
+
+	info, err := os.Stat(dest)
+	if err != nil {
+		t.Fatalf("stat: %v", err)
+	}
+	if perm := info.Mode().Perm(); perm != 0o644 {
+		t.Fatalf("expected mode 0644, got %04o", perm)
+	}
+}
+
+// Verifies that a multi-file upload returns correct byte counts for each file
+// and that all files have 0644 permissions.
+func TestUploadFilesMultiFileBytesAndMode(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	tempDir := t.TempDir()
+
+	type entry struct {
+		dest    string
+		content string
+	}
+	entries := []entry{
+		{dest: filepath.Join(tempDir, "a.txt"), content: "short"},
+		{dest: filepath.Join(tempDir, "b.bin"), content: strings.Repeat("B", 128*1024)},
+		{dest: filepath.Join(tempDir, "c.txt"), content: ""},
+	}
+
+	body := &bytes.Buffer{}
+	mw := multipart.NewWriter(body)
+	for i, e := range entries {
+		if err := mw.WriteField(formField(i, "path"), e.dest); err != nil {
+			t.Fatalf("write path: %v", err)
+		}
+		part, err := mw.CreateFormFile(formField(i, "file"), filepath.Base(e.dest))
+		if err != nil {
+			t.Fatalf("form file: %v", err)
+		}
+		if _, err := part.Write([]byte(e.content)); err != nil {
+			t.Fatalf("write: %v", err)
+		}
+	}
+	if err := mw.Close(); err != nil {
+		t.Fatalf("close: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/files/bulk-upload", body)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	rec := httptest.NewRecorder()
+
+	_, engine := gin.CreateTestContext(rec)
+	engine.POST("/files/bulk-upload", UploadFiles)
+	engine.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d (body: %s)", rec.Code, rec.Body.String())
+	}
+
+	var resp struct {
+		Files []struct {
+			Path  string `json:"path"`
+			Bytes int64  `json:"bytes"`
+		} `json:"files"`
+	}
+	if err := json.NewDecoder(rec.Body).Decode(&resp); err != nil {
+		t.Fatalf("decode response: %v", err)
+	}
+	if len(resp.Files) != len(entries) {
+		t.Fatalf("expected %d file results, got %d", len(entries), len(resp.Files))
+	}
+
+	for i, e := range entries {
+		r := resp.Files[i]
+		if r.Path != e.dest {
+			t.Fatalf("file[%d]: expected path %q, got %q", i, e.dest, r.Path)
+		}
+		if r.Bytes != int64(len(e.content)) {
+			t.Fatalf("file[%d]: expected %d bytes, got %d", i, len(e.content), r.Bytes)
+		}
+
+		info, err := os.Stat(e.dest)
+		if err != nil {
+			t.Fatalf("stat %s: %v", e.dest, err)
+		}
+		if perm := info.Mode().Perm(); perm != 0o644 {
+			t.Fatalf("file[%d]: expected mode 0644, got %04o", i, perm)
+		}
+	}
+}
+
+func TestUploadFilesWritesThroughSymlink(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	tempDir := t.TempDir()
+	realFile := filepath.Join(tempDir, "real.txt")
+	if err := os.WriteFile(realFile, []byte("old content"), 0o644); err != nil {
+		t.Fatalf("seed file: %v", err)
+	}
+	link := filepath.Join(tempDir, "link.txt")
+	if err := os.Symlink(realFile, link); err != nil {
+		t.Fatalf("symlink: %v", err)
+	}
+
+	content := "new content via symlink"
+	body := &bytes.Buffer{}
+	mw := multipart.NewWriter(body)
+	if err := mw.WriteField("files[0].path", link); err != nil {
+		t.Fatalf("write path: %v", err)
+	}
+	part, err := mw.CreateFormFile("files[0].file", "link.txt")
+	if err != nil {
+		t.Fatalf("form file: %v", err)
+	}
+	if _, err := part.Write([]byte(content)); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	if err := mw.Close(); err != nil {
+		t.Fatalf("close: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/files/bulk-upload", body)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	rec := httptest.NewRecorder()
+
+	_, engine := gin.CreateTestContext(rec)
+	engine.POST("/files/bulk-upload", UploadFiles)
+	engine.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d (body: %s)", rec.Code, rec.Body.String())
+	}
+
+	fi, err := os.Lstat(link)
+	if err != nil {
+		t.Fatalf("lstat link: %v", err)
+	}
+	if fi.Mode()&os.ModeSymlink == 0 {
+		t.Fatalf("symlink was replaced instead of written through")
+	}
+
+	got, err := os.ReadFile(realFile)
+	if err != nil {
+		t.Fatalf("read real file: %v", err)
+	}
+	if string(got) != content {
+		t.Fatalf("expected %q at real path, got %q", content, string(got))
 	}
 }
 
