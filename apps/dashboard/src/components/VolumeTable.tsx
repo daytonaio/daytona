@@ -48,7 +48,7 @@ import {
 } from '@tanstack/react-table'
 import { AlertTriangle, CheckCircle, HardDrive, Loader2, MoreHorizontal, Timer } from 'lucide-react'
 import { AnimatePresence } from 'motion/react'
-import { type ReactNode, useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { VolumeBulkAction, VolumeBulkActionAlertDialog } from './VolumeTable/BulkActionAlertDialog'
 import { getVolumeBulkActionCounts, isVolumeDeletable, useVolumeCommands } from './VolumeTable/useVolumeCommands'
 
@@ -75,7 +75,6 @@ interface VolumeTableProps {
   onDelete: (volume: VolumeDto) => void
   onBulkDelete: (volumes: VolumeDto[]) => void
   onCreateVolume?: () => void
-  toolbarActions?: ReactNode
 }
 
 export function VolumeTable({
@@ -85,7 +84,6 @@ export function VolumeTable({
   onDelete,
   onBulkDelete,
   onCreateVolume,
-  toolbarActions,
 }: VolumeTableProps) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
   const { setIsOpen } = useCommandPaletteActions()
@@ -206,7 +204,6 @@ export function VolumeTable({
             <DataTableFacetedFilter column={table.getColumn('state')} title="State" options={statuses} />
           )}
         </div>
-        <div className="flex shrink-0 items-center gap-2 empty:hidden sm:ml-auto">{toolbarActions}</div>
       </div>
       <TableContainer
         className={isEmpty ? 'min-h-[26rem]' : undefined}

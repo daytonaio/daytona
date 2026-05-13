@@ -42,7 +42,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { Mail } from 'lucide-react'
-import { type ReactNode, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { EndpointOut } from 'svix'
 import { columns } from './columns'
@@ -53,7 +53,6 @@ interface WebhooksEndpointTableProps {
   onDisable: (endpoint: EndpointOut) => void
   onDelete: (endpoint: EndpointOut) => void
   isLoadingEndpoint: (endpoint: EndpointOut) => boolean
-  toolbarActions?: ReactNode
 }
 
 export function WebhooksEndpointTable({
@@ -62,7 +61,6 @@ export function WebhooksEndpointTable({
   onDisable,
   onDelete,
   isLoadingEndpoint,
-  toolbarActions,
 }: WebhooksEndpointTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
@@ -145,7 +143,6 @@ export function WebhooksEndpointTable({
           placeholder="Search by URL or Description"
           containerClassName="min-w-0 flex-1 sm:max-w-sm"
         />
-        <div className="flex shrink-0 items-center gap-2 empty:hidden sm:ml-auto">{toolbarActions}</div>
       </div>
       <TableContainer
         className={cn({

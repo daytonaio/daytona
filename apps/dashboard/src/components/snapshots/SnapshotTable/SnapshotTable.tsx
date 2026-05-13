@@ -21,7 +21,7 @@ import { OrganizationRolePermissionsEnum, SnapshotDto, SnapshotState } from '@da
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { Box } from 'lucide-react'
 import { AnimatePresence } from 'motion/react'
-import { type ReactNode, useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Pagination } from '../../Pagination'
 import {
   Table,
@@ -71,7 +71,6 @@ interface DataTableProps {
   onSortingChange: (sorting: SnapshotSorting) => void
   stateFilter: Set<string>
   onStateFilterChange: (values: Set<string>) => void
-  toolbarActions?: ReactNode
 }
 
 function SnapshotStateFilterLabel({ colorClassName, label }: { colorClassName: string; label: string }) {
@@ -138,7 +137,6 @@ export function SnapshotTable({
   onSortingChange,
   stateFilter,
   onStateFilterChange,
-  toolbarActions,
 }: DataTableProps) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -305,7 +303,6 @@ export function SnapshotTable({
             setSelectedValues={onStateFilterChange}
           />
         </div>
-        <div className="flex shrink-0 items-center gap-2 empty:hidden sm:ml-auto">{toolbarActions}</div>
       </div>
       <TableContainer
         className={isEmpty ? 'min-h-[26rem]' : undefined}

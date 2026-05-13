@@ -20,7 +20,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { MoreHorizontal, Server } from 'lucide-react'
-import { type ReactNode, useState } from 'react'
+import { useState } from 'react'
 import { CopyButton } from './CopyButton'
 import { PageFooterPortal } from './PageLayout'
 import { Pagination } from './Pagination'
@@ -77,7 +77,6 @@ interface RunnerTableProps {
   onRefresh?: () => void
   isRefreshing?: boolean
   lastUpdatedAt?: number
-  toolbarActions?: ReactNode
 }
 
 export function RunnerTable({
@@ -96,7 +95,6 @@ export function RunnerTable({
   onRefresh,
   isRefreshing = false,
   lastUpdatedAt,
-  toolbarActions,
 }: RunnerTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
@@ -179,7 +177,6 @@ export function RunnerTable({
             ]}
           />
         )}
-        <div className="flex shrink-0 items-center gap-2 empty:hidden">{toolbarActions}</div>
       </div>
 
       <TableContainer

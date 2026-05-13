@@ -52,7 +52,6 @@ export function SandboxTableHeader({
   regionsDataIsLoading,
   snapshots,
   loadingSnapshots,
-  toolbarActions,
 }: SandboxTableHeaderProps) {
   const hasStateFilter = ((table.getColumn('state')?.getFilterValue() as string[]) || []).length > 0
   const hasSnapshotFilter = ((table.getColumn('snapshot')?.getFilterValue() as string[]) || []).length > 0
@@ -190,7 +189,6 @@ export function SandboxTableHeader({
         </div>
 
         <div className="flex shrink-0 items-center gap-2 sm:ml-auto">
-          {toolbarActions}
           <SandboxTableSettings table={table} />
         </div>
       </div>

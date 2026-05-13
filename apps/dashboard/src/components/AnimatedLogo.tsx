@@ -1,4 +1,7 @@
-'use client'
+/*
+ * Copyright Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
 
 import { motion, MotionProps } from 'motion/react'
 import { ComponentProps } from 'react'

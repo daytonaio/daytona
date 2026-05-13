@@ -37,7 +37,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { MoreHorizontal, Users } from 'lucide-react'
-import { type ReactNode, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 type MemberTableMeta = {
   onUpdateMemberRole: (member: OrganizationUser) => void
@@ -65,7 +65,6 @@ interface DataTableProps {
   pendingMemberIds: Set<string>
   ownerMode: boolean
   currentUserId?: string
-  toolbarActions?: ReactNode
 }
 
 export function OrganizationMemberTable({
@@ -76,7 +75,6 @@ export function OrganizationMemberTable({
   pendingMemberIds,
   ownerMode,
   currentUserId,
-  toolbarActions,
 }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
@@ -195,7 +193,6 @@ export function OrganizationMemberTable({
             placeholder="Search by Email, Role, or Assignment"
             containerClassName="min-w-0 flex-1 sm:max-w-sm"
           />
-          <div className="flex shrink-0 items-center gap-2 empty:hidden sm:ml-auto">{toolbarActions}</div>
         </div>
         <TableContainer
           className={cn('max-h-[550px]', {
