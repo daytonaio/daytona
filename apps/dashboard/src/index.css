@@ -243,3 +243,37 @@ body {
     background-position: 200% top;
   }
 }
+
+.marquee-scroll-y {
+  --duration: 10s;
+  --delay: calc((var(--duration) / var(--count)) * (var(--index) - var(--count)));
+  animation: marquee-scroll-y-anim var(--duration) var(--delay) infinite linear;
+  translate: 0 calc((var(--count) - var(--index)) * 100%);
+}
+
+@keyframes marquee-scroll-y-anim {
+  100% {
+    translate: 0 calc(var(--index) * -100%);
+  }
+}
+
+.marquee-scroll-x {
+  --duration: 10s;
+  --delay: calc((var(--duration) / var(--count)) * (var(--index) - var(--count)));
+  animation: marquee-scroll-x-anim var(--duration) var(--delay) infinite linear;
+  translate: calc((var(--count) - var(--index)) * 100%) 0;
+}
+
+@keyframes marquee-scroll-x-anim {
+  100% {
+    translate: calc(var(--index) * -100%) 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-scroll-y,
+  .marquee-scroll-x {
+    animation: none;
+    translate: none;
+  }
+}

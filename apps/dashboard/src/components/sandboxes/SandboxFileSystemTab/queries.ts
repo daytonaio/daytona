@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Buffer } from 'buffer'
-import { useCallback, useMemo } from 'react'
 import {
   keepPreviousData,
   useIsFetching,
@@ -14,9 +12,11 @@ import {
   type QueryClient,
   type UseQueryOptions,
 } from '@tanstack/react-query'
+import { Buffer } from 'buffer'
+import { useCallback, useMemo } from 'react'
 
-import type { PreviewKind, SandboxFileSystemNode, SandboxInstance } from './types'
 import { ROOT_NODE, ROOT_PATH } from './constants'
+import type { PreviewKind, SandboxFileSystemNode, SandboxInstance } from './types'
 import {
   getImageMimeType,
   getParentPath,
