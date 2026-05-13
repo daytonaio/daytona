@@ -127,13 +127,20 @@ func sweepPending() {
 	}
 }
 
-// Wait wraps cmd.Wait() with cooperative recovery from the PID-1 reaper.
+// Wait waits for cmd to exit and returns its exit code.
 //
-// Returns the process exit code (matching os.ProcessState.ExitCode()
-// semantics: 0..255 for normal exit, -1 for signal-terminated processes).
-// Returns a non-nil error only when the exit status truly cannot be
-// recovered — e.g., cmd was never started, or the reaper never published a
-// status within recoveryTimeout.
+// Unlike cmd.Wait(), Wait does not block on the kernel-level wait4 syscall
+// for the child PID. Instead it races cmd.Wait() (in a goroutine) against
+// the PID-1 reaper's status channel and returns as soon as EITHER resolves.
+// This matters because cmd.Wait() can block indefinitely when the reaper
+// has already consumed the zombie — the Go runtime's wait machinery does
+// not always handle externally-reaped children promptly. The reaper's
+// status channel is our own mechanism and is guaranteed to deliver.
+//
+// Returns the exit code matching os.ProcessState.ExitCode() semantics:
+// 0..255 for normal exit, -1 for signal-terminated processes. Returns a
+// non-nil error only when no exit status could be recovered within
+// hangTimeout (e.g., cmd was never started, or the reaper missed it).
 //
 // Safe for concurrent use across goroutines, each waiting on its own cmd.
 func Wait(cmd *exec.Cmd) (int, error) {
@@ -142,29 +149,83 @@ func Wait(cmd *exec.Cmd) (int, error) {
 	}
 	pid := cmd.Process.Pid
 
-	// Register BEFORE cmd.Wait so a fast reaper still routes our status
-	// into reg.ch instead of the pending map.
+	// Register BEFORE doing anything else so a fast reaper routes our
+	// status into reg.ch instead of pending.
 	reg := register(pid)
 	defer unregister(pid)
 
-	err := cmd.Wait()
-	if err == nil {
-		return 0, nil
-	}
-	var exitErr *exec.ExitError
-	if errors.As(err, &exitErr) {
-		return exitErr.ExitCode(), nil
+	// The reaper may have already published status before we registered.
+	if ws, ok := claimPending(pid); ok {
+		// Fire-and-forget cmd.Wait for pipe cleanup. We don't wait for it
+		// because cmd.Wait can hang in this case; the runtime/GC will
+		// eventually clean up file descriptors if the goroutine never
+		// returns.
+		go func() { _ = cmd.Wait() }()
+		return ws.ExitStatus(), nil
 	}
 
-	// cmd.Wait() returned a non-ExitError — almost always ECHILD because
-	// the reaper consumed the zombie first. Recover from the reaper's
-	// status report.
-	ws, recovered := recoverStatus(pid, reg)
-	if !recovered {
-		return -1, fmt.Errorf("childreap.Wait: lost exit status for pid %d: %w", pid, err)
+	// Race cmd.Wait against the reaper status channel. Each outcome path
+	// is independent — whichever arrives first wins.
+	type cmdResult struct {
+		exitCode int
+		err      error
+		// resolved is true for nil-error or *exec.ExitError outcomes;
+		// false means cmd.Wait failed in a way (likely ECHILD) that we
+		// should fall through to channel/pending recovery.
+		resolved bool
 	}
-	return ws.ExitStatus(), nil
+	waitCh := make(chan cmdResult, 1)
+	go func() {
+		err := cmd.Wait()
+		if err == nil {
+			waitCh <- cmdResult{0, nil, true}
+			return
+		}
+		var ee *exec.ExitError
+		if errors.As(err, &ee) {
+			waitCh <- cmdResult{ee.ExitCode(), nil, true}
+			return
+		}
+		waitCh <- cmdResult{-1, err, false}
+	}()
+
+	select {
+	case r := <-waitCh:
+		if r.resolved {
+			return r.exitCode, nil
+		}
+		// cmd.Wait returned ECHILD-ish. Wait briefly for the reaper.
+		if ws, ok := claimPending(pid); ok {
+			return ws.ExitStatus(), nil
+		}
+		select {
+		case ws := <-reg.ch:
+			return ws.ExitStatus(), nil
+		case <-time.After(recoveryTimeout):
+			return -1, fmt.Errorf("childreap.Wait: lost exit status for pid %d: %w", pid, r.err)
+		}
+
+	case ws := <-reg.ch:
+		// Reaper delivered status before cmd.Wait. We have the answer;
+		// don't block the caller on cmd.Wait completing.
+		return ws.ExitStatus(), nil
+
+	case <-time.After(hangTimeout):
+		// Both paths failed to resolve. Either the child never exited or
+		// something is wedged. Return what we can.
+		if ws, ok := claimPending(pid); ok {
+			return ws.ExitStatus(), nil
+		}
+		return -1, fmt.Errorf("childreap.Wait: timed out waiting for pid %d", pid)
+	}
 }
+
+// hangTimeout is the upper bound on how long Wait will block. Above this,
+// we assume something is wedged (kernel-level wait stuck, lost SIGCHLD,
+// daemon not running as PID 1, etc.) and return an error rather than hang
+// the caller indefinitely. Sized to comfortably cover normal child exits
+// while still surfacing real hangs in API request handling.
+var hangTimeout = 30 * time.Second
 
 func register(pid int) *pidRegistration {
 	reg := &pidRegistration{ch: make(chan syscall.WaitStatus, 1)}
@@ -180,29 +241,12 @@ func unregister(pid int) {
 	mu.Unlock()
 }
 
-// recoverStatus is only called after cmd.Wait() returned ECHILD, so we
-// know the PID has exited. Check pending first (status arrived before
-// register completed); otherwise park on the waiter channel.
-func recoverStatus(pid int, reg *pidRegistration) (syscall.WaitStatus, bool) {
+func claimPending(pid int) (syscall.WaitStatus, bool) {
 	mu.Lock()
+	defer mu.Unlock()
 	if ps, ok := pending[pid]; ok {
 		delete(pending, pid)
-		mu.Unlock()
 		return ps.ws, true
 	}
-	mu.Unlock()
-
-	select {
-	case ws := <-reg.ch:
-		return ws, true
-	case <-time.After(recoveryTimeout):
-		// One last look in case status raced in during the timeout.
-		mu.Lock()
-		defer mu.Unlock()
-		if ps, ok := pending[pid]; ok {
-			delete(pending, pid)
-			return ps.ws, true
-		}
-		return 0, false
-	}
+	return 0, false
 }

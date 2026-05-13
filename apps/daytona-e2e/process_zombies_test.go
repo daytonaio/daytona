@@ -52,7 +52,10 @@ func TestProcessZombieCleanup(t *testing.T) {
 	}
 
 	baseURL := strings.TrimRight(toolboxProxyURL, "/") + "/" + sandboxID
-	httpCli := &http.Client{Timeout: 30 * time.Second}
+	// 60s timeout: session delete chains terminateSession (≤5s grace) +
+	// gopsutil tree walk + filesystem cleanup. Plenty of headroom for a
+	// slow slim-image container while still surfacing a real hang.
+	httpCli := &http.Client{Timeout: 60 * time.Second}
 
 	t.Logf("sandbox %s started, toolboxProxyUrl: %s", sandboxID, toolboxProxyURL)
 
@@ -89,14 +92,24 @@ func TestProcessZombieCleanup(t *testing.T) {
 		return r.ExitCode, r.Result
 	}
 
-	// listZombies returns the raw ps lines whose STAT contains 'Z'. Empty
-	// string means no zombies are present in the sandbox.
+	// procScanZombies reads /proc/[pid]/stat directly and prints "PID
+	// COMM" for every zombie. We avoid `ps` because the slim sandbox image
+	// doesn't ship one. /proc/PID/stat format is:
+	//   pid (comm) state ppid ...
+	// `comm` may contain spaces or parens, so we strip everything up to
+	// and including ") " before reading the state field.
+	const procScanZombies = `awk 'FNR==1{` +
+		`comm=$0; sub(/\).*/,"",comm); sub(/^[^(]*\(/,"",comm);` +
+		`rest=$0; sub(/.*\) /,"",rest); split(rest,f," ");` +
+		`split(FILENAME,p,"/");` +
+		`if (f[1]=="Z") print "Z " p[3] " " comm` +
+		`}' /proc/[0-9]*/stat 2>/dev/null`
+
+	// listZombies returns one line per zombie process ("Z <pid> <comm>"),
+	// or an empty string if there are none.
 	listZombies := func(t *testing.T) string {
 		t.Helper()
-		// awk filters by stat column containing 'Z'. `|| true` keeps the
-		// pipeline exit code clean when there are no matches.
-		_, out := execCommand(t, `ps -eo pid,ppid,stat,comm,args | awk 'NR==1 || $3 ~ /Z/' ; true`)
-		// Trim trailing whitespace for cleaner assertions.
+		_, out := execCommand(t, procScanZombies)
 		return strings.TrimSpace(out)
 	}
 
@@ -109,14 +122,33 @@ func TestProcessZombieCleanup(t *testing.T) {
 		deadline := time.Now().Add(5 * time.Second)
 		for time.Now().Before(deadline) {
 			last = listZombies(t)
-			if !strings.Contains(last, "<defunct>") {
-				t.Logf("ps zombie scan (clean):\n%s", last)
+			if last == "" {
+				t.Logf("/proc zombie scan: clean")
 				return
 			}
 			time.Sleep(250 * time.Millisecond)
 		}
-		t.Logf("ps zombie scan (FAIL):\n%s", last)
-		assert.NotContains(t, last, "<defunct>", msg)
+		t.Logf("/proc zombie scan (FAIL):\n%s", last)
+		assert.Empty(t, last, msg)
+	}
+
+	// procScanForCmdline returns a shell command that prints every
+	// /proc/[pid]/cmdline whose contents include `needle`, formatted as
+	// "<pid> <full cmdline>". Used in place of `ps … | grep …`.
+	procScanForCmdline := func(needle string) string {
+		// Single-quoted `needle` is embedded into a shell `case` glob, so
+		// we reject quotes to keep the test honest about what it's
+		// matching. Tests pass simple ASCII tokens.
+		if strings.ContainsAny(needle, "'\"\\") {
+			t.Fatalf("procScanForCmdline: unsupported needle %q", needle)
+		}
+		return `for c in /proc/[0-9]*/cmdline; do ` +
+			`[ -r "$c" ] || continue; ` +
+			`a=$(tr '\0' ' ' < "$c" 2>/dev/null); ` +
+			`case "$a" in *'` + needle + `'*) ` +
+			`echo "$(basename $(dirname $c)) $a";; ` +
+			`esac; ` +
+			`done`
 	}
 
 	createSession := func(t *testing.T, sessionID string) {
@@ -217,26 +249,27 @@ func TestProcessZombieCleanup(t *testing.T) {
 		time.Sleep(1 * time.Second)
 
 		// Sanity check: confirm the sleep is running before delete.
-		_, before := execCommand(t, fmt.Sprintf("ps -eo pid,ppid,stat,comm,args | grep 'sleep %s' | grep -v grep ; true", sentinel))
-		require.Contains(t, before, "sleep "+sentinel, "sentinel sleep must be running before session delete; ps output: %s", before)
+		needle := "sleep " + sentinel
+		_, before := execCommand(t, procScanForCmdline(needle))
+		require.Contains(t, before, needle, "sentinel sleep must be running before session delete; /proc scan: %s", before)
 
 		deleteSession(t, sessionID)
 
-		// After delete: kill(-pgid, SIGKILL) plus the descendant walk
-		// should have taken the sleep down. Poll briefly to allow signal
-		// delivery + reaping to flush through.
+		// After delete: the daemon's signalProcessTree walk should have
+		// taken the sleep down before the session shell was reaped. Poll
+		// briefly to allow signal delivery + reaping to flush through.
 		var after string
 		deadline := time.Now().Add(5 * time.Second)
 		gone := false
 		for time.Now().Before(deadline) {
-			_, after = execCommand(t, fmt.Sprintf("ps -eo pid,ppid,stat,comm,args | grep 'sleep %s' | grep -v grep ; true", sentinel))
-			if !strings.Contains(after, "sleep "+sentinel) {
+			_, after = execCommand(t, procScanForCmdline(needle))
+			if !strings.Contains(after, needle) {
 				gone = true
 				break
 			}
 			time.Sleep(250 * time.Millisecond)
 		}
-		assert.True(t, gone, "sentinel sleep must be killed when its session is deleted; final ps output: %s", after)
+		assert.True(t, gone, "sentinel sleep must be killed when its session is deleted; final /proc scan: %s", after)
 
 		// And no zombies should be left behind by the teardown either.
 		assertNoZombies(t, "session teardown must not leave zombies")
