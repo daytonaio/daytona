@@ -8,6 +8,8 @@
     "types": ["node"],
     "declaration": true,
     "declarationMap": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "experimentalDecorators": false,
+    "emitDecoratorMetadata": false
   }
 }

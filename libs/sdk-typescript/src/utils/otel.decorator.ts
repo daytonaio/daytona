@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { trace, context, metrics, SpanStatusCode, Histogram } from '@opentelemetry/api'
+import { trace, context as otelContext, metrics, SpanStatusCode, Histogram } from '@opentelemetry/api'
 
 // Lazy initialization to ensure SDK is started before getting tracer/meter
 const getTracer = () => trace.getTracer('')
@@ -69,6 +69,8 @@ export interface InstrumentationConfig {
   enableMetrics?: boolean
 }
 
+type AsyncMethod<This, Args extends any[], Return> = (this: This, ...args: Args) => Promise<Return>
+
 /**
  * Converts a string to snake_case for Prometheus-friendly metric names
  */
@@ -84,34 +86,30 @@ function toSnakeCase(str: string): string {
  * Decorator for instrumenting methods with OpenTelemetry spans (traces only)
  *
  * @param config - Configuration object or string name for the span
- *
  */
 export function WithSpan(config?: string | SpanConfig) {
-  return (target: object, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
-    const originalMethod = descriptor.value
-    const methodName = String(propertyKey)
+  return function <This, Args extends any[], Return>(
+    originalMethod: AsyncMethod<This, Args, Return>,
+    context: ClassMethodDecoratorContext<This, AsyncMethod<This, Args, Return>>,
+  ): AsyncMethod<This, Args, Return> {
+    const methodName = String(context.name)
 
-    descriptor.value = async function (...args: any[]) {
+    return async function (this: This, ...args: Args): Promise<Return> {
       const cfg: SpanConfig = typeof config === 'string' ? { name: config } : config || {}
       const { name, attributes = {} } = cfg
 
-      const spanName = name || `${target.constructor.name}.${methodName}`
+      const className = (this as any)?.constructor?.name ?? 'Anonymous'
+      const spanName = name || `${className}.${methodName}`
 
       const allAttributes = {
-        component: target.constructor.name,
+        component: className,
         method: methodName,
         ...attributes,
       }
 
-      const span = getTracer().startSpan(
-        spanName,
-        {
-          attributes: allAttributes,
-        },
-        context.active(),
-      )
+      const span = getTracer().startSpan(spanName, { attributes: allAttributes }, otelContext.active())
 
-      return context.with(trace.setSpan(context.active(), span), async () => {
+      return otelContext.with(trace.setSpan(otelContext.active(), span), async () => {
         try {
           const result = await originalMethod.apply(this, args)
           span.setStatus({ code: SpanStatusCode.OK })
@@ -134,30 +132,30 @@ export function WithSpan(config?: string | SpanConfig) {
 /**
  * Decorator for instrumenting methods with OpenTelemetry metrics (metrics only)
  *
- * Collects two metrics:
- * - Counter: `{name}_executions` - tracks number of executions with status (success/error)
- * - Histogram: `{name}_duration` - tracks execution duration in milliseconds
+ * Collects:
+ * - Histogram: `{name}_duration` - tracks execution duration in milliseconds, with a `status` label (success/error)
  *
  * @param config - Configuration object or string name for the metric
- *
  */
 export function WithMetric(config?: string | MetricConfig) {
-  return (target: object, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
-    const originalMethod = descriptor.value
-    const methodName = String(propertyKey)
+  return function <This, Args extends any[], Return>(
+    originalMethod: AsyncMethod<This, Args, Return>,
+    context: ClassMethodDecoratorContext<This, AsyncMethod<This, Args, Return>>,
+  ): AsyncMethod<This, Args, Return> {
+    const methodName = String(context.name)
 
-    descriptor.value = async function (...args: any[]) {
+    return async function (this: This, ...args: Args): Promise<Return> {
       const cfg: MetricConfig = typeof config === 'string' ? { name: config } : config || {}
       const { name, description, labels = {} } = cfg
 
-      const metricName = toSnakeCase(name || `${target.constructor.name}.${methodName}`)
+      const className = (this as any)?.constructor?.name ?? 'Anonymous'
+      const metricName = toSnakeCase(name || `${className}.${methodName}`)
       const allLabels = {
-        component: target.constructor.name,
+        component: className,
         method: methodName,
         ...labels,
       }
 
-      // Get or create histogram for this method
       if (!executionHistograms.has(metricName)) {
         executionHistograms.set(
           metricName,
@@ -173,7 +171,6 @@ export function WithMetric(config?: string | MetricConfig) {
       }
 
       const startTime = Date.now()
-
       let status: 'success' | 'error' = 'success'
       try {
         const result = await originalMethod.apply(this, args)
@@ -197,21 +194,21 @@ export function WithMetric(config?: string | MetricConfig) {
  *
  * @param config - Configuration object or string name for the instrumentation
  */
-export function WithInstrumentation(config?: string | InstrumentationConfig): MethodDecorator {
+export function WithInstrumentation(config?: string | InstrumentationConfig) {
   const cfg: InstrumentationConfig = typeof config === 'string' ? { name: config } : config || {}
   const { enableTraces = true, enableMetrics = true, name, description, labels } = cfg
 
-  const decorators: MethodDecorator[] = []
-
-  if (enableTraces) {
-    decorators.push(WithSpan({ name, attributes: labels }))
-  }
-
-  if (enableMetrics) {
-    decorators.push(WithMetric({ name, description, labels }))
-  }
-
-  return (target: object, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
-    decorators.forEach((decorator) => decorator(target, propertyKey, descriptor))
+  return function <This, Args extends any[], Return>(
+    originalMethod: AsyncMethod<This, Args, Return>,
+    context: ClassMethodDecoratorContext<This, AsyncMethod<This, Args, Return>>,
+  ): AsyncMethod<This, Args, Return> {
+    let wrapped: AsyncMethod<This, Args, Return> = originalMethod
+    if (enableTraces) {
+      wrapped = WithSpan({ name, attributes: labels })(wrapped, context)
+    }
+    if (enableMetrics) {
+      wrapped = WithMetric({ name, description, labels })(wrapped, context)
+    }
+    return wrapped
   }
 }
