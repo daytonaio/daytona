@@ -137,19 +137,26 @@ func (s *PTYSession) kill() {
 		pid = s.cmd.Process.Pid
 	}
 
+	// SIGKILL descendants BEFORE we cancel the ctx or close the PTY
+	// master. Both of those have side effects that quickly kill the
+	// shell — ctx cancel triggers an async SIGKILL via exec.CommandContext's
+	// watchdog, and closing ptmx makes the shell's tty disappear — and
+	// once the shell exits, the kernel reparents its children to PID 1.
+	// At that point gopsutil.Children(shell_pid) returns nothing (the
+	// children's PPID is no longer shell_pid), so descendants like a
+	// `sleep & disown` that escaped job-control pgid would slip through
+	// and survive teardown. Walking while the shell is still alive
+	// guarantees we see and kill them.
+	if pid > 0 {
+		killProcessTree(pid)
+	}
+
 	if s.cancel != nil {
 		s.cancel()
 	}
 	if s.ptmx != nil {
 		_ = s.ptmx.Close()
 		s.ptmx = nil
-	}
-	// SIGKILL the shell's descendants first. Interactive shells put
-	// backgrounded jobs in their own process groups (job control), so they
-	// would escape kill(-pgid). Walking the tree before reaping the shell
-	// catches those before they're reparented to PID 1.
-	if pid > 0 {
-		killProcessTree(pid)
 	}
 	if s.cmd != nil && s.cmd.Process != nil {
 		_ = s.cmd.Process.Kill()

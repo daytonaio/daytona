@@ -11,10 +11,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -24,9 +26,12 @@ import (
 //   - deleting a session reaps the session shell (no zombie zsh left behind)
 //   - deleting a session also kills the session shell's process group, so
 //     long-running children spawned inside the session don't survive
+//   - deleting a PTY session walks the shell's process tree BEFORE the
+//     shell exits, catching disowned descendants that would otherwise be
+//     reparented to PID 1 and survive teardown
 //
-// The tests work over plain HTTP (no PTY/WebSocket) and only require the
-// toolbox proxy URL exposed by the API after the sandbox reaches `started`.
+// Most subtests are pure HTTP. The PTY subtest additionally opens a
+// WebSocket through the toolbox proxy to drive the shell.
 func TestProcessZombieCleanup(t *testing.T) {
 	cfg := LoadConfig(t)
 	client := NewAPIClient(cfg)
@@ -273,5 +278,174 @@ func TestProcessZombieCleanup(t *testing.T) {
 
 		// And no zombies should be left behind by the teardown either.
 		assertNoZombies(t, "session teardown must not leave zombies")
+	})
+
+	// --- PTY helpers (only used by the PTY subtest below) ---------------
+
+	createPTY := func(t *testing.T, ptyID string) {
+		t.Helper()
+		body, err := json.Marshal(map[string]interface{}{
+			"id":   ptyID,
+			"cols": 120,
+			"rows": 30,
+		})
+		require.NoError(t, err)
+		req, err := http.NewRequest(http.MethodPost, baseURL+"/process/pty", bytes.NewReader(body))
+		require.NoError(t, err)
+		req.Header.Set("Authorization", "Bearer "+cfg.APIKey)
+		req.Header.Set("Content-Type", "application/json")
+		resp, err := httpCli.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+		respBody, _ := io.ReadAll(resp.Body)
+		require.Equal(t, http.StatusCreated, resp.StatusCode, "create pty failed: %s", string(respBody))
+	}
+
+	deletePTY := func(t *testing.T, ptyID string) {
+		t.Helper()
+		req, err := http.NewRequest(http.MethodDelete, baseURL+"/process/pty/"+ptyID, nil)
+		require.NoError(t, err)
+		req.Header.Set("Authorization", "Bearer "+cfg.APIKey)
+		resp, err := httpCli.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+		respBody, _ := io.ReadAll(resp.Body)
+		require.Equal(t, http.StatusOK, resp.StatusCode, "delete pty failed: %s", string(respBody))
+	}
+
+	// dialPTY opens a WebSocket to the PTY's input/output channel. The
+	// returned connection sends client input to the shell when written to
+	// (as text or binary messages) and receives the shell's output as
+	// binary messages.
+	dialPTY := func(t *testing.T, ptyID string) *websocket.Conn {
+		t.Helper()
+		parsed, err := url.Parse(baseURL + "/process/pty/" + ptyID + "/connect")
+		require.NoError(t, err)
+		switch parsed.Scheme {
+		case "http":
+			parsed.Scheme = "ws"
+		case "https":
+			parsed.Scheme = "wss"
+		}
+		hdr := http.Header{}
+		hdr.Set("Authorization", "Bearer "+cfg.APIKey)
+		dialer := *websocket.DefaultDialer
+		dialer.HandshakeTimeout = 15 * time.Second
+		conn, resp, err := dialer.Dial(parsed.String(), hdr)
+		if resp != nil {
+			defer resp.Body.Close()
+		}
+		require.NoError(t, err, "ws dial to %s failed", parsed.String())
+		return conn
+	}
+
+	t.Run("PTYKillTakesDownDisownedDescendants", func(t *testing.T) {
+		// Regression test for the PTY teardown order bug:
+		//
+		// Inside an interactive shell, `cmd & disown` puts cmd into its own
+		// process group (escaping kill(-pgid)). Before the fix, kill()
+		// cancelled the cmd.Context and closed the PTY master FIRST, which
+		// caused the shell to exit fast — at which point the kernel
+		// reparented the disowned child to PID 1, and the subsequent
+		// gopsutil.Children(shell_pid) tree walk returned nothing (the
+		// child's PPID is no longer shell_pid). The disowned child then
+		// survived the PTY delete.
+		//
+		// The fix walks the process tree BEFORE cancelling/closing, while
+		// the shell is still alive and the child's PPID still points at it.
+		//
+		// To trigger the regression we need a child whose teardown depends
+		// on the PPID walk specifically — i.e. `disown` so it escapes
+		// pgid-based teardown.
+		ptyID := fmt.Sprintf("e2e-zombie-pty-%s", runID[4:])
+		const sentinel = "8765431"
+		needle := "sleep " + sentinel
+
+		createPTY(t, ptyID)
+		conn := dialPTY(t, ptyID)
+
+		ptyClosed := false
+		closeConn := func() {
+			if ptyClosed {
+				return
+			}
+			ptyClosed = true
+			_ = conn.Close()
+		}
+		defer closeConn()
+
+		// Best-effort guarantees that the PTY is gone even if the
+		// assertion below panics or fails mid-flight, so we don't leak
+		// state across test runs of the same sandbox.
+		defer func() {
+			if !ptyClosed {
+				closeConn()
+			}
+			req, err := http.NewRequest(http.MethodDelete, baseURL+"/process/pty/"+ptyID, nil)
+			if err == nil {
+				req.Header.Set("Authorization", "Bearer "+cfg.APIKey)
+				if resp, derr := httpCli.Do(req); derr == nil {
+					resp.Body.Close()
+				}
+			}
+			// And nuke any straggler sleep with our sentinel.
+			_, _ = execCommand(t, fmt.Sprintf("pkill -KILL -f '%s' 2>/dev/null || true", needle))
+		}()
+
+		// Give the shell a moment to print its first prompt before we
+		// pipe input in (interactive shells can race against early input).
+		time.Sleep(500 * time.Millisecond)
+
+		err := conn.WriteMessage(
+			websocket.TextMessage,
+			[]byte(fmt.Sprintf("sleep %s & disown\n", sentinel)),
+		)
+		require.NoError(t, err, "ws write (sleep & disown) failed")
+
+		// Wait until the sentinel sleep is actually running before we
+		// trigger the teardown — otherwise we'd be racing the shell's
+		// fork+exec.
+		var before string
+		spawnedDeadline := time.Now().Add(8 * time.Second)
+		spawned := false
+		for time.Now().Before(spawnedDeadline) {
+			_, before = execCommand(t, procScanForCmdline(needle))
+			if strings.Contains(before, needle) {
+				spawned = true
+				break
+			}
+			time.Sleep(250 * time.Millisecond)
+		}
+		require.True(t, spawned, "sentinel sleep never showed up in /proc; pty likely didn't accept input; /proc scan: %s", before)
+
+		// Close the WS first so the DELETE doesn't race the read goroutine
+		// inside the daemon.
+		closeConn()
+
+		deletePTY(t, ptyID)
+
+		// After delete: killProcessTree must have walked the shell's
+		// descendants and SIGKILLed the disowned sleep BEFORE the shell
+		// itself was reaped. If the bug regresses, the sleep gets
+		// reparented to PID 1 first and stays alive.
+		var after string
+		killDeadline := time.Now().Add(8 * time.Second)
+		gone := false
+		for time.Now().Before(killDeadline) {
+			_, after = execCommand(t, procScanForCmdline(needle))
+			if !strings.Contains(after, needle) {
+				gone = true
+				break
+			}
+			time.Sleep(250 * time.Millisecond)
+		}
+		assert.True(t, gone,
+			"disowned sentinel sleep must be killed when its PTY is deleted; "+
+				"if this fails, the PTY kill() ordering has regressed and "+
+				"killProcessTree is being called AFTER the shell has already exited. "+
+				"final /proc scan: %s", after)
+
+		// And no zombies from the teardown.
+		assertNoZombies(t, "PTY teardown must not leave zombies")
 	})
 }
