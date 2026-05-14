@@ -6,7 +6,7 @@
 import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { JobConflictError } from '../errors/job-conflict.error'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, LessThan, In, EntityManager } from 'typeorm'
+import { Repository, LessThan, In, EntityManager, DeleteResult } from 'typeorm'
 import { Job } from '../entities/job.entity'
 import { JobDto, JobStatus, JobType, ResourceType } from '../dto/job.dto'
 import { ResourceTypeForJobType } from '../dto/job-type-map.dto'
@@ -328,6 +328,17 @@ export class JobService {
       order: {
         createdAt: 'DESC',
       },
+    })
+  }
+
+  async deleteByResourceIds(resourceType: ResourceType, resourceIds: string[]): Promise<DeleteResult> {
+    if (resourceIds.length === 0) {
+      return { affected: 0, raw: [] }
+    }
+
+    return this.jobRepository.delete({
+      resourceType,
+      resourceId: In(resourceIds),
     })
   }
 
