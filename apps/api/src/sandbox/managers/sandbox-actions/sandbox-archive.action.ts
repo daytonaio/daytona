@@ -70,10 +70,7 @@ export class SandboxArchiveAction extends SandboxAction {
             'Failed to archive sandbox after 3 retries',
             undefined,
             undefined,
-            // Preserve the recoverable flag set by backup.manager.ts on recoverable backup errors
-            // (e.g. "no space left on device"). Otherwise updateSandboxState defaults it to false
-            // when errorReason is provided, and the new flag-based /recover gate would reject
-            // a sandbox that is in fact recoverable via backupErrorReason.
+            // Preserve recoverable; updateSandboxState would otherwise clear it once an errorReason is set.
             sandbox.recoverable,
           )
         }
@@ -135,9 +132,7 @@ export class SandboxArchiveAction extends SandboxAction {
           this.logger.warn(`Transitioning sandbox ${sandbox.id} from ERROR to ARCHIVED state (runner draining)`)
         }
 
-        // Clear recoverable here: this is the only exit path for an archive flow that
-        // may have set recoverable=true on a backup failure (backup.manager.ts:447).
-        // Scheduled/ad-hoc backup completions must not touch the flag.
+        // Archive succeeded — clear any recoverable flag carried over from a prior backup failure.
         await this.updateSandboxState(
           sandbox,
           SandboxState.ARCHIVED,

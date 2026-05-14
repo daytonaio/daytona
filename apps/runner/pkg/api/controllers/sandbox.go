@@ -450,8 +450,7 @@ func Info(ctx *gin.Context) {
 		BackupState:    info.BackupState,
 		BackupSnapshot: info.BackupSnapshot,
 		BackupError:    info.BackupErrorReason,
-		// Recoverable reports only whether the error class is recoverable.
-		// The API gates user-facing exposure via archive intent (isUserInitiated).
+		// Reports only whether the error class is recoverable; the API decides whether to surface it.
 		Recoverable:   info.BackupErrorReason != nil && common.IsRecoverable(*info.BackupErrorReason),
 		DaemonVersion: daemonVersion,
 	})
