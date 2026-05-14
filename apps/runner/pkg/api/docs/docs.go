@@ -1764,7 +1764,7 @@ const docTemplate = `{
                     }
                 },
                 "errorReason": {
-                    "description": "At least one of ErrorReason or BackupErrorReason must deduce a recovery type in\napps/runner/pkg/docker/recover.go; both are optional at the DTO level so that the\ncaller can send only whichever one is populated (archive-backup failures leave\nerrorReason null on the API side).",
+                    "description": "At least one of ErrorReason or BackupErrorReason must yield a recovery type; both are optional.",
                     "type": "string"
                 },
                 "fromVolumeId": {

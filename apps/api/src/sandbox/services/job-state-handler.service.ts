@@ -28,7 +28,7 @@ import { getStateChangeLockKey } from '../utils/lock-key.util'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxStartedEvent } from '../events/sandbox-started.event'
 import { persistSnapshotFromSandbox } from '../utils/persist-snapshot-from-sandbox.util'
-import { RunnerService } from './runner.service'
+import { Runner } from '../entities/runner.entity'
 
 /**
  * Service for handling entity state updates based on job completion (v2 runners only).
@@ -46,17 +46,17 @@ export class JobStateHandlerService {
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly eventEmitter: EventEmitter2,
-    private readonly runnerService: RunnerService,
+    @InjectRepository(Runner)
+    private readonly runnerRepository: Repository<Runner>,
   ) {}
 
   private async runnerIsDraining(sandbox: Sandbox): Promise<boolean> {
     if (!sandbox.runnerId) return false
-    try {
-      const runner = await this.runnerService.findOne(sandbox.runnerId)
-      return runner?.draining === true
-    } catch {
-      return false
-    }
+    const runner = await this.runnerRepository.findOne({
+      where: { id: sandbox.runnerId },
+      select: ['draining'],
+    })
+    return runner?.draining === true
   }
 
   /**

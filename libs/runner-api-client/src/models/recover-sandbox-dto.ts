@@ -25,7 +25,7 @@ export interface RecoverSandboxDTO {
     'cpuQuota'?: number;
     'env'?: { [key: string]: string; };
     /**
-     * At least one of ErrorReason or BackupErrorReason must deduce a recovery type in apps/runner/pkg/docker/recover.go; both are optional at the DTO level so that the caller can send only whichever one is populated (archive-backup failures leave errorReason null on the API side).
+     * At least one of ErrorReason or BackupErrorReason must yield a recovery type; both are optional.
      */
     'errorReason'?: string;
     'fromVolumeId'?: string;
