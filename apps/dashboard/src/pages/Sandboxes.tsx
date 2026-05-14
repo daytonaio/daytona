@@ -12,6 +12,7 @@ import { CreateSandboxSheet } from '@/components/Sandbox/CreateSandboxSheet'
 import { CreateSshAccessSheet } from '@/components/sandboxes/CreateSshAccessSheet'
 import { RevokeSshAccessDialog } from '@/components/sandboxes/RevokeSshAccessDialog'
 import SandboxDetailsSheet, { type SandboxDetailsSheetTabValue } from '@/components/sandboxes/SandboxDetailsSheet'
+import { SandboxSheetRef } from '@/components/sandboxes/SandboxDetailsSheet/SandboxDetailsSheet'
 import { tabParser } from '@/components/sandboxes/SearchParams'
 import { SandboxTable } from '@/components/SandboxTable'
 import type { SandboxTableRef } from '@/components/SandboxTable/types'
@@ -63,6 +64,8 @@ const Sandboxes: React.FC = () => {
   const { user } = useAuth()
   const { notificationSocket } = useNotificationSocket()
   const config = useConfig()
+
+  const sandboxSheetRef = useRef<SandboxSheetRef>(null)
 
   const [sandboxes, setSandboxes] = useState<Sandbox[]>([])
   const [snapshots, setSnapshots] = useState<SnapshotDto[]>([])
@@ -119,7 +122,6 @@ const Sandboxes: React.FC = () => {
 
   const [selectedSandboxId, setSelectedSandboxId] = useState<string | null>(null)
   const [orderedSandboxItems, setOrderedSandboxItems] = useState<Sandbox[] | null>(null)
-  const [showSandboxDetails, setShowSandboxDetails] = useState(false)
   const [sandboxDetailsInitialTab, setSandboxDetailsInitialTab] = useState<SandboxDetailsSheetTabValue>('overview')
   const [sandboxIdParam, setSandboxIdParam] = useQueryState('sandboxId', parseAsString)
   const [sandboxTabParam, setSandboxTabParam] = useQueryState('tab', tabParser)
@@ -195,9 +197,10 @@ const Sandboxes: React.FC = () => {
 
   useEffect(() => {
     if (!sandboxIdParam) {
-      setShowSandboxDetails(false)
       setSelectedSandboxId(null)
       setOrderedSandboxItems(null)
+      sandboxSheetRef.current?.close()
+
       return
     }
 
@@ -207,11 +210,12 @@ const Sandboxes: React.FC = () => {
     }
 
     setSelectedSandboxId(sandboxIdParam)
-    if (!showSandboxDetails || selectedSandboxId !== sandboxIdParam) {
+    if (selectedSandboxId !== sandboxIdParam) {
       setSandboxDetailsInitialTab(sandboxTabParam ?? 'overview')
     }
-    setShowSandboxDetails(true)
-  }, [sandboxIdParam, sandboxTabParam, sandboxes, seedSandboxDetailsCache, selectedSandboxId, showSandboxDetails])
+
+    sandboxSheetRef.current?.open()
+  }, [sandboxIdParam, sandboxTabParam, sandboxes, seedSandboxDetailsCache, selectedSandboxId])
 
   useEffect(() => {
     const handleSandboxCreatedEvent = (sandbox: Sandbox) => {
@@ -362,7 +366,8 @@ const Sandboxes: React.FC = () => {
       setShowDeleteDialog(false)
 
       if (selectedSandboxId === id) {
-        setShowSandboxDetails(false)
+        sandboxSheetRef.current?.close()
+
         setSelectedSandboxId(null)
         setSandboxIdParam(null)
         setSandboxTabParam(null)
@@ -544,7 +549,8 @@ const Sandboxes: React.FC = () => {
     })
 
     if (selectedSandboxInBulk) {
-      setShowSandboxDetails(false)
+      sandboxSheetRef.current?.close()
+
       setSelectedSandboxId(null)
       setSandboxIdParam(null)
       setSandboxTabParam(null)
@@ -709,8 +715,6 @@ const Sandboxes: React.FC = () => {
   }
 
   const handleSandboxDetailsOpenChange = (isOpen: boolean) => {
-    setShowSandboxDetails(isOpen)
-
     if (!isOpen) {
       setSandboxIdParam(null)
       setSandboxTabParam(null)
@@ -726,7 +730,8 @@ const Sandboxes: React.FC = () => {
     setSandboxDetailsInitialTab(initialTab)
     setSandboxIdParam(sandbox.id)
     setSandboxTabParam(initialTab)
-    setShowSandboxDetails(true)
+
+    sandboxSheetRef.current?.open()
   }
 
   const handleSandboxRowClick = (sandbox: Sandbox) => {
@@ -829,7 +834,7 @@ const Sandboxes: React.FC = () => {
           ref={sandboxTableRef}
           sandboxIsLoading={loadingSandboxes}
           sandboxStateIsTransitioning={transitioningSandboxes}
-          activeSandboxId={showSandboxDetails ? selectedSandboxId : undefined}
+          activeSandboxId={selectedSandboxId}
           handleStart={handleStart}
           handleStop={handleStop}
           handleDelete={openDeleteDialog}
@@ -970,8 +975,8 @@ const Sandboxes: React.FC = () => {
         />
 
         <SandboxDetailsSheet
+          ref={sandboxSheetRef}
           sandboxId={selectedSandboxId}
-          open={showSandboxDetails}
           onOpenChange={handleSandboxDetailsOpenChange}
           sandboxIsLoading={loadingSandboxes}
           handleStart={handleStart}
