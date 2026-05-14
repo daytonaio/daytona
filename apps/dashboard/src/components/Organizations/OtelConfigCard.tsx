@@ -222,6 +222,7 @@ export const OtelConfigCard: React.FC = () => {
                             headerKeyInputRefs.current[index] = element
                           }}
                           headerKey={header.key}
+                          invalid={hasErrors}
                           headerValue={header.value}
                           onChangeKey={(key) => {
                             const next = [...field.state.value]
@@ -294,6 +295,7 @@ export const OtelConfigCard: React.FC = () => {
 const HeaderInput = ({
   keyInputRef,
   headerKey,
+  invalid,
   headerValue,
   onChangeKey,
   onChangeValue,
@@ -301,6 +303,7 @@ const HeaderInput = ({
 }: {
   keyInputRef: (element: HTMLInputElement | null) => void
   headerKey: string
+  invalid: boolean
   headerValue: string
   onChangeKey: (value: string) => void
   onChangeValue: (value: string) => void
@@ -310,6 +313,7 @@ const HeaderInput = ({
     <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2rem] gap-2">
       <Input
         ref={keyInputRef}
+        aria-invalid={invalid}
         placeholder="Header key"
         value={headerKey}
         onChange={(e) => onChangeKey(e.target.value)}
