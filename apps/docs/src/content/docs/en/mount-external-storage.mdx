@@ -11,7 +11,7 @@ External storage mounts and [Daytona Volumes](/docs/en/volumes/) are complementa
 
 External storage is mounted using FUSE. Daytona supports two approaches, and each provider section below shows both — pick whichever fits your workflow:
 
-- **Pre-baked snapshot** — build a [snapshot](/docs/en/snapshots/) once with the FUSE tool (`mount-s3`, `gcsfuse`, `blobfuse2`) baked in, then launch every sandbox from that snapshot. Cold starts are fast and predictable. Best for production.
+- **Pre-built snapshot** — build a [snapshot](/docs/en/snapshots/) once with the FUSE tool (`mount-s3`, `gcsfuse`, `blobfuse2`) built-in, then launch every sandbox from that snapshot. Cold starts are fast and predictable. Best for production.
 - **Runtime install** — launch a default sandbox and `apt-get install` the FUSE tool when the sandbox starts. Adds time to sandbox startup, but you don't manage snapshots. Best for quick experiments.
 
 Both approaches end with the same mount command and the same usage — the only difference is when the FUSE tool gets installed.
@@ -22,11 +22,13 @@ Mount an S3 bucket using [Mountpoint for Amazon S3 ↗](https://github.com/awsla
 
 **Credentials** — set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in your local environment. The snippets below pass them into the sandbox via `envVars`, and `mount-s3` reads them from there.
 
-### Pre-baked snapshot
+### Pre-built snapshot
 
-Build a snapshot once with `mount-s3` installed, then launch sandboxes from it.
+Build a snapshot with `mount-s3` preinstalled, then launch all S3-enabled sandboxes from that snapshot. This removes per-sandbox package install work, keeps cold starts predictable, and gives you a reusable baseline image for production workloads.
 
 #### Build a snapshot
+
+Create a reusable snapshot that installs `mount-s3` and its system dependencies. After it finishes, every sandbox launched from `fuse-s3` already has the mount binary available.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -363,7 +365,7 @@ public class App {
 
 ### Runtime install
 
-Skip the snapshot and install `mount-s3` when the sandbox starts. Same end result, slower cold start.
+Start from a default sandbox and install `mount-s3` during startup before running the mount command. This is useful for quick testing and temporary environments where you do not want to maintain a custom snapshot, with the tradeoff of slower cold starts.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -580,11 +582,13 @@ Cloudflare R2 is S3-compatible, so the same `mount-s3` tool works. Pass an expli
 
 **Credentials** — set `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, and `R2_SECRET_ACCESS_KEY` in your local environment. R2 is S3-compatible, so the snippets below pass your R2 keys into the sandbox via `envVars` under the `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` names that `mount-s3` expects.
 
-### Pre-baked snapshot
+### Pre-built snapshot
 
-Build a snapshot once with `mount-s3` installed (the same FUSE tool used for S3), then launch sandboxes from it.
+Build a snapshot with `mount-s3` preinstalled, then launch all R2-enabled sandboxes from that snapshot. The mount flow stays identical to S3 except for the R2 `--endpoint-url`, and startup remains fast because installation is done once at snapshot build time.
 
 #### Build a snapshot
+
+Create a reusable snapshot that installs the same `mount-s3` tool used for S3. R2 remains S3-compatible, so this snapshot is identical to S3 setup and only the runtime mount command changes.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -731,6 +735,8 @@ public class App {
 </Tabs>
 
 #### Launch and mount
+
+Pass your R2 credentials into the sandbox as `AWS_*` environment variables and mount with the R2 endpoint URL. This keeps the authentication flow compatible with `mount-s3` while targeting your Cloudflare account.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -927,6 +933,8 @@ public class App {
 </Tabs>
 
 ### Runtime install
+
+Start from a default sandbox and install `mount-s3` during startup, then mount your bucket with the R2 `--endpoint-url`. This path is convenient for prototyping or one-off tasks, but each new sandbox pays the package installation cost.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -1174,9 +1182,13 @@ Mount a GCS bucket using [gcsfuse ↗](https://github.com/GoogleCloudPlatform/gc
 Daytona's base image is Debian Trixie, but Google has not published a Trixie-specific gcsfuse repository yet. The `gcsfuse-bookworm` repo packages run cleanly on Trixie, so we use them in the snippets below.
 :::
 
-### Pre-baked snapshot
+### Pre-built snapshot
+
+Build a snapshot with `gcsfuse` preinstalled, then launch all GCS-enabled sandboxes from that snapshot. This avoids repeating apt repository setup and package installation for every sandbox, which makes startup behavior more consistent.
 
 #### Build a snapshot
+
+Create a reusable snapshot that installs `gcsfuse` plus its apt repository configuration. After this step, GCS-enabled sandboxes can mount immediately without repeating package setup.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -1533,6 +1545,8 @@ public class App {
 
 ### Runtime install
 
+Start from a default sandbox and install `gcsfuse` when the sandbox starts, then upload the service account key and mount the bucket. This is the fastest way to iterate on setup, but every sandbox repeats install and key staging steps.
+
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 
@@ -1794,9 +1808,13 @@ Mount an Azure Blob container using [blobfuse2 ↗](https://github.com/Azure/azu
 Daytona's base image is Debian Trixie. Microsoft's `blobfuse2` Bookworm binary links against `libfuse3.so.3`, but Trixie's `fuse3` package bumped the SONAME to `.4`, so `libfuse3.so.3` is missing on disk. The snapshot recipe below creates a compatibility symlink. Without it, `blobfuse2` fails with `libfuse3.so.3: cannot open shared object file`.
 :::
 
-### Pre-baked snapshot
+### Pre-built snapshot
+
+Build a snapshot with `blobfuse2` and required FUSE compatibility setup preinstalled, then launch all Azure-enabled sandboxes from that snapshot. This is the recommended path for stable environments because dependency and compatibility work runs once during snapshot creation.
 
 #### Build a snapshot
+
+Create a reusable snapshot that installs `blobfuse2`, configures required FUSE dependencies, and applies the Trixie compatibility steps. This ensures Azure mounts work out of the box in sandboxes launched from `fuse-azure`.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -2287,6 +2305,8 @@ public class App {
 
 ### Runtime install
 
+Start from a default sandbox and install `blobfuse2` during startup before writing the config and mounting the container. This is useful for quick validation and experiments, with the tradeoff of slower cold starts and repeated setup on each sandbox launch.
+
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 
@@ -2659,9 +2679,13 @@ The Mesa setup follows the same pattern as the bucket providers but uses the Mes
 
 **Credentials** — set `MESA_API_KEY` and `MESA_ORG` (your Mesa organization slug) in your local environment. The snippets below pass them into the sandbox via `envVars`, and the Mesa CLI reads them from there.
 
-### Pre-baked snapshot
+### Pre-built snapshot
+
+Build a snapshot with the Mesa CLI preinstalled, then launch Mesa-enabled sandboxes from that snapshot. You still authenticate and mount at runtime, but installation is no longer part of each sandbox startup sequence.
 
 #### Build a snapshot
+
+Create a reusable snapshot that installs the Mesa CLI and enables the FUSE `user_allow_other` setting. Sandboxes launched from `fuse-mesa` can then authenticate and mount repos without repeating install work.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -3031,7 +3055,7 @@ public class App {
 
 ### Runtime install
 
-Skip the snapshot and install the Mesa CLI when the sandbox starts. Same end result, slower cold start.
+Start from a default sandbox and install the Mesa CLI during startup before configuring auth and running `mesa mount --daemonize`. This is useful when iterating quickly on mount behavior, with the tradeoff of slower cold starts for each sandbox.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -3381,7 +3405,3 @@ sudo mount --move <your-mount-path> /tmp/.fuse-defunct-$$
 After this, your original mount path is free for remounting. The FUSE daemon stays alive serving the mount at the new path; both the relocated mount and the daemon are cleaned up automatically when the sandbox is deleted.
 
 This works for any FUSE-based mount — verified against `mount-s3`, `gcsfuse`, and `blobfuse2`.
-
-## Tips
-
-- **Snapshot versioning** — name snapshots like `fuse-s3-v1`. Bump the suffix to force a rebuild whenever you upgrade the FUSE tool.
