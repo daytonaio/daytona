@@ -894,11 +894,9 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/recover' \
 
 ## Resize Sandboxes
 
-:::caution[Experimental]
-This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
-:::
+Daytona provides methods to resize [sandbox resources](#resources) after creation using [Python](/docs/en/python-sdk/), [TypeScript](/docs/en/typescript-sdk/), [Ruby](/docs/en/ruby-sdk/), [Go](/docs/en/go-sdk/daytona/) **SDKs**, and [API](/docs/en/tools/api/#daytona). On a running sandbox, you can increase CPU and memory without interruption. To decrease CPU or memory, or to increase disk capacity, stop the sandbox first. Disk size can only be increased and cannot be decreased.
 
-Daytona provides methods to resize [sandbox resources](#resources) after creation. On a running sandbox, you can increase CPU and memory without interruption. To decrease CPU or memory, or to increase disk capacity, stop the sandbox first. Disk size can only be increased and cannot be decreased.
+Resizing updates the sandbox resource allocation (`cpu`, `memory`, and `disk`) for that sandbox only. CPU and memory control compute capacity for running workloads, while disk controls persistent filesystem capacity. Values must be integers and stay within your organization's per-sandbox resource limits.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
