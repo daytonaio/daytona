@@ -71,10 +71,10 @@ export default defineConfig((mode) => ({
   ],
   resolve: {
     alias: [
-      // Resolve @daytona/sdk to the local source
+      // Resolve @daytona/sdk to the built ESM entry so browsers never receive raw SDK TypeScript decorators.
       {
         find: '@daytona/sdk',
-        replacement: path.resolve(__dirname, '../../libs/sdk-typescript/src'),
+        replacement: path.resolve(__dirname, '../../dist/libs/sdk-typescript'),
       },
       // Target @ but not @daytona,
       {

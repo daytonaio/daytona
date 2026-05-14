@@ -18,6 +18,14 @@
         }
       ]
     },
+    "serve": {
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "sdk-typescript"
+        }
+      ]
+    },
     "storybook": {
       "executor": "nx:run-commands",
       "options": {
