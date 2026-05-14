@@ -50,8 +50,9 @@ class CreateSandbox(BaseModel):
     auto_delete_interval: Optional[StrictInt] = Field(default=None, description="Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)", serialization_alias="autoDeleteInterval")
     volumes: Optional[List[SandboxVolume]] = Field(default=None, description="Array of volumes to attach to the sandbox")
     build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the sandbox", serialization_alias="buildInfo")
+    linked_sandbox: Optional[StrictStr] = Field(default=None, description="ID or name of an existing sandbox to link the new sandbox to. The new sandbox will be scheduled on the same runner as the linked sandbox so a local network can be established between them. Linked sandboxes must be ephemeral (autoDeleteInterval=0) and cannot themselves be linked to another sandbox.", serialization_alias="linkedSandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo"]
+    __properties: ClassVar[List[str]] = ["name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "linkedSandbox"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -137,7 +138,8 @@ class CreateSandbox(BaseModel):
             "auto_archive_interval": obj.get("autoArchiveInterval"),
             "auto_delete_interval": obj.get("autoDeleteInterval"),
             "volumes": [SandboxVolume.from_dict(_item) for _item in obj["volumes"]] if obj.get("volumes") is not None else None,
-            "build_info": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None
+            "build_info": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
+            "linked_sandbox": obj.get("linkedSandbox")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

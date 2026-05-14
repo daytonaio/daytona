@@ -27,6 +27,7 @@ public class CreateSandboxParams {
     private Integer autoDeleteInterval;
     private List<VolumeMount> volumes;
     private Boolean networkBlockAll;
+    private String linkedSandbox;
 
     /**
      * Returns Sandbox name.
@@ -181,4 +182,23 @@ public class CreateSandboxParams {
      * @param networkBlockAll network block flag
      */
     public void setNetworkBlockAll(Boolean networkBlockAll) { this.networkBlockAll = networkBlockAll; }
+
+    /**
+     * Returns the ID or name of an existing Sandbox to link the new Sandbox to.
+     *
+     * <p>When set, the new Sandbox will be scheduled on the same runner as the linked Sandbox so a
+     * local network can be established between them.
+     * Linked Sandboxes must be ephemeral ({@code autoDeleteInterval=0}) and cannot themselves be
+     * linked to another Sandbox.
+     *
+     * @return linked Sandbox identifier, or {@code null} when unlinked
+     */
+    public String getLinkedSandbox() { return linkedSandbox; }
+
+    /**
+     * Sets the ID or name of an existing Sandbox to link the new Sandbox to.
+     *
+     * @param linkedSandbox linked Sandbox identifier
+     */
+    public void setLinkedSandbox(String linkedSandbox) { this.linkedSandbox = linkedSandbox; }
 }

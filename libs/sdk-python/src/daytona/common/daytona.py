@@ -140,6 +140,10 @@ class CreateSandboxBaseParams(BaseModel):
         network_allow_list (str | None): Comma-separated list of allowed CIDR network addresses for the Sandbox.
         ephemeral (bool | None): Whether the Sandbox should be ephemeral.
             If True, auto_delete_interval will be set to 0.
+        linked_sandbox (str | None): ID or name of an existing Sandbox to link the new Sandbox to. The new
+            Sandbox will be scheduled on the same runner as the linked Sandbox so a local network can be
+            established between them. Linked Sandboxes must be
+            ephemeral (auto_delete_interval=0) and cannot themselves be linked to another Sandbox.
     """
 
     name: str | None = None
@@ -155,6 +159,7 @@ class CreateSandboxBaseParams(BaseModel):
     network_block_all: bool | None = None
     network_allow_list: str | None = None
     ephemeral: bool | None = None
+    linked_sandbox: str | None = None
 
     @model_validator(mode="before")
     @classmethod

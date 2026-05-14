@@ -111,6 +111,9 @@ module DaytonaApiClient
     # The runner ID of the sandbox
     attr_accessor :runner_id
 
+    # ID of the sandbox this sandbox is linked to. When set, the sandbox is co-located on the same runner as the linked sandbox.
+    attr_accessor :linked_sandbox_id
+
     # The toolbox proxy URL for the sandbox
     attr_accessor :toolbox_proxy_url
 
@@ -183,6 +186,7 @@ module DaytonaApiClient
         :'sandbox_class' => :'sandboxClass',
         :'daemon_version' => :'daemonVersion',
         :'runner_id' => :'runnerId',
+        :'linked_sandbox_id' => :'linkedSandboxId',
         :'toolbox_proxy_url' => :'toolboxProxyUrl',
         :'image' => :'image',
         :'snapshot_state' => :'snapshotState',
@@ -236,6 +240,7 @@ module DaytonaApiClient
         :'sandbox_class' => :'String',
         :'daemon_version' => :'String',
         :'runner_id' => :'String',
+        :'linked_sandbox_id' => :'String',
         :'toolbox_proxy_url' => :'String',
         :'image' => :'String',
         :'snapshot_state' => :'String',
@@ -424,6 +429,10 @@ module DaytonaApiClient
 
       if attributes.key?(:'runner_id')
         self.runner_id = attributes[:'runner_id']
+      end
+
+      if attributes.key?(:'linked_sandbox_id')
+        self.linked_sandbox_id = attributes[:'linked_sandbox_id']
       end
 
       if attributes.key?(:'toolbox_proxy_url')
@@ -747,6 +756,7 @@ module DaytonaApiClient
           sandbox_class == o.sandbox_class &&
           daemon_version == o.daemon_version &&
           runner_id == o.runner_id &&
+          linked_sandbox_id == o.linked_sandbox_id &&
           toolbox_proxy_url == o.toolbox_proxy_url &&
           image == o.image &&
           snapshot_state == o.snapshot_state &&
@@ -763,7 +773,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, memory, disk, state, desired_state, error_reason, recoverable, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, last_activity_at, sandbox_class, daemon_version, runner_id, toolbox_proxy_url, image, snapshot_state, snapshot_created_at, info].hash
+      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, memory, disk, state, desired_state, error_reason, recoverable, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, last_activity_at, sandbox_class, daemon_version, runner_id, linked_sandbox_id, toolbox_proxy_url, image, snapshot_state, snapshot_created_at, info].hash
     end
 
     # Builds the object from hash

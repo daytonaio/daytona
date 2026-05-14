@@ -284,6 +284,7 @@ export class SandboxController {
         buildInfo: req.body?.buildInfo,
         networkBlockAll: req.body?.networkBlockAll,
         networkAllowList: req.body?.networkAllowList,
+        linkedSandbox: req.body?.linkedSandbox,
       }),
     },
   })
@@ -297,6 +298,11 @@ export class SandboxController {
     if (createSandboxDto.buildInfo) {
       if (createSandboxDto.snapshot) {
         throw new BadRequestError('Cannot specify a snapshot when using a build info entry')
+      }
+      if (createSandboxDto.linkedSandbox) {
+        throw new BadRequestError(
+          'linkedSandbox is not supported with declarative builds. Create a sandbox from a snapshot',
+        )
       }
       sandbox = await this.sandboxService.createFromBuildInfo(createSandboxDto, organization)
     } else {

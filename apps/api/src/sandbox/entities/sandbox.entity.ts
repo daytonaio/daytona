@@ -49,6 +49,7 @@ import { SandboxLastActivity } from './sandbox-last-activity.entity'
 @Index('sandbox_buildinfosnapshotref_idx', { synchronize: false })
 @Index('sandbox_labels_gin_full_idx', { synchronize: false })
 @Index('idx_sandbox_volumes_gin', { synchronize: false })
+@Index('sandbox_linked_sandbox_id_idx', ['linkedSandboxId'])
 export class Sandbox {
   @PrimaryColumn({ default: () => 'uuid_generate_v4()' })
   id: string
@@ -219,6 +220,13 @@ export class Sandbox {
 
   @Column({ nullable: true })
   daemonVersion?: string
+
+  // ID of another sandbox this sandbox is linked to. When set, this sandbox is
+  // co-located on the same runner as the linked sandbox so a local network can be
+  // established between them. A sandbox that is itself linked cannot be the target
+  // of another link (no chains). Linked sandboxes are always ephemeral.
+  @Column({ nullable: true })
+  linkedSandboxId?: string | null
 
   constructor(region: string, name?: string) {
     this.id = uuidv4()
