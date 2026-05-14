@@ -3,9 +3,25 @@
 
 from __future__ import annotations
 
+import asyncio
+import logging
 from typing import Any
 
 import aiohttp
+
+logger = logging.getLogger(__name__)
+
+# Connection-level errors that indicate the request was never processed by the
+# server. Safe to retry on any HTTP method — async counterpart of the sync
+# client's urllib3 RemoteDisconnected retry.
+_RETRYABLE_CONN_ERRORS: tuple[type[BaseException], ...] = (
+    aiohttp.ServerDisconnectedError,
+    aiohttp.ClientOSError,
+    aiohttp.ClientConnectorError,
+    ConnectionResetError,
+    BrokenPipeError,
+)
+_MAX_CONN_RETRIES = 2
 
 
 class SharedAiohttpSession:
@@ -17,13 +33,54 @@ class SharedAiohttpSession:
     then propagates that session to every other attached rest_client so all SDK
     traffic shares one TCP/TLS pool.
 
+    The wrapper also retries transient connection-level errors
+    (``ServerDisconnectedError``, ``ClientOSError``/broken pipe,
+    ``ClientConnectorError``) on any HTTP method, since those failures indicate
+    the request was never processed by the server.  This is the async equivalent
+    of ``urllib3_retry.RemoteDisconnectedRetry`` used by the sync client.
+
     ``session``/``require_session`` expose the adopted session for direct WS and
     streaming use (multipart uploads, log follows, etc.).
     """
 
-    def __init__(self) -> None:
+    def __init__(self, **connector_overrides: float | None) -> None:
+        """
+        Args:
+            **connector_overrides: Forwarded verbatim to
+                ``aiohttp.TCPConnector``.  Only the keys explicitly passed
+                override aiohttp's own defaults — e.g. callers can pass
+                ``happy_eyeballs_delay=None`` to disable the RFC 8305
+                IPv4/IPv6 race, or omit the kwarg entirely to inherit
+                whatever default aiohttp ships with.
+        """
         self._session: aiohttp.ClientSession | None = None
         self._rest_clients: list[Any] = []
+        self._connector_overrides: dict[str, float | None] = dict(connector_overrides)
+
+    def _ensure_session(self, rest_client: Any) -> None:
+        """Lazily create the shared aiohttp session on first request.
+
+        Runs before the rest_client's own lazy-create branch so the SDK
+        controls the connector settings, not the generated ``rest.py``.
+        """
+        if self._session is not None and not self._session.closed:
+            return
+
+        connector_kwargs: dict[str, Any] = {
+            "limit": getattr(rest_client, "maxsize", 100),
+            "keepalive_timeout": 30,
+        }
+        ssl_context = getattr(rest_client, "ssl_context", None)
+        if ssl_context is not None:
+            connector_kwargs["ssl"] = ssl_context
+        connector_kwargs.update(self._connector_overrides)
+
+        self._session = aiohttp.ClientSession(
+            connector=aiohttp.TCPConnector(**connector_kwargs),
+            trust_env=True,
+        )
+        for client in self._rest_clients:
+            client.pool_manager = self._session
 
     def attach(self, rest_client: Any) -> None:
         if not (hasattr(rest_client, "request") and hasattr(rest_client, "pool_manager")):
@@ -39,17 +96,39 @@ class SharedAiohttpSession:
             # No timeout injection: callers that need one pass _request_timeout
             # explicitly; everyone else gets aiohttp's session DEFAULT_TIMEOUT. The
             # TCPConnector limit on the shared session is what bounds concurrency.
-            started_with_none = rest_client.pool_manager is None
+            coordinator._ensure_session(rest_client)
 
-            if not started_with_none:
-                coordinator._adopt(rest_client.pool_manager)
+            for attempt in range(1, _MAX_CONN_RETRIES + 2):
+                started_with_none = rest_client.pool_manager is None
 
-            result = await original_request(*args, **kwargs)
+                if not started_with_none:
+                    coordinator._adopt(rest_client.pool_manager)
 
-            if started_with_none:
-                coordinator._adopt(rest_client.pool_manager)
+                try:
+                    result = await original_request(*args, **kwargs)
+                except _RETRYABLE_CONN_ERRORS as e:
+                    # On first-call failure the rest_client created its session but
+                    # the request never completed; still adopt it so the next attempt
+                    # reuses the shared pool.
+                    if started_with_none and rest_client.pool_manager is not None:
+                        coordinator._adopt(rest_client.pool_manager)
+                    if attempt > _MAX_CONN_RETRIES:
+                        raise
+                    logger.debug(
+                        "Retryable connection error (%s); retry %d/%d",
+                        type(e).__name__,
+                        attempt,
+                        _MAX_CONN_RETRIES,
+                    )
+                    await asyncio.sleep(0.25 * attempt)
+                    continue
 
-            return result
+                if started_with_none:
+                    coordinator._adopt(rest_client.pool_manager)
+
+                return result
+
+            raise AssertionError("unreachable")
 
         rest_client.request = request_wrapper
         self._rest_clients.append(rest_client)

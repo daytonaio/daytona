@@ -123,23 +123,34 @@ class TestAsyncDaytonaSharedSession:
     rest_clients regardless of which one fires first."""
 
     @pytest.mark.asyncio
-    async def test_first_request_propagates_session_to_other_rest_client(self):
-        """The first lazy-created session is propagated to every attached rest_client."""
+    async def test_first_request_propagates_session_to_other_rest_client(self, monkeypatch):
+        """The coordinator pre-creates one shared session and propagates it to every
+        attached rest_client before their lazy-create branch ever runs.  This is what
+        lets the SDK's runtime ``happy_eyeballs_delay`` decision win over the value
+        baked into the generated ``rest.py``.
+        """
         import aiohttp
 
+        from daytona.internal import shared_session as ss
         from daytona.internal.shared_session import SharedAiohttpSession
 
         fake_session = MagicMock(spec=aiohttp.ClientSession)
         fake_session.closed = False
+
+        def fake_ensure(self: SharedAiohttpSession, rest_client: object) -> None:
+            if self._session is None:
+                self._session = fake_session
+                for client in self._rest_clients:
+                    client.pool_manager = fake_session
+
+        monkeypatch.setattr(ss.SharedAiohttpSession, "_ensure_session", fake_ensure)
 
         rc_main = MagicMock(spec=["request", "pool_manager"])
         rc_main.pool_manager = None
         rc_tb = MagicMock(spec=["request", "pool_manager"])
         rc_tb.pool_manager = None
 
-        # Stub mimics generated rest_client.request: assigns pool_manager then returns.
         async def stub_request(*_args, **_kwargs):
-            rc_main.pool_manager = fake_session
             return None
 
         rc_main.request = stub_request
@@ -386,3 +397,41 @@ class TestAsyncDaytonaValidateLanguageLabel:
         daytona = _make_async_daytona()
         with pytest.raises(DaytonaValidationError, match=f"Invalid {CODE_TOOLBOX_LANGUAGE_LABEL}"):
             daytona._validate_language_label("ruby")
+
+
+class TestResolveHappyEyeballsDelay:
+    @pytest.mark.parametrize("raw", [None, "", "   "])
+    def test_unset_returns_missing_sentinel(self, raw):
+        from daytona._async.daytona import _MISSING_HAPPY_EYEBALLS_DELAY, _resolve_happy_eyeballs_delay
+
+        assert _resolve_happy_eyeballs_delay(raw) is _MISSING_HAPPY_EYEBALLS_DELAY
+
+    @pytest.mark.parametrize("raw", ["none", "None", "NONE", "  none  "])
+    def test_none_disables(self, raw):
+        from daytona._async.daytona import _resolve_happy_eyeballs_delay
+
+        assert _resolve_happy_eyeballs_delay(raw) is None
+
+    @pytest.mark.parametrize(
+        "raw,expected",
+        [
+            ("0", 0.0),
+            ("0.5", 0.5),
+            ("1", 1.0),
+            ("10.5", 10.5),
+        ],
+    )
+    def test_valid_floats(self, raw, expected):
+        from daytona._async.daytona import _resolve_happy_eyeballs_delay
+
+        assert _resolve_happy_eyeballs_delay(raw) == expected
+
+    @pytest.mark.parametrize("raw", ["abc", "-1", "-0.5", "1.0.0", "true", "false"])
+    def test_invalid_values_raise(self, raw):
+        from daytona._async.daytona import _resolve_happy_eyeballs_delay
+
+        with pytest.raises(
+            DaytonaValidationError,
+            match="DAYTONA_HAPPY_EYEBALLS_DELAY must be a non-negative float or 'none'",
+        ):
+            _resolve_happy_eyeballs_delay(raw)
