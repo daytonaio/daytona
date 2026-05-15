@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Logo, LogoText } from '@/assets/Logo'
 import {
   Sidebar as SidebarComponent,
   SidebarContent,
@@ -16,9 +15,11 @@ import {
   SidebarProvider,
   SidebarSeparator,
 } from '@/components/ui/sidebar'
-import { motion } from 'framer-motion'
+import { cn } from '@/lib/utils'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { AnimatedLogo } from './AnimatedLogo'
 import { Separator } from './ui/separator'
 import { Skeleton } from './ui/skeleton'
 
@@ -56,12 +57,9 @@ const LoadingFallback = () => {
       <SidebarComponent isBannerVisible={false} collapsible="icon">
         <SidebarHeader>
           <div className="flex h-[46px] items-center justify-between gap-2 px-2 pt-2">
-            <div className="flex items-center gap-2 text-primary group-data-[state=collapsed]:hidden">
-              <Logo className="size-6" />
-              <div className="w-[85px] overflow-hidden">
-                <LogoText />
-              </div>
-            </div>
+            <AnimatePresence initial={false}>
+              <AnimatedLogo className={cn('w-[117px] text-primary')} />
+            </AnimatePresence>
           </div>
         </SidebarHeader>
         <Separator className="mx-0 w-full" />
