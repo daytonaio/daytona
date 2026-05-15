@@ -339,7 +339,6 @@ const Runners: React.FC = () => {
           setDeleteRunnerDialogIsOpen(true)
           setShowRunnerDetails(false)
         }}
-        onToggleEnabled={handleToggleEnabled}
         getRegionName={getRegionName}
       />
     </PageLayout>
