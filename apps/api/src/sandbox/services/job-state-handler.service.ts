@@ -86,6 +86,12 @@ export class JobStateHandlerService {
       case JobType.STOP_SANDBOX:
         await this.handleStopSandboxJobCompletion(job)
         break
+      case JobType.PAUSE_SANDBOX:
+        await this.handlePauseSandboxJobCompletion(job)
+        break
+      case JobType.RESUME_SANDBOX:
+        await this.handleResumeSandboxJobCompletion(job)
+        break
       case JobType.DESTROY_SANDBOX:
         await this.handleDestroySandboxJobCompletion(job)
         break
@@ -258,6 +264,84 @@ export class JobStateHandlerService {
       await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
     } catch (error) {
       this.logger.error(`Error handling STOP_SANDBOX job completion for sandbox ${sandboxId}:`, error)
+    }
+  }
+
+  private async handlePauseSandboxJobCompletion(job: Job): Promise<void> {
+    const sandboxId = job.resourceId
+    if (!sandboxId) return
+
+    try {
+      const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
+      if (!sandbox) {
+        this.logger.warn(`Sandbox ${sandboxId} not found for PAUSE_SANDBOX job ${job.id}`)
+        return
+      }
+
+      if (sandbox.state !== SandboxState.PAUSING) {
+        this.logger.error(
+          `Sandbox ${sandboxId} is not in state PAUSING for PAUSE_SANDBOX job ${job.id}. State: ${sandbox.state}`,
+        )
+        return
+      }
+
+      const updateData: Partial<Sandbox> = {}
+
+      if (job.status === JobStatus.COMPLETED) {
+        this.logger.debug(`PAUSE_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as PAUSED`)
+        updateData.state = SandboxState.PAUSED
+        updateData.errorReason = null
+      } else if (job.status === JobStatus.FAILED) {
+        this.logger.error(`PAUSE_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
+        updateData.state = SandboxState.ERROR
+        const { recoverable, errorReason } = sanitizeSandboxError(job.errorMessage)
+        updateData.errorReason = errorReason || 'Failed to pause sandbox'
+        updateData.recoverable = recoverable
+      }
+
+      await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
+    } catch (error) {
+      this.logger.error(`Error handling PAUSE_SANDBOX job completion for sandbox ${sandboxId}:`, error)
+    }
+  }
+
+  private async handleResumeSandboxJobCompletion(job: Job): Promise<void> {
+    const sandboxId = job.resourceId
+    if (!sandboxId) return
+
+    try {
+      const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
+      if (!sandbox) {
+        this.logger.warn(`Sandbox ${sandboxId} not found for RESUME_SANDBOX job ${job.id}`)
+        return
+      }
+
+      if (sandbox.state !== SandboxState.RESUMING) {
+        this.logger.error(
+          `Sandbox ${sandboxId} is not in state RESUMING for RESUME_SANDBOX job ${job.id}. State: ${sandbox.state}`,
+        )
+        return
+      }
+
+      const updateData: Partial<Sandbox> = {}
+
+      if (job.status === JobStatus.COMPLETED) {
+        this.logger.debug(
+          `RESUME_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STARTED`,
+        )
+        updateData.state = SandboxState.STARTED
+        updateData.errorReason = null
+      } else if (job.status === JobStatus.FAILED) {
+        this.logger.error(`RESUME_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
+        updateData.state = SandboxState.ERROR
+        const { recoverable, errorReason } = sanitizeSandboxError(job.errorMessage)
+        updateData.errorReason = errorReason || 'Failed to resume sandbox'
+        updateData.recoverable = recoverable
+      }
+
+      await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
+    } catch (error) {
+      this.logger.error(`Error handling RESUME_SANDBOX job completion for sandbox ${sandboxId}:`, error)
     }
   }
 

@@ -437,6 +437,124 @@ export class Sandbox implements SandboxDto {
   }
 
   /**
+   * Pauses the Sandbox, freezing all running processes.
+   *
+   * The Sandbox will enter a 'pausing' state and transition to 'paused' when
+   * complete. While paused, the Sandbox retains its state in memory but does
+   * not consume CPU cycles.
+   *
+   * @param {number} [timeout] - Maximum time to wait in seconds. 0 means no timeout.
+   *                            Defaults to 60-second timeout.
+   * @returns {Promise<void>}
+   * @throws {DaytonaValidationError} - If timeout is a negative number
+   * @throws {DaytonaError} - If the pause operation fails or times out
+   *
+   * @example
+   * const sandbox = await daytona.get('my-sandbox');
+   * await sandbox._experimental_pause();
+   * console.log('Sandbox paused successfully');
+   */
+  @WithInstrumentation()
+  public async _experimental_pause(timeout = 60): Promise<void> {
+    if (timeout < 0) {
+      throw new DaytonaValidationError('Timeout must be a non-negative number')
+    }
+
+    const startTime = Date.now()
+    await this.sandboxApi.pauseSandbox(this.id, undefined, {
+      timeout: timeout * 1000,
+    })
+
+    await this.refreshData()
+
+    const timeElapsed = Date.now() - startTime
+    const remainingTimeout = timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout
+    await this.waitForPauseComplete(remainingTimeout)
+  }
+
+  private async waitForPauseComplete(timeout: number) {
+    let checkInterval = 100
+    const startTime = Date.now()
+
+    while (this.state === SandboxState.PAUSING) {
+      await this.refreshData()
+
+      // @ts-expect-error this.refreshData() can modify this.state so this check is fine
+      if (this.state === SandboxState.ERROR) {
+        throw new DaytonaError(
+          `Sandbox ${this.id} pause failed with state: ${this.state}, error reason: ${this.errorReason}`,
+        )
+      }
+
+      if (timeout > 0 && (Date.now() - startTime) / 1000 >= timeout) {
+        throw new DaytonaError(`Sandbox ${this.id} failed to pause within ${timeout} seconds`)
+      }
+
+      await new Promise((resolve) => globalThis.setTimeout(resolve, checkInterval))
+      checkInterval = Math.min(checkInterval * 1.5, 1000)
+    }
+  }
+
+  /**
+   * Resumes a paused Sandbox, thawing all frozen processes.
+   *
+   * The Sandbox will enter a 'resuming' state and transition to 'started' when
+   * complete. All processes and network connections that were active when the
+   * Sandbox was paused will continue from where they left off.
+   *
+   * @param {number} [timeout] - Maximum time to wait in seconds. 0 means no timeout.
+   *                            Defaults to 60-second timeout.
+   * @returns {Promise<void>}
+   * @throws {DaytonaValidationError} - If timeout is a negative number
+   * @throws {DaytonaError} - If the resume operation fails or times out
+   *
+   * @example
+   * const sandbox = await daytona.get('my-sandbox');
+   * await sandbox._experimental_resume();
+   * console.log('Sandbox resumed successfully');
+   */
+  @WithInstrumentation()
+  public async _experimental_resume(timeout = 60): Promise<void> {
+    if (timeout < 0) {
+      throw new DaytonaValidationError('Timeout must be a non-negative number')
+    }
+
+    const startTime = Date.now()
+    await this.sandboxApi.resumeSandbox(this.id, undefined, {
+      timeout: timeout * 1000,
+    })
+
+    await this.refreshData()
+
+    const timeElapsed = Date.now() - startTime
+    const remainingTimeout = timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout
+    await this.waitForResumeComplete(remainingTimeout)
+  }
+
+  private async waitForResumeComplete(timeout: number) {
+    let checkInterval = 100
+    const startTime = Date.now()
+
+    while (this.state === SandboxState.RESUMING) {
+      await this.refreshData()
+
+      // @ts-expect-error this.refreshData() can modify this.state so this check is fine
+      if (this.state === SandboxState.ERROR) {
+        throw new DaytonaError(
+          `Sandbox ${this.id} resume failed with state: ${this.state}, error reason: ${this.errorReason}`,
+        )
+      }
+
+      if (timeout > 0 && (Date.now() - startTime) / 1000 >= timeout) {
+        throw new DaytonaError(`Sandbox ${this.id} failed to resume within ${timeout} seconds`)
+      }
+
+      await new Promise((resolve) => globalThis.setTimeout(resolve, checkInterval))
+      checkInterval = Math.min(checkInterval * 1.5, 1000)
+    }
+  }
+
+  /**
    * Deletes the Sandbox.
    * @returns {Promise<void>}
    */

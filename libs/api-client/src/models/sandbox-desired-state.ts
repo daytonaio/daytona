@@ -24,6 +24,7 @@ export const SandboxDesiredState = {
     STOPPED: 'stopped',
     RESIZED: 'resized',
     ARCHIVED: 'archived',
+    PAUSED: 'paused',
     UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 

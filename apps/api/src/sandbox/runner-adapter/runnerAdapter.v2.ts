@@ -5,7 +5,13 @@
 
 import { Injectable, Logger } from '@nestjs/common'
 import { create, toJson } from '@bufbuild/protobuf'
-import { SnapshotSandboxPayloadSchema, ForkSandboxPayloadSchema, RegistrySchema } from '@daytona/runner-proto'
+import {
+  SnapshotSandboxPayloadSchema,
+  ForkSandboxPayloadSchema,
+  PauseSandboxPayloadSchema,
+  ResumeSandboxPayloadSchema,
+  RegistrySchema,
+} from '@daytona/runner-proto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, IsNull, Not } from 'typeorm'
 import {
@@ -532,6 +538,46 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     this.logger.debug(
       `Created UPDATE_SANDBOX_NETWORK_SETTINGS job for sandbox ${sandboxId} on runner ${this.runner.id}`,
     )
+  }
+
+  async pauseSandbox(sandboxId: string): Promise<void> {
+    const payload = toJson(
+      PauseSandboxPayloadSchema,
+      create(PauseSandboxPayloadSchema, {
+        sandboxId,
+      }),
+    ) as Record<string, unknown>
+
+    await this.jobService.createJob(
+      null,
+      JobType.PAUSE_SANDBOX,
+      this.runner.id,
+      ResourceType.SANDBOX,
+      sandboxId,
+      payload,
+    )
+
+    this.logger.debug(`Created PAUSE_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
+  }
+
+  async resumeSandbox(sandboxId: string): Promise<void> {
+    const payload = toJson(
+      ResumeSandboxPayloadSchema,
+      create(ResumeSandboxPayloadSchema, {
+        sandboxId,
+      }),
+    ) as Record<string, unknown>
+
+    await this.jobService.createJob(
+      null,
+      JobType.RESUME_SANDBOX,
+      this.runner.id,
+      ResourceType.SANDBOX,
+      sandboxId,
+      payload,
+    )
+
+    this.logger.debug(`Created RESUME_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }
 
   async forkSandbox(sourceSandboxId: string, newSandboxId: string): Promise<void> {

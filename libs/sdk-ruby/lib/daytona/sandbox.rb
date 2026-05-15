@@ -533,6 +533,38 @@ module Daytona
       ) { wait_for_snapshot_complete }
     end
 
+    # Pauses the Sandbox, freezing all running processes.
+    # The Sandbox will temporarily enter a 'pausing' state and return to its previous state when complete.
+    #
+    # @param timeout [Numeric] Maximum wait time in seconds (defaults to 60 s)
+    # @return [void]
+    def experimental_pause(timeout: DEFAULT_TIMEOUT)
+      with_timeout(
+        timeout:,
+        message: "Sandbox #{id} failed to pause within the #{timeout} seconds timeout period",
+        setup: proc {
+          sandbox_api.pause_sandbox(id)
+          refresh
+        }
+      ) { wait_for_pause_complete }
+    end
+
+    # Resumes a paused Sandbox, thawing all frozen processes.
+    # The Sandbox will enter a 'resuming' state and transition to 'started' when complete.
+    #
+    # @param timeout [Numeric] Maximum wait time in seconds (defaults to 60 s)
+    # @return [void]
+    def experimental_resume(timeout: DEFAULT_TIMEOUT)
+      with_timeout(
+        timeout:,
+        message: "Sandbox #{id} failed to resume within the #{timeout} seconds timeout period",
+        setup: proc {
+          sandbox_api.resume_sandbox(id)
+          refresh
+        }
+      ) { wait_for_resume_complete }
+    end
+
     instrument :archive, :auto_archive_interval=, :auto_delete_interval=, :auto_stop_interval=,
                :update_network_settings,
                :create_ssh_access, :delete, :get_user_home_dir, :get_work_dir, :labels=,
@@ -540,7 +572,7 @@ module Daytona
                :refresh, :refresh_activity, :revoke_ssh_access, :start, :recover, :stop,
                :create_lsp_server, :validate_ssh_access, :wait_for_sandbox_start,
                :wait_for_sandbox_stop, :resize, :wait_for_resize_complete,
-               :experimental_fork, :experimental_create_snapshot,
+               :experimental_fork, :experimental_create_snapshot, :experimental_pause, :experimental_resume,
                component: 'Sandbox'
 
     private
@@ -677,6 +709,46 @@ module Daytona
         end
 
         break if state != DaytonaApiClient::SandboxState::SNAPSHOTTING
+
+        sleep(interval)
+        if ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - start_time > 5
+          interval = [interval * BACKOFF_MULTIPLIER, MAX_POLL_INTERVAL].min
+        end
+      end
+    end
+
+    def wait_for_pause_complete
+      interval = INITIAL_POLL_INTERVAL
+      start_time = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+      while state == DaytonaApiClient::SandboxState::PAUSING
+        refresh
+
+        if [DaytonaApiClient::SandboxState::ERROR, DaytonaApiClient::SandboxState::BUILD_FAILED].include?(state)
+          raise Sdk::Error,
+                "Sandbox #{id} pause failed with state: #{state}, error reason: #{error_reason}"
+        end
+
+        break if state != DaytonaApiClient::SandboxState::PAUSING
+
+        sleep(interval)
+        if ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - start_time > 5
+          interval = [interval * BACKOFF_MULTIPLIER, MAX_POLL_INTERVAL].min
+        end
+      end
+    end
+
+    def wait_for_resume_complete
+      interval = INITIAL_POLL_INTERVAL
+      start_time = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+      while state == DaytonaApiClient::SandboxState::RESUMING
+        refresh
+
+        if [DaytonaApiClient::SandboxState::ERROR, DaytonaApiClient::SandboxState::BUILD_FAILED].include?(state)
+          raise Sdk::Error,
+                "Sandbox #{id} resume failed with state: #{state}, error reason: #{error_reason}"
+        end
+
+        break if state != DaytonaApiClient::SandboxState::RESUMING
 
         sleep(interval)
         if ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - start_time > 5

@@ -902,6 +902,176 @@ func (s *Sandbox) waitForSnapshotComplete(ctx context.Context) error {
 	return nil
 }
 
+// ExperimentalPause pauses the Sandbox, freezing all running processes.
+// Uses a default timeout of 60 seconds.
+//
+// The Sandbox will temporarily enter a 'pausing' state and return to its previous state when complete.
+//
+// Example:
+//
+//	err := sandbox.ExperimentalPause(ctx)
+//	if err != nil {
+//	    return err
+//	}
+func (s *Sandbox) ExperimentalPause(ctx context.Context) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "ExperimentalPause", func(ctx context.Context) error {
+		return s.ExperimentalPauseWithTimeout(ctx, 60*time.Second)
+	})
+}
+
+// ExperimentalPauseWithTimeout pauses the Sandbox with a custom timeout.
+// 0 means no timeout.
+//
+// Example:
+//
+//	err := sandbox.ExperimentalPauseWithTimeout(ctx, 2*time.Minute)
+func (s *Sandbox) ExperimentalPauseWithTimeout(ctx context.Context, timeout time.Duration) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "ExperimentalPauseWithTimeout", func(ctx context.Context) error {
+		return s.doExperimentalPauseWithTimeout(ctx, timeout)
+	})
+}
+
+func (s *Sandbox) doExperimentalPauseWithTimeout(ctx context.Context, timeout time.Duration) error {
+	if timeout < 0 {
+		return errors.NewDaytonaError("Timeout must be a non-negative number", 0, nil)
+	}
+
+	if timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
+
+	authCtx := s.client.getAuthContext(ctx)
+	_, httpResp, err := s.client.apiClient.SandboxAPI.PauseSandbox(authCtx, s.ID).Execute()
+	if err != nil {
+		return errors.ConvertAPIError(err, httpResp)
+	}
+
+	if err := s.RefreshData(ctx); err != nil {
+		return err
+	}
+
+	return s.waitForPauseComplete(ctx)
+}
+
+func (s *Sandbox) waitForPauseComplete(ctx context.Context) error {
+	checkInterval := 100 * time.Millisecond
+	startTime := time.Now()
+
+	for s.State == apiclient.SANDBOXSTATE_PAUSING {
+		if err := s.RefreshData(ctx); err != nil {
+			return err
+		}
+
+		if s.State == apiclient.SANDBOXSTATE_ERROR || s.State == apiclient.SANDBOXSTATE_BUILD_FAILED {
+			return errors.NewDaytonaError(
+				fmt.Sprintf("Sandbox %s pause failed with state: %s", s.ID, s.State), 0, nil,
+			)
+		}
+
+		if s.State != apiclient.SANDBOXSTATE_PAUSING {
+			return nil
+		}
+
+		select {
+		case <-ctx.Done():
+			return errors.NewDaytonaError("Sandbox pause did not complete within the timeout period", 0, nil)
+		case <-time.After(checkInterval):
+		}
+
+		if time.Since(startTime) > 5*time.Second {
+			checkInterval = min(time.Duration(float64(checkInterval)*1.1), 1*time.Second)
+		}
+	}
+	return nil
+}
+
+// ExperimentalResume resumes a paused Sandbox, thawing all frozen processes.
+// Uses a default timeout of 60 seconds.
+//
+// The Sandbox will enter a 'resuming' state and transition to 'started' when complete.
+//
+// Example:
+//
+//	err := sandbox.ExperimentalResume(ctx)
+//	if err != nil {
+//	    return err
+//	}
+func (s *Sandbox) ExperimentalResume(ctx context.Context) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "ExperimentalResume", func(ctx context.Context) error {
+		return s.ExperimentalResumeWithTimeout(ctx, 60*time.Second)
+	})
+}
+
+// ExperimentalResumeWithTimeout resumes a paused Sandbox with a custom timeout.
+// 0 means no timeout.
+//
+// Example:
+//
+//	err := sandbox.ExperimentalResumeWithTimeout(ctx, 2*time.Minute)
+func (s *Sandbox) ExperimentalResumeWithTimeout(ctx context.Context, timeout time.Duration) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "ExperimentalResumeWithTimeout", func(ctx context.Context) error {
+		return s.doExperimentalResumeWithTimeout(ctx, timeout)
+	})
+}
+
+func (s *Sandbox) doExperimentalResumeWithTimeout(ctx context.Context, timeout time.Duration) error {
+	if timeout < 0 {
+		return errors.NewDaytonaError("Timeout must be a non-negative number", 0, nil)
+	}
+
+	if timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
+
+	authCtx := s.client.getAuthContext(ctx)
+	_, httpResp, err := s.client.apiClient.SandboxAPI.ResumeSandbox(authCtx, s.ID).Execute()
+	if err != nil {
+		return errors.ConvertAPIError(err, httpResp)
+	}
+
+	if err := s.RefreshData(ctx); err != nil {
+		return err
+	}
+
+	return s.waitForResumeComplete(ctx)
+}
+
+func (s *Sandbox) waitForResumeComplete(ctx context.Context) error {
+	checkInterval := 100 * time.Millisecond
+	startTime := time.Now()
+
+	for s.State == apiclient.SANDBOXSTATE_RESUMING {
+		if err := s.RefreshData(ctx); err != nil {
+			return err
+		}
+
+		if s.State == apiclient.SANDBOXSTATE_ERROR || s.State == apiclient.SANDBOXSTATE_BUILD_FAILED {
+			return errors.NewDaytonaError(
+				fmt.Sprintf("Sandbox %s resume failed with state: %s", s.ID, s.State), 0, nil,
+			)
+		}
+
+		if s.State != apiclient.SANDBOXSTATE_RESUMING {
+			return nil
+		}
+
+		select {
+		case <-ctx.Done():
+			return errors.NewDaytonaError("Sandbox resume did not complete within the timeout period", 0, nil)
+		case <-time.After(checkInterval):
+		}
+
+		if time.Since(startTime) > 5*time.Second {
+			checkInterval = min(time.Duration(float64(checkInterval)*1.1), 1*time.Second)
+		}
+	}
+	return nil
+}
+
 // Resize resizes the sandbox resources with a default timeout of 60 seconds.
 //
 // Changes the CPU, memory, or disk allocation for the sandbox. Resizing a started

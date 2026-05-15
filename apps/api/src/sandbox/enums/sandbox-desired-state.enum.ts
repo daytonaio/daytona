@@ -9,4 +9,5 @@ export enum SandboxDesiredState {
   STOPPED = 'stopped',
   RESIZED = 'resized',
   ARCHIVED = 'archived',
+  PAUSED = 'paused',
 }

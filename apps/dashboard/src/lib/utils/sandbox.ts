@@ -10,7 +10,15 @@ export function isStartable(sandbox: Sandbox): boolean {
 }
 
 export function isStoppable(sandbox: Sandbox): boolean {
+  return sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.PAUSED
+}
+
+export function isPausable(sandbox: Sandbox): boolean {
   return sandbox.state === SandboxState.STARTED
+}
+
+export function isResumable(sandbox: Sandbox): boolean {
+  return sandbox.state === SandboxState.PAUSED
 }
 
 export function isArchivable(sandbox: Sandbox): boolean {
@@ -34,7 +42,9 @@ export function isTransitioning(sandbox: Sandbox): boolean {
     sandbox.state === SandboxState.ARCHIVING ||
     sandbox.state === SandboxState.RESTORING ||
     sandbox.state === SandboxState.BUILDING_SNAPSHOT ||
-    sandbox.state === SandboxState.PULLING_SNAPSHOT
+    sandbox.state === SandboxState.PULLING_SNAPSHOT ||
+    sandbox.state === SandboxState.PAUSING ||
+    sandbox.state === SandboxState.RESUMING
   )
 }
 

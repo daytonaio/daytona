@@ -320,6 +320,8 @@ export class Sandbox {
             SandboxState.RESIZING,
             SandboxState.SNAPSHOTTING,
             SandboxState.FORKING,
+            SandboxState.PAUSED,
+            SandboxState.RESUMING,
           ].includes(this.state)
         ) {
           break
@@ -336,6 +338,8 @@ export class Sandbox {
             SandboxState.RESIZING,
             SandboxState.SNAPSHOTTING,
             SandboxState.FORKING,
+            SandboxState.PAUSED,
+            SandboxState.PAUSING,
           ].includes(this.state)
         ) {
           break
@@ -366,11 +370,17 @@ export class Sandbox {
             SandboxState.BUILD_FAILED,
             SandboxState.ARCHIVING,
             SandboxState.PENDING_BUILD,
+            SandboxState.PAUSED,
           ].includes(this.state)
         ) {
           break
         }
         throw new Error(`Sandbox ${this.id} is not in a valid state to be destroyed. State: ${this.state}`)
+      case SandboxDesiredState.PAUSED:
+        if ([SandboxState.STARTED, SandboxState.PAUSING, SandboxState.PAUSED].includes(this.state)) {
+          break
+        }
+        throw new Error(`Sandbox ${this.id} is not in a valid state to be paused. State: ${this.state}`)
     }
   }
 

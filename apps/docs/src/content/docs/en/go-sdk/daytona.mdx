@@ -243,6 +243,10 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) ExperimentalCreateSnapshotWithTimeout\(ctx context.Context, name string, timeout time.Duration\) error](<#Sandbox.ExperimentalCreateSnapshotWithTimeout>)
   - [func \(s \*Sandbox\) ExperimentalFork\(ctx context.Context, name \*string\) \(\*Sandbox, error\)](<#Sandbox.ExperimentalFork>)
   - [func \(s \*Sandbox\) ExperimentalForkWithTimeout\(ctx context.Context, name \*string, timeout time.Duration\) \(\*Sandbox, error\)](<#Sandbox.ExperimentalForkWithTimeout>)
+  - [func \(s \*Sandbox\) ExperimentalPause\(ctx context.Context\) error](<#Sandbox.ExperimentalPause>)
+  - [func \(s \*Sandbox\) ExperimentalPauseWithTimeout\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.ExperimentalPauseWithTimeout>)
+  - [func \(s \*Sandbox\) ExperimentalResume\(ctx context.Context\) error](<#Sandbox.ExperimentalResume>)
+  - [func \(s \*Sandbox\) ExperimentalResumeWithTimeout\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.ExperimentalResumeWithTimeout>)
   - [func \(s \*Sandbox\) ExpireSignedPreviewLink\(ctx context.Context, port int, token string\) error](<#Sandbox.ExpireSignedPreviewLink>)
   - [func \(s \*Sandbox\) GetPreviewLink\(ctx context.Context, port int\) \(\*types.PreviewLink, error\)](<#Sandbox.GetPreviewLink>)
   - [func \(s \*Sandbox\) GetSignedPreviewLink\(ctx context.Context, port int, expiresInSeconds int\) \(\*types.SignedPreviewLink, error\)](<#Sandbox.GetSignedPreviewLink>)
@@ -4111,6 +4115,76 @@ if err != nil {
     return err
 }
 fmt.Printf("Forked sandbox: %s\n", forked.ID)
+```
+
+<a name="Sandbox.ExperimentalPause"></a>
+### func \(\*Sandbox\) ExperimentalPause
+
+```go
+func (s *Sandbox) ExperimentalPause(ctx context.Context) error
+```
+
+ExperimentalPause pauses the Sandbox, freezing all running processes. Uses a default timeout of 60 seconds.
+
+The Sandbox will temporarily enter a 'pausing' state and return to its previous state when complete.
+
+Example:
+
+```
+err := sandbox.ExperimentalPause(ctx)
+if err != nil {
+    return err
+}
+```
+
+<a name="Sandbox.ExperimentalPauseWithTimeout"></a>
+### func \(\*Sandbox\) ExperimentalPauseWithTimeout
+
+```go
+func (s *Sandbox) ExperimentalPauseWithTimeout(ctx context.Context, timeout time.Duration) error
+```
+
+ExperimentalPauseWithTimeout pauses the Sandbox with a custom timeout. 0 means no timeout.
+
+Example:
+
+```
+err := sandbox.ExperimentalPauseWithTimeout(ctx, 2*time.Minute)
+```
+
+<a name="Sandbox.ExperimentalResume"></a>
+### func \(\*Sandbox\) ExperimentalResume
+
+```go
+func (s *Sandbox) ExperimentalResume(ctx context.Context) error
+```
+
+ExperimentalResume resumes a paused Sandbox, thawing all frozen processes. Uses a default timeout of 60 seconds.
+
+The Sandbox will enter a 'resuming' state and transition to 'started' when complete.
+
+Example:
+
+```
+err := sandbox.ExperimentalResume(ctx)
+if err != nil {
+    return err
+}
+```
+
+<a name="Sandbox.ExperimentalResumeWithTimeout"></a>
+### func \(\*Sandbox\) ExperimentalResumeWithTimeout
+
+```go
+func (s *Sandbox) ExperimentalResumeWithTimeout(ctx context.Context, timeout time.Duration) error
+```
+
+ExperimentalResumeWithTimeout resumes a paused Sandbox with a custom timeout. 0 means no timeout.
+
+Example:
+
+```
+err := sandbox.ExperimentalResumeWithTimeout(ctx, 2*time.Minute)
 ```
 
 <a name="Sandbox.ExpireSignedPreviewLink"></a>

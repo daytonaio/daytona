@@ -418,6 +418,9 @@ definitions:
       - error
       - unknown
       - pulling_snapshot
+      - pausing
+      - paused
+      - resuming
     type: string
     x-enum-varnames:
       - SandboxStateCreating
@@ -432,6 +435,9 @@ definitions:
       - SandboxStateError
       - SandboxStateUnknown
       - SandboxStatePullingSnapshot
+      - SandboxStatePausing
+      - SandboxStatePaused
+      - SandboxStateResuming
 info:
   contact: {}
   description: Daytona Runner API

@@ -2093,7 +2093,10 @@ const docTemplate = `{
                 "resizing",
                 "error",
                 "unknown",
-                "pulling_snapshot"
+                "pulling_snapshot",
+                "pausing",
+                "paused",
+                "resuming"
             ],
             "x-enum-varnames": [
                 "SandboxStateCreating",
@@ -2107,7 +2110,10 @@ const docTemplate = `{
                 "SandboxStateResizing",
                 "SandboxStateError",
                 "SandboxStateUnknown",
-                "SandboxStatePullingSnapshot"
+                "SandboxStatePullingSnapshot",
+                "SandboxStatePausing",
+                "SandboxStatePaused",
+                "SandboxStateResuming"
             ]
         }
     },

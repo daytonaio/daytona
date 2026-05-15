@@ -54,6 +54,12 @@ export interface JobTypeMap {
   [JobType.FORK_SANDBOX]: {
     resourceType: [ResourceType.SANDBOX]
   }
+  [JobType.PAUSE_SANDBOX]: {
+    resourceType: [ResourceType.SANDBOX]
+  }
+  [JobType.RESUME_SANDBOX]: {
+    resourceType: [ResourceType.SANDBOX]
+  }
 }
 
 /**

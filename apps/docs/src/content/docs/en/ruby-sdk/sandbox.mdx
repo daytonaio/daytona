@@ -960,3 +960,39 @@ The Sandbox will temporarily enter a 'snapshotting' state and return to its prev
 **Returns**:
 
 - `void`
+
+#### experimental_pause()
+
+```ruby
+def experimental_pause(timeout:)
+
+```
+
+Pauses the Sandbox, freezing all running processes.
+The Sandbox will temporarily enter a 'pausing' state and return to its previous state when complete.
+
+**Parameters**:
+
+- `timeout` _Numeric_ - Maximum wait time in seconds (defaults to 60 s)
+
+**Returns**:
+
+- `void`
+
+#### experimental_resume()
+
+```ruby
+def experimental_resume(timeout:)
+
+```
+
+Resumes a paused Sandbox, thawing all frozen processes.
+The Sandbox will enter a 'resuming' state and transition to 'started' when complete.
+
+**Parameters**:
+
+- `timeout` _Numeric_ - Maximum wait time in seconds (defaults to 60 s)
+
+**Returns**:
+
+- `void`

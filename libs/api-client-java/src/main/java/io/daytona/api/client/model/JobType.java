@@ -57,6 +57,10 @@ public enum JobType {
   
   FORK_SANDBOX("FORK_SANDBOX"),
   
+  PAUSE_SANDBOX("PAUSE_SANDBOX"),
+  
+  RESUME_SANDBOX("RESUME_SANDBOX"),
+  
   UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 
   private String value;

@@ -334,6 +334,62 @@ The Sandbox will temporarily enter a 'snapshotting' state and return to its prev
 
 - `DaytonaException` - if the snapshot operation fails
 
+#### experimentalPause()
+```java
+public void experimentalPause() throws DaytonaException
+```
+
+Pauses the Sandbox, freezing all running processes.
+Uses default timeout of 60 seconds.
+
+**Throws**:
+
+- `DaytonaException` - if the pause operation fails
+
+#### experimentalPause()
+```java
+public void experimentalPause(long timeoutSeconds) throws DaytonaException
+```
+
+Pauses the Sandbox, freezing all running processes.
+The Sandbox will temporarily enter a 'pausing' state and return to its previous state when complete.
+
+**Parameters**:
+
+- `timeoutSeconds` _long_ - maximum time to wait in seconds (0 = no timeout)
+
+**Throws**:
+
+- `DaytonaException` - if timeout is negative or the operation fails/times out
+
+#### experimentalResume()
+```java
+public void experimentalResume() throws DaytonaException
+```
+
+Resumes a paused Sandbox, thawing all frozen processes.
+Uses default timeout of 60 seconds.
+
+**Throws**:
+
+- `DaytonaException` - if the resume operation fails
+
+#### experimentalResume()
+```java
+public void experimentalResume(long timeoutSeconds) throws DaytonaException
+```
+
+Resumes a paused Sandbox, thawing all frozen processes.
+The Sandbox will enter a 'resuming' state and transition to 'started' when complete.
+
+**Parameters**:
+
+- `timeoutSeconds` _long_ - maximum time to wait in seconds (0 = no timeout)
+
+**Throws**:
+
+- `DaytonaException` - if timeout is negative or the operation fails/times out
+
 #### getId()
 ```java
 public String getId()
