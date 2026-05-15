@@ -214,7 +214,7 @@ export const UpsertEndpointSheet = ({
               Edit Endpoint
             </Button>
           ) : (
-            <CreateResourceButton resource="Endpoint" disabled={disabled} className={className} title="Add Endpoint">
+            <CreateResourceButton resource="Endpoint" disabled={disabled} className={className} title="Create Endpoint">
               Endpoint
             </CreateResourceButton>
           )}
@@ -224,7 +224,7 @@ export const UpsertEndpointSheet = ({
       )}
       <SheetContent className="w-dvw sm:w-[500px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle>{isEditMode ? 'Edit Webhook Endpoint' : 'Add Webhook Endpoint'}</SheetTitle>
+          <SheetTitle>{isEditMode ? 'Edit Endpoint' : 'Create Endpoint'}</SheetTitle>
           <SheetDescription className="sr-only">
             {isEditMode ? 'Update the endpoint configuration.' : 'Configure a new endpoint to receive webhook events.'}
           </SheetDescription>

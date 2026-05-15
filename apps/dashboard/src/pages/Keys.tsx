@@ -91,7 +91,7 @@ const Keys: React.FC = () => {
     return [
       {
         id: 'create-key',
-        label: 'Create Key',
+        label: 'Create API Key',
         icon: <PlusIcon className="w-4 h-4" />,
         onSelect: () => createApiKeySheetRef.current?.open(),
       },

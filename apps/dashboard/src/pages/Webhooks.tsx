@@ -83,7 +83,7 @@ const Webhooks: React.FC = () => {
     return [
       {
         id: 'add-endpoint',
-        label: 'Add Endpoint',
+        label: 'Create Endpoint',
         icon: <PlusIcon className="w-4 h-4" />,
         onSelect: () => {
           setActiveTab('endpoints')

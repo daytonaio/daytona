@@ -264,7 +264,7 @@ export const UpsertRegistrySheet = ({
               Edit Registry
             </Button>
           ) : (
-            <CreateResourceButton resource="Registry" disabled={disabled} className={className} title="Add Registry">
+            <CreateResourceButton resource="Registry" disabled={disabled} className={className} title="Create Registry">
               Registry
             </CreateResourceButton>
           )}
@@ -274,7 +274,7 @@ export const UpsertRegistrySheet = ({
       )}
       <SheetContent className="w-dvw sm:w-[460px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle>{isEditMode ? 'Edit Registry' : 'Add Registry'}</SheetTitle>
+          <SheetTitle>{isEditMode ? 'Edit Registry' : 'Create Registry'}</SheetTitle>
           <SheetDescription className="sr-only">
             Registry details must be provided for images that are not publicly available.
           </SheetDescription>

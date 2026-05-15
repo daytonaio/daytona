@@ -152,7 +152,7 @@ export const CreateSnapshotSheet = ({
       </SheetTrigger>
       <SheetContent className={`w-dvw sm:w-[500px] p-0 flex flex-col gap-0 ${className ?? ''}`}>
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle>Create New Snapshot</SheetTitle>
+          <SheetTitle>Create Snapshot</SheetTitle>
           <SheetDescription className="sr-only">
             Register a new snapshot to be used for spinning up sandboxes in your organization.
           </SheetDescription>

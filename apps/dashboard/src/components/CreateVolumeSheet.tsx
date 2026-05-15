@@ -112,7 +112,7 @@ export const CreateVolumeSheet = ({
       </SheetTrigger>
       <SheetContent className="w-dvw sm:w-[420px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle>Create New Volume</SheetTitle>
+          <SheetTitle>Create Volume</SheetTitle>
           <SheetDescription className="sr-only">Create a new volume for shared, persistent storage.</SheetDescription>
         </SheetHeader>
 

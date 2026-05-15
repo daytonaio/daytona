@@ -148,7 +148,7 @@ export const CreateApiKeySheet: React.FC<CreateApiKeySheetProps> = ({
 
       <SheetContent className="w-dvw sm:w-[500px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle>{createdKey ? 'API Key Created' : 'Create New API Key'}</SheetTitle>
+          <SheetTitle>{createdKey ? 'API Key Created' : 'Create API Key'}</SheetTitle>
           <SheetDescription className="sr-only">
             {createdKey
               ? 'Your API key has been created successfully.'

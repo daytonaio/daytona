@@ -105,7 +105,7 @@ export function CreateFolderSheet({
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetContent side="right" className="w-dvw flex flex-col gap-0 p-0 sm:w-[400px]">
         <SheetHeader className="flex flex-row items-center border-b border-border p-4 px-5 text-left">
-          <SheetTitle>Create folder</SheetTitle>
+          <SheetTitle>Create Folder</SheetTitle>
           <SheetDescription className="sr-only">Create a folder in {parentNode?.path}</SheetDescription>
         </SheetHeader>
         <div className="flex-1 overflow-y-auto p-5">

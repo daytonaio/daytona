@@ -781,7 +781,7 @@ export function FileTreePane({
                             ) : null}
                             {node.isDir ? (
                               <DropdownMenuItem onSelect={() => onRequestCreateFolder(node.path)}>
-                                Create folder
+                                Create Folder
                               </DropdownMenuItem>
                             ) : null}
                             {node.path !== ROOT_PATH ? <DropdownMenuSeparator /> : null}
