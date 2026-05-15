@@ -139,19 +139,9 @@ const Webhooks: React.FC = () => {
         />
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col gap-0">
           <div className="flex items-center justify-between shadow-[inset_0_-1px] shadow-border">
-            <TabsList className="px-2 shadow-none bg-transparent w-auto pb-0">
-              <TabsTrigger
-                value="endpoints"
-                className="data-[state=inactive]:border-b-transparent data-[state=active]:border-b-foreground border-b rounded-none !shadow-none -mb-0.5 pb-1.5"
-              >
-                Endpoints
-              </TabsTrigger>
-              <TabsTrigger
-                value="messages"
-                className="data-[state=inactive]:border-b-transparent data-[state=active]:border-b-foreground border-b rounded-none !shadow-none -mb-0.5 pb-1.5"
-              >
-                Messages
-              </TabsTrigger>
+            <TabsList variant="underline">
+              <TabsTrigger value="endpoints">Endpoints</TabsTrigger>
+              <TabsTrigger value="messages">Messages</TabsTrigger>
             </TabsList>
           </div>
           <TabsContent
