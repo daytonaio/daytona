@@ -843,9 +843,22 @@ const Sandboxes: React.FC = () => {
         <PageIntro
           title="Sandboxes"
           actions={
-            canCreateSandbox ? (
-              <CreateSandboxSheet ref={createSandboxSheetRef} onSandboxCreated={handleSandboxCreated} />
-            ) : undefined
+            <>
+              {!loadingTable && sandboxes.length === 0 && (
+                <Button
+                  variant="link"
+                  onClick={() => navigate(RoutePath.ONBOARDING)}
+                  size="sm"
+                  className="text-muted-foreground"
+                >
+                  Onboarding guide
+                </Button>
+              )}
+
+              {canCreateSandbox && (
+                <CreateSandboxSheet ref={createSandboxSheetRef} onSandboxCreated={handleSandboxCreated} />
+              )}
+            </>
           }
         />
         <SandboxTable
