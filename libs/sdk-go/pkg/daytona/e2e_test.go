@@ -962,17 +962,26 @@ PY`, options.WithExecuteTimeout(10*time.Second))
 	})
 
 	t.Run("ClientOps/ListSandboxes", func(t *testing.T) {
-		listed, listErr := client.List(ctx, nil, nil, nil)
-		require.NoError(t, listErr)
-		assert.GreaterOrEqual(t, listed.Total, 1)
+		iter := client.List(ctx, nil)
+		count := 0
+		for iter.Next() {
+			require.NotNil(t, iter.Value())
+			count++
+		}
+		require.NoError(t, iter.Err())
+		assert.GreaterOrEqual(t, count, 1)
 	})
 
-	t.Run("ClientOps/ListWithPagination", func(t *testing.T) {
-		page, limit := 1, 10
-		listed, listErr := client.List(ctx, nil, &page, &limit)
-		require.NoError(t, listErr)
-		assert.Equal(t, 1, listed.Page)
-		assert.GreaterOrEqual(t, listed.Total, 1)
+	t.Run("ClientOps/ListWithPaginationLimit", func(t *testing.T) {
+		limit := 10
+		iter := client.List(ctx, &ListSandboxesQuery{Limit: &limit})
+		count := 0
+		for iter.Next() {
+			require.NotNil(t, iter.Value())
+			count++
+		}
+		require.NoError(t, iter.Err())
+		assert.GreaterOrEqual(t, count, 1)
 	})
 
 	t.Run("ClientOps/GetByID", func(t *testing.T) {

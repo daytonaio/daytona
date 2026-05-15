@@ -56,6 +56,8 @@ async function bootstrap() {
   const configService = app.get(TypedConfigService)
   const failedAuthTracker = app.get(FailedAuthTrackerService)
   app.set('trust proxy', true)
+  // Use qs library for query parsing so bracket-style array params (?a[]=v) work.
+  app.set('query parser', 'extended')
   app.useGlobalFilters(new AllExceptionsFilter(failedAuthTracker))
   app.useGlobalInterceptors(new LoggerErrorInterceptor())
   app.useGlobalInterceptors(new ContentTypeInterceptor())

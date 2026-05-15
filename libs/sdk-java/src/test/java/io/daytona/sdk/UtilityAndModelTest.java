@@ -10,9 +10,12 @@ import io.daytona.sdk.model.ExecuteResponse;
 import io.daytona.sdk.model.FileInfo;
 import io.daytona.sdk.model.GitCommitResponse;
 import io.daytona.sdk.model.GitStatus;
-import io.daytona.sdk.model.PaginatedSandboxes;
+import io.daytona.sdk.model.ListSandboxesQuery;
 import io.daytona.sdk.model.PaginatedSnapshots;
 import io.daytona.sdk.model.Resources;
+import io.daytona.sdk.model.SandboxListSortDirection;
+import io.daytona.sdk.model.SandboxListSortField;
+import io.daytona.sdk.model.SandboxState;
 import io.daytona.sdk.model.Session;
 import io.daytona.sdk.model.SessionCommandLogsResponse;
 import io.daytona.sdk.model.SessionExecuteRequest;
@@ -23,6 +26,7 @@ import io.daytona.sdk.model.VolumeMount;
 import io.daytona.sdk.exception.DaytonaException;
 import org.junit.jupiter.api.Test;
 
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -165,15 +169,59 @@ class UtilityAndModelTest {
     }
 
     @Test
-    void paginatedModelsExposeAssignedCollections() {
-        PaginatedSandboxes sandboxes = new PaginatedSandboxes();
-        Map<String, Object> item = new HashMap<String, Object>();
-        item.put("id", "sb-1");
-        sandboxes.setItems(Collections.singletonList(item));
-        sandboxes.setTotal(1);
-        sandboxes.setPage(2);
-        sandboxes.setTotalPages(3);
+    void listSandboxesQueryRoundTripsAllAccessors() {
+        ListSandboxesQuery query = new ListSandboxesQuery();
+        query.setLimit(25);
+        query.setId("sb-prefix");
+        query.setName("name-prefix");
+        query.setLabels(Collections.singletonMap("env", "prod"));
+        query.setStates(Arrays.asList(SandboxState.STARTED, SandboxState.STOPPED));
+        query.setSnapshots(Collections.singletonList("ubuntu:22.04"));
+        query.setTargets(Collections.singletonList("us"));
+        query.setMinCpu(1);
+        query.setMaxCpu(8);
+        query.setMinMemoryGib(2);
+        query.setMaxMemoryGib(16);
+        query.setMinDiskGib(3);
+        query.setMaxDiskGib(100);
+        query.setIsPublic(true);
+        query.setIsRecoverable(false);
+        OffsetDateTime createdAfter = OffsetDateTime.parse("2026-01-01T00:00:00Z");
+        OffsetDateTime createdBefore = OffsetDateTime.parse("2026-12-31T23:59:59Z");
+        OffsetDateTime activityAfter = OffsetDateTime.parse("2026-04-01T00:00:00Z");
+        OffsetDateTime activityBefore = OffsetDateTime.parse("2026-04-30T23:59:59Z");
+        query.setCreatedAtAfter(createdAfter);
+        query.setCreatedAtBefore(createdBefore);
+        query.setLastActivityAfter(activityAfter);
+        query.setLastActivityBefore(activityBefore);
+        query.setSort(SandboxListSortField.CREATED_AT);
+        query.setOrder(SandboxListSortDirection.DESC);
 
+        assertThat(query.getLimit()).isEqualTo(25);
+        assertThat(query.getId()).isEqualTo("sb-prefix");
+        assertThat(query.getName()).isEqualTo("name-prefix");
+        assertThat(query.getLabels()).containsEntry("env", "prod");
+        assertThat(query.getStates()).containsExactly(SandboxState.STARTED, SandboxState.STOPPED);
+        assertThat(query.getSnapshots()).containsExactly("ubuntu:22.04");
+        assertThat(query.getTargets()).containsExactly("us");
+        assertThat(query.getMinCpu()).isEqualTo(1);
+        assertThat(query.getMaxCpu()).isEqualTo(8);
+        assertThat(query.getMinMemoryGib()).isEqualTo(2);
+        assertThat(query.getMaxMemoryGib()).isEqualTo(16);
+        assertThat(query.getMinDiskGib()).isEqualTo(3);
+        assertThat(query.getMaxDiskGib()).isEqualTo(100);
+        assertThat(query.getIsPublic()).isTrue();
+        assertThat(query.getIsRecoverable()).isFalse();
+        assertThat(query.getCreatedAtAfter()).isEqualTo(createdAfter);
+        assertThat(query.getCreatedAtBefore()).isEqualTo(createdBefore);
+        assertThat(query.getLastActivityAfter()).isEqualTo(activityAfter);
+        assertThat(query.getLastActivityBefore()).isEqualTo(activityBefore);
+        assertThat(query.getSort()).isEqualTo(SandboxListSortField.CREATED_AT);
+        assertThat(query.getOrder()).isEqualTo(SandboxListSortDirection.DESC);
+    }
+
+    @Test
+    void paginatedSnapshotsExposesAssignedCollections() {
         PaginatedSnapshots snapshots = new PaginatedSnapshots();
         Snapshot snapshot = new Snapshot();
         snapshot.setId("snap-1");
@@ -182,10 +230,6 @@ class UtilityAndModelTest {
         snapshots.setPage(4);
         snapshots.setTotalPages(5);
 
-        assertThat(sandboxes.getItems()).containsExactly(item);
-        assertThat(sandboxes.getTotal()).isEqualTo(1);
-        assertThat(sandboxes.getPage()).isEqualTo(2);
-        assertThat(sandboxes.getTotalPages()).isEqualTo(3);
         assertThat(snapshots.getItems()).containsExactly(snapshot);
         assertThat(snapshots.getTotal()).isEqualTo(1);
         assertThat(snapshots.getPage()).isEqualTo(4);
@@ -193,13 +237,10 @@ class UtilityAndModelTest {
     }
 
     @Test
-    void paginatedModelsReturnEmptyDefaults() {
-        PaginatedSandboxes sandboxes = new PaginatedSandboxes();
+    void paginatedSnapshotsReturnsEmptyDefaults() {
         PaginatedSnapshots snapshots = new PaginatedSnapshots();
         GitStatus status = new GitStatus();
 
-        assertThat(sandboxes.getItems()).isEmpty();
-        assertThat(sandboxes.getTotal()).isZero();
         assertThat(snapshots.getItems()).isEmpty();
         assertThat(snapshots.getTotalPages()).isZero();
         assertThat(status.getFileStatus()).isEmpty();

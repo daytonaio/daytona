@@ -1020,20 +1020,28 @@ or encounters an error.
 **Throws**:
 
 - `DaytonaError` - If the sandbox fails to stop within the timeout period.
-## PaginatedSandboxes
-
-**Extends:**
+## ListSandboxesQuery
 
 **Properties**:
 
-- `items` _Sandbox\[\]_
-- `page` _number_
-    - _Inherited from_: `PaginatedSandboxesDto.page`
-- `total` _number_
-    - _Inherited from_: `PaginatedSandboxesDto.total`
-- `totalPages` _number_
-    - _Inherited from_: `PaginatedSandboxesDto.totalPages`
-
-
-
-- `Omit`\<`PaginatedSandboxesDto`, `"items"`\>
+- `createdAtAfter?` _Date_ - Include sandboxes created after this timestamp
+- `createdAtBefore?` _Date_ - Include sandboxes created before this timestamp
+- `id?` _string_ - Filter by ID prefix (case-insensitive)
+- `isPublic?` _boolean_ - Filter by public status
+- `isRecoverable?` _boolean_ - Filter by recoverable status
+- `labels?` _Record\<string, string\>_ - Filter by labels
+- `lastActivityAfter?` _Date_ - Include sandboxes with last activity after this timestamp
+- `lastActivityBefore?` _Date_ - Include sandboxes with last activity before this timestamp
+- `limit?` _number_ - Per-page fetch size. Does NOT limit the total number of Sandboxes returned.
+- `maxCpu?` _number_ - Filter by maximum CPU
+- `maxDiskGib?` _number_ - Filter by maximum disk space in GiB
+- `maxMemoryGib?` _number_ - Filter by maximum memory in GiB
+- `minCpu?` _number_ - Filter by minimum CPU
+- `minDiskGib?` _number_ - Filter by minimum disk space in GiB
+- `minMemoryGib?` _number_ - Filter by minimum memory in GiB
+- `name?` _string_ - Filter by name prefix (case-insensitive)
+- `order?` _SandboxListSortDirection_ - Sort direction
+- `snapshots?` _string\[\]_ - Filter by snapshot names
+- `sort?` _SandboxListSortField_ - Sort by field
+- `states?` _SandboxState\[\]_ - Filter by states
+- `targets?` _string\[\]_ - Filter by targets

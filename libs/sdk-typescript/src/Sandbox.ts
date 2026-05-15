@@ -6,7 +6,6 @@
 import { SandboxState, SandboxApi, SandboxBackupStateEnum, Configuration } from '@daytona/api-client'
 import type {
   Sandbox as SandboxDto,
-  PaginatedSandboxes as PaginatedSandboxesDto,
   PortPreviewUrl,
   SandboxVolume,
   BuildInfo,
@@ -16,6 +15,8 @@ import type {
   ResizeSandbox,
   CreateSandboxSnapshot,
   UpdateSandboxNetworkSettings,
+  SandboxListSortField,
+  SandboxListSortDirection,
 } from '@daytona/api-client'
 import { Daytona } from './Daytona'
 import type { Resources } from './Daytona'
@@ -895,6 +896,109 @@ export class Sandbox implements SandboxDto {
   }
 }
 
-export interface PaginatedSandboxes extends Omit<PaginatedSandboxesDto, 'items'> {
-  items: Sandbox[]
+export interface ListSandboxesQuery {
+  /**
+   * Per-page fetch size. Does NOT limit the total number of Sandboxes returned.
+   * */
+  limit?: number
+
+  /**
+   * Sort by field
+   * */
+  sort?: SandboxListSortField
+
+  /**
+   * Sort direction
+   * */
+  order?: SandboxListSortDirection
+
+  /**
+   * Filter by ID prefix (case-insensitive)
+   * */
+  id?: string
+
+  /**
+   * Filter by name prefix (case-insensitive)
+   * */
+  name?: string
+
+  /**
+   * Filter by labels
+   * */
+  labels?: Record<string, string>
+
+  /**
+   * Filter by states
+   * */
+  states?: SandboxState[]
+
+  /**
+   * Filter by snapshot names
+   * */
+  snapshots?: string[]
+
+  /**
+   * Filter by targets
+   * */
+  targets?: string[]
+
+  /**
+   * Filter by minimum CPU
+   * */
+  minCpu?: number
+
+  /**
+   * Filter by maximum CPU
+   * */
+  maxCpu?: number
+
+  /**
+   * Filter by minimum memory in GiB
+   * */
+  minMemoryGib?: number
+
+  /**
+   * Filter by maximum memory in GiB
+   * */
+  maxMemoryGib?: number
+
+  /**
+   * Filter by minimum disk space in GiB
+   * */
+  minDiskGib?: number
+
+  /**
+   * Filter by maximum disk space in GiB
+   * */
+  maxDiskGib?: number
+
+  /**
+   * Filter by public status
+   * */
+  isPublic?: boolean
+
+  /**
+   * Filter by recoverable status
+   * */
+  isRecoverable?: boolean
+
+  /**
+   * Include sandboxes created after this timestamp
+   * */
+  createdAtAfter?: Date
+
+  /**
+   * Include sandboxes created before this timestamp
+   * */
+  createdAtBefore?: Date
+
+  /**
+   * Include sandboxes with last activity after this timestamp
+   * */
+  lastActivityAfter?: Date
+
+  /**
+   * Include sandboxes with last activity before this timestamp
+   * */
+  lastActivityBefore?: Date
 }

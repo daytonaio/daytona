@@ -5,6 +5,7 @@
 
 import { SnapshotQueryParams } from './useSnapshotsQuery'
 import type { AuditLogsQueryParams } from './useAuditLogsQuery'
+import type { SandboxQueryParams } from './useSandboxesQuery'
 
 export const queryKeys = {
   config: {
@@ -112,6 +113,28 @@ export const queryKeys = {
   },
   sandboxes: {
     all: ['sandboxes'] as const,
+    list: (organizationId: string, params?: SandboxQueryParams) => {
+      const base = [...queryKeys.sandboxes.all, organizationId, 'list'] as const
+      if (!params) return base
+
+      return [
+        ...base,
+        {
+          cursor: params.cursor,
+          limit: params.limit,
+          ...(params.filters && {
+            filters: {
+              ...params.filters,
+              createdAtAfter: params.filters.createdAtAfter?.toISOString(),
+              createdAtBefore: params.filters.createdAtBefore?.toISOString(),
+              lastEventAfter: params.filters.lastEventAfter?.toISOString(),
+              lastEventBefore: params.filters.lastEventBefore?.toISOString(),
+            },
+          }),
+          ...(params.sorting && { sorting: params.sorting }),
+        },
+      ] as const
+    },
     detail: (organizationId: string, sandboxId: string) =>
       [...queryKeys.sandboxes.all, organizationId, sandboxId, 'detail'] as const,
     terminalSession: (sandboxId: string) => [...queryKeys.sandboxes.all, sandboxId, 'terminal-session'] as const,

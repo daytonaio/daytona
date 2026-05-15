@@ -68,7 +68,8 @@ class DaytonaAuthenticationError(DaytonaError):
     Example:
         ```python
         try:
-            daytona.list()
+            for sandbox in daytona.list():
+                print(sandbox.id)
         except DaytonaAuthenticationError as exc:
             print(exc.status_code)
         ```
@@ -94,7 +95,8 @@ class DaytonaRateLimitError(DaytonaError):
     Example:
         ```python
         try:
-            daytona.list()
+            for sandbox in daytona.list():
+                print(sandbox.id)
         except DaytonaRateLimitError as exc:
             print(exc.error_code)
         ```

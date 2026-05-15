@@ -284,31 +284,25 @@ console.log(`Sandbox state: ${sandbox.state}`);
 #### list()
 
 ```ts
-list(
-   labels?: Record<string, string>, 
-   page?: number, 
-limit?: number): Promise<PaginatedSandboxes>
+list(query?: ListSandboxesQuery): AsyncIterableIterator<Sandbox>
 ```
 
-Returns paginated list of Sandboxes filtered by labels.
+Iterates over Sandboxes matching the given query.
 
 **Parameters**:
 
-- `labels?` _Record\<string, string\>_ - Labels to filter Sandboxes
-- `page?` _number_ - Page number for pagination (starting from 1)
-- `limit?` _number_ - Maximum number of items per page
+- `query?` _ListSandboxesQuery_ - Optional filters, sorting, and per-page size.
 
 
-**Returns**:
+##### Returns
 
-- `Promise<PaginatedSandboxes>` - Paginated list of Sandboxes that match the labels.
+`AsyncIterableIterator`\<`Sandbox`\>
 
 **Example:**
 
 ```ts
-const result = await daytona.list({ 'my-label': 'my-value' }, 2, 10);
-for (const sandbox of result.items) {
-    console.log(`${sandbox.id}: ${sandbox.state}`);
+for await (const sandbox of daytona.list({ labels: { env: 'dev' } })) {
+  console.log(sandbox.id)
 }
 ```
 

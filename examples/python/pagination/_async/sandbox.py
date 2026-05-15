@@ -1,13 +1,20 @@
 import asyncio
 
-from daytona import AsyncDaytona
+from daytona import AsyncDaytona, ListSandboxesQuery, SandboxListSortDirection, SandboxListSortField, SandboxState
 
 
 async def main():
     async with AsyncDaytona() as daytona:
-        result = await daytona.list(labels={"my-label": "my-value"}, page=2, limit=10)
-        for sandbox in result.items:
-            print(f"{sandbox.id}: {sandbox.state}")
+        async for sandbox in daytona.list(
+            ListSandboxesQuery(
+                limit=10,
+                labels={"env": "dev"},
+                states=[SandboxState.STARTED],
+                sort=SandboxListSortField.CREATEDAT,
+                order=SandboxListSortDirection.DESC,
+            )
+        ):
+            print(sandbox.id)
 
 
 if __name__ == "__main__":

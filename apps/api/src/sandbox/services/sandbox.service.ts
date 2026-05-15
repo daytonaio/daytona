@@ -5,6 +5,7 @@
 
 import {
   ForbiddenException,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
@@ -63,11 +64,11 @@ import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 import {
-  SandboxSortField,
-  SandboxSortDirection,
-  DEFAULT_SANDBOX_SORT_FIELD,
-  DEFAULT_SANDBOX_SORT_DIRECTION,
-} from '../dto/list-sandboxes-query.dto'
+  SandboxSortFieldDeprecated,
+  SandboxSortDirectionDeprecated,
+  DEFAULT_SANDBOX_SORT_FIELD_DEPRECATED,
+  DEFAULT_SANDBOX_SORT_DIRECTION_DEPRECATED,
+} from '../dto/list-sandboxes-query.deprecated.dto'
 import { createRangeFilter } from '../../common/utils/range-filter'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import {
@@ -108,6 +109,10 @@ import {
 import { SandboxLookupCacheInvalidationService } from './sandbox-lookup-cache-invalidation.service'
 import { Region } from '../../region/entities/region.entity'
 import { SandboxActivityService } from './sandbox-activity.service'
+import { ListSandboxesResponseDto } from '../dto/list-sandboxes-response.dto'
+import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
+import { SANDBOX_SEARCH_ADAPTER } from '../constants/sandbox-tokens'
+import { SandboxSearchAdapter } from '../interfaces/sandbox-search.interface'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -144,6 +149,8 @@ export class SandboxService {
     private readonly dockerRegistryService: DockerRegistryService,
     @InjectRepository(SandboxFork)
     private readonly sandboxForkRepository: Repository<SandboxFork>,
+    @Inject(SANDBOX_SEARCH_ADAPTER)
+    private readonly sandboxSearchAdapter: SandboxSearchAdapter,
   ) {}
 
   protected getLockKey(id: string): string {
@@ -1327,7 +1334,7 @@ export class SandboxService {
     return this.sandboxRepository.find({ where, relations: ['lastActivityAt'] })
   }
 
-  async findAll(
+  async findAllPaginatedDeprecated(
     organizationId: string,
     page = 1,
     limit = 10,
@@ -1349,8 +1356,8 @@ export class SandboxService {
       lastEventBefore?: Date
     },
     sort?: {
-      field?: SandboxSortField
-      direction?: SandboxSortDirection
+      field?: SandboxSortFieldDeprecated
+      direction?: SandboxSortDirectionDeprecated
     },
   ): Promise<PaginatedList<Sandbox>> {
     const pageNum = Number(page)
@@ -1374,8 +1381,10 @@ export class SandboxService {
       lastEventBefore,
     } = filters || {}
 
-    const { field: sortField = DEFAULT_SANDBOX_SORT_FIELD, direction: sortDirection = DEFAULT_SANDBOX_SORT_DIRECTION } =
-      sort || {}
+    const {
+      field: sortField = DEFAULT_SANDBOX_SORT_FIELD_DEPRECATED,
+      direction: sortDirection = DEFAULT_SANDBOX_SORT_DIRECTION_DEPRECATED,
+    } = sort || {}
 
     const baseFindOptions: FindOptionsWhere<Sandbox> = {
       organizationId,
@@ -1422,7 +1431,7 @@ export class SandboxService {
       where,
       relations: ['lastActivityAt'],
       order: {
-        ...(sortField === SandboxSortField.LAST_ACTIVITY_AT
+        ...(sortField === SandboxSortFieldDeprecated.LAST_ACTIVITY_AT
           ? { lastActivityAt: { lastActivityAt: { direction: sortDirection, nulls: 'LAST' } } }
           : {
               [sortField]: {
@@ -1430,7 +1439,7 @@ export class SandboxService {
                 nulls: 'LAST',
               },
             }),
-        ...(sortField !== SandboxSortField.CREATED_AT && { createdAt: 'DESC' }),
+        ...(sortField !== SandboxSortFieldDeprecated.CREATED_AT && { createdAt: 'DESC' }),
       },
       skip: (pageNum - 1) * limitNum,
       take: limitNum,
@@ -1441,6 +1450,74 @@ export class SandboxService {
       total,
       page: pageNum,
       totalPages: Math.ceil(total / limitNum),
+    }
+  }
+
+  /**
+   * Search sandboxes
+   * @param organizationId - The ID of the organization
+   * @param query - The query parameters
+   * @returns The paginated list of sandboxes. If cursor is omitted from the query, newest sandboxes will be returned.
+   * @throws BadRequestError if the cursor is invalid
+   */
+  async search(organizationId: string, query: ListSandboxesQueryDto): Promise<ListSandboxesResponseDto> {
+    let parsedLabels: { [key: string]: string } | undefined
+    if (query.labels) {
+      try {
+        parsedLabels = JSON.parse(query.labels)
+      } catch {
+        throw new BadRequestError('Invalid labels JSON format')
+      }
+    }
+
+    const result = await this.sandboxSearchAdapter.search({
+      filters: {
+        organizationId,
+        idPrefix: query.id,
+        namePrefix: query.name,
+        labels: parsedLabels,
+        includeErroredDeleted: query.includeErroredDeleted,
+        states: query.states,
+        snapshots: query.snapshots,
+        regionIds: query.regionIds,
+        minCpu: query.minCpu,
+        maxCpu: query.maxCpu,
+        minMemoryGiB: query.minMemoryGib,
+        maxMemoryGiB: query.maxMemoryGib,
+        minDiskGiB: query.minDiskGib,
+        maxDiskGiB: query.maxDiskGib,
+        isPublic: query.isPublic,
+        isRecoverable: query.isRecoverable,
+        createdAtAfter: query.createdAtAfter,
+        createdAtBefore: query.createdAtBefore,
+        lastEventAfter: query.lastEventAfter,
+        lastEventBefore: query.lastEventBefore,
+      },
+      pagination: {
+        cursor: query.cursor,
+        limit: query.limit,
+      },
+      sort: {
+        field: query.sort,
+        direction: query.order,
+      },
+    })
+
+    const targets = [...new Set(result.items.map((item) => item.target))]
+    const toolboxProxyUrlMap = await this.resolveToolboxProxyUrls(targets)
+
+    return {
+      items: result.items.map((item) => {
+        const url = toolboxProxyUrlMap.get(item.target)
+        if (!url) {
+          throw new NotFoundException(`Toolbox proxy URL not resolved for region ${item.target}`)
+        }
+        return {
+          ...item,
+          toolboxProxyUrl: url,
+        } satisfies SandboxDto
+      }),
+      nextCursor: result.nextCursor,
     }
   }
 

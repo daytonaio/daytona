@@ -144,6 +144,15 @@ const configuration = {
       rejectUnauthorized: process.env.OPENSEARCH_TLS_REJECT_UNAUTHORIZED !== 'false',
     },
   },
+  sandboxSearch: {
+    publish: {
+      enabled: process.env.SANDBOX_SEARCH_PUBLISH_ENABLED === 'true',
+      storageAdapter: process.env.SANDBOX_SEARCH_PUBLISH_STORAGE_ADAPTER || 'opensearch',
+      opensearchIndexName: process.env.SANDBOX_SEARCH_PUBLISH_OPENSEARCH_INDEX_NAME || 'sandboxes',
+      numberOfShards: parseInt(process.env.SANDBOX_SEARCH_PUBLISH_NUMBER_OF_SHARDS || '1', 10),
+      numberOfReplicas: parseInt(process.env.SANDBOX_SEARCH_PUBLISH_NUMBER_OF_REPLICAS || '1', 10),
+    },
+  },
   cronTimeZone: process.env.CRON_TIMEZONE,
   maxConcurrentBackupsPerRunner: parseInt(process.env.MAX_CONCURRENT_BACKUPS_PER_RUNNER || '6', 10),
   webhook: {

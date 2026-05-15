@@ -76,8 +76,6 @@ func getTableRowData(sandbox apiclient.Sandbox) *RowData {
 
 	if sandbox.LastActivityAt != nil {
 		rowData.LastEvent = util.GetTimeSinceLabelFromString(*sandbox.LastActivityAt)
-	} else if sandbox.UpdatedAt != nil {
-		rowData.LastEvent = util.GetTimeSinceLabelFromString(*sandbox.UpdatedAt)
 	}
 
 	return &rowData

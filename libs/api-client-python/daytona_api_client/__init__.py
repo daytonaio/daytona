@@ -118,6 +118,7 @@ if TYPE_CHECKING:
     from daytona_api_client.models.keyboard_press_request import KeyboardPressRequest
     from daytona_api_client.models.keyboard_type_request import KeyboardTypeRequest
     from daytona_api_client.models.list_branch_response import ListBranchResponse
+    from daytona_api_client.models.list_sandboxes_response import ListSandboxesResponse
     from daytona_api_client.models.log_entry import LogEntry
     from daytona_api_client.models.lsp_completion_params import LspCompletionParams
     from daytona_api_client.models.lsp_document_request import LspDocumentRequest
@@ -149,7 +150,7 @@ if TYPE_CHECKING:
     from daytona_api_client.models.paginated_audit_logs import PaginatedAuditLogs
     from daytona_api_client.models.paginated_jobs import PaginatedJobs
     from daytona_api_client.models.paginated_logs import PaginatedLogs
-    from daytona_api_client.models.paginated_sandboxes import PaginatedSandboxes
+    from daytona_api_client.models.paginated_sandboxes_deprecated import PaginatedSandboxesDeprecated
     from daytona_api_client.models.paginated_snapshots import PaginatedSnapshots
     from daytona_api_client.models.paginated_traces import PaginatedTraces
     from daytona_api_client.models.poll_jobs_response import PollJobsResponse
@@ -192,6 +193,8 @@ if TYPE_CHECKING:
     from daytona_api_client.models.sandbox_desired_state import SandboxDesiredState
     from daytona_api_client.models.sandbox_info import SandboxInfo
     from daytona_api_client.models.sandbox_labels import SandboxLabels
+    from daytona_api_client.models.sandbox_list_sort_direction import SandboxListSortDirection
+    from daytona_api_client.models.sandbox_list_sort_field import SandboxListSortField
     from daytona_api_client.models.sandbox_state import SandboxState
     from daytona_api_client.models.sandbox_volume import SandboxVolume
     from daytona_api_client.models.screenshot_response import ScreenshotResponse
@@ -332,6 +335,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "KeyboardPressRequest": "daytona_api_client.models.keyboard_press_request",
     "KeyboardTypeRequest": "daytona_api_client.models.keyboard_type_request",
     "ListBranchResponse": "daytona_api_client.models.list_branch_response",
+    "ListSandboxesResponse": "daytona_api_client.models.list_sandboxes_response",
     "LogEntry": "daytona_api_client.models.log_entry",
     "LspCompletionParams": "daytona_api_client.models.lsp_completion_params",
     "LspDocumentRequest": "daytona_api_client.models.lsp_document_request",
@@ -363,7 +367,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "PaginatedAuditLogs": "daytona_api_client.models.paginated_audit_logs",
     "PaginatedJobs": "daytona_api_client.models.paginated_jobs",
     "PaginatedLogs": "daytona_api_client.models.paginated_logs",
-    "PaginatedSandboxes": "daytona_api_client.models.paginated_sandboxes",
+    "PaginatedSandboxesDeprecated": "daytona_api_client.models.paginated_sandboxes_deprecated",
     "PaginatedSnapshots": "daytona_api_client.models.paginated_snapshots",
     "PaginatedTraces": "daytona_api_client.models.paginated_traces",
     "PollJobsResponse": "daytona_api_client.models.poll_jobs_response",
@@ -406,6 +410,8 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "SandboxDesiredState": "daytona_api_client.models.sandbox_desired_state",
     "SandboxInfo": "daytona_api_client.models.sandbox_info",
     "SandboxLabels": "daytona_api_client.models.sandbox_labels",
+    "SandboxListSortDirection": "daytona_api_client.models.sandbox_list_sort_direction",
+    "SandboxListSortField": "daytona_api_client.models.sandbox_list_sort_field",
     "SandboxState": "daytona_api_client.models.sandbox_state",
     "SandboxVolume": "daytona_api_client.models.sandbox_volume",
     "ScreenshotResponse": "daytona_api_client.models.screenshot_response",
@@ -560,6 +566,7 @@ __all__ = [
     "KeyboardPressRequest",
     "KeyboardTypeRequest",
     "ListBranchResponse",
+    "ListSandboxesResponse",
     "LogEntry",
     "LspCompletionParams",
     "LspDocumentRequest",
@@ -591,7 +598,7 @@ __all__ = [
     "PaginatedAuditLogs",
     "PaginatedJobs",
     "PaginatedLogs",
-    "PaginatedSandboxes",
+    "PaginatedSandboxesDeprecated",
     "PaginatedSnapshots",
     "PaginatedTraces",
     "PollJobsResponse",
@@ -634,6 +641,8 @@ __all__ = [
     "SandboxDesiredState",
     "SandboxInfo",
     "SandboxLabels",
+    "SandboxListSortDirection",
+    "SandboxListSortField",
     "SandboxState",
     "SandboxVolume",
     "ScreenshotResponse",

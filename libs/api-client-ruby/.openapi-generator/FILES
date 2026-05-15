@@ -91,6 +91,7 @@ lib/daytona_api_client/models/keyboard_hotkey_request.rb
 lib/daytona_api_client/models/keyboard_press_request.rb
 lib/daytona_api_client/models/keyboard_type_request.rb
 lib/daytona_api_client/models/list_branch_response.rb
+lib/daytona_api_client/models/list_sandboxes_response.rb
 lib/daytona_api_client/models/log_entry.rb
 lib/daytona_api_client/models/lsp_completion_params.rb
 lib/daytona_api_client/models/lsp_document_request.rb
@@ -122,7 +123,7 @@ lib/daytona_api_client/models/otel_config.rb
 lib/daytona_api_client/models/paginated_audit_logs.rb
 lib/daytona_api_client/models/paginated_jobs.rb
 lib/daytona_api_client/models/paginated_logs.rb
-lib/daytona_api_client/models/paginated_sandboxes.rb
+lib/daytona_api_client/models/paginated_sandboxes_deprecated.rb
 lib/daytona_api_client/models/paginated_snapshots.rb
 lib/daytona_api_client/models/paginated_traces.rb
 lib/daytona_api_client/models/poll_jobs_response.rb
@@ -165,6 +166,8 @@ lib/daytona_api_client/models/sandbox_class.rb
 lib/daytona_api_client/models/sandbox_desired_state.rb
 lib/daytona_api_client/models/sandbox_info.rb
 lib/daytona_api_client/models/sandbox_labels.rb
+lib/daytona_api_client/models/sandbox_list_sort_direction.rb
+lib/daytona_api_client/models/sandbox_list_sort_field.rb
 lib/daytona_api_client/models/sandbox_state.rb
 lib/daytona_api_client/models/sandbox_volume.rb
 lib/daytona_api_client/models/screenshot_response.rb

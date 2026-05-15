@@ -7,6 +7,7 @@ import asyncio
 import json
 import time
 import warnings
+from collections.abc import Iterator
 from copy import deepcopy
 from importlib.metadata import version
 from typing import Callable, cast, overload
@@ -50,9 +51,10 @@ from ..common.daytona import (
 )
 from ..common.errors import DaytonaAuthenticationError, DaytonaValidationError
 from ..common.image import Image
+from ..common.sandbox import ListSandboxesQuery
 from ..internal.http_client import build_sync_http_client
 from ..internal.urllib3_retry import RemoteDisconnectedRetry
-from .sandbox import PaginatedSandboxes, Sandbox
+from .sandbox import Sandbox
 from .snapshot import SnapshotService
 from .volume import VolumeService
 
@@ -563,51 +565,73 @@ class Daytona:
     @intercept_errors(message_prefix="Failed to list sandboxes: ")
     @with_instrumentation()
     def list(
-        self, labels: dict[str, str] | None = None, page: int | None = None, limit: int | None = None
-    ) -> PaginatedSandboxes:
-        """Returns paginated list of Sandboxes filtered by labels.
+        self,
+        query: ListSandboxesQuery | None = None,
+    ) -> Iterator[Sandbox]:
+        """Iterates over Sandboxes matching the given query.
 
         Args:
-            labels (dict[str, str] | None): Labels to filter Sandboxes.
-            page (int | None): Page number for pagination (starting from 1).
-            limit (int | None): Maximum number of items per page.
+            query: Optional filters, sorting, and per-page size.
 
-        Returns:
-            PaginatedSandboxes: Paginated list of Sandbox instances that match the labels.
+        Yields:
+            Sandbox: Each Sandbox matching the query.
 
         Example:
             ```python
-            result = daytona.list(labels={"my-label": "my-value"}, page=2, limit=10)
-            for sandbox in result.items:
-                print(f"{sandbox.id}: {sandbox.state}")
+            from daytona import ListSandboxesQuery
+
+            for sandbox in daytona.list(ListSandboxesQuery(labels={"env": "dev"})):
+                print(sandbox.id)
             ```
         """
-        if page is not None and page < 1:
-            raise DaytonaValidationError("page must be a positive integer")
+        q = query or ListSandboxesQuery()
 
-        if limit is not None and limit < 1:
+        if q.limit is not None and q.limit < 1:
             raise DaytonaValidationError("limit must be a positive integer")
 
-        response = self._sandbox_api.list_sandboxes_paginated(labels=json.dumps(labels), page=page, limit=limit)
+        cursor: str | None = None
+        first_page = True
 
-        items: list[Sandbox] = []
-        for sandbox in response.items:
-            language = self._validate_language_label(sandbox.labels.get(CODE_TOOLBOX_LANGUAGE_LABEL)).value
-            items.append(
-                Sandbox(
+        while first_page or cursor:
+            first_page = False
+            response = self._fetch_sandbox_page(q, cursor)
+            for sandbox in response.items:
+                language = self._validate_language_label(sandbox.labels.get(CODE_TOOLBOX_LANGUAGE_LABEL)).value
+                yield Sandbox(
                     sandbox,
                     self._toolbox_api_client,
                     self._sandbox_api,
                     language,
                     http_client=self._http_client,
                 )
-            )
+            cursor = response.next_cursor or None
 
-        return PaginatedSandboxes(
-            items=items,
-            total=response.total,
-            page=response.page,
-            total_pages=response.total_pages,
+    @with_instrumentation(name="Daytona.list.fetch_page")
+    def _fetch_sandbox_page(self, q: ListSandboxesQuery, cursor: str | None):
+        """Fetches a single page of sandboxes. Each call is one OTEL span."""
+        return self._sandbox_api.list_sandboxes(
+            labels=json.dumps(q.labels) if q.labels else None,
+            cursor=cursor,
+            limit=q.limit,
+            id=q.id,
+            name=q.name,
+            states=q.states,
+            snapshots=q.snapshots,
+            region_ids=q.targets,
+            min_cpu=q.min_cpu,
+            max_cpu=q.max_cpu,
+            min_memory_gib=q.min_memory_gib,
+            max_memory_gib=q.max_memory_gib,
+            min_disk_gib=q.min_disk_gib,
+            max_disk_gib=q.max_disk_gib,
+            is_public=q.is_public,
+            is_recoverable=q.is_recoverable,
+            created_at_after=q.created_at_after,
+            created_at_before=q.created_at_before,
+            last_event_after=q.last_activity_after,
+            last_event_before=q.last_activity_before,
+            sort=q.sort,
+            order=q.order,
         )
 
     def _validate_language_label(self, language: str | None = None) -> CodeLanguage:

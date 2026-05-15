@@ -594,35 +594,50 @@ Daytona provides methods to list sandboxes and view their details in [Daytona Da
 <TabItem label="Python" icon="seti:python">
 
 ```python
-daytona.list()
+for sandbox in daytona.list():
+    print(sandbox.id)
 ```
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-await daytona.list()
+for await (const sandbox of daytona.list()) {
+  console.log(sandbox.id)
+}
 ```
 
 </TabItem>
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
-daytona.list
+daytona.list.each { |sandbox| puts sandbox.id }
 ```
 
 </TabItem>
 <TabItem label="Go" icon="seti:go">
 
 ```go
-result, err := client.List(ctx, nil, nil, nil)
+iter := client.List(ctx, nil)
+defer iter.Close()
+for iter.Next() {
+    sandbox := iter.Value()
+    fmt.Println(sandbox.ID)
+}
+if err := iter.Err(); err != nil {
+    log.Fatal(err)
+}
 ```
 
 </TabItem>
 <TabItem label="Java" icon="seti:java">
 
 ```java
-daytona.list();
+Iterator<Map<String, Object>> iter = daytona.list();
+while (iter.hasNext()) {
+    Map<String, Object> sandbox = iter.next();
+    System.out.println(sandbox.get("id"));
+}
 ```
 
 </TabItem>

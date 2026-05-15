@@ -7,6 +7,7 @@ import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { queryKeys } from '@/hooks/queries/queryKeys'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { mutationKeys } from './mutationKeys'
 
 interface ArchiveSandboxVariables {
   sandboxId: string
@@ -22,6 +23,7 @@ export const useArchiveSandboxMutation = ({ invalidate = true }: UseArchiveSandb
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: mutationKeys.sandboxes.archive(),
     mutationFn: async ({ sandboxId }: ArchiveSandboxVariables) => {
       await sandboxApi.archiveSandbox(sandboxId, selectedOrganization?.id)
     },

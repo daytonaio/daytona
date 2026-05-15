@@ -828,16 +828,19 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
 
   context 'Client Operations', order: :defined do
     it 'lists sandboxes' do
-      result = @daytona.list
-      expect(result).to be_a(Daytona::PaginatedResource)
-      expect(result.total).to be > 0
-      expect(result.items).to be_a(Array)
+      enumerator = @daytona.list
+      expect(enumerator).to be_a(Enumerator)
+      sandboxes = enumerator.to_a
+      expect(sandboxes.size).to be > 0
     end
 
-    it 'lists with pagination' do
-      result = @daytona.list({}, page: 1, limit: 2)
-      expect(result.page).to eq(1)
-      expect(result.items.length).to be <= 2
+    it 'lists with limit hint and supports early termination' do
+      yielded = 0
+      @daytona.list(Daytona::ListSandboxesQuery.new(limit: 1)).each do
+        yielded += 1
+        break if yielded >= 1
+      end
+      expect(yielded).to be >= 1
     end
 
     it 'gets sandbox by id' do
@@ -848,9 +851,7 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
 
     it 'lists sandboxes filtered by labels' do
       @sandbox.labels = { 'test' => 'e2e' } unless @sandbox.labels&.dig('test') == 'e2e'
-      result = @daytona.list({ 'test' => 'e2e' })
-      expect(result).to be_a(Daytona::PaginatedResource)
-      ids = result.items.map(&:id)
+      ids = @daytona.list(Daytona::ListSandboxesQuery.new(labels: { 'test' => 'e2e' })).map(&:id)
       expect(ids).to include(@sandbox.id)
     end
   end
