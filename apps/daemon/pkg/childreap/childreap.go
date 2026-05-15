@@ -35,10 +35,11 @@ const (
 	statusChannelBuf = 1024
 
 	// pendingTTL bounds how long an unclaimed reaper status sits in the
-	// pending map. Long enough that Wait() registering moments after the
-	// child exited can still find it; short enough that an exited PID
-	// being reused doesn't deliver stale status to the new process.
-	pendingTTL = 30 * time.Second
+	// pending map before the sweeper evicts it for memory cleanliness.
+	// Claim-time staleness (pendingMaxAge) is what prevents stale entries
+	// from being matched against recycled pids — TTL only controls when
+	// orphan entries that never get claimed are released.
+	pendingTTL = 10 * time.Second
 
 	// pendingSweepInterval is how often we evict expired pending entries.
 	pendingSweepInterval = 5 * time.Second
@@ -50,9 +51,28 @@ const (
 // Wait() never hangs forever. var (not const) so tests can shorten it.
 var recoveryTimeout = 5 * time.Second
 
+// pendingMaxAge is the maximum age, relative to the registering caller's
+// own time, of a pending entry we'll accept. Entries older than this are
+// treated as stale and discarded rather than matched against the caller's
+// pid — they're almost certainly from a previous process whose pid has
+// since been recycled by the kernel (Linux's default pid_max is 32k and
+// cycles quickly under fork-heavy workloads).
+//
+// The legitimate use of pending is the pre-register race: a child exits
+// and the reaper records its status BEFORE Wait/Reap calls register.
+// That window is bounded by the (typically sub-millisecond) gap between
+// cmd.Start() returning and the caller invoking Wait/Reap; 1 second is
+// generous enough to cover heavily-scheduled goroutines while staying
+// well below realistic pid-recycle horizons.
+var pendingMaxAge = 1 * time.Second
+
 type pidRegistration struct {
 	// ch is buffered 1 so the dispatcher's send never blocks.
 	ch chan syscall.WaitStatus
+	// registeredAt is the wall-clock time the registration was created.
+	// claimPending compares pending entries' addedAt against this to
+	// reject stale orphans from recycled pids (see pendingMaxAge).
+	registeredAt time.Time
 }
 
 type pendingStatus struct {
@@ -158,7 +178,7 @@ func Wait(cmd *exec.Cmd) (int, error) {
 
 	// Status may have arrived before we registered.
 	var reaperStatus *syscall.WaitStatus
-	if ws, ok := claimPending(pid); ok {
+	if ws, ok := claimPending(pid, reg.registeredAt); ok {
 		reaperStatus = &ws
 	}
 
@@ -174,7 +194,7 @@ func Wait(cmd *exec.Cmd) (int, error) {
 			// cmd.Wait returned ECHILD. Cmd.Wait drains I/O goroutines
 			// regardless of Process.Wait's outcome, so I/O is already
 			// settled — only the status needs recovery.
-			if ws, ok := claimPending(pid); ok {
+			if ws, ok := claimPending(pid, reg.registeredAt); ok {
 				return ws.ExitStatus(), nil
 			}
 			select {
@@ -217,7 +237,7 @@ func Reap(cmd *exec.Cmd) (int, error) {
 	reg := register(pid)
 	defer unregister(pid)
 
-	if ws, ok := claimPending(pid); ok {
+	if ws, ok := claimPending(pid, reg.registeredAt); ok {
 		// Fire-and-forget cmd.Wait so file descriptors eventually close.
 		// The goroutine returns on its own (kernel ECHILD).
 		go func() { _ = cmd.Wait() }()
@@ -231,7 +251,7 @@ func Reap(cmd *exec.Cmd) (int, error) {
 		if r.resolved {
 			return r.exitCode, nil
 		}
-		if ws, ok := claimPending(pid); ok {
+		if ws, ok := claimPending(pid, reg.registeredAt); ok {
 			return ws.ExitStatus(), nil
 		}
 		select {
@@ -243,7 +263,7 @@ func Reap(cmd *exec.Cmd) (int, error) {
 	case ws := <-reg.ch:
 		return ws.ExitStatus(), nil
 	case <-time.After(hangTimeout):
-		if ws, ok := claimPending(pid); ok {
+		if ws, ok := claimPending(pid, reg.registeredAt); ok {
 			return ws.ExitStatus(), nil
 		}
 		return -1, fmt.Errorf("childreap.Reap: timed out waiting for pid %d", pid)
@@ -283,7 +303,10 @@ func startCmdWaitGoroutine(cmd *exec.Cmd) chan cmdWaitResult {
 var hangTimeout = 30 * time.Second
 
 func register(pid int) *pidRegistration {
-	reg := &pidRegistration{ch: make(chan syscall.WaitStatus, 1)}
+	reg := &pidRegistration{
+		ch:           make(chan syscall.WaitStatus, 1),
+		registeredAt: time.Now(),
+	}
 	mu.Lock()
 	registry[pid] = reg
 	mu.Unlock()
@@ -296,12 +319,25 @@ func unregister(pid int) {
 	mu.Unlock()
 }
 
-func claimPending(pid int) (syscall.WaitStatus, bool) {
+// claimPending returns and removes a pending status for pid if one exists
+// AND it's recent enough (within pendingMaxAge of registeredAt) to
+// plausibly belong to the registering caller's process. Stale entries —
+// older than pendingMaxAge relative to registeredAt — are discarded as
+// orphan statuses whose pid has been recycled by the kernel since.
+func claimPending(pid int, registeredAt time.Time) (syscall.WaitStatus, bool) {
 	mu.Lock()
 	defer mu.Unlock()
-	if ps, ok := pending[pid]; ok {
-		delete(pending, pid)
-		return ps.ws, true
+	ps, ok := pending[pid]
+	if !ok {
+		return 0, false
 	}
-	return 0, false
+	if registeredAt.Sub(ps.addedAt) > pendingMaxAge {
+		// Stale: this status predates our registration by more than the
+		// fast-exit recovery window, so it can't be for our process.
+		// Drop it so subsequent calls don't keep seeing it.
+		delete(pending, pid)
+		return 0, false
+	}
+	delete(pending, pid)
+	return ps.ws, true
 }

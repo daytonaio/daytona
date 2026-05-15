@@ -161,3 +161,74 @@ func TestWait_ECHILDRecovery_Timeout(t *testing.T) {
 		t.Errorf("Wait took too long: %s", elapsed)
 	}
 }
+
+// TestWait_StalePendingRejected guards the PID-reuse hardening: a status
+// stored in pending more than pendingMaxAge before the caller's register
+// must NOT be claimed as the caller's exit status, because it almost
+// certainly belongs to a previous process whose pid has since been
+// recycled by the kernel.
+//
+// We simulate this by injecting a stale pending entry for the cmd's pid
+// (i.e., with an addedAt timestamp well in the past), reaping the child
+// externally so cmd.Wait sees ECHILD, then asserting that Wait recovers
+// via the recoveryTimeout path (an error) rather than returning the
+// stale status.
+func TestWait_StalePendingRejected(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping stale pending test in short mode")
+	}
+
+	// Tight timeouts so the test completes quickly. pendingMaxAge is set
+	// well below the staleness of the injected entry; recoveryTimeout is
+	// shortened so the failure path returns within ~100ms.
+	origMaxAge := overridePendingMaxAgeForTest(50 * time.Millisecond)
+	defer overridePendingMaxAgeForTest(origMaxAge)
+	origRecovery := overrideRecoveryTimeoutForTest(100 * time.Millisecond)
+	defer overrideRecoveryTimeoutForTest(origRecovery)
+
+	cmd := exec.Command("sh", "-c", "exit 0")
+	if err := cmd.Start(); err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+	pid := cmd.Process.Pid
+
+	// Reap externally so cmd.Wait will return ECHILD on its own.
+	var ws syscall.WaitStatus
+	if _, err := syscall.Wait4(pid, &ws, 0, nil); err != nil {
+		t.Fatalf("manual Wait4: %v", err)
+	}
+
+	// Inject a stale pending entry for the same pid. addedAt is in the
+	// past by 1 second — well past pendingMaxAge (50ms). Imitates what
+	// would happen if an earlier (unrelated) process had been reaped
+	// holding the same pid before the kernel handed it to our cmd.
+	var staleWS syscall.WaitStatus
+	// Construct a "would have been exit 99" WaitStatus by hand.
+	// On Linux, ExitStatus() reads (status >> 8) & 0xff for exited
+	// children, so writing 99 << 8 gives us a status that would surface
+	// as 99 if claimed.
+	staleWS = syscall.WaitStatus(99 << 8)
+	mu.Lock()
+	pending[pid] = pendingStatus{ws: staleWS, addedAt: time.Now().Add(-1 * time.Second)}
+	mu.Unlock()
+
+	code, err := Wait(cmd)
+
+	// The stale entry must NOT have been claimed. Wait should fall
+	// through to the recoveryTimeout error path.
+	if err == nil {
+		t.Fatalf("expected error when only a stale pending entry was available, got nil and code=%d", code)
+	}
+	if code == 99 {
+		t.Fatalf("Wait claimed the stale pending entry (code=99) — PID-reuse hardening regressed")
+	}
+
+	// And the stale entry must be evicted by the claim attempt so a later
+	// caller doesn't keep tripping over it.
+	mu.Lock()
+	_, stillThere := pending[pid]
+	mu.Unlock()
+	if stillThere {
+		t.Errorf("stale pending entry was not evicted after rejected claim")
+	}
+}

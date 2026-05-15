@@ -13,3 +13,11 @@ func overrideRecoveryTimeoutForTest(d time.Duration) time.Duration {
 	recoveryTimeout = d
 	return prev
 }
+
+// overridePendingMaxAgeForTest swaps in a shorter max age so the
+// PID-reuse staleness check can be exercised without burning wall time.
+func overridePendingMaxAgeForTest(d time.Duration) time.Duration {
+	prev := pendingMaxAge
+	pendingMaxAge = d
+	return prev
+}
