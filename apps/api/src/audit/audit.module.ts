@@ -9,7 +9,6 @@ import { OrganizationModule } from '../organization/organization.module'
 import { AuditLog } from './entities/audit-log.entity'
 import { AuditService } from './services/audit.service'
 import { AuditInterceptor } from './interceptors/audit.interceptor'
-import { AuditLogSubscriber } from './subscribers/audit-log.subscriber'
 import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 import { AuditController } from './controllers/audit.controller'
 import { AuditKafkaConsumerController } from './publishers/kafka/audit-kafka-consumer.controller'
@@ -53,14 +52,7 @@ import { AUDIT_KAFKA_SERVICE } from './constants/audit-tokens'
     }),
   ],
   controllers: [AuditController, AuditKafkaConsumerController],
-  providers: [
-    AuditService,
-    AuditInterceptor,
-    AuditLogSubscriber,
-    RedisLockProvider,
-    AuditStorageAdapterProvider,
-    AuditPublisherProvider,
-  ],
+  providers: [AuditService, AuditInterceptor, RedisLockProvider, AuditStorageAdapterProvider, AuditPublisherProvider],
   exports: [AuditService, AuditInterceptor],
 })
 export class AuditModule {}
