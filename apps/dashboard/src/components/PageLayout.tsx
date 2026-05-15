@@ -193,7 +193,7 @@ function PageHeaderProfileMenu() {
 
 function PageTitle({ className, children, ...props }: ComponentProps<'h1'>) {
   return (
-    <h1 className={cn('text-2xl sm:text-3xl font-medium tracking-tight', className)} {...props}>
+    <h1 className={cn('text-2xl sm:text-3.5xl font-medium tracking-tight', className)} {...props}>
       {children}
     </h1>
   )
