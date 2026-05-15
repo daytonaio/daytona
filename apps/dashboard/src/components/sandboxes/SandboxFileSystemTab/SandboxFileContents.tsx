@@ -509,7 +509,7 @@ export function SandboxFileContents({
                   ) : null}
                   {canCreateFolderInSelectedDirectory ? (
                     <DropdownMenuItem onSelect={() => onStartCreateFolder(selectedNode.path)}>
-                      Create folder
+                      Create Folder
                     </DropdownMenuItem>
                   ) : null}
                   {selectedNode.path !== ROOT_PATH ? <DropdownMenuSeparator /> : null}

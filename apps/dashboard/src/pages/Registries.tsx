@@ -69,7 +69,7 @@ const Registries: React.FC = () => {
     return [
       {
         id: 'add-registry',
-        label: 'Add Registry',
+        label: 'Create Registry',
         icon: <PlusIcon className="w-4 h-4" />,
         onSelect: () => addRegistrySheetRef.current?.open(),
       },

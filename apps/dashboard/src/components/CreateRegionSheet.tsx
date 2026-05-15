@@ -168,7 +168,7 @@ export const CreateRegionSheet: React.FC<CreateRegionSheetProps> = ({
 
       <SheetContent className="w-dvw sm:w-[500px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle>{createdRegion ? 'New Region Created' : 'Create New Region'}</SheetTitle>
+          <SheetTitle>{createdRegion ? 'Region Created' : 'Create Region'}</SheetTitle>
           <SheetDescription className="sr-only">
             {!createdRegion
               ? 'Add a new region for grouping runners and sandboxes.'
