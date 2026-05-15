@@ -221,7 +221,7 @@ func (s *Server) handleNonPty(session ssh.Session) {
 
 	if waitErr != nil || exitCode != 0 {
 		s.logger.Info("Command exited", "command", session.RawCommand(), "exitCode", exitCode, "error", waitErr)
-		session.Exit(127)
+		session.Exit(exitCode)
 		return
 	}
 
