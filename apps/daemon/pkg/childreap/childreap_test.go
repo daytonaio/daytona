@@ -202,12 +202,11 @@ func TestWait_StalePendingRejected(t *testing.T) {
 	// past by 1 second — well past pendingMaxAge (50ms). Imitates what
 	// would happen if an earlier (unrelated) process had been reaped
 	// holding the same pid before the kernel handed it to our cmd.
-	var staleWS syscall.WaitStatus
 	// Construct a "would have been exit 99" WaitStatus by hand.
 	// On Linux, ExitStatus() reads (status >> 8) & 0xff for exited
 	// children, so writing 99 << 8 gives us a status that would surface
 	// as 99 if claimed.
-	staleWS = syscall.WaitStatus(99 << 8)
+	staleWS := syscall.WaitStatus(99 << 8)
 	mu.Lock()
 	pending[pid] = pendingStatus{ws: staleWS, addedAt: time.Now().Add(-1 * time.Second)}
 	mu.Unlock()
