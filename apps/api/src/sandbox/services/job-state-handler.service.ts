@@ -52,11 +52,15 @@ export class JobStateHandlerService {
 
   private async runnerIsDraining(sandbox: Sandbox): Promise<boolean> {
     if (!sandbox.runnerId) return false
-    const runner = await this.runnerRepository.findOne({
-      where: { id: sandbox.runnerId },
-      select: ['draining'],
-    })
-    return runner?.draining === true
+    try {
+      const runner = await this.runnerRepository.findOne({
+        where: { id: sandbox.runnerId },
+        select: ['draining'],
+      })
+      return runner?.draining === true
+    } catch {
+      return false
+    }
   }
 
   /**
