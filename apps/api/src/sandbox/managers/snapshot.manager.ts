@@ -600,12 +600,17 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  // Pulls stopped sandboxes' backup snapshots to another runner to prepare for reassignment during draining
+  // Pulls stopped sandboxes' backup snapshots to another runner to prepare for migration during draining.
+  // Only meaningful when DRAIN_MODE=migrate; in 'archive' mode no relocation happens, so no pre-pull is needed.
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'migrate-draining-runner-snapshots', waitForCompletion: true })
   @TrackJobExecution()
   @LogExecution('migrate-draining-runner-snapshots')
   @WithInstrumentation()
   private async handleMigrateDrainingRunnerSnapshots() {
+    if (this.configService.get('draining.mode') !== 'migrate') {
+      return
+    }
+
     const lockKey = 'migrate-draining-runner-snapshots'
     const hasLock = await this.redisLockProvider.lock(lockKey, 60)
     if (!hasLock) {
