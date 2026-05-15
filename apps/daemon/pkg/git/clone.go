@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/daytonaio/daemon/pkg/childreap"
 	"github.com/daytonaio/daemon/pkg/gitprovider"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -109,8 +110,15 @@ func (s *Service) CloneRepositoryCLI(repo *gitprovider.GitRepository, auth *http
 	cmd := exec.Command(gitBin, buildCloneArgs(repo, s.WorkDir)...)
 	cmd.Env = buildCloneEnv(os.Environ(), askPath, auth)
 	tail := s.attachCmdOutput(cmd, 64*1024)
-	if err := cmd.Run(); err != nil {
+	// childreap.Run instead of cmd.Run so the reaper claiming the zombie
+	// first doesn't surface as a spurious "git clone failed: wait: no
+	// child processes" to API clients.
+	exitCode, err := childreap.Run(cmd)
+	if err != nil {
 		return fmt.Errorf("git clone failed: %w\n--- git output (tail) ---\n%s", err, tail.String())
+	}
+	if exitCode != 0 {
+		return fmt.Errorf("git clone exited with status %d\n--- git output (tail) ---\n%s", exitCode, tail.String())
 	}
 
 	if repo.Target == gitprovider.CloneTargetCommit {
@@ -120,8 +128,12 @@ func (s *Service) CloneRepositoryCLI(repo *gitprovider.GitRepository, auth *http
 		// exfiltrate GIT_USERNAME / GIT_PASSWORD.
 		checkout.Env = buildCloneEnv(os.Environ(), askPath, nil)
 		checkoutTail := s.attachCmdOutput(checkout, 16*1024)
-		if err := checkout.Run(); err != nil {
+		checkoutCode, err := childreap.Run(checkout)
+		if err != nil {
 			return fmt.Errorf("git checkout %s failed: %w\n--- git output (tail) ---\n%s", repo.Sha, err, checkoutTail.String())
+		}
+		if checkoutCode != 0 {
+			return fmt.Errorf("git checkout %s exited with status %d\n--- git output (tail) ---\n%s", repo.Sha, checkoutCode, checkoutTail.String())
 		}
 	}
 

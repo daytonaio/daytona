@@ -13,6 +13,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/daytonaio/daemon/pkg/childreap"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
@@ -53,25 +54,22 @@ func detectPluginError(logger *slog.Logger, path string) *ComputerUseError {
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	// Execute the command
-	err := cmd.Run()
+	// Execute via childreap.Run so an ECHILD from the PID-1 reaper
+	// winning the race doesn't get misclassified as a real plugin
+	// failure here. childreap.Run returns (exitCode, err) directly so
+	// we no longer need to type-switch *exec.ExitError to get the code.
+	exitCode, err := childreap.Run(cmd)
 
 	// Get the combined output
 	output := stdout.String() + stderr.String()
 
-	if err == nil {
+	if err == nil && exitCode == 0 {
 		// Plugin executed successfully, this shouldn't happen in normal flow
 		return &ComputerUseError{
 			Type:    "plugin",
 			Message: "Plugin executed successfully but failed during handshake",
 			Details: "This may indicate a protocol version mismatch or plugin configuration issue.",
 		}
-	}
-
-	// Get exit code if available
-	exitCode := -1
-	if exitErr, ok := err.(*exec.ExitError); ok {
-		exitCode = exitErr.ExitCode()
 	}
 
 	// Log the raw error for debugging

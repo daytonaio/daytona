@@ -7,11 +7,18 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/daytonaio/daemon/pkg/childreap"
 )
 
 func GetShell() string {
-	out, err := exec.Command("sh", "-c", "grep '^[^#]' /etc/shells").Output()
-	if err != nil {
+	cmd := exec.Command("sh", "-c", "grep '^[^#]' /etc/shells")
+	// childreap.Output (not cmd.Output) so the PID-1 reaper winning the
+	// race against cmd.Wait doesn't drop us into the err != nil branch
+	// and silently fall back to "sh" on sandboxes that actually have
+	// zsh/bash available.
+	out, exitCode, err := childreap.Output(cmd)
+	if err != nil || exitCode != 0 {
 		return "sh"
 	}
 

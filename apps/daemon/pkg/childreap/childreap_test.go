@@ -4,7 +4,9 @@
 package childreap
 
 import (
+	"bytes"
 	"os/exec"
+	"strings"
 	"syscall"
 	"testing"
 	"time"
@@ -160,6 +162,93 @@ func TestWait_ECHILDRecovery_Timeout(t *testing.T) {
 	if elapsed > 500*time.Millisecond {
 		t.Errorf("Wait took too long: %s", elapsed)
 	}
+}
+
+// TestRun covers the cmd.Run replacement helper.
+func TestRun(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		code, err := Run(exec.Command("true"))
+		if err != nil {
+			t.Fatalf("Run returned unexpected error: %v", err)
+		}
+		if code != 0 {
+			t.Errorf("expected exit code 0, got %d", code)
+		}
+	})
+
+	t.Run("NonZeroExit", func(t *testing.T) {
+		code, err := Run(exec.Command("sh", "-c", "exit 17"))
+		if err != nil {
+			t.Fatalf("Run returned unexpected error: %v", err)
+		}
+		if code != 17 {
+			t.Errorf("expected exit code 17, got %d", code)
+		}
+	})
+
+	t.Run("StartFailure", func(t *testing.T) {
+		// Bogus binary path. cmd.Start should fail.
+		_, err := Run(exec.Command("/this/path/does/not/exist/zzz"))
+		if err == nil {
+			t.Fatalf("expected start error, got nil")
+		}
+	})
+}
+
+// TestCombinedOutput covers the cmd.CombinedOutput replacement helper.
+func TestCombinedOutput(t *testing.T) {
+	t.Run("CapturesBoth", func(t *testing.T) {
+		out, code, err := CombinedOutput(
+			exec.Command("sh", "-c", "echo out-line && echo err-line >&2"),
+		)
+		if err != nil {
+			t.Fatalf("CombinedOutput returned unexpected error: %v", err)
+		}
+		if code != 0 {
+			t.Errorf("expected exit code 0, got %d", code)
+		}
+		s := string(out)
+		if !strings.Contains(s, "out-line") {
+			t.Errorf("missing stdout in output: %q", s)
+		}
+		if !strings.Contains(s, "err-line") {
+			t.Errorf("missing stderr in output: %q", s)
+		}
+	})
+
+	t.Run("RejectsPresetStdout", func(t *testing.T) {
+		cmd := exec.Command("true")
+		cmd.Stdout = &bytes.Buffer{}
+		_, _, err := CombinedOutput(cmd)
+		if err == nil {
+			t.Fatal("expected error when cmd.Stdout was already set")
+		}
+	})
+}
+
+// TestOutput covers the cmd.Output replacement helper.
+func TestOutput(t *testing.T) {
+	t.Run("CapturesStdout", func(t *testing.T) {
+		out, code, err := Output(exec.Command("sh", "-c", "echo just-stdout"))
+		if err != nil {
+			t.Fatalf("Output returned unexpected error: %v", err)
+		}
+		if code != 0 {
+			t.Errorf("expected exit code 0, got %d", code)
+		}
+		if !strings.Contains(string(out), "just-stdout") {
+			t.Errorf("missing stdout: %q", string(out))
+		}
+	})
+
+	t.Run("RejectsPresetStdout", func(t *testing.T) {
+		cmd := exec.Command("true")
+		cmd.Stdout = &bytes.Buffer{}
+		_, _, err := Output(cmd)
+		if err == nil {
+			t.Fatal("expected error when cmd.Stdout was already set")
+		}
+	})
 }
 
 // TestWait_StalePendingRejected guards the PID-reuse hardening: a status

@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/daytonaio/daemon/pkg/childreap"
 	"github.com/go-git/go-git/v5"
 )
 
@@ -72,8 +73,11 @@ func (s *Service) isBranchPublished() (bool, error) {
 
 func (s *Service) getUpstreamBranch() (string, error) {
 	cmd := exec.Command("git", "-C", s.WorkDir, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}")
-	out, err := cmd.CombinedOutput()
-	if err != nil {
+	// childreap.CombinedOutput so the reaper winning the race doesn't
+	// surface as a spurious error and trick this into reporting "no
+	// upstream" when one actually exists.
+	out, exitCode, err := childreap.CombinedOutput(cmd)
+	if err != nil || exitCode != 0 {
 		return "", nil
 	}
 
@@ -90,8 +94,8 @@ func (s *Service) getAheadBehindInfo() (int, int, error) {
 	}
 
 	cmd := exec.Command("git", "-C", s.WorkDir, "rev-list", "--left-right", "--count", fmt.Sprintf("%s...HEAD", upstream))
-	out, err := cmd.CombinedOutput()
-	if err != nil {
+	out, exitCode, err := childreap.CombinedOutput(cmd)
+	if err != nil || exitCode != 0 {
 		return 0, 0, nil
 	}
 
