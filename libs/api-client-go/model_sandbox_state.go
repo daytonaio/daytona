@@ -15,7 +15,7 @@ import (
 	"encoding/json"
 )
 
-// SandboxState The state of the sandbox
+// SandboxState the model 'SandboxState'
 type SandboxState string
 
 // List of SandboxState

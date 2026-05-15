@@ -13,7 +13,6 @@ interface UseSandboxCommandsProps {
   writePermitted: boolean
   deletePermitted: boolean
   selectedCount: number
-  totalCount: number
   selectableCount: number
   toggleAllRowsSelected: (selected: boolean) => void
   bulkActionCounts: BulkActionCounts
@@ -28,7 +27,6 @@ export function useSandboxCommands({
   deletePermitted,
   selectedCount,
   selectableCount,
-  totalCount,
   toggleAllRowsSelected,
   bulkActionCounts,
   onDelete,

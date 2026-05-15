@@ -7,7 +7,7 @@ const mockAxiosCreate = jest.fn()
 const mockSandboxApi = {
   createSandbox: jest.fn(),
   getSandbox: jest.fn(),
-  listSandboxesPaginated: jest.fn(),
+  listSandboxes: jest.fn(),
   getBuildLogsUrl: jest.fn(),
 }
 const mockSnapshotsApi = {}
@@ -415,20 +415,20 @@ describe('Daytona', () => {
     const { Daytona } = await import('../Daytona')
     const instance = new Daytona({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
 
-    mockSandboxApi.listSandboxesPaginated.mockResolvedValue(
-      createApiResponse({ items: [], total: 0, page: 2, totalPages: 0 }),
-    )
+    mockSandboxApi.listSandboxes.mockResolvedValue(createApiResponse({ items: [], nextCursor: null }))
 
-    await instance.list({ team: 'sdk', env: 'test' }, 2, 5)
+    const iter = instance.list({ labels: { team: 'sdk', env: 'test' }, limit: 5 })
+    // Drive the generator to trigger the API call.
+    for await (const _ of iter) {
+      // no-op
+    }
 
-    expect(mockSandboxApi.listSandboxesPaginated).toHaveBeenCalledWith(
-      undefined,
-      2,
-      5,
-      undefined,
-      undefined,
-      '{"team":"sdk","env":"test"}',
-    )
+    expect(mockSandboxApi.listSandboxes).toHaveBeenCalledTimes(1)
+    const call = mockSandboxApi.listSandboxes.mock.calls[0]
+    // Positional args: (orgHeader, cursor, limit, id, name, labelsJson, ...)
+    expect(call[1]).toBeUndefined() // cursor on first call
+    expect(call[2]).toBe(5) // limit
+    expect(call[5]).toBe('{"team":"sdk","env":"test"}') // labels JSON
   })
 
   it('delegates experimental fork to the sandbox instance', async () => {
@@ -452,12 +452,10 @@ describe('Daytona', () => {
     mockSandboxApi.getSandbox.mockResolvedValue(
       createApiResponse({ id: 'sb-1', labels: { 'code-toolbox-language': 'python' } }),
     )
-    mockSandboxApi.listSandboxesPaginated.mockResolvedValue(
+    mockSandboxApi.listSandboxes.mockResolvedValue(
       createApiResponse({
         items: [{ id: 'sb-1', labels: { 'code-toolbox-language': 'python' } }],
-        total: 1,
-        page: 1,
-        totalPages: 1,
+        nextCursor: null,
       }),
     )
 
@@ -469,9 +467,12 @@ describe('Daytona', () => {
     }
     expect(mockSandboxApi.getSandbox).toHaveBeenCalledWith('sb-1')
 
-    const list = await instance.list({ project: 'sdk' }, 1, 10)
-    expect(mockSandboxApi.listSandboxesPaginated).toHaveBeenCalled()
-    expect(list.total).toBe(1)
+    const collected: unknown[] = []
+    for await (const sb of instance.list({ labels: { project: 'sdk' }, limit: 10 })) {
+      collected.push(sb)
+    }
+    expect(mockSandboxApi.listSandboxes).toHaveBeenCalled()
+    expect(collected).toHaveLength(1)
 
     await instance.start(sandboxFromGet as unknown as never)
     await instance.stop(sandboxFromGet as unknown as never)

@@ -6,59 +6,108 @@
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { queryKeys } from '@/hooks/queries/queryKeys'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { Sandbox, SandboxState } from '@daytona/api-client'
+import { Sandbox, SandboxDesiredState, SandboxState } from '@daytona/api-client'
 import type { QueryKey } from '@tanstack/react-query'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 
-interface UseSandboxWsSyncOptions {
+export type SandboxWsSyncEvent =
+  | {
+      type: 'created'
+      sandbox: Sandbox
+    }
+  | {
+      type: 'state.updated'
+      sandbox: Sandbox
+      oldState: SandboxState
+      newState: SandboxState
+    }
+  | {
+      type: 'desired-state.updated'
+      sandbox: Sandbox
+      oldDesiredState: SandboxDesiredState
+      newDesiredState: SandboxDesiredState
+    }
+
+interface UseSandboxWsSyncOptions<TData = Sandbox> {
   enabled?: boolean
   sandboxId?: string
-  queryKey: QueryKey
-  sync: (oldData: Sandbox | undefined, sandbox: Sandbox) => Sandbox | undefined
+  queryKey?: QueryKey
+  sync?: (oldData: TData | undefined, sandbox: Sandbox, event: SandboxWsSyncEvent) => TData | undefined
+  onSync?: (event: SandboxWsSyncEvent) => void | Promise<void>
 }
 
-export function useSandboxWsSync({ enabled = true, sandboxId, queryKey, sync }: UseSandboxWsSyncOptions) {
+export function useSandboxWsSync<TData = Sandbox>({
+  enabled = true,
+  sandboxId,
+  queryKey,
+  sync,
+  onSync,
+}: UseSandboxWsSyncOptions<TData>) {
   const { notificationSocket } = useNotificationSocket()
   const { selectedOrganization } = useSelectedOrganization()
   const queryClient = useQueryClient()
   const queryKeyRef = useRef(queryKey)
   const syncRef = useRef(sync)
+  const onSyncRef = useRef(onSync)
 
   queryKeyRef.current = queryKey
   syncRef.current = sync
+  onSyncRef.current = onSync
 
   useEffect(() => {
-    if (!enabled || !notificationSocket || !selectedOrganization?.id || !sandboxId) return
+    if (!enabled || !notificationSocket || !selectedOrganization?.id) return
+    if (!queryKeyRef.current && !onSyncRef.current) return
 
-    const cancelSandboxQuery = () => {
-      queryClient.cancelQueries({
+    const cancelSandboxQuery = async () => {
+      if (!queryKeyRef.current) return
+
+      await queryClient.cancelQueries({
         queryKey: queryKeyRef.current,
       })
     }
 
-    const syncSandboxInCache = (sandbox: Sandbox) => {
-      queryClient.setQueryData<Sandbox>(queryKeyRef.current, (oldData) => syncRef.current(oldData, sandbox))
+    const syncSandboxInCache = (event: SandboxWsSyncEvent) => {
+      if (!queryKeyRef.current || !syncRef.current) return
+
+      queryClient.setQueryData<TData>(queryKeyRef.current, (oldData) =>
+        syncRef.current?.(oldData, event.sandbox, event),
+      )
     }
 
-    const syncSandboxFromEvent = async (sandbox: Sandbox) => {
-      cancelSandboxQuery()
-      syncSandboxInCache(sandbox)
+    const syncSandboxFromEvent = async (event: SandboxWsSyncEvent) => {
+      await cancelSandboxQuery()
+      syncSandboxInCache(event)
+      await onSyncRef.current?.(event)
     }
 
     const handleCreated = async (sandbox: Sandbox) => {
       if (sandboxId && sandbox.id !== sandboxId) return
-      await syncSandboxFromEvent(sandbox)
+      await syncSandboxFromEvent({ type: 'created', sandbox })
     }
 
     const handleStateUpdated = async (data: { sandbox: Sandbox; oldState: SandboxState; newState: SandboxState }) => {
       if (sandboxId && data.sandbox.id !== sandboxId) return
-      await syncSandboxFromEvent(data.sandbox)
+      await syncSandboxFromEvent({
+        type: 'state.updated',
+        sandbox: data.sandbox,
+        oldState: data.oldState,
+        newState: data.newState,
+      })
     }
 
-    const handleDesiredStateUpdated = async (data: { sandbox: Sandbox }) => {
+    const handleDesiredStateUpdated = async (data: {
+      sandbox: Sandbox
+      oldDesiredState: SandboxDesiredState
+      newDesiredState: SandboxDesiredState
+    }) => {
       if (sandboxId && data.sandbox.id !== sandboxId) return
-      await syncSandboxFromEvent(data.sandbox)
+      await syncSandboxFromEvent({
+        type: 'desired-state.updated',
+        sandbox: data.sandbox,
+        oldDesiredState: data.oldDesiredState,
+        newDesiredState: data.newDesiredState,
+      })
     }
 
     notificationSocket.on('sandbox.created', handleCreated)

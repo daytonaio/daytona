@@ -1,12 +1,19 @@
-from daytona import Daytona
+from daytona import Daytona, ListSandboxesQuery, SandboxListSortDirection, SandboxListSortField, SandboxState
 
 
 def main():
     daytona = Daytona()
 
-    result = daytona.list(labels={"my-label": "my-value"}, page=2, limit=10)
-    for sandbox in result.items:
-        print(f"{sandbox.id}: {sandbox.state}")
+    for sandbox in daytona.list(
+        ListSandboxesQuery(
+            limit=10,
+            labels={"env": "dev"},
+            states=[SandboxState.STARTED],
+            sort=SandboxListSortField.CREATEDAT,
+            order=SandboxListSortDirection.DESC,
+        )
+    ):
+        print(sandbox.id)
 
 
 if __name__ == "__main__":

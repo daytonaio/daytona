@@ -6,8 +6,8 @@
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 import { SandboxDto } from './sandbox.dto'
 
-@ApiSchema({ name: 'PaginatedSandboxes' })
-export class PaginatedSandboxesDto {
+@ApiSchema({ name: 'PaginatedSandboxes_deprecated' })
+export class PaginatedSandboxesDtoDeprecated {
   @ApiProperty({ type: [SandboxDto] })
   items: SandboxDto[]
 

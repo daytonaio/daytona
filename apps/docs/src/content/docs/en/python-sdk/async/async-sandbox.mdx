@@ -662,29 +662,6 @@ await sandbox.refresh_activity()
 ```
 
 
-## AsyncPaginatedSandboxes
-
-```python
-class AsyncPaginatedSandboxes(PaginatedSandboxesDto)
-```
-
-Represents a paginated list of Daytona Sandboxes.
-
-**Attributes**:
-
-- `items` _list[AsyncSandbox]_ - List of Sandbox instances in the current page.
-- `total` _int_ - Total number of Sandboxes across all pages.
-- `page` _int_ - Current page number.
-- `total_pages` _int_ - Total number of pages available.
-
-##### items: `list[AsyncSandbox]`
-
-```python
-items = None
-```
-
-pyright: ignore[reportIncompatibleVariableOverride]
-
 ## Resources
 
 ```python
@@ -717,4 +694,38 @@ params = CreateSandboxFromImageParams(
     resources=resources
 )
 ```
+
+## ListSandboxesQuery
+
+```python
+@dataclass
+class ListSandboxesQuery()
+```
+
+Query parameters for filtering and sorting when listing Sandboxes.
+
+**Attributes**:
+
+- `limit` - Per-page fetch size. Does NOT limit the total number of
+  Sandboxes returned.
+- `id` - Filter by ID prefix (case-insensitive).
+- `name` - Filter by name prefix (case-insensitive).
+- `labels` - Filter by labels.
+- `states` - Filter by states.
+- `snapshots` - Filter by snapshot names.
+- `targets` - Filter by targets.
+- `min_cpu` - Filter by minimum CPU.
+- `max_cpu` - Filter by maximum CPU.
+- `min_memory_gib` - Filter by minimum memory in GiB.
+- `max_memory_gib` - Filter by maximum memory in GiB.
+- `min_disk_gib` - Filter by minimum disk space in GiB.
+- `max_disk_gib` - Filter by maximum disk space in GiB.
+- `is_public` - Filter by public status.
+- `is_recoverable` - Filter by recoverable status.
+- `created_at_after` _datetime_ - Include sandboxes created after this timestamp.
+- `created_at_before` _datetime_ - Include sandboxes created before this timestamp.
+- `last_activity_after` _datetime_ - Include sandboxes with last activity after this timestamp.
+- `last_activity_before` _datetime_ - Include sandboxes with last activity before this timestamp.
+- `sort` - Field to sort by.
+- `order` - Sort direction.
 

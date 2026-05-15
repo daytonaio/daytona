@@ -201,9 +201,9 @@ daytona list [flags]
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
+| `--cursor` | `-c` | Cursor for pagination |
 | `--format` | `-f` | Output format. Must be one of (yaml, json) |
 | `--limit` | `-l` | Maximum number of items per page |
-| `--page` | `-p` | Page number for pagination (starting from 1) |
 | `--help` |  | help for daytona |
 
 
@@ -406,7 +406,7 @@ __Flags__
 Delete a snapshot
 
 ```shell
-daytona snapshot delete [SNAPSHOT_ID] [flags]
+daytona snapshot delete [SNAPSHOT_ID | SNAPSHOT_NAME] [flags]
 ```
 
 __Flags__
@@ -488,6 +488,7 @@ daytona stop [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
+| `--force` | `-f` | Force stop the sandbox using SIGKILL |
 | `--help` |  | help for daytona |
 
 

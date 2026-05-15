@@ -7,6 +7,7 @@ import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { queryKeys } from '@/hooks/queries/queryKeys'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { mutationKeys } from './mutationKeys'
 
 interface StartSandboxVariables {
   sandboxId: string
@@ -22,6 +23,7 @@ export const useStartSandboxMutation = ({ invalidate = true }: UseStartSandboxMu
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: mutationKeys.sandboxes.start(),
     mutationFn: async ({ sandboxId }: StartSandboxVariables) => {
       await sandboxApi.startSandbox(sandboxId, selectedOrganization?.id)
     },

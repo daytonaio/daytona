@@ -1,4 +1,4 @@
-import { Daytona } from '@daytona/sdk'
+import { Daytona, SandboxListSortDirection, SandboxListSortField, SandboxState } from '@daytona/sdk'
 
 async function main() {
   const daytona = new Daytona()
@@ -35,10 +35,15 @@ async function main() {
     console.log(response.result)
   }
 
-  const result = await daytona.list()
-  console.log('Total sandboxes count:', result.total)
-
-  console.log(`Printing first sandbox -> id: ${result.items[0].id} state: ${result.items[0].state}`)
+  for await (const sb of daytona.list({
+    limit: 10,
+    labels: { env: 'dev' },
+    states: [SandboxState.STARTED],
+    sort: SandboxListSortField.CREATEDAT,
+    order: SandboxListSortDirection.DESC,
+  })) {
+    console.log(sb.id)
+  }
 
   console.log('Deleting sandbox')
   await sandbox.delete()

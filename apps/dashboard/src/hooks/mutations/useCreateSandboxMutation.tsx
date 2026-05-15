@@ -7,7 +7,7 @@ import { CreateSandboxFromImageParams, CreateSandboxFromSnapshotParams, Daytona,
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from 'react-oidc-context'
 import { useConfig } from '../useConfig'
-import { getSandboxesQueryKey } from '../useSandboxes'
+import { getSandboxesQueryKey } from '../queries/useSandboxesQuery'
 import { useSelectedOrganization } from '../useSelectedOrganization'
 
 export type CreateSandboxParams = (CreateSandboxFromSnapshotParams | CreateSandboxFromImageParams) & {
