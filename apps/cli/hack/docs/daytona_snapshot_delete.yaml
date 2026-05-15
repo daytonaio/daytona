@@ -1,6 +1,6 @@
 name: daytona snapshot delete
 synopsis: Delete a snapshot
-usage: daytona snapshot delete [SNAPSHOT_ID] [flags]
+usage: daytona snapshot delete [SNAPSHOT_ID | SNAPSHOT_NAME] [flags]
 options:
   - name: all
     shorthand: a

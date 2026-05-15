@@ -16,11 +16,11 @@ import (
 	"fmt"
 )
 
-// checks if the PaginatedSandboxes type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &PaginatedSandboxes{}
+// checks if the PaginatedSandboxesDeprecated type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &PaginatedSandboxesDeprecated{}
 
-// PaginatedSandboxes struct for PaginatedSandboxes
-type PaginatedSandboxes struct {
+// PaginatedSandboxesDeprecated struct for PaginatedSandboxesDeprecated
+type PaginatedSandboxesDeprecated struct {
 	Items []Sandbox `json:"items"`
 	Total float32 `json:"total"`
 	Page float32 `json:"page"`
@@ -28,14 +28,14 @@ type PaginatedSandboxes struct {
 	AdditionalProperties map[string]interface{}
 }
 
-type _PaginatedSandboxes PaginatedSandboxes
+type _PaginatedSandboxesDeprecated PaginatedSandboxesDeprecated
 
-// NewPaginatedSandboxes instantiates a new PaginatedSandboxes object
+// NewPaginatedSandboxesDeprecated instantiates a new PaginatedSandboxesDeprecated object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPaginatedSandboxes(items []Sandbox, total float32, page float32, totalPages float32) *PaginatedSandboxes {
-	this := PaginatedSandboxes{}
+func NewPaginatedSandboxesDeprecated(items []Sandbox, total float32, page float32, totalPages float32) *PaginatedSandboxesDeprecated {
+	this := PaginatedSandboxesDeprecated{}
 	this.Items = items
 	this.Total = total
 	this.Page = page
@@ -43,16 +43,16 @@ func NewPaginatedSandboxes(items []Sandbox, total float32, page float32, totalPa
 	return &this
 }
 
-// NewPaginatedSandboxesWithDefaults instantiates a new PaginatedSandboxes object
+// NewPaginatedSandboxesDeprecatedWithDefaults instantiates a new PaginatedSandboxesDeprecated object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewPaginatedSandboxesWithDefaults() *PaginatedSandboxes {
-	this := PaginatedSandboxes{}
+func NewPaginatedSandboxesDeprecatedWithDefaults() *PaginatedSandboxesDeprecated {
+	this := PaginatedSandboxesDeprecated{}
 	return &this
 }
 
 // GetItems returns the Items field value
-func (o *PaginatedSandboxes) GetItems() []Sandbox {
+func (o *PaginatedSandboxesDeprecated) GetItems() []Sandbox {
 	if o == nil {
 		var ret []Sandbox
 		return ret
@@ -63,7 +63,7 @@ func (o *PaginatedSandboxes) GetItems() []Sandbox {
 
 // GetItemsOk returns a tuple with the Items field value
 // and a boolean to check if the value has been set.
-func (o *PaginatedSandboxes) GetItemsOk() ([]Sandbox, bool) {
+func (o *PaginatedSandboxesDeprecated) GetItemsOk() ([]Sandbox, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -71,12 +71,12 @@ func (o *PaginatedSandboxes) GetItemsOk() ([]Sandbox, bool) {
 }
 
 // SetItems sets field value
-func (o *PaginatedSandboxes) SetItems(v []Sandbox) {
+func (o *PaginatedSandboxesDeprecated) SetItems(v []Sandbox) {
 	o.Items = v
 }
 
 // GetTotal returns the Total field value
-func (o *PaginatedSandboxes) GetTotal() float32 {
+func (o *PaginatedSandboxesDeprecated) GetTotal() float32 {
 	if o == nil {
 		var ret float32
 		return ret
@@ -87,7 +87,7 @@ func (o *PaginatedSandboxes) GetTotal() float32 {
 
 // GetTotalOk returns a tuple with the Total field value
 // and a boolean to check if the value has been set.
-func (o *PaginatedSandboxes) GetTotalOk() (*float32, bool) {
+func (o *PaginatedSandboxesDeprecated) GetTotalOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -95,12 +95,12 @@ func (o *PaginatedSandboxes) GetTotalOk() (*float32, bool) {
 }
 
 // SetTotal sets field value
-func (o *PaginatedSandboxes) SetTotal(v float32) {
+func (o *PaginatedSandboxesDeprecated) SetTotal(v float32) {
 	o.Total = v
 }
 
 // GetPage returns the Page field value
-func (o *PaginatedSandboxes) GetPage() float32 {
+func (o *PaginatedSandboxesDeprecated) GetPage() float32 {
 	if o == nil {
 		var ret float32
 		return ret
@@ -111,7 +111,7 @@ func (o *PaginatedSandboxes) GetPage() float32 {
 
 // GetPageOk returns a tuple with the Page field value
 // and a boolean to check if the value has been set.
-func (o *PaginatedSandboxes) GetPageOk() (*float32, bool) {
+func (o *PaginatedSandboxesDeprecated) GetPageOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -119,12 +119,12 @@ func (o *PaginatedSandboxes) GetPageOk() (*float32, bool) {
 }
 
 // SetPage sets field value
-func (o *PaginatedSandboxes) SetPage(v float32) {
+func (o *PaginatedSandboxesDeprecated) SetPage(v float32) {
 	o.Page = v
 }
 
 // GetTotalPages returns the TotalPages field value
-func (o *PaginatedSandboxes) GetTotalPages() float32 {
+func (o *PaginatedSandboxesDeprecated) GetTotalPages() float32 {
 	if o == nil {
 		var ret float32
 		return ret
@@ -135,7 +135,7 @@ func (o *PaginatedSandboxes) GetTotalPages() float32 {
 
 // GetTotalPagesOk returns a tuple with the TotalPages field value
 // and a boolean to check if the value has been set.
-func (o *PaginatedSandboxes) GetTotalPagesOk() (*float32, bool) {
+func (o *PaginatedSandboxesDeprecated) GetTotalPagesOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -143,11 +143,11 @@ func (o *PaginatedSandboxes) GetTotalPagesOk() (*float32, bool) {
 }
 
 // SetTotalPages sets field value
-func (o *PaginatedSandboxes) SetTotalPages(v float32) {
+func (o *PaginatedSandboxesDeprecated) SetTotalPages(v float32) {
 	o.TotalPages = v
 }
 
-func (o PaginatedSandboxes) MarshalJSON() ([]byte, error) {
+func (o PaginatedSandboxesDeprecated) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -155,7 +155,7 @@ func (o PaginatedSandboxes) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o PaginatedSandboxes) ToMap() (map[string]interface{}, error) {
+func (o PaginatedSandboxesDeprecated) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["items"] = o.Items
 	toSerialize["total"] = o.Total
@@ -169,7 +169,7 @@ func (o PaginatedSandboxes) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *PaginatedSandboxes) UnmarshalJSON(data []byte) (err error) {
+func (o *PaginatedSandboxesDeprecated) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -194,15 +194,15 @@ func (o *PaginatedSandboxes) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varPaginatedSandboxes := _PaginatedSandboxes{}
+	varPaginatedSandboxesDeprecated := _PaginatedSandboxesDeprecated{}
 
-	err = json.Unmarshal(data, &varPaginatedSandboxes)
+	err = json.Unmarshal(data, &varPaginatedSandboxesDeprecated)
 
 	if err != nil {
 		return err
 	}
 
-	*o = PaginatedSandboxes(varPaginatedSandboxes)
+	*o = PaginatedSandboxesDeprecated(varPaginatedSandboxesDeprecated)
 
 	additionalProperties := make(map[string]interface{})
 
@@ -217,38 +217,38 @@ func (o *PaginatedSandboxes) UnmarshalJSON(data []byte) (err error) {
 	return err
 }
 
-type NullablePaginatedSandboxes struct {
-	value *PaginatedSandboxes
+type NullablePaginatedSandboxesDeprecated struct {
+	value *PaginatedSandboxesDeprecated
 	isSet bool
 }
 
-func (v NullablePaginatedSandboxes) Get() *PaginatedSandboxes {
+func (v NullablePaginatedSandboxesDeprecated) Get() *PaginatedSandboxesDeprecated {
 	return v.value
 }
 
-func (v *NullablePaginatedSandboxes) Set(val *PaginatedSandboxes) {
+func (v *NullablePaginatedSandboxesDeprecated) Set(val *PaginatedSandboxesDeprecated) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullablePaginatedSandboxes) IsSet() bool {
+func (v NullablePaginatedSandboxesDeprecated) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullablePaginatedSandboxes) Unset() {
+func (v *NullablePaginatedSandboxesDeprecated) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullablePaginatedSandboxes(val *PaginatedSandboxes) *NullablePaginatedSandboxes {
-	return &NullablePaginatedSandboxes{value: val, isSet: true}
+func NewNullablePaginatedSandboxesDeprecated(val *PaginatedSandboxesDeprecated) *NullablePaginatedSandboxesDeprecated {
+	return &NullablePaginatedSandboxesDeprecated{value: val, isSet: true}
 }
 
-func (v NullablePaginatedSandboxes) MarshalJSON() ([]byte, error) {
+func (v NullablePaginatedSandboxesDeprecated) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullablePaginatedSandboxes) UnmarshalJSON(src []byte) error {
+func (v *NullablePaginatedSandboxesDeprecated) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

@@ -1,4 +1,4 @@
-from daytona import Daytona
+from daytona import Daytona, ListSandboxesQuery, SandboxListSortDirection, SandboxListSortField, SandboxState
 
 
 def main():
@@ -32,10 +32,16 @@ def main():
     else:
         print(response.result)
 
-    result = daytona.list()
-    print("Total sandboxes count:", result.total)
-
-    print(f"Printing first sandbox -> id: {result.items[0].id} state: {result.items[0].state}")
+    for sb in daytona.list(
+        ListSandboxesQuery(
+            limit=10,
+            labels={"env": "dev"},
+            states=[SandboxState.STARTED],
+            sort=SandboxListSortField.CREATEDAT,
+            order=SandboxListSortDirection.DESC,
+        )
+    ):
+        print(sb.id)
 
     print("Removing sandbox")
     daytona.delete(sandbox)

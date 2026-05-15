@@ -214,6 +214,7 @@ export function SandboxTableActions({
             onStart(sandbox.id)
           }
         }}
+        disabled={isLoading}
       >
         {sandbox.state === SandboxState.STARTED ? (
           <Square className="w-4 h-4" />
@@ -234,6 +235,7 @@ export function SandboxTableActions({
           e.stopPropagation()
           onOpenTerminal?.()
         }}
+        disabled={isLoading}
       >
         <Terminal className="w-4 h-4" />
       </Button>

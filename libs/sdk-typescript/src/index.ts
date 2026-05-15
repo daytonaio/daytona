@@ -44,6 +44,7 @@ export {
 } from './errors/DaytonaError'
 export { Image } from './Image'
 export { Sandbox } from './Sandbox'
+export type { ListSandboxesQuery } from './Sandbox'
 export type { CreateSnapshotParams } from './Snapshot'
 export { ComputerUse, Mouse, Keyboard, Screenshot, Display, Accessibility } from './ComputerUse'
 export type {
@@ -65,7 +66,7 @@ export type {
 export { ChartType } from './types/Charts'
 export type { ExecutionError, ExecutionResult, OutputMessage, RunCodeOptions } from './types/CodeInterpreter'
 
-export { SandboxState } from '@daytona/api-client'
+export { SandboxState, SandboxListSortField, SandboxListSortDirection } from '@daytona/api-client'
 export type {
   FileInfo,
   GitStatus,

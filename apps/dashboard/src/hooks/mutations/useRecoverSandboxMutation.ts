@@ -7,6 +7,7 @@ import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { queryKeys } from '@/hooks/queries/queryKeys'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { mutationKeys } from './mutationKeys'
 
 interface RecoverSandboxVariables {
   sandboxId: string
@@ -22,6 +23,7 @@ export const useRecoverSandboxMutation = ({ invalidate = true }: UseRecoverSandb
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: mutationKeys.sandboxes.recover(),
     mutationFn: async ({ sandboxId }: RecoverSandboxVariables) => {
       await sandboxApi.recoverSandbox(sandboxId, selectedOrganization?.id)
     },

@@ -20,16 +20,16 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
 from typing import Any, ClassVar, Dict, List, Union
-from daytona_api_client.models.sandbox import Sandbox
+from daytona_api_client_async.models.sandbox import Sandbox
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
 
 _JSON_ADAPTER = TypeAdapter(Dict[str, Any])
 
-class PaginatedSandboxes(BaseModel):
+class PaginatedSandboxesDeprecated(BaseModel):
     """
-    PaginatedSandboxes
+    PaginatedSandboxesDeprecated
     """ # noqa: E501
     items: List[Sandbox]
     total: Union[StrictFloat, StrictInt]
@@ -55,7 +55,7 @@ class PaginatedSandboxes(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of PaginatedSandboxes from a JSON string"""
+        """Create an instance of PaginatedSandboxesDeprecated from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -94,7 +94,7 @@ class PaginatedSandboxes(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of PaginatedSandboxes from a dict"""
+        """Create an instance of PaginatedSandboxesDeprecated from a dict"""
         if obj is None:
             return None
 

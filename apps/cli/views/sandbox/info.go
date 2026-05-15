@@ -42,8 +42,6 @@ func RenderInfo(sandbox *apiclient.Sandbox, forceUnstyled bool) {
 
 	if sandbox.LastActivityAt != nil {
 		output += getInfoLine("Last Event", util.GetTimeSinceLabelFromString(*sandbox.LastActivityAt)) + "\n"
-	} else if sandbox.UpdatedAt != nil {
-		output += getInfoLine("Last Event", util.GetTimeSinceLabelFromString(*sandbox.UpdatedAt)) + "\n"
 	}
 
 	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))

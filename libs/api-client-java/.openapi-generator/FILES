@@ -105,6 +105,7 @@ src/main/java/io/daytona/api/client/model/KeyboardHotkeyRequest.java
 src/main/java/io/daytona/api/client/model/KeyboardPressRequest.java
 src/main/java/io/daytona/api/client/model/KeyboardTypeRequest.java
 src/main/java/io/daytona/api/client/model/ListBranchResponse.java
+src/main/java/io/daytona/api/client/model/ListSandboxesResponse.java
 src/main/java/io/daytona/api/client/model/LogEntry.java
 src/main/java/io/daytona/api/client/model/LspCompletionParams.java
 src/main/java/io/daytona/api/client/model/LspDocumentRequest.java
@@ -136,7 +137,7 @@ src/main/java/io/daytona/api/client/model/OtelConfig.java
 src/main/java/io/daytona/api/client/model/PaginatedAuditLogs.java
 src/main/java/io/daytona/api/client/model/PaginatedJobs.java
 src/main/java/io/daytona/api/client/model/PaginatedLogs.java
-src/main/java/io/daytona/api/client/model/PaginatedSandboxes.java
+src/main/java/io/daytona/api/client/model/PaginatedSandboxesDeprecated.java
 src/main/java/io/daytona/api/client/model/PaginatedSnapshots.java
 src/main/java/io/daytona/api/client/model/PaginatedTraces.java
 src/main/java/io/daytona/api/client/model/PollJobsResponse.java
@@ -179,6 +180,8 @@ src/main/java/io/daytona/api/client/model/SandboxClass.java
 src/main/java/io/daytona/api/client/model/SandboxDesiredState.java
 src/main/java/io/daytona/api/client/model/SandboxInfo.java
 src/main/java/io/daytona/api/client/model/SandboxLabels.java
+src/main/java/io/daytona/api/client/model/SandboxListSortDirection.java
+src/main/java/io/daytona/api/client/model/SandboxListSortField.java
 src/main/java/io/daytona/api/client/model/SandboxState.java
 src/main/java/io/daytona/api/client/model/SandboxVolume.java
 src/main/java/io/daytona/api/client/model/ScreenshotResponse.java
@@ -305,6 +308,7 @@ src/test/java/io/daytona/api/client/model/KeyboardHotkeyRequestTest.java
 src/test/java/io/daytona/api/client/model/KeyboardPressRequestTest.java
 src/test/java/io/daytona/api/client/model/KeyboardTypeRequestTest.java
 src/test/java/io/daytona/api/client/model/ListBranchResponseTest.java
+src/test/java/io/daytona/api/client/model/ListSandboxesResponseTest.java
 src/test/java/io/daytona/api/client/model/LogEntryTest.java
 src/test/java/io/daytona/api/client/model/LspCompletionParamsTest.java
 src/test/java/io/daytona/api/client/model/LspDocumentRequestTest.java
@@ -336,7 +340,7 @@ src/test/java/io/daytona/api/client/model/OtelConfigTest.java
 src/test/java/io/daytona/api/client/model/PaginatedAuditLogsTest.java
 src/test/java/io/daytona/api/client/model/PaginatedJobsTest.java
 src/test/java/io/daytona/api/client/model/PaginatedLogsTest.java
-src/test/java/io/daytona/api/client/model/PaginatedSandboxesTest.java
+src/test/java/io/daytona/api/client/model/PaginatedSandboxesDeprecatedTest.java
 src/test/java/io/daytona/api/client/model/PaginatedSnapshotsTest.java
 src/test/java/io/daytona/api/client/model/PaginatedTracesTest.java
 src/test/java/io/daytona/api/client/model/PollJobsResponseTest.java
@@ -378,6 +382,8 @@ src/test/java/io/daytona/api/client/model/SandboxClassTest.java
 src/test/java/io/daytona/api/client/model/SandboxDesiredStateTest.java
 src/test/java/io/daytona/api/client/model/SandboxInfoTest.java
 src/test/java/io/daytona/api/client/model/SandboxLabelsTest.java
+src/test/java/io/daytona/api/client/model/SandboxListSortDirectionTest.java
+src/test/java/io/daytona/api/client/model/SandboxListSortFieldTest.java
 src/test/java/io/daytona/api/client/model/SandboxStateTest.java
 src/test/java/io/daytona/api/client/model/SandboxTest.java
 src/test/java/io/daytona/api/client/model/SandboxVolumeTest.java

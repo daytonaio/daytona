@@ -4,6 +4,18 @@
  */
 
 export const mutationKeys = {
+  sandboxes: {
+    all: ['sandboxes'] as const,
+    start: () => [...mutationKeys.sandboxes.all, 'start'] as const,
+    stop: () => [...mutationKeys.sandboxes.all, 'stop'] as const,
+    archive: () => [...mutationKeys.sandboxes.all, 'archive'] as const,
+    recover: () => [...mutationKeys.sandboxes.all, 'recover'] as const,
+    remove: () => [...mutationKeys.sandboxes.all, 'remove'] as const,
+    fork: () => [...mutationKeys.sandboxes.all, 'fork'] as const,
+    createSnapshot: () => [...mutationKeys.sandboxes.all, 'create-snapshot'] as const,
+    vnc: () => [...mutationKeys.sandboxes.all, 'vnc'] as const,
+    screenRecordings: () => [...mutationKeys.sandboxes.all, 'screen-recordings'] as const,
+  },
   organization: {
     members: {
       all: ['organization-members'] as const,

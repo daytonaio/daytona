@@ -20,7 +20,6 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.daytona.api.client.model.Sandbox;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,17 +27,17 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
- * Model tests for PaginatedSandboxes
+ * Model tests for ListSandboxesResponse
  */
-public class PaginatedSandboxesTest {
-    private final PaginatedSandboxes model = new PaginatedSandboxes();
+public class ListSandboxesResponseTest {
+    private final ListSandboxesResponse model = new ListSandboxesResponse();
 
     /**
-     * Model tests for PaginatedSandboxes
+     * Model tests for ListSandboxesResponse
      */
     @Test
-    public void testPaginatedSandboxes() {
-        // TODO: test PaginatedSandboxes
+    public void testListSandboxesResponse() {
+        // TODO: test ListSandboxesResponse
     }
 
     /**
@@ -50,27 +49,11 @@ public class PaginatedSandboxesTest {
     }
 
     /**
-     * Test the property 'total'
+     * Test the property 'nextCursor'
      */
     @Test
-    public void totalTest() {
-        // TODO: test total
-    }
-
-    /**
-     * Test the property 'page'
-     */
-    @Test
-    public void pageTest() {
-        // TODO: test page
-    }
-
-    /**
-     * Test the property 'totalPages'
-     */
-    @Test
-    public void totalPagesTest() {
-        // TODO: test totalPages
+    public void nextCursorTest() {
+        // TODO: test nextCursor
     }
 
 }

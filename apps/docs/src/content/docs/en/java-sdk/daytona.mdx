@@ -183,39 +183,74 @@ Retrieves a Sandbox by ID or name.
 
 #### list()
 ```java
-public PaginatedSandboxes list()
+public Iterator<Map<String, Object>> list()
 ```
 
-Lists Sandboxes using default pagination.
+Iterates over all Sandboxes (no filter, default sort).
 
 **Returns**:
 
-- `PaginatedSandboxes` - first page of Sandboxes with default page size
-
-**Throws**:
-
-- `DaytonaException` - if listing fails
+- `Iterator\<Map\<String, Object\>\>` - iterator over Sandboxes
 
 #### list()
 ```java
-public PaginatedSandboxes list(Map<String, String> labels, Integer page, Integer limit)
+public Iterator<Map<String, Object>> list(ListSandboxesQuery query)
 ```
 
-Lists Sandboxes with optional label filtering and pagination.
+Iterates over Sandboxes matching the given query.
+```java
+ListSandboxesQuery query = new ListSandboxesQuery();
+query.setLabels(Map.of("env", "dev"));
+Iterator<Map<String, Object>> iter = daytona.list(query);
+while (iter.hasNext()) {
+System.out.println(iter.next().get("id"));
+}
+```
 
 **Parameters**:
 
-- `labels` _Map\<String, String\>_ - label filter map; only Sandboxes with matching labels are returned
-- `page` _Integer_ - page number starting from 1
-- `limit` _Integer_ - maximum items per page
+- `query` _ListSandboxesQuery_ - optional filters, sorting, and per-page size
 
 **Returns**:
 
-- `PaginatedSandboxes` - paginated Sandbox list
+- `Iterator\<Map\<String, Object\>\>` - iterator over Sandboxes
 
-**Throws**:
+#### listStream()
+```java
+public Stream<Map<String, Object>> listStream()
+```
 
-- `DaytonaException` - if listing fails
+Streams all Sandboxes (no filter, default sort).
+
+The returned stream should be closed (use try-with-resources).
+
+**Returns**:
+
+- `Stream\<Map\<String, Object\>\>` - stream of Sandboxes
+
+#### listStream()
+```java
+public Stream<Map<String, Object>> listStream(ListSandboxesQuery query)
+```
+
+Streams Sandboxes matching the given query.
+
+The returned stream should be closed (use try-with-resources).
+```java
+try (Stream<Map<String, Object>> stream = daytona.listStream(query)) {
+stream.filter(sb -> "started".equals(sb.get("state")))
+.limit(5)
+.forEach(sb -> System.out.println(sb.get("id")));
+}
+```
+
+**Parameters**:
+
+- `query` _ListSandboxesQuery_ - optional filters, sorting, and per-page size
+
+**Returns**:
+
+- `Stream\<Map\<String, Object\>\>` - stream of Sandboxes
 
 #### snapshot()
 ```java

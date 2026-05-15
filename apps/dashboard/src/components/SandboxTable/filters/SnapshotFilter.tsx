@@ -9,23 +9,30 @@ import {
   CommandEmpty,
   CommandGroup,
   CommandInput,
-  CommandInputButton,
   CommandList,
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SnapshotDto } from '@daytona/api-client'
-import { Loader2, X } from 'lucide-react'
-import { useState } from 'react'
+import { X } from 'lucide-react'
 
 interface SnapshotFilterProps {
   value: string[]
   onFilterChange: (value: string[] | undefined) => void
   snapshots: SnapshotDto[]
-  loadingSnapshots: boolean
+  snapshotsDataIsLoading: boolean
+  snapshotsDataHasMore?: boolean
+  onChangeSnapshotSearchValue?: (name?: string) => void
 }
 
-export function SnapshotFilterIndicator({ value, onFilterChange, snapshots, loadingSnapshots }: SnapshotFilterProps) {
+export function SnapshotFilterIndicator({
+  value,
+  onFilterChange,
+  snapshots,
+  snapshotsDataIsLoading,
+  snapshotsDataHasMore,
+  onChangeSnapshotSearchValue,
+}: SnapshotFilterProps) {
   return (
     <div className="flex items-center h-6 gap-0.5 rounded-sm border border-border bg-muted/80 hover:bg-muted/50 text-sm">
       <Popover>
@@ -38,7 +45,9 @@ export function SnapshotFilterIndicator({ value, onFilterChange, snapshots, load
             value={value}
             onFilterChange={onFilterChange}
             snapshots={snapshots}
-            loadingSnapshots={loadingSnapshots}
+            snapshotsDataIsLoading={snapshotsDataIsLoading}
+            snapshotsDataHasMore={snapshotsDataHasMore}
+            onChangeSnapshotSearchValue={onChangeSnapshotSearchValue}
           />
         </PopoverContent>
       </Popover>
@@ -50,7 +59,14 @@ export function SnapshotFilterIndicator({ value, onFilterChange, snapshots, load
   )
 }
 
-export function SnapshotFilter({ value, onFilterChange, snapshots, loadingSnapshots }: SnapshotFilterProps) {
+export function SnapshotFilter({
+  value,
+  onFilterChange,
+  snapshots,
+  snapshotsDataIsLoading,
+  snapshotsDataHasMore,
+  onChangeSnapshotSearchValue,
+}: SnapshotFilterProps) {
   const handleSelect = (snapshotName: string) => {
     const newValue = value.includes(snapshotName)
       ? value.filter((name) => name !== snapshotName)
@@ -61,7 +77,11 @@ export function SnapshotFilter({ value, onFilterChange, snapshots, loadingSnapsh
   return (
     <Command>
       <div className="flex items-center gap-2 justify-between p-2">
-        <CommandInput placeholder="Filter by snapshot..." className="border border-border rounded-md h-8" />
+        <CommandInput
+          placeholder="Filter by snapshot..."
+          className="border border-border rounded-md h-8"
+          onValueChange={(search) => onChangeSnapshotSearchValue?.(search || undefined)}
+        />
         <button
           className="text-sm text-muted-foreground hover:text-primary px-2"
           onClick={() => onFilterChange(undefined)}
@@ -70,7 +90,7 @@ export function SnapshotFilter({ value, onFilterChange, snapshots, loadingSnapsh
         </button>
       </div>
       <CommandList>
-        {loadingSnapshots ? (
+        {snapshotsDataIsLoading ? (
           <div className="p-1">
             <Skeleton className="h-8 w-full mb-1" />
             <Skeleton className="h-8 w-full mb-1" />
@@ -92,6 +112,9 @@ export function SnapshotFilter({ value, onFilterChange, snapshots, loadingSnapsh
                 </CommandCheckboxItem>
               ))}
             </CommandGroup>
+            {snapshotsDataHasMore && (
+              <div className="p-2 text-xs text-muted-foreground text-center">Search to load more results</div>
+            )}
           </>
         )}
       </CommandList>

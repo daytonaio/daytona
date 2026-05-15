@@ -7,9 +7,7 @@ import asyncio
 from deprecated import deprecated
 from pydantic import ConfigDict, PrivateAttr
 
-from daytona_api_client_async import BuildInfo, CreateSandboxSnapshot, ForkSandbox
-from daytona_api_client_async import PaginatedSandboxes as PaginatedSandboxesDto
-from daytona_api_client_async import PortPreviewUrl, ResizeSandbox
+from daytona_api_client_async import BuildInfo, CreateSandboxSnapshot, ForkSandbox, PortPreviewUrl, ResizeSandbox
 from daytona_api_client_async import Sandbox as SandboxDto
 from daytona_api_client_async import (
     SandboxApi,
@@ -840,18 +838,3 @@ class AsyncSandbox(SandboxDto):
             await self.refresh_data()
         except DaytonaNotFoundError:
             self.state = SandboxState.DESTROYED
-
-
-class AsyncPaginatedSandboxes(PaginatedSandboxesDto):
-    """Represents a paginated list of Daytona Sandboxes.
-
-    Attributes:
-        items (list[AsyncSandbox]): List of Sandbox instances in the current page.
-        total (int): Total number of Sandboxes across all pages.
-        page (int): Current page number.
-        total_pages (int): Total number of pages available.
-    """
-
-    items: list[AsyncSandbox]  # pyright: ignore[reportIncompatibleVariableOverride]
-
-    model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)

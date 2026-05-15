@@ -5,6 +5,7 @@ package sandbox
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
@@ -14,8 +15,8 @@ import (
 )
 
 var (
-	pageFlag  int
-	limitFlag int
+	cursorFlag string
+	limitFlag  int
 )
 
 var ListCmd = &cobra.Command{
@@ -31,18 +32,18 @@ var ListCmd = &cobra.Command{
 			return err
 		}
 
-		page := float32(1.0)
 		limit := float32(100.0)
-
-		if cmd.Flags().Changed("page") {
-			page = float32(pageFlag)
-		}
 
 		if cmd.Flags().Changed("limit") {
 			limit = float32(limitFlag)
 		}
 
-		sandboxList, res, err := apiClient.SandboxAPI.ListSandboxesPaginated(ctx).Page(page).Limit(limit).Execute()
+		request := apiClient.SandboxAPI.ListSandboxes(ctx).Limit(limit)
+		if cmd.Flags().Changed("cursor") {
+			request = request.Cursor(cursorFlag)
+		}
+
+		sandboxList, res, err := request.Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
@@ -66,12 +67,17 @@ var ListCmd = &cobra.Command{
 		}
 
 		sandbox.ListSandboxes(sandboxList.Items, activeOrganizationName)
+
+		if sandboxList.NextCursor.IsSet() && sandboxList.NextCursor.Get() != nil {
+			fmt.Printf("\nNext cursor: %s\n", *sandboxList.NextCursor.Get())
+		}
+
 		return nil
 	},
 }
 
 func init() {
-	ListCmd.Flags().IntVarP(&pageFlag, "page", "p", 1, "Page number for pagination (starting from 1)")
+	ListCmd.Flags().StringVarP(&cursorFlag, "cursor", "c", "", "Cursor for pagination")
 	ListCmd.Flags().IntVarP(&limitFlag, "limit", "l", 100, "Maximum number of items per page")
 	common.RegisterFormatFlag(ListCmd)
 }
