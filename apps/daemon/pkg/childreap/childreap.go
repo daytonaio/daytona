@@ -318,6 +318,9 @@ var hangTimeout = 30 * time.Second
 // Returns a non-nil error only when cmd couldn't be started or its exit
 // status couldn't be recovered (see Wait for details).
 func Run(cmd *exec.Cmd) (int, error) {
+	if cmd == nil {
+		return -1, errors.New("childreap.Run: nil cmd")
+	}
 	if err := cmd.Start(); err != nil {
 		return -1, err
 	}
@@ -331,6 +334,9 @@ func Run(cmd *exec.Cmd) (int, error) {
 // contract. err being nil does NOT mean the command succeeded — check
 // exitCode for that.
 func CombinedOutput(cmd *exec.Cmd) ([]byte, int, error) {
+	if cmd == nil {
+		return nil, -1, errors.New("childreap.CombinedOutput: nil cmd")
+	}
 	if cmd.Stdout != nil {
 		return nil, -1, errors.New("childreap.CombinedOutput: cmd.Stdout already set")
 	}
@@ -351,6 +357,9 @@ func CombinedOutput(cmd *exec.Cmd) ([]byte, int, error) {
 // Returns (stdout, exitCode, err); see Run for the (exitCode, err)
 // contract.
 func Output(cmd *exec.Cmd) ([]byte, int, error) {
+	if cmd == nil {
+		return nil, -1, errors.New("childreap.Output: nil cmd")
+	}
 	if cmd.Stdout != nil {
 		return nil, -1, errors.New("childreap.Output: cmd.Stdout already set")
 	}

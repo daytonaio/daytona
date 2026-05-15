@@ -193,6 +193,14 @@ func TestRun(t *testing.T) {
 			t.Fatalf("expected start error, got nil")
 		}
 	})
+
+	t.Run("NilCmd", func(t *testing.T) {
+		// Must return an error, not panic.
+		_, err := Run(nil)
+		if err == nil {
+			t.Fatalf("expected error for nil cmd, got nil")
+		}
+	})
 }
 
 // TestCombinedOutput covers the cmd.CombinedOutput replacement helper.
@@ -224,6 +232,13 @@ func TestCombinedOutput(t *testing.T) {
 			t.Fatal("expected error when cmd.Stdout was already set")
 		}
 	})
+
+	t.Run("NilCmd", func(t *testing.T) {
+		_, _, err := CombinedOutput(nil)
+		if err == nil {
+			t.Fatalf("expected error for nil cmd, got nil")
+		}
+	})
 }
 
 // TestOutput covers the cmd.Output replacement helper.
@@ -247,6 +262,13 @@ func TestOutput(t *testing.T) {
 		_, _, err := Output(cmd)
 		if err == nil {
 			t.Fatal("expected error when cmd.Stdout was already set")
+		}
+	})
+
+	t.Run("NilCmd", func(t *testing.T) {
+		_, _, err := Output(nil)
+		if err == nil {
+			t.Fatalf("expected error for nil cmd, got nil")
 		}
 	})
 }
