@@ -830,12 +830,20 @@ export class RunnerService {
   }
 
   /**
-   * Returns the IDs of runners where the total allocated CPUs across active
-   * sandboxes with the given `buildInfoSnapshotRef` exceeds `maxCpu`.
+   * Returns the IDs of runners where placing a new sandbox with `requestedCpu`
+   * CPUs and `buildInfoSnapshotRef` would push the total allocated CPUs across
+   * active sandboxes with that same `buildInfoSnapshotRef` over `maxCpu`.
    * Useful to avoid piling up too many resources for the same declarative build
    * on the same runner.
+   *
+   * If `requestedCpu` is omitted, only runners whose current SUM already
+   * exceeds `maxCpu` are returned.
    */
-  async getRunnersWithMaxBuildInfoSnapshotRefCpu(buildInfoSnapshotRef: string, maxCpu: number): Promise<string[]> {
+  async getRunnersWithMaxBuildInfoSnapshotRefCpu(
+    buildInfoSnapshotRef: string,
+    maxCpu: number,
+    requestedCpu = 0,
+  ): Promise<string[]> {
     if (!buildInfoSnapshotRef || maxCpu <= 0) {
       return []
     }
@@ -854,6 +862,8 @@ export class RunnerService {
       SandboxState.FORKING,
     ]
 
+    const normalizedRequestedCpu = Math.max(0, requestedCpu)
+
     const runners = await this.sandboxRepository
       .createQueryBuilder('sandbox')
       .select('sandbox.runnerId', 'runnerId')
@@ -861,7 +871,10 @@ export class RunnerService {
       .andWhere('sandbox.runnerId IS NOT NULL')
       .andWhere('sandbox.state IN (:...states)', { states: activeStates })
       .groupBy('sandbox.runnerId')
-      .having('SUM(sandbox.cpu) > :maxCpu', { maxCpu })
+      .having('SUM(sandbox.cpu) + :requestedCpu > :maxCpu', {
+        requestedCpu: normalizedRequestedCpu,
+        maxCpu,
+      })
       .getRawMany()
 
     return runners.map((item) => item.runnerId).filter((id): id is string => !!id)

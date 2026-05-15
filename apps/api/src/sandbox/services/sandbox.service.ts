@@ -757,7 +757,11 @@ export class SandboxService {
         const maxCpuPerRunner = this.configService.getOrThrow('buildInfo.maxCpuPerRunner')
         const excludedRunnerIds =
           maxCpuPerRunner > 0
-            ? await this.runnerService.getRunnersWithMaxBuildInfoSnapshotRefCpu(buildInfoSnapshotRef, maxCpuPerRunner)
+            ? await this.runnerService.getRunnersWithMaxBuildInfoSnapshotRefCpu(
+                buildInfoSnapshotRef,
+                maxCpuPerRunner,
+                sandbox.cpu,
+              )
             : []
         runner = await this.runnerService.getRandomAvailableRunner({
           regions: [sandbox.region],
