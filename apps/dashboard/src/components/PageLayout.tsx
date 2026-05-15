@@ -50,7 +50,7 @@ function PageHeader({ className, children, ...props }: ComponentProps<'header'>)
   return (
     <header
       className={cn(
-        'flex gap-2 sm:gap-4 items-center border-b border-border px-4 py-[15px] bg-background z-10 group-[:has([data-slot=page-banner]:not(:empty))]/page:border-b-transparent min-h-[55px]',
+        'flex gap-2 sm:gap-4 items-center border-b border-border px-4 py-[15px] bg-background z-10 min-h-[55px]',
         className,
       )}
       {...props}
@@ -58,7 +58,12 @@ function PageHeader({ className, children, ...props }: ComponentProps<'header'>)
       <SidebarTrigger className="shrink-0 [&_svg]:size-5 md:hidden" />
       <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">{children}</div>
       <div className="flex shrink-0 items-center">
-        <PageHeaderExternalAction label="Docs" href={DAYTONA_DOCS_URL} icon={<BookOpen className="size-4" />} />
+        <PageHeaderExternalAction
+          label="Docs"
+          href={DAYTONA_DOCS_URL}
+          icon={<BookOpen className="size-4" />}
+          variant="link"
+        />
         <PageHeaderSupportAction />
         <PageHeaderProfileMenu />
       </div>
@@ -66,15 +71,21 @@ function PageHeader({ className, children, ...props }: ComponentProps<'header'>)
   )
 }
 
-function PageHeaderExternalAction({ label, href, icon }: { label: string; href: string; icon: ReactNode }) {
+function PageHeaderExternalAction({
+  label,
+  className,
+  href,
+  icon,
+  variant = 'ghost',
+}: {
+  label: string
+  href: string
+  icon: ReactNode
+  variant?: 'ghost' | 'link'
+  className?: string
+}) {
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      className="px-2 text-muted-foreground hover:text-foreground md:px-3"
-      aria-label={label}
-      asChild
-    >
+    <Button variant={variant} size="sm" className={cn('text-muted-foreground', className)} aria-label={label} asChild>
       <a href={href} target="_blank" rel="noopener noreferrer">
         {icon}
         <span className="hidden md:inline">{label}</span>
@@ -93,9 +104,9 @@ function PageHeaderSupportAction() {
   return (
     <Button
       type="button"
-      variant="ghost"
+      variant="link"
       size="sm"
-      className="px-2 text-muted-foreground hover:text-foreground md:px-3"
+      className="text-muted-foreground hover:text-foreground"
       aria-label="Support"
       onClick={toggle}
     >
@@ -236,24 +247,25 @@ function PageBanner({ className, children, ...props }: ComponentProps<'div'>) {
 function PageContent({
   className,
   size = 'default',
+  children,
   ...props
 }: ComponentProps<'main'> & { size?: 'default' | 'full' }) {
   return (
-    <>
+    <main
+      className={cn(
+        'flex flex-col gap-4 p-4 w-full flex-1 min-h-0 overflow-auto',
+        {
+          'max-w-5xl mx-auto': size === 'default',
+        },
+        className,
+      )}
+      {...props}
+    >
       <PageBanner>
         <BannerStack bannerClassName={cn({ 'max-w-5xl mx-auto': size === 'default' })} />
       </PageBanner>
-      <main
-        className={cn(
-          'flex flex-col gap-4 p-4 w-full flex-1 min-h-0 overflow-auto',
-          {
-            'max-w-5xl mx-auto': size === 'default',
-          },
-          className,
-        )}
-        {...props}
-      />
-    </>
+      {children}
+    </main>
   )
 }
 
