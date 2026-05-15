@@ -4,6 +4,7 @@
  */
 
 import { Badge } from '@/components/ui/badge'
+import { CreateResourceButton } from '@/components/CreateResourceButton'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
@@ -366,14 +367,11 @@ export const CreateSandboxSheet = ({
       }}
     >
       <SheetTrigger asChild>
-        <Button variant="default" size="sm">
-          <Plus className="size-4" />
-          Create Sandbox
-        </Button>
+        <CreateResourceButton resource="Sandbox" />
       </SheetTrigger>
       <SheetContent className={`w-dvw sm:w-[500px] p-0 flex flex-col gap-0 ${className ?? ''}`}>
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle className="text-2xl">Create Sandbox</SheetTitle>
+          <SheetTitle>Create Sandbox</SheetTitle>
           <SheetDescription className="sr-only">Create a new sandbox in your organization.</SheetDescription>
         </SheetHeader>
         <ScrollArea fade="mask" className="flex-1 min-h-0">

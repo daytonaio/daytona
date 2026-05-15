@@ -4,7 +4,7 @@
  */
 
 import { CreateVolumeSheet } from '@/components/CreateVolumeSheet'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -155,14 +155,13 @@ const Volumes: React.FC = () => {
 
   return (
     <PageLayout contained>
-      <PageHeader>
-        <PageTitle>Volumes</PageTitle>
-        {writePermitted && (
-          <CreateVolumeSheet className="ml-auto" disabled={loadingVolumes} ref={createVolumeSheetRef} />
-        )}
-      </PageHeader>
+      <PageHeader />
 
       <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="Volumes"
+          actions={writePermitted ? <CreateVolumeSheet disabled={loadingVolumes} ref={createVolumeSheetRef} /> : null}
+        />
         <VolumeTable
           data={volumes}
           loading={loadingVolumes}

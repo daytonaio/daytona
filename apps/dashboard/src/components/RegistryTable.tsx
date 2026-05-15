@@ -140,7 +140,7 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
           value={globalFilter}
           onValueChange={handleChangeFilter}
           placeholder="Search by Name, URL, Project, or Username"
-          containerClassName="max-w-sm"
+          containerClassName="min-w-0 flex-1 sm:max-w-sm"
         />
       </div>
       <TableContainer

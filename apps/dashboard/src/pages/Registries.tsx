@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { UpsertRegistrySheet } from '@/components/UpsertRegistrySheet'
-import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { useRegisterCommands, type CommandConfig } from '@/components/CommandPalette'
+import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { RegistryTable } from '@/components/RegistryTable'
 import { Button } from '@/components/ui/button'
 import {
@@ -17,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { UpsertRegistrySheet } from '@/components/UpsertRegistrySheet'
 import { useDeleteRegistryMutation } from '@/hooks/mutations/useDeleteRegistryMutation'
 import { useRegistriesQuery } from '@/hooks/queries/useRegistriesQuery'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
@@ -69,7 +69,7 @@ const Registries: React.FC = () => {
     return [
       {
         id: 'add-registry',
-        label: 'Add Registry',
+        label: 'Create Registry',
         icon: <PlusIcon className="w-4 h-4" />,
         onSelect: () => addRegistrySheetRef.current?.open(),
       },
@@ -80,12 +80,13 @@ const Registries: React.FC = () => {
 
   return (
     <PageLayout contained>
-      <PageHeader>
-        <PageTitle>Registries</PageTitle>
-        {writePermitted && <UpsertRegistrySheet className="ml-auto" disabled={loading} ref={addRegistrySheetRef} />}
-      </PageHeader>
+      <PageHeader />
 
       <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="Registries"
+          actions={writePermitted ? <UpsertRegistrySheet disabled={loading} ref={addRegistrySheetRef} /> : undefined}
+        />
         <RegistryTable
           data={registries}
           loading={loading}

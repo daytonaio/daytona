@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { CreateResourceButton } from '@/components/CreateResourceButton'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
@@ -24,7 +25,6 @@ import { OrganizationRolePermissionGroup } from '@/types/OrganizationRolePermiss
 import { OrganizationRolePermissionsEnum } from '@daytona/api-client'
 import { useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
-import { Plus } from 'lucide-react'
 import React, { Ref, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { z } from 'zod'
 
@@ -112,14 +112,11 @@ export const CreateOrganizationRoleSheet: React.FC<CreateOrganizationRoleSheetPr
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="default" size="sm" className={className}>
-          <Plus className="w-4 h-4" />
-          Create Role
-        </Button>
+        <CreateResourceButton resource="Role" className={className} />
       </SheetTrigger>
       <SheetContent className="w-dvw sm:w-[560px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle className="text-2xl">Create Role</SheetTitle>
+          <SheetTitle>Create Role</SheetTitle>
           <SheetDescription className="sr-only">
             Define a custom role for managing access to the organization.
           </SheetDescription>

@@ -5,17 +5,20 @@
 
 import { Calendar, Camera, Columns, Cpu, Globe, HardDrive, ListFilter, MemoryStick, Square, Tag } from 'lucide-react'
 import { SearchInput } from '../SearchInput'
-import { TableColumnVisibilityToggle } from '../TableColumnVisibilityToggle'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuLabel,
   DropdownMenuPortal,
+  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { LabelFilter, LabelFilterIndicator } from './filters/LabelFilter'
 import { LastEventFilter, LastEventFilterIndicator } from './filters/LastEventFilter'
 import { RegionFilter, RegionFilterIndicator } from './filters/RegionFilter'
@@ -29,6 +32,18 @@ const RESOURCE_FILTERS = [
   { type: 'memory' as const, label: 'Memory', icon: MemoryStick },
   { type: 'disk' as const, label: 'Disk', icon: HardDrive },
 ]
+
+const SANDBOX_TABLE_COLUMN_LABELS: Record<string, string> = {
+  name: 'Name',
+  id: 'UUID',
+  state: 'State',
+  snapshot: 'Snapshot',
+  region: 'Region',
+  resources: 'Resources',
+  labels: 'Labels',
+  lastEvent: 'Last Event',
+  createdAt: 'Created At',
+}
 
 export function SandboxTableHeader({
   table,
@@ -57,7 +72,7 @@ export function SandboxTableHeader({
 
   return (
     <div className="flex flex-col gap-1">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div className="flex items-center gap-2">
         <div className="flex flex-1 items-center gap-2 min-w-0">
           <SearchInput
             debounced
@@ -71,7 +86,7 @@ export function SandboxTableHeader({
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="shrink-0">
                 <ListFilter className="w-4 h-4" />
-                Filter
+                <span className="max-[420px]:hidden">Filter</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-40" align="start">
@@ -173,32 +188,8 @@ export function SandboxTableHeader({
           </DropdownMenu>
         </div>
 
-        <div className="hidden sm:block ml-auto">
-          <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="shrink-0">
-                <Columns className="w-4 h-4" />
-                View
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px] p-0">
-              <TableColumnVisibilityToggle
-                columns={table.getAllColumns().filter((column) => ['name', 'id', 'labels'].includes(column.id))}
-                getColumnLabel={(id: string) => {
-                  switch (id) {
-                    case 'name':
-                      return 'Name'
-                    case 'id':
-                      return 'UUID'
-                    case 'labels':
-                      return 'Labels'
-                    default:
-                      return id
-                  }
-                }}
-              />
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className="flex shrink-0 items-center gap-2 sm:ml-auto">
+          <SandboxTableSettings table={table} />
         </div>
       </div>
 
@@ -258,5 +249,42 @@ export function SandboxTableHeader({
         </div>
       ) : null}
     </div>
+  )
+}
+
+function SandboxTableSettings({ table }: Pick<SandboxTableHeaderProps, 'table'>) {
+  const hideableColumns = table.getAllLeafColumns().filter((column) => column.getCanHide())
+
+  if (hideableColumns.length === 0) {
+    return null
+  }
+
+  return (
+    <DropdownMenu modal={false}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon-sm" aria-label="Table settings">
+              <Columns className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Table settings</TooltipContent>
+      </Tooltip>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuLabel>Columns</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {hideableColumns.map((column) => (
+          <DropdownMenuCheckboxItem
+            key={column.id}
+            checked={column.getIsVisible()}
+            onCheckedChange={(checked) => column.toggleVisibility(checked === true)}
+            onSelect={(event) => event.preventDefault()}
+          >
+            {SANDBOX_TABLE_COLUMN_LABELS[column.id] ?? column.id}
+          </DropdownMenuCheckboxItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

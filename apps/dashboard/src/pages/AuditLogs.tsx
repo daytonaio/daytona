@@ -4,7 +4,7 @@
  */
 
 import { AuditLogTable } from '@/components/AuditLogTable'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { RefreshSegmentedButton } from '@/components/RefreshSegmentedButton'
 import { DateRangePicker, QuickRangesConfig } from '@/components/ui/date-range-picker'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
@@ -228,44 +228,46 @@ const AuditLogs: React.FC = () => {
 
   return (
     <PageLayout contained>
-      <PageHeader>
-        <PageTitle>Audit Logs</PageTitle>
-      </PageHeader>
+      <PageHeader />
 
-      <PageContent size="full" className="overflow-hidden gap-3">
-        <div className="flex gap-2 flex-wrap justify-between">
-          <DateRangePicker
-            className="max-w-[380px] truncate"
-            value={dateRange}
-            onChange={handleDateRangeChange}
-            quickRangesEnabled
-            quickRanges={AUDIT_LOG_QUICK_RANGES}
-            timeSelection
-            disabled={isLoading}
-          />
-          <RefreshSegmentedButton
-            value={refreshInterval}
-            onChange={setRefreshInterval}
-            onRefresh={refetch}
-            isRefreshing={isRefetching}
-            lastUpdatedAt={dataUpdatedAt}
+      <PageContent size="full" className="overflow-hidden">
+        <PageIntro title="Audit Logs" />
+        <div className="flex min-h-0 flex-1 flex-col gap-4">
+          <AuditLogTable
+            data={data.items}
+            loading={isLoading}
+            isRefetching={isRefetching}
+            hasFilters={hasFilters}
+            onClearFilters={handleClearFilters}
+            pageCount={data.totalPages}
+            totalItems={data.total}
+            onPaginationChange={handlePaginationChange}
+            pagination={{
+              pageIndex: pagination.pageIndex,
+              pageSize: pagination.pageSize,
+            }}
+            toolbarActions={
+              <>
+                <DateRangePicker
+                  className="max-w-[380px] truncate"
+                  value={dateRange}
+                  onChange={handleDateRangeChange}
+                  quickRangesEnabled
+                  quickRanges={AUDIT_LOG_QUICK_RANGES}
+                  timeSelection
+                  disabled={isLoading}
+                />
+                <RefreshSegmentedButton
+                  value={refreshInterval}
+                  onChange={setRefreshInterval}
+                  onRefresh={refetch}
+                  isRefreshing={isRefetching}
+                  lastUpdatedAt={dataUpdatedAt}
+                />
+              </>
+            }
           />
         </div>
-
-        <AuditLogTable
-          data={data.items}
-          loading={isLoading}
-          isRefetching={isRefetching}
-          hasFilters={hasFilters}
-          onClearFilters={handleClearFilters}
-          pageCount={data.totalPages}
-          totalItems={data.total}
-          onPaginationChange={handlePaginationChange}
-          pagination={{
-            pageIndex: pagination.pageIndex,
-            pageSize: pagination.pageSize,
-          }}
-        />
       </PageContent>
       <PageFooter />
     </PageLayout>

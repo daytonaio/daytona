@@ -135,13 +135,13 @@ export function WebhooksEndpointTable({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
         <SearchInput
           debounced
           value={globalFilter ?? ''}
           onValueChange={handleChangeFilter}
           placeholder="Search by URL or Description"
-          containerClassName="max-w-sm"
+          containerClassName="min-w-0 flex-1 sm:max-w-sm"
         />
       </div>
       <TableContainer

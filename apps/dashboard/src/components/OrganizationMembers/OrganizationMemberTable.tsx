@@ -185,13 +185,15 @@ export function OrganizationMemberTable({
   return (
     <>
       <div className="flex min-h-0 flex-col gap-3">
-        <SearchInput
-          debounced
-          value={globalFilter}
-          onValueChange={handleChangeFilter}
-          placeholder="Search by Email, Role, or Assignment"
-          containerClassName="max-w-sm"
-        />
+        <div className="flex items-center gap-2">
+          <SearchInput
+            debounced
+            value={globalFilter}
+            onValueChange={handleChangeFilter}
+            placeholder="Search by Email, Role, or Assignment"
+            containerClassName="min-w-0 flex-1 sm:max-w-sm"
+          />
+        </div>
         <TableContainer
           className={cn('max-h-[550px]', {
             'min-h-[20rem]': isEmpty,

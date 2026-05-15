@@ -6,7 +6,7 @@
 import { Invoice } from '@/billing-api/types/Invoice'
 import { AutomaticTopUp } from '@/billing-api/types/OrganizationWallet'
 import { InvoicesTable } from '@/components/Invoices'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -243,11 +243,10 @@ const Wallet = () => {
 
   return (
     <PageLayout>
-      <PageHeader>
-        <PageTitle>Wallet</PageTitle>
-      </PageHeader>
+      <PageHeader />
 
       <PageContent>
+        <PageIntro title="Wallet" />
         {isBillingLoading && (
           <div className="flex flex-col gap-6">
             <Card className="flex flex-col gap-4">

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { PrivacyPreferencesDialog } from '@/components/PrivacyPreferencesDialog'
 import { usePrivacyConsent } from '@/hooks/usePrivacyConsent'
 import { Button } from '@/components/ui/button'
@@ -17,11 +17,10 @@ const AccountSettings: React.FC<{ linkedAccountsEnabled: boolean }> = ({ linkedA
 
   return (
     <PageLayout>
-      <PageHeader>
-        <PageTitle>Account Settings</PageTitle>
-      </PageHeader>
+      <PageHeader />
 
       <PageContent>
+        <PageIntro title="Account Settings" />
         <div className="flex flex-col gap-6">
           {linkedAccountsEnabled && <LinkedAccounts />}
 

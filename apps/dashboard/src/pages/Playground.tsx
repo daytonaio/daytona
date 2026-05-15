@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import {
   PlaygroundLayout,
   PlaygroundLayoutContent,
@@ -89,69 +89,66 @@ const Playground: React.FC = () => {
 
   return (
     <PageLayout className="max-h-[100vh] overflow-auto">
-      <PageHeader>
-        <PageTitle>Playground</PageTitle>
-      </PageHeader>
+      <PageHeader />
 
       <PageContent size="full" className="!p-0 h-full flex flex-col flex-1 overflow-auto" ref={pageContentRef}>
-        <PlaygroundProvider>
-          <PlaygroundSandboxProvider activeTab={playgroundCategory}>
-            <Tabs
-              value={playgroundCategory}
-              onValueChange={(value) => setPlaygroundCategory(value as PlaygroundCategories)}
-              className="h-full gap-0"
-            >
-              <div className="flex items-center justify-between shadow-[inset_0_-1px] shadow-border pr-4">
-                <TabsList className="px-2 shadow-none bg-transparent w-auto pb-0">
-                  {playgroundCategoriesData.map((category) => (
-                    <TabsTrigger
-                      value={category.value}
-                      key={category.value}
-                      className="data-[state=inactive]:border-b-transparent data-[state=active]:border-b-foreground border-b rounded-none !shadow-none -mb-0.5 pb-1.5"
-                    >
-                      {category.label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-                <Button
-                  onClick={() => setDrawerOpen(playgroundCategory)}
-                  variant="ghost"
-                  size="sm"
-                  className="lg:hidden"
-                >
-                  <SettingsIcon className="size-4 mr-2" /> Configure
-                </Button>
-              </div>
-              <TabsContent
+        <PageIntro title="Playground" className="mb-8 px-4 pt-4" />
+        <div className="min-h-0 flex-1">
+          <PlaygroundProvider>
+            <PlaygroundSandboxProvider activeTab={playgroundCategory}>
+              <Tabs
                 value={playgroundCategory}
-                key={playgroundCategory}
-                className="mt-0 data-[state=inactive]:hidden"
-                asChild
+                onValueChange={(value) => setPlaygroundCategory(value as PlaygroundCategories)}
+                className="h-full gap-0"
               >
-                <PlaygroundLayout className="overflow-auto">
-                  <PlaygroundLayoutSidebar>
-                    <AnimatePresence mode="popLayout">
-                      <SlideLeftRight direction={direction} key={playgroundCategory}>
-                        {sidePanel}
-                      </SlideLeftRight>
-                    </AnimatePresence>
-                  </PlaygroundLayoutSidebar>
+                <div className="flex items-center justify-between shadow-[inset_0_-1px] shadow-border pr-4">
+                  <TabsList variant="underline">
+                    {playgroundCategoriesData.map((category) => (
+                      <TabsTrigger value={category.value} key={category.value}>
+                        {category.label}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                  <Button
+                    onClick={() => setDrawerOpen(playgroundCategory)}
+                    variant="ghost"
+                    size="sm"
+                    className="lg:hidden"
+                  >
+                    <SettingsIcon className="size-4 mr-2" /> Configure
+                  </Button>
+                </div>
+                <TabsContent
+                  value={playgroundCategory}
+                  key={playgroundCategory}
+                  className="mt-0 data-[state=inactive]:hidden"
+                  asChild
+                >
+                  <PlaygroundLayout className="overflow-auto">
+                    <PlaygroundLayoutSidebar>
+                      <AnimatePresence mode="popLayout">
+                        <SlideLeftRight direction={direction} key={playgroundCategory}>
+                          {sidePanel}
+                        </SlideLeftRight>
+                      </AnimatePresence>
+                    </PlaygroundLayoutSidebar>
 
-                  <Drawer open={drawerOpen === playgroundCategory} onOpenChange={handleDrawerOpenChange}>
-                    <DrawerContent>
-                      <div className="p-4 overflow-auto">{sidePanel}</div>
-                    </DrawerContent>
-                  </Drawer>
-                  <PlaygroundLayoutContent className="[&>*]:w-full [&>*]:max-w-[min(90%,1024px)]">
-                    {playgroundCategory === PlaygroundCategories.SANDBOX && <SandboxCodeSnippetsResponse />}
-                    {playgroundCategory === PlaygroundCategories.TERMINAL && <WebTerminal />}
-                    {playgroundCategory === PlaygroundCategories.VNC && <VNCDesktopWindowResponse />}
-                  </PlaygroundLayoutContent>
-                </PlaygroundLayout>
-              </TabsContent>
-            </Tabs>
-          </PlaygroundSandboxProvider>
-        </PlaygroundProvider>
+                    <Drawer open={drawerOpen === playgroundCategory} onOpenChange={handleDrawerOpenChange}>
+                      <DrawerContent>
+                        <div className="p-4 overflow-auto">{sidePanel}</div>
+                      </DrawerContent>
+                    </Drawer>
+                    <PlaygroundLayoutContent className="[&>*]:w-full [&>*]:max-w-[min(90%,1024px)]">
+                      {playgroundCategory === PlaygroundCategories.SANDBOX && <SandboxCodeSnippetsResponse />}
+                      {playgroundCategory === PlaygroundCategories.TERMINAL && <WebTerminal />}
+                      {playgroundCategory === PlaygroundCategories.VNC && <VNCDesktopWindowResponse />}
+                    </PlaygroundLayoutContent>
+                  </PlaygroundLayout>
+                </TabsContent>
+              </Tabs>
+            </PlaygroundSandboxProvider>
+          </PlaygroundProvider>
+        </div>
       </PageContent>
     </PageLayout>
   )

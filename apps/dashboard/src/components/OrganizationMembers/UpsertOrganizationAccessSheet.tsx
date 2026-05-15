@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { CreateResourceButton } from '@/components/CreateResourceButton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -24,7 +25,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { useOrganizationRolesQuery } from '@/hooks/queries/useOrganizationRolesQuery'
 import { CreateOrganizationInvitationRoleEnum, OrganizationRole } from '@daytona/api-client'
 import { useForm } from '@tanstack/react-form'
-import { AlertTriangle, Plus } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import React, {
   Ref,
   type ReactNode,
@@ -234,10 +235,15 @@ export const UpsertOrganizationAccessSheet: React.FC<UpsertOrganizationAccessShe
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       {trigger === undefined ? (
         <SheetTrigger asChild>
-          <Button variant="default" size="sm" className={className} disabled={disabled}>
-            {isCreateMode && <Plus className="w-4 h-4" />}
-            {isCreateMode ? 'Invite Member' : 'Update Access'}
-          </Button>
+          {isCreateMode ? (
+            <CreateResourceButton resource="Member" className={className} disabled={disabled}>
+              Member
+            </CreateResourceButton>
+          ) : (
+            <Button variant="default" size="sm" className={className} disabled={disabled}>
+              Update Access
+            </Button>
+          )}
         </SheetTrigger>
       ) : (
         trigger
@@ -245,7 +251,7 @@ export const UpsertOrganizationAccessSheet: React.FC<UpsertOrganizationAccessShe
 
       <SheetContent className="w-dvw sm:w-[560px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle className="text-2xl">{resolvedTitle}</SheetTitle>
+          <SheetTitle>{resolvedTitle}</SheetTitle>
           <SheetDescription className="sr-only">{resolvedDescription}</SheetDescription>
         </SheetHeader>
 

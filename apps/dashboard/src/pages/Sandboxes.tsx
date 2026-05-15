@@ -6,13 +6,13 @@
 import { OrganizationSuspendedError } from '@/api/errors'
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { ForkTreeDialog } from '@/components/ForkTreeDialog'
-import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { RecursiveDeleteDialog } from '@/components/RecursiveDeleteDialog'
 import { CreateSandboxSheet } from '@/components/Sandbox/CreateSandboxSheet'
-import { tabParser } from '@/components/sandboxes/SearchParams'
 import { CreateSshAccessSheet } from '@/components/sandboxes/CreateSshAccessSheet'
 import { RevokeSshAccessDialog } from '@/components/sandboxes/RevokeSshAccessDialog'
-import SandboxDetailsSheet, { type SandboxDetailsSheetTabValue } from '@/components/sandboxes/SandboxDetailsSheet'
+import SandboxDetailsSheet, { SandboxDetailsSheetTabValue } from '@/components/sandboxes/SandboxDetailsSheet'
+import { tabParser } from '@/components/sandboxes/SearchParams'
 import { SandboxTable } from '@/components/SandboxTable'
 import type { SandboxTableRef } from '@/components/SandboxTable/types'
 import {
@@ -838,27 +838,29 @@ const Sandboxes: React.FC = () => {
 
   return (
     <PageLayout contained>
-      <PageHeader>
-        <PageTitle>Sandboxes</PageTitle>
-        <div className="flex items-center gap-2 ml-auto">
-          {!loadingTable && sandboxes.length === 0 && (
-            <>
-              <Button variant="link" className="text-primary" onClick={() => navigate(RoutePath.ONBOARDING)} size="sm">
-                Onboarding guide
-              </Button>
-              <Button variant="link" className="text-primary" asChild size="sm">
-                <a href={DAYTONA_DOCS_URL} target="_blank" rel="noopener noreferrer" className="text-primary">
-                  Docs
-                </a>
-              </Button>
-            </>
-          )}
-          {canCreateSandbox && (
-            <CreateSandboxSheet ref={createSandboxSheetRef} onSandboxCreated={handleSandboxCreated} />
-          )}
-        </div>
-      </PageHeader>
+      <PageHeader />
       <PageContent size="full" className="overflow-hidden">
+        <PageIntro
+          title="Sandboxes"
+          actions={
+            <>
+              {!loadingTable && sandboxes.length === 0 && (
+                <Button
+                  variant="link"
+                  onClick={() => navigate(RoutePath.ONBOARDING)}
+                  size="sm"
+                  className="text-muted-foreground"
+                >
+                  Onboarding guide
+                </Button>
+              )}
+
+              {canCreateSandbox && (
+                <CreateSandboxSheet ref={createSandboxSheetRef} onSandboxCreated={handleSandboxCreated} />
+              )}
+            </>
+          }
+        />
         <SandboxTable
           ref={sandboxTableRef}
           sandboxIsLoading={loadingSandboxes}

@@ -9,7 +9,8 @@ import { useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { z } from 'zod'
 import { AnimatePresence, motion } from 'framer-motion'
-import { CheckIcon, CopyIcon, EyeIcon, EyeOffIcon, InfoIcon, Plus } from 'lucide-react'
+import { CheckIcon, CopyIcon, EyeIcon, EyeOffIcon, InfoIcon } from 'lucide-react'
+import { CreateResourceButton } from '@/components/CreateResourceButton'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
@@ -121,15 +122,12 @@ export const CreateRunnerSheet: React.FC<CreateRunnerSheetProps> = ({ regions, o
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="default" size="sm" className="w-auto px-4">
-          <Plus className="w-4 h-4" />
-          Create Runner
-        </Button>
+        <CreateResourceButton resource="Runner" />
       </SheetTrigger>
 
       <SheetContent className="w-dvw sm:w-[500px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle className="text-2xl">{createdRunner ? 'Runner Created' : 'Create New Runner'}</SheetTitle>
+          <SheetTitle>{createdRunner ? 'Runner Created' : 'Create Runner'}</SheetTitle>
           <SheetDescription className="sr-only">
             {createdRunner
               ? 'Your runner token has been created successfully.'

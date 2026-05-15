@@ -3,12 +3,18 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
-import { Command, CommandList, CommandGroup, CommandItem, CommandInput } from '@/components/ui/command'
-import { cn } from '@/lib/utils'
-import { Check } from 'lucide-react'
+import {
+  Command,
+  CommandGroup,
+  CommandInput,
+  CommandInputButton,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
 import { FacetedFilterOption } from '@/components/ui/data-table-faceted-filter'
-import { X } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
+import { Check, X } from 'lucide-react'
 
 interface LabelFilterProps {
   value: string[]
@@ -43,46 +49,52 @@ export function LabelFilterIndicator({
 export function LabelFilter({ value, onFilterChange, options }: LabelFilterProps) {
   return (
     <Command>
-      <div className="flex items-center gap-2 justify-between p-2">
-        <CommandInput placeholder="Filter by label..." className="border border-border rounded-md h-8" />
-        <button
+      <CommandInput placeholder="Search...">
+        <CommandInputButton
           className="text-sm text-muted-foreground hover:text-primary px-2"
           onClick={() => onFilterChange(undefined)}
         >
           Clear
-        </button>
-      </div>
+        </CommandInputButton>
+      </CommandInput>
+
       <CommandList>
         <CommandGroup>
-          {options.map((option) => (
-            <CommandItem
-              key={option.value}
-              onSelect={() => {
-                const newValue = value.includes(option.value)
-                  ? value.filter((v) => v !== option.value)
-                  : [...value, option.value]
-                onFilterChange(newValue.length > 0 ? newValue : undefined)
-              }}
-            >
-              <div className="flex items-center">
-                <div
-                  className={cn(
-                    'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                    value.includes(option.value)
-                      ? 'bg-primary text-primary-foreground'
-                      : 'opacity-50 [&_svg]:invisible',
-                  )}
-                >
-                  <Check className={cn('h-4 w-4')} />
-                </div>
-                <div className="truncate max-w-md rounded-sm bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-200 px-1">
-                  {option.label.split(':')[0]}
-                </div>
+          {options.map((option) => {
+            const label = String(option.label ?? option.value)
+            const [name, ...detailParts] = label.split(':')
+            const detail = detailParts.join(':')
 
-                <span className="ml-2 text-muted-foreground">{option.label.split(':')[1]}</span>
-              </div>
-            </CommandItem>
-          ))}
+            return (
+              <CommandItem
+                key={option.value}
+                onSelect={() => {
+                  const newValue = value.includes(option.value)
+                    ? value.filter((v) => v !== option.value)
+                    : [...value, option.value]
+                  onFilterChange(newValue.length > 0 ? newValue : undefined)
+                }}
+              >
+                <div className="flex items-center">
+                  <div
+                    className={cn(
+                      'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                      value.includes(option.value)
+                        ? 'bg-primary text-primary-foreground'
+                        : 'opacity-50 [&_svg]:invisible',
+                    )}
+                  >
+                    <Check className={cn('h-4 w-4')} />
+                  </div>
+                  <div className="truncate max-w-md rounded-sm bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-200 px-1">
+                    {name}
+                  </div>
+
+                  {detail ? <span className="ml-2 text-muted-foreground">{detail}</span> : null}
+                </div>
+              </CommandItem>
+            )
+          })}
         </CommandGroup>
       </CommandList>
     </Command>

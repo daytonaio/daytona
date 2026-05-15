@@ -31,7 +31,7 @@ interface DataTableFacetedFilterProps<TData, TValue> {
 }
 
 export type FacetedFilterOption = {
-  label: string
+  label: React.ReactNode
   value: string
   icon?: React.ComponentType<{ className?: string }>
 }
@@ -109,7 +109,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                     }}
                   >
                     {option.icon && <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
-                    <span>{option.label}</span>
+                    {option.label}
                     {facets?.get(option.value) && (
                       <span className="ml-auto flex h-4 w-4 items-center justify-center font-mono text-xs">
                         {facets.get(option.value)}
