@@ -3,16 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  SandboxState,
-  SandboxApi,
+import { SandboxState, SandboxApi, SandboxBackupStateEnum, Configuration } from '@daytona/api-client'
+import type {
   Sandbox as SandboxDto,
   PaginatedSandboxes as PaginatedSandboxesDto,
   PortPreviewUrl,
   SandboxVolume,
   BuildInfo,
-  SandboxBackupStateEnum,
-  Configuration,
   SshAccessDto,
   SshAccessValidationDto,
   SignedPortPreviewUrl,
@@ -20,7 +17,8 @@ import {
   CreateSandboxSnapshot,
   UpdateSandboxNetworkSettings,
 } from '@daytona/api-client'
-import { Resources, Daytona } from './Daytona'
+import { Daytona } from './Daytona'
+import type { Resources } from './Daytona'
 import type { CodeLanguage } from './Daytona'
 import {
   FileSystemApi,

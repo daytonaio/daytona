@@ -247,7 +247,7 @@
     "@nx/webpack": "21.4.1",
     "@nx/workspace": "21.4.1",
     "@openapitools/openapi-generator-cli": "^2.31.1",
-    "@opencode-ai/plugin": "^1.1.42",
+    "@opencode-ai/plugin": "^1.14.33",
     "@storybook/addon-essentials": "8",
     "@storybook/blocks": "8",
     "@storybook/react": "8",

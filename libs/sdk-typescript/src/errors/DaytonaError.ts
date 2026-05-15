@@ -7,7 +7,8 @@
  * @module Errors
  */
 
-import { AxiosError, AxiosHeaders } from 'axios'
+import { AxiosHeaders } from 'axios'
+import type { AxiosError } from 'axios'
 
 export type ResponseHeaders = InstanceType<typeof AxiosHeaders>
 
@@ -58,8 +59,7 @@ export class DaytonaError extends Error {
  * }
  * ```
  */
-export class DaytonaNotFoundError extends DaytonaError {
-}
+export class DaytonaNotFoundError extends DaytonaError {}
 
 /**
  * Error thrown when rate limit is exceeded.
@@ -75,8 +75,7 @@ export class DaytonaNotFoundError extends DaytonaError {
  * }
  * ```
  */
-export class DaytonaRateLimitError extends DaytonaError {
-}
+export class DaytonaRateLimitError extends DaytonaError {}
 
 /**
  * Error thrown when authentication fails (HTTP 401).
@@ -92,8 +91,7 @@ export class DaytonaRateLimitError extends DaytonaError {
  * }
  * ```
  */
-export class DaytonaAuthenticationError extends DaytonaError {
-}
+export class DaytonaAuthenticationError extends DaytonaError {}
 
 /**
  * Error thrown when the request is forbidden (HTTP 403).
@@ -109,8 +107,7 @@ export class DaytonaAuthenticationError extends DaytonaError {
  * }
  * ```
  */
-export class DaytonaAuthorizationError extends DaytonaError {
-}
+export class DaytonaAuthorizationError extends DaytonaError {}
 
 /**
  * Error thrown when a resource conflict occurs (HTTP 409).
@@ -126,8 +123,7 @@ export class DaytonaAuthorizationError extends DaytonaError {
  * }
  * ```
  */
-export class DaytonaConflictError extends DaytonaError {
-}
+export class DaytonaConflictError extends DaytonaError {}
 
 /**
  * Error thrown when input validation fails (HTTP 400 or client-side validation).
@@ -143,8 +139,7 @@ export class DaytonaConflictError extends DaytonaError {
  * }
  * ```
  */
-export class DaytonaValidationError extends DaytonaError {
-}
+export class DaytonaValidationError extends DaytonaError {}
 
 /**
  * Error thrown when a timeout occurs.
@@ -160,8 +155,7 @@ export class DaytonaValidationError extends DaytonaError {
  * }
  * ```
  */
-export class DaytonaTimeoutError extends DaytonaError {
-}
+export class DaytonaTimeoutError extends DaytonaError {}
 
 /**
  * Error thrown when a network connection fails.
@@ -177,8 +171,7 @@ export class DaytonaTimeoutError extends DaytonaError {
  * }
  * ```
  */
-export class DaytonaConnectionError extends DaytonaError {
-}
+export class DaytonaConnectionError extends DaytonaError {}
 
 const STATUS_CODE_TO_ERROR: Record<number, typeof DaytonaError> = {
   400: DaytonaValidationError,
