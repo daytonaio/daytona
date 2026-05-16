@@ -112,6 +112,121 @@ func TestBuildCloneArgs_NeverEmbedsCredsInURL(t *testing.T) {
 	}
 }
 
+func TestBuildCloneArgs_WithShallowAndAdvancedOptions(t *testing.T) {
+	depth := 1
+	singleBranch := false
+	noTags := true
+	sparse := true
+	repo := &gitprovider.GitRepository{
+		Url:          "https://github.com/daytonaio/daytona",
+		Branch:       "main",
+		Depth:        &depth,
+		SingleBranch: &singleBranch,
+		ShallowSince: "2025-01-01",
+		NoTags:       &noTags,
+		Filter:       "blob:none",
+		Sparse:       &sparse,
+	}
+
+	got := buildCloneArgs(repo, "/work-dir")
+
+	require.Equal(t, []string{
+		"-c", "credential.helper=",
+		"-c", "http.sslVerify=false",
+		"clone",
+		"--no-single-branch",
+		"--progress",
+		"--depth=1",
+		"--shallow-since=2025-01-01",
+		"--no-tags",
+		"--filter=blob:none",
+		"--sparse",
+		"--branch", "main",
+		"--", "https://github.com/daytonaio/daytona", "/work-dir",
+	}, got)
+}
+
+func TestBuildCloneArgs_WithReferenceAndSubmoduleOptions(t *testing.T) {
+	recurseSubmodules := true
+	shallowSubmodules := true
+	filterSubmodules := true
+	dissociate := true
+	repo := &gitprovider.GitRepository{
+		Url:               "https://github.com/daytonaio/daytona",
+		ReferencePath:     "/cache/daytona.git",
+		Dissociate:        &dissociate,
+		Filter:            "blob:none",
+		RecurseSubmodules: &recurseSubmodules,
+		ShallowSubmodules: &shallowSubmodules,
+		FilterSubmodules:  &filterSubmodules,
+	}
+
+	got := buildCloneArgs(repo, "/work-dir")
+
+	require.Equal(t, []string{
+		"-c", "credential.helper=",
+		"-c", "http.sslVerify=false",
+		"clone",
+		"--single-branch",
+		"--progress",
+		"--filter=blob:none",
+		"--reference-if-able=/cache/daytona.git",
+		"--dissociate",
+		"--recurse-submodules",
+		"--shallow-submodules",
+		"--also-filter-submodules",
+		"--", "https://github.com/daytonaio/daytona", "/work-dir",
+	}, got)
+}
+
+func TestValidateCloneOptions(t *testing.T) {
+	depth := 0
+	repo := &gitprovider.GitRepository{Depth: &depth}
+	require.ErrorContains(t, validateCloneOptions(repo, true), "depth must be greater than or equal to 1")
+
+	depth = 1
+	repo = &gitprovider.GitRepository{Depth: &depth}
+	require.ErrorContains(t, validateCloneOptions(repo, false), "DAYTONA_EXPERIMENTAL_USE_GIT_CLONE_CLI=true")
+
+	repo = &gitprovider.GitRepository{
+		Depth:  &depth,
+		Target: gitprovider.CloneTargetCommit,
+		Sha:    "abc123",
+	}
+	require.ErrorContains(t, validateCloneOptions(repo, true), "requires branch to be set")
+
+	repo = &gitprovider.GitRepository{Filter: "blob:none\n--upload-pack=evil"}
+	require.ErrorContains(t, validateCloneOptions(repo, true), "filter contains invalid characters")
+
+	repo = &gitprovider.GitRepository{SparsePaths: []string{"../outside"}}
+	require.ErrorContains(t, validateCloneOptions(repo, true), "sparse_paths must contain relative paths")
+
+	dissociate := true
+	repo = &gitprovider.GitRepository{Dissociate: &dissociate}
+	require.ErrorContains(t, validateCloneOptions(repo, true), "dissociate requires reference_path")
+
+	shallowSubmodules := true
+	repo = &gitprovider.GitRepository{ShallowSubmodules: &shallowSubmodules}
+	require.ErrorContains(t, validateCloneOptions(repo, true), "shallow_submodules requires recurse_submodules")
+
+	filterSubmodules := true
+	recurseSubmodules := true
+	repo = &gitprovider.GitRepository{FilterSubmodules: &filterSubmodules, RecurseSubmodules: &recurseSubmodules}
+	require.ErrorContains(t, validateCloneOptions(repo, true), "filter_submodules requires filter")
+}
+
+func TestBuildSparseCheckoutArgs(t *testing.T) {
+	got := buildSparseCheckoutArgs("/work-dir", []string{"src", "docs/guides"})
+
+	require.Equal(t, []string{
+		"-C", "/work-dir",
+		"sparse-checkout", "set",
+		"--cone",
+		"--",
+		"src", "docs/guides",
+	}, got)
+}
+
 func TestBuildCloneEnv_WithCreds(t *testing.T) {
 	env := buildCloneEnv(nil, "/tmp/askpass.sh", testCreds)
 

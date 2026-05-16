@@ -63,6 +63,45 @@ class TestSyncGit:
         assert call_args.kwargs["request"].username == "user"
         assert call_args.kwargs["request"].password == "token"
 
+    def test_clone_with_advanced_options(self):
+        git, api = self._make_git()
+        api.clone_repository.return_value = None
+        git.clone(
+            "https://github.com/user/repo.git",
+            "workspace/repo",
+            branch="main",
+            commit_id="abc123",
+            username="user",
+            password="token",
+            depth=1,
+            single_branch=False,
+            shallow_since="2025-01-01",
+            no_tags=True,
+            filter="blob:none",
+            sparse=True,
+            sparse_paths=["src", "README.md"],
+            reference_path="/cache/repo.git",
+            dissociate=True,
+            recurse_submodules=True,
+            shallow_submodules=True,
+            filter_submodules=True,
+        )
+        request = api.clone_repository.call_args.kwargs["request"]
+        assert request.branch == "main"
+        assert request.commit_id == "abc123"
+        assert request.depth == 1
+        assert request.single_branch is False
+        assert request.shallow_since == "2025-01-01"
+        assert request.no_tags is True
+        assert request.filter == "blob:none"
+        assert request.sparse is True
+        assert request.sparse_paths == ["src", "README.md"]
+        assert request.reference_path == "/cache/repo.git"
+        assert request.dissociate is True
+        assert request.recurse_submodules is True
+        assert request.shallow_submodules is True
+        assert request.filter_submodules is True
+
     def test_commit(self):
         git, api = self._make_git()
         mock_response = MagicMock()
@@ -149,6 +188,45 @@ class TestAsyncGit:
         git, api = self._make_git()
         await git.clone("https://github.com/user/repo.git", "workspace/repo")
         api.clone_repository.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_clone_with_advanced_options(self):
+        git, api = self._make_git()
+        await git.clone(
+            "https://github.com/user/repo.git",
+            "workspace/repo",
+            branch="main",
+            commit_id="abc123",
+            username="user",
+            password="token",
+            depth=1,
+            single_branch=False,
+            shallow_since="2025-01-01",
+            no_tags=True,
+            filter="blob:none",
+            sparse=True,
+            sparse_paths=["src", "README.md"],
+            reference_path="/cache/repo.git",
+            dissociate=True,
+            recurse_submodules=True,
+            shallow_submodules=True,
+            filter_submodules=True,
+        )
+        request = api.clone_repository.call_args.kwargs["request"]
+        assert request.branch == "main"
+        assert request.commit_id == "abc123"
+        assert request.depth == 1
+        assert request.single_branch is False
+        assert request.shallow_since == "2025-01-01"
+        assert request.no_tags is True
+        assert request.filter == "blob:none"
+        assert request.sparse is True
+        assert request.sparse_paths == ["src", "README.md"]
+        assert request.reference_path == "/cache/repo.git"
+        assert request.dissociate is True
+        assert request.recurse_submodules is True
+        assert request.shallow_submodules is True
+        assert request.filter_submodules is True
 
     @pytest.mark.asyncio
     async def test_commit(self):

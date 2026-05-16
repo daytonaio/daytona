@@ -17,6 +17,28 @@ export interface GitCommitResponse {
 }
 
 /**
+ * Optional parameters for cloning a Git repository.
+ */
+export interface GitCloneOptions {
+  branch?: string
+  commitId?: string
+  username?: string
+  password?: string
+  depth?: number
+  singleBranch?: boolean
+  shallowSince?: string
+  noTags?: boolean
+  filter?: string
+  sparse?: boolean
+  sparsePaths?: string[]
+  referencePath?: string
+  dissociate?: boolean
+  recurseSubmodules?: boolean
+  shallowSubmodules?: boolean
+  filterSubmodules?: boolean
+}
+
+/**
  * Provides Git operations within a Sandbox.
  *
  * @class
@@ -128,10 +150,10 @@ export class Git {
    *
    * @param {string} url - Repository URL to clone from
    * @param {string} path - Path where the repository should be cloned. Relative paths are resolved based on the sandbox working directory.
-   * @param {string} [branch] - Specific branch to clone. If not specified, clones the default branch
-   * @param {string} [commitId] - Specific commit to clone. If specified, the repository will be left in a detached HEAD state at this commit
-   * @param {string} [username] - Git username for authentication
-   * @param {string} [password] - Git password or token for authentication
+   * @param {GitCloneOptions|string} [options] - Clone options or, for backward compatibility, a branch name
+   * @param {string} [commitId] - Specific commit to clone when using positional arguments
+   * @param {string} [username] - Git username for authentication when using positional arguments
+   * @param {string} [password] - Git password or token for authentication when using positional arguments
    * @returns {Promise<void>}
    *
    * @example
@@ -159,7 +181,7 @@ export class Git {
    *   commitId='abc123'
    * );
    */
-  @WithInstrumentation()
+  public async clone(url: string, path: string, options?: GitCloneOptions): Promise<void>
   public async clone(
     url: string,
     path: string,
@@ -167,14 +189,45 @@ export class Git {
     commitId?: string,
     username?: string,
     password?: string,
+  ): Promise<void>
+  @WithInstrumentation()
+  public async clone(
+    url: string,
+    path: string,
+    optionsOrBranch?: GitCloneOptions | string,
+    commitId?: string,
+    username?: string,
+    password?: string,
   ): Promise<void> {
+    const options: GitCloneOptions =
+      typeof optionsOrBranch === 'object' && optionsOrBranch !== null
+        ? optionsOrBranch
+        : {
+            branch: optionsOrBranch as string | undefined,
+            commitId,
+            username,
+            password,
+          }
+
     await this.apiClient.cloneRepository({
       url: url,
-      branch: branch,
+      branch: options.branch,
       path,
-      username,
-      password,
-      commit_id: commitId,
+      username: options.username,
+      password: options.password,
+      commit_id: options.commitId,
+      depth: options.depth,
+      single_branch: options.singleBranch,
+      shallow_since: options.shallowSince,
+      no_tags: options.noTags,
+      filter: options.filter,
+      sparse: options.sparse,
+      sparse_paths: options.sparsePaths,
+      reference_path: options.referencePath,
+      dissociate: options.dissociate,
+      recurse_submodules: options.recurseSubmodules,
+      shallow_submodules: options.shallowSubmodules,
+      filter_submodules: options.filterSubmodules,
     })
   }
 

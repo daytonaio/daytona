@@ -59,6 +59,60 @@ describe('Git', () => {
       username: 'alice',
       password: 'secret',
       commit_id: 'deadbeef',
+      depth: undefined,
+      single_branch: undefined,
+      shallow_since: undefined,
+      no_tags: undefined,
+      filter: undefined,
+      sparse: undefined,
+      sparse_paths: undefined,
+      reference_path: undefined,
+      dissociate: undefined,
+      recurse_submodules: undefined,
+      shallow_submodules: undefined,
+      filter_submodules: undefined,
+    })
+  })
+
+  it('passes advanced clone options', async () => {
+    await git.clone('https://github.com/org/repo.git', '/repo', {
+      branch: 'main',
+      commitId: 'abc123',
+      username: 'alice',
+      password: 'secret',
+      depth: 1,
+      singleBranch: false,
+      shallowSince: '2025-01-01',
+      noTags: true,
+      filter: 'blob:none',
+      sparse: true,
+      sparsePaths: ['src', 'README.md'],
+      referencePath: '/cache/repo.git',
+      dissociate: true,
+      recurseSubmodules: true,
+      shallowSubmodules: true,
+      filterSubmodules: true,
+    })
+
+    expect(apiClient.cloneRepository).toHaveBeenCalledWith({
+      url: 'https://github.com/org/repo.git',
+      branch: 'main',
+      path: '/repo',
+      username: 'alice',
+      password: 'secret',
+      commit_id: 'abc123',
+      depth: 1,
+      single_branch: false,
+      shallow_since: '2025-01-01',
+      no_tags: true,
+      filter: 'blob:none',
+      sparse: true,
+      sparse_paths: ['src', 'README.md'],
+      reference_path: '/cache/repo.git',
+      dissociate: true,
+      recurse_submodules: true,
+      shallow_submodules: true,
+      filter_submodules: true,
     })
   })
 
@@ -72,6 +126,18 @@ describe('Git', () => {
       username: undefined,
       password: undefined,
       commit_id: undefined,
+      depth: undefined,
+      single_branch: undefined,
+      shallow_since: undefined,
+      no_tags: undefined,
+      filter: undefined,
+      sparse: undefined,
+      sparse_paths: undefined,
+      reference_path: undefined,
+      dissociate: undefined,
+      recurse_submodules: undefined,
+      shallow_submodules: undefined,
+      filter_submodules: undefined,
     })
   })
 

@@ -36,16 +36,28 @@ const (
 )
 
 type GitRepository struct {
-	Id       string      `json:"id" validate:"required"`
-	Url      string      `json:"url" validate:"required"`
-	Name     string      `json:"name" validate:"required"`
-	Branch   string      `json:"branch" validate:"required"`
-	Sha      string      `json:"sha" validate:"required"`
-	Owner    string      `json:"owner" validate:"required"`
-	PrNumber *uint32     `json:"prNumber,omitempty" validate:"optional"`
-	Source   string      `json:"source" validate:"required"`
-	Path     *string     `json:"path,omitempty" validate:"optional"`
-	Target   CloneTarget `json:"cloneTarget,omitempty" validate:"optional"`
+	Id                string      `json:"id" validate:"required"`
+	Url               string      `json:"url" validate:"required"`
+	Name              string      `json:"name" validate:"required"`
+	Branch            string      `json:"branch" validate:"required"`
+	Sha               string      `json:"sha" validate:"required"`
+	Owner             string      `json:"owner" validate:"required"`
+	PrNumber          *uint32     `json:"prNumber,omitempty" validate:"optional"`
+	Source            string      `json:"source" validate:"required"`
+	Path              *string     `json:"path,omitempty" validate:"optional"`
+	Target            CloneTarget `json:"cloneTarget,omitempty" validate:"optional"`
+	Depth             *int        `json:"depth,omitempty" validate:"optional"`
+	SingleBranch      *bool       `json:"single_branch,omitempty" validate:"optional"`
+	ShallowSince      string      `json:"shallow_since,omitempty" validate:"optional"`
+	NoTags            *bool       `json:"no_tags,omitempty" validate:"optional"`
+	Filter            string      `json:"filter,omitempty" validate:"optional"`
+	Sparse            *bool       `json:"sparse,omitempty" validate:"optional"`
+	SparsePaths       []string    `json:"sparse_paths,omitempty" validate:"optional"`
+	ReferencePath     string      `json:"reference_path,omitempty" validate:"optional"`
+	Dissociate        *bool       `json:"dissociate,omitempty" validate:"optional"`
+	RecurseSubmodules *bool       `json:"recurse_submodules,omitempty" validate:"optional"`
+	ShallowSubmodules *bool       `json:"shallow_submodules,omitempty" validate:"optional"`
+	FilterSubmodules  *bool       `json:"filter_submodules,omitempty" validate:"optional"`
 } // @name GitRepository
 
 type GitNamespace struct {

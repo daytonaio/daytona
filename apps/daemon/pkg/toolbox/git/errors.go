@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	daemon_git "github.com/daytonaio/daemon/pkg/git"
 	"github.com/gin-gonic/gin"
 	go_git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -15,6 +16,11 @@ import (
 )
 
 func classifyGitError(err error) error {
+	var invalidCloneOptions *daemon_git.InvalidCloneOptionsError
+	if errors.As(err, &invalidCloneOptions) {
+		return common_errors.NewBadRequestError(err)
+	}
+
 	if errors.Is(err, transport.ErrAuthenticationRequired) ||
 		errors.Is(err, transport.ErrInvalidAuthMethod) {
 		return common_errors.NewUnauthorizedError(err)

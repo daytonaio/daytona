@@ -118,6 +118,18 @@ class Git:
         commit_id: str | None = None,
         username: str | None = None,
         password: str | None = None,
+        depth: int | None = None,
+        single_branch: bool | None = None,
+        shallow_since: str | None = None,
+        no_tags: bool | None = None,
+        filter: str | None = None,
+        sparse: bool | None = None,
+        sparse_paths: list[str] | None = None,
+        reference_path: str | None = None,
+        dissociate: bool | None = None,
+        recurse_submodules: bool | None = None,
+        shallow_submodules: bool | None = None,
+        filter_submodules: bool | None = None,
     ) -> None:
         """Clones a Git repository into the specified path. It supports
         cloning specific branches or commits, and can authenticate with the remote
@@ -133,6 +145,18 @@ class Git:
                 the repository will be left in a detached HEAD state at this commit.
             username (str | None): Git username for authentication.
             password (str | None): Git password or token for authentication.
+            depth (int | None): Number of commits to fetch for a shallow clone.
+            single_branch (bool | None): Whether to restrict history to one branch.
+            shallow_since (str | None): Fetch only history newer than this date.
+            no_tags (bool | None): Skip fetching tags.
+            filter (str | None): Partial clone filter, such as "blob:none".
+            sparse (bool | None): Initialize sparse checkout.
+            sparse_paths (list[str] | None): Sparse checkout paths to include.
+            reference_path (str | None): Local Git object store to borrow from if available.
+            dissociate (bool | None): Copy borrowed reference objects into the clone.
+            recurse_submodules (bool | None): Clone submodules recursively.
+            shallow_submodules (bool | None): Use shallow clones for submodules.
+            filter_submodules (bool | None): Apply the partial clone filter to submodules.
 
         Example:
             ```python
@@ -167,6 +191,18 @@ class Git:
                 username=username,
                 password=password,
                 commit_id=commit_id,
+                depth=depth,
+                single_branch=single_branch,
+                shallow_since=shallow_since,
+                no_tags=no_tags,
+                filter=filter,
+                sparse=sparse,
+                sparse_paths=sparse_paths,
+                reference_path=reference_path,
+                dissociate=dissociate,
+                recurse_submodules=recurse_submodules,
+                shallow_submodules=shallow_submodules,
+                filter_submodules=filter_submodules,
             ),
         )
 

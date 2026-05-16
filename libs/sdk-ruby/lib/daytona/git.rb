@@ -82,6 +82,18 @@ module Daytona
     #   the repository will be left in a detached HEAD state at this commit.
     # @param username [String, nil] Git username for authentication.
     # @param password [String, nil] Git password or token for authentication.
+    # @param depth [Integer, nil] Number of commits to fetch for a shallow clone.
+    # @param single_branch [Boolean, nil] Whether to restrict history to one branch.
+    # @param shallow_since [String, nil] Fetch only history newer than this date.
+    # @param no_tags [Boolean, nil] Skip fetching tags.
+    # @param filter [String, nil] Partial clone filter, such as "blob:none".
+    # @param sparse [Boolean, nil] Initialize sparse checkout.
+    # @param sparse_paths [Array<String>, nil] Sparse checkout paths to include.
+    # @param reference_path [String, nil] Local Git object store to borrow from if available.
+    # @param dissociate [Boolean, nil] Copy borrowed reference objects into the clone.
+    # @param recurse_submodules [Boolean, nil] Clone submodules recursively.
+    # @param shallow_submodules [Boolean, nil] Use shallow clones for submodules.
+    # @param filter_submodules [Boolean, nil] Apply the partial clone filter to submodules.
     # @return [void]
     # @raise [Daytona::Sdk::Error] if cloning repository fails
     #
@@ -107,7 +119,26 @@ module Daytona
     #     path: "workspace/repo-old",
     #     commit_id: "abc123"
     #   )
-    def clone(url:, path:, branch: nil, commit_id: nil, username: nil, password: nil) # rubocop:disable Metrics/MethodLength, Metrics/ParameterLists
+    def clone( # rubocop:disable Metrics/MethodLength, Metrics/ParameterLists
+      url:,
+      path:,
+      branch: nil,
+      commit_id: nil,
+      username: nil,
+      password: nil,
+      depth: nil,
+      single_branch: nil,
+      shallow_since: nil,
+      no_tags: nil,
+      filter: nil,
+      sparse: nil,
+      sparse_paths: nil,
+      reference_path: nil,
+      dissociate: nil,
+      recurse_submodules: nil,
+      shallow_submodules: nil,
+      filter_submodules: nil
+    )
       toolbox_api.clone_repository(
         DaytonaToolboxApiClient::GitCloneRequest.new(
           url: url,
@@ -115,7 +146,19 @@ module Daytona
           path: path,
           username: username,
           password: password,
-          commit_id: commit_id
+          commit_id: commit_id,
+          depth: depth,
+          single_branch: single_branch,
+          shallow_since: shallow_since,
+          no_tags: no_tags,
+          filter: filter,
+          sparse: sparse,
+          sparse_paths: sparse_paths,
+          reference_path: reference_path,
+          dissociate: dissociate,
+          recurse_submodules: recurse_submodules,
+          shallow_submodules: shallow_submodules,
+          filter_submodules: filter_submodules
         )
       )
     rescue DaytonaToolboxApiClient::ApiError => e

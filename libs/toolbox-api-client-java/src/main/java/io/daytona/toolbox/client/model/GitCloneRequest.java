@@ -20,7 +20,9 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -60,6 +62,31 @@ public class GitCloneRequest {
   @javax.annotation.Nullable
   private String commitId;
 
+  public static final String SERIALIZED_NAME_DEPTH = "depth";
+  @SerializedName(SERIALIZED_NAME_DEPTH)
+  @javax.annotation.Nullable
+  private Integer depth;
+
+  public static final String SERIALIZED_NAME_DISSOCIATE = "dissociate";
+  @SerializedName(SERIALIZED_NAME_DISSOCIATE)
+  @javax.annotation.Nullable
+  private Boolean dissociate;
+
+  public static final String SERIALIZED_NAME_FILTER = "filter";
+  @SerializedName(SERIALIZED_NAME_FILTER)
+  @javax.annotation.Nullable
+  private String filter;
+
+  public static final String SERIALIZED_NAME_FILTER_SUBMODULES = "filter_submodules";
+  @SerializedName(SERIALIZED_NAME_FILTER_SUBMODULES)
+  @javax.annotation.Nullable
+  private Boolean filterSubmodules;
+
+  public static final String SERIALIZED_NAME_NO_TAGS = "no_tags";
+  @SerializedName(SERIALIZED_NAME_NO_TAGS)
+  @javax.annotation.Nullable
+  private Boolean noTags;
+
   public static final String SERIALIZED_NAME_PASSWORD = "password";
   @SerializedName(SERIALIZED_NAME_PASSWORD)
   @javax.annotation.Nullable
@@ -69,6 +96,41 @@ public class GitCloneRequest {
   @SerializedName(SERIALIZED_NAME_PATH)
   @javax.annotation.Nonnull
   private String path;
+
+  public static final String SERIALIZED_NAME_RECURSE_SUBMODULES = "recurse_submodules";
+  @SerializedName(SERIALIZED_NAME_RECURSE_SUBMODULES)
+  @javax.annotation.Nullable
+  private Boolean recurseSubmodules;
+
+  public static final String SERIALIZED_NAME_REFERENCE_PATH = "reference_path";
+  @SerializedName(SERIALIZED_NAME_REFERENCE_PATH)
+  @javax.annotation.Nullable
+  private String referencePath;
+
+  public static final String SERIALIZED_NAME_SHALLOW_SINCE = "shallow_since";
+  @SerializedName(SERIALIZED_NAME_SHALLOW_SINCE)
+  @javax.annotation.Nullable
+  private String shallowSince;
+
+  public static final String SERIALIZED_NAME_SHALLOW_SUBMODULES = "shallow_submodules";
+  @SerializedName(SERIALIZED_NAME_SHALLOW_SUBMODULES)
+  @javax.annotation.Nullable
+  private Boolean shallowSubmodules;
+
+  public static final String SERIALIZED_NAME_SINGLE_BRANCH = "single_branch";
+  @SerializedName(SERIALIZED_NAME_SINGLE_BRANCH)
+  @javax.annotation.Nullable
+  private Boolean singleBranch;
+
+  public static final String SERIALIZED_NAME_SPARSE = "sparse";
+  @SerializedName(SERIALIZED_NAME_SPARSE)
+  @javax.annotation.Nullable
+  private Boolean sparse;
+
+  public static final String SERIALIZED_NAME_SPARSE_PATHS = "sparse_paths";
+  @SerializedName(SERIALIZED_NAME_SPARSE_PATHS)
+  @javax.annotation.Nullable
+  private List<String> sparsePaths = new ArrayList<>();
 
   public static final String SERIALIZED_NAME_URL = "url";
   @SerializedName(SERIALIZED_NAME_URL)
@@ -121,6 +183,101 @@ public class GitCloneRequest {
   }
 
 
+  public GitCloneRequest depth(@javax.annotation.Nullable Integer depth) {
+    this.depth = depth;
+    return this;
+  }
+
+  /**
+   * Get depth
+   * @return depth
+   */
+  @javax.annotation.Nullable
+  public Integer getDepth() {
+    return depth;
+  }
+
+  public void setDepth(@javax.annotation.Nullable Integer depth) {
+    this.depth = depth;
+  }
+
+
+  public GitCloneRequest dissociate(@javax.annotation.Nullable Boolean dissociate) {
+    this.dissociate = dissociate;
+    return this;
+  }
+
+  /**
+   * Get dissociate
+   * @return dissociate
+   */
+  @javax.annotation.Nullable
+  public Boolean getDissociate() {
+    return dissociate;
+  }
+
+  public void setDissociate(@javax.annotation.Nullable Boolean dissociate) {
+    this.dissociate = dissociate;
+  }
+
+
+  public GitCloneRequest filter(@javax.annotation.Nullable String filter) {
+    this.filter = filter;
+    return this;
+  }
+
+  /**
+   * Get filter
+   * @return filter
+   */
+  @javax.annotation.Nullable
+  public String getFilter() {
+    return filter;
+  }
+
+  public void setFilter(@javax.annotation.Nullable String filter) {
+    this.filter = filter;
+  }
+
+
+  public GitCloneRequest filterSubmodules(@javax.annotation.Nullable Boolean filterSubmodules) {
+    this.filterSubmodules = filterSubmodules;
+    return this;
+  }
+
+  /**
+   * Get filterSubmodules
+   * @return filterSubmodules
+   */
+  @javax.annotation.Nullable
+  public Boolean getFilterSubmodules() {
+    return filterSubmodules;
+  }
+
+  public void setFilterSubmodules(@javax.annotation.Nullable Boolean filterSubmodules) {
+    this.filterSubmodules = filterSubmodules;
+  }
+
+
+  public GitCloneRequest noTags(@javax.annotation.Nullable Boolean noTags) {
+    this.noTags = noTags;
+    return this;
+  }
+
+  /**
+   * Get noTags
+   * @return noTags
+   */
+  @javax.annotation.Nullable
+  public Boolean getNoTags() {
+    return noTags;
+  }
+
+  public void setNoTags(@javax.annotation.Nullable Boolean noTags) {
+    this.noTags = noTags;
+  }
+
+
   public GitCloneRequest password(@javax.annotation.Nullable String password) {
     this.password = password;
     return this;
@@ -156,6 +313,147 @@ public class GitCloneRequest {
 
   public void setPath(@javax.annotation.Nonnull String path) {
     this.path = path;
+  }
+
+
+  public GitCloneRequest recurseSubmodules(@javax.annotation.Nullable Boolean recurseSubmodules) {
+    this.recurseSubmodules = recurseSubmodules;
+    return this;
+  }
+
+  /**
+   * Get recurseSubmodules
+   * @return recurseSubmodules
+   */
+  @javax.annotation.Nullable
+  public Boolean getRecurseSubmodules() {
+    return recurseSubmodules;
+  }
+
+  public void setRecurseSubmodules(@javax.annotation.Nullable Boolean recurseSubmodules) {
+    this.recurseSubmodules = recurseSubmodules;
+  }
+
+
+  public GitCloneRequest referencePath(@javax.annotation.Nullable String referencePath) {
+    this.referencePath = referencePath;
+    return this;
+  }
+
+  /**
+   * Get referencePath
+   * @return referencePath
+   */
+  @javax.annotation.Nullable
+  public String getReferencePath() {
+    return referencePath;
+  }
+
+  public void setReferencePath(@javax.annotation.Nullable String referencePath) {
+    this.referencePath = referencePath;
+  }
+
+
+  public GitCloneRequest shallowSince(@javax.annotation.Nullable String shallowSince) {
+    this.shallowSince = shallowSince;
+    return this;
+  }
+
+  /**
+   * Get shallowSince
+   * @return shallowSince
+   */
+  @javax.annotation.Nullable
+  public String getShallowSince() {
+    return shallowSince;
+  }
+
+  public void setShallowSince(@javax.annotation.Nullable String shallowSince) {
+    this.shallowSince = shallowSince;
+  }
+
+
+  public GitCloneRequest shallowSubmodules(@javax.annotation.Nullable Boolean shallowSubmodules) {
+    this.shallowSubmodules = shallowSubmodules;
+    return this;
+  }
+
+  /**
+   * Get shallowSubmodules
+   * @return shallowSubmodules
+   */
+  @javax.annotation.Nullable
+  public Boolean getShallowSubmodules() {
+    return shallowSubmodules;
+  }
+
+  public void setShallowSubmodules(@javax.annotation.Nullable Boolean shallowSubmodules) {
+    this.shallowSubmodules = shallowSubmodules;
+  }
+
+
+  public GitCloneRequest singleBranch(@javax.annotation.Nullable Boolean singleBranch) {
+    this.singleBranch = singleBranch;
+    return this;
+  }
+
+  /**
+   * Get singleBranch
+   * @return singleBranch
+   */
+  @javax.annotation.Nullable
+  public Boolean getSingleBranch() {
+    return singleBranch;
+  }
+
+  public void setSingleBranch(@javax.annotation.Nullable Boolean singleBranch) {
+    this.singleBranch = singleBranch;
+  }
+
+
+  public GitCloneRequest sparse(@javax.annotation.Nullable Boolean sparse) {
+    this.sparse = sparse;
+    return this;
+  }
+
+  /**
+   * Get sparse
+   * @return sparse
+   */
+  @javax.annotation.Nullable
+  public Boolean getSparse() {
+    return sparse;
+  }
+
+  public void setSparse(@javax.annotation.Nullable Boolean sparse) {
+    this.sparse = sparse;
+  }
+
+
+  public GitCloneRequest sparsePaths(@javax.annotation.Nullable List<String> sparsePaths) {
+    this.sparsePaths = sparsePaths;
+    return this;
+  }
+
+  public GitCloneRequest addSparsePathsItem(String sparsePathsItem) {
+    if (this.sparsePaths == null) {
+      this.sparsePaths = new ArrayList<>();
+    }
+    this.sparsePaths.add(sparsePathsItem);
+    return this;
+  }
+
+  /**
+   * Get sparsePaths
+   * @return sparsePaths
+   */
+  @javax.annotation.Nullable
+  public List<String> getSparsePaths() {
+    return sparsePaths;
+  }
+
+  public void setSparsePaths(@javax.annotation.Nullable List<String> sparsePaths) {
+    this.sparsePaths = sparsePaths;
   }
 
 
@@ -253,8 +551,20 @@ public class GitCloneRequest {
     GitCloneRequest gitCloneRequest = (GitCloneRequest) o;
     return Objects.equals(this.branch, gitCloneRequest.branch) &&
         Objects.equals(this.commitId, gitCloneRequest.commitId) &&
+        Objects.equals(this.depth, gitCloneRequest.depth) &&
+        Objects.equals(this.dissociate, gitCloneRequest.dissociate) &&
+        Objects.equals(this.filter, gitCloneRequest.filter) &&
+        Objects.equals(this.filterSubmodules, gitCloneRequest.filterSubmodules) &&
+        Objects.equals(this.noTags, gitCloneRequest.noTags) &&
         Objects.equals(this.password, gitCloneRequest.password) &&
         Objects.equals(this.path, gitCloneRequest.path) &&
+        Objects.equals(this.recurseSubmodules, gitCloneRequest.recurseSubmodules) &&
+        Objects.equals(this.referencePath, gitCloneRequest.referencePath) &&
+        Objects.equals(this.shallowSince, gitCloneRequest.shallowSince) &&
+        Objects.equals(this.shallowSubmodules, gitCloneRequest.shallowSubmodules) &&
+        Objects.equals(this.singleBranch, gitCloneRequest.singleBranch) &&
+        Objects.equals(this.sparse, gitCloneRequest.sparse) &&
+        Objects.equals(this.sparsePaths, gitCloneRequest.sparsePaths) &&
         Objects.equals(this.url, gitCloneRequest.url) &&
         Objects.equals(this.username, gitCloneRequest.username)&&
         Objects.equals(this.additionalProperties, gitCloneRequest.additionalProperties);
@@ -262,7 +572,7 @@ public class GitCloneRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(branch, commitId, password, path, url, username, additionalProperties);
+    return Objects.hash(branch, commitId, depth, dissociate, filter, filterSubmodules, noTags, password, path, recurseSubmodules, referencePath, shallowSince, shallowSubmodules, singleBranch, sparse, sparsePaths, url, username, additionalProperties);
   }
 
   @Override
@@ -271,8 +581,20 @@ public class GitCloneRequest {
     sb.append("class GitCloneRequest {\n");
     sb.append("    branch: ").append(toIndentedString(branch)).append("\n");
     sb.append("    commitId: ").append(toIndentedString(commitId)).append("\n");
+    sb.append("    depth: ").append(toIndentedString(depth)).append("\n");
+    sb.append("    dissociate: ").append(toIndentedString(dissociate)).append("\n");
+    sb.append("    filter: ").append(toIndentedString(filter)).append("\n");
+    sb.append("    filterSubmodules: ").append(toIndentedString(filterSubmodules)).append("\n");
+    sb.append("    noTags: ").append(toIndentedString(noTags)).append("\n");
     sb.append("    password: ").append(toIndentedString(password)).append("\n");
     sb.append("    path: ").append(toIndentedString(path)).append("\n");
+    sb.append("    recurseSubmodules: ").append(toIndentedString(recurseSubmodules)).append("\n");
+    sb.append("    referencePath: ").append(toIndentedString(referencePath)).append("\n");
+    sb.append("    shallowSince: ").append(toIndentedString(shallowSince)).append("\n");
+    sb.append("    shallowSubmodules: ").append(toIndentedString(shallowSubmodules)).append("\n");
+    sb.append("    singleBranch: ").append(toIndentedString(singleBranch)).append("\n");
+    sb.append("    sparse: ").append(toIndentedString(sparse)).append("\n");
+    sb.append("    sparsePaths: ").append(toIndentedString(sparsePaths)).append("\n");
     sb.append("    url: ").append(toIndentedString(url)).append("\n");
     sb.append("    username: ").append(toIndentedString(username)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
@@ -294,7 +616,7 @@ public class GitCloneRequest {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("branch", "commit_id", "password", "path", "url", "username"));
+    openapiFields = new HashSet<String>(Arrays.asList("branch", "commit_id", "depth", "dissociate", "filter", "filter_submodules", "no_tags", "password", "path", "recurse_submodules", "reference_path", "shallow_since", "shallow_submodules", "single_branch", "sparse", "sparse_paths", "url", "username"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("path", "url"));
@@ -326,11 +648,24 @@ public class GitCloneRequest {
       if ((jsonObj.get("commit_id") != null && !jsonObj.get("commit_id").isJsonNull()) && !jsonObj.get("commit_id").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `commit_id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("commit_id").toString()));
       }
+      if ((jsonObj.get("filter") != null && !jsonObj.get("filter").isJsonNull()) && !jsonObj.get("filter").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `filter` to be a primitive type in the JSON string but got `%s`", jsonObj.get("filter").toString()));
+      }
       if ((jsonObj.get("password") != null && !jsonObj.get("password").isJsonNull()) && !jsonObj.get("password").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `password` to be a primitive type in the JSON string but got `%s`", jsonObj.get("password").toString()));
       }
       if (!jsonObj.get("path").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `path` to be a primitive type in the JSON string but got `%s`", jsonObj.get("path").toString()));
+      }
+      if ((jsonObj.get("reference_path") != null && !jsonObj.get("reference_path").isJsonNull()) && !jsonObj.get("reference_path").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `reference_path` to be a primitive type in the JSON string but got `%s`", jsonObj.get("reference_path").toString()));
+      }
+      if ((jsonObj.get("shallow_since") != null && !jsonObj.get("shallow_since").isJsonNull()) && !jsonObj.get("shallow_since").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `shallow_since` to be a primitive type in the JSON string but got `%s`", jsonObj.get("shallow_since").toString()));
+      }
+      // ensure the optional json data is an array if present
+      if (jsonObj.get("sparse_paths") != null && !jsonObj.get("sparse_paths").isJsonNull() && !jsonObj.get("sparse_paths").isJsonArray()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `sparse_paths` to be an array in the JSON string but got `%s`", jsonObj.get("sparse_paths").toString()));
       }
       if (!jsonObj.get("url").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `url` to be a primitive type in the JSON string but got `%s`", jsonObj.get("url").toString()));

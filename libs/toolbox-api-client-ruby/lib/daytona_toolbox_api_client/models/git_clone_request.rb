@@ -19,9 +19,33 @@ module DaytonaToolboxApiClient
 
     attr_accessor :commit_id
 
+    attr_accessor :depth
+
+    attr_accessor :dissociate
+
+    attr_accessor :filter
+
+    attr_accessor :filter_submodules
+
+    attr_accessor :no_tags
+
     attr_accessor :password
 
     attr_accessor :path
+
+    attr_accessor :recurse_submodules
+
+    attr_accessor :reference_path
+
+    attr_accessor :shallow_since
+
+    attr_accessor :shallow_submodules
+
+    attr_accessor :single_branch
+
+    attr_accessor :sparse
+
+    attr_accessor :sparse_paths
 
     attr_accessor :url
 
@@ -32,8 +56,20 @@ module DaytonaToolboxApiClient
       {
         :'branch' => :'branch',
         :'commit_id' => :'commit_id',
+        :'depth' => :'depth',
+        :'dissociate' => :'dissociate',
+        :'filter' => :'filter',
+        :'filter_submodules' => :'filter_submodules',
+        :'no_tags' => :'no_tags',
         :'password' => :'password',
         :'path' => :'path',
+        :'recurse_submodules' => :'recurse_submodules',
+        :'reference_path' => :'reference_path',
+        :'shallow_since' => :'shallow_since',
+        :'shallow_submodules' => :'shallow_submodules',
+        :'single_branch' => :'single_branch',
+        :'sparse' => :'sparse',
+        :'sparse_paths' => :'sparse_paths',
         :'url' => :'url',
         :'username' => :'username'
       }
@@ -54,8 +90,20 @@ module DaytonaToolboxApiClient
       {
         :'branch' => :'String',
         :'commit_id' => :'String',
+        :'depth' => :'Integer',
+        :'dissociate' => :'Boolean',
+        :'filter' => :'String',
+        :'filter_submodules' => :'Boolean',
+        :'no_tags' => :'Boolean',
         :'password' => :'String',
         :'path' => :'String',
+        :'recurse_submodules' => :'Boolean',
+        :'reference_path' => :'String',
+        :'shallow_since' => :'String',
+        :'shallow_submodules' => :'Boolean',
+        :'single_branch' => :'Boolean',
+        :'sparse' => :'Boolean',
+        :'sparse_paths' => :'Array<String>',
         :'url' => :'String',
         :'username' => :'String'
       }
@@ -91,6 +139,26 @@ module DaytonaToolboxApiClient
         self.commit_id = attributes[:'commit_id']
       end
 
+      if attributes.key?(:'depth')
+        self.depth = attributes[:'depth']
+      end
+
+      if attributes.key?(:'dissociate')
+        self.dissociate = attributes[:'dissociate']
+      end
+
+      if attributes.key?(:'filter')
+        self.filter = attributes[:'filter']
+      end
+
+      if attributes.key?(:'filter_submodules')
+        self.filter_submodules = attributes[:'filter_submodules']
+      end
+
+      if attributes.key?(:'no_tags')
+        self.no_tags = attributes[:'no_tags']
+      end
+
       if attributes.key?(:'password')
         self.password = attributes[:'password']
       end
@@ -99,6 +167,36 @@ module DaytonaToolboxApiClient
         self.path = attributes[:'path']
       else
         self.path = nil
+      end
+
+      if attributes.key?(:'recurse_submodules')
+        self.recurse_submodules = attributes[:'recurse_submodules']
+      end
+
+      if attributes.key?(:'reference_path')
+        self.reference_path = attributes[:'reference_path']
+      end
+
+      if attributes.key?(:'shallow_since')
+        self.shallow_since = attributes[:'shallow_since']
+      end
+
+      if attributes.key?(:'shallow_submodules')
+        self.shallow_submodules = attributes[:'shallow_submodules']
+      end
+
+      if attributes.key?(:'single_branch')
+        self.single_branch = attributes[:'single_branch']
+      end
+
+      if attributes.key?(:'sparse')
+        self.sparse = attributes[:'sparse']
+      end
+
+      if attributes.key?(:'sparse_paths')
+        if (value = attributes[:'sparse_paths']).is_a?(Array)
+          self.sparse_paths = value
+        end
       end
 
       if attributes.key?(:'url')
@@ -164,8 +262,20 @@ module DaytonaToolboxApiClient
       self.class == o.class &&
           branch == o.branch &&
           commit_id == o.commit_id &&
+          depth == o.depth &&
+          dissociate == o.dissociate &&
+          filter == o.filter &&
+          filter_submodules == o.filter_submodules &&
+          no_tags == o.no_tags &&
           password == o.password &&
           path == o.path &&
+          recurse_submodules == o.recurse_submodules &&
+          reference_path == o.reference_path &&
+          shallow_since == o.shallow_since &&
+          shallow_submodules == o.shallow_submodules &&
+          single_branch == o.single_branch &&
+          sparse == o.sparse &&
+          sparse_paths == o.sparse_paths &&
           url == o.url &&
           username == o.username
     end
@@ -179,7 +289,7 @@ module DaytonaToolboxApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [branch, commit_id, password, path, url, username].hash
+      [branch, commit_id, depth, dissociate, filter, filter_submodules, no_tags, password, path, recurse_submodules, reference_path, shallow_since, shallow_submodules, single_branch, sparse, sparse_paths, url, username].hash
     end
 
     # Builds the object from hash
