@@ -21,4 +21,5 @@ func init() {
 	VolumeCmd.AddCommand(CreateCmd)
 	VolumeCmd.AddCommand(GetCmd)
 	VolumeCmd.AddCommand(DeleteCmd)
+	VolumeCmd.AddCommand(UpdateCmd)
 }
