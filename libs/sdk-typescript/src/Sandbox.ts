@@ -36,7 +36,7 @@ import { LspLanguageId, LspServer } from './LspServer'
 import { DaytonaError, DaytonaNotFoundError, DaytonaTimeoutError, DaytonaValidationError } from './errors/DaytonaError'
 import { CODE_TOOLBOX_LANGUAGE_LABEL } from './Daytona'
 import { ComputerUse } from './ComputerUse'
-import { AxiosInstance } from 'axios'
+import type { AxiosInstance } from 'axios'
 import { CodeInterpreter } from './CodeInterpreter'
 import { WithInstrumentation } from './utils/otel.decorator'
 
