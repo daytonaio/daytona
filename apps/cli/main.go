@@ -6,6 +6,7 @@ package main
 import (
 	"os"
 
+	"github.com/daytonaio/daytona/cli/cmd/profile"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/daytonaio/daytona/cli/cmd"
@@ -47,6 +48,7 @@ func init() {
 	rootCmd.AddCommand(cmd.AutoCompleteCmd)
 	rootCmd.AddCommand(cmd.GenerateDocsCmd)
 	rootCmd.AddCommand(cmd.VersionCmd)
+	profile.InitProfileCommands(rootCmd)
 
 	// Add sandbox subcommands as top-level shortcuts
 	rootCmd.AddCommand(createSandboxShortcut(sandbox.CreateCmd))
