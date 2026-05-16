@@ -170,6 +170,32 @@ jobs:
           GONOSUMDB=github.com/daytonaio/daytona go work sync
           git diff --exit-code || (echo "Code not formatted or linting errors! Hint: 'yarn generate:api-client', 'yarn lint:fix', 'yarn docs' and commit" && exit 1)
 
+  typecheck-sdk-typescript:
+    name: TypeScript SDK type check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 22
+      - run: corepack enable
+      - name: Get yarn cache directory
+        id: yarn-cache
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: yarn-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: yarn-${{ runner.os }}-${{ runner.arch }}-
+      - run: yarn install --immutable
+      - name: Check type-only imports (verbatimModuleSyntax)
+        run: |
+          npx tsc -p ./libs/sdk-typescript/tsconfig.json \
+            --noEmit --verbatimModuleSyntax \
+            --module preserve --moduleResolution bundler
+
   test:
     runs-on: ubuntu-latest
     steps:
