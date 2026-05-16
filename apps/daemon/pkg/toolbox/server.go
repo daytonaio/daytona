@@ -22,7 +22,6 @@ import (
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/daytonaio/common-go/pkg/telemetry"
-	"github.com/daytonaio/daemon/internal"
 	"github.com/daytonaio/daemon/pkg/recording"
 	session_svc "github.com/daytonaio/daemon/pkg/session"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
@@ -45,11 +44,8 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/daytonaio/daemon/pkg/toolbox/docs"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	swaggerfiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type ServerConfig struct {
@@ -115,11 +111,6 @@ func (s *server) Start() error {
 	s.ctx, s.cancel = context.WithCancel(context.Background())
 	defer s.cancel()
 
-	docs.SwaggerInfo.Description = "Daytona Toolbox API"
-	docs.SwaggerInfo.Title = "Daytona Toolbox API"
-	docs.SwaggerInfo.BasePath = "/"
-	docs.SwaggerInfo.Version = internal.Version
-
 	// Set Gin to release mode in production
 	if os.Getenv("ENVIRONMENT") == "production" {
 		gin.SetMode(gin.ReleaseMode)
@@ -152,10 +143,7 @@ func (s *server) Start() error {
 	noTelemetryRouter.Use(errMiddleware)
 	binding.Validator = new(DefaultValidator)
 
-	// Add swagger UI in development mode
-	if os.Getenv("ENVIRONMENT") != "production" {
-		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	}
+	registerSwagger(r)
 
 	r.POST("/init", s.Initialize(otelServiceName, s.entrypointLogFilePath, s.organizationId, s.regionId, s.snapshot))
 
