@@ -46,3 +46,17 @@ func GetShell() string {
 
 	return "sh"
 }
+
+// GetShellArgs returns the shell path and no-init flags to prevent the shell
+// from reading init files that may consume stdin bytes or run exit.
+func GetShellArgs() []string {
+	shell := GetShell()
+	switch {
+	case shell == "zsh", strings.HasSuffix(shell, "/zsh"):
+		return []string{shell, "-f"}
+	case shell == "bash", strings.HasSuffix(shell, "/bash"):
+		return []string{shell, "--norc", "--noprofile"}
+	default:
+		return []string{shell}
+	}
+}
