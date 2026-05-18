@@ -46,8 +46,11 @@ func UploadFiles(c *gin.Context) {
 			break
 		}
 		if err != nil {
+			// The multipart reader is unrecoverable after a non-EOF error
+			// (subsequent calls return the same error forever), so we must
+			// stop iterating to avoid an infinite loop / OOM.
 			errs = append(errs, fmt.Sprintf("reading part: %v", err))
-			continue
+			break
 		}
 
 		name := part.FormName()
@@ -90,11 +93,20 @@ func UploadFiles(c *gin.Context) {
 				continue
 			}
 
-			n, err := io.Copy(f, part)
-			if err != nil {
-				errs = append(errs, fmt.Sprintf("%s: write: %v", dest, err))
+			n, copyErr := io.Copy(f, part)
+			if copyErr != nil {
+				errs = append(errs, fmt.Sprintf("%s: write: %v", dest, copyErr))
 			}
-			f.Close()
+			// Inspect Close() — on FUSE-backed filesystems (e.g. mount-s3 for
+			// volume mounts) the actual remote write/CompleteMultipartUpload
+			// happens here, so a swallowed close error means silent data loss.
+			if closeErr := f.Close(); closeErr != nil && copyErr == nil {
+				errs = append(errs, fmt.Sprintf("%s: close: %v", dest, closeErr))
+				continue
+			}
+			if copyErr != nil {
+				continue
+			}
 			files = append(files, fileResult{Path: dest, Bytes: n})
 			continue
 		}

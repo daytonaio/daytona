@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -85,6 +86,53 @@ func TestUploadFilesStreamsToDisk(t *testing.T) {
 				t.Fatalf("leftover temp file: %s", filepath.Join(filepath.Dir(w.path), e.Name()))
 			}
 		}
+	}
+}
+
+// A multipart body that ends before the final boundary causes NextPart to
+// return io.ErrUnexpectedEOF. The handler must break out of the read loop
+// (the multipart reader is unrecoverable after a non-EOF error) and return
+// 400 with the error captured. This prevents an infinite loop / OOM if the
+// caller hangs up mid-upload.
+func TestUploadFilesTruncatedBodyReturnsErrorWithoutHanging(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	tempDir := t.TempDir()
+	dest := filepath.Join(tempDir, "partial.bin")
+
+	boundary := "DaytonaTestBoundary"
+	body := &bytes.Buffer{}
+	body.WriteString("--" + boundary + "\r\n")
+	body.WriteString("Content-Disposition: form-data; name=\"files[0].path\"\r\n\r\n")
+	body.WriteString(dest)
+	body.WriteString("\r\n--" + boundary + "\r\n")
+	body.WriteString("Content-Disposition: form-data; name=\"files[0].file\"; filename=\"partial.bin\"\r\n")
+	body.WriteString("Content-Type: application/octet-stream\r\n\r\n")
+	body.WriteString("partial-data-no-trailing-boundary")
+
+	req := httptest.NewRequest(http.MethodPost, "/files/bulk-upload", body)
+	req.Header.Set("Content-Type", "multipart/form-data; boundary="+boundary)
+	rec := httptest.NewRecorder()
+
+	_, engine := gin.CreateTestContext(rec)
+	engine.POST("/files/bulk-upload", UploadFiles)
+
+	done := make(chan struct{})
+	go func() {
+		engine.ServeHTTP(rec, req)
+		close(done)
+	}()
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		t.Fatalf("handler did not return within 5s — likely infinite loop on multipart read error")
+	}
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d (body: %s)", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "reading part") {
+		t.Fatalf("expected 'reading part' error, got %s", rec.Body.String())
 	}
 }
 
