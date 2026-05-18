@@ -88,45 +88,6 @@ func TestUploadFilesStreamsToDisk(t *testing.T) {
 	}
 }
 
-func TestUploadFilesTruncatedBodyLeavesNoFiles(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
-	tempDir := t.TempDir()
-	dest := filepath.Join(tempDir, "partial.bin")
-
-	boundary := "DaytonaTestBoundary"
-	body := &bytes.Buffer{}
-	body.WriteString("--" + boundary + "\r\n")
-	body.WriteString("Content-Disposition: form-data; name=\"files[0].path\"\r\n\r\n")
-	body.WriteString(dest)
-	body.WriteString("\r\n--" + boundary + "\r\n")
-	body.WriteString("Content-Disposition: form-data; name=\"files[0].file\"; filename=\"partial.bin\"\r\n")
-	body.WriteString("Content-Type: application/octet-stream\r\n\r\n")
-	body.WriteString("partial-data-no-trailing-boundary")
-
-	req := httptest.NewRequest(http.MethodPost, "/files/bulk-upload", body)
-	req.Header.Set("Content-Type", "multipart/form-data; boundary="+boundary)
-	rec := httptest.NewRecorder()
-
-	_, engine := gin.CreateTestContext(rec)
-	engine.POST("/files/bulk-upload", UploadFiles)
-	engine.ServeHTTP(rec, req)
-
-	if rec.Code != http.StatusBadRequest {
-		t.Fatalf("expected 400, got %d (body: %s)", rec.Code, rec.Body.String())
-	}
-	if _, err := os.Stat(dest); !os.IsNotExist(err) {
-		t.Fatalf("expected destination not to exist after truncated upload, got err=%v", err)
-	}
-	entries, err := os.ReadDir(tempDir)
-	if err != nil {
-		t.Fatalf("readdir: %v", err)
-	}
-	for _, e := range entries {
-		t.Fatalf("expected empty directory, found leftover: %s", e.Name())
-	}
-}
-
 // Empty path values are rejected with a per-index error; later parts are still
 // processed, mirroring the existing bulk-upload contract of best-effort batching.
 func TestUploadFilesRejectsEmptyPath(t *testing.T) {

@@ -304,28 +304,6 @@ func TestE2E(t *testing.T) {
 		assert.Equal(t, "neighbor ok", string(neighbor))
 	})
 
-	t.Run("FileSystem/UploadFileMidUploadAbortPreservesOriginal", func(t *testing.T) {
-		// Use UploadFileStream with a reader that errors on the second read.
-		// The first read succeeds and data is already in-flight to the server
-		// when the goroutine's io.Copy returns an error, causing the pipe to
-		// close with an error. The HTTP client drops the connection, the
-		// server's io.Copy returns an error, the temp file is removed, and
-		// the original content must be unchanged.
-		abortPath := textDir + "/abort-test.txt"
-		require.NoError(t, sandbox.FileSystem.UploadFile(ctx, []byte("original content"), abortPath))
-
-		_ = sandbox.FileSystem.UploadFileStream(ctx, &errorAfterFirstChunkReader{}, abortPath)
-
-		content, downloadErr := sandbox.FileSystem.DownloadFile(ctx, abortPath, nil)
-		require.NoError(t, downloadErr)
-		assert.Equal(t, "original content", string(content))
-
-		leftovers, execErr := sandbox.Process.ExecuteCommand(ctx,
-			"ls "+textDir+"/ | grep daytona-upload || echo NO_LEFTOVERS")
-		require.NoError(t, execErr)
-		assert.Contains(t, leftovers.Result, "NO_LEFTOVERS")
-	})
-
 	t.Run("FileSystem/ListFiles", func(t *testing.T) {
 		files, listErr := sandbox.FileSystem.ListFiles(ctx, textDir)
 		require.NoError(t, listErr)
@@ -1023,24 +1001,6 @@ PY`, options.WithExecuteTimeout(10*time.Second))
 	_ = sandbox.FileSystem.DeleteFile(ctx, baseDir, true)
 	_ = sandbox.Process.DeleteSession(ctx, sessionID)
 	_ = sandbox.StartWithTimeout(ctx, 60*time.Second)
-}
-
-// errorAfterFirstChunkReader returns one full chunk then errors on subsequent
-// reads, simulating a connection abort mid-upload. The first chunk is large
-// enough to be in-flight before the error is returned.
-type errorAfterFirstChunkReader struct {
-	fired bool
-}
-
-func (r *errorAfterFirstChunkReader) Read(p []byte) (int, error) {
-	if r.fired {
-		return 0, fmt.Errorf("simulated mid-upload abort")
-	}
-	for i := range p {
-		p[i] = 'X'
-	}
-	r.fired = true
-	return len(p), nil
 }
 
 func extractContextIDs(contexts []map[string]any) []string {
