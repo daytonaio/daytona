@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { trace, context as otelContext, metrics, SpanStatusCode, Histogram } from '@opentelemetry/api'
+import { trace, context as otelContext, metrics, SpanStatusCode } from '@opentelemetry/api'
+import type { Histogram } from '@opentelemetry/api'
 
 // Lazy initialization to ensure SDK is started before getting tracer/meter
 const getTracer = () => trace.getTracer('')

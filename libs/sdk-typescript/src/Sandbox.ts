@@ -3,16 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  SandboxState,
-  SandboxApi,
+import { SandboxState, SandboxApi, SandboxBackupStateEnum, Configuration } from '@daytona/api-client'
+import type {
   Sandbox as SandboxDto,
   PaginatedSandboxes as PaginatedSandboxesDto,
   PortPreviewUrl,
   SandboxVolume,
   BuildInfo,
-  SandboxBackupStateEnum,
-  Configuration,
   SshAccessDto,
   SshAccessValidationDto,
   SignedPortPreviewUrl,
@@ -20,7 +17,8 @@ import {
   CreateSandboxSnapshot,
   UpdateSandboxNetworkSettings,
 } from '@daytona/api-client'
-import { Resources, Daytona } from './Daytona'
+import { Daytona } from './Daytona'
+import type { Resources } from './Daytona'
 import type { CodeLanguage } from './Daytona'
 import {
   FileSystemApi,
@@ -38,7 +36,7 @@ import { LspLanguageId, LspServer } from './LspServer'
 import { DaytonaError, DaytonaNotFoundError, DaytonaTimeoutError, DaytonaValidationError } from './errors/DaytonaError'
 import { CODE_TOOLBOX_LANGUAGE_LABEL } from './Daytona'
 import { ComputerUse } from './ComputerUse'
-import { AxiosInstance } from 'axios'
+import type { AxiosInstance } from 'axios'
 import { CodeInterpreter } from './CodeInterpreter'
 import { WithInstrumentation } from './utils/otel.decorator'
 

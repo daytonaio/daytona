@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VolumeDto, VolumesApi } from '@daytona/api-client'
+import { VolumesApi } from '@daytona/api-client'
+import type { VolumeDto } from '@daytona/api-client'
 import { DaytonaNotFoundError } from './errors/DaytonaError'
 import { WithInstrumentation } from './utils/otel.decorator'
 

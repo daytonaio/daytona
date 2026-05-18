@@ -3,18 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  ObjectStorageApi,
-  SnapshotDto,
-  SnapshotsApi,
-  SnapshotState,
-  CreateSnapshot,
-  Configuration,
-  PaginatedSnapshots as PaginatedSnapshotsDto,
-} from '@daytona/api-client'
+import { ObjectStorageApi, SnapshotsApi, SnapshotState, Configuration } from '@daytona/api-client'
+import type { SnapshotDto, CreateSnapshot, PaginatedSnapshots as PaginatedSnapshotsDto } from '@daytona/api-client'
 import { DaytonaError } from './errors/DaytonaError'
 import { Image } from './Image'
-import { Resources } from './Daytona'
+import type { Resources } from './Daytona'
 import { processStreamingResponse } from './utils/Stream'
 import { dynamicImport } from './utils/Import'
 import { WithInstrumentation } from './utils/otel.decorator'

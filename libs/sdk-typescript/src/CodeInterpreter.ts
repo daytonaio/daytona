@@ -8,7 +8,8 @@
  */
 
 import WebSocket from 'isomorphic-ws'
-import { InterpreterApi, InterpreterContext } from '@daytona/toolbox-api-client'
+import { InterpreterApi } from '@daytona/toolbox-api-client'
+import type { InterpreterContext } from '@daytona/toolbox-api-client'
 import { Configuration } from '@daytona/api-client'
 import {
   DaytonaConnectionError,
@@ -16,7 +17,7 @@ import {
   DaytonaTimeoutError,
   DaytonaValidationError,
 } from './errors/DaytonaError'
-import { ExecutionError, ExecutionResult, RunCodeOptions } from './types/CodeInterpreter'
+import type { ExecutionError, ExecutionResult, RunCodeOptions } from './types/CodeInterpreter'
 import { createSandboxWebSocket } from './utils/WebSocket'
 
 type CloseEvent = {
