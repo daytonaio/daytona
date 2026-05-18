@@ -5,7 +5,7 @@
 set -e
 
 # Validate DAYTONA_BASE_API_URL is a well-formed URL
-if ! echo "$DAYTONA_BASE_API_URL" | grep -Eq '^https?://[a-zA-Z0-9./?=_-]*$'; then
+if ! echo "$DAYTONA_BASE_API_URL" | grep -Eq '^https?://[a-zA-Z0-9.:/?=_-]*$'; then
     echo "Error: DAYTONA_BASE_API_URL is not a valid URL."
     exit 1
 fi

@@ -13,6 +13,7 @@ const outDir = '../../dist/apps/dashboard'
 
 export default defineConfig((mode) => ({
   root: __dirname,
+  base: process.env.VITE_BASE_PATH || '/',
   cacheDir: '../../node_modules/.vite/apps/dashboard',
   server: {
     port: 3000,

@@ -1,18 +1,34 @@
 FROM node:20-alpine AS builder
 
+ENV CI=true
+
 RUN npm install -g corepack && corepack enable
 
 WORKDIR /daytona
 
-COPY . .
+# Yarn caching layer
+COPY package.json yarn.lock .yarnrc.yml ./
+RUN yarn install --immutable
 
-RUN yarn
+# Nx + TS config
+COPY nx.json tsconfig.base.json .nxignore ./
 
-RUN VITE_BASE_API_URL=%DAYTONA_BASE_API_URL% yarn nx build dashboard --configuration=production --nxBail=true
+# App source
+COPY apps/dashboard/ apps/dashboard/
+
+# Lib dependencies
+COPY libs/api-client/ libs/api-client/
+COPY libs/analytics-api-client/ libs/analytics-api-client/
+COPY libs/toolbox-api-client/ libs/toolbox-api-client/
+COPY libs/sdk-typescript/ libs/sdk-typescript/
+
+ENV NX_DAEMON=false
+
+RUN VITE_BASE_PATH=/dashboard/ VITE_API_URL=%DAYTONA_BASE_API_URL%/api yarn nx build dashboard --configuration=production --nxBail=true
 
 FROM nginx:alpine as dashboard
 
-COPY --from=builder /daytona/dist/apps/dashboard /usr/share/nginx/html
+COPY --from=builder /daytona/dist/apps/dashboard /usr/share/nginx/html/dashboard
 COPY --from=builder /daytona/apps/dashboard/docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /daytona/apps/dashboard/docker/entrypoint.sh /entrypoint.sh
 
