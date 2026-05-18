@@ -89,7 +89,7 @@ const RunnerDetailsSheet: React.FC<RunnerDetailsSheetProps> = ({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-dvw sm:w-[800px] p-0 flex flex-col gap-0 [&>button]:hidden">
         <SheetHeader className="space-y-0 flex flex-row justify-between items-center p-6">
-          <SheetTitle className="text-2xl font-medium">Runner Details</SheetTitle>
+          <SheetTitle>Runner Details</SheetTitle>
           <div className="flex items-center">
             {deletePermitted && (
               <Button

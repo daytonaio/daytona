@@ -270,7 +270,7 @@ export function SnapshotSheet({
       >
         <SheetHeader className="flex flex-row items-center justify-between p-4 px-5 space-y-0">
           <div className="min-w-0">
-            <SheetTitle className="text-lg font-medium">Snapshot Details</SheetTitle>
+            <SheetTitle>Snapshot Details</SheetTitle>
           </div>
           <div className="flex items-center justify-end shrink-0">
             <Button variant="ghost" size="icon-sm" disabled={!hasPrev} onClick={() => onNavigate('prev')}>
