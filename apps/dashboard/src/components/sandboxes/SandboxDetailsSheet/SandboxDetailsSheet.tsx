@@ -4,6 +4,7 @@
  */
 
 import { Button } from '@/components/ui/button'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   ResizableSheetContent,
@@ -13,18 +14,15 @@ import {
   type ResizableSheetContentRef,
 } from '@/components/ui/sheet'
 import { useSidebar } from '@/components/ui/sidebar'
-import { Tabs, TabsContent } from '@/components/ui/tabs'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Skeleton } from '@/components/ui/skeleton'
+import { getSandboxQueryErrorStatus, useSandboxQuery } from '@/hooks/queries/useSandboxQuery'
 import { useConfig } from '@/hooks/useConfig'
+import { useSandboxDetailsWsSync } from '@/hooks/useSandboxWsSync'
 import { SandboxSessionProvider } from '@/providers/SandboxSessionProvider'
-import type { Sandbox } from '@daytona/api-client'
-import { ChevronDown, ChevronUp, ChevronsRight, X } from 'lucide-react'
-import React, { useCallback, useEffect, useState } from 'react'
-import { SandboxActionsSegmented } from '../SandboxActionsSegmented'
-import { SandboxInfoPanel } from '../SandboxInfoPanel'
-import { SandboxDetailsHeader } from './SandboxDetailsHeader'
-import { SandboxDetailsTabContent } from './SandboxDetailsTabContent'
-import { SandboxDetailsTabsList, SandboxOverviewTabTrigger } from './SandboxDetailsTabsList'
+import { ChevronDown, ChevronUp, Container, X } from 'lucide-react'
+import React, { Ref, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { InfoPanelSkeleton } from '../SandboxInfoPanel'
+import { SandboxDetailsSheetContent } from './SandboxDetailsSheetContent'
 
 export type SandboxDetailsSheetTabValue =
   | 'overview'
@@ -36,9 +34,14 @@ export type SandboxDetailsSheetTabValue =
   | 'filesystem'
   | 'vnc'
 
+export interface SandboxSheetRef {
+  open: () => void
+  close: () => void
+}
+
 export interface SandboxDetailsSheetProps {
-  sandbox: Sandbox | null
-  open: boolean
+  sandboxId: string | null
+  ref?: Ref<SandboxSheetRef>
   onOpenChange: (open: boolean) => void
   sandboxIsLoading: Record<string, boolean>
   handleStart: (id: string) => void
@@ -93,9 +96,44 @@ function isNestedAlertDialogEvent(event: Event) {
   )
 }
 
+function SandboxDetailsSheetSkeleton() {
+  return (
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden max-w-[450px]">
+      <div className="flex h-[41px] shrink-0 items-center gap-4 border-b border-border px-4 border-r">
+        <Skeleton className="h-4 w-16" />
+        <Skeleton className="h-4 w-12" />
+        <Skeleton className="h-4 w-14" />
+        <Skeleton className="h-4 w-16" />
+      </div>
+      <div className="border-b border-border p-5">
+        <Skeleton className="mb-2 h-5 w-48" />
+        <Skeleton className="h-4 w-64 max-w-full" />
+      </div>
+      <ScrollArea fade="mask" className="min-h-0 flex-1">
+        <InfoPanelSkeleton />
+      </ScrollArea>
+    </div>
+  )
+}
+
+function SandboxDetailsSheetEmptyState({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="flex min-h-0 flex-1 items-center justify-center p-6">
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Container className="size-4" />
+          </EmptyMedia>
+          <EmptyTitle>{title}</EmptyTitle>
+          <EmptyDescription>{description}</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    </div>
+  )
+}
+
 const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
-  sandbox,
-  open,
+  sandboxId,
   onOpenChange,
   sandboxIsLoading,
   handleStart,
@@ -115,17 +153,32 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   initialTab = 'overview',
   activeTab: activeTabProp,
   onTabChange,
+  ref,
 }) => {
+  const [open, setOpen] = useState(false)
   const { currentWidth: sidebarWidth } = useSidebar()
-  const sheetContentRef = React.useRef<ResizableSheetContentRef>(null)
-  const isHeaderNavigationRef = React.useRef(false)
-  const initializedOpenSandboxIdRef = React.useRef<string | null>(null)
+  const sheetContentRef = useRef<ResizableSheetContentRef>(null)
+  const isHeaderNavigationRef = useRef(false)
+  const initializedOpenSandboxIdRef = useRef<string | null>(null)
   const [internalActiveTab, setInternalActiveTab] = useState<SandboxDetailsSheetTabValue>('overview')
   const activeTab = activeTabProp ?? internalActiveTab
   const [viewportWidth, setViewportWidth] = useState(() => getViewportWidth())
   const config = useConfig()
   const spendingTabAvailable = !!config.analyticsApiUrl
   const isDesktop = viewportWidth >= MOBILE_BREAKPOINT
+
+  const { data: sandbox, error, isError, isLoading } = useSandboxQuery(sandboxId || '')
+  useSandboxDetailsWsSync(sandboxId || '')
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen)
+    onOpenChange(isOpen)
+  }
+
+  useImperativeHandle(ref, () => ({
+    open: () => setOpen(true),
+    close: () => setOpen(false),
+  }))
 
   useEffect(() => {
     const handleResize = () => {
@@ -189,15 +242,15 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   )
 
   useEffect(() => {
-    if (!open) {
+    if (!open || !sandboxId) {
       initializedOpenSandboxIdRef.current = null
       return
     }
 
-    if (initializedOpenSandboxIdRef.current === sandbox?.id) {
+    if (initializedOpenSandboxIdRef.current === sandboxId) {
       return
     }
-    initializedOpenSandboxIdRef.current = sandbox?.id ?? null
+    initializedOpenSandboxIdRef.current = sandboxId
 
     if (isHeaderNavigationRef.current) {
       isHeaderNavigationRef.current = false
@@ -205,7 +258,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
     }
 
     resetToTab(initialTab, true)
-  }, [initialTab, open, resetToTab, sandbox?.id])
+  }, [initialTab, open, resetToTab, sandboxId])
 
   useEffect(() => {
     if (!open || activeTabProp === undefined) {
@@ -229,40 +282,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
     }
   }, [activeTab, handleTabChange, spendingTabAvailable])
 
-  if (!sandbox) return null
-
-  const actionDisabled = sandboxIsLoading[sandbox.id]
-  const sandboxHeaderActions =
-    writePermitted || deletePermitted ? (
-      <SandboxActionsSegmented
-        sandbox={sandbox}
-        writePermitted={writePermitted}
-        deletePermitted={deletePermitted}
-        actionsDisabled={actionDisabled}
-        onStart={() => handleStart(sandbox.id)}
-        onStop={() => handleStop(sandbox.id)}
-        onArchive={() => handleArchive(sandbox.id)}
-        onRecover={() => handleRecover(sandbox.id)}
-        onDelete={() => handleDelete(sandbox.id)}
-        onCreateSshAccess={() => onCreateSshAccess(sandbox.id)}
-        onRevokeSshAccess={() => onRevokeSshAccess(sandbox.id)}
-        onScreenRecordings={() => onScreenRecordings(sandbox.id)}
-      />
-    ) : null
-
-  const sandboxInfoPanel = (
-    <ScrollArea fade="mask" className="flex-1 min-h-0">
-      <SandboxInfoPanel
-        sandbox={sandbox}
-        getRegionName={getRegionName}
-        actionsDisabled={actionDisabled}
-        writePermitted={writePermitted}
-        onCreateSshAccess={() => onCreateSshAccess(sandbox.id)}
-        onRevokeSshAccess={() => onRevokeSshAccess(sandbox.id)}
-        onScreenRecordings={() => onScreenRecordings(sandbox.id)}
-      />
-    </ScrollArea>
-  )
+  const actionDisabled = sandbox ? !!sandboxIsLoading[sandbox.id] : false
 
   const maxWidth = isDesktop ? getExpandedWidth(viewportWidth, sidebarWidth) : viewportWidth
   const minWidth = isDesktop
@@ -279,8 +299,10 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
     onNavigate(direction)
   }
 
+  const isNotFound = isError && getSandboxQueryErrorStatus(error) === 404
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <ResizableSheetContent
         ref={sheetContentRef}
         side="right"
@@ -314,7 +336,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
               <ChevronDown className="size-4" />
               <span className="sr-only">Next sandbox</span>
             </Button>
-            <Button variant="ghost" size="icon-sm" onClick={() => onOpenChange(false)} disabled={actionDisabled}>
+            <Button variant="ghost" size="icon-sm" onClick={() => handleOpenChange(false)} disabled={actionDisabled}>
               <X className="size-4" />
               <span className="sr-only">Close</span>
             </Button>
@@ -322,69 +344,40 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
         </SheetHeader>
 
         <SandboxSessionProvider>
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="flex flex-1 min-h-0 flex-col gap-0">
-            {isDesktop ? (
-              activeTab === 'overview' ? (
-                <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-                  <SandboxDetailsTabsList spendingTabAvailable={spendingTabAvailable} showOverview />
-                  <div className="flex min-h-0 flex-1 max-w-[450px] flex-col">
-                    <SandboxDetailsHeader sandbox={sandbox} actions={sandboxHeaderActions} />
-                    {sandboxInfoPanel}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-1 min-h-0 overflow-hidden">
-                  <div className="flex w-[450px] shrink-0 min-h-0 flex-col border-r border-border">
-                    <SandboxOverviewTabTrigger />
-                    <SandboxDetailsHeader sandbox={sandbox} actions={sandboxHeaderActions} />
-                    {sandboxInfoPanel}
-                  </div>
-                  <div className="flex min-w-0 min-h-0 flex-1 flex-col overflow-hidden">
-                    <div className="animate-in fade-in slide-in-from-left-3 duration-500 ease-out">
-                      <SandboxDetailsTabsList
-                        spendingTabAvailable={spendingTabAvailable}
-                        showOverview={false}
-                        leadingContent={
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                className="mx-1 size-8 text-muted-foreground hover:text-foreground"
-                                onClick={() => resetToOverview()}
-                              >
-                                <ChevronsRight className="size-4" />
-                                <span className="sr-only">Collapse</span>
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Collapse</TooltipContent>
-                          </Tooltip>
-                        }
-                      />
-                    </div>
-                    <div className="flex min-w-0 min-h-0 flex-1 flex-col overflow-hidden">
-                      <div className="flex min-h-0 flex-1 flex-col animate-in fade-in slide-in-from-right-20 duration-300 ease-out">
-                        <SandboxDetailsTabContent sandbox={sandbox} spendingTabAvailable={spendingTabAvailable} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )
-            ) : (
-              <>
-                <div className="flex min-h-0 shrink-0 flex-col">
-                  <SandboxDetailsHeader sandbox={sandbox} actions={sandboxHeaderActions} />
-                  <SandboxDetailsTabsList spendingTabAvailable={spendingTabAvailable} showOverview />
-                </div>
-
-                <TabsContent value="overview" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col">
-                  {sandboxInfoPanel}
-                </TabsContent>
-
-                <SandboxDetailsTabContent sandbox={sandbox} spendingTabAvailable={spendingTabAvailable} />
-              </>
-            )}
-          </Tabs>
+          {isNotFound ? (
+            <SandboxDetailsSheetEmptyState
+              title="Sandbox not found"
+              description="This sandbox may not exist, or you may not have access to it in this organization."
+            />
+          ) : sandbox ? (
+            <SandboxDetailsSheetContent
+              sandbox={sandbox}
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+              isDesktop={isDesktop}
+              spendingTabAvailable={spendingTabAvailable}
+              actionDisabled={actionDisabled}
+              writePermitted={writePermitted}
+              deletePermitted={deletePermitted}
+              handleStart={handleStart}
+              handleStop={handleStop}
+              handleDelete={handleDelete}
+              handleArchive={handleArchive}
+              handleRecover={handleRecover}
+              getRegionName={getRegionName}
+              onCreateSshAccess={onCreateSshAccess}
+              onRevokeSshAccess={onRevokeSshAccess}
+              onScreenRecordings={onScreenRecordings}
+              onResetToOverview={resetToOverview}
+            />
+          ) : isLoading ? (
+            <SandboxDetailsSheetSkeleton />
+          ) : (
+            <SandboxDetailsSheetEmptyState
+              title="Failed to load sandbox"
+              description="Something went wrong while loading this sandbox. Please try again."
+            />
+          )}
         </SandboxSessionProvider>
       </ResizableSheetContent>
     </Sheet>
