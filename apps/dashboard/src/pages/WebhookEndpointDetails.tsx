@@ -4,7 +4,7 @@
  */
 
 import { CopyButton } from '@/components/CopyButton'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { TimestampTooltip } from '@/components/TimestampTooltip'
 import {
   AlertDialog,
@@ -137,11 +137,10 @@ const WebhookEndpointDetails: React.FC = () => {
 
   return (
     <PageLayout>
-      <PageHeader>
-        <PageTitle>Webhooks</PageTitle>
-      </PageHeader>
+      <PageHeader />
 
       <PageContent className="gap-6">
+        <PageIntro title="Webhooks" className="mb-0" />
         <div className="flex items-center gap-3 min-w-0">
           <Button variant="ghost" size="icon-sm" className="shrink-0" onClick={() => navigate(RoutePath.WEBHOOKS)}>
             <ArrowLeft className="w-4 h-4" />
