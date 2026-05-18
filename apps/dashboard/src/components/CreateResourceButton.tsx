@@ -8,14 +8,11 @@ import { cn } from '@/lib/utils'
 import { Plus } from 'lucide-react'
 import type { ComponentProps, ReactNode } from 'react'
 
-export function CreateResourceButton({
-  resource,
-  children,
-  className,
-  ...props
-}: ComponentProps<typeof Button> & {
+type CreateResourceButtonProps = Omit<ComponentProps<typeof Button>, 'asChild'> & {
   resource: ReactNode
-}) {
+}
+
+export function CreateResourceButton({ resource, children, className, ...props }: CreateResourceButtonProps) {
   return (
     <Button
       variant="default"

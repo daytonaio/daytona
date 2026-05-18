@@ -84,7 +84,7 @@ export function SandboxTableHeader({
 
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="shrink-0">
+              <Button variant="outline" className="shrink-0" aria-label="Filter">
                 <ListFilter className="w-4 h-4" />
                 <span className="max-[420px]:hidden">Filter</span>
               </Button>

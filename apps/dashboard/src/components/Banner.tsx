@@ -170,7 +170,7 @@ export const Banner = ({
       <div className={cn(bannerVariants({ variant }))} role={role}>
         <div
           className={cn(
-            'grid grid-cols-[auto_1fr_auto_auto] grid-rows-[auto_auto] sm:grid-rows-1 items-center gap-x-2 px-4 sm:px-5 py-1 mx-auto justify-center',
+            'grid grid-cols-[auto_1fr_auto_auto] grid-rows-[auto_auto] sm:grid-rows-1 items-center gap-x-2 px-3 py-1 mx-auto justify-center',
             bannerClassName,
           )}
         >
