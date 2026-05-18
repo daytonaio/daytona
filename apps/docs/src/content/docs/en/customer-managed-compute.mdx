@@ -1,0 +1,352 @@
+---
+title: Customer Managed Compute
+description: Bring your own compute (BYOC) infrastructure to provision and scale Daytona sandboxes.
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+import CustomerManagedComputeDiagram from '@components/CustomerManagedComputeDiagram.astro'
+
+Customer Managed Compute enables you to run sandbox workloads on your own infrastructure while using Daytona's control plane to manage them. Daytona uses regions for grouping runner nodes: instances running the sandbox workloads. Each sandbox is assigned to a single region.
+
+Daytona provides two [built-in regions](/docs/en/regions) (**US** and **EU**) for shared compute resources and handling provisioning, maintenance, monitoring, and scaling on your behalf.
+
+You can define one or more [custom regions](#custom-regions) and attach your own runner nodes. Custom regions can also include a region-specific sandbox proxy service and snapshot manager service.
+
+<CustomerManagedComputeDiagram />
+
+## Custom regions
+
+Custom regions are created and managed by your organization, allowing you to use your own runner nodes and infrastructure and scale compute resources independently within each region. This provides maximum control over data locality, compliance, and infrastructure configuration.
+
+Additionally, custom regions have no limits applied for concurrent resource usage, giving you full control over capacity and performance.
+
+### Create a custom region
+
+Daytona provides methods to create a custom region using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions) or programmatically using the [API](/docs/en/tools/api#daytona/tag/organizations/POST/regions).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions)
+2. Click the **Create Region** button
+3. Enter the **region name**, **proxy URL**, **SSH gateway URL**, and **snapshot manager URL**
+
+- **Region name**: a unique identifier for your region; must contain only letters, numbers, underscores, periods, and hyphens
+- **Proxy URL** (optional): the URL of the proxy service that routes traffic to sandboxes in this region
+- **SSH gateway URL** (optional): the URL of the SSH gateway that handles SSH connections to sandboxes in this region
+- **Snapshot manager URL** (optional): the URL of the snapshot manager that handles storage and retrieval of snapshots in this region
+
+4. Click **Create** to create the region
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/regions \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+    "name": "my-custom-region",
+    "proxyUrl": "https://proxy.example.com",
+    "sshGatewayUrl": "ssh://ssh-gateway.example.com",
+    "snapshotManagerUrl": "https://snapshot-manager.example.com"
+  }'
+```
+
+</TabItem>
+</Tabs>
+
+### List custom regions
+
+Daytona provides methods to list all available regions for your organization using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions) or programmatically using the [API](/docs/en/tools/api#daytona/tag/organizations/GET/regions).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions)
+2. The list of regions is displayed in the **Regions** table with the following columns:
+
+- **Name**: the name of the region
+- **ID**: the ID of the region
+- **Created**: the date and time the region was created
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/regions \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+### Get a custom region
+
+Daytona provides methods to get the details of a specific region using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions) or programmatically using the [API](/docs/en/tools/api#daytona/tag/organizations/GET/regions/{id}).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions)
+2. Click the region you want to get the details of
+3. The region details are displayed in the **Region Details** panel with the following information:
+
+- **Name**: the name of the region
+- **ID**: the ID of the region
+- **Created**: the date and time the region was created
+- **URLs**: the URLs of the region's proxy, SSH gateway, and snapshot manager services
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/regions/{regionId} \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+### Update a custom region
+
+Daytona provides methods to update the configuration of an existing custom region using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions) or programmatically using the [API](/docs/en/tools/api#daytona/tag/organizations/PATCH/regions/{id}).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions)
+2. Click the region you want to update the configuration of
+3. Click the three dots menu (**⋮**) next to the region and select the **Edit** icon
+4. Enter the new **proxy URL**, **SSH gateway URL**, and **snapshot manager URL**
+
+- **Proxy URL** (optional): the new URL of the custom proxy
+- **SSH gateway URL** (optional): the new URL of the custom SSH gateway
+- **Snapshot manager URL** (optional): the new URL of the custom snapshot manager
+
+5. Click **Update** to update the region configuration
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/regions/{regionId} \
+  --request PATCH \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+    "proxyUrl": "https://new-proxy.example.com",
+    "sshGatewayUrl": "ssh://new-ssh-gateway.example.com",
+    "snapshotManagerUrl": "https://new-snapshot-manager.example.com"
+  }'
+```
+
+</TabItem>
+</Tabs>
+
+### Delete a custom region
+
+Daytona provides methods to delete a custom region using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions) or programmatically using the [API](/docs/en/tools/api#daytona/tag/organizations/DELETE/regions/{id}). Regions that have runners assigned to them cannot be deleted.
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions)
+2. Click the region you want to delete
+3. Click the three dots menu (**⋮**) next to the region and select **Delete**
+4. Confirm the deletion
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/regions/{regionId} \
+  --request DELETE \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+## Deployments
+
+Daytona provides official [Terraform modules](#terraform) and [Helm charts](#helm-charts) for provisioning and operating custom regions with your own compute infrastructure.
+
+### Terraform
+
+Daytona provides Terraform modules you can use to build and scale custom regions with your own compute. The AWS EC2 runner module provisions region runner nodes, applies security and instance configuration, and registers each runner to the target Daytona region.
+
+View the full documentation and examples in the GitHub repository:
+
+- [daytonaio/terraform-modules](https://github.com/daytonaio/terraform-modules)
+
+### Helm charts
+
+Daytona provides Helm charts for deploying region-scoped Daytona services on Kubernetes. The `daytona-region` chart is focused on custom region infrastructure and deploys the region proxy, optional snapshot manager, and registration job required to operate that region in your cluster.
+
+View the full documentation and examples in the GitHub repository:
+
+- [daytonaio/helm-charts](https://github.com/daytonaio/helm-charts)
+
+#### Prerequisites
+
+- Kubernetes 1.19+
+- Helm 3.2.0+
+- A Daytona organization with API access
+- DNS records pointing to your cluster's ingress
+- S3-compatible storage for snapshot manager (optional)
+
+#### Installation
+
+1. Create a values file for your custom region
+
+```yaml
+# Region name - unique identifier for this region
+regionName: 'my-custom-region'
+
+# Proxy URL - the full URL where the proxy will be accessible
+proxyUrl: 'https://proxy.mycompany.daytona.io'
+
+# Daytona API credentials (obtain from your Daytona organization)
+daytonaApiUrl: 'https://api.daytona.io/api'
+daytonaApiKey: 'dtn_your_api_key_here'
+
+# Enable region registration (required for first install)
+registration:
+  enabled: true
+
+# Optional: Snapshot manager for local snapshot storage
+services:
+  snapshotManager:
+    enabled: true
+    ingress:
+      enabled: true
+      hostname: 'snapshots.mycompany.daytona.io'
+    storage:
+      s3:
+        region: 'us-east-1'
+        bucket: 'my-daytona-snapshots'
+        accessKey: 'AKIAXXXXXXXXXX'
+        secretKey: 'your-secret-key'
+```
+
+2. Install the Helm chart
+
+```bash
+helm install my-region ./charts/daytona-region -f my-values.yaml
+```
+
+#### Configuration
+
+**Required Configuration**
+
+| Parameter           | Description                       | Example                             |
+| ------------------- | --------------------------------- | ----------------------------------- |
+| **`regionName`**    | Unique identifier for this region | **`eu-west-region`**                |
+| **`proxyUrl`**      | Full URL to the proxy service     | **`https://proxy.eu.mycompany.io`** |
+| **`daytonaApiUrl`** | Daytona API endpoint              | **`https://api.daytona.io/api`**    |
+| **`daytonaApiKey`** | API key for authentication        | **`dtn_xxx...`**                    |
+
+**Global Configuration**
+
+| Parameter                     | Description                    | Default                                          |
+| ----------------------------- | ------------------------------ | ------------------------------------------------ |
+| **`global.imageRegistry`**    | Global image registry override | **`""`**                                         |
+| **`global.imagePullSecrets`** | Global image pull secrets      | **`[]`**                                         |
+| **`global.storageClass`**     | Global storage class           | **`""`**                                         |
+| **`global.namespace`**        | Namespace override             | **`""`** <small>(uses Release.Namespace)</small> |
+
+**Proxy Service Configuration**
+
+| Parameter                                | Description                | Default                                                                                                                                 |
+| ---------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **`services.proxy.image.repository`**    | Proxy image repository     | **`daytonaio/daytona-proxy`**                                                                                                           |
+| **`services.proxy.image.tag`**           | Proxy image tag            | **`""`** <small>(Chart.AppVersion)</small>                                                                                              |
+| **`services.proxy.service.type`**        | Service type               | **`ClusterIP`**                                                                                                                         |
+| **`services.proxy.service.port`**        | Service port               | **`4000`**                                                                                                                              |
+| **`services.proxy.ingress.enabled`**     | Enable ingress             | **`true`**                                                                                                                              |
+| **`services.proxy.ingress.className`**   | Ingress class              | **`nginx`**                                                                                                                             |
+| **`services.proxy.ingress.tls`**         | Enable TLS                 | **`true`**                                                                                                                              |
+| **`services.proxy.ingress.selfSigned`**  | Generate self-signed certs | **`false`**                                                                                                                             |
+| **`services.proxy.replicaCount`**        | Number of replicas         | **`1`**                                                                                                                                 |
+| **`services.proxy.autoscaling.enabled`** | Enable HPA                 | **`false`**                                                                                                                             |
+| **`services.proxy.resources`**           | Resource limits/requests   | See [**<u>values.yaml</u>**](https://raw.githubusercontent.com/daytonaio/helm-charts/refs/heads/main/charts/daytona-region/values.yaml) |
+
+**Snapshot Manager Configuration**
+
+| Parameter                                           | Description                                    | Default        |
+| --------------------------------------------------- | ---------------------------------------------- | -------------- |
+| **`services.snapshotManager.enabled`**              | Enable snapshot manager                        | **`false`**    |
+| **`services.snapshotManager.image.repository`**     | Image repository                               | **`registry`** |
+| **`services.snapshotManager.service.port`**         | Service port                                   | **`5000`**     |
+| **`services.snapshotManager.ingress.enabled`**      | Enable ingress                                 | **`false`**    |
+| **`services.snapshotManager.ingress.hostname`**     | Ingress hostname (required if ingress enabled) | **`""`**       |
+| **`services.snapshotManager.storage.s3.region`**    | S3 region                                      | **`""`**       |
+| **`services.snapshotManager.storage.s3.bucket`**    | S3 bucket name                                 | **`""`**       |
+| **`services.snapshotManager.storage.s3.accessKey`** | S3 access key (if not using IRSA)              | **`""`**       |
+| **`services.snapshotManager.storage.s3.secretKey`** | S3 secret key (if not using IRSA)              | **`""`**       |
+| **`services.snapshotManager.storage.s3.encrypt`**   | Enable S3 encryption                           | **`true`**     |
+| **`services.snapshotManager.storage.s3.secure`**    | Use HTTPS for S3                               | **`true`**     |
+
+**Registration Configuration**
+
+| Parameter                           | Description                     | Default                                                                                                                                 |
+| ----------------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **`registration.enabled`**          | Enable region registration hook | **`true`**                                                                                                                              |
+| **`registration.existingSecret`**   | Use existing secret for API key | **`""`**                                                                                                                                |
+| **`registration.image.repository`** | Job image                       | **`daytonaio/kubectl`**                                                                                                                 |
+| **`registration.resources`**        | Job resource limits             | See [**<u>values.yaml</u>**](https://raw.githubusercontent.com/daytonaio/helm-charts/refs/heads/main/charts/daytona-region/values.yaml) |
+
+**URL Derivation**
+
+The `proxyUrl` is the source of truth for proxy configuration. The following values are automatically derived:
+
+- **Proxy hostname**: extracted from **`proxyUrl`** (e.g., `proxy.example.com`)
+- **Proxy port**: extracted from **`proxyUrl`** (e.g., `4000`) or defaults to standard ports
+- **Protocol**: extracted from **`proxyUrl`** (e.g., `https`)
+- **Cookie domain**: base domain extracted by stripping first subdomain (e.g., `example.com`)
+- **Ingress hosts**: proxy hostname + wildcard for sandbox subdomains
+
+**TLS Configuration**
+
+The proxy ingress creates rules for both the proxy hostname and a wildcard pattern for sandbox subdomains:
+
+- `proxy.example.com` - Main proxy endpoint
+- `*.proxy.example.com` - Sandbox subdomain routing
+
+Your TLS certificate should cover both patterns. Options:
+
+1. **cert-manager**: automatically provisions certificates
+2. **Self-signed**: set **`services.proxy.ingress.selfSigned: true`**
+3. **Custom certificate**: provide via **`services.proxy.ingress.secrets`**
+
+#### S3 Authentication for Snapshot Manager
+
+The snapshot manager supports multiple authentication methods for S3:
+
+##### 1. IRSA (IAM Roles for Service Accounts) - Recommended for AWS
+
+```yaml
+services:
+  snapshotManager:
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: 'arn:aws:iam::123456789:role/daytona-snapshots'
+    storage:
+      s3:
+        region: 'us-east-1'
+        bucket: 'my-snapshots'
+        # No accessKey/secretKey needed
+```
+
+##### 2. Static Credentials
+
+```yaml
+services:
+  snapshotManager:
+    storage:
+      s3:
+        region: 'us-east-1'
+        bucket: 'my-snapshots'
+        accessKey: 'AKIAXXXXXXXXXX'
+        secretKey: 'your-secret-key'
+```
+
+##### 3. Existing Secret
+
+```yaml
+services:
+  snapshotManager:
+    storage:
+      s3:
+        region: 'us-east-1'
+        bucket: 'my-snapshots'
+        existingSecret: 'my-s3-credentials'
+        # Secret must contain keys: accessKey, secretKey
+```
