@@ -224,12 +224,12 @@ function PageIntro({
   return (
     <div className={cn('mb-8 shrink-0 flex flex-col gap-1', className)}>
       <div className="flex min-w-0 flex-wrap items-start justify-between gap-x-4 gap-y-3">
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="flex flex-1 flex-col gap-1">
           <PageTitle>{title}</PageTitle>
           {desc ? <div className="text-sm text-muted-foreground">{desc}</div> : null}
         </div>
         {actions ? (
-          <div className="ml-auto flex shrink-0 flex-wrap items-center justify-end gap-x-3 gap-y-2">{actions}</div>
+          <div className="ml-auto flex shrink-0 flex-wrap items-center justify-end gap-x-1 gap-y-2">{actions}</div>
         ) : null}
       </div>
     </div>

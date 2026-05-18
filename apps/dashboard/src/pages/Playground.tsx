@@ -138,7 +138,7 @@ const Playground: React.FC = () => {
                         <div className="p-4 overflow-auto">{sidePanel}</div>
                       </DrawerContent>
                     </Drawer>
-                    <PlaygroundLayoutContent className="[&>*]:w-full [&>*]:max-w-[min(90%,1024px)]">
+                    <PlaygroundLayoutContent className="[&>*]:w-full xs:[&>*]:max-w-[min(90%,1024px)]">
                       {playgroundCategory === PlaygroundCategories.SANDBOX && <SandboxCodeSnippetsResponse />}
                       {playgroundCategory === PlaygroundCategories.TERMINAL && <WebTerminal />}
                       {playgroundCategory === PlaygroundCategories.VNC && <VNCDesktopWindowResponse />}

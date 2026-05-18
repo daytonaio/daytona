@@ -36,7 +36,7 @@ const WebTerminal: React.FC<{ className?: string }> = ({ className }) => {
                 ) : (
                   <motion.p
                     key="error"
-                    className="flex flex-col items-center justify-center gap-2"
+                    className="flex flex-col items-center justify-center gap-2 text-center px-2"
                     {...motionLoadingProps}
                   >
                     There was an error loading the terminal.

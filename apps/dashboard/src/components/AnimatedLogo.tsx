@@ -4,7 +4,7 @@
  */
 
 import { motion, MotionProps } from 'motion/react'
-import { ComponentProps } from 'react'
+import { ComponentProps, useId } from 'react'
 
 const wordmarkProps = (index: number): MotionProps => ({
   initial: {
@@ -51,6 +51,8 @@ type AnimatedLogoProps = ComponentProps<typeof motion.svg> & {
 const animationProps = (animated: boolean, props: MotionProps): MotionProps => (animated ? props : {})
 
 export function AnimatedLogo({ animated = true, ...props }: AnimatedLogoProps) {
+  const clipPathId = useId()
+
   return (
     <motion.svg width="266" height="60" viewBox="0 0 266 60" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <motion.g>
@@ -99,7 +101,7 @@ export function AnimatedLogo({ animated = true, ...props }: AnimatedLogoProps) {
         />
       </motion.g>
 
-      <g clipPath="url(#clip0_1096_829)">
+      <g clipPath={`url(#${clipPathId})`}>
         <motion.g {...animationProps(animated, logoContainerProps)}>
           <motion.rect
             {...animationProps(animated, logoRectProps(0))}
@@ -155,7 +157,7 @@ export function AnimatedLogo({ animated = true, ...props }: AnimatedLogoProps) {
             fill="currentColor"
           />
           <motion.rect
-            {...animationProps(animated, logoRectProps(7))}
+            {...animationProps(animated, logoRectProps(6))}
             x="27.5098"
             y="20.2285"
             width="6.30469"
@@ -164,7 +166,7 @@ export function AnimatedLogo({ animated = true, ...props }: AnimatedLogoProps) {
             fill="currentColor"
           />
           <motion.rect
-            {...animationProps(animated, logoRectProps(6))}
+            {...animationProps(animated, logoRectProps(7))}
             x="32.3066"
             y="24.6875"
             width="6.30469"
@@ -175,7 +177,7 @@ export function AnimatedLogo({ animated = true, ...props }: AnimatedLogoProps) {
         </motion.g>
       </g>
       <defs>
-        <clipPath id="clip0_1096_829">
+        <clipPath id={clipPathId}>
           <rect width="266" height="60" fill="white" />
         </clipPath>
       </defs>

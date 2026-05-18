@@ -130,7 +130,6 @@ const Snapshots: React.FC = () => {
 
     if (snapshotFromLoadedResults) {
       seedSnapshotDetail(snapshotFromLoadedResults)
-      setOrderedSnapshotItems(snapshotsData?.items ?? null)
     }
 
     const frameId = requestAnimationFrame(() => {
@@ -138,7 +137,7 @@ const Snapshots: React.FC = () => {
     })
 
     return () => cancelAnimationFrame(frameId)
-  }, [seedSnapshotDetail, snapshotIdParam, snapshotFromLoadedResults, snapshotsData?.items])
+  }, [seedSnapshotDetail, snapshotIdParam, snapshotFromLoadedResults])
 
   const updateSnapshotInCache = useCallback(
     (snapshotId: string, updates: Partial<SnapshotDto>) => {

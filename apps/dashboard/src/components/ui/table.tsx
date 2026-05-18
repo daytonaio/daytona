@@ -74,7 +74,7 @@ function TableContainer({
       ref={containerRef}
       data-slot="table-container"
       className={cn(
-        'relative w-full overflow-auto border border-border bg-table-cell overscroll-x-none rounded-md scrollbar-sm has-[[data-slot=empty]]:overflow-hidden',
+        'relative w-full overflow-auto border border-border bg-table-cell overscroll-x-none rounded-md scrollbar-sm has-[[data-slot=empty]]:overflow-x-hidden',
         className,
       )}
       {...props}
@@ -210,7 +210,7 @@ function TableEmptyState({
     return (
       <div
         data-slot="empty"
-        className={cn('absolute inset-x-0 top-8 bottom-0 flex items-center justify-center p-4', className)}
+        className={cn('absolute inset-x-0 top-8 bottom-0 flex justify-center p-4 items-start', className)}
       >
         <Empty className="w-full max-w-xl border-none py-8 bg-transparent">
           <EmptyHeader className="w-full">
