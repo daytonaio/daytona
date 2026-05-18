@@ -60,8 +60,12 @@ func DownloadFiles(c *gin.Context) {
 	}
 
 	const boundary = "DAYTONA-FILE-BOUNDARY"
-	c.Status(http.StatusOK)
+	// Headers must be set BEFORE any body write (or Flush). Gin's Status() is
+	// lazy so the existing ordering happens to work, but setting headers
+	// first is the canonical pattern and removes a fragile dependency on
+	// gin internals.
 	c.Header("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", boundary))
+	c.Status(http.StatusOK)
 
 	mw := multipart.NewWriter(c.Writer)
 	if err := mw.SetBoundary(boundary); err != nil {
@@ -70,7 +74,12 @@ func DownloadFiles(c *gin.Context) {
 		})
 		return
 	}
-	defer mw.Close() // ensure final boundary is written
+	// Note: do NOT use `defer mw.Close()` here. The closing boundary
+	// ("\r\n--BOUNDARY--\r\n") is the SDK's signal that the response is
+	// complete; if it is buffered behind the function-exit/flush sequence we
+	// risk silent truncation under load. We close + flush explicitly below
+	// (and on the partial-part error path) so the closing boundary is on the
+	// wire before the handler returns.
 
 	for _, path := range req.Paths {
 		f, info, downloadErr := openDownloadFile(c, path)
@@ -84,10 +93,40 @@ func DownloadFiles(c *gin.Context) {
 
 			// If streaming fails after the multipart file part has started, emitting a
 			// second error part for the same path breaks the response contract.
-			c.Error(err)
+			_ = c.Error(err)
+			// Best-effort: still emit the closing boundary and flush so the
+			// SDK sees a well-formed (if short) response rather than a
+			// silently-truncated stream that decodes to partial bytes.
+			_ = mw.Close()
+			flushResponse(c)
 			return
 		}
 		f.Close()
+		// Flush after each completed file part. This keeps progress callbacks
+		// responsive on the SDK side and prevents large inter-part buffers
+		// from accumulating in any intermediate proxy.
+		flushResponse(c)
+	}
+
+	// Explicit close + flush guarantees the closing multipart boundary is on
+	// the wire before this handler returns. Without it we'd be relying on
+	// net/http's deferred response finalization, which under load can race
+	// with proxy-side connection teardown and silently drop the last few
+	// bytes - exactly the truncation pattern observed in CI.
+	if err := mw.Close(); err != nil {
+		// Headers already on the wire; we can't switch to a JSON error now -
+		// surface via gin's error stack for logs.
+		_ = c.Error(fmt.Errorf("close multipart writer: %w", err))
+	}
+	flushResponse(c)
+}
+
+// flushResponse pushes any buffered response bytes onto the wire. Errors are
+// non-fatal: a non-flushable writer or a hung-up client both mean there is
+// nothing useful left to do here.
+func flushResponse(c *gin.Context) {
+	if flusher, ok := c.Writer.(http.Flusher); ok {
+		flusher.Flush()
 	}
 }
 

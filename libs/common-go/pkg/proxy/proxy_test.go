@@ -4,6 +4,7 @@
 package proxy_test
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -166,5 +167,81 @@ func TestNewProxyRequestHandler_PreservesPathEncoding(t *testing.T) {
 				t.Errorf("backend received URI:\n  got  %q\n  want %q", backendReceivedURI, tc.wantPath)
 			}
 		})
+	}
+}
+
+// TestNewProxyRequestHandler_StreamsFullResponseBody verifies that the
+// proxy forwards a streaming response body in full — every byte the upstream
+// writes reaches the client, including the tail. With FlushInterval=-1 set
+// on the underlying httputil.ReverseProxy, intermediate buffers are flushed
+// after each upstream write rather than being held back until end-of-stream,
+// which closes the door on the silent-truncation race observed when an
+// upstream connection close happens at the same time as a buffered final
+// chunk.
+func TestNewProxyRequestHandler_StreamsFullResponseBody(t *testing.T) {
+	const totalBytes = 256 * 1024
+	const chunkSize = 4 * 1024
+
+	// Upstream produces totalBytes deterministically, in chunks, with a
+	// Flush() between each write. This mirrors how the daemon's bulk-download
+	// handler writes multipart parts.
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/octet-stream")
+		// No Content-Length on purpose: forces chunked transfer encoding,
+		// which is what the real download endpoint also uses.
+		w.WriteHeader(http.StatusOK)
+		flusher, _ := w.(http.Flusher)
+		chunk := make([]byte, chunkSize)
+		for i := range chunk {
+			chunk[i] = byte(i % 251) // arbitrary pattern
+		}
+		written := 0
+		for written < totalBytes {
+			n := chunkSize
+			if written+n > totalBytes {
+				n = totalBytes - written
+			}
+			if _, err := w.Write(chunk[:n]); err != nil {
+				return
+			}
+			written += n
+			if flusher != nil {
+				flusher.Flush()
+			}
+		}
+	}))
+	defer upstream.Close()
+
+	upstreamURL, _ := url.Parse(upstream.URL)
+	getTarget := func(ctx *gin.Context) (*url.URL, map[string]string, error) {
+		return upstreamURL, nil, nil
+	}
+
+	router := gin.New()
+	router.GET("/*path", proxy.NewProxyRequestHandler(getTarget, nil))
+
+	proxyServer := httptest.NewServer(router)
+	defer proxyServer.Close()
+
+	resp, err := http.Get(proxyServer.URL + "/anything")
+	if err != nil {
+		t.Fatalf("proxy request failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("read proxied body: %v", err)
+	}
+	if len(body) != totalBytes {
+		t.Fatalf("proxied body truncated: got %d bytes, want %d", len(body), totalBytes)
+	}
+	// Spot-check the tail to make sure it isn't just zero-padded.
+	tailStart := totalBytes - 16
+	for i := tailStart; i < totalBytes; i++ {
+		want := byte(i % chunkSize % 251)
+		if body[i] != want {
+			t.Fatalf("byte %d: got 0x%02x, want 0x%02x (tail content corruption)", i, body[i], want)
+		}
 	}
 }

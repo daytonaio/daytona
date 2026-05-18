@@ -64,7 +64,18 @@ func NewProxyRequestHandler(getProxyTarget func(*gin.Context) (targetUrl *url.UR
 					req.Header.Add(key, value)
 				}
 			},
-			Transport:      proxyTransport,
+			Transport: proxyTransport,
+			// Flush each upstream write to the client immediately. Without
+			// this, the default 32KB io.Copy buffer can hold back the tail
+			// of a streaming multipart/form-data response (e.g. file
+			// downloads) just long enough for an upstream connection close
+			// to race with the proxy's read, silently dropping the closing
+			// boundary. Go's stdlib already auto-flushes when ContentLength
+			// is -1, but being explicit here protects every code path the
+			// proxy forwards — including responses where upstream sets a
+			// Content-Length but the body is still produced incrementally.
+			// Negative duration = flush after every Write.
+			FlushInterval:  -1,
 			ModifyResponse: modifyResponse,
 		}
 

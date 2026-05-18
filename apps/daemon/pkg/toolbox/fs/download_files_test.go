@@ -387,3 +387,104 @@ func TestDownloadFilesEmitsContentLength(t *testing.T) {
 		t.Fatalf("expected io.EOF after final part, got %v", err)
 	}
 }
+
+// Verifies the handler:
+//  1. Emits the closing multipart boundary (--BOUNDARY--) so the SDK parser
+//     can finalize cleanly without dropping look-ahead-buffered bytes.
+//  2. Explicitly flushes the response writer at least once before returning,
+//     so the closing boundary reaches the wire instead of relying on
+//     net/http's deferred response finalization (which can race with
+//     intermediate-proxy connection teardown under load — the truncation
+//     pattern observed in CI).
+//
+// Both invariants are validated for the all-success path, the partial-error
+// path (one missing file mixed in), and an early all-error case.
+func TestDownloadFilesFlushesAndClosesMultipart(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	tempDir := t.TempDir()
+	goodPath := filepath.Join(tempDir, "good.txt")
+	if err := os.WriteFile(goodPath, []byte("payload"), 0o644); err != nil {
+		t.Fatalf("write good file: %v", err)
+	}
+	missingPath := filepath.Join(tempDir, "missing.txt")
+
+	cases := []struct {
+		name  string
+		paths []string
+	}{
+		{name: "all_success", paths: []string{goodPath}},
+		{name: "mixed", paths: []string{goodPath, missingPath}},
+		{name: "all_error", paths: []string{missingPath}},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			body, err := json.Marshal(FilesDownloadRequest{Paths: tc.paths})
+			if err != nil {
+				t.Fatalf("marshal request: %v", err)
+			}
+
+			req := httptest.NewRequest(http.MethodPost, "/files/bulk-download", bytes.NewReader(body))
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+
+			_, engine := gin.CreateTestContext(rec)
+			engine.POST("/files/bulk-download", DownloadFiles)
+			engine.ServeHTTP(rec, req)
+
+			if rec.Code != http.StatusOK {
+				t.Fatalf("expected status %d, got %d (body: %s)", http.StatusOK, rec.Code, rec.Body.String())
+			}
+
+			if !rec.Flushed {
+				t.Fatalf("response was not flushed before handler return — closing boundary may not reach the wire under load")
+			}
+
+			ct := rec.Header().Get("Content-Type")
+			mediaType, params, err := mime.ParseMediaType(ct)
+			if err != nil {
+				t.Fatalf("parse content type %q: %v", ct, err)
+			}
+			if mediaType != "multipart/form-data" {
+				t.Fatalf("expected multipart/form-data, got %q", mediaType)
+			}
+			boundary, ok := params["boundary"]
+			if !ok || boundary == "" {
+				t.Fatalf("missing boundary parameter on Content-Type %q", ct)
+			}
+
+			// The terminating boundary is the literal sequence the SDK looks
+			// for to know the response is complete. Asserting it as a raw
+			// suffix catches regressions where the handler returns early
+			// without emitting it (e.g. a future refactor that drops the
+			// explicit mw.Close() in favour of defer again).
+			wantTerminator := []byte("\r\n--" + boundary + "--\r\n")
+			if !bytes.HasSuffix(rec.Body.Bytes(), wantTerminator) {
+				t.Fatalf("response body does not end with closing multipart boundary; got last 64 bytes: %q",
+					tailBytes(rec.Body.Bytes(), 64))
+			}
+
+			// And the parser-level check: NextPart must terminate cleanly
+			// with io.EOF, not some short-read / unexpected-EOF error.
+			reader := multipart.NewReader(bytes.NewReader(rec.Body.Bytes()), boundary)
+			for {
+				_, err := reader.NextPart()
+				if err == io.EOF {
+					break
+				}
+				if err != nil {
+					t.Fatalf("multipart parse error before EOF: %v", err)
+				}
+			}
+		})
+	}
+}
+
+func tailBytes(b []byte, n int) []byte {
+	if len(b) <= n {
+		return b
+	}
+	return b[len(b)-n:]
+}
