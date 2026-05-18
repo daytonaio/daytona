@@ -342,6 +342,7 @@ const configuration = {
     mode: (process.env.DRAINING_MODE === 'archive' ? 'archive' : 'migrate') as 'migrate' | 'archive',
     force: process.env.DRAINING_FORCE === 'true',
   },
+  dontServeDashboard: process.env.DONT_SERVE_DASHBOARD === 'true',
 }
 
 export { configuration }
