@@ -147,8 +147,18 @@ class SharedAiohttpSession:
                 if not started_with_none:
                     coordinator._adopt(rest_client.pool_manager)
 
+                # Shallow-copy mutable kwargs so a retry doesn't observe state the
+                # first attempt left behind.  The generated rest_client mutates
+                # ``headers`` in place (adds ``Content-Type`` for JSON, deletes it
+                # for multipart) — without this copy the second attempt of a
+                # multipart request would re-send without a Content-Type header.
+                attempt_kwargs = dict(kwargs)
+                headers = attempt_kwargs.get("headers")
+                if isinstance(headers, dict):
+                    attempt_kwargs["headers"] = headers.copy()
+
                 try:
-                    result = await original_request(*args, **kwargs)
+                    result = await original_request(*args, **attempt_kwargs)
                 except _ALWAYS_RETRYABLE_CONN_ERRORS as e:
                     # Pre-flight failure (TCP connect): the request was never sent,
                     # so retrying is safe regardless of HTTP method.

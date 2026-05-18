@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import math
 import warnings
 from copy import deepcopy
 from importlib.metadata import version
@@ -64,20 +65,24 @@ def _resolve_happy_eyeballs_delay(raw: str | None) -> object:
     - unset / empty → ``_MISSING_HAPPY_EYEBALLS_DELAY`` sentinel; the caller
       omits the kwarg so ``aiohttp`` applies its own default
     - ``"none"`` (case-insensitive) → ``None``; disables the IPv4/IPv6 race
-    - any non-negative float → that value, in seconds
-    - anything else → :class:`DaytonaValidationError`
+    - any finite non-negative float → that value, in seconds
+    - anything else (NaN, +/-inf, negative, non-numeric, …) →
+      :class:`DaytonaValidationError`
     """
     if raw is None or raw.strip() == "":
         return _MISSING_HAPPY_EYEBALLS_DELAY
     value = raw.strip()
     if value.lower() == "none":
         return None
-    invalid_message = f"DAYTONA_HAPPY_EYEBALLS_DELAY must be a non-negative float or 'none', got {raw!r}"
+    invalid_message = f"DAYTONA_HAPPY_EYEBALLS_DELAY must be a finite non-negative float or 'none', got {raw!r}"
     try:
         parsed = float(value)
     except ValueError as exc:
         raise DaytonaValidationError(invalid_message) from exc
-    if parsed < 0:
+    # ``float()`` accepts ``"nan"``, ``"inf"`` and ``"-inf"`` (case-insensitive).
+    # NaN compares False against any number, so ``parsed < 0`` would silently
+    # let it through; +inf would pass too.  ``math.isfinite`` rejects both.
+    if not math.isfinite(parsed) or parsed < 0:
         raise DaytonaValidationError(invalid_message)
     return parsed
 
