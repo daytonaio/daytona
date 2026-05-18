@@ -34,6 +34,17 @@ public class UsersApiTest {
     private final UsersApi api = new UsersApi();
 
     /**
+     * Delete authenticated user account
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void deleteAuthenticatedUserTest() throws ApiException {
+        api.deleteAuthenticatedUser();
+        // TODO: test validations
+    }
+
+    /**
      * Enroll in SMS MFA
      *
      * @throws ApiException if the Api call fails

@@ -28,6 +28,8 @@ import {
   RegionSnapshotManagerUpdatedEvent,
 } from '../../region/events/region-snapshot-manager-creds.event'
 import { EcrCredentialsService } from './ecr-credentials.service'
+import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
+import { OrganizationDeletedEvent } from '../../organization/events/organization-deleted.event'
 
 const AXIOS_TIMEOUT_MS = 3000
 const DOCKER_HUB_REGISTRY = 'registry-1.docker.io'
@@ -1004,5 +1006,14 @@ export class DockerRegistryService {
 
     const repository = entityManager.getRepository(DockerRegistry)
     await repository.delete({ region: region.id })
+  }
+
+  @OnAsyncEvent({
+    event: OrganizationEvents.DELETED,
+  })
+  async handleOrganizationDeletedEvent(payload: OrganizationDeletedEvent): Promise<void> {
+    const { entityManager, organizationId } = payload
+
+    await entityManager.delete(DockerRegistry, { organizationId, registryType: RegistryType.ORGANIZATION })
   }
 }

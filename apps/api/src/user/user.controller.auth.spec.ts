@@ -25,6 +25,13 @@ describe('[AUTH] UserController', () => {
     expectArrayMatch(getAuthContextGuards(UserController, methodName), [UserAuthContextGuard])
   })
 
+  it('deleteAuthenticatedUser', () => {
+    const methodName = trackMethod('deleteAuthenticatedUser')
+    expect(isPublicEndpoint(UserController, methodName)).toBe(false)
+    expectArrayMatch(getAllowedAuthStrategies(UserController, methodName), [AuthStrategyType.JWT])
+    expectArrayMatch(getAuthContextGuards(UserController, methodName), [UserAuthContextGuard])
+  })
+
   it('getAvailableAccountProviders', () => {
     const methodName = trackMethod('getAvailableAccountProviders')
     expect(isPublicEndpoint(UserController, methodName)).toBe(false)
