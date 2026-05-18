@@ -21,6 +21,7 @@ import { getOpenApiConfig } from './openapi.config'
 import { AuditInterceptor } from './audit/interceptors/audit.interceptor'
 import { join } from 'node:path'
 import { ApiKeyService } from './api-key/api-key.service'
+import { corsOptions } from './cors-options'
 import { DAYTONA_ADMIN_USER_ID } from './app.service'
 import { OrganizationService } from './organization/services/organization.service'
 import { OrganizationResourcePermission } from './organization/enums/organization-resource-permission.enum'
@@ -47,11 +48,7 @@ async function bootstrap() {
   })
   app.useLogger(app.get(PinoLogger))
   app.flushLogs()
-  app.enableCors({
-    origin: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true,
-  })
+  app.enableCors(corsOptions)
 
   const configService = app.get(TypedConfigService)
   const failedAuthTracker = app.get(FailedAuthTrackerService)
