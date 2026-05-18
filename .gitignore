@@ -59,6 +59,7 @@ vitest.config.*.timestamp*
 .eslintcache
 .tmp/
 .env.local
+apps/ssh-gateway/.env
 
 # Python package metadata
 *.egg-info/
