@@ -584,15 +584,15 @@ curl https://app.daytona.io/api/snapshots \
 Building a custom image for a GPU snapshot requires Ubuntu 24.04 and compatible NVIDIA userspace packages. Include the following in your snapshot Dockerfile:
 
 ```dockerfile
-ARG NVIDIA_DRIVER_VERSION=580.126.20
-ARG UBUNTU_PKG_SUFFIX=0ubuntu0.24.04.2
+ARG NVIDIA_DRIVER_VERSION=595.58.03
+ARG UBUNTU_PKG_SUFFIX=0ubuntu0.24.04.1
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update -qq \
  && apt-get install -y -qq --no-install-recommends \
-      nvidia-utils-580-server=${NVIDIA_DRIVER_VERSION}-${UBUNTU_PKG_SUFFIX} \
-      libnvidia-compute-580-server=${NVIDIA_DRIVER_VERSION}-${UBUNTU_PKG_SUFFIX} \
+      nvidia-utils-595-server=${NVIDIA_DRIVER_VERSION}-${UBUNTU_PKG_SUFFIX} \
+      libnvidia-compute-595-server=${NVIDIA_DRIVER_VERSION}-${UBUNTU_PKG_SUFFIX} \
       python3 \
       ca-certificates \
  && apt-get clean \
