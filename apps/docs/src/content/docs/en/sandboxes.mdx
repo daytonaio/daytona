@@ -44,6 +44,23 @@ The diagram below demonstrates the states and possible transitions between them.
 
 <SandboxDiagram />
 
+## Runtime features
+
+| **Runtime**           | **Linux Container**                     | **Linux VM**                         | **Windows VM**                    | **MacOS VM**                 | **Android VM**                    |
+| :-------------------- | :------------------------------------- | :----------------------------------- | :-------------------------------- | :--------------------------- | :-------------------------------- |
+| Description           | <small>Isolated Linux container</small> | <small>Linux virtual machine</small> | <small>Windows OS runtime</small> | <small>MacOS runtime</small> | <small>Android OS runtime</small> |
+| GPU                   | ✗                                       | ✓                                    | ✓                                 | ✓                            | ✗                                 |
+| **Features**          |                                         |                                      |                                   |                              |                                   |
+| Filesystem operations | ✓                                       | ✓                                    | ✓                                 | ✓                            | ✗                                 |
+| Process and code exec | ✓                                       | ✓                                    | ✓                                 | ✓                            | ✗                                 |
+| Pause sandboxes       | ✗                                       | ✓                                    | ✓                                 | ✗                            | ✗                                 |
+| Fork sandboxes        | ✗                                       | ✓                                    | ✓                                 | ✗                            | ✗                                 |
+| Resize sandboxes      | ✓                                       | ✓                                    | ✓                                 | ✓                            | ✓                                 |
+| Create snapshots      | <small>*Coming soon*</small>            | ✓                                    | ✓                                 | ✓                            | ✗                                 |
+| Declarative builder   | ✓                                       | ✗                                    | ✗                                 | ✗                            | ✗                                 |
+| SSH access            | ✓                                       | ✓                                    | ✓                                 | ✓                            | ✗                                 |
+| ADB access            | ✗                                       | ✗                                    | ✗                                 | ✗                            | ✓                                 |
+
 ## Multiple runtime support
 
 Daytona sandboxes support Python, TypeScript, and JavaScript programming language runtimes for direct code execution inside the sandbox. The `language` parameter controls which programming language runtime is used for the sandbox:
