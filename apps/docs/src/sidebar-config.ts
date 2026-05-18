@@ -8,6 +8,11 @@ export enum NavigationCategory {
   TYPESCRIPT_SDK,
   PYTHON_SDK,
   GUIDES,
+  PLATFORM_MANAGEMENT,
+  SECURITY_COMPLIANCE,
+  TELEMETRY,
+  DEPLOYMENTS_OPEN_SOURCE,
+  DEPLOYMENTS_CUSTOMER_MANAGED_COMPUTE,
   RUBY_SDK,
   GO_SDK,
   JAVA_SDK,
@@ -158,15 +163,6 @@ export const getSidebarConfig = (
       homePageHref: localizePath('/docs', locale),
       category: NavigationCategory.GENERAL,
       entries: [
-        {
-          type: 'link',
-          href: localizePath('/docs/configuration', locale),
-          label: t('sidebarconfig.environment'),
-          description: t('sidebarconfig.configurationDescription'),
-          attrs: {
-            icon: 'git-commit.svg',
-          },
-        },
         {
           type: 'link',
           href: localizePath('/docs/snapshots', locale),
@@ -343,15 +339,6 @@ export const getSidebarConfig = (
           description: t('sidebarconfig.previewDescription'),
           attrs: {
             icon: 'globe.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/custom-preview-proxy', locale),
-          label: t('sidebarconfig.customPreviewProxy'),
-          description: t('sidebarconfig.customPreviewProxyDescription'),
-          attrs: {
-            icon: 'proxy-link.svg',
           },
         },
         {
@@ -720,80 +707,16 @@ export const getSidebarConfig = (
     },
     {
       type: 'group',
-      label: t('sidebarconfig.security'),
+      label: t('sidebarconfig.platformManagement'),
       homePageHref: localizePath('/docs', locale),
-      category: NavigationCategory.GENERAL,
+      category: NavigationCategory.PLATFORM_MANAGEMENT,
       entries: [
         {
           type: 'link',
-          href: localizePath('/docs/audit-logs', locale),
-          label: t('sidebarconfig.auditLogs'),
-          description: t('sidebarconfig.auditLogsDescription'),
-          attrs: {
-            icon: 'log.svg',
-          },
+          href: localizePath('/docs/manage/platform-management', locale),
+          label: t('sidebarconfig.platformManagementOverview'),
+          description: t('sidebarconfig.platformManagementOverviewDescription'),
         },
-        {
-          type: 'link',
-          href: localizePath('/docs/security-exhibit', locale),
-          label: t('sidebarconfig.securityExhibit'),
-          description: t('sidebarconfig.securityExhibitDescription'),
-          attrs: {
-            icon: 'security.svg',
-          },
-        },
-      ],
-    },
-    {
-      type: 'group',
-      label: t('sidebarconfig.deployments'),
-      homePageHref: localizePath('/docs', locale),
-      category: NavigationCategory.GENERAL,
-      entries: [
-        {
-          type: 'link',
-          href: localizePath('/docs/oss-deployment', locale),
-          label: t('sidebarconfig.ossDeployment'),
-          disablePagination: true,
-          attrs: {
-            icon: 'computer.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/runners', locale),
-          label: t('sidebarconfig.customerManagedCompute'),
-          description: t('sidebarconfig.customerManagedComputeDescription'),
-          disablePagination: true,
-          attrs: {
-            icon: 'computer.svg',
-          },
-        },
-      ],
-    },
-    {
-      type: 'group',
-      label: t('sidebarconfig.observability'),
-      homePageHref: localizePath('/docs', locale),
-      category: NavigationCategory.GENERAL,
-      entries: [
-        {
-          type: 'link',
-          href: localizePath('/docs/observability/otel-collection', locale),
-          label: t('sidebarconfig.otelCollection'),
-          disablePagination: true,
-          attrs: {
-            icon: 'telemetry.svg',
-          },
-        },
-      ],
-    },
-    {
-      type: 'group',
-      label: t('sidebarconfig.accountManagement'),
-      homePageHref: localizePath('/docs', locale),
-      category: NavigationCategory.GENERAL,
-      entries: [
         {
           type: 'link',
           href: localizePath('/docs/api-keys', locale),
@@ -830,13 +753,99 @@ export const getSidebarConfig = (
             icon: 'credit-card.svg',
           },
         },
+      ],
+    },
+    {
+      type: 'group',
+      label: t('sidebarconfig.securityCompliance'),
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.SECURITY_COMPLIANCE,
+      entries: [
         {
           type: 'link',
-          href: localizePath('/docs/linked-accounts', locale),
-          label: t('sidebarconfig.linkedAccounts'),
-          description: t('sidebarconfig.linkedAccountsDescription'),
+          href: localizePath('/docs/manage/security-compliance', locale),
+          label: t('sidebarconfig.securityComplianceOverview'),
+          description: t('sidebarconfig.securityComplianceOverviewDescription'),
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/security-exhibit', locale),
+          label: t('sidebarconfig.securityExhibit'),
+          description: t('sidebarconfig.securityExhibitDescription'),
           attrs: {
-            icon: 'link.svg',
+            icon: 'security.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/audit-logs', locale),
+          label: t('sidebarconfig.auditLogs'),
+          description: t('sidebarconfig.auditLogsDescription'),
+          attrs: {
+            icon: 'log.svg',
+          },
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: t('sidebarconfig.observability'),
+      label: t('sidebarconfig.telemetry'),
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.TELEMETRY,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/manage/telemetry', locale),
+          label: t('sidebarconfig.telemetryOverview'),
+          description: t('sidebarconfig.telemetryOverviewDescription'),
+          attrs: {
+            icon: 'document.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/observability/otel-collection', locale),
+          label: t('sidebarconfig.otelCollection'),
+          description: t('sidebarconfig.otelCollectionDescription'),
+          disablePagination: true,
+          attrs: {
+            icon: 'telemetry.svg',
+          },
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: t('sidebarconfig.deploymentsOpenSource'),
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.DEPLOYMENTS_OPEN_SOURCE,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/oss-deployment', locale),
+          label: t('sidebarconfig.ossDeployment'),
+          disablePagination: true,
+          attrs: {
+            icon: 'computer.svg',
+          },
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: t('sidebarconfig.deploymentsCustomerManagedCompute'),
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.DEPLOYMENTS_CUSTOMER_MANAGED_COMPUTE,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/runners', locale),
+          label: t('sidebarconfig.customerManagedCompute'),
+          description: t('sidebarconfig.customerManagedComputeDescription'),
+          disablePagination: true,
+          attrs: {
+            icon: 'computer.svg',
           },
         },
       ],
