@@ -42,6 +42,7 @@
   "sidebarconfig.reference": "Reference",
   "sidebarconfig.documentation": "Docs",
   "sidebarconfig.guides": "Guides",
+  "sidebarconfig.examples": "Examples",
   "sidebarconfig.tsSdkReference": "TypeScript SDK",
   "sidebarconfig.pythonSdkReference": "Python SDK",
   "sidebarconfig.rubySdkReference": "Ruby SDK",
