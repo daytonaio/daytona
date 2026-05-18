@@ -311,15 +311,21 @@ func TestReap_LongRunningProcess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Reap returned unexpected error: %v", err)
 	}
-	// SIGKILL surfaces as either 137 (128+9) via WaitStatus.ExitStatus
-	// being -1 mapped... actually ExitStatus returns -1 for signaled
-	// processes, which our switch upstream interprets. Just assert Reap
-	// did not return until at least the kill delay elapsed — that proves
-	// Phase 1 didn't time out.
+	// Wall-time check: Reap must not return until the kill lands. If
+	// Phase 1 had a (buggy) timeout shorter than the kill delay, Reap
+	// would return early — that's the regression we're guarding against.
 	if elapsed < 250*time.Millisecond {
 		t.Errorf("Reap returned before the kill landed (%s) — Phase 1 timed out", elapsed)
 	}
-	_ = code
+	// Exit-code check: SIGKILL surfaces as ExitStatus()/ExitCode() == -1
+	// on Linux for signaled processes (Go's syscall package returns -1
+	// when !WaitStatus.Exited()). A buggy Reap that completed at the
+	// right wall time but mapped the status wrong (e.g. returned 0 via
+	// a default branch) would slip past the elapsed check above — this
+	// assertion is what catches that.
+	if code != -1 {
+		t.Errorf("expected SIGKILL exit code -1, got %d", code)
+	}
 }
 
 // TestWait_StalePendingRejected guards the PID-reuse hardening: a status
