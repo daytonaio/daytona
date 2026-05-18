@@ -117,7 +117,7 @@ async function bootstrap() {
   })
 
   // Replace dashboard api url before serving
-  if (configService.get('production')) {
+  if (configService.get('production') && !configService.get('dontServeDashboard')) {
     const dashboardDir = join(__dirname, '..', 'dashboard')
     const replaceInDirectory = (dir: string) => {
       for (const file of readdirSync(dir)) {
