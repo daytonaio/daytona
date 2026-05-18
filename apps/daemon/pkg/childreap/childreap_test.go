@@ -273,6 +273,61 @@ func TestOutput(t *testing.T) {
 	})
 }
 
+// TestReap_LongRunningProcess guards the PTY-session bug: Reap must NOT
+// impose a wall-clock timeout on Phase 1 (waiting for exit status). The
+// PTY session goroutine calls Reap on an interactive shell that stays
+// alive indefinitely; a Phase-1 timeout would kill the session.
+//
+// We start a process that runs longer than any realistic hangTimeout
+// shrinkage, kill it after a short delay, and assert that Reap returns
+// the signal-derived exit code rather than a timeout error.
+func TestReap_LongRunningProcess(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping long-running reap test in short mode")
+	}
+
+	// Shrink hangTimeout to a value that would trip a buggy Reap quickly.
+	// The real cmd doesn't exit on its own; we kill it after a delay that
+	// is strictly greater than hangTimeout. If Reap honors the (buggy)
+	// hangTimeout in Phase 1, it returns an error before the kill lands.
+	orig := hangTimeout
+	hangTimeout = 100 * time.Millisecond
+	defer func() { hangTimeout = orig }()
+
+	cmd := exec.Command("sh", "-c", "sleep 30")
+	if err := cmd.Start(); err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+
+	go func() {
+		time.Sleep(300 * time.Millisecond)
+		_ = cmd.Process.Kill()
+	}()
+
+	start := time.Now()
+	code, err := Reap(cmd)
+	elapsed := time.Since(start)
+
+	if err != nil {
+		t.Fatalf("Reap returned unexpected error: %v", err)
+	}
+	// Wall-time check: Reap must not return until the kill lands. If
+	// Phase 1 had a (buggy) timeout shorter than the kill delay, Reap
+	// would return early — that's the regression we're guarding against.
+	if elapsed < 250*time.Millisecond {
+		t.Errorf("Reap returned before the kill landed (%s) — Phase 1 timed out", elapsed)
+	}
+	// Exit-code check: SIGKILL surfaces as ExitStatus()/ExitCode() == -1
+	// on Linux for signaled processes (Go's syscall package returns -1
+	// when !WaitStatus.Exited()). A buggy Reap that completed at the
+	// right wall time but mapped the status wrong (e.g. returned 0 via
+	// a default branch) would slip past the elapsed check above — this
+	// assertion is what catches that.
+	if code != -1 {
+		t.Errorf("expected SIGKILL exit code -1, got %d", code)
+	}
+}
+
 // TestWait_StalePendingRejected guards the PID-reuse hardening: a status
 // stored in pending more than pendingMaxAge before the caller's register
 // must NOT be claimed as the caller's exit status, because it almost
