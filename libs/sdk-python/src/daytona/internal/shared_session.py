@@ -11,17 +11,48 @@ import aiohttp
 
 logger = logging.getLogger(__name__)
 
-# Connection-level errors that indicate the request was never processed by the
-# server. Safe to retry on any HTTP method — async counterpart of the sync
-# client's urllib3 RemoteDisconnected retry.
-_RETRYABLE_CONN_ERRORS: tuple[type[BaseException], ...] = (
+# Errors raised by ``aiohttp.TCPConnector`` *before* any bytes are written to
+# the socket — TCP ``connect()`` itself failed (DNS resolution, RST during
+# handshake, SSL failure on connect, …).  The application cannot have seen
+# the request, so retrying is safe on any HTTP method, including non-idempotent
+# ones.  ``ClientConnectorError`` is a subclass of ``ClientOSError``, so it
+# must be matched first.
+_ALWAYS_RETRYABLE_CONN_ERRORS: tuple[type[BaseException], ...] = (aiohttp.ClientConnectorError,)
+
+# Errors that *could* fire after the request was partially or fully written to
+# the socket — i.e. the server may have started processing it before the
+# connection dropped.  Retrying is only safe for methods that are idempotent
+# by HTTP semantics (RFC 9110 §9.2.2).
+_IDEMPOTENT_ONLY_RETRYABLE_CONN_ERRORS: tuple[type[BaseException], ...] = (
     aiohttp.ServerDisconnectedError,
     aiohttp.ClientOSError,
-    aiohttp.ClientConnectorError,
     ConnectionResetError,
     BrokenPipeError,
 )
+
+# Methods that are idempotent under HTTP semantics (RFC 9110 §9.2.2).
+# Matches urllib3's ``DEFAULT_ALLOWED_METHODS`` used by the sync client.
+_IDEMPOTENT_METHODS: frozenset[str] = frozenset({"GET", "HEAD", "OPTIONS", "TRACE", "PUT", "DELETE"})
+
 _MAX_CONN_RETRIES = 2
+
+
+def _extract_method(args: tuple[object, ...], kwargs: dict[str, object]) -> str | None:
+    """Pull the HTTP method out of a ``rest_client.request`` call.
+
+    The generated ``RESTClientObject.request`` takes ``method`` as the first
+    positional argument; the generated ``ApiClient.__call_api`` always passes
+    it positionally.  We also accept ``method=`` as a keyword for robustness
+    in case future generator changes shift to kwargs.
+    """
+    raw: object | None = None
+    if args:
+        raw = args[0]
+    elif "method" in kwargs:
+        raw = kwargs["method"]
+    if isinstance(raw, str):
+        return raw.upper()
+    return None
 
 
 class SharedAiohttpSession:
@@ -33,11 +64,20 @@ class SharedAiohttpSession:
     then propagates that session to every other attached rest_client so all SDK
     traffic shares one TCP/TLS pool.
 
-    The wrapper also retries transient connection-level errors
-    (``ServerDisconnectedError``, ``ClientOSError``/broken pipe,
-    ``ClientConnectorError``) on any HTTP method, since those failures indicate
-    the request was never processed by the server.  This is the async equivalent
-    of ``urllib3_retry.RemoteDisconnectedRetry`` used by the sync client.
+    The wrapper also retries transient connection-level errors:
+
+    - ``ClientConnectorError`` (TCP ``connect()`` failure — nothing was sent)
+      is retried on **any** HTTP method, since the application cannot have
+      seen the request.
+    - ``ServerDisconnectedError``, ``ClientOSError``, ``ConnectionResetError``,
+      and ``BrokenPipeError`` are retried **only for idempotent methods**
+      (``GET``/``HEAD``/``OPTIONS``/``TRACE``/``PUT``/``DELETE``) because the
+      server may already have started processing the request when the
+      connection dropped.
+
+    This is the async counterpart of ``urllib3_retry.RemoteDisconnectedRetry``
+    used by the sync client, hardened against the rare double-execution window
+    of non-idempotent requests.
 
     ``session``/``require_session`` expose the adopted session for direct WS and
     streaming use (multipart uploads, log follows, etc.).
@@ -98,6 +138,9 @@ class SharedAiohttpSession:
             # TCPConnector limit on the shared session is what bounds concurrency.
             coordinator._ensure_session(rest_client)
 
+            method = _extract_method(args, kwargs)
+            is_idempotent = method in _IDEMPOTENT_METHODS
+
             for attempt in range(1, _MAX_CONN_RETRIES + 2):
                 started_with_none = rest_client.pool_manager is None
 
@@ -106,17 +149,35 @@ class SharedAiohttpSession:
 
                 try:
                     result = await original_request(*args, **kwargs)
-                except _RETRYABLE_CONN_ERRORS as e:
-                    # On first-call failure the rest_client created its session but
-                    # the request never completed; still adopt it so the next attempt
-                    # reuses the shared pool.
+                except _ALWAYS_RETRYABLE_CONN_ERRORS as e:
+                    # Pre-flight failure (TCP connect): the request was never sent,
+                    # so retrying is safe regardless of HTTP method.
                     if started_with_none and rest_client.pool_manager is not None:
                         coordinator._adopt(rest_client.pool_manager)
                     if attempt > _MAX_CONN_RETRIES:
                         raise
                     logger.debug(
-                        "Retryable connection error (%s); retry %d/%d",
+                        "Retryable connect-time error (%s) for %s; retry %d/%d",
                         type(e).__name__,
+                        method or "<unknown method>",
+                        attempt,
+                        _MAX_CONN_RETRIES,
+                    )
+                    await asyncio.sleep(0.25 * attempt)
+                    continue
+                except _IDEMPOTENT_ONLY_RETRYABLE_CONN_ERRORS as e:
+                    # The connection may have failed *after* the server began
+                    # processing the request, so we only retry methods that are
+                    # idempotent under HTTP semantics.  Non-idempotent failures
+                    # surface to the caller unchanged.
+                    if started_with_none and rest_client.pool_manager is not None:
+                        coordinator._adopt(rest_client.pool_manager)
+                    if not is_idempotent or attempt > _MAX_CONN_RETRIES:
+                        raise
+                    logger.debug(
+                        "Retryable connection error (%s) for idempotent %s; retry %d/%d",
+                        type(e).__name__,
+                        method,
                         attempt,
                         _MAX_CONN_RETRIES,
                     )

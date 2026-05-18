@@ -244,6 +244,120 @@ class TestAsyncDaytonaSharedSession:
         with pytest.raises(RuntimeError, match="rest_client API surface changed"):
             coordinator.attach(object())
 
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("method", ["GET", "HEAD", "OPTIONS", "TRACE", "PUT", "DELETE"])
+    async def test_idempotent_methods_retry_on_server_disconnect(self, method, monkeypatch):
+        """ServerDisconnectedError on an idempotent method is retried."""
+        import aiohttp
+
+        from daytona.internal import shared_session as ss
+        from daytona.internal.shared_session import SharedAiohttpSession
+
+        monkeypatch.setattr(ss.SharedAiohttpSession, "_ensure_session", lambda self, rc: None)
+
+        rc = MagicMock(spec=["request", "pool_manager"])
+        rc.pool_manager = MagicMock()
+        rc.pool_manager.closed = False
+
+        calls = 0
+        sentinel = object()
+
+        async def stub_request(*_args, **_kwargs):
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise aiohttp.ServerDisconnectedError("simulated stale keep-alive")
+            return sentinel
+
+        rc.request = stub_request
+
+        coordinator = SharedAiohttpSession()
+        coordinator.attach(rc)
+
+        result = await rc.request(method, "/anything")
+
+        assert result is sentinel
+        assert calls == 2
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("method", ["POST", "PATCH"])
+    async def test_non_idempotent_methods_do_not_retry_on_server_disconnect(self, method, monkeypatch):
+        """ServerDisconnectedError on a non-idempotent method propagates immediately."""
+        import aiohttp
+
+        from daytona.internal import shared_session as ss
+        from daytona.internal.shared_session import SharedAiohttpSession
+
+        monkeypatch.setattr(ss.SharedAiohttpSession, "_ensure_session", lambda self, rc: None)
+
+        rc = MagicMock(spec=["request", "pool_manager"])
+        rc.pool_manager = MagicMock()
+        rc.pool_manager.closed = False
+
+        calls = 0
+
+        async def stub_request(*_args, **_kwargs):
+            nonlocal calls
+            calls += 1
+            raise aiohttp.ServerDisconnectedError("simulated stale keep-alive")
+
+        rc.request = stub_request
+
+        coordinator = SharedAiohttpSession()
+        coordinator.attach(rc)
+
+        with pytest.raises(aiohttp.ServerDisconnectedError):
+            await rc.request(method, "/anything")
+
+        assert calls == 1  # no retries
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("method", ["POST", "PATCH", "PUT", "DELETE", "GET"])
+    async def test_connector_error_retries_on_any_method(self, method, monkeypatch):
+        """ClientConnectorError (TCP connect() failed) is safe to retry on any
+        method since the request was never sent."""
+        import aiohttp
+        from aiohttp.client_reqrep import ConnectionKey
+
+        from daytona.internal import shared_session as ss
+        from daytona.internal.shared_session import SharedAiohttpSession
+
+        monkeypatch.setattr(ss.SharedAiohttpSession, "_ensure_session", lambda self, rc: None)
+
+        rc = MagicMock(spec=["request", "pool_manager"])
+        rc.pool_manager = MagicMock()
+        rc.pool_manager.closed = False
+
+        conn_key = ConnectionKey(
+            host="example.invalid",
+            port=443,
+            is_ssl=True,
+            ssl=True,
+            proxy=None,
+            proxy_auth=None,
+            proxy_headers_hash=None,
+        )
+
+        calls = 0
+        sentinel = object()
+
+        async def stub_request(*_args, **_kwargs):
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise aiohttp.ClientConnectorError(conn_key, OSError("simulated connect failure"))
+            return sentinel
+
+        rc.request = stub_request
+
+        coordinator = SharedAiohttpSession()
+        coordinator.attach(rc)
+
+        result = await rc.request(method, "/anything")
+
+        assert result is sentinel
+        assert calls == 2
+
 
 class TestAsyncDaytonaCreateValidation:
     @pytest.mark.asyncio
