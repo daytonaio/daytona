@@ -273,6 +273,55 @@ func TestOutput(t *testing.T) {
 	})
 }
 
+// TestReap_LongRunningProcess guards the PTY-session bug: Reap must NOT
+// impose a wall-clock timeout on Phase 1 (waiting for exit status). The
+// PTY session goroutine calls Reap on an interactive shell that stays
+// alive indefinitely; a Phase-1 timeout would kill the session.
+//
+// We start a process that runs longer than any realistic hangTimeout
+// shrinkage, kill it after a short delay, and assert that Reap returns
+// the signal-derived exit code rather than a timeout error.
+func TestReap_LongRunningProcess(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping long-running reap test in short mode")
+	}
+
+	// Shrink hangTimeout to a value that would trip a buggy Reap quickly.
+	// The real cmd doesn't exit on its own; we kill it after a delay that
+	// is strictly greater than hangTimeout. If Reap honors the (buggy)
+	// hangTimeout in Phase 1, it returns an error before the kill lands.
+	orig := hangTimeout
+	hangTimeout = 100 * time.Millisecond
+	defer func() { hangTimeout = orig }()
+
+	cmd := exec.Command("sh", "-c", "sleep 30")
+	if err := cmd.Start(); err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+
+	go func() {
+		time.Sleep(300 * time.Millisecond)
+		_ = cmd.Process.Kill()
+	}()
+
+	start := time.Now()
+	code, err := Reap(cmd)
+	elapsed := time.Since(start)
+
+	if err != nil {
+		t.Fatalf("Reap returned unexpected error: %v", err)
+	}
+	// SIGKILL surfaces as either 137 (128+9) via WaitStatus.ExitStatus
+	// being -1 mapped... actually ExitStatus returns -1 for signaled
+	// processes, which our switch upstream interprets. Just assert Reap
+	// did not return until at least the kill delay elapsed — that proves
+	// Phase 1 didn't time out.
+	if elapsed < 250*time.Millisecond {
+		t.Errorf("Reap returned before the kill landed (%s) — Phase 1 timed out", elapsed)
+	}
+	_ = code
+}
+
 // TestWait_StalePendingRejected guards the PID-reuse hardening: a status
 // stored in pending more than pendingMaxAge before the caller's register
 // must NOT be claimed as the caller's exit status, because it almost

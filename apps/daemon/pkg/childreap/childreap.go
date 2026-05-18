@@ -247,6 +247,9 @@ func Reap(cmd *exec.Cmd) (int, error) {
 
 	waitCh := startCmdWaitGoroutine(cmd)
 
+	// Phase 1: wait for exit status. No timeout — long-running children
+	// (e.g. an interactive PTY shell) are legitimate. Returns when EITHER
+	// cmd.Wait or the reaper resolves.
 	select {
 	case r := <-waitCh:
 		if r.resolved {
@@ -263,11 +266,6 @@ func Reap(cmd *exec.Cmd) (int, error) {
 		}
 	case ws := <-reg.ch:
 		return ws.ExitStatus(), nil
-	case <-time.After(hangTimeout):
-		if ws, ok := claimPending(pid, reg.registeredAt); ok {
-			return ws.ExitStatus(), nil
-		}
-		return -1, fmt.Errorf("childreap.Reap: timed out waiting for pid %d", pid)
 	}
 }
 
@@ -298,9 +296,11 @@ func startCmdWaitGoroutine(cmd *exec.Cmd) chan cmdWaitResult {
 	return waitCh
 }
 
-// hangTimeout caps how long Wait/Reap will block AFTER the exit status
-// is known (Phase 2) waiting for cmd.Wait to drain. Phase 1 (waiting for
-// status itself) has no timeout — long-running children are legitimate.
+// hangTimeout caps how long Wait will block AFTER the exit status is
+// known (Phase 2) waiting for cmd.Wait to drain its internal I/O copy
+// goroutines. Phase 1 (waiting for status itself) has no timeout —
+// long-running children are legitimate. Reap doesn't drain I/O, so it
+// doesn't use this at all.
 var hangTimeout = 30 * time.Second
 
 // Run starts cmd and waits for it to finish. The reaper-safe analog of
