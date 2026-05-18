@@ -358,6 +358,58 @@ class TestAsyncDaytonaSharedSession:
         assert result is sentinel
         assert calls == 2
 
+    @pytest.mark.asyncio
+    async def test_retry_does_not_observe_first_attempt_header_mutation(self, monkeypatch):
+        """Mutable kwargs are shallow-copied before each attempt so a retry
+        cannot see headers the first attempt added or deleted.
+
+        The generated rest_client mutates ``headers`` in place (adds
+        ``Content-Type`` for JSON, deletes it for multipart).  Without a
+        per-attempt copy, attempt 2 would re-use the mutated dict.
+        """
+        import aiohttp
+
+        from daytona.internal import shared_session as ss
+        from daytona.internal.shared_session import SharedAiohttpSession
+
+        monkeypatch.setattr(ss.SharedAiohttpSession, "_ensure_session", lambda self, rc: None)
+
+        rc = MagicMock(spec=["request", "pool_manager"])
+        rc.pool_manager = MagicMock()
+        rc.pool_manager.closed = False
+
+        calls = 0
+        seen_headers: list[dict[str, str]] = []
+        sentinel = object()
+
+        async def stub_request(*_args, **kwargs):
+            nonlocal calls
+            calls += 1
+            headers = kwargs.get("headers")
+            # Snapshot the headers dict we received this attempt.
+            seen_headers.append(dict(headers) if isinstance(headers, dict) else {})
+            # Mutate the dict in place, mirroring the generated client's behavior.
+            if isinstance(headers, dict):
+                headers["Content-Type"] = "application/json"
+            if calls == 1:
+                raise aiohttp.ServerDisconnectedError("simulated")
+            return sentinel
+
+        rc.request = stub_request
+
+        coordinator = SharedAiohttpSession()
+        coordinator.attach(rc)
+
+        caller_headers = {"Authorization": "Bearer xxx"}
+        result = await rc.request("GET", "/anything", headers=caller_headers)
+
+        assert result is sentinel
+        assert calls == 2
+        # Second attempt must NOT see the Content-Type that the first attempt set.
+        assert "Content-Type" not in seen_headers[1]
+        # The caller's original dict must NOT have been mutated either.
+        assert "Content-Type" not in caller_headers
+
 
 class TestAsyncDaytonaCreateValidation:
     @pytest.mark.asyncio
@@ -540,12 +592,28 @@ class TestResolveHappyEyeballsDelay:
 
         assert _resolve_happy_eyeballs_delay(raw) == expected
 
-    @pytest.mark.parametrize("raw", ["abc", "-1", "-0.5", "1.0.0", "true", "false"])
+    @pytest.mark.parametrize(
+        "raw",
+        [
+            "abc",
+            "-1",
+            "-0.5",
+            "1.0.0",
+            "true",
+            "false",
+            # float() accepts these without raising; the resolver must catch them.
+            "nan",
+            "NaN",
+            "inf",
+            "Infinity",
+            "-inf",
+        ],
+    )
     def test_invalid_values_raise(self, raw):
         from daytona._async.daytona import _resolve_happy_eyeballs_delay
 
         with pytest.raises(
             DaytonaValidationError,
-            match="DAYTONA_HAPPY_EYEBALLS_DELAY must be a non-negative float or 'none'",
+            match="DAYTONA_HAPPY_EYEBALLS_DELAY must be a finite non-negative float or 'none'",
         ):
             _resolve_happy_eyeballs_delay(raw)
