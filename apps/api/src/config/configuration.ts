@@ -335,18 +335,11 @@ const configuration = {
   sandboxSnapshottingTimeoutMin: parseInt(process.env.SANDBOX_SNAPSHOTTING_TIMEOUT_MIN || '60', 10),
   failedSnapshotRunnerRetentionHours: parseInt(process.env.FAILED_SNAPSHOT_RUNNER_RETENTION_HOURS || '3', 10),
   buildInfoSnapshotRunnerStalenessDays: parseInt(process.env.BUILDINFO_SNAPSHOT_RUNNER_STALENESS_DAYS || '7', 10),
-  // Runner draining behavior:
-  //   DRAINING_MODE selects what happens to STOPPED sandboxes on a draining runner.
-  //     - 'migrate' (default): relocate to another ready runner (suitable for SaaS).
-  //     - 'archive': archive in place (clears runnerId). No target capacity required —
-  //       suitable for k8s self-hosted clusters where a full cluster drain leaves no
-  //       schedulable target runners.
-  //   DRAINING_FORCE controls whether running sandboxes are force-stopped to make the
-  //   drain converge. Off by default — preserves user work until the user (or auto-stop)
-  //   stops the sandbox naturally. Turn on for operator-initiated aggressive drains (SaaS)
-  //   or k8s full drains where nodes must empty quickly.
+  // DRAINING_MODE: 'migrate' (default) relocates stopped sandboxes to another runner;
+  // 'archive' archives in place (no target capacity needed — for k8s full drains).
+  // DRAINING_FORCE: when true, force-stops running sandboxes so the drain converges.
   draining: {
-    mode: (process.env.DRAINING_MODE || 'migrate') as 'migrate' | 'archive',
+    mode: (process.env.DRAINING_MODE === 'archive' ? 'archive' : 'migrate') as 'migrate' | 'archive',
     force: process.env.DRAINING_FORCE === 'true',
   },
 }

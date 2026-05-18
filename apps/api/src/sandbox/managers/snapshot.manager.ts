@@ -600,8 +600,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  // Pulls stopped sandboxes' backup snapshots to another runner to prepare for migration during draining.
-  // Only meaningful when DRAIN_MODE=migrate; in 'archive' mode no relocation happens, so no pre-pull is needed.
+  // Pre-pulls backup snapshots to other runners to speed migration during draining.
+  // No-op when DRAINING_MODE != migrate (nothing to migrate to).
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'migrate-draining-runner-snapshots', waitForCompletion: true })
   @TrackJobExecution()
   @LogExecution('migrate-draining-runner-snapshots')

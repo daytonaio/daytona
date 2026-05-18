@@ -322,17 +322,13 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       await Promise.allSettled(
         drainingRunners.map(async (runner) => {
           try {
-            // Force-stop running sandboxes regardless of disposition strategy.
-            // Required for drain to converge in k8s full-drain or operator-initiated
-            // aggressive drains; off by default to preserve current SaaS behavior.
+            // Stop running sandboxes so drain can converge. Off by default.
             if (drainForce) {
               await this.forceStopStartedSandboxesOnDrainingRunner(runner.id)
             }
 
-            // Disposition for STOPPED + backup=COMPLETED sandboxes. Transient-state
-            // sandboxes (PULLING_SNAPSHOT, BUILDING_SNAPSHOT, ARCHIVING, RESIZING,
-            // FORKING, SNAPSHOTTING) are skipped by both branches and picked up on a
-            // subsequent tick once they settle.
+            // Dispose STOPPED+backed-up sandboxes. Transient states are skipped here
+            // and picked up on a subsequent tick.
             if (drainMode === 'archive') {
               await this.archiveStoppedSandboxesOnDrainingRunner(runner.id)
             } else {
@@ -360,8 +356,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
   private async migrateStoppedSandboxesOnDrainingRunner(runner: Runner): Promise<void> {
     const sandboxes = await this.sandboxRepository.find({
       where: {
-        // STOPPED sandboxes without a completed backup are picked up by the backup
-        // manager and become eligible on a subsequent tick.
+        // Sandboxes without a completed backup are handled by the backup manager.
         runnerId: runner.id,
         state: SandboxState.STOPPED,
         desiredState: SandboxDesiredState.STOPPED,
@@ -451,8 +446,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
   private async archiveStoppedSandboxesOnDrainingRunner(runnerId: string): Promise<void> {
     const sandboxes = await this.sandboxRepository.find({
       where: {
-        // STOPPED sandboxes without a completed backup are picked up by the backup
-        // manager and become eligible on a subsequent tick.
+        // Sandboxes without a completed backup are handled by the backup manager.
         runnerId,
         state: SandboxState.STOPPED,
         desiredState: SandboxDesiredState.STOPPED,
