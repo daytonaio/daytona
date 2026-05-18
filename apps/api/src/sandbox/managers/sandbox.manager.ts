@@ -44,6 +44,7 @@ import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { sanitizeSandboxError } from '../utils/sanitize-error.util'
 import { isEphemeral } from '../utils/ephemeral.util'
 import { Sandbox } from '../entities/sandbox.entity'
+import { Runner } from '../entities/runner.entity'
 import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { OrganizationService } from '../../organization/services/organization.service'
@@ -79,7 +80,11 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     private readonly backupManager: BackupManager,
     @InjectRedis() private readonly redis: Redis,
     @InjectDataSource() private readonly dataSource: DataSource,
-  ) {}
+  ) {
+    this.logger.log(
+      `Drain mode: ${this.configService.get('draining.mode')} (force=${this.configService.get('draining.force')})`,
+    )
+  }
 
   async onApplicationShutdown() {
     //  wait for all active jobs to finish
@@ -311,48 +316,28 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
       await this.redis.set('draining-runner-sandboxes-skip', Number(skip) + drainingRunners.length)
 
+      const drainMode = this.configService.get('draining.mode')
+      const drainForce = this.configService.get('draining.force')
+
       await Promise.allSettled(
         drainingRunners.map(async (runner) => {
           try {
-            const sandboxes = await this.sandboxRepository.find({
-              where: {
-                runnerId: runner.id,
-                state: SandboxState.STOPPED,
-                desiredState: SandboxDesiredState.STOPPED,
-                backupState: BackupState.COMPLETED,
-                backupSnapshot: Not(IsNull()),
-              },
-              take: 100,
-            })
+            // Force-stop running sandboxes regardless of disposition strategy.
+            // Required for drain to converge in k8s full-drain or operator-initiated
+            // aggressive drains; off by default to preserve current SaaS behavior.
+            if (drainForce) {
+              await this.forceStopStartedSandboxesOnDrainingRunner(runner.id)
+            }
 
-            this.logger.debug(
-              `Found ${sandboxes.length} eligible sandboxes on draining runner ${runner.id} for migration`,
-            )
-
-            await Promise.allSettled(
-              sandboxes.map(async (sandbox) => {
-                const sandboxLockKey = getStateChangeLockKey(sandbox.id)
-                const hasSandboxLock = await this.redisLockProvider.lock(sandboxLockKey, 60)
-                if (!hasSandboxLock) {
-                  return
-                }
-
-                try {
-                  const startScoreThreshold = this.configService.get('runnerScore.thresholds.start') || 0
-                  const targetRunner = await this.runnerService.getRandomAvailableRunner({
-                    snapshotRef: sandbox.backupSnapshot,
-                    excludedRunnerIds: [runner.id],
-                    availabilityScoreThreshold: startScoreThreshold,
-                  })
-
-                  await this.reassignSandbox(sandbox, runner.id, targetRunner.id)
-                } catch (e) {
-                  this.logger.error(`Error migrating sandbox ${sandbox.id} from draining runner ${runner.id}`, e)
-                } finally {
-                  await this.redisLockProvider.unlock(sandboxLockKey)
-                }
-              }),
-            )
+            // Disposition for STOPPED + backup=COMPLETED sandboxes. Transient-state
+            // sandboxes (PULLING_SNAPSHOT, BUILDING_SNAPSHOT, ARCHIVING, RESIZING,
+            // FORKING, SNAPSHOTTING) are skipped by both branches and picked up on a
+            // subsequent tick once they settle.
+            if (drainMode === 'archive') {
+              await this.archiveStoppedSandboxesOnDrainingRunner(runner.id)
+            } else {
+              await this.migrateStoppedSandboxesOnDrainingRunner(runner)
+            }
 
             // Archive ERROR sandboxes that have completed backups on this draining runner
             await this.archiveErroredSandboxesOnDrainingRunner(runner.id)
@@ -370,6 +355,140 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     } finally {
       await this.redisLockProvider.unlock(lockKey)
     }
+  }
+
+  private async migrateStoppedSandboxesOnDrainingRunner(runner: Runner): Promise<void> {
+    const sandboxes = await this.sandboxRepository.find({
+      where: {
+        // STOPPED sandboxes without a completed backup are picked up by the backup
+        // manager and become eligible on a subsequent tick.
+        runnerId: runner.id,
+        state: SandboxState.STOPPED,
+        desiredState: SandboxDesiredState.STOPPED,
+        backupState: BackupState.COMPLETED,
+        backupSnapshot: Not(IsNull()),
+      },
+      take: 100,
+    })
+
+    this.logger.debug(`Found ${sandboxes.length} eligible sandboxes on draining runner ${runner.id} for migration`)
+
+    await Promise.allSettled(
+      sandboxes.map(async (sandbox) => {
+        const sandboxLockKey = getStateChangeLockKey(sandbox.id)
+        const hasSandboxLock = await this.redisLockProvider.lock(sandboxLockKey, 60)
+        if (!hasSandboxLock) {
+          return
+        }
+
+        try {
+          const startScoreThreshold = this.configService.get('runnerScore.thresholds.start') || 0
+          const targetRunner = await this.runnerService.getRandomAvailableRunner({
+            snapshotRef: sandbox.backupSnapshot,
+            excludedRunnerIds: [runner.id],
+            availabilityScoreThreshold: startScoreThreshold,
+          })
+
+          await this.migrateSandbox(sandbox, runner.id, targetRunner.id)
+        } catch (e) {
+          this.logger.error(`Error migrating sandbox ${sandbox.id} from draining runner ${runner.id}`, e)
+        } finally {
+          await this.redisLockProvider.unlock(sandboxLockKey)
+        }
+      }),
+    )
+  }
+
+  private async forceStopStartedSandboxesOnDrainingRunner(runnerId: string): Promise<void> {
+    const sandboxes = await this.sandboxRepository.find({
+      where: {
+        runnerId,
+        state: SandboxState.STARTED,
+        desiredState: SandboxDesiredState.STARTED,
+        pending: false,
+      },
+      take: 100,
+    })
+
+    if (sandboxes.length === 0) {
+      return
+    }
+
+    this.logger.debug(`Found ${sandboxes.length} started sandboxes on draining runner ${runnerId} to stop`)
+
+    await Promise.allSettled(
+      sandboxes.map(async (sandbox) => {
+        const sandboxLockKey = getStateChangeLockKey(sandbox.id)
+        const acquired = await this.redisLockProvider.lock(sandboxLockKey, 30)
+        if (!acquired) {
+          return
+        }
+
+        try {
+          let updateData: Partial<Sandbox> = {}
+          if (isEphemeral(sandbox)) {
+            updateData = Sandbox.getSoftDeleteUpdate(sandbox)
+          } else {
+            updateData.pending = true
+            updateData.desiredState = SandboxDesiredState.STOPPED
+          }
+
+          await this.sandboxRepository.updateWhere(sandbox.id, {
+            updateData,
+            whereCondition: { pending: false, state: SandboxState.STARTED },
+          })
+
+          this.syncInstanceState(sandbox.id).catch(this.logger.error)
+        } catch (e) {
+          this.logger.error(`Failed to request stop for sandbox ${sandbox.id} on draining runner ${runnerId}`, e)
+        } finally {
+          await this.redisLockProvider.unlock(sandboxLockKey)
+        }
+      }),
+    )
+  }
+
+  private async archiveStoppedSandboxesOnDrainingRunner(runnerId: string): Promise<void> {
+    const sandboxes = await this.sandboxRepository.find({
+      where: {
+        // STOPPED sandboxes without a completed backup are picked up by the backup
+        // manager and become eligible on a subsequent tick.
+        runnerId,
+        state: SandboxState.STOPPED,
+        desiredState: SandboxDesiredState.STOPPED,
+        backupState: BackupState.COMPLETED,
+        backupSnapshot: Not(IsNull()),
+        pending: false,
+      },
+      take: 100,
+    })
+
+    if (sandboxes.length === 0) {
+      return
+    }
+
+    this.logger.debug(`Found ${sandboxes.length} stopped sandboxes on draining runner ${runnerId} to archive`)
+
+    await Promise.allSettled(
+      sandboxes.map(async (sandbox) => {
+        const sandboxLockKey = getStateChangeLockKey(sandbox.id)
+        const acquired = await this.redisLockProvider.lock(sandboxLockKey, 30)
+        if (!acquired) {
+          return
+        }
+
+        try {
+          await this.sandboxRepository.updateWhere(sandbox.id, {
+            updateData: { desiredState: SandboxDesiredState.ARCHIVED },
+            whereCondition: { pending: false, state: SandboxState.STOPPED },
+          })
+        } catch (e) {
+          this.logger.error(`Failed to request archive for sandbox ${sandbox.id} on draining runner ${runnerId}`, e)
+        } finally {
+          await this.redisLockProvider.unlock(sandboxLockKey)
+        }
+      }),
+    )
   }
 
   private async archiveErroredSandboxesOnDrainingRunner(runnerId: string): Promise<void> {
@@ -580,15 +699,15 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     )
   }
 
-  private async reassignSandbox(sandbox: Sandbox, oldRunnerId: string, newRunnerId: string): Promise<void> {
+  private async migrateSandbox(sandbox: Sandbox, oldRunnerId: string, newRunnerId: string): Promise<void> {
     this.logger.debug(
-      `Starting sandbox reassignment for ${sandbox.id} from runner ${oldRunnerId} to runner ${newRunnerId}`,
+      `Starting sandbox migration for ${sandbox.id} from runner ${oldRunnerId} to runner ${newRunnerId}`,
     )
 
     // Safety check: ensure sandbox is not pending
     if (sandbox.pending) {
       this.logger.warn(
-        `Sandbox ${sandbox.id} is pending, skipping reassignment from runner ${oldRunnerId} to runner ${newRunnerId}`,
+        `Sandbox ${sandbox.id} is pending, skipping migration from runner ${oldRunnerId} to runner ${newRunnerId}`,
       )
       return
     }
@@ -633,7 +752,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     const freshSandbox = await this.sandboxRepository.findOne({ where: { id: sandbox.id } })
     if (!freshSandbox || freshSandbox.pending) {
       this.logger.warn(
-        `Sandbox ${sandbox.id} is pending or missing, aborting reassignment from runner ${oldRunnerId} to runner ${newRunnerId}`,
+        `Sandbox ${sandbox.id} is pending or missing, aborting migration from runner ${oldRunnerId} to runner ${newRunnerId}`,
       )
 
       // Roll back: remove the sandbox from the new runner since we won't complete the migration
