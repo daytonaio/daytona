@@ -139,7 +139,7 @@ export function WebhooksMessagesTable() {
         </Button>
       </div>
       <TableContainer
-        className={cn({
+        className={cn('max-h-[550px]', {
           'min-h-[26rem]': isEmpty,
         })}
         empty={

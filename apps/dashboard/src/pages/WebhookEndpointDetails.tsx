@@ -140,189 +140,98 @@ const WebhookEndpointDetails: React.FC = () => {
       <PageHeader />
 
       <PageContent className="gap-6">
-        <PageIntro title="Webhooks" className="mb-0" />
-        <div className="flex items-center gap-3 min-w-0">
-          <Button variant="ghost" size="icon-sm" className="shrink-0" onClick={() => navigate(RoutePath.WEBHOOKS)}>
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-          {endpoint.loading ? (
-            <>
-              <Skeleton className="h-6 w-48" />
-              <Skeleton className="h-5 w-16" />
-              <Skeleton className="h-4 w-24" />
-            </>
-          ) : endpointData ? (
-            <>
-              <h2 className="text-lg font-medium truncate min-w-0">{endpointData.description || 'Unnamed Endpoint'}</h2>
-              <Badge variant={endpointData.disabled ? 'secondary' : 'success'} className="shrink-0">
-                {endpointData.disabled ? 'Disabled' : 'Enabled'}
-              </Badge>
-              <span className="text-sm text-muted-foreground shrink-0 hidden sm:inline">•</span>
-              <TimestampTooltip
-                timestamp={
-                  typeof endpointData.createdAt === 'string'
-                    ? endpointData.createdAt
-                    : endpointData.createdAt.toISOString()
-                }
-              >
-                <span className="text-sm text-muted-foreground cursor-default shrink-0 hidden sm:inline">
-                  {relativeTime}
-                </span>
-              </TimestampTooltip>
-              <div className="ml-auto flex items-center gap-2 shrink-0">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon-sm" aria-label="Open menu" disabled={isMutating}>
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setEditSheetOpen(true)}>Edit</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setDisableDialogOpen(true)}>
-                      {endpointData.disabled ? 'Enable' : 'Disable'}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setRotateSecretDialogOpen(true)}>Rotate Secret</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive" onClick={() => setDeleteDialogOpen(true)}>
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <Button variant="ghost" size="icon-sm" onClick={handleRetry} disabled={isRefreshing}>
-                  {isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
-                </Button>
-              </div>
-            </>
-          ) : null}
-        </div>
-
-        {endpoint.loading ? (
-          <div className="flex flex-col gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Endpoint Configuration</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 flex flex-col gap-4">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <div className="flex flex-col">
-                    <div className="text-muted-foreground text-xs mb-1">URL</div>
-                    <Skeleton className="h-9 w-full" />
-                  </div>
-                  <div className="flex flex-col">
-                    <div className="text-muted-foreground text-xs mb-1">Signing Secret</div>
-                    <Skeleton className="h-9 w-full" />
-                  </div>
+        <PageIntro title="Webhooks" />
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <Button variant="ghost" size="icon-sm" className="shrink-0" onClick={() => navigate(RoutePath.WEBHOOKS)}>
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            {endpoint.loading ? (
+              <>
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-5 w-16" />
+                <Skeleton className="h-4 w-24" />
+              </>
+            ) : endpointData ? (
+              <>
+                <h2 className="text-lg font-medium truncate min-w-0">
+                  {endpointData.description || 'Unnamed Endpoint'}
+                </h2>
+                <Badge variant={endpointData.disabled ? 'secondary' : 'success'} className="shrink-0">
+                  {endpointData.disabled ? 'Disabled' : 'Enabled'}
+                </Badge>
+                <span className="text-sm text-muted-foreground shrink-0 hidden sm:inline">•</span>
+                <TimestampTooltip
+                  timestamp={
+                    typeof endpointData.createdAt === 'string'
+                      ? endpointData.createdAt
+                      : endpointData.createdAt.toISOString()
+                  }
+                >
+                  <span className="text-sm text-muted-foreground cursor-default shrink-0 hidden sm:inline">
+                    {relativeTime}
+                  </span>
+                </TimestampTooltip>
+                <div className="ml-auto flex items-center gap-2 shrink-0">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="icon-sm" aria-label="Open menu" disabled={isMutating}>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => setEditSheetOpen(true)}>Edit</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setDisableDialogOpen(true)}>
+                        {endpointData.disabled ? 'Enable' : 'Disable'}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setRotateSecretDialogOpen(true)}>Rotate Secret</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem variant="destructive" onClick={() => setDeleteDialogOpen(true)}>
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <Button variant="ghost" size="icon-sm" onClick={handleRetry} disabled={isRefreshing}>
+                    {isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
+                  </Button>
                 </div>
-                <div>
-                  <div className="text-muted-foreground text-xs mb-1">Listening For</div>
-                  <div className="flex flex-wrap gap-1.5">
-                    <Skeleton className="h-5 w-24 rounded-full" />
-                    <Skeleton className="h-5 w-32 rounded-full" />
-                    <Skeleton className="h-5 w-20 rounded-full" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Delivery Stats</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col gap-2">
-                  <Skeleton className="h-2 w-full rounded-full" />
-                  <div className="flex items-center gap-4">
-                    <Skeleton className="h-3 w-20" />
-                    <Skeleton className="h-3 w-16" />
-                    <Skeleton className="h-3 w-18" />
-                    <Skeleton className="h-3 w-18" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Event History</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <EndpointEventsTable data={[]} loading={true} onReplay={handleReplay} />
-              </CardContent>
-            </Card>
+              </>
+            ) : null}
           </div>
-        ) : endpoint.error || !endpointData ? (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-center">Oops, something went wrong</CardTitle>
-            </CardHeader>
-            <CardContent className="flex justify-between items-center flex-col gap-3">
-              <div>There was an error loading the endpoint details.</div>
-              <Button variant="outline" onClick={handleRetry}>
-                <RefreshCcw className="mr-2 h-4 w-4" />
-                Retry
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="flex flex-col gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Endpoint Configuration</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 flex flex-col gap-4">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <div className="flex flex-col">
-                    <div className="text-muted-foreground text-xs mb-1">URL</div>
-                    <InputGroup className="pr-1">
-                      <InputGroupInput value={endpointData.url} readOnly className="font-mono text-sm" />
-                      <CopyButton value={endpointData.url} size="icon-xs" tooltipText="Copy URL" />
-                    </InputGroup>
-                  </div>
-                  <div className="flex flex-col">
-                    <div className="text-muted-foreground text-xs mb-1">Signing Secret</div>
-                    {secret.loading ? (
+
+          {endpoint.loading ? (
+            <div className="flex flex-col gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Endpoint Configuration</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 flex flex-col gap-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="flex flex-col">
+                      <div className="text-muted-foreground text-xs mb-1">URL</div>
                       <Skeleton className="h-9 w-full" />
-                    ) : secret.error ? (
-                      <span className="text-sm text-muted-foreground">Failed to load</span>
-                    ) : secret.data ? (
-                      <InputGroup className="pr-1">
-                        <InputGroupInput
-                          value={isSecretRevealed ? secret.data.key : getMaskedToken(secret.data.key)}
-                          readOnly
-                          className="font-mono text-sm"
-                        />
-                        <InputGroupButton
-                          variant="ghost"
-                          size="icon-xs"
-                          onClick={() => setIsSecretRevealed(!isSecretRevealed)}
-                          title={isSecretRevealed ? 'Hide secret' : 'Reveal secret'}
-                        >
-                          {isSecretRevealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </InputGroupButton>
-                        <CopyButton value={secret.data.key} size="icon-xs" tooltipText="Copy Signing Secret" />
-                      </InputGroup>
-                    ) : null}
+                    </div>
+                    <div className="flex flex-col">
+                      <div className="text-muted-foreground text-xs mb-1">Signing Secret</div>
+                      <Skeleton className="h-9 w-full" />
+                    </div>
                   </div>
-                </div>
-                {endpointData.filterTypes && endpointData.filterTypes.length > 0 && (
                   <div>
                     <div className="text-muted-foreground text-xs mb-1">Listening For</div>
                     <div className="flex flex-wrap gap-1.5">
-                      {endpointData.filterTypes.map((eventType) => (
-                        <Badge key={eventType} variant="secondary" className="font-normal text-xs">
-                          {eventType}
-                        </Badge>
-                      ))}
+                      <Skeleton className="h-5 w-24 rounded-full" />
+                      <Skeleton className="h-5 w-32 rounded-full" />
+                      <Skeleton className="h-5 w-20 rounded-full" />
                     </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Delivery Stats</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {statsIsLoading ? (
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Delivery Stats</CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div className="flex flex-col gap-2">
                     <Skeleton className="h-2 w-full rounded-full" />
                     <div className="flex items-center gap-4">
@@ -332,23 +241,118 @@ const WebhookEndpointDetails: React.FC = () => {
                       <Skeleton className="h-3 w-18" />
                     </div>
                   </div>
-                ) : stats.data ? (
-                  <div className={statsIsFetching ? 'opacity-50 transition-opacity' : ''}>
-                    <DeliveryStatsLine stats={stats.data} />
-                  </div>
-                ) : null}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Event History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <EndpointEventsTable data={[]} loading={true} onReplay={handleReplay} />
+                </CardContent>
+              </Card>
+            </div>
+          ) : endpoint.error || !endpointData ? (
             <Card>
               <CardHeader>
-                <CardTitle>Event History</CardTitle>
+                <CardTitle className="text-center">Oops, something went wrong</CardTitle>
               </CardHeader>
-              <CardContent>
-                <EndpointEventsTable data={messages.data || []} loading={messages.loading} onReplay={handleReplay} />
+              <CardContent className="flex justify-between items-center flex-col gap-3">
+                <div>There was an error loading the endpoint details.</div>
+                <Button variant="outline" onClick={handleRetry}>
+                  <RefreshCcw className="mr-2 h-4 w-4" />
+                  Retry
+                </Button>
               </CardContent>
             </Card>
-          </div>
-        )}
+          ) : (
+            <div className="flex flex-col gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Endpoint Configuration</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 flex flex-col gap-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="flex flex-col">
+                      <div className="text-muted-foreground text-xs mb-1">URL</div>
+                      <InputGroup className="pr-1">
+                        <InputGroupInput value={endpointData.url} readOnly className="font-mono text-sm" />
+                        <CopyButton value={endpointData.url} size="icon-xs" tooltipText="Copy URL" />
+                      </InputGroup>
+                    </div>
+                    <div className="flex flex-col">
+                      <div className="text-muted-foreground text-xs mb-1">Signing Secret</div>
+                      {secret.loading ? (
+                        <Skeleton className="h-9 w-full" />
+                      ) : secret.error ? (
+                        <span className="text-sm text-muted-foreground">Failed to load</span>
+                      ) : secret.data ? (
+                        <InputGroup className="pr-1">
+                          <InputGroupInput
+                            value={isSecretRevealed ? secret.data.key : getMaskedToken(secret.data.key)}
+                            readOnly
+                            className="font-mono text-sm"
+                          />
+                          <InputGroupButton
+                            variant="ghost"
+                            size="icon-xs"
+                            onClick={() => setIsSecretRevealed(!isSecretRevealed)}
+                            title={isSecretRevealed ? 'Hide secret' : 'Reveal secret'}
+                          >
+                            {isSecretRevealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </InputGroupButton>
+                          <CopyButton value={secret.data.key} size="icon-xs" tooltipText="Copy Signing Secret" />
+                        </InputGroup>
+                      ) : null}
+                    </div>
+                  </div>
+                  {endpointData.filterTypes && endpointData.filterTypes.length > 0 && (
+                    <div>
+                      <div className="text-muted-foreground text-xs mb-1">Listening For</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {endpointData.filterTypes.map((eventType) => (
+                          <Badge key={eventType} variant="secondary" className="font-normal text-xs">
+                            {eventType}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Delivery Stats</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {statsIsLoading ? (
+                    <div className="flex flex-col gap-2">
+                      <Skeleton className="h-2 w-full rounded-full" />
+                      <div className="flex items-center gap-4">
+                        <Skeleton className="h-3 w-20" />
+                        <Skeleton className="h-3 w-16" />
+                        <Skeleton className="h-3 w-18" />
+                        <Skeleton className="h-3 w-18" />
+                      </div>
+                    </div>
+                  ) : stats.data ? (
+                    <div className={statsIsFetching ? 'opacity-50 transition-opacity' : ''}>
+                      <DeliveryStatsLine stats={stats.data} />
+                    </div>
+                  ) : null}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Event History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <EndpointEventsTable data={messages.data || []} loading={messages.loading} onReplay={handleReplay} />
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
       </PageContent>
 
       <UpsertEndpointSheet

@@ -53,10 +53,7 @@ export function SvixProvider({ children }: SvixProviderProps) {
           size={isWebhooksListPage ? 'full' : 'default'}
           className={cn({ '!p-0 overflow-hidden': isWebhooksListPage })}
         >
-          <PageIntro
-            title="Webhooks"
-            className={cn({ 'mb-8 px-4 pt-4': isWebhooksListPage, 'mb-0': !isWebhooksListPage })}
-          />
+          <PageIntro title="Webhooks" className={cn({ 'mb-8 px-4 pt-4': isWebhooksListPage })} />
           <Card className={cn({ 'mx-4': isWebhooksListPage })}>
             <CardHeader>
               <Skeleton className="h-6 w-48" />
@@ -80,10 +77,7 @@ export function SvixProvider({ children }: SvixProviderProps) {
           size={isWebhooksListPage ? 'full' : 'default'}
           className={cn({ '!p-0 overflow-hidden': isWebhooksListPage })}
         >
-          <PageIntro
-            title="Webhooks"
-            className={cn({ 'mb-8 px-4 pt-4': isWebhooksListPage, 'mb-0': !isWebhooksListPage })}
-          />
+          <PageIntro title="Webhooks" className={cn({ 'mb-8 px-4 pt-4': isWebhooksListPage })} />
           <Card className={cn({ 'mx-4': isWebhooksListPage })}>
             <CardHeader>
               <CardTitle className="text-center">Oops, something went wrong</CardTitle>
