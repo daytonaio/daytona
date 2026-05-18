@@ -108,6 +108,8 @@ import {
 import { SandboxLookupCacheInvalidationService } from './sandbox-lookup-cache-invalidation.service'
 import { Region } from '../../region/entities/region.entity'
 import { SandboxActivityService } from './sandbox-activity.service'
+import { JobService } from './job.service'
+import { ResourceType } from '../enums/resource-type.enum'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -144,6 +146,7 @@ export class SandboxService {
     private readonly dockerRegistryService: DockerRegistryService,
     @InjectRepository(SandboxFork)
     private readonly sandboxForkRepository: Repository<SandboxFork>,
+    private readonly jobService: JobService,
   ) {}
 
   protected getLockKey(id: string): string {
@@ -2401,6 +2404,18 @@ export class SandboxService {
     return await this.sandboxRepository.update(sandbox.id, { updateData, entity: sandbox })
   }
 
+  private async cleanupSandboxesMatching(criteria: FindOptionsWhere<Sandbox>, label: string): Promise<void> {
+    const sandboxes = await this.sandboxRepository.find({ where: criteria, select: ['id'] })
+    if (sandboxes.length === 0) {
+      return
+    }
+
+    const sandboxIds = sandboxes.map((s) => s.id)
+    await this.jobService.deleteByResourceIds(ResourceType.SANDBOX, sandboxIds)
+    const result = await this.sandboxRepository.delete(criteria)
+    this.logger.debug(`Cleaned up ${result.affected} ${label}`)
+  }
+
   @Cron(CronExpression.EVERY_SECOND, { name: 'cleanup-destroyed-sandboxes' })
   @LogExecution('cleanup-destroyed-sandboxes')
   @WithInstrumentation()
@@ -2415,14 +2430,13 @@ export class SandboxService {
       const twentyFourHoursAgo = new Date()
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
 
-      const destroyedSandboxs = await this.sandboxRepository.delete({
-        state: SandboxState.DESTROYED,
-        updatedAt: LessThan(twentyFourHoursAgo),
-      })
-
-      if (destroyedSandboxs.affected > 0) {
-        this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} destroyed sandboxes`)
-      }
+      await this.cleanupSandboxesMatching(
+        {
+          state: SandboxState.DESTROYED,
+          updatedAt: LessThan(twentyFourHoursAgo),
+        },
+        'destroyed sandboxes',
+      )
     } finally {
       await this.redisLockProvider.unlock(lockKey)
     }
@@ -2442,15 +2456,14 @@ export class SandboxService {
       const twentyFourHoursAgo = new Date()
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
 
-      const destroyedSandboxs = await this.sandboxRepository.delete({
-        state: SandboxState.BUILD_FAILED,
-        desiredState: SandboxDesiredState.DESTROYED,
-        updatedAt: LessThan(twentyFourHoursAgo),
-      })
-
-      if (destroyedSandboxs.affected > 0) {
-        this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} build failed sandboxes`)
-      }
+      await this.cleanupSandboxesMatching(
+        {
+          state: SandboxState.BUILD_FAILED,
+          desiredState: SandboxDesiredState.DESTROYED,
+          updatedAt: LessThan(twentyFourHoursAgo),
+        },
+        'build failed sandboxes',
+      )
     } finally {
       await this.redisLockProvider.unlock(lockKey)
     }
@@ -2470,15 +2483,14 @@ export class SandboxService {
       const sevenDaysAgo = new Date()
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-      const result = await this.sandboxRepository.delete({
-        state: SandboxState.BUILD_FAILED,
-        desiredState: SandboxDesiredState.STARTED,
-        updatedAt: LessThan(sevenDaysAgo),
-      })
-
-      if (result.affected > 0) {
-        this.logger.debug(`Cleaned up ${result.affected} stale build failed sandboxes`)
-      }
+      await this.cleanupSandboxesMatching(
+        {
+          state: SandboxState.BUILD_FAILED,
+          desiredState: SandboxDesiredState.STARTED,
+          updatedAt: LessThan(sevenDaysAgo),
+        },
+        'stale build failed sandboxes',
+      )
     } finally {
       await this.redisLockProvider.unlock(lockKey)
     }
@@ -2498,15 +2510,14 @@ export class SandboxService {
       const sevenDaysAgo = new Date()
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-      const result = await this.sandboxRepository.delete({
-        state: SandboxState.ERROR,
-        desiredState: SandboxDesiredState.DESTROYED,
-        updatedAt: LessThan(sevenDaysAgo),
-      })
-
-      if (result.affected > 0) {
-        this.logger.debug(`Cleaned up ${result.affected} stale error sandboxes`)
-      }
+      await this.cleanupSandboxesMatching(
+        {
+          state: SandboxState.ERROR,
+          desiredState: SandboxDesiredState.DESTROYED,
+          updatedAt: LessThan(sevenDaysAgo),
+        },
+        'stale error sandboxes',
+      )
     } finally {
       await this.redisLockProvider.unlock(lockKey)
     }
