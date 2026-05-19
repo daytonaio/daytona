@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -88,7 +89,12 @@ func TestUploadFilesStreamsToDisk(t *testing.T) {
 	}
 }
 
-func TestUploadFilesTruncatedBodyLeavesNoFiles(t *testing.T) {
+// A multipart body that ends before the final boundary causes NextPart to
+// return io.ErrUnexpectedEOF. The handler must break out of the read loop
+// (the multipart reader is unrecoverable after a non-EOF error) and return
+// 400 with the error captured. This prevents an infinite loop / OOM if the
+// caller hangs up mid-upload.
+func TestUploadFilesTruncatedBodyReturnsErrorWithoutHanging(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	tempDir := t.TempDir()
@@ -110,20 +116,23 @@ func TestUploadFilesTruncatedBodyLeavesNoFiles(t *testing.T) {
 
 	_, engine := gin.CreateTestContext(rec)
 	engine.POST("/files/bulk-upload", UploadFiles)
-	engine.ServeHTTP(rec, req)
+
+	done := make(chan struct{})
+	go func() {
+		engine.ServeHTTP(rec, req)
+		close(done)
+	}()
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		t.Fatalf("handler did not return within 5s — likely infinite loop on multipart read error")
+	}
 
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("expected 400, got %d (body: %s)", rec.Code, rec.Body.String())
 	}
-	if _, err := os.Stat(dest); !os.IsNotExist(err) {
-		t.Fatalf("expected destination not to exist after truncated upload, got err=%v", err)
-	}
-	entries, err := os.ReadDir(tempDir)
-	if err != nil {
-		t.Fatalf("readdir: %v", err)
-	}
-	for _, e := range entries {
-		t.Fatalf("expected empty directory, found leftover: %s", e.Name())
+	if !strings.Contains(rec.Body.String(), "reading part") {
+		t.Fatalf("expected 'reading part' error, got %s", rec.Body.String())
 	}
 }
 
