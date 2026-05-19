@@ -25,3 +25,33 @@ updates:
           - "*"
     commit-message:
       prefix: "chore(deps)"
+
+  - package-ecosystem: docker
+    directories:
+      - "/apps/api"
+      - "/apps/proxy"
+      - "/apps/runner"
+      - "/apps/snapshot-manager"
+      - "/apps/ssh-gateway"
+      - "/apps/otel-collector"
+      - "/apps/docs"
+      - "/images/sandbox"
+      - "/images/sandbox-slim"
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      docker-base-images:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "docker"
+      docker-engine:
+        patterns:
+          - "docker"
+    ignore:
+      - dependency-name: "docker"
+        update-types:
+          - "version-update:semver-major"
+    commit-message:
+      prefix: "chore(deps)"
