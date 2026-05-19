@@ -89,7 +89,7 @@ from daytona import CreateSnapshotParams, Daytona, Image, Resources
 
 Daytona().snapshot.create(
     CreateSnapshotParams(
-        name="daytona-env-default",
+        name="byoc-env-default",
         image=Image.from_dockerfile("Dockerfile"),
         resources=Resources(cpu=2, memory=8, disk=10),
     ),
