@@ -4,35 +4,29 @@
 """
 Build the default BYOC sandbox snapshot from Dockerfile.default.
 
-Hashes the Dockerfile, names the snapshot byoc-env-default-{sha8}, and skips
-the build if a snapshot with that name already exists. Streams build logs.
+Names the snapshot using host_lib.default_snapshot_name() so the orchestrator
+and this builder cannot drift, and skips the build if a snapshot with that
+name already exists. Streams build logs.
 """
-import hashlib
-import pathlib
 import sys
 
 import dotenv
+import host_lib
 
 from daytona import CreateSnapshotParams, Daytona, DaytonaNotFoundError, Image, Resources
 
 dotenv.load_dotenv(override=True)
 
-DOCKERFILE = pathlib.Path("Dockerfile.default")
-SNAPSHOT_PREFIX = "byoc-env-default"
+DOCKERFILE = host_lib.DEFAULT_DOCKERFILE
 RESOURCES = Resources(cpu=2, memory=8, disk=10)
-
-
-def short_hash(path: pathlib.Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()[:8]
 
 
 def main() -> int:
     if not DOCKERFILE.is_file():
-        print(f"!! {DOCKERFILE} not found in cwd {pathlib.Path.cwd()}", file=sys.stderr)
+        print(f"!! {DOCKERFILE} not found", file=sys.stderr)
         return 1
 
-    sha = short_hash(DOCKERFILE)
-    name = f"{SNAPSHOT_PREFIX}-{sha}"
+    name = host_lib.default_snapshot_name()
 
     daytona = Daytona()
     try:
