@@ -1838,9 +1838,12 @@ export class SandboxService {
       throw new StateChangeInProgressError()
     }
 
-    const updateData: Partial<Sandbox> = {
-      pending: true,
-      desiredState: isEphemeral(sandbox) ? SandboxDesiredState.DESTROYED : SandboxDesiredState.STOPPED,
+    let updateData: Partial<Sandbox> = {}
+    if (isEphemeral(sandbox)) {
+      updateData = Sandbox.getSoftDeleteUpdate(sandbox)
+    } else {
+      updateData.pending = true
+      updateData.desiredState = SandboxDesiredState.STOPPED
     }
 
     const updatedSandbox = await this.sandboxRepository.updateWhere(sandbox.id, {
@@ -2717,6 +2720,10 @@ export class SandboxService {
     const desiredState = this.getExpectedDesiredStateForState(newState)
     if (desiredState) {
       updateData.desiredState = desiredState
+    }
+
+    if (newState === SandboxState.DESTROYED) {
+      Object.assign(updateData, Sandbox.getSoftDeleteUpdate(sandbox))
     }
 
     await this.sandboxRepository.updateWhere(sandbox.id, {
