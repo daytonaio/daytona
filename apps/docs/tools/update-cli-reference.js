@@ -40,10 +40,18 @@ Install the Daytona CLI to interact with Daytona sandboxes from the command line
 </TabItem>
 <TabItem label="Linux">
 
-On Linux, the command below downloads the latest binary from GitHub releases and installs it to \`/usr/local/bin\`, overwriting any existing version.
+Choose the command for your Linux architecture. Both commands download the latest binary from GitHub releases and install it to \`/usr/local/bin\`, overwriting any existing version.
+
+For \`amd64\` (\`x86_64\`):
 
   \`\`\`bash
-  sudo curl -L https://github.com/daytonaio/daytona/releases/latest/download/daytona-linux-amd64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
+  sudo curl -fL https://github.com/daytonaio/daytona/releases/latest/download/daytona-linux-amd64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
+  \`\`\`
+
+For \`arm64\` (\`aarch64\`):
+
+  \`\`\`bash
+  sudo curl -fL https://github.com/daytonaio/daytona/releases/latest/download/daytona-linux-arm64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
   \`\`\`
 
 </TabItem>
@@ -73,7 +81,13 @@ brew upgrade daytonaio/cli/daytona
 <TabItem label="Linux">
 
 \`\`\`bash
-sudo curl -L https://github.com/daytonaio/daytona/releases/latest/download/daytona-linux-amd64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
+sudo curl -fL https://github.com/daytonaio/daytona/releases/latest/download/daytona-linux-amd64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
+\`\`\`
+
+For \`arm64\` (\`aarch64\`):
+
+\`\`\`bash
+sudo curl -fL https://github.com/daytonaio/daytona/releases/latest/download/daytona-linux-arm64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
 \`\`\`
 
 </TabItem>
