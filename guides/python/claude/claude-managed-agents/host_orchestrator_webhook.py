@@ -6,6 +6,7 @@
 """FastAPI webhook entrypoint for the shared host orchestrator."""
 from __future__ import annotations
 
+import math
 import os
 import threading
 
@@ -21,8 +22,8 @@ def _positive_float_from_env(name: str, default: str) -> float:
         value = float(raw)
     except ValueError as e:
         raise ValueError(f"{name} must be a positive number, got {raw!r}") from e
-    if value <= 0:
-        raise ValueError(f"{name} must be a positive number, got {value}")
+    if not math.isfinite(value) or value <= 0:
+        raise ValueError(f"{name} must be a finite positive number, got {value}")
     return value
 
 
