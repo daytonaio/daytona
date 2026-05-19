@@ -14,10 +14,58 @@ import orchestrator_lib
 import uvicorn
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 
+
+def _positive_float_from_env(name: str, default: str) -> float:
+    raw = os.environ.get(name, default)
+    try:
+        value = float(raw)
+    except ValueError as e:
+        raise ValueError(f"{name} must be a positive number, got {raw!r}") from e
+    if value <= 0:
+        raise ValueError(f"{name} must be a positive number, got {value}")
+    return value
+
+
+def _nonnegative_int_from_env(name: str, default: str) -> int:
+    raw = os.environ.get(name, default)
+    try:
+        value = int(raw)
+    except ValueError as e:
+        raise ValueError(f"{name} must be a non-negative integer, got {raw!r}") from e
+    if value < 0:
+        raise ValueError(f"{name} must be a non-negative integer, got {value}")
+    return value
+
+
 PORT = int(os.environ.get("PORT", "5051"))
 WEBHOOK_SECRET = os.environ.get("ANTHROPIC_WEBHOOK_SECRET")
+WEBHOOK_DRAIN_SECONDS = _positive_float_from_env("WEBHOOK_DRAIN_SECONDS", "30")
+WEBHOOK_RECLAIM_OLDER_THAN_MS = _nonnegative_int_from_env("WEBHOOK_RECLAIM_OLDER_THAN_MS", "2000")
 
 app = FastAPI()
+
+
+def webhook_fallback_drain_loop() -> None:
+    """Poll occasionally so a delivered webhook is not the only drain trigger."""
+    transient_attempts = 0
+    while not orchestrator_lib.shutdown.is_set():
+        try:
+            processed = orchestrator_lib.drain_work(
+                reclaim_older_than_ms=WEBHOOK_RECLAIM_OLDER_THAN_MS,
+                raise_poll_errors=True,
+            )
+            transient_attempts = 0
+            if processed:
+                print(f"[webhook] fallback drain processed={len(processed)}", flush=True)
+            wait = WEBHOOK_DRAIN_SECONDS
+        except Exception as e:
+            transient_attempts += 1
+            wait = min(60.0, 2.0 ** min(transient_attempts, 6))
+            print(
+                f"[webhook] fallback drain failed; retrying in {wait:.1f}s " f"({type(e).__name__}: {e})",
+                flush=True,
+            )
+        orchestrator_lib.shutdown.wait(wait)
 
 
 async def _handle_webhook(request: Request, background_tasks: BackgroundTasks) -> dict:
@@ -41,7 +89,10 @@ async def _handle_webhook(request: Request, background_tasks: BackgroundTasks) -
     # tens of seconds and would otherwise hold the webhook POST open long
     # enough for Anthropic to time out and retry. DRAIN_LOCK serializes
     # concurrent drains inside orchestrator_lib.
-    background_tasks.add_task(orchestrator_lib.drain_work)
+    background_tasks.add_task(
+        orchestrator_lib.drain_work,
+        reclaim_older_than_ms=WEBHOOK_RECLAIM_OLDER_THAN_MS,
+    )
     return {"status": "queued"}
 
 
@@ -63,6 +114,10 @@ def on_startup() -> None:
             "Set it in .env, or run host_orchestrator_polling.py if you don't want a webhook."
         )
     orchestrator_lib.acquire_orchestrator_lock("webhook")
+    threading.Thread(
+        target=webhook_fallback_drain_loop,
+        daemon=True,
+    ).start()
     threading.Thread(
         target=orchestrator_lib.janitor_loop,
         kwargs={"recover_crashed_runners": True},

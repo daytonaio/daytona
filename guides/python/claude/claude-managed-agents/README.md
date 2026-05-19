@@ -68,6 +68,7 @@ Listens on `:5051` and requires `ANTHROPIC_WEBHOOK_SECRET`. The server exposes `
 Anthropic requires the registered webhook endpoint to be a public HTTPS URL on port 443, so expose `:5051` through a TLS-terminating reverse proxy, load balancer, or tunnel. Register that public endpoint URL with Anthropic, not the raw orchestrator address.
 
 In this mode the janitor thread also handles crash recovery: it polls the work queue to replace runners whose sandbox is still up but whose process exited.
+Webhook-triggered drains are backed by a periodic safety-net drain loop, so a process restart after acknowledging a webhook cannot leave newly queued work waiting indefinitely for another webhook.
 
 ## Drive a session
 
@@ -163,6 +164,7 @@ Optional tuning (see `.env.example` for defaults):
 - `MAX_IDLE_DAYS`: delete stopped/archived sandboxes this long after they were stopped. `0` disables.
 - `PORT`: webhook receiver port.
 - `POLL_BLOCK_MS`, `POLL_RECLAIM_OLDER_THAN_MS`: long-poll timing for polling mode. `POLL_BLOCK_MS` must be in `1..999`.
+- `WEBHOOK_DRAIN_SECONDS`, `WEBHOOK_RECLAIM_OLDER_THAN_MS`: safety-net drain timing for webhook mode.
 - `LOG_LEVEL`: log level for the in-sandbox runner (default `INFO`).
 - `DEFAULT_SNAPSHOT_NAME`: override the hash-derived default snapshot name.
 - `ORCHESTRATOR_LOCK_FILE`: override the single-instance lock file path (default `/tmp/anthropic-selfhosted-orchestrator-{ENVIRONMENT_ID}.lock`).
