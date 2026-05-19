@@ -50,7 +50,7 @@ def poll_loop() -> None:
             if orchestrator_lib.is_permanent_poll_error(e):
                 raise
             transient_attempts += 1
-            wait = min(60.0, 2.0**transient_attempts)
+            wait = min(60.0, 2.0 ** min(transient_attempts, 6))
             print(
                 f"[poll] transient failure; retrying in {wait:.1f}s " f"({type(e).__name__}: {e})",
                 flush=True,
