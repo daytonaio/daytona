@@ -80,6 +80,8 @@ brew upgrade daytonaio/cli/daytona
 </TabItem>
 <TabItem label="Linux">
 
+For \`amd64\` (\`x86_64\`):
+
 \`\`\`bash
 sudo curl -fL https://github.com/daytonaio/daytona/releases/latest/download/daytona-linux-amd64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
 \`\`\`
