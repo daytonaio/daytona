@@ -13,7 +13,7 @@ import (
 
 // RecoverFromStorageLimit attempts to recover a sandbox from storage limit issues
 // by expanding its storage quota by 5% of the original quota per attempt, up to 10% total.
-func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId string, originalStorageQuota float64, registry *dto.RegistryDTO) error {
+func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId string, originalStorageQuota float64, registries []dto.RegistryDTO) error {
 	originalContainer, err := d.ContainerInspect(ctx, sandboxId)
 	if err != nil {
 		return fmt.Errorf("failed to inspect container: %w", err)
@@ -60,5 +60,5 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 		}
 	}
 
-	return d.ContainerDiskResize(ctx, sandboxId, newStorageQuota, 0, 0, "recovery", registry)
+	return d.ContainerDiskResize(ctx, sandboxId, newStorageQuota, 0, 0, "recovery", registries)
 }

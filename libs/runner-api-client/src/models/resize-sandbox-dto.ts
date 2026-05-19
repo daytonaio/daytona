@@ -22,6 +22,6 @@ export interface ResizeSandboxDTO {
     'disk'?: number;
     'gpu'?: number;
     'memory'?: number;
-    'registry'?: RegistryDTO;
+    'registries'?: Array<RegistryDTO>;
 }
 
