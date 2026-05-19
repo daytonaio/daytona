@@ -10,11 +10,11 @@ export class Migration1779199836948 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE UNIQUE INDEX CONCURRENTLY "sandbox_usage_periods_one_open_period_per_sandbox_idx" ON "sandbox_usage_periods" ("sandboxId") WHERE "endAt" IS NULL`,
+      `CREATE UNIQUE INDEX "sandbox_usage_periods_one_open_period_per_sandbox_idx" ON "sandbox_usage_periods" ("sandboxId") WHERE "endAt" IS NULL`,
     )
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP INDEX CONCURRENTLY "public"."sandbox_usage_periods_one_open_period_per_sandbox_idx"`)
+    await queryRunner.query(`DROP INDEX "public"."sandbox_usage_periods_one_open_period_per_sandbox_idx"`)
   }
 }
