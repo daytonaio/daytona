@@ -47,6 +47,8 @@ import { Sandbox } from '../entities/sandbox.entity'
 import { Runner } from '../entities/runner.entity'
 import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
+import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
+import { SnapshotService } from '../services/snapshot.service'
 import { OrganizationService } from '../../organization/services/organization.service'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { TypedConfigService } from '../../config/typed-config.service'
@@ -74,6 +76,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     private readonly sandboxArchiveAction: SandboxArchiveAction,
     private readonly configService: TypedConfigService,
     private readonly dockerRegistryService: DockerRegistryService,
+    private readonly snapshotService: SnapshotService,
     private readonly organizationService: OrganizationService,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
@@ -655,11 +658,9 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             })
           }
 
-          const backupRegistry = sandbox.backupRegistryId
-            ? ((await this.dockerRegistryService.findOne(sandbox.backupRegistryId)) ?? undefined)
-            : undefined
+          const candidateRegistries = await this.resolveCandidateRegistriesForSandbox(sandbox)
 
-          await runnerAdapter.recoverSandbox(sandbox, backupRegistry, true)
+          await runnerAdapter.recoverSandbox(sandbox, candidateRegistries, true)
 
           if (runner.apiVersion !== '2') {
             await this.sandboxRepository.updateWhere(sandbox.id, {
@@ -690,6 +691,30 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           await this.redisLockProvider.unlock(sandboxLockKey)
         }
       }),
+    )
+  }
+
+  // Mirror of SandboxService.resolveCandidateRegistriesForSandbox for the drain-recover path,
+  // which can't reach SandboxService without a circular module dependency.
+  private async resolveCandidateRegistriesForSandbox(sandbox: Sandbox): Promise<DockerRegistry[]> {
+    let snapshotRef: string | null = null
+    if (sandbox.buildInfo) {
+      snapshotRef = sandbox.buildInfo.snapshotRef
+    } else if (sandbox.snapshot) {
+      try {
+        const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
+        snapshotRef = snapshot.ref
+      } catch (err) {
+        this.logger.warn(
+          `Could not resolve snapshot ref for sandbox ${sandbox.id} (snapshot=${sandbox.snapshot}): ${err instanceof Error ? err.message : err}`,
+        )
+      }
+    }
+
+    return this.dockerRegistryService.findCandidateRegistriesForSandbox(
+      sandbox.backupRegistryId,
+      snapshotRef,
+      sandbox.region,
     )
   }
 

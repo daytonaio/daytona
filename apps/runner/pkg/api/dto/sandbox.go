@@ -30,11 +30,11 @@ type CreateSandboxDTO struct {
 } //	@name	CreateSandboxDTO
 
 type ResizeSandboxDTO struct {
-	Cpu      int64        `json:"cpu,omitempty" validate:"omitempty,min=1"`
-	Gpu      int64        `json:"gpu,omitempty" validate:"omitempty,min=0"`
-	Memory   int64        `json:"memory,omitempty" validate:"omitempty,min=1"`
-	Disk     int64        `json:"disk,omitempty" validate:"omitempty,min=1"`
-	Registry *RegistryDTO `json:"registry,omitempty"`
+	Cpu        int64         `json:"cpu,omitempty" validate:"omitempty,min=1"`
+	Gpu        int64         `json:"gpu,omitempty" validate:"omitempty,min=0"`
+	Memory     int64         `json:"memory,omitempty" validate:"omitempty,min=1"`
+	Disk       int64         `json:"disk,omitempty" validate:"omitempty,min=1"`
+	Registries []RegistryDTO `json:"registries,omitempty"`
 } //	@name	ResizeSandboxDTO
 
 type UpdateNetworkSettingsDTO struct {
@@ -57,9 +57,9 @@ type RecoverSandboxDTO struct {
 	NetworkBlockAll  *bool             `json:"networkBlockAll,omitempty"`
 	NetworkAllowList *string           `json:"networkAllowList,omitempty"`
 	// At least one of ErrorReason or BackupErrorReason must yield a recovery type; both are optional.
-	ErrorReason       string       `json:"errorReason,omitempty"`
-	BackupErrorReason string       `json:"backupErrorReason,omitempty"`
-	Registry          *RegistryDTO `json:"registry,omitempty"`
+	ErrorReason       string        `json:"errorReason,omitempty"`
+	BackupErrorReason string        `json:"backupErrorReason,omitempty"`
+	Registries        []RegistryDTO `json:"registries,omitempty"`
 } //	@name	RecoverSandboxDTO
 
 type IsRecoverableDTO struct {

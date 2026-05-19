@@ -24,7 +24,7 @@ func (d *DockerClient) RecoverSandbox(ctx context.Context, sandboxId string, rec
 
 	switch recoveryType {
 	case models.RecoveryTypeStorageExpansion:
-		return d.RecoverFromStorageLimit(ctx, sandboxId, float64(recoverDto.StorageQuota), recoverDto.Registry)
+		return d.RecoverFromStorageLimit(ctx, sandboxId, float64(recoverDto.StorageQuota), recoverDto.Registries)
 	default:
 		return fmt.Errorf("unsupported recovery type: %s", recoveryType)
 	}

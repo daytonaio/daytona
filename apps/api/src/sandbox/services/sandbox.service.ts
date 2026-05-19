@@ -1934,18 +1934,10 @@ export class SandboxService {
 
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-      const backupRegistry = sandbox.backupRegistryId
-        ? ((await this.dockerRegistryService.findOne(sandbox.backupRegistryId)) ?? undefined)
-        : undefined
-
-      if (sandbox.backupRegistryId && !backupRegistry) {
-        this.logger.warn(
-          `Backup registry ${sandbox.backupRegistryId} not found for sandbox ${sandbox.id}; proceeding without registry credentials`,
-        )
-      }
+      const candidateRegistries = await this.resolveCandidateRegistriesForSandbox(sandbox)
 
       try {
-        await runnerAdapter.recoverSandbox(sandbox, backupRegistry, skipStart)
+        await runnerAdapter.recoverSandbox(sandbox, candidateRegistries, skipStart)
       } catch (error) {
         if (error instanceof Error && error.message.includes('storage cannot be further expanded')) {
           throw new ForbiddenException(
@@ -2161,17 +2153,15 @@ export class SandboxService {
       try {
         const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-        const backupRegistry = sandbox.backupRegistryId
-          ? ((await this.dockerRegistryService.findOne(sandbox.backupRegistryId)) ?? undefined)
-          : undefined
+        const candidateRegistries = await this.resolveCandidateRegistriesForSandbox(sandbox)
 
-        if (sandbox.backupRegistryId && !backupRegistry) {
-          this.logger.warn(
-            `Backup registry ${sandbox.backupRegistryId} not found for sandbox ${sandbox.id}; proceeding without registry credentials`,
-          )
-        }
-
-        await runnerAdapter.resizeSandbox(sandbox.id, resizeDto.cpu, resizeDto.memory, resizeDto.disk, backupRegistry)
+        await runnerAdapter.resizeSandbox(
+          sandbox.id,
+          resizeDto.cpu,
+          resizeDto.memory,
+          resizeDto.disk,
+          candidateRegistries,
+        )
 
         // For V0 runners, update resources immediately (subscriber emits STATE_UPDATED)
         // For V2 runners, job handler will update resources on completion
@@ -2345,6 +2335,39 @@ export class SandboxService {
     }
 
     return region.proxyUrl + '/sandboxes/' + sandbox.id + '/build-logs'
+  }
+
+  // Returns the registries a runner may need to pull the sandbox's current container image
+  // during resize/recover. The runner doesn't tell us which image its container is currently
+  // on (snapshot vs. backup), so we forward both candidates and let it pick by host match.
+  private async resolveCandidateRegistriesForSandbox(sandbox: Sandbox): Promise<DockerRegistry[]> {
+    let snapshotRef: string | null = null
+    if (sandbox.buildInfo) {
+      snapshotRef = sandbox.buildInfo.snapshotRef
+    } else if (sandbox.snapshot) {
+      try {
+        const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
+        snapshotRef = snapshot.ref
+      } catch (err) {
+        this.logger.warn(
+          `Could not resolve snapshot ref for sandbox ${sandbox.id} (snapshot=${sandbox.snapshot}): ${err instanceof Error ? err.message : err}`,
+        )
+      }
+    }
+
+    const candidates = await this.dockerRegistryService.findCandidateRegistriesForSandbox(
+      sandbox.backupRegistryId,
+      snapshotRef,
+      sandbox.region,
+    )
+
+    if (sandbox.backupRegistryId && !candidates.some((r) => r.id === sandbox.backupRegistryId)) {
+      this.logger.warn(
+        `Backup registry ${sandbox.backupRegistryId} not found for sandbox ${sandbox.id}; proceeding without backup registry credentials`,
+      )
+    }
+
+    return candidates
   }
 
   private async getValidatedOrDefaultRegion(organization: Organization, regionIdOrName?: string): Promise<Region> {

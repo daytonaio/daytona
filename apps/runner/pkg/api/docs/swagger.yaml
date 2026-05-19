@@ -203,8 +203,10 @@ definitions:
         type: boolean
       osUser:
         type: string
-      registry:
-        $ref: '#/definitions/RegistryDTO'
+      registries:
+        items:
+          $ref: '#/definitions/RegistryDTO'
+        type: array
       snapshot:
         type: string
       storageQuota:
@@ -247,8 +249,10 @@ definitions:
       memory:
         minimum: 1
         type: integer
-      registry:
-        $ref: '#/definitions/RegistryDTO'
+      registries:
+        items:
+          $ref: '#/definitions/RegistryDTO'
+        type: array
     type: object
   RunnerInfoResponseDTO:
     properties:
