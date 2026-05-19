@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Logo } from '@/assets/Logo'
 import {
   Sidebar as SidebarComponent,
   SidebarContent,
@@ -296,22 +295,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
             </AnimatePresence>
           </div>
           <div className="relative">
-            <SidebarTrigger
-              className={cn(
-                'p-2 [&_svg]:size-5 group-hover:opacity-100 opacity-0 transition-all peer focus-visible:opacity-100',
-                {
-                  'opacity-100': sidebarExpanded,
-                },
-              )}
-            />
-            <Logo
-              className={cn(
-                'w-6 h-6 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none group-hover:opacity-0 transition-all peer-focus-visible:opacity-0',
-                {
-                  'opacity-0': sidebarExpanded,
-                },
-              )}
-            />
+            <SidebarTrigger className={cn('p-2 [&_svg]:size-5 transition-all peer')} />
           </div>
         </div>
       </SidebarHeader>
