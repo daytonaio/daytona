@@ -23,10 +23,19 @@ Daytona provides command-line access to core features for interacting with Dayto
 To interact with Daytona Sandboxes from the command line, install the Daytona CLI:
 
 <Tabs syncKey="language">
-<TabItem label="Mac/Linux">
+<TabItem label="Mac">
 
   ```bash
   brew install daytonaio/cli/daytona
+  ```
+
+</TabItem>
+<TabItem label="Linux">
+
+On Linux, the GitHub release command downloads the latest binary and replaces the existing `daytona` binary in `/usr/local/bin`.
+
+  ```bash
+  sudo curl -L https://github.com/daytonaio/daytona/releases/latest/download/daytona-linux-amd64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
   ```
 
 </TabItem>
@@ -44,10 +53,17 @@ After installing the Daytona CLI, use the `daytona` command to interact with Day
 To upgrade the Daytona CLI to the latest version:
 
 <Tabs syncKey="language">
-<TabItem label="Mac/Linux">
+<TabItem label="Mac">
 
 ```bash
 brew upgrade daytonaio/cli/daytona
+```
+
+</TabItem>
+<TabItem label="Linux">
+
+```bash
+sudo curl -L https://github.com/daytonaio/daytona/releases/latest/download/daytona-linux-amd64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
 ```
 
 </TabItem>

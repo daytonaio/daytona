@@ -31,10 +31,19 @@ You can access this documentation on a per-command basis by appending the \`--he
 Install the Daytona CLI to interact with Daytona sandboxes from the command line.
 
 <Tabs syncKey="language">
-<TabItem label="Mac/Linux">
+<TabItem label="Mac">
 
   \`\`\`bash
   brew install daytonaio/cli/daytona
+  \`\`\`
+
+</TabItem>
+<TabItem label="Linux">
+
+On Linux, the GitHub release command downloads the latest binary and replaces the existing \`daytona\` binary in \`/usr/local/bin\`.
+
+  \`\`\`bash
+  sudo curl -L https://github.com/daytonaio/daytona/releases/latest/download/daytona-linux-amd64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
   \`\`\`
 
 </TabItem>
@@ -54,10 +63,17 @@ After installing the Daytona CLI, use the \`daytona\` command to interact with D
 To update the Daytona CLI to the latest version:
 
 <Tabs syncKey="language">
-<TabItem label="Mac/Linux">
+<TabItem label="Mac">
 
 \`\`\`bash
 brew upgrade daytonaio/cli/daytona
+\`\`\`
+
+</TabItem>
+<TabItem label="Linux">
+
+\`\`\`bash
+sudo curl -L https://github.com/daytonaio/daytona/releases/latest/download/daytona-linux-amd64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
 \`\`\`
 
 </TabItem>
@@ -69,6 +85,8 @@ powershell -Command "irm https://get.daytona.io/windows | iex"
 
 </TabItem>
 </Tabs>
+
+On Linux, the GitHub release command downloads the latest binary and replaces the existing \`daytona\` binary in \`/usr/local/bin\`.
 `
 
 // content to appear below the commands outline
