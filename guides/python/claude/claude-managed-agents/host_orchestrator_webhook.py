@@ -6,14 +6,13 @@
 """FastAPI webhook entrypoint for the shared host orchestrator."""
 from __future__ import annotations
 
-import asyncio
 import os
 import threading
 
 import anthropic
 import orchestrator_lib
 import uvicorn
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 
 PORT = int(os.environ.get("PORT", "5051"))
 WEBHOOK_SECRET = os.environ.get("ANTHROPIC_WEBHOOK_SECRET")
@@ -21,7 +20,7 @@ WEBHOOK_SECRET = os.environ.get("ANTHROPIC_WEBHOOK_SECRET")
 app = FastAPI()
 
 
-async def _handle_webhook(request: Request) -> dict:
+async def _handle_webhook(request: Request, background_tasks: BackgroundTasks) -> dict:
     if WEBHOOK_SECRET is None:
         raise HTTPException(status_code=500, detail="ANTHROPIC_WEBHOOK_SECRET not set")
     raw = await request.body()
@@ -38,14 +37,17 @@ async def _handle_webhook(request: Request) -> dict:
     print(f"[webhook] event={ev_type} session={session_id}", flush=True)
     if ev_type != "session.status_run_started":
         return {"status": "ignored", "type": ev_type}
-    loop = asyncio.get_event_loop()
-    drained = await loop.run_in_executor(None, orchestrator_lib.drain_work)
-    return {"status": "ok", "drained": drained}
+    # Ack immediately and drain after the response; starting sandboxes can take
+    # tens of seconds and would otherwise hold the webhook POST open long
+    # enough for Anthropic to time out and retry. DRAIN_LOCK serializes
+    # concurrent drains inside orchestrator_lib.
+    background_tasks.add_task(orchestrator_lib.drain_work)
+    return {"status": "queued"}
 
 
 @app.post("/")
-async def webhook(request: Request):
-    return await _handle_webhook(request)
+async def webhook(request: Request, background_tasks: BackgroundTasks):
+    return await _handle_webhook(request, background_tasks)
 
 
 @app.get("/healthz")
