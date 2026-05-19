@@ -7,6 +7,10 @@ import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity('sandbox_usage_periods')
 @Index('idx_sandbox_usage_periods_sandbox_end', ['sandboxId', 'endAt'])
+@Index('sandbox_usage_periods_one_open_period_per_sandbox_idx', ['sandboxId'], {
+  unique: true,
+  where: '"endAt" IS NULL',
+})
 export class SandboxUsagePeriod {
   @PrimaryGeneratedColumn('uuid')
   id: string
