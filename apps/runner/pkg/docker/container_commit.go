@@ -95,11 +95,11 @@ func (d *DockerClient) exportImportContainer(ctx context.Context, containerId, i
 			if len(splitEnv) != 2 {
 				continue
 			}
-			// Escape backslashes and double quotes so Docker's Dockerfile parser
-			// doesn't misinterpret values containing them (e.g. embedded JSON) as
-			// additional key=value tokens.
+			// Escape Dockerfile double-quoted specials so embedded JSON parses
+			// and $VAR isn't expanded to "". Backslash first to avoid re-escaping.
 			escapedValue := strings.ReplaceAll(splitEnv[1], `\`, `\\`)
 			escapedValue = strings.ReplaceAll(escapedValue, `"`, `\"`)
+			escapedValue = strings.ReplaceAll(escapedValue, `$`, `\$`)
 			env = fmt.Sprintf(`%s="%s"`, splitEnv[0], escapedValue)
 			changes = append(changes, fmt.Sprintf(`ENV %s`, env))
 		}
