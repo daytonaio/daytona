@@ -68,6 +68,21 @@ type Service struct {
 	OpenRepository    *git.Repository
 }
 
+// Set to "true" to opt into the git-CLI clone path (bounded memory, needs `git` in PATH).
+// Deprecated: prefer experimentalUseGitCLIEnv which covers all network git operations.
+const experimentalUseGitCloneCLIEnv = "DAYTONA_EXPERIMENTAL_USE_GIT_CLONE_CLI"
+
+// Set to "true" to opt into git-CLI paths for all network operations (clone, push, pull).
+// Bounded memory via native git's mmap-based pack handling.
+const experimentalUseGitCLIEnv = "DAYTONA_EXPERIMENTAL_USE_GIT_CLI"
+
+// isGitCLIModeEnabled reports whether the umbrella `DAYTONA_EXPERIMENTAL_USE_GIT_CLI`
+// env var is set. Push and pull only check this flag; clone additionally honors
+// the legacy `DAYTONA_EXPERIMENTAL_USE_GIT_CLONE_CLI` for backward compatibility.
+func isGitCLIModeEnabled() bool {
+	return os.Getenv(experimentalUseGitCLIEnv) == "true"
+}
+
 func (s *Service) RepositoryExists() (bool, error) {
 	_, err := os.Stat(filepath.Join(s.WorkDir, ".git"))
 	if os.IsNotExist(err) {

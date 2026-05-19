@@ -9,10 +9,8 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 
-	"github.com/daytonaio/daemon/pkg/childreap"
 	"github.com/daytonaio/daemon/pkg/gitprovider"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -21,11 +19,8 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
-// Set to "true" to opt into the git-CLI clone path (bounded memory, needs `git` in PATH).
-const experimentalUseGitCloneCLIEnv = "DAYTONA_EXPERIMENTAL_USE_GIT_CLONE_CLI"
-
 func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.BasicAuth) error {
-	if os.Getenv(experimentalUseGitCloneCLIEnv) == "true" {
+	if isGitCLIModeEnabled() || os.Getenv(experimentalUseGitCloneCLIEnv) == "true" {
 		return s.CloneRepositoryCLI(repo, auth)
 	}
 
@@ -91,52 +86,21 @@ esac
 // CloneRepositoryCLI clones via the `git` CLI. Bounded memory (mmap pack handling).
 // Creds flow through GIT_ASKPASS + env — never via URL or argv.
 func (s *Service) CloneRepositoryCLI(repo *gitprovider.GitRepository, auth *http.BasicAuth) error {
-	gitBin, err := exec.LookPath("git")
-	if err != nil {
-		return fmt.Errorf("git binary not found in PATH: %w", err)
-	}
-
-	askDir, err := os.MkdirTemp("", "daytona-clone-*")
-	if err != nil {
-		return fmt.Errorf("create askpass temp dir: %w", err)
-	}
-	defer os.RemoveAll(askDir)
-
-	askPath := filepath.Join(askDir, "askpass.sh")
-	if err := os.WriteFile(askPath, []byte(askpassScript), 0o700); err != nil {
-		return fmt.Errorf("write askpass helper: %w", err)
-	}
-
-	cmd := exec.Command(gitBin, buildCloneArgs(repo, s.WorkDir)...)
-	cmd.Env = buildCloneEnv(os.Environ(), askPath, auth)
-	tail := s.attachCmdOutput(cmd, 64*1024)
-	// childreap.Run instead of cmd.Run so the reaper claiming the zombie
-	// first doesn't surface as a spurious "git clone failed: wait: no
-	// child processes" to API clients.
-	exitCode, err := childreap.Run(cmd)
-	if err != nil {
-		return fmt.Errorf("git clone failed: %w\n--- git output (tail) ---\n%s", err, tail.String())
-	}
-	if exitCode != 0 {
-		return fmt.Errorf("git clone exited with status %d\n--- git output (tail) ---\n%s", exitCode, tail.String())
+	if err := s.gitCLIRun("git clone", buildCloneArgs(repo, s.WorkDir), auth, 64*1024); err != nil {
+		return err
 	}
 
 	if repo.Target == gitprovider.CloneTargetCommit {
-		checkout := exec.Command(gitBin, buildCheckoutArgs(s.WorkDir, repo.Sha)...)
-		// Checkout is a purely local op and does not need network credentials.
-		// Pass a sanitized env with auth omitted so rogue checkout hooks cannot
-		// exfiltrate GIT_USERNAME / GIT_PASSWORD.
-		checkout.Env = buildCloneEnv(os.Environ(), askPath, nil)
-		checkoutTail := s.attachCmdOutput(checkout, 16*1024)
-		checkoutCode, err := childreap.Run(checkout)
-		if err != nil {
-			return fmt.Errorf("git checkout %s failed: %w\n--- git output (tail) ---\n%s", repo.Sha, err, checkoutTail.String())
-		}
-		if checkoutCode != 0 {
-			return fmt.Errorf("git checkout %s exited with status %d\n--- git output (tail) ---\n%s", repo.Sha, checkoutCode, checkoutTail.String())
-		}
+		// Checkout is a purely local op — no network creds needed. Pass
+		// auth=nil so rogue checkout hooks cannot exfiltrate the token via
+		// GIT_USERNAME / GIT_PASSWORD.
+		return s.gitCLIRun(
+			fmt.Sprintf("git checkout %s", repo.Sha),
+			buildCheckoutArgs(s.WorkDir, repo.Sha),
+			nil,
+			16*1024,
+		)
 	}
-
 	return nil
 }
 

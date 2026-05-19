@@ -10,6 +10,10 @@ import (
 )
 
 func (s *Service) Pull(auth *http.BasicAuth) error {
+	if isGitCLIModeEnabled() {
+		return s.PullCLI(auth)
+	}
+
 	repo, err := git.PlainOpen(s.WorkDir)
 	if err != nil {
 		return err
@@ -26,4 +30,20 @@ func (s *Service) Pull(auth *http.BasicAuth) error {
 	}
 
 	return w.Pull(options)
+}
+
+func (s *Service) PullCLI(auth *http.BasicAuth) error {
+	return s.gitCLIRun("git pull", buildPullArgs(s.WorkDir), auth, 64*1024)
+}
+
+func buildPullArgs(workDir string) []string {
+	return []string{
+		"-C", workDir,
+		"-c", "credential.helper=",
+		"-c", "http.sslVerify=false",
+		"-c", "core.hooksPath=/dev/null",
+		"pull",
+		"origin",
+		"--progress",
+	}
 }
