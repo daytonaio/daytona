@@ -57,13 +57,12 @@ def healthz():
 
 @app.on_event("startup")
 def on_startup() -> None:
-    orchestrator_lib.acquire_orchestrator_lock("webhook")
     if WEBHOOK_SECRET is None:
-        print(
-            "WARNING: ANTHROPIC_WEBHOOK_SECRET is not set; webhook POSTs will 500. "
-            "Set it in .env to enable signature verification.",
-            flush=True,
+        raise RuntimeError(
+            "ANTHROPIC_WEBHOOK_SECRET is not set; webhook mode cannot verify signatures. "
+            "Set it in .env, or run host_orchestrator_polling.py if you don't want a webhook."
         )
+    orchestrator_lib.acquire_orchestrator_lock("webhook")
     threading.Thread(
         target=orchestrator_lib.janitor_loop,
         kwargs={"recover_crashed_runners": True},
