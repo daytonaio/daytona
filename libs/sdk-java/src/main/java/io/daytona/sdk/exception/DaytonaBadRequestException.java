@@ -23,4 +23,12 @@ public class DaytonaBadRequestException extends DaytonaException {
     public DaytonaBadRequestException(String message) {
         super(400, message);
     }
+
+    /**
+     * @param message error description from the API
+     * @param cause root cause
+     */
+    public DaytonaBadRequestException(String message, Throwable cause) {
+        super(400, message, cause);
+    }
 }

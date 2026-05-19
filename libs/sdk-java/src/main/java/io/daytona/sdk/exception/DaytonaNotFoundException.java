@@ -15,4 +15,12 @@ public class DaytonaNotFoundException extends DaytonaException {
     public DaytonaNotFoundException(String message) {
         super(404, message);
     }
+
+    /**
+     * @param message error description from the API
+     * @param cause root cause
+     */
+    public DaytonaNotFoundException(String message, Throwable cause) {
+        super(404, message, cause);
+    }
 }

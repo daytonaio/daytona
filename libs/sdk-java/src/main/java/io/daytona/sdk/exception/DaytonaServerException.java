@@ -26,4 +26,13 @@ public class DaytonaServerException extends DaytonaException {
     public DaytonaServerException(int statusCode, String message) {
         super(statusCode, message);
     }
+
+    /**
+     * @param statusCode HTTP status code (typically 5xx)
+     * @param message error description from the API
+     * @param cause root cause
+     */
+    public DaytonaServerException(int statusCode, String message, Throwable cause) {
+        super(statusCode, message, cause);
+    }
 }

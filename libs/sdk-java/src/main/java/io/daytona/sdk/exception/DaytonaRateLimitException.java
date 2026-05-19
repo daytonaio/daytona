@@ -15,4 +15,12 @@ public class DaytonaRateLimitException extends DaytonaException {
     public DaytonaRateLimitException(String message) {
         super(429, message);
     }
+
+    /**
+     * @param message error description from the API
+     * @param cause root cause
+     */
+    public DaytonaRateLimitException(String message, Throwable cause) {
+        super(429, message, cause);
+    }
 }

@@ -64,6 +64,19 @@ public class DaytonaException extends RuntimeException {
     }
 
     /**
+     * Creates a Daytona exception with explicit HTTP status code and a cause.
+     *
+     * @param statusCode HTTP status code
+     * @param message error description
+     * @param cause root cause
+     */
+    public DaytonaException(int statusCode, String message, Throwable cause) {
+        super(message, cause);
+        this.statusCode = statusCode;
+        this.headers = Collections.emptyMap();
+    }
+
+    /**
      * Creates a Daytona exception with HTTP status code and headers.
      *
      * @param statusCode HTTP status code

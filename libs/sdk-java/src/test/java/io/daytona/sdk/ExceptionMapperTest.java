@@ -6,13 +6,19 @@ package io.daytona.sdk;
 import io.daytona.sdk.exception.DaytonaAuthenticationException;
 import io.daytona.sdk.exception.DaytonaBadRequestException;
 import io.daytona.sdk.exception.DaytonaConflictException;
+import io.daytona.sdk.exception.DaytonaConnectionException;
 import io.daytona.sdk.exception.DaytonaException;
 import io.daytona.sdk.exception.DaytonaForbiddenException;
 import io.daytona.sdk.exception.DaytonaNotFoundException;
 import io.daytona.sdk.exception.DaytonaRateLimitException;
 import io.daytona.sdk.exception.DaytonaServerException;
+import io.daytona.sdk.exception.DaytonaTimeoutException;
 import io.daytona.sdk.exception.DaytonaValidationException;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -117,5 +123,79 @@ class ExceptionMapperTest {
         ExceptionMapper.runToolbox(() -> { });
 
         assertThat(value).isEqualTo("ok");
+    }
+
+    @Test
+    void preservesApiExceptionAsCause() {
+        io.daytona.api.client.ApiException apiException =
+                new io.daytona.api.client.ApiException(404, "not found", null, "{\"message\":\"gone\"}");
+
+        assertThatThrownBy(() -> ExceptionMapper.callMain(() -> { throw apiException; }))
+                .isInstanceOf(DaytonaNotFoundException.class)
+                .hasCause(apiException);
+    }
+
+    @Test
+    void preservesNestedIoExceptionCauseChain() {
+        IOException ioException = new IOException("connection reset");
+        io.daytona.api.client.ApiException apiException = new io.daytona.api.client.ApiException(ioException);
+
+        assertThatThrownBy(() -> ExceptionMapper.callMain(() -> { throw apiException; }))
+                .hasCause(apiException)
+                .hasRootCause(ioException);
+    }
+
+    @Test
+    void mapsSocketTimeoutToTimeoutException() {
+        SocketTimeoutException timeout = new SocketTimeoutException("Read timed out");
+        io.daytona.api.client.ApiException apiException = new io.daytona.api.client.ApiException(timeout);
+
+        assertThatThrownBy(() -> ExceptionMapper.callMain(() -> { throw apiException; }))
+                .isInstanceOf(DaytonaTimeoutException.class)
+                .hasMessageContaining("Read timed out")
+                .hasCause(apiException);
+    }
+
+    @Test
+    void mapsConnectExceptionToConnectionException() {
+        ConnectException connectException = new ConnectException("Connection refused");
+        io.daytona.api.client.ApiException apiException = new io.daytona.api.client.ApiException(connectException);
+
+        assertThatThrownBy(() -> ExceptionMapper.callMain(() -> { throw apiException; }))
+                .isInstanceOf(DaytonaConnectionException.class)
+                .hasMessageContaining("Connection refused")
+                .hasCause(apiException);
+    }
+
+    @Test
+    void mapsGenericIoExceptionToConnectionException() {
+        IOException ioException = new IOException("DNS resolution failed");
+        io.daytona.api.client.ApiException apiException = new io.daytona.api.client.ApiException(ioException);
+
+        assertThatThrownBy(() -> ExceptionMapper.callMain(() -> { throw apiException; }))
+                .isInstanceOf(DaytonaConnectionException.class)
+                .hasMessageContaining("DNS resolution failed")
+                .hasCause(apiException);
+    }
+
+    @Test
+    void nullCauseDoesNotThrow() {
+        DaytonaException exception = ExceptionMapper.map(400, "{\"message\":\"bad\"}", null);
+        assertThat(exception).isInstanceOf(DaytonaBadRequestException.class);
+        assertThat(exception.getCause()).isNull();
+        assertThat(exception.getMessage()).isEqualTo("bad");
+    }
+
+    @Test
+    void clientSideValidationApiExceptionIsNotMisclassifiedAsTransportFailure() {
+        io.daytona.api.client.ApiException apiException = new io.daytona.api.client.ApiException(
+                "Missing the required parameter 'id' when calling getSandbox(Async)");
+
+        assertThatThrownBy(() -> ExceptionMapper.callMain(() -> { throw apiException; }))
+                .isInstanceOf(DaytonaException.class)
+                .isNotInstanceOf(DaytonaConnectionException.class)
+                .isNotInstanceOf(DaytonaTimeoutException.class)
+                .hasMessageContaining("Missing the required parameter 'id'")
+                .hasCause(apiException);
     }
 }

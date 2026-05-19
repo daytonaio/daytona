@@ -26,4 +26,12 @@ public class DaytonaValidationException extends DaytonaException {
     public DaytonaValidationException(String message) {
         super(422, message);
     }
+
+    /**
+     * @param message error description from the API
+     * @param cause root cause
+     */
+    public DaytonaValidationException(String message, Throwable cause) {
+        super(422, message, cause);
+    }
 }
