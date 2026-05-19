@@ -26,4 +26,12 @@ public class DaytonaConflictException extends DaytonaException {
     public DaytonaConflictException(String message) {
         super(409, message);
     }
+
+    /**
+     * @param message error description from the API
+     * @param cause root cause
+     */
+    public DaytonaConflictException(String message, Throwable cause) {
+        super(409, message, cause);
+    }
 }

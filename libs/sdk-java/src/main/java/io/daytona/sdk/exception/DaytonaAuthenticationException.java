@@ -23,4 +23,12 @@ public class DaytonaAuthenticationException extends DaytonaException {
     public DaytonaAuthenticationException(String message) {
         super(401, message);
     }
+
+    /**
+     * @param message error description from the API
+     * @param cause root cause
+     */
+    public DaytonaAuthenticationException(String message, Throwable cause) {
+        super(401, message, cause);
+    }
 }

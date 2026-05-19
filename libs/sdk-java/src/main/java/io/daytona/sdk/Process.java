@@ -442,7 +442,9 @@ public class Process {
             @Override
             public void onFailure(WebSocket webSocket, Throwable t, Response response) {
                 flush();
-                failure.compareAndSet(null, new DaytonaException("Log streaming failed: " + t.getMessage()));
+                String msg = (t == null || t.getMessage() == null || t.getMessage().isEmpty())
+                        ? "WebSocket failure" : t.getMessage();
+                failure.compareAndSet(null, new DaytonaException("Log streaming failed: " + msg, t));
                 doneLatch.countDown();
             }
 

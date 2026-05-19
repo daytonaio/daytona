@@ -130,7 +130,7 @@ final class FileTransfer {
             apiClient.processCookieParams(new HashMap<String, String>(), requestBuilder);
             return requestBuilder.build();
         } catch (io.daytona.toolbox.client.ApiException e) {
-            throw ExceptionMapper.map(e.getCode(), e.getResponseBody());
+            throw ExceptionMapper.map(e.getCode(), e.getResponseBody(), e);
         }
     }
 
@@ -286,7 +286,7 @@ final class FileTransfer {
             responseBody = "{\"message\":\"Download failed\"}";
         }
 
-        return ExceptionMapper.map(statusCode, responseBody);
+        return ExceptionMapper.map(statusCode, responseBody, null);
     }
 
     private static long parsePartContentLength(String contentLengthHeader) {

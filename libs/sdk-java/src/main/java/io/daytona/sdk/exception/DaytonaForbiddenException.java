@@ -23,4 +23,12 @@ public class DaytonaForbiddenException extends DaytonaException {
     public DaytonaForbiddenException(String message) {
         super(403, message);
     }
+
+    /**
+     * @param message error description from the API
+     * @param cause root cause
+     */
+    public DaytonaForbiddenException(String message, Throwable cause) {
+        super(403, message, cause);
+    }
 }

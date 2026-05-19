@@ -153,8 +153,9 @@ public class CodeInterpreter {
 
             @Override
             public void onFailure(WebSocket webSocket, Throwable t, Response response) {
-                String message = t == null ? "Interpreter WebSocket failure" : t.getMessage();
-                failure.compareAndSet(null, new DaytonaException("Failed to execute code: " + message));
+                String msg = (t == null || t.getMessage() == null || t.getMessage().isEmpty())
+                        ? "WebSocket failure" : t.getMessage();
+                failure.compareAndSet(null, new DaytonaException("Failed to execute code: " + msg, t));
                 complete();
             }
 

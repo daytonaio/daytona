@@ -60,6 +60,19 @@ Creates a Daytona exception with explicit HTTP status code.
 
 #### new DaytonaException()
 ```java
+public DaytonaException(int statusCode, String message, Throwable cause)
+```
+
+Creates a Daytona exception with explicit HTTP status code and a cause.
+
+**Parameters**:
+
+- `statusCode` _int_ - HTTP status code
+- `message` _String_ - error description
+- `cause` _Throwable_ - root cause
+
+#### new DaytonaException()
+```java
 public DaytonaException(int statusCode, String message, Map<String, String> headers)
 ```
 
@@ -119,6 +132,16 @@ Creates an authentication exception.
 
 - `message` _String_ - error description from the API
 
+#### new DaytonaAuthenticationException()
+```java
+public DaytonaAuthenticationException(String message, Throwable cause)
+```
+
+**Parameters**:
+
+- `message` _String_ - error description from the API
+- `cause` _Throwable_ - root cause
+
 ## DaytonaBadRequestException
 
 Raised when the request is malformed or contains invalid parameters (HTTP 400).
@@ -142,6 +165,16 @@ Creates a bad-request exception.
 **Parameters**:
 
 - `message` _String_ - error description from the API
+
+#### new DaytonaBadRequestException()
+```java
+public DaytonaBadRequestException(String message, Throwable cause)
+```
+
+**Parameters**:
+
+- `message` _String_ - error description from the API
+- `cause` _Throwable_ - root cause
 
 ## DaytonaConflictException
 
@@ -169,6 +202,16 @@ Creates a conflict exception.
 **Parameters**:
 
 - `message` _String_ - error description from the API
+
+#### new DaytonaConflictException()
+```java
+public DaytonaConflictException(String message, Throwable cause)
+```
+
+**Parameters**:
+
+- `message` _String_ - error description from the API
+- `cause` _Throwable_ - root cause
 
 ## DaytonaConnectionException
 
@@ -233,6 +276,16 @@ Creates a forbidden exception.
 
 - `message` _String_ - error description from the API
 
+#### new DaytonaForbiddenException()
+```java
+public DaytonaForbiddenException(String message, Throwable cause)
+```
+
+**Parameters**:
+
+- `message` _String_ - error description from the API
+- `cause` _Throwable_ - root cause
+
 ## DaytonaNotFoundException
 
 Raised when a requested resource does not exist (HTTP 404).
@@ -250,6 +303,16 @@ Creates a not-found exception.
 
 - `message` _String_ - error description from the API
 
+#### new DaytonaNotFoundException()
+```java
+public DaytonaNotFoundException(String message, Throwable cause)
+```
+
+**Parameters**:
+
+- `message` _String_ - error description from the API
+- `cause` _Throwable_ - root cause
+
 ## DaytonaRateLimitException
 
 Raised when API rate limits are exceeded (HTTP 429).
@@ -266,6 +329,16 @@ Creates a rate-limit exception.
 **Parameters**:
 
 - `message` _String_ - error description from the API
+
+#### new DaytonaRateLimitException()
+```java
+public DaytonaRateLimitException(String message, Throwable cause)
+```
+
+**Parameters**:
+
+- `message` _String_ - error description from the API
+- `cause` _Throwable_ - root cause
 
 ## DaytonaServerException
 
@@ -293,6 +366,17 @@ Creates a server exception.
 
 - `statusCode` _int_ - HTTP status code (typically 5xx)
 - `message` _String_ - error description from the API
+
+#### new DaytonaServerException()
+```java
+public DaytonaServerException(int statusCode, String message, Throwable cause)
+```
+
+**Parameters**:
+
+- `statusCode` _int_ - HTTP status code (typically 5xx)
+- `message` _String_ - error description from the API
+- `cause` _Throwable_ - root cause
 
 ## DaytonaTimeoutException
 
@@ -351,3 +435,13 @@ Creates a validation exception.
 **Parameters**:
 
 - `message` _String_ - error description from the API
+
+#### new DaytonaValidationException()
+```java
+public DaytonaValidationException(String message, Throwable cause)
+```
+
+**Parameters**:
+
+- `message` _String_ - error description from the API
+- `cause` _Throwable_ - root cause

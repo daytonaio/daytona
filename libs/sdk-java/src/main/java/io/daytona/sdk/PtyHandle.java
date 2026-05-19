@@ -30,6 +30,7 @@ public class PtyHandle {
     private final String sessionId;
     private volatile Integer exitCode;
     private volatile String error;
+    private volatile Throwable failure;
     private volatile boolean connected = false;
     private volatile boolean connectionEstablished = false;
     private final CountDownLatch connectionLatch = new CountDownLatch(1);
@@ -75,7 +76,7 @@ public class PtyHandle {
         }
 
         if (error != null && !error.isEmpty()) {
-            throw new DaytonaException("PTY connection failed: " + error);
+            throw new DaytonaException("PTY connection failed: " + error, failure);
         }
         if (!connectionEstablished) {
             throw new DaytonaException("PTY connection was not established");
@@ -260,7 +261,9 @@ public class PtyHandle {
 
         @Override
         public void onFailure(WebSocket ws, Throwable t, Response response) {
-            error = t == null ? "PTY websocket failure" : t.getMessage();
+            String msg = t == null ? "PTY websocket failure" : t.getMessage();
+            error = (msg != null && !msg.isEmpty()) ? msg : "PTY websocket failure";
+            failure = t;
             connected = false;
             connectionLatch.countDown();
             exitLatch.countDown();
