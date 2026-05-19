@@ -15,7 +15,7 @@ Similar to [file system operations](/docs/en/file-system-operations), the starti
 
 ### Clone repositories
 
-Daytona provides methods to clone Git repositories into sandboxes. You can clone public or private repositories, specific branches, and authenticate using personal access tokens.
+Daytona provides methods to clone Git repositories into sandboxes. You can clone public or private repositories, specific branches, authenticate using personal access tokens, and use shallow, partial, or sparse clone options for large repositories.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -41,6 +41,17 @@ sandbox.git.clone(
     path="workspace/repo",
     branch="develop"
 )
+
+# Faster clone for large repositories
+sandbox.git.clone(
+    url="https://github.com/user/repo.git",
+    path="workspace/repo",
+    branch="main",
+    depth=1,
+    no_tags=True,
+    filter="blob:none",
+    sparse_paths=["src", "README.md"]
+)
 ```
 
 </TabItem>
@@ -48,27 +59,33 @@ sandbox.git.clone(
 
 ```typescript
 // Basic clone
-await sandbox.git.clone(
-    "https://github.com/user/repo.git",
-    "workspace/repo"
-);
+await sandbox.git.clone('https://github.com/user/repo.git', 'workspace/repo')
 
 // Clone with authentication
 await sandbox.git.clone(
-    "https://github.com/user/repo.git",
-    "workspace/repo",
-    undefined,
-    undefined,
-    "git",
-    "personal_access_token"
-);
+  'https://github.com/user/repo.git',
+  'workspace/repo',
+  undefined,
+  undefined,
+  'git',
+  'personal_access_token'
+)
 
 // Clone specific branch
 await sandbox.git.clone(
-    "https://github.com/user/repo.git",
-    "workspace/repo",
-    "develop"
-);
+  'https://github.com/user/repo.git',
+  'workspace/repo',
+  'develop'
+)
+
+// Faster clone for large repositories
+await sandbox.git.clone('https://github.com/user/repo.git', 'workspace/repo', {
+  branch: 'main',
+  depth: 1,
+  noTags: true,
+  filter: 'blob:none',
+  sparsePaths: ['src', 'README.md'],
+})
 ```
 
 </TabItem>
@@ -95,6 +112,17 @@ sandbox.git.clone(
   path: 'workspace/repo',
   branch: 'develop'
 )
+
+# Faster clone for large repositories
+sandbox.git.clone(
+  url: 'https://github.com/user/repo.git',
+  path: 'workspace/repo',
+  branch: 'main',
+  depth: 1,
+  no_tags: true,
+  filter: 'blob:none',
+  sparse_paths: ['src', 'README.md']
+)
 ```
 
 </TabItem>
@@ -119,6 +147,18 @@ if err != nil {
 // Clone specific branch
 err = sandbox.Git.Clone(ctx, "https://github.com/user/repo.git", "workspace/repo",
 	options.WithBranch("develop"),
+)
+if err != nil {
+	log.Fatal(err)
+}
+
+// Faster clone for large repositories
+err = sandbox.Git.Clone(ctx, "https://github.com/user/repo.git", "workspace/repo",
+	options.WithBranch("main"),
+	options.WithDepth(1),
+	options.WithNoTags(true),
+	options.WithFilter("blob:none"),
+	options.WithSparsePaths([]string{"src", "README.md"}),
 )
 if err != nil {
 	log.Fatal(err)
@@ -151,6 +191,18 @@ sandbox.git.clone(
     null,
     null
 );
+
+// Faster clone for large repositories
+sandbox.git.clone(
+    "https://github.com/user/repo.git",
+    "workspace/repo",
+    new GitCloneOptions()
+        .branch("main")
+        .depth(1)
+        .noTags(true)
+        .filter("blob:none")
+        .sparsePaths(List.of("src", "README.md"))
+);
 ```
 
 </TabItem>
@@ -163,10 +215,287 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/clone' \
   --data '{
   "branch": "",
   "commit_id": "",
+  "depth": 1,
+  "filter": "blob:none",
+  "no_tags": true,
   "password": "",
   "path": "",
+  "shallow_since": "",
+  "single_branch": true,
+  "sparse": true,
+  "sparse_paths": ["src", "README.md"],
   "url": "",
   "username": ""
+}'
+```
+
+</TabItem>
+</Tabs>
+
+### Shallow clone large repositories
+
+Use `depth` and `single_branch` when you only need the current working tree of a repository with a large history. These options require `DAYTONA_EXPERIMENTAL_USE_GIT_CLONE_CLI=true` in the sandbox environment.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+sandbox.git.clone(
+    url="https://github.com/torvalds/linux.git",
+    path="/home/daytona/linux",
+    depth=1,
+    single_branch=True
+)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+await sandbox.git.clone(
+  'https://github.com/torvalds/linux.git',
+  '/home/daytona/linux',
+  {
+    depth: 1,
+    singleBranch: true,
+  }
+)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+sandbox.git.clone(
+  url: 'https://github.com/torvalds/linux.git',
+  path: '/home/daytona/linux',
+  depth: 1,
+  single_branch: true
+)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+err := sandbox.Git.Clone(ctx, "https://github.com/torvalds/linux.git", "/home/daytona/linux",
+	options.WithDepth(1),
+	options.WithSingleBranch(true),
+)
+if err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+sandbox.git.clone(
+    "https://github.com/torvalds/linux.git",
+    "/home/daytona/linux",
+    new GitCloneOptions()
+        .depth(1)
+        .singleBranch(true)
+);
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/clone' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "url": "https://github.com/torvalds/linux.git",
+  "path": "/home/daytona/linux",
+  "depth": 1,
+  "single_branch": true
+}'
+```
+
+</TabItem>
+</Tabs>
+
+### Reuse local Git object caches
+
+Use `reference_path` when the sandbox already has a bare mirror or previous checkout that can act as a local object cache. Daytona passes this to Git as `--reference-if-able`, so a missing cache does not fail the clone. Add `dissociate` when you want the resulting repository to copy borrowed objects and stay independent of the cache after clone completion.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+sandbox.git.clone(
+    url="https://github.com/daytonaio/daytona.git",
+    path="/home/daytona/daytona",
+    reference_path="/var/cache/git/daytona.git",
+    dissociate=True
+)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+await sandbox.git.clone(
+  'https://github.com/daytonaio/daytona.git',
+  '/home/daytona/daytona',
+  {
+    referencePath: '/var/cache/git/daytona.git',
+    dissociate: true,
+  }
+)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+sandbox.git.clone(
+  url: 'https://github.com/daytonaio/daytona.git',
+  path: '/home/daytona/daytona',
+  reference_path: '/var/cache/git/daytona.git',
+  dissociate: true
+)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+err := sandbox.Git.Clone(ctx, "https://github.com/daytonaio/daytona.git", "/home/daytona/daytona",
+	options.WithReferencePath("/var/cache/git/daytona.git"),
+	options.WithDissociate(true),
+)
+if err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+sandbox.git.clone(
+    "https://github.com/daytonaio/daytona.git",
+    "/home/daytona/daytona",
+    new GitCloneOptions()
+        .referencePath("/var/cache/git/daytona.git")
+        .dissociate(true)
+);
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/clone' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "url": "https://github.com/daytonaio/daytona.git",
+  "path": "/home/daytona/daytona",
+  "reference_path": "/var/cache/git/daytona.git",
+  "dissociate": true
+}'
+```
+
+</TabItem>
+</Tabs>
+
+### Optimize submodule clones
+
+Use `recurse_submodules` when a repository needs submodules. Combine it with `shallow_submodules` to avoid fetching full submodule histories. When using a partial clone filter such as `blob:none`, add `filter_submodules` to apply the same filter to submodules.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+sandbox.git.clone(
+    url="https://github.com/user/repo-with-submodules.git",
+    path="/home/daytona/repo",
+    filter="blob:none",
+    recurse_submodules=True,
+    shallow_submodules=True,
+    filter_submodules=True
+)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+await sandbox.git.clone(
+  'https://github.com/user/repo-with-submodules.git',
+  '/home/daytona/repo',
+  {
+    filter: 'blob:none',
+    recurseSubmodules: true,
+    shallowSubmodules: true,
+    filterSubmodules: true,
+  }
+)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+sandbox.git.clone(
+  url: 'https://github.com/user/repo-with-submodules.git',
+  path: '/home/daytona/repo',
+  filter: 'blob:none',
+  recurse_submodules: true,
+  shallow_submodules: true,
+  filter_submodules: true
+)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+err := sandbox.Git.Clone(ctx, "https://github.com/user/repo-with-submodules.git", "/home/daytona/repo",
+	options.WithFilter("blob:none"),
+	options.WithRecurseSubmodules(true),
+	options.WithShallowSubmodules(true),
+	options.WithFilterSubmodules(true),
+)
+if err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+sandbox.git.clone(
+    "https://github.com/user/repo-with-submodules.git",
+    "/home/daytona/repo",
+    new GitCloneOptions()
+        .filter("blob:none")
+        .recurseSubmodules(true)
+        .shallowSubmodules(true)
+        .filterSubmodules(true)
+);
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/clone' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "url": "https://github.com/user/repo-with-submodules.git",
+  "path": "/home/daytona/repo",
+  "filter": "blob:none",
+  "recurse_submodules": true,
+  "shallow_submodules": true,
+  "filter_submodules": true
 }'
 ```
 
@@ -200,19 +529,19 @@ for branch in response.branches:
 
 ```typescript
 // Get repository status
-const status = await sandbox.git.status("workspace/repo");
-console.log(`Current branch: ${status.currentBranch}`);
-console.log(`Commits ahead: ${status.ahead}`);
-console.log(`Commits behind: ${status.behind}`);
+const status = await sandbox.git.status('workspace/repo')
+console.log(`Current branch: ${status.currentBranch}`)
+console.log(`Commits ahead: ${status.ahead}`)
+console.log(`Commits behind: ${status.behind}`)
 status.fileStatus.forEach(file => {
-    console.log(`File: ${file.name}`);
-});
+  console.log(`File: ${file.name}`)
+})
 
 // List branches
-const response = await sandbox.git.branches("workspace/repo");
+const response = await sandbox.git.branches('workspace/repo')
 response.branches.forEach(branch => {
-    console.log(`Branch: ${branch}`);
-});
+  console.log(`Branch: ${branch}`)
+})
 ```
 
 </TabItem>
@@ -317,7 +646,7 @@ sandbox.git.create_branch("workspace/repo", "new-feature")
 
 ```typescript
 // Create new branch
-await git.createBranch('workspace/repo', 'new-feature');
+await git.createBranch('workspace/repo', 'new-feature')
 ```
 
 </TabItem>
@@ -372,7 +701,7 @@ sandbox.git.checkout_branch("workspace/repo", "feature-branch")
 
 ```typescript
 // Checkout a branch
-await git.checkoutBranch('workspace/repo', 'feature-branch');
+await git.checkoutBranch('workspace/repo', 'feature-branch')
 ```
 
 </TabItem>
@@ -427,7 +756,7 @@ sandbox.git.delete_branch("workspace/repo", "old-feature")
 
 ```typescript
 // Delete a branch
-await git.deleteBranch('workspace/repo', 'old-feature');
+await git.deleteBranch('workspace/repo', 'old-feature')
 ```
 
 </TabItem>
@@ -489,9 +818,9 @@ sandbox.git.add("workspace/repo", [
 
 ```typescript
 // Stage a single file
-await git.add('workspace/repo', ['file.txt']);
+await git.add('workspace/repo', ['file.txt'])
 // Stage whole repository
-await git.add('workspace/repo', ['.']);
+await git.add('workspace/repo', ['.'])
 ```
 
 </TabItem>
@@ -590,14 +919,14 @@ sandbox.git.commit(
 
 ```typescript
 // Stage and commit changes
-await git.add('workspace/repo', ['README.md']);
+await git.add('workspace/repo', ['README.md'])
 await git.commit(
   'workspace/repo',
   'Update documentation',
   'John Doe',
   'john@example.com',
   true
-);
+)
 ```
 
 </TabItem>
@@ -696,14 +1025,10 @@ sandbox.git.push(
 
 ```typescript
 // Push to a public repository
-await git.push('workspace/repo');
+await git.push('workspace/repo')
 
 // Push to a private repository
-await git.push(
-  'workspace/repo',
-  'user',
-  'token'
-);
+await git.push('workspace/repo', 'user', 'token')
 ```
 
 </TabItem>
@@ -781,14 +1106,10 @@ sandbox.git.pull(
 
 ```typescript
 // Pull from a public repository
-await git.pull('workspace/repo');
+await git.pull('workspace/repo')
 
 // Pull from a private repository
-await git.pull(
-  'workspace/repo',
-  'user',
-  'token'
-);
+await git.pull('workspace/repo', 'user', 'token')
 ```
 
 </TabItem>
@@ -798,6 +1119,7 @@ await git.pull(
 # Pull changes
 sandbox.git.pull('workspace/repo')
 ```
+
 </TabItem>
 <TabItem label="Go" icon="seti:go">
 
@@ -842,4 +1164,3 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/pull' \
 
 </TabItem>
 </Tabs>
-

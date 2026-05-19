@@ -38,7 +38,7 @@ public class Git {
      * @throws io.daytona.sdk.exception.DaytonaException if cloning fails
      */
     public void clone(String url, String path) {
-        clone(url, path, null, null, null, null);
+        clone(url, path, (GitCloneOptions) null);
     }
 
     /**
@@ -53,11 +53,41 @@ public class Git {
      * @throws io.daytona.sdk.exception.DaytonaException if cloning fails
      */
     public void clone(String url, String path, String branch, String commitId, String username, String password) {
+        clone(url, path, new GitCloneOptions()
+                .branch(branch)
+                .commitId(commitId)
+                .username(username)
+                .password(password));
+    }
+
+    /**
+     * Clones a repository with advanced clone options.
+     *
+     * @param url repository URL
+     * @param path destination path in the Sandbox
+     * @param options clone options; {@code null} uses defaults
+     * @throws io.daytona.sdk.exception.DaytonaException if cloning fails
+     */
+    public void clone(String url, String path, GitCloneOptions options) {
         GitCloneRequest request = new GitCloneRequest().url(url).path(path);
-        if (branch != null) request.branch(branch);
-        if (commitId != null) request.commitId(commitId);
-        if (username != null) request.username(username);
-        if (password != null) request.password(password);
+        if (options != null) {
+            if (options.getBranch() != null) request.branch(options.getBranch());
+            if (options.getCommitId() != null) request.commitId(options.getCommitId());
+            if (options.getUsername() != null) request.username(options.getUsername());
+            if (options.getPassword() != null) request.password(options.getPassword());
+            if (options.getDepth() != null) request.depth(options.getDepth());
+            if (options.getSingleBranch() != null) request.singleBranch(options.getSingleBranch());
+            if (options.getShallowSince() != null) request.shallowSince(options.getShallowSince());
+            if (options.getNoTags() != null) request.noTags(options.getNoTags());
+            if (options.getFilter() != null) request.filter(options.getFilter());
+            if (options.getSparse() != null) request.sparse(options.getSparse());
+            if (options.getSparsePaths() != null) request.sparsePaths(options.getSparsePaths());
+            if (options.getReferencePath() != null) request.referencePath(options.getReferencePath());
+            if (options.getDissociate() != null) request.dissociate(options.getDissociate());
+            if (options.getRecurseSubmodules() != null) request.recurseSubmodules(options.getRecurseSubmodules());
+            if (options.getShallowSubmodules() != null) request.shallowSubmodules(options.getShallowSubmodules());
+            if (options.getFilterSubmodules() != null) request.filterSubmodules(options.getFilterSubmodules());
+        }
         ExceptionMapper.runToolbox(() -> gitApi.cloneRepository(request));
     }
 

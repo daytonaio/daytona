@@ -59,6 +59,18 @@ func NewGitService(toolboxClient *toolbox.APIClient, otel *otelState) *GitServic
 //   - [options.WithCommitId]: Checkout a specific commit after cloning
 //   - [options.WithUsername]: Username for authentication (HTTPS)
 //   - [options.WithPassword]: Password or token for authentication (HTTPS)
+//   - [options.WithDepth]: Use a shallow clone with the specified depth
+//   - [options.WithSingleBranch]: Control whether clone history is restricted to one branch
+//   - [options.WithShallowSince]: Fetch history newer than the supplied date
+//   - [options.WithNoTags]: Skip fetching tags
+//   - [options.WithFilter]: Use a partial clone filter, such as "blob:none"
+//   - [options.WithSparse]: Initialize sparse checkout
+//   - [options.WithSparsePaths]: Restrict sparse checkout to the supplied paths
+//   - [options.WithReferencePath]: Borrow objects from a local Git repository or mirror
+//   - [options.WithDissociate]: Copy borrowed reference objects into the clone
+//   - [options.WithRecurseSubmodules]: Clone submodules recursively
+//   - [options.WithShallowSubmodules]: Use shallow clones for submodules
+//   - [options.WithFilterSubmodules]: Apply the partial clone filter to submodules
 //
 // Example:
 //
@@ -94,6 +106,42 @@ func (g *GitService) Clone(ctx context.Context, url, path string, opts ...func(*
 		}
 		if cloneOpts.Password != nil {
 			req.SetPassword(*cloneOpts.Password)
+		}
+		if cloneOpts.Depth != nil {
+			req.SetDepth(int32(*cloneOpts.Depth))
+		}
+		if cloneOpts.SingleBranch != nil {
+			req.SetSingleBranch(*cloneOpts.SingleBranch)
+		}
+		if cloneOpts.ShallowSince != nil {
+			req.SetShallowSince(*cloneOpts.ShallowSince)
+		}
+		if cloneOpts.NoTags != nil {
+			req.SetNoTags(*cloneOpts.NoTags)
+		}
+		if cloneOpts.Filter != nil {
+			req.SetFilter(*cloneOpts.Filter)
+		}
+		if cloneOpts.Sparse != nil {
+			req.SetSparse(*cloneOpts.Sparse)
+		}
+		if len(cloneOpts.SparsePaths) > 0 {
+			req.SetSparsePaths(cloneOpts.SparsePaths)
+		}
+		if cloneOpts.ReferencePath != nil {
+			req.SetReferencePath(*cloneOpts.ReferencePath)
+		}
+		if cloneOpts.Dissociate != nil {
+			req.SetDissociate(*cloneOpts.Dissociate)
+		}
+		if cloneOpts.RecurseSubmodules != nil {
+			req.SetRecurseSubmodules(*cloneOpts.RecurseSubmodules)
+		}
+		if cloneOpts.ShallowSubmodules != nil {
+			req.SetShallowSubmodules(*cloneOpts.ShallowSubmodules)
+		}
+		if cloneOpts.FilterSubmodules != nil {
+			req.SetFilterSubmodules(*cloneOpts.FilterSubmodules)
 		}
 
 		httpResp, err := g.toolboxClient.GitAPI.CloneRepository(ctx).Request(*req).Execute()

@@ -54,10 +54,22 @@ func Apply[T any](opts ...func(*T)) *T {
 // Fields are pointers to distinguish between unset values and zero values.
 // Use the corresponding With* functions to set these options.
 type GitClone struct {
-	Branch   *string // Branch to clone (defaults to repository's default branch)
-	CommitId *string // Specific commit SHA to checkout after cloning
-	Username *string // Username for HTTPS authentication
-	Password *string // Password or token for HTTPS authentication
+	Branch            *string  // Branch to clone (defaults to repository's default branch)
+	CommitId          *string  // Specific commit SHA to checkout after cloning
+	Username          *string  // Username for HTTPS authentication
+	Password          *string  // Password or token for HTTPS authentication
+	Depth             *int     // Number of commits to fetch for a shallow clone
+	SingleBranch      *bool    // Restrict clone history to one branch
+	ShallowSince      *string  // Fetch commits newer than this date
+	NoTags            *bool    // Skip fetching tags
+	Filter            *string  // Partial clone filter, such as blob:none
+	Sparse            *bool    // Initialize sparse checkout
+	SparsePaths       []string // Sparse checkout paths to include
+	ReferencePath     *string  // Local Git object store to borrow with --reference-if-able
+	Dissociate        *bool    // Copy borrowed objects so the clone is self-contained
+	RecurseSubmodules *bool    // Clone submodules recursively
+	ShallowSubmodules *bool    // Use shallow clones for submodules
+	FilterSubmodules  *bool    // Apply the partial clone filter to submodules
 }
 
 // WithBranch sets the branch to clone instead of the repository's default branch.
@@ -116,6 +128,94 @@ func WithUsername(username string) func(*GitClone) {
 func WithPassword(password string) func(*GitClone) {
 	return func(opts *GitClone) {
 		opts.Password = &password
+	}
+}
+
+// WithDepth sets the shallow clone depth.
+//
+// Example:
+//
+//	err := sandbox.Git.Clone(ctx, url, path, options.WithDepth(1))
+func WithDepth(depth int) func(*GitClone) {
+	return func(opts *GitClone) {
+		opts.Depth = &depth
+	}
+}
+
+// WithSingleBranch controls whether clone history is restricted to one branch.
+func WithSingleBranch(singleBranch bool) func(*GitClone) {
+	return func(opts *GitClone) {
+		opts.SingleBranch = &singleBranch
+	}
+}
+
+// WithShallowSince fetches only history newer than the supplied date.
+func WithShallowSince(shallowSince string) func(*GitClone) {
+	return func(opts *GitClone) {
+		opts.ShallowSince = &shallowSince
+	}
+}
+
+// WithNoTags skips fetching tags during clone.
+func WithNoTags(noTags bool) func(*GitClone) {
+	return func(opts *GitClone) {
+		opts.NoTags = &noTags
+	}
+}
+
+// WithFilter sets a partial clone filter, such as "blob:none".
+func WithFilter(filter string) func(*GitClone) {
+	return func(opts *GitClone) {
+		opts.Filter = &filter
+	}
+}
+
+// WithSparse initializes sparse checkout for the clone.
+func WithSparse(sparse bool) func(*GitClone) {
+	return func(opts *GitClone) {
+		opts.Sparse = &sparse
+	}
+}
+
+// WithSparsePaths sets the sparse checkout paths to include.
+func WithSparsePaths(paths []string) func(*GitClone) {
+	return func(opts *GitClone) {
+		opts.SparsePaths = paths
+	}
+}
+
+// WithReferencePath borrows objects from a local Git repository or mirror if it exists.
+func WithReferencePath(path string) func(*GitClone) {
+	return func(opts *GitClone) {
+		opts.ReferencePath = &path
+	}
+}
+
+// WithDissociate copies borrowed reference objects into the clone before finishing.
+func WithDissociate(dissociate bool) func(*GitClone) {
+	return func(opts *GitClone) {
+		opts.Dissociate = &dissociate
+	}
+}
+
+// WithRecurseSubmodules clones submodules recursively.
+func WithRecurseSubmodules(recurseSubmodules bool) func(*GitClone) {
+	return func(opts *GitClone) {
+		opts.RecurseSubmodules = &recurseSubmodules
+	}
+}
+
+// WithShallowSubmodules uses shallow clones for submodules.
+func WithShallowSubmodules(shallowSubmodules bool) func(*GitClone) {
+	return func(opts *GitClone) {
+		opts.ShallowSubmodules = &shallowSubmodules
+	}
+}
+
+// WithFilterSubmodules applies the partial clone filter to submodules.
+func WithFilterSubmodules(filterSubmodules bool) func(*GitClone) {
+	return func(opts *GitClone) {
+		opts.FilterSubmodules = &filterSubmodules
 	}
 }
 

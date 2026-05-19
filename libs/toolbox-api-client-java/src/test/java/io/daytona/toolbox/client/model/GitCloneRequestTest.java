@@ -19,7 +19,9 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -54,6 +56,46 @@ public class GitCloneRequestTest {
     }
 
     /**
+     * Test the property 'depth'
+     */
+    @Test
+    public void depthTest() {
+        // TODO: test depth
+    }
+
+    /**
+     * Test the property 'dissociate'
+     */
+    @Test
+    public void dissociateTest() {
+        // TODO: test dissociate
+    }
+
+    /**
+     * Test the property 'filter'
+     */
+    @Test
+    public void filterTest() {
+        // TODO: test filter
+    }
+
+    /**
+     * Test the property 'filterSubmodules'
+     */
+    @Test
+    public void filterSubmodulesTest() {
+        // TODO: test filterSubmodules
+    }
+
+    /**
+     * Test the property 'noTags'
+     */
+    @Test
+    public void noTagsTest() {
+        // TODO: test noTags
+    }
+
+    /**
      * Test the property 'password'
      */
     @Test
@@ -67,6 +109,62 @@ public class GitCloneRequestTest {
     @Test
     public void pathTest() {
         // TODO: test path
+    }
+
+    /**
+     * Test the property 'recurseSubmodules'
+     */
+    @Test
+    public void recurseSubmodulesTest() {
+        // TODO: test recurseSubmodules
+    }
+
+    /**
+     * Test the property 'referencePath'
+     */
+    @Test
+    public void referencePathTest() {
+        // TODO: test referencePath
+    }
+
+    /**
+     * Test the property 'shallowSince'
+     */
+    @Test
+    public void shallowSinceTest() {
+        // TODO: test shallowSince
+    }
+
+    /**
+     * Test the property 'shallowSubmodules'
+     */
+    @Test
+    public void shallowSubmodulesTest() {
+        // TODO: test shallowSubmodules
+    }
+
+    /**
+     * Test the property 'singleBranch'
+     */
+    @Test
+    public void singleBranchTest() {
+        // TODO: test singleBranch
+    }
+
+    /**
+     * Test the property 'sparse'
+     */
+    @Test
+    public void sparseTest() {
+        // TODO: test sparse
+    }
+
+    /**
+     * Test the property 'sparsePaths'
+     */
+    @Test
+    public void sparsePathsTest() {
+        // TODO: test sparsePaths
     }
 
     /**

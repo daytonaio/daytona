@@ -10,12 +10,24 @@ type GitAddRequest struct {
 } //	@name	GitAddRequest
 
 type GitCloneRequest struct {
-	URL      string  `json:"url" validate:"required"`
-	Path     string  `json:"path" validate:"required"`
-	Username *string `json:"username,omitempty" validate:"optional"`
-	Password *string `json:"password,omitempty" validate:"optional"`
-	Branch   *string `json:"branch,omitempty" validate:"optional"`
-	CommitID *string `json:"commit_id,omitempty" validate:"optional"`
+	URL               string   `json:"url" validate:"required"`
+	Path              string   `json:"path" validate:"required"`
+	Username          *string  `json:"username,omitempty" validate:"optional"`
+	Password          *string  `json:"password,omitempty" validate:"optional"`
+	Branch            *string  `json:"branch,omitempty" validate:"optional"`
+	CommitID          *string  `json:"commit_id,omitempty" validate:"optional"`
+	Depth             *int     `json:"depth,omitempty" validate:"optional"`
+	SingleBranch      *bool    `json:"single_branch,omitempty" validate:"optional"`
+	ShallowSince      *string  `json:"shallow_since,omitempty" validate:"optional"`
+	NoTags            *bool    `json:"no_tags,omitempty" validate:"optional"`
+	Filter            *string  `json:"filter,omitempty" validate:"optional"`
+	Sparse            *bool    `json:"sparse,omitempty" validate:"optional"`
+	SparsePaths       []string `json:"sparse_paths,omitempty" validate:"optional"`
+	ReferencePath     *string  `json:"reference_path,omitempty" validate:"optional"`
+	Dissociate        *bool    `json:"dissociate,omitempty" validate:"optional"`
+	RecurseSubmodules *bool    `json:"recurse_submodules,omitempty" validate:"optional"`
+	ShallowSubmodules *bool    `json:"shallow_submodules,omitempty" validate:"optional"`
+	FilterSubmodules  *bool    `json:"filter_submodules,omitempty" validate:"optional"`
 } //	@name	GitCloneRequest
 
 type GitCommitRequest struct {

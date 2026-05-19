@@ -37,6 +37,23 @@ func TestGitClone(t *testing.T) {
 
 func TestGitCloneWithOptions(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var req toolbox.GitCloneRequest
+		require.NoError(t, json.NewDecoder(r.Body).Decode(&req))
+		require.Equal(t, "develop", req.GetBranch())
+		require.Equal(t, "user", req.GetUsername())
+		require.Equal(t, "token", req.GetPassword())
+		require.Equal(t, int32(1), req.GetDepth())
+		require.False(t, req.GetSingleBranch())
+		require.Equal(t, "2025-01-01", req.GetShallowSince())
+		require.True(t, req.GetNoTags())
+		require.Equal(t, "blob:none", req.GetFilter())
+		require.True(t, req.GetSparse())
+		require.Equal(t, []string{"src", "README.md"}, req.GetSparsePaths())
+		require.Equal(t, "/cache/repo.git", req.GetReferencePath())
+		require.True(t, req.GetDissociate())
+		require.True(t, req.GetRecurseSubmodules())
+		require.True(t, req.GetShallowSubmodules())
+		require.True(t, req.GetFilterSubmodules())
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer server.Close()
@@ -49,6 +66,18 @@ func TestGitCloneWithOptions(t *testing.T) {
 		options.WithBranch("develop"),
 		options.WithUsername("user"),
 		options.WithPassword("token"),
+		options.WithDepth(1),
+		options.WithSingleBranch(false),
+		options.WithShallowSince("2025-01-01"),
+		options.WithNoTags(true),
+		options.WithFilter("blob:none"),
+		options.WithSparse(true),
+		options.WithSparsePaths([]string{"src", "README.md"}),
+		options.WithReferencePath("/cache/repo.git"),
+		options.WithDissociate(true),
+		options.WithRecurseSubmodules(true),
+		options.WithShallowSubmodules(true),
+		options.WithFilterSubmodules(true),
 	)
 	assert.NoError(t, err)
 }

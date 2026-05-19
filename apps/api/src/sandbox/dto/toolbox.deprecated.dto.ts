@@ -124,6 +124,42 @@ export class GitCloneRequestDto {
 
   @ApiPropertyOptional()
   commit_id?: string
+
+  @ApiPropertyOptional()
+  depth?: number
+
+  @ApiPropertyOptional()
+  single_branch?: boolean
+
+  @ApiPropertyOptional()
+  shallow_since?: string
+
+  @ApiPropertyOptional()
+  no_tags?: boolean
+
+  @ApiPropertyOptional()
+  filter?: string
+
+  @ApiPropertyOptional()
+  sparse?: boolean
+
+  @ApiPropertyOptional({ type: [String] })
+  sparse_paths?: string[]
+
+  @ApiPropertyOptional()
+  reference_path?: string
+
+  @ApiPropertyOptional()
+  dissociate?: boolean
+
+  @ApiPropertyOptional()
+  recurse_submodules?: boolean
+
+  @ApiPropertyOptional()
+  shallow_submodules?: boolean
+
+  @ApiPropertyOptional()
+  filter_submodules?: boolean
 }
 
 @ApiSchema({ name: 'GitCommitRequest' })

@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from pydantic import TypeAdapter
 from typing import Optional, Set
@@ -31,12 +31,24 @@ class GitCloneRequest(BaseModel):
     """ # noqa: E501
     branch: Optional[StrictStr] = None
     commit_id: Optional[StrictStr] = None
+    depth: Optional[StrictInt] = None
+    dissociate: Optional[StrictBool] = None
+    filter: Optional[StrictStr] = None
+    filter_submodules: Optional[StrictBool] = None
+    no_tags: Optional[StrictBool] = None
     password: Optional[StrictStr] = None
     path: StrictStr
+    recurse_submodules: Optional[StrictBool] = None
+    reference_path: Optional[StrictStr] = None
+    shallow_since: Optional[StrictStr] = None
+    shallow_submodules: Optional[StrictBool] = None
+    single_branch: Optional[StrictBool] = None
+    sparse: Optional[StrictBool] = None
+    sparse_paths: Optional[List[StrictStr]] = None
     url: StrictStr
     username: Optional[StrictStr] = None
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["branch", "commit_id", "password", "path", "url", "username"]
+    __properties: ClassVar[List[str]] = ["branch", "commit_id", "depth", "dissociate", "filter", "filter_submodules", "no_tags", "password", "path", "recurse_submodules", "reference_path", "shallow_since", "shallow_submodules", "single_branch", "sparse", "sparse_paths", "url", "username"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -97,8 +109,20 @@ class GitCloneRequest(BaseModel):
         _obj = cls.model_validate({
             "branch": obj.get("branch"),
             "commit_id": obj.get("commit_id"),
+            "depth": obj.get("depth"),
+            "dissociate": obj.get("dissociate"),
+            "filter": obj.get("filter"),
+            "filter_submodules": obj.get("filter_submodules"),
+            "no_tags": obj.get("no_tags"),
             "password": obj.get("password"),
             "path": obj.get("path"),
+            "recurse_submodules": obj.get("recurse_submodules"),
+            "reference_path": obj.get("reference_path"),
+            "shallow_since": obj.get("shallow_since"),
+            "shallow_submodules": obj.get("shallow_submodules"),
+            "single_branch": obj.get("single_branch"),
+            "sparse": obj.get("sparse"),
+            "sparse_paths": obj.get("sparse_paths"),
             "url": obj.get("url"),
             "username": obj.get("username")
         })

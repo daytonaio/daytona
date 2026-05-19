@@ -39,8 +39,27 @@ func CloneRepository(c *gin.Context) {
 	}
 
 	repo := gitprovider.GitRepository{
-		Url:    req.URL,
-		Branch: branch,
+		Url:               req.URL,
+		Branch:            branch,
+		Depth:             req.Depth,
+		SingleBranch:      req.SingleBranch,
+		NoTags:            req.NoTags,
+		Sparse:            req.Sparse,
+		SparsePaths:       req.SparsePaths,
+		Dissociate:        req.Dissociate,
+		RecurseSubmodules: req.RecurseSubmodules,
+		ShallowSubmodules: req.ShallowSubmodules,
+		FilterSubmodules:  req.FilterSubmodules,
+	}
+
+	if req.ShallowSince != nil {
+		repo.ShallowSince = *req.ShallowSince
+	}
+	if req.Filter != nil {
+		repo.Filter = *req.Filter
+	}
+	if req.ReferencePath != nil {
+		repo.ReferencePath = *req.ReferencePath
 	}
 
 	if req.CommitID != nil {

@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/daytonaio/daemon/pkg/childreap"
@@ -25,7 +26,12 @@ import (
 const experimentalUseGitCloneCLIEnv = "DAYTONA_EXPERIMENTAL_USE_GIT_CLONE_CLI"
 
 func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.BasicAuth) error {
-	if os.Getenv(experimentalUseGitCloneCLIEnv) == "true" {
+	useCLI := os.Getenv(experimentalUseGitCloneCLIEnv) == "true"
+	if err := validateCloneOptions(repo, useCLI); err != nil {
+		return err
+	}
+
+	if useCLI {
 		return s.CloneRepositoryCLI(repo, auth)
 	}
 
@@ -137,6 +143,103 @@ func (s *Service) CloneRepositoryCLI(repo *gitprovider.GitRepository, auth *http
 		}
 	}
 
+	if len(repo.SparsePaths) > 0 {
+		sparseCheckout := exec.Command(gitBin, buildSparseCheckoutArgs(s.WorkDir, repo.SparsePaths)...)
+		sparseCheckout.Env = buildCloneEnv(os.Environ(), askPath, nil)
+		sparseCheckoutTail := s.attachCmdOutput(sparseCheckout, 16*1024)
+		if err := sparseCheckout.Run(); err != nil {
+			return fmt.Errorf("git sparse-checkout set failed: %w\n--- git output (tail) ---\n%s", err, sparseCheckoutTail.String())
+		}
+	}
+
+	return nil
+}
+
+type InvalidCloneOptionsError struct {
+	Message string
+}
+
+func (e *InvalidCloneOptionsError) Error() string {
+	return e.Message
+}
+
+func validateCloneOptions(repo *gitprovider.GitRepository, useCLI bool) error {
+	if repo == nil {
+		return nil
+	}
+
+	if repo.Depth != nil && *repo.Depth < 1 {
+		return &InvalidCloneOptionsError{Message: "depth must be greater than or equal to 1"}
+	}
+	if strings.ContainsAny(repo.Filter, "\x00\r\n") {
+		return &InvalidCloneOptionsError{Message: "filter contains invalid characters"}
+	}
+	if strings.ContainsAny(repo.ReferencePath, "\x00\r\n") {
+		return &InvalidCloneOptionsError{Message: "reference_path contains invalid characters"}
+	}
+	for _, sparsePath := range repo.SparsePaths {
+		if err := validateSparsePath(sparsePath); err != nil {
+			return err
+		}
+	}
+
+	if hasOptimizedCloneOptions(repo) && !useCLI {
+		return &InvalidCloneOptionsError{Message: "optimized clone options require DAYTONA_EXPERIMENTAL_USE_GIT_CLONE_CLI=true"}
+	}
+	if repo.Target == gitprovider.CloneTargetCommit && repo.Branch == "" && (repo.Depth != nil || repo.ShallowSince != "") {
+		return &InvalidCloneOptionsError{Message: "commit_id with depth or shallow_since requires branch to be set"}
+	}
+	if repo.Dissociate != nil && *repo.Dissociate && repo.ReferencePath == "" {
+		return &InvalidCloneOptionsError{Message: "dissociate requires reference_path"}
+	}
+	if repo.ShallowSubmodules != nil && *repo.ShallowSubmodules && !boolValue(repo.RecurseSubmodules) {
+		return &InvalidCloneOptionsError{Message: "shallow_submodules requires recurse_submodules"}
+	}
+	if repo.FilterSubmodules != nil && *repo.FilterSubmodules {
+		if !boolValue(repo.RecurseSubmodules) {
+			return &InvalidCloneOptionsError{Message: "filter_submodules requires recurse_submodules"}
+		}
+		if repo.Filter == "" {
+			return &InvalidCloneOptionsError{Message: "filter_submodules requires filter"}
+		}
+	}
+
+	return nil
+}
+
+func hasOptimizedCloneOptions(repo *gitprovider.GitRepository) bool {
+	return repo.Depth != nil ||
+		repo.SingleBranch != nil ||
+		repo.ShallowSince != "" ||
+		repo.NoTags != nil ||
+		repo.Filter != "" ||
+		repo.Sparse != nil ||
+		len(repo.SparsePaths) > 0 ||
+		repo.ReferencePath != "" ||
+		repo.Dissociate != nil ||
+		repo.RecurseSubmodules != nil ||
+		repo.ShallowSubmodules != nil ||
+		repo.FilterSubmodules != nil
+}
+
+func boolValue(value *bool) bool {
+	return value != nil && *value
+}
+
+func validateSparsePath(sparsePath string) error {
+	if sparsePath == "" {
+		return &InvalidCloneOptionsError{Message: "sparse_paths must not contain empty paths"}
+	}
+	if strings.ContainsAny(sparsePath, "\x00\r\n") {
+		return &InvalidCloneOptionsError{Message: "sparse_paths contains invalid characters"}
+	}
+	if filepath.IsAbs(sparsePath) {
+		return &InvalidCloneOptionsError{Message: "sparse_paths must contain relative paths"}
+	}
+	clean := filepath.Clean(sparsePath)
+	if clean == "." || clean == ".." || strings.HasPrefix(clean, ".."+string(filepath.Separator)) {
+		return &InvalidCloneOptionsError{Message: "sparse_paths must contain relative paths"}
+	}
 	return nil
 }
 
@@ -169,8 +272,42 @@ func buildCloneArgs(repo *gitprovider.GitRepository, workDir string) []string {
 		"-c", "credential.helper=", // prevent any inherited helper from persisting the token
 		"-c", "http.sslVerify=false", // parity with go-git InsecureSkipTLS
 		"clone",
-		"--single-branch",
-		"--progress",
+	}
+	if repo.SingleBranch == nil || *repo.SingleBranch {
+		args = append(args, "--single-branch")
+	} else {
+		args = append(args, "--no-single-branch")
+	}
+	args = append(args, "--progress")
+	if repo.Depth != nil {
+		args = append(args, "--depth="+strconv.Itoa(*repo.Depth))
+	}
+	if repo.ShallowSince != "" {
+		args = append(args, "--shallow-since="+repo.ShallowSince)
+	}
+	if repo.NoTags != nil && *repo.NoTags {
+		args = append(args, "--no-tags")
+	}
+	if repo.Filter != "" {
+		args = append(args, "--filter="+repo.Filter)
+	}
+	if (repo.Sparse != nil && *repo.Sparse) || len(repo.SparsePaths) > 0 {
+		args = append(args, "--sparse")
+	}
+	if repo.ReferencePath != "" {
+		args = append(args, "--reference-if-able="+repo.ReferencePath)
+	}
+	if repo.Dissociate != nil && *repo.Dissociate {
+		args = append(args, "--dissociate")
+	}
+	if repo.RecurseSubmodules != nil && *repo.RecurseSubmodules {
+		args = append(args, "--recurse-submodules")
+	}
+	if repo.ShallowSubmodules != nil && *repo.ShallowSubmodules {
+		args = append(args, "--shallow-submodules")
+	}
+	if repo.FilterSubmodules != nil && *repo.FilterSubmodules {
+		args = append(args, "--also-filter-submodules")
 	}
 	if repo.Branch != "" {
 		args = append(args, "--branch", repo.Branch)
@@ -211,6 +348,12 @@ func buildCloneEnv(baseEnv []string, askPath string, auth *http.BasicAuth) []str
 func buildCheckoutArgs(workDir, sha string) []string {
 	// No `--` separator: that would make git treat the SHA as a pathspec.
 	return []string{"-C", workDir, "checkout", sha}
+}
+
+func buildSparseCheckoutArgs(workDir string, sparsePaths []string) []string {
+	args := []string{"-C", workDir, "sparse-checkout", "set", "--cone", "--"}
+	args = append(args, sparsePaths...)
+	return args
 }
 
 // tailBuffer keeps only the last N bytes — lets us include git's final error
