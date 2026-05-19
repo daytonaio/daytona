@@ -40,7 +40,7 @@ Install the Daytona CLI to interact with Daytona sandboxes from the command line
 </TabItem>
 <TabItem label="Linux">
 
-On Linux, the GitHub release command downloads the latest binary and replaces the existing \`daytona\` binary in \`/usr/local/bin\`.
+On Linux, the command below downloads the latest binary from GitHub releases and installs it to \`/usr/local/bin\`, overwriting any existing version.
 
   \`\`\`bash
   sudo curl -L https://github.com/daytonaio/daytona/releases/latest/download/daytona-linux-amd64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
