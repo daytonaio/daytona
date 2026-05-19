@@ -711,11 +711,19 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       }
     }
 
-    return this.dockerRegistryService.findCandidateRegistriesForSandbox(
+    const candidates = await this.dockerRegistryService.findCandidateRegistriesForSandbox(
       sandbox.backupRegistryId,
       snapshotRef,
       sandbox.region,
     )
+
+    if (sandbox.backupRegistryId && !candidates.some((r) => r.id === sandbox.backupRegistryId)) {
+      this.logger.warn(
+        `Backup registry ${sandbox.backupRegistryId} not found for sandbox ${sandbox.id}; proceeding without backup registry credentials`,
+      )
+    }
+
+    return candidates
   }
 
   private async migrateSandbox(sandbox: Sandbox, oldRunnerId: string, newRunnerId: string): Promise<void> {

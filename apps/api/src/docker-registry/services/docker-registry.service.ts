@@ -141,8 +141,10 @@ export class DockerRegistryService {
 
   /**
    * Returns candidate registries a runner may need to pull the container's current image
-   * from during resize/recover: the sandbox's backup registry plus the internal registry
-   * holding its source snapshot. Either side may be missing; rows are deduplicated by id.
+   * from during resize/recover: the internal registry holding the source snapshot plus
+   * the sandbox's backup registry. Source comes first so same-host matches prefer the
+   * pull-scoped creds over backup creds that may be push-only. Either side may be
+   * missing; rows are deduplicated by id.
    */
   async findCandidateRegistriesForSandbox(
     backupRegistryId: string | null | undefined,
@@ -151,17 +153,17 @@ export class DockerRegistryService {
   ): Promise<DockerRegistry[]> {
     const candidates: DockerRegistry[] = []
 
-    if (backupRegistryId) {
-      const backup = await this.findOne(backupRegistryId)
-      if (backup) {
-        candidates.push(backup)
+    if (snapshotRef) {
+      const internal = await this.findInternalRegistryBySnapshotRef(snapshotRef, regionId)
+      if (internal) {
+        candidates.push(internal)
       }
     }
 
-    if (snapshotRef) {
-      const internal = await this.findInternalRegistryBySnapshotRef(snapshotRef, regionId)
-      if (internal && !candidates.some((r) => r.id === internal.id)) {
-        candidates.push(internal)
+    if (backupRegistryId) {
+      const backup = await this.findOne(backupRegistryId)
+      if (backup && !candidates.some((r) => r.id === backup.id)) {
+        candidates.push(backup)
       }
     }
 

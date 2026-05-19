@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/containerd/errdefs"
 	"github.com/daytonaio/common-go/pkg/utils"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
@@ -216,12 +217,18 @@ func (d *DockerClient) resolveContainerImage(ctx context.Context, sandboxId stri
 
 	if _, err := d.apiClient.ImageInspect(ctx, imageRef); err == nil {
 		return imageRef
+	} else if !errdefs.IsNotFound(err) {
+		d.logger.WarnContext(ctx, "ImageInspect by tag failed with non-NotFound error; treating as missing",
+			"imageRef", imageRef, "error", err)
 	}
 
 	if _, err := d.apiClient.ImageInspect(ctx, originalContainer.Image); err == nil {
 		d.logger.WarnContext(ctx, "Image not found by tag, falling back to image ID",
 			"imageRef", imageRef, "imageID", originalContainer.Image)
 		return originalContainer.Image
+	} else if !errdefs.IsNotFound(err) {
+		d.logger.WarnContext(ctx, "ImageInspect by ID failed with non-NotFound error; treating as missing",
+			"imageID", originalContainer.Image, "error", err)
 	}
 
 	matched := pickRegistryForImage(imageRef, registries)
@@ -247,8 +254,10 @@ func (d *DockerClient) resolveContainerImage(ctx context.Context, sandboxId stri
 func pickRegistryForImage(imageRef string, registries []dto.RegistryDTO) *dto.RegistryDTO {
 	for i := range registries {
 		reg := &registries[i]
-		stripped := strings.TrimPrefix(reg.Url, "https://")
+		stripped := strings.TrimSpace(reg.Url)
+		stripped = strings.TrimPrefix(stripped, "https://")
 		stripped = strings.TrimPrefix(stripped, "http://")
+		stripped = strings.TrimSuffix(stripped, "/")
 		if stripped == "" || !strings.HasPrefix(imageRef, stripped) {
 			continue
 		}
