@@ -80,7 +80,12 @@ export class ApiClient {
     this._organizationsApi = new OrganizationsApi(this.config, undefined, axiosInstance)
     const billingConfig = new BillingConfiguration({
       basePath: config.billingApiUrl || window.location.origin,
-      accessToken,
+      accessToken: accessToken,
+      baseOptions: {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
     })
     this._billingApi = new BillingApiClient(billingConfig, axiosInstance)
     this._volumeApi = new VolumesApi(this.config, undefined, axiosInstance)
