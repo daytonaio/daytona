@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Invoice } from '@/billing-api/types/Invoice'
+import { Invoice } from '@daytona/billing-api-client'
 import {
   ColumnFiltersState,
   getCoreRowModel,
@@ -86,7 +86,7 @@ export function useInvoicesTable({
     defaultColumn: {
       size: 100,
     },
-    getRowId: (row) => row.id,
+    getRowId: (row, index) => row.id ?? String(index),
   })
 
   return {

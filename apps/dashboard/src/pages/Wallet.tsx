@@ -3,11 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Invoice } from '@/billing-api/types/Invoice'
-import { AutomaticTopUp } from '@/billing-api/types/OrganizationWallet'
+import { AutomaticTopUp, BillingType, Invoice } from '@daytona/billing-api-client'
+import { BillingInfoCard } from '@/components/BillingInfoCard'
+import { ChargesTable } from '@/components/Charges'
 import { InvoicesTable } from '@/components/Invoices'
 import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
+import { PaymentMethodsCard } from '@/components/PaymentMethodsCard'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -27,6 +30,8 @@ import {
   useOwnerInvoicesQuery,
   useOwnerWalletQuery,
 } from '@/hooks/queries/billingQueries'
+import { useChargesQuery } from '@/hooks/queries/useChargesQuery'
+import { useBillingV2Enabled } from '@/hooks/useBillingV2Enabled'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { formatAmount } from '@/lib/utils'
 import { ArrowUpRight, CheckCircleIcon, InfoIcon, SparklesIcon, TriangleAlertIcon } from 'lucide-react'
@@ -40,6 +45,7 @@ const DEFAULT_PAGE_SIZE = 10
 const Wallet = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const { user } = useAuth()
+  const isBillingV2 = useBillingV2Enabled()
   const [automaticTopUp, setAutomaticTopUp] = useState<AutomaticTopUp | undefined>(undefined)
   const [couponCode, setCouponCode] = useState<string>('')
   const [redeemCouponError, setRedeemCouponError] = useState<string | null>(null)
@@ -53,6 +59,10 @@ const Wallet = () => {
   const walletQuery = useOwnerWalletQuery({ refetchOnMount: 'always' })
   const billingPortalUrlQuery = useOwnerBillingPortalUrlQuery()
   const invoicesQuery = useOwnerInvoicesQuery(invoicesPagination.pageIndex + 1, invoicesPagination.pageSize)
+  const chargesQuery = useChargesQuery({
+    organizationId: selectedOrganization?.id ?? '',
+    enabled: Boolean(selectedOrganization && isBillingV2),
+  })
 
   const isCheckoutUrlLoading = useIsOwnerCheckoutUrlFetching()
   const fetchCheckoutUrl = useFetchOwnerCheckoutUrlQuery()
@@ -132,6 +142,10 @@ const Wallet = () => {
       return true
     }
 
+    if (wallet?.automaticTopUp?.disabled && (automaticTopUp?.thresholdAmount || 0) > 0) {
+      return false
+    }
+
     if (automaticTopUp?.thresholdAmount !== wallet?.automaticTopUp?.thresholdAmount) {
       if (!wallet?.automaticTopUp) {
         if ((automaticTopUp?.thresholdAmount || 0) !== 0) {
@@ -171,7 +185,7 @@ const Wallet = () => {
         amountCents: amount * 100,
       })
       if (newWindow) {
-        newWindow.location.href = result.url
+        newWindow.location.href = result.url ?? ''
       }
     } catch (error) {
       newWindow?.close()
@@ -191,10 +205,10 @@ const Wallet = () => {
       try {
         const result = await createInvoicePaymentUrlMutation.mutateAsync({
           organizationId: selectedOrganization.id,
-          invoiceId: invoice.id,
+          invoiceId: invoice.id ?? '',
         })
         if (newWindow) {
-          newWindow.location.href = result.url
+          newWindow.location.href = result.url ?? ''
         }
       } catch (error) {
         newWindow?.close()
@@ -212,7 +226,7 @@ const Wallet = () => {
         return
       }
 
-      window.open(invoice.fileUrl, '_blank')
+      window.open(invoice.fileUrl ?? '', '_blank')
     },
     [selectedOrganization],
   )
@@ -225,7 +239,7 @@ const Wallet = () => {
       try {
         await voidInvoiceMutation.mutateAsync({
           organizationId: selectedOrganization.id,
-          invoiceId: invoice.id,
+          invoiceId: invoice.id ?? '',
         })
         toast.success('Invoice voided successfully')
       } catch (error) {
@@ -238,6 +252,7 @@ const Wallet = () => {
   )
 
   const isBillingLoading = walletQuery.isLoading && billingPortalUrlQuery.isLoading
+  const isPostPaid = wallet?.billingType === BillingType.BillingTypePostPaid
   const topUpEnabled =
     wallet?.creditCardConnected && !topUpWalletMutation.isPending && (selectedPreset || oneTimeTopUpAmount)
 
@@ -281,7 +296,7 @@ const Wallet = () => {
                     <TriangleAlertIcon />
                     <AlertTitle>Verify your email</AlertTitle>
                     <AlertDescription>
-                      {wallet.balanceCents && wallet.balanceCents > 0 ? (
+                      {(wallet.balanceCents ?? 0) > 0 ? (
                         <>
                           Please verify your email address to complete your account setup.
                           <br />A verification email was sent to you.
@@ -313,10 +328,23 @@ const Wallet = () => {
                 </AlertDescription>
               </Alert>
             )}
+            {wallet.automaticTopUp?.disabled && (
+              <Alert variant="destructive">
+                <TriangleAlertIcon />
+                <AlertTitle>Automatic top-up disabled</AlertTitle>
+                <AlertDescription>
+                  Your automatic top-up was disabled because of a failed payment. Please update your payment method and
+                  enable it again manually below.
+                </AlertDescription>
+              </Alert>
+            )}
 
             <Card>
               <CardHeader>
-                <CardTitle>Overview</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  Overview
+                  {isPostPaid && <Badge variant="secondary">Post-paid</Badge>}
+                </CardTitle>
               </CardHeader>
               <CardContent className="">
                 <div className="flex items-start sm:flex-row flex-col gap-4 sm:items-end justify-between">
@@ -324,17 +352,17 @@ const Wallet = () => {
                     <div className="flex flex-col gap-1">
                       <div className="">Current balance</div>
                       <div className="text-xl text-foreground font-semibold">
-                        {formatAmount(wallet.ongoingBalanceCents)}
+                        {formatAmount(wallet.ongoingBalanceCents ?? 0)}
                       </div>
                     </div>
                     <div className="flex flex-col gap-1">
                       <div className="">Spent this month</div>
                       <div className="text-xl font-semibold">
-                        {formatAmount(wallet.balanceCents - wallet.ongoingBalanceCents)}
+                        {formatAmount((wallet.balanceCents ?? 0) - (wallet.ongoingBalanceCents ?? 0))}
                       </div>
                     </div>
                   </div>
-                  {billingPortalUrlQuery.isLoading ? (
+                  {isBillingV2 ? null : billingPortalUrlQuery.isLoading ? (
                     <Skeleton className="h-8 w-[160px]" />
                   ) : billingPortalUrl ? (
                     <Button variant="link" asChild className="flex items-center gap-2 !px-0">
@@ -350,29 +378,31 @@ const Wallet = () => {
                   ) : null}
                 </div>
               </CardContent>
-              <CardContent className="border-t border-border">
-                <div className="flex gap-4 items-center justify-between">
-                  <div className="flex flex-col gap-1 items-start">
-                    <div className="text-sm font-medium">Payment method</div>
+              {!isBillingV2 && (
+                <CardContent className="border-t border-border">
+                  <div className="flex gap-4 items-center justify-between">
+                    <div className="flex flex-col gap-1 items-start">
+                      <div className="text-sm font-medium">Payment method</div>
+                      {!wallet.creditCardConnected ? (
+                        <div className="text-sm text-muted-foreground">Payment method not connected</div>
+                      ) : (
+                        <div className="text-sm text-muted-foreground flex items-center gap-2">
+                          <CheckCircleIcon className="w-4 h-4 shrink-0" /> Credit card connected
+                        </div>
+                      )}
+                    </div>
                     {!wallet.creditCardConnected ? (
-                      <div className="text-sm text-muted-foreground">Payment method not connected</div>
+                      <Button variant="default" onClick={handleUpdatePaymentMethod} disabled={isCheckoutUrlLoading}>
+                        {isCheckoutUrlLoading && <Spinner />} Connect
+                      </Button>
                     ) : (
-                      <div className="text-sm text-muted-foreground flex items-center gap-2">
-                        <CheckCircleIcon className="w-4 h-4 shrink-0" /> Credit card connected
-                      </div>
+                      <Button variant="secondary" onClick={handleUpdatePaymentMethod} disabled={isCheckoutUrlLoading}>
+                        {isCheckoutUrlLoading && <Spinner />} Update
+                      </Button>
                     )}
                   </div>
-                  {!wallet.creditCardConnected ? (
-                    <Button variant="default" onClick={handleUpdatePaymentMethod} disabled={isCheckoutUrlLoading}>
-                      {isCheckoutUrlLoading && <Spinner />} Connect
-                    </Button>
-                  ) : (
-                    <Button variant="secondary" onClick={handleUpdatePaymentMethod} disabled={isCheckoutUrlLoading}>
-                      {isCheckoutUrlLoading && <Spinner />} Update
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
+                </CardContent>
+              )}
 
               {user?.profile.email_verified && (
                 <CardContent className="border-t border-border">
@@ -407,7 +437,14 @@ const Wallet = () => {
               )}
             </Card>
 
-            {wallet.creditCardConnected && (
+            {isBillingV2 && selectedOrganization && (
+              <>
+                <BillingInfoCard organizationId={selectedOrganization.id} />
+                <PaymentMethodsCard organizationId={selectedOrganization.id} />
+              </>
+            )}
+
+            {wallet.creditCardConnected && !isPostPaid && (
               <Card className="w-full">
                 <CardHeader>
                   <CardTitle>Automatic top-up</CardTitle>
@@ -604,11 +641,23 @@ const Wallet = () => {
                   onPaginationChange={setInvoicesPagination}
                   loading={invoicesQuery.isLoading}
                   onViewInvoice={handleViewInvoice}
-                  onVoidInvoice={handleVoidInvoice}
+                  onVoidInvoice={isBillingV2 ? undefined : handleVoidInvoice}
                   onPayInvoice={handlePayInvoice}
                 />
               </CardContent>
             </Card>
+
+            {isBillingV2 && selectedOrganization && (
+              <Card className="w-full">
+                <CardHeader>
+                  <CardTitle>Charges</CardTitle>
+                  <CardDescription>All payment attempts on your organization, including failed ones.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ChargesTable data={chargesQuery.charges} loading={chargesQuery.isLoading} />
+                </CardContent>
+              </Card>
+            )}
           </>
         )}
       </PageContent>

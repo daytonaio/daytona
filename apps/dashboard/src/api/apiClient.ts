@@ -10,6 +10,7 @@ import {
   TelemetryApi as AnalyticsTelemetryApi,
   UsageApi as AnalyticsUsageApi,
 } from '@daytona/analytics-api-client'
+import { Configuration as BillingConfiguration } from '@daytona/billing-api-client'
 import {
   ApiKeysApi,
   AuditApi,
@@ -77,7 +78,16 @@ export class ApiClient {
     this._apiKeyApi = new ApiKeysApi(this.config, undefined, axiosInstance)
     this._dockerRegistryApi = new DockerRegistryApi(this.config, undefined, axiosInstance)
     this._organizationsApi = new OrganizationsApi(this.config, undefined, axiosInstance)
-    this._billingApi = new BillingApiClient(config.billingApiUrl || window.location.origin, accessToken)
+    const billingConfig = new BillingConfiguration({
+      basePath: config.billingApiUrl || window.location.origin,
+      accessToken: accessToken,
+      baseOptions: {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    })
+    this._billingApi = new BillingApiClient(billingConfig, axiosInstance)
     this._volumeApi = new VolumesApi(this.config, undefined, axiosInstance)
     this._toolboxApi = new ToolboxApi(this.config, undefined, axiosInstance)
     this._auditApi = new AuditApi(this.config, undefined, axiosInstance)

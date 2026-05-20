@@ -33,12 +33,15 @@ export const queryKeys = {
     usage: {
       overview: (organizationId: string) =>
         [...queryKeys.organization.all, organizationId, 'usage', 'overview'] as const,
-      current: (organizationId: string) => [...queryKeys.organization.all, organizationId, 'usage', 'current'] as const,
-      past: (organizationId: string) => [...queryKeys.organization.all, organizationId, 'usage', 'past'] as const,
+      current: (organizationId: string, v2: boolean) =>
+        [...queryKeys.organization.all, organizationId, 'usage', 'current', { v2 }] as const,
+      past: (organizationId: string, v2: boolean) =>
+        [...queryKeys.organization.all, organizationId, 'usage', 'past', { v2 }] as const,
     },
 
     tier: (organizationId: string) => [...queryKeys.organization.all, organizationId, 'tier'] as const,
-    wallet: (organizationId: string) => [...queryKeys.organization.all, organizationId, 'wallet'] as const,
+    wallet: (organizationId: string, v2: boolean) =>
+      [...queryKeys.organization.all, organizationId, 'wallet', { v2 }] as const,
   },
   user: {
     all: ['users'] as const,
@@ -48,13 +51,20 @@ export const queryKeys = {
     all: ['billing'] as const,
     tiers: () => [...queryKeys.billing.all, 'tiers'] as const,
     emails: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'emails'] as const,
-    portalUrl: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'portal-url'] as const,
-    checkoutUrl: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'checkout-url'] as const,
-    invoices: (organizationId: string, page?: number, perPage?: number) =>
+    portalUrl: (organizationId: string, v2: boolean) =>
+      [...queryKeys.billing.all, organizationId, 'portal-url', { v2 }] as const,
+    checkoutUrl: (organizationId: string, v2: boolean) =>
+      [...queryKeys.billing.all, organizationId, 'checkout-url', { v2 }] as const,
+    usagePortalUrl: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'usage-portal-url'] as const,
+    billingInfo: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'billing-info'] as const,
+    paymentMethods: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'payment-methods'] as const,
+    charges: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'charges'] as const,
+    invoices: (organizationId: string, v2: boolean, page?: number, perPage?: number) =>
       [
         ...queryKeys.billing.all,
         organizationId,
         'invoices',
+        { v2 },
         ...(page !== undefined && perPage !== undefined ? [{ page, perPage }] : []),
       ] as const,
   },
