@@ -58,6 +58,21 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
           await this.closeUsagePeriod(event.sandbox.id)
           await this.createUsagePeriod(event, true)
           break
+        // Safeguard if STOPPING state is skipped
+        case SandboxState.STOPPED: {
+          const cpuUsagePeriod = await this.sandboxUsagePeriodRepository.findOne({
+            where: {
+              sandboxId: event.sandbox.id,
+              endAt: IsNull(),
+              cpu: Not(0),
+            },
+          })
+          if (cpuUsagePeriod) {
+            await this.closeUsagePeriod(event.sandbox.id)
+            await this.createUsagePeriod(event, true)
+          }
+          break
+        }
         case SandboxState.ERROR:
         case SandboxState.BUILD_FAILED:
         case SandboxState.ARCHIVED:
@@ -160,6 +175,11 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
             const newUsagePeriod = SandboxUsagePeriod.fromUsagePeriod(usagePeriod)
             newUsagePeriod.startAt = closeTime
             newUsagePeriod.endAt = null
+            if (sandbox.state === SandboxState.STOPPED) {
+              newUsagePeriod.cpu = 0
+              newUsagePeriod.gpu = 0
+              newUsagePeriod.mem = 0
+            }
             await transactionalEntityManager.save(newUsagePeriod)
           }
         })
