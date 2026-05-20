@@ -53,16 +53,17 @@ function buildTierComparisonTableData(tiers: Tier[]): ComparisonSection[] {
       title: 'Tiers',
       rows: tiers
         .map((tier) => {
-          const tierNumber = tier.tier ?? 0
+          const tierNumber = tier.tier
+          const rateLimits = tierNumber != null ? TIER_RATE_LIMITS[tierNumber] : undefined
           return {
-            label: <span className="whitespace-nowrap">{tierNumber}</span>,
+            label: <span className="whitespace-nowrap">{tierNumber ?? '-'}</span>,
             values: [
               `${tier.tierLimit?.concurrentCPU ?? '-'}`,
               `${tier.tierLimit?.concurrentRAMGiB ?? '-'}`,
               `${tier.tierLimit?.concurrentDiskGiB ?? '-'}`,
-              `${TIER_RATE_LIMITS[tierNumber]?.authenticatedRateLimit.toLocaleString() || '-'}`,
-              `${TIER_RATE_LIMITS[tierNumber]?.sandboxCreateRateLimit.toLocaleString() || '-'}`,
-              `${TIER_RATE_LIMITS[tierNumber]?.sandboxLifecycleRateLimit.toLocaleString() || '-'}`,
+              `${rateLimits?.authenticatedRateLimit.toLocaleString() || '-'}`,
+              `${rateLimits?.sandboxCreateRateLimit.toLocaleString() || '-'}`,
+              `${rateLimits?.sandboxLifecycleRateLimit.toLocaleString() || '-'}`,
             ],
           }
         })

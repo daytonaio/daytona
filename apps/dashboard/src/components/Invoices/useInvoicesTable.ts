@@ -86,7 +86,7 @@ export function useInvoicesTable({
     defaultColumn: {
       size: 100,
     },
-    getRowId: (row) => row.id ?? '',
+    getRowId: (row, index) => row.id ?? String(index),
   })
 
   return {

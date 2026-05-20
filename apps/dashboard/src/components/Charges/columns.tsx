@@ -44,16 +44,27 @@ export function getColumns(): ColumnDef<Charge>[] {
       size: 140,
       header: ({ column }) => <SortableHeader column={column} label="Date" />,
       cell: ({ row }) => {
-        const date = new Date(row.original.createdAt ?? '')
+        const timestamp = parseTimestamp(row.original.createdAt)
         return (
           <div className="w-full truncate">
-            <span>{date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+            <span>
+              {timestamp != null
+                ? new Date(timestamp).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })
+                : '—'}
+            </span>
           </div>
         )
       },
-      accessorFn: (row) => new Date(row.createdAt ?? '').getTime(),
+      accessorFn: (row) => parseTimestamp(row.createdAt) ?? -Infinity,
       sortingFn: (rowA, rowB) => {
-        return new Date(rowA.original.createdAt ?? '').getTime() - new Date(rowB.original.createdAt ?? '').getTime()
+        return (
+          (parseTimestamp(rowA.original.createdAt) ?? -Infinity) -
+          (parseTimestamp(rowB.original.createdAt) ?? -Infinity)
+        )
       },
     },
     {
@@ -119,6 +130,12 @@ export function getColumns(): ColumnDef<Charge>[] {
       ),
     },
   ]
+}
+
+function parseTimestamp(value?: string | null): number | null {
+  if (!value) return null
+  const time = new Date(value).getTime()
+  return Number.isNaN(time) ? null : time
 }
 
 // Maps Stripe's charge.status values to our badge variants.

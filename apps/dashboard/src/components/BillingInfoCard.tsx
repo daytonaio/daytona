@@ -28,12 +28,19 @@ export function BillingInfoCard({ organizationId }: BillingInfoCardProps) {
           <CardTitle>Billing info</CardTitle>
           <CardDescription>Contact and address used for invoices and payment receipts.</CardDescription>
         </div>
-        <Button variant="secondary" size="sm" asChild disabled={!portalUrl}>
-          <a href={portalUrl ?? '#'} target="_blank" rel="noopener noreferrer" aria-disabled={!portalUrl}>
+        {portalUrl ? (
+          <Button variant="secondary" size="sm" asChild>
+            <a href={portalUrl} target="_blank" rel="noopener noreferrer">
+              <PencilIcon />
+              Edit
+            </a>
+          </Button>
+        ) : (
+          <Button variant="secondary" size="sm" disabled>
             <PencilIcon />
             Edit
-          </a>
-        </Button>
+          </Button>
+        )}
       </CardHeader>
 
       <CardContent>

@@ -29,12 +29,19 @@ export function PaymentMethodsCard({ organizationId }: PaymentMethodsCardProps) 
           <CardTitle>Payment methods</CardTitle>
           <CardDescription>Cards on file. The default is used for automatic charges and invoices.</CardDescription>
         </div>
-        <Button variant="secondary" size="sm" asChild disabled={!portalUrl}>
-          <a href={portalUrl ?? '#'} target="_blank" rel="noopener noreferrer" aria-disabled={!portalUrl}>
+        {portalUrl ? (
+          <Button variant="secondary" size="sm" asChild>
+            <a href={portalUrl} target="_blank" rel="noopener noreferrer">
+              <PencilIcon />
+              Edit
+            </a>
+          </Button>
+        ) : (
+          <Button variant="secondary" size="sm" disabled>
             <PencilIcon />
             Edit
-          </a>
-        </Button>
+          </Button>
+        )}
       </CardHeader>
 
       <CardContent className="border-t border-border p-0">
@@ -48,8 +55,8 @@ export function PaymentMethodsCard({ organizationId }: PaymentMethodsCardProps) 
           <p className="p-4 text-sm text-muted-foreground">No cards on file yet.</p>
         ) : (
           <ul className="divide-y divide-border">
-            {methods.map((method) => (
-              <li key={method.id ?? ''} className="flex items-center justify-between gap-4 p-4">
+            {methods.map((method, index) => (
+              <li key={method.id ?? `method-${index}`} className="flex items-center justify-between gap-4 p-4">
                 <PaymentMethodRow method={method} />
               </li>
             ))}

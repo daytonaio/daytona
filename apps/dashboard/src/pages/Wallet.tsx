@@ -641,7 +641,7 @@ const Wallet = () => {
                   onPaginationChange={setInvoicesPagination}
                   loading={invoicesQuery.isLoading}
                   onViewInvoice={handleViewInvoice}
-                  onVoidInvoice={handleVoidInvoice}
+                  onVoidInvoice={isBillingV2 ? undefined : handleVoidInvoice}
                   onPayInvoice={handlePayInvoice}
                 />
               </CardContent>
@@ -654,7 +654,7 @@ const Wallet = () => {
                   <CardDescription>All payment attempts on your organization, including failed ones.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ChargesTable data={chargesQuery.data?.data ?? []} loading={chargesQuery.isLoading} />
+                  <ChargesTable data={chargesQuery.charges} loading={chargesQuery.isLoading} />
                 </CardContent>
               </Card>
             )}

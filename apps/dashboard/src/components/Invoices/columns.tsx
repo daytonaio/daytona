@@ -49,6 +49,25 @@ const getMeta = (table: Table<Invoice>) => {
   return table.options.meta?.invoices as InvoicesTableMeta
 }
 
+function parseTimestamp(value?: string | null): number | null {
+  if (!value) return null
+  const time = new Date(value).getTime()
+  return Number.isNaN(time) ? null : time
+}
+
+const DateCell: React.FC<{ value?: string | null }> = ({ value }) => {
+  const timestamp = parseTimestamp(value)
+  return (
+    <div className="w-full truncate">
+      <span>
+        {timestamp != null
+          ? new Date(timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+          : '—'}
+      </span>
+    </div>
+  )
+}
+
 export const invoiceColumns: ColumnDef<Invoice>[] = [
   {
     id: 'number',
@@ -73,17 +92,13 @@ export const invoiceColumns: ColumnDef<Invoice>[] = [
     header: ({ column }) => {
       return <SortableHeader column={column} label="Date" />
     },
-    cell: ({ row }) => {
-      const date = new Date(row.original.issuingDate ?? '')
-      return (
-        <div className="w-full truncate">
-          <span>{date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-        </div>
-      )
-    },
-    accessorFn: (row) => new Date(row.issuingDate ?? '').getTime(),
+    cell: ({ row }) => <DateCell value={row.original.issuingDate} />,
+    accessorFn: (row) => parseTimestamp(row.issuingDate) ?? -Infinity,
     sortingFn: (rowA, rowB) => {
-      return new Date(rowA.original.issuingDate ?? '').getTime() - new Date(rowB.original.issuingDate ?? '').getTime()
+      return (
+        (parseTimestamp(rowA.original.issuingDate) ?? -Infinity) -
+        (parseTimestamp(rowB.original.issuingDate) ?? -Infinity)
+      )
     },
   },
   {
@@ -92,18 +107,12 @@ export const invoiceColumns: ColumnDef<Invoice>[] = [
     header: ({ column }) => {
       return <SortableHeader column={column} label="Due Date" />
     },
-    cell: ({ row }) => {
-      const date = new Date(row.original.paymentDueDate ?? '')
-      return (
-        <div className="w-full truncate">
-          <span>{date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-        </div>
-      )
-    },
-    accessorFn: (row) => new Date(row.paymentDueDate ?? '').getTime(),
+    cell: ({ row }) => <DateCell value={row.original.paymentDueDate} />,
+    accessorFn: (row) => parseTimestamp(row.paymentDueDate) ?? -Infinity,
     sortingFn: (rowA, rowB) => {
       return (
-        new Date(rowA.original.paymentDueDate ?? '').getTime() - new Date(rowB.original.paymentDueDate ?? '').getTime()
+        (parseTimestamp(rowA.original.paymentDueDate) ?? -Infinity) -
+        (parseTimestamp(rowB.original.paymentDueDate) ?? -Infinity)
       )
     },
   },

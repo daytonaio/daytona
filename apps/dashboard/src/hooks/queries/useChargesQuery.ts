@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import type { ChargeList } from '@daytona/billing-api-client'
-import { useQuery } from '@tanstack/react-query'
+import type { Charge } from '@daytona/billing-api-client'
+import { useInfiniteQuery } from '@tanstack/react-query'
+import { useEffect, useMemo } from 'react'
 import { useApi } from '../useApi'
 import { useBillingV2Enabled } from '../useBillingV2Enabled'
 import { useConfig } from '../useConfig'
@@ -15,9 +16,27 @@ export const useChargesQuery = ({ organizationId, enabled = true }: { organizati
   const config = useConfig()
   const v2 = useBillingV2Enabled()
 
-  return useQuery<ChargeList>({
+  const query = useInfiniteQuery({
     queryKey: queryKeys.billing.charges(organizationId),
-    queryFn: () => billingApi.listCharges(organizationId),
+    queryFn: ({ pageParam }) => billingApi.listCharges(organizationId, { startingAfter: pageParam }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.nextCursor : undefined),
     enabled: Boolean(enabled && v2 && config.billingApiUrl && organizationId),
   })
+
+  useEffect(() => {
+    if (query.hasNextPage && !query.isFetchingNextPage) {
+      query.fetchNextPage()
+    }
+  }, [query.hasNextPage, query.isFetchingNextPage, query.fetchNextPage])
+
+  const charges = useMemo<Charge[]>(() => query.data?.pages.flatMap((page) => page.data ?? []) ?? [], [query.data])
+
+  return {
+    charges,
+    isLoading: query.isLoading || query.hasNextPage || query.isFetchingNextPage,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
+  }
 }

@@ -126,9 +126,9 @@ const Spending = () => {
 
   const usageChartData = useMemo(
     () =>
-      [...sortedPastUsage, ...(currentOrganizationUsage ? [currentOrganizationUsage] : [])].map(
-        convertUsageToChartData,
-      ),
+      [...sortedPastUsage, ...(currentOrganizationUsage ? [currentOrganizationUsage] : [])]
+        .map(convertUsageToChartData)
+        .filter((entry): entry is UsageChartData => entry !== null),
     [sortedPastUsage, currentOrganizationUsage],
   )
 
@@ -260,7 +260,7 @@ const Spending = () => {
   )
 }
 
-function convertUsageToChartData(usage: OrganizationUsage): UsageChartData {
+function convertUsageToChartData(usage: OrganizationUsage): UsageChartData | null {
   let ramGB = 0
   let cpu = 0
   let diskGB = 0
@@ -283,8 +283,13 @@ function convertUsageToChartData(usage: OrganizationUsage): UsageChartData {
     }
   }
 
+  const from = usage.from ? new Date(usage.from) : null
+  if (!from || Number.isNaN(from.getTime())) {
+    return null
+  }
+
   return {
-    date: new Date(usage.from ?? '').toISOString(),
+    date: from.toISOString(),
     diskGB,
     ramGB,
     cpu,

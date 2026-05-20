@@ -16,7 +16,7 @@
 
 export interface AutomaticTopUp {
     /**
-     * Disabled is true when the threshold rule still has amounts configured but is not currently active. The most common cause is Metronome auto-disabling the rule after a Stripe charge for a threshold top-up fails. The customer can re-enable by re-submitting the rule through SetAutomaticTopUp.
+     * Disabled is true when the threshold rule still has amounts configured but is not currently active
      */
     'disabled'?: boolean;
     'targetAmount'?: number;

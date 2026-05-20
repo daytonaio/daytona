@@ -28,9 +28,6 @@ export function ChargesTable({ data, loading, onRowClick }: ChargesTableProps) {
                   <TableHead
                     key={header.id}
                     data-state={header.column.getCanSort() && 'sortable'}
-                    onClick={() =>
-                      header.column.getCanSort() && header.column.toggleSorting(header.column.getIsSorted() === 'asc')
-                    }
                     className={cn(
                       'sticky top-0 z-[3] border-b border-border',
                       header.column.getCanSort() ? 'hover:bg-muted cursor-pointer' : '',
