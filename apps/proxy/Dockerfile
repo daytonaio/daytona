@@ -4,7 +4,7 @@ ENV CI=true
 
 RUN npm install -g corepack && corepack enable
 
-COPY --from=golang:1.25.4-alpine /usr/local/go/ /usr/local/go/
+COPY --from=golang:1.25.7-alpine /usr/local/go/ /usr/local/go/
 
 ENV PATH="/usr/local/go/bin:${PATH}"
 
@@ -42,7 +42,8 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 
 FROM alpine:3.22 AS proxy
 
-RUN apk add --no-cache curl
+RUN apk update && apk upgrade --no-cache openssl pcre2 \
+  && apk add --no-cache curl
 
 WORKDIR /usr/local/bin
 
