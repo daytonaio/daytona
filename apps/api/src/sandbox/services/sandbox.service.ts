@@ -621,6 +621,9 @@ export class SandboxService {
     }
 
     if (createSandboxDto.autoDeleteInterval !== undefined) {
+      if (warmPoolSandbox.gpu > 0 && createSandboxDto.autoDeleteInterval !== 0) {
+        throw new BadRequestError('GPU sandboxes must be ephemeral - autoDeleteInterval must be 0')
+      }
       updateData.autoDeleteInterval = createSandboxDto.autoDeleteInterval
     }
 
@@ -686,6 +689,11 @@ export class SandboxService {
       const mem = createSandboxDto.memory || DEFAULT_MEMORY
       const disk = createSandboxDto.disk || DEFAULT_DISK
       const gpu = createSandboxDto.gpu || DEFAULT_GPU
+
+      // GPU sandboxes are always ephemeral - delete on first stop.
+      if (gpu > 0 && !isEphemeral(createSandboxDto)) {
+        throw new BadRequestError('GPU sandboxes must be ephemeral - set autoDeleteInterval to 0')
+      }
 
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
@@ -2613,6 +2621,10 @@ export class SandboxService {
 
   async setAutoDeleteInterval(sandboxIdOrName: string, interval: number, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
+
+    if (sandbox.gpu > 0) {
+      throw new BadRequestError('GPU sandboxes must remain ephemeral')
+    }
 
     const updateData: Partial<Sandbox> = {
       autoDeleteInterval: interval,
