@@ -406,6 +406,7 @@ export class OrganizationController {
         totalCpuQuota: req.body?.totalCpuQuota,
         totalMemoryQuota: req.body?.totalMemoryQuota,
         totalDiskQuota: req.body?.totalDiskQuota,
+        totalGpuQuota: req.body?.totalGpuQuota,
       }),
     },
   })

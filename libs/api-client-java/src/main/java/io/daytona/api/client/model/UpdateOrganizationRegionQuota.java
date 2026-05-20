@@ -67,6 +67,11 @@ public class UpdateOrganizationRegionQuota {
   @javax.annotation.Nullable
   private BigDecimal totalDiskQuota;
 
+  public static final String SERIALIZED_NAME_TOTAL_GPU_QUOTA = "totalGpuQuota";
+  @SerializedName(SERIALIZED_NAME_TOTAL_GPU_QUOTA)
+  @javax.annotation.Nullable
+  private BigDecimal totalGpuQuota;
+
   public static final String SERIALIZED_NAME_MAX_CPU_PER_SANDBOX = "maxCpuPerSandbox";
   @SerializedName(SERIALIZED_NAME_MAX_CPU_PER_SANDBOX)
   @javax.annotation.Nullable
@@ -144,6 +149,25 @@ public class UpdateOrganizationRegionQuota {
 
   public void setTotalDiskQuota(@javax.annotation.Nullable BigDecimal totalDiskQuota) {
     this.totalDiskQuota = totalDiskQuota;
+  }
+
+
+  public UpdateOrganizationRegionQuota totalGpuQuota(@javax.annotation.Nullable BigDecimal totalGpuQuota) {
+    this.totalGpuQuota = totalGpuQuota;
+    return this;
+  }
+
+  /**
+   * Get totalGpuQuota
+   * @return totalGpuQuota
+   */
+  @javax.annotation.Nullable
+  public BigDecimal getTotalGpuQuota() {
+    return totalGpuQuota;
+  }
+
+  public void setTotalGpuQuota(@javax.annotation.Nullable BigDecimal totalGpuQuota) {
+    this.totalGpuQuota = totalGpuQuota;
   }
 
 
@@ -280,6 +304,7 @@ public class UpdateOrganizationRegionQuota {
     return Objects.equals(this.totalCpuQuota, updateOrganizationRegionQuota.totalCpuQuota) &&
         Objects.equals(this.totalMemoryQuota, updateOrganizationRegionQuota.totalMemoryQuota) &&
         Objects.equals(this.totalDiskQuota, updateOrganizationRegionQuota.totalDiskQuota) &&
+        Objects.equals(this.totalGpuQuota, updateOrganizationRegionQuota.totalGpuQuota) &&
         Objects.equals(this.maxCpuPerSandbox, updateOrganizationRegionQuota.maxCpuPerSandbox) &&
         Objects.equals(this.maxMemoryPerSandbox, updateOrganizationRegionQuota.maxMemoryPerSandbox) &&
         Objects.equals(this.maxDiskPerSandbox, updateOrganizationRegionQuota.maxDiskPerSandbox) &&
@@ -293,7 +318,7 @@ public class UpdateOrganizationRegionQuota {
 
   @Override
   public int hashCode() {
-    return Objects.hash(totalCpuQuota, totalMemoryQuota, totalDiskQuota, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, additionalProperties);
+    return Objects.hash(totalCpuQuota, totalMemoryQuota, totalDiskQuota, totalGpuQuota, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, additionalProperties);
   }
 
   private static <T> int hashCodeNullable(JsonNullable<T> a) {
@@ -310,6 +335,7 @@ public class UpdateOrganizationRegionQuota {
     sb.append("    totalCpuQuota: ").append(toIndentedString(totalCpuQuota)).append("\n");
     sb.append("    totalMemoryQuota: ").append(toIndentedString(totalMemoryQuota)).append("\n");
     sb.append("    totalDiskQuota: ").append(toIndentedString(totalDiskQuota)).append("\n");
+    sb.append("    totalGpuQuota: ").append(toIndentedString(totalGpuQuota)).append("\n");
     sb.append("    maxCpuPerSandbox: ").append(toIndentedString(maxCpuPerSandbox)).append("\n");
     sb.append("    maxMemoryPerSandbox: ").append(toIndentedString(maxMemoryPerSandbox)).append("\n");
     sb.append("    maxDiskPerSandbox: ").append(toIndentedString(maxDiskPerSandbox)).append("\n");
@@ -333,10 +359,10 @@ public class UpdateOrganizationRegionQuota {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
+    openapiFields = new HashSet<String>(Arrays.asList("totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalGpuQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>(Arrays.asList("totalCpuQuota", "totalMemoryQuota", "totalDiskQuota"));
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalGpuQuota"));
   }
 
   /**

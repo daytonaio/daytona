@@ -16,6 +16,9 @@ export class UpdateOrganizationRegionQuotaDto {
   @ApiProperty({ nullable: true })
   totalDiskQuota?: number
 
+  @ApiProperty({ nullable: true })
+  totalGpuQuota?: number
+
   @ApiPropertyOptional({ nullable: true })
   maxCpuPerSandbox?: number | null
 

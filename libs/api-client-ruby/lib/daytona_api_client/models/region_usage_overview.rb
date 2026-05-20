@@ -29,6 +29,10 @@ module DaytonaApiClient
 
     attr_accessor :current_disk_usage
 
+    attr_accessor :total_gpu_quota
+
+    attr_accessor :current_gpu_usage
+
     attr_accessor :max_cpu_per_sandbox
 
     attr_accessor :max_memory_per_sandbox
@@ -47,6 +51,8 @@ module DaytonaApiClient
         :'current_memory_usage' => :'currentMemoryUsage',
         :'total_disk_quota' => :'totalDiskQuota',
         :'current_disk_usage' => :'currentDiskUsage',
+        :'total_gpu_quota' => :'totalGpuQuota',
+        :'current_gpu_usage' => :'currentGpuUsage',
         :'max_cpu_per_sandbox' => :'maxCpuPerSandbox',
         :'max_memory_per_sandbox' => :'maxMemoryPerSandbox',
         :'max_disk_per_sandbox' => :'maxDiskPerSandbox',
@@ -74,6 +80,8 @@ module DaytonaApiClient
         :'current_memory_usage' => :'Float',
         :'total_disk_quota' => :'Float',
         :'current_disk_usage' => :'Float',
+        :'total_gpu_quota' => :'Float',
+        :'current_gpu_usage' => :'Float',
         :'max_cpu_per_sandbox' => :'Float',
         :'max_memory_per_sandbox' => :'Float',
         :'max_disk_per_sandbox' => :'Float',
@@ -149,6 +157,18 @@ module DaytonaApiClient
         self.current_disk_usage = nil
       end
 
+      if attributes.key?(:'total_gpu_quota')
+        self.total_gpu_quota = attributes[:'total_gpu_quota']
+      else
+        self.total_gpu_quota = nil
+      end
+
+      if attributes.key?(:'current_gpu_usage')
+        self.current_gpu_usage = attributes[:'current_gpu_usage']
+      else
+        self.current_gpu_usage = nil
+      end
+
       if attributes.key?(:'max_cpu_per_sandbox')
         self.max_cpu_per_sandbox = attributes[:'max_cpu_per_sandbox']
       else
@@ -207,6 +227,14 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "current_disk_usage", current_disk_usage cannot be nil.')
       end
 
+      if @total_gpu_quota.nil?
+        invalid_properties.push('invalid value for "total_gpu_quota", total_gpu_quota cannot be nil.')
+      end
+
+      if @current_gpu_usage.nil?
+        invalid_properties.push('invalid value for "current_gpu_usage", current_gpu_usage cannot be nil.')
+      end
+
       invalid_properties
     end
 
@@ -221,6 +249,8 @@ module DaytonaApiClient
       return false if @current_memory_usage.nil?
       return false if @total_disk_quota.nil?
       return false if @current_disk_usage.nil?
+      return false if @total_gpu_quota.nil?
+      return false if @current_gpu_usage.nil?
       true
     end
 
@@ -294,6 +324,26 @@ module DaytonaApiClient
       @current_disk_usage = current_disk_usage
     end
 
+    # Custom attribute writer method with validation
+    # @param [Object] total_gpu_quota Value to be assigned
+    def total_gpu_quota=(total_gpu_quota)
+      if total_gpu_quota.nil?
+        fail ArgumentError, 'total_gpu_quota cannot be nil'
+      end
+
+      @total_gpu_quota = total_gpu_quota
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] current_gpu_usage Value to be assigned
+    def current_gpu_usage=(current_gpu_usage)
+      if current_gpu_usage.nil?
+        fail ArgumentError, 'current_gpu_usage cannot be nil'
+      end
+
+      @current_gpu_usage = current_gpu_usage
+    end
+
     # Checks equality by comparing each attribute.
     # @param [Object] Object to be compared
     def ==(o)
@@ -306,6 +356,8 @@ module DaytonaApiClient
           current_memory_usage == o.current_memory_usage &&
           total_disk_quota == o.total_disk_quota &&
           current_disk_usage == o.current_disk_usage &&
+          total_gpu_quota == o.total_gpu_quota &&
+          current_gpu_usage == o.current_gpu_usage &&
           max_cpu_per_sandbox == o.max_cpu_per_sandbox &&
           max_memory_per_sandbox == o.max_memory_per_sandbox &&
           max_disk_per_sandbox == o.max_disk_per_sandbox &&
@@ -321,7 +373,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [region_id, total_cpu_quota, current_cpu_usage, total_memory_quota, current_memory_usage, total_disk_quota, current_disk_usage, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, max_disk_per_non_ephemeral_sandbox].hash
+      [region_id, total_cpu_quota, current_cpu_usage, total_memory_quota, current_memory_usage, total_disk_quota, current_disk_usage, total_gpu_quota, current_gpu_usage, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, max_disk_per_non_ephemeral_sandbox].hash
     end
 
     # Builds the object from hash

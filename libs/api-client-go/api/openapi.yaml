@@ -9930,14 +9930,16 @@ components:
     RegionUsageOverview:
       example:
         totalCpuQuota: 0.8008281904610115
-        maxCpuPerSandbox: 7.061401241503109
-        maxDiskPerSandbox: 3.616076749251911
-        maxDiskPerNonEphemeralSandbox: 2.027123023002322
+        currentGpuUsage: 9.301444243932576
+        totalGpuQuota: 7.061401241503109
+        maxCpuPerSandbox: 3.616076749251911
+        maxDiskPerSandbox: 4.145608029883936
+        maxDiskPerNonEphemeralSandbox: 7.386281948385884
         regionId: regionId
         currentDiskUsage: 2.3021358869347655
         currentMemoryUsage: 5.962133916683182
         currentCpuUsage: 6.027456183070403
-        maxMemoryPerSandbox: 9.301444243932576
+        maxMemoryPerSandbox: 2.027123023002322
         totalMemoryQuota: 1.4658129805029452
         totalDiskQuota: 5.637376656633329
       properties:
@@ -9955,6 +9957,10 @@ components:
           type: number
         currentDiskUsage:
           type: number
+        totalGpuQuota:
+          type: number
+        currentGpuUsage:
+          type: number
         maxCpuPerSandbox:
           nullable: true
           type: number
@@ -9970,6 +9976,7 @@ components:
       required:
       - currentCpuUsage
       - currentDiskUsage
+      - currentGpuUsage
       - currentMemoryUsage
       - maxCpuPerSandbox
       - maxDiskPerNonEphemeralSandbox
@@ -9978,35 +9985,40 @@ components:
       - regionId
       - totalCpuQuota
       - totalDiskQuota
+      - totalGpuQuota
       - totalMemoryQuota
       type: object
     OrganizationUsageOverview:
       example:
-        totalSnapshotQuota: 4.145608029883936
-        currentVolumeUsage: 1.0246457001441578
-        totalVolumeQuota: 1.2315135367772556
-        currentSnapshotUsage: 7.386281948385884
+        totalSnapshotQuota: 1.2315135367772556
+        currentVolumeUsage: 6.84685269835264
+        totalVolumeQuota: 1.4894159098541704
+        currentSnapshotUsage: 1.0246457001441578
         regionUsage:
         - totalCpuQuota: 0.8008281904610115
-          maxCpuPerSandbox: 7.061401241503109
-          maxDiskPerSandbox: 3.616076749251911
-          maxDiskPerNonEphemeralSandbox: 2.027123023002322
+          currentGpuUsage: 9.301444243932576
+          totalGpuQuota: 7.061401241503109
+          maxCpuPerSandbox: 3.616076749251911
+          maxDiskPerSandbox: 4.145608029883936
+          maxDiskPerNonEphemeralSandbox: 7.386281948385884
           regionId: regionId
           currentDiskUsage: 2.3021358869347655
           currentMemoryUsage: 5.962133916683182
           currentCpuUsage: 6.027456183070403
-          maxMemoryPerSandbox: 9.301444243932576
+          maxMemoryPerSandbox: 2.027123023002322
           totalMemoryQuota: 1.4658129805029452
           totalDiskQuota: 5.637376656633329
         - totalCpuQuota: 0.8008281904610115
-          maxCpuPerSandbox: 7.061401241503109
-          maxDiskPerSandbox: 3.616076749251911
-          maxDiskPerNonEphemeralSandbox: 2.027123023002322
+          currentGpuUsage: 9.301444243932576
+          totalGpuQuota: 7.061401241503109
+          maxCpuPerSandbox: 3.616076749251911
+          maxDiskPerSandbox: 4.145608029883936
+          maxDiskPerNonEphemeralSandbox: 7.386281948385884
           regionId: regionId
           currentDiskUsage: 2.3021358869347655
           currentMemoryUsage: 5.962133916683182
           currentCpuUsage: 6.027456183070403
-          maxMemoryPerSandbox: 9.301444243932576
+          maxMemoryPerSandbox: 2.027123023002322
           totalMemoryQuota: 1.4658129805029452
           totalDiskQuota: 5.637376656633329
       properties:
@@ -10103,10 +10115,11 @@ components:
     UpdateOrganizationRegionQuota:
       example:
         totalCpuQuota: 0.8008281904610115
-        maxCpuPerSandbox: 5.962133916683182
-        maxDiskPerSandbox: 2.3021358869347655
-        maxDiskPerNonEphemeralSandbox: 7.061401241503109
-        maxMemoryPerSandbox: 5.637376656633329
+        maxCpuPerSandbox: 5.637376656633329
+        maxDiskPerSandbox: 7.061401241503109
+        maxDiskPerNonEphemeralSandbox: 9.301444243932576
+        maxMemoryPerSandbox: 2.3021358869347655
+        totalGpuQuota: 5.962133916683182
         totalMemoryQuota: 6.027456183070403
         totalDiskQuota: 1.4658129805029452
       properties:
@@ -10117,6 +10130,9 @@ components:
           nullable: true
           type: number
         totalDiskQuota:
+          nullable: true
+          type: number
+        totalGpuQuota:
           nullable: true
           type: number
         maxCpuPerSandbox:
@@ -10134,6 +10150,7 @@ components:
       required:
       - totalCpuQuota
       - totalDiskQuota
+      - totalGpuQuota
       - totalMemoryQuota
       type: object
     OrganizationSuspension:
@@ -11485,11 +11502,12 @@ components:
       example:
         organizationId: organizationId
         totalCpuQuota: 0.8008281904610115
-        maxCpuPerSandbox: 5.962133916683182
-        maxDiskPerSandbox: 2.3021358869347655
-        maxDiskPerNonEphemeralSandbox: 7.061401241503109
+        maxCpuPerSandbox: 5.637376656633329
+        maxDiskPerSandbox: 7.061401241503109
+        maxDiskPerNonEphemeralSandbox: 9.301444243932576
         regionId: regionId
-        maxMemoryPerSandbox: 5.637376656633329
+        maxMemoryPerSandbox: 2.3021358869347655
+        totalGpuQuota: 5.962133916683182
         totalMemoryQuota: 6.027456183070403
         totalDiskQuota: 1.4658129805029452
       properties:
@@ -11502,6 +11520,8 @@ components:
         totalMemoryQuota:
           type: number
         totalDiskQuota:
+          type: number
+        totalGpuQuota:
           type: number
         maxCpuPerSandbox:
           nullable: true
@@ -11524,6 +11544,7 @@ components:
       - regionId
       - totalCpuQuota
       - totalDiskQuota
+      - totalGpuQuota
       - totalMemoryQuota
       type: object
     CreateRunner:

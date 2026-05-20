@@ -4,7 +4,7 @@
  */
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { IsArray, IsObject, IsNumber, IsOptional, IsString } from 'class-validator'
+import { IsArray, IsObject, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator'
 import { CreateBuildInfoDto } from './create-build-info.dto'
 import { IsSafeDisplayString } from '../../common/validators'
 
@@ -44,6 +44,7 @@ export class CreateSnapshotDto {
   })
   @IsOptional()
   @IsNumber()
+  @Min(0)
   cpu?: number
 
   @ApiPropertyOptional({
@@ -53,6 +54,8 @@ export class CreateSnapshotDto {
   })
   @IsOptional()
   @IsNumber()
+  @Min(0)
+  @Max(1)
   gpu?: number
 
   @ApiPropertyOptional({
@@ -62,6 +65,7 @@ export class CreateSnapshotDto {
   })
   @IsOptional()
   @IsNumber()
+  @Min(0)
   memory?: number
 
   @ApiPropertyOptional({
@@ -71,6 +75,7 @@ export class CreateSnapshotDto {
   })
   @IsOptional()
   @IsNumber()
+  @Min(0)
   disk?: number
 
   @ApiPropertyOptional({

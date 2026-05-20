@@ -37,12 +37,14 @@ class RegionUsageOverview(BaseModel):
     current_memory_usage: Union[StrictFloat, StrictInt] = Field(serialization_alias="currentMemoryUsage")
     total_disk_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalDiskQuota")
     current_disk_usage: Union[StrictFloat, StrictInt] = Field(serialization_alias="currentDiskUsage")
+    total_gpu_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalGpuQuota")
+    current_gpu_usage: Union[StrictFloat, StrictInt] = Field(serialization_alias="currentGpuUsage")
     max_cpu_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxCpuPerSandbox")
     max_memory_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxMemoryPerSandbox")
     max_disk_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxDiskPerSandbox")
     max_disk_per_non_ephemeral_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxDiskPerNonEphemeralSandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["regionId", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"]
+    __properties: ClassVar[List[str]] = ["regionId", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage", "totalGpuQuota", "currentGpuUsage", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -128,6 +130,8 @@ class RegionUsageOverview(BaseModel):
             "current_memory_usage": obj.get("currentMemoryUsage"),
             "total_disk_quota": obj.get("totalDiskQuota"),
             "current_disk_usage": obj.get("currentDiskUsage"),
+            "total_gpu_quota": obj.get("totalGpuQuota"),
+            "current_gpu_usage": obj.get("currentGpuUsage"),
             "max_cpu_per_sandbox": obj.get("maxCpuPerSandbox"),
             "max_memory_per_sandbox": obj.get("maxMemoryPerSandbox"),
             "max_disk_per_sandbox": obj.get("maxDiskPerSandbox"),

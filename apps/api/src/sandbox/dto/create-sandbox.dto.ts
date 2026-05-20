@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { IsEnum, IsObject, IsOptional, IsString, IsNumber, IsBoolean, IsArray } from 'class-validator'
+import { IsEnum, IsObject, IsOptional, IsString, IsNumber, IsBoolean, IsArray, Max, Min } from 'class-validator'
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { SandboxVolume } from './sandbox.dto'
@@ -105,6 +105,7 @@ export class CreateSandboxDto {
   })
   @IsOptional()
   @IsNumber()
+  @Min(0)
   cpu?: number
 
   @ApiPropertyOptional({
@@ -114,6 +115,8 @@ export class CreateSandboxDto {
   })
   @IsOptional()
   @IsNumber()
+  @Min(0)
+  @Max(1)
   gpu?: number
 
   @ApiPropertyOptional({
@@ -123,6 +126,7 @@ export class CreateSandboxDto {
   })
   @IsOptional()
   @IsNumber()
+  @Min(0)
   memory?: number
 
   @ApiPropertyOptional({
@@ -132,6 +136,7 @@ export class CreateSandboxDto {
   })
   @IsOptional()
   @IsNumber()
+  @Min(0)
   disk?: number
 
   @ApiPropertyOptional({

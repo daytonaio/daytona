@@ -86,6 +86,16 @@ public class RegionUsageOverview {
   @javax.annotation.Nonnull
   private BigDecimal currentDiskUsage;
 
+  public static final String SERIALIZED_NAME_TOTAL_GPU_QUOTA = "totalGpuQuota";
+  @SerializedName(SERIALIZED_NAME_TOTAL_GPU_QUOTA)
+  @javax.annotation.Nonnull
+  private BigDecimal totalGpuQuota;
+
+  public static final String SERIALIZED_NAME_CURRENT_GPU_USAGE = "currentGpuUsage";
+  @SerializedName(SERIALIZED_NAME_CURRENT_GPU_USAGE)
+  @javax.annotation.Nonnull
+  private BigDecimal currentGpuUsage;
+
   public static final String SERIALIZED_NAME_MAX_CPU_PER_SANDBOX = "maxCpuPerSandbox";
   @SerializedName(SERIALIZED_NAME_MAX_CPU_PER_SANDBOX)
   @javax.annotation.Nullable
@@ -242,6 +252,44 @@ public class RegionUsageOverview {
   }
 
 
+  public RegionUsageOverview totalGpuQuota(@javax.annotation.Nonnull BigDecimal totalGpuQuota) {
+    this.totalGpuQuota = totalGpuQuota;
+    return this;
+  }
+
+  /**
+   * Get totalGpuQuota
+   * @return totalGpuQuota
+   */
+  @javax.annotation.Nonnull
+  public BigDecimal getTotalGpuQuota() {
+    return totalGpuQuota;
+  }
+
+  public void setTotalGpuQuota(@javax.annotation.Nonnull BigDecimal totalGpuQuota) {
+    this.totalGpuQuota = totalGpuQuota;
+  }
+
+
+  public RegionUsageOverview currentGpuUsage(@javax.annotation.Nonnull BigDecimal currentGpuUsage) {
+    this.currentGpuUsage = currentGpuUsage;
+    return this;
+  }
+
+  /**
+   * Get currentGpuUsage
+   * @return currentGpuUsage
+   */
+  @javax.annotation.Nonnull
+  public BigDecimal getCurrentGpuUsage() {
+    return currentGpuUsage;
+  }
+
+  public void setCurrentGpuUsage(@javax.annotation.Nonnull BigDecimal currentGpuUsage) {
+    this.currentGpuUsage = currentGpuUsage;
+  }
+
+
   public RegionUsageOverview maxCpuPerSandbox(@javax.annotation.Nullable BigDecimal maxCpuPerSandbox) {
     this.maxCpuPerSandbox = maxCpuPerSandbox;
     return this;
@@ -379,6 +427,8 @@ public class RegionUsageOverview {
         Objects.equals(this.currentMemoryUsage, regionUsageOverview.currentMemoryUsage) &&
         Objects.equals(this.totalDiskQuota, regionUsageOverview.totalDiskQuota) &&
         Objects.equals(this.currentDiskUsage, regionUsageOverview.currentDiskUsage) &&
+        Objects.equals(this.totalGpuQuota, regionUsageOverview.totalGpuQuota) &&
+        Objects.equals(this.currentGpuUsage, regionUsageOverview.currentGpuUsage) &&
         Objects.equals(this.maxCpuPerSandbox, regionUsageOverview.maxCpuPerSandbox) &&
         Objects.equals(this.maxMemoryPerSandbox, regionUsageOverview.maxMemoryPerSandbox) &&
         Objects.equals(this.maxDiskPerSandbox, regionUsageOverview.maxDiskPerSandbox) &&
@@ -388,7 +438,7 @@ public class RegionUsageOverview {
 
   @Override
   public int hashCode() {
-    return Objects.hash(regionId, totalCpuQuota, currentCpuUsage, totalMemoryQuota, currentMemoryUsage, totalDiskQuota, currentDiskUsage, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, additionalProperties);
+    return Objects.hash(regionId, totalCpuQuota, currentCpuUsage, totalMemoryQuota, currentMemoryUsage, totalDiskQuota, currentDiskUsage, totalGpuQuota, currentGpuUsage, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, additionalProperties);
   }
 
   @Override
@@ -402,6 +452,8 @@ public class RegionUsageOverview {
     sb.append("    currentMemoryUsage: ").append(toIndentedString(currentMemoryUsage)).append("\n");
     sb.append("    totalDiskQuota: ").append(toIndentedString(totalDiskQuota)).append("\n");
     sb.append("    currentDiskUsage: ").append(toIndentedString(currentDiskUsage)).append("\n");
+    sb.append("    totalGpuQuota: ").append(toIndentedString(totalGpuQuota)).append("\n");
+    sb.append("    currentGpuUsage: ").append(toIndentedString(currentGpuUsage)).append("\n");
     sb.append("    maxCpuPerSandbox: ").append(toIndentedString(maxCpuPerSandbox)).append("\n");
     sb.append("    maxMemoryPerSandbox: ").append(toIndentedString(maxMemoryPerSandbox)).append("\n");
     sb.append("    maxDiskPerSandbox: ").append(toIndentedString(maxDiskPerSandbox)).append("\n");
@@ -425,10 +477,10 @@ public class RegionUsageOverview {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("regionId", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
+    openapiFields = new HashSet<String>(Arrays.asList("regionId", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage", "totalGpuQuota", "currentGpuUsage", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>(Arrays.asList("regionId", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("regionId", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage", "totalGpuQuota", "currentGpuUsage", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
   }
 
   /**

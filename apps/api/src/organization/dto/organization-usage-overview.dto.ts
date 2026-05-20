@@ -25,6 +25,11 @@ export class RegionUsageOverviewDto {
   @ApiProperty()
   currentDiskUsage: number
 
+  @ApiProperty()
+  totalGpuQuota: number
+  @ApiProperty()
+  currentGpuUsage: number
+
   @ApiProperty({ nullable: true })
   maxCpuPerSandbox: number | null
 

@@ -38,6 +38,15 @@ export function UsageOverview({
         </div>
         <QuotaLine current={usageOverview.currentDiskUsage} total={usageOverview.totalDiskQuota} />
       </div>
+      {usageOverview.totalGpuQuota > 0 && (
+        <div className="flex flex-col gap-1">
+          <div className="w-full flex justify-between gap-2">
+            <div className="text-muted-foreground text-xs">GPU</div>
+            <UsageLabel current={usageOverview.currentGpuUsage} total={usageOverview.totalGpuQuota} unit="GPU" />
+          </div>
+          <QuotaLine current={usageOverview.currentGpuUsage} total={usageOverview.totalGpuQuota} />
+        </div>
+      )}
     </div>
   )
 }

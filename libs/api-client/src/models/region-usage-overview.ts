@@ -22,6 +22,8 @@ export interface RegionUsageOverview {
     'currentMemoryUsage': number;
     'totalDiskQuota': number;
     'currentDiskUsage': number;
+    'totalGpuQuota': number;
+    'currentGpuUsage': number;
     'maxCpuPerSandbox': number | null;
     'maxMemoryPerSandbox': number | null;
     'maxDiskPerSandbox': number | null;

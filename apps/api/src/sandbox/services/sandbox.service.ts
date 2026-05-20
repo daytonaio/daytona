@@ -162,6 +162,7 @@ export class SandboxService {
     cpu: number,
     memory: number,
     disk: number,
+    gpu: number,
     ephemeral: boolean,
     excludeSandboxId?: string,
     regionQuota?: RegionQuotaDto | null,
@@ -169,6 +170,7 @@ export class SandboxService {
     pendingCpuIncremented: boolean
     pendingMemoryIncremented: boolean
     pendingDiskIncremented: boolean
+    pendingGpuIncremented: boolean
   }> {
     if (!regionQuota && region.enforceQuotas) {
       regionQuota = await this.organizationService.getRegionQuota(organization.id, region.id)
@@ -211,6 +213,7 @@ export class SandboxService {
         pendingCpuIncremented: false,
         pendingMemoryIncremented: false,
         pendingDiskIncremented: false,
+        pendingGpuIncremented: false,
       }
     }
 
@@ -224,17 +227,24 @@ export class SandboxService {
       }
     }
 
+    // Fail fast: requesting GPU in a region with no GPU quota at all.
+    if (gpu > 0 && regionQuota.totalGpuQuota === 0) {
+      throw new BadRequestError(`Total GPU limit exceeded. Maximum allowed: ${regionQuota.totalGpuQuota}.`)
+    }
+
     // validate usage quotas
     const {
       cpuIncremented: pendingCpuIncremented,
       memoryIncremented: pendingMemoryIncremented,
       diskIncremented: pendingDiskIncremented,
+      gpuIncremented: pendingGpuIncremented,
     } = await this.organizationUsageService.incrementPendingSandboxUsage(
       organization.id,
       region.id,
       cpu,
       memory,
       disk,
+      gpu,
       excludeSandboxId,
     )
 
@@ -264,6 +274,12 @@ export class SandboxService {
           `Total disk limit exceeded. Maximum allowed: ${regionQuota.totalDiskQuota}GiB.\n${ARCHIVE_SANDBOXES_MESSAGE}\n${upgradeTierMessage}`,
         )
       }
+
+      if (usageOverview.currentGpuUsage + usageOverview.pendingGpuUsage > regionQuota.totalGpuQuota) {
+        throw new BadRequestError(
+          `Total GPU limit exceeded. Maximum allowed: ${regionQuota.totalGpuQuota}.\n${upgradeTierMessage}`,
+        )
+      }
     } catch (error) {
       await this.rollbackPendingUsage(
         organization.id,
@@ -271,6 +287,7 @@ export class SandboxService {
         pendingCpuIncremented ? cpu : undefined,
         pendingMemoryIncremented ? memory : undefined,
         pendingDiskIncremented ? disk : undefined,
+        pendingGpuIncremented ? gpu : undefined,
       )
       throw error
     }
@@ -279,6 +296,7 @@ export class SandboxService {
       pendingCpuIncremented,
       pendingMemoryIncremented,
       pendingDiskIncremented,
+      pendingGpuIncremented,
     }
   }
 
@@ -288,8 +306,9 @@ export class SandboxService {
     pendingCpuIncrement?: number,
     pendingMemoryIncrement?: number,
     pendingDiskIncrement?: number,
+    pendingGpuIncrement?: number,
   ): Promise<void> {
-    if (!pendingCpuIncrement && !pendingMemoryIncrement && !pendingDiskIncrement) {
+    if (!pendingCpuIncrement && !pendingMemoryIncrement && !pendingDiskIncrement && !pendingGpuIncrement) {
       return
     }
 
@@ -300,6 +319,7 @@ export class SandboxService {
         pendingCpuIncrement,
         pendingMemoryIncrement,
         pendingDiskIncrement,
+        pendingGpuIncrement,
       )
     } catch (error) {
       this.logger.error(`Error rolling back pending sandbox usage: ${error}`)
@@ -389,6 +409,7 @@ export class SandboxService {
     let pendingCpuIncrement: number | undefined
     let pendingMemoryIncrement: number | undefined
     let pendingDiskIncrement: number | undefined
+    let pendingGpuIncrement: number | undefined
 
     const region = await this.getValidatedOrDefaultRegion(organization, createSandboxDto.target)
 
@@ -469,8 +490,8 @@ export class SandboxService {
 
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
-      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
-        await this.validateOrganizationQuotas(organization, region, cpu, mem, disk, isEphemeral(createSandboxDto))
+      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented, pendingGpuIncremented } =
+        await this.validateOrganizationQuotas(organization, region, cpu, mem, disk, gpu, isEphemeral(createSandboxDto))
 
       if (pendingCpuIncremented) {
         pendingCpuIncrement = cpu
@@ -480,6 +501,9 @@ export class SandboxService {
       }
       if (pendingDiskIncremented) {
         pendingDiskIncrement = disk
+      }
+      if (pendingGpuIncremented) {
+        pendingGpuIncrement = gpu
       }
 
       // GPU sandboxes are always ephemeral: they get exclusive ownership of a
@@ -585,6 +609,7 @@ export class SandboxService {
         pendingCpuIncrement,
         pendingMemoryIncrement,
         pendingDiskIncrement,
+        pendingGpuIncrement,
       )
 
       if (error.code === '23505') {
@@ -679,6 +704,7 @@ export class SandboxService {
     let pendingCpuIncrement: number | undefined
     let pendingMemoryIncrement: number | undefined
     let pendingDiskIncrement: number | undefined
+    let pendingGpuIncrement: number | undefined
 
     const region = await this.getValidatedOrDefaultRegion(organization, createSandboxDto.target)
 
@@ -697,8 +723,8 @@ export class SandboxService {
 
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
-      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
-        await this.validateOrganizationQuotas(organization, region, cpu, mem, disk, isEphemeral(createSandboxDto))
+      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented, pendingGpuIncremented } =
+        await this.validateOrganizationQuotas(organization, region, cpu, mem, disk, gpu, isEphemeral(createSandboxDto))
 
       if (pendingCpuIncremented) {
         pendingCpuIncrement = cpu
@@ -708,6 +734,9 @@ export class SandboxService {
       }
       if (pendingDiskIncremented) {
         pendingDiskIncrement = disk
+      }
+      if (pendingGpuIncremented) {
+        pendingGpuIncrement = gpu
       }
 
       if (createSandboxDto.volumes && createSandboxDto.volumes.length > 0) {
@@ -836,6 +865,7 @@ export class SandboxService {
         pendingCpuIncrement,
         pendingMemoryIncrement,
         pendingDiskIncrement,
+        pendingGpuIncrement,
       )
 
       if (error.code === '23505') {
@@ -866,6 +896,7 @@ export class SandboxService {
     let pendingCpuIncrement: number | undefined
     let pendingMemoryIncrement: number | undefined
     let pendingDiskIncrement: number | undefined
+    let pendingGpuIncrement: number | undefined
 
     const sourceSandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
@@ -923,13 +954,14 @@ export class SandboxService {
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
       // Validate organization usage quotas are not exceeded due to new sandbox created by forking
-      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
+      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented, pendingGpuIncremented } =
         await this.validateOrganizationQuotas(
           organization,
           region,
           forkedSandbox.cpu,
           forkedSandbox.mem,
           forkedSandbox.disk,
+          forkedSandbox.gpu,
           isEphemeral(forkedSandbox),
         )
 
@@ -941,6 +973,9 @@ export class SandboxService {
       }
       if (pendingDiskIncremented) {
         pendingDiskIncrement = forkedSandbox.disk
+      }
+      if (pendingGpuIncremented) {
+        pendingGpuIncrement = forkedSandbox.gpu
       }
 
       // Capture state of source sandbox before transitioning to FORKING
@@ -1001,6 +1036,7 @@ export class SandboxService {
         pendingCpuIncrement,
         pendingMemoryIncrement,
         pendingDiskIncrement,
+        pendingGpuIncrement,
       )
 
       if (error.code === '23505') {
@@ -1115,6 +1151,7 @@ export class SandboxService {
         sandbox.cpu,
         sandbox.mem,
         sandbox.disk,
+        sandbox.gpu,
       )
 
       if (pendingSnapshotCountIncremented) {
@@ -1753,6 +1790,7 @@ export class SandboxService {
     let pendingCpuIncrement: number | undefined
     let pendingMemoryIncrement: number | undefined
     let pendingDiskIncrement: number | undefined
+    let pendingGpuIncrement: number | undefined
 
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
@@ -1788,13 +1826,14 @@ export class SandboxService {
 
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
-      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
+      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented, pendingGpuIncremented } =
         await this.validateOrganizationQuotas(
           organization,
           region,
           sandbox.cpu,
           sandbox.mem,
           sandbox.disk,
+          sandbox.gpu,
           isEphemeral(sandbox),
           sandbox.id,
         )
@@ -1807,6 +1846,9 @@ export class SandboxService {
       }
       if (pendingDiskIncremented) {
         pendingDiskIncrement = sandbox.disk
+      }
+      if (pendingGpuIncremented) {
+        pendingGpuIncrement = sandbox.gpu
       }
 
       const updateData: Partial<Sandbox> = {
@@ -1830,6 +1872,7 @@ export class SandboxService {
         pendingCpuIncrement,
         pendingMemoryIncrement,
         pendingDiskIncrement,
+        pendingGpuIncrement,
       )
       throw error
     }
@@ -1878,6 +1921,7 @@ export class SandboxService {
     let pendingCpuIncrement: number | undefined
     let pendingMemoryIncrement: number | undefined
     let pendingDiskIncrement: number | undefined
+    let pendingGpuIncrement: number | undefined
 
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
@@ -1915,15 +1959,16 @@ export class SandboxService {
         this.organizationService.assertOrganizationIsNotSuspended(organization)
       }
 
-      // ERROR → STOPPED activates disk usage; v2 + !skipStart additionally activates cpu/mem
+      // ERROR → STOPPED activates disk usage; v2 + !skipStart additionally activates cpu/mem/gpu
       // because there is no trailing start() call to validate them.
-      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
+      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented, pendingGpuIncremented } =
         await this.validateOrganizationQuotas(
           organization,
           region,
           willStartOnV2 ? sandbox.cpu : 0,
           willStartOnV2 ? sandbox.mem : 0,
           sandbox.disk,
+          willStartOnV2 ? sandbox.gpu : 0,
           isEphemeral(sandbox),
           sandbox.id,
         )
@@ -1935,6 +1980,9 @@ export class SandboxService {
       }
       if (pendingDiskIncremented) {
         pendingDiskIncrement = sandbox.disk
+      }
+      if (pendingGpuIncremented) {
+        pendingGpuIncrement = sandbox.gpu
       }
 
       // Normalize desiredState upfront so the job handler can detect mid-job intent changes
@@ -2010,6 +2058,7 @@ export class SandboxService {
         pendingCpuIncrement,
         pendingMemoryIncrement,
         pendingDiskIncrement,
+        pendingGpuIncrement,
       )
       throw error
     } finally {
@@ -2021,6 +2070,7 @@ export class SandboxService {
     let pendingCpuIncrement: number | undefined
     let pendingMemoryIncrement: number | undefined
     let pendingDiskIncrement: number | undefined
+    let pendingGpuIncrement: number | undefined
 
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
@@ -2121,7 +2171,8 @@ export class SandboxService {
       const memDeltaForQuota = isHotResize ? newMem - sandbox.mem : 0
       const diskDeltaForQuota = newDisk - sandbox.disk // Disk only increases (validated at start of method)
 
-      // Validate and track pending for any non-zero quota changes
+      // Validate and track pending for any non-zero quota changes.
+      // Resize never changes GPU allocation — always pass 0.
       if (cpuDeltaForQuota !== 0 || memDeltaForQuota !== 0 || diskDeltaForQuota !== 0) {
         const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
           await this.validateOrganizationQuotas(
@@ -2130,6 +2181,7 @@ export class SandboxService {
             cpuDeltaForQuota,
             memDeltaForQuota,
             diskDeltaForQuota,
+            0,
             isEphemeral(sandbox),
             undefined,
             regionQuota,
@@ -2206,13 +2258,15 @@ export class SandboxService {
           })
 
           // Apply the usage change (increments current, decrements pending)
-          // Only apply deltas for quotas that were validated/pending-incremented
+          // Only apply deltas for quotas that were validated/pending-incremented.
+          // Resize never changes GPU allocation — always pass 0.
           await this.organizationUsageService.applyResizeUsageChange(
             organization.id,
             sandbox.region,
             cpuDeltaForQuota,
             memDeltaForQuota,
             diskDeltaForQuota,
+            0,
           )
         }
 
@@ -2237,6 +2291,7 @@ export class SandboxService {
         pendingCpuIncrement,
         pendingMemoryIncrement,
         pendingDiskIncrement,
+        pendingGpuIncrement,
       )
       throw error
     }

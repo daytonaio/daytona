@@ -188,6 +188,9 @@ export default function Limits() {
                       value: currentRegionUsageOverview?.maxDiskPerSandbox ?? selectedOrganization?.maxDiskPerSandbox,
                       unit: 'GiB',
                     },
+                    ...((currentRegionUsageOverview?.totalGpuQuota ?? 0) > 0
+                      ? [{ label: 'GPU', value: 1, unit: 'GPU' }]
+                      : []),
                   ]}
                 />
 

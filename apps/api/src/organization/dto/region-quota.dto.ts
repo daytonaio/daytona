@@ -23,6 +23,9 @@ export class RegionQuotaDto {
   @ApiProperty()
   totalDiskQuota: number
 
+  @ApiProperty()
+  totalGpuQuota: number
+
   @ApiProperty({ nullable: true })
   maxCpuPerSandbox: number | null
 
@@ -41,6 +44,7 @@ export class RegionQuotaDto {
     this.totalCpuQuota = regionQuota.totalCpuQuota
     this.totalMemoryQuota = regionQuota.totalMemoryQuota
     this.totalDiskQuota = regionQuota.totalDiskQuota
+    this.totalGpuQuota = regionQuota.totalGpuQuota
     this.maxCpuPerSandbox = regionQuota.maxCpuPerSandbox
     this.maxMemoryPerSandbox = regionQuota.maxMemoryPerSandbox
     this.maxDiskPerSandbox = regionQuota.maxDiskPerSandbox

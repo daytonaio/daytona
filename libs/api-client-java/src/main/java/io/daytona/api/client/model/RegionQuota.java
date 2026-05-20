@@ -76,6 +76,11 @@ public class RegionQuota {
   @javax.annotation.Nonnull
   private BigDecimal totalDiskQuota;
 
+  public static final String SERIALIZED_NAME_TOTAL_GPU_QUOTA = "totalGpuQuota";
+  @SerializedName(SERIALIZED_NAME_TOTAL_GPU_QUOTA)
+  @javax.annotation.Nonnull
+  private BigDecimal totalGpuQuota;
+
   public static final String SERIALIZED_NAME_MAX_CPU_PER_SANDBOX = "maxCpuPerSandbox";
   @SerializedName(SERIALIZED_NAME_MAX_CPU_PER_SANDBOX)
   @javax.annotation.Nullable
@@ -191,6 +196,25 @@ public class RegionQuota {
 
   public void setTotalDiskQuota(@javax.annotation.Nonnull BigDecimal totalDiskQuota) {
     this.totalDiskQuota = totalDiskQuota;
+  }
+
+
+  public RegionQuota totalGpuQuota(@javax.annotation.Nonnull BigDecimal totalGpuQuota) {
+    this.totalGpuQuota = totalGpuQuota;
+    return this;
+  }
+
+  /**
+   * Get totalGpuQuota
+   * @return totalGpuQuota
+   */
+  @javax.annotation.Nonnull
+  public BigDecimal getTotalGpuQuota() {
+    return totalGpuQuota;
+  }
+
+  public void setTotalGpuQuota(@javax.annotation.Nonnull BigDecimal totalGpuQuota) {
+    this.totalGpuQuota = totalGpuQuota;
   }
 
 
@@ -329,6 +353,7 @@ public class RegionQuota {
         Objects.equals(this.totalCpuQuota, regionQuota.totalCpuQuota) &&
         Objects.equals(this.totalMemoryQuota, regionQuota.totalMemoryQuota) &&
         Objects.equals(this.totalDiskQuota, regionQuota.totalDiskQuota) &&
+        Objects.equals(this.totalGpuQuota, regionQuota.totalGpuQuota) &&
         Objects.equals(this.maxCpuPerSandbox, regionQuota.maxCpuPerSandbox) &&
         Objects.equals(this.maxMemoryPerSandbox, regionQuota.maxMemoryPerSandbox) &&
         Objects.equals(this.maxDiskPerSandbox, regionQuota.maxDiskPerSandbox) &&
@@ -338,7 +363,7 @@ public class RegionQuota {
 
   @Override
   public int hashCode() {
-    return Objects.hash(organizationId, regionId, totalCpuQuota, totalMemoryQuota, totalDiskQuota, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, additionalProperties);
+    return Objects.hash(organizationId, regionId, totalCpuQuota, totalMemoryQuota, totalDiskQuota, totalGpuQuota, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, additionalProperties);
   }
 
   @Override
@@ -350,6 +375,7 @@ public class RegionQuota {
     sb.append("    totalCpuQuota: ").append(toIndentedString(totalCpuQuota)).append("\n");
     sb.append("    totalMemoryQuota: ").append(toIndentedString(totalMemoryQuota)).append("\n");
     sb.append("    totalDiskQuota: ").append(toIndentedString(totalDiskQuota)).append("\n");
+    sb.append("    totalGpuQuota: ").append(toIndentedString(totalGpuQuota)).append("\n");
     sb.append("    maxCpuPerSandbox: ").append(toIndentedString(maxCpuPerSandbox)).append("\n");
     sb.append("    maxMemoryPerSandbox: ").append(toIndentedString(maxMemoryPerSandbox)).append("\n");
     sb.append("    maxDiskPerSandbox: ").append(toIndentedString(maxDiskPerSandbox)).append("\n");
@@ -373,10 +399,10 @@ public class RegionQuota {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("organizationId", "regionId", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
+    openapiFields = new HashSet<String>(Arrays.asList("organizationId", "regionId", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalGpuQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>(Arrays.asList("organizationId", "regionId", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("organizationId", "regionId", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalGpuQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"));
   }
 
   /**

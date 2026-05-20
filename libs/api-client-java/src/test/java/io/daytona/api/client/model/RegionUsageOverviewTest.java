@@ -95,6 +95,22 @@ public class RegionUsageOverviewTest {
     }
 
     /**
+     * Test the property 'totalGpuQuota'
+     */
+    @Test
+    public void totalGpuQuotaTest() {
+        // TODO: test totalGpuQuota
+    }
+
+    /**
+     * Test the property 'currentGpuUsage'
+     */
+    @Test
+    public void currentGpuUsageTest() {
+        // TODO: test currentGpuUsage
+    }
+
+    /**
      * Test the property 'maxCpuPerSandbox'
      */
     @Test

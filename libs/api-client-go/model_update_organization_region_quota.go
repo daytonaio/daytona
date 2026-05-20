@@ -24,6 +24,7 @@ type UpdateOrganizationRegionQuota struct {
 	TotalCpuQuota NullableFloat32 `json:"totalCpuQuota"`
 	TotalMemoryQuota NullableFloat32 `json:"totalMemoryQuota"`
 	TotalDiskQuota NullableFloat32 `json:"totalDiskQuota"`
+	TotalGpuQuota NullableFloat32 `json:"totalGpuQuota"`
 	MaxCpuPerSandbox NullableFloat32 `json:"maxCpuPerSandbox,omitempty"`
 	MaxMemoryPerSandbox NullableFloat32 `json:"maxMemoryPerSandbox,omitempty"`
 	MaxDiskPerSandbox NullableFloat32 `json:"maxDiskPerSandbox,omitempty"`
@@ -37,11 +38,12 @@ type _UpdateOrganizationRegionQuota UpdateOrganizationRegionQuota
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUpdateOrganizationRegionQuota(totalCpuQuota NullableFloat32, totalMemoryQuota NullableFloat32, totalDiskQuota NullableFloat32) *UpdateOrganizationRegionQuota {
+func NewUpdateOrganizationRegionQuota(totalCpuQuota NullableFloat32, totalMemoryQuota NullableFloat32, totalDiskQuota NullableFloat32, totalGpuQuota NullableFloat32) *UpdateOrganizationRegionQuota {
 	this := UpdateOrganizationRegionQuota{}
 	this.TotalCpuQuota = totalCpuQuota
 	this.TotalMemoryQuota = totalMemoryQuota
 	this.TotalDiskQuota = totalDiskQuota
+	this.TotalGpuQuota = totalGpuQuota
 	return &this
 }
 
@@ -129,6 +131,32 @@ func (o *UpdateOrganizationRegionQuota) GetTotalDiskQuotaOk() (*float32, bool) {
 // SetTotalDiskQuota sets field value
 func (o *UpdateOrganizationRegionQuota) SetTotalDiskQuota(v float32) {
 	o.TotalDiskQuota.Set(&v)
+}
+
+// GetTotalGpuQuota returns the TotalGpuQuota field value
+// If the value is explicit nil, the zero value for float32 will be returned
+func (o *UpdateOrganizationRegionQuota) GetTotalGpuQuota() float32 {
+	if o == nil || o.TotalGpuQuota.Get() == nil {
+		var ret float32
+		return ret
+	}
+
+	return *o.TotalGpuQuota.Get()
+}
+
+// GetTotalGpuQuotaOk returns a tuple with the TotalGpuQuota field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UpdateOrganizationRegionQuota) GetTotalGpuQuotaOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.TotalGpuQuota.Get(), o.TotalGpuQuota.IsSet()
+}
+
+// SetTotalGpuQuota sets field value
+func (o *UpdateOrganizationRegionQuota) SetTotalGpuQuota(v float32) {
+	o.TotalGpuQuota.Set(&v)
 }
 
 // GetMaxCpuPerSandbox returns the MaxCpuPerSandbox field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -312,6 +340,7 @@ func (o UpdateOrganizationRegionQuota) ToMap() (map[string]interface{}, error) {
 	toSerialize["totalCpuQuota"] = o.TotalCpuQuota.Get()
 	toSerialize["totalMemoryQuota"] = o.TotalMemoryQuota.Get()
 	toSerialize["totalDiskQuota"] = o.TotalDiskQuota.Get()
+	toSerialize["totalGpuQuota"] = o.TotalGpuQuota.Get()
 	if o.MaxCpuPerSandbox.IsSet() {
 		toSerialize["maxCpuPerSandbox"] = o.MaxCpuPerSandbox.Get()
 	}
@@ -340,6 +369,7 @@ func (o *UpdateOrganizationRegionQuota) UnmarshalJSON(data []byte) (err error) {
 		"totalCpuQuota",
 		"totalMemoryQuota",
 		"totalDiskQuota",
+		"totalGpuQuota",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -372,6 +402,7 @@ func (o *UpdateOrganizationRegionQuota) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "totalCpuQuota")
 		delete(additionalProperties, "totalMemoryQuota")
 		delete(additionalProperties, "totalDiskQuota")
+		delete(additionalProperties, "totalGpuQuota")
 		delete(additionalProperties, "maxCpuPerSandbox")
 		delete(additionalProperties, "maxMemoryPerSandbox")
 		delete(additionalProperties, "maxDiskPerSandbox")

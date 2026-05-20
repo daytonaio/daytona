@@ -184,6 +184,7 @@ export class SnapshotService {
         createSnapshotDto.cpu,
         createSnapshotDto.memory,
         createSnapshotDto.disk,
+        createSnapshotDto.gpu,
       )
 
       if (pendingSnapshotCountIncremented) {
@@ -252,6 +253,7 @@ export class SnapshotService {
         createSnapshotDto.cpu,
         createSnapshotDto.memory,
         createSnapshotDto.disk,
+        createSnapshotDto.gpu,
       )
 
       if (pendingSnapshotCountIncremented) {
@@ -540,6 +542,7 @@ export class SnapshotService {
     cpu?: number,
     memory?: number,
     disk?: number,
+    gpu?: number,
   ): Promise<{
     pendingSnapshotCountIncremented: boolean
   }> {
@@ -567,6 +570,11 @@ export class SnapshotService {
       throw new BadRequestError(
         `Disk request ${disk}GB exceeds maximum allowed per sandbox (${maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
+    }
+
+    // Do not allow creation of GPU snapshots if the region has no GPU quota at all.
+    if (gpu && gpu > 0 && region.enforceQuotas && (!regionQuota || regionQuota.totalGpuQuota === 0)) {
+      throw new BadRequestError(`GPU quota exceeded. Maximum allowed: ${regionQuota.totalGpuQuota}`)
     }
 
     // validate usage quotas
@@ -669,6 +677,7 @@ export class SnapshotService {
         snapshot.cpu,
         snapshot.mem,
         snapshot.disk,
+        snapshot.gpu,
       )
 
       if (pendingSnapshotCountIncremented) {

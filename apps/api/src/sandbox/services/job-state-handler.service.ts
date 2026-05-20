@@ -544,6 +544,7 @@ export class JobStateHandlerService {
           skipStart ? undefined : sandbox.cpu,
           skipStart ? undefined : sandbox.mem,
           sandbox.disk,
+          skipStart ? undefined : sandbox.gpu,
         )
         return
       }
@@ -566,13 +567,14 @@ export class JobStateHandlerService {
         updateData.errorReason = errorReason || 'Failed to recover sandbox'
         updateData.recoverable = recoverable
 
-        // Roll back upstream reservation: disk always, cpu/mem only when start was requested.
+        // Roll back upstream reservation: disk always, cpu/mem/gpu only when start was requested.
         await this.organizationUsageService.decrementPendingSandboxUsage(
           sandbox.organizationId,
           sandbox.region,
           skipStart ? undefined : sandbox.cpu,
           skipStart ? undefined : sandbox.mem,
           sandbox.disk,
+          skipStart ? undefined : sandbox.gpu,
         )
       }
 
@@ -640,24 +642,28 @@ export class JobStateHandlerService {
         updateData.disk = payload.disk ?? sandbox.disk
         updateData.state = previousState
 
-        // Apply usage change (handles both positive and negative deltas)
+        // Apply usage change (handles both positive and negative deltas).
+        // Resize never changes GPU allocation — always pass 0.
         await this.organizationUsageService.applyResizeUsageChange(
           sandbox.organizationId,
           sandbox.region,
           cpuDeltaForQuota,
           memDeltaForQuota,
           diskDeltaForQuota,
+          0,
         )
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`RESIZE_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
 
-        // Rollback pending usage (all deltas were tracked, including negative)
+        // Rollback pending usage (all deltas were tracked, including negative).
+        // Resize never changes GPU allocation — always pass undefined for gpu.
         await this.organizationUsageService.decrementPendingSandboxUsage(
           sandbox.organizationId,
           sandbox.region,
           cpuDeltaForQuota !== 0 ? cpuDeltaForQuota : undefined,
           memDeltaForQuota !== 0 ? memDeltaForQuota : undefined,
           diskDeltaForQuota !== 0 ? diskDeltaForQuota : undefined,
+          undefined,
         )
 
         updateData.state = previousState

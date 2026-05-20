@@ -35,12 +35,13 @@ class RegionQuota(BaseModel):
     total_cpu_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalCpuQuota")
     total_memory_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalMemoryQuota")
     total_disk_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalDiskQuota")
+    total_gpu_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalGpuQuota")
     max_cpu_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxCpuPerSandbox")
     max_memory_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxMemoryPerSandbox")
     max_disk_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxDiskPerSandbox")
     max_disk_per_non_ephemeral_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxDiskPerNonEphemeralSandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["organizationId", "regionId", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"]
+    __properties: ClassVar[List[str]] = ["organizationId", "regionId", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalGpuQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -124,6 +125,7 @@ class RegionQuota(BaseModel):
             "total_cpu_quota": obj.get("totalCpuQuota"),
             "total_memory_quota": obj.get("totalMemoryQuota"),
             "total_disk_quota": obj.get("totalDiskQuota"),
+            "total_gpu_quota": obj.get("totalGpuQuota"),
             "max_cpu_per_sandbox": obj.get("maxCpuPerSandbox"),
             "max_memory_per_sandbox": obj.get("maxMemoryPerSandbox"),
             "max_disk_per_sandbox": obj.get("maxDiskPerSandbox"),

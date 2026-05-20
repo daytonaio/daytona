@@ -43,6 +43,13 @@ export class RegionQuota {
 
   @Column({
     type: 'int',
+    default: 0,
+    name: 'total_gpu_quota',
+  })
+  totalGpuQuota: number
+
+  @Column({
+    type: 'int',
     nullable: true,
     name: 'max_cpu_per_sandbox',
   })
@@ -90,6 +97,7 @@ export class RegionQuota {
     totalCpuQuota: number,
     totalMemoryQuota: number,
     totalDiskQuota: number,
+    totalGpuQuota = 0,
     maxCpuPerSandbox: number | null = null,
     maxMemoryPerSandbox: number | null = null,
     maxDiskPerSandbox: number | null = null,
@@ -100,6 +108,7 @@ export class RegionQuota {
     this.totalCpuQuota = totalCpuQuota
     this.totalMemoryQuota = totalMemoryQuota
     this.totalDiskQuota = totalDiskQuota
+    this.totalGpuQuota = totalGpuQuota
     this.maxCpuPerSandbox = maxCpuPerSandbox
     this.maxMemoryPerSandbox = maxMemoryPerSandbox
     this.maxDiskPerSandbox = maxDiskPerSandbox

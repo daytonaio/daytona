@@ -107,9 +107,11 @@ export class OrganizationUsageService {
           totalCpuQuota: rq.totalCpuQuota,
           totalMemoryQuota: rq.totalMemoryQuota,
           totalDiskQuota: rq.totalDiskQuota,
+          totalGpuQuota: rq.totalGpuQuota,
           currentCpuUsage: sandboxUsage.currentCpuUsage,
           currentMemoryUsage: sandboxUsage.currentMemoryUsage,
           currentDiskUsage: sandboxUsage.currentDiskUsage,
+          currentGpuUsage: sandboxUsage.currentGpuUsage,
           maxCpuPerSandbox: rq.maxCpuPerSandbox,
           maxMemoryPerSandbox: rq.maxMemoryPerSandbox,
           maxDiskPerSandbox: rq.maxDiskPerSandbox,
@@ -296,10 +298,12 @@ export class OrganizationUsageService {
     let cpuToSubtract = 0
     let memToSubtract = 0
     let diskToSubtract = 0
+    let gpuToSubtract = 0
 
     if (SANDBOX_STATES_CONSUMING_COMPUTE.includes(excludedSandbox.state)) {
       cpuToSubtract = excludedSandbox.cpu
       memToSubtract = excludedSandbox.mem
+      gpuToSubtract = excludedSandbox.gpu
     }
 
     if (SANDBOX_STATES_CONSUMING_DISK.includes(excludedSandbox.state)) {
@@ -311,6 +315,7 @@ export class OrganizationUsageService {
       currentCpuUsage: Math.max(0, usageOverview.currentCpuUsage - cpuToSubtract),
       currentMemoryUsage: Math.max(0, usageOverview.currentMemoryUsage - memToSubtract),
       currentDiskUsage: Math.max(0, usageOverview.currentDiskUsage - diskToSubtract),
+      currentGpuUsage: Math.max(0, usageOverview.currentGpuUsage - gpuToSubtract),
     }
   }
 
@@ -331,25 +336,38 @@ export class OrganizationUsageService {
         redis.call("GET", KEYS[3]),
         redis.call("GET", KEYS[4]),
         redis.call("GET", KEYS[5]),
-        redis.call("GET", KEYS[6])
+        redis.call("GET", KEYS[6]),
+        redis.call("GET", KEYS[7]),
+        redis.call("GET", KEYS[8])
       }
     `
 
     const result = (await this.redis.eval(
       script,
-      6,
+      8,
       this.getCurrentQuotaUsageCacheKey(organizationId, 'cpu', regionId),
       this.getCurrentQuotaUsageCacheKey(organizationId, 'memory', regionId),
       this.getCurrentQuotaUsageCacheKey(organizationId, 'disk', regionId),
+      this.getCurrentQuotaUsageCacheKey(organizationId, 'gpu', regionId),
       this.getPendingQuotaUsageCacheKey(organizationId, 'cpu', regionId),
       this.getPendingQuotaUsageCacheKey(organizationId, 'memory', regionId),
       this.getPendingQuotaUsageCacheKey(organizationId, 'disk', regionId),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'gpu', regionId),
     )) as (string | null)[]
 
-    const [cpuUsage, memoryUsage, diskUsage, pendingCpuUsage, pendingMemoryUsage, pendingDiskUsage] = result
+    const [
+      cpuUsage,
+      memoryUsage,
+      diskUsage,
+      gpuUsage,
+      pendingCpuUsage,
+      pendingMemoryUsage,
+      pendingDiskUsage,
+      pendingGpuUsage,
+    ] = result
 
     // Cache miss
-    if (cpuUsage === null || memoryUsage === null || diskUsage === null) {
+    if (cpuUsage === null || memoryUsage === null || diskUsage === null || gpuUsage === null) {
       return null
     }
 
@@ -364,8 +382,9 @@ export class OrganizationUsageService {
     const parsedCpuUsage = this.parseNonNegativeCachedValue(cpuUsage)
     const parsedMemoryUsage = this.parseNonNegativeCachedValue(memoryUsage)
     const parsedDiskUsage = this.parseNonNegativeCachedValue(diskUsage)
+    const parsedGpuUsage = this.parseNonNegativeCachedValue(gpuUsage)
 
-    if (parsedCpuUsage === null || parsedMemoryUsage === null || parsedDiskUsage === null) {
+    if (parsedCpuUsage === null || parsedMemoryUsage === null || parsedDiskUsage === null || parsedGpuUsage === null) {
       return null
     }
 
@@ -373,14 +392,17 @@ export class OrganizationUsageService {
     const parsedPendingCpuUsage = this.parseNonNegativeCachedValue(pendingCpuUsage)
     const parsedPendingMemoryUsage = this.parseNonNegativeCachedValue(pendingMemoryUsage)
     const parsedPendingDiskUsage = this.parseNonNegativeCachedValue(pendingDiskUsage)
+    const parsedPendingGpuUsage = this.parseNonNegativeCachedValue(pendingGpuUsage)
 
     return {
       currentCpuUsage: parsedCpuUsage,
       currentMemoryUsage: parsedMemoryUsage,
       currentDiskUsage: parsedDiskUsage,
+      currentGpuUsage: parsedGpuUsage,
       pendingCpuUsage: parsedPendingCpuUsage,
       pendingMemoryUsage: parsedPendingMemoryUsage,
       pendingDiskUsage: parsedPendingDiskUsage,
+      pendingGpuUsage: parsedPendingGpuUsage,
     }
   }
 
@@ -398,27 +420,31 @@ export class OrganizationUsageService {
       return {
         redis.call("GET", KEYS[1]),
         redis.call("GET", KEYS[2]),
-        redis.call("GET", KEYS[3])
+        redis.call("GET", KEYS[3]),
+        redis.call("GET", KEYS[4])
       }
     `
     const result = (await this.redis.eval(
       script,
-      3,
+      4,
       this.getPendingQuotaUsageCacheKey(organizationId, 'cpu', regionId),
       this.getPendingQuotaUsageCacheKey(organizationId, 'memory', regionId),
       this.getPendingQuotaUsageCacheKey(organizationId, 'disk', regionId),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'gpu', regionId),
     )) as (string | null)[]
 
-    const [pendingCpuUsage, pendingMemoryUsage, pendingDiskUsage] = result
+    const [pendingCpuUsage, pendingMemoryUsage, pendingDiskUsage, pendingGpuUsage] = result
 
     const parsedPendingCpuUsage = this.parseNonNegativeCachedValue(pendingCpuUsage)
     const parsedPendingMemoryUsage = this.parseNonNegativeCachedValue(pendingMemoryUsage)
     const parsedPendingDiskUsage = this.parseNonNegativeCachedValue(pendingDiskUsage)
+    const parsedPendingGpuUsage = this.parseNonNegativeCachedValue(pendingGpuUsage)
 
     return {
       pendingCpuUsage: parsedPendingCpuUsage,
       pendingMemoryUsage: parsedPendingMemoryUsage,
       pendingDiskUsage: parsedPendingDiskUsage,
+      pendingGpuUsage: parsedPendingGpuUsage,
     }
   }
 
@@ -611,18 +637,20 @@ export class OrganizationUsageService {
    */
   async fetchSandboxUsageFromDb(organizationId: string, regionId: string): Promise<SandboxUsageOverviewInternalDto> {
     // fetch from db
-    // For CPU/memory, we need to also count RESIZING sandboxes that were hot resizing (desiredState = 'started')
+    // For CPU/memory/GPU, we need to also count RESIZING sandboxes that were hot resizing (desiredState = 'started')
     // since they are still running and consuming compute resources
     const sandboxUsageMetrics: {
       used_cpu: number
       used_mem: number
       used_disk: number
+      used_gpu: number
     } = await this.sandboxRepository
       .createQueryBuilder('sandbox')
       .select([
         `SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) OR (sandbox.state IN (:...statesConditionallyConsumingCompute) AND sandbox."desiredState" = :startedDesiredState) THEN sandbox.cpu ELSE 0 END) as used_cpu`,
         `SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) OR (sandbox.state IN (:...statesConditionallyConsumingCompute) AND sandbox."desiredState" = :startedDesiredState) THEN sandbox.mem ELSE 0 END) as used_mem`,
         'SUM(CASE WHEN sandbox.state IN (:...statesConsumingDisk) THEN sandbox.disk ELSE 0 END) as used_disk',
+        `SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) OR (sandbox.state IN (:...statesConditionallyConsumingCompute) AND sandbox."desiredState" = :startedDesiredState) THEN sandbox.gpu ELSE 0 END) as used_gpu`,
       ])
       .where('sandbox.organizationId = :organizationId', { organizationId })
       .andWhere('sandbox.region = :regionId', { regionId })
@@ -635,17 +663,20 @@ export class OrganizationUsageService {
     const cpuUsage = Number(sandboxUsageMetrics.used_cpu) || 0
     const memoryUsage = Number(sandboxUsageMetrics.used_mem) || 0
     const diskUsage = Number(sandboxUsageMetrics.used_disk) || 0
+    const gpuUsage = Number(sandboxUsageMetrics.used_gpu) || 0
 
     // cache the results
     const cpuCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, 'cpu', regionId)
     const memoryCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, 'memory', regionId)
     const diskCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, 'disk', regionId)
+    const gpuCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, 'gpu', regionId)
 
     await this.redis
       .multi()
       .setex(cpuCacheKey, this.CACHE_TTL_SECONDS, cpuUsage)
       .setex(memoryCacheKey, this.CACHE_TTL_SECONDS, memoryUsage)
       .setex(diskCacheKey, this.CACHE_TTL_SECONDS, diskUsage)
+      .setex(gpuCacheKey, this.CACHE_TTL_SECONDS, gpuUsage)
       .exec()
 
     await this.resetCacheStaleness(organizationId, 'sandbox', regionId)
@@ -654,6 +685,7 @@ export class OrganizationUsageService {
       currentCpuUsage: cpuUsage,
       currentMemoryUsage: memoryUsage,
       currentDiskUsage: diskUsage,
+      currentGpuUsage: gpuUsage,
     }
   }
 
@@ -712,7 +744,7 @@ export class OrganizationUsageService {
    */
   private getCurrentQuotaUsageCacheKey(
     organizationId: string,
-    quotaType: 'cpu' | 'memory' | 'disk',
+    quotaType: 'cpu' | 'memory' | 'disk' | 'gpu',
     regionId: string,
   ): string
   private getCurrentQuotaUsageCacheKey(organizationId: string, quotaType: 'snapshot_count' | 'volume_count'): string
@@ -729,7 +761,7 @@ export class OrganizationUsageService {
    */
   private getPendingQuotaUsageCacheKey(
     organizationId: string,
-    quotaType: 'cpu' | 'memory' | 'disk',
+    quotaType: 'cpu' | 'memory' | 'disk' | 'gpu',
     regionId: string,
   ): string
   private getPendingQuotaUsageCacheKey(organizationId: string, quotaType: 'snapshot_count' | 'volume_count'): string
@@ -748,7 +780,7 @@ export class OrganizationUsageService {
    */
   private async updateCurrentQuotaUsage(
     organizationId: string,
-    quotaType: 'cpu' | 'memory' | 'disk',
+    quotaType: 'cpu' | 'memory' | 'disk' | 'gpu',
     delta: number,
     regionId: string,
   ): Promise<void>
@@ -787,6 +819,7 @@ export class OrganizationUsageService {
       case 'cpu':
       case 'memory':
       case 'disk':
+      case 'gpu':
         currentQuotaUsageCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, quotaType, regionId)
         pendingQuotaUsageCacheKey = this.getPendingQuotaUsageCacheKey(organizationId, quotaType, regionId)
         break
@@ -832,16 +865,19 @@ export class OrganizationUsageService {
     cpu: number,
     memory: number,
     disk: number,
+    gpu: number,
     excludeSandboxId?: string,
   ): Promise<{
     cpuIncremented: boolean
     memoryIncremented: boolean
     diskIncremented: boolean
+    gpuIncremented: boolean
   }> {
     // determine for which quota types we should increment the pending usage
     let shouldIncrementCpu = true
     let shouldIncrementMemory = true
     let shouldIncrementDisk = true
+    let shouldIncrementGpu = true
 
     if (excludeSandboxId) {
       const excludedSandbox = await this.sandboxRepository.findOne({
@@ -852,6 +888,7 @@ export class OrganizationUsageService {
         if (SANDBOX_STATES_CONSUMING_COMPUTE.includes(excludedSandbox.state)) {
           shouldIncrementCpu = false
           shouldIncrementMemory = false
+          shouldIncrementGpu = false
         }
 
         if (SANDBOX_STATES_CONSUMING_DISK.includes(excludedSandbox.state)) {
@@ -865,16 +902,19 @@ export class OrganizationUsageService {
       local cpuKey = KEYS[1]
       local memoryKey = KEYS[2]
       local diskKey = KEYS[3]
+      local gpuKey = KEYS[4]
 
       local shouldIncrementCpu = ARGV[1] == "true"
       local shouldIncrementMemory = ARGV[2] == "true"
       local shouldIncrementDisk = ARGV[3] == "true"
+      local shouldIncrementGpu = ARGV[4] == "true"
 
-      local cpuIncrement = tonumber(ARGV[4])
-      local memoryIncrement = tonumber(ARGV[5])
-      local diskIncrement = tonumber(ARGV[6])
+      local cpuIncrement = tonumber(ARGV[5])
+      local memoryIncrement = tonumber(ARGV[6])
+      local diskIncrement = tonumber(ARGV[7])
+      local gpuIncrement = tonumber(ARGV[8])
 
-      local ttl = tonumber(ARGV[7])
+      local ttl = tonumber(ARGV[9])
     
       if shouldIncrementCpu then
         redis.call("INCRBY", cpuKey, cpuIncrement)
@@ -890,20 +930,28 @@ export class OrganizationUsageService {
         redis.call("INCRBY", diskKey, diskIncrement)
         redis.call("EXPIRE", diskKey, ttl)
       end
+
+      if shouldIncrementGpu then
+        redis.call("INCRBY", gpuKey, gpuIncrement)
+        redis.call("EXPIRE", gpuKey, ttl)
+      end
     `
 
     await this.redis.eval(
       script,
-      3,
+      4,
       this.getPendingQuotaUsageCacheKey(organizationId, 'cpu', regionId),
       this.getPendingQuotaUsageCacheKey(organizationId, 'memory', regionId),
       this.getPendingQuotaUsageCacheKey(organizationId, 'disk', regionId),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'gpu', regionId),
       shouldIncrementCpu.toString(),
       shouldIncrementMemory.toString(),
       shouldIncrementDisk.toString(),
+      shouldIncrementGpu.toString(),
       cpu.toString(),
       memory.toString(),
       disk.toString(),
+      gpu.toString(),
       this.CACHE_TTL_SECONDS.toString(),
     )
 
@@ -911,6 +959,7 @@ export class OrganizationUsageService {
       cpuIncremented: shouldIncrementCpu,
       memoryIncremented: shouldIncrementMemory,
       diskIncremented: shouldIncrementDisk,
+      gpuIncremented: shouldIncrementGpu,
     }
   }
 
@@ -937,16 +986,19 @@ export class OrganizationUsageService {
     cpu?: number,
     memory?: number,
     disk?: number,
+    gpu?: number,
   ): Promise<void> {
     // decrement the pending usage for necessary quota types
     const script = `
       local cpuKey = KEYS[1]
       local memoryKey = KEYS[2] 
       local diskKey = KEYS[3]
+      local gpuKey = KEYS[4]
 
       local cpuDecrement = tonumber(ARGV[1])
       local memoryDecrement = tonumber(ARGV[2])
       local diskDecrement = tonumber(ARGV[3])
+      local gpuDecrement = tonumber(ARGV[4])
       
       if cpuDecrement then
         redis.call("DECRBY", cpuKey, cpuDecrement)
@@ -959,17 +1011,23 @@ export class OrganizationUsageService {
       if diskDecrement then
         redis.call("DECRBY", diskKey, diskDecrement)
       end
+
+      if gpuDecrement then
+        redis.call("DECRBY", gpuKey, gpuDecrement)
+      end
     `
 
     await this.redis.eval(
       script,
-      3,
+      4,
       this.getPendingQuotaUsageCacheKey(organizationId, 'cpu', regionId),
       this.getPendingQuotaUsageCacheKey(organizationId, 'memory', regionId),
       this.getPendingQuotaUsageCacheKey(organizationId, 'disk', regionId),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'gpu', regionId),
       cpu?.toString() ?? '0',
       memory?.toString() ?? '0',
       disk?.toString() ?? '0',
+      gpu?.toString() ?? '0',
     )
   }
 
@@ -1125,6 +1183,7 @@ export class OrganizationUsageService {
     cpuDelta: number,
     memDelta: number,
     diskDelta: number,
+    gpuDelta: number,
   ): Promise<void> {
     if (cpuDelta !== 0) {
       await this.updateCurrentQuotaUsage(organizationId, 'cpu', cpuDelta, regionId)
@@ -1134,6 +1193,9 @@ export class OrganizationUsageService {
     }
     if (diskDelta !== 0) {
       await this.updateCurrentQuotaUsage(organizationId, 'disk', diskDelta, regionId)
+    }
+    if (gpuDelta !== 0) {
+      await this.updateCurrentQuotaUsage(organizationId, 'gpu', gpuDelta, regionId)
     }
   }
 
@@ -1207,6 +1269,7 @@ export class OrganizationUsageService {
         event.sandbox.region,
       )
       await this.updateCurrentQuotaUsage(event.sandbox.organizationId, 'disk', event.sandbox.disk, event.sandbox.region)
+      await this.updateCurrentQuotaUsage(event.sandbox.organizationId, 'gpu', event.sandbox.gpu, event.sandbox.region)
     } catch (error) {
       this.logger.warn(
         `Error updating cached sandbox quota usage for organization ${event.sandbox.organizationId} in region ${event.sandbox.region}`,
@@ -1245,6 +1308,7 @@ export class OrganizationUsageService {
           event.sandbox.disk,
           event.sandbox.region,
         )
+        await this.updateCurrentQuotaUsage(event.sandbox.organizationId, 'gpu', event.sandbox.gpu, event.sandbox.region)
         return
       } catch (error) {
         this.logger.warn(
@@ -1279,6 +1343,13 @@ export class OrganizationUsageService {
         SANDBOX_STATES_CONSUMING_DISK,
       )
 
+      const gpuDelta = this.calculateQuotaUsageDelta(
+        event.sandbox.gpu,
+        event.oldState,
+        event.newState,
+        SANDBOX_STATES_CONSUMING_COMPUTE,
+      )
+
       if (cpuDelta !== 0) {
         await this.updateCurrentQuotaUsage(event.sandbox.organizationId, 'cpu', cpuDelta, event.sandbox.region)
       }
@@ -1289,6 +1360,10 @@ export class OrganizationUsageService {
 
       if (diskDelta !== 0) {
         await this.updateCurrentQuotaUsage(event.sandbox.organizationId, 'disk', diskDelta, event.sandbox.region)
+      }
+
+      if (gpuDelta !== 0) {
+        await this.updateCurrentQuotaUsage(event.sandbox.organizationId, 'gpu', gpuDelta, event.sandbox.region)
       }
     } catch (error) {
       this.logger.warn(

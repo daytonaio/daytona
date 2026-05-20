@@ -28,6 +28,8 @@ type RegionUsageOverview struct {
 	CurrentMemoryUsage float32 `json:"currentMemoryUsage"`
 	TotalDiskQuota float32 `json:"totalDiskQuota"`
 	CurrentDiskUsage float32 `json:"currentDiskUsage"`
+	TotalGpuQuota float32 `json:"totalGpuQuota"`
+	CurrentGpuUsage float32 `json:"currentGpuUsage"`
 	MaxCpuPerSandbox NullableFloat32 `json:"maxCpuPerSandbox"`
 	MaxMemoryPerSandbox NullableFloat32 `json:"maxMemoryPerSandbox"`
 	MaxDiskPerSandbox NullableFloat32 `json:"maxDiskPerSandbox"`
@@ -41,7 +43,7 @@ type _RegionUsageOverview RegionUsageOverview
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRegionUsageOverview(regionId string, totalCpuQuota float32, currentCpuUsage float32, totalMemoryQuota float32, currentMemoryUsage float32, totalDiskQuota float32, currentDiskUsage float32, maxCpuPerSandbox NullableFloat32, maxMemoryPerSandbox NullableFloat32, maxDiskPerSandbox NullableFloat32, maxDiskPerNonEphemeralSandbox NullableFloat32) *RegionUsageOverview {
+func NewRegionUsageOverview(regionId string, totalCpuQuota float32, currentCpuUsage float32, totalMemoryQuota float32, currentMemoryUsage float32, totalDiskQuota float32, currentDiskUsage float32, totalGpuQuota float32, currentGpuUsage float32, maxCpuPerSandbox NullableFloat32, maxMemoryPerSandbox NullableFloat32, maxDiskPerSandbox NullableFloat32, maxDiskPerNonEphemeralSandbox NullableFloat32) *RegionUsageOverview {
 	this := RegionUsageOverview{}
 	this.RegionId = regionId
 	this.TotalCpuQuota = totalCpuQuota
@@ -50,6 +52,8 @@ func NewRegionUsageOverview(regionId string, totalCpuQuota float32, currentCpuUs
 	this.CurrentMemoryUsage = currentMemoryUsage
 	this.TotalDiskQuota = totalDiskQuota
 	this.CurrentDiskUsage = currentDiskUsage
+	this.TotalGpuQuota = totalGpuQuota
+	this.CurrentGpuUsage = currentGpuUsage
 	this.MaxCpuPerSandbox = maxCpuPerSandbox
 	this.MaxMemoryPerSandbox = maxMemoryPerSandbox
 	this.MaxDiskPerSandbox = maxDiskPerSandbox
@@ -233,6 +237,54 @@ func (o *RegionUsageOverview) SetCurrentDiskUsage(v float32) {
 	o.CurrentDiskUsage = v
 }
 
+// GetTotalGpuQuota returns the TotalGpuQuota field value
+func (o *RegionUsageOverview) GetTotalGpuQuota() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.TotalGpuQuota
+}
+
+// GetTotalGpuQuotaOk returns a tuple with the TotalGpuQuota field value
+// and a boolean to check if the value has been set.
+func (o *RegionUsageOverview) GetTotalGpuQuotaOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.TotalGpuQuota, true
+}
+
+// SetTotalGpuQuota sets field value
+func (o *RegionUsageOverview) SetTotalGpuQuota(v float32) {
+	o.TotalGpuQuota = v
+}
+
+// GetCurrentGpuUsage returns the CurrentGpuUsage field value
+func (o *RegionUsageOverview) GetCurrentGpuUsage() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.CurrentGpuUsage
+}
+
+// GetCurrentGpuUsageOk returns a tuple with the CurrentGpuUsage field value
+// and a boolean to check if the value has been set.
+func (o *RegionUsageOverview) GetCurrentGpuUsageOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.CurrentGpuUsage, true
+}
+
+// SetCurrentGpuUsage sets field value
+func (o *RegionUsageOverview) SetCurrentGpuUsage(v float32) {
+	o.CurrentGpuUsage = v
+}
+
 // GetMaxCpuPerSandbox returns the MaxCpuPerSandbox field value
 // If the value is explicit nil, the zero value for float32 will be returned
 func (o *RegionUsageOverview) GetMaxCpuPerSandbox() float32 {
@@ -354,6 +406,8 @@ func (o RegionUsageOverview) ToMap() (map[string]interface{}, error) {
 	toSerialize["currentMemoryUsage"] = o.CurrentMemoryUsage
 	toSerialize["totalDiskQuota"] = o.TotalDiskQuota
 	toSerialize["currentDiskUsage"] = o.CurrentDiskUsage
+	toSerialize["totalGpuQuota"] = o.TotalGpuQuota
+	toSerialize["currentGpuUsage"] = o.CurrentGpuUsage
 	toSerialize["maxCpuPerSandbox"] = o.MaxCpuPerSandbox.Get()
 	toSerialize["maxMemoryPerSandbox"] = o.MaxMemoryPerSandbox.Get()
 	toSerialize["maxDiskPerSandbox"] = o.MaxDiskPerSandbox.Get()
@@ -378,6 +432,8 @@ func (o *RegionUsageOverview) UnmarshalJSON(data []byte) (err error) {
 		"currentMemoryUsage",
 		"totalDiskQuota",
 		"currentDiskUsage",
+		"totalGpuQuota",
+		"currentGpuUsage",
 		"maxCpuPerSandbox",
 		"maxMemoryPerSandbox",
 		"maxDiskPerSandbox",
@@ -418,6 +474,8 @@ func (o *RegionUsageOverview) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "currentMemoryUsage")
 		delete(additionalProperties, "totalDiskQuota")
 		delete(additionalProperties, "currentDiskUsage")
+		delete(additionalProperties, "totalGpuQuota")
+		delete(additionalProperties, "currentGpuUsage")
 		delete(additionalProperties, "maxCpuPerSandbox")
 		delete(additionalProperties, "maxMemoryPerSandbox")
 		delete(additionalProperties, "maxDiskPerSandbox")
