@@ -37,6 +37,7 @@ func TestBuildCloneArgs(t *testing.T) {
 			expected: []string{
 				"-c", "credential.helper=",
 				"-c", "http.sslVerify=false",
+				"-c", "core.hooksPath=/dev/null",
 				"clone", "--single-branch", "--progress",
 				"--branch", "main",
 				"--", "https://github.com/daytonaio/daytona", "/work-dir",
@@ -52,6 +53,7 @@ func TestBuildCloneArgs(t *testing.T) {
 			expected: []string{
 				"-c", "credential.helper=",
 				"-c", "http.sslVerify=false",
+				"-c", "core.hooksPath=/dev/null",
 				"clone", "--single-branch", "--progress",
 				"--branch", "main",
 				"--", "http://localhost:3000/daytonaio/daytona", "/work-dir",
@@ -67,6 +69,7 @@ func TestBuildCloneArgs(t *testing.T) {
 			expected: []string{
 				"-c", "credential.helper=",
 				"-c", "http.sslVerify=false",
+				"-c", "core.hooksPath=/dev/null",
 				"clone", "--single-branch", "--progress",
 				"--branch", "main",
 				"--", "https://github.com/daytonaio/daytona", "/work-dir",
@@ -81,6 +84,7 @@ func TestBuildCloneArgs(t *testing.T) {
 			expected: []string{
 				"-c", "credential.helper=",
 				"-c", "http.sslVerify=false",
+				"-c", "core.hooksPath=/dev/null",
 				"clone", "--single-branch", "--progress",
 				"--", "https://github.com/daytonaio/daytona", "/work-dir",
 			},

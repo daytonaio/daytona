@@ -10,6 +10,10 @@ import (
 )
 
 func (s *Service) Pull(auth *http.BasicAuth) error {
+	if isGitCLIModeEnabled() {
+		return s.PullCLI(auth)
+	}
+
 	repo, err := git.PlainOpen(s.WorkDir)
 	if err != nil {
 		return err
@@ -26,4 +30,30 @@ func (s *Service) Pull(auth *http.BasicAuth) error {
 	}
 
 	return w.Pull(options)
+}
+
+func (s *Service) PullCLI(auth *http.BasicAuth) error {
+	return s.gitCLIRun("git pull", buildPullArgs(s.WorkDir), auth, 64*1024)
+}
+
+func buildPullArgs(workDir string) []string {
+	// Note: no -c http.sslVerify=false here. go-git's default PullOptions
+	// does NOT skip TLS verification (unlike its CloneOptions, which we
+	// match with InsecureSkipTLS:true). Skipping verify on pull would be a
+	// behavior change and a MITM risk for the basic-auth token.
+	//
+	// --ff-only matches go-git's `w.Pull()` semantics, which fails with
+	// ErrNonFastForwardUpdate on divergent histories instead of producing
+	// a merge commit. Without --ff-only, plain `git pull` would honor the
+	// repo/user pull.rebase / merge.ff config and could diverge from the
+	// go-git path's behavior.
+	return []string{
+		"-C", workDir,
+		"-c", "credential.helper=",
+		"-c", "core.hooksPath=/dev/null",
+		"pull",
+		"--ff-only",
+		"--progress",
+		"origin",
+	}
 }
