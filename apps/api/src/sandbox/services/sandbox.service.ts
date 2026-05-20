@@ -371,6 +371,7 @@ export class SandboxService {
       regions: [sandbox.region],
       sandboxClass: sandbox.class,
       snapshotRef: snapshot.ref,
+      gpu: sandbox.gpu,
     })
 
     sandbox.runnerId = runner.id
@@ -521,7 +522,7 @@ export class SandboxService {
         regions: [region.id],
         sandboxClass,
         snapshotRef: snapshot.ref,
-        gpu: gpu > 0 ? gpu : undefined,
+        gpu,
       })
 
       const sandbox = new Sandbox(region.id, createSandboxDto.name)
@@ -767,6 +768,7 @@ export class SandboxService {
           regions: [sandbox.region],
           sandboxClass: sandbox.class,
           snapshotRef: buildInfoSnapshotRef,
+          gpu: sandbox.gpu,
           ...(excludedRunnerIds.length > 0 && { excludedRunnerIds }),
           ...(declarativeBuildScoreThreshold !== undefined && {
             availabilityScoreThreshold: declarativeBuildScoreThreshold,
@@ -881,6 +883,10 @@ export class SandboxService {
 
       if (runner.runnerClass !== RunnerClass.VM) {
         throw new HttpException('Forking is not supported for this sandbox', HttpStatus.UNPROCESSABLE_ENTITY)
+      }
+
+      if (sourceSandbox.gpu > 0) {
+        throw new HttpException('Forking is not supported for GPU sandboxes', HttpStatus.UNPROCESSABLE_ENTITY)
       }
 
       // Copy all properties from source sandbox to forked sandbox

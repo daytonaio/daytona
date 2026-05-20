@@ -6,7 +6,18 @@
 import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { DataSource, FindOptionsWhere, In, MoreThanOrEqual, Not, Repository, UpdateResult } from 'typeorm'
+import {
+  DataSource,
+  Equal,
+  FindOptionsWhere,
+  In,
+  IsNull,
+  MoreThanOrEqual,
+  Not,
+  Or,
+  Repository,
+  UpdateResult,
+} from 'typeorm'
 import { Runner } from '../entities/runner.entity'
 import { CreateRunnerInternalDto } from '../dto/create-runner-internal.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
@@ -290,15 +301,18 @@ export class RunnerService {
         : MoreThanOrEqual(this.configService.getOrThrow('runnerScore.thresholds.availability')),
     }
 
-    if (params.gpu) {
+    if (params.gpu > 0) {
       runnerFilter.gpu = MoreThanOrEqual(params.gpu)
+    } else {
+      // GPU runners are exclusively reserved for GPU sandboxes.
+      runnerFilter.gpu = Or(IsNull(), Equal(0))
     }
 
     const excludedRunnerIds = new Set((params.excludedRunnerIds ?? []).filter((id): id is string => !!id))
 
     // GPU sandboxes get exclusive ownership of a runner: skip any runner that
     // already hosts an active sandbox, regardless of whether that sandbox uses GPU.
-    if (params.gpu) {
+    if (params.gpu > 0) {
       const occupiedRunnerIds = await this.getRunnersWithActiveGpuSandbox()
       for (const id of occupiedRunnerIds) {
         excludedRunnerIds.add(id)
@@ -1120,7 +1134,7 @@ export class GetRunnerParams {
   availabilityScoreThreshold?: number
   // When > 0, only consider runners that have at least this much GPU capacity
   // and do not currently host any active sandbox (one-GPU-sandbox-per-runner rule).
-  gpu?: number
+  gpu: number
 }
 
 interface AvailabilityScoreParams {

@@ -382,6 +382,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             snapshotRef: sandbox.backupSnapshot,
             excludedRunnerIds: [runner.id],
             availabilityScoreThreshold: startScoreThreshold,
+            gpu: sandbox.gpu,
           })
 
           await this.migrateSandbox(sandbox, runner.id, targetRunner.id)
