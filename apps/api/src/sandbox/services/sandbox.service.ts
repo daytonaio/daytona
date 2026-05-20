@@ -29,6 +29,7 @@ import { FeatureFlags } from '../../common/constants/feature-flags'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { resolveGpuTypePreferences } from '../utils/gpu-type-preferences.util'
 import { RunnerService } from './runner.service'
+import { RunnerUsageService } from './runner-usage.service'
 import { SandboxError } from '../../exceptions/sandbox-error.exception'
 import { StateChangeInProgressError } from '../../exceptions/state-change-in-progress.exception'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
@@ -137,6 +138,7 @@ export class SandboxService {
     @InjectRepository(SshAccess)
     private readonly sshAccessRepository: Repository<SshAccess>,
     private readonly runnerService: RunnerService,
+    private readonly runnerUsageService: RunnerUsageService,
     private readonly volumeService: VolumeService,
     private readonly configService: TypedConfigService,
     private readonly warmPoolService: SandboxWarmPoolService,
@@ -2370,7 +2372,7 @@ export class SandboxService {
     let pendingCpuIncrement: number | undefined
     let pendingMemoryIncrement: number | undefined
     let pendingDiskIncrement: number | undefined
-    let admittedRunnerAllocation: { runnerId: string; cpu: number; memory: number; disk: number } | undefined
+    let admittedRunnerUsage: { runnerId: string; cpu: number; memory: number; disk: number } | undefined
     let pendingGpuIncrement: number | undefined
 
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
@@ -2472,6 +2474,12 @@ export class SandboxService {
       const memDeltaForQuota = isHotResize ? newMem - sandbox.mem : 0
       const diskDeltaForQuota = newDisk - sandbox.disk // Disk only increases (validated at start of method)
 
+      // Runner admission deltas: actual increase (hot or cold), clamped at >= 0 so a
+      // downsize reserves nothing and admission/release stay symmetric.
+      const cpuDeltaForRunner = Math.max(0, newCpu - sandbox.cpu)
+      const memDeltaForRunner = Math.max(0, newMem - sandbox.mem)
+      const diskDeltaForRunner = Math.max(0, newDisk - sandbox.disk)
+
       // Validate and track pending for any non-zero quota changes.
       // Resize never changes GPU allocation — always pass 0 for the GPU delta, but pass
       // `gpuEnabled = sandbox.gpu > 0` so per-sandbox limit checks use the GPU-specific table.
@@ -2521,37 +2529,27 @@ export class SandboxService {
         throw new BadRequestError('Sandbox must be in started or stopped state to resize')
       }
 
-      // Per-runner admission gate: reject (409) if pending allocations + this resize would
-      // drop the runner's projected score below the threshold. Locked against stale-view
-      // races. Cold cpu/mem resizes are gated too, as a proxy until start is also gated.
-      const allocationLockKey = `runner-${runner.id}-pending-allocation-lock`
-      await this.redisLockProvider.waitForLock(allocationLockKey, 10)
-      try {
-        const projectedScore = await this.runnerService.getProjectedAvailabilityScore(runner, {
-          cpu: cpuDeltaForQuota,
-          memory: memDeltaForQuota,
-          disk: diskDeltaForQuota,
-        })
-        const resizeScoreThreshold = this.configService.getOrThrow('runnerScore.thresholds.resize')
-        if (projectedScore < resizeScoreThreshold) {
-          throw new ConflictException(
-            `Runner load would exceed resize threshold (projected score ${projectedScore} < ${resizeScoreThreshold}). Please retry shortly.`,
-          )
-        }
-        await this.runnerService.incrementPendingRunnerAllocation(
-          runner.id,
-          cpuDeltaForQuota,
-          memDeltaForQuota,
-          diskDeltaForQuota,
-        )
-        admittedRunnerAllocation = {
-          runnerId: runner.id,
-          cpu: cpuDeltaForQuota,
-          memory: memDeltaForQuota,
-          disk: diskDeltaForQuota,
-        }
-      } finally {
-        await this.redisLockProvider.unlock(allocationLockKey)
+      // Per-runner admission gate (lock-free, mirrors OrganizationUsageService): reserve the
+      // usage first via atomic HINCRBY, then project the score from the post-reservation
+      // hash — so concurrent resizes each see the others' reservations and none can
+      // over-admit. Below threshold → throw; the outer catch releases the reservation.
+      // Cold cpu/mem resizes are gated too, as a proxy until start is also gated.
+      await this.runnerUsageService.incrementPendingRunnerUsage(
+        runner.id,
+        cpuDeltaForRunner,
+        memDeltaForRunner,
+        diskDeltaForRunner,
+      )
+      admittedRunnerUsage = {
+        runnerId: runner.id,
+        cpu: cpuDeltaForRunner,
+        memory: memDeltaForRunner,
+        disk: diskDeltaForRunner,
+      }
+      const projectedScore = await this.runnerService.getProjectedAvailabilityScore(runner)
+      const resizeScoreThreshold = this.configService.getOrThrow('runnerScore.thresholds.resize')
+      if (projectedScore < resizeScoreThreshold) {
+        throw new ConflictException('Sandbox runner is temporarily at capacity. Please retry the resize shortly.')
       }
 
       // Now transition to RESIZING state
@@ -2607,20 +2605,19 @@ export class SandboxService {
             0,
           )
 
-          // Release the per-runner pending allocation slot — runner has applied the resize
-          // synchronously on the V0 path. (Brief under-counting until the next healthcheck
-          // refreshes runner.currentAllocatedCpu is documented and accepted.)
-          await this.runnerService.safeDecrementPendingRunnerAllocation(
+          // Release the slot — V0 applies the resize synchronously. (Brief under-counting
+          // until the next healthcheck refreshes currentAllocatedCpu is accepted.)
+          await this.runnerUsageService.safeDecrementPendingRunnerUsage(
             runner.id,
-            cpuDeltaForQuota,
-            memDeltaForQuota,
-            diskDeltaForQuota,
+            cpuDeltaForRunner,
+            memDeltaForRunner,
+            diskDeltaForRunner,
           )
-          admittedRunnerAllocation = undefined
+          admittedRunnerUsage = undefined
         } else {
           // V2: job enqueued — handler now owns state + slot release; clear to avoid a
           // double-release in the outer catch.
-          admittedRunnerAllocation = undefined
+          admittedRunnerUsage = undefined
         }
       } catch (error) {
         // resize failed — revert RESIZING. Excludes the findOneByIdOrName below, which
@@ -2648,12 +2645,12 @@ export class SandboxService {
         pendingDiskIncrement,
         pendingGpuIncrement,
       )
-      if (admittedRunnerAllocation) {
-        await this.runnerService.safeDecrementPendingRunnerAllocation(
-          admittedRunnerAllocation.runnerId,
-          admittedRunnerAllocation.cpu,
-          admittedRunnerAllocation.memory,
-          admittedRunnerAllocation.disk,
+      if (admittedRunnerUsage) {
+        await this.runnerUsageService.safeDecrementPendingRunnerUsage(
+          admittedRunnerUsage.runnerId,
+          admittedRunnerUsage.cpu,
+          admittedRunnerUsage.memory,
+          admittedRunnerUsage.disk,
         )
       }
       throw error

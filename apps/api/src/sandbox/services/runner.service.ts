@@ -51,14 +51,13 @@ import { normalizeGpuType } from '../utils/gpu-type-normalizer.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { RunnerServiceInfo } from '../common/runner-service-info'
+import { RunnerUsageService } from './runner-usage.service'
 
 @Injectable()
 export class RunnerService {
   private readonly logger = new Logger(RunnerService.name)
   private readonly serviceStartTime = new Date()
   private readonly scoreConfig: AvailabilityScoreConfig
-  // Safety-net TTL only; the normal path releases each slot explicitly on completion.
-  private readonly PENDING_ALLOCATION_TTL_S = 2 * 60
 
   constructor(
     @InjectRepository(Runner)
@@ -76,6 +75,7 @@ export class RunnerService {
     private readonly dataSource: DataSource,
     @InjectRedis()
     private readonly redis: Redis,
+    private readonly runnerUsageService: RunnerUsageService,
   ) {
     this.scoreConfig = this.getAvailabilityScoreConfig()
   }
@@ -1203,87 +1203,21 @@ export class RunnerService {
     }
   }
 
-  private getPendingAllocationKey(runnerId: string): string {
-    return `runner:${runnerId}:allocation:pending`
-  }
-
   /**
-   * Atomically adjusts the per-runner pending allocation hash and refreshes its TTL.
-   * Signed deltas; each field is clamped at 0 so a double-release can't go negative.
+   * Computes the runner's availabilityScore as it would be with the currently-reserved
+   * pending usage applied on top of its last reported metrics. The resize admission gate
+   * calls this *after* reserving its own usage, so the projection already includes it.
    */
-  async incrementPendingRunnerAllocation(runnerId: string, cpu: number, memory: number, disk: number): Promise<void> {
-    const script = `
-      local function adjust(field, delta)
-        local value = redis.call("HINCRBY", KEYS[1], field, delta)
-        if value < 0 then
-          redis.call("HSET", KEYS[1], field, 0)
-        end
-      end
-      adjust("cpu",    ARGV[1])
-      adjust("memory", ARGV[2])
-      adjust("disk",   ARGV[3])
-      redis.call("EXPIRE", KEYS[1], ARGV[4])
-    `
-    await this.redis.eval(
-      script,
-      1,
-      this.getPendingAllocationKey(runnerId),
-      cpu.toString(),
-      memory.toString(),
-      disk.toString(),
-      this.PENDING_ALLOCATION_TTL_S.toString(),
-    )
-  }
-
-  /**
-   * Releases a pending allocation slot. Symmetric with incrementPendingRunnerAllocation —
-   * passes negatives through the same Lua so behavior (incl. TTL refresh) stays identical.
-   */
-  async decrementPendingRunnerAllocation(runnerId: string, cpu: number, memory: number, disk: number): Promise<void> {
-    return this.incrementPendingRunnerAllocation(runnerId, -cpu, -memory, -disk)
-  }
-
-  /**
-   * decrementPendingRunnerAllocation that swallows + warns on failure, so a Redis blip
-   * in a terminal hook never shadows the original error; the TTL is the safety net.
-   */
-  async safeDecrementPendingRunnerAllocation(
-    runnerId: string,
-    cpu: number,
-    memory: number,
-    disk: number,
-  ): Promise<void> {
-    try {
-      await this.decrementPendingRunnerAllocation(runnerId, cpu, memory, disk)
-    } catch (e) {
-      this.logger.warn(`Failed to decrement pending runner allocation for ${runnerId}: ${e}`)
-    }
-  }
-
-  /**
-   * Computes the runner's availabilityScore as it would be after the currently-cached
-   * pending allocations *and* the caller-supplied extra deltas are applied on top of
-   * the runner's last reported metrics. Used as an admission gate before accepting
-   * new on-runner work.
-   */
-  async getProjectedAvailabilityScore(
-    runner: Runner,
-    extra: { cpu: number; memory: number; disk: number },
-  ): Promise<number> {
-    const [cpuPending, memoryPending, diskPending] = await this.redis.hmget(
-      this.getPendingAllocationKey(runner.id),
-      'cpu',
-      'memory',
-      'disk',
-    )
+  async getProjectedAvailabilityScore(runner: Runner): Promise<number> {
+    const pending = await this.runnerUsageService.getPendingRunnerUsage(runner.id)
     return this.calculateAvailabilityScore(runner.id, {
       cpuLoadAverage: runner.currentCpuLoadAverage,
       cpuUsage: runner.currentCpuUsagePercentage,
       memoryUsage: runner.currentMemoryUsagePercentage,
       diskUsage: runner.currentDiskUsagePercentage,
-      allocatedCpu: runner.currentAllocatedCpu + Number(cpuPending ?? 0) + extra.cpu,
-      allocatedMemoryGiB: runner.currentAllocatedMemoryGiB + Number(memoryPending ?? 0) + extra.memory,
-      allocatedDiskGiB: runner.currentAllocatedDiskGiB + Number(diskPending ?? 0) + extra.disk,
+      allocatedCpu: runner.currentAllocatedCpu + pending.cpu,
+      allocatedMemoryGiB: runner.currentAllocatedMemoryGiB + pending.memory,
+      allocatedDiskGiB: runner.currentAllocatedDiskGiB + pending.disk,
       runnerCpu: runner.cpu,
       runnerMemoryGiB: runner.memoryGiB,
       runnerDiskGiB: runner.diskGiB,
