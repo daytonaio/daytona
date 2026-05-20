@@ -2723,7 +2723,7 @@ export class SandboxService {
     }
 
     if (newState === SandboxState.DESTROYED) {
-      Object.assign(updateData, Sandbox.getSoftDeleteUpdate(sandbox))
+      updateData.name = Sandbox.getSoftDeleteName(sandbox.name)
     }
 
     await this.sandboxRepository.updateWhere(sandbox.id, {

@@ -281,6 +281,13 @@ export class Sandbox {
   }
 
   /**
+   * Helper method that returns the name of a soft deleted sandbox.
+   */
+  static getSoftDeleteName(originalName: string): string {
+    return 'DESTROYED_' + originalName + '_' + Date.now()
+  }
+
+  /**
    * Helper method that returns the update data needed for a soft delete operation.
    */
   static getSoftDeleteUpdate(sandbox: Sandbox): Partial<Sandbox> {
@@ -288,7 +295,7 @@ export class Sandbox {
       pending: true,
       desiredState: SandboxDesiredState.DESTROYED,
       backupState: BackupState.NONE,
-      name: 'DESTROYED_' + sandbox.name + '_' + Date.now(),
+      name: Sandbox.getSoftDeleteName(sandbox.name),
     }
   }
 
