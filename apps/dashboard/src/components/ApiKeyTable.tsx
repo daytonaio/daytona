@@ -117,13 +117,13 @@ export function ApiKeyTable({ data, loading, isLoadingKey, onRevokeRequest }: Da
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <div>
+      <div className="flex items-center gap-2">
         <SearchInput
           debounced
           value={globalFilter}
           onValueChange={handleChangeFilter}
           placeholder="Search by Name or Permission"
-          containerClassName="max-w-sm"
+          containerClassName="min-w-0 flex-1 sm:max-w-sm"
         />
       </div>
       <TableContainer

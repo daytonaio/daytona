@@ -36,7 +36,7 @@ const priorityMap: Record<BannerVariant, number> = {
   neutral: 4,
 }
 
-const bannerVariants = cva('relative overflow-hidden backdrop-blur-xl border-y w-full', {
+const bannerVariants = cva('relative overflow-hidden backdrop-blur-xl border w-full rounded-lg', {
   variants: {
     variant: {
       info: 'bg-info-background text-info-foreground border-info-separator',
@@ -170,7 +170,7 @@ export const Banner = ({
       <div className={cn(bannerVariants({ variant }))} role={role}>
         <div
           className={cn(
-            'grid grid-cols-[auto_1fr_auto_auto] grid-rows-[auto_auto] sm:grid-rows-1 items-center gap-x-2 px-4 sm:px-5 py-2 mx-auto justify-center',
+            'grid grid-cols-[auto_1fr_auto_auto] grid-rows-[auto_auto] sm:grid-rows-1 items-center gap-x-2 px-3 py-1 mx-auto justify-center',
             bannerClassName,
           )}
         >
@@ -190,7 +190,7 @@ export const Banner = ({
             <button
               type="button"
               onClick={action.onClick}
-              className="text-sm font-medium underline-offset-4 underline row-[2] sm:row-[1] col-[2] sm:col-[3] justify-self-start"
+              className="text-sm font-medium underline-offset-2 underline row-[2] sm:row-[1] col-[2] sm:col-[3] justify-self-start"
             >
               {action.label}
             </button>

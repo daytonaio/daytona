@@ -133,7 +133,7 @@ export function RegionTable({
           value={globalFilter ?? ''}
           onValueChange={handleChangeFilter}
           placeholder="Search by Name or ID"
-          containerClassName="max-w-sm"
+          containerClassName="min-w-0 flex-1 sm:max-w-sm"
         />
       </div>
       <TableContainer

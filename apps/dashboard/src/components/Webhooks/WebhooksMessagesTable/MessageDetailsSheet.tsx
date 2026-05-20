@@ -45,7 +45,7 @@ export function MessageDetailsSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-dvw sm:w-[520px] p-0 flex flex-col gap-0 [&>button]:hidden" side="right">
         <SheetHeader className="flex flex-row items-center justify-between p-4 px-5 space-y-0">
-          <SheetTitle className="text-lg font-medium">Message Details</SheetTitle>
+          <SheetTitle>Message Details</SheetTitle>
           <div className="flex items-center">
             <Button variant="ghost" size="icon-sm" disabled={!hasPrev} onClick={() => onNavigate('prev')}>
               <ChevronUp className="size-4" />

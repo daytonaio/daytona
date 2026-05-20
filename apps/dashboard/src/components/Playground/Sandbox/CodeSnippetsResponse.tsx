@@ -336,7 +336,7 @@ const SandboxCodeSnippetsResponse = ({ className }: { className?: string }) => {
                 >
                   <div className="flex items-center text-sm">
                     <img src={language.icon} alt={`${language.label} icon`} className="w-4 h-4" />
-                    <span className="ml-2">{language.label}</span>
+                    <span className="ml-2 hidden xs:block">{language.label}</span>
                   </div>
                 </TabsTrigger>
               ))}

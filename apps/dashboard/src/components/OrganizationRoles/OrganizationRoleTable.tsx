@@ -166,14 +166,14 @@ export function OrganizationRoleTable({
 
   return (
     <>
-      <div className="flex min-h-0 flex-1 flex-col pt-2">
-        <div className="mb-3">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 pt-2">
+        <div className="flex items-center gap-2">
           <SearchInput
             debounced
             value={globalFilter}
             onValueChange={handleChangeFilter}
             placeholder="Search by Name, Description, or Permission"
-            containerClassName="max-w-sm"
+            containerClassName="min-w-0 flex-1 sm:max-w-sm"
           />
         </div>
         <TableContainer

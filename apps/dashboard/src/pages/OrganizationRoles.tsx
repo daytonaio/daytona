@@ -6,7 +6,7 @@
 import { CreateOrganizationRoleSheet } from '@/components/OrganizationRoles/CreateOrganizationRoleSheet'
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { OrganizationRoleTable } from '@/components/OrganizationRoles/OrganizationRoleTable'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { useApi } from '@/hooks/useApi'
 import { useOrganizationRoles } from '@/hooks/useOrganizationRoles'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
@@ -109,12 +109,13 @@ const OrganizationRoles: React.FC = () => {
 
   return (
     <PageLayout>
-      <PageHeader>
-        <PageTitle>Roles</PageTitle>
-        <CreateOrganizationRoleSheet className="ml-auto" onCreateRole={handleCreateRole} ref={createRoleSheetRef} />
-      </PageHeader>
+      <PageHeader />
 
       <PageContent>
+        <PageIntro
+          title="Roles"
+          actions={<CreateOrganizationRoleSheet onCreateRole={handleCreateRole} ref={createRoleSheetRef} />}
+        />
         <OrganizationRoleTable
           data={roles}
           loadingData={loadingRoles}

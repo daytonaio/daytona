@@ -8,7 +8,8 @@ import { CreateRegion, CreateRegionResponse } from '@daytona/api-client'
 import { useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { z } from 'zod'
-import { CheckIcon, CopyIcon, EyeIcon, EyeOffIcon, Plus } from 'lucide-react'
+import { CheckIcon, CopyIcon, EyeIcon, EyeOffIcon } from 'lucide-react'
+import { CreateResourceButton } from '@/components/CreateResourceButton'
 import { Button } from '@/components/ui/button'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -162,15 +163,12 @@ export const CreateRegionSheet: React.FC<CreateRegionSheetProps> = ({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="default" size="sm" disabled={loadingData} className="w-auto px-4">
-          <Plus className="w-4 h-4" />
-          Create Region
-        </Button>
+        <CreateResourceButton resource="Region" disabled={loadingData} />
       </SheetTrigger>
 
       <SheetContent className="w-dvw sm:w-[500px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle className="text-2xl">{createdRegion ? 'New Region Created' : 'Create New Region'}</SheetTitle>
+          <SheetTitle>{createdRegion ? 'Region Created' : 'Create Region'}</SheetTitle>
           <SheetDescription className="sr-only">
             {!createdRegion
               ? 'Add a new region for grouping runners and sandboxes.'
@@ -178,7 +176,7 @@ export const CreateRegionSheet: React.FC<CreateRegionSheetProps> = ({
           </SheetDescription>
         </SheetHeader>
 
-        <ScrollArea fade="mask" className="flex-1 min-h-0">
+        <ScrollArea fade="mask" fadeOffset={30} className="flex-1 min-h-0">
           <div className="p-5">
             {showCredentials ? (
               <div className="space-y-6">

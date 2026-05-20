@@ -8,6 +8,7 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { VariantProps, cva } from 'class-variance-authority'
 import { PanelLeft } from 'lucide-react'
 import * as React from 'react'
+import TooltipButton from '../TooltipButton'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -217,7 +218,7 @@ const Sidebar = React.forwardRef<
         {/* This is what handles the sidebar gap on desktop */}
         <div
           className={cn(
-            'duration-200 relative h-svh w-[--sidebar-width] bg-transparent transition-[width] ease-linear',
+            'duration-200 relative h-svh w-[--sidebar-width] bg-transparent transition-[width] ease-out',
             'group-data-[collapsible=offcanvas]:w-0',
             'group-data-[side=right]:rotate-180',
             variant === 'floating' || variant === 'inset'
@@ -227,7 +228,7 @@ const Sidebar = React.forwardRef<
         />
         <div
           className={cn(
-            'duration-200 fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] ease-linear md:flex',
+            'duration-200 fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] ease-out md:flex',
             isBannerVisible ? 'md:top-12 md:bottom-0 md:h-[calc(100svh-3rem)]' : '',
             side === 'left'
               ? 'left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
@@ -258,11 +259,13 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
     const { toggleSidebar } = useSidebar()
 
     return (
-      <Button
+      <TooltipButton
         ref={ref}
+        tooltipText="Toggle Sidebar"
         data-sidebar="trigger"
         variant="ghost"
         size="icon"
+        side="right"
         className={cn('h-5 w-5', className)}
         onClick={(event) => {
           onClick?.(event)
@@ -271,8 +274,7 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
         {...props}
       >
         <PanelLeft size={20} strokeWidth={1.5} className="w-5 h-5" />
-        <span className="sr-only">Toggle Sidebar</span>
-      </Button>
+      </TooltipButton>
     )
   },
 )
@@ -291,7 +293,7 @@ const SidebarRail = React.forwardRef<HTMLButtonElement, React.ComponentProps<'bu
         onClick={toggleSidebar}
         title="Toggle Sidebar"
         className={cn(
-          'absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex',
+          'absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-out after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex',
           '[[data-side=left]_&]:cursor-w-resize [[data-side=right]_&]:cursor-e-resize',
           '[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize',
           'group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full group-data-[collapsible=offcanvas]:hover:bg-sidebar',
@@ -441,7 +443,7 @@ const SidebarMenuItem = React.forwardRef<HTMLLIElement, React.ComponentProps<'li
 SidebarMenuItem.displayName = 'SidebarMenuItem'
 
 const sidebarMenuButtonVariants = cva(
-  'peer/menu-button flex w-full items-center px-2 gap-2 overflow-hidden rounded-md text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[active=true]:bg-muted data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!py-2 group-data-[collapsible=icon]:!px-2 [&>span:last-child]:truncate [&>svg]:shrink-0',
+  'peer/menu-button flex w-full items-center px-2 gap-2 overflow-hidden rounded-md text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:text-sidebar-accent-foreground data-[active=true]:bg-muted data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!py-2 group-data-[collapsible=icon]:!px-2 [&>span:last-child]:truncate [&>svg]:shrink-0',
   {
     variants: {
       variant: {

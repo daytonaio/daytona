@@ -29,7 +29,7 @@ function TabsList({
         data-slot="tabs-list"
         className={cn(
           variant === 'underline'
-            ? 'inline-flex items-center w-full bg-transparent border-b border-border rounded-none h-auto p-0 gap-0 justify-start shrink-0 text-muted-foreground'
+            ? 'inline-flex items-center bg-transparent border-b border-border rounded-none h-auto p-0 gap-0 justify-start shrink-0 text-muted-foreground'
             : 'inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground',
           className,
         )}

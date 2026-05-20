@@ -3,15 +3,19 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { WebhookEndpointDetailsPageSkeleton } from '@/components/Webhooks/WebhookEndpointDetailsSkeleton'
+import { WebhooksPageSkeleton } from '@/components/Webhooks/WebhooksPageSkeleton'
+import { RoutePath } from '@/enums/RoutePath'
 import { useWebhookAppPortalAccessQuery } from '@/hooks/queries/useWebhookAppPortalAccessQuery'
 import { useWebhookInitializationStatusQuery } from '@/hooks/queries/useWebhookInitializationStatusQuery'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { cn } from '@/lib/utils'
 import { RefreshCcw } from 'lucide-react'
 import React from 'react'
+import { useLocation } from 'react-router-dom'
 import { SvixProvider as SvixReactProvider } from 'svix-react'
 
 interface SvixProviderProps {
@@ -20,6 +24,8 @@ interface SvixProviderProps {
 
 export function SvixProvider({ children }: SvixProviderProps) {
   const { selectedOrganization } = useSelectedOrganization()
+  const location = useLocation()
+  const isWebhooksListPage = location.pathname === RoutePath.WEBHOOKS
   const {
     data: appPortalAccess,
     isLoading: isLoadingAppPortalAccess,
@@ -41,35 +47,23 @@ export function SvixProvider({ children }: SvixProviderProps) {
   }
 
   if (isLoading) {
-    return (
-      <PageLayout>
-        <PageHeader>
-          <PageTitle>Webhooks</PageTitle>
-        </PageHeader>
-        <PageContent>
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-6 w-48" />
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </CardContent>
-          </Card>
-        </PageContent>
-      </PageLayout>
-    )
+    if (isWebhooksListPage) {
+      return <WebhooksPageSkeleton />
+    }
+
+    return <WebhookEndpointDetailsPageSkeleton />
   }
 
   if (error || !appPortalAccess?.token || !initStatus?.svixApplicationId) {
     return (
-      <PageLayout>
-        <PageHeader>
-          <PageTitle>Webhooks</PageTitle>
-        </PageHeader>
-        <PageContent>
-          <Card>
+      <PageLayout contained={isWebhooksListPage}>
+        <PageHeader />
+        <PageContent
+          size={isWebhooksListPage ? 'full' : 'default'}
+          className={cn({ '!p-0 overflow-hidden': isWebhooksListPage })}
+        >
+          <PageIntro title="Webhooks" className={cn({ 'mb-8 px-4 pt-4': isWebhooksListPage })} />
+          <Card className={cn({ 'mx-4': isWebhooksListPage })}>
             <CardHeader>
               <CardTitle className="text-center">Oops, something went wrong</CardTitle>
             </CardHeader>

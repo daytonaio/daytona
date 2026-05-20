@@ -20,12 +20,16 @@ import { cn, getRelativeTimeString } from '@/lib/utils'
 import { SnapshotDto, SnapshotState } from '@daytona/api-client'
 import { MagnifyingGlassIcon } from '@phosphor-icons/react'
 import { ChevronDown, ChevronUp, CircleAlert, Pause, Play, Trash2, X } from 'lucide-react'
-import React from 'react'
+import React, { Ref, useImperativeHandle, useState } from 'react'
+
+export interface SnapshotSheetRef {
+  open: () => void
+  close: () => void
+}
 
 export interface SnapshotSheetProps {
+  ref?: Ref<SnapshotSheetRef>
   snapshotId?: string | null
-  snapshot: SnapshotDto | null
-  open: boolean
   onOpenChange: (open: boolean) => void
   getRegionName: (regionId: string) => string | undefined
   onNavigate: (direction: 'prev' | 'next') => void
@@ -119,7 +123,7 @@ function getStateLabel(state: SnapshotState) {
     return 'Deleting'
   }
 
-  return state
+  return String(state)
     .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ')
@@ -212,9 +216,8 @@ function SnapshotSheetEmptyState({ error }: { error: boolean }) {
 }
 
 export function SnapshotSheet({
+  ref,
   snapshotId,
-  snapshot,
-  open,
   onOpenChange,
   getRegionName,
   onNavigate,
@@ -227,6 +230,18 @@ export function SnapshotSheet({
   onDeactivate,
   onDelete,
 }: SnapshotSheetProps) {
+  const [open, setOpen] = useState(false)
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen)
+    onOpenChange(isOpen)
+  }
+
+  useImperativeHandle(ref, () => ({
+    open: () => setOpen(true),
+    close: () => setOpen(false),
+  }))
+
   const {
     data: fetchedSnapshot,
     isLoading: snapshotIsLoading,
@@ -234,10 +249,10 @@ export function SnapshotSheet({
     isError: snapshotIsError,
     error: snapshotError,
   } = useSnapshotQuery(snapshotId, {
-    enabled: open && !snapshot && !!snapshotId,
+    enabled: open && !!snapshotId,
   })
 
-  const activeSnapshot = snapshot ?? fetchedSnapshot
+  const activeSnapshot = fetchedSnapshot
   const loadingSnapshot = !activeSnapshot && (snapshotIsLoading || snapshotIsFetching)
   const snapshotNotFound = snapshotIsError && getSnapshotQueryErrorStatus(snapshotError) === 404
   const regionNames = activeSnapshot?.regionIds?.map((id) => getRegionName(id) ?? id) ?? []
@@ -246,10 +261,8 @@ export function SnapshotSheet({
   const showDeactivate = !!activeSnapshot && writePermitted && activeSnapshot.state === SnapshotState.ACTIVE
   const showDelete = !!activeSnapshot && deletePermitted && activeSnapshot.state !== SnapshotState.REMOVING
 
-  if (!snapshotId && !activeSnapshot) return null
-
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent
         side="right"
         showCloseButton={false}
@@ -257,7 +270,7 @@ export function SnapshotSheet({
       >
         <SheetHeader className="flex flex-row items-center justify-between p-4 px-5 space-y-0">
           <div className="min-w-0">
-            <SheetTitle className="text-lg font-medium">Snapshot Details</SheetTitle>
+            <SheetTitle>Snapshot Details</SheetTitle>
           </div>
           <div className="flex items-center justify-end shrink-0">
             <Button variant="ghost" size="icon-sm" disabled={!hasPrev} onClick={() => onNavigate('prev')}>
@@ -268,7 +281,7 @@ export function SnapshotSheet({
               <ChevronDown className="size-4" />
               <span className="sr-only">Next snapshot</span>
             </Button>
-            <Button variant="ghost" size="icon-sm" onClick={() => onOpenChange(false)}>
+            <Button variant="ghost" size="icon-sm" onClick={() => handleOpenChange(false)}>
               <X className="size-4" />
               <span className="sr-only">Close</span>
             </Button>

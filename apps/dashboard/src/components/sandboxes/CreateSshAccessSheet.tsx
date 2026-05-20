@@ -101,7 +101,7 @@ export function CreateSshAccessSheet({ sandboxId, open, onOpenChange }: CreateSs
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-dvw sm:w-[400px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle className="text-2xl">{sshAccess ? 'SSH Access Created' : 'Create SSH Access'}</SheetTitle>
+          <SheetTitle>{sshAccess ? 'SSH Access Created' : 'Create SSH Access'}</SheetTitle>
           <SheetDescription className="sr-only">
             {sshAccess ? 'Your SSH access has been created successfully.' : 'Set the expiration time for SSH access.'}
           </SheetDescription>

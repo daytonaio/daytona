@@ -74,7 +74,7 @@ function TableContainer({
       ref={containerRef}
       data-slot="table-container"
       className={cn(
-        'relative w-full overflow-auto border border-border bg-table-cell overscroll-x-none rounded-md scrollbar-sm has-[[data-slot=empty]]:overflow-hidden',
+        'relative w-full overflow-auto border border-border bg-table-cell overscroll-x-none rounded-md scrollbar-sm has-[[data-slot=empty]]:overflow-x-hidden',
         className,
       )}
       {...props}
@@ -149,7 +149,7 @@ function TableHead({ className, style, sticky, ...props }: React.ComponentProps<
       data-slot="table-head"
       data-sticky-state={stickySide}
       className={cn(
-        'text-muted-foreground border-b h-8 px-3 text-left align-middle font-medium whitespace-nowrap text-sm [&_*]:text-sm bg-table-header [&:has([data-sort])]:text-foreground',
+        'text-muted-foreground border-b h-8 px-3 text-left align-middle !font-mono font-medium !uppercase whitespace-nowrap !text-xs [&_*]:!font-mono [&_*]:!uppercase [&_*]:!text-xs bg-table-header [&:has([data-sort])]:text-foreground',
         sticky && 'sticky z-[2]',
         stickySide === 'left' && 'left-0',
         stickySide === 'right' && 'right-0',
@@ -210,7 +210,7 @@ function TableEmptyState({
     return (
       <div
         data-slot="empty"
-        className={cn('absolute inset-x-0 top-8 bottom-0 flex items-center justify-center p-4', className)}
+        className={cn('absolute inset-x-0 top-8 bottom-0 flex justify-center p-4 items-start', className)}
       >
         <Empty className="w-full max-w-xl border-none py-8 bg-transparent">
           <EmptyHeader className="w-full">

@@ -158,7 +158,7 @@ export function RunnerTable({
           value={globalFilter ?? ''}
           onValueChange={handleChangeFilter}
           placeholder="Search by ID, Name, or Region"
-          containerClassName="max-w-sm"
+          containerClassName="min-w-0 flex-1 sm:max-w-sm"
         />
         {onRefreshIntervalChange && onRefresh && (
           <RefreshSegmentedButton
@@ -300,7 +300,7 @@ const getStateBadgeVariant = (state: RunnerState): BadgeProps['variant'] => {
 }
 
 const getStateLabel = (state: RunnerState) => {
-  return state
+  return String(state)
     .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ')

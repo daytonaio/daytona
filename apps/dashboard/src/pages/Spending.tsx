@@ -4,7 +4,7 @@
  */
 
 import { BillableMetricCode, OrganizationUsage } from '@/billing-api/types/OrganizationUsage'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { AggregatedUsageChart, ResourceUsageBreakdown, UsageSummary } from '@/components/spending/AggregatedUsageChart'
 import { CostBreakdown } from '@/components/spending/CostBreakdown'
 import { UsageChartData } from '@/components/spending/ResourceUsageChart'
@@ -131,11 +131,10 @@ const Spending = () => {
 
   return (
     <PageLayout>
-      <PageHeader>
-        <PageTitle>Spending</PageTitle>
-      </PageHeader>
+      <PageHeader />
 
       <PageContent>
+        <PageIntro title="Spending" />
         {analyticsAvailable && (
           <Card>
             <CardHeader className="flex flex-row items-center gap-2 space-y-0 border-b p-4">

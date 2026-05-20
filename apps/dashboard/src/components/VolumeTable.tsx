@@ -192,16 +192,18 @@ export function VolumeTable({
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
       <div className="flex items-center gap-2">
-        <SearchInput
-          debounced
-          value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-          onValueChange={(value) => table.getColumn('name')?.setFilterValue(value)}
-          placeholder="Search by Name, ID, or State"
-          containerClassName="max-w-sm"
-        />
-        {table.getColumn('state') && (
-          <DataTableFacetedFilter column={table.getColumn('state')} title="State" options={statuses} />
-        )}
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <SearchInput
+            debounced
+            value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+            onValueChange={(value) => table.getColumn('name')?.setFilterValue(value)}
+            placeholder="Search by Name, ID, or State"
+            containerClassName="min-w-0 flex-1 sm:max-w-sm"
+          />
+          {table.getColumn('state') && (
+            <DataTableFacetedFilter column={table.getColumn('state')} title="State" options={statuses} />
+          )}
+        </div>
       </div>
       <TableContainer
         className={isEmpty ? 'min-h-[26rem]' : undefined}
@@ -342,7 +344,7 @@ const getStateBadgeVariant = (state: VolumeState): BadgeProps['variant'] => {
 }
 
 const getStateLabel = (state: VolumeState) => {
-  return state
+  return String(state)
     .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ')

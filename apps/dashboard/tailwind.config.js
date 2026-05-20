@@ -19,6 +19,9 @@ module.exports = {
       screens: {
         xs: '480px',
       },
+      fontSize: {
+        '3.5xl': ['2rem', { lineHeight: '2.375rem' }],
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',

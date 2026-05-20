@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { CreateResourceButton } from '@/components/CreateResourceButton'
 import { Button } from '@/components/ui/button'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -21,7 +22,6 @@ import { useCreateVolumeMutation } from '@/hooks/mutations/useCreateVolumeMutati
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { useForm } from '@tanstack/react-form'
-import { Plus } from 'lucide-react'
 import { Ref, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -108,14 +108,11 @@ export const CreateVolumeSheet = ({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="default" size="sm" disabled={disabled} className={className}>
-          <Plus className="w-4 h-4" />
-          Create Volume
-        </Button>
+        <CreateResourceButton resource="Volume" disabled={disabled} className={className} />
       </SheetTrigger>
       <SheetContent className="w-dvw sm:w-[420px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle className="text-2xl">Create New Volume</SheetTitle>
+          <SheetTitle>Create Volume</SheetTitle>
           <SheetDescription className="sr-only">Create a new volume for shared, persistent storage.</SheetDescription>
         </SheetHeader>
 
