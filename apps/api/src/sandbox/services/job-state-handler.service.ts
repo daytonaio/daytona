@@ -20,7 +20,7 @@ import { BackupState } from '../enums/backup-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { sanitizeSandboxError } from '../utils/sanitize-error.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
-import { RunnerService } from './runner.service'
+import { RunnerUsageService } from './runner-usage.service'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { Sandbox } from '../entities/sandbox.entity'
 import { RedisLockProvider } from '../common/redis-lock.provider'
@@ -47,7 +47,7 @@ export class JobStateHandlerService {
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly eventEmitter: EventEmitter2,
-    private readonly runnerService: RunnerService,
+    private readonly runnerUsageService: RunnerUsageService,
     @InjectRepository(Runner)
     private readonly runnerRepository: Repository<Runner>,
   ) {}
@@ -635,6 +635,11 @@ export class JobStateHandlerService {
       const memDeltaForQuota = isHotResize ? (payload.memory ?? sandbox.mem) - sandbox.mem : 0
       const diskDeltaForQuota = (payload.disk ?? sandbox.disk) - sandbox.disk // Disk only increases
 
+      // Runner deltas — mirror what the admission gate reserved, to release the slot.
+      const cpuDeltaForRunner = Math.max(0, (payload.cpu ?? sandbox.cpu) - sandbox.cpu)
+      const memDeltaForRunner = Math.max(0, (payload.memory ?? sandbox.mem) - sandbox.mem)
+      const diskDeltaForRunner = Math.max(0, (payload.disk ?? sandbox.disk) - sandbox.disk)
+
       try {
         const updateData: Partial<Sandbox> = {}
 
@@ -678,14 +683,14 @@ export class JobStateHandlerService {
 
         await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
       } finally {
-        // Release the per-runner pending allocation slot regardless of COMPLETED vs FAILED —
-        // either way the runner has finished with this resize. Safe-wrapped so a Redis blip
-        // doesn't shadow the original error; 60s TTL is the safety net for any swallow.
-        await this.runnerService.safeDecrementPendingRunnerAllocation(
+        // Release the per-runner pending usage slot on COMPLETED or FAILED — either way the
+        // runner is done resizing. Safe-wrapped so a Redis blip can't shadow the original
+        // error; the 2-minute TTL is the backstop.
+        await this.runnerUsageService.safeDecrementPendingRunnerUsage(
           job.runnerId,
-          cpuDeltaForQuota,
-          memDeltaForQuota,
-          diskDeltaForQuota,
+          cpuDeltaForRunner,
+          memDeltaForRunner,
+          diskDeltaForRunner,
         )
       }
     } catch (error) {
