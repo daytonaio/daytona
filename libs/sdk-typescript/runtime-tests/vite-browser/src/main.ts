@@ -56,8 +56,12 @@ if (apiKey && apiUrl) {
   const daytona = new Daytona({ apiKey, apiUrl })
 
   try {
-    const r = await daytona.list()
-    result.listOk = Array.isArray(r.items)
+    const iter = daytona.list()
+    if (typeof (iter as any)[Symbol.asyncIterator] !== 'function') {
+      throw new Error('list() did not return an async iterator')
+    }
+    const first = await iter.next()
+    result.listOk = typeof first === 'object' && first !== null && 'done' in first
   } catch (e: unknown) {
     result.listError = e instanceof Error ? e.message : String(e)
     result.listOk = false

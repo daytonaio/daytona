@@ -10,11 +10,12 @@ export async function sandboxesHandler(_req: HttpRequest, _ctx: InvocationContex
     apiKey: process.env.DAYTONA_API_KEY,
     apiUrl: process.env.DAYTONA_API_URL,
   })
-  const r: any = await daytona.list()
+  const iter = daytona.list()
+  const listOk = typeof (iter as any)[Symbol.asyncIterator] === 'function' && typeof (await iter.next()) === 'object'
   return {
     jsonBody: {
       imageOk: image.dockerfile.includes('FROM alpine'),
-      listOk: Array.isArray(r.items),
+      listOk,
     },
   }
 }
