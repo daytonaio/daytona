@@ -10,6 +10,9 @@ import { Organization } from '../../organization/entities/organization.entity'
 import { InjectRepository } from '@nestjs/typeorm'
 import { WebhookInitialization } from '../entities/webhook-initialization.entity'
 import { Repository } from 'typeorm'
+import { OrganizationDeletedEvent } from '../../organization/events/organization-deleted.event'
+import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
+import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
 
 @Injectable()
 export class WebhookService implements OnModuleInit {
@@ -62,6 +65,36 @@ export class WebhookService implements OnModuleInit {
     } catch (error) {
       this.logger.error(`Failed to create Svix application for organization ${organization.id}:`, error)
     }
+  }
+
+  @OnAsyncEvent({
+    event: OrganizationEvents.DELETED,
+  })
+  async handleOrganizationDeletedEvent(payload: OrganizationDeletedEvent): Promise<void> {
+    const { entityManager, organizationId } = payload
+
+    if (!this.svix) {
+      this.logger.debug('Svix not configured, skipping webhook deletion')
+      return
+    }
+
+    const webhookInitialization = await this.getInitializationStatus(organizationId)
+    if (!webhookInitialization) {
+      this.logger.debug(
+        `Webhook initialization not found for organization ${organizationId}, skipping webhook deletion`,
+      )
+      return
+    }
+
+    if (webhookInitialization.svixApplicationId) {
+      try {
+        await this.svix.application.delete(organizationId)
+      } catch (error) {
+        this.logger.error(`Failed to delete Svix application for organization ${organizationId}:`, error)
+      }
+    }
+
+    await entityManager.delete(WebhookInitialization, { organizationId })
   }
 
   /**

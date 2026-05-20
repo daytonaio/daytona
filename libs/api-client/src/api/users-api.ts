@@ -34,6 +34,41 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
     return {
         /**
          * 
+         * @summary Delete authenticated user account
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteAuthenticatedUser: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/users/me`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Enroll in SMS MFA
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -234,6 +269,18 @@ export const UsersApiFp = function(configuration?: Configuration) {
     return {
         /**
          * 
+         * @summary Delete authenticated user account
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteAuthenticatedUser(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteAuthenticatedUser(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UsersApi.deleteAuthenticatedUser']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Enroll in SMS MFA
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -306,6 +353,15 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
     return {
         /**
          * 
+         * @summary Delete authenticated user account
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteAuthenticatedUser(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.deleteAuthenticatedUser(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Enroll in SMS MFA
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -359,6 +415,16 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
  * UsersApi - object-oriented interface
  */
 export class UsersApi extends BaseAPI {
+    /**
+     * 
+     * @summary Delete authenticated user account
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public deleteAuthenticatedUser(options?: RawAxiosRequestConfig) {
+        return UsersApiFp(this.configuration).deleteAuthenticatedUser(options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * 
      * @summary Enroll in SMS MFA
