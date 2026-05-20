@@ -326,6 +326,13 @@
   "nx": {
     "includedScripts": []
   },
+  "resolutions": {
+    "handlebars": "4.7.9",
+    "fast-xml-parser@5.2.5": "5.3.5",
+    "protobufjs@^7.2.5": "7.5.5",
+    "protobufjs@^7.3.2": "7.5.5",
+    "protobufjs@^7.5.3": "7.5.5"
+  },
   "lint-staged": {
     "apps/api/src/migrations/**/*-migration.ts": [
       "bash apps/api/scripts/validate-migration-paths.sh"
