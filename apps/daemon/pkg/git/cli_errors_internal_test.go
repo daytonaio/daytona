@@ -181,4 +181,19 @@ func TestRedactCredentials(t *testing.T) {
 		got := redactCredentials(raw, &http.BasicAuth{})
 		require.Equal(t, raw, got)
 	})
+
+	t.Run("username substring of password does not leak password tail", func(t *testing.T) {
+		// Regression: when username is a substring of password (e.g.
+		// username="foo", password="foopassword"), redacting the username
+		// first would turn "foopassword" into "***password" and leak the
+		// "password" suffix. Password must be redacted first.
+		overlapping := &http.BasicAuth{
+			Username: "foo",
+			Password: "foopassword",
+		}
+		raw := "leaked: foopassword and foo"
+		got := redactCredentials(raw, overlapping)
+		require.NotContains(t, got, "password", "password tail leaked: %q", got)
+		require.NotContains(t, got, "foopassword")
+	})
 }

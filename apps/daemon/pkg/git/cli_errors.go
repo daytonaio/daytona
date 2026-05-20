@@ -135,15 +135,22 @@ func contains(haystack, needle string) bool {
 // redactCredentials replaces the basic-auth username and password with `***`
 // in the given string. Used to scrub captured git output before it surfaces
 // in error messages (where it would otherwise leak into logs / API responses).
+//
+// Order matters: replace the password first. If the username happens to be a
+// substring of the password (e.g. username="foo", password="foopassword"),
+// redacting the username first turns "foopassword" into "***password" and
+// the remaining "password" tail leaks. Replacing the password first avoids
+// this. We can't sort by length generically because the strings are short
+// enough that an explicit ordering is clearer than a sort.
 func redactCredentials(s string, auth *http.BasicAuth) string {
 	if auth == nil {
 		return s
 	}
-	if auth.Username != "" {
-		s = strings.ReplaceAll(s, auth.Username, "***")
-	}
 	if auth.Password != "" {
 		s = strings.ReplaceAll(s, auth.Password, "***")
+	}
+	if auth.Username != "" {
+		s = strings.ReplaceAll(s, auth.Username, "***")
 	}
 	return s
 }

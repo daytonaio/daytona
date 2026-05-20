@@ -20,12 +20,38 @@ func TestBuildPullArgs(t *testing.T) {
 	require.Equal(t, []string{
 		"-C", "/work-dir",
 		"-c", "credential.helper=",
-		"-c", "http.sslVerify=false",
 		"-c", "core.hooksPath=/dev/null",
 		"pull",
-		"origin",
+		"--ff-only",
 		"--progress",
+		"origin",
 	}, got)
+}
+
+func TestBuildPullArgs_VerifiesTLS(t *testing.T) {
+	// Pull must NOT skip TLS verification (parity with go-git PullOptions,
+	// which does not set InsecureSkipTLS). Skipping verify would be a MITM
+	// risk for the basic-auth token.
+	args := buildPullArgs("/work-dir")
+	for _, arg := range args {
+		require.NotEqual(t, "http.sslVerify=false", arg,
+			"pull args must NOT disable TLS verification")
+	}
+}
+
+func TestBuildPullArgs_FastForwardOnly(t *testing.T) {
+	// Pull must be fast-forward-only to match go-git's w.Pull() behavior
+	// (which returns ErrNonFastForwardUpdate on divergent histories instead
+	// of producing a merge commit).
+	args := buildPullArgs("/work-dir")
+	found := false
+	for _, arg := range args {
+		if arg == "--ff-only" {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "pull args must include --ff-only")
 }
 
 func TestBuildPullArgs_NeverEmbedsCredsInArgs(t *testing.T) {

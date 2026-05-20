@@ -24,7 +24,6 @@ func TestBuildPushArgs(t *testing.T) {
 	require.Equal(t, []string{
 		"-C", "/work-dir",
 		"-c", "credential.helper=",
-		"-c", "http.sslVerify=false",
 		"-c", "core.hooksPath=/dev/null",
 		"push",
 		"origin",
@@ -55,6 +54,17 @@ func TestBuildPushArgs_DisablesHooks(t *testing.T) {
 		}
 	}
 	require.True(t, found, "push args must disable hooks via core.hooksPath=/dev/null")
+}
+
+func TestBuildPushArgs_VerifiesTLS(t *testing.T) {
+	// Push must NOT skip TLS verification (parity with go-git PushOptions,
+	// which does not set InsecureSkipTLS). Skipping verify would be a MITM
+	// risk for the basic-auth token.
+	args := buildPushArgs("/work-dir", "refs/heads/main")
+	for _, arg := range args {
+		require.NotEqual(t, "http.sslVerify=false", arg,
+			"push args must NOT disable TLS verification")
+	}
 }
 
 func TestPushCLI_EnvContainsAskpassAndCreds(t *testing.T) {
@@ -91,7 +101,16 @@ func initTestRepoOnBranch(t *testing.T, branch string) string {
 
 	dir := t.TempDir()
 	run := func(args ...string) {
-		cmd := exec.Command(gitBin, append([]string{"-C", dir}, args...)...)
+		// Force-disable global git config that can break these tests on dev
+		// machines (commit hooks set in ~/.gitconfig, gpg signing requirements,
+		// commit signoff templates, etc.).
+		base := []string{
+			"-C", dir,
+			"-c", "core.hooksPath=/dev/null",
+			"-c", "commit.gpgSign=false",
+			"-c", "tag.gpgSign=false",
+		}
+		cmd := exec.Command(gitBin, append(base, args...)...)
 		cmd.Env = append(os.Environ(),
 			"GIT_AUTHOR_NAME=test", "GIT_AUTHOR_EMAIL=test@test",
 			"GIT_COMMITTER_NAME=test", "GIT_COMMITTER_EMAIL=test@test",
