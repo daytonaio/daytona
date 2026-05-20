@@ -1,4 +1,5 @@
-FROM node:24-slim AS daytona
+# ── builder ───────────────────────────────────────────────────────────────────
+FROM node:24-slim AS builder
 
 ENV CI=true
 
@@ -32,8 +33,24 @@ COPY libs/billing-api-client/ libs/billing-api-client/
 ENV NX_DAEMON=false
 
 RUN yarn nx build api --configuration=production --nxBail=true
-
 RUN VITE_API_URL=%DAYTONA_BASE_API_URL%/api yarn nx build dashboard --configuration=production --nxBail=true --output-style=stream
+
+# ── runtime ───────────────────────────────────────────────────────────────────
+FROM node:24-slim AS daytona
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /daytona
+
+# Nx writes a minimal package.json into dist/apps/api listing only the
+# external modules the bundle actually requires at runtime (generatePackageJson:
+# true in project.json). Install from that instead of copying the full monorepo
+# node_modules which includes all devDependencies.
+COPY --from=builder /daytona/dist/apps/api/package.json ./package.json
+RUN npm install --omit=dev --legacy-peer-deps
+
+COPY --from=builder /daytona/dist ./dist
 
 ARG VERSION=0.0.1
 ENV VERSION=${VERSION}
