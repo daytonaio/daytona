@@ -7,7 +7,7 @@ async function main() {
     limit: 10,
     labels: { env: 'dev' },
     states: [SandboxState.STARTED],
-    sort: SandboxListSortField.CREATEDAT,
+    sort: SandboxListSortField.CREATED_AT,
     order: SandboxListSortDirection.DESC,
   })) {
     console.log(sandbox.id)
