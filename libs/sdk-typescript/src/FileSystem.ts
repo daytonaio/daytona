@@ -358,6 +358,11 @@ export class FileSystem {
     const metadataMap = new Map<string, DownloadMetadata>()
     metadataMap.set(remotePath, {})
 
+    // Pre-resolve `stream` so the synchronous `onFileStream` callback below
+    // never needs to call `require()` — bare `require()` is unavailable in
+    // ESM under Next.js `serverExternalPackages` (issue #4771).
+    const { Transform } = await dynamicImport('stream', 'downloadFileStream progress tracking is not supported: ')
+
     return new Promise<Readable>((resolve, reject) => {
       let resolvedStream: Readable | null = null
 
@@ -367,7 +372,6 @@ export class FileSystem {
         metadataMap,
         (_source, fileStream, totalBytes) => {
           if (options.onProgress) {
-            const { Transform } = require('stream') as typeof import('stream')
             let bytesReceived = 0
             const progress = new Transform({
               transform(chunk, _encoding, callback) {
