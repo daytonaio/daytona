@@ -23,6 +23,8 @@ import {
 import { SandboxDto } from '../dto/sandbox.dto'
 
 export class SandboxOpenSearchSearchAdapter implements SandboxSearchAdapter, OnModuleInit {
+  private static readonly FIELDS_EXCLUDED_FROM_INDEX: ReadonlyArray<keyof Sandbox> = ['existingBackupSnapshots']
+
   private readonly logger = new Logger(SandboxOpenSearchSearchAdapter.name)
   private readonly indexName: string
   private readonly numberOfShards: number
@@ -56,17 +58,31 @@ export class SandboxOpenSearchSearchAdapter implements SandboxSearchAdapter, OnM
   }
 
   private async putIngestPipeline(): Promise<void> {
+    const excludedFields: ReadonlyArray<string> = SandboxOpenSearchSearchAdapter.FIELDS_EXCLUDED_FROM_INDEX
+    const jsonbFieldsToProcess = this.jsonbFields.filter((field) => !excludedFields.includes(field))
+
+    const processors: Record<string, unknown>[] = [
+      ...jsonbFieldsToProcess.map((field) => ({
+        json: {
+          field,
+          if: `ctx.${field} instanceof String`,
+          ignore_failure: true,
+        },
+      })),
+      ...excludedFields.map((field) => ({
+        remove: {
+          field,
+          ignore_failure: true,
+        },
+      })),
+    ]
+
     await this.client.ingest.putPipeline({
       id: this.pipelineName,
       body: {
-        description: 'Parses JSONB string fields into native JSON objects for indexing',
-        processors: this.jsonbFields.map((field) => ({
-          json: {
-            field,
-            if: `ctx.${field} instanceof String`,
-            ignore_failure: true,
-          },
-        })),
+        description:
+          'Parses JSONB string fields into native JSON objects for indexing and strips fields excluded from the index',
+        processors,
       },
     })
     this.logger.debug(`Created ingest pipeline: ${this.pipelineName}`)
