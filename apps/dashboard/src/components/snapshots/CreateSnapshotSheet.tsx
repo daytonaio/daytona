@@ -324,10 +324,6 @@ export const CreateSnapshotSheet = ({
                               <Label htmlFor={field.name} className="text-sm font-normal">
                                 Allocate GPU
                               </Label>
-                              <FieldDescription>
-                                Sandboxes created from this snapshot will own a GPU runner exclusively and are
-                                auto-deleted on first stop.
-                              </FieldDescription>
                             </div>
                           </div>
                         )}

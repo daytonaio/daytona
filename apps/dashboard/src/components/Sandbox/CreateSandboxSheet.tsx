@@ -620,9 +620,6 @@ export const CreateSandboxSheet = ({
                                       <Label htmlFor={field.name} className="text-sm font-normal">
                                         Allocate GPU
                                       </Label>
-                                      <FieldDescription>
-                                        Sandbox will own a GPU runner exclusively and is auto-deleted on first stop.
-                                      </FieldDescription>
                                     </div>
                                   </div>
                                 )}
@@ -632,9 +629,7 @@ export const CreateSandboxSheet = ({
                         </form.Subscribe>
                       </div>
                       <FieldDescription>
-                        {`Defaults: 1 vCPU, 1 GiB memory, 3 GiB storage.`}
-                        <br />
-                        {maxCpu ? ` Limits: ${maxCpu} vCPU, ${maxMemory} GiB memory, ${maxDisk} GiB storage.` : ''}
+                        If not specified, default values will be used (1 vCPU, 1 GiB memory, 3 GiB storage).
                       </FieldDescription>
                     </div>
                   </TabsContent>
