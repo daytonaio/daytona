@@ -31,34 +31,34 @@ You can access this documentation on a per-command basis by appending the \`--he
 Install the Daytona CLI to interact with Daytona sandboxes from the command line.
 
 <Tabs syncKey="language">
-<TabItem label="Mac/Linux">
+<TabItem label="Mac">
 
-  \`\`\`bash
-  brew install daytonaio/cli/daytona
-  \`\`\`
+\`\`\`bash
+brew install daytonaio/cli/daytona
+\`\`\`
 
-</TabItem>
-<TabItem label="Windows">
-
-  \`\`\`bash
-  powershell -Command "irm https://get.daytona.io/windows | iex"
-  \`\`\`
-
-</TabItem>
-</Tabs>
-
-After installing the Daytona CLI, use the \`daytona\` command to interact with Daytona Sandboxes from the command line.
-
-## Update
-
-To update the Daytona CLI to the latest version:
-
-<Tabs syncKey="language">
-<TabItem label="Mac/Linux">
+To upgrade the Daytona CLI to the latest version:
 
 \`\`\`bash
 brew upgrade daytonaio/cli/daytona
 \`\`\`
+
+</TabItem>
+<TabItem label="Linux">
+
+Choose the command for your Linux architecture. Both commands download the latest binary from GitHub releases and install it to \`/usr/local/bin\`, overwriting any existing version.
+
+For \`amd64\` (\`x86_64\`):
+
+  \`\`\`bash
+  sudo curl -fL https://github.com/daytonaio/daytona/releases/latest/download/daytona-linux-amd64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
+  \`\`\`
+
+For \`arm64\` (\`aarch64\`):
+
+  \`\`\`bash
+  sudo curl -fL https://github.com/daytonaio/daytona/releases/latest/download/daytona-linux-arm64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
+  \`\`\`
 
 </TabItem>
 <TabItem label="Windows">
@@ -69,6 +69,8 @@ powershell -Command "irm https://get.daytona.io/windows | iex"
 
 </TabItem>
 </Tabs>
+
+After installing the Daytona CLI, use the \`daytona\` command to interact with Daytona sandboxes from the command line.
 `
 
 // content to appear below the commands outline
