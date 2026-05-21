@@ -161,7 +161,7 @@ func (d *DockerClient) ContainerDiskResize(ctx context.Context, sandboxId string
 			d.logger.WarnContext(ctx, "Old sandbox preserved as for manual data recovery", "oldName", oldName)
 			_ = d.apiClient.ContainerRemove(ctx, sandboxId, container.RemoveOptions{Force: true})
 			_ = d.apiClient.ContainerRename(ctx, oldName, sandboxId)
-			return fmt.Errorf("failed to copy data: %w", err)
+			return err
 		}
 		d.logger.DebugContext(ctx, "Data copy completed")
 	} else {
