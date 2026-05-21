@@ -16,6 +16,13 @@
         "command": "tsc --noEmit --project libs/opencode-plugin/tsconfig.json"
       }
     },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "bun test --timeout 180000"
+      }
+    },
     "build": {
       "executor": "@nx/js:tsc",
       "inputs": ["default", "{projectRoot}/package.json", { "dependentTasksOutputFiles": "**/*", "transitive": true }],
