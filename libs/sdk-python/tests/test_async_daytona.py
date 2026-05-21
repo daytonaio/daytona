@@ -410,6 +410,27 @@ class TestAsyncDaytonaSharedSession:
         # The caller's original dict must NOT have been mutated either.
         assert "Content-Type" not in caller_headers
 
+    def test_retry_backoff_has_jitter_and_grows_with_attempt(self):
+        """Backoff is ``base * attempt + uniform(0, jitter)`` — must not be
+        a constant (we'd lock-step concurrent retries) and must grow with
+        attempt within the jitter window."""
+        from daytona.internal.shared_session import (
+            _RETRY_BACKOFF_BASE_S,
+            _RETRY_BACKOFF_JITTER_S,
+            _retry_backoff_seconds,
+        )
+
+        # Bounds for any given attempt.
+        for attempt in (1, 2):
+            samples = [_retry_backoff_seconds(attempt) for _ in range(200)]
+            lo = _RETRY_BACKOFF_BASE_S * attempt
+            hi = lo + _RETRY_BACKOFF_JITTER_S
+            assert all(
+                lo <= s <= hi for s in samples
+            ), f"attempt {attempt}: samples out of [{lo}, {hi}] -> {min(samples)}..{max(samples)}"
+            # Jitter must actually vary — refuse identical samples.
+            assert len(set(samples)) > 1, f"attempt {attempt}: backoff is constant"
+
 
 class TestAsyncDaytonaCreateValidation:
     @pytest.mark.asyncio
