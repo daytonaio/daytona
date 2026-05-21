@@ -69,7 +69,7 @@ func (e *Executor) pullSnapshot(ctx context.Context, job *apiclient.Job) (any, e
 }
 
 func (e *Executor) removeSnapshot(ctx context.Context, job *apiclient.Job) (any, error) {
-	return nil, e.docker.RemoveImage(ctx, job.ResourceId, true)
+	return nil, e.docker.RemoveImage(ctx, job.ResourceId, false)
 }
 
 func (e *Executor) inspectSnapshotInRegistry(ctx context.Context, job *apiclient.Job) (any, error) {
