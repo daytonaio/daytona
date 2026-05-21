@@ -24,6 +24,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCreateSandboxMutation } from '@/hooks/mutations/useCreateSandboxMutation'
 import { useSetOrganizationDefaultRegionMutation } from '@/hooks/mutations/useSetOrganizationDefaultRegionMutation'
+import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
 import { useSnapshotsQuery } from '@/hooks/queries/useSnapshotsQuery'
 import { useConfig } from '@/hooks/useConfig'
 import { useRegions } from '@/hooks/useRegions'
@@ -95,6 +96,7 @@ const buildBaseFormSchema = (maxCpu?: number, maxMemory?: number, maxDisk?: numb
     networkBlockAll: z.boolean().optional(),
     ephemeral: z.boolean().optional(),
     setAsDefaultRegion: z.boolean().optional(),
+    gpu: z.boolean().optional(),
   })
 
 const buildFormSchema = (maxCpu?: number, maxMemory?: number, maxDisk?: number) => {
@@ -137,6 +139,7 @@ const defaultValues: FormValues = {
   networkBlockAll: false,
   ephemeral: false,
   setAsDefaultRegion: false,
+  gpu: false,
 }
 
 const InfoTooltipButton = ({ className, ...props }: ComponentProps<'button'>) => {
@@ -182,6 +185,10 @@ export const CreateSandboxSheet = ({
   const canSetDefaultRegion =
     !selectedOrganization?.defaultRegionId &&
     authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
+
+  const { data: usageOverview } = useOrganizationUsageOverviewQuery({
+    organizationId: selectedOrganization?.id || '',
+  })
 
   const formSchema = useMemo(() => buildFormSchema(maxCpu, maxMemory, maxDisk), [maxCpu, maxMemory, maxDisk])
 
@@ -261,8 +268,13 @@ export const CreateSandboxSheet = ({
             ...baseParams,
             image: value.image,
             resources:
-              value.cpu || value.memory || value.disk
-                ? { cpu: value.cpu, memory: value.memory, disk: value.disk }
+              value.cpu || value.memory || value.disk || value.gpu
+                ? {
+                    cpu: value.cpu,
+                    memory: value.memory,
+                    disk: value.disk,
+                    gpu: value.gpu ? 1 : undefined,
+                  }
                 : undefined,
           })
         } else {
@@ -590,6 +602,34 @@ export const CreateSandboxSheet = ({
                             )
                           }}
                         </form.Field>
+                        <form.Subscribe selector={(state) => state.values.regionId}>
+                          {(regionId) => {
+                            const region = usageOverview?.regionUsage.find((r) => r.regionId === regionId)
+                            if ((region?.totalGpuQuota ?? 0) <= 0) return null
+                            return (
+                              <form.Field name="gpu">
+                                {(field) => (
+                                  <div className="flex items-start gap-2 pt-1">
+                                    <Checkbox
+                                      id={field.name}
+                                      className="mt-0.5"
+                                      checked={field.state.value ?? false}
+                                      onCheckedChange={(checked) => field.handleChange(checked === true)}
+                                    />
+                                    <div className="flex flex-col gap-1">
+                                      <Label htmlFor={field.name} className="text-sm font-normal">
+                                        Allocate GPU
+                                      </Label>
+                                      <FieldDescription>
+                                        Sandbox will own a GPU runner exclusively and is auto-deleted on first stop.
+                                      </FieldDescription>
+                                    </div>
+                                  </div>
+                                )}
+                              </form.Field>
+                            )
+                          }}
+                        </form.Subscribe>
                       </div>
                       <FieldDescription>
                         {`Defaults: 1 vCPU, 1 GiB memory, 3 GiB storage.`}

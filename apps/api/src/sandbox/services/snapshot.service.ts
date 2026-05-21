@@ -575,7 +575,7 @@ export class SnapshotService {
 
     // Do not allow creation of GPU snapshots if the region has no GPU quota at all.
     if (gpu && gpu > 0 && region.enforceQuotas && (!regionQuota || regionQuota.totalGpuQuota === 0)) {
-      throw new BadRequestError(`GPU quota exceeded. Maximum allowed: ${regionQuota.totalGpuQuota}`)
+      throw new BadRequestError(`GPU quota exceeded. Maximum allowed: ${regionQuota?.totalGpuQuota ?? 0}.`)
     }
 
     // validate usage quotas

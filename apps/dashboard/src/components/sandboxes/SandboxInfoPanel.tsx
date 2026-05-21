@@ -114,6 +114,7 @@ export function SandboxInfoPanel({
           <ResourceChip resource="cpu" value={sandbox.cpu} />
           <ResourceChip resource="memory" value={sandbox.memory} />
           <ResourceChip resource="disk" value={sandbox.disk} />
+          {sandbox.gpu > 0 && <ResourceChip resource="gpu" value={sandbox.gpu} />}
         </div>
       </InfoSection>
 

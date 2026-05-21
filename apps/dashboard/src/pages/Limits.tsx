@@ -241,7 +241,7 @@ export default function Limits() {
   )
 }
 
-type ResourceType = 'compute' | 'memory' | 'storage' | 'gpu'
+type ResourceType = 'compute' | 'memory' | 'storage'
 
 interface LimitItem {
   value?: number | null
@@ -274,20 +274,21 @@ function buildSandboxLimitItems(region: RegionUsageOverview | null, org: Organiz
   const diskGpu = gpuEnabled ? region?.maxDiskPerGpuSandbox : null
 
   const showNonEphemSplit = diskNonEphem != null && diskNonEphem > 0 && diskNonEphem !== diskBase
+  const showStorageGpuVariant = diskGpu != null && diskGpu !== diskBase
 
-  if (showNonEphemSplit) {
-    items.push({ resourceType: 'storage', label: 'Storage (Ephemeral)', value: diskBase, unit: 'GiB' })
-    items.push({ resourceType: 'storage', label: 'Storage (Non-Ephemeral)', value: diskNonEphem, unit: 'GiB' })
-  } else {
-    items.push({ resourceType: 'storage', label: 'Storage', value: diskBase, unit: 'GiB' })
-  }
+  items.push({
+    resourceType: 'storage',
+    label: showNonEphemSplit ? 'Storage (Ephemeral)' : 'Storage',
+    value: diskBase,
+    unit: 'GiB',
+  })
 
-  if (diskGpu != null && diskGpu !== diskBase) {
+  if (showStorageGpuVariant) {
     items.push({ resourceType: 'storage', label: 'Storage (GPU)', value: diskGpu, unit: 'GiB' })
   }
 
-  if (gpuEnabled) {
-    items.push({ resourceType: 'gpu', label: 'GPU', value: 1, unit: 'GPU' })
+  if (showNonEphemSplit) {
+    items.push({ resourceType: 'storage', label: 'Storage (Non-Ephemeral)', value: diskNonEphem, unit: 'GiB' })
   }
 
   return items
@@ -319,9 +320,7 @@ function RateLimits({
         <div className="text-muted-foreground text-sm">{description}</div>
       </div>
       {grouped ? (
-        <div
-          className={cn('grid grid-cols-1 gap-2 sm:gap-4', grouped.length === 4 ? 'sm:grid-cols-4' : 'sm:grid-cols-3')}
-        >
+        <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-3">
           {grouped.map((column) => (
             <div key={column[0].resourceType} className="flex flex-col gap-2 sm:gap-4">
               {column.map(

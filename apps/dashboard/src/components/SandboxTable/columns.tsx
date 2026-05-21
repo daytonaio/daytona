@@ -266,6 +266,14 @@ export function getColumns({
             <div className="whitespace-nowrap">
               {row.original.disk} <span className="text-muted-foreground">GiB</span>
             </div>
+            {row.original.gpu > 0 && (
+              <>
+                <div className="w-[1px] h-6 bg-muted-foreground/20 rounded-full inline-block"></div>
+                <div className="whitespace-nowrap">
+                  {row.original.gpu} <span className="text-muted-foreground">GPU</span>
+                </div>
+              </>
+            )}
           </div>
         )
       },

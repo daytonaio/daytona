@@ -5,6 +5,7 @@
 
 import { CreateResourceButton } from '@/components/CreateResourceButton'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -20,6 +21,7 @@ import {
 } from '@/components/ui/sheet'
 import { Spinner } from '@/components/ui/spinner'
 import { useCreateSnapshotMutation } from '@/hooks/mutations/useCreateSnapshotMutation'
+import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
 import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
@@ -46,6 +48,7 @@ const formSchema = z.object({
   cpu: z.number().min(1).optional(),
   memory: z.number().min(1).optional(),
   disk: z.number().min(1).optional(),
+  gpu: z.boolean().optional(),
   regionId: z.string().optional(),
 })
 
@@ -58,6 +61,7 @@ const defaultValues: FormValues = {
   cpu: undefined,
   memory: undefined,
   disk: undefined,
+  gpu: false,
   regionId: undefined,
 }
 
@@ -76,6 +80,9 @@ export const CreateSnapshotSheet = ({
   const { selectedOrganization } = useSelectedOrganization()
   const { reset: resetCreateSnapshotMutation, ...createSnapshotMutation } = useCreateSnapshotMutation()
   const formRef = useRef<HTMLFormElement>(null)
+  const { data: usageOverview } = useOrganizationUsageOverviewQuery({
+    organizationId: selectedOrganization?.id || '',
+  })
   const formDefaultValues = useMemo<FormValues>(
     () => ({
       ...defaultValues,
@@ -119,6 +126,7 @@ export const CreateSnapshotSheet = ({
             cpu: value.cpu,
             memory: value.memory,
             disk: value.disk,
+            gpu: value.gpu ? 1 : undefined,
             regionId: value.regionId,
           },
           organizationId: selectedOrganization.id,
@@ -298,6 +306,35 @@ export const CreateSnapshotSheet = ({
                     </div>
                   )}
                 </form.Field>
+                <form.Subscribe selector={(state) => state.values.regionId}>
+                  {(regionId) => {
+                    const region = usageOverview?.regionUsage.find((r) => r.regionId === regionId)
+                    if ((region?.totalGpuQuota ?? 0) <= 0) return null
+                    return (
+                      <form.Field name="gpu">
+                        {(field) => (
+                          <div className="flex items-start gap-2 pt-1">
+                            <Checkbox
+                              id={field.name}
+                              className="mt-0.5"
+                              checked={field.state.value ?? false}
+                              onCheckedChange={(checked) => field.handleChange(checked === true)}
+                            />
+                            <div className="flex flex-col gap-1">
+                              <Label htmlFor={field.name} className="text-sm font-normal">
+                                Allocate GPU
+                              </Label>
+                              <FieldDescription>
+                                Sandboxes created from this snapshot will own a GPU runner exclusively and are
+                                auto-deleted on first stop.
+                              </FieldDescription>
+                            </div>
+                          </div>
+                        )}
+                      </form.Field>
+                    )
+                  }}
+                </form.Subscribe>
               </div>
               <FieldDescription>
                 If not specified, default values will be used (1 vCPU, 1 GiB memory, 3 GiB storage).

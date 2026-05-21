@@ -127,6 +127,9 @@ export class OrgMetricsExporterService {
       if (rq.totalDiskQuota > 0) {
         this.addDataPoint(metrics, 'daytona.sandbox.total_storage', regionAttrs, rq.totalDiskQuota, nowNano)
       }
+      if (rq.totalGpuQuota > 0) {
+        this.addDataPoint(metrics, 'daytona.sandbox.total_gpu', regionAttrs, rq.totalGpuQuota, nowNano)
+      }
     }
 
     const payload = {

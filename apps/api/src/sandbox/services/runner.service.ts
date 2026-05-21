@@ -49,7 +49,10 @@ import { runnerLookupCacheKeyById, RUNNER_LOOKUP_CACHE_TTL_MS } from '../utils/r
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { RunnerServiceInfo } from '../common/runner-service-info'
-import { SANDBOX_STATES_CONSUMING_COMPUTE } from '../../organization/constants/sandbox-states-consuming-compute.constant'
+import {
+  SANDBOX_STATES_CONDITIONALLY_CONSUMING_COMPUTE,
+  SANDBOX_STATES_CONSUMING_COMPUTE,
+} from '../../organization/constants/sandbox-states-consuming-compute.constant'
 
 @Injectable()
 export class RunnerService {
@@ -900,6 +903,10 @@ export class RunnerService {
    * Returns runner IDs that currently host at least one GPU sandbox in a
    * non-terminal state. Used by the GPU scheduler to enforce
    * one-gpu-sandbox-per-runner exclusivity.
+   *
+   * Includes the conditionally-consuming states (RESIZING, SNAPSHOTTING) because a
+   * GPU sandbox in either of those states is still physically present on its runner,
+   * regardless of `desiredState`. The runner cannot host a second GPU sandbox.
    */
   async getRunnersWithActiveGpuSandbox(): Promise<string[]> {
     const rows = await this.sandboxRepository
@@ -907,7 +914,9 @@ export class RunnerService {
       .select('DISTINCT sandbox.runnerId', 'runnerId')
       .where('sandbox.runnerId IS NOT NULL')
       .andWhere('sandbox.gpu > 0')
-      .andWhere('sandbox.state IN (:...states)', { states: SANDBOX_STATES_CONSUMING_COMPUTE })
+      .andWhere('sandbox.state IN (:...states)', {
+        states: [...SANDBOX_STATES_CONSUMING_COMPUTE, ...SANDBOX_STATES_CONDITIONALLY_CONSUMING_COMPUTE],
+      })
       .getRawMany()
 
     return rows.map((r) => r.runnerId).filter((id): id is string => !!id)

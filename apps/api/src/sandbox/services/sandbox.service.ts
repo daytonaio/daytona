@@ -166,6 +166,11 @@ export class SandboxService {
     ephemeral: boolean,
     excludeSandboxId?: string,
     regionQuota?: RegionQuotaDto | null,
+    // Controls which per-sandbox limits table is used (GPU-specific vs non-GPU).
+    // Defaults to `gpu > 0`, which is correct for create/start/fork/archive paths where
+    // `gpu` is the absolute sandbox GPU allocation. Resize passes `gpu = 0` (no GPU delta)
+    // but still needs GPU-aware per-sandbox limits when the sandbox itself is a GPU sandbox.
+    gpuEnabled: boolean = gpu > 0,
   ): Promise<{
     pendingCpuIncremented: boolean
     pendingMemoryIncremented: boolean
@@ -178,7 +183,7 @@ export class SandboxService {
 
     // validate per-sandbox quotas
     const { maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox } =
-      getEffectivePerSandboxLimits(organization, regionQuota, gpu > 0)
+      getEffectivePerSandboxLimits(organization, regionQuota, gpuEnabled)
 
     if (cpu > maxCpuPerSandbox) {
       throw new BadRequestError(
@@ -645,10 +650,12 @@ export class SandboxService {
       updateData.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
     }
 
-    if (createSandboxDto.autoDeleteInterval !== undefined) {
-      if (warmPoolSandbox.gpu > 0 && createSandboxDto.autoDeleteInterval !== 0) {
+    if (warmPoolSandbox.gpu > 0) {
+      if (createSandboxDto.autoDeleteInterval !== undefined && createSandboxDto.autoDeleteInterval !== 0) {
         throw new BadRequestError('GPU sandboxes must be ephemeral - autoDeleteInterval must be 0')
       }
+      updateData.autoDeleteInterval = 0
+    } else if (createSandboxDto.autoDeleteInterval !== undefined) {
       updateData.autoDeleteInterval = createSandboxDto.autoDeleteInterval
     }
 
@@ -2172,7 +2179,8 @@ export class SandboxService {
       const diskDeltaForQuota = newDisk - sandbox.disk // Disk only increases (validated at start of method)
 
       // Validate and track pending for any non-zero quota changes.
-      // Resize never changes GPU allocation — always pass 0.
+      // Resize never changes GPU allocation — always pass 0 for the GPU delta, but pass
+      // `gpuEnabled = sandbox.gpu > 0` so per-sandbox limit checks use the GPU-specific table.
       if (cpuDeltaForQuota !== 0 || memDeltaForQuota !== 0 || diskDeltaForQuota !== 0) {
         const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
           await this.validateOrganizationQuotas(
@@ -2185,6 +2193,7 @@ export class SandboxService {
             isEphemeral(sandbox),
             undefined,
             regionQuota,
+            sandbox.gpu > 0,
           )
 
         if (pendingCpuIncremented) {
