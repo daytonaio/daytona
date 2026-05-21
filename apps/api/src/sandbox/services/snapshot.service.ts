@@ -554,6 +554,7 @@ export class SnapshotService {
     const { maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox } = getEffectivePerSandboxLimits(
       organization,
       regionQuota,
+      (gpu ?? 0) > 0,
     )
 
     if (cpu && cpu > maxCpuPerSandbox) {

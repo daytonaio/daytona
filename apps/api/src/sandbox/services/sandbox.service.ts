@@ -178,7 +178,7 @@ export class SandboxService {
 
     // validate per-sandbox quotas
     const { maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox } =
-      getEffectivePerSandboxLimits(organization, regionQuota)
+      getEffectivePerSandboxLimits(organization, regionQuota, gpu > 0)
 
     if (cpu > maxCpuPerSandbox) {
       throw new BadRequestError(
@@ -2136,7 +2136,7 @@ export class SandboxService {
         : null
 
       const { maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox } =
-        getEffectivePerSandboxLimits(organization, regionQuota)
+        getEffectivePerSandboxLimits(organization, regionQuota, sandbox.gpu > 0)
 
       if (newCpu > maxCpuPerSandbox) {
         throw new BadRequestError(

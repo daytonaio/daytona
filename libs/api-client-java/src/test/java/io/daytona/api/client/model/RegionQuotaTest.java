@@ -118,4 +118,28 @@ public class RegionQuotaTest {
         // TODO: test maxDiskPerNonEphemeralSandbox
     }
 
+    /**
+     * Test the property 'maxCpuPerGpuSandbox'
+     */
+    @Test
+    public void maxCpuPerGpuSandboxTest() {
+        // TODO: test maxCpuPerGpuSandbox
+    }
+
+    /**
+     * Test the property 'maxMemoryPerGpuSandbox'
+     */
+    @Test
+    public void maxMemoryPerGpuSandboxTest() {
+        // TODO: test maxMemoryPerGpuSandbox
+    }
+
+    /**
+     * Test the property 'maxDiskPerGpuSandbox'
+     */
+    @Test
+    public void maxDiskPerGpuSandboxTest() {
+        // TODO: test maxDiskPerGpuSandbox
+    }
+
 }

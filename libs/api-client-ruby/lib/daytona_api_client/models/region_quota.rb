@@ -35,6 +35,12 @@ module DaytonaApiClient
 
     attr_accessor :max_disk_per_non_ephemeral_sandbox
 
+    attr_accessor :max_cpu_per_gpu_sandbox
+
+    attr_accessor :max_memory_per_gpu_sandbox
+
+    attr_accessor :max_disk_per_gpu_sandbox
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
@@ -47,7 +53,10 @@ module DaytonaApiClient
         :'max_cpu_per_sandbox' => :'maxCpuPerSandbox',
         :'max_memory_per_sandbox' => :'maxMemoryPerSandbox',
         :'max_disk_per_sandbox' => :'maxDiskPerSandbox',
-        :'max_disk_per_non_ephemeral_sandbox' => :'maxDiskPerNonEphemeralSandbox'
+        :'max_disk_per_non_ephemeral_sandbox' => :'maxDiskPerNonEphemeralSandbox',
+        :'max_cpu_per_gpu_sandbox' => :'maxCpuPerGpuSandbox',
+        :'max_memory_per_gpu_sandbox' => :'maxMemoryPerGpuSandbox',
+        :'max_disk_per_gpu_sandbox' => :'maxDiskPerGpuSandbox'
       }
     end
 
@@ -73,7 +82,10 @@ module DaytonaApiClient
         :'max_cpu_per_sandbox' => :'Float',
         :'max_memory_per_sandbox' => :'Float',
         :'max_disk_per_sandbox' => :'Float',
-        :'max_disk_per_non_ephemeral_sandbox' => :'Float'
+        :'max_disk_per_non_ephemeral_sandbox' => :'Float',
+        :'max_cpu_per_gpu_sandbox' => :'Float',
+        :'max_memory_per_gpu_sandbox' => :'Float',
+        :'max_disk_per_gpu_sandbox' => :'Float'
       }
     end
 
@@ -83,7 +95,10 @@ module DaytonaApiClient
         :'max_cpu_per_sandbox',
         :'max_memory_per_sandbox',
         :'max_disk_per_sandbox',
-        :'max_disk_per_non_ephemeral_sandbox'
+        :'max_disk_per_non_ephemeral_sandbox',
+        :'max_cpu_per_gpu_sandbox',
+        :'max_memory_per_gpu_sandbox',
+        :'max_disk_per_gpu_sandbox'
       ])
     end
 
@@ -161,6 +176,24 @@ module DaytonaApiClient
         self.max_disk_per_non_ephemeral_sandbox = attributes[:'max_disk_per_non_ephemeral_sandbox']
       else
         self.max_disk_per_non_ephemeral_sandbox = nil
+      end
+
+      if attributes.key?(:'max_cpu_per_gpu_sandbox')
+        self.max_cpu_per_gpu_sandbox = attributes[:'max_cpu_per_gpu_sandbox']
+      else
+        self.max_cpu_per_gpu_sandbox = nil
+      end
+
+      if attributes.key?(:'max_memory_per_gpu_sandbox')
+        self.max_memory_per_gpu_sandbox = attributes[:'max_memory_per_gpu_sandbox']
+      else
+        self.max_memory_per_gpu_sandbox = nil
+      end
+
+      if attributes.key?(:'max_disk_per_gpu_sandbox')
+        self.max_disk_per_gpu_sandbox = attributes[:'max_disk_per_gpu_sandbox']
+      else
+        self.max_disk_per_gpu_sandbox = nil
       end
     end
 
@@ -283,7 +316,10 @@ module DaytonaApiClient
           max_cpu_per_sandbox == o.max_cpu_per_sandbox &&
           max_memory_per_sandbox == o.max_memory_per_sandbox &&
           max_disk_per_sandbox == o.max_disk_per_sandbox &&
-          max_disk_per_non_ephemeral_sandbox == o.max_disk_per_non_ephemeral_sandbox
+          max_disk_per_non_ephemeral_sandbox == o.max_disk_per_non_ephemeral_sandbox &&
+          max_cpu_per_gpu_sandbox == o.max_cpu_per_gpu_sandbox &&
+          max_memory_per_gpu_sandbox == o.max_memory_per_gpu_sandbox &&
+          max_disk_per_gpu_sandbox == o.max_disk_per_gpu_sandbox
     end
 
     # @see the `==` method
@@ -295,7 +331,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [organization_id, region_id, total_cpu_quota, total_memory_quota, total_disk_quota, total_gpu_quota, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, max_disk_per_non_ephemeral_sandbox].hash
+      [organization_id, region_id, total_cpu_quota, total_memory_quota, total_disk_quota, total_gpu_quota, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, max_disk_per_non_ephemeral_sandbox, max_cpu_per_gpu_sandbox, max_memory_per_gpu_sandbox, max_disk_per_gpu_sandbox].hash
     end
 
     # Builds the object from hash

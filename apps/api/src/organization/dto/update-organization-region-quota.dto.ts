@@ -30,4 +30,13 @@ export class UpdateOrganizationRegionQuotaDto {
 
   @ApiPropertyOptional({ nullable: true })
   maxDiskPerNonEphemeralSandbox?: number | null
+
+  @ApiPropertyOptional({ nullable: true })
+  maxCpuPerGpuSandbox?: number | null
+
+  @ApiPropertyOptional({ nullable: true })
+  maxMemoryPerGpuSandbox?: number | null
+
+  @ApiPropertyOptional({ nullable: true })
+  maxDiskPerGpuSandbox?: number | null
 }

@@ -116,6 +116,9 @@ export class OrganizationUsageService {
           maxMemoryPerSandbox: rq.maxMemoryPerSandbox,
           maxDiskPerSandbox: rq.maxDiskPerSandbox,
           maxDiskPerNonEphemeralSandbox: rq.maxDiskPerNonEphemeralSandbox,
+          maxCpuPerGpuSandbox: rq.maxCpuPerGpuSandbox,
+          maxMemoryPerGpuSandbox: rq.maxMemoryPerGpuSandbox,
+          maxDiskPerGpuSandbox: rq.maxDiskPerGpuSandbox,
         }
 
         return usage
