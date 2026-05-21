@@ -4,7 +4,7 @@
  */
 
 import { Controller, Post, Get, Param, UseGuards, HttpCode, HttpStatus, NotFoundException } from '@nestjs/common'
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiOAuth2, ApiHeader } from '@nestjs/swagger'
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiOAuth2, ApiHeader, ApiParam } from '@nestjs/swagger'
 import { WebhookService } from '../services/webhook.service'
 import { OrganizationAuthContextGuard } from '../../organization/guards/organization-auth-context.guard'
 import { WebhookAppPortalAccessDto } from '../dto/webhook-app-portal-access.dto'
@@ -13,6 +13,11 @@ import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-r
 import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
 import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 import { CustomHeaders } from '../../common/constants/header.constants'
+import { IsOrganizationAuthContext } from '../../common/decorators/auth-context.decorator'
+import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
+import { Audit } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 @Controller('webhooks')
 @ApiTags('webhooks')
@@ -51,6 +56,35 @@ export class WebhookController {
     @Param('organizationId') organizationId: string,
   ): Promise<WebhookInitializationStatusDto> {
     const status = await this.webhookService.getInitializationStatus(organizationId)
+    if (!status) {
+      throw new NotFoundException('Webhook initialization status not found')
+    }
+    return WebhookInitializationStatusDto.fromWebhookInitialization(status)
+  }
+
+  @Post('organizations/:organizationId/initialize')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Initialize webhooks for an organization' })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Webhooks initialized successfully',
+    type: WebhookInitializationStatusDto,
+  })
+  @Audit({
+    action: AuditAction.INITIALIZE_WEBHOOKS,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+  })
+  async initializeWebhooks(
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
+  ): Promise<WebhookInitializationStatusDto> {
+    await this.webhookService.createSvixApplication(authContext.organization)
+    const status = await this.webhookService.getInitializationStatus(authContext.organization.id)
     if (!status) {
       throw new NotFoundException('Webhook initialization status not found')
     }

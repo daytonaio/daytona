@@ -37,6 +37,16 @@ describe('[AUTH] WebhookController', () => {
     expectArrayMatch(getAuthContextGuards(WebhookController, methodName), [OrganizationAuthContextGuard])
   })
 
+  it('initializeWebhooks', () => {
+    const methodName = trackMethod('initializeWebhooks')
+    expect(isPublicEndpoint(WebhookController, methodName)).toBe(false)
+    expectArrayMatch(getAllowedAuthStrategies(WebhookController, methodName), [
+      AuthStrategyType.API_KEY,
+      AuthStrategyType.JWT,
+    ])
+    expectArrayMatch(getAuthContextGuards(WebhookController, methodName), [OrganizationAuthContextGuard])
+  })
+
   it('refreshEndpoints', () => {
     const methodName = trackMethod('refreshEndpoints')
     expect(isPublicEndpoint(WebhookController, methodName)).toBe(false)

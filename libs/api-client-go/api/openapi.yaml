@@ -8775,6 +8775,42 @@ paths:
       summary: Get webhook initialization status for an organization
       tags:
       - webhooks
+  /webhooks/organizations/{organizationId}/initialize:
+    post:
+      operationId: WebhookController_initializeWebhooks
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: Organization ID
+        explode: false
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookInitializationStatus"
+          description: Webhooks initialized successfully
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Initialize webhooks for an organization
+      tags:
+      - webhooks
   /webhooks/organizations/{organizationId}/refresh-endpoints:
     post:
       operationId: WebhookController_refreshEndpoints

@@ -59,6 +59,19 @@ public class WebhooksApiTest {
     }
 
     /**
+     * Initialize webhooks for an organization
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void webhookControllerInitializeWebhooksTest() throws ApiException {
+        String organizationId = null;
+        String xDaytonaOrganizationID = null;
+        WebhookInitializationStatus response = api.webhookControllerInitializeWebhooks(organizationId, xDaytonaOrganizationID);
+        // TODO: test validations
+    }
+
+    /**
      * Refresh cached endpoint presence flag for an organization
      *
      * @throws ApiException if the Api call fails
