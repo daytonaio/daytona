@@ -350,6 +350,142 @@ public class WebhooksApi {
         return localVarCall;
     }
     /**
+     * Build call for webhookControllerInitializeWebhooks
+     * @param organizationId Organization ID (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Webhooks initialized successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call webhookControllerInitializeWebhooksCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/webhooks/organizations/{organizationId}/initialize"
+            .replace("{" + "organizationId" + "}", localVarApiClient.escapeString(organizationId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (xDaytonaOrganizationID != null) {
+            localVarHeaderParams.put("X-Daytona-Organization-ID", localVarApiClient.parameterToString(xDaytonaOrganizationID));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call webhookControllerInitializeWebhooksValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'organizationId' is set
+        if (organizationId == null) {
+            throw new ApiException("Missing the required parameter 'organizationId' when calling webhookControllerInitializeWebhooks(Async)");
+        }
+
+        return webhookControllerInitializeWebhooksCall(organizationId, xDaytonaOrganizationID, _callback);
+
+    }
+
+    /**
+     * Initialize webhooks for an organization
+     * 
+     * @param organizationId Organization ID (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return WebhookInitializationStatus
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Webhooks initialized successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public WebhookInitializationStatus webhookControllerInitializeWebhooks(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
+        ApiResponse<WebhookInitializationStatus> localVarResp = webhookControllerInitializeWebhooksWithHttpInfo(organizationId, xDaytonaOrganizationID);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Initialize webhooks for an organization
+     * 
+     * @param organizationId Organization ID (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return ApiResponse&lt;WebhookInitializationStatus&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Webhooks initialized successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<WebhookInitializationStatus> webhookControllerInitializeWebhooksWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
+        okhttp3.Call localVarCall = webhookControllerInitializeWebhooksValidateBeforeCall(organizationId, xDaytonaOrganizationID, null);
+        Type localVarReturnType = new TypeToken<WebhookInitializationStatus>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Initialize webhooks for an organization (asynchronously)
+     * 
+     * @param organizationId Organization ID (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Webhooks initialized successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call webhookControllerInitializeWebhooksAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<WebhookInitializationStatus> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = webhookControllerInitializeWebhooksValidateBeforeCall(organizationId, xDaytonaOrganizationID, _callback);
+        Type localVarReturnType = new TypeToken<WebhookInitializationStatus>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for webhookControllerRefreshEndpoints
      * @param organizationId  (required)
      * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)

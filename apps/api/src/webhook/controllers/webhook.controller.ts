@@ -4,7 +4,7 @@
  */
 
 import { Controller, Post, Get, Param, UseGuards, HttpCode, HttpStatus, NotFoundException } from '@nestjs/common'
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiOAuth2, ApiHeader } from '@nestjs/swagger'
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiOAuth2, ApiHeader, ApiParam } from '@nestjs/swagger'
 import { WebhookService } from '../services/webhook.service'
 import { OrganizationAuthContextGuard } from '../../organization/guards/organization-auth-context.guard'
 import { WebhookAppPortalAccessDto } from '../dto/webhook-app-portal-access.dto'
@@ -65,6 +65,11 @@ export class WebhookController {
   @Post('organizations/:organizationId/initialize')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Initialize webhooks for an organization' })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'Webhooks initialized successfully',
@@ -76,11 +81,10 @@ export class WebhookController {
     targetIdFromRequest: (req) => req.params.organizationId,
   })
   async initializeWebhooks(
-    @Param('organizationId') organizationId: string,
     @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
   ): Promise<WebhookInitializationStatusDto> {
     await this.webhookService.createSvixApplication(authContext.organization)
-    const status = await this.webhookService.getInitializationStatus(organizationId)
+    const status = await this.webhookService.getInitializationStatus(authContext.organization.id)
     if (!status) {
       throw new NotFoundException('Webhook initialization status not found')
     }

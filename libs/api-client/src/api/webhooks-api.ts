@@ -121,7 +121,7 @@ export const WebhooksApiAxiosParamCreator = function (configuration?: Configurat
         /**
          * 
          * @summary Initialize webhooks for an organization
-         * @param {string} organizationId 
+         * @param {string} organizationId Organization ID
          * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -245,7 +245,7 @@ export const WebhooksApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary Initialize webhooks for an organization
-         * @param {string} organizationId 
+         * @param {string} organizationId Organization ID
          * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -304,7 +304,7 @@ export const WebhooksApiFactory = function (configuration?: Configuration, baseP
         /**
          * 
          * @summary Initialize webhooks for an organization
-         * @param {string} organizationId 
+         * @param {string} organizationId Organization ID
          * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -357,7 +357,7 @@ export class WebhooksApi extends BaseAPI {
     /**
      * 
      * @summary Initialize webhooks for an organization
-     * @param {string} organizationId 
+     * @param {string} organizationId Organization ID
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}

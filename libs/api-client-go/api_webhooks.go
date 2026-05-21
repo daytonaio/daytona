@@ -50,6 +50,19 @@ type WebhooksAPI interface {
 	WebhookControllerGetInitializationStatusExecute(r WebhooksAPIWebhookControllerGetInitializationStatusRequest) (*WebhookInitializationStatus, *http.Response, error)
 
 	/*
+	WebhookControllerInitializeWebhooks Initialize webhooks for an organization
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId Organization ID
+	@return WebhooksAPIWebhookControllerInitializeWebhooksRequest
+	*/
+	WebhookControllerInitializeWebhooks(ctx context.Context, organizationId string) WebhooksAPIWebhookControllerInitializeWebhooksRequest
+
+	// WebhookControllerInitializeWebhooksExecute executes the request
+	//  @return WebhookInitializationStatus
+	WebhookControllerInitializeWebhooksExecute(r WebhooksAPIWebhookControllerInitializeWebhooksRequest) (*WebhookInitializationStatus, *http.Response, error)
+
+	/*
 	WebhookControllerRefreshEndpoints Refresh cached endpoint presence flag for an organization
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -224,6 +237,117 @@ func (a *WebhooksAPIService) WebhookControllerGetInitializationStatusExecute(r W
 	}
 
 	localVarPath := localBasePath + "/webhooks/organizations/{organizationId}/initialization-status"
+	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type WebhooksAPIWebhookControllerInitializeWebhooksRequest struct {
+	ctx context.Context
+	ApiService WebhooksAPI
+	organizationId string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r WebhooksAPIWebhookControllerInitializeWebhooksRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) WebhooksAPIWebhookControllerInitializeWebhooksRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r WebhooksAPIWebhookControllerInitializeWebhooksRequest) Execute() (*WebhookInitializationStatus, *http.Response, error) {
+	return r.ApiService.WebhookControllerInitializeWebhooksExecute(r)
+}
+
+/*
+WebhookControllerInitializeWebhooks Initialize webhooks for an organization
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param organizationId Organization ID
+ @return WebhooksAPIWebhookControllerInitializeWebhooksRequest
+*/
+func (a *WebhooksAPIService) WebhookControllerInitializeWebhooks(ctx context.Context, organizationId string) WebhooksAPIWebhookControllerInitializeWebhooksRequest {
+	return WebhooksAPIWebhookControllerInitializeWebhooksRequest{
+		ApiService: a,
+		ctx: ctx,
+		organizationId: organizationId,
+	}
+}
+
+// Execute executes the request
+//  @return WebhookInitializationStatus
+func (a *WebhooksAPIService) WebhookControllerInitializeWebhooksExecute(r WebhooksAPIWebhookControllerInitializeWebhooksRequest) (*WebhookInitializationStatus, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *WebhookInitializationStatus
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WebhooksAPIService.WebhookControllerInitializeWebhooks")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/webhooks/organizations/{organizationId}/initialize"
 	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
