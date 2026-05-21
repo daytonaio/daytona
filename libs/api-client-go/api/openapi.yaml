@@ -1643,11 +1643,7 @@ paths:
           default: false
           type: boolean
         style: form
-      - description: "List of states to filter by. Can not be combined with \"name\"\
-          . Allowed values: creating, restoring, destroying, started, stopped, starting,\
-          \ stopping, error, build_failed, pending_build, building_snapshot, unknown,\
-          \ pulling_snapshot, archived, archiving, resizing, snapshotting, forking\
-          \ (DESTROYED is rejected at validation time)."
+      - description: List of states to filter by.
         explode: true
         in: query
         name: states
@@ -1698,7 +1694,7 @@ paths:
       - description: Minimum memory in GiB
         explode: true
         in: query
-        name: minMemoryGib
+        name: minMemoryGiB
         required: false
         schema:
           minimum: 1
@@ -1707,7 +1703,7 @@ paths:
       - description: Maximum memory in GiB
         explode: true
         in: query
-        name: maxMemoryGib
+        name: maxMemoryGiB
         required: false
         schema:
           minimum: 1
@@ -1716,7 +1712,7 @@ paths:
       - description: Minimum disk space in GiB
         explode: true
         in: query
-        name: minDiskGib
+        name: minDiskGiB
         required: false
         schema:
           minimum: 1
@@ -1725,7 +1721,7 @@ paths:
       - description: Maximum disk space in GiB
         explode: true
         in: query
-        name: maxDiskGib
+        name: maxDiskGiB
         required: false
         schema:
           minimum: 1

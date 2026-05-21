@@ -3521,10 +3521,10 @@ type SandboxAPIListSandboxesRequest struct {
 	regionIds *[]string
 	minCpu *float32
 	maxCpu *float32
-	minMemoryGib *float32
-	maxMemoryGib *float32
-	minDiskGib *float32
-	maxDiskGib *float32
+	minMemoryGiB *float32
+	maxMemoryGiB *float32
+	minDiskGiB *float32
+	maxDiskGiB *float32
 	isPublic *bool
 	isRecoverable *bool
 	createdAtAfter *time.Time
@@ -3577,7 +3577,7 @@ func (r SandboxAPIListSandboxesRequest) IncludeErroredDeleted(includeErroredDele
 	return r
 }
 
-// List of states to filter by. Can not be combined with \&quot;name\&quot;. Allowed values: creating, restoring, destroying, started, stopped, starting, stopping, error, build_failed, pending_build, building_snapshot, unknown, pulling_snapshot, archived, archiving, resizing, snapshotting, forking (DESTROYED is rejected at validation time).
+// List of states to filter by.
 func (r SandboxAPIListSandboxesRequest) States(states []SandboxState) SandboxAPIListSandboxesRequest {
 	r.states = &states
 	return r
@@ -3608,26 +3608,26 @@ func (r SandboxAPIListSandboxesRequest) MaxCpu(maxCpu float32) SandboxAPIListSan
 }
 
 // Minimum memory in GiB
-func (r SandboxAPIListSandboxesRequest) MinMemoryGib(minMemoryGib float32) SandboxAPIListSandboxesRequest {
-	r.minMemoryGib = &minMemoryGib
+func (r SandboxAPIListSandboxesRequest) MinMemoryGiB(minMemoryGiB float32) SandboxAPIListSandboxesRequest {
+	r.minMemoryGiB = &minMemoryGiB
 	return r
 }
 
 // Maximum memory in GiB
-func (r SandboxAPIListSandboxesRequest) MaxMemoryGib(maxMemoryGib float32) SandboxAPIListSandboxesRequest {
-	r.maxMemoryGib = &maxMemoryGib
+func (r SandboxAPIListSandboxesRequest) MaxMemoryGiB(maxMemoryGiB float32) SandboxAPIListSandboxesRequest {
+	r.maxMemoryGiB = &maxMemoryGiB
 	return r
 }
 
 // Minimum disk space in GiB
-func (r SandboxAPIListSandboxesRequest) MinDiskGib(minDiskGib float32) SandboxAPIListSandboxesRequest {
-	r.minDiskGib = &minDiskGib
+func (r SandboxAPIListSandboxesRequest) MinDiskGiB(minDiskGiB float32) SandboxAPIListSandboxesRequest {
+	r.minDiskGiB = &minDiskGiB
 	return r
 }
 
 // Maximum disk space in GiB
-func (r SandboxAPIListSandboxesRequest) MaxDiskGib(maxDiskGib float32) SandboxAPIListSandboxesRequest {
-	r.maxDiskGib = &maxDiskGib
+func (r SandboxAPIListSandboxesRequest) MaxDiskGiB(maxDiskGiB float32) SandboxAPIListSandboxesRequest {
+	r.maxDiskGiB = &maxDiskGiB
 	return r
 }
 
@@ -3784,17 +3784,17 @@ func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesReques
 	if r.maxCpu != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "maxCpu", r.maxCpu, "form", "")
 	}
-	if r.minMemoryGib != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "minMemoryGib", r.minMemoryGib, "form", "")
+	if r.minMemoryGiB != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "minMemoryGiB", r.minMemoryGiB, "form", "")
 	}
-	if r.maxMemoryGib != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "maxMemoryGib", r.maxMemoryGib, "form", "")
+	if r.maxMemoryGiB != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "maxMemoryGiB", r.maxMemoryGiB, "form", "")
 	}
-	if r.minDiskGib != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "minDiskGib", r.minDiskGib, "form", "")
+	if r.minDiskGiB != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "minDiskGiB", r.minDiskGiB, "form", "")
 	}
-	if r.maxDiskGib != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "maxDiskGib", r.maxDiskGib, "form", "")
+	if r.maxDiskGiB != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "maxDiskGiB", r.maxDiskGiB, "form", "")
 	}
 	if r.isPublic != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "isPublic", r.isPublic, "form", "")

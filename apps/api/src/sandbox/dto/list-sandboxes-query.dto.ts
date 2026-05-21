@@ -91,7 +91,7 @@ export class ListSandboxesQueryDto {
 
   @ApiProperty({
     name: 'states',
-    description: `List of states to filter by. Can not be combined with "name". Allowed values: ${LIST_SANDBOXES_QUERY_VALID_STATES.join(', ')} (DESTROYED is rejected at validation time).`,
+    description: `List of states to filter by.`,
     required: false,
     enum: SandboxState,
     enumName: 'SandboxState',
@@ -157,7 +157,7 @@ export class ListSandboxesQueryDto {
   maxCpu?: number
 
   @ApiProperty({
-    name: 'minMemoryGib',
+    name: 'minMemoryGiB',
     description: 'Minimum memory in GiB',
     required: false,
     type: Number,
@@ -167,10 +167,10 @@ export class ListSandboxesQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  minMemoryGib?: number
+  minMemoryGiB?: number
 
   @ApiProperty({
-    name: 'maxMemoryGib',
+    name: 'maxMemoryGiB',
     description: 'Maximum memory in GiB',
     required: false,
     type: Number,
@@ -180,10 +180,10 @@ export class ListSandboxesQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  maxMemoryGib?: number
+  maxMemoryGiB?: number
 
   @ApiProperty({
-    name: 'minDiskGib',
+    name: 'minDiskGiB',
     description: 'Minimum disk space in GiB',
     required: false,
     type: Number,
@@ -193,10 +193,10 @@ export class ListSandboxesQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  minDiskGib?: number
+  minDiskGiB?: number
 
   @ApiProperty({
-    name: 'maxDiskGib',
+    name: 'maxDiskGiB',
     description: 'Maximum disk space in GiB',
     required: false,
     type: Number,
@@ -206,7 +206,7 @@ export class ListSandboxesQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  maxDiskGib?: number
+  maxDiskGiB?: number
 
   @ApiProperty({
     name: 'isPublic',

@@ -426,10 +426,10 @@ public class SandboxApiTest {
         List<String> regionIds = null;
         BigDecimal minCpu = null;
         BigDecimal maxCpu = null;
-        BigDecimal minMemoryGib = null;
-        BigDecimal maxMemoryGib = null;
-        BigDecimal minDiskGib = null;
-        BigDecimal maxDiskGib = null;
+        BigDecimal minMemoryGiB = null;
+        BigDecimal maxMemoryGiB = null;
+        BigDecimal minDiskGiB = null;
+        BigDecimal maxDiskGiB = null;
         Boolean isPublic = null;
         Boolean isRecoverable = null;
         OffsetDateTime createdAtAfter = null;
@@ -438,7 +438,7 @@ public class SandboxApiTest {
         OffsetDateTime lastEventBefore = null;
         SandboxListSortField sort = null;
         SandboxListSortDirection order = null;
-        ListSandboxesResponse response = api.listSandboxes(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, minCpu, maxCpu, minMemoryGib, maxMemoryGib, minDiskGib, maxDiskGib, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order);
+        ListSandboxesResponse response = api.listSandboxes(xDaytonaOrganizationID, cursor, limit, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, sort, order);
         // TODO: test validations
     }
 

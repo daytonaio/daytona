@@ -1706,15 +1706,15 @@ module DaytonaApiClient
     # @option opts [String] :name Filter by name prefix (case-insensitive)
     # @option opts [String] :labels JSON encoded labels to filter by
     # @option opts [Boolean] :include_errored_deleted Include results with errored state and deleted desired state (default to false)
-    # @option opts [Array<SandboxState>] :states List of states to filter by. Can not be combined with \&quot;name\&quot;. Allowed values: creating, restoring, destroying, started, stopped, starting, stopping, error, build_failed, pending_build, building_snapshot, unknown, pulling_snapshot, archived, archiving, resizing, snapshotting, forking (DESTROYED is rejected at validation time).
+    # @option opts [Array<SandboxState>] :states List of states to filter by.
     # @option opts [Array<String>] :snapshots List of snapshot names to filter by
     # @option opts [Array<String>] :region_ids List of regions IDs to filter by
     # @option opts [Float] :min_cpu Minimum CPU
     # @option opts [Float] :max_cpu Maximum CPU
-    # @option opts [Float] :min_memory_gib Minimum memory in GiB
-    # @option opts [Float] :max_memory_gib Maximum memory in GiB
-    # @option opts [Float] :min_disk_gib Minimum disk space in GiB
-    # @option opts [Float] :max_disk_gib Maximum disk space in GiB
+    # @option opts [Float] :min_memory_gi_b Minimum memory in GiB
+    # @option opts [Float] :max_memory_gi_b Maximum memory in GiB
+    # @option opts [Float] :min_disk_gi_b Minimum disk space in GiB
+    # @option opts [Float] :max_disk_gi_b Maximum disk space in GiB
     # @option opts [Boolean] :is_public Filter by public status
     # @option opts [Boolean] :is_recoverable Filter by recoverable status
     # @option opts [Time] :created_at_after Include items created after this timestamp
@@ -1739,15 +1739,15 @@ module DaytonaApiClient
     # @option opts [String] :name Filter by name prefix (case-insensitive)
     # @option opts [String] :labels JSON encoded labels to filter by
     # @option opts [Boolean] :include_errored_deleted Include results with errored state and deleted desired state (default to false)
-    # @option opts [Array<SandboxState>] :states List of states to filter by. Can not be combined with \&quot;name\&quot;. Allowed values: creating, restoring, destroying, started, stopped, starting, stopping, error, build_failed, pending_build, building_snapshot, unknown, pulling_snapshot, archived, archiving, resizing, snapshotting, forking (DESTROYED is rejected at validation time).
+    # @option opts [Array<SandboxState>] :states List of states to filter by.
     # @option opts [Array<String>] :snapshots List of snapshot names to filter by
     # @option opts [Array<String>] :region_ids List of regions IDs to filter by
     # @option opts [Float] :min_cpu Minimum CPU
     # @option opts [Float] :max_cpu Maximum CPU
-    # @option opts [Float] :min_memory_gib Minimum memory in GiB
-    # @option opts [Float] :max_memory_gib Maximum memory in GiB
-    # @option opts [Float] :min_disk_gib Minimum disk space in GiB
-    # @option opts [Float] :max_disk_gib Maximum disk space in GiB
+    # @option opts [Float] :min_memory_gi_b Minimum memory in GiB
+    # @option opts [Float] :max_memory_gi_b Maximum memory in GiB
+    # @option opts [Float] :min_disk_gi_b Minimum disk space in GiB
+    # @option opts [Float] :max_disk_gi_b Maximum disk space in GiB
     # @option opts [Boolean] :is_public Filter by public status
     # @option opts [Boolean] :is_recoverable Filter by recoverable status
     # @option opts [Time] :created_at_after Include items created after this timestamp
@@ -1777,20 +1777,20 @@ module DaytonaApiClient
         fail ArgumentError, 'invalid value for "opts[:"max_cpu"]" when calling SandboxApi.list_sandboxes, must be greater than or equal to 1.'
       end
 
-      if @api_client.config.client_side_validation && !opts[:'min_memory_gib'].nil? && opts[:'min_memory_gib'] < 1
-        fail ArgumentError, 'invalid value for "opts[:"min_memory_gib"]" when calling SandboxApi.list_sandboxes, must be greater than or equal to 1.'
+      if @api_client.config.client_side_validation && !opts[:'min_memory_gi_b'].nil? && opts[:'min_memory_gi_b'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"min_memory_gi_b"]" when calling SandboxApi.list_sandboxes, must be greater than or equal to 1.'
       end
 
-      if @api_client.config.client_side_validation && !opts[:'max_memory_gib'].nil? && opts[:'max_memory_gib'] < 1
-        fail ArgumentError, 'invalid value for "opts[:"max_memory_gib"]" when calling SandboxApi.list_sandboxes, must be greater than or equal to 1.'
+      if @api_client.config.client_side_validation && !opts[:'max_memory_gi_b'].nil? && opts[:'max_memory_gi_b'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"max_memory_gi_b"]" when calling SandboxApi.list_sandboxes, must be greater than or equal to 1.'
       end
 
-      if @api_client.config.client_side_validation && !opts[:'min_disk_gib'].nil? && opts[:'min_disk_gib'] < 1
-        fail ArgumentError, 'invalid value for "opts[:"min_disk_gib"]" when calling SandboxApi.list_sandboxes, must be greater than or equal to 1.'
+      if @api_client.config.client_side_validation && !opts[:'min_disk_gi_b'].nil? && opts[:'min_disk_gi_b'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"min_disk_gi_b"]" when calling SandboxApi.list_sandboxes, must be greater than or equal to 1.'
       end
 
-      if @api_client.config.client_side_validation && !opts[:'max_disk_gib'].nil? && opts[:'max_disk_gib'] < 1
-        fail ArgumentError, 'invalid value for "opts[:"max_disk_gib"]" when calling SandboxApi.list_sandboxes, must be greater than or equal to 1.'
+      if @api_client.config.client_side_validation && !opts[:'max_disk_gi_b'].nil? && opts[:'max_disk_gi_b'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"max_disk_gi_b"]" when calling SandboxApi.list_sandboxes, must be greater than or equal to 1.'
       end
 
       # resource path
@@ -1809,10 +1809,10 @@ module DaytonaApiClient
       query_params[:'regionIds'] = @api_client.build_collection_param(opts[:'region_ids'], :multi) if !opts[:'region_ids'].nil?
       query_params[:'minCpu'] = opts[:'min_cpu'] if !opts[:'min_cpu'].nil?
       query_params[:'maxCpu'] = opts[:'max_cpu'] if !opts[:'max_cpu'].nil?
-      query_params[:'minMemoryGib'] = opts[:'min_memory_gib'] if !opts[:'min_memory_gib'].nil?
-      query_params[:'maxMemoryGib'] = opts[:'max_memory_gib'] if !opts[:'max_memory_gib'].nil?
-      query_params[:'minDiskGib'] = opts[:'min_disk_gib'] if !opts[:'min_disk_gib'].nil?
-      query_params[:'maxDiskGib'] = opts[:'max_disk_gib'] if !opts[:'max_disk_gib'].nil?
+      query_params[:'minMemoryGiB'] = opts[:'min_memory_gi_b'] if !opts[:'min_memory_gi_b'].nil?
+      query_params[:'maxMemoryGiB'] = opts[:'max_memory_gi_b'] if !opts[:'max_memory_gi_b'].nil?
+      query_params[:'minDiskGiB'] = opts[:'min_disk_gi_b'] if !opts[:'min_disk_gi_b'].nil?
+      query_params[:'maxDiskGiB'] = opts[:'max_disk_gi_b'] if !opts[:'max_disk_gi_b'].nil?
       query_params[:'isPublic'] = opts[:'is_public'] if !opts[:'is_public'].nil?
       query_params[:'isRecoverable'] = opts[:'is_recoverable'] if !opts[:'is_recoverable'].nil?
       query_params[:'createdAtAfter'] = opts[:'created_at_after'] if !opts[:'created_at_after'].nil?
