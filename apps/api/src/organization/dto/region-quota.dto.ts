@@ -23,6 +23,9 @@ export class RegionQuotaDto {
   @ApiProperty()
   totalDiskQuota: number
 
+  @ApiProperty()
+  totalGpuQuota: number
+
   @ApiProperty({ nullable: true })
   maxCpuPerSandbox: number | null
 
@@ -35,15 +38,28 @@ export class RegionQuotaDto {
   @ApiProperty({ nullable: true })
   maxDiskPerNonEphemeralSandbox: number | null
 
+  @ApiProperty({ nullable: true })
+  maxCpuPerGpuSandbox: number | null
+
+  @ApiProperty({ nullable: true })
+  maxMemoryPerGpuSandbox: number | null
+
+  @ApiProperty({ nullable: true })
+  maxDiskPerGpuSandbox: number | null
+
   constructor(regionQuota: RegionQuota) {
     this.organizationId = regionQuota.organizationId
     this.regionId = regionQuota.regionId
     this.totalCpuQuota = regionQuota.totalCpuQuota
     this.totalMemoryQuota = regionQuota.totalMemoryQuota
     this.totalDiskQuota = regionQuota.totalDiskQuota
+    this.totalGpuQuota = regionQuota.totalGpuQuota
     this.maxCpuPerSandbox = regionQuota.maxCpuPerSandbox
     this.maxMemoryPerSandbox = regionQuota.maxMemoryPerSandbox
     this.maxDiskPerSandbox = regionQuota.maxDiskPerSandbox
     this.maxDiskPerNonEphemeralSandbox = regionQuota.maxDiskPerNonEphemeralSandbox
+    this.maxCpuPerGpuSandbox = regionQuota.maxCpuPerGpuSandbox
+    this.maxMemoryPerGpuSandbox = regionQuota.maxMemoryPerGpuSandbox
+    this.maxDiskPerGpuSandbox = regionQuota.maxDiskPerGpuSandbox
   }
 }

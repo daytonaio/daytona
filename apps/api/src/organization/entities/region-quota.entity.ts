@@ -43,6 +43,13 @@ export class RegionQuota {
 
   @Column({
     type: 'int',
+    default: 0,
+    name: 'total_gpu_quota',
+  })
+  totalGpuQuota: number
+
+  @Column({
+    type: 'int',
     nullable: true,
     name: 'max_cpu_per_sandbox',
   })
@@ -74,6 +81,39 @@ export class RegionQuota {
   })
   maxDiskPerNonEphemeralSandbox: number | null
 
+  /**
+   * If `null`, fallback to `maxCpuPerSandbox`.
+   * Typically larger than `maxCpuPerSandbox` since GPU sandboxes own the whole runner exclusively.
+   */
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'max_cpu_per_gpu_sandbox',
+  })
+  maxCpuPerGpuSandbox: number | null
+
+  /**
+   * If `null`, fallback to `maxMemoryPerSandbox`.
+   * Typically larger than `maxMemoryPerSandbox` since GPU sandboxes own the whole runner exclusively.
+   */
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'max_memory_per_gpu_sandbox',
+  })
+  maxMemoryPerGpuSandbox: number | null
+
+  /**
+   * If `null`, fallback to `maxDiskPerSandbox`.
+   * Typically larger than `maxDiskPerSandbox` since GPU sandboxes own the whole runner exclusively.
+   */
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'max_disk_per_gpu_sandbox',
+  })
+  maxDiskPerGpuSandbox: number | null
+
   @CreateDateColumn({
     type: 'timestamp with time zone',
   })
@@ -90,19 +130,27 @@ export class RegionQuota {
     totalCpuQuota: number,
     totalMemoryQuota: number,
     totalDiskQuota: number,
+    totalGpuQuota = 0,
     maxCpuPerSandbox: number | null = null,
     maxMemoryPerSandbox: number | null = null,
     maxDiskPerSandbox: number | null = null,
     maxDiskPerNonEphemeralSandbox: number | null = null,
+    maxCpuPerGpuSandbox: number | null = null,
+    maxMemoryPerGpuSandbox: number | null = null,
+    maxDiskPerGpuSandbox: number | null = null,
   ) {
     this.organizationId = organizationId
     this.regionId = regionId
     this.totalCpuQuota = totalCpuQuota
     this.totalMemoryQuota = totalMemoryQuota
     this.totalDiskQuota = totalDiskQuota
+    this.totalGpuQuota = totalGpuQuota
     this.maxCpuPerSandbox = maxCpuPerSandbox
     this.maxMemoryPerSandbox = maxMemoryPerSandbox
     this.maxDiskPerSandbox = maxDiskPerSandbox
     this.maxDiskPerNonEphemeralSandbox = maxDiskPerNonEphemeralSandbox
+    this.maxCpuPerGpuSandbox = maxCpuPerGpuSandbox
+    this.maxMemoryPerGpuSandbox = maxMemoryPerGpuSandbox
+    this.maxDiskPerGpuSandbox = maxDiskPerGpuSandbox
   }
 }

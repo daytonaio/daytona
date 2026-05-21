@@ -96,10 +96,14 @@ export class OrgMetricsExporterService {
         totalCpuQuota: -1,
         totalMemoryQuota: -1,
         totalDiskQuota: -1,
+        totalGpuQuota: -1,
         maxCpuPerSandbox: null,
         maxMemoryPerSandbox: null,
         maxDiskPerSandbox: null,
         maxDiskPerNonEphemeralSandbox: null,
+        maxCpuPerGpuSandbox: null,
+        maxMemoryPerGpuSandbox: null,
+        maxDiskPerGpuSandbox: null,
       })
     }
 
@@ -122,6 +126,9 @@ export class OrgMetricsExporterService {
       }
       if (rq.totalDiskQuota > 0) {
         this.addDataPoint(metrics, 'daytona.sandbox.total_storage', regionAttrs, rq.totalDiskQuota, nowNano)
+      }
+      if (rq.totalGpuQuota > 0) {
+        this.addDataPoint(metrics, 'daytona.sandbox.total_gpu', regionAttrs, rq.totalGpuQuota, nowNano)
       }
     }
 

@@ -6,7 +6,18 @@
 import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { DataSource, FindOptionsWhere, In, MoreThanOrEqual, Not, Repository, UpdateResult } from 'typeorm'
+import {
+  DataSource,
+  Equal,
+  FindOptionsWhere,
+  In,
+  IsNull,
+  MoreThanOrEqual,
+  Not,
+  Or,
+  Repository,
+  UpdateResult,
+} from 'typeorm'
 import { Runner } from '../entities/runner.entity'
 import { CreateRunnerInternalDto } from '../dto/create-runner-internal.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
@@ -38,7 +49,10 @@ import { runnerLookupCacheKeyById, RUNNER_LOOKUP_CACHE_TTL_MS } from '../utils/r
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { RunnerServiceInfo } from '../common/runner-service-info'
-import { SANDBOX_STATES_CONSUMING_COMPUTE } from '../../organization/constants/sandbox-states-consuming-compute.constant'
+import {
+  SANDBOX_STATES_CONDITIONALLY_CONSUMING_COMPUTE,
+  SANDBOX_STATES_CONSUMING_COMPUTE,
+} from '../../organization/constants/sandbox-states-consuming-compute.constant'
 
 @Injectable()
 export class RunnerService {
@@ -290,15 +304,18 @@ export class RunnerService {
         : MoreThanOrEqual(this.configService.getOrThrow('runnerScore.thresholds.availability')),
     }
 
-    if (params.gpu) {
+    if (params.gpu > 0) {
       runnerFilter.gpu = MoreThanOrEqual(params.gpu)
+    } else {
+      // GPU runners are exclusively reserved for GPU sandboxes.
+      runnerFilter.gpu = Or(IsNull(), Equal(0))
     }
 
     const excludedRunnerIds = new Set((params.excludedRunnerIds ?? []).filter((id): id is string => !!id))
 
     // GPU sandboxes get exclusive ownership of a runner: skip any runner that
     // already hosts an active sandbox, regardless of whether that sandbox uses GPU.
-    if (params.gpu) {
+    if (params.gpu > 0) {
       const occupiedRunnerIds = await this.getRunnersWithActiveGpuSandbox()
       for (const id of occupiedRunnerIds) {
         excludedRunnerIds.add(id)
@@ -886,6 +903,10 @@ export class RunnerService {
    * Returns runner IDs that currently host at least one GPU sandbox in a
    * non-terminal state. Used by the GPU scheduler to enforce
    * one-gpu-sandbox-per-runner exclusivity.
+   *
+   * Includes the conditionally-consuming states (RESIZING, SNAPSHOTTING) because a
+   * GPU sandbox in either of those states is still physically present on its runner,
+   * regardless of `desiredState`. The runner cannot host a second GPU sandbox.
    */
   async getRunnersWithActiveGpuSandbox(): Promise<string[]> {
     const rows = await this.sandboxRepository
@@ -893,7 +914,9 @@ export class RunnerService {
       .select('DISTINCT sandbox.runnerId', 'runnerId')
       .where('sandbox.runnerId IS NOT NULL')
       .andWhere('sandbox.gpu > 0')
-      .andWhere('sandbox.state IN (:...states)', { states: SANDBOX_STATES_CONSUMING_COMPUTE })
+      .andWhere('sandbox.state IN (:...states)', {
+        states: [...SANDBOX_STATES_CONSUMING_COMPUTE, ...SANDBOX_STATES_CONDITIONALLY_CONSUMING_COMPUTE],
+      })
       .getRawMany()
 
     return rows.map((r) => r.runnerId).filter((id): id is string => !!id)
@@ -1120,7 +1143,7 @@ export class GetRunnerParams {
   availabilityScoreThreshold?: number
   // When > 0, only consider runners that have at least this much GPU capacity
   // and do not currently host any active sandbox (one-GPU-sandbox-per-runner rule).
-  gpu?: number
+  gpu: number
 }
 
 interface AvailabilityScoreParams {

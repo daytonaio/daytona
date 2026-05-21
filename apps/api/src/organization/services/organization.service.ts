@@ -212,6 +212,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     regionQuota.totalCpuQuota = updateDto.totalCpuQuota ?? regionQuota.totalCpuQuota
     regionQuota.totalMemoryQuota = updateDto.totalMemoryQuota ?? regionQuota.totalMemoryQuota
     regionQuota.totalDiskQuota = updateDto.totalDiskQuota ?? regionQuota.totalDiskQuota
+    regionQuota.totalGpuQuota = updateDto.totalGpuQuota ?? regionQuota.totalGpuQuota
 
     if (updateDto.maxCpuPerSandbox !== undefined) {
       regionQuota.maxCpuPerSandbox = updateDto.maxCpuPerSandbox
@@ -224,6 +225,15 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     }
     if (updateDto.maxDiskPerNonEphemeralSandbox !== undefined) {
       regionQuota.maxDiskPerNonEphemeralSandbox = updateDto.maxDiskPerNonEphemeralSandbox
+    }
+    if (updateDto.maxCpuPerGpuSandbox !== undefined) {
+      regionQuota.maxCpuPerGpuSandbox = updateDto.maxCpuPerGpuSandbox
+    }
+    if (updateDto.maxMemoryPerGpuSandbox !== undefined) {
+      regionQuota.maxMemoryPerGpuSandbox = updateDto.maxMemoryPerGpuSandbox
+    }
+    if (updateDto.maxDiskPerGpuSandbox !== undefined) {
+      regionQuota.maxDiskPerGpuSandbox = updateDto.maxDiskPerGpuSandbox
     }
 
     await this.regionQuotaRepository.save(regionQuota)

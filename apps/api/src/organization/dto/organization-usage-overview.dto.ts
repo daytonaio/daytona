@@ -25,6 +25,11 @@ export class RegionUsageOverviewDto {
   @ApiProperty()
   currentDiskUsage: number
 
+  @ApiProperty()
+  totalGpuQuota: number
+  @ApiProperty()
+  currentGpuUsage: number
+
   @ApiProperty({ nullable: true })
   maxCpuPerSandbox: number | null
 
@@ -36,6 +41,15 @@ export class RegionUsageOverviewDto {
 
   @ApiProperty({ nullable: true })
   maxDiskPerNonEphemeralSandbox: number | null
+
+  @ApiProperty({ nullable: true })
+  maxCpuPerGpuSandbox: number | null
+
+  @ApiProperty({ nullable: true })
+  maxMemoryPerGpuSandbox: number | null
+
+  @ApiProperty({ nullable: true })
+  maxDiskPerGpuSandbox: number | null
 }
 
 @ApiSchema({ name: 'OrganizationUsageOverview' })

@@ -388,6 +388,7 @@ export function SnapshotSheet({
                   <ResourceChip resource="cpu" value={activeSnapshot.cpu} />
                   <ResourceChip resource="memory" value={activeSnapshot.mem} />
                   <ResourceChip resource="disk" value={activeSnapshot.disk} />
+                  {activeSnapshot.gpu > 0 && <ResourceChip resource="gpu" value={activeSnapshot.gpu} />}
                 </div>
               </InfoSection>
 

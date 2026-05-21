@@ -20,7 +20,7 @@ import { useConfig } from '@/hooks/useConfig'
 import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
-import type { RegionUsageOverview } from '@daytona/api-client'
+import type { Organization, RegionUsageOverview } from '@daytona/api-client'
 import { keepPreviousData } from '@tanstack/react-query'
 import { RefreshCcw } from 'lucide-react'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -171,24 +171,7 @@ export default function Limits() {
                   title="Sandbox Limits"
                   description="Resources limit per sandbox."
                   className="border-t border-border"
-                  rateLimits={[
-                    {
-                      label: 'Compute',
-                      value: currentRegionUsageOverview?.maxCpuPerSandbox ?? selectedOrganization?.maxCpuPerSandbox,
-                      unit: 'vCPU',
-                    },
-                    {
-                      label: 'Memory',
-                      value:
-                        currentRegionUsageOverview?.maxMemoryPerSandbox ?? selectedOrganization?.maxMemoryPerSandbox,
-                      unit: 'GiB',
-                    },
-                    {
-                      label: 'Storage',
-                      value: currentRegionUsageOverview?.maxDiskPerSandbox ?? selectedOrganization?.maxDiskPerSandbox,
-                      unit: 'GiB',
-                    },
-                  ]}
+                  rateLimits={buildSandboxLimitItems(currentRegionUsageOverview, selectedOrganization)}
                 />
 
                 <RateLimits
@@ -258,11 +241,57 @@ export default function Limits() {
   )
 }
 
+type ResourceType = 'compute' | 'memory' | 'storage'
+
 interface LimitItem {
   value?: number | null
   unit?: string
   label: string
   ttlSeconds?: number | null
+  resourceType?: ResourceType
+}
+
+function buildSandboxLimitItems(region: RegionUsageOverview | null, org: Organization | null | undefined): LimitItem[] {
+  const items: LimitItem[] = []
+  const gpuEnabled = (region?.totalGpuQuota ?? 0) > 0
+
+  const cpuBase = region?.maxCpuPerSandbox ?? org?.maxCpuPerSandbox
+  const cpuGpu = gpuEnabled ? region?.maxCpuPerGpuSandbox : null
+  items.push({ resourceType: 'compute', label: 'Compute', value: cpuBase, unit: 'vCPU' })
+  if (cpuGpu != null && cpuGpu !== cpuBase) {
+    items.push({ resourceType: 'compute', label: 'Compute (GPU)', value: cpuGpu, unit: 'vCPU' })
+  }
+
+  const memBase = region?.maxMemoryPerSandbox ?? org?.maxMemoryPerSandbox
+  const memGpu = gpuEnabled ? region?.maxMemoryPerGpuSandbox : null
+  items.push({ resourceType: 'memory', label: 'Memory', value: memBase, unit: 'GiB' })
+  if (memGpu != null && memGpu !== memBase) {
+    items.push({ resourceType: 'memory', label: 'Memory (GPU)', value: memGpu, unit: 'GiB' })
+  }
+
+  const diskBase = region?.maxDiskPerSandbox ?? org?.maxDiskPerSandbox
+  const diskNonEphem = region?.maxDiskPerNonEphemeralSandbox
+  const diskGpu = gpuEnabled ? region?.maxDiskPerGpuSandbox : null
+
+  const showNonEphemSplit = diskNonEphem != null && diskNonEphem > 0 && diskNonEphem !== diskBase
+  const showStorageGpuVariant = diskGpu != null && diskGpu !== diskBase
+
+  items.push({
+    resourceType: 'storage',
+    label: showNonEphemSplit ? 'Storage (Ephemeral)' : 'Storage',
+    value: diskBase,
+    unit: 'GiB',
+  })
+
+  if (showStorageGpuVariant) {
+    items.push({ resourceType: 'storage', label: 'Storage (GPU)', value: diskGpu, unit: 'GiB' })
+  }
+
+  if (showNonEphemSplit) {
+    items.push({ resourceType: 'storage', label: 'Storage (Non-Ephemeral)', value: diskNonEphem, unit: 'GiB' })
+  }
+
+  return items
 }
 
 function RateLimits({
@@ -277,9 +306,12 @@ function RateLimits({
   description: ReactNode
 }) {
   const isEmpty = rateLimits.every(({ value }) => !value)
-  if (isEmpty) {
-    return null
-  }
+  if (isEmpty) return null
+
+  // When items carry resourceType, render each type as its own desktop column
+  // (variants stack vertically within the column). Otherwise fall back to the
+  // flat grid used by sections like "Rate Limits".
+  const grouped = groupByResourceType(rateLimits)
 
   return (
     <div className={cn('p-4 border-t border-border flex flex-col gap-4', className)}>
@@ -287,14 +319,46 @@ function RateLimits({
         <div className="text-foreground text-sm font-medium">{title}</div>
         <div className="text-muted-foreground text-sm">{description}</div>
       </div>
-      <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-3">
-        {rateLimits.map(
-          ({ label, value, unit, ttlSeconds }) =>
-            value && <RateLimitItem key={label} label={label} value={value} unit={unit} ttlSeconds={ttlSeconds} />,
-        )}
-      </div>
+      {grouped ? (
+        <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-3">
+          {grouped.map((column) => (
+            <div key={column[0].resourceType} className="flex flex-col gap-2 sm:gap-4">
+              {column.map(
+                ({ label, value, unit, ttlSeconds }) =>
+                  value && (
+                    <RateLimitItem key={label} label={label} value={value} unit={unit} ttlSeconds={ttlSeconds} />
+                  ),
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-3">
+          {rateLimits.map(
+            ({ label, value, unit, ttlSeconds }) =>
+              value && <RateLimitItem key={label} label={label} value={value} unit={unit} ttlSeconds={ttlSeconds} />,
+          )}
+        </div>
+      )}
     </div>
   )
+}
+
+function groupByResourceType(items: LimitItem[]): LimitItem[][] | null {
+  if (!items.some((item) => item.resourceType !== undefined)) {
+    return null
+  }
+  const groups = new Map<ResourceType, LimitItem[]>()
+  for (const item of items) {
+    if (!item.resourceType) continue
+    const existing = groups.get(item.resourceType)
+    if (existing) {
+      existing.push(item)
+    } else {
+      groups.set(item.resourceType, [item])
+    }
+  }
+  return Array.from(groups.values())
 }
 
 function formatTtl(ttlSeconds?: number | null): string {

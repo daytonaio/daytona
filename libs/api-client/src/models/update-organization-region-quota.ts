@@ -18,9 +18,13 @@ export interface UpdateOrganizationRegionQuota {
     'totalCpuQuota': number | null;
     'totalMemoryQuota': number | null;
     'totalDiskQuota': number | null;
+    'totalGpuQuota': number | null;
     'maxCpuPerSandbox'?: number | null;
     'maxMemoryPerSandbox'?: number | null;
     'maxDiskPerSandbox'?: number | null;
     'maxDiskPerNonEphemeralSandbox'?: number | null;
+    'maxCpuPerGpuSandbox'?: number | null;
+    'maxMemoryPerGpuSandbox'?: number | null;
+    'maxDiskPerGpuSandbox'?: number | null;
 }
 

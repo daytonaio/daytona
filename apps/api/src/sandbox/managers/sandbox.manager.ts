@@ -382,6 +382,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             snapshotRef: sandbox.backupSnapshot,
             excludedRunnerIds: [runner.id],
             availabilityScoreThreshold: startScoreThreshold,
+            gpu: sandbox.gpu,
           })
 
           await this.migrateSandbox(sandbox, runner.id, targetRunner.id)
@@ -636,13 +637,15 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
         let diskIncremented = false
         try {
-          // Reserve disk for the ERROR → STOPPED transition.
+          // Reserve disk for the ERROR → STOPPED transition. GPU is not reserved here:
+          // the recover path does not transition to STARTED, so no GPU is consumed.
           const result = await this.organizationUsageService.incrementPendingSandboxUsage(
             sandbox.organizationId,
             sandbox.region,
             0,
             0,
             sandbox.disk,
+            0,
             sandbox.id,
           )
           diskIncremented = result.diskIncremented
@@ -681,7 +684,14 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         } catch (e) {
           if (diskIncremented) {
             await this.organizationUsageService
-              .decrementPendingSandboxUsage(sandbox.organizationId, sandbox.region, undefined, undefined, sandbox.disk)
+              .decrementPendingSandboxUsage(
+                sandbox.organizationId,
+                sandbox.region,
+                undefined,
+                undefined,
+                sandbox.disk,
+                undefined,
+              )
               .catch(() => undefined)
           }
           await this.redis.set(redisKey, '1', 'EX', SandboxManager.DRAINING_RECOVER_TTL_SECONDS)

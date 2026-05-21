@@ -238,7 +238,6 @@ const columns: ColumnDef<SnapshotDto>[] = [
   {
     id: 'resources',
     size: 190,
-    maxSize: 190,
     enableSorting: false,
     header: 'Resources',
     cell: ({ row }) => {
@@ -257,6 +256,14 @@ const columns: ColumnDef<SnapshotDto>[] = [
           <div className="whitespace-nowrap">
             {snapshot.disk} <span className="text-muted-foreground">GiB</span>
           </div>
+          {snapshot.gpu > 0 && (
+            <>
+              <div className="w-[1px] h-6 bg-muted-foreground/20 rounded-full inline-block"></div>
+              <div className="whitespace-nowrap">
+                {snapshot.gpu} <span className="text-muted-foreground">GPU</span>
+              </div>
+            </>
+          )}
         </div>
       )
     },

@@ -20,9 +20,13 @@ export interface RegionQuota {
     'totalCpuQuota': number;
     'totalMemoryQuota': number;
     'totalDiskQuota': number;
+    'totalGpuQuota': number;
     'maxCpuPerSandbox': number | null;
     'maxMemoryPerSandbox': number | null;
     'maxDiskPerSandbox': number | null;
     'maxDiskPerNonEphemeralSandbox': number | null;
+    'maxCpuPerGpuSandbox': number | null;
+    'maxMemoryPerGpuSandbox': number | null;
+    'maxDiskPerGpuSandbox': number | null;
 }
 
