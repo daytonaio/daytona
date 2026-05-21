@@ -238,7 +238,6 @@ const columns: ColumnDef<SnapshotDto>[] = [
   {
     id: 'resources',
     size: 190,
-    maxSize: 190,
     enableSorting: false,
     header: 'Resources',
     cell: ({ row }) => {
