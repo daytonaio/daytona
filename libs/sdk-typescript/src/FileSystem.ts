@@ -331,6 +331,9 @@ export class FileSystem {
       throw new DaytonaError('Download cancelled')
     }
 
+    // Pre-resolve `stream` so the sync `onFileStream` callback below is await-free.
+    const { Transform } = await dynamicImport('stream', 'downloadFileStream progress tracking is not supported: ')
+
     const toDownloadCancelledError = () => new DaytonaError('Download cancelled')
     const isCanceledError = (err: unknown) => {
       const error = err as { code?: string; name?: string }
@@ -357,11 +360,6 @@ export class FileSystem {
     const responseStream = normalizeResponseStream(response.data)
     const metadataMap = new Map<string, DownloadMetadata>()
     metadataMap.set(remotePath, {})
-
-    // Pre-resolve `stream` so the synchronous `onFileStream` callback below
-    // never needs to call `require()` — bare `require()` is unavailable in
-    // ESM under Next.js `serverExternalPackages` (issue #4771).
-    const { Transform } = await dynamicImport('stream', 'downloadFileStream progress tracking is not supported: ')
 
     return new Promise<Readable>((resolve, reject) => {
       let resolvedStream: Readable | null = null

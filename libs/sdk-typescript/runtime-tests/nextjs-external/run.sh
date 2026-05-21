@@ -18,6 +18,24 @@ npm install --silent "$API_CLIENT_TARBALL" "$TOOLBOX_API_CLIENT_TARBALL" "$SDK_T
 FILE_CONTENT="hello from nextjs-external"
 FILE_PATH="test.txt"
 
+# Register cleanup BEFORE creating the sandbox so any failure during creation
+# (or between creation and the rest of the script) is still cleaned up.
+SANDBOX_ID=""
+SERVER_PID=""
+cleanup() {
+  if [ -n "$SANDBOX_ID" ]; then
+    node --input-type=module -e "
+      import { Daytona } from '@daytona/sdk';
+      const d = new Daytona();
+      try { const s = await d.get('${SANDBOX_ID}'); await d.delete(s); } catch {}
+    " 2>/dev/null || true
+  fi
+  if [ -n "$SERVER_PID" ]; then
+    kill -9 "$SERVER_PID" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
 SANDBOX_ID=$(node --input-type=module -e "
 import { Daytona } from '@daytona/sdk';
 const d = new Daytona();
@@ -26,17 +44,6 @@ await s.fs.uploadFile(Buffer.from('${FILE_CONTENT}'), '${FILE_PATH}');
 process.stdout.write(s.id);
 ")
 echo "Sandbox created: $SANDBOX_ID"
-
-cleanup() {
-  node --input-type=module -e "
-    import { Daytona } from '@daytona/sdk';
-    const d = new Daytona();
-    try { const s = await d.get('${SANDBOX_ID}'); await d.delete(s); } catch {}
-  " 2>/dev/null || true
-  kill -9 "${SERVER_PID:-}" 2>/dev/null || true
-  pkill -9 -f 'next start' 2>/dev/null || true
-}
-trap cleanup EXIT
 
 NODE_ENV=production npm run build >/dev/null
 
