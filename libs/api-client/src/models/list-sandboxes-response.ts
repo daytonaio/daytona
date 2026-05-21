@@ -15,13 +15,13 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
-import type { Sandbox } from './sandbox';
+import type { SandboxListItem } from './sandbox-list-item';
 
 export interface ListSandboxesResponse {
     /**
      * List of results for the current page
      */
-    'items': Array<Sandbox>;
+    'items': Array<SandboxListItem>;
     /**
      * Cursor for the next page of results
      */

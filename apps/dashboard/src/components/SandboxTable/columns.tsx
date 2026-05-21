@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { getRelativeTimeString } from '@/lib/utils'
-import { Sandbox, SandboxDesiredState } from '@daytona/api-client'
+import { SandboxDesiredState, SandboxListItem } from '@daytona/api-client'
 import { Column, ColumnDef, RowData, Table } from '@tanstack/react-table'
 import { Loader2 } from 'lucide-react'
 import React from 'react'
@@ -37,22 +37,22 @@ type SandboxTableMeta = {
   handleCreateSnapshot: (id: string) => void
   handleFork: (id: string) => void
   handleViewForks: (id: string) => void
-  handleOpenTerminal: (sandbox: Sandbox) => void
+  handleOpenTerminal: (sandbox: SandboxListItem) => void
 }
 
 declare module '@tanstack/react-table' {
   interface TableMeta<TData extends RowData> {
-    sandbox?: TData extends Sandbox ? SandboxTableMeta : never
+    sandbox?: TData extends SandboxListItem ? SandboxTableMeta : never
   }
 }
 
 interface SortableHeaderProps {
-  column: Column<Sandbox, unknown>
+  column: Column<SandboxListItem, unknown>
   label: string
   dataState?: string
 }
 
-const getMeta = (table: Table<Sandbox>) => {
+const getMeta = (table: Table<SandboxListItem>) => {
   return table.options.meta?.sandbox as SandboxTableMeta
 }
 
@@ -76,7 +76,7 @@ const SandboxStateCell = React.memo(function SandboxStateCell({
   state,
   errorReason,
   recoverable,
-}: Pick<Sandbox, 'state' | 'errorReason' | 'recoverable'>) {
+}: Pick<SandboxListItem, 'state' | 'errorReason' | 'recoverable'>) {
   return (
     <div className="w-full truncate">
       <SandboxStateComponent state={state} errorReason={errorReason} recoverable={recoverable} animate />
@@ -84,7 +84,7 @@ const SandboxStateCell = React.memo(function SandboxStateCell({
   )
 })
 
-const columns: ColumnDef<Sandbox>[] = [
+const columns: ColumnDef<SandboxListItem>[] = [
   {
     id: 'select',
     size: 44,
@@ -396,7 +396,7 @@ const columns: ColumnDef<Sandbox>[] = [
   },
 ]
 
-function getDisplayName(sandbox: Sandbox): string {
+function getDisplayName(sandbox: SandboxListItem): string {
   if (sandbox.desiredState === SandboxDesiredState.DESTROYED && sandbox.name.startsWith('DESTROYED_')) {
     const withoutPrefix = sandbox.name.substring(10)
     const lastUnderscoreIndex = withoutPrefix.lastIndexOf('_')
@@ -408,7 +408,7 @@ function getDisplayName(sandbox: Sandbox): string {
   return sandbox.name
 }
 
-function getLastEvent(sandbox: Sandbox): { date: Date; relativeTimeString: string } {
+function getLastEvent(sandbox: SandboxListItem): { date: Date; relativeTimeString: string } {
   return getRelativeTimeString(sandbox.lastActivityAt)
 }
 

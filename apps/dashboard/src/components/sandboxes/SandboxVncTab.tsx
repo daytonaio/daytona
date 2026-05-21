@@ -11,13 +11,13 @@ import { useStartVncMutation } from '@/hooks/mutations/useStartVncMutation'
 import { useVncInitialStatusQuery, useVncPollStatusQuery } from '@/hooks/queries/useVncStatusQuery'
 import { useVncSessionQuery } from '@/hooks/queries/useVncSessionQuery'
 import { isStoppable } from '@/lib/utils/sandbox'
-import { Sandbox } from '@daytona/api-client'
+import { SandboxListItem } from '@daytona/api-client'
 import { Spinner } from '@/components/ui/spinner'
 import { ArrowUpRight, Monitor, Play, RefreshCw } from 'lucide-react'
 
 const VNC_MISSING_DEPS_MSG = 'Computer-use functionality is not available'
 
-export function SandboxVncTab({ sandbox }: { sandbox: Sandbox }) {
+export function SandboxVncTab({ sandbox }: { sandbox: SandboxListItem }) {
   const running = isStoppable(sandbox)
 
   // 1. Check initial VNC availability & status

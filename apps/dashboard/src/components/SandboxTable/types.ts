@@ -6,7 +6,7 @@
 import { DEFAULT_SANDBOX_SORTING, SandboxFilters, SandboxSorting } from '@/hooks/queries/useSandboxesQuery'
 import {
   Region,
-  Sandbox,
+  SandboxListItem,
   SandboxListSortDirection,
   SandboxListSortField,
   SandboxState,
@@ -17,12 +17,12 @@ import type { Ref } from 'react'
 import { ResourceFilterValue } from './filters/ResourceFilter'
 
 export interface SandboxTableRef {
-  table: Table<Sandbox>
+  table: Table<SandboxListItem>
 }
 
 export interface SandboxTableProps {
   ref?: Ref<SandboxTableRef>
-  data: Sandbox[]
+  data: SandboxListItem[]
   sandboxIsLoading: Record<string, boolean>
   activeSandboxId?: string
   loading: boolean
@@ -45,7 +45,7 @@ export interface SandboxTableProps {
   handleVnc: (id: string) => void
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
-  onRowClick?: (sandbox: Sandbox) => void
+  onRowClick?: (sandbox: SandboxListItem) => void
   handleRecover: (id: string) => void
   handleScreenRecordings: (id: string) => void
   handleCreateSnapshot: (id: string) => void
@@ -57,11 +57,11 @@ export interface SandboxTableProps {
   onSortingChange: (sorting: SandboxSorting) => void
   filters: SandboxFilters
   onFiltersChange: (filters: SandboxFilters) => void
-  handleOpenTerminal: (sandbox: Sandbox) => void
+  handleOpenTerminal: (sandbox: SandboxListItem) => void
 }
 
 export interface SandboxTableActionsProps {
-  sandbox: Sandbox
+  sandbox: SandboxListItem
   writePermitted: boolean
   deletePermitted: boolean
   isLoading: boolean
@@ -82,7 +82,7 @@ export interface SandboxTableActionsProps {
 }
 
 export interface SandboxTableHeaderProps {
-  table: Table<Sandbox>
+  table: Table<SandboxListItem>
   regionOptions: FacetedFilterOption[]
   regionsDataIsLoading: boolean
   snapshots: SnapshotDto[]

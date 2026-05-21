@@ -64,6 +64,7 @@ import {
   OrganizationUserRoleEnum,
   Sandbox,
   SandboxDesiredState,
+  SandboxListItem,
   SandboxListSortDirection,
   SandboxListSortField,
   SandboxState,
@@ -99,7 +100,7 @@ const SANDBOX_SORT_FIELDS: SandboxListSortField[] = [
 ]
 const SANDBOX_SORT_DIRECTIONS = Object.values(SandboxListSortDirection)
 const SANDBOX_STATES = Object.values(SandboxState)
-const DEFAULT_SANDBOXES: Sandbox[] = []
+const DEFAULT_SANDBOXES: SandboxListItem[] = []
 const SANDBOX_LIST_REVALIDATION_DEBOUNCE_MS = 500
 
 const labelsParser = parseAsJson<Record<string, string>>((value) => {
@@ -484,8 +485,8 @@ const Sandboxes: React.FC = () => {
   const [recursiveDeleteSandboxId, setRecursiveDeleteSandboxId] = useState<string | null>(null)
   const [sandboxToSnapshot, setSandboxToSnapshot] = useState<string | null>(null)
   const [snapshotName, setSnapshotName] = useState('')
-  const [selectedSandbox, setSelectedSandbox] = useState<Sandbox | null>(null)
-  const [orderedSandboxItems, setOrderedSandboxItems] = useState<Sandbox[] | null>(null)
+  const [selectedSandbox, setSelectedSandbox] = useState<SandboxListItem | null>(null)
+  const [orderedSandboxItems, setOrderedSandboxItems] = useState<SandboxListItem[] | null>(null)
   const [sandboxDetailsInitialTab, setSandboxDetailsInitialTab] = useState<SandboxDetailsSheetTabValue>('overview')
   const [showCreateSshDialog, setShowCreateSshDialog] = useState(false)
   const [showRevokeSshDialog, setShowRevokeSshDialog] = useState(false)
@@ -1111,7 +1112,7 @@ const Sandboxes: React.FC = () => {
     }
   }
 
-  const openSandboxDetails = (sandbox: Sandbox, initialTab: SandboxDetailsSheetTabValue = 'overview') => {
+  const openSandboxDetails = (sandbox: SandboxListItem, initialTab: SandboxDetailsSheetTabValue = 'overview') => {
     const orderedSandboxes =
       sandboxTableRef.current?.table.getPrePaginationRowModel().rows.map((row) => row.original) ?? []
     setOrderedSandboxItems(orderedSandboxes.some((item) => item.id === sandbox.id) ? orderedSandboxes : null)
@@ -1121,11 +1122,11 @@ const Sandboxes: React.FC = () => {
     setSandboxTabParam(initialTab)
   }
 
-  const handleSandboxRowClick = (sandbox: Sandbox) => {
+  const handleSandboxRowClick = (sandbox: SandboxListItem) => {
     openSandboxDetails(sandbox)
   }
 
-  const handleOpenTerminal = (sandbox: Sandbox) => {
+  const handleOpenTerminal = (sandbox: SandboxListItem) => {
     openSandboxDetails(sandbox, 'terminal')
   }
 

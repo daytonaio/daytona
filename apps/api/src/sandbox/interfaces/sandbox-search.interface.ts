@@ -4,7 +4,7 @@
  */
 
 import { SandboxState } from '../enums/sandbox-state.enum'
-import { SandboxDto } from '../dto/sandbox.dto'
+import { SandboxListItemDto } from '../dto/sandbox-list-item.dto'
 import {
   SandboxListSortField as SandboxSearchSortField,
   SandboxListSortDirection as SandboxSearchSortDirection,
@@ -118,7 +118,7 @@ export interface SandboxSearchSort {
 }
 
 export interface SandboxSearchResult {
-  items: SandboxDto[]
+  items: SandboxListItemDto[]
   nextCursor: string | null
 }
 

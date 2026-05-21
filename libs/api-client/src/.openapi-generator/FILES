@@ -160,6 +160,7 @@ models/runner.ts
 models/sandbox-class.ts
 models/sandbox-desired-state.ts
 models/sandbox-labels.ts
+models/sandbox-list-item.ts
 models/sandbox-list-sort-direction.ts
 models/sandbox-list-sort-field.ts
 models/sandbox-state.ts

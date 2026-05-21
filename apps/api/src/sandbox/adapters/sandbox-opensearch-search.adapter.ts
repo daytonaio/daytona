@@ -8,7 +8,6 @@ import { OpensearchClient } from 'nestjs-opensearch'
 import { Search_RequestBody } from '@opensearch-project/opensearch/api/index.js'
 import { QueryContainer } from '@opensearch-project/opensearch/api/_types/_common.query_dsl.js'
 import { Sandbox } from '../entities/sandbox.entity'
-import { SandboxLastActivity } from '../entities/sandbox-last-activity.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { TypedConfigService } from '../../config/typed-config.service'
@@ -20,7 +19,7 @@ import {
   SandboxSearchSort,
   SandboxSearchSortField,
 } from '../interfaces/sandbox-search.interface'
-import { SandboxDto } from '../dto/sandbox.dto'
+import { SandboxListItemDto } from '../dto/sandbox-list-item.dto'
 
 export class SandboxOpenSearchSearchAdapter implements SandboxSearchAdapter, OnModuleInit {
   private static readonly FIELDS_EXCLUDED_FROM_INDEX: ReadonlyArray<keyof Sandbox> = ['existingBackupSnapshots']
@@ -359,47 +358,44 @@ export class SandboxOpenSearchSearchAdapter implements SandboxSearchAdapter, OnM
     }
 
     return {
-      items: items.map((hit: any) => this.mapSourceToSandbox(hit._source)),
+      items: items.map((hit: any) => this.mapSourceToDto(hit._source)),
       nextCursor,
     }
   }
 
-  private mapSourceToSandbox(source: any): SandboxDto {
-    const sandbox = new Sandbox(source.region, source.name)
-    sandbox.id = source.id
-    sandbox.organizationId = source.organizationId
-    sandbox.runnerId = source.runnerId
-    sandbox.class = source.class
-    sandbox.state = source.state
-    sandbox.desiredState = source.desiredState
-    sandbox.snapshot = source.snapshot
-    sandbox.osUser = source.osUser
-    sandbox.errorReason = source.errorReason
-    sandbox.recoverable = source.recoverable
-    sandbox.public = source.public
-    sandbox.cpu = source.cpu
-    sandbox.gpu = source.gpu
-    sandbox.mem = source.mem
-    sandbox.disk = source.disk
-    sandbox.labels =
+  private mapSourceToDto(source: any): SandboxListItemDto {
+    const labels: { [key: string]: string } =
       typeof source.labels === 'string'
         ? JSON.parse(source.labels || '{}')
         : ((source.labels || {}) as { [key: string]: string })
-    sandbox.backupState = source.backupState
-    sandbox.autoStopInterval = source.autoStopInterval
-    sandbox.autoArchiveInterval = source.autoArchiveInterval
-    sandbox.autoDeleteInterval = source.autoDeleteInterval
-    sandbox.createdAt = source.createdAt ? new Date(source.createdAt) : undefined
-    sandbox.updatedAt = source.updatedAt ? new Date(source.updatedAt) : undefined
 
-    if (source.lastActivityAt) {
-      const lastActivity = new SandboxLastActivity()
-      lastActivity.sandboxId = source.id
-      lastActivity.lastActivityAt = new Date(source.lastActivityAt)
-      sandbox.lastActivityAt = lastActivity
-    }
-
-    // note: toolbox proxy URL is resolved in the service layer
-    return SandboxDto.fromSandbox(sandbox, '')
+    return new SandboxListItemDto({
+      id: source.id,
+      organizationId: source.organizationId,
+      name: source.name,
+      target: source.region,
+      runnerId: source.runnerId,
+      class: source.class,
+      state: source.state as SandboxState,
+      desiredState: source.desiredState as SandboxDesiredState | undefined,
+      snapshot: source.snapshot,
+      user: source.osUser,
+      errorReason: source.errorReason,
+      recoverable: source.recoverable,
+      public: source.public,
+      cpu: source.cpu,
+      gpu: source.gpu,
+      memory: source.mem,
+      disk: source.disk,
+      labels,
+      backupState: source.backupState,
+      autoStopInterval: source.autoStopInterval,
+      autoArchiveInterval: source.autoArchiveInterval,
+      autoDeleteInterval: source.autoDeleteInterval,
+      createdAt: source.createdAt ? new Date(source.createdAt).toISOString() : undefined,
+      updatedAt: source.updatedAt ? new Date(source.updatedAt).toISOString() : undefined,
+      lastActivityAt: source.lastActivityAt ? new Date(source.lastActivityAt).toISOString() : undefined,
+      daemonVersion: source.daemonVersion,
+    })
   }
 }

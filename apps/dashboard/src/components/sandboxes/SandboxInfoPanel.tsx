@@ -13,7 +13,7 @@ import { ButtonGroup } from '@/components/ui/button-group'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn, formatDuration, getRelativeTimeString } from '@/lib/utils'
-import { Sandbox } from '@daytona/api-client'
+import { SandboxListItem } from '@daytona/api-client'
 import { AlertCircle, ArrowUpRight, KeyRound, Tag, UserRoundX } from 'lucide-react'
 import React, { ReactNode, useMemo } from 'react'
 
@@ -52,7 +52,7 @@ export function InfoRow({
 }
 
 interface SandboxInfoPanelProps {
-  sandbox: Sandbox
+  sandbox: SandboxListItem
   getRegionName: (id: string) => string | undefined
   actionsDisabled?: boolean
   writePermitted?: boolean

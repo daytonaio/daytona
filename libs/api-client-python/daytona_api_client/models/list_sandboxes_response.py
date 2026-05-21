@@ -20,7 +20,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from daytona_api_client.models.sandbox import Sandbox
+from daytona_api_client.models.sandbox_list_item import SandboxListItem
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
@@ -31,7 +31,7 @@ class ListSandboxesResponse(BaseModel):
     """
     ListSandboxesResponse
     """ # noqa: E501
-    items: List[Sandbox] = Field(description="List of results for the current page")
+    items: List[SandboxListItem] = Field(description="List of results for the current page")
     next_cursor: Optional[StrictStr] = Field(description="Cursor for the next page of results", serialization_alias="nextCursor")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["items", "nextCursor"]
@@ -105,7 +105,7 @@ class ListSandboxesResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "items": [Sandbox.from_dict(_item) for _item in obj["items"]] if obj.get("items") is not None else None,
+            "items": [SandboxListItem.from_dict(_item) for _item in obj["items"]] if obj.get("items") is not None else None,
             "next_cursor": obj.get("nextCursor")
         })
         # store additional fields in additional_properties

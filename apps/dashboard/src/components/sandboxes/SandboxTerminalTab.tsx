@@ -10,11 +10,11 @@ import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { useTerminalSessionQuery } from '@/hooks/queries/useTerminalSessionQuery'
 import { useSandboxSessionContext } from '@/hooks/useSandboxSessionContext'
 import { isStoppable } from '@/lib/utils/sandbox'
-import { Sandbox } from '@daytona/api-client'
+import { SandboxListItem } from '@daytona/api-client'
 import { Spinner } from '@/components/ui/spinner'
 import { ArrowUpRight, RefreshCw, TerminalSquare } from 'lucide-react'
 
-export function SandboxTerminalTab({ sandbox }: { sandbox: Sandbox }) {
+export function SandboxTerminalTab({ sandbox }: { sandbox: SandboxListItem }) {
   const running = isStoppable(sandbox)
   const { isTerminalActivated, activateTerminal } = useSandboxSessionContext()
 

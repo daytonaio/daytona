@@ -17,7 +17,7 @@ import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useConfig } from '@/hooks/useConfig'
 import { SandboxSessionProvider } from '@/providers/SandboxSessionProvider'
-import type { Sandbox } from '@daytona/api-client'
+import type { SandboxListItem } from '@daytona/api-client'
 import { ChevronDown, ChevronUp, ChevronsRight, X } from 'lucide-react'
 import React, { useCallback, useEffect, useState } from 'react'
 import { SandboxActionsSegmented } from '../SandboxActionsSegmented'
@@ -37,7 +37,7 @@ export type SandboxDetailsSheetTabValue =
   | 'vnc'
 
 export interface SandboxDetailsSheetProps {
-  sandbox: Sandbox | null
+  sandbox: SandboxListItem | null
   open: boolean
   onOpenChange: (open: boolean) => void
   sandboxIsLoading: Record<string, boolean>

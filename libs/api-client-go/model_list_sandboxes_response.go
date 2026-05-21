@@ -22,7 +22,7 @@ var _ MappedNullable = &ListSandboxesResponse{}
 // ListSandboxesResponse struct for ListSandboxesResponse
 type ListSandboxesResponse struct {
 	// List of results for the current page
-	Items []Sandbox `json:"items"`
+	Items []SandboxListItem `json:"items"`
 	// Cursor for the next page of results
 	NextCursor NullableString `json:"nextCursor"`
 	AdditionalProperties map[string]interface{}
@@ -34,7 +34,7 @@ type _ListSandboxesResponse ListSandboxesResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewListSandboxesResponse(items []Sandbox, nextCursor NullableString) *ListSandboxesResponse {
+func NewListSandboxesResponse(items []SandboxListItem, nextCursor NullableString) *ListSandboxesResponse {
 	this := ListSandboxesResponse{}
 	this.Items = items
 	this.NextCursor = nextCursor
@@ -50,9 +50,9 @@ func NewListSandboxesResponseWithDefaults() *ListSandboxesResponse {
 }
 
 // GetItems returns the Items field value
-func (o *ListSandboxesResponse) GetItems() []Sandbox {
+func (o *ListSandboxesResponse) GetItems() []SandboxListItem {
 	if o == nil {
-		var ret []Sandbox
+		var ret []SandboxListItem
 		return ret
 	}
 
@@ -61,7 +61,7 @@ func (o *ListSandboxesResponse) GetItems() []Sandbox {
 
 // GetItemsOk returns a tuple with the Items field value
 // and a boolean to check if the value has been set.
-func (o *ListSandboxesResponse) GetItemsOk() ([]Sandbox, bool) {
+func (o *ListSandboxesResponse) GetItemsOk() ([]SandboxListItem, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -69,7 +69,7 @@ func (o *ListSandboxesResponse) GetItemsOk() ([]Sandbox, bool) {
 }
 
 // SetItems sets field value
-func (o *ListSandboxesResponse) SetItems(v []Sandbox) {
+func (o *ListSandboxesResponse) SetItems(v []SandboxListItem) {
 	o.Items = v
 }
 

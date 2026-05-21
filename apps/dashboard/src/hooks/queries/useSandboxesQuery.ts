@@ -8,7 +8,7 @@ import type { QueryKey } from '@tanstack/react-query'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import {
-  type Sandbox,
+  type SandboxListItem,
   SandboxListSortDirection,
   SandboxListSortField,
   SandboxState,
@@ -16,7 +16,7 @@ import {
 } from '@daytona/api-client'
 import { queryKeys } from './queryKeys'
 
-type ListSandboxesQueryResponse = ListSandboxesResponse | Sandbox[]
+type ListSandboxesQueryResponse = ListSandboxesResponse | SandboxListItem[]
 
 export interface SandboxFilters {
   name?: string

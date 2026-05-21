@@ -4,15 +4,15 @@
  */
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
-import { SandboxDto } from './sandbox.dto'
+import { SandboxListItemDto } from './sandbox-list-item.dto'
 
 @ApiSchema({ name: 'ListSandboxesResponse' })
 export class ListSandboxesResponseDto {
   @ApiProperty({
     description: 'List of results for the current page',
-    type: [SandboxDto],
+    type: [SandboxListItemDto],
   })
-  items: SandboxDto[]
+  items: SandboxListItemDto[]
 
   @ApiProperty({
     description: 'Cursor for the next page of results',

@@ -4,12 +4,12 @@
  */
 
 import { CopyButton } from '@/components/CopyButton'
-import type { Sandbox } from '@daytona/api-client'
+import type { SandboxListItem } from '@daytona/api-client'
 import type React from 'react'
 import { InfoRow, InfoSection } from '../SandboxInfoPanel'
 import { SandboxState as SandboxStateComponent } from '../SandboxState'
 
-export function SandboxDetailsHeader({ sandbox, actions }: { sandbox: Sandbox; actions?: React.ReactNode }) {
+export function SandboxDetailsHeader({ sandbox, actions }: { sandbox: SandboxListItem; actions?: React.ReactNode }) {
   const hasCustomName = !!sandbox.name && sandbox.name !== sandbox.id
 
   return (

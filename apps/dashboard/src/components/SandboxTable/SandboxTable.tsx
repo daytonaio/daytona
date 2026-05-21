@@ -19,7 +19,7 @@ import {
   isTransitioning,
 } from '@/lib/utils/sandbox'
 import { getColumnSizeStyles } from '@/lib/utils/table'
-import { OrganizationRolePermissionsEnum, Sandbox, SandboxState } from '@daytona/api-client'
+import { OrganizationRolePermissionsEnum, SandboxListItem, SandboxState } from '@daytona/api-client'
 import {
   flexRender,
   getCoreRowModel,
@@ -201,7 +201,7 @@ export function SandboxTable({
   const selectedRows = table.getSelectedRowModel().rows
   const hasSelection = selectedRows.length > 0
   const selectedCount = selectedRows.length
-  const selectedSandboxes: Sandbox[] = selectedRows.map((row) => row.original)
+  const selectedSandboxes: SandboxListItem[] = selectedRows.map((row) => row.original)
   const isEmpty = !loading && table.getRowModel().rows.length === 0
   const hasFilters =
     table.getState().columnFilters.length > 0 || String(table.getState().globalFilter ?? '').trim().length > 0

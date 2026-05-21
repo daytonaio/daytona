@@ -17,7 +17,7 @@ import {
   SandboxSearchSortDirection,
   SandboxSearchSortField,
 } from '../interfaces/sandbox-search.interface'
-import { SandboxDto } from '../dto/sandbox.dto'
+import { SandboxListItemDto } from '../dto/sandbox-list-item.dto'
 
 export class SandboxTypeormSearchAdapter implements SandboxSearchAdapter {
   private readonly logger = new Logger(SandboxTypeormSearchAdapter.name)
@@ -163,11 +163,43 @@ export class SandboxTypeormSearchAdapter implements SandboxSearchAdapter {
       nextCursor = this.encodeCursor(lastItem, sort.field)
     }
 
-    // note: toolbox proxy URL is resolved in the service layer
     return {
-      items: returnItems.map((sandbox) => SandboxDto.fromSandbox(sandbox, '')),
+      items: returnItems.map((sandbox) => this.mapEntityToDto(sandbox)),
       nextCursor,
     }
+  }
+
+  private mapEntityToDto(sandbox: Sandbox): SandboxListItemDto {
+    return new SandboxListItemDto({
+      id: sandbox.id,
+      organizationId: sandbox.organizationId,
+      name: sandbox.name,
+      target: sandbox.region,
+      runnerId: sandbox.runnerId,
+      class: sandbox.class,
+      state: sandbox.state,
+      desiredState: sandbox.desiredState,
+      snapshot: sandbox.snapshot,
+      user: sandbox.osUser,
+      errorReason: sandbox.errorReason,
+      recoverable: sandbox.recoverable,
+      public: sandbox.public,
+      cpu: sandbox.cpu,
+      gpu: sandbox.gpu,
+      memory: sandbox.mem,
+      disk: sandbox.disk,
+      labels: sandbox.labels,
+      backupState: sandbox.backupState,
+      autoStopInterval: sandbox.autoStopInterval,
+      autoArchiveInterval: sandbox.autoArchiveInterval,
+      autoDeleteInterval: sandbox.autoDeleteInterval,
+      createdAt: sandbox.createdAt ? new Date(sandbox.createdAt).toISOString() : undefined,
+      updatedAt: sandbox.updatedAt ? new Date(sandbox.updatedAt).toISOString() : undefined,
+      lastActivityAt: sandbox.lastActivityAt?.lastActivityAt
+        ? new Date(sandbox.lastActivityAt.lastActivityAt).toISOString()
+        : undefined,
+      daemonVersion: sandbox.daemonVersion,
+    })
   }
 
   private getSortFieldMapping(sortField: SandboxSearchSortField): string {

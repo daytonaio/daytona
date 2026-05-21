@@ -42,7 +42,7 @@ module DaytonaApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'items' => :'Array<Sandbox>',
+        :'items' => :'Array<SandboxListItem>',
         :'next_cursor' => :'String'
       }
     end

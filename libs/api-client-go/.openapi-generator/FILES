@@ -159,6 +159,7 @@ model_sandbox.go
 model_sandbox_class.go
 model_sandbox_desired_state.go
 model_sandbox_labels.go
+model_sandbox_list_item.go
 model_sandbox_list_sort_direction.go
 model_sandbox_list_sort_field.go
 model_sandbox_state.go

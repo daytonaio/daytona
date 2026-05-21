@@ -4,7 +4,7 @@
  */
 
 import { TabsContent } from '@/components/ui/tabs'
-import { Sandbox } from '@daytona/api-client'
+import { SandboxListItem } from '@daytona/api-client'
 import { SandboxFileSystemTab } from '../SandboxFileSystemTab'
 import { SandboxLogsTab } from '../SandboxLogsTab'
 import { SandboxMetricsTab } from '../SandboxMetricsTab'
@@ -17,7 +17,7 @@ export function SandboxDetailsTabContent({
   sandbox,
   spendingTabAvailable,
 }: {
-  sandbox: Sandbox
+  sandbox: SandboxListItem
   spendingTabAvailable: boolean | undefined
 }) {
   return (

@@ -1466,10 +1466,8 @@ export class SandboxService {
         if (!url) {
           throw new NotFoundException(`Toolbox proxy URL not resolved for region ${item.target}`)
         }
-        return {
-          ...item,
-          toolboxProxyUrl: url,
-        } satisfies SandboxDto
+        item.toolboxProxyUrl = url
+        return item
       }),
       nextCursor: result.nextCursor,
     }

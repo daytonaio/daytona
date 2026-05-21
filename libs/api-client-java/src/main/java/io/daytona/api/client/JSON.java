@@ -226,6 +226,7 @@ public class JSON {
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.api.client.model.RunnerSnapshotDto.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.api.client.model.Sandbox.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.api.client.model.SandboxLabels.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new io.daytona.api.client.model.SandboxListItem.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.api.client.model.SandboxVolume.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.api.client.model.ScreenshotResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.api.client.model.SearchFilesResponse.CustomTypeAdapterFactory());

@@ -163,6 +163,7 @@ lib/daytona_api_client/models/sandbox.rb
 lib/daytona_api_client/models/sandbox_class.rb
 lib/daytona_api_client/models/sandbox_desired_state.rb
 lib/daytona_api_client/models/sandbox_labels.rb
+lib/daytona_api_client/models/sandbox_list_item.rb
 lib/daytona_api_client/models/sandbox_list_sort_direction.rb
 lib/daytona_api_client/models/sandbox_list_sort_field.rb
 lib/daytona_api_client/models/sandbox_state.rb

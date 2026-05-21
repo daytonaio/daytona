@@ -7,11 +7,11 @@ import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { isArchivable, isRecoverable, isStartable, isStoppable, isTransitioning } from '@/lib/utils/sandbox'
-import { Sandbox, SandboxState } from '@daytona/api-client'
+import { SandboxListItem, SandboxState } from '@daytona/api-client'
 import { Archive, Play, Square, Trash2, Wrench } from 'lucide-react'
 
 interface SandboxActionsSegmentedProps {
-  sandbox: Sandbox
+  sandbox: SandboxListItem
   writePermitted: boolean
   deletePermitted: boolean
   actionsDisabled: boolean
@@ -35,7 +35,7 @@ const emptyActions: ActionVisibility = {
   recover: false,
 }
 
-function getVisibleActions(sandbox: Sandbox, writePermitted: boolean): ActionVisibility {
+function getVisibleActions(sandbox: SandboxListItem, writePermitted: boolean): ActionVisibility {
   if (!writePermitted) {
     return emptyActions
   }

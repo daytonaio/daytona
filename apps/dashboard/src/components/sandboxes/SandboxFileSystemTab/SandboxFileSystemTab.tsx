@@ -9,7 +9,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { handleApiError } from '@/lib/error-handling'
 import { cn } from '@/lib/utils'
 import { isStoppable } from '@/lib/utils/sandbox'
-import { Sandbox } from '@daytona/api-client'
+import { SandboxListItem } from '@daytona/api-client'
 import { useQueryClient } from '@tanstack/react-query'
 import { HardDriveIcon } from 'lucide-react'
 import { memo, startTransition, useCallback, useEffect, useRef, useState } from 'react'
@@ -40,7 +40,7 @@ const DEFAULT_DIRECTORY_PERMISSIONS = '0755'
 const MemoizedFileTreePane = memo(FileTreePane)
 const MemoizedSandboxFileContents = memo(SandboxFileContents)
 
-function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
+function SandboxFileSystem({ sandbox }: { sandbox: SandboxListItem }) {
   const queryClient = useQueryClient()
   const filesystemRootRef = useRef<HTMLDivElement>(null)
   const createFolderSheetRef = useRef<CreateFolderSheetHandle>(null)
@@ -472,7 +472,7 @@ function SandboxFileSystem({ sandbox }: { sandbox: Sandbox }) {
   )
 }
 
-export function SandboxFileSystemTab({ sandbox }: { sandbox: Sandbox }) {
+export function SandboxFileSystemTab({ sandbox }: { sandbox: SandboxListItem }) {
   return (
     <FileSystemStoreProvider>
       <SandboxFileSystem sandbox={sandbox} />

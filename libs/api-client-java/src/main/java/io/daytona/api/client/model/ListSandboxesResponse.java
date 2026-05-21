@@ -19,7 +19,7 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import io.daytona.api.client.model.Sandbox;
+import io.daytona.api.client.model.SandboxListItem;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,7 +56,7 @@ public class ListSandboxesResponse {
   public static final String SERIALIZED_NAME_ITEMS = "items";
   @SerializedName(SERIALIZED_NAME_ITEMS)
   @javax.annotation.Nonnull
-  private List<Sandbox> items = new ArrayList<>();
+  private List<SandboxListItem> items = new ArrayList<>();
 
   public static final String SERIALIZED_NAME_NEXT_CURSOR = "nextCursor";
   @SerializedName(SERIALIZED_NAME_NEXT_CURSOR)
@@ -66,12 +66,12 @@ public class ListSandboxesResponse {
   public ListSandboxesResponse() {
   }
 
-  public ListSandboxesResponse items(@javax.annotation.Nonnull List<Sandbox> items) {
+  public ListSandboxesResponse items(@javax.annotation.Nonnull List<SandboxListItem> items) {
     this.items = items;
     return this;
   }
 
-  public ListSandboxesResponse addItemsItem(Sandbox itemsItem) {
+  public ListSandboxesResponse addItemsItem(SandboxListItem itemsItem) {
     if (this.items == null) {
       this.items = new ArrayList<>();
     }
@@ -84,11 +84,11 @@ public class ListSandboxesResponse {
    * @return items
    */
   @javax.annotation.Nonnull
-  public List<Sandbox> getItems() {
+  public List<SandboxListItem> getItems() {
     return items;
   }
 
-  public void setItems(@javax.annotation.Nonnull List<Sandbox> items) {
+  public void setItems(@javax.annotation.Nonnull List<SandboxListItem> items) {
     this.items = items;
   }
 
@@ -234,7 +234,7 @@ public class ListSandboxesResponse {
         JsonArray jsonArrayitems = jsonObj.getAsJsonArray("items");
         // validate the required field `items` (array)
         for (int i = 0; i < jsonArrayitems.size(); i++) {
-          Sandbox.validateJsonElement(jsonArrayitems.get(i));
+          SandboxListItem.validateJsonElement(jsonArrayitems.get(i));
         }
       }
       if ((jsonObj.get("nextCursor") != null && !jsonObj.get("nextCursor").isJsonNull()) && !jsonObj.get("nextCursor").isJsonPrimitive()) {

@@ -18,7 +18,7 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import io.daytona.api.client.model.Sandbox;
+import io.daytona.api.client.model.SandboxListItem;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
