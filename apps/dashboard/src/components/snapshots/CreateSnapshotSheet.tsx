@@ -324,6 +324,10 @@ export const CreateSnapshotSheet = ({
                               <Label htmlFor={field.name} className="text-sm font-normal">
                                 Allocate GPU
                               </Label>
+                              <FieldDescription>
+                                Sandboxes created from this snapshot must be ephemeral - set autoDeleteInterval to 0
+                                when creating the sandbox.
+                              </FieldDescription>
                             </div>
                           </div>
                         )}

@@ -620,6 +620,9 @@ export const CreateSandboxSheet = ({
                                       <Label htmlFor={field.name} className="text-sm font-normal">
                                         Allocate GPU
                                       </Label>
+                                      <FieldDescription>
+                                        GPU sandboxes must be ephemeral - set autoDeleteInterval to 0.
+                                      </FieldDescription>
                                     </div>
                                   </div>
                                 )}
