@@ -306,6 +306,7 @@ export const CreateSandboxSheet = ({
         form.setFieldValue('cpu', undefined)
         form.setFieldValue('memory', undefined)
         form.setFieldValue('disk', undefined)
+        form.setFieldValue('gpu', false)
       } else {
         form.setFieldValue('snapshot', undefined)
       }
@@ -614,14 +615,21 @@ export const CreateSandboxSheet = ({
                                       id={field.name}
                                       className="mt-0.5"
                                       checked={field.state.value ?? false}
-                                      onCheckedChange={(checked) => field.handleChange(checked === true)}
+                                      onCheckedChange={(checked) => {
+                                        const isChecked = checked === true
+                                        field.handleChange(isChecked)
+                                        if (isChecked) {
+                                          form.setFieldValue('ephemeral', true)
+                                          form.setFieldValue('autoDeleteInterval', 0)
+                                        }
+                                      }}
                                     />
                                     <div className="flex flex-col gap-1">
                                       <Label htmlFor={field.name} className="text-sm font-normal">
                                         Allocate GPU
                                       </Label>
                                       <FieldDescription>
-                                        GPU sandboxes must be ephemeral - set autoDeleteInterval to 0.
+                                        GPU sandboxes are always ephemeral and auto-deleted when stopped.
                                       </FieldDescription>
                                     </div>
                                   </div>
@@ -797,26 +805,35 @@ export const CreateSandboxSheet = ({
                 </form.Field>
                 <form.Field name="ephemeral">
                   {(field) => (
-                    <div className="flex items-start gap-2">
-                      <Checkbox
-                        className="mt-0.5"
-                        id={field.name}
-                        checked={field.state.value ?? false}
-                        onCheckedChange={(checked) => {
-                          const isEphemeral = checked === true
-                          field.handleChange(isEphemeral)
-                          if (isEphemeral) {
-                            form.setFieldValue('autoDeleteInterval', 0)
-                          }
-                        }}
-                      />
-                      <div className="flex flex-col gap-1">
-                        <Label htmlFor={field.name} className="text-sm font-normal">
-                          Ephemeral
-                        </Label>
-                        <FieldDescription>Automatically delete the sandbox when it stops.</FieldDescription>
-                      </div>
-                    </div>
+                    <form.Subscribe selector={(state) => state.values.gpu}>
+                      {(gpu) => (
+                        <div className="flex items-start gap-2">
+                          <Checkbox
+                            className="mt-0.5"
+                            id={field.name}
+                            checked={field.state.value ?? false}
+                            disabled={gpu ?? false}
+                            onCheckedChange={(checked) => {
+                              const isEphemeral = checked === true
+                              field.handleChange(isEphemeral)
+                              if (isEphemeral) {
+                                form.setFieldValue('autoDeleteInterval', 0)
+                              }
+                            }}
+                          />
+                          <div className="flex flex-col gap-1">
+                            <Label htmlFor={field.name} className="text-sm font-normal">
+                              Ephemeral
+                            </Label>
+                            <FieldDescription>
+                              {gpu
+                                ? 'Required for GPU sandboxes - automatically deleted when stopped.'
+                                : 'Automatically delete the sandbox when it stops.'}
+                            </FieldDescription>
+                          </div>
+                        </div>
+                      )}
+                    </form.Subscribe>
                   )}
                 </form.Field>
               </div>

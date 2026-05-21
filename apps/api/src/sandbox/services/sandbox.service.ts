@@ -472,11 +472,6 @@ export class SandboxService {
       let disk = snapshot.disk
       let gpu = snapshot.gpu
 
-      // GPU sandboxes are always ephemeral - delete on first stop.
-      if (gpu > 0 && !isEphemeral(createSandboxDto)) {
-        throw new BadRequestError('GPU sandboxes must be ephemeral - set autoDeleteInterval to 0')
-      }
-
       // Remove the deprecated behavior in a future release
       if (useSandboxResourceParams_deprecated) {
         if (createSandboxDto.cpu) {
@@ -491,6 +486,12 @@ export class SandboxService {
         if (createSandboxDto.gpu) {
           gpu = createSandboxDto.gpu
         }
+      }
+
+      // GPU sandboxes are always ephemeral. Must run after the deprecated-override block
+      // above so it sees the effective gpu value, not the initial snapshot.gpu.
+      if (gpu > 0 && !isEphemeral(createSandboxDto)) {
+        throw new BadRequestError('GPU sandboxes must be ephemeral - set autoDeleteInterval to 0')
       }
 
       this.organizationService.assertOrganizationIsNotSuspended(organization)
