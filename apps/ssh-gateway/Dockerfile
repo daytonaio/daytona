@@ -4,7 +4,7 @@ ENV CI=true
 
 RUN npm install -g corepack && corepack enable
 
-COPY --from=golang:1.25.4-alpine /usr/local/go/ /usr/local/go/
+COPY --from=golang:1.25.10-alpine3.22 /usr/local/go/ /usr/local/go/
 
 ENV PATH="/usr/local/go/bin:${PATH}"
 
@@ -36,7 +36,9 @@ COPY libs/api-client-go/ libs/api-client-go/
 
 RUN yarn nx build ssh-gateway --configuration=production --nxBail=true
 
-FROM alpine:3.22 AS ssh-gateway
+FROM alpine:3.22.4 AS ssh-gateway
+
+RUN apk upgrade --no-cache
 
 WORKDIR /usr/local/bin
 

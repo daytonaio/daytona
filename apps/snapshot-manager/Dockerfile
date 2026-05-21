@@ -4,7 +4,7 @@ ENV CI=true
 
 RUN npm install -g corepack && corepack enable
 
-COPY --from=golang:1.25.4-alpine /usr/local/go/ /usr/local/go/
+COPY --from=golang:1.25.10-alpine3.22 /usr/local/go/ /usr/local/go/
 
 ENV PATH="/usr/local/go/bin:${PATH}"
 
@@ -36,9 +36,9 @@ ARG VERSION=0.0.1
 RUN --mount=type=cache,target=/root/.cache/go-build \
   VERSION=$VERSION yarn nx build snapshot-manager --configuration=production --nxBail=true
 
-FROM alpine:3.22 AS snapshot-manager
+FROM alpine:3.22.4 AS snapshot-manager
 
-RUN apk add --no-cache curl
+RUN apk upgrade --no-cache && apk add --no-cache curl
 
 WORKDIR /usr/local/bin
 

@@ -4,7 +4,7 @@ ENV CI=true
 
 RUN npm install -g corepack && corepack enable
 
-COPY --from=golang:1.25.4-alpine /usr/local/go/ /usr/local/go/
+COPY --from=golang:1.25.10-alpine3.22 /usr/local/go/ /usr/local/go/
 
 ENV PATH="/usr/local/go/bin:${PATH}"
 
@@ -41,9 +41,9 @@ RUN mkdir -p dist/apps/otel-collector
 
 RUN yarn nx build otel-collector --configuration=production --nxBail=true
 
-FROM alpine:3.22 AS otel-collector
+FROM alpine:3.22.4 AS otel-collector
 
-RUN apk add --no-cache curl
+RUN apk upgrade --no-cache && apk add --no-cache curl
 
 WORKDIR /usr/local/bin
 
