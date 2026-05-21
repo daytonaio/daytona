@@ -117,6 +117,13 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO,
 }
 
 func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) (*container.HostConfig, error) {
+	if d.gpuEnabled && sandboxDto.GpuQuota <= 0 {
+		return nil, fmt.Errorf("cpu-only sandbox cannot run on GPU-enabled runner")
+	}
+	if !d.gpuEnabled && sandboxDto.GpuQuota > 0 {
+		return nil, fmt.Errorf("GPU sandbox cannot run on non-GPU runner")
+	}
+
 	var binds []string
 
 	binds = append(binds, fmt.Sprintf("%s:%s:ro", d.daemonPath, common.DAEMON_PATH))
@@ -161,21 +168,11 @@ func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, v
 		}
 	}
 
-	if d.gpuEnabled {
-		nvidiaDevices := []string{
-			"/dev/nvidia0",
-			"/dev/nvidiactl",
-			"/dev/nvidia-uvm",
-			"/dev/nvidia-uvm-tools",
-			"/dev/nvidia-modeset",
-		}
-		for _, dev := range nvidiaDevices {
-			hostConfig.Devices = append(hostConfig.Devices, container.DeviceMapping{
-				PathOnHost:        dev,
-				PathInContainer:   dev,
-				CgroupPermissions: "rwm",
-			})
-		}
+	if d.gpuEnabled && sandboxDto.GpuQuota > 0 {
+		hostConfig.DeviceRequests = append(hostConfig.DeviceRequests, container.DeviceRequest{
+			Driver:    "cdi",
+			DeviceIDs: []string{"nvidia.com/gpu=all"},
+		})
 	}
 
 	return hostConfig, nil
