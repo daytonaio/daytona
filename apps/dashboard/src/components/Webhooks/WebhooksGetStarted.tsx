@@ -11,14 +11,13 @@ import { useInitializeWebhooksMutation } from '@/hooks/mutations/useInitializeWe
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { Webhook } from 'lucide-react'
-import { useCallback } from 'react'
 import { toast } from 'sonner'
 
 export function WebhooksGetStarted() {
   const { selectedOrganization } = useSelectedOrganization()
   const initializeMutation = useInitializeWebhooksMutation()
 
-  const handleEnable = useCallback(async () => {
+  const handleEnable = async () => {
     if (!selectedOrganization?.id) {
       return
     }
@@ -28,7 +27,7 @@ export function WebhooksGetStarted() {
     } catch (error) {
       handleApiError(error, 'Failed to enable webhooks')
     }
-  }, [initializeMutation, selectedOrganization?.id])
+  }
 
   return (
     <PageLayout contained>
