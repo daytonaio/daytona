@@ -4,7 +4,7 @@ ENV CI=true
 
 RUN npm install -g corepack && corepack enable
 
-COPY --from=golang:1.25.4-alpine /usr/local/go/ /usr/local/go/
+COPY --from=golang:1.25.10-alpine3.22 /usr/local/go/ /usr/local/go/
 
 ENV PATH="/usr/local/go/bin:${PATH}"
 
@@ -55,9 +55,9 @@ ARG VERSION=0.0.1
 RUN --mount=type=cache,target=/root/.cache/go-build \
   SKIP_COMPUTER_USE_BUILD=true VERSION=$VERSION yarn nx build runner --configuration=production --nxBail=true
 
-FROM docker:28.2.2-dind-alpine3.22 AS runner
+FROM docker:28.5.2-dind-alpine3.22 AS runner
 
-RUN apk add --no-cache curl rsync
+RUN apk upgrade --no-cache && apk add --no-cache curl rsync
 
 WORKDIR /usr/local/bin
 
