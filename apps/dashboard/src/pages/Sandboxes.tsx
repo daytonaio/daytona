@@ -537,10 +537,10 @@ const Sandboxes: React.FC = () => {
   })
 
   useEffect(() => {
-    if (sandboxes.length === 0 && cursorHistory.length > 0) {
+    if (!sandboxesDataIsPlaceholderData && sandboxes.length === 0 && cursorHistory.length > 0) {
       handlePreviousPage()
     }
-  }, [cursorHistory.length, handlePreviousPage, sandboxes.length])
+  }, [cursorHistory.length, handlePreviousPage, sandboxes.length, sandboxesDataIsPlaceholderData])
 
   const pendingSandboxIds = useMutatingSandboxes()
   const sandboxIsLoading = useMemo(() => {
