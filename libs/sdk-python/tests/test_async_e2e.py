@@ -23,6 +23,7 @@ from collections import Counter
 from collections.abc import AsyncIterator
 
 import pytest
+import pytest_asyncio
 
 from daytona import AsyncDaytona, CreateSandboxFromSnapshotParams
 from daytona.common.errors import DaytonaConnectionError, DaytonaError, DaytonaNotFoundError
@@ -30,7 +31,11 @@ from daytona.common.errors import DaytonaConnectionError, DaytonaError, DaytonaN
 if not os.getenv("DAYTONA_API_KEY"):
     raise RuntimeError("DAYTONA_API_KEY environment variable is required for E2E tests")
 
-pytestmark = [pytest.mark.e2e, pytest.mark.asyncio]
+# Module-scoped loop is opt-in here (vs. the suite-wide default of function-scoped)
+# so the module-scoped ``async_daytona_client`` / ``async_sandbox`` fixtures
+# below can outlive a single test function without ``RuntimeError: Session is
+# closed``.  The fixture's ``loop_scope`` must match the test marker's.
+pytestmark = [pytest.mark.e2e, pytest.mark.asyncio(loop_scope="module")]
 
 
 # ---------------------------------------------------------------------------
@@ -38,13 +43,13 @@ pytestmark = [pytest.mark.e2e, pytest.mark.asyncio]
 # ---------------------------------------------------------------------------
 
 
-@pytest.fixture(scope="module")
+@pytest_asyncio.fixture(loop_scope="module", scope="module")
 async def async_daytona_client() -> AsyncIterator[AsyncDaytona]:
     async with AsyncDaytona() as daytona:
         yield daytona
 
 
-@pytest.fixture(scope="module")
+@pytest_asyncio.fixture(loop_scope="module", scope="module")
 async def async_sandbox(async_daytona_client: AsyncDaytona):
     params = CreateSandboxFromSnapshotParams(language="python")
     sb = await async_daytona_client.create(params, timeout=120)

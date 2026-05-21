@@ -5,11 +5,24 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import random
 from typing import Any
 
 import aiohttp
 
 logger = logging.getLogger(__name__)
+
+# Backoff = (base * attempt) + uniform(0, jitter).  Jitter de-correlates
+# concurrent retries so a fleet that all hit the same transient blip doesn't
+# come back in synchronized waves and hammer a recovering server.
+_RETRY_BACKOFF_BASE_S = 0.25
+_RETRY_BACKOFF_JITTER_S = 0.1
+
+
+def _retry_backoff_seconds(attempt: int) -> float:
+    """Return the backoff delay for ``attempt`` (1-based)."""
+    return _RETRY_BACKOFF_BASE_S * attempt + random.random() * _RETRY_BACKOFF_JITTER_S
+
 
 # Errors raised by ``aiohttp.TCPConnector`` *before* any bytes are written to
 # the socket — TCP ``connect()`` itself failed (DNS resolution, RST during
@@ -173,7 +186,7 @@ class SharedAiohttpSession:
                         attempt,
                         _MAX_CONN_RETRIES,
                     )
-                    await asyncio.sleep(0.25 * attempt)
+                    await asyncio.sleep(_retry_backoff_seconds(attempt))
                     continue
                 except _IDEMPOTENT_ONLY_RETRYABLE_CONN_ERRORS as e:
                     # The connection may have failed *after* the server began
@@ -191,7 +204,7 @@ class SharedAiohttpSession:
                         attempt,
                         _MAX_CONN_RETRIES,
                     )
-                    await asyncio.sleep(0.25 * attempt)
+                    await asyncio.sleep(_retry_backoff_seconds(attempt))
                     continue
 
                 if started_with_none:
