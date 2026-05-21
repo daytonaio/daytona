@@ -13,6 +13,11 @@ import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-r
 import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
 import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 import { CustomHeaders } from '../../common/constants/header.constants'
+import { IsOrganizationAuthContext } from '../../common/decorators/auth-context.decorator'
+import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
+import { Audit } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 @Controller('webhooks')
 @ApiTags('webhooks')
@@ -50,6 +55,31 @@ export class WebhookController {
   async getInitializationStatus(
     @Param('organizationId') organizationId: string,
   ): Promise<WebhookInitializationStatusDto> {
+    const status = await this.webhookService.getInitializationStatus(organizationId)
+    if (!status) {
+      throw new NotFoundException('Webhook initialization status not found')
+    }
+    return WebhookInitializationStatusDto.fromWebhookInitialization(status)
+  }
+
+  @Post('organizations/:organizationId/initialize')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Initialize webhooks for an organization' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Webhooks initialized successfully',
+    type: WebhookInitializationStatusDto,
+  })
+  @Audit({
+    action: AuditAction.INITIALIZE_WEBHOOKS,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+  })
+  async initializeWebhooks(
+    @Param('organizationId') organizationId: string,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
+  ): Promise<WebhookInitializationStatusDto> {
+    await this.webhookService.createSvixApplication(authContext.organization)
     const status = await this.webhookService.getInitializationStatus(organizationId)
     if (!status) {
       throw new NotFoundException('Webhook initialization status not found')

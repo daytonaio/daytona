@@ -7,6 +7,7 @@ import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/Pag
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { WebhookEndpointDetailsPageSkeleton } from '@/components/Webhooks/WebhookEndpointDetailsSkeleton'
+import { WebhooksGetStarted } from '@/components/Webhooks/WebhooksGetStarted'
 import { WebhooksPageSkeleton } from '@/components/Webhooks/WebhooksPageSkeleton'
 import { RoutePath } from '@/enums/RoutePath'
 import { useWebhookAppPortalAccessQuery } from '@/hooks/queries/useWebhookAppPortalAccessQuery'
@@ -52,6 +53,11 @@ export function SvixProvider({ children }: SvixProviderProps) {
     }
 
     return <WebhookEndpointDetailsPageSkeleton />
+  }
+
+  // Init status loaded successfully but webhooks aren't enabled yet.
+  if (!initStatusError && !initStatus?.svixApplicationId) {
+    return <WebhooksGetStarted />
   }
 
   if (error || !appPortalAccess?.token || !initStatus?.svixApplicationId) {

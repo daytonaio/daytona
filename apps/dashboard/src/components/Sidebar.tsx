@@ -21,7 +21,6 @@ import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
 import { useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useWebhooks } from '@/hooks/useWebhooks'
 import { cn, getMetaKey } from '@/lib/utils'
 import { usePylonCommands } from '@/vendor/pylon'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytona/api-client'
@@ -95,7 +94,6 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
   const { isMobile, setOpenMobile } = sidebar
   const { selectedOrganization, authenticatedUserOrganizationMember, authenticatedUserHasPermission } =
     useSelectedOrganization()
-  const { isInitialized: webhooksInitialized } = useWebhooks()
   const orgInfraEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_INFRASTRUCTURE)
 
   const sidebarItems = useMemo(() => {
@@ -140,13 +138,11 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       { icon: <KeyRound size={16} strokeWidth={1.5} />, label: 'API Keys', path: RoutePath.KEYS },
     ]
 
-    if (webhooksInitialized) {
-      arr.push({
-        icon: <Mail size={16} strokeWidth={1.5} />,
-        label: 'Webhooks',
-        path: RoutePath.WEBHOOKS,
-      })
-    }
+    arr.push({
+      icon: <Mail size={16} strokeWidth={1.5} />,
+      label: 'Webhooks',
+      path: RoutePath.WEBHOOKS,
+    })
 
     if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
       arr.push({
@@ -175,7 +171,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     })
 
     return arr
-  }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal, webhooksInitialized])
+  }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal])
 
   const billingItems = useMemo(() => {
     if (!billingEnabled || authenticatedUserOrganizationMember?.role !== OrganizationUserRoleEnum.OWNER) {

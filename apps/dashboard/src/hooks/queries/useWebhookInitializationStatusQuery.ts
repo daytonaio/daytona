@@ -5,6 +5,7 @@
 
 import { WebhookInitializationStatus } from '@daytona/api-client'
 import { useQuery } from '@tanstack/react-query'
+import { isAxiosError } from 'axios'
 import { useApi } from '../useApi'
 import { queryKeys } from './queryKeys'
 
@@ -21,12 +22,15 @@ export const useWebhookInitializationStatusQuery = (organizationId?: string) => 
       try {
         const response = await webhooksApi.webhookControllerGetInitializationStatus(organizationId)
         return response.data
-      } catch {
-        // If the endpoint returns 404, webhooks are not initialized
-        return null
+      } catch (error) {
+        // 404 means not initialized; let other errors surface.
+        if (error instanceof Error && isAxiosError(error.cause) && error.cause.status === 404) {
+          return null
+        }
+        throw error
       }
     },
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    retry: false, // Don't retry on 404
+    retry: false,
   })
 }
