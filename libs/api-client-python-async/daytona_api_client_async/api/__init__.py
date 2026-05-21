@@ -25,7 +25,6 @@ if TYPE_CHECKING:
     from daytona_api_client_async.api.users_api import UsersApi
     from daytona_api_client_async.api.volumes_api import VolumesApi
     from daytona_api_client_async.api.webhooks_api import WebhooksApi
-    from daytona_api_client_async.api.workspace_api import WorkspaceApi
 
 
 _DYNAMIC_IMPORTS: dict[str, str] = {
@@ -47,7 +46,6 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "UsersApi": "daytona_api_client_async.api.users_api",
     "VolumesApi": "daytona_api_client_async.api.volumes_api",
     "WebhooksApi": "daytona_api_client_async.api.webhooks_api",
-    "WorkspaceApi": "daytona_api_client_async.api.workspace_api",
 
 }
 

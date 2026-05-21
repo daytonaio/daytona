@@ -41,7 +41,6 @@ if TYPE_CHECKING:
     from daytona_api_client.api.users_api import UsersApi
     from daytona_api_client.api.volumes_api import VolumesApi
     from daytona_api_client.api.webhooks_api import WebhooksApi
-    from daytona_api_client.api.workspace_api import WorkspaceApi
     # import ApiClient
     from daytona_api_client.api_response import ApiResponse
     from daytona_api_client.api_client import ApiClient
@@ -88,7 +87,6 @@ if TYPE_CHECKING:
     from daytona_api_client.models.create_snapshot import CreateSnapshot
     from daytona_api_client.models.create_user import CreateUser
     from daytona_api_client.models.create_volume import CreateVolume
-    from daytona_api_client.models.create_workspace import CreateWorkspace
     from daytona_api_client.models.daytona_configuration import DaytonaConfiguration
     from daytona_api_client.models.display_info_response import DisplayInfoResponse
     from daytona_api_client.models.docker_registry import DockerRegistry
@@ -191,7 +189,6 @@ if TYPE_CHECKING:
     from daytona_api_client.models.sandbox import Sandbox
     from daytona_api_client.models.sandbox_class import SandboxClass
     from daytona_api_client.models.sandbox_desired_state import SandboxDesiredState
-    from daytona_api_client.models.sandbox_info import SandboxInfo
     from daytona_api_client.models.sandbox_labels import SandboxLabels
     from daytona_api_client.models.sandbox_list_sort_direction import SandboxListSortDirection
     from daytona_api_client.models.sandbox_list_sort_field import SandboxListSortField
@@ -236,8 +233,6 @@ if TYPE_CHECKING:
     from daytona_api_client.models.webhook_initialization_status import WebhookInitializationStatus
     from daytona_api_client.models.windows_response import WindowsResponse
     from daytona_api_client.models.work_dir_response import WorkDirResponse
-    from daytona_api_client.models.workspace import Workspace
-    from daytona_api_client.models.workspace_port_preview_url import WorkspacePortPreviewUrl
 
 _DYNAMIC_IMPORTS: dict[str, str] = {
     # apis
@@ -259,7 +254,6 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "UsersApi": "daytona_api_client.api.users_api",
     "VolumesApi": "daytona_api_client.api.volumes_api",
     "WebhooksApi": "daytona_api_client.api.webhooks_api",
-    "WorkspaceApi": "daytona_api_client.api.workspace_api",
     # ApiClient
     "ApiResponse": "daytona_api_client.api_response",
     "ApiClient": "daytona_api_client.api_client",
@@ -305,7 +299,6 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "CreateSnapshot": "daytona_api_client.models.create_snapshot",
     "CreateUser": "daytona_api_client.models.create_user",
     "CreateVolume": "daytona_api_client.models.create_volume",
-    "CreateWorkspace": "daytona_api_client.models.create_workspace",
     "DaytonaConfiguration": "daytona_api_client.models.daytona_configuration",
     "DisplayInfoResponse": "daytona_api_client.models.display_info_response",
     "DockerRegistry": "daytona_api_client.models.docker_registry",
@@ -408,7 +401,6 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "Sandbox": "daytona_api_client.models.sandbox",
     "SandboxClass": "daytona_api_client.models.sandbox_class",
     "SandboxDesiredState": "daytona_api_client.models.sandbox_desired_state",
-    "SandboxInfo": "daytona_api_client.models.sandbox_info",
     "SandboxLabels": "daytona_api_client.models.sandbox_labels",
     "SandboxListSortDirection": "daytona_api_client.models.sandbox_list_sort_direction",
     "SandboxListSortField": "daytona_api_client.models.sandbox_list_sort_field",
@@ -453,8 +445,6 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "WebhookInitializationStatus": "daytona_api_client.models.webhook_initialization_status",
     "WindowsResponse": "daytona_api_client.models.windows_response",
     "WorkDirResponse": "daytona_api_client.models.work_dir_response",
-    "Workspace": "daytona_api_client.models.workspace",
-    "WorkspacePortPreviewUrl": "daytona_api_client.models.workspace_port_preview_url",
 }
 
 
@@ -501,7 +491,6 @@ __all__ = [
     "UsersApi",
     "VolumesApi",
     "WebhooksApi",
-    "WorkspaceApi",
     "AccountProvider",
     "AdminCreateRunner",
     "AdminGetWebhookStatus200Response",
@@ -536,7 +525,6 @@ __all__ = [
     "CreateSnapshot",
     "CreateUser",
     "CreateVolume",
-    "CreateWorkspace",
     "DaytonaConfiguration",
     "DisplayInfoResponse",
     "DockerRegistry",
@@ -639,7 +627,6 @@ __all__ = [
     "Sandbox",
     "SandboxClass",
     "SandboxDesiredState",
-    "SandboxInfo",
     "SandboxLabels",
     "SandboxListSortDirection",
     "SandboxListSortField",
@@ -684,7 +671,5 @@ __all__ = [
     "WebhookInitializationStatus",
     "WindowsResponse",
     "WorkDirResponse",
-    "Workspace",
-    "WorkspacePortPreviewUrl",
 
 ]

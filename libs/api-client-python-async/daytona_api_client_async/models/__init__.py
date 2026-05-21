@@ -54,7 +54,6 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.create_snapshot import CreateSnapshot
     from daytona_api_client_async.models.create_user import CreateUser
     from daytona_api_client_async.models.create_volume import CreateVolume
-    from daytona_api_client_async.models.create_workspace import CreateWorkspace
     from daytona_api_client_async.models.daytona_configuration import DaytonaConfiguration
     from daytona_api_client_async.models.display_info_response import DisplayInfoResponse
     from daytona_api_client_async.models.docker_registry import DockerRegistry
@@ -157,7 +156,6 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.sandbox import Sandbox
     from daytona_api_client_async.models.sandbox_class import SandboxClass
     from daytona_api_client_async.models.sandbox_desired_state import SandboxDesiredState
-    from daytona_api_client_async.models.sandbox_info import SandboxInfo
     from daytona_api_client_async.models.sandbox_labels import SandboxLabels
     from daytona_api_client_async.models.sandbox_list_sort_direction import SandboxListSortDirection
     from daytona_api_client_async.models.sandbox_list_sort_field import SandboxListSortField
@@ -202,8 +200,6 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.webhook_initialization_status import WebhookInitializationStatus
     from daytona_api_client_async.models.windows_response import WindowsResponse
     from daytona_api_client_async.models.work_dir_response import WorkDirResponse
-    from daytona_api_client_async.models.workspace import Workspace
-    from daytona_api_client_async.models.workspace_port_preview_url import WorkspacePortPreviewUrl
 
 _DYNAMIC_IMPORTS: dict[str, str] = {
     "AccountProvider": "daytona_api_client_async.models.account_provider",
@@ -240,7 +236,6 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "CreateSnapshot": "daytona_api_client_async.models.create_snapshot",
     "CreateUser": "daytona_api_client_async.models.create_user",
     "CreateVolume": "daytona_api_client_async.models.create_volume",
-    "CreateWorkspace": "daytona_api_client_async.models.create_workspace",
     "DaytonaConfiguration": "daytona_api_client_async.models.daytona_configuration",
     "DisplayInfoResponse": "daytona_api_client_async.models.display_info_response",
     "DockerRegistry": "daytona_api_client_async.models.docker_registry",
@@ -343,7 +338,6 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "Sandbox": "daytona_api_client_async.models.sandbox",
     "SandboxClass": "daytona_api_client_async.models.sandbox_class",
     "SandboxDesiredState": "daytona_api_client_async.models.sandbox_desired_state",
-    "SandboxInfo": "daytona_api_client_async.models.sandbox_info",
     "SandboxLabels": "daytona_api_client_async.models.sandbox_labels",
     "SandboxListSortDirection": "daytona_api_client_async.models.sandbox_list_sort_direction",
     "SandboxListSortField": "daytona_api_client_async.models.sandbox_list_sort_field",
@@ -388,8 +382,6 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "WebhookInitializationStatus": "daytona_api_client_async.models.webhook_initialization_status",
     "WindowsResponse": "daytona_api_client_async.models.windows_response",
     "WorkDirResponse": "daytona_api_client_async.models.work_dir_response",
-    "Workspace": "daytona_api_client_async.models.workspace",
-    "WorkspacePortPreviewUrl": "daytona_api_client_async.models.workspace_port_preview_url",
 }
 
 

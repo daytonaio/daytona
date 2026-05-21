@@ -32,5 +32,4 @@ export * from './api/toolbox-api';
 export * from './api/users-api';
 export * from './api/volumes-api';
 export * from './api/webhooks-api';
-export * from './api/workspace-api';
 

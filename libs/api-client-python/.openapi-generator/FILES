@@ -19,7 +19,6 @@ daytona_api_client/api/toolbox_api.py
 daytona_api_client/api/users_api.py
 daytona_api_client/api/volumes_api.py
 daytona_api_client/api/webhooks_api.py
-daytona_api_client/api/workspace_api.py
 daytona_api_client/api_client.py
 daytona_api_client/api_response.py
 daytona_api_client/configuration.py
@@ -59,7 +58,6 @@ daytona_api_client/models/create_session_request.py
 daytona_api_client/models/create_snapshot.py
 daytona_api_client/models/create_user.py
 daytona_api_client/models/create_volume.py
-daytona_api_client/models/create_workspace.py
 daytona_api_client/models/daytona_configuration.py
 daytona_api_client/models/display_info_response.py
 daytona_api_client/models/docker_registry.py
@@ -162,7 +160,6 @@ daytona_api_client/models/runner_state.py
 daytona_api_client/models/sandbox.py
 daytona_api_client/models/sandbox_class.py
 daytona_api_client/models/sandbox_desired_state.py
-daytona_api_client/models/sandbox_info.py
 daytona_api_client/models/sandbox_labels.py
 daytona_api_client/models/sandbox_list_sort_direction.py
 daytona_api_client/models/sandbox_list_sort_field.py
@@ -207,8 +204,6 @@ daytona_api_client/models/webhook_event.py
 daytona_api_client/models/webhook_initialization_status.py
 daytona_api_client/models/windows_response.py
 daytona_api_client/models/work_dir_response.py
-daytona_api_client/models/workspace.py
-daytona_api_client/models/workspace_port_preview_url.py
 daytona_api_client/py.typed
 daytona_api_client/rest.py
 pyproject.toml

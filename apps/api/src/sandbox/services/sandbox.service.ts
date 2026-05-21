@@ -413,11 +413,7 @@ export class SandboxService {
     return sandbox
   }
 
-  async createFromSnapshot(
-    createSandboxDto: CreateSandboxDto,
-    organization: Organization,
-    useSandboxResourceParams_deprecated?: boolean,
-  ): Promise<SandboxDto> {
+  async createFromSnapshot(createSandboxDto: CreateSandboxDto, organization: Organization): Promise<SandboxDto> {
     let pendingCpuIncrement: number | undefined
     let pendingMemoryIncrement: number | undefined
     let pendingDiskIncrement: number | undefined
@@ -474,29 +470,12 @@ export class SandboxService {
         throw new BadRequestError('Snapshot ref is not defined')
       }
 
-      let cpu = snapshot.cpu
-      let mem = snapshot.mem
-      let disk = snapshot.disk
-      let gpu = snapshot.gpu
+      const cpu = snapshot.cpu
+      const mem = snapshot.mem
+      const disk = snapshot.disk
+      const gpu = snapshot.gpu
 
-      // Remove the deprecated behavior in a future release
-      if (useSandboxResourceParams_deprecated) {
-        if (createSandboxDto.cpu) {
-          cpu = createSandboxDto.cpu
-        }
-        if (createSandboxDto.memory) {
-          mem = createSandboxDto.memory
-        }
-        if (createSandboxDto.disk) {
-          disk = createSandboxDto.disk
-        }
-        if (createSandboxDto.gpu) {
-          gpu = createSandboxDto.gpu
-        }
-      }
-
-      // GPU sandboxes are always ephemeral. Must run after the deprecated-override block
-      // above so it sees the effective gpu value, not the initial snapshot.gpu.
+      // GPU sandboxes are always ephemeral.
       if (gpu > 0 && !isEphemeral(createSandboxDto)) {
         throw new BadRequestError('GPU sandboxes must be ephemeral - set autoDeleteInterval to 0')
       }
@@ -1307,31 +1286,6 @@ export class SandboxService {
         .rollbackPendingUsage(organizationId, pendingSnapshotCountIncrement)
         .catch((err) => this.logger.error(`Failed to roll back pending snapshot quota for org ${organizationId}:`, err))
     }
-  }
-
-  async findAllDeprecated(
-    organizationId: string,
-    labels?: { [key: string]: string },
-    includeErroredDestroyed?: boolean,
-  ): Promise<Sandbox[]> {
-    const baseFindOptions: FindOptionsWhere<Sandbox> = {
-      organizationId,
-      ...(labels ? { labels: JsonContains(labels) } : {}),
-    }
-
-    const where: FindOptionsWhere<Sandbox>[] = [
-      {
-        ...baseFindOptions,
-        state: Not(In([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED])),
-      },
-      {
-        ...baseFindOptions,
-        state: In([SandboxState.ERROR, SandboxState.BUILD_FAILED]),
-        ...(includeErroredDestroyed ? {} : { desiredState: Not(SandboxDesiredState.DESTROYED) }),
-      },
-    ]
-
-    return this.sandboxRepository.find({ where, relations: ['lastActivityAt'] })
   }
 
   async findAllPaginatedDeprecated(
