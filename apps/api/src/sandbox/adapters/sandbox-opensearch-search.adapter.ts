@@ -161,7 +161,7 @@ export class SandboxOpenSearchSearchAdapter implements SandboxSearchAdapter, OnM
     const query = this.buildSearchQuery(params.filters)
     const searchBody = this.buildSearchBody(query, params.pagination, params.sort)
     const response = await this.executeSearch(searchBody)
-    return this.processSearchResponse(response, params.pagination.limit, params.sort.field)
+    return this.processSearchResponse(response, params.pagination.limit)
   }
 
   private buildSearchQuery(filters: SandboxSearchFilters): QueryContainer {
@@ -345,7 +345,7 @@ export class SandboxOpenSearchSearchAdapter implements SandboxSearchAdapter, OnM
     })
   }
 
-  private processSearchResponse(response: any, limit: number, sortField: SandboxSearchSortField): SandboxSearchResult {
+  private processSearchResponse(response: any, limit: number): SandboxSearchResult {
     const hits = response.body.hits?.hits || []
     const hasMore = hits.length > limit
     const items = hasMore ? hits.slice(0, limit) : hits
@@ -353,9 +353,9 @@ export class SandboxOpenSearchSearchAdapter implements SandboxSearchAdapter, OnM
     let nextCursor: string | null = null
     if (hasMore && items.length > 0) {
       const lastItem = items[items.length - 1]
-      const opensearchSortField = this.getSortFieldMapping(sortField)
-      const searchAfter = [lastItem._source[opensearchSortField], lastItem._source.id]
-      nextCursor = Buffer.from(JSON.stringify(searchAfter)).toString('base64')
+      if (Array.isArray(lastItem.sort) && lastItem.sort.length > 0) {
+        nextCursor = Buffer.from(JSON.stringify(lastItem.sort)).toString('base64')
+      }
     }
 
     return {
