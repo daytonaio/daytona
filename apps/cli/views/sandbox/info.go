@@ -24,7 +24,6 @@ type sandboxInfo interface {
 	GetLabels() map[string]string
 	GetStateOk() (*apiclient.SandboxState, bool)
 	GetSnapshotOk() (*string, bool)
-	GetClassOk() (*string, bool)
 	GetCreatedAtOk() (*string, bool)
 	GetLastActivityAtOk() (*string, bool)
 }
@@ -45,10 +44,6 @@ func RenderInfo(sandbox sandboxInfo, forceUnstyled bool) {
 	}
 
 	output += getInfoLine("Region", sandbox.GetTarget()) + "\n"
-
-	if class, ok := sandbox.GetClassOk(); ok && class != nil {
-		output += getInfoLine("Class", *class) + "\n"
-	}
 
 	if createdAt, ok := sandbox.GetCreatedAtOk(); ok && createdAt != nil {
 		output += getInfoLine("Created", util.GetTimeSinceLabelFromString(*createdAt)) + "\n"

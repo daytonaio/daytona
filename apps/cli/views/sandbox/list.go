@@ -16,7 +16,6 @@ type RowData struct {
 	Name      string
 	State     string
 	Region    string
-	Class     string
 	LastEvent string
 }
 
@@ -26,7 +25,7 @@ func ListSandboxes(sandboxList []apiclient.SandboxListItem, activeOrganizationNa
 		return
 	}
 
-	headers := []string{"Sandbox", "State", "Region", "Class", "Last Event"}
+	headers := []string{"Sandbox", "State", "Region", "Last Event"}
 
 	data := [][]string{}
 
@@ -63,16 +62,13 @@ func SortSandboxes(sandboxList *[]apiclient.SandboxListItem) {
 }
 
 func getTableRowData(sandbox apiclient.SandboxListItem) *RowData {
-	rowData := RowData{"", "", "", "", ""}
+	rowData := RowData{"", "", "", ""}
 	rowData.Name = sandbox.Id + util.AdditionalPropertyPadding
 	if sandbox.State != nil {
 		rowData.State = getStateLabel(*sandbox.State)
 	}
 
 	rowData.Region = sandbox.Target
-	if sandbox.Class != nil {
-		rowData.Class = *sandbox.Class
-	}
 
 	if sandbox.LastActivityAt != nil {
 		rowData.LastEvent = util.GetTimeSinceLabelFromString(*sandbox.LastActivityAt)
@@ -98,7 +94,6 @@ func getRowFromRowData(rowData RowData) []string {
 		common.NameStyle.Render(rowData.Name),
 		rowData.State,
 		common.DefaultRowDataStyle.Render(rowData.Region),
-		common.DefaultRowDataStyle.Render(rowData.Class),
 		common.DefaultRowDataStyle.Render(rowData.LastEvent),
 	}
 
