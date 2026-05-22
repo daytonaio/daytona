@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import weakref
+
 import aiohttp
 import httpx
 
@@ -48,7 +50,35 @@ def build_async_http_client(pool_size: int | None = DEFAULT_POOL_SIZE) -> httpx.
 
 
 def build_sync_http_client(pool_size: int | None = DEFAULT_POOL_SIZE) -> httpx.Client:
-    return httpx.Client(limits=_build_limits(pool_size), timeout=_build_timeout())
+    client = httpx.Client(limits=_build_limits(pool_size), timeout=_build_timeout())
+    _attach_self_finalizer(client)
+    return client
+
+
+def _attach_self_finalizer(client: httpx.Client) -> None:
+    """Close the underlying transports when *client* itself is garbage-collected.
+
+    Anchoring the finalizer on the client (rather than on the owning ``Daytona``)
+    means the pool survives as long as anything still references it — the
+    parent ``Daytona`` or any ``Sandbox`` it returned — and closes
+    deterministically only when the last reference drops. This prevents
+    ``Daytona().create()``-style usage from prematurely closing the shared
+    client while the returned sandbox is still in use.
+
+    The callback captures only the transport objects (not the client), so it
+    introduces no self-reference that would keep the client alive forever.
+    """
+    transport = client._transport
+    mounts = tuple(t for t in client._mounts.values() if t is not None)
+
+    def _close() -> None:
+        for t in (transport, *mounts):
+            try:
+                t.close()
+            except Exception:  # noqa: BLE001 - best-effort cleanup
+                pass
+
+    _ = weakref.finalize(client, _close)
 
 
 def aiohttp_request_timeout(timeout: float | None) -> aiohttp.ClientTimeout:
