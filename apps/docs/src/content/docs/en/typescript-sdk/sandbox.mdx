@@ -11,222 +11,50 @@ Represents a Daytona Sandbox.
 **Properties**:
 
 - `autoArchiveInterval?` _number_ - Auto-archive interval in minutes
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.autoArchiveInterval
-    ```
 - `autoDeleteInterval?` _number_ - Auto-delete interval in minutes
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.autoDeleteInterval
-    ```
 - `autoStopInterval?` _number_ - Auto-stop interval in minutes
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.autoStopInterval
-    ```
-- `backupCreatedAt?` _string_ - When the backup was created
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.backupCreatedAt
-    ```
+- `backupCreatedAt?` _string_ - When the backup was created (not returned by list results;
+    call `refreshData()` on each item to populate)
 - `backupState?` _SandboxBackupStateEnum_ - Current state of Sandbox backup
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.backupState
-    ```
 - `buildInfo?` _BuildInfo_ - Build information for the Sandbox if it was created from dynamic build
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.buildInfo
-    ```
+    (not returned by list results; call `refreshData()` on each item to populate)
 - `codeInterpreter` _CodeInterpreter_ - Stateful interpreter interface for executing code.
     Currently supports only Python. For other languages, use the `process.codeRun` method.
 - `computerUse` _ComputerUse_ - Computer use operations interface for desktop automation
 - `cpu` _number_ - Number of CPUs allocated to the Sandbox
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.cpu
-    ```
 - `createdAt?` _string_ - When the Sandbox was created
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.createdAt
-    ```
 - `disk` _number_ - Amount of disk space allocated to the Sandbox in GiB
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.disk
-    ```
-- `env` _Record\<string, string\>_ - Environment variables set in the Sandbox
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.env
-    ```
+- `env?` _Record\<string, string\>_ - Environment variables set in the Sandbox
+    (not returned by list results; call `refreshData()` on each item to populate)
 - `errorReason?` _string_ - Error message if Sandbox is in error state
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.errorReason
-    ```
 - `fs` _FileSystem_ - File system operations interface
 - `git` _Git_ - Git operations interface
 - `gpu` _number_ - Number of GPUs allocated to the Sandbox
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.gpu
-    ```
 - `id` _string_ - Unique identifier for the Sandbox
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.id
-    ```
 - `labels` _Record\<string, string\>_ - Custom labels attached to the Sandbox
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.labels
-    ```
 - `lastActivityAt?` _string_ - When the Sandbox last had activity
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.lastActivityAt
-    ```
 - `memory` _number_ - Amount of memory allocated to the Sandbox in GiB
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.memory
-    ```
-- `name` _string_ - The name of the sandbox
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.name
-    ```
+- `name` _string_
 - `networkAllowList?` _string_ - Comma-separated list of allowed CIDR network addresses for the Sandbox
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.networkAllowList
-    ```
-- `networkBlockAll` _boolean_ - Whether to block all network access for the Sandbox
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.networkBlockAll
-    ```
+    (not returned by list results; call `refreshData()` on each item to populate)
+- `networkBlockAll?` _boolean_ - Whether to block all network access for the Sandbox
+    (not returned by list results; call `refreshData()` on each item to populate)
 - `organizationId` _string_ - Organization ID of the Sandbox
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.organizationId
-    ```
 - `process` _Process_ - Process execution interface
 - `public` _boolean_ - Whether the Sandbox is publicly accessible
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.public
-    ```
 - `recoverable?` _boolean_ - Whether the Sandbox error is recoverable.
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.recoverable
-    ```
 - `snapshot?` _string_ - Daytona snapshot used to create the Sandbox
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.snapshot
-    ```
 - `state?` _SandboxState_ - Current state of the Sandbox (e.g., "started", "stopped")
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.state
-    ```
 - `target` _string_ - Target location of the runner where the Sandbox runs
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.target
-    ```
-- `toolboxProxyUrl` _string_ - The toolbox proxy URL for the sandbox
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.toolboxProxyUrl
-    ```
+- `toolboxProxyUrl` _string_
 - `updatedAt?` _string_ - When the Sandbox was last updated
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.updatedAt
-    ```
 - `user` _string_ - OS user running in the Sandbox
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.user
-    ```
-- `volumes?` _SandboxVolume\[\]_ - Volumes attached to the Sandbox
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.volumes
-    ```
+- `volumes?` _SandboxVolume\[\]_ - Volumes attached to the Sandbox (not returned by
+    list results; call `refreshData()` on each item to populate)
     
 
 
 
-
-### Implements
-
-- `Sandbox`
 
 ### Constructors
 
@@ -234,7 +62,7 @@ Represents a Daytona Sandbox.
 
 ```ts
 new Sandbox(
-   sandboxDto: Sandbox, 
+   sandboxDto: SandboxListItem | Sandbox, 
    clientConfig: Configuration, 
    axiosInstance: AxiosInstance, 
    sandboxApi: SandboxApi): Sandbox
@@ -244,7 +72,7 @@ Creates a new Sandbox instance
 
 **Parameters**:
 
-- `sandboxDto` _Sandbox_ - The API Sandbox instance
+- `sandboxDto` _The API Sandbox instance_ - `SandboxListItem` | `Sandbox`
 - `clientConfig` _Configuration_
 - `axiosInstance` _AxiosInstance_
 - `sandboxApi` _SandboxApi_

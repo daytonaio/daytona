@@ -14,6 +14,7 @@ from daytona_api_client import Sandbox as SandboxDto
 from daytona_api_client import (
     SandboxApi,
     SandboxLabels,
+    SandboxListItem,
     SandboxState,
     SandboxVolume,
     SignedPortPreviewUrl,
@@ -61,9 +62,10 @@ class Sandbox(SandboxDto):
         id (str): Unique identifier for the Sandbox.
         name (str): Name of the Sandbox.
         organization_id (str): Organization ID of the Sandbox.
-        snapshot (str): Daytona snapshot used to create the Sandbox.
+        snapshot (str | None): Daytona snapshot used to create the Sandbox.
         user (str): OS user running in the Sandbox.
-        env (dict[str, str]): Environment variables set in the Sandbox.
+        env (dict[str, str] | None): Environment variables set in the Sandbox (not returned by list
+            results; call `refresh_data()` on each item to populate).
         labels (dict[str, str]): Custom labels attached to the Sandbox.
         public (bool): Whether the Sandbox is publicly accessible.
         target (str): Target location of the runner where the Sandbox runs.
@@ -71,22 +73,31 @@ class Sandbox(SandboxDto):
         gpu (int): Number of GPUs allocated to the Sandbox.
         memory (int): Amount of memory allocated to the Sandbox in GiB.
         disk (int): Amount of disk space allocated to the Sandbox in GiB.
-        state (SandboxState): Current state of the Sandbox (e.g., "started", "stopped").
-        error_reason (str): Error message if Sandbox is in error state.
-        recoverable (bool): Whether the Sandbox error is recoverable.
-        backup_state (SandboxBackupStateEnum): Current state of Sandbox backup.
-        backup_created_at (str): When the backup was created.
-        auto_stop_interval (int): Auto-stop interval in minutes.
-        auto_archive_interval (int): Auto-archive interval in minutes.
-        auto_delete_interval (int): Auto-delete interval in minutes.
-        volumes (list[str]): Volumes attached to the Sandbox.
-        build_info (str): Build information for the Sandbox if it was created from dynamic build.
-        created_at (str): When the Sandbox was created.
-        updated_at (str): When the Sandbox was last updated.
-        last_activity_at (str): When the Sandbox last had activity.
-        network_block_all (bool): Whether to block all network access for the Sandbox.
-        network_allow_list (str): Comma-separated list of allowed CIDR network addresses for the Sandbox.
+        state (SandboxState | None): Current state of the Sandbox (e.g., "started", "stopped").
+        error_reason (str | None): Error message if Sandbox is in error state.
+        recoverable (bool | None): Whether the Sandbox error is recoverable.
+        backup_state (str | None): Current state of Sandbox backup.
+        backup_created_at (str | None): When the backup was created (not returned by list results;
+            call `refresh_data()` on each item to populate).
+        auto_stop_interval (int | None): Auto-stop interval in minutes.
+        auto_archive_interval (int | None): Auto-archive interval in minutes.
+        auto_delete_interval (int | None): Auto-delete interval in minutes.
+        volumes (list[SandboxVolume] | None): Volumes attached to the Sandbox (not returned by list
+            results; call `refresh_data()` on each item to populate).
+        build_info (BuildInfo | None): Build information for the Sandbox if it was created from
+            dynamic build (not returned by list results; call `refresh_data()` on each item to populate).
+        created_at (str | None): When the Sandbox was created.
+        updated_at (str | None): When the Sandbox was last updated.
+        last_activity_at (str | None): When the Sandbox last had activity.
+        network_block_all (bool | None): Whether to block all network access for the Sandbox
+            (not returned by list results; call `refresh_data()` on each item to populate).
+        network_allow_list (str | None): Comma-separated list of allowed CIDR network addresses for
+            the Sandbox (not returned by list results; call `refresh_data()` on each item to populate).
+        toolbox_proxy_url (str): The toolbox proxy URL for the Sandbox.
     """
+
+    env: dict[str, str] | None = None  # pyright: ignore[reportRedeclaration]
+    network_block_all: bool | None = None  # pyright: ignore[reportRedeclaration]
 
     _fs: FileSystem = PrivateAttr()
     _git: Git = PrivateAttr()
@@ -99,7 +110,7 @@ class Sandbox(SandboxDto):
 
     def __init__(
         self,
-        sandbox_dto: SandboxDto,
+        sandbox_dto: SandboxDto | SandboxListItem,
         toolbox_api: ApiClient,
         sandbox_api: SandboxApi,
         language: str,
@@ -108,7 +119,7 @@ class Sandbox(SandboxDto):
         """Initialize a new Sandbox instance.
 
         Args:
-            sandbox_dto (SandboxDto): The sandbox data from the API.
+            sandbox_dto (SandboxDto | SandboxListItem): The sandbox data from the API.
             toolbox_api (ApiClient): API client for toolbox operations.
             sandbox_api (SandboxApi): API client for Sandbox operations.
             http_client (httpx.Client): Shared pooled client for file transfers.
@@ -815,13 +826,12 @@ class Sandbox(SandboxDto):
             if time.monotonic() - start_time > 5:
                 check_interval = min(check_interval * 1.1, 1.0)
 
-    def __process_sandbox_dto(self, sandbox_dto: SandboxDto) -> None:
+    def __process_sandbox_dto(self, sandbox_dto: SandboxDto | SandboxListItem) -> None:
         self.id: str = sandbox_dto.id
         self.name: str = sandbox_dto.name
         self.organization_id: str = sandbox_dto.organization_id
         self.snapshot: str | None = sandbox_dto.snapshot
         self.user: str = sandbox_dto.user
-        self.env: dict[str, str] = sandbox_dto.env
         self.labels: dict[str, str] = sandbox_dto.labels
         self.public: bool = sandbox_dto.public
         self.target: str = sandbox_dto.target
@@ -833,18 +843,24 @@ class Sandbox(SandboxDto):
         self.error_reason: str | None = sandbox_dto.error_reason
         self.recoverable: bool | None = sandbox_dto.recoverable
         self.backup_state: str | None = sandbox_dto.backup_state
-        self.backup_created_at: str | None = sandbox_dto.backup_created_at
         self.auto_stop_interval: float | int | None = sandbox_dto.auto_stop_interval
         self.auto_archive_interval: float | int | None = sandbox_dto.auto_archive_interval
         self.auto_delete_interval: float | int | None = sandbox_dto.auto_delete_interval
-        self.volumes: list[SandboxVolume] | None = sandbox_dto.volumes
-        self.build_info: BuildInfo | None = sandbox_dto.build_info
         self.created_at: str | None = sandbox_dto.created_at
         self.updated_at: str | None = sandbox_dto.updated_at
         self.last_activity_at: str | None = sandbox_dto.last_activity_at
-        self.network_block_all: bool = sandbox_dto.network_block_all
-        self.network_allow_list: str | None = sandbox_dto.network_allow_list
         self.toolbox_proxy_url: str = sandbox_dto.toolbox_proxy_url
+
+        # Fields only present in the full SandboxDto (not returned by list results
+        if isinstance(sandbox_dto, SandboxDto):
+            self.env: dict[str, str] | None = sandbox_dto.env  # pyright: ignore[reportIncompatibleVariableOverride]
+            self.network_block_all: bool | None = (  # pyright: ignore[reportIncompatibleVariableOverride]
+                sandbox_dto.network_block_all
+            )
+            self.network_allow_list: str | None = sandbox_dto.network_allow_list
+            self.volumes: list[SandboxVolume] | None = sandbox_dto.volumes
+            self.build_info: BuildInfo | None = sandbox_dto.build_info
+            self.backup_created_at: str | None = sandbox_dto.backup_created_at
 
     def __refresh_data_safe(self) -> None:
         """Refreshes the Sandbox data from the API, but does not throw an error if the sandbox has been deleted.

@@ -44,11 +44,28 @@ import (
 type Sandbox struct {
 	client        *Client
 	otel          *otelState
-	ID            string                 // Unique sandbox identifier
-	Name          string                 // Human-readable sandbox name
-	State         apiclient.SandboxState // Current sandbox state
-	Target        string                 // Target region/environment where the sandbox runs
-	ToolboxClient *toolbox.APIClient     // Internal API client
+	ToolboxClient *toolbox.APIClient // Internal API client
+
+	ID             string                 // Unique sandbox identifier
+	Name           string                 // Human-readable sandbox name
+	OrganizationId string                 // Organization ID of the sandbox
+	Snapshot       *string                // Daytona snapshot used to create the sandbox
+	User           string                 // OS user running in the sandbox
+	Labels         map[string]string      // Custom labels attached to the sandbox
+	Public         bool                   // Whether the sandbox is publicly accessible
+	Target         string                 // Target region/environment where the sandbox runs
+	Cpu            float32                // Number of CPUs allocated to the sandbox
+	Gpu            float32                // Number of GPUs allocated to the sandbox
+	Memory         float32                // Amount of memory allocated to the sandbox in GiB
+	Disk           float32                // Amount of disk space allocated to the sandbox in GiB
+	State          apiclient.SandboxState // Current sandbox state
+	ErrorReason    *string                // Error message if the sandbox is in an error state
+	Recoverable    *bool                  // Whether the sandbox error is recoverable
+	BackupState    *string                // Current state of the sandbox backup
+
+	// AutoStopInterval is the time in minutes of inactivity before auto-stopping.
+	// 0 means disabled.
+	AutoStopInterval int
 
 	// AutoArchiveInterval is the time in minutes after stopping before auto-archiving.
 	// Set to 0 to disable auto-archiving.
@@ -59,10 +76,32 @@ type Sandbox struct {
 	// Set to 0 to delete immediately upon stopping.
 	AutoDeleteInterval int
 
-	// NetworkBlockAll blocks all network access when true.
-	NetworkBlockAll bool
+	CreatedAt      *string // When the sandbox was created
+	UpdatedAt      *string // When the sandbox was last updated
+	LastActivityAt *string // When the sandbox last had activity
+
+	// Env contains environment variables set in the sandbox.
+	// Not populated by [Client.List]; call [Sandbox.RefreshData] on each item to populate.
+	Env map[string]string
+
+	// BackupCreatedAt is the timestamp of the last backup.
+	// Not populated by [Client.List]; call [Sandbox.RefreshData] on each item to populate.
+	BackupCreatedAt *string
+
+	// Volumes attached to the sandbox.
+	// Not populated by [Client.List]; call [Sandbox.RefreshData] on each item to populate.
+	Volumes []apiclient.SandboxVolume
+
+	// BuildInfo contains build information for the sandbox if it was created from a dynamic build.
+	// Not populated by [Client.List]; call [Sandbox.RefreshData] on each item to populate.
+	BuildInfo *apiclient.BuildInfo
+
+	// NetworkBlockAll blocks all network access when true. Nil when not populated.
+	// Not populated by [Client.List]; call [Sandbox.RefreshData] on each item to populate.
+	NetworkBlockAll *bool
 
 	// NetworkAllowList is a comma-separated list of allowed CIDR addresses.
+	// Not populated by [Client.List]; call [Sandbox.RefreshData] on each item to populate.
 	NetworkAllowList *string
 
 	FileSystem      *FileSystemService      // File system operations
@@ -70,6 +109,52 @@ type Sandbox struct {
 	Process         *ProcessService         // Process and PTY operations
 	CodeInterpreter *CodeInterpreterService // Python code execution
 	ComputerUse     *ComputerUseService     // Desktop automation
+}
+
+// sandboxDTO is the common subset of fields exposed by both [apiclient.Sandbox]
+// (returned by single-sandbox endpoints) and [apiclient.SandboxListItem]
+// (returned by the list endpoint). It lets [NewSandbox] and
+// [Sandbox.populateFromDTO] accept either DTO without duplicating logic.
+//
+// Fields that exist only on the full [apiclient.Sandbox] DTO (Env,
+// NetworkBlockAll, NetworkAllowList, Volumes, BuildInfo, BackupCreatedAt) are
+// populated via a type assertion inside populateFromDTO.
+type sandboxDTO interface {
+	GetId() string
+	GetName() string
+	GetOrganizationId() string
+	GetSnapshot() string
+	GetUser() string
+	GetLabels() map[string]string
+	GetPublic() bool
+	GetTarget() string
+	GetCpu() float32
+	GetGpu() float32
+	GetMemory() float32
+	GetDisk() float32
+	GetState() apiclient.SandboxState
+	GetErrorReason() string
+	GetRecoverable() bool
+	GetBackupState() string
+	GetAutoStopInterval() float32
+	GetAutoArchiveInterval() float32
+	GetAutoDeleteInterval() float32
+	GetCreatedAt() string
+	GetUpdatedAt() string
+	GetLastActivityAt() string
+	GetToolboxProxyUrl() string
+
+	// *Ok accessors used to distinguish unset optional fields from zero values.
+	GetSnapshotOk() (*string, bool)
+	GetErrorReasonOk() (*string, bool)
+	GetRecoverableOk() (*bool, bool)
+	GetBackupStateOk() (*string, bool)
+	GetAutoStopIntervalOk() (*float32, bool)
+	GetAutoArchiveIntervalOk() (*float32, bool)
+	GetAutoDeleteIntervalOk() (*float32, bool)
+	GetCreatedAtOk() (*string, bool)
+	GetUpdatedAtOk() (*string, bool)
+	GetLastActivityAtOk() (*string, bool)
 }
 
 // ListSandboxesQuery contains query parameters for filtering and sorting when listing sandboxes.
@@ -199,39 +284,104 @@ func (it *SandboxIterator) Err() error {
 	return it.err
 }
 
-// NewSandbox creates a new Sandbox instance.
+// NewSandbox creates a new Sandbox instance from an API DTO.
 //
-// This is typically called internally by the SDK. Users should create sandboxes
-// using [Client.Create] rather than calling this directly.
-func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, name string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList *string, language types.CodeLanguage) *Sandbox {
+// dto may be either *[apiclient.Sandbox] (returned by single-sandbox endpoints
+// such as Create, Get, Fork, RefreshData) or *[apiclient.SandboxListItem]
+// (returned by the list endpoint). When dto is a *[apiclient.SandboxListItem],
+// the fields documented as "Not populated by [Client.List]" remain at their
+// zero values; call [Sandbox.RefreshData] to populate them.
+//
+// This is typically called internally by the SDK. Users should obtain sandboxes
+// via [Client.Create], [Client.Get], or [Client.List] rather than calling this
+// directly.
+func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, dto sandboxDTO, language types.CodeLanguage) *Sandbox {
 	var otelSt *otelState
 	if client != nil {
 		otelSt = client.Otel
 	}
-	return &Sandbox{
-		client:              client,
-		otel:                otelSt,
-		ID:                  id,
-		Name:                name,
-		State:               state,
-		Target:              target,
-		AutoArchiveInterval: autoArchiveInterval,
-		AutoDeleteInterval:  autoDeleteInterval,
-		NetworkBlockAll:     networkBlockAll,
-		NetworkAllowList:    networkAllowList,
-		ToolboxClient:       toolboxClient,
-		FileSystem:          NewFileSystemService(toolboxClient, otelSt),
-		Git:                 NewGitService(toolboxClient, otelSt),
-		Process:             NewProcessService(toolboxClient, otelSt, language),
-		CodeInterpreter:     NewCodeInterpreterService(toolboxClient, otelSt),
-		ComputerUse:         NewComputerUseService(toolboxClient, otelSt),
+	s := &Sandbox{
+		client:          client,
+		otel:            otelSt,
+		ToolboxClient:   toolboxClient,
+		FileSystem:      NewFileSystemService(toolboxClient, otelSt),
+		Git:             NewGitService(toolboxClient, otelSt),
+		Process:         NewProcessService(toolboxClient, otelSt, language),
+		CodeInterpreter: NewCodeInterpreterService(toolboxClient, otelSt),
+		ComputerUse:     NewComputerUseService(toolboxClient, otelSt),
+	}
+	s.populateFromDTO(dto)
+	return s
+}
+
+// populateFromDTO copies fields from a sandbox API DTO onto the receiver.
+//
+// Fields present only on the full *[apiclient.Sandbox] DTO (Env, NetworkBlockAll,
+// NetworkAllowList, Volumes, BuildInfo, BackupCreatedAt) are populated via a
+// type assertion. When dto is a *[apiclient.SandboxListItem] they remain at
+// their zero values.
+func (s *Sandbox) populateFromDTO(dto sandboxDTO) {
+	// Fields shared by both apiclient.Sandbox and apiclient.SandboxListItem.
+	s.ID = dto.GetId()
+	s.Name = dto.GetName()
+	s.OrganizationId = dto.GetOrganizationId()
+	if v, ok := dto.GetSnapshotOk(); ok {
+		s.Snapshot = v
+	}
+	s.User = dto.GetUser()
+	s.Labels = dto.GetLabels()
+	s.Public = dto.GetPublic()
+	s.Target = dto.GetTarget()
+	s.Cpu = dto.GetCpu()
+	s.Gpu = dto.GetGpu()
+	s.Memory = dto.GetMemory()
+	s.Disk = dto.GetDisk()
+	s.State = dto.GetState()
+	if v, ok := dto.GetErrorReasonOk(); ok {
+		s.ErrorReason = v
+	}
+	if v, ok := dto.GetRecoverableOk(); ok {
+		s.Recoverable = v
+	}
+	if v, ok := dto.GetBackupStateOk(); ok {
+		s.BackupState = v
+	}
+	if v, ok := dto.GetAutoStopIntervalOk(); ok && v != nil {
+		s.AutoStopInterval = int(*v)
+	}
+	if v, ok := dto.GetAutoArchiveIntervalOk(); ok && v != nil {
+		s.AutoArchiveInterval = int(*v)
+	}
+	if v, ok := dto.GetAutoDeleteIntervalOk(); ok && v != nil {
+		s.AutoDeleteInterval = int(*v)
+	}
+	if v, ok := dto.GetCreatedAtOk(); ok {
+		s.CreatedAt = v
+	}
+	if v, ok := dto.GetUpdatedAtOk(); ok {
+		s.UpdatedAt = v
+	}
+	if v, ok := dto.GetLastActivityAtOk(); ok {
+		s.LastActivityAt = v
+	}
+
+	// Fields only present on the full apiclient.Sandbox DTO (not returned by
+	// the list endpoint).
+	if full, ok := dto.(*apiclient.Sandbox); ok {
+		s.Env = full.Env
+		s.NetworkBlockAll = &full.NetworkBlockAll
+		s.NetworkAllowList = full.NetworkAllowList
+		s.Volumes = full.Volumes
+		s.BuildInfo = full.BuildInfo
+		s.BackupCreatedAt = full.BackupCreatedAt
 	}
 }
 
 // RefreshData refreshes the sandbox data from the API.
 //
-// This updates the sandbox's State and other properties from the server.
-// Useful for checking if the sandbox state has changed.
+// This updates all sandbox fields from the server, including those not
+// populated by [Client.List] (Env, NetworkBlockAll, NetworkAllowList, Volumes,
+// BuildInfo, BackupCreatedAt).
 //
 // Example:
 //
@@ -253,23 +403,7 @@ func (s *Sandbox) doRefreshData(ctx context.Context) error {
 		return errors.ConvertAPIError(err, httpResp)
 	}
 
-	// Update sandboxDTO for backward compatibility
-	s.Name = sandboxResp.GetName()
-	s.State = sandboxResp.GetState()
-	s.Target = sandboxResp.GetTarget()
-
-	// Update intervals
-	if sandboxResp.AutoArchiveInterval != nil {
-		s.AutoArchiveInterval = int(*sandboxResp.AutoArchiveInterval)
-	}
-	if sandboxResp.AutoDeleteInterval != nil {
-		s.AutoDeleteInterval = int(*sandboxResp.AutoDeleteInterval)
-	}
-
-	// Update network settings
-	s.NetworkBlockAll = sandboxResp.GetNetworkBlockAll()
-	s.NetworkAllowList = sandboxResp.NetworkAllowList
-
+	s.populateFromDTO(sandboxResp)
 	return nil
 }
 
@@ -839,8 +973,7 @@ func (s *Sandbox) doUpdateNetworkSettings(ctx context.Context, settings apiclien
 		return errors.ConvertAPIError(err, httpResp)
 	}
 
-	s.NetworkBlockAll = sandboxResp.GetNetworkBlockAll()
-	s.NetworkAllowList = sandboxResp.NetworkAllowList
+	s.populateFromDTO(sandboxResp)
 	return nil
 }
 
@@ -912,18 +1045,8 @@ func (s *Sandbox) doExperimentalForkWithTimeout(ctx context.Context, name *strin
 		return nil, err
 	}
 
-	autoArchiveInterval := 0
-	if sandboxResp.AutoArchiveInterval != nil {
-		autoArchiveInterval = int(*sandboxResp.AutoArchiveInterval)
-	}
-
-	autoDeleteInterval := 0
-	if sandboxResp.AutoDeleteInterval != nil {
-		autoDeleteInterval = int(*sandboxResp.AutoDeleteInterval)
-	}
-
 	language := types.CodeLanguage(sandboxResp.GetLabels()[types.CodeToolboxLanguageLabel])
-	forked := NewSandbox(s.client, toolboxClient, sandboxResp.GetId(), sandboxResp.GetName(), sandboxResp.GetState(), sandboxResp.GetTarget(), autoArchiveInterval, autoDeleteInterval, sandboxResp.GetNetworkBlockAll(), sandboxResp.NetworkAllowList, language)
+	forked := NewSandbox(s.client, toolboxClient, sandboxResp, language)
 
 	if err := forked.WaitForStart(ctx, timeout); err != nil {
 		return nil, err

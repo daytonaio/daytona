@@ -208,29 +208,37 @@ public class Daytona implements AutoCloseable {
     /**
      * Iterates over all Sandboxes (no filter, default sort).
      *
-     * @return iterator over Sandboxes
+     * <p>Returns a lazily-paged {@link Iterable}; see {@link #list(ListSandboxesQuery)} for details
+     * on partial hydration and Stream usage.
+     *
+     * @return iterable over Sandboxes
      */
-    public Iterator<Map<String, Object>> list() {
+    public Iterable<Sandbox> list() {
         return list(null);
     }
 
     /**
      * Iterates over Sandboxes matching the given query.
      *
+     * <p>The returned {@link Iterable} lazily fetches pages from the API as iteration proceeds.
+     * Sandboxes are hydrated from the list endpoint, so fields marked "Not returned by
+     * {@code Daytona.list}" on {@link Sandbox} (env, networkBlockAll, networkAllowList, volumes,
+     * buildInfo, backupCreatedAt) remain {@code null} until {@link Sandbox#refreshData()} is called.
+     * For a {@link Stream} variant see {@link #listStream(ListSandboxesQuery)}.
+     *
      * <pre>{@code
      * ListSandboxesQuery query = new ListSandboxesQuery();
      * query.setLabels(Map.of("env", "dev"));
-     * Iterator<Map<String, Object>> iter = daytona.list(query);
-     * while (iter.hasNext()) {
-     *     System.out.println(iter.next().get("id"));
+     * for (Sandbox sandbox : daytona.list(query)) {
+     *     System.out.println(sandbox.getId());
      * }
      * }</pre>
      *
      * @param query optional filters, sorting, and per-page size
-     * @return iterator over Sandboxes
+     * @return iterable over Sandboxes
      */
-    public Iterator<Map<String, Object>> list(ListSandboxesQuery query) {
-        return new SandboxIterator(this, query);
+    public Iterable<Sandbox> list(ListSandboxesQuery query) {
+        return () -> new SandboxIterator(this, query);
     }
 
     /**
@@ -239,8 +247,9 @@ public class Daytona implements AutoCloseable {
      * <p>The returned stream should be closed (use try-with-resources).
      *
      * @return stream of Sandboxes
+     * @see #list()
      */
-    public Stream<Map<String, Object>> listStream() {
+    public Stream<Sandbox> listStream() {
         return listStream(null);
     }
 
@@ -250,19 +259,19 @@ public class Daytona implements AutoCloseable {
      * <p>The returned stream should be closed (use try-with-resources).
      *
      * <pre>{@code
-     * try (Stream<Map<String, Object>> stream = daytona.listStream(query)) {
-     *     stream.filter(sb -> "started".equals(sb.get("state")))
+     * try (Stream<Sandbox> stream = daytona.listStream(query)) {
+     *     stream.filter(sb -> "started".equals(sb.getState()))
      *           .limit(5)
-     *           .forEach(sb -> System.out.println(sb.get("id")));
+     *           .forEach(sb -> System.out.println(sb.getId()));
      * }
      * }</pre>
      *
      * @param query optional filters, sorting, and per-page size
      * @return stream of Sandboxes
      */
-    public Stream<Map<String, Object>> listStream(ListSandboxesQuery query) {
-        Iterator<Map<String, Object>> iter = list(query);
-        Spliterator<Map<String, Object>> spliterator = Spliterators.spliteratorUnknownSize(
+    public Stream<Sandbox> listStream(ListSandboxesQuery query) {
+        Iterator<Sandbox> iter = list(query).iterator();
+        Spliterator<Sandbox> spliterator = Spliterators.spliteratorUnknownSize(
                 iter, Spliterator.ORDERED | Spliterator.NONNULL);
         return StreamSupport.stream(spliterator, false);
     }
@@ -375,10 +384,10 @@ public class Daytona implements AutoCloseable {
                 fOrder
         ));
 
-        List<Map<String, Object>> items = new ArrayList<>();
+        List<Sandbox> items = new ArrayList<>();
         if (result != null && result.getItems() != null) {
-            for (io.daytona.api.client.model.Sandbox item : result.getItems()) {
-                items.add(sandboxToMap(item));
+            for (io.daytona.api.client.model.SandboxListItem item : result.getItems()) {
+                items.add(new Sandbox(sandboxApi, config, item));
             }
         }
         String nextCursor = result != null ? result.getNextCursor() : null;
@@ -389,10 +398,10 @@ public class Daytona implements AutoCloseable {
      * Internal page payload used by {@link SandboxIterator}.
      */
     static final class PageResult {
-        final List<Map<String, Object>> items;
+        final List<Sandbox> items;
         final String nextCursor;
 
-        PageResult(List<Map<String, Object>> items, String nextCursor) {
+        PageResult(List<Sandbox> items, String nextCursor) {
             this.items = items;
             this.nextCursor = nextCursor;
         }
@@ -404,11 +413,11 @@ public class Daytona implements AutoCloseable {
      * <p>Single-consumer, not thread-safe. Stops fetching as soon as the API
      * signals no further cursor.
      */
-    private static final class SandboxIterator implements Iterator<Map<String, Object>> {
+    private static final class SandboxIterator implements Iterator<Sandbox> {
         private final Daytona daytona;
         private final ListSandboxesQuery query;
 
-        private List<Map<String, Object>> page = null;
+        private List<Sandbox> page = null;
         private int pageIndex = 0;
         private String cursor = null;
         private boolean firstPageFetched = false;
@@ -426,7 +435,7 @@ public class Daytona implements AutoCloseable {
         }
 
         @Override
-        public Map<String, Object> next() {
+        public Sandbox next() {
             advanceIfNeeded();
             if (page == null || pageIndex >= page.size()) {
                 throw new NoSuchElementException();
@@ -582,29 +591,6 @@ public class Daytona implements AutoCloseable {
             output = output.substring(0, output.length() - 1);
         }
         return output;
-    }
-
-    static Map<String, Object> sandboxToMap(io.daytona.api.client.model.Sandbox sandbox) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        if (sandbox == null) {
-            return map;
-        }
-        map.put("id", sandbox.getId());
-        map.put("name", sandbox.getName());
-        map.put("state", sandbox.getState() == null ? null : sandbox.getState().getValue());
-        map.put("target", sandbox.getTarget());
-        map.put("user", sandbox.getUser());
-        map.put("toolboxProxyUrl", sandbox.getToolboxProxyUrl());
-        map.put("cpu", sandbox.getCpu() == null ? 0 : sandbox.getCpu().intValue());
-        map.put("gpu", sandbox.getGpu() == null ? 0 : sandbox.getGpu().intValue());
-        map.put("memory", sandbox.getMemory() == null ? 0 : sandbox.getMemory().intValue());
-        map.put("disk", sandbox.getDisk() == null ? 0 : sandbox.getDisk().intValue());
-        map.put("env", sandbox.getEnv());
-        map.put("labels", sandbox.getLabels());
-        map.put("autoStopInterval", sandbox.getAutoStopInterval() == null ? null : sandbox.getAutoStopInterval().intValue());
-        map.put("autoArchiveInterval", sandbox.getAutoArchiveInterval() == null ? null : sandbox.getAutoArchiveInterval().intValue());
-        map.put("autoDeleteInterval", sandbox.getAutoDeleteInterval() == null ? null : sandbox.getAutoDeleteInterval().intValue());
-        return map;
     }
 
     static String urlEncodePathSegment(String value) {

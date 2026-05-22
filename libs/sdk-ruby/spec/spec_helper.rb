@@ -63,6 +63,7 @@ end
 def build_sandbox_dto(overrides = {}) # rubocop:disable Metrics/MethodLength
   attrs = {
     id: 'sandbox-123',
+    name: 'sandbox-123',
     organization_id: 'org-1',
     snapshot: 'default-snapshot',
     user: 'daytona',
@@ -93,7 +94,9 @@ def build_sandbox_dto(overrides = {}) # rubocop:disable Metrics/MethodLength
     toolbox_proxy_url: 'https://proxy.example.com/'
   }.merge(overrides)
 
-  instance_double(DaytonaApiClient::Sandbox, **attrs)
+  # Use a real instance (not instance_double) so that is_a?(DaytonaApiClient::Sandbox)
+  # checks in Sandbox#process_response take the full-DTO branch.
+  DaytonaApiClient::Sandbox.new(**attrs)
 end
 
 def build_volume_dto(overrides = {})

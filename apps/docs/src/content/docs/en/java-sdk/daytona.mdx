@@ -183,27 +183,35 @@ Retrieves a Sandbox by ID or name.
 
 #### list()
 ```java
-public Iterator<Map<String, Object>> list()
+public Iterable<Sandbox> list()
 ```
 
 Iterates over all Sandboxes (no filter, default sort).
 
+Returns a lazily-paged `Iterable`; see `#list(ListSandboxesQuery)` for details
+on partial hydration and Stream usage.
+
 **Returns**:
 
-- `Iterator\<Map\<String, Object\>\>` - iterator over Sandboxes
+- `Iterable\<Sandbox\>` - iterable over Sandboxes
 
 #### list()
 ```java
-public Iterator<Map<String, Object>> list(ListSandboxesQuery query)
+public Iterable<Sandbox> list(ListSandboxesQuery query)
 ```
 
 Iterates over Sandboxes matching the given query.
+
+The returned `Iterable` lazily fetches pages from the API as iteration proceeds.
+Sandboxes are hydrated from the list endpoint, so fields marked "Not returned by
+`Daytona.list`" on `Sandbox` (env, networkBlockAll, networkAllowList, volumes,
+buildInfo, backupCreatedAt) remain `null` until `Sandbox#refreshData()` is called.
+For a `Stream` variant see `#listStream(ListSandboxesQuery)`.
 ```java
 ListSandboxesQuery query = new ListSandboxesQuery();
 query.setLabels(Map.of("env", "dev"));
-Iterator<Map<String, Object>> iter = daytona.list(query);
-while (iter.hasNext()) {
-System.out.println(iter.next().get("id"));
+for (Sandbox sandbox : daytona.list(query)) {
+System.out.println(sandbox.getId());
 }
 ```
 
@@ -213,11 +221,11 @@ System.out.println(iter.next().get("id"));
 
 **Returns**:
 
-- `Iterator\<Map\<String, Object\>\>` - iterator over Sandboxes
+- `Iterable\<Sandbox\>` - iterable over Sandboxes
 
 #### listStream()
 ```java
-public Stream<Map<String, Object>> listStream()
+public Stream<Sandbox> listStream()
 ```
 
 Streams all Sandboxes (no filter, default sort).
@@ -226,21 +234,21 @@ The returned stream should be closed (use try-with-resources).
 
 **Returns**:
 
-- `Stream\<Map\<String, Object\>\>` - stream of Sandboxes
+- `Stream\<Sandbox\>` - stream of Sandboxes
 
 #### listStream()
 ```java
-public Stream<Map<String, Object>> listStream(ListSandboxesQuery query)
+public Stream<Sandbox> listStream(ListSandboxesQuery query)
 ```
 
 Streams Sandboxes matching the given query.
 
 The returned stream should be closed (use try-with-resources).
 ```java
-try (Stream<Map<String, Object>> stream = daytona.listStream(query)) {
-stream.filter(sb -> "started".equals(sb.get("state")))
+try (Stream<Sandbox> stream = daytona.listStream(query)) {
+stream.filter(sb -> "started".equals(sb.getState()))
 .limit(5)
-.forEach(sb -> System.out.println(sb.get("id")));
+.forEach(sb -> System.out.println(sb.getId()));
 }
 ```
 
@@ -250,7 +258,7 @@ stream.filter(sb -> "started".equals(sb.get("state")))
 
 **Returns**:
 
-- `Stream\<Map\<String, Object\>\>` - stream of Sandboxes
+- `Stream\<Sandbox\>` - stream of Sandboxes
 
 #### snapshot()
 ```java

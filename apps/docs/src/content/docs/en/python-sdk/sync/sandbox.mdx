@@ -22,9 +22,10 @@ Represents a Daytona Sandbox.
 - `id` _str_ - Unique identifier for the Sandbox.
 - `name` _str_ - Name of the Sandbox.
 - `organization_id` _str_ - Organization ID of the Sandbox.
-- `snapshot` _str_ - Daytona snapshot used to create the Sandbox.
+- `snapshot` _str | None_ - Daytona snapshot used to create the Sandbox.
 - `user` _str_ - OS user running in the Sandbox.
-- `env` _dict[str, str]_ - Environment variables set in the Sandbox.
+- `env` _dict[str, str] | None_ - Environment variables set in the Sandbox (not returned by list
+  results; call `refresh_data()` on each item to populate).
 - `labels` _dict[str, str]_ - Custom labels attached to the Sandbox.
 - `public` _bool_ - Whether the Sandbox is publicly accessible.
 - `target` _str_ - Target location of the runner where the Sandbox runs.
@@ -32,26 +33,32 @@ Represents a Daytona Sandbox.
 - `gpu` _int_ - Number of GPUs allocated to the Sandbox.
 - `memory` _int_ - Amount of memory allocated to the Sandbox in GiB.
 - `disk` _int_ - Amount of disk space allocated to the Sandbox in GiB.
-- `state` _SandboxState_ - Current state of the Sandbox (e.g., "started", "stopped").
-- `error_reason` _str_ - Error message if Sandbox is in error state.
-- `recoverable` _bool_ - Whether the Sandbox error is recoverable.
-- `backup_state` _SandboxBackupStateEnum_ - Current state of Sandbox backup.
-- `backup_created_at` _str_ - When the backup was created.
-- `auto_stop_interval` _int_ - Auto-stop interval in minutes.
-- `auto_archive_interval` _int_ - Auto-archive interval in minutes.
-- `auto_delete_interval` _int_ - Auto-delete interval in minutes.
-- `volumes` _list[str]_ - Volumes attached to the Sandbox.
-- `build_info` _str_ - Build information for the Sandbox if it was created from dynamic build.
-- `created_at` _str_ - When the Sandbox was created.
-- `updated_at` _str_ - When the Sandbox was last updated.
-- `last_activity_at` _str_ - When the Sandbox last had activity.
-- `network_block_all` _bool_ - Whether to block all network access for the Sandbox.
-- `network_allow_list` _str_ - Comma-separated list of allowed CIDR network addresses for the Sandbox.
+- `state` _SandboxState | None_ - Current state of the Sandbox (e.g., "started", "stopped").
+- `error_reason` _str | None_ - Error message if Sandbox is in error state.
+- `recoverable` _bool | None_ - Whether the Sandbox error is recoverable.
+- `backup_state` _str | None_ - Current state of Sandbox backup.
+- `backup_created_at` _str | None_ - When the backup was created (not returned by list results;
+  call `refresh_data()` on each item to populate).
+- `auto_stop_interval` _int | None_ - Auto-stop interval in minutes.
+- `auto_archive_interval` _int | None_ - Auto-archive interval in minutes.
+- `auto_delete_interval` _int | None_ - Auto-delete interval in minutes.
+- `volumes` _list[SandboxVolume] | None_ - Volumes attached to the Sandbox (not returned by list
+  results; call `refresh_data()` on each item to populate).
+- `build_info` _BuildInfo | None_ - Build information for the Sandbox if it was created from
+  dynamic build (not returned by list results; call `refresh_data()` on each item to populate).
+- `created_at` _str | None_ - When the Sandbox was created.
+- `updated_at` _str | None_ - When the Sandbox was last updated.
+- `last_activity_at` _str | None_ - When the Sandbox last had activity.
+- `network_block_all` _bool | None_ - Whether to block all network access for the Sandbox
+  (not returned by list results; call `refresh_data()` on each item to populate).
+- `network_allow_list` _str | None_ - Comma-separated list of allowed CIDR network addresses for
+  the Sandbox (not returned by list results; call `refresh_data()` on each item to populate).
+- `toolbox_proxy_url` _str_ - The toolbox proxy URL for the Sandbox.
 
 #### Sandbox.\_\_init\_\_
 
 ```python
-def __init__(sandbox_dto: SandboxDto, toolbox_api: ApiClient,
+def __init__(sandbox_dto: SandboxDto | SandboxListItem, toolbox_api: ApiClient,
              sandbox_api: SandboxApi, language: str,
              http_client: httpx.Client)
 ```
@@ -60,7 +67,7 @@ Initialize a new Sandbox instance.
 
 **Arguments**:
 
-- `sandbox_dto` _SandboxDto_ - The sandbox data from the API.
+- `sandbox_dto` _SandboxDto | SandboxListItem_ - The sandbox data from the API.
 - `toolbox_api` _ApiClient_ - API client for toolbox operations.
 - `sandbox_api` _SandboxApi_ - API client for Sandbox operations.
 - `http_client` _httpx.Client_ - Shared pooled client for file transfers.

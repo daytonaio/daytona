@@ -552,18 +552,8 @@ func (c *Client) doCreate(ctx context.Context, params any, opts ...func(*options
 		return nil, err
 	}
 
-	autoArchiveInterval := 0
-	if sandboxResp.AutoArchiveInterval != nil {
-		autoArchiveInterval = int(*sandboxResp.AutoArchiveInterval)
-	}
-
-	autoDeleteInterval := 0
-	if sandboxResp.AutoDeleteInterval != nil {
-		autoDeleteInterval = int(*sandboxResp.AutoDeleteInterval)
-	}
-
 	language := types.CodeLanguage(sandboxResp.GetLabels()[types.CodeToolboxLanguageLabel])
-	sandbox := NewSandbox(c, toolboxClient, sandboxResp.GetId(), sandboxResp.GetName(), sandboxResp.GetState(), sandboxResp.GetTarget(), autoArchiveInterval, autoDeleteInterval, sandboxResp.GetNetworkBlockAll(), sandboxResp.NetworkAllowList, language)
+	sandbox := NewSandbox(c, toolboxClient, sandboxResp, language)
 
 	// Handle snapshot build logs
 	if sandbox.State == apiclient.SANDBOXSTATE_PENDING_BUILD {
@@ -648,30 +638,8 @@ func (c *Client) doGet(ctx context.Context, sandboxIDOrName string) (*Sandbox, e
 		return nil, err
 	}
 
-	autoArchiveInterval := 0
-	if sandboxResp.AutoArchiveInterval != nil {
-		autoArchiveInterval = int(*sandboxResp.AutoArchiveInterval)
-	}
-
-	autoDeleteInterval := 0
-	if sandboxResp.AutoDeleteInterval != nil {
-		autoDeleteInterval = int(*sandboxResp.AutoDeleteInterval)
-	}
-
 	language := types.CodeLanguage(sandboxResp.GetLabels()[types.CodeToolboxLanguageLabel])
-	sandbox := NewSandbox(c,
-		toolboxClient,
-		sandboxResp.GetId(),
-		sandboxResp.GetName(),
-		sandboxResp.GetState(),
-		sandboxResp.GetTarget(),
-		autoArchiveInterval,
-		autoDeleteInterval,
-		sandboxResp.GetNetworkBlockAll(),
-		sandboxResp.NetworkAllowList,
-		language,
-	)
-	return sandbox, nil
+	return NewSandbox(c, toolboxClient, sandboxResp, language), nil
 }
 
 // List returns an iterator over Sandboxes matching the given query, following
@@ -768,16 +736,16 @@ func (c *Client) fetchPage(ctx context.Context, query *ListSandboxesQuery, curso
 				request = request.MaxCpu(float32(*query.MaxCpu))
 			}
 			if query.MinMemoryGib != nil {
-				request = request.MinMemoryGib(float32(*query.MinMemoryGib))
+				request = request.MinMemoryGiB(float32(*query.MinMemoryGib))
 			}
 			if query.MaxMemoryGib != nil {
-				request = request.MaxMemoryGib(float32(*query.MaxMemoryGib))
+				request = request.MaxMemoryGiB(float32(*query.MaxMemoryGib))
 			}
 			if query.MinDiskGib != nil {
-				request = request.MinDiskGib(float32(*query.MinDiskGib))
+				request = request.MinDiskGiB(float32(*query.MinDiskGib))
 			}
 			if query.MaxDiskGib != nil {
-				request = request.MaxDiskGib(float32(*query.MaxDiskGib))
+				request = request.MaxDiskGiB(float32(*query.MaxDiskGib))
 			}
 			if query.IsPublic != nil {
 				request = request.IsPublic(*query.IsPublic)
@@ -818,29 +786,8 @@ func (c *Client) fetchPage(ctx context.Context, query *ListSandboxesQuery, curso
 				return nil, tcErr
 			}
 
-			autoArchiveInterval := 0
-			if items[i].AutoArchiveInterval != nil {
-				autoArchiveInterval = int(*items[i].AutoArchiveInterval)
-			}
-
-			autoDeleteInterval := 0
-			if items[i].AutoDeleteInterval != nil {
-				autoDeleteInterval = int(*items[i].AutoDeleteInterval)
-			}
-
 			lang := types.CodeLanguage(items[i].GetLabels()[types.CodeToolboxLanguageLabel])
-			sandboxes[i] = NewSandbox(c,
-				toolboxClient,
-				items[i].GetId(),
-				items[i].GetName(),
-				items[i].GetState(),
-				items[i].GetTarget(),
-				autoArchiveInterval,
-				autoDeleteInterval,
-				items[i].GetNetworkBlockAll(),
-				items[i].NetworkAllowList,
-				lang,
-			)
+			sandboxes[i] = NewSandbox(c, toolboxClient, &items[i], lang)
 		}
 
 		var nextCursor *string

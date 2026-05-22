@@ -4,12 +4,12 @@
 package io.daytona.examples;
 
 import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
 import io.daytona.sdk.model.ListSandboxesQuery;
 import io.daytona.sdk.model.SandboxListSortDirection;
 import io.daytona.sdk.model.SandboxListSortField;
 import io.daytona.sdk.model.SandboxState;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -23,10 +23,8 @@ public class Pagination {
             query.setSort(SandboxListSortField.CREATED_AT);
             query.setOrder(SandboxListSortDirection.DESC);
 
-            Iterator<Map<String, Object>> iter = daytona.list(query);
-            while (iter.hasNext()) {
-                Map<String, Object> sandbox = iter.next();
-                System.out.println(sandbox.get("id"));
+            for (Sandbox sandbox : daytona.list(query)) {
+                System.out.println(sandbox.getId());
             }
         }
     }

@@ -241,7 +241,7 @@ class DaytonaTest {
     @Test
     void listIteratorYieldsSandboxesAndForwardsLabelFilter() {
         ListSandboxesResponse response = new ListSandboxesResponse();
-        response.setItems(Collections.singletonList(TestSupport.mainSandbox("sb-1", SandboxState.STARTED)));
+        response.setItems(Collections.singletonList(TestSupport.mainSandboxListItem("sb-1", SandboxState.STARTED)));
         response.setNextCursor(null);
         doReturn(response).when(sandboxApi).listSandboxes(
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
@@ -252,14 +252,12 @@ class DaytonaTest {
         query.setLabels(Collections.singletonMap("team", "sdk"));
         query.setLimit(5);
 
-        Iterator<Map<String, Object>> iter = daytona.list(query);
-
-        List<Map<String, Object>> collected = new ArrayList<>();
-        while (iter.hasNext()) {
-            collected.add(iter.next());
+        List<Sandbox> collected = new ArrayList<>();
+        for (Sandbox sandbox : daytona.list(query)) {
+            collected.add(sandbox);
         }
 
-        assertThat(collected).singleElement().satisfies(item -> assertThat(item).containsEntry("id", "sb-1"));
+        assertThat(collected).singleElement().satisfies(sandbox -> assertThat(sandbox.getId()).isEqualTo("sb-1"));
 
         org.mockito.Mockito.verify(sandboxApi).listSandboxes(
                 isNull(),                                  // org header
@@ -282,14 +280,14 @@ class DaytonaTest {
     @Test
     void listWithNoQueryUsesAllNullFilters() {
         ListSandboxesResponse response = new ListSandboxesResponse();
-        response.setItems(Collections.<io.daytona.api.client.model.Sandbox>emptyList());
+        response.setItems(Collections.<io.daytona.api.client.model.SandboxListItem>emptyList());
         response.setNextCursor(null);
         doReturn(response).when(sandboxApi).listSandboxes(
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any());
 
-        Iterator<Map<String, Object>> iter = daytona.list();
+        Iterator<Sandbox> iter = daytona.list().iterator();
         // Drive the iterator so the API call actually happens.
         assertThat(iter.hasNext()).isFalse();
 
@@ -311,7 +309,7 @@ class DaytonaTest {
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any());
 
-        Iterator<Map<String, Object>> iter = daytona.list(new ListSandboxesQuery());
+        Iterator<Sandbox> iter = daytona.list(new ListSandboxesQuery()).iterator();
 
         assertThat(iter.hasNext()).isFalse();
     }
@@ -320,13 +318,13 @@ class DaytonaTest {
     void listPaginatesAcrossMultiplePages() {
         ListSandboxesResponse page1 = new ListSandboxesResponse();
         page1.setItems(java.util.Arrays.asList(
-                TestSupport.mainSandbox("sb-1", SandboxState.STARTED),
-                TestSupport.mainSandbox("sb-2", SandboxState.STARTED)
+                TestSupport.mainSandboxListItem("sb-1", SandboxState.STARTED),
+                TestSupport.mainSandboxListItem("sb-2", SandboxState.STARTED)
         ));
         page1.setNextCursor("cursor-2");
 
         ListSandboxesResponse page2 = new ListSandboxesResponse();
-        page2.setItems(Collections.singletonList(TestSupport.mainSandbox("sb-3", SandboxState.STARTED)));
+        page2.setItems(Collections.singletonList(TestSupport.mainSandboxListItem("sb-3", SandboxState.STARTED)));
         page2.setNextCursor(null);
 
         doReturn(page1, page2).when(sandboxApi).listSandboxes(
@@ -334,10 +332,9 @@ class DaytonaTest {
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any());
 
-        Iterator<Map<String, Object>> iter = daytona.list();
-        List<Object> ids = new ArrayList<>();
-        while (iter.hasNext()) {
-            ids.add(iter.next().get("id"));
+        List<String> ids = new ArrayList<>();
+        for (Sandbox sandbox : daytona.list()) {
+            ids.add(sandbox.getId());
         }
 
         assertThat(ids).containsExactly("sb-1", "sb-2", "sb-3");
@@ -363,9 +360,6 @@ class DaytonaTest {
         assertThat(Daytona.urlEncodePathSegment("a b/c")).isEqualTo("a+b%2Fc".replace("+", "%20"));
         assertThat(Daytona.urlEncodeQuery("a b")).isEqualTo("a+b");
         assertThat(Daytona.castStringMap(Collections.singletonMap(1, null))).containsEntry("1", "");
-        assertThat(Daytona.sandboxToMap(TestSupport.mainSandbox("sb-map", SandboxState.STARTED)))
-                .containsEntry("id", "sb-map")
-                .containsEntry("state", "started");
         Daytona.shutdownHttpClient(null);
 
         io.daytona.api.client.ApiClient apiClient = TestSupport.getField(daytona, "apiClient", io.daytona.api.client.ApiClient.class);

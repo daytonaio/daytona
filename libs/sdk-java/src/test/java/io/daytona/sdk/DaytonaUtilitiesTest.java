@@ -42,23 +42,25 @@ class DaytonaUtilitiesTest {
     }
 
     @Test
-    void sandboxToMapHandlesNullSandboxAndMissingFields() {
-        assertThat(Daytona.sandboxToMap(null)).isEmpty();
+    void sandboxConstructorTolaratesMissingNumericFields() {
+        io.daytona.api.client.model.Sandbox model = TestSupport.mainSandbox("sb-utility", SandboxState.STARTED);
+        model.setCpu(null);
+        model.setGpu(null);
+        model.setMemory(null);
+        model.setDisk(null);
+        model.setState(null);
 
-        io.daytona.api.client.model.Sandbox sandbox = TestSupport.mainSandbox("sb-utility", SandboxState.STARTED);
-        sandbox.setCpu(null);
-        sandbox.setGpu(null);
-        sandbox.setMemory(null);
-        sandbox.setDisk(null);
-        sandbox.setState(null);
+        io.daytona.api.client.api.SandboxApi sandboxApi =
+                org.mockito.Mockito.mock(io.daytona.api.client.api.SandboxApi.class);
 
-        assertThat(Daytona.sandboxToMap(sandbox))
-                .containsEntry("id", "sb-utility")
-                .containsEntry("state", null)
-                .containsEntry("cpu", 0)
-                .containsEntry("gpu", 0)
-                .containsEntry("memory", 0)
-                .containsEntry("disk", 0);
+        Sandbox sandbox = new Sandbox(sandboxApi, TestSupport.config(), model);
+
+        assertThat(sandbox.getId()).isEqualTo("sb-utility");
+        assertThat(sandbox.getState()).isEmpty();
+        assertThat(sandbox.getCpu()).isZero();
+        assertThat(sandbox.getGpu()).isZero();
+        assertThat(sandbox.getMemory()).isZero();
+        assertThat(sandbox.getDisk()).isZero();
     }
 
     @Test

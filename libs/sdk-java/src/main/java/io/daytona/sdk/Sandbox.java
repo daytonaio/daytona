@@ -4,15 +4,20 @@
 package io.daytona.sdk;
 
 import io.daytona.api.client.api.SandboxApi;
+import io.daytona.api.client.model.BuildInfo;
 import io.daytona.api.client.model.CreateSandboxSnapshot;
 import io.daytona.api.client.model.ForkSandbox;
 import io.daytona.api.client.model.SandboxLabels;
+import io.daytona.api.client.model.SandboxListItem;
+import io.daytona.api.client.model.SandboxVolume;
 import io.daytona.api.client.model.ToolboxProxyUrl;
 import io.daytona.api.client.model.UpdateSandboxNetworkSettings;
 import io.daytona.sdk.exception.DaytonaException;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,23 +33,39 @@ public class Sandbox {
     private final io.daytona.toolbox.client.api.InfoApi infoApi;
     private final String apiKey;
 
+    // Fields shared by both io.daytona.api.client.model.Sandbox and SandboxListItem.
     private String id;
     private String name;
-    private String state;
-    private String target;
+    private String organizationId;
+    private String snapshot;
     private String user;
-    private String toolboxProxyUrl;
+    private Map<String, String> labels;
+    private Boolean isPublic;
+    private String target;
     private int cpu;
     private int gpu;
     private int memory;
     private int disk;
-    private Map<String, String> env;
-    private Map<String, String> labels;
+    private String state;
+    private String errorReason;
+    private Boolean recoverable;
+    private String backupState;
     private Integer autoStopInterval;
     private Integer autoArchiveInterval;
     private Integer autoDeleteInterval;
+    private String createdAt;
+    private String updatedAt;
+    private String lastActivityAt;
+    private String toolboxProxyUrl;
+
+    // Fields only present on the full Sandbox DTO; not populated by Daytona.list() —
+    // call refreshData() on each item to populate.
+    private Map<String, String> env;
     private Boolean networkBlockAll;
     private String networkAllowList;
+    private List<SandboxVolume> volumes;
+    private BuildInfo buildInfo;
+    private String backupCreatedAt;
 
     /** Process execution interface for this Sandbox. */
     public final Process process;
@@ -61,8 +82,35 @@ public class Sandbox {
         this.sandboxApi = sandboxApi;
         this.config = config;
         this.apiKey = config.getApiKey();
-        updateFromModel(data);
+        populateFromDTO(data);
+        this.toolboxApiClient = buildToolboxApiClient(sandboxApi, config);
+        this.infoApi = new io.daytona.toolbox.client.api.InfoApi(toolboxApiClient);
+        this.process = new Process(new io.daytona.toolbox.client.api.ProcessApi(toolboxApiClient), this);
+        this.fs = new FileSystem(new io.daytona.toolbox.client.api.FileSystemApi(toolboxApiClient));
+        this.git = new Git(new io.daytona.toolbox.client.api.GitApi(toolboxApiClient));
+        this.computerUse = new ComputerUse(new io.daytona.toolbox.client.api.ComputerUseApi(toolboxApiClient));
+        this.codeInterpreter = new CodeInterpreter(new io.daytona.toolbox.client.api.InterpreterApi(toolboxApiClient), this);
+    }
 
+    Sandbox(SandboxApi sandboxApi, DaytonaConfig config, SandboxListItem data) {
+        this.sandboxApi = sandboxApi;
+        this.config = config;
+        this.apiKey = config.getApiKey();
+        populateFromDTO(data);
+        this.toolboxApiClient = buildToolboxApiClient(sandboxApi, config);
+        this.infoApi = new io.daytona.toolbox.client.api.InfoApi(toolboxApiClient);
+        this.process = new Process(new io.daytona.toolbox.client.api.ProcessApi(toolboxApiClient), this);
+        this.fs = new FileSystem(new io.daytona.toolbox.client.api.FileSystemApi(toolboxApiClient));
+        this.git = new Git(new io.daytona.toolbox.client.api.GitApi(toolboxApiClient));
+        this.computerUse = new ComputerUse(new io.daytona.toolbox.client.api.ComputerUseApi(toolboxApiClient));
+        this.codeInterpreter = new CodeInterpreter(new io.daytona.toolbox.client.api.InterpreterApi(toolboxApiClient), this);
+    }
+
+    /**
+     * Builds the toolbox HTTP client, resolving the proxy URL if missing and attaching auth + SDK headers.
+     * Requires {@code this.id} and {@code this.toolboxProxyUrl} to be populated.
+     */
+    private io.daytona.toolbox.client.ApiClient buildToolboxApiClient(SandboxApi sandboxApi, DaytonaConfig config) {
         String proxyBase = this.toolboxProxyUrl;
         if (proxyBase == null || proxyBase.isEmpty()) {
             ToolboxProxyUrl proxy = ExceptionMapper.callMain(() -> sandboxApi.getToolboxProxyUrl(this.id, null));
@@ -70,21 +118,15 @@ public class Sandbox {
         }
 
         String toolboxBase = trimTrailingSlash(proxyBase) + "/" + this.id;
-        this.toolboxApiClient = new io.daytona.toolbox.client.ApiClient();
-        this.toolboxApiClient.setBasePath(toolboxBase);
+        io.daytona.toolbox.client.ApiClient client = new io.daytona.toolbox.client.ApiClient();
+        client.setBasePath(toolboxBase);
         String sdkVersion = Daytona.class.getPackage().getImplementationVersion();
         if (sdkVersion == null) sdkVersion = "dev";
-        this.toolboxApiClient.addDefaultHeader("Authorization", "Bearer " + config.getApiKey());
-        this.toolboxApiClient.addDefaultHeader("X-Daytona-Source", "sdk-java");
-        this.toolboxApiClient.addDefaultHeader("X-Daytona-SDK-Version", sdkVersion);
-        this.toolboxApiClient.setUserAgent("sdk-java/" + sdkVersion);
-
-        this.infoApi = new io.daytona.toolbox.client.api.InfoApi(toolboxApiClient);
-        this.process = new Process(new io.daytona.toolbox.client.api.ProcessApi(toolboxApiClient), this);
-        this.fs = new FileSystem(new io.daytona.toolbox.client.api.FileSystemApi(toolboxApiClient));
-        this.git = new Git(new io.daytona.toolbox.client.api.GitApi(toolboxApiClient));
-        this.computerUse = new ComputerUse(new io.daytona.toolbox.client.api.ComputerUseApi(toolboxApiClient));
-        this.codeInterpreter = new CodeInterpreter(new io.daytona.toolbox.client.api.InterpreterApi(toolboxApiClient), this);
+        client.addDefaultHeader("Authorization", "Bearer " + config.getApiKey());
+        client.addDefaultHeader("X-Daytona-Source", "sdk-java");
+        client.addDefaultHeader("X-Daytona-SDK-Version", sdkVersion);
+        client.setUserAgent("sdk-java/" + sdkVersion);
+        return client;
     }
 
     /**
@@ -124,7 +166,7 @@ public class Sandbox {
     public void start(long timeoutSeconds) {
         io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(() -> sandboxApi.startSandbox(id, null));
         if (response != null) {
-            updateFromModel(response);
+            populateFromDTO(response);
         }
         waitUntilStarted(timeoutSeconds);
     }
@@ -226,7 +268,7 @@ public class Sandbox {
     public void setAutostopInterval(int minutes) {
         io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(() -> sandboxApi.setAutostopInterval(id, BigDecimal.valueOf(minutes), null));
         if (response != null) {
-            updateFromModel(response);
+            populateFromDTO(response);
         }
     }
 
@@ -239,7 +281,7 @@ public class Sandbox {
     public void setAutoArchiveInterval(int minutes) {
         io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(() -> sandboxApi.setAutoArchiveInterval(id, BigDecimal.valueOf(minutes), null));
         if (response != null) {
-            updateFromModel(response);
+            populateFromDTO(response);
         }
     }
 
@@ -252,7 +294,7 @@ public class Sandbox {
     public void setAutoDeleteInterval(int minutes) {
         io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(() -> sandboxApi.setAutoDeleteInterval(id, BigDecimal.valueOf(minutes), null));
         if (response != null) {
-            updateFromModel(response);
+            populateFromDTO(response);
         }
     }
 
@@ -265,7 +307,7 @@ public class Sandbox {
     public void updateNetworkSettings(UpdateSandboxNetworkSettings settings) {
         io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(() -> sandboxApi.updateNetworkSettings(id, settings, null));
         if (response != null) {
-            updateFromModel(response);
+            populateFromDTO(response);
         }
     }
 
@@ -324,38 +366,106 @@ public class Sandbox {
     }
 
     /**
-     * Refreshes local Sandbox fields from latest API state.
+     * Refreshes local Sandbox fields from latest API state. After refresh, all fields
+     * — including those not returned by {@link Daytona#list} — are populated.
      *
      * @throws DaytonaException if refresh fails
      */
     public void refreshData() {
         io.daytona.api.client.model.Sandbox data = ExceptionMapper.callMain(() -> sandboxApi.getSandbox(id, null, null));
         if (data != null) {
-            updateFromModel(data);
+            populateFromDTO(data);
         }
     }
 
-    private void updateFromModel(io.daytona.api.client.model.Sandbox data) {
-        if (data == null) {
+    /**
+     * Copies fields from the full {@link io.daytona.api.client.model.Sandbox} DTO onto this instance.
+     *
+     * <p>Populates every field, including those not returned by the list endpoint (env,
+     * networkBlockAll, networkAllowList, volumes, buildInfo, backupCreatedAt).
+     */
+    private void populateFromDTO(io.daytona.api.client.model.Sandbox d) {
+        if (d == null) {
             return;
         }
-        this.id = asString(data.getId());
-        this.name = asString(data.getName());
-        this.state = data.getState() == null ? "" : data.getState().getValue();
-        this.target = asString(data.getTarget());
-        this.user = asString(data.getUser());
-        this.toolboxProxyUrl = asString(data.getToolboxProxyUrl());
-        this.cpu = data.getCpu() == null ? 0 : data.getCpu().intValue();
-        this.gpu = data.getGpu() == null ? 0 : data.getGpu().intValue();
-        this.memory = data.getMemory() == null ? 0 : data.getMemory().intValue();
-        this.disk = data.getDisk() == null ? 0 : data.getDisk().intValue();
-        this.env = data.getEnv() == null ? new HashMap<String, String>() : new HashMap<String, String>(data.getEnv());
-        this.labels = data.getLabels() == null ? new HashMap<String, String>() : new HashMap<String, String>(data.getLabels());
-        this.autoStopInterval = data.getAutoStopInterval() == null ? null : data.getAutoStopInterval().intValue();
-        this.autoArchiveInterval = data.getAutoArchiveInterval() == null ? null : data.getAutoArchiveInterval().intValue();
-        this.autoDeleteInterval = data.getAutoDeleteInterval() == null ? null : data.getAutoDeleteInterval().intValue();
-        this.networkBlockAll = data.getNetworkBlockAll();
-        this.networkAllowList = data.getNetworkAllowList();
+        populateCommonFields(
+                d.getId(), d.getName(), d.getOrganizationId(), d.getSnapshot(), d.getUser(),
+                d.getLabels(), d.getPublic(), d.getTarget(),
+                d.getCpu(), d.getGpu(), d.getMemory(), d.getDisk(),
+                d.getState() == null ? null : d.getState().getValue(),
+                d.getErrorReason(), d.getRecoverable(),
+                d.getBackupState() == null ? null : d.getBackupState().getValue(),
+                d.getAutoStopInterval(), d.getAutoArchiveInterval(), d.getAutoDeleteInterval(),
+                d.getCreatedAt(), d.getUpdatedAt(), d.getLastActivityAt(),
+                d.getToolboxProxyUrl()
+        );
+
+        // Fields only present on the full Sandbox DTO.
+        this.env = d.getEnv() == null ? new HashMap<String, String>() : new HashMap<String, String>(d.getEnv());
+        this.networkBlockAll = d.getNetworkBlockAll();
+        this.networkAllowList = d.getNetworkAllowList();
+        this.volumes = d.getVolumes() == null ? null : Collections.unmodifiableList(d.getVolumes());
+        this.buildInfo = d.getBuildInfo();
+        this.backupCreatedAt = d.getBackupCreatedAt();
+    }
+
+    /**
+     * Copies fields from a {@link SandboxListItem} DTO onto this instance.
+     *
+     * <p>The list endpoint omits env, networkBlockAll, networkAllowList, volumes, buildInfo, and
+     * backupCreatedAt; those fields remain {@code null} until {@link #refreshData()} is called.
+     */
+    private void populateFromDTO(SandboxListItem d) {
+        if (d == null) {
+            return;
+        }
+        populateCommonFields(
+                d.getId(), d.getName(), d.getOrganizationId(), d.getSnapshot(), d.getUser(),
+                d.getLabels(), d.getPublic(), d.getTarget(),
+                d.getCpu(), d.getGpu(), d.getMemory(), d.getDisk(),
+                d.getState() == null ? null : d.getState().getValue(),
+                d.getErrorReason(), d.getRecoverable(),
+                d.getBackupState() == null ? null : d.getBackupState().getValue(),
+                d.getAutoStopInterval(), d.getAutoArchiveInterval(), d.getAutoDeleteInterval(),
+                d.getCreatedAt(), d.getUpdatedAt(), d.getLastActivityAt(),
+                d.getToolboxProxyUrl()
+        );
+    }
+
+    // Shared population logic for fields present on both Sandbox and SandboxListItem DTOs.
+    // Takes already-extracted values (rather than the DTO itself) so the two type-safe overloads
+    // above can each call it without referencing the other DTO's enum types.
+    private void populateCommonFields(
+            String id, String name, String organizationId, String snapshot, String user,
+            Map<String, String> labels, Boolean isPublic, String target,
+            BigDecimal cpu, BigDecimal gpu, BigDecimal memory, BigDecimal disk,
+            String state, String errorReason, Boolean recoverable, String backupState,
+            BigDecimal autoStopInterval, BigDecimal autoArchiveInterval, BigDecimal autoDeleteInterval,
+            String createdAt, String updatedAt, String lastActivityAt,
+            String toolboxProxyUrl) {
+        this.id = asString(id);
+        this.name = asString(name);
+        this.organizationId = asString(organizationId);
+        this.snapshot = snapshot;
+        this.user = asString(user);
+        this.labels = labels == null ? new HashMap<String, String>() : new HashMap<String, String>(labels);
+        this.isPublic = isPublic;
+        this.target = asString(target);
+        this.cpu = cpu == null ? 0 : cpu.intValue();
+        this.gpu = gpu == null ? 0 : gpu.intValue();
+        this.memory = memory == null ? 0 : memory.intValue();
+        this.disk = disk == null ? 0 : disk.intValue();
+        this.state = state == null ? "" : state;
+        this.errorReason = errorReason;
+        this.recoverable = recoverable;
+        this.backupState = backupState;
+        this.autoStopInterval = autoStopInterval == null ? null : autoStopInterval.intValue();
+        this.autoArchiveInterval = autoArchiveInterval == null ? null : autoArchiveInterval.intValue();
+        this.autoDeleteInterval = autoDeleteInterval == null ? null : autoDeleteInterval.intValue();
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.lastActivityAt = lastActivityAt;
+        this.toolboxProxyUrl = asString(toolboxProxyUrl);
     }
 
     private String asString(Object value) {
@@ -455,126 +565,107 @@ public class Sandbox {
         }
     }
 
-    /**
-     * Returns Sandbox ID.
-     *
-     * @return Sandbox ID
-     */
+    /** @return Sandbox ID. */
     public String getId() { return id; }
-    /**
-     * Returns Sandbox name.
-     *
-     * @return Sandbox name
-     */
+    /** @return Sandbox name. */
     public String getName() { return name; }
-    /**
-     * Returns Sandbox state.
-     *
-     * @return lifecycle state
-     */
-    public String getState() { return state; }
-    /**
-     * Returns target region.
-     *
-     * @return target identifier
-     */
-    public String getTarget() { return target; }
-    /**
-     * Returns Sandbox OS user.
-     *
-     * @return OS user
-     */
+    /** @return organization ID that owns this Sandbox. */
+    public String getOrganizationId() { return organizationId; }
+    /** @return Daytona snapshot used to create this Sandbox, or {@code null} if none. */
+    public String getSnapshot() { return snapshot; }
+    /** @return OS user running in the Sandbox. */
     public String getUser() { return user; }
-    /**
-     * Returns toolbox proxy URL.
-     *
-     * @return proxy URL
-     */
-    public String getToolboxProxyUrl() { return toolboxProxyUrl; }
-    /**
-     * Returns allocated CPU cores.
-     *
-     * @return CPU cores
-     */
+    /** @return custom labels attached to the Sandbox. */
+    public Map<String, String> getLabels() { return labels; }
+    /** @return whether the Sandbox HTTP preview is publicly accessible. */
+    public Boolean getPublic() { return isPublic; }
+    /** @return target region/environment where the Sandbox runs. */
+    public String getTarget() { return target; }
+    /** @return allocated CPU cores. */
     public int getCpu() { return cpu; }
-    /**
-     * Returns allocated GPU units.
-     *
-     * @return GPU units
-     */
+    /** @return allocated GPU units. */
     public int getGpu() { return gpu; }
-    /**
-     * Returns allocated memory in GiB.
-     *
-     * @return memory in GiB
-     */
+    /** @return allocated memory in GiB. */
     public int getMemory() { return memory; }
-    /**
-     * Returns allocated disk in GiB.
-     *
-     * @return disk in GiB
-     */
+    /** @return allocated disk in GiB. */
     public int getDisk() { return disk; }
+    /** @return current lifecycle state (e.g. "started", "stopped"). */
+    public String getState() { return state; }
+    /** @return error message if the Sandbox is in an error state, or {@code null}. */
+    public String getErrorReason() { return errorReason; }
+    /** @return whether the Sandbox error is recoverable, or {@code null} if unknown. */
+    public Boolean getRecoverable() { return recoverable; }
+    /** @return current state of the Sandbox backup as a string, or {@code null}. */
+    public String getBackupState() { return backupState; }
+    /** @return auto-stop interval in minutes (0 means disabled). */
+    public Integer getAutoStopInterval() { return autoStopInterval; }
+    /** @return auto-archive interval in minutes. */
+    public Integer getAutoArchiveInterval() { return autoArchiveInterval; }
+    /** @return auto-delete interval in minutes (negative means disabled). */
+    public Integer getAutoDeleteInterval() { return autoDeleteInterval; }
+    /** @return when the Sandbox was created, or {@code null}. */
+    public String getCreatedAt() { return createdAt; }
+    /** @return when the Sandbox was last updated, or {@code null}. */
+    public String getUpdatedAt() { return updatedAt; }
+    /** @return when the Sandbox last had activity, or {@code null}. */
+    public String getLastActivityAt() { return lastActivityAt; }
+    /** @return toolbox proxy URL. */
+    public String getToolboxProxyUrl() { return toolboxProxyUrl; }
+
     /**
      * Returns Sandbox environment variables.
      *
-     * @return environment map
+     * <p>Not returned by {@link Daytona#list}; call {@link #refreshData()} on each item to populate.
+     *
+     * @return environment map, or {@code null} if not yet populated
      */
     public Map<String, String> getEnv() { return env; }
     /**
-     * Returns Sandbox labels.
-     *
-     * @return labels map
-     */
-    public Map<String, String> getLabels() { return labels; }
-    /**
-     * Returns auto-stop interval in minutes.
-     *
-     * @return auto-stop interval
-     */
-    public Integer getAutoStopInterval() { return autoStopInterval; }
-    /**
-     * Returns auto-archive interval in minutes.
-     *
-     * @return auto-archive interval
-     */
-    public Integer getAutoArchiveInterval() { return autoArchiveInterval; }
-    /**
-     * Returns auto-delete interval in minutes.
-     *
-     * @return auto-delete interval
-     */
-    public Integer getAutoDeleteInterval() { return autoDeleteInterval; }
-    /**
      * Returns whether all network access is blocked for this Sandbox.
      *
-     * @return block-all flag, or null if unknown
+     * <p>Not returned by {@link Daytona#list}; call {@link #refreshData()} on each item to populate.
+     *
+     * @return block-all flag, or {@code null} if not yet populated
      */
     public Boolean getNetworkBlockAll() { return networkBlockAll; }
     /**
      * Returns the comma-separated CIDR allow list, if any.
      *
-     * @return allow list or null
+     * <p>Not returned by {@link Daytona#list}; call {@link #refreshData()} on each item to populate.
+     *
+     * @return allow list, or {@code null}
      */
     public String getNetworkAllowList() { return networkAllowList; }
+    /**
+     * Returns volumes attached to the Sandbox.
+     *
+     * <p>Not returned by {@link Daytona#list}; call {@link #refreshData()} on each item to populate.
+     *
+     * @return immutable list of attached volumes, or {@code null} if not yet populated
+     */
+    public List<SandboxVolume> getVolumes() { return volumes; }
+    /**
+     * Returns build information if the Sandbox was created from a dynamic build.
+     *
+     * <p>Not returned by {@link Daytona#list}; call {@link #refreshData()} on each item to populate.
+     *
+     * @return build info, or {@code null}
+     */
+    public BuildInfo getBuildInfo() { return buildInfo; }
+    /**
+     * Returns the creation timestamp of the last backup.
+     *
+     * <p>Not returned by {@link Daytona#list}; call {@link #refreshData()} on each item to populate.
+     *
+     * @return backup timestamp, or {@code null}
+     */
+    public String getBackupCreatedAt() { return backupCreatedAt; }
 
-    /**
-     * Returns process operations facade.
-     *
-     * @return process interface
-     */
+    /** @return process operations facade. */
     public Process getProcess() { return process; }
-    /**
-     * Returns file-system operations facade.
-     *
-     * @return file-system interface
-     */
+    /** @return file-system operations facade. */
     public FileSystem getFs() { return fs; }
-    /**
-     * Returns Git operations facade.
-     *
-     * @return Git interface
-     */
+    /** @return Git operations facade. */
     public Git getGit() { return git; }
     io.daytona.toolbox.client.ApiClient getToolboxApiClient() { return toolboxApiClient; }
     String getApiKey() { return apiKey; }

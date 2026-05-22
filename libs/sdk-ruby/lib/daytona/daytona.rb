@@ -163,10 +163,10 @@ module Daytona
         region_ids: q.targets,
         min_cpu: q.min_cpu,
         max_cpu: q.max_cpu,
-        min_memory_gib: q.min_memory_gib,
-        max_memory_gib: q.max_memory_gib,
-        min_disk_gib: q.min_disk_gib,
-        max_disk_gib: q.max_disk_gib,
+        min_memory_gi_b: q.min_memory_gib,
+        max_memory_gi_b: q.max_memory_gib,
+        min_disk_gi_b: q.min_disk_gib,
+        max_disk_gi_b: q.max_disk_gib,
         is_public: q.is_public,
         is_recoverable: q.is_recoverable,
         created_at_after: q.created_at_after,
@@ -304,7 +304,7 @@ module Daytona
       end
     end
 
-    # @param sandbox_dto [DaytonaApiClient::Sandbox]
+    # @param sandbox_dto [DaytonaApiClient::Sandbox, DaytonaApiClient::SandboxListItem]
     # @return [Daytona::Sandbox]
     def to_sandbox(sandbox_dto:)
       Sandbox.new(
