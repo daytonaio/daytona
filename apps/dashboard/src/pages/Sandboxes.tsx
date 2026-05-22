@@ -260,7 +260,8 @@ function useSandboxesPageWsSync({
       ) {
         updateSandboxInCache(event.sandbox.id, { ...event.sandbox, state: SandboxState.DESTROYED })
       } else {
-        updateSandboxInCache(event.sandbox.id, event.sandbox)
+        const { state: _ignoredState, ...sandboxWithoutState } = event.sandbox
+        updateSandboxInCache(event.sandbox.id, sandboxWithoutState)
       }
 
       reconcileSandboxListAfterSync(event.sandbox.id)
